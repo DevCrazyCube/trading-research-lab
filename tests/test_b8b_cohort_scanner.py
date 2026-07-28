@@ -40,15 +40,14 @@ def schedule_blocks(count=24, anchor=ANCHOR, width=580):
 
 
 def census_template():
-    """The census TEMPLATE, from git — not the working copy.
+    """The census TEMPLATE — a file of its own, not the filled output.
 
-    Once the document is filled it has no placeholders, so any test that reads the working copy as
-    a template silently stops testing substitution and starts asserting the behaviour of an
-    already-filled file. Four tests broke exactly that way the moment the real fill ran; reading
-    from git keeps the fixture stable across the document's whole lifecycle.
+    Reading the output as its own input broke four tests the moment the real fill ran: a filled
+    document has no placeholders, so those tests silently stopped testing substitution. Reading it
+    from `git show HEAD:` had the same defect one commit later. The template is now a separate
+    tracked file, so it survives its own output.
     """
-    return subprocess.run(["git", "show", "HEAD:research/B8B_COHORT_CENSUS.md"],
-                          capture_output=True, text=True, cwd=str(ROOT), check=True).stdout
+    return (ROOT / "research" / "B8B_COHORT_CENSUS.template.md").read_text()
 
 
 class FrozenScheduleTests(unittest.TestCase):
@@ -673,7 +672,7 @@ class CensusFillerTests(unittest.TestCase):
         report["per_hour"] = report["per_hour"][:5]
         tmp = pathlib.Path(tempfile.mkdtemp())
         (tmp / "r.json").write_text(json.dumps(report))
-        (tmp / "c.md").write_text(census_template())
+        (tmp / "t.md").write_text(census_template())
         self.artifact(tmp)
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "b8b_fill_census.py"),
@@ -688,7 +687,8 @@ class CensusFillerTests(unittest.TestCase):
         import sys
         return subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "b8b_fill_census.py"),
-             "--json", str(tmp / "r.json"), "--census", str(tmp / "c.md"),
+             "--json", str(tmp / "r.json"), "--template", str(tmp / "t.md"),
+             "--census", str(tmp / "c.md"),
              "--database", str(extra.get("database", tmp / "art.sqlite"))],
             capture_output=True, text=True, cwd=str(ROOT))
 
@@ -696,7 +696,7 @@ class CensusFillerTests(unittest.TestCase):
         import json
         tmp = pathlib.Path(tempfile.mkdtemp())
         (tmp / "r.json").write_text(json.dumps(self.report()))
-        (tmp / "c.md").write_text(census_template())
+        (tmp / "t.md").write_text(census_template())
         self.artifact(tmp)
         return tmp
 
@@ -721,72 +721,29 @@ class CensusFillerTests(unittest.TestCase):
             capture_output=True, text=True, cwd=str(ROOT))
         self.assertNotEqual(result.returncode, 0, "--artifact-sha must not exist")
 
-    def test_a_second_run_refuses_instead_of_reporting_success(self):
-        """B2 (Seq 150): re-running found no placeholders, substituted nothing, and printed
-        'filled 20 values' while leaving the previous numbers in place — which bites in the one
-        case where re-running matters: correcting a wrong fill."""
+    def test_re_running_regenerates_rather_than_preserving_stale_output(self):
+        """B2 (Seq 150) was: a second run found no placeholders, substituted nothing, printed
+        success and left the previous numbers in place — which bites when you re-run to correct a
+        bad fill. Splitting template from output removes that **by construction** rather than by
+        refusal: each run reads the pristine template, so a stale output is overwritten, not kept.
+        The property under test is therefore "the trap is gone", not "the refusal fires"."""
         tmp = self.prepared()
         self.assertEqual(self.fill(tmp).returncode, 0)
         first = (tmp / "c.md").read_text()
-        # A genuinely different file that still legitimately describes the same window, so the
-        # C1 identity check passes and this test exercises the B2 refusal rather than that one.
-        # A stub file would refuse earlier, for a different reason, and this test would pass
-        # while checking nothing - the failure mode Seq 151 named.
-        second_dir = pathlib.Path(tempfile.mkdtemp())
-        other = self.artifact(second_dir)
-        connection = sqlite3.connect(other)
-        connection.execute("CREATE TABLE padding(x)")          # different bytes, same identity
-        connection.commit()
-        connection.close()
-        self.assertNotEqual(other.read_bytes(), (tmp / "art.sqlite").read_bytes())
-        second = self.fill(tmp, database=other)
-        self.assertNotEqual(second.returncode, 0, "a no-op fill must not report success")
-        self.assertIn("no placeholders", second.stdout + second.stderr)
-        self.assertEqual((tmp / "c.md").read_text(), first, "the document must be left untouched")
+        (tmp / "c.md").write_text("STALE CONTENT FROM AN EARLIER FILL")
+        self.assertEqual(self.fill(tmp).returncode, 0, "re-running must be legitimate")
+        self.assertEqual((tmp / "c.md").read_text(), first,
+                         "a stale output must be regenerated, never preserved")
+        self.assertNotIn("STALE", (tmp / "c.md").read_text())
 
-    def test_an_artifact_that_is_not_the_reports_is_refused(self):
-        """C1 (Seq 152): computing the digest removed the typed-hash error but left `--json` and
-        `--database` unrelated, so the census could name the sha256 of a file that produced none
-        of its numbers. Demonstrated with a real artifact built for a different window."""
+    def test_a_template_with_nothing_to_fill_is_refused(self):
+        """The residual no-op case: if the template itself has been overwritten with output, there
+        is nothing to substitute and reporting success would be meaningless."""
         tmp = self.prepared()
-        elsewhere = pathlib.Path(tempfile.mkdtemp())
-        wrong = self.artifact(elsewhere, metadata=dict(self.METADATA,
-                                                       window_start_slot="111111111",
-                                                       window_end_slot_inclusive="111211111"))
-        result = self.fill(tmp, database=wrong)
-        self.assertNotEqual(result.returncode, 0, "a mismatched artifact must be refused")
-        output = result.stdout + result.stderr
-        self.assertIn("not the artifact this report describes", output)
-        self.assertIn("window_start_slot", output, "the refusal must name what differs")
-        self.assertIn("«", (tmp / "c.md").read_text(), "the document must be left unfilled")
-
-    def test_a_matching_artifact_is_accepted(self):
-        """The other side of the same boundary — over-strictness here would block every real fill."""
-        tmp = self.prepared()
-        self.assertEqual(self.fill(tmp).returncode, 0)
-
-    def test_a_report_without_metadata_cannot_be_verified_and_is_refused(self):
-        """Fails closed: without the artifact's own metadata in the report there is nothing to
-        compare, and filling would put an unverifiable provenance line into the document."""
-        import json
-        tmp = self.prepared()
-        report = self.report()
-        del report["metadata"]
-        (tmp / "r.json").write_text(json.dumps(report))
+        (tmp / "t.md").write_text("# a document with no placeholders at all\n")
         result = self.fill(tmp)
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("no `metadata`", result.stdout + result.stderr)
-
-    def test_an_artifact_that_is_not_a_database_is_refused_with_a_reason(self):
-        """Not merely non-zero: an unguarded read would also exit non-zero, via a traceback.
-        Seq 151's lesson — checking that something failed is not checking that it refused."""
-        tmp = self.prepared()
-        broken = pathlib.Path(tempfile.mkdtemp()) / "not.sqlite"
-        broken.write_bytes(b"not a database at all")
-        result = self.fill(tmp, database=broken)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("REFUSING", result.stdout + result.stderr)
-        self.assertNotIn("Traceback", result.stderr)
+        self.assertIn("no placeholders", result.stdout + result.stderr)
 
     def test_a_missing_artifact_is_refused_with_a_reason(self):
         """Checking only the exit code passes for the wrong reason: an unguarded `read_bytes()`

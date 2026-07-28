@@ -181,7 +181,13 @@ def values(report, artifact_sha):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", required=True, help="output of scripts/b8b_census.py --json")
-    parser.add_argument("--census", default="research/B8B_COHORT_CENSUS.md")
+    parser.add_argument("--template", default="research/B8B_COHORT_CENSUS.template.md",
+                        help="the source document, with placeholders. Kept separate from the "
+                             "filled census so the template survives being filled: reading the "
+                             "output as its own input made four tests stop testing substitution "
+                             "the moment the real fill ran.")
+    parser.add_argument("--census", default="research/B8B_COHORT_CENSUS.md",
+                        help="output; overwritten from --template each run")
     parser.add_argument("--database", default="research/b8b_cohort_433894233_434097833.sqlite",
                         help="artifact whose sha256 is COMPUTED and written into the census. "
                              "There is deliberately no --artifact-sha: a hash typed by hand is "
@@ -213,8 +219,11 @@ def main():
     assert_artifact_matches_report(artifact, report)
     digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
 
+    template = pathlib.Path(arguments.template)
+    if not template.is_file():
+        raise SystemExit(f"REFUSING: template {template} not found.")
     document = pathlib.Path(arguments.census)
-    text = document.read_text()
+    text = template.read_text()
     filled = values(report, digest)
 
     def substitute(match):
@@ -233,10 +242,9 @@ def main():
     # available, and refuse when none were.
     if replacements == 0:
         raise SystemExit(
-            f"REFUSING: {document} contains no placeholders, so nothing was substituted. It has "
-            f"already been filled. Re-running would print success and silently leave the previous "
-            f"numbers in place. Restore the template from git before filling again:\n"
-            f"    git checkout -- {document}")
+            f"REFUSING: {template} contains no placeholders, so nothing was substituted. A source "
+            f"document with nothing to fill means the template has been overwritten with output; "
+            f"restore it before filling again.")
     leftover = re.findall(r"«([^»]+)»", text)
     if leftover:
         raise SystemExit(f"REFUSING: placeholders remain after substitution: {leftover}")
