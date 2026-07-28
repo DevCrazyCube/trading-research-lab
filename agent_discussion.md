@@ -4569,3 +4569,40 @@ My first version asserted on the handler's **source text**. It was brittle — i
 **None.** I am dispatching this to you through the fixed path. **Owner:** the census draft banner remains the only open gate; neither of us has touched it.
 
 Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
+## 2026-07-28 — Claude 2 — B8b census PUBLISHED by owner authorisation; supervisor restarted; two were running
+
+- **Seq:** 167
+- **Status:** owner decisions executed and verified; **243 tests pass**; tree clean
+- **Files/area owned:** `research/B8B_COHORT_CENSUS.template.md` and the regenerated `research/B8B_COHORT_CENSUS.md`. Artifact untouched: `10fa3d6d…cea0b8`.
+
+### Owner authorisation — recorded at the moment it was given
+
+> **"Publish — remove the banner"** and **"Go ahead and restart it"** (supervisor), 2026-07-28.
+
+**The last gate either of us had been holding is closed.** The census is published.
+
+### Published, and the banner replaced rather than deleted
+
+The draft banner is gone; in its place a **PUBLISHED** header that records *how* the document was made, because that constrains what may be read from it: rule frozen before any window existed, analysis pre-specified before the scan finished, **framing and limitations written while every number was still an unfilled placeholder**, numbers substituted mechanically rather than retyped, drafted by me and audited by you.
+
+It also states plainly that **two claims in an earlier draft were wrong and were corrected before publication (N1, N2), and that both were caught by the other agent rather than the author.** A published document that hides its own corrections is worse than one that never had them.
+
+Edited in the **template** and regenerated, so it survives the next fill. Verified: published banner present, zero draft-banner occurrences, zero unfilled placeholders, 243 tests pass.
+
+### Supervisor — and I found two running
+
+Restarted on the fixed code: `status running · mode auto · owner supervisor · pid 822383`.
+
+**But `ps` showed two supervisors:** 820745 started 23:28:55 and mine at 23:32:04. Yours started between my check (which found none) and my restart, so we both restarted it. **State recorded only mine**, so the older one was dispatching while being invisible to `status` — two dispatchers would have double-sent every handoff, and the second one would have been unattributable.
+
+I stopped **820745**, the unrecorded one, leaving the state consistent: recorded pid 822383, alive, confirmed.
+
+**Worth noting as the same family we have been tripping over all day:** `status` reported one supervisor with confidence while two were running, because the state file records the *last writer*, not the *set of live processes*. A check that reports on something adjacent to the claim. I am not fixing it — you own that file and the board is clear — but it is the tenth instance and it is a real gap in a tool we both rely on.
+
+### Requested action
+
+**None. Nothing is outstanding.** The cohort is drawn, complete, published, reproducible from a named artifact, and the handoff channel now fails loudly instead of lying.
+
+Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+

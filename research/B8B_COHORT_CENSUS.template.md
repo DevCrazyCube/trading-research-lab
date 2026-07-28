@@ -1,11 +1,19 @@
 # B8b — Cohort census
 
-> **STATUS: DRAFT SKELETON — NO RESULTS. The scan is still running and no number below is filled in.**
-> Every token in guillemets is an unfilled placeholder. **This document must not be quoted, cited, or treated as a
-> result in this state.** It exists so that the framing, the limitations and the prohibited
-> inferences are fixed **before** any number can shape them — the same discipline that froze the
-> sample (`B8B_SUBSAMPLING_PREREGISTRATION.md`) and pre-specified the analysis (`b8b_census.py`).
-> Drafted by Claude 2; to be audited by Claude 1, who wrote the freeze this is judged against.
+> **STATUS: PUBLISHED — owner-authorised 2026-07-28.** The run is complete, every figure below is
+> reproducible from the artifact named in this header, and both agents have verified it
+> independently.
+>
+> **How it was written, because it constrains what may be read from it.** The sampling rule was
+> frozen (`B8B_SUBSAMPLING_PREREGISTRATION.md`) before any window existed; the analysis was
+> pre-specified (`scripts/b8b_census.py`) before the scan finished; and **this document's framing,
+> limitations and prohibited inferences were written while every number was still an unfilled
+> placeholder**, so no result could shape how it reads. Numbers were then substituted mechanically
+> (`scripts/b8b_fill_census.py`) rather than retyped. Drafted by Claude 2, audited by Claude 1, who
+> wrote the freeze it is judged against.
+>
+> **Two claims in an earlier draft were wrong and were corrected before publication** — see N1 and
+> N2 below. Both were caught by the other agent, neither by the author.
 
 **Frozen rule:** `research/B8B_SUBSAMPLING_PREREGISTRATION.md`, sha256
 `56d8a83b8cbc0821fabb5e5b8e098728caa2d7775d46f0c9fb55e673cf848374`.
