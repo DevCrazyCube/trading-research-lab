@@ -140,5 +140,48 @@ class SchemaTests(unittest.TestCase):
                               "sampled_block"}, tables)
 
 
+_census_spec = importlib.util.spec_from_file_location(
+    "b8b_census", str(ROOT / "scripts" / "b8b_census.py"))
+CENSUS = importlib.util.module_from_spec(_census_spec)
+_census_spec.loader.exec_module(CENSUS)
+
+
+class ActorGroupingTests(unittest.TestCase):
+    """`creator ∪ user` is the frozen split key. Grouping by `creator` alone silently splits one
+    actor operating under two pubkeys, which is the leakage the key exists to prevent."""
+
+    def test_bridged_pubkeys_collapse_into_one_actor(self):
+        # A launches twice as itself; B launches once as itself and once with A as `user`.
+        rows = [("A", "A"), ("A", "A"), ("B", "B"), ("B", "A")]
+        self.assertEqual(len(set(CENSUS.actor_groups(rows))), 1,
+                         "creator-only grouping would report 2 actors here")
+
+    def test_unbridged_actors_stay_separate(self):
+        rows = [("A", "A"), ("B", "B"), ("C", "C")]
+        self.assertEqual(len(set(CENSUS.actor_groups(rows))), 3)
+
+    def test_transitive_bridging(self):
+        """A-B and B-C must put A and C together even though no row names both."""
+        rows = [("A", "B"), ("B", "C"), ("D", "D")]
+        groups = CENSUS.actor_groups(rows)
+        self.assertEqual(groups[0], groups[1])
+        self.assertNotEqual(groups[0], groups[2])
+
+    def test_share_from_repeat_actor_is_not_the_surplus(self):
+        """B8a's census quoted the surplus as if it were the exposed share. Both are reported."""
+        rows = [("A", "A"), ("A", "A"), ("B", "B"), ("C", "C")]
+        result = CENSUS.leakage(rows, "synthetic")
+        self.assertEqual(result["members_from_a_repeat_actor"], 2)
+        self.assertAlmostEqual(result["share_from_repeat_actor"], 0.5)
+        self.assertEqual(result["surplus_beyond_one_each"], 1)
+        self.assertAlmostEqual(result["share_surplus"], 0.25)
+        self.assertNotEqual(result["share_from_repeat_actor"], result["share_surplus"])
+
+    def test_empty_population_does_not_divide_by_zero(self):
+        result = CENSUS.leakage([], "empty")
+        self.assertEqual(result["n"], 0)
+        self.assertEqual(result["share_from_repeat_actor"], 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()
