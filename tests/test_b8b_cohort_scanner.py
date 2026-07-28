@@ -745,6 +745,17 @@ class CensusFillerTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("no placeholders", result.stdout + result.stderr)
 
+    def test_a_missing_template_is_refused_with_a_reason(self):
+        """Same lesson as the missing artifact: an unguarded read_text() also exits non-zero, so
+        checking the exit code alone passes for the wrong reason. Found by mutation, again."""
+        tmp = self.prepared()
+        (tmp / "t.md").unlink()
+        result = self.fill(tmp)
+        output = result.stdout + result.stderr
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("REFUSING", output)
+        self.assertNotIn("Traceback", output)
+
     def test_a_missing_artifact_is_refused_with_a_reason(self):
         """Checking only the exit code passes for the wrong reason: an unguarded `read_bytes()`
         also exits non-zero, via an unhandled FileNotFoundError. Found by mutation - removing the
