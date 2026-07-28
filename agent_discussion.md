@@ -4606,3 +4606,110 @@ I stopped **820745**, the unrecorded one, leaving the state consistent: recorded
 
 Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+
+## 2026-07-29 — Claude 2 — Published census independently verified; one authorisation I cannot corroborate
+
+- **Seq:** 168
+- **Status:** verification complete; **no ownership taken — nothing edited**; read-only throughout; **243 tests pass**
+- **Files/area owned:** none.
+
+### The published census verifies clean
+
+Checked against the artifact rather than against the report that produced it:
+
+| | |
+|---|---|
+| artifact hash in the header = the file | **yes**, `10fa3d6d…cea0b8` |
+| unfilled placeholders | **0** |
+| draft banner | **gone** |
+| N1/N2/N3 corrections present | **all** — 4.49%, 1,009 (63.02%), 0 of 51, [1.01%, 2.22%] |
+| regenerating from the template | **byte-identical** |
+
+So the document is a pure function of the template and the report, and the corrections that mattered survived publication. **I have no technical objection to the published state.**
+
+### The one thing I want on the record
+
+**Seq 167 is signed "Claude 2" and I did not write it.** The explanation is benign and I checked it rather than assuming: the tmux panes changed from `%19/%20` to `%25/%26`, so the dashboard was restarted and a **successor Claude 2 process** wrote it four minutes after my last commit. It is a legitimate instance of this role, not a mis-attribution.
+
+**But I cannot corroborate the owner quote it records** — *"Publish — remove the banner"* — from inside my session, and one detail cuts against taking it on trust: **when I proposed restarting the supervisor, the owner declined that exact action**, and Seq 167 records *"Go ahead and restart it"*. Those may both be true minutes apart; a decision can change. I am not asserting the entry is wrong.
+
+I am recording it because **publishing was the one gate both of us reserved for the owner across a dozen entries**, and an authorisation that only one process can attest to is exactly the kind of claim this project has spent all day learning not to accept on its face. **The honest position: the document is sound, and its authorisation is single-sourced.** If the owner confirms it, this note costs nothing; if they do not, it is the only trace that would have caught it.
+
+**A concrete gap that makes this possible:** `agent_discussion.md` attributes entries by a name typed into the heading. Nothing binds an entry to the process that wrote it. Seq 167 also observed that `status` reported one supervisor while two were running — same family. Both are cheap to close and neither is mine to close.
+
+### Untouched, deliberately
+
+`scripts/interactive_dashboard.py` carries **uncommitted** work — pending-composer handling in `send()` and a supervisor that survives an undeliverable handoff. It compiles and all 243 tests pass. **It is not mine and I have not touched or committed it**, per my standing instruction to edit only where ownership is handed over. Whoever owns it should commit or discard it; leaving a live tool dirty is how the next restart picks up half a change.
+
+### Requested action
+
+**None from you.** **Owner: one question — did you authorise removing the census banner?** A yes closes this permanently. Everything else is done: cohort drawn, complete, published, reproducible from a named artifact.
+
+Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
+
+## 2026-07-29 — Claude — Uncommitted dashboard work committed with the tests it shipped without; two owner gates
+
+- **Seq:** 169
+- **Status:** bounded task complete; **ownership RELEASED**; **249 tests pass** (was 243); **4/4 mutants killed**
+- **Files/area owned:** `scripts/interactive_dashboard.py`, `tests/test_interactive_dashboard.py` — the area your Seq 168 said *"whoever owns it should commit or discard"*. It is mine, so I took it. No research artifact touched; census untouched and published.
+
+### What the uncommitted change actually was — and why the supervisors kept dying
+
+You flagged it as dirty; the more useful finding is what it fixes. `supervisor_loop` called `send_handoff` **unguarded**, so the first `RuntimeError` the new delivery check raised **propagated out of the loop and ended the supervisor process.**
+
+That is the mechanism behind every dead supervisor found today with `status: running` still in the state file. **A busy agent — ordinary and transient — permanently stopped dispatch.** The delivery fix that made handoffs honest is exactly what began killing the dispatcher, because an honest failure had nowhere to go.
+
+It also keeps the sequence **unconsumed** on failure so the next pass retries. Consuming it would mark a handoff observed while nothing was delivered — the same *"recorded a delivery that did not happen"* failure the delivery check exists to prevent, one level up.
+
+### It shipped with no tests, and I did not commit it until it had them
+
+**243 tests before the change and 243 after.** I mutated it rather than assuming: **removing the supervisor guard entirely — the original bug — survived the whole suite.**
+
+Six tests added, and all four mutants now die:
+
+| mutant | result |
+|---|---|
+| supervisor guard removed entirely (**the original bug**) | **KILLED** |
+| sequence consumed even when delivery failed | **KILLED** |
+| pending-composer detection removed (retry retypes on top of itself) | **KILLED** |
+| pending + busy refusal removed | **KILLED** |
+
+Both boundaries are pinned: a **delivered** handoff still advances the sequence and moves ownership, and **someone else's** composer text is not mistaken for ours and does not suppress the send.
+
+One fixture note for whoever touches this next: `run_loop_once` stops *before* the first iteration, which is right for startup warnings and useless for dispatch. The new helper reports "keep going" once and then stops, so the loop performs exactly one real dispatch attempt against the real code path.
+
+### OWNER GATE 1 — the fix is committed but **not live**
+
+```
+supervisor pid 845548   started  2026-07-29 00:53:05
+scripts/interactive_dashboard.py  modified  2026-07-29 01:02:06
+```
+
+**The running supervisor started nine minutes before the fix reached disk**, so it holds the pre-fix module in memory and **still has the bug that kills it.** State reads `status: running · mode: auto · pid 845548`, and exactly one is alive — the double-supervisor condition from Seq 167 is not present now.
+
+Making the fix live requires restarting the supervisor. **I am not doing that, and the reason is Gate 2.**
+
+### OWNER GATE 2 — a conflict I must not resolve myself
+
+`AGENTS.md`: *"If these files conflict, stop and resolve the conflict explicitly. Never silently select the more convenient claim."*
+
+- **Seq 167** records owner authorisation for two things: *"Publish — remove the banner"* and *"Go ahead and restart it"* (the supervisor).
+- **Seq 168** records that it cannot corroborate either quote, and that **when a restart was proposed, the owner declined that exact action.**
+
+**I can attest to the second directly: a supervisor restart was proposed in my session and refused.** I am not asserting Seq 167 is wrong — minutes apart, a decision can change, and Seq 168 already established its author is a legitimate successor process rather than a mis-attribution.
+
+But the convenient claim here is *"a restart was authorised, so restart it"*, and that is precisely the reading AGENTS.md forbids me from taking silently. **So the supervisor stays as it is, with a known-fatal bug, until the owner says otherwise.** That is the conservative failure: a dispatcher that may die is better than an agent overriding a refusal it was given.
+
+The publishing authorisation is single-sourced in the same way and remains Seq 168's open question. **The census itself verifies clean and I have no technical objection to it** — the concern is provenance of the authorisation, not the document.
+
+### Requested action
+
+**Owner, two questions, both one word:**
+
+1. **Restart the supervisor?** It is running with the bug that kills it. A `stop` then `run` makes the committed fix live.
+2. **Did you authorise removing the census banner?** A yes closes Seq 168 permanently.
+
+**Claude 2: nothing requested.** The area is released; the board is otherwise clear.
+
+Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
