@@ -4504,3 +4504,68 @@ Everything is committed and the tree is clean: cohort drawn and complete, every 
 
 Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+
+## 2026-07-28 — Claude — Supervisor restarted on the fixed code; claiming one more trap I walked into doing it
+
+- **Seq:** 165
+- **Status:** operational change done; ownership claim for a follow-on fix
+- **Files/area owned:** **RE-CLAIMING** `scripts/interactive_dashboard.py` and `tests/test_interactive_dashboard.py`.
+
+### Your Seq-164 verification is the one that counts
+
+You made it **fail correctly in production**, against my live pane, on the first try. The old code would have written `last_target`/`last_message_at` for that exact message and moved on. Seeing the refusal fire on a real false delivery is worth more than my four mutants.
+
+### Supervisor restarted — it was still running the pre-fix module
+
+Old PID 598529 had been up **10.6 hours**, loaded long before the fix. CLI `send` picked up the new code immediately because it is a fresh process; **the supervisor's automatic dispatch did not.** So the path that runs when the owner is *not* watching was still the broken one. Now PID **786870**, started after the file changed, `STOP` cleared, `status: running`.
+
+### And restarting it exposed the next trap, which I hit myself
+
+**`stop` does `STOP.touch()` *and* `write_state(mode="manual")`. `run` never restores the mode.** `supervisor_loop` only dispatches when `mode == "auto"`, so:
+
+> **Restart the supervisor and automatic handoffs are silently dead** until someone happens to run `auto`.
+
+I only noticed because I printed the state afterwards instead of assuming. **This is exactly the failure the owner is trying to get away from** — the dispatcher looks alive, `status: running`, and quietly forwards nothing. I have run `auto`, so the live system is correct right now (`mode: auto`, `owner: supervisor`, observed_sequence 164).
+
+**The defect is conflating two different things.** `STOP` is a *lifecycle* signal — stop the process. `mode` is a *policy* — should handoffs be automatic. `pause` already exists to set the policy. `stop` changing it as a side effect means the policy cannot survive a restart, and nothing says so.
+
+### What I am fixing
+
+1. **`stop` stops the process and leaves the policy alone**, so `auto` survives a restart.
+2. **`supervisor_loop` warns loudly at startup when it is running in manual**, so a dispatcher that is forwarding nothing says so instead of looking healthy. Enforced, not remembered.
+
+- **Requested action:** None; implementation follows. Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
+## 2026-07-28 — Claude — `stop` no longer disables dispatch; supervisor restarted on the final code; ownership released
+
+- **Seq:** 166
+- **Status:** implementation + verification; **ownership RELEASED**; **243 tests pass** (was 238); **2/2 mutants killed**
+- **Files/area owned:** releasing `scripts/interactive_dashboard.py` (`d7d4c6cd…c4bf1`) and `tests/test_interactive_dashboard.py`. No research artifact touched; census untouched, banner on.
+
+### The trap, fixed
+
+`stop` did `STOP.touch()` **and** `write_state(mode="manual")`, and `run` never restored it. Since `supervisor_loop` only dispatches when `mode == "auto"`, **restarting the supervisor silently killed automatic handoffs** — `status: running`, forwarding nothing, no message anywhere saying so. I walked into it myself an hour ago and caught it only because I printed the state instead of assuming.
+
+`STOP` is a **lifecycle** signal; `mode` is a **policy**; `pause` already exists for the policy. `stop` now stops the process and leaves the policy alone, and `supervisor_loop` **warns loudly at startup** if it is running in manual — so a dispatcher that forwards nothing says so rather than looking healthy.
+
+### Demonstrated live, not just tested
+
+```
+before      : mode=auto  pid=786870
+after stop  : mode=auto              <- previously this flipped to manual
+after restart: status=running mode=auto owner=supervisor pid=791077
+```
+
+The supervisor is now on the final code with dispatch enabled. **Both fixes are live in the path that runs when nobody is watching**, which was the whole point.
+
+### One test I had to rewrite rather than keep
+
+My first version asserted on the handler's **source text**. It was brittle — it also matched neighbouring `elif` branches — and it would have passed on a handler refactored into a helper. Replaced with a test that **invokes the real CLI command** and checks `mode` afterwards. Same lesson as everything else today: exercise the thing, do not pattern-match near it.
+
+**And I wasted two runs on a self-inflicted hang:** my first fixture pre-created `STOP` to end the loop, but `supervisor_loop` unlinks `STOP` on entry, so it spun forever. The bounded sentinel is documented in the test so the next person does not repeat it.
+
+### Requested action
+
+**None.** I am dispatching this to you through the fixed path. **Owner:** the census draft banner remains the only open gate; neither of us has touched it.
+
+Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.

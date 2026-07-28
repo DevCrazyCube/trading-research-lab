@@ -333,6 +333,97 @@ class SequenceAllocationTests(unittest.TestCase):
         self.assertIn("actually newest", entry.splitlines()[0])
 
 
+class SupervisorModeTests(IsolatedDashboard):
+    """`stop` must not disable automatic handoffs (Seq 165).
+
+    `STOP` is a lifecycle signal and `mode` is a policy. Conflating them meant restarting the
+    supervisor silently killed dispatch: `status: running`, forwarding nothing, and no message
+    anywhere saying so. Walked into it in production while restarting for the delivery fix.
+    """
+
+    dash = DASH
+
+    def test_stop_leaves_the_dispatch_policy_alone(self):
+        DASH.write_state(mode="auto", owner="supervisor")
+        DASH.STOP.touch()                       # what the `stop` command now does
+        self.assertEqual(DASH.read_state()["mode"], "auto",
+                         "stopping the process must not change whether handoffs are automatic")
+
+    def test_pause_is_what_disables_handoffs(self):
+        DASH.write_state(mode="auto", owner="supervisor")
+        DASH.write_state(mode="manual", owner="none")     # what `pause` does
+        self.assertEqual(DASH.read_state()["mode"], "manual")
+
+    def test_the_real_stop_command_preserves_auto_mode(self):
+        """Runs the actual CLI handler, not a copy of it or a scrape of its source.
+
+        This is the regression that matters: `stop` used to call
+        `write_state(mode="manual", ...)`, so restarting the supervisor left dispatch silently
+        disabled. A source-text assertion would pass on a handler that had been refactored into
+        a helper; invoking the command cannot.
+        """
+        import contextlib
+        import io
+        import sys
+        DASH.write_state(mode="auto", owner="supervisor")
+        saved_argv = sys.argv
+        sys.argv = ["interactive_dashboard.py", "stop"]
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                DASH.main()
+        finally:
+            sys.argv = saved_argv
+        self.assertTrue(DASH.STOP.exists(), "stop must still signal the process to exit")
+        self.assertEqual(DASH.read_state()["mode"], "auto",
+                         "stopping the process must not disable automatic handoffs")
+
+    def run_loop_once(self):
+        """Run `supervisor_loop` for exactly one startup pass.
+
+        The loop calls `STOP.unlink(missing_ok=True)` on entry, so a pre-created STOP file cannot
+        end it — it spins forever, which is exactly what my first version of this test did.
+        Substituting the sentinel is the only way to observe startup behaviour while still running
+        the real loop, and running the real loop is the point: asserting against a copy of the
+        warning string would pin nothing.
+        """
+        import contextlib
+        import io
+
+        class Sentinel:
+            def unlink(self, missing_ok=False):
+                pass
+
+            def exists(self):
+                return True                     # stop before the first iteration
+
+            def touch(self):
+                pass
+
+        saved, DASH.STOP = DASH.STOP, Sentinel()
+        captured = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(captured):
+                DASH.supervisor_loop(interval=0.01)
+        finally:
+            DASH.STOP = saved
+        return captured.getvalue()
+
+    def seed(self, mode, owner):
+        DASH.write_state(mode=mode, owner=owner, observed_sequence=1)
+        DASH.DISCUSSION.write_text("## d — Claude — x\n- **Seq:** 1\n- **Status:** handoff\n",
+                                   encoding="utf-8")
+
+    def test_supervisor_warns_when_it_would_dispatch_nothing(self):
+        """A dispatcher forwarding nothing must say so, not merely report `status: running`."""
+        self.seed("manual", "none")
+        self.assertIn("automatic handoffs DISABLED", self.run_loop_once())
+
+    def test_no_warning_when_dispatch_is_live(self):
+        """The other side of the boundary: a healthy supervisor must not cry wolf."""
+        self.seed("auto", "supervisor")
+        self.assertNotIn("DISABLED", self.run_loop_once())
+
+
 class SeqNoteParsingTests(unittest.TestCase):
     """A renumbered entry carries a trailing note, and the parser must still see it.
 

@@ -378,6 +378,12 @@ def supervisor_loop(interval=2.0):
     persisted = read_state().get("observed_sequence")
     baseline = persisted if isinstance(persisted, int) else sequence
     write_state(status="running", supervisor_pid=os.getpid(), observed_sequence=baseline)
+    # A supervisor running in manual mode forwards nothing while reporting `status: running`.
+    # Say so rather than leave it to whoever thinks to read the state file.
+    if read_state().get("mode") != "auto":
+        print("WARNING supervisor is running with automatic handoffs DISABLED (mode is not "
+              "'auto'); no released entry will be dispatched until you run: "
+              "python scripts/interactive_dashboard.py auto", flush=True)
     try:
         while not STOP.exists():
             state = read_state()
@@ -544,7 +550,11 @@ def main():
                           "total_entries": len(all_sequences())}, sort_keys=True))
         return 1 if dupes else 0
     else:
-        STOP.touch(); write_state(mode="manual", owner="none"); print("interactive supervisor stop requested")
+        # `STOP` is a lifecycle signal; `mode` is a policy. Conflating them meant a restart
+        # silently disabled automatic handoffs - the dispatcher looked healthy and forwarded
+        # nothing (Seq 165). `pause` already exists for the policy; this only stops the process.
+        STOP.touch(); print("interactive supervisor stop requested (mode unchanged; use `pause` "
+                            "to disable automatic handoffs)")
     return 0
 
 
