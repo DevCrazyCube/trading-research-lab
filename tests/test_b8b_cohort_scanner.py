@@ -641,12 +641,82 @@ class CensusFillerTests(unittest.TestCase):
         tmp = pathlib.Path(tempfile.mkdtemp())
         (tmp / "r.json").write_text(json.dumps(report))
         (tmp / "c.md").write_text((ROOT / "research" / "B8B_COHORT_CENSUS.md").read_text())
+        (tmp / "art.sqlite").write_bytes(b"artifact")
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "b8b_fill_census.py"),
              "--json", str(tmp / "r.json"), "--census", str(tmp / "c.md"),
-             "--artifact-sha", "abc"], capture_output=True, text=True, cwd=str(ROOT))
+             "--database", str(tmp / "art.sqlite")],
+            capture_output=True, text=True, cwd=str(ROOT))
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("per-hour rows", result.stdout + result.stderr)
+
+    def fill(self, tmp, **extra):
+        import subprocess
+        import sys
+        return subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "b8b_fill_census.py"),
+             "--json", str(tmp / "r.json"), "--census", str(tmp / "c.md"),
+             "--database", str(extra.get("database", tmp / "art.sqlite"))],
+            capture_output=True, text=True, cwd=str(ROOT))
+
+    def prepared(self):
+        import json
+        tmp = pathlib.Path(tempfile.mkdtemp())
+        (tmp / "r.json").write_text(json.dumps(self.report()))
+        (tmp / "c.md").write_text((ROOT / "research" / "B8B_COHORT_CENSUS.md").read_text())
+        (tmp / "art.sqlite").write_bytes(b"artifact bytes")
+        return tmp
+
+    def test_the_artifact_hash_is_computed_not_supplied(self):
+        """B1 (Seq 150): the script exists so numbers stop being retyped, then required a
+        64-character hash to be typed by hand and wrote it in unchecked. Now derived."""
+        import hashlib
+        tmp = self.prepared()
+        result = self.fill(tmp)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        expected = hashlib.sha256((tmp / "art.sqlite").read_bytes()).hexdigest()
+        self.assertIn(expected, (tmp / "c.md").read_text())
+
+    def test_there_is_no_way_to_supply_a_hash_by_hand(self):
+        import subprocess
+        import sys
+        tmp = self.prepared()
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "b8b_fill_census.py"),
+             "--json", str(tmp / "r.json"), "--census", str(tmp / "c.md"),
+             "--artifact-sha", "not-a-hash-at-all"],
+            capture_output=True, text=True, cwd=str(ROOT))
+        self.assertNotEqual(result.returncode, 0, "--artifact-sha must not exist")
+
+    def test_a_second_run_refuses_instead_of_reporting_success(self):
+        """B2 (Seq 150): re-running found no placeholders, substituted nothing, and printed
+        'filled 20 values' while leaving the previous numbers in place — which bites in the one
+        case where re-running matters: correcting a wrong fill."""
+        tmp = self.prepared()
+        self.assertEqual(self.fill(tmp).returncode, 0)
+        first = (tmp / "c.md").read_text()
+        other = tmp / "other.sqlite"
+        other.write_bytes(b"completely different artifact")
+        second = self.fill(tmp, database=other)
+        self.assertNotEqual(second.returncode, 0, "a no-op fill must not report success")
+        self.assertIn("no placeholders", second.stdout + second.stderr)
+        self.assertEqual((tmp / "c.md").read_text(), first, "the document must be left untouched")
+
+    def test_a_missing_artifact_is_refused(self):
+        tmp = self.prepared()
+        result = self.fill(tmp, database=tmp / "does_not_exist.sqlite")
+        self.assertNotEqual(result.returncode, 0)
+
+    def test_an_incomplete_verdict_has_no_bypass(self):
+        """B3 (Seq 150): --allow-incomplete was hidden by argparse.SUPPRESS, so the docstring's
+        primary refusal was false and invisible. Removed; tests use values() directly."""
+        import json
+        tmp = self.prepared()
+        (tmp / "r.json").write_text(json.dumps(self.report(verdict="FAIL")))
+        self.assertNotEqual(self.fill(tmp).returncode, 0)
+        source = (ROOT / "scripts" / "b8b_fill_census.py").read_text()
+        self.assertNotIn("allow_incomplete", source)
+        self.assertNotIn("SUPPRESS", source)
 
     def test_wilson_interval_is_asymmetric_and_shifted_up_at_small_p(self):
         """The whole reason it is reported instead of the Wald half-width."""

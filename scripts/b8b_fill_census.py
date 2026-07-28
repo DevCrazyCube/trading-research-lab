@@ -24,6 +24,7 @@ Read-only with respect to the artifact. Usage:
     python3 scripts/b8b_fill_census.py --json out.json # fill the document from it
 """
 import argparse
+import hashlib
 import json
 import math
 import pathlib
@@ -125,15 +126,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", required=True, help="output of scripts/b8b_census.py --json")
     parser.add_argument("--census", default="research/B8B_COHORT_CENSUS.md")
-    parser.add_argument("--artifact-sha", required=True,
-                        help="sha256 of the artifact. Required: a census that does not name the "
-                             "exact bytes it describes cannot be checked by anyone later.")
-    parser.add_argument("--allow-incomplete", action="store_true",
-                        help=argparse.SUPPRESS)   # tests only; never for a published document
+    parser.add_argument("--database", default="research/b8b_cohort_433894233_434097833.sqlite",
+                        help="artifact whose sha256 is COMPUTED and written into the census. "
+                             "There is deliberately no --artifact-sha: a hash typed by hand is "
+                             "exactly the transcription error this script exists to remove (B1).")
     arguments = parser.parse_args()
 
     report = json.loads(pathlib.Path(arguments.json).read_text())
-    if report.get("verdict") != "COMPLETE" and not arguments.allow_incomplete:
+    if report.get("verdict") != "COMPLETE":
         raise SystemExit(
             f"REFUSING: census verdict is {report.get('verdict')!r}, not COMPLETE. A partial run "
             f"must not be written up as a result (freeze §5), and a half-filled document is the "
@@ -150,9 +150,15 @@ def main():
             f"rows. Rendering that would put a {reported}-row table under prose describing "
             f"{declared} strata.")
 
+    artifact = pathlib.Path(arguments.database)
+    if not artifact.is_file():
+        raise SystemExit(f"REFUSING: artifact {artifact} not found; its sha256 is computed, not "
+                         f"supplied, so the census cannot name the bytes it describes.")
+    digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+
     document = pathlib.Path(arguments.census)
     text = document.read_text()
-    filled = values(report, arguments.artifact_sha)
+    filled = values(report, digest)
 
     def substitute(match):
         key = match.group(1)
@@ -162,13 +168,25 @@ def main():
                              f"without provenance.")
         return filled[key]
 
-    text = re.sub(r"«([^»]+)»", substitute, text)
+    text, replacements = re.subn(r"«([^»]+)»", substitute, text)
+    # B2: a second run finds no placeholders, substitutes nothing, sees an empty `leftover`, and
+    # writes the unchanged file while printing success. That bites in the one case where re-running
+    # matters most - you fill, notice the report was wrong, re-run with corrected input, get
+    # "filled 20 values", and publish the stale numbers. Report replacements MADE, not values
+    # available, and refuse when none were.
+    if replacements == 0:
+        raise SystemExit(
+            f"REFUSING: {document} contains no placeholders, so nothing was substituted. It has "
+            f"already been filled. Re-running would print success and silently leave the previous "
+            f"numbers in place. Restore the template from git before filling again:\n"
+            f"    git checkout -- {document}")
     leftover = re.findall(r"«([^»]+)»", text)
     if leftover:
         raise SystemExit(f"REFUSING: placeholders remain after substitution: {leftover}")
 
     document.write_text(text)
-    print(f"filled {len(filled)} values into {document}")
+    print(f"substituted {replacements} placeholders in {document}")
+    print(f"artifact sha256 {digest} (computed from {artifact}, not supplied)")
     print("NOTE: the draft banner is NOT removed automatically — removing it is the act of "
           "publishing, and that stays a human decision.")
     return 0
