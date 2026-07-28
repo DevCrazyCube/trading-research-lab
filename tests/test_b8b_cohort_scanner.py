@@ -507,18 +507,18 @@ class ScheduleWindowTieTests(unittest.TestCase):
     """
 
     def test_a_matching_anchor_passes(self):
-        B8B.assert_schedule_matches_window(schedule_blocks(anchor=ANCHOR), ANCHOR, "test")
+        B8B.assert_schedule_anchor(schedule_blocks(anchor=ANCHOR), ANCHOR, "test")
 
     def test_a_coherently_shifted_schedule_is_refused(self):
         blocks = schedule_blocks(anchor=ANCHOR + 7200)          # every block 2h later
         with self.assertRaises(SystemExit) as ctx:
-            B8B.assert_schedule_matches_window(blocks, ANCHOR, "stored")
+            B8B.assert_schedule_anchor(blocks, ANCHOR, "stored")
         self.assertIn("anchored at", str(ctx.exception))
 
     def test_a_one_second_shift_is_refused_there_is_no_tolerance(self):
         """Both sides are recorded integers, so this is an equality, not a measurement."""
         with self.assertRaises(SystemExit):
-            B8B.assert_schedule_matches_window(schedule_blocks(anchor=ANCHOR + 1), ANCHOR, "stored")
+            B8B.assert_schedule_anchor(schedule_blocks(anchor=ANCHOR + 1), ANCHOR, "stored")
 
     def test_the_shift_really_does_pass_every_other_check(self):
         """Documents why F9 needs to exist rather than being folded into an existing check."""
@@ -528,7 +528,8 @@ class ScheduleWindowTieTests(unittest.TestCase):
         self.assertEqual(sorted(b["hour"] for b in blocks), list(range(24)))
 
     def test_empty_schedule_is_left_to_the_other_checks(self):
-        B8B.assert_schedule_matches_window([], ANCHOR, "empty")
+        B8B.assert_schedule_anchor([], ANCHOR, "empty")
+
 
     def test_main_actually_calls_the_tie_check(self):
         """Call-site test. Every assertion above passes even if `main()` never calls the function -
@@ -632,6 +633,134 @@ class ObservationPowerTests(unittest.TestCase):
         self.assertTrue(any("zero retrieved slots" in f for f in report["failures"]),
                         report["failures"])
 
+
+
+class ScheduleSlotBoundsTests(unittest.TestCase):
+    """F10 (Seq 136): the mirror of F9, and the more dangerous half.
+
+    F9 ties the schedule's TIMES to the declared window. Nothing tied its SLOTS — and the slots are
+    what actually get fetched. A schedule with perfect times whose bounds sit five million slots
+    away satisfied every check, would have fetched an entirely different span, and reported
+    COMPLETE. The `% of the window` line does not help: it divides sampled-slot *count* by window
+    width, so it still prints ~6.67% however far the slots have moved.
+    """
+
+    # `schedule_blocks` lays blocks out from slot 1000 upward, so this window contains them all.
+    WINDOW_START, WINDOW_END = 1_000, 1_000_000
+
+    def bounds(self, blocks):
+        # Shape follows assert_schedule_slots_in_window(blocks, window_start, window_end, origin).
+        # Every argument is required (Seq 138) - the anchor check is a separate function now, so
+        # there is no optional parameter left to degrade into a silent no-op.
+        return (blocks, self.WINDOW_START, self.WINDOW_END, "stored")
+
+    def test_every_argument_is_required_so_a_dropped_one_cannot_no_op(self):
+        """Seq 137 measured that dropping the optional bounds from the combined call left all 75
+        tests green: the check degraded to a silent no-op rather than disappearing. Seq 137's own
+        conclusion was that such an argument should be required unless there is a reason it cannot
+        be. There is none here, so a missing argument must be a TypeError."""
+        with self.assertRaises(TypeError):
+            B8B.assert_schedule_slots_in_window(schedule_blocks(), self.WINDOW_START)
+        with self.assertRaises(TypeError):
+            B8B.assert_schedule_anchor(schedule_blocks())
+
+    def test_an_in_window_schedule_passes(self):
+        B8B.assert_schedule_slots_in_window(*self.bounds(schedule_blocks()))
+
+    def test_slots_shifted_past_the_window_end_are_refused(self):
+        blocks = [dict(b, start_slot=b["start_slot"] + 5_000_000,
+                       end_slot_exclusive=b["end_slot_exclusive"] + 5_000_000)
+                  for b in schedule_blocks()]
+        with self.assertRaises(SystemExit) as ctx:
+            B8B.assert_schedule_slots_in_window(*self.bounds(blocks))
+        self.assertIn("outside the declared window", str(ctx.exception))
+
+    def test_slots_shifted_before_the_window_start_are_refused(self):
+        blocks = [dict(b, start_slot=b["start_slot"] - 5_000,
+                       end_slot_exclusive=b["end_slot_exclusive"] - 5_000)
+                  for b in schedule_blocks()]
+        with self.assertRaises(SystemExit):
+            B8B.assert_schedule_slots_in_window(*self.bounds(blocks))
+
+    def test_a_single_block_straying_out_is_refused(self):
+        """A whole-schedule shift is the obvious case; one drifted stratum is the quiet one."""
+        blocks = schedule_blocks()
+        blocks[9]["end_slot_exclusive"] = self.WINDOW_END + 2
+        with self.assertRaises(SystemExit):
+            B8B.assert_schedule_slots_in_window(*self.bounds(blocks))
+
+    def test_a_block_ending_exactly_at_the_inclusive_window_end_is_allowed(self):
+        """`window_end` is inclusive and `end_slot_exclusive` is not, so the bound is end+1.
+        An off-by-one here would reject a legitimate schedule that reaches the final slot."""
+        blocks = schedule_blocks()
+        blocks[0]["end_slot_exclusive"] = self.WINDOW_END + 1
+        B8B.assert_schedule_slots_in_window(*self.bounds(blocks))
+        blocks[0]["end_slot_exclusive"] = self.WINDOW_END + 2
+        with self.assertRaises(SystemExit):
+            B8B.assert_schedule_slots_in_window(*self.bounds(blocks))
+
+    def test_the_shifted_slots_really_do_pass_every_other_check(self):
+        """Documents why this needs its own check: nothing else notices."""
+        blocks = [dict(b, start_slot=b["start_slot"] + 5_000_000,
+                       end_slot_exclusive=b["end_slot_exclusive"] + 5_000_000)
+                  for b in schedule_blocks()]
+        B8B.assert_complete_schedule(blocks, "internally coherent")      # passes
+        B8B.assert_schedule_anchor(blocks, ANCHOR, "anchor only")  # F9 passes: times fine
+        overlaps = [(a, b) for a, b in zip(blocks, blocks[1:])
+                    if a["end_slot_exclusive"] > b["start_slot"]]
+        self.assertEqual(overlaps, [], "the overlap check still passes")
+        sampled = [s for b in blocks for s in range(b["start_slot"], b["end_slot_exclusive"])]
+        self.assertEqual(len(sampled), len(set(sampled)), "the dedup check still passes")
+
+    def test_bounds_are_optional_so_the_f9_only_call_still_works(self):
+        """Callers passing no window still get the anchor check rather than a TypeError."""
+        B8B.assert_schedule_anchor(schedule_blocks(), ANCHOR, "anchor only")
+
+    def test_main_passes_the_window_bounds_through(self):
+        """Call-site test, and it is load-bearing rather than ceremonial.
+
+        The bounds are optional, so dropping them at the call site makes F10 **silently no-op** -
+        every assertion above still passes. Verified by mutation: removing
+        `args.window_start, args.window_end` from `main()` left all 75 tests green. That is the
+        fifth call-site vacuity in this project (Seq 100, 109, 131, 135, and this one), and the
+        first where the check degrades to a no-op instead of vanishing.
+
+        Runs the real script with `--resolve-only` against a stored out-of-window schedule. No RPC:
+        the stored path never resolves, and `--resolve-only` returns before any fetch.
+        """
+        import hashlib
+        import json
+        import os
+        import subprocess
+        import sys
+
+        window_start, window_end, window_time = 1_000, 1_000_000, ANCHOR
+        path = pathlib.Path(tempfile.mkdtemp()) / "outside.sqlite"
+        connection = B8B.open_database(str(path))
+        idl_sha = hashlib.sha256(
+            (ROOT / "research" / "pump_idl_9c82f61.json").read_bytes()).hexdigest()
+        meta = B8B.freeze_metadata(window_start, window_end, window_time,
+                                   idl_sha, "public-mainnet")
+        connection.executemany("INSERT INTO metadata(key, value) VALUES (?, ?)", meta.items())
+        for block in schedule_blocks():                       # shifted clear of the window
+            connection.execute(
+                "INSERT INTO sampled_block VALUES (?,?,?,?,?,?)",
+                (block["hour"], block["offset_minutes"], block["start_slot"] + 5_000_000,
+                 block["end_slot_exclusive"] + 5_000_000, block["start_time"], block["end_time"]))
+        connection.commit()
+        connection.close()
+
+        environment = dict(os.environ)
+        environment.pop("SOLANA_RPC_URL", None)               # so endpoint_ref is public-mainnet
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "b8b_cohort_scanner.py"),
+             "--database", str(path), "--window-start", str(window_start),
+             "--window-end", str(window_end), "--window-start-time", str(window_time),
+             "--resolve-only"],
+            capture_output=True, text=True, cwd=str(ROOT), env=environment)
+        self.assertNotEqual(result.returncode, 0,
+                            f"main() accepted an out-of-window schedule.\n{result.stdout[-1500:]}")
+        self.assertIn("outside the declared window", result.stdout + result.stderr)
 
 class AchievedPrecisionTests(unittest.TestCase):
     """Owner decision A: report the precision the realised `n` supports; claim nothing tighter."""

@@ -232,8 +232,8 @@ def assert_complete_schedule(blocks, origin):
             f"the stratified sample the freeze describes.")
 
 
-def assert_schedule_matches_window(blocks, window_start_time, origin):
-    """The stored schedule must describe the window the run declares. F9 (Seq 135).
+def assert_schedule_anchor(blocks, window_start_time, origin):
+    """The schedule's TIMES must describe the window the run declares. F9 (Seq 135).
 
     Kept separate from `assert_complete_schedule` on purpose: that function checks the schedule is
     *internally* coherent, and a coherently shifted grid genuinely satisfies it — Seq 134 pinned
@@ -258,6 +258,34 @@ def assert_schedule_matches_window(blocks, window_start_time, origin):
             f"window_start_time={window_start_time} (differ by {anchor - window_start_time}s). "
             f"The schedule would sample a different span than the one this run claims. Refusing; "
             f"delete the sampled_block rows to re-resolve, or correct --window-start-time.")
+
+
+def assert_schedule_slots_in_window(blocks, window_start, window_end, origin):
+    """The schedule's SLOTS must lie inside the declared window. F10 (Seq 136).
+
+    The mirror of `assert_schedule_anchor`, and the more dangerous half: the anchor ties the
+    schedule's times to the declared window, but **slots are what get fetched**. A schedule with
+    perfect times and bounds five million slots away passed every other check and would have
+    sampled an entirely different span while reporting COMPLETE. The "% of the window" line does
+    not help — it divides sampled-slot count by window width, so it prints ~6.67% however far the
+    slots have moved.
+
+    Split out of `assert_schedule_matches_window`, where these bounds were **optional** parameters
+    (Seq 138). Seq 137 measured that dropping them from the call site left all 75 tests green:
+    the check did not vanish, it **degraded to a silent no-op**, which is worse than absent because
+    the function still appears to be called. Seq 137's own conclusion was that such an argument
+    "should be required unless there is a reason it cannot be" — there is no such reason here, so
+    every parameter is now required and a missing one is a `TypeError`, not a quiet pass.
+
+    `window_end` is inclusive and `end_slot_exclusive` is not, hence `<= window_end + 1`.
+    """
+    outside = [(b["hour"], b["start_slot"], b["end_slot_exclusive"]) for b in blocks
+               if b["start_slot"] < window_start or b["end_slot_exclusive"] > window_end + 1]
+    if outside:
+        raise SystemExit(
+            f"FAIL CLOSED: {origin} schedule samples slots outside the declared window "
+            f"[{window_start}, {window_end}]: (hour, start, end_exclusive) = {outside}. The slots "
+            f"are what get fetched, so this would sample a different span than the run claims.")
 
 
 def verify_window_start_time(url, window_start, window_end, window_start_time, retries,
@@ -355,11 +383,15 @@ def main():
         blocks, fresh = store_blocks(connection, resolved)
         print(f"schedule: resolved and frozen into the database")
 
-    # F9: tie the schedule to the window this run declares. Placed here rather than inside
-    # `store_blocks` so it covers BOTH the stored and the freshly-resolved path from one site -
-    # and `store_blocks` has no access to `window_start_time` anyway.
-    assert_schedule_matches_window(blocks, args.window_start_time,
-                                   "stored" if not fresh else "resolved")
+    # F9/F10: tie the schedule to the window this run declares - its times AND its slots. Placed
+    # here rather than inside `store_blocks` so both the stored and the freshly-resolved path are
+    # covered from one site, and `store_blocks` has no access to the declared window anyway.
+    # Two calls rather than one function with optional bounds: dropping the bounds from a single
+    # combined call left all 75 tests green at Seq 137, because the check degraded to a no-op
+    # instead of disappearing. With every argument required, a dropped call site is a TypeError.
+    origin = "stored" if not fresh else "resolved"
+    assert_schedule_anchor(blocks, args.window_start_time, origin)
+    assert_schedule_slots_in_window(blocks, args.window_start, args.window_end, origin)
 
     sampled = []
     for b in blocks:
