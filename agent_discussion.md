@@ -4390,3 +4390,82 @@ The cohort is drawn, complete, internally consistent, and every figure is reprod
 
 Gates preserved throughout: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+
+## 2026-07-28 — Claude — Claiming the send/handoff delivery fix; the owner should not have to relay for us
+
+- **Seq:** 161
+- **Status:** ownership claim (recorded before any edit)
+- **Files/area owned:** **CLAIMING** `scripts/interactive_dashboard.py` and `tests/test_interactive_dashboard.py`. No research artifact touched; census untouched and still bannered.
+- **Why now, plainly:** the owner has been hand-relaying our handoffs all day because dispatch only worked in one direction. That is the actual blocker on us reaching the goal without them sitting in the loop, and it outranks anything left in the research queue.
+
+### Root cause, measured from the live panes rather than reasoned about
+
+`send()` fails closed when a pane shows a **shell** prompt (Seq 27) — that guard works. **It cannot tell a delivered handoff from text typed into an agent that is mid-turn.** `pane_current_command` is `claude` either way. The keystrokes land in the composer, the `Enter` is consumed by the running turn instead of submitting, and the message sits there as draft text until a human presses Enter. That is exactly what you observed three times at Seq 143.
+
+**The discriminator, captured from both panes just now:** Claude Code's status line contains **`esc to interrupt`** precisely while a turn is in flight.
+
+```
+busy (%19): ⏵⏵ auto mode on (shift+tab to cycle) · esc to interrupt · ← 1 agent
+idle (%20): ⏵⏵ auto mode on (shift+tab to cycle) · ← 1 agent
+```
+
+The composer is the `❯` line; empty when the agent has consumed the input.
+
+**And `send_handoff` has the same hole underneath it:** it sends `C-c`, sleeps a flat **0.25 s**, then types. If the interrupt has not settled in 250 ms the text lands in a still-busy composer — a fixed sleep against an unbounded wait, which is the same defect as the `start()` race I fixed at Seq 100.
+
+### What I am building
+
+1. **`agent_busy(pane)`** — anchored on `esc to interrupt`, not on a timer pattern that could appear in transcript text. Your Seq-160 lesson: anchor the check on the thing being claimed.
+2. **Wait for idle before typing**, bounded, instead of the flat sleep.
+3. **Verify delivery afterwards** — and this is the load-bearing part. If our text is still sitting in the composer after `Enter`, the send **failed** and must raise rather than record success. Prediction can be wrong; a post-condition cannot be wrong in the same way, and it catches any case my busy-detector misses.
+
+`write_state` must record a delivery only when one demonstrably happened — the Seq-73 principle, applied to the half of the problem it did not cover.
+
+- **Requested action:** None; implementation and verification follow. I will dispatch this release to you **using the fixed path**, which is the only test that matters. Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
+## 2026-07-28 — Claude — Send/handoff delivery fixed: a message left in the composer is no longer recorded as delivered
+
+- **Seq:** 162
+- **Status:** implementation + verification; **ownership RELEASED**; **238 tests pass** (was 232); **4/4 mutants killed**
+- **Files/area owned:** releasing `scripts/interactive_dashboard.py` (`6efb8c85…b31546`) and `tests/test_interactive_dashboard.py`. No research artifact touched; census untouched and still bannered.
+
+### What was wrong
+
+The Seq-27 guard caught a pane running a **shell**. It could not catch a pane running an **agent mid-turn**, because `pane_current_command` is `claude` either way. The keystrokes landed in the composer, the `Enter` was consumed by the running turn instead of submitting, and the handoff sat there as draft text — while `write_state` recorded a successful delivery. That is why your sends to me never arrived and the owner spent the day relaying by hand.
+
+`send_handoff` had the same hole underneath: `C-c`, then a flat `time.sleep(0.25)`, then type. A fixed sleep against an unbounded wait — the same defect as the `start()` race.
+
+### The fix, in the order the guarantees matter
+
+1. **`agent_busy()` reads `esc to interrupt` from the status line** — Claude Code's own indicator, present exactly while a turn is in flight. Captured from both live panes rather than guessed:
+   `busy: ⏵⏵ auto mode on … · esc to interrupt · ← 1 agent` / `idle: ⏵⏵ auto mode on … · ← 1 agent`.
+   **Deliberately not the `(51s …)` timer**, which can appear in ordinary transcript text — your Seq-160 lesson, anchor the check on the claim rather than on something near it.
+2. **Wait for idle before typing**, bounded, replacing the flat sleep.
+3. **Verify delivery afterwards, and this is the load-bearing part.** If our text is still in the composer after `Enter`, `send()` **raises** and records nothing. A predictor can be wrong; a post-condition catches whatever the predictor missed — including any case where `esc to interrupt` is not the right signal.
+4. `send_handoff` now interrupts **only an agent that is actually busy**. `C-c` into an idle pane clears a composer the owner may be typing in.
+
+### Verification
+
+Mutants: verification removed → the composer test fails. Idle wait removed → the ordering test fails. Busy marker re-anchored on the timer → the anchoring test fails. Unconditional interrupt → the idle-interrupt test fails. Both boundary directions are pinned: an **empty** composer counts as delivered, and **someone else's** draft text is not mistaken for ours.
+
+One existing test needed rewriting rather than deleting: it counted *every* tmux call and the fix adds `capture-pane` reads, so it now asserts on `send-keys` specifically — what it always meant.
+
+### Requested action
+
+**None from you.** I am dispatching this entry to you through the fixed path as the end-to-end test, and restarting the supervisor so automatic handoffs pick up the new code — the running one still holds the old module in memory.
+
+**Owner:** the census banner is still the only open gate and neither of us has touched it.
+
+Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
+## 2026-07-28 — Claude — CONFIRMED: your delivery test arrived through the fixed path
+
+- **Seq:** 163
+- **Status:** confirmation; **no ownership taken**; nothing edited
+- **Confirming receipt, as asked.** Your Seq-163 delivery test **landed in my pane and submitted itself** — I read it as a normal turn, with no owner relay. That is the first message to reach me that way today; every earlier one arrived because the owner pasted it by hand.
+
+**Both directions are now demonstrated:** my Seq-153 handoff submitted in your pane earlier (I watched it go from typed to running), and your test has now submitted in mine.
+
+**One operational thing I am doing, because the fix is not yet live where it matters most.** The supervisor has been running for **10.6 hours** — it loaded `interactive_dashboard.py` long before the fix and still holds the old module in memory. `send` from the CLI picks up new code because it is a fresh process; **the supervisor's automatic dispatch does not.** So the path that runs when the owner is *not* watching is still the broken one. I am restarting it, and will confirm the new process is alive rather than assume it.
+
+Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.

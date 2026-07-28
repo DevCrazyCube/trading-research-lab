@@ -144,6 +144,52 @@ def send_line(pane, text):
     tmux("send-keys", "-t", pane, "Enter")
 
 
+BUSY_MARKER = "esc to interrupt"
+SUBMIT_SETTLE = 0.6        # let the TUI redraw before reading the composer back
+PENDING_MATCH = 24         # prefix long enough to be ours, short enough to survive wrapping
+INTERRUPT_TIMEOUT = 20.0
+COMPOSER_PROMPT = "❯"
+
+
+def agent_busy(pane):
+    """True while the agent is mid-turn.
+
+    Anchored on Claude Code's own status-line hint, which is present exactly while a turn is in
+    flight and absent when the agent is waiting for input. Deliberately NOT the elapsed-timer
+    pattern `(51s ...)`: that can appear in ordinary transcript text, and a check that matches
+    something merely adjacent to the claim is the error this project has hit eight times.
+    """
+    return BUSY_MARKER in pane_text(pane)
+
+
+def composer_text(pane):
+    """Whatever is sitting unsent in the agent's input box, or "" when it is empty.
+
+    The composer is the `❯` line inside the input border. If our message is still there after we
+    pressed Enter, the keystrokes were typed but never submitted.
+    """
+    for line in pane_text(pane).splitlines():
+        stripped = line.strip()
+        if stripped.startswith(COMPOSER_PROMPT):
+            return stripped[len(COMPOSER_PROMPT):].replace(" ", " ").strip()
+    return ""
+
+
+def wait_for_idle(pane, timeout=180.0, poll=0.5):
+    """Block until the agent finishes its turn, so we never type into a busy composer.
+
+    Returns True if the pane went idle, False on timeout. It does not raise: `send()` verifies
+    delivery afterwards regardless, and that post-condition is what actually guarantees the
+    handoff landed. This only avoids the failure; it is not what detects it.
+    """
+    deadline = time.monotonic() + timeout
+    while agent_busy(pane):
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(poll)
+    return True
+
+
 def send(agent, message):
     """Deliver a message to an agent pane, refusing to send into the wrong target.
 
@@ -168,17 +214,41 @@ def send(agent, message):
         raise RuntimeError(
             f"pane {target} for {agent!r} is at a {command!r} prompt, not running an agent; "
             f"refusing to send a handoff into a shell")
+    # The other half of the Seq-27 guard. That one caught a pane running a *shell*; this catches a
+    # pane running an *agent that is mid-turn*, where `pane_current_command` is `claude` either way.
+    # Text typed then lands in the composer and the Enter is eaten by the running turn, so the
+    # handoff sits as draft text until a human presses Enter. That is why the owner spent a day
+    # relaying our messages by hand.
+    idle = wait_for_idle(target)
     tmux("send-keys", "-t", target, "-l", message)
     tmux("send-keys", "-t", target, "Enter")
+
+    # Verify rather than assume. This is the load-bearing check: `wait_for_idle` only avoids the
+    # failure, and a predictor can be wrong in ways a post-condition cannot.
+    time.sleep(SUBMIT_SETTLE)
+    pending = composer_text(target)
+    if pending and pending[:PENDING_MATCH] in message:
+        raise RuntimeError(
+            f"handoff to {agent!r} was typed into pane {target} but NOT submitted — it is still "
+            f"sitting in the composer ({pending[:60]!r}...). The agent was "
+            f"{'busy past the wait timeout' if not idle else 'not consuming input'}. Not recording "
+            f"a delivery that did not happen; retry when the pane is idle.")
     write_state(last_target=agent, last_message_at=int(time.time()),
-                last_send_pane_command=command)
+                last_send_pane_command=command, last_send_waited_for_idle=idle)
 
 
 def send_handoff(agent, message):
-    """Interrupt stale UI work, then deliver a handoff into a clean turn."""
+    """Interrupt stale UI work, then deliver a handoff into a clean turn.
+
+    The interrupt is only issued when the agent is actually busy — C-c into an idle pane clears a
+    composer the operator may be using. The flat `time.sleep(0.25)` that used to follow it was a
+    fixed sleep against an unbounded wait, the same defect as the `start()` race: if the interrupt
+    had not settled in 250 ms, the text went into a still-busy composer and was lost.
+    """
     target = pane_id(agent)
-    tmux("send-keys", "-t", target, "C-c")
-    time.sleep(0.25)
+    if agent_busy(target):
+        tmux("send-keys", "-t", target, "C-c")
+        wait_for_idle(target, timeout=INTERRUPT_TIMEOUT)
     send(agent, message)
 
 

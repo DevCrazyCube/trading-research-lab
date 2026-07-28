@@ -128,17 +128,26 @@ class SendGuardTests(unittest.TestCase):
         self.originals = (DASH.tmux, DASH.pane_id, DASH.write_state)
         DASH.pane_id = lambda agent: "%15"
         DASH.write_state = lambda **kw: self.calls.append(("state", kw))
+        self.saved_sleep, DASH.time.sleep = DASH.time.sleep, lambda _s: None
 
     def tearDown(self):
+        DASH.time.sleep = self.saved_sleep
         DASH.tmux, DASH.pane_id, DASH.write_state = self.originals
 
-    def _tmux_with_command(self, command):
+    def _tmux_with_command(self, command, pane_text="❯ "):
+        """`pane_text` models what capture-pane returns: the composer line, plus the busy marker
+        when the agent is mid-turn. send() now reads it back to verify the message was submitted."""
         def fake(*args, capture=False, check=True):
             if args and args[0] == "display-message":
                 return command
+            if args and args[0] == "capture-pane":
+                return pane_text
             self.calls.append(("tmux", args))
             return 0
         return fake
+
+    def sent_keys(self):
+        return [c for c in self.calls if c[0] == "tmux" and c[1][0] == "send-keys"]
 
     def test_refuses_to_send_into_a_shell_prompt(self):
         for shell in ("zsh", "bash", "sh"):
@@ -147,8 +156,7 @@ class SendGuardTests(unittest.TestCase):
             with self.assertRaises(RuntimeError) as ctx:
                 DASH.send("claude1", "handoff")
             self.assertIn("refusing", str(ctx.exception))
-            self.assertEqual([c for c in self.calls if c[0] == "tmux"], [],
-                             "must not send keys at all")
+            self.assertEqual(self.sent_keys(), [], "must not send keys at all")
             self.assertEqual([c for c in self.calls if c[0] == "state"], [],
                              "must not record a delivery that did not happen")
 
@@ -162,12 +170,75 @@ class SendGuardTests(unittest.TestCase):
     def test_sends_and_records_when_an_agent_is_running(self):
         DASH.tmux = self._tmux_with_command("claude")
         DASH.send("claude1", "handoff")
-        sends = [c for c in self.calls if c[0] == "tmux"]
-        self.assertEqual(len(sends), 2, "literal text then Enter")
+        self.assertEqual(len(self.sent_keys()), 2, "literal text then Enter")
         state = [c for c in self.calls if c[0] == "state"]
         self.assertEqual(len(state), 1)
         self.assertEqual(state[0][1]["last_target"], "claude1")
         self.assertEqual(state[0][1]["last_send_pane_command"], "claude")
+
+    def test_refuses_when_the_message_is_left_sitting_in_the_composer(self):
+        """The defect that made the owner relay our handoffs by hand for a day.
+
+        `pane_current_command` is `claude` whether the agent is idle or mid-turn, so the Seq-27
+        guard could not see this. The keystrokes land in the composer, the Enter is eaten by the
+        running turn, and the message sits there as draft text — while state recorded a delivery.
+        """
+        message = "Read the latest handoff in agent_discussion.md and continue"
+        DASH.tmux = self._tmux_with_command("claude", pane_text=f"❯ {message}")
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.send("claude1", message)
+        self.assertIn("NOT submitted", str(ctx.exception))
+        self.assertEqual([c for c in self.calls if c[0] == "state"], [],
+                         "a message still in the composer is not a delivery")
+
+    def test_an_empty_composer_after_sending_counts_as_delivered(self):
+        """The other side of the boundary: over-strictness here would break every real handoff."""
+        DASH.tmux = self._tmux_with_command("claude", pane_text="❯ ")
+        DASH.send("claude1", "handoff")
+        self.assertEqual(len([c for c in self.calls if c[0] == "state"]), 1)
+
+    def test_someone_elses_draft_text_is_not_mistaken_for_ours(self):
+        """A composer holding unrelated text must not fail the send - it is not our message."""
+        DASH.tmux = self._tmux_with_command("claude", pane_text="❯ some unrelated draft")
+        DASH.send("claude1", "a completely different handoff message")
+        self.assertEqual(len([c for c in self.calls if c[0] == "state"]), 1)
+
+    def test_waits_for_the_agent_to_finish_before_typing(self):
+        """Busy first, then idle: nothing may be typed until the turn in flight has ended."""
+        states = [f"⏵⏵ auto mode on · {DASH.BUSY_MARKER} · ← 1 agent\n❯ "] * 3 + ["❯ "]
+        order = []
+
+        def fake(*args, capture=False, check=True):
+            if args[0] == "display-message":
+                return "claude"
+            if args[0] == "capture-pane":
+                order.append("poll")
+                return states.pop(0) if len(states) > 1 else states[0]
+            order.append(args[0])
+            self.calls.append(("tmux", args))
+            return 0
+
+        DASH.tmux = fake
+        DASH.send("claude1", "handoff")
+        first_send = order.index("send-keys")
+        self.assertGreaterEqual(order[:first_send].count("poll"), 3,
+                                "must poll until idle before typing")
+        self.assertEqual(len([c for c in self.calls if c[0] == "state"]), 1)
+
+    def test_agent_busy_reads_the_status_line_not_a_timer(self):
+        """Anchored on the claim, per Seq 160. An elapsed timer in transcript text is not busy."""
+        DASH.tmux = self._tmux_with_command("claude", pane_text="ran in (51s) earlier\n❯ ")
+        self.assertFalse(DASH.agent_busy("%15"))
+        DASH.tmux = self._tmux_with_command(
+            "claude", pane_text=f"⏵⏵ auto mode on · {DASH.BUSY_MARKER}\n❯ ")
+        self.assertTrue(DASH.agent_busy("%15"))
+
+    def test_handoff_only_interrupts_an_agent_that_is_actually_busy(self):
+        """C-c into an idle pane clears a composer the operator may be using."""
+        DASH.tmux = self._tmux_with_command("claude", pane_text="❯ ")
+        DASH.send_handoff("claude1", "handoff")
+        interrupts = [c for c in self.sent_keys() if "C-c" in c[1]]
+        self.assertEqual(interrupts, [], "an idle agent must not be interrupted")
 
     def test_rejects_unknown_agent_before_touching_tmux(self):
         DASH.tmux = self._tmux_with_command("claude")
