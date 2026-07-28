@@ -176,6 +176,11 @@ Two different things must not be conflated, and the census separates them:
 | `11111111111111111111111111111111` | SOL (native sentinel) | 1,577 | 98.50% |
 | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` | USDC | 24 | 1.50% |
 
+**No change in the USDC share is demonstrated (N3, Seq 157).** B8a was 8/242 = **3.31%**, 95%
+Wilson **[1.68%, 6.39%]**; B8b is 24/1,601 = **1.50%**, Wilson **[1.01%, 2.22%]**. **The intervals
+overlap**, so these two cohorts are not distinguishable on USDC share and no decline may be read
+from them. Two points are not a trend.
+
 **`sol_amount` must branch on `quote_mint` or fail closed** (B7k). And `quote_mint` itself has two
 representations for SOL — event-derived `111…111` versus account-derived `So111…112` (B7l) — so a
 filter written against the wrong one returns **zero** SOL members and reads as *"no SOL launches"*
@@ -191,8 +196,24 @@ rather than as a bug.
 | `is_cashback_enabled` | 1 | 621 | 38.8% |
 
 Mayhem is a **covariate excluded at decision time**, never a sampling step. Excluding it is a
-**change in creator composition**, not a row filter — in B8a it removed the most concentrated block
-of the cohort, which is why tradable leakage read *lower* than raw.
+**change in creator composition**, not a row filter.
+
+**And in this cohort that change runs the opposite way to B8a — the inherited intuition is wrong
+here (N2, Seq 157).** In B8a the largest actor group was 10 members, **all 10 Mayhem**, so the
+exclusion removed the most concentrated block and tradable leakage read *lower* than raw. In B8b:
+
+| | B8a | **B8b** |
+|---|---:|---:|
+| largest actor group | 10 | **51** |
+| of which Mayhem | **10 of 10** | **0 of 51** |
+| effect of excluding Mayhem | removed it entirely | **leaves it wholly intact** |
+| its share: whole cohort → tradable population | — | **3.19% → 4.49%** |
+
+**The single most concentrated actor here is entirely tradable.** Excluding Mayhem does not remove
+the concentration; it makes it proportionally **worse** in the population actually used for
+modelling. **One actor group is 4.49% of the tradable set**, and that is the figure that matters
+when folds are built — a fold that happens to receive that group receives one actor's behaviour as
+4.5% of its data.
 
 ## Actor leakage under the frozen `creator ∪ user` key
 
@@ -207,6 +228,19 @@ split across blocks or across folds**. Two figures are reported separately and m
 - **members belonging to a repeat actor** — the exposed share.
 - **surplus beyond one-each** — a different quantity. B8a's first census quoted the surplus (35.1%)
   as if it were the exposed share (50.4%), and the correction is why both are labelled here.
+
+**What the union key actually did in this cohort: nothing (N1, Seq 157).** 16 rows have
+`creator != user`; 7 of those name a `user` who is also a creator — but those 7 encode **one
+distinct identity link**, not seven. Its effect:
+
+| grouping | actor groups | members from a repeat actor |
+|---|---:|---:|
+| `creator` alone | 825 | 1,009 (63.02%) |
+| **`creator ∪ user`** | **824** | **1,009 (63.02%)** |
+
+One group merged; **not one published figure moved.** The union key remains the correct default —
+it is free insurance, and B8a's audit argued for it correctly — but **this cohort supplies no
+evidence for it**, and a reader must not take "7 bridge rows" as seven independent confirmations.
 
 ## What this does not establish
 
