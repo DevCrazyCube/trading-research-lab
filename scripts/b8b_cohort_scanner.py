@@ -172,6 +172,63 @@ def freeze_metadata(window_start, window_end, window_start_time, idl_sha, endpoi
     }
 
 
+def assert_complete_schedule(blocks, origin):
+    """A schedule is the sample definition, so a partial one is not a smaller sample - it is a
+    different, unstratified one wearing the label of a stratified one (freeze §5)."""
+    if len(blocks) != HOURS:
+        raise SystemExit(
+            f"FAIL CLOSED: {origin} schedule has {len(blocks)} blocks, expected {HOURS} hourly "
+            f"strata. A truncated schedule would scan a fraction of the strata and report it as "
+            f"the sample. Refusing; delete the sampled_block rows to re-resolve from scratch.")
+    hours = [b["hour"] for b in blocks]
+    if sorted(hours) != list(range(HOURS)):
+        raise SystemExit(
+            f"FAIL CLOSED: {origin} schedule does not cover hours 0..{HOURS - 1} exactly once "
+            f"(got {sorted(hours)}).")
+    expected = offsets()
+    wrong = [(b["hour"], b["offset_minutes"], expected[b["hour"]])
+             for b in blocks if b["offset_minutes"] != expected[b["hour"]]]
+    if wrong:
+        raise SystemExit(
+            f"FAIL CLOSED: {origin} schedule offsets do not match the frozen rule "
+            f"offset(h) = ({STRIDE}h mod {MODULUS}); (hour, stored, expected) = {wrong}")
+    # Block width. `resolve_blocks` already refuses `after <= begin`, but it is NEVER CALLED on a
+    # resume - the stored schedule is used directly - so that guarantee does not reach this path.
+    # A zero-width block contributes no slots, so the hour vanishes from `sampled`, nothing is
+    # "missing", and a 23-stratum run reports COMPLETE. Same vacuity shape as F1: emptiness making
+    # the check that should have caught it trivially true.
+    degenerate = [(b["hour"], b["start_slot"], b["end_slot_exclusive"])
+                  for b in blocks if b["end_slot_exclusive"] <= b["start_slot"]]
+    if degenerate:
+        raise SystemExit(
+            f"FAIL CLOSED: {origin} schedule has non-positive block width at "
+            f"(hour, start, end_exclusive) = {degenerate}. Such an hour contributes zero slots and "
+            f"would silently drop a stratum while the run still reported COMPLETE.")
+
+
+def verify_window_start_time(url, window_start, window_end, window_start_time, retries,
+                             tolerance_slots=25):
+    """Cross-check `--window-start-time` against the chain before it defines 24 boundaries.
+
+    It is a CLI default, and every block time is computed from it. A wrong value shifts all 24
+    blocks coherently, so nothing downstream looks odd and nothing fails - the sample simply is
+    not the one the freeze describes. Verified only on a fresh resolve; a resumed run reuses the
+    stored schedule and never re-derives times.
+    """
+    found = first_slot_at_or_after(url, window_start_time, window_start, window_end, retries)
+    if found is None:
+        raise SystemExit(
+            f"FAIL CLOSED: no slot at or after window_start_time={window_start_time} inside "
+            f"[{window_start}, {window_end}]; the declared start time is not in this window.")
+    if abs(found - window_start) > tolerance_slots:
+        raise SystemExit(
+            f"FAIL CLOSED: window_start_time={window_start_time} resolves to slot {found}, which "
+            f"is {abs(found - window_start)} slots from the declared window_start={window_start} "
+            f"(tolerance {tolerance_slots}). All 24 boundaries derive from this time, so a wrong "
+            f"value moves the entire sample without anything else looking wrong.")
+    return found
+
+
 def store_blocks(connection, blocks):
     """Write the schedule once. On resume, the stored schedule wins - never recompute."""
     existing = connection.execute("SELECT COUNT(*) FROM sampled_block").fetchone()[0]
@@ -181,6 +238,10 @@ def store_blocks(connection, blocks):
                   for row in connection.execute(
                       "SELECT hour, offset_minutes, start_slot, end_slot_exclusive, start_time, "
                       "end_time FROM sampled_block ORDER BY hour")]
+        # A stored schedule always wins over a recomputed one - but only if it is a WHOLE
+        # schedule. Reusing a truncated one would silently scan a fraction of the strata and
+        # report it as the sample; the census would then have to be the thing that catches it.
+        assert_complete_schedule(stored, "stored")
         return stored, False
     connection.executemany(
         "INSERT INTO sampled_block(hour, offset_minutes, start_slot, end_slot_exclusive, "
@@ -230,9 +291,14 @@ def main():
     else:
         print(f"resolving 48 boundaries against on-chain blockTime "
               f"(endpoint={endpoint_ref}) ...", flush=True)
-        blocks, fresh = store_blocks(
-            connection, resolve_blocks(url, args.window_start, args.window_end,
-                                       args.window_start_time, args.retries))
+        anchor = verify_window_start_time(url, args.window_start, args.window_end,
+                                          args.window_start_time, args.retries)
+        print(f"window_start_time verified against chain: resolves to slot {anchor:,} "
+              f"(declared start {args.window_start:,})")
+        resolved = resolve_blocks(url, args.window_start, args.window_end,
+                                  args.window_start_time, args.retries)
+        assert_complete_schedule(resolved, "resolved")
+        blocks, fresh = store_blocks(connection, resolved)
         print(f"schedule: resolved and frozen into the database")
 
     sampled = []

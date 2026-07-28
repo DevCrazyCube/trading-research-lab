@@ -395,3 +395,17 @@ The two do not imply each other. A user-ratified decision can remain provisional
   - **Evidence artifacts (`*.sqlite`) are deliberately NOT tracked.** They are large, and their integrity is already established by the recorded SHA-256 hashes in this file and in the research documents. The irreplaceable material is the markdown record.
   - The parent repository at `/home/anont` is unaffected: it ignores `meme/` entirely, and a nested repository is independent of it.
 
+
+## 2026-07-28 — B8b sample size: complete as frozen and report achieved precision (option A)
+
+- **Status:** accepted
+- **Ratified by:** **user (2026-07-28)** — *"go with A"*, answering the gate raised in `agent_discussion.md` Seq 129.
+- **Decision:** The B8b run **completes exactly as frozen**. The realised `n` is reported whatever it turns out to be, together with the confidence interval that `n` actually supports. **No claim may be made at a precision the realised `n` does not support.** The sampling rule, the block size and the window are unchanged.
+- **Reason:** The realised launch rate is running ~25% below the B8a extrapolation, so `n` is projected near **1,300** rather than the ~1,715 assumed in freeze §4. At n=1,300 the 95% half-width at p=1% is **±0.541 pp**, against a design bar of ±0.5 pp — a miss of 0.041 pp. `research/B8B_SUBSAMPLING_PREREGISTRATION.md` §4 had already pre-committed to this outcome: *"the realised `n` falls where it falls and is reported, whatever it is… not a reason to resize the sample mid-run."*
+- **Consequence:**
+  - **The freeze is NOT amended.** It stays at `56d8a83b…8374`. Option A requires no change to it, which is the point — amending an authorised freeze after learning its bar would be missed is the failure mode the discipline exists to prevent, even when the amendment tightens.
+  - **The shortfall is itself a finding.** B8a's 25,718/day came from a single 13.6-minute window and the freeze labelled it *"not a measurement"*. A realised rate ~25% lower confirms that caveat, and vindicates freezing the **fraction** rather than a target count — had the count been frozen, the sampling would now be being stretched to reach it.
+  - **The miss is narrow, and overstating it would be its own error.** At n≈1,300 the ±0.5 pp bar still holds for **every p ≤ 0.85%**; it fails only in a band around 1%.
+  - **Option B (a second 24-hour window, n≈2,600, ±0.38 pp, ~6.2 h) was offered and not chosen.** It remains available later as a *new* preregistered decision, and would still be defensible on blinded-sample-size grounds only while no label or outcome exists.
+  - **Option C — widening the precision bar to fit the realised `n` — was recommended against and is not adopted.** Moving a success criterion after seeing it will be missed is goalpost-moving regardless of the parameter involved.
+  - `scripts/b8b_census.py` now prints the achieved half-widths and the largest `p` still meeting the bar, so the interval is reported with the count rather than left to a reader.

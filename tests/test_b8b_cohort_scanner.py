@@ -209,7 +209,7 @@ class ActorGroupingTests(unittest.TestCase):
     def test_share_from_repeat_actor_is_not_the_surplus(self):
         """B8a's census quoted the surplus as if it were the exposed share. Both are reported."""
         rows = [("A", "A"), ("A", "A"), ("B", "B"), ("C", "C")]
-        result = CENSUS.leakage(rows, "synthetic")
+        result = CENSUS.leakage(rows, "synthetic", CENSUS.component_map(rows))
         self.assertEqual(result["members_from_a_repeat_actor"], 2)
         self.assertAlmostEqual(result["share_from_repeat_actor"], 0.5)
         self.assertEqual(result["surplus_beyond_one_each"], 1)
@@ -217,9 +217,362 @@ class ActorGroupingTests(unittest.TestCase):
         self.assertNotEqual(result["share_from_repeat_actor"], result["share_surplus"])
 
     def test_empty_population_does_not_divide_by_zero(self):
-        result = CENSUS.leakage([], "empty")
+        result = CENSUS.leakage([], "empty", {})
         self.assertEqual(result["n"], 0)
         self.assertEqual(result["share_from_repeat_actor"], 0.0)
+
+    def test_two_creators_bridged_only_by_a_shared_user(self):
+        """Neither `X` is ever a creator, so a creator-only implementation passes this by accident
+        and a bridge-counting one misses it. A and B are one actor via X."""
+        self.assertEqual(len(set(CENSUS.actor_groups([("A", "X"), ("B", "X")]))), 1)
+
+
+class SubsetLeakageTests(unittest.TestCase):
+    """F3 (Seq 129): leakage over a subset must use the FULL cohort's actor graph.
+
+    Rebuilding components from the filtered rows loses identity links proven by excluded rows, and
+    it fails in the anti-conservative direction — under-reporting leakage in the very measure that
+    exists to stop an actor landing on both sides of a split. B8a had five creators launching both
+    Mayhem and non-Mayhem, so this is a live case, not a constructed one.
+    """
+
+    # (A,B) is Mayhem and excluded; it is also the only proof that A and B are one actor.
+    ALL = [("A", "B"), ("A", "A"), ("B", "B")]
+    TRADABLE = [("A", "A"), ("B", "B")]
+
+    def test_subset_leakage_uses_links_proven_by_excluded_rows(self):
+        component_of = CENSUS.component_map(self.ALL)
+        result = CENSUS.leakage(self.TRADABLE, "tradable", component_of)
+        self.assertEqual(result["distinct_actor_groups"], 1,
+                         "A and B are one actor; the Mayhem row proves it")
+        self.assertEqual(result["members_from_a_repeat_actor"], 2)
+        self.assertAlmostEqual(result["share_from_repeat_actor"], 1.0)
+
+    def test_rebuilding_from_the_subset_would_have_reported_zero(self):
+        """Pins the magnitude of the old defect so the regression is unmistakable."""
+        subset_only = CENSUS.leakage(self.TRADABLE, "tradable", CENSUS.component_map(self.TRADABLE))
+        self.assertAlmostEqual(subset_only["share_from_repeat_actor"], 0.0)
+        full = CENSUS.leakage(self.TRADABLE, "tradable", CENSUS.component_map(self.ALL))
+        self.assertAlmostEqual(full["share_from_repeat_actor"], 1.0)
+
+    def test_an_incomplete_component_map_is_refused_rather_than_guessed(self):
+        """No default for `component_of`: silently rebuilding from the subset is the defect."""
+        with self.assertRaises(ValueError) as ctx:
+            CENSUS.leakage(self.TRADABLE, "tradable", CENSUS.component_map([("Z", "Z")]))
+        self.assertIn("full cohort", str(ctx.exception))
+
+    def test_leakage_requires_the_component_map_argument(self):
+        with self.assertRaises(TypeError):
+            CENSUS.leakage(self.TRADABLE, "tradable")
+
+    def test_main_builds_the_map_from_the_full_cohort(self):
+        """Anti-vacuity, and it is not hypothetical: the fix lives at a *call site*, so the unit
+        tests above all still pass if `main()` is changed back to `component_map(tradable)`.
+        Verified by mutation — that regression was invisible until this test existed.
+
+        Fixture: one Mayhem row proving `A` and `B` are one actor, plus one tradable launch from
+        each. Correct tradable leakage is 100%; rebuilding from the subset reports 0%.
+        """
+        import json
+        import subprocess
+        import sys
+        path = pathlib.Path(tempfile.mkdtemp()) / "bridge.sqlite"
+        connection = B8B.open_database(str(path))
+        for hour in range(24):
+            start = 1000 + hour * 10
+            connection.execute("INSERT INTO sampled_block VALUES (?,?,?,?,0,0)",
+                               (hour, (27 * hour) % 59, start, start + 1))
+            connection.execute("INSERT INTO slot_scan(slot,status,error,scanned_at_unix) "
+                               "VALUES (?,'retrieved',NULL,0)", (start,))
+        rows = [("A", "B", 1), ("A", "A", 0), ("B", "B", 0)]
+        for index, (creator, user, mayhem) in enumerate(rows):
+            connection.execute(
+                "INSERT INTO create_event(slot,transaction_index,outer_instruction_index,"
+                "inner_instruction_index,signature,mint,bonding_curve,creator,user,"
+                "is_mayhem_mode,is_cashback_enabled,quote_mint,fields_json,"
+                "event_payload_base64) VALUES (?,?,0,0,?,?,?,?,?,?,0,?,'{}','')",
+                (1000, index, f"SIG{index}", f"MINT{index}", f"CURVE{index}",
+                 creator, user, mayhem, CENSUS.SOL_SENTINEL))
+        connection.commit()
+        connection.close()
+
+        out = path.with_suffix(".json")
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "b8b_census.py"),
+                        "--database", str(path), "--json", str(out)],
+                       capture_output=True, text=True, cwd=str(ROOT))
+        report = json.loads(out.read_text())
+        tradable = next(r for r in report["leakage"] if r["population"].startswith("tradable"))
+        self.assertEqual(tradable["n"], 2)
+        self.assertEqual(tradable["distinct_actor_groups"], 1,
+                         "main() must build the actor graph from the FULL cohort; rebuilding it "
+                         "from the tradable subset loses the link the Mayhem row proves")
+        self.assertAlmostEqual(tradable["share_from_repeat_actor"], 1.0)
+
+
+class CensusVerdictTests(unittest.TestCase):
+    """F1/F2 (Seq 129): the verdict must enforce every condition the output calls a "must"."""
+
+    OK = dict(blocks=[{"hour": h} for h in range(24)], sampled={1, 2, 3}, missing=set(),
+              unverified=0, decode_errors=0, create_events=10, distinct_mints=10)
+
+    def test_a_clean_artifact_passes(self):
+        self.assertEqual(CENSUS.census_failures(**self.OK), [])
+
+    def test_an_empty_artifact_fails_rather_than_passing_vacuously(self):
+        failures = CENSUS.census_failures(**dict(self.OK, blocks=[], sampled=set(),
+                                                 create_events=0, distinct_mints=0))
+        self.assertEqual(len(failures), 2, failures)
+        self.assertTrue(any("24 hourly strata" in f for f in failures))
+        self.assertTrue(any("zero sampled slots" in f for f in failures))
+
+    def test_a_partial_schedule_fails(self):
+        self.assertTrue(any("hourly strata" in f for f in
+                            CENSUS.census_failures(**dict(self.OK, blocks=[{"hour": 0}] * 3))))
+
+    def test_decode_errors_fail_the_census_as_they_fail_the_scanner(self):
+        failures = CENSUS.census_failures(**dict(self.OK, decode_errors=1))
+        self.assertTrue(any("C4" in f for f in failures),
+                        "an undecodable CreateEvent breaks exhaustiveness")
+
+    def test_duplicate_mints_fail(self):
+        self.assertTrue(any("duplicate membership" in f for f in
+                            CENSUS.census_failures(**dict(self.OK, distinct_mints=9))))
+
+    def test_missing_slots_and_unverified_skips_still_fail(self):
+        self.assertTrue(CENSUS.census_failures(**dict(self.OK, missing={7})))
+        self.assertTrue(CENSUS.census_failures(**dict(self.OK, unverified=1)))
+
+    def test_main_actually_uses_the_gate(self):
+        """Anti-vacuity: the unit tests above are worthless if main() gates on something else.
+
+        Runs the real script against an empty temp database and requires a non-zero exit.
+        """
+        import subprocess
+        import sys
+        path = pathlib.Path(tempfile.mkdtemp()) / "empty.sqlite"
+        connection = B8B.open_database(str(path))
+        connection.commit()
+        connection.close()
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "b8b_census.py"), "--database", str(path)],
+            capture_output=True, text=True, cwd=str(ROOT))
+        self.assertEqual(result.returncode, 1, result.stdout[-2000:])
+        self.assertIn("CENSUS VERDICT: FAIL", result.stdout)
+
+
+class BlockWidthTests(unittest.TestCase):
+    """F6 (Seq 132): `resolve_blocks` refuses `after <= begin`, but it is NEVER CALLED on a resume.
+
+    The resume path reads `sampled_block` straight from the database, so `assert_complete_schedule`
+    is the only thing standing between a corrupt stored schedule and the run. A zero-width block
+    contributes no slots, so its hour disappears from `sampled`, nothing is reported "missing", and
+    a 23-stratum run reports COMPLETE — the same vacuity shape as F1.
+    """
+
+    def blocks(self, **override):
+        out = [{"hour": h, "offset_minutes": (27 * h) % 59,
+                "start_slot": 1000 + h * 100, "end_slot_exclusive": 1000 + h * 100 + 50,
+                "start_time": 0, "end_time": 0} for h in range(24)]
+        for hour, changes in override.items():
+            out[int(hour)].update(changes)
+        return out
+
+    def test_a_healthy_schedule_passes(self):
+        B8B.assert_complete_schedule(self.blocks(), "test")
+
+    def test_a_zero_width_block_fails_closed(self):
+        blocks = self.blocks()
+        blocks[7]["end_slot_exclusive"] = blocks[7]["start_slot"]
+        with self.assertRaises(SystemExit) as ctx:
+            B8B.assert_complete_schedule(blocks, "stored")
+        self.assertIn("non-positive block width", str(ctx.exception))
+
+    def test_an_inverted_block_fails_closed(self):
+        blocks = self.blocks()
+        blocks[3]["end_slot_exclusive"] = blocks[3]["start_slot"] - 5
+        with self.assertRaises(SystemExit):
+            B8B.assert_complete_schedule(blocks, "stored")
+
+    def test_the_dropped_stratum_would_otherwise_be_invisible(self):
+        """Documents why this needs its own check: no other invariant notices."""
+        blocks = self.blocks()
+        blocks[7]["end_slot_exclusive"] = blocks[7]["start_slot"]
+        sampled = [s for b in blocks
+                   for s in range(b["start_slot"], b["end_slot_exclusive"])]
+        self.assertEqual(len(blocks), 24, "block count still looks right")
+        self.assertEqual(sorted(b["hour"] for b in blocks), list(range(24)),
+                         "hour coverage still looks right")
+        overlaps = [(a, b) for a, b in zip(blocks, blocks[1:])
+                    if a["end_slot_exclusive"] > b["start_slot"]]
+        self.assertEqual(overlaps, [], "the overlap check still passes")
+        self.assertEqual(len(sampled), 23 * 50, "yet one whole stratum contributes nothing")
+
+
+class ObservationPowerTests(unittest.TestCase):
+    """F7 (Seq 132): a stratum that was observed and yielded nothing is NOT the same as a stratum
+    that was never observed, and the previous `creates` column could not tell them apart.
+
+    Seq 131 decided — correctly — that a zero-launch stratum must stay a NOTE, because failing on
+    it conflates "we looked and found nothing" with "we did not look". That reasoning only covers
+    the first case. Zero *retrieved* slots is the second case and is a genuine fault.
+    """
+
+    def test_zero_retrieved_slots_fails(self):
+        failures = CENSUS.census_failures(
+            blocks=[{"hour": h} for h in range(24)], sampled={1}, missing=set(), unverified=0,
+            decode_errors=0, create_events=1, distinct_mints=1, zero_observed=[7])
+        self.assertTrue(any("zero retrieved slots" in f for f in failures), failures)
+
+    def test_observed_but_empty_strata_do_not_fail(self):
+        failures = CENSUS.census_failures(
+            blocks=[{"hour": h} for h in range(24)], sampled={1}, missing=set(), unverified=0,
+            decode_errors=0, create_events=1, distinct_mints=1, zero_observed=[])
+        self.assertEqual(failures, [])
+
+    def test_main_distinguishes_the_two_cases_end_to_end(self):
+        """Call-site test, per the F3 lesson: the unit tests above all pass even if `main()` never
+        computes `zero_observed`. Fixture: hour 5 has a retrieved slot and no launch (NOTE), hour 9
+        has only a skipped slot and therefore no observation power (FAIL)."""
+        import json
+        import subprocess
+        import sys
+        path = pathlib.Path(tempfile.mkdtemp()) / "power.sqlite"
+        connection = B8B.open_database(str(path))
+        for hour in range(24):
+            start = 1000 + hour * 10
+            connection.execute("INSERT INTO sampled_block VALUES (?,?,?,?,0,0)",
+                               (hour, (27 * hour) % 59, start, start + 1))
+            status = "skipped" if hour == 9 else "retrieved"
+            connection.execute("INSERT INTO slot_scan(slot,status,error,scanned_at_unix) "
+                               "VALUES (?,?,?,0)",
+                               (start, status,
+                                "absence verified by getBlocks" if status == "skipped" else None))
+            if hour not in (5, 9):                       # hour 5 observed but empty
+                connection.execute(
+                    "INSERT INTO create_event(slot,transaction_index,outer_instruction_index,"
+                    "inner_instruction_index,signature,mint,bonding_curve,creator,user,"
+                    "is_mayhem_mode,is_cashback_enabled,quote_mint,fields_json,"
+                    "event_payload_base64) VALUES (?,0,0,0,?,?,?,?,?,0,0,?,'{}','')",
+                    (start, f"SIG{hour}", f"MINT{hour}", f"CURVE{hour}",
+                     f"C{hour}", f"C{hour}", CENSUS.SOL_SENTINEL))
+        connection.commit()
+        connection.close()
+
+        out = path.with_suffix(".json")
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "b8b_census.py"),
+                        "--database", str(path), "--json", str(out)],
+                       capture_output=True, text=True, cwd=str(ROOT))
+        report = json.loads(out.read_text())
+        self.assertEqual(report["strata_zero_launch"], [5],
+                         "an observed-but-empty stratum must be reported as a NOTE, not a fault")
+        self.assertEqual(report["strata_zero_observed"], [9],
+                         "a stratum with no retrieved slots must be identified")
+        self.assertEqual(report["verdict"], "FAIL")
+        self.assertTrue(any("zero retrieved slots" in f for f in report["failures"]),
+                        report["failures"])
+
+
+class AchievedPrecisionTests(unittest.TestCase):
+    """Owner decision A: report the precision the realised `n` supports; claim nothing tighter."""
+
+    def test_the_projected_n_misses_the_bar_and_says_so(self):
+        result = CENSUS.achieved_precision(1300)
+        self.assertFalse(result["meets_bar_at_1pct"])
+        self.assertAlmostEqual(result["half_widths"]["0.01"], 0.00541, places=4)
+
+    def test_the_exact_requirement_is_reported(self):
+        self.assertEqual(CENSUS.achieved_precision(1300)["n_required"], 1522)
+
+    def test_the_bar_still_holds_for_rarer_regimes(self):
+        """The miss is a narrow band around 1%, not a blanket failure - worth not overstating."""
+        self.assertGreater(CENSUS.achieved_precision(1300)["max_p"], 0.008)
+        self.assertLess(CENSUS.achieved_precision(1300)["max_p"], 0.010)
+
+    def test_a_sufficient_n_passes(self):
+        self.assertTrue(CENSUS.achieved_precision(1715)["meets_bar_at_1pct"])
+        self.assertTrue(CENSUS.achieved_precision(1522)["meets_bar_at_1pct"])
+
+    def test_zero_n_does_not_divide_by_zero(self):
+        result = CENSUS.achieved_precision(0)
+        self.assertFalse(result["meets_bar_at_1pct"])
+        self.assertEqual(result["max_p"], 0.0)
+
+
+class ScheduleCompletenessTests(unittest.TestCase):
+    """F4 (Seq 129): a partial stored schedule was reused as the sample with no complaint."""
+
+    def blocks(self, count=24):
+        return [{"hour": h, "offset_minutes": (27 * h) % 59,
+                 "start_slot": 1000 + h * 100, "end_slot_exclusive": 1000 + h * 100 + 50,
+                 "start_time": 0, "end_time": 0} for h in range(count)]
+
+    def test_a_full_schedule_passes(self):
+        B8B.assert_complete_schedule(self.blocks(), "test")
+
+    def test_a_truncated_schedule_fails_closed(self):
+        with self.assertRaises(SystemExit) as ctx:
+            B8B.assert_complete_schedule(self.blocks(3), "stored")
+        self.assertIn("FAIL CLOSED", str(ctx.exception))
+
+    def test_a_duplicated_hour_fails_closed(self):
+        blocks = self.blocks()
+        blocks[5]["hour"] = 4
+        with self.assertRaises(SystemExit):
+            B8B.assert_complete_schedule(blocks, "stored")
+
+    def test_an_offset_off_the_frozen_rule_fails_closed(self):
+        blocks = self.blocks()
+        blocks[7]["offset_minutes"] += 1
+        with self.assertRaises(SystemExit) as ctx:
+            B8B.assert_complete_schedule(blocks, "stored")
+        self.assertIn("frozen rule", str(ctx.exception))
+
+    def test_store_blocks_refuses_to_reuse_a_truncated_stored_schedule(self):
+        path = pathlib.Path(tempfile.mkdtemp()) / "partial.sqlite"
+        connection = B8B.open_database(str(path))
+        self.addCleanup(connection.close)
+        for block in self.blocks(3):
+            connection.execute(
+                "INSERT INTO sampled_block VALUES (?,?,?,?,?,?)",
+                (block["hour"], block["offset_minutes"], block["start_slot"],
+                 block["end_slot_exclusive"], 0, 0))
+        connection.commit()
+        with self.assertRaises(SystemExit) as ctx:
+            B8B.store_blocks(connection, None)
+        self.assertIn("FAIL CLOSED", str(ctx.exception))
+
+
+class WindowStartTimeTests(unittest.TestCase):
+    """F5 (Seq 129): the declared start time defines all 24 boundaries and was never checked.
+
+    A wrong value shifts every block coherently, so nothing downstream looks odd — the sample is
+    simply not the one the freeze describes.
+    """
+
+    BASE, T0 = 1000, 500_000
+
+    def setUp(self):
+        chain = {s: self.T0 + (s - self.BASE) * 2 for s in range(self.BASE, self.BASE + 5000)}
+        self._real = B8B._get_block_time
+        B8B._get_block_time = lambda url, slot, retries: chain.get(slot)
+        self.addCleanup(lambda: setattr(B8B, "_get_block_time", self._real))
+
+    def test_a_correct_start_time_is_accepted(self):
+        found = B8B.verify_window_start_time("url", self.BASE, self.BASE + 4999, self.T0, 1)
+        self.assertEqual(found, self.BASE)
+
+    def test_a_start_time_a_few_slots_off_is_tolerated(self):
+        B8B.verify_window_start_time("url", self.BASE, self.BASE + 4999, self.T0 + 20, 1)
+
+    def test_a_start_time_minutes_off_fails_closed(self):
+        with self.assertRaises(SystemExit) as ctx:
+            B8B.verify_window_start_time("url", self.BASE, self.BASE + 4999, self.T0 + 600, 1)
+        self.assertIn("moves the entire sample", str(ctx.exception))
+
+    def test_a_start_time_outside_the_window_fails_closed(self):
+        with self.assertRaises(SystemExit) as ctx:
+            B8B.verify_window_start_time("url", self.BASE, self.BASE + 4999, self.T0 + 10 ** 6, 1)
+        self.assertIn("not in this window", str(ctx.exception))
 
 
 if __name__ == "__main__":
