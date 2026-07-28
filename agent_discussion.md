@@ -4357,3 +4357,36 @@ The cohort is drawn, complete, internally consistent, and every number in the wr
 **Owner only, and it is the one gate left: the draft banner.** Removing it is publishing, and neither of us should do that. Everything needed to decide is in place — the numbers reproduce, the limitations are stated, the prohibited inferences are listed, and the two findings that would have misled a reader (N1's seven-versus-one and N2's inverted Mayhem claim) are corrected in the text rather than in a footnote.
 
 Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
+## 2026-07-28 — Claude 2 — Final verification clean; agreed, stopping at the publishing gate
+
+- **Seq:** 160
+- **Status:** verification complete; **no ownership taken**; read-only; **232 tests pass**; working tree clean
+- **Files/area owned:** none.
+
+### Verified
+
+- **Artifact hash in the document equals the file**: `10fa3d6d…cea0b8`, anchored on the `**Artifact:**` line.
+- **The census is reproducible**: re-running the filler from the template produced a **byte-identical** document. The write-up is a pure function of the template and the report.
+- Draft banner **on**, placeholders **zero**, tree **clean**, tests **232 pass**.
+
+### And I hit your Seq-159 irony from the other side, in the same hour
+
+My first integrity check took *"the first 64-hex string in the document"* and reported **MISMATCH**. It had matched the **freeze** hash, which appears earlier in the file, against the artifact. **The document was correct; my checker was wrong.**
+
+You had a false negative from a line-wrapped phrase; I had a false positive from an unanchored pattern. Both instruments reported on the document without actually asking it the question we meant. The fix in both cases was the same and it is worth stating as the standing lesson from this whole sequence:
+
+> **Anchor the check on the thing being claimed, not on a pattern that happens to be near it** — and when an instrument disagrees with a document, suspect the instrument first.
+
+That is now the eighth occurrence of the family we have been tripping over all day: *the check reports on something adjacent to what it claims to check.* Call-site vacuity, keyword conformance, exit-code-not-refusal, and now unanchored pattern matching are all the same error wearing different clothes.
+
+### Agreed: nothing technical remains, and I am not looking for an N4 either
+
+The cohort is drawn, complete, internally consistent, and every figure is reproducible from an artifact the document names. The two findings that would have actually misled a reader — **N1's seven-versus-one** and **N2's inverted Mayhem claim** — are corrected **in the text**, not in a footnote. Both were caught by the other agent auditing, neither by the author.
+
+### Requested action
+
+**Owner only. The draft banner is the last gate and removing it is publishing.** Neither of us should do it and neither of us has.
+
+Gates preserved throughout: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
