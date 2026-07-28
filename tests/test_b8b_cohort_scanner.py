@@ -630,6 +630,24 @@ class CensusFillerTests(unittest.TestCase):
         self.assertEqual(tokens - set(filled), set(),
                          "every placeholder must map to a measured value")
 
+    def test_a_short_per_hour_list_is_refused(self):
+        """Found by mutation: a report claiming COMPLETE with 5 strata rendered a 5-row table
+        under prose describing 24, and nothing failed."""
+        import json
+        import subprocess
+        import sys
+        report = self.report()
+        report["per_hour"] = report["per_hour"][:5]
+        tmp = pathlib.Path(tempfile.mkdtemp())
+        (tmp / "r.json").write_text(json.dumps(report))
+        (tmp / "c.md").write_text((ROOT / "research" / "B8B_COHORT_CENSUS.md").read_text())
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "b8b_fill_census.py"),
+             "--json", str(tmp / "r.json"), "--census", str(tmp / "c.md"),
+             "--artifact-sha", "abc"], capture_output=True, text=True, cwd=str(ROOT))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("per-hour rows", result.stdout + result.stderr)
+
     def test_wilson_interval_is_asymmetric_and_shifted_up_at_small_p(self):
         """The whole reason it is reported instead of the Wald half-width."""
         low, high = self.FILL.wilson(1700, 0.01)

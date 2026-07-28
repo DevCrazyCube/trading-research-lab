@@ -91,7 +91,7 @@ def actor_groups(rows):
 
 
 def census_failures(blocks, sampled, missing, unverified, decode_errors,
-                    create_events, distinct_mints, zero_observed=()):
+                    create_events, distinct_mints, zero_observed, members_outside_blocks):
     """Every condition the census output labels a "must", enforced.
 
     The original verdict gated on `missing` and `unverified` only, while printing three further
@@ -116,6 +116,16 @@ def census_failures(blocks, sampled, missing, unverified, decode_errors,
     if distinct_mints != create_events:
         failures.append(f"{create_events:,} CreateEvents but {distinct_mints:,} distinct mints "
                         f"— duplicate membership")
+    if members_outside_blocks:
+        # The mirror of `missing` (Seq 139, F12). `missing` catches sampled slots we failed to
+        # scan; this catches members that were never in the sample at all. Membership IS the cohort
+        # definition - the launch window is the union of the 24 blocks, so a launch outside all of
+        # them is not a member. Every downstream number (n, the quote split, the leakage shares,
+        # the achieved precision) is computed over `create_event`, so one non-member inflates the
+        # count and contaminates every proportion derived from it.
+        failures.append(
+            f"{members_outside_blocks:,} CreateEvents lie outside every sampled block — they are "
+            f"not members of this cohort and must not be counted in it")
     if zero_observed:
         # A stratum with zero RETRIEVED slots has no observation power, which is not the same as a
         # stratum that was observed and yielded nothing (that stays a NOTE, per Seq 131). Gated
@@ -224,8 +234,18 @@ def main():
     print(f"  CreateEvents         {n:,}")
     print(f"  distinct mints       {mints:,}   (must equal CreateEvents)")
     print(f"  distinct slots       {one('SELECT COUNT(DISTINCT slot) FROM create_event'):,}")
+    # Membership containment: the launch window IS the union of the 24 blocks, so a CreateEvent
+    # outside all of them is not a member of this cohort. Mirror of the `missing` check - that one
+    # catches sampled slots never scanned, this one catches members never sampled.
+    members_per_slot = dict(q("SELECT slot, COUNT(*) FROM create_event GROUP BY slot"))
+    outside_slots = sorted(slot for slot in members_per_slot if slot not in sampled)
+    members_outside = sum(members_per_slot[slot] for slot in outside_slots)
+    print(f"  members outside every sampled block: {members_outside}   <- must be 0; membership "
+          f"is the cohort definition")
     print(f"  realised n vs ~1,715 expectation: the FRACTION was frozen, not the count")
-    out["cohort"] = {"create_events": n, "distinct_mints": mints}
+    out["cohort"] = {"create_events": n, "distinct_mints": mints,
+                     "members_outside_blocks": members_outside,
+                     "slots_outside_blocks": outside_slots[:20]}
 
     print("\n=== per-stratum yield (stratification only works if every hour contributed) ===")
     # Two different things look identical in a `creates` column, and only one of them is a fault:
@@ -312,7 +332,8 @@ def main():
     failures = census_failures(blocks=blocks, sampled=sampled, missing=missing,
                                unverified=unverified, decode_errors=decode_errors,
                                create_events=n, distinct_mints=mints,
-                               zero_observed=zero_observed)
+                               zero_observed=zero_observed,
+                               members_outside_blocks=members_outside)
     if zero_launch:
         # Deliberately NOT a failure. A 4-minute block genuinely containing no launch is an
         # observation, and treating it as a fault would conflate "we did not look" with "we looked

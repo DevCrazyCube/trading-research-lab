@@ -139,6 +139,17 @@ def main():
             f"must not be written up as a result (freeze §5), and a half-filled document is the "
             f"most quotable thing there is. Finish or resume the scan first.")
 
+    # The census script already gates on block count, but the filler must not trust its input:
+    # a report claiming COMPLETE with fewer per-hour rows renders a short table into a document
+    # whose prose says 24 strata, and the mismatch is invisible in the rendered output.
+    declared = report["completeness"]["blocks"]
+    reported = len(report.get("per_hour", []))
+    if declared != reported:
+        raise SystemExit(
+            f"REFUSING: report declares {declared} sampled blocks but carries {reported} per-hour "
+            f"rows. Rendering that would put a {reported}-row table under prose describing "
+            f"{declared} strata.")
+
     document = pathlib.Path(arguments.census)
     text = document.read_text()
     filled = values(report, arguments.artifact_sha)
