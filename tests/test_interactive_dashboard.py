@@ -546,6 +546,146 @@ class ProductionSafetyTests(unittest.TestCase):
         self.assertGreaterEqual(len(before), 5, "protected set should cover the core documents")
 
 
+class SupervisorResilienceTests(IsolatedDashboard):
+    """An undeliverable handoff must not kill the dispatcher, and must not be recorded as sent.
+
+    `supervisor_loop` called `send_handoff` unguarded, so the first `RuntimeError` the delivery
+    check raised propagated out of the loop and **ended the supervisor process**. That is the
+    mechanism behind supervisors repeatedly found dead with `status: running` in the state file:
+    a busy agent — an ordinary, transient condition — permanently stopped dispatch.
+
+    The sequence must also stay unconsumed, or the retry never happens: consuming it would mark
+    the handoff observed while nothing was delivered, which is the same "recorded a delivery that
+    did not happen" failure the delivery check exists to prevent, one level up.
+    """
+
+    dash = DASH
+
+    def setUp(self):
+        super().setUp()
+        DASH.write_state(mode="auto", owner="supervisor", active_agent="claude2",
+                         observed_sequence=1)
+        DASH.DISCUSSION.write_text(
+            "## d — Claude — released\n- **Seq:** 2\n- **Status:** released\n", encoding="utf-8")
+
+    def run_one_iteration(self, handoff):
+        """Run `supervisor_loop` for exactly one dispatching pass.
+
+        The existing `run_loop_once` helper stops *before* the first iteration, which is right for
+        startup warnings and useless here. This sentinel reports "keep going" once and then stops,
+        so the loop performs one real dispatch attempt against the real code path.
+        """
+        import contextlib
+        import io
+
+        class Sentinel:
+            def __init__(self):
+                self.checks = 0
+
+            def unlink(self, missing_ok=False):
+                pass
+
+            def exists(self):
+                self.checks += 1
+                return self.checks > 1          # one iteration, then stop
+
+            def touch(self):
+                pass
+
+        saved_stop, DASH.STOP = DASH.STOP, Sentinel()
+        saved_handoff, DASH.send_handoff = DASH.send_handoff, handoff
+        saved_tmux, DASH.tmux = DASH.tmux, lambda *a, **k: 0
+        saved_pane, DASH.pane_id = DASH.pane_id, lambda agent: "%9"
+        captured = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(captured):
+                DASH.supervisor_loop(interval=0.001)
+        finally:
+            (DASH.STOP, DASH.send_handoff, DASH.tmux,
+             DASH.pane_id) = saved_stop, saved_handoff, saved_tmux, saved_pane
+        return captured.getvalue()
+
+    def test_an_undeliverable_handoff_does_not_kill_the_supervisor(self):
+        def refuse(agent, message):
+            raise RuntimeError("agent is mid-turn")
+
+        output = self.run_one_iteration(refuse)          # must not propagate
+        self.assertIn("handoff pending", output,
+                      "an undeliverable handoff must be reported, not swallowed silently")
+
+    def test_an_undeliverable_handoff_leaves_the_sequence_unconsumed_so_it_retries(self):
+        def refuse(agent, message):
+            raise RuntimeError("agent is mid-turn")
+
+        self.run_one_iteration(refuse)
+        self.assertEqual(DASH.read_state()["observed_sequence"], 1,
+                         "consuming the sequence would record a handoff that was never delivered")
+
+    def test_a_delivered_handoff_consumes_the_sequence_and_moves_ownership(self):
+        """The other side of the boundary: a working dispatch must still advance."""
+        delivered = []
+        self.run_one_iteration(lambda agent, message: delivered.append(agent))
+        self.assertEqual(delivered, ["claude1"])
+        state = DASH.read_state()
+        self.assertEqual(state["observed_sequence"], 2)
+        self.assertEqual(state["active_agent"], "claude1")
+
+
+class PendingComposerTests(IsolatedDashboard):
+    """A retry must submit the draft already in the composer, never append a second copy.
+
+    Once `send()` began refusing undelivered handoffs, the natural retry typed the whole message
+    again into a composer that already held it — producing a doubled handoff that reads as
+    corruption. Matching on a prefix of what is already there distinguishes *our* pending draft
+    from text the owner happens to be typing.
+    """
+
+    dash = DASH
+
+    def arrange(self, pending, idle):
+        self.sent = []
+        self.saved = (DASH.tmux, DASH.pane_id, DASH.pane_command,
+                      DASH.wait_for_idle, DASH.composer_text)
+        DASH.tmux = lambda *a, **k: self.sent.append(a) or 0
+        DASH.pane_id = lambda agent: "%9"
+        DASH.pane_command = lambda pane: "claude"
+        DASH.wait_for_idle = lambda pane: idle
+        DASH.composer_text = lambda pane: pending
+        self.addCleanup(self.restore)
+
+    def restore(self):
+        (DASH.tmux, DASH.pane_id, DASH.pane_command,
+         DASH.wait_for_idle, DASH.composer_text) = self.saved
+
+    def test_a_pending_draft_of_ours_is_submitted_not_retyped(self):
+        message = "Read the latest handoff in agent_discussion.md and continue the work."
+        self.arrange(pending=message[:40], idle=True)
+        with self.assertRaises(RuntimeError):
+            DASH.send("claude1", message)        # post-condition still sees it pending
+        typed = [a for a in self.sent if len(a) > 3 and a[3] == "-l"]
+        self.assertEqual(typed, [], "the message must not be typed again on top of itself")
+        self.assertTrue(any(a[-1] == "Enter" for a in self.sent), "the draft must be submitted")
+
+    def test_a_pending_draft_with_a_busy_agent_refuses_rather_than_pressing_enter(self):
+        message = "Read the latest handoff in agent_discussion.md and continue the work."
+        self.arrange(pending=message[:40], idle=False)
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.send("claude1", message)
+        self.assertIn("pending", str(ctx.exception))
+        self.assertEqual([a for a in self.sent if a[-1] == "Enter"], [],
+                         "pressing Enter into a busy agent is what created the draft to begin with")
+
+    def test_someone_elses_draft_is_not_mistaken_for_ours(self):
+        """The boundary that keeps this safe: unrelated composer text must not suppress the send."""
+        self.arrange(pending="a note the owner was typing", idle=True)
+        try:
+            DASH.send("claude1", "Read the latest handoff in agent_discussion.md and continue.")
+        except RuntimeError:
+            pass                                  # post-condition may still fire; not the point
+        typed = [a for a in self.sent if len(a) > 3 and a[3] == "-l"]
+        self.assertEqual(len(typed), 1, "our message must still be typed when the draft is not ours")
+
+
 class FakeTmux:
     """Records every tmux call and simulates a pane that is not ready straight away.
 

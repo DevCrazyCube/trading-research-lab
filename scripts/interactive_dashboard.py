@@ -220,8 +220,17 @@ def send(agent, message):
     # handoff sits as draft text until a human presses Enter. That is why the owner spent a day
     # relaying our messages by hand.
     idle = wait_for_idle(target)
-    tmux("send-keys", "-t", target, "-l", message)
-    tmux("send-keys", "-t", target, "Enter")
+    pending_before = composer_text(target)
+    if pending_before and pending_before[:PENDING_MATCH] in message:
+        # A previous attempt reached the composer but the agent was still busy. Do not append a
+        # duplicate; submit the existing draft once the pane is idle.
+        if not idle:
+            raise RuntimeError(
+                f"handoff to {agent!r} is pending in pane {target}; waiting for the agent to go idle")
+        tmux("send-keys", "-t", target, "Enter")
+    else:
+        tmux("send-keys", "-t", target, "-l", message)
+        tmux("send-keys", "-t", target, "Enter")
 
     # Verify rather than assume. This is the load-bearing check: `wait_for_idle` only avoids the
     # failure, and a predictor can be wrong in ways a post-condition cannot.
@@ -407,8 +416,14 @@ def supervisor_loop(interval=2.0):
                     source = state.get("active_agent")
                     if source in AGENTS and source != target:
                         tmux("send-keys", "-t", pane_id(source), "C-c")
-                    send_handoff(target, message)
-                    write_state(active_agent=target, owner=target, observed_sequence=current)
+                    try:
+                        send_handoff(target, message)
+                    except RuntimeError as exc:
+                        # A busy CLI is transient. Keep the sequence unconsumed so the next loop
+                        # retries; never let one undeliverable handoff kill the supervisor.
+                        print(f"handoff pending for {target}: {exc}", flush=True)
+                    else:
+                        write_state(active_agent=target, owner=target, observed_sequence=current)
                 else:
                     write_state(observed_sequence=current)
             time.sleep(interval)
