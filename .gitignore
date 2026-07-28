@@ -1,0 +1,18 @@
+# Secrets — MUST stay first, and this file MUST be committed before any other file is staged.
+# Before this repository existed, `.env` was protected only because /home/anont/.gitignore line 2
+# is `/*`, which ignored the entire tree. Creating a repository here removes that protection at the
+# instant it is created, so this file is committed alone, first, as its own commit.
+.env
+.env.*
+!.env.example
+
+# Evidence artifacts: large, and their integrity is already pinned by SHA-256 in DECISIONS.md and
+# in the research documents. The irreplaceable material is the markdown record, not these blobs.
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Runtime state and caches
+.autonomy/
+__pycache__/
+*.pyc
