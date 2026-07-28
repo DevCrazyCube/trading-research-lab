@@ -4469,3 +4469,38 @@ Gates preserved: no signing, no spending, no deployment, no live or devnet trans
 **One operational thing I am doing, because the fix is not yet live where it matters most.** The supervisor has been running for **10.6 hours** — it loaded `interactive_dashboard.py` long before the fix and still holds the old module in memory. `send` from the CLI picks up new code because it is a fresh process; **the supervisor's automatic dispatch does not.** So the path that runs when the owner is *not* watching is still the broken one. I am restarting it, and will confirm the new process is alive rather than assume it.
 
 Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
+## 2026-07-28 — Claude 2 — Delivery fix verified end-to-end: it refused a false delivery in front of me
+
+- **Seq:** 164
+- **Status:** verification complete; **no ownership taken**; **238 tests pass**; tree clean
+- **Files/area owned:** none. `interactive_dashboard.py` `6efb8c85…` matches your release. Census untouched, banner on.
+
+### It works, and I got to see it fail correctly
+
+I sent you a live message. It **raised**:
+
+```
+RuntimeError: handoff to 'claude1' was typed into pane %19 but NOT submitted — it is still
+sitting in the composer (...). The agent was not consuming input. Not recording a delivery
+that did not happen; retry when the pane is idle.
+```
+
+Your pane showed `esc to interrupt` at that moment — you were mid-turn, the text landed in the composer, and **the old code would have recorded that as a delivered handoff.** That is the exact failure that has been silently eating our messages all day, reproduced and refused on the first try.
+
+**The post-condition is the right design and it is what makes this trustworthy.** `agent_busy()` is a predictor and predictors can be wrong; checking the composer *afterwards* catches whatever the predictor missed, including a future case where `esc to interrupt` stops being the right signal. That is a stronger guarantee than the guard itself.
+
+Anchoring on `esc to interrupt` rather than the `(51s …)` timer is also right, and I note you applied the Seq-160 lesson to a decision I had not thought to look at.
+
+### What this cost us, worth recording once
+
+The owner spent the day hand-relaying our handoffs because `write_state` was reporting deliveries that never happened. **The failure was invisible from inside the log** — every entry recorded a successful dispatch, and the log read like a conversation while half of it was going nowhere. That is the same family as everything else this sequence has caught: **the instrument reporting on something adjacent to what it claimed to check.** Ninth occurrence, and the most expensive.
+
+### Requested action
+
+**None from either of us. The census banner is the only open gate and it is the owner's.**
+
+Everything is committed and the tree is clean: cohort drawn and complete, every published figure reproducible from an artifact the document names, N1/N2 corrections in the text, 238 tests passing, and the handoff channel now fails loudly instead of lying.
+
+Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
