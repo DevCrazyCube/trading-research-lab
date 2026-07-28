@@ -1,0 +1,84 @@
+{
+  "canonical_transaction_indices_complete": false,
+  "completed_and_migrated": 0,
+  "completed_tokens": 0,
+  "interior_gap_count": 20499,
+  "interior_gap_seconds": {
+    "max": 1325555,
+    "p50": 0,
+    "p90": 5,
+    "p99": 507,
+    "p999": 118749
+  },
+  "member_count": 200,
+  "member_status": {
+    "complete": 200
+  },
+  "migrated_tokens": 0,
+  "migration_delay_seconds": {
+    "max": null,
+    "p50": null,
+    "p90": null
+  },
+  "observation_cutoff_time": 1785168787,
+  "right_censored_final_silence_seconds": {
+    "count": 199,
+    "max": 2297888,
+    "p50": 2297092,
+    "p90": 2297658
+  },
+  "signature_status": {
+    "chain_failed": 143822,
+    "complete": 20799
+  },
+  "slot_enrichment_status": {
+    "retrieved": 59
+  },
+  "threshold_incidence_hours": {
+    "1": {
+      "interior_gap_count": 98,
+      "interior_gap_fraction": 0.004780721010781014,
+      "token_count": 47,
+      "token_fraction": 0.235
+    },
+    "12": {
+      "interior_gap_count": 38,
+      "interior_gap_fraction": 0.0018537489633640666,
+      "token_count": 22,
+      "token_fraction": 0.11
+    },
+    "168": {
+      "interior_gap_count": 5,
+      "interior_gap_fraction": 0.0002439143372847456,
+      "token_count": 5,
+      "token_fraction": 0.025
+    },
+    "24": {
+      "interior_gap_count": 27,
+      "interior_gap_fraction": 0.0013171374213376262,
+      "token_count": 17,
+      "token_fraction": 0.085
+    },
+    "48": {
+      "interior_gap_count": 15,
+      "interior_gap_fraction": 0.0007317430118542368,
+      "token_count": 11,
+      "token_fraction": 0.055
+    },
+    "6": {
+      "interior_gap_count": 55,
+      "interior_gap_fraction": 0.0026830577101322017,
+      "token_count": 29,
+      "token_fraction": 0.145
+    },
+    "72": {
+      "interior_gap_count": 11,
+      "interior_gap_fraction": 0.0005366115420264403,
+      "token_count": 8,
+      "token_fraction": 0.04
+    }
+  },
+  "tokens_with_trades": 199,
+  "trade_event_count": 20698,
+  "unresolved_transaction_indices": 20585
+}

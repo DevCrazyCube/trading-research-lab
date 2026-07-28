@@ -1,0 +1,136 @@
+{
+  "c4_quote_mint_consistent": false,
+  "c4_quote_mint_distinct": [
+    "11111111111111111111111111111111",
+    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+  ],
+  "graduation_arm": {
+    "arm": "graduation",
+    "checks": {
+      "c1_membership": {
+        "fail": 0,
+        "not_applicable": 0,
+        "pass": 4
+      },
+      "c2_timestamp": {
+        "fail": 0,
+        "not_applicable": 0,
+        "pass": 4
+      },
+      "c3_exact_consumption": {
+        "fail": 0,
+        "not_applicable": 0,
+        "pass": 4
+      }
+    },
+    "distinct_transactions": 4,
+    "failure_examples": [],
+    "n": 4,
+    "unresolvable": 0,
+    "verdict": "PASS"
+  },
+  "graduation_detail": [
+    {
+      "c1_membership": true,
+      "c2_timestamp": true,
+      "c3_exact_consumption": true,
+      "detail": [],
+      "event_name": "CompleteEvent",
+      "fields": {
+        "bonding_curve": "DXZCWKMWX486Ld1U9dgjvsmnFv9KtCh2T9cF3uJNkKZN",
+        "mint": "4R2Sxa8j219C8ydPoi1TDAgDFBHoWA7zMv8XyFpvpump",
+        "quote_mint": "11111111111111111111111111111111",
+        "timestamp": 1785166724,
+        "user": "GA9HKs3AwdovUuHmqaABsYTbj8EU7k7zerThYgQek6DJ"
+      },
+      "quote_mint": "11111111111111111111111111111111",
+      "signature": "3n8D6WY9ktYEuETy1Zoqsh5bcAnAAJUVoquVaPzfAniwNkNixmBbtfMns8W7zJ3CATcwr31hcf6U4vhBdh1NjzhG",
+      "unresolvable": null
+    },
+    {
+      "c1_membership": true,
+      "c2_timestamp": true,
+      "c3_exact_consumption": true,
+      "detail": [],
+      "event_name": "CompletePumpAmmMigrationEvent",
+      "fields": {
+        "bonding_curve": "DXZCWKMWX486Ld1U9dgjvsmnFv9KtCh2T9cF3uJNkKZN",
+        "mint": "4R2Sxa8j219C8ydPoi1TDAgDFBHoWA7zMv8XyFpvpump",
+        "mint_amount": 206900000000000,
+        "pool": "6tUrT4Bnf8QiCA8k5n9j4WVgkcrAqhwZHMkHG66WsYuR",
+        "pool_migration_fee": 15000001,
+        "quote_mint": "11111111111111111111111111111111",
+        "sol_amount": 84990359274,
+        "timestamp": 1785166729,
+        "user": "9C4nRvhhVquCKATjDCx5FKvNS9PNgNqgyWy9AcoDjYv5"
+      },
+      "quote_mint": "11111111111111111111111111111111",
+      "signature": "22SwrXnja6cJ9f8zjCWu4xdfyasdKUxDbTF235vzQNV2gLoWMatMwa2tmjZqhG6sXkCZUeYE9txosAT9JSEMpUpa",
+      "unresolvable": null
+    },
+    {
+      "c1_membership": true,
+      "c2_timestamp": true,
+      "c3_exact_consumption": true,
+      "detail": [],
+      "event_name": "CompleteEvent",
+      "fields": {
+        "bonding_curve": "8gUwhVqztYs3jmG9nATBHzLaodbquoJqN7zDyYpKZCUr",
+        "mint": "5iHCTc3Q9HzTmi6XbhtoYwZ7zGpX18soScxjtZH4pump",
+        "quote_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "timestamp": 1785166762,
+        "user": "8qDLPwd2CGQrihHoHx31NYBFRE93GBKZJtuEWbJEnka6"
+      },
+      "quote_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "signature": "2MXfFHZ9L5iAL1EqXmbDKrZqmYmRBVxcQHE93unKsrk1Zjwii1At1N2GHMW93b4baMD4DC7WmyjCneRmCZBhka2r",
+      "unresolvable": null
+    },
+    {
+      "c1_membership": true,
+      "c2_timestamp": true,
+      "c3_exact_consumption": true,
+      "detail": [],
+      "event_name": "CompletePumpAmmMigrationEvent",
+      "fields": {
+        "bonding_curve": "8gUwhVqztYs3jmG9nATBHzLaodbquoJqN7zDyYpKZCUr",
+        "mint": "5iHCTc3Q9HzTmi6XbhtoYwZ7zGpX18soScxjtZH4pump",
+        "mint_amount": 206900000000000,
+        "pool": "D3UfVhc2ZhiMrStZVBXwx9wK4uu9itsYt58XZzvydrNF",
+        "pool_migration_fee": 15000001,
+        "quote_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "sol_amount": 9816363,
+        "timestamp": 1785166763,
+        "user": "9C4nRvhhVquCKATjDCx5FKvNS9PNgNqgyWy9AcoDjYv5"
+      },
+      "quote_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "signature": "2UhezsQwwxS8fNtgJMENHV8k4SpMhd6rGRSwgwkBkjqEiamoihQuy9RYQ2Wmi2v1wnkCNena3L1YxgVpcs2ydWrX",
+      "unresolvable": null
+    }
+  ],
+  "preregistration_sha256": "05704fc910b680c3136187b9326901faab8eae0283e2121181d0f36644334a07",
+  "trade_arm": {
+    "arm": "trade_event",
+    "checks": {
+      "c1_membership": {
+        "fail": 0,
+        "not_applicable": 0,
+        "pass": 8075
+      },
+      "c2_timestamp": {
+        "fail": 0,
+        "not_applicable": 0,
+        "pass": 8075
+      },
+      "c3_exact_consumption": {
+        "fail": 0,
+        "not_applicable": 0,
+        "pass": 8075
+      }
+    },
+    "distinct_transactions": 7957,
+    "failure_examples": [],
+    "n": 8075,
+    "unresolvable": 0,
+    "verdict": "PASS"
+  }
+}

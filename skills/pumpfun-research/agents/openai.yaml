@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pump.fun Research"
+  short_description: "Evidence-first Pump.fun trading research"
+  default_prompt: "Use $pumpfun-research to continue the Pump.fun recorder, simulator, and trading research safely."
