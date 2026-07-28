@@ -109,10 +109,27 @@ split across folds**. Two figures are reported separately and must not be swappe
 - **Funding-cluster leakage is unmeasured** and is a **superset** of creator leakage — two creator
   pubkeys funded from one source are one actor, and nothing in this design detects that. Creator
   grouping removes *creator* leakage and no more.
-- **No labels, no features, no model, no threshold.** Cohort membership only. T2 labels are not
-  valid until 8 days after the launch window opens (`W_obs`), and T2 is **not absorbing** — a
+- **No labels, no features, no model, no threshold.** Cohort membership only. **C2** — T2 labels are
+  not valid until 8 days after the launch window opens (`W_obs`) — and T2 is **not absorbing**: a
   resumption was observed at 450.8 h, so a T2 member that trades again is a recorded **re-entry**.
 - **No rate or distribution may be quoted from an incomplete run.**
+
+## Censoring rules, and which of them this document can speak to
+
+Named by identifier so conformance is checkable rather than a matter of reading for tone.
+
+| rule | status in this census |
+|---|---|
+| **C1** right-censoring — members still in T3 at the end of `W_obs` are censored, not dropped | **not yet applicable.** No lifetime has been observed; this document is enumeration only. |
+| **C2** launch window must end ≥ `D_dead` before the observation window ends | **satisfied by construction** — the window was pinned 8.000 days before tip. |
+| **C3** no left-truncation; membership fixed at launch, nothing enters later | **satisfied** — membership is exactly the `CreateEvent`s inside the 24 blocks. |
+| **C4** exhaustive within the launch window, no attribute filtering | **the central claim**, evidenced in *Completeness* above. |
+| **C5** a recorder `gap` overlapping a member's lifetime marks that member **incomplete** | **binds the observation phase, not this one.** B8b enumerates historical blocks via `getBlock`; there is no recorder gap register involved in drawing the cohort. **It is recorded here because it will bind whatever follows**, and a later document that reconstructs member histories must honour it rather than discovering it. |
+
+**C5 was missing from the first draft of this section.** It was caught by checking the skeleton
+against the freeze clause by clause — and the automated keyword check I first used reported it as
+*covered*, matching the unrelated phrase "incomplete run". A conformance check can be vacuous in
+exactly the way a test can.
 
 ## Reproduction
 
