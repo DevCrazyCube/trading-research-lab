@@ -43,13 +43,83 @@ Exhaustiveness is the claim everything else rests on, so it is reported before a
 **Partial completion is FAIL, not a smaller result** (freeze §5). A truncated run is a
 time-of-day-biased sample wearing the label of a stratified one.
 
+## Disjointness from every burned range (freeze §6.1)
+
+Exhaustiveness says the cohort contains everything it should. Disjointness says it contains nothing
+it should not. **This section was absent from the first draft (A3, Seq 145)** — a reader could not
+tell whether the window overlapped a burned range, including B8a's.
+
+Window `[433,894,233, 434,097,833]` versus all six burned ranges, checked individually, failing
+closed on any overlap:
+
+| range | origin | result |
+|---|---|---|
+| `[429,998,000, 430,000,000)` | B7e mature cohort | disjoint |
+| `[430,000,000, 430,000,500)` | B7d pilot | disjoint |
+| `[433,302,364, 433,304,364)` | **B8a cohort** | disjoint |
+| `[435,564,885, 435,565,324)` | B7j/B7k positive-control envelope | disjoint |
+| `435,566,652 – 435,566,690` | B7b `D_dead` throwaway sample | disjoint |
+| `435,569,119 – 435,569,149` | B7c trade-only gap sample | disjoint |
+
+**All six disjoint.** The window also sits entirely inside one program regime: the last loader
+`Upgrade` was slot **433,095,571**, which is **798,662 slots (~3.9 days) before** the window opens,
+and no upgrade has landed since — confirmed live against `ProgramData` at pre-flight.
+
+## Stratification properties (freeze §2)
+
+The freeze argues these at length and the scanner asserts them at runtime; **the first draft
+asserted that stratification works without showing the reader why (A5, Seq 145).** All are derived
+from `sampled_block` in the artifact:
+
+| property | why it matters | measured |
+|---|---|---|
+| 24 offsets **all distinct** | a repeated minute-of-hour would alias with hourly-periodic launchers | **yes** |
+| minutes-of-hour reachable | the first schedule (`7h mod 54`) could never sample minute 59 of any hour | **60 / 60** |
+| no block straddles an hour | a straddling block would put one stratum's slots in the next hour | **max offset 56 + 4 = 60** |
+| offsets match `(27h mod 59)` | the schedule is the sample definition | **yes, all 24** |
+| min consecutive-hour offset gap | scatter, not a slow drift across the day | **27 minutes** |
+
+## This window is burned by this document
+
+Freeze §7 burns B8a **because its composition was inspected**. This census does exactly that to
+B8b — quote split, Mayhem breakdown, per-stratum yield, creator concentration. **On the freeze's
+own §7 logic, `[433,894,233, 434,097,833]` is therefore burned for future cohort *selection* from
+the moment this document exists (A4, Seq 145).**
+
+It remains valid as the cohort it was authorised to be. It is no longer available as a window
+someone chooses later, because by then they will have read these numbers. Recorded here rather than
+left implied, since the next window will be chosen by whoever reads this.
+
 ## Cohort size and the precision it actually supports
 
-> **«n» members, and at that `n` the 95% interval at p ≈ 1% is ±«hw» pp.**
+> **«n» members, and at that `n` a proportion near 1% carries a 95% Wilson interval of
+> «wilson_lo»–«wilson_hi» %.**
 
 Stated in one sentence deliberately, per **owner decision A** (`DECISIONS.md`, 2026-07-28):
 separating a proportion from its interval is how a reader ends up quoting the first without the
 second.
+
+**Two intervals are reported, and they are not interchangeable (A1, Seq 145).** The frozen ±0.5 pp
+bar was defined on the **Wald normal approximation**, which is unreliable exactly here: at p ≈ 1%
+the expected count `np` is ~13, near the threshold where Wald is usable at all. Verified by **exact
+binomial enumeration**, not simulation:
+
+| n | p | `np` | Wald coverage | Wilson coverage |
+|---:|---:|---:|---:|---:|
+| 1,300 | 1.0% | 13.0 | **93.9%** | 96.5% |
+| **2,572** (the design's assumed n) | 1.0% | 25.7 | **94.2%** | 95.3% |
+| 1,300 | 3.3% | 42.9 | 95.2% | 94.8% |
+
+**A sentence that says "95%" and delivers 93.9% is the kind of number that gets quoted for years.**
+Note the second row: the under-coverage is **not** an artifact of the realised `n` falling short —
+the frozen bar was going to under-deliver at p ≈ 1% even at its own assumed sample size. The defect
+is in the estimator the bar was written on, and it predates this run.
+
+**The frozen bar is reported as-is and is NOT recomputed with a better estimator.** Changing the
+formula of a success criterion after learning it would be missed is the same move as resizing the
+sample after seeing the shortfall. So: the Wald figure is reported **against the frozen bar, which
+was defined on the normal approximation**, and the **Wilson interval is the one a reader should
+quote.**
 
 The design was sized against a **±0.5 pp bar at p ≈ 1%**, assuming ~25,700 launches/day
 extrapolated from B8a's single 13.6-minute window. **The freeze fixed the sampling *fraction*, not
@@ -57,8 +127,10 @@ a target count** — *"the realised `n` falls where it falls and is reported, wh
 realised `n` below the assumption is a **reported outcome, not a defect and not grounds to resize
 the sample after the fact.**
 
-- bar met at p ≤ «max_p» — «met/missed» at p = 1%
-- `n` that would have been required for the bar at p = 1%: «n_required»
+- frozen (Wald) bar met at p ≤ «max_p» — «met/missed» at p = 1%
+- `n` that would have been required for the Wald bar at p = 1%: «n_required»
+- Wald half-width at p = 1%: ±«hw_wald» pp — **reported against the criterion, not as the interval
+  to quote**
 
 ## Per-stratum yield
 
@@ -94,7 +166,7 @@ of the cohort, which is why tradable leakage read *lower* than raw.
 «leakage table: all vs tradable»
 
 The split key is `creator ∪ user`, **never token and never time**, and **an actor group is never
-split across folds**. Two figures are reported separately and must not be swapped:
+split across blocks or across folds**. Two figures are reported separately and must not be swapped:
 
 - **members belonging to a repeat actor** — the exposed share.
 - **surplus beyond one-each** — a different quantity. B8a's first census quoted the surplus (35.1%)
@@ -121,7 +193,7 @@ Named by identifier so conformance is checkable rather than a matter of reading 
 | rule | status in this census |
 |---|---|
 | **C1** right-censoring — members still in T3 at the end of `W_obs` are censored, not dropped | **not yet applicable.** No lifetime has been observed; this document is enumeration only. |
-| **C2** launch window must end ≥ `D_dead` before the observation window ends | **satisfied by construction** — the window was pinned 8.000 days before tip. |
+| **C2** launch window must end ≥ `D_dead` before the **observation window** ends | **not yet demonstrable** — `W_obs` is 8 days and `D_dead` is 7, so C2 holds for the *design*, but it constrains the observation phase and no observation has run. Cited correctly here after A1/A2 review: the 8-day figure below is **freeze §6.2** (ends ≥ `W_obs` before the **tip**), which is a different constraint. |
 | **C3** no left-truncation; membership fixed at launch, nothing enters later | **satisfied** — membership is exactly the `CreateEvent`s inside the 24 blocks. |
 | **C4** exhaustive within the launch window, no attribute filtering | **the central claim**, evidenced in *Completeness* above. |
 | **C5** a recorder `gap` overlapping a member's lifetime marks that member **incomplete** | **binds the observation phase, not this one.** B8b enumerates historical blocks via `getBlock`; there is no recorder gap register involved in drawing the cohort. **It is recorded here because it will bind whatever follows**, and a later document that reconstructs member histories must honour it rather than discovering it. |
