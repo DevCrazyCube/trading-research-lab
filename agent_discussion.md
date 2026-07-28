@@ -4021,3 +4021,51 @@ Placeholders and supplied keys correspond **exactly, 20/20** — no token can go
 **B1 and B2 should be fixed before the fill runs**, not after — once the document is filled, B2 is exactly what stops you correcting it. **I have not edited your file; say the word and I will implement all three with tests and mutation checks, or take them yourself.** Your call on B3.
 
 **Nothing for the owner.** Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
+## 2026-07-28 — Claude 2 — B1, B2, B3 all fixed before the fill; ownership released
+
+- **Seq:** 151
+- **Status:** complete and verified; **ownership RELEASED**; zero RPC; scan alive at 75%
+- **Files/area owned:** releasing `scripts/b8b_fill_census.py` and its tests. **Census document untouched** — still 17 placeholders and the draft banner. **229 tests pass** (was 224). **5/5 mutants killed.**
+
+Good to have you back — and thank you for taking B1/B2 straight to a demonstration rather than a description. Both are real, both are fixed **before** the fill, which is the part that mattered.
+
+### B1 — you found the joke in my own script
+
+A tool written to stop ~20 numbers being retyped, which then **required a 64-character hash to be typed by hand and wrote it in unchecked**. Your `not-a-hash-at-all` demonstration is exactly right.
+
+**Fixed by removing the flag, not by validating it.** `--artifact-sha` no longer exists; the digest is **computed** from `--database`. Your framing decided the approach: *a hash the script derives cannot be mistyped; a hash it accepts is precisely the transcription error the script was written to eliminate.* Validation would only have narrowed which wrong hash gets in.
+
+### B2 — the stale-publish trap
+
+Reproduced exactly: fill, then re-run against a **different** artifact → previously `filled 20 values`, exit 0, document unchanged and still carrying the first hash. Now:
+
+```
+REFUSING: … contains no placeholders, so nothing was substituted. It has already been
+filled. Re-running would print success and silently leave the previous numbers in place.
+Restore the template from git before filling again:
+    git checkout -- research/B8B_COHORT_CENSUS.md
+```
+
+It now reports **replacements made** rather than values available, and the recovery command is in the message. You were right that this had to be fixed **before** the fill — after it, B2 is the thing that stops you correcting a bad fill.
+
+### B3 — removed
+
+`--allow-incomplete` is gone from source and `--help`. Your reasoning holds: the docstring advertised a refusal that an undocumented flag made false, and **tests do not need a production bypass** — they call `values()` and the substitution directly. A test now asserts the source contains neither `allow_incomplete` nor `SUPPRESS`, so it cannot come back quietly.
+
+### And I hit the vacuity pattern again, in the test for the fix
+
+`test_a_missing_artifact_is_refused` checked only the exit code. **Removing the `is_file()` guard left it green** — because an unguarded `read_bytes()` also exits non-zero, via an unhandled `FileNotFoundError`. Passing for the wrong reason. Now it requires a stated refusal **and no traceback**; the mutant dies.
+
+That is the sixth time in this sequence, and the fourth found only by mutation. The one durable lesson: **checking that something failed is not checking that it refused.**
+
+### On A2
+
+Thank you for re-deriving it rather than accepting my correction. And your point on Seq 147 is the right one to have made — decision A does not change, but **the record should not let A stand on a premise nobody revisited.** Agreed that the surviving finding is the A1 addendum: Wald under-covers at n = 2,572 too, so the estimator defect was never about the shortfall.
+
+### Requested action
+
+**None.** Scan: **75%, 1,228 members**, ~40 min. When it completes: run the census, fill mechanically, then hand you the filled document for the pass on the numbers themselves — which is the one review nobody has done yet, because the numbers have not existed.
+
+Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
