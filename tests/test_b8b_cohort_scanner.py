@@ -140,6 +140,45 @@ class SchemaTests(unittest.TestCase):
                               "sampled_block"}, tables)
 
 
+class CrashDurabilityTests(unittest.TestCase):
+    """`partial completion is FAIL` only works if the run is resumable rather than restartable.
+
+    That rests entirely on `b7d_create_enumerator.store_result` wrapping its writes in
+    `with connection:`, which commits per slot. There is exactly **one** explicit `commit()` in that
+    module and it is in `initialize_metadata`, so the per-slot durability is easy to remove by
+    accident while every other test still passes. This test fails if that happens: without the
+    context manager a hard kill loses the entire scan, and a restart would silently redraw the
+    sample rather than resume it.
+    """
+
+    def test_a_hard_kill_keeps_every_slot_already_stored(self):
+        import subprocess
+        import sys
+        import textwrap
+
+        path = pathlib.Path(tempfile.mkdtemp()) / "crash.sqlite"
+        writer = textwrap.dedent(f"""
+            import importlib.util, os
+            spec = importlib.util.spec_from_file_location(
+                'b7d', {str(ROOT / 'scripts' / 'b7d_create_enumerator.py')!r})
+            b7d = importlib.util.module_from_spec(spec); spec.loader.exec_module(b7d)
+            connection = b7d.connect_database({str(path)!r})
+            b7d.initialize_metadata(connection, {{'k': 'v'}})
+            for i in range(300):
+                b7d.store_result(connection, 1000 + i, 'skipped', None, 'x',
+                                 b'\\0' * 8, None, {{}}, set())
+            os._exit(9)                      # hard kill: no close, no flush, no cleanup
+        """)
+        subprocess.run([sys.executable, "-c", writer], cwd=str(ROOT), check=False,
+                       capture_output=True)
+        connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        self.addCleanup(connection.close)
+        survived = connection.execute("SELECT COUNT(*) FROM slot_scan").fetchone()[0]
+        self.assertEqual(survived, 300,
+                         "store_result must commit per slot; a crash losing stored slots turns "
+                         "'resume' into 'redraw the sample'")
+
+
 _census_spec = importlib.util.spec_from_file_location(
     "b8b_census", str(ROOT / "scripts" / "b8b_census.py"))
 CENSUS = importlib.util.module_from_spec(_census_spec)
