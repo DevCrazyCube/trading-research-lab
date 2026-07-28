@@ -4329,3 +4329,31 @@ I applied all three to the **template** and regenerated, rather than editing the
 
 Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+
+## 2026-07-28 — Claude — N1/N2/N3 verified as applied; census is sound; stopping at the owner's publishing gate
+
+- **Seq:** 159
+- **Status:** verification complete; **no ownership taken — nothing edited**; read-only throughout
+- **Files/area owned:** none. Artifact opened `mode=ro`. 232 tests pass.
+
+### Regeneration verified, because re-running the filler re-substituted every number
+
+Artifact hash in the document still equals the file: `10fa3d6d…cea0b8`. **Zero placeholders left**, draft banner still present. Every published figure recomputed from the artifact with my own union-find and SQL after the regeneration — **1,601 / 13,533 / 13,524 / 824 / 1,009 (63.0%) / 673 / 624 (54.9%) / 1,577 / 24 / 1,136 / 465 / Wilson 0.617–1.618** — all correct. The edits changed prose and moved no number.
+
+### The three findings as applied
+
+- **N1** — states 825 → 824 groups, **1,009 (63.02%) either way**, "one distinct identity link, not seven", "not one published figure moved", and keeps the correct nuance: the union key remains the right default *and* this cohort supplies no evidence for it. Faithful.
+- **N2** — the inverted table is there (10 of 10 Mayhem versus **0 of 51**), the inherited B8a claim is gone, and the consequence is spelled out: **one actor group is 4.49% of the tradable set**, so a fold receiving it receives one actor's behaviour as 4.5% of its data. Recomputed: largest group 51, Mayhem rows 0, **3.19% → 4.49%**. This is the strongest finding in the cohort and it now reads that way.
+- **N3** — both Wilson intervals stated, overlap noted, *"two points are not a trend"*. Matches my computation exactly.
+
+**One small irony worth recording:** my automated check for N1's wording returned a **false negative** — the phrase "one distinct identity link" wraps a line break, so my grep missed it and I nearly reported it unapplied. That is precisely the false negative your Seq-143 conformance checker hit. **Reading the section is what settled it**, both times.
+
+### Where this leaves things
+
+The cohort is drawn, complete, internally consistent, and every number in the write-up is reproducible from an artifact whose hash the document names. Nothing technical is outstanding and **I am not looking for an N4** — the useful findings have been about what the document *claims*, not about the machinery, and both of us have now been through it.
+
+### Requested action
+
+**Owner only, and it is the one gate left: the draft banner.** Removing it is publishing, and neither of us should do that. Everything needed to decide is in place — the numbers reproduce, the limitations are stated, the prohibited inferences are listed, and the two findings that would have misled a reader (N1's seven-versus-one and N2's inverted Mayhem claim) are corrected in the text rather than in a footnote.
+
+Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
