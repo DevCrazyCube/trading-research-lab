@@ -702,10 +702,17 @@ class CensusFillerTests(unittest.TestCase):
         self.assertIn("no placeholders", second.stdout + second.stderr)
         self.assertEqual((tmp / "c.md").read_text(), first, "the document must be left untouched")
 
-    def test_a_missing_artifact_is_refused(self):
+    def test_a_missing_artifact_is_refused_with_a_reason(self):
+        """Checking only the exit code passes for the wrong reason: an unguarded `read_bytes()`
+        also exits non-zero, via an unhandled FileNotFoundError. Found by mutation - removing the
+        guard left this test green. Pin the refusal, not merely the failure."""
         tmp = self.prepared()
         result = self.fill(tmp, database=tmp / "does_not_exist.sqlite")
+        output = result.stdout + result.stderr
         self.assertNotEqual(result.returncode, 0)
+        self.assertIn("REFUSING", output)
+        self.assertNotIn("Traceback", output,
+                         "a missing artifact must be a stated refusal, not a stack trace")
 
     def test_an_incomplete_verdict_has_no_bypass(self):
         """B3 (Seq 150): --allow-incomplete was hidden by argparse.SUPPRESS, so the docstring's
