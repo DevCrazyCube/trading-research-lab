@@ -10,6 +10,7 @@ databases only; the live artifact is never opened.
 import importlib.util
 import pathlib
 import sqlite3
+import subprocess
 import tempfile
 import unittest
 
@@ -36,6 +37,18 @@ def schedule_blocks(count=24, anchor=ANCHOR, width=580):
              "start_time": anchor + h * 3600 + offsets[h] * 60,
              "end_time": anchor + h * 3600 + offsets[h] * 60 + B8B.BLOCK_MINUTES * 60}
             for h in range(count)]
+
+
+def census_template():
+    """The census TEMPLATE, from git — not the working copy.
+
+    Once the document is filled it has no placeholders, so any test that reads the working copy as
+    a template silently stops testing substitution and starts asserting the behaviour of an
+    already-filled file. Four tests broke exactly that way the moment the real fill ran; reading
+    from git keeps the fixture stable across the document's whole lifecycle.
+    """
+    return subprocess.run(["git", "show", "HEAD:research/B8B_COHORT_CENSUS.md"],
+                          capture_output=True, text=True, cwd=str(ROOT), check=True).stdout
 
 
 class FrozenScheduleTests(unittest.TestCase):
@@ -605,7 +618,8 @@ class CensusFillerTests(unittest.TestCase):
             "completeness": {"blocks": 24, "sampled": 13533, "missing": 0, "skips_unverified": 0,
                              "decode_errors": 0, "members_outside_blocks": 0,
                              "status": {"retrieved": 13400, "skipped": 133}},
-            "cohort": {"create_events": 1700, "distinct_mints": 1700},
+            "cohort": {"create_events": 1700, "distinct_mints": 1700,
+                       "members_outside_blocks": 0},
             "precision": {"half_widths": {"0.01": 0.00473, "0.033": 0.0085},
                           "max_p_meeting_bar": 0.011, "max_p": 0.011, "bar": 0.005,
                           "n_required": 1522, "meets_bar_at_1pct": True},
@@ -618,13 +632,32 @@ class CensusFillerTests(unittest.TestCase):
                          "repeat_actor_groups": 300, "members_from_a_repeat_actor": 1000,
                          "share_from_repeat_actor": 0.588, "surplus_beyond_one_each": 700,
                          "share_surplus": 0.412, "largest_actor_group": 12}],
+            "metadata": dict(self.METADATA),
         }
         base.update(override)
         return base
 
+    # The artifact's own metadata table, copied into the report by `b8b_census.py`. C1 (Seq 152)
+    # compares the two, so a fixture must build an artifact that genuinely matches its report -
+    # a stub file would only ever exercise the refusal path.
+    METADATA = {"schema_version": "b8b-v1", "window_start_slot": "433894233",
+                "window_end_slot_inclusive": "434097833", "window_start_time": "1784463582",
+                "stride": "27", "modulus": "59", "block_minutes": "4"}
+
+    def artifact(self, directory, metadata=None):
+        """A real SQLite artifact whose metadata matches the report unless told otherwise."""
+        path = pathlib.Path(directory) / "art.sqlite"
+        connection = sqlite3.connect(path)
+        connection.execute("CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+        connection.executemany("INSERT INTO metadata VALUES (?,?)",
+                               (metadata or self.METADATA).items())
+        connection.commit()
+        connection.close()
+        return path
+
     def test_a_complete_report_fills_every_placeholder(self):
         import re
-        text = (ROOT / "research" / "B8B_COHORT_CENSUS.md").read_text()
+        text = census_template()
         filled = self.FILL.values(self.report(), "abc123")
         tokens = set(re.findall(r"«([^»]+)»", text))
         self.assertEqual(tokens - set(filled), set(),
@@ -640,8 +673,8 @@ class CensusFillerTests(unittest.TestCase):
         report["per_hour"] = report["per_hour"][:5]
         tmp = pathlib.Path(tempfile.mkdtemp())
         (tmp / "r.json").write_text(json.dumps(report))
-        (tmp / "c.md").write_text((ROOT / "research" / "B8B_COHORT_CENSUS.md").read_text())
-        (tmp / "art.sqlite").write_bytes(b"artifact")
+        (tmp / "c.md").write_text(census_template())
+        self.artifact(tmp)
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "b8b_fill_census.py"),
              "--json", str(tmp / "r.json"), "--census", str(tmp / "c.md"),
@@ -663,8 +696,8 @@ class CensusFillerTests(unittest.TestCase):
         import json
         tmp = pathlib.Path(tempfile.mkdtemp())
         (tmp / "r.json").write_text(json.dumps(self.report()))
-        (tmp / "c.md").write_text((ROOT / "research" / "B8B_COHORT_CENSUS.md").read_text())
-        (tmp / "art.sqlite").write_bytes(b"artifact bytes")
+        (tmp / "c.md").write_text(census_template())
+        self.artifact(tmp)
         return tmp
 
     def test_the_artifact_hash_is_computed_not_supplied(self):
@@ -695,12 +728,65 @@ class CensusFillerTests(unittest.TestCase):
         tmp = self.prepared()
         self.assertEqual(self.fill(tmp).returncode, 0)
         first = (tmp / "c.md").read_text()
-        other = tmp / "other.sqlite"
-        other.write_bytes(b"completely different artifact")
+        # A genuinely different file that still legitimately describes the same window, so the
+        # C1 identity check passes and this test exercises the B2 refusal rather than that one.
+        # A stub file would refuse earlier, for a different reason, and this test would pass
+        # while checking nothing - the failure mode Seq 151 named.
+        second_dir = pathlib.Path(tempfile.mkdtemp())
+        other = self.artifact(second_dir)
+        connection = sqlite3.connect(other)
+        connection.execute("CREATE TABLE padding(x)")          # different bytes, same identity
+        connection.commit()
+        connection.close()
+        self.assertNotEqual(other.read_bytes(), (tmp / "art.sqlite").read_bytes())
         second = self.fill(tmp, database=other)
         self.assertNotEqual(second.returncode, 0, "a no-op fill must not report success")
         self.assertIn("no placeholders", second.stdout + second.stderr)
         self.assertEqual((tmp / "c.md").read_text(), first, "the document must be left untouched")
+
+    def test_an_artifact_that_is_not_the_reports_is_refused(self):
+        """C1 (Seq 152): computing the digest removed the typed-hash error but left `--json` and
+        `--database` unrelated, so the census could name the sha256 of a file that produced none
+        of its numbers. Demonstrated with a real artifact built for a different window."""
+        tmp = self.prepared()
+        elsewhere = pathlib.Path(tempfile.mkdtemp())
+        wrong = self.artifact(elsewhere, metadata=dict(self.METADATA,
+                                                       window_start_slot="111111111",
+                                                       window_end_slot_inclusive="111211111"))
+        result = self.fill(tmp, database=wrong)
+        self.assertNotEqual(result.returncode, 0, "a mismatched artifact must be refused")
+        output = result.stdout + result.stderr
+        self.assertIn("not the artifact this report describes", output)
+        self.assertIn("window_start_slot", output, "the refusal must name what differs")
+        self.assertIn("«", (tmp / "c.md").read_text(), "the document must be left unfilled")
+
+    def test_a_matching_artifact_is_accepted(self):
+        """The other side of the same boundary — over-strictness here would block every real fill."""
+        tmp = self.prepared()
+        self.assertEqual(self.fill(tmp).returncode, 0)
+
+    def test_a_report_without_metadata_cannot_be_verified_and_is_refused(self):
+        """Fails closed: without the artifact's own metadata in the report there is nothing to
+        compare, and filling would put an unverifiable provenance line into the document."""
+        import json
+        tmp = self.prepared()
+        report = self.report()
+        del report["metadata"]
+        (tmp / "r.json").write_text(json.dumps(report))
+        result = self.fill(tmp)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("no `metadata`", result.stdout + result.stderr)
+
+    def test_an_artifact_that_is_not_a_database_is_refused_with_a_reason(self):
+        """Not merely non-zero: an unguarded read would also exit non-zero, via a traceback.
+        Seq 151's lesson — checking that something failed is not checking that it refused."""
+        tmp = self.prepared()
+        broken = pathlib.Path(tempfile.mkdtemp()) / "not.sqlite"
+        broken.write_bytes(b"not a database at all")
+        result = self.fill(tmp, database=broken)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("REFUSING", result.stdout + result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
 
     def test_a_missing_artifact_is_refused_with_a_reason(self):
         """Checking only the exit code passes for the wrong reason: an unguarded `read_bytes()`
@@ -724,6 +810,17 @@ class CensusFillerTests(unittest.TestCase):
         source = (ROOT / "scripts" / "b8b_fill_census.py").read_text()
         self.assertNotIn("allow_incomplete", source)
         self.assertNotIn("SUPPRESS", source)
+
+    def test_a_missing_reported_value_refuses_rather_than_defaulting(self):
+        """The filler read `members_outside_blocks` from the wrong section with a `, 0` default,
+        so the census printed "0 members outside every sampled block" as a **default rather than a
+        measurement**. It was the true value, which is exactly why it would never have been
+        noticed — a provenance claim with nothing behind it, the same class as C1."""
+        report = self.report()
+        del report["cohort"]["members_outside_blocks"]
+        with self.assertRaises(SystemExit) as ctx:
+            self.FILL.values(report, "abc123")
+        self.assertIn("members_outside_blocks", str(ctx.exception))
 
     def test_wilson_interval_is_asymmetric_and_shifted_up_at_small_p(self):
         """The whole reason it is reported instead of the Wald half-width."""

@@ -12,7 +12,7 @@
 **Owner authorisation:** `agent_discussion.md` Seq 121 — 4 minutes/hour.
 **Window:** `[433,894,233, 434,097,833]`, 203,601 slots, 24.000 h, pinned by the Seq-123 pre-flight
 against finalized tip 435,741,966.
-**Artifact:** `research/b8b_cohort_433894233_434097833.sqlite`, sha256 `«artifact»`.
+**Artifact:** `research/b8b_cohort_433894233_434097833.sqlite`, sha256 `10fa3d6d608d2b4515de9f92d5aa8e4063ace4b72cda3300a7df0353e5cea0b8`.
 **Analysis:** `scripts/b8b_census.py`, written before the scan completed.
 
 ## What this cohort is
@@ -32,13 +32,13 @@ Exhaustiveness is the claim everything else rests on, so it is reported before a
 
 | | |
 |---|---:|
-| sampled blocks | «24» |
-| sampled slots | «n_sampled» |
-| retrieved / skipped | «retrieved» / «skipped» |
-| skips verified absent by `getBlocks` | «verified» |
-| slots unaccounted for | «missing» |
-| decode errors | «decode_errors» |
-| members outside every sampled block | «outside» |
+| sampled blocks | 24 |
+| sampled slots | 13,533 |
+| retrieved / skipped | 13,524 / 9 |
+| skips verified absent by `getBlocks` | 9 |
+| slots unaccounted for | 0 |
+| decode errors | 0 |
+| members outside every sampled block | 0 |
 
 **Partial completion is FAIL, not a smaller result** (freeze §5). A truncated run is a
 time-of-day-biased sample wearing the label of a stratified one.
@@ -92,8 +92,8 @@ left implied, since the next window will be chosen by whoever reads this.
 
 ## Cohort size and the precision it actually supports
 
-> **«n» members, and at that `n` a proportion near 1% carries a 95% Wilson interval of
-> «wilson_lo»–«wilson_hi» %.**
+> **1,601 members, and at that `n` a proportion near 1% carries a 95% Wilson interval of
+> 0.617–1.618 %.**
 
 Stated in one sentence deliberately, per **owner decision A** (`DECISIONS.md`, 2026-07-28):
 separating a proportion from its interval is how a reader ends up quoting the first without the
@@ -127,16 +127,41 @@ a target count** — *"the realised `n` falls where it falls and is reported, wh
 realised `n` below the assumption is a **reported outcome, not a defect and not grounds to resize
 the sample after the fact.**
 
-- frozen (Wald) bar met at p ≤ «max_p» — «met/missed» at p = 1%
-- `n` that would have been required for the Wald bar at p = 1%: «n_required»
-- Wald half-width at p = 1%: ±«hw_wald» pp — **reported against the criterion, not as the interval
+- frozen (Wald) bar met at p ≤ 1.05% — met at p = 1%
+- `n` that would have been required for the Wald bar at p = 1%: 1,522
+- Wald half-width at p = 1%: ±0.487 pp — **reported against the criterion, not as the interval
   to quote**
 
 ## Per-stratum yield
 
 Stratification only means something if every hour actually contributed.
 
-«per-hour table»
+| hour | offset (min) | retrieved | skipped | members |
+|---|---|---|---|---|
+| 0 | 0 | 577 | 0 | 50 |
+| 1 | 27 | 575 | 0 | 63 |
+| 2 | 54 | 557 | 0 | 52 |
+| 3 | 22 | 566 | 0 | 44 |
+| 4 | 49 | 564 | 0 | 73 |
+| 5 | 17 | 562 | 1 | 78 |
+| 6 | 44 | 574 | 0 | 53 |
+| 7 | 12 | 576 | 0 | 70 |
+| 8 | 39 | 572 | 0 | 79 |
+| 9 | 7 | 561 | 4 | 95 |
+| 10 | 34 | 556 | 0 | 122 |
+| 11 | 2 | 561 | 1 | 65 |
+| 12 | 29 | 557 | 0 | 72 |
+| 13 | 56 | 551 | 1 | 84 |
+| 14 | 24 | 566 | 0 | 64 |
+| 15 | 51 | 568 | 0 | 52 |
+| 16 | 19 | 567 | 0 | 47 |
+| 17 | 46 | 557 | 0 | 65 |
+| 18 | 14 | 563 | 2 | 44 |
+| 19 | 41 | 555 | 0 | 60 |
+| 20 | 9 | 558 | 0 | 47 |
+| 21 | 36 | 566 | 0 | 76 |
+| 22 | 4 | 556 | 0 | 43 |
+| 23 | 31 | 559 | 0 | 103 |
 
 Two different things must not be conflated, and the census separates them:
 
@@ -146,7 +171,10 @@ Two different things must not be conflated, and the census separates them:
 
 ## Quote regime — reported split, never pooled
 
-«regime table»
+| quote mint | regime | members | share |
+|---|---|---|---|
+| `11111111111111111111111111111111` | SOL (native sentinel) | 1,577 | 98.50% |
+| `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` | USDC | 24 | 1.50% |
 
 **`sol_amount` must branch on `quote_mint` or fail closed** (B7k). And `quote_mint` itself has two
 representations for SOL — event-derived `111…111` versus account-derived `So111…112` (B7l) — so a
@@ -155,7 +183,12 @@ rather than as a bug.
 
 ## Regime covariates — recorded, not filtered
 
-«mayhem / cashback table»
+| covariate | value | members | share |
+|---|---|---|---|
+| `is_mayhem_mode` | 0 | 1,136 | 71.0% |
+| `is_mayhem_mode` | 1 | 465 | 29.0% |
+| `is_cashback_enabled` | 0 | 980 | 61.2% |
+| `is_cashback_enabled` | 1 | 621 | 38.8% |
 
 Mayhem is a **covariate excluded at decision time**, never a sampling step. Excluding it is a
 **change in creator composition**, not a row filter — in B8a it removed the most concentrated block
@@ -163,7 +196,10 @@ of the cohort, which is why tradable leakage read *lower* than raw.
 
 ## Actor leakage under the frozen `creator ∪ user` key
 
-«leakage table: all vs tradable»
+| population | n | actor groups | repeat actors | members from a repeat actor | surplus beyond one-each | largest group |
+|---|---|---|---|---|---|---|
+| all | 1,601 | 824 | 232 | 1,009 (63.0%) | 777 (48.5%) | 51 |
+| tradable (Mayhem excluded) | 1,136 | 673 | 161 | 624 (54.9%) | 463 (40.8%) | 51 |
 
 The split key is `creator ∪ user`, **never token and never time**, and **an actor group is never
 split across blocks or across folds**. Two figures are reported separately and must not be swapped:

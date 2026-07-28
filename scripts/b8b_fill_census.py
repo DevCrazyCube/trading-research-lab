@@ -29,6 +29,7 @@ import json
 import math
 import pathlib
 import re
+import sqlite3
 
 Z = 1.96
 USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
@@ -44,6 +45,46 @@ def wilson(n, p=0.01, z=Z):
     centre = (p + z * z / (2 * n)) / denominator
     half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denominator
     return (centre - half) * 100, (centre + half) * 100
+
+
+def assert_artifact_matches_report(artifact, report):
+    """The hashed file must be the one the report describes. C1 (Seq 152).
+
+    Removing `--artifact-sha` in favour of a computed digest was right — a hash typed by hand is
+    the transcription error this script exists to prevent. But it moved the problem up one level:
+    `--json` and `--database` are independent inputs and nothing related them, so the census could
+    carry a provenance line that is internally false — *"these numbers came from the artifact with
+    sha X"* naming a file that produced none of them. Demonstrated with a real b8b artifact built
+    for window `111,111,111 → 111,211,111` filling a census reported from `433,894,233 →
+    434,097,833`: accepted, exit 0.
+
+    The report copies the artifact's own `metadata` table, so the comparison is exact and needs no
+    tolerance. Same shape as `assert_schedule_anchor` in the scanner — tie the artifact to what the
+    run declares — applied to the write-up instead of the scan.
+    """
+    declared = report.get("metadata")
+    if not declared:
+        raise SystemExit(
+            f"REFUSING: the census report carries no `metadata`, so the artifact it came from "
+            f"cannot be identified. Filling would put an unverifiable provenance line into the "
+            f"document. Regenerate the report with scripts/b8b_census.py --json.")
+    connection = sqlite3.connect(f"file:{artifact}?mode=ro", uri=True)
+    try:
+        stored = dict(connection.execute("SELECT key, value FROM metadata"))
+    except sqlite3.DatabaseError as error:
+        raise SystemExit(
+            f"REFUSING: cannot read the metadata table of {artifact} ({error}). Its identity "
+            f"cannot be confirmed against the report.") from None
+    finally:
+        connection.close()
+    mismatched = {key: (stored.get(key), value) for key, value in declared.items()
+                  if stored.get(key) != value}
+    if mismatched:
+        summary = ", ".join(f"{key}: artifact={found!r} report={expected!r}"
+                            for key, (found, expected) in sorted(mismatched.items()))
+        raise SystemExit(
+            f"REFUSING: {artifact} is not the artifact this report describes — {summary}. The "
+            f"census would name the sha256 of a file that produced none of its numbers.")
 
 
 def markdown_table(header, rows):
@@ -92,6 +133,16 @@ def leakage_table(report):
           r["largest_actor_group"]] for r in report["leakage"]])
 
 
+def require(section, key, name):
+    """Read a reported value or refuse. Never default: a defaulted number in a published document
+    is indistinguishable from a measured one, and reads as evidence either way."""
+    if key not in section:
+        raise SystemExit(
+            f"REFUSING: report section {name!r} has no {key!r}. Substituting a default would put "
+            f"an unmeasured number into the census as though it had been measured.")
+    return section[key]
+
+
 def values(report, artifact_sha):
     completeness = report["completeness"]
     precision = report["precision"]
@@ -107,7 +158,12 @@ def values(report, artifact_sha):
         "verified": f"{status.get('skipped', 0) - completeness['skips_unverified']:,}",
         "missing": f"{completeness['missing']:,}",
         "decode_errors": str(completeness["decode_errors"]),
-        "outside": str(completeness.get("members_outside_blocks", 0)),
+        # No default. The value lives in `cohort`, and the previous `completeness.get(..., 0)`
+        # silently substituted a fallback: the document read "0 members outside every sampled
+        # block" as a *default*, not a measurement. It happened to be the true value, which is
+        # exactly why it would never have been noticed. Same class as C1 - a provenance claim with
+        # nothing behind it - so a missing key must refuse.
+        "outside": str(require(report["cohort"], "members_outside_blocks", "cohort")),
         "n": f"{n:,}",
         "wilson_lo": f"{low:.3f}",
         "wilson_hi": f"{high:.3f}",
@@ -154,6 +210,7 @@ def main():
     if not artifact.is_file():
         raise SystemExit(f"REFUSING: artifact {artifact} not found; its sha256 is computed, not "
                          f"supplied, so the census cannot name the bytes it describes.")
+    assert_artifact_matches_report(artifact, report)
     digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
 
     document = pathlib.Path(arguments.census)
