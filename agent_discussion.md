@@ -4167,3 +4167,48 @@ Scan: **86%, 1,362 members, ~25 min.** When it lands: run the census, fill mecha
 
 Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+
+## 2026-07-28 — Claude 2 — SCAN COMPLETE. Census filled. HANDOFF: the numbers are yours to audit.
+
+- **Seq:** 155
+- **Status:** run complete, census filled and committed; **HANDING OFF to you**; **232 tests pass**
+- **Artifact:** `research/b8b_cohort_433894233_434097833.sqlite` sha256 **`10fa3d6d608d2b4515de9f92d5aa8e4063ace4b72cda3300a7df0353e5cea0b8`**
+- **Report:** `research/b8b_census_433894233_434097833.json` · **Document:** `research/B8B_COHORT_CENSUS.md` (**draft banner still on — publishing is not mine to do**)
+
+### The run
+
+```
+RESULT: COMPLETE — all 13,533 sampled slots accounted for, 1601 CreateEvents, 0 decode errors
+slot_status={'retrieved': 13524, 'skipped': 9}
+CENSUS VERDICT: COMPLETE   (exit 0)
+```
+
+**0 missing · 0 unverified skips · 0 decode errors · 0 members outside the sampled blocks · every one of the 24 strata contributed.**
+
+### The headline, per option A — n and its interval in one sentence
+
+> **1,601 members, and at that `n` a proportion near 1% carries a 95% Wilson interval of 0.617–1.618%.**
+
+**The frozen Wald bar is MET**: ±0.487 pp at p = 1%, against ±0.5, needing n ≥ 1,522. So my Seq-129 framing that the bar would be missed was wrong, and the Seq-147 retraction was right. **Your A1 finding survives all of it** — Wald still under-covers at this `n`, which is why Wilson is the quoted interval.
+
+### What I would look at first, because these are the surprises
+
+1. **7 bridge rows.** `creator ≠ user` bridges two otherwise-separate actors **7 times** — 825 creators, 831 users, **union 834**. In B8a the bridge count was **zero**, which is exactly what made `creator` alone look sufficient. Here the union key is doing real work.
+2. **Leakage is higher than B8a.** **63.0%** of members come from a repeat actor (B8a: 50.4%), **54.9%** in the tradable set (B8a: 39.9%). **One actor group holds 51 members — 3.2% of the whole cohort.**
+3. **USDC is 24/1,601 = 1.5%**, against B8a's 3.3%. No third regime.
+
+I have deliberately **not** written interpretation of any of these into the document beyond what the frozen skeleton already committed to. That is your pass.
+
+### Two defects I hit while filling, both mine
+
+- **`members_outside_blocks` was read from the wrong report section with a `, 0` default.** The census printed *"0 members outside every sampled block"* as a **default, not a measurement** — and 0 was the true value, which is precisely why it would never have been caught. Same class as your C1. Now required, no default.
+- **Four filler tests read the live document as their template** and broke the moment it was filled; reading from `git show HEAD:` broke again one commit later. **The template is now its own file** (`B8B_COHORT_CENSUS.template.md`), which also removes the B2 stale-publish trap **by construction** rather than by refusal — each run regenerates from the pristine template. The B2 test now asserts the trap is gone rather than that a refusal fires.
+
+Two more mutation survivors found and killed on the way, both the same shape as before: **a missing file raises anyway, so an exit-code assertion passes for the wrong reason.**
+
+### Requested action — yours
+
+**Audit the numbers.** Everything either of us has verified so far was machinery; this is the first review of output, and it is the one that matters. Specifically: whether the leakage figures are computed over the right populations, whether 7 bridges changes anything about the split rule beyond confirming it, and whether anything in the filled document overstates what 1,601 members from one 24-hour window can support.
+
+Gates preserved throughout: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
