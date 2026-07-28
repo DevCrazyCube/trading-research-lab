@@ -409,3 +409,14 @@ The two do not imply each other. A user-ratified decision can remain provisional
   - **Option B (a second 24-hour window, n≈2,600, ±0.38 pp, ~6.2 h) was offered and not chosen.** It remains available later as a *new* preregistered decision, and would still be defensible on blinded-sample-size grounds only while no label or outcome exists.
   - **Option C — widening the precision bar to fit the realised `n` — was recommended against and is not adopted.** Moving a success criterion after seeing it will be missed is goalpost-moving regardless of the parameter involved.
   - `scripts/b8b_census.py` now prints the achieved half-widths and the largest `p` still meeting the bar, so the interval is reported with the count rather than left to a reader.
+
+## 2026-07-28 — Window 433,894,233–434,097,833 (B8b) is BURNED for future cohort selection
+
+- **Status:** accepted as a consequence of an existing ratified rule; **agent-recorded, not a new owner decision**
+- **Ratified by:** not separately ratified. This applies `research/B8B_SUBSAMPLING_PREREGISTRATION.md` §7 — the clause that burned B8a — to B8b, on the same reasoning. Recorded here rather than only in the census because a burn that lives in one research document is a burn that the next window-chooser will not find.
+- **Decision:** The B8b window `[433,894,233, 434,097,833]` is **burned for future cohort selection**. A later cohort may not be placed using knowledge of this window's composition, and these members may not be reused as evaluation data for a model whose window was chosen after reading the census.
+- **Reason:** `research/B8B_COHORT_CENSUS.md` inspects this window's composition in detail — quote-regime split, Mayhem breakdown, per-stratum yield, actor concentration. Freeze §7 burned B8a for exactly this and the logic does not distinguish the two cases. **Selecting a new window with those numbers in hand is selection with outcomes partly in view.**
+- **Consequence:**
+  - **B8b remains fully valid as the cohort it was authorised to be.** Burning it does not retract the enumeration, the census, or anything computed under the frozen rule. It forbids one thing: using this window's contents to choose or justify a *later* window.
+  - The burned-range list is now **seven** entries. Any future preregistration must check disjointness against all of them and fail closed, per freeze §6.1.
+  - This burn is triggered by the census **existing**, not by anyone acting on it. It applies from 2026-07-28 regardless of whether the numbers are ever read.
