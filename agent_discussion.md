@@ -3031,3 +3031,62 @@ Owner authorisation for the run is already recorded (Seq 121, 4 min/hour, ~6.2 h
 
 Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+
+## 2026-07-28 — Claude 2 — Claiming the B8b scanner
+
+- **Seq:** 125
+- **Status:** claiming — **do not edit `scripts/b8b_*` or `research/b8b_*` until I release**
+- **Files/area claimed:** new `scripts/b8b_cohort_scanner.py` and the artifact it writes. `scripts/b7d_create_enumerator.py` will be **reused unmodified** as the substrate, exactly as B8a did, and is **not** claimed.
+
+Authorisation is recorded (Seq 121: 4 min/hour, ~6.2 h). Window is pinned (Seq 123: `[433,894,233, 434,097,833]`). Freeze is `56d8a83b…8374`. Nothing further is needed from the owner.
+
+**Design constraints I am binding myself to before writing a line, so they cannot be relaxed once the run is inconvenient:**
+
+1. **`blockTime`-resolved boundaries, never interpolated.** My own Seq-123 sizing used linear interpolation and is not adequate for the frozen schedule — slot production drifts, and drift attacks the stratification itself. All 48 boundaries get binary-searched against on-chain `blockTime`, and **ambiguity fails closed** rather than being resolved by assumption.
+2. **Exhaustive inside every block. No attribute filtering of any kind.** That is C4, and it is the rule doing the anti-leakage work.
+3. **Partial completion is FAIL, not a result.** So the run must be **resumable**, never restartable — a restart would silently redraw the sample. Checkpointing per slot, and the scanner reports FAIL unless every slot in all 24 blocks is accounted for.
+4. **Skipped slots verified, not assumed.** `getBlock` returns `-32009` ambiguously for "skipped **or** missing"; every one is re-checked against `getBlocks`, per B8a's precedent, because the exhaustiveness claim rests on that distinction.
+5. **The artifact records the frozen schedule itself** — stride, modulus, block length, window bounds, freeze hash — so it is self-describing and a later reader can re-derive the sample without trusting this entry.
+
+I will report the boundary resolution **before** starting the 6-hour fetch, so the schedule can be checked while it is still cheap to check.
+
+
+## 2026-07-28 — Claude 2 — B8b schedule resolved against on-chain blockTime and verified; starting the fetch
+
+- **Seq:** 126
+- **Status:** boundaries resolved and **frozen into the artifact**; verified independently; **fetch starting now**
+- **Files/area owned:** `scripts/b8b_cohort_scanner.py` (claimed Seq 124), `research/b8b_cohort_433894233_434097833.sqlite`. `b7d_create_enumerator.py` reused **unmodified**.
+
+Reporting before the 6-hour fetch, as promised in the claim — while the schedule is still cheap to check.
+
+### The 24 blocks, resolved from `blockTime`, not interpolated
+
+**13,533 sampled slots = 6.65%** of the 203,601-slot window. Nominal is 6.67%; the shortfall is real slot-rate variation, and it is **reported rather than corrected**, because the freeze fixes the *time fraction* and lets the realised count fall where it falls.
+
+### Verification — the claim my Seq-123 interpolation could not make
+
+I re-fetched `blockTime` for the first and last slot of all 24 blocks and checked them against their target wall-clock windows:
+
+| check | result |
+|---|---|
+| first sampled slot at or after target start | **24/24**, and `lead = 0 s` in **every** block |
+| last sampled slot strictly before target end | **24/24** |
+| block wall-clock span | **239 s in all 24** — exactly right, since the last slot must precede t+240 |
+| boundaries violating their window | **0** |
+
+Every block lands **exactly** on its intended second. That is the property that makes "one 4-minute block per clock hour at offset `(27h mod 59)`" true of the data and not just of the document.
+
+Structural checks also pass: 24 offsets distinct, none straddling an hour, all 60 minutes-of-hour reachable, no overlap between consecutive blocks, no duplicate slots.
+
+### The artifact is self-describing
+
+`metadata` carries the **freeze hash** `56d8a83b…8374`, the IDL hash `b90bc471…8e49`, the rule string, stride 27, modulus 59, block 4 min, and the window bounds. `sampled_block` holds all 24 resolved ranges. **A later reader can re-derive the sample without trusting this entry** — which is the point.
+
+**The schedule is frozen in the database and a resumed run re-reads it rather than recomputing it.** Recomputation against a moved tip would silently redraw the sample; this is why the run is resumable and never restartable.
+
+### Now starting: ~13,533 slots, ~6 h
+
+Exhaustive inside every block, **no attribute filtering**. Skipped slots re-verified against `getBlocks`. **Partial completion exits FAIL, not a result.** Progress reported; I will release with the census when it completes or report honestly if it does not.
+
+Gates: read-only, no signing, no spending, no deployment, no live or devnet transactions, credentials sourced silently and never printed.
+
