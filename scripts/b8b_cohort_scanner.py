@@ -204,6 +204,60 @@ def assert_complete_schedule(blocks, origin):
             f"FAIL CLOSED: {origin} schedule has non-positive block width at "
             f"(hour, start, end_exclusive) = {degenerate}. Such an hour contributes zero slots and "
             f"would silently drop a stratum while the run still reported COMPLETE.")
+    # The stored TIMES are the block definition; the slot bounds are only their resolution against
+    # the chain. Nothing validated the times, so a block whose span was 1 second, or whose start
+    # sat hours off the frozen grid, passed every check above. Both are exactly checkable offline.
+    #
+    # No anchor argument is needed: offset(0) = 0, so hour 0's start_time IS the window anchor and
+    # the schedule checks itself. A coherent shift of ALL blocks is deliberately out of scope here
+    # - that is what `verify_window_start_time` covers on a fresh resolve, and what the metadata
+    # mismatch check covers on a resume.
+    span = BLOCK_MINUTES * 60
+    bad_span = [(b["hour"], b["end_time"] - b["start_time"])
+                for b in blocks if b["end_time"] - b["start_time"] != span]
+    if bad_span:
+        raise SystemExit(
+            f"FAIL CLOSED: {origin} schedule has blocks whose stored time span is not {span}s "
+            f"(hour, span) = {bad_span}. The span is the sampling fraction; a wrong one silently "
+            f"reweights that stratum.")
+    anchor = blocks[0]["start_time"] - (0 * 3600 + expected[0] * 60)
+    off_grid = [(b["hour"], b["start_time"], anchor + b["hour"] * 3600 + expected[b["hour"]] * 60)
+                for b in blocks
+                if b["start_time"] != anchor + b["hour"] * 3600 + expected[b["hour"]] * 60]
+    if off_grid:
+        raise SystemExit(
+            f"FAIL CLOSED: {origin} schedule has start times off the frozen grid "
+            f"(hour, stored, expected) = {off_grid}. Times must satisfy "
+            f"start(h) = anchor + 3600h + 60*offset(h); a block sampling the wrong minute is not "
+            f"the stratified sample the freeze describes.")
+
+
+def assert_schedule_matches_window(blocks, window_start_time, origin):
+    """The stored schedule must describe the window the run declares. F9 (Seq 135).
+
+    Kept separate from `assert_complete_schedule` on purpose: that function checks the schedule is
+    *internally* coherent, and a coherently shifted grid genuinely satisfies it — Seq 134 pinned
+    that as a deliberate non-guarantee and pointed at the metadata check to catch it instead.
+
+    **The metadata check does not catch it.** The schedule and the metadata are separate stores, so
+    shifting every `start_time` while leaving `metadata` alone passes `initialize_metadata`
+    (metadata unchanged) *and* `assert_complete_schedule` (the grid is self-anchored on hour 0).
+    Measured, not argued: a 2-hour shift passes both. A resume would then sample 24 blocks from the
+    wrong part of the day and report COMPLETE.
+
+    `offset(0) = 0` identically, so hour 0's `start_time` is the anchor and must equal the declared
+    `window_start_time` exactly. No tolerance: this is an equality between two recorded numbers,
+    not a measurement against the chain.
+    """
+    if not blocks:
+        return
+    anchor = blocks[0]["start_time"]
+    if anchor != window_start_time:
+        raise SystemExit(
+            f"FAIL CLOSED: {origin} schedule is anchored at {anchor} but the run declares "
+            f"window_start_time={window_start_time} (differ by {anchor - window_start_time}s). "
+            f"The schedule would sample a different span than the one this run claims. Refusing; "
+            f"delete the sampled_block rows to re-resolve, or correct --window-start-time.")
 
 
 def verify_window_start_time(url, window_start, window_end, window_start_time, retries,
@@ -300,6 +354,12 @@ def main():
         assert_complete_schedule(resolved, "resolved")
         blocks, fresh = store_blocks(connection, resolved)
         print(f"schedule: resolved and frozen into the database")
+
+    # F9: tie the schedule to the window this run declares. Placed here rather than inside
+    # `store_blocks` so it covers BOTH the stored and the freshly-resolved path from one site -
+    # and `store_blocks` has no access to `window_start_time` anyway.
+    assert_schedule_matches_window(blocks, args.window_start_time,
+                                   "stored" if not fresh else "resolved")
 
     sampled = []
     for b in blocks:

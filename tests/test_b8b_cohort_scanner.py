@@ -19,6 +19,24 @@ _spec = importlib.util.spec_from_file_location(
 B8B = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(B8B)
 
+ANCHOR = 500_000
+
+
+def schedule_blocks(count=24, anchor=ANCHOR, width=580):
+    """A schedule as `resolve_blocks` would actually produce one.
+
+    One shared builder because three fixtures previously carried placeholder times (`0`/`0`, or a
+    span with no offset term). Those are not schedules the scanner can emit, and a fixture that
+    production cannot produce is how a test ends up pinning nothing - the Seq-67 lesson. Every
+    field here satisfies the frozen grid, so a test that fails does so for its own reason.
+    """
+    offsets = [(B8B.STRIDE * h) % B8B.MODULUS for h in range(count)]
+    return [{"hour": h, "offset_minutes": offsets[h],
+             "start_slot": 1000 + h * 1000, "end_slot_exclusive": 1000 + h * 1000 + width,
+             "start_time": anchor + h * 3600 + offsets[h] * 60,
+             "end_time": anchor + h * 3600 + offsets[h] * 60 + B8B.BLOCK_MINUTES * 60}
+            for h in range(count)]
+
 
 class FrozenScheduleTests(unittest.TestCase):
     """The schedule is the sample definition. If it changes, the cohort changes."""
@@ -99,10 +117,7 @@ class ScheduleFreezingTests(unittest.TestCase):
         self.path = pathlib.Path(tempfile.mkdtemp()) / "b8b_test.sqlite"
         self.connection = B8B.open_database(str(self.path))
         self.addCleanup(self.connection.close)
-        self.blocks = [{"hour": h, "offset_minutes": (27 * h) % 59,
-                        "start_slot": 1000 + h * 100, "end_slot_exclusive": 1000 + h * 100 + 50,
-                        "start_time": 5000 + h * 3600, "end_time": 5000 + h * 3600 + 240}
-                       for h in range(24)]
+        self.blocks = schedule_blocks()
 
     def test_first_run_stores_the_schedule(self):
         stored, fresh = B8B.store_blocks(self.connection, self.blocks)
@@ -370,9 +385,7 @@ class BlockWidthTests(unittest.TestCase):
     """
 
     def blocks(self, **override):
-        out = [{"hour": h, "offset_minutes": (27 * h) % 59,
-                "start_slot": 1000 + h * 100, "end_slot_exclusive": 1000 + h * 100 + 50,
-                "start_time": 0, "end_time": 0} for h in range(24)]
+        out = schedule_blocks()
         for hour, changes in override.items():
             out[int(hour)].update(changes)
         return out
@@ -393,6 +406,7 @@ class BlockWidthTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             B8B.assert_complete_schedule(blocks, "stored")
 
+
     def test_the_dropped_stratum_would_otherwise_be_invisible(self):
         """Documents why this needs its own check: no other invariant notices."""
         blocks = self.blocks()
@@ -405,7 +419,154 @@ class BlockWidthTests(unittest.TestCase):
         overlaps = [(a, b) for a, b in zip(blocks, blocks[1:])
                     if a["end_slot_exclusive"] > b["start_slot"]]
         self.assertEqual(overlaps, [], "the overlap check still passes")
-        self.assertEqual(len(sampled), 23 * 50, "yet one whole stratum contributes nothing")
+        # Derived from the fixture rather than hardcoded, so the assertion survives a change of
+        # fixture geometry instead of silently becoming an arithmetic identity about it.
+        intact = self.blocks()
+        width = intact[7]["end_slot_exclusive"] - intact[7]["start_slot"]
+        expected_full = sum(b["end_slot_exclusive"] - b["start_slot"] for b in intact)
+        self.assertEqual(len(sampled), expected_full - width,
+                         "yet one whole stratum contributes nothing")
+
+
+class StoredTimeValidationTests(unittest.TestCase):
+    """F8 (Seq 133): the stored *times* define each block; nothing validated them.
+
+    `start_slot`/`end_slot_exclusive` are only the resolution of those times against the chain, so
+    a schedule with correct slot bounds and wrong times is not the sample the freeze describes. A
+    1-second span and a start six hours off the grid both passed every earlier check.
+    """
+
+    def test_a_healthy_schedule_passes(self):
+        B8B.assert_complete_schedule(schedule_blocks(), "test")
+
+    def test_the_check_is_self_anchoring_so_any_real_window_passes(self):
+        """No anchor argument: offset(0)=0, so hour 0's start_time IS the window anchor."""
+        for anchor in (0, 500_000, 1784463582):
+            B8B.assert_complete_schedule(schedule_blocks(anchor=anchor), f"anchor {anchor}")
+
+    def test_a_wrong_time_span_fails_closed(self):
+        blocks = schedule_blocks()
+        blocks[7]["end_time"] = blocks[7]["start_time"] + 1
+        with self.assertRaises(SystemExit) as ctx:
+            B8B.assert_complete_schedule(blocks, "stored")
+        self.assertIn("time span is not 240s", str(ctx.exception))
+
+    def test_a_span_wrong_by_one_second_fails_closed(self):
+        """Exact invariant, so it is checked exactly - no tolerance to erode later."""
+        blocks = schedule_blocks()
+        blocks[0]["end_time"] += 1
+        with self.assertRaises(SystemExit):
+            B8B.assert_complete_schedule(blocks, "stored")
+
+    def test_a_start_time_off_the_frozen_grid_fails_closed(self):
+        for shift in (60, 3600, 21600):
+            blocks = schedule_blocks()
+            blocks[7]["start_time"] += shift
+            blocks[7]["end_time"] += shift
+            with self.assertRaises(SystemExit) as ctx:
+                B8B.assert_complete_schedule(blocks, "stored")
+            self.assertIn("off the frozen grid", str(ctx.exception), f"shift {shift}")
+
+    def test_times_must_match_the_offset_the_same_row_declares(self):
+        """A row whose offset column and start_time disagree is internally inconsistent."""
+        blocks = schedule_blocks()
+        blocks[5]["start_time"] += 60
+        blocks[5]["end_time"] += 60
+        with self.assertRaises(SystemExit):
+            B8B.assert_complete_schedule(blocks, "stored")
+
+    def test_a_coherent_shift_of_every_block_is_deliberately_out_of_scope(self):
+        """Documents the boundary rather than implying coverage.
+
+        Shifting all 24 blocks equally is still a valid grid, so this check cannot see it - that
+        is `verify_window_start_time`'s job on a fresh resolve, and the metadata mismatch check's
+        job on a resume. Asserting it here would be claiming a guarantee this function does not
+        provide.
+        """
+        B8B.assert_complete_schedule(schedule_blocks(anchor=ANCHOR + 86_400), "shifted")
+
+    def test_a_one_slot_wide_block_is_NOT_caught_and_that_is_recorded(self):
+        """Also a boundary: slot bounds cannot be re-verified without RPC.
+
+        A stratum reduced to one slot keeps a valid grid and a positive width, so it survives. It
+        would need chain access to detect, and F7's zero-retrieved gate does not fire on 1. Pinned
+        so the limit is visible rather than assumed away.
+        """
+        blocks = schedule_blocks()
+        blocks[7]["end_slot_exclusive"] = blocks[7]["start_slot"] + 1
+        B8B.assert_complete_schedule(blocks, "stored")      # passes, knowingly
+
+class ScheduleWindowTieTests(unittest.TestCase):
+    """F9 (Seq 135): a coherently shifted schedule passes every other check.
+
+    Seq 134 pinned the shift as a deliberate non-guarantee of `assert_complete_schedule` and named
+    the metadata mismatch check as the thing that would catch it on a resume. Measured, it does
+    not: the schedule and the metadata are separate stores, so shifting every `start_time` and
+    leaving `metadata` alone passes both. A resume would sample 24 blocks from the wrong part of
+    the day, satisfy every invariant, and report COMPLETE.
+    """
+
+    def test_a_matching_anchor_passes(self):
+        B8B.assert_schedule_matches_window(schedule_blocks(anchor=ANCHOR), ANCHOR, "test")
+
+    def test_a_coherently_shifted_schedule_is_refused(self):
+        blocks = schedule_blocks(anchor=ANCHOR + 7200)          # every block 2h later
+        with self.assertRaises(SystemExit) as ctx:
+            B8B.assert_schedule_matches_window(blocks, ANCHOR, "stored")
+        self.assertIn("anchored at", str(ctx.exception))
+
+    def test_a_one_second_shift_is_refused_there_is_no_tolerance(self):
+        """Both sides are recorded integers, so this is an equality, not a measurement."""
+        with self.assertRaises(SystemExit):
+            B8B.assert_schedule_matches_window(schedule_blocks(anchor=ANCHOR + 1), ANCHOR, "stored")
+
+    def test_the_shift_really_does_pass_every_other_check(self):
+        """Documents why F9 needs to exist rather than being folded into an existing check."""
+        blocks = schedule_blocks(anchor=ANCHOR + 7200)
+        B8B.assert_complete_schedule(blocks, "internally coherent")     # passes, correctly
+        self.assertEqual(len(blocks), 24)
+        self.assertEqual(sorted(b["hour"] for b in blocks), list(range(24)))
+
+    def test_empty_schedule_is_left_to_the_other_checks(self):
+        B8B.assert_schedule_matches_window([], ANCHOR, "empty")
+
+    def test_main_actually_calls_the_tie_check(self):
+        """Call-site test. Every assertion above passes even if `main()` never calls the function -
+        verified by mutation: removing the call site survived the whole unit suite. This is the
+        third time this project has hit call-site vacuity (Seq 100, Seq 109, Seq 131), and I hit it
+        again one entry after naming it.
+
+        A stored schedule takes the resume path, and the tie check runs before any RPC, so this
+        makes no network call.
+        """
+        import subprocess
+        import sys
+        path = pathlib.Path(tempfile.mkdtemp()) / "shifted.sqlite"
+        connection = B8B.open_database(str(path))
+        declared = 1784463582
+        # Metadata must match what the subprocess will compute, or `initialize_metadata` raises
+        # first and the tie check is never reached. The real IDL hash; `public-mainnet` because the
+        # test environment sets no SOLANA_RPC_URL.
+        import hashlib
+        idl_sha = hashlib.sha256((ROOT / "research" / "pump_idl_9c82f61.json").read_bytes()).hexdigest()
+        B8B.B7D.initialize_metadata(connection, B8B.freeze_metadata(
+            433894233, 434097833, declared, idl_sha, "public-mainnet"))
+        offsets = B8B.offsets()
+        for hour in range(24):                       # every block shifted 2h from `declared`
+            begin = declared + 7200 + 3600 * hour + 60 * offsets[hour]
+            connection.execute("INSERT INTO sampled_block VALUES (?,?,?,?,?,?)",
+                               (hour, offsets[hour], 433894233 + hour * 1000,
+                                433894233 + hour * 1000 + 560, begin, begin + 240))
+        connection.commit()
+        connection.close()
+
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "b8b_cohort_scanner.py"),
+             "--database", str(path), "--window-start-time", str(declared), "--resolve-only"],
+            capture_output=True, text=True, cwd=str(ROOT))
+        self.assertNotEqual(result.returncode, 0,
+                            "main() must refuse a schedule anchored outside the declared window")
+        self.assertIn("anchored at", result.stdout + result.stderr)
 
 
 class ObservationPowerTests(unittest.TestCase):
@@ -502,9 +663,7 @@ class ScheduleCompletenessTests(unittest.TestCase):
     """F4 (Seq 129): a partial stored schedule was reused as the sample with no complaint."""
 
     def blocks(self, count=24):
-        return [{"hour": h, "offset_minutes": (27 * h) % 59,
-                 "start_slot": 1000 + h * 100, "end_slot_exclusive": 1000 + h * 100 + 50,
-                 "start_time": 0, "end_time": 0} for h in range(count)]
+        return schedule_blocks(count)
 
     def test_a_full_schedule_passes(self):
         B8B.assert_complete_schedule(self.blocks(), "test")
