@@ -328,7 +328,8 @@ class CensusVerdictTests(unittest.TestCase):
     """F1/F2 (Seq 129): the verdict must enforce every condition the output calls a "must"."""
 
     OK = dict(blocks=[{"hour": h} for h in range(24)], sampled={1, 2, 3}, missing=set(),
-              unverified=0, decode_errors=0, create_events=10, distinct_mints=10)
+              unverified=0, decode_errors=0, create_events=10, distinct_mints=10,
+              zero_observed=(), members_outside_blocks=0)
 
     def test_a_clean_artifact_passes(self):
         self.assertEqual(CENSUS.census_failures(**self.OK), [])
@@ -356,6 +357,24 @@ class CensusVerdictTests(unittest.TestCase):
     def test_missing_slots_and_unverified_skips_still_fail(self):
         self.assertTrue(CENSUS.census_failures(**dict(self.OK, missing={7})))
         self.assertTrue(CENSUS.census_failures(**dict(self.OK, unverified=1)))
+
+    def test_members_outside_the_sampled_blocks_fail(self):
+        """F12 (Seq 139): the mirror of `missing`.
+
+        `missing` catches sampled slots never scanned; this catches members never sampled. The
+        launch window IS the union of the 24 blocks, so a launch outside all of them is not a
+        member — and every downstream figure is computed over `create_event`.
+        """
+        failures = CENSUS.census_failures(**dict(self.OK, members_outside_blocks=1))
+        self.assertTrue(any("outside every sampled block" in f for f in failures), failures)
+
+    def test_every_gate_argument_is_required(self):
+        """Per the F11 rule: an optional argument turns a dropped call-site argument into a silent
+        no-op. Five call-site vacuities in this project; required parameters remove the shape."""
+        for omit in ("zero_observed", "members_outside_blocks", "decode_errors", "distinct_mints"):
+            arguments = {k: v for k, v in self.OK.items() if k != omit}
+            with self.assertRaises(TypeError, msg=f"{omit} must be required"):
+                CENSUS.census_failures(**arguments)
 
     def test_main_actually_uses_the_gate(self):
         """Anti-vacuity: the unit tests above are worthless if main() gates on something else.
@@ -570,6 +589,67 @@ class ScheduleWindowTieTests(unittest.TestCase):
         self.assertIn("anchored at", result.stdout + result.stderr)
 
 
+class CensusFillerTests(unittest.TestCase):
+    """The filler exists so the census's numbers are not retyped. Its refusals are the point."""
+
+    def setUp(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "b8b_fill", str(ROOT / "scripts" / "b8b_fill_census.py"))
+        self.FILL = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.FILL)
+
+    def report(self, **override):
+        base = {
+            "verdict": "COMPLETE", "failures": [],
+            "completeness": {"blocks": 24, "sampled": 13533, "missing": 0, "skips_unverified": 0,
+                             "decode_errors": 0, "members_outside_blocks": 0,
+                             "status": {"retrieved": 13400, "skipped": 133}},
+            "cohort": {"create_events": 1700, "distinct_mints": 1700},
+            "precision": {"half_widths": {"0.01": 0.00473, "0.033": 0.0085},
+                          "max_p_meeting_bar": 0.011, "max_p": 0.011, "bar": 0.005,
+                          "n_required": 1522, "meets_bar_at_1pct": True},
+            "per_hour": [{"hour": h, "offset": (27 * h) % 59, "creates": 70,
+                          "retrieved_slots": 560, "skipped_slots": 2} for h in range(24)],
+            "quote_regimes": {self.FILL.SOL_SENTINEL: 1650, self.FILL.USDC: 50},
+            "is_mayhem_mode": {"0": 1400, "1": 300},
+            "is_cashback_enabled": {"0": 900, "1": 800},
+            "leakage": [{"population": "all", "n": 1700, "distinct_actor_groups": 1000,
+                         "repeat_actor_groups": 300, "members_from_a_repeat_actor": 1000,
+                         "share_from_repeat_actor": 0.588, "surplus_beyond_one_each": 700,
+                         "share_surplus": 0.412, "largest_actor_group": 12}],
+        }
+        base.update(override)
+        return base
+
+    def test_a_complete_report_fills_every_placeholder(self):
+        import re
+        text = (ROOT / "research" / "B8B_COHORT_CENSUS.md").read_text()
+        filled = self.FILL.values(self.report(), "abc123")
+        tokens = set(re.findall(r"«([^»]+)»", text))
+        self.assertEqual(tokens - set(filled), set(),
+                         "every placeholder must map to a measured value")
+
+    def test_wilson_interval_is_asymmetric_and_shifted_up_at_small_p(self):
+        """The whole reason it is reported instead of the Wald half-width."""
+        low, high = self.FILL.wilson(1700, 0.01)
+        self.assertLess(low, 1.0)
+        self.assertGreater(high, 1.0)
+        self.assertGreater(abs(high - 1.0), abs(1.0 - low), "Wilson must lean upward at p=1%")
+
+    def test_zero_n_does_not_divide_by_zero(self):
+        self.assertEqual(self.FILL.wilson(0), (0.0, 0.0))
+
+    def test_an_unmapped_regime_is_flagged_not_silently_named(self):
+        """A third quote mint must shout, not be quietly listed."""
+        table = self.FILL.regime_table(self.report(quote_regimes={"SomeOtherMint": 5}))
+        self.assertIn("OTHER", table)
+
+    def test_tables_render_one_row_per_stratum(self):
+        table = self.FILL.per_hour_table(self.report())
+        self.assertEqual(len(table.splitlines()), 26, "header, separator, and 24 strata")
+
+
 class ObservationPowerTests(unittest.TestCase):
     """F7 (Seq 132): a stratum that was observed and yielded nothing is NOT the same as a stratum
     that was never observed, and the previous `creates` column could not tell them apart.
@@ -582,13 +662,15 @@ class ObservationPowerTests(unittest.TestCase):
     def test_zero_retrieved_slots_fails(self):
         failures = CENSUS.census_failures(
             blocks=[{"hour": h} for h in range(24)], sampled={1}, missing=set(), unverified=0,
-            decode_errors=0, create_events=1, distinct_mints=1, zero_observed=[7])
+            decode_errors=0, create_events=1, distinct_mints=1, zero_observed=[7],
+            members_outside_blocks=0)
         self.assertTrue(any("zero retrieved slots" in f for f in failures), failures)
 
     def test_observed_but_empty_strata_do_not_fail(self):
         failures = CENSUS.census_failures(
             blocks=[{"hour": h} for h in range(24)], sampled={1}, missing=set(), unverified=0,
-            decode_errors=0, create_events=1, distinct_mints=1, zero_observed=[])
+            decode_errors=0, create_events=1, distinct_mints=1, zero_observed=[],
+            members_outside_blocks=0)
         self.assertEqual(failures, [])
 
     def test_main_distinguishes_the_two_cases_end_to_end(self):
@@ -632,6 +714,81 @@ class ObservationPowerTests(unittest.TestCase):
         self.assertEqual(report["verdict"], "FAIL")
         self.assertTrue(any("zero retrieved slots" in f for f in report["failures"]),
                         report["failures"])
+
+
+class MembershipContainmentTests(unittest.TestCase):
+    """F12 (Seq 139): a CreateEvent outside every sampled block was silently a cohort member.
+
+    Measured before the fix: 24 clean strata, one member inside a block and one at a slot outside
+    all of them — `CENSUS VERDICT: COMPLETE`, exit 0, `CreateEvents` reported as 2. Membership is
+    the cohort definition, and every downstream figure is computed over `create_event`.
+    """
+
+    def build(self, extra_slot=None):
+        path = pathlib.Path(tempfile.mkdtemp()) / "members.sqlite"
+        connection = B8B.open_database(str(path))
+        for hour in range(24):
+            start = 1000 + hour * 1000
+            connection.execute("INSERT INTO sampled_block VALUES (?,?,?,?,0,240)",
+                               (hour, (27 * hour) % 59, start, start + 2))
+            for slot in (start, start + 1):
+                connection.execute("INSERT INTO slot_scan(slot,status,error,scanned_at_unix) "
+                                   "VALUES (?,'retrieved',NULL,0)", (slot,))
+            self.member(connection, start, hour)
+        if extra_slot is not None:
+            self.member(connection, extra_slot, 999)
+        connection.commit()
+        connection.close()
+        return path
+
+    def member(self, connection, slot, tag):
+        connection.execute(
+            "INSERT INTO create_event(slot,transaction_index,outer_instruction_index,"
+            "inner_instruction_index,signature,mint,bonding_curve,creator,user,is_mayhem_mode,"
+            "is_cashback_enabled,quote_mint,fields_json,event_payload_base64) "
+            "VALUES (?,0,0,0,?,?,?,?,?,0,0,?,'{}','')",
+            (slot, f"SIG{tag}", f"MINT{tag}", f"CURVE{tag}", f"C{tag}", f"C{tag}",
+             CENSUS.SOL_SENTINEL))
+
+    def run_census(self, path):
+        import json
+        import subprocess
+        import sys
+        out = path.with_suffix(".json")
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "b8b_census.py"),
+             "--database", str(path), "--json", str(out)],
+            capture_output=True, text=True, cwd=str(ROOT))
+        return result, json.loads(out.read_text())
+
+    def test_a_cohort_wholly_inside_its_blocks_passes(self):
+        result, report = self.run_census(self.build())
+        self.assertEqual(report["cohort"]["members_outside_blocks"], 0)
+        self.assertEqual(report["verdict"], "COMPLETE", report["failures"])
+        self.assertEqual(result.returncode, 0)
+
+    def test_a_member_outside_every_block_fails_end_to_end(self):
+        """Call-site test as well as a behaviour test: the unit gate above passes even if `main()`
+        never computes the figure, which is the fifth-time-lucky lesson from Seq 137."""
+        result, report = self.run_census(self.build(extra_slot=999_999))
+        self.assertEqual(report["cohort"]["members_outside_blocks"], 1)
+        self.assertIn(999_999, report["cohort"]["slots_outside_blocks"])
+        self.assertEqual(report["verdict"], "FAIL")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue(any("outside every sampled block" in f for f in report["failures"]),
+                        report["failures"])
+
+    def test_a_member_one_slot_past_a_block_end_is_outside(self):
+        """`end_slot_exclusive` is exclusive; an off-by-one here would admit a non-member."""
+        _, report = self.run_census(self.build(extra_slot=1002))   # block 0 is [1000, 1002)
+        self.assertEqual(report["cohort"]["members_outside_blocks"], 1)
+        self.assertEqual(report["verdict"], "FAIL")
+
+    def test_a_member_on_the_last_slot_of_a_block_is_inside(self):
+        """The other side of the same boundary — rejecting this would drop a real member."""
+        _, report = self.run_census(self.build(extra_slot=1001))   # last slot of block 0
+        self.assertEqual(report["cohort"]["members_outside_blocks"], 0)
+        self.assertEqual(report["verdict"], "COMPLETE", report["failures"])
 
 
 

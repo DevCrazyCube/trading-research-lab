@@ -1,7 +1,7 @@
 # B8b — Cohort census
 
 > **STATUS: DRAFT SKELETON — NO RESULTS. The scan is still running and no number below is filled in.**
-> Every `«…»` is an unfilled placeholder. **This document must not be quoted, cited, or treated as a
+> Every token in guillemets is an unfilled placeholder. **This document must not be quoted, cited, or treated as a
 > result in this state.** It exists so that the framing, the limitations and the prohibited
 > inferences are fixed **before** any number can shape them — the same discipline that froze the
 > sample (`B8B_SUBSAMPLING_PREREGISTRATION.md`) and pre-specified the analysis (`b8b_census.py`).
@@ -207,7 +207,7 @@ exactly the way a test can.
 
 ```
 python3 scripts/b8b_cohort_scanner.py            # resumable; partial completion exits FAIL
-python3 scripts/b8b_census.py --json «out».json  # read-only; exits non-zero unless COMPLETE
+python3 scripts/b8b_census.py --json OUT.json    # read-only; exits non-zero unless COMPLETE
 ```
 
 The artifact is self-describing: `metadata` carries the freeze hash, the IDL hash, the rule string,
