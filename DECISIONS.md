@@ -541,3 +541,25 @@ The two do not imply each other. A user-ratified decision can remain provisional
     Freezing the method is free; running it is not, and the second does not follow from the first.
   - A high classification-failure rate is a publishable result. Reporting a partial classification
     as if it were complete is the recurring failure this project has documented twelve times.
+
+## 2026-07-29 — B9d canonical ordering adds 38,853 block lookups; recall claim remains withheld
+
+- **Status:** accepted pre-execution methodology correction; execution still not authorised
+- **Ratified by:** agent audit before any B9d transaction body was fetched
+- **Decision:** B9d cannot derive `transaction_index` from `getTransaction`. It must preserve
+  `getBlock` signature lists for every distinct involved slot and map each frozen signature to one
+  unique zero-based list position. The frozen 94,985-signature population spans **38,853 distinct
+  non-null slots**, so the minimum request count is 133,838 before boundary verification. B9d also
+  freezes the conservative branch for address-index recall: it publishes no exhaustiveness claim;
+  any recall experiment is a separate preregistration, never a sample chosen after bodies are seen.
+- **Reason:** The original freeze required the full canonical key while specifying no evidence
+  source for transaction index, leaving insertion/fetch order as the only implementable fallback —
+  explicitly forbidden by AGENTS.md. Its recall section also left both branch choice and sample
+  size free, so it was not a freeze. Offline B9c re-derivation gives 94,985 signatures, 38,853 slots,
+  and zero null-slot rows without inspecting a transaction body.
+- **Consequence:** B9d's exact request floor is **133,838 calls**, plus boundary verification. The
+  transaction component retains B6j's separate ~10.6-hour estimate. **14.9 hours is only a scenario
+  assuming `getBlock` signatures sustain the `getTransaction` rate**, not a lower bound; block-call
+  throughput and volume are unmeasured. Only transaction-body volume has the prior ~0.95 GB
+  estimate. Owner authorization must cover this corrected scope and endpoint. See the Seq 197 amendment in
+  `research/B9D_TRANSACTION_BODY_PREREGISTRATION.md`.

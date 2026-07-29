@@ -13,6 +13,12 @@ and the B8b cohort at freeze `56d8a83b…8374`
 
 This freeze is written before any transaction body has been fetched or inspected.
 
+**Pre-execution audit amendment (Codex, Seq 197):** §6 originally required
+`transaction_index` while fetching only `getTransaction`, which does not supply that coordinate.
+The amendment below adds preserved block-signature lookups for every involved slot, freezes the
+conservative no-recall-claim branch in §8a, and corrects §10's cost floor. No transaction body had
+been fetched when amended.
+
 ## 1. Independent re-derivation of the population (done before freezing)
 
 The entire B9d scope rests on one number, so it was re-derived from the B9c artifact before this
@@ -104,6 +110,12 @@ That evidence is **not sufficient**, for two reasons that must be stated rather 
 **Frozen requirement.** Before decoding, B9d re-runs the upgrade inventory over
 `[433,894,233, 435,536,742]` for both the Pump program and PumpSwap, preserves the responses, and:
 
+- first decodes each current ProgramData account's last-deploy slot from a preserved
+  `getAccountInfo` response. If that slot is before the observation range, this directly proves no
+  later deployment occurred inside it. If it lies inside or after the range, preserved loader
+  history must classify every candidate needed to prove the exact interval; a recent-first history
+  list that does not cross below the range is incomplete and fails visibly;
+
 - if **no** boundary is found, records that as a preserved, dated result and decodes with one pinned
   IDL revision;
 - if **any** boundary is found, the decoder must be version-aware across it, the boundary slot is
@@ -130,6 +142,10 @@ A new SQLite database, `WAL`, `synchronous=FULL`, holding at least:
 5. `classification_failure` — every unknown discriminator, unparsed instruction, missing field, or
    ambiguity, with enough context to reproduce it. **This table being empty is a result, not a
    precondition.**
+6. `raw_block_signatures` / `transaction_coordinate` — byte-exact preserved `getBlock` signature
+   responses for every distinct involved slot, and the unique mapping from each frozen signature
+   to its zero-based transaction index. Missing signatures, duplicates, or slot disagreement fail
+   visibly.
 
 Each raw response and its derived rows commit in **one** transaction. A completed artifact can never
 be overwritten, even with a reset flag. A partial artifact resumes only after source metadata
@@ -163,12 +179,26 @@ AGENTS.md. **Database insertion order is never used**, and no reserve path may b
 `ROWID`, fetch order, or completion order. Any transaction whose ordering key cannot be fully
 determined is a `classification_failure`, not a row placed by best guess.
 
+`getTransaction` provides the slot but **not** `transaction_index`. B9d therefore fetches and
+preserves `getBlock` with `transactionDetails: "signatures"` for every distinct slot in the frozen
+population, locates each signature's unique list position, and reconciles that slot against the
+transaction response. Offline re-derivation from B9c gives **38,853 distinct non-null slots** for
+the 94,985 signatures (range 433,894,233–435,536,000). B9d asserts those figures before any network
+call. Signature-list retrieval is part of the required population, not an optional enhancement.
+This response-shape claim was checked against the official Solana RPC documentation on 2026-07-29:
+[`getTransaction`](https://solana.com/docs/rpc/http/gettransaction) and
+[`getBlock`](https://solana.com/docs/rpc/http/getblock).
+
 ## 7. Classification rules
 
-- **Every** instruction in a fetched transaction is classified, at outer and inner (CPI) levels, for
-  both the Pump and PumpSwap program ids.
-- An **unknown discriminator fails visibly** and is recorded. It is never dropped, never bucketed as
-  "other", and never inferred from an adjacent event.
+- **Every Pump and PumpSwap instruction** in a fetched transaction is classified at outer and inner
+  (CPI) levels. Every non-target instruction still retains its program id and canonical coordinate;
+  known infrastructure families may receive a pinned classifier, but B9d does not pretend an
+  arbitrary third-party program has a Pump IDL.
+- An **unknown Pump or PumpSwap discriminator fails visibly** and is recorded. It is never dropped,
+  never bucketed as "other", and never inferred from an adjacent event. An unrecognised non-target
+  program id is preserved as a non-target program id and cannot silently be treated as a reserve
+  mutation.
 - **No event-name shortcut.** Decoding only `TradeEvent` and assuming everything else leaves reserves
   untouched is precisely the narrowing B9c refused to authorise. Non-trade instructions can mutate
   relevant state; that must be demonstrated against fetched bodies, not assumed away.
@@ -184,14 +214,12 @@ and regime**, and `PLAN.md` states B7h does not generalise across regimes. Wheth
 captures every transaction touching a curve, including those reaching it through an address lookup
 table, is **an open question for this window.**
 
-Frozen: B9d publishes no exhaustiveness claim without one of —
-(a) a bounded recall check on a **preregistered random sample of slots inside the window**, chosen
-before any body is decoded, full-block decoded and compared bidirectionally against the B9c index,
-with the sample size and its slot list fixed in advance; or
-(b) a prominent, unhedged caveat that curve-history completeness is inherited from a different
-window and unverified here.
-
-Option (a) is preferred and its cost belongs in the §10 authorisation.
+**Frozen resolution:** B9d takes branch (b). It publishes a prominent, unhedged caveat that
+curve-history completeness is inherited from a different window and unverified here, and makes no
+exhaustiveness claim. A recall experiment is a separate future preregistration with its own fixed
+sample size, deterministic slot list, cost, and authorization; it cannot be designed after B9d
+bodies are inspected and retrofitted as support. The earlier wording left both sample size and
+branch choice free and therefore was not actually frozen.
 
 **8b. Reserve paths end at graduation, by construction.** After a curve completes, trading moves to
 a PumpSwap pool whose transactions need not touch the bonding-curve address, so they are absent from
@@ -216,22 +244,29 @@ disjointness against all seven and fail closed.
 
 ## 10. Cost, and the authorisation gate this document does not clear
 
-At B6j's separately measured ~2.5 successful `getTransaction`/s, 94,985 fetches imply roughly
-**10.6 continuous hours** and **~0.95 GB**. That is a cross-run planning estimate, not an endpoint
-guarantee, and it excludes §4's boundary re-verification and §8a's recall sample.
+The exact request floor is **94,985 transaction fetches + 38,853 block-signature fetches = 133,838
+calls**, before boundary verification. B6j separately measured ~2.5 successful
+`getTransaction` calls/s, so the transaction component alone retains its **~10.6-hour** planning
+estimate. If—and only if—the endpoint serves `getBlock` signature calls at the same sustained rate,
+the combined scenario is **~14.9 hours**. `getBlock` throughput and payload size are unmeasured, so
+14.9 hours is not a lower bound or guarantee. Transaction bodies alone retain the rough **0.95 GB**
+estimate; block-signature volume must not be invented. §8a now freezes the no-recall-claim branch,
+so no recall-sample cost is included or implied.
 
 **This is materially larger than anything the project has authorised.** The standing authorisation
 on record (Seq 121) is 4 min/hour for ~6.2 hours, granted for B8b. **B9d execution requires a new,
-explicit owner authorisation** covering duration, endpoint, and the two additional bounded costs
-above. Freezing the method is free; running it is not, and this document deliberately does not
-assume the second follows from the first.
+explicit owner authorisation** covering duration, endpoint, the 38,853 block-signature lookups, and
+the boundary re-verification. Freezing the method is free; running it is not, and this document
+deliberately does not assume the second follows from the first.
 
 ## 11. Publication gates
 
 B9d publishes no result unless: both source SHA-256s matched at start; the population re-derived to
 exactly 94,985; every raw response hash re-verifies; the upgrade-boundary check completed and is
 preserved; every instruction at every nesting level is classified or recorded as a failure;
-canonical ordering is complete for every reserve path; SQLite `integrity_check` is `ok`; a completed
+all **38,853** expected slots have preserved signature lists and every frozen signature maps to one
+unique transaction index; canonical ordering is complete for every reserve path; SQLite
+`integrity_check` is `ok`; a completed
 rerun is byte-immutable and makes zero RPC calls; and no completed source artifact changed hash.
 
 **A high classification-failure rate is a publishable result.** Reporting "97% classified" while
