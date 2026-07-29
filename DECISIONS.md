@@ -579,3 +579,17 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Consequence:** slow-but-real submissions are recorded once instead of retried indefinitely;
   genuinely stuck drafts remain fail-closed. Restarting the watcher is still a controlled host-pane
   operation and must never be inferred from namespace-local PID visibility.
+
+## 2026-07-29 — B9d read-only historical collection authorized
+
+- **Status:** owner-authorized execution decision (agent_discussion Seq 218)
+- **Decision:** Run the frozen B9d workload against the existing credentialed RPC endpoint from the
+  ignored environment: 94,985 `getTransaction` calls, 38,853 `getBlock` signature calls, and the
+  required boundary/preflight evidence. The run is resumable and may take roughly 15 hours; that is
+  a scenario, because block-call throughput was previously unmeasured.
+- **Reason:** The owner explicitly authorized continuing without further approval to finish the
+  project after being shown the exact request floor, endpoint choice, and duration estimate.
+- **Consequence:** Endpoint credentials remain excluded from commands, logs, artifacts, and commits;
+  only a query-free endpoint reference is recorded. This authorizes read-only historical evidence
+  collection only. It does not authorize wallets, signing, transaction submission, spending,
+  deployment, or live/devnet trading, whose PLAN gates remain binding.

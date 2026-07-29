@@ -8,6 +8,7 @@ streams 1.35M rows would move that check into the suite and slow it into disuse.
 import hashlib
 import importlib.util
 import json
+import os
 import pathlib
 import sqlite3
 import tempfile
@@ -692,23 +693,41 @@ class ArtifactTests(unittest.TestCase):
 
 
 class ExecutionGateTests(unittest.TestCase):
-    """§10: the gate must be a hard stop in code, not a sentence in a document."""
+    """§10: authorized collection stays credential-redacting and fail-closed."""
 
-    def test_run_refuses_and_names_the_authorisation_it_lacks(self):
-        with self.assertRaises(SystemExit) as ctx:
-            B9D.main(["run"])
-        message = str(ctx.exception)
-        self.assertIn("NOT authorised", message)
-        self.assertIn("94,985", message)
-        self.assertIn("38,853", message)
-        self.assertIn("133,838", message)
+    def test_run_still_requires_an_endpoint_environment_variable(self):
+        saved = os.environ.pop("B9D_TEST_RPC", None)
+        try:
+            with self.assertRaises(SystemExit) as ctx:
+                B9D.main(["run", "x.sqlite", "--rpc-env", "B9D_TEST_RPC"])
+            self.assertIn("missing RPC endpoint", str(ctx.exception))
+        finally:
+            if saved is not None:
+                os.environ["B9D_TEST_RPC"] = saved
 
-    def test_the_module_issues_no_network_calls_at_all(self):
-        """A scaffold that imports an HTTP client is one edit away from being runnable."""
-        source = (ROOT / "scripts" / "b9d_transaction_bodies.py").read_text()
-        for forbidden in ("urllib.request", "urlopen", "requests.", "http.client", "socket."):
-            self.assertNotIn(forbidden, source,
-                             f"{forbidden} must not appear in the gated scaffold")
+    def test_endpoint_reference_strips_query_credentials(self):
+        self.assertEqual(B9D.endpoint_reference(
+            "https://mainnet.example/rpc?api-key=secret"), "https://mainnet.example/rpc")
+
+    def test_transaction_preflight_requires_every_frozen_meta_field(self):
+        meta = {field: [] for field in B9D.REQUIRED_META_FIELDS}
+        meta.update({"err": None, "fee": 1})
+        result = {"meta": meta, "transaction": ["AAAA", "base64"]}
+        self.assertTrue(B9D.assert_transaction_shape("sig", result))
+        del meta["fee"]
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.assert_transaction_shape("sig", result)
+
+    def test_raw_response_resume_requires_identical_bytes(self):
+        database = sqlite3.connect(":memory:")
+        B9D.schema(database)
+        self.assertTrue(B9D.store_raw(database, "raw_transaction", "signature", "s",
+                                      "getTransaction", ["s"], b"one", received_at=1))
+        self.assertFalse(B9D.store_raw(database, "raw_transaction", "signature", "s",
+                                       "getTransaction", ["s"], b"one", received_at=2))
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.store_raw(database, "raw_transaction", "signature", "s",
+                          "getTransaction", ["s"], b"two", received_at=3)
 
     def test_verify_is_offline_and_init_creates_an_artifact(self):
         directory = pathlib.Path(tempfile.mkdtemp())

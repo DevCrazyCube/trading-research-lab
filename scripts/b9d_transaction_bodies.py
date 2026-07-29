@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""B9d transaction-body reconstruction scaffold — OFFLINE ONLY.
+"""B9d transaction-body reconstruction and resumable evidence collector.
 
 Implements the amended freeze `research/B9D_TRANSACTION_BODY_PREREGISTRATION.md` up to, but not
 including, network execution. Everything here runs with no RPC: source-hash and population
@@ -7,16 +7,22 @@ assertions, the evidence-artifact schema, the signature -> transaction-index map
 because `getTransaction` does not carry that coordinate, canonical instruction keys, unknown-target
 classification, resume, and completed-artifact immutability.
 
-**`run` is deliberately gated closed.** B9d execution is 94,985 transaction fetches plus 38,853
-block-signature fetches and requires an explicit owner authorisation that does not exist. The gate
-is a hard stop in code, not a comment, so the scaffold cannot be started by accident.
+Network execution was explicitly authorised by the owner in `agent_discussion.md` Seq 218. The
+collector remains read-only, resumable, and credential-redacting; it does not sign or submit any
+transaction.
 """
 import argparse
 import hashlib
 import json
+import os
 import sqlite3
 import struct
 import sys
+import time
+import urllib.parse
+import urllib.request
+import urllib.error
+import zlib
 
 # Primary sources. Pinned by hash: a scaffold that silently accepts a different artifact would
 # reproduce the frozen counts against the wrong evidence.
@@ -147,6 +153,35 @@ def frozen_population(b9c_path=B9C_PATH, b9a_path=B9A_PATH, assert_counts=True):
     if assert_counts:
         assert_population(signatures, slots)
     return signatures, slots
+
+
+def frozen_population_by_slot(b9c_path=B9C_PATH, b9a_path=B9A_PATH, assert_counts=True):
+    """Frozen signature population grouped by its B9c slot, with cross-row agreement enforced."""
+    signatures, slots = frozen_population(b9c_path, b9a_path, assert_counts=assert_counts)
+    outcomes = sqlite3.connect(f"file:{b9a_path}?mode=ro", uri=True)
+    try:
+        mayhem = dict(outcomes.execute("SELECT bonding_curve,is_mayhem_mode FROM outcome"))
+    finally:
+        outcomes.close()
+    grouped, signature_slots = {}, {}
+    inventory = sqlite3.connect(f"file:{b9c_path}?mode=ro", uri=True)
+    try:
+        for curve, signature, err_json, slot in inventory.execute(
+                "SELECT bonding_curve,signature,err_json,slot FROM signature_observation "
+                "WHERE time_class='in_window'"):
+            if err_json != "null" or mayhem[curve] != 0:
+                continue
+            previous = signature_slots.setdefault(signature, slot)
+            if previous != slot:
+                raise FreezeViolation(
+                    f"signature {signature} is assigned to slots {previous} and {slot} in B9c")
+    finally:
+        inventory.close()
+    if set(signature_slots) != signatures or set(signature_slots.values()) != slots:
+        raise FreezeViolation("grouped population disagrees with the frozen population")
+    for signature, slot in signature_slots.items():
+        grouped.setdefault(slot, []).append(signature)
+    return {slot: sorted(values) for slot, values in grouped.items()}
 
 
 def assert_population(signatures, slots):
@@ -899,23 +934,188 @@ def classify_instruction(program_id, data, idl_maps):
 
 
 # ---------------------------------------------------------------------------------------------
-# Execution gate (§10)
+# Authorized read-only evidence collection (§10; owner authorization Seq 218)
 # ---------------------------------------------------------------------------------------------
 
-AUTHORISATION_GATE = (
-    "B9d network execution is NOT authorised and this scaffold refuses to start it.\n"
-    f"  Frozen workload: {EXPECTED_SIGNATURES:,} getTransaction + {EXPECTED_SLOTS:,} getBlock "
-    f"signature calls = {EXPECTED_SIGNATURES + EXPECTED_SLOTS:,} requests, before boundary "
-    "verification.\n"
-    "  ~10.6 h for the transaction component at B6j's measured ~2.5 calls/s; getBlock throughput "
-    "is unmeasured, so the combined figure is a scenario, not a lower bound.\n"
-    "  Standing authorisation on record (Seq 121) is 4 min/hour for ~6.2 h, granted for B8b.\n"
-    "  Requires a new explicit owner authorisation covering endpoint and duration. See "
-    "research/B9D_TRANSACTION_BODY_PREREGISTRATION.md §10.")
+def endpoint_reference(endpoint):
+    """Credential-free endpoint identity suitable for artifact metadata."""
+    parsed = urllib.parse.urlsplit(endpoint)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname:
+        raise FreezeViolation("RPC endpoint must be an http(s) URL")
+    port = f":{parsed.port}" if parsed.port else ""
+    return f"{parsed.scheme}://{parsed.hostname}{port}{parsed.path}"
 
 
-def run_gate():
-    raise SystemExit(AUTHORISATION_GATE)
+def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None, retries=8):
+    """Return byte-exact response plus parsed result; RPC errors are fatal and preserved by caller."""
+    request_body = json.dumps({"jsonrpc": "2.0", "id": request_id, "method": method,
+                               "params": params}, separators=(",", ":")).encode()
+    request = urllib.request.Request(endpoint, data=request_body,
+                                     headers={"Content-Type": "application/json"})
+    transport = opener or urllib.request.urlopen
+    for attempt in range(retries + 1):
+        try:
+            with transport(request, timeout=timeout) as response:
+                raw = response.read()
+            break
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as error:
+            retryable = not isinstance(error, urllib.error.HTTPError) or error.code in (
+                408, 429, 500, 502, 503, 504)
+            if not retryable or attempt == retries:
+                raise FreezeViolation(f"{method} transport failed after {attempt + 1} attempt(s): "
+                                      f"{type(error).__name__}") from error
+            headers = getattr(error, "headers", None)
+            retry_after = headers.get("Retry-After") if headers is not None else None
+            delay = float(retry_after) if retry_after and retry_after.isdigit() else min(30, 2 ** attempt)
+            time.sleep(delay)
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise FreezeViolation(f"{method} returned non-JSON bytes: {error}") from error
+    if payload.get("error") is not None:
+        raise FreezeViolation(f"{method} RPC error: {payload['error']}")
+    if "result" not in payload:
+        raise FreezeViolation(f"{method} response lacks result")
+    return raw, payload["result"]
+
+
+def store_raw(database, table, key_column, key, method, params, raw, received_at=None):
+    """Insert one immutable raw response; an existing key must have identical bytes."""
+    digest = hashlib.sha256(raw).hexdigest()
+    existing = database.execute(
+        f"SELECT response_sha256 FROM {table} WHERE {key_column}=?", (key,)).fetchone()
+    if existing:
+        if existing[0] != digest:
+            raise FreezeViolation(f"{table} {key} changed response bytes on resume")
+        return False
+    database.execute(
+        f"INSERT INTO {table} ({key_column},method,params_json,received_at_unix,response_sha256,"
+        "raw_zlib) VALUES (?,?,?,?,?,?)",
+        (key, method, json.dumps(params, separators=(",", ":")), received_at or time.time(),
+         digest, zlib.compress(raw, 6)))
+    return True
+
+
+REQUIRED_META_FIELDS = ("err", "fee", "innerInstructions", "preBalances", "postBalances",
+                        "preTokenBalances", "postTokenBalances", "logMessages")
+
+
+def assert_transaction_shape(signature, result):
+    """Preflight the exact base64 response shape before the main population runs."""
+    if not isinstance(result, dict) or not isinstance(result.get("meta"), dict):
+        raise FreezeViolation(f"{signature}: getTransaction result/meta is absent")
+    missing = [field for field in REQUIRED_META_FIELDS if field not in result["meta"]]
+    if missing:
+        raise FreezeViolation(f"{signature}: getTransaction meta lacks {', '.join(missing)}")
+    transaction = result.get("transaction")
+    if not (isinstance(transaction, list) and len(transaction) == 2 and
+            isinstance(transaction[0], str) and transaction[1] == "base64"):
+        raise FreezeViolation(f"{signature}: transaction is not [base64-bytes,'base64']")
+    return True
+
+
+def initialize_run(database, endpoint, digests):
+    schema(database)
+    refuse_if_complete(database)
+    assert_resumable(database, digests)
+    record_decoder_manifest(database, decoder_manifest())
+    values = {"b9c_sha256": next((v for k, v in digests.items() if v == B9C_SHA256), B9C_SHA256),
+              "b9a_sha256": next((v for k, v in digests.items() if v == B9A_SHA256), B9A_SHA256),
+              "endpoint_reference": endpoint_reference(endpoint),
+              "authorization_seq": "218", "schema_version": SCHEMA_VERSION,
+              "cutoff_slot": str(CUTOFF_SLOT)}
+    present = dict(database.execute("SELECT key,value FROM metadata"))
+    for key, value in values.items():
+        if key in present and present[key] != value:
+            raise FreezeViolation(f"run metadata drift for {key}")
+        database.execute("INSERT OR IGNORE INTO metadata VALUES (?,?)", (key, value))
+    database.execute("INSERT OR IGNORE INTO metadata VALUES ('started_at_unix',?)",
+                     (str(time.time()),))
+    database.commit()
+
+
+def collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
+                           max_slots=None, max_transactions=None, progress_every=100,
+                           calls_per_second=2.5):
+    """Resumably preserve block coordinates and transaction response bodies; no decoding yet."""
+    digests = assert_sources(b9c_path, b9a_path)
+    grouped = frozen_population_by_slot(b9c_path, b9a_path)
+    database = connect(output)
+    try:
+        initialize_run(database, endpoint, digests)
+        if calls_per_second <= 0:
+            raise FreezeViolation("calls_per_second must be positive")
+        minimum_interval = 1.0 / calls_per_second
+        last_call = [None]
+
+        def paced_request(method, params, request_id):
+            if last_call[0] is not None:
+                remaining = minimum_interval - (time.monotonic() - last_call[0])
+                if remaining > 0:
+                    time.sleep(remaining)
+            raw_result = rpc_request(endpoint, method, params, request_id=request_id)
+            last_call[0] = time.monotonic()
+            return raw_result
+
+        done_blocks = {row[0] for row in database.execute("SELECT slot FROM raw_block_signatures")}
+        block_count = 0
+        for slot in sorted(grouped):
+            if slot in done_blocks:
+                continue
+            if max_slots is not None and block_count >= max_slots:
+                break
+            params = [slot, {"commitment": "finalized", "transactionDetails": "signatures",
+                             "rewards": False, "maxSupportedTransactionVersion": 0}]
+            raw, result = paced_request("getBlock", params, request_id=slot)
+            if not isinstance(result, dict) or not isinstance(result.get("signatures"), list):
+                raise FreezeViolation(f"slot {slot}: getBlock lacks a signatures list")
+            coordinates = transaction_coordinates(slot, result["signatures"], grouped[slot])
+            with database:
+                store_raw(database, "raw_block_signatures", "slot", slot, "getBlock", params, raw)
+                database.executemany(
+                    "INSERT OR IGNORE INTO transaction_coordinate VALUES (?,?,?)",
+                    [(signature, slot, index) for signature, index in coordinates.items()])
+            block_count += 1
+            if progress_every and block_count % progress_every == 0:
+                print(f"blocks +{block_count}; latest slot {slot}", flush=True)
+
+        coordinates = list(database.execute(
+            "SELECT signature,slot FROM transaction_coordinate ORDER BY slot,transaction_index"))
+        done_transactions = {row[0] for row in database.execute("SELECT signature FROM raw_transaction")}
+        transaction_count = 0
+        preflight_done = database.execute(
+            "SELECT value FROM metadata WHERE key='transaction_shape_preflight' ").fetchone()
+        for signature, slot in coordinates:
+            if signature in done_transactions:
+                continue
+            if max_transactions is not None and transaction_count >= max_transactions:
+                break
+            params = [signature, {"encoding": "base64", "commitment": "finalized",
+                                  "maxSupportedTransactionVersion": 0}]
+            raw, result = paced_request("getTransaction", params, transaction_count + 1)
+            if result is None:
+                raise FreezeViolation(f"{signature}: finalized getTransaction returned null")
+            if not preflight_done:
+                assert_transaction_shape(signature, result)
+            reconcile_slot(signature, slot, result.get("slot"))
+            with database:
+                store_raw(database, "raw_transaction", "signature", signature,
+                          "getTransaction", params, raw)
+                if not preflight_done:
+                    database.execute(
+                        "INSERT INTO metadata VALUES ('transaction_shape_preflight',?)",
+                        (signature,))
+                    preflight_done = (signature,)
+            transaction_count += 1
+            if progress_every and transaction_count % progress_every == 0:
+                print(f"transactions +{transaction_count}; latest slot {slot}", flush=True)
+        return {"blocks_added": block_count, "transactions_added": transaction_count,
+                "blocks_total": database.execute(
+                    "SELECT count(*) FROM raw_block_signatures").fetchone()[0],
+                "transactions_total": database.execute(
+                    "SELECT count(*) FROM raw_transaction").fetchone()[0]}
+    finally:
+        database.close()
 
 
 def main(argv=None):
@@ -926,7 +1126,13 @@ def main(argv=None):
     verify.add_argument("--b9a", default=B9A_PATH)
     init = sub.add_parser("init", help="offline: create the evidence artifact schema")
     init.add_argument("path")
-    sub.add_parser("run", help="GATED: requires explicit owner authorisation")
+    run = sub.add_parser("run", help="authorized read-only resumable raw evidence collection")
+    run.add_argument("output")
+    run.add_argument("--rpc-env", default="SOLANA_RPC_URL")
+    run.add_argument("--max-slots", type=int)
+    run.add_argument("--max-transactions", type=int)
+    run.add_argument("--progress-every", type=int, default=100)
+    run.add_argument("--calls-per-second", type=float, default=2.5)
 
     args = parser.parse_args(argv)
     if args.command == "verify":
@@ -953,7 +1159,15 @@ def main(argv=None):
             database.close()
         print(f"initialised {SCHEMA_VERSION} artifact at {args.path}")
         return 0
-    run_gate()
+    endpoint = os.environ.get(args.rpc_env)
+    if not endpoint:
+        raise SystemExit(f"missing RPC endpoint environment variable {args.rpc_env}")
+    result = collect_raw_population(
+        endpoint, args.output, max_slots=args.max_slots,
+        max_transactions=args.max_transactions, progress_every=args.progress_every,
+        calls_per_second=args.calls_per_second)
+    print(json.dumps(result, sort_keys=True))
+    return 0
 
 
 if __name__ == "__main__":

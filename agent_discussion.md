@@ -6294,6 +6294,46 @@ requests.
 Gates preserved: read-only; no chain RPC, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
 
+## 2026-07-29 — Codex — Claiming authorized B9d historical RPC execution path
+
+- **Seq:** 218
+- **Status:** claiming; read-only historical RPC now explicitly authorized
+- **Authorization:** owner explicitly authorized continuing without further approval to reach the
+  project goal. Codex binds this to B9d's frozen read-only workload: at least 94,985
+  `getTransaction` plus 38,853 `getBlock` calls and required boundary/preflight calls, using the
+  existing credentialed endpoint from ignored environment configuration for the approximately
+  15-hour scenario. Credentials must never enter commands, logs, artifacts, or commits.
+- **Files/area claimed:** B9d runner, tests, decision/authorization record, and its new resumable
+  evidence artifact only. Live trading, signing, wallets, spending, and deployment remain outside
+  authorization and gated by `PLAN.md`.
+- **Proposal:** replace the hard execution stub with a fail-closed resumable RPC collector matching
+  the preregistration, prove response shape on a small deterministic preflight, preserve raw bodies
+  and canonical block coordinates transactionally, then launch the full run with visible progress.
+- **Requested action:** none unless the frozen evidence itself contradicts its preconditions.
+
+## 2026-07-29 — Codex — B9d collector launched; implementation released, evidence run active
+
+- **Seq:** 219
+- **Status:** implementation verified and **RELEASED**; authorized collection ACTIVE
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`, focused tests, and authorization
+  decision. The growing ignored `research/b9d_transaction_bodies.sqlite` remains owned by the
+  active collector and must not be edited, moved, vacuumed, or opened writable by another process.
+- **Authorization binding:** read-only historical Helius RPC via ignored `SOLANA_RPC_URL`, paced at
+  2.5 calls/s, approximately 15-hour scenario. Endpoint query credentials are absent from commands,
+  output, artifact metadata, and Git. No signing or transaction submission exists in this path.
+- **Preflight evidence:** one real `getBlock` at slot 433,894,233 preserved four unique canonical
+  coordinates; one real finalized base64 `getTransaction` passed every frozen meta-field and slot
+  check. Artifact metadata records only `https://mainnet.helius-rpc.com/` and authorization Seq 218.
+- **Active evidence:** persistent execution session 58603 reached **100 preserved blocks**, latest
+  slot 433,894,521, without a failure. It resumes from the preflight rows and reports every 100.
+- **Verification:** focused B9d suite **78 passed**; full unrestricted suite **391 passed**;
+  `py_compile` and `git diff --check` pass. The sandbox-only full run had five loopback socket
+  failures imposed below Python; rerunning outside that restriction was clean.
+- **Requested action:** monitor the artifact counts and collector session; do not launch a second
+  collector. On completion, verify all 38,853 blocks, 94,985 transactions, raw hashes, coordinates,
+  boundary evidence, classification accounting, and only then mark the artifact complete.
+- **Gates preserved:** no live/devnet trading, signing, wallets, spending, deployment, or secrets.
+
 ## 2026-07-29 — Codex — Claiming busy-marker edge fix and approved commit
 
 - **Seq:** 215
