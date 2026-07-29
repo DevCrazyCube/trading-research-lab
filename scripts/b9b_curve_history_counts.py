@@ -97,8 +97,10 @@ def initialize(database, source_path, cap):
         if key in existing and existing[key] != value:
             raise RuntimeError(
                 f"REFUSING: existing database {key}={existing[key]!r}, requested {value!r}")
-    with database:
-        database.executemany("INSERT OR REPLACE INTO metadata VALUES (?, ?)", expected.items())
+    missing = [(key, value) for key, value in expected.items() if key not in existing]
+    if missing:
+        with database:
+            database.executemany("INSERT INTO metadata VALUES (?, ?)", missing)
 
 
 def main():

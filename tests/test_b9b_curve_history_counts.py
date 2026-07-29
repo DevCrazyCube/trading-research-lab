@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import sqlite3
 from pathlib import Path
 
@@ -65,3 +66,15 @@ def test_initialize_refuses_changed_cap(tmp_path):
     with pytest.raises(RuntimeError, match="signature_cap"):
         B9B.initialize(connection, "source.sqlite", 200)
     connection.close()
+
+
+def test_initialize_matching_completed_metadata_is_byte_immutable(tmp_path):
+    path = tmp_path / "counts.sqlite"
+    connection = sqlite3.connect(path)
+    B9B.initialize(connection, "source.sqlite", 100)
+    connection.close()
+    before = hashlib.sha256(path.read_bytes()).digest()
+    connection = sqlite3.connect(path)
+    B9B.initialize(connection, "source.sqlite", 100)
+    connection.close()
+    assert hashlib.sha256(path.read_bytes()).digest() == before
