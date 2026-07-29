@@ -372,6 +372,48 @@ class SendGuardTests(unittest.TestCase):
         DASH.send("codex", "handoff")
         self.assertEqual(len([c for c in self.calls if c[0] == "state"]), 1)
 
+    def test_a_slowly_accepted_submission_counts_as_delivered_when_turn_starts(self):
+        """The live Seq-208 race: text survives one redraw, then Claude starts the turn."""
+        message = "Read the latest handoff in agent_discussion.md and continue"
+        snapshots = [f"❯ {message}",
+                     f"❯ {message}\n⏵⏵ auto mode on · {DASH.BUSY_MARKER}"]
+
+        def fake(*args, capture=False, check=True):
+            if args[0] == "display-message":
+                return "claude"
+            if args[0] == "capture-pane":
+                return snapshots.pop(0) if len(snapshots) > 1 else snapshots[0]
+            self.calls.append(("tmux", args))
+            return 0
+
+        DASH.tmux = fake
+        DASH.send("codex", message)
+        self.assertEqual(len([c for c in self.calls if c[0] == "state"]), 1)
+
+    def test_preexisting_busy_marker_cannot_prove_the_new_message_was_submitted(self):
+        """A level-triggered marker from the old turn is not an acceptance edge for ours."""
+        message = "Read the latest handoff in agent_discussion.md and continue"
+        saved = DASH.wait_for_idle
+        DASH.wait_for_idle = lambda pane: False
+        self.addCleanup(lambda: setattr(DASH, "wait_for_idle", saved))
+        snapshots = [f"❯ \n⏵⏵ auto mode on · {DASH.BUSY_MARKER}",
+                     f"❯ {message}\n⏵⏵ auto mode on · {DASH.BUSY_MARKER}"]
+
+        def fake(*args, capture=False, check=True):
+            if args[0] == "display-message":
+                return "claude"
+            if args[0] == "capture-pane":
+                return snapshots.pop(0) if len(snapshots) > 1 else snapshots[0]
+            self.calls.append(("tmux", args))
+            return 0
+
+        DASH.tmux = fake
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.send("codex", message)
+        self.assertIn("NOT submitted", str(ctx.exception))
+        self.assertEqual([c for c in self.calls if c[0] == "state"], [],
+                         "pre-existing busy state must not consume the handoff sequence")
+
     def test_someone_elses_draft_text_is_not_mistaken_for_ours(self):
         """A composer holding unrelated text must not fail the send - it is not our message."""
         DASH.tmux = self._tmux_with_command("claude", pane_text="❯ some unrelated draft")
@@ -924,17 +966,18 @@ class PendingComposerTests(IsolatedDashboard):
     def arrange(self, pending, idle):
         self.sent = []
         self.saved = (DASH.tmux, DASH.pane_id, DASH.pane_command,
-                      DASH.wait_for_idle, DASH.composer_text)
+                      DASH.wait_for_idle, DASH.composer_text, DASH.pane_text)
         DASH.tmux = lambda *a, **k: self.sent.append(a) or 0
         DASH.pane_id = lambda agent: "%9"
         DASH.pane_command = lambda pane: "claude"
         DASH.wait_for_idle = lambda pane: idle
         DASH.composer_text = lambda pane: pending
+        DASH.pane_text = lambda pane: f"❯ {pending}"
         self.addCleanup(self.restore)
 
     def restore(self):
         (DASH.tmux, DASH.pane_id, DASH.pane_command,
-         DASH.wait_for_idle, DASH.composer_text) = self.saved
+         DASH.wait_for_idle, DASH.composer_text, DASH.pane_text) = self.saved
 
     def test_a_pending_draft_of_ours_is_submitted_not_retyped(self):
         message = "Read the latest handoff in agent_discussion.md and continue the work."

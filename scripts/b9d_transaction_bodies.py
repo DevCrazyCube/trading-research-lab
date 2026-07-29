@@ -211,6 +211,31 @@ def schema(database):
             FOREIGN KEY(slot) REFERENCES raw_block_signatures(slot)
         );
 
+        -- §4 upgrade-boundary re-verification. B0's inventory stops ~2h before the cutoff slot's
+        -- block time and its ProgramData history has unverified archival completeness, so coverage
+        -- of the observation range is a measurement this artifact must carry, not an assumption.
+        CREATE TABLE IF NOT EXISTS raw_boundary_response (
+            request_key TEXT PRIMARY KEY,
+            program_id TEXT NOT NULL,
+            method TEXT NOT NULL,
+            params_json TEXT NOT NULL,
+            received_at_unix REAL NOT NULL,
+            response_sha256 TEXT NOT NULL,
+            raw_zlib BLOB NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS program_version (
+            program_id TEXT NOT NULL,
+            from_slot INTEGER NOT NULL,          -- inclusive
+            to_slot INTEGER NOT NULL,            -- inclusive
+            idl_path TEXT,                       -- NULL only for a KNOWN-UNCOVERED interval
+            idl_sha256 TEXT,
+            deploy_slot INTEGER,                 -- the deployment that opened this interval
+            evidence_key TEXT,                   -- -> raw_boundary_response.request_key
+            coverage TEXT NOT NULL CHECK(coverage IN ('covered','uncovered')),
+            PRIMARY KEY(program_id, from_slot),
+            CHECK(to_slot >= from_slot)
+        );
+
         -- §6 canonical order. Never ROWID, fetch order, or completion order.
         CREATE TABLE IF NOT EXISTS instruction (
             slot INTEGER NOT NULL,
@@ -324,6 +349,161 @@ def transaction_coordinates(slot, block_signatures, wanted):
             f"slot {slot} signature list is missing {len(missing)} expected signature(s), "
             f"first {missing[0]}; the block does not contain a transaction B9c indexed to it")
     return {signature: seen[signature] for signature in wanted}
+
+
+# ---------------------------------------------------------------------------------------------
+# §4 upgrade-boundary coverage and the fail-closed version map
+# ---------------------------------------------------------------------------------------------
+
+# The freeze's range: earliest B8b launch slot through the ratified cutoff slot. Note this is wider
+# than SLOT_MAX (435,536,000), which is only the newest slot the population happens to occupy.
+CUTOFF_SLOT = 435_536_742
+OBSERVATION_RANGE = (SLOT_MIN, CUTOFF_SLOT)
+
+
+def validate_intervals(program_id, intervals):
+    """Sort and check one program's version intervals; refuse anything ambiguous.
+
+    A `covered` interval must name the pinned revision and the preserved evidence that established
+    it. An `uncovered` interval must NOT name a revision — otherwise a gap in the evidence could sit
+    in the table looking exactly like a decodable interval.
+    """
+    ordered = sorted(intervals, key=lambda row: (row["from_slot"], row["to_slot"]))
+    previous = None
+    for row in ordered:
+        if row["to_slot"] < row["from_slot"]:
+            raise FreezeViolation(
+                f"{program_id}: interval {row['from_slot']}..{row['to_slot']} is inverted")
+        if previous is not None and row["from_slot"] <= previous["to_slot"]:
+            raise FreezeViolation(
+                f"{program_id}: intervals {previous['from_slot']}..{previous['to_slot']} and "
+                f"{row['from_slot']}..{row['to_slot']} overlap; a slot would resolve to two "
+                "interfaces")
+        if row["coverage"] == "covered":
+            missing = [field for field in ("idl_path", "idl_sha256", "evidence_key")
+                       if not row.get(field)]
+            if missing:
+                raise FreezeViolation(
+                    f"{program_id}: interval {row['from_slot']}..{row['to_slot']} claims coverage "
+                    f"without {', '.join(missing)}; a pin needs a revision and its evidence")
+        elif row["coverage"] == "uncovered":
+            if row.get("idl_path") or row.get("idl_sha256"):
+                raise FreezeViolation(
+                    f"{program_id}: interval {row['from_slot']}..{row['to_slot']} is uncovered but "
+                    "names a revision; an evidence gap must not look decodable")
+        else:
+            raise FreezeViolation(f"{program_id}: unknown coverage {row['coverage']!r}")
+        previous = row
+    return ordered
+
+
+def coverage_gaps(intervals, span=OBSERVATION_RANGE):
+    """Sub-ranges of `span` that no interval covers at all. Empty means fully tiled."""
+    low, high = span
+    gaps, cursor = [], low
+    for row in sorted(intervals, key=lambda r: r["from_slot"]):
+        if row["to_slot"] < low or row["from_slot"] > high:
+            continue
+        if row["from_slot"] > cursor:
+            gaps.append((cursor, row["from_slot"] - 1))
+        cursor = max(cursor, row["to_slot"] + 1)
+        if cursor > high:
+            break
+    if cursor <= high:
+        gaps.append((cursor, high))
+    return gaps
+
+
+def assert_boundary_coverage(program_id, intervals, span=OBSERVATION_RANGE):
+    """§4: the observation range must be fully tiled by intervals that are all `covered`.
+
+    Called before decoding. B0 put the last Pump deploy 798,662 slots before the window opens, but
+    B0 ran ~2 h before the cutoff slot's block time and its ProgramData history has unverified
+    archival completeness — so this is a check the artifact performs, never a fact it inherits.
+    """
+    ordered = validate_intervals(program_id, intervals)
+    gaps = coverage_gaps(ordered, span)
+    if gaps:
+        rendered = ", ".join(f"{low:,}..{high:,}" for low, high in gaps)
+        raise FreezeViolation(
+            f"{program_id}: no boundary evidence covers slot range(s) {rendered} inside the "
+            f"observation range {span[0]:,}..{span[1]:,}; refusing to decode an interval whose "
+            "interface was never established")
+    uncovered = [row for row in ordered if row["coverage"] == "uncovered"
+                 and row["to_slot"] >= span[0] and row["from_slot"] <= span[1]]
+    if uncovered:
+        rendered = ", ".join(f"{row['from_slot']:,}..{row['to_slot']:,}" for row in uncovered)
+        raise FreezeViolation(
+            f"{program_id}: interval(s) {rendered} overlap the observation range with no pinned "
+            "revision. A boundary exists inside the range, so §4 requires a version-aware decoder "
+            "with a revision pinned per interval before any transaction is decoded.")
+    return ordered
+
+
+def resolve_version(program_id, slot, intervals):
+    """The pinned revision in force at `slot`, or a hard stop. Never a nearest-neighbour guess."""
+    for row in validate_intervals(program_id, intervals):
+        if row["from_slot"] <= slot <= row["to_slot"]:
+            if row["coverage"] != "covered":
+                raise FreezeViolation(
+                    f"{program_id}: slot {slot:,} falls in an uncovered interval "
+                    f"{row['from_slot']:,}..{row['to_slot']:,}; refusing to decode it")
+            return row
+    raise FreezeViolation(
+        f"{program_id}: no version interval contains slot {slot:,}; refusing to attribute it to "
+        "the nearest pinned revision")
+
+
+def intervals_from_boundary_evidence(program_id, last_deploy_slot, in_range_deploys,
+                                     idl_path, idl_sha256, evidence_key,
+                                     history_complete=False, span=OBSERVATION_RANGE):
+    """Turn preserved boundary evidence into version intervals, conservatively.
+
+    The one case that yields a covered range is the freeze's own argument: if the **current**
+    ProgramData last-deploy slot is at or before the range start, then since it is the most recent
+    deployment that ever happened, no deployment occurred inside the range. Current account state
+    alone proves it and no history list is needed.
+
+    Every other case yields `uncovered`. If the last deploy is *after* the range, the build running
+    during the range was an earlier one, and a single IDL revision retrieved today cannot be
+    attributed to it without further evidence — even when no boundary sits inside the range itself.
+    That is deliberately conservative: the failure mode being avoided is decoding 94,985
+    transactions against an interface that was not in force.
+    """
+    low, high = span
+    outside = [slot for slot in in_range_deploys if not low <= slot <= high]
+    if outside:
+        raise FreezeViolation(
+            f"{program_id}: deploy slot(s) {outside} were supplied as in-range but fall outside "
+            f"{low:,}..{high:,}")
+
+    if last_deploy_slot <= low:
+        if in_range_deploys:
+            raise FreezeViolation(
+                f"{program_id}: current last-deploy slot {last_deploy_slot:,} is at or before the "
+                f"range start, which contradicts the in-range deploy(s) {sorted(in_range_deploys)}; "
+                "refusing to reconcile contradictory boundary evidence")
+        return [{"program_id": program_id, "from_slot": low, "to_slot": high,
+                 "idl_path": idl_path, "idl_sha256": idl_sha256,
+                 "deploy_slot": last_deploy_slot, "evidence_key": evidence_key,
+                 "coverage": "covered"}]
+
+    if not history_complete:
+        raise FreezeViolation(
+            f"{program_id}: current last-deploy slot {last_deploy_slot:,} is after the range start "
+            f"{low:,}, so current account state cannot prove the range's interface. Preserved "
+            "loader history crossing below the range is required, and it was not marked complete.")
+
+    edges = sorted(set(in_range_deploys))
+    intervals, cursor = [], low
+    for edge in edges + [high + 1]:
+        if edge > cursor:
+            intervals.append({"program_id": program_id, "from_slot": cursor,
+                              "to_slot": min(edge - 1, high), "idl_path": None,
+                              "idl_sha256": None, "deploy_slot": None,
+                              "evidence_key": evidence_key, "coverage": "uncovered"})
+        cursor = edge
+    return intervals
 
 
 def reconcile_slot(signature, coordinate_slot, transaction_slot):
@@ -577,6 +757,64 @@ def reserve_after_from_event(name, fields):
     if missing:
         raise FreezeViolation(f"TradeEvent lacks reserve field(s): {', '.join(missing)}")
     return {field: fields[field] for field in required}
+
+
+RESERVE_STATE_ACCOUNTS = {
+    PUMP_PROGRAM: frozenset({"bonding_curve", "associated_bonding_curve"}),
+    PUMPSWAP_PROGRAM: frozenset({
+        "pool", "pool_base_token_account", "pool_quote_token_account",
+    }),
+}
+
+
+def reserve_mutation_candidates(program_id, idl):
+    """Derive instructions that *may* mutate reserve-bearing state from the pinned IDL.
+
+    This is deliberately a candidate set, not a claim about runtime behaviour. An instruction is
+    included when the official IDL marks a curve/pool state account or pool vault writable. The
+    transaction's decoded accounts and balance/state evidence must still prove the transition.
+    Read-only access is not promoted to a mutation, and an event's absence never clears a writable
+    candidate: §7 explicitly forbids the `TradeEvent`-only shortcut.
+    """
+    if program_id not in RESERVE_STATE_ACCOUNTS:
+        raise FreezeViolation(f"no reserve-state account contract for {program_id}")
+    roles = RESERVE_STATE_ACCOUNTS[program_id]
+    candidates = {}
+    for instruction in idl.get("instructions", []):
+        writable_roles = sorted({
+            account["name"] for account in flatten_accounts(instruction.get("accounts", []))
+            if account.get("name") in roles and account.get("writable") is True
+        })
+        if writable_roles:
+            candidates[instruction["name"]] = tuple(writable_roles)
+    if not candidates:
+        raise FreezeViolation(f"pinned IDL for {program_id} has no writable reserve-state roles")
+    return candidates
+
+
+def reserve_extraction_plan(program_id, instruction_name, candidate_maps):
+    """Return the fail-closed evidence obligation for one classified target instruction.
+
+    `TradeEvent` can provide an exact post-state projection for trades, but transaction/account
+    reconciliation remains mandatory. Other writable candidates are not guessed unchanged; they
+    remain explicitly unresolved until body evidence supplies their transition.
+    """
+    if program_id not in TARGET_PROGRAMS:
+        raise FreezeViolation(f"reserve extraction requested for non-target program {program_id}")
+    if program_id not in candidate_maps:
+        raise FreezeViolation(f"reserve candidate map missing target program {program_id}")
+    roles = candidate_maps[program_id].get(instruction_name)
+    if roles is None:
+        return {"candidate": False, "writable_roles": (), "event_projection": None,
+                "reconciliation_required": False}
+    trade_names = {
+        PUMP_PROGRAM: {"buy", "buy_exact_sol_in", "buy_v2", "buy_exact_quote_in_v2",
+                       "sell", "sell_v2"},
+        PUMPSWAP_PROGRAM: {"buy", "buy_exact_quote_in", "sell"},
+    }
+    projection = "TradeEvent" if instruction_name in trade_names[program_id] else None
+    return {"candidate": True, "writable_roles": roles, "event_projection": projection,
+            "reconciliation_required": True}
 
 
 def decoder_manifest(pump_path=PUMP_IDL_PATH, pumpswap_path=PUMPSWAP_IDL_PATH):

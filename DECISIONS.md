@@ -563,3 +563,19 @@ The two do not imply each other. A user-ratified decision can remain provisional
   throughput and volume are unmeasured. Only transaction-body volume has the prior ~0.95 GB
   estimate. Owner authorization must cover this corrected scope and endpoint. See the Seq 197 amendment in
   `research/B9D_TRANSACTION_BODY_PREREGISTRATION.md`.
+
+## 2026-07-29 — Handoff submission uses bounded TUI acceptance polling
+
+- **Status:** accepted collaboration-infrastructure correction
+- **Decision:** After pressing Enter, the dashboard polls for up to five seconds and accepts either
+  composer clearance or the agent TUI's busy marker as proof that the turn started. A draft that
+  remains after the bounded window still fails visibly and leaves the handoff sequence unconsumed.
+  Supervisor liveness is verified from the host control pane's job table; sandbox `/proc` and
+  `os.kill` checks are not valid for host PIDs across namespace boundaries.
+- **Reason:** PID 285256 was alive in the authoritative control-pane `jobs -l`, disproving the
+  sandbox PID diagnosis in Seq 208. The real log showed accepted handoffs being reported as
+  pending because a single check after 0.6 seconds raced Claude Code's composer redraw. The target
+  pane subsequently showed the handoff in its transcript and an active turn.
+- **Consequence:** slow-but-real submissions are recorded once instead of retried indefinitely;
+  genuinely stuck drafts remain fail-closed. Restarting the watcher is still a controlled host-pane
+  operation and must never be inferred from namespace-local PID visibility.

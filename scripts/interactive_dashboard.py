@@ -252,7 +252,8 @@ def send_line(pane, text):
 
 
 BUSY_MARKER = "esc to interrupt"
-SUBMIT_SETTLE = 0.6        # let the TUI redraw before reading the composer back
+SUBMIT_POLL = 0.2          # TUI acceptance/redraw is asynchronous
+SUBMIT_POLLS = 25          # five-second bounded post-condition window
 PENDING_MATCH = 24         # prefix long enough to be ours, short enough to survive wrapping
 INTERRUPT_TIMEOUT = 20.0
 COMPOSER_PROMPTS = ("❯", "›")   # Claude Code, Codex — different applications, different glyphs
@@ -291,12 +292,7 @@ def composer_text(pane):
     for the only caller, which asks whether a prefix of what sits here appears in the message it
     is trying to deliver; a placeholder never does.
     """
-    for line in reversed(pane_text(pane).splitlines()):
-        stripped = line.strip()
-        for prompt in COMPOSER_PROMPTS:
-            if stripped.startswith(prompt):
-                return stripped[len(prompt):].replace(NBSP, " ").strip()
-    return ""
+    return composer_text_from_text(pane_text(pane))
 
 
 def wait_for_idle(pane, timeout=180.0, poll=0.5):
@@ -312,6 +308,36 @@ def wait_for_idle(pane, timeout=180.0, poll=0.5):
             return False
         time.sleep(poll)
     return True
+
+
+def wait_for_submission(pane, message, trust_busy_marker):
+    """Wait for the draft to clear or the TUI to begin the submitted turn.
+
+    Claude Code may leave submitted text visible in the composer for longer than one redraw. A
+    one-shot 0.6 s read therefore reported accepted handoffs as pending. The busy marker is an
+    equally strong acceptance signal: once the agent starts the turn, the message was submitted.
+    """
+    pending = ""
+    for attempt in range(SUBMIT_POLLS):
+        text = pane_text(pane)
+        if trust_busy_marker and BUSY_MARKER in text:
+            return True, ""
+        pending = composer_text_from_text(text)
+        if not pending or pending[:PENDING_MATCH] not in message:
+            return True, pending
+        if attempt + 1 < SUBMIT_POLLS:
+            time.sleep(SUBMIT_POLL)
+    return False, pending
+
+
+def composer_text_from_text(text):
+    """Parse composer content from one captured pane snapshot."""
+    for line in reversed(text.splitlines()):
+        stripped = line.strip()
+        for prompt in COMPOSER_PROMPTS:
+            if stripped.startswith(prompt):
+                return stripped[len(prompt):].replace(NBSP, " ").strip()
+    return ""
 
 
 def send(agent, message):
@@ -364,11 +390,10 @@ def send(agent, message):
         tmux("send-keys", "-t", target, "-l", message)
         tmux("send-keys", "-t", target, "Enter")
 
-    # Verify rather than assume. This is the load-bearing check: `wait_for_idle` only avoids the
-    # failure, and a predictor can be wrong in ways a post-condition cannot.
-    time.sleep(SUBMIT_SETTLE)
-    pending = composer_text(target)
-    if pending and pending[:PENDING_MATCH] in message:
+    # Verify rather than assume. Acceptance and TUI redraw are asynchronous, so poll for either
+    # composer clearance or the busy marker instead of declaring failure after one fixed sleep.
+    submitted, pending = wait_for_submission(target, message, trust_busy_marker=idle)
+    if not submitted:
         raise RuntimeError(
             f"handoff to {agent!r} was typed into pane {target} but NOT submitted — it is still "
             f"sitting in the composer ({pending[:60]!r}...). The agent was "

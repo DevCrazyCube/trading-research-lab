@@ -140,6 +140,162 @@ class SourceHashTests(unittest.TestCase):
                          hashlib.sha256(blob.read_bytes()).hexdigest())
 
 
+class BoundaryCoverageTests(unittest.TestCase):
+    """§4: interface coverage over the observation range is measured, never inherited.
+
+    B0 puts the last Pump deploy 798,662 slots before the window opens, but B0 ran ~2 h before the
+    cutoff slot's block time and its ProgramData history has unverified archival completeness. So
+    the artifact carries the check.
+    """
+
+    PROGRAM = "TestProgram1111111111111111111111111111111"
+
+    def covered(self, low, high, **overrides):
+        row = {"program_id": self.PROGRAM, "from_slot": low, "to_slot": high,
+               "idl_path": "research/x.json", "idl_sha256": "a" * 64,
+               "deploy_slot": low - 1, "evidence_key": "getAccountInfo:1",
+               "coverage": "covered"}
+        row.update(overrides)
+        return row
+
+    def test_the_frozen_range_is_the_freeze_range_not_the_population_range(self):
+        """SLOT_MAX is only the newest slot the population occupies; the range runs to the cutoff."""
+        self.assertEqual(B9D.OBSERVATION_RANGE, (433_894_233, 435_536_742))
+        self.assertEqual(B9D.CUTOFF_SLOT, 435_536_742)
+        self.assertGreater(B9D.CUTOFF_SLOT, B9D.SLOT_MAX)
+
+    def test_a_fully_tiled_covered_range_passes(self):
+        low, high = B9D.OBSERVATION_RANGE
+        rows = B9D.assert_boundary_coverage(self.PROGRAM, [self.covered(low, high)])
+        self.assertEqual(len(rows), 1)
+
+    def test_a_gap_inside_the_range_is_refused_and_named(self):
+        low, high = B9D.OBSERVATION_RANGE
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.assert_boundary_coverage(
+                self.PROGRAM, [self.covered(low, high - 100)])
+        self.assertIn("no boundary evidence covers", str(ctx.exception))
+        self.assertIn(f"{high - 99:,}", str(ctx.exception))
+
+    def test_an_uncovered_interval_overlapping_the_range_is_refused(self):
+        low, high = B9D.OBSERVATION_RANGE
+        rows = [self.covered(low, low + 10),
+                {"program_id": self.PROGRAM, "from_slot": low + 11, "to_slot": high,
+                 "idl_path": None, "idl_sha256": None, "deploy_slot": None,
+                 "evidence_key": "k", "coverage": "uncovered"}]
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.assert_boundary_coverage(self.PROGRAM, rows)
+        self.assertIn("version-aware decoder", str(ctx.exception))
+
+    def test_overlapping_intervals_are_refused(self):
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.validate_intervals(self.PROGRAM,
+                                   [self.covered(100, 200), self.covered(150, 300)])
+        self.assertIn("overlap", str(ctx.exception))
+
+    def test_a_covered_interval_without_its_evidence_is_refused(self):
+        for field in ("idl_path", "idl_sha256", "evidence_key"):
+            with self.assertRaises(B9D.FreezeViolation) as ctx:
+                B9D.validate_intervals(self.PROGRAM, [self.covered(100, 200, **{field: None})])
+            self.assertIn(field, str(ctx.exception))
+
+    def test_an_uncovered_interval_may_not_name_a_revision(self):
+        """Otherwise an evidence gap sits in the table looking exactly like a decodable interval."""
+        row = self.covered(100, 200, coverage="uncovered")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.validate_intervals(self.PROGRAM, [row])
+        self.assertIn("must not look decodable", str(ctx.exception))
+
+    def test_resolve_returns_the_interval_in_force(self):
+        rows = [self.covered(100, 200), self.covered(201, 300, idl_sha256="b" * 64)]
+        self.assertEqual(B9D.resolve_version(self.PROGRAM, 250, rows)["idl_sha256"], "b" * 64)
+        self.assertEqual(B9D.resolve_version(self.PROGRAM, 100, rows)["idl_sha256"], "a" * 64)
+
+    def test_a_slot_outside_every_interval_is_not_attributed_to_the_nearest(self):
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.resolve_version(self.PROGRAM, 999, [self.covered(100, 200)])
+        self.assertIn("nearest pinned revision", str(ctx.exception))
+
+    def test_resolving_inside_an_uncovered_interval_is_refused(self):
+        row = {"program_id": self.PROGRAM, "from_slot": 100, "to_slot": 200, "idl_path": None,
+               "idl_sha256": None, "deploy_slot": None, "evidence_key": "k",
+               "coverage": "uncovered"}
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.resolve_version(self.PROGRAM, 150, [row])
+        self.assertIn("refusing to decode", str(ctx.exception))
+
+
+class BoundaryEvidenceDerivationTests(unittest.TestCase):
+    """The one case that yields coverage is the freeze's own argument, and only that case."""
+
+    PROGRAM = "TestProgram1111111111111111111111111111111"
+    LOW, HIGH = B9D.OBSERVATION_RANGE
+
+    def derive(self, last_deploy, in_range=(), **kwargs):
+        return B9D.intervals_from_boundary_evidence(
+            self.PROGRAM, last_deploy, list(in_range), "research/x.json", "a" * 64,
+            "getAccountInfo:1", **kwargs)
+
+    def test_a_last_deploy_before_the_range_covers_it_from_current_state_alone(self):
+        """Since it is the most recent deployment ever, none happened inside the range."""
+        rows = self.derive(self.LOW - 798_662)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["coverage"], "covered")
+        self.assertEqual((rows[0]["from_slot"], rows[0]["to_slot"]), (self.LOW, self.HIGH))
+        self.assertEqual(B9D.assert_boundary_coverage(self.PROGRAM, rows), rows)
+
+    def test_the_real_pump_deploy_slot_covers_the_frozen_range(self):
+        """B0's measured last Pump deploy, checked against the frozen range arithmetic."""
+        rows = self.derive(433_095_571)
+        self.assertEqual(rows[0]["coverage"], "covered")
+        self.assertEqual(self.LOW - 433_095_571, 798_662)
+
+    def test_a_deploy_after_the_range_start_cannot_be_settled_by_current_state(self):
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.derive(self.LOW + 5)
+        self.assertIn("loader history", str(ctx.exception))
+
+    def test_a_deploy_after_the_whole_range_still_yields_no_coverage(self):
+        """The build running during the range was an earlier one; today's pin is unattributed.
+
+        This is the subtle case: no boundary sits inside the range, so a lenient implementation
+        would call it covered. It is not — the revision in force then was not necessarily the
+        revision retrieved now.
+        """
+        rows = self.derive(self.HIGH + 1_000, history_complete=True)
+        self.assertTrue(rows)
+        self.assertTrue(all(row["coverage"] == "uncovered" for row in rows))
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.assert_boundary_coverage(self.PROGRAM, rows)
+
+    def test_an_in_range_deploy_splits_the_range_and_covers_nothing(self):
+        edge = self.LOW + 1_000
+        rows = self.derive(self.HIGH + 1, in_range=[edge], history_complete=True)
+        self.assertEqual([(r["from_slot"], r["to_slot"]) for r in rows],
+                         [(self.LOW, edge - 1), (edge, self.HIGH)])
+        self.assertTrue(all(r["coverage"] == "uncovered" for r in rows))
+
+    def test_contradictory_evidence_is_refused_rather_than_reconciled(self):
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.derive(self.LOW - 10, in_range=[self.LOW + 5])
+        self.assertIn("contradict", str(ctx.exception))
+
+    def test_a_deploy_slot_outside_the_range_cannot_be_passed_as_in_range(self):
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.derive(self.HIGH + 1, in_range=[self.HIGH + 500], history_complete=True)
+        self.assertIn("outside", str(ctx.exception))
+
+    def test_the_schema_carries_boundary_evidence_and_the_version_map(self):
+        path = pathlib.Path(tempfile.mkdtemp()) / "b9d.sqlite"
+        database = B9D.connect(str(path))
+        B9D.schema(database)
+        names = {row[0] for row in database.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'")}
+        database.close()
+        self.assertIn("raw_boundary_response", names)
+        self.assertIn("program_version", names)
+
+
 class TransactionCoordinateTests(unittest.TestCase):
     """§6: the coordinate `getTransaction` does not supply.
 
@@ -305,6 +461,30 @@ class PinnedDecoderTests(unittest.TestCase):
             "real_quote_reserves": 3, "real_token_reserves": 4})
         self.assertIsNone(B9D.reserve_after_from_event("CompleteEvent", fields))
 
+    def test_pump_candidates_are_derived_from_writable_curve_accounts(self):
+        candidates = B9D.reserve_mutation_candidates(B9D.PUMP_PROGRAM, self.idl)
+        self.assertIn("buy", candidates)
+        self.assertIn("migrate", candidates)
+        self.assertIn("set_mayhem_virtual_params", candidates)
+        self.assertNotIn("get_minimum_distributable_fee", candidates)
+        self.assertEqual(candidates["set_mayhem_virtual_params"], ("bonding_curve",))
+
+    def test_non_trade_writable_candidate_cannot_be_cleared_by_event_absence(self):
+        candidates = {B9D.PUMP_PROGRAM:
+                      B9D.reserve_mutation_candidates(B9D.PUMP_PROGRAM, self.idl)}
+        plan = B9D.reserve_extraction_plan(
+            B9D.PUMP_PROGRAM, "set_mayhem_virtual_params", candidates)
+        self.assertTrue(plan["candidate"])
+        self.assertIsNone(plan["event_projection"])
+        self.assertTrue(plan["reconciliation_required"])
+
+    def test_trade_event_projection_does_not_waive_reconciliation(self):
+        candidates = {B9D.PUMP_PROGRAM:
+                      B9D.reserve_mutation_candidates(B9D.PUMP_PROGRAM, self.idl)}
+        plan = B9D.reserve_extraction_plan(B9D.PUMP_PROGRAM, "buy", candidates)
+        self.assertEqual(plan["event_projection"], "TradeEvent")
+        self.assertTrue(plan["reconciliation_required"])
+
     def test_a_partial_target_map_is_still_refused(self):
         """The gap Codex left visible in Seq 202 must stay refusable now that it is filled.
 
@@ -361,21 +541,69 @@ class PinnedPumpSwapIdlTests(unittest.TestCase):
                          "a collision would have been silently deduplicated")
         self.assertEqual(len(mapping), 31)
 
-    def test_target_maps_cover_both_programs_and_do_not_collide_across_them(self):
+    def test_pumpswap_candidates_include_non_trade_vault_mutations(self):
+        candidates = B9D.reserve_mutation_candidates(B9D.PUMPSWAP_PROGRAM, self.idl)
+        self.assertIn("deposit", candidates)
+        self.assertIn("withdraw", candidates)
+        self.assertIn("boost_buy_and_burn", candidates)
+        self.assertIn("migrate_pool_coin_creator", candidates)
+        self.assertEqual(candidates["migrate_pool_coin_creator"], ("pool",))
+        self.assertEqual(
+            candidates["boost_buy_and_burn"],
+            ("pool_base_token_account", "pool_quote_token_account"))
+
+    def test_pumpswap_non_trade_requires_reconciliation_without_trade_projection(self):
+        candidates = {B9D.PUMPSWAP_PROGRAM:
+                      B9D.reserve_mutation_candidates(B9D.PUMPSWAP_PROGRAM, self.idl)}
+        plan = B9D.reserve_extraction_plan(B9D.PUMPSWAP_PROGRAM, "deposit", candidates)
+        self.assertEqual(plan["writable_roles"],
+                         ("pool", "pool_base_token_account", "pool_quote_token_account"))
+        self.assertIsNone(plan["event_projection"])
+        self.assertTrue(plan["reconciliation_required"])
+
+    def test_target_maps_cover_both_programs_and_are_not_swapped(self):
+        """`sell` and `buy` exist in BOTH IDLs with identical discriminators.
+
+        An earlier version of this test classified `sell` and passed whether or not
+        `target_idl_maps` loaded the Pump IDL for the PumpSwap program — a mutation proved it. The
+        13 shared names are exactly the ones that cannot distinguish the two maps, so the
+        assertions below use instructions unique to each side.
+        """
         maps = B9D.target_idl_maps(str(ROOT / B9D.PUMP_IDL_PATH), str(self.path))
         self.assertEqual(set(maps), set(B9D.TARGET_PROGRAMS))
         self.assertTrue(B9D.require_all_target_idls(maps))
-        # Programs may legitimately share an instruction name; the maps must stay separate so a
-        # PumpSwap discriminator can never resolve against the Pump interface.
-        self.assertIsNot(maps[B9D.PUMP_PROGRAM], maps[B9D.PUMPSWAP_PROGRAM])
+        self.assertNotEqual(maps[B9D.PUMP_PROGRAM], maps[B9D.PUMPSWAP_PROGRAM],
+                            "identical maps would mean one IDL was loaded for both programs")
+        self.assertIn("create_pool", maps[B9D.PUMPSWAP_PROGRAM].values())
+        self.assertNotIn("create_pool", maps[B9D.PUMP_PROGRAM].values())
+        self.assertIn("migrate", maps[B9D.PUMP_PROGRAM].values())
+        self.assertNotIn("migrate", maps[B9D.PUMPSWAP_PROGRAM].values())
 
-    def test_a_pumpswap_instruction_classifies_against_its_own_idl(self):
+    def test_a_pumpswap_only_instruction_classifies_against_its_own_idl(self):
         maps = B9D.target_idl_maps(str(ROOT / B9D.PUMP_IDL_PATH), str(self.path))
-        entry = next(i for i in self.idl["instructions"] if i["name"] == "sell")
+        entry = next(i for i in self.idl["instructions"] if i["name"] == "create_pool")
         data = bytes(entry["discriminator"]) + b"\x00" * 16
         target, name, disc, reason = B9D.classify_instruction(B9D.PUMPSWAP_PROGRAM, data, maps)
-        self.assertEqual((target, name, reason), (True, "sell", None))
+        self.assertEqual((target, name, reason), (True, "create_pool", None))
         self.assertEqual(disc, bytes(entry["discriminator"]).hex())
+        # The same bytes on the Pump program must NOT resolve: it has no such instruction.
+        target, name, _, reason = B9D.classify_instruction(B9D.PUMP_PROGRAM, data, maps)
+        self.assertTrue(target)
+        self.assertIsNone(name)
+        self.assertIn("unknown", reason)
+
+    def test_a_declared_discriminator_collision_is_refused_not_deduplicated(self):
+        """The real IDL has no collision, so only a synthetic one can exercise the guard.
+
+        Without this, removing the collision check changed nothing observable: the completeness
+        assertion `len(map) == len(instructions)` holds trivially when no two entries collide.
+        """
+        shared = list(hashlib.sha256(b"global:buy").digest()[:8])
+        colliding = {"instructions": [{"name": "buy", "discriminator": shared},
+                                      {"name": "sell", "discriminator": shared}]}
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.idl_instruction_map(colliding)
+        self.assertIn("collision", str(ctx.exception))
 
     def test_an_unknown_pumpswap_discriminator_still_fails_visibly(self):
         maps = B9D.target_idl_maps(str(ROOT / B9D.PUMP_IDL_PATH), str(self.path))
