@@ -5048,3 +5048,68 @@ No return, no profit, no strategy — **graduation only**. Nothing about timing,
 
 Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+
+
+## 2026-07-29 — Claude 2 — B9a audited: decode confirmed, F2 overstated, and the Mayhem exclusion upgraded from inference to measurement
+
+- **Seq:** 178
+- **Status:** audit complete; **ownership RELEASED**; **zero RPC requests — entirely from the published artifact**; 16 new tests
+- **Files/area owned:** releasing `scripts/b9a_cohort_outcomes.py`, `research/B9A_COHORT_OUTCOMES.md`, `tests/test_b9a_cohort_outcomes.py`. `research/b9a_outcomes.sqlite` opened `mode=ro` and untouched.
+
+**Every published figure reproduces exactly.** 2.69% / 1.41% / 5.81%, all four Wilson intervals to the stated digits, Fisher two-sided **p = 3.585 × 10⁻⁶** against the claimed 3.6 × 10⁻⁶, 94.61% under 0.01 SOL, 10.21% at zero, 4.12×. The arithmetic is not where the problems are.
+
+### 1. The struct decode is CORRECT — five independent confirmations
+
+IDL field order matches `<QQQQQ?` exactly and Borsh is unpadded, so `complete` is the byte at offset 48. Beyond that, the data proves the offsets rather than restating them:
+
+- **`token_total_supply` = 1e15 for all 1,601.** It is the *fifth* u64, so every preceding offset is right or this is garbage.
+- **`complete` ⟺ `real_token_reserves = 0`, 43 / 1,558, zero exceptions.** A bool at a wrong offset cannot track a u64 at a different offset perfectly.
+- **`virtual_quote_reserves = 30 SOL + real_quote_reserves`, and the token side agrees, across all 1,110** non-Mayhem incomplete SOL curves — four fields mutually consistent.
+- **`owner` = the pump program for all 1,601.**
+
+**Two gaps closed rather than noted.** The script defined `PUMP` and **never asserted the account owner**, and **never checked the discriminator** — a wrong-but-pump-owned address would have decoded silently into a plausible `complete` flag, which is precisely the failure you asked me to look for. Both now refuse. I also added `tests/test_b9a_cohort_outcomes.py` (16 tests, synthetic accounts built **from the IDL** rather than from the script's constant, plus a deliberately-transposed-layout test so the decoder can be seen to fail). **B9a was the only B-script with no tests.**
+
+### 2. I could not break F3. I found the measurement that settles it — F5
+
+You argued the exclusion holds because `set_mayhem_virtual_params` **can** mutate a Mayhem curve. It **did**, on **425 of 427**, and it is in the artifact you already published:
+
+| | |
+|---|---|
+| **Trading conserves k** | all **1,110 / 1,110** non-Mayhem curves within 1% of `k₀ = 3.219 × 10²⁵`, zero exceptions |
+| **Mayhem launches at the same k₀** | exactly **2** Mayhem curves sit at `k₀`, and both are untouched — **1 and 3 lamports** of real quote, token reserves *exactly* at launch |
+| **The rest have left it** | **425 / 427**, spanning **0.0006× to 33.8×**, median 0.245× |
+
+Trading cannot do that, and premise 2 shows they did not start somewhere else. **They were moved.** The 4.12× is the visible surface of a curve whose price math a counterparty edits. **Treat the frozen exclusion as confirmed by measurement, not by inference.**
+
+*(My first version of this test asserted 427/427 and my own test caught the 2 exceptions. Those two turned out to be the load-bearing evidence — without them the deviation could have been differing launch parameters rather than mutation. Reporting that because the stronger claim was the wrong one and the weaker one is the proof.)*
+
+### 3. A limitation in F3 you did not state
+
+The two populations have **almost disjoint creators — 160 Mayhem, 674 non-Mayhem, overlap of 9.** So "not driven by a *few* actors" is established; "not a property of a *different population of* actors" is not, and cannot be from data of this shape. The effect does survive stratification by creator prolificacy, monotone in every stratum (12.79/2.37, 6.49/1.03, 2.67/0.00) — but that stratification cannot undo a disjoint-population confound.
+
+### 4. F2 is overstated, and this is the one I would act on
+
+> "94.6% of non-graduates **never accumulated** 0.01 SOL"
+
+That is a claim about the **path**, from a single terminal **snapshot** — the same family as the twelve before it: something adjacent to the claim, reported as the claim.
+
+**`real_quote_reserves` falls when holders sell.** The curve state is one-dimensional in it — I verified `vqr = vqr₀ + rqr` and the token side across all 1,110 non-Mayhem curves, zero exceptions. **A curve that ran to 30 SOL and fully round-tripped returns to exactly its launch state**, indistinguishable from one never bought. Only the **159 at exactly zero with token reserves still at launch** are provably never traded; the other 1,315 accumulated *something* and the snapshot cannot say how much.
+
+**What survives:** these positions cannot be closed *today*. **What does not:** *"any backtest assuming fills measures a market that does not exist."* A backtest exits **during** the holding window, and the reserves available then are exactly what is unmeasured. F2 is a strong reason to build Phase 2 with a constrained-exit model; it does not yet size the constraint. Doc corrected in place, with the original wording quoted so the change is auditable.
+
+### 5. The denominator — 1.41% is right for the claim it makes
+
+Cohort integrity is clean: **1,601 rows, 1,601 distinct mints, 1,601 distinct curves, 0 decode errors**, all accounts present. The only arguable alternative is immaterial — "tradable" still contains **10 USDC** launches, and SOL-only gives **16/1,126 = 1.42%** against 1.408%. It is also **right-censored** at 8 days, so it is a lower bound, and the artifact records no graduation time so the magnitude is unmeasurable here. Your refusal to compute a filtered rate post hoc was correct.
+
+> ⚠️ **My audit contaminated the obvious filter candidates.** Answering (2) required cross-tabbing outcome against the t=0 covariates, and **`is_cashback_enabled` separates the tradable population 1.83% vs 0.93%.** I am **not** reporting that as a finding — it was found by looking at outcomes. Any filter touching a covariate I examined must be frozen and measured on a **fresh cohort, never on B8b.** On the record so it is not rediscovered later as a "result".
+
+### Not mine, but the suite is red
+
+**269 passed, 4 failed.** All four are `test_interactive_dashboard.py`, and they are **not** from this audit — no shared imports. Cause: the **uncommitted** change in `scripts/interactive_dashboard.py` (predates my session) dropped `-c` from the launch command, while `FakeTmux` gates the pane's shell→app transition on the literal string **`"claude -c"`** (test lines 820, 934, 1006), so `wait_for_app` times out. The fix is to update those three literals. **I have not touched it** — that file has someone's work in flight and a second hand in it is how this project has lost days.
+
+### Requested action
+
+**Owner:** the uncommitted dashboard change needs committing with its three test literals updated — it is the change that made this session's pane identities correct, and it is currently both uncommitted and red.
+**Whoever takes Phase 2:** F2 as corrected means the simulator needs a constrained-exit model, and the constraint's *size* is not yet known from any published artifact.
+
+Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.

@@ -41,8 +41,16 @@ USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 #   virtual_token_reserves u64 · virtual_quote_reserves u64 · real_token_reserves u64
 #   real_quote_reserves u64 · token_total_supply u64 · complete bool · creator pubkey
 #   is_mayhem_mode bool · is_cashback_coin bool · quote_mint pubkey
+# Borsh is unpadded, so "<" (little-endian, standard size, no alignment) is the correct
+# format prefix: 5 * u64 + 1 * bool = 41 bytes with no gaps.
 CURVE_STRUCT = struct.Struct("<QQQQQ?")
 CURVE_PREFIX = 8
+
+# sha256("account:BondingCurve")[:8], and identical to the IDL's declared discriminator.
+# Checked because nothing else distinguishes a BondingCurve from any other pump-owned
+# account: a wrong address that still decodes yields a plausible `complete` flag rather
+# than an error. The owner is checked for the same reason.
+CURVE_DISCRIMINATOR = bytes.fromhex("17b7f83760d8ac60")
 
 
 def rpc(url, method, params, retries=6):
@@ -72,9 +80,16 @@ def decode_curve(account):
     """
     if account is None:
         return None
+    owner = account.get("owner")
+    if owner != PUMP:
+        raise ValueError(f"REFUSING: bonding curve owned by {owner}, expected {PUMP}")
     raw = base64.b64decode(account["data"][0])
     if len(raw) < CURVE_PREFIX + CURVE_STRUCT.size:
         raise ValueError(f"bonding curve account too short: {len(raw)} bytes")
+    if raw[:CURVE_PREFIX] != CURVE_DISCRIMINATOR:
+        raise ValueError(
+            f"REFUSING: discriminator {raw[:CURVE_PREFIX].hex()} is not BondingCurve "
+            f"({CURVE_DISCRIMINATOR.hex()}) — the offsets below would decode garbage silently")
     fields = CURVE_STRUCT.unpack_from(raw, CURVE_PREFIX)
     return {
         "virtual_token_reserves": fields[0], "virtual_quote_reserves": fields[1],
