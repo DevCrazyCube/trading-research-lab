@@ -498,3 +498,46 @@ The two do not imply each other. A user-ratified decision can remain provisional
   interrupted by the supervisor at all. That is intended — the release entry is what ends a claim —
   but it means a genuinely stuck claimant needs the explicit `interrupt` command, which is
   unchanged and remains available to the owner.
+
+## 2026-07-29 — B9d transaction-body reconstruction frozen before execution (NOT authorised to run)
+
+- **Status:** methodology frozen; **execution requires a new owner authorisation that does not yet
+  exist**.
+- **Ratified by:** not separately ratified. Preregistered under the same discipline as B9c, before
+  any transaction body was fetched or inspected. Full text:
+  `research/B9D_TRANSACTION_BODY_PREREGISTRATION.md`.
+- **Decision:** B9d fetches and classifies exactly the 94,985 distinct successful in-window
+  signatures of the tradable non-Mayhem B8b population, derived by one pinned query against the
+  B9c artifact at its pinned SHA-256. Byte-exact response bodies are primary evidence; every
+  instruction is classified at every nesting level against a pinned IDL **revision**; unknown
+  discriminators fail visibly; reserve paths are assembled in canonical
+  `(slot, transaction_index, outer_instruction_index, inner_instruction_index)` order and never by
+  insertion order. No token, creator, activity-size, history-size, graduation, terminal-reserve, or
+  outcome filter may reduce the fetch set, and no event-name shortcut is authorised.
+- **Reason and the three things this freeze adds beyond B9c's request:**
+  - **The population was re-derived before being frozen.** All eight of B9c's published figures
+    reproduce exactly from the artifact, with zero contradictory `err` statuses, zero signatures
+    straddling the Mayhem/tradable split, and zero curves present in B9c but absent from B9a.
+  - **A predicate trap is frozen against.** `err_json` stores `json.dumps(err)`, so success is the
+    string `'null'` and the column is never SQL `NULL`. The natural `err_json IS NULL` test
+    classifies all 1,347,469 signatures as failed while reproducing every other published figure —
+    a clean, plausible, entirely wrong table. B9d must assert the population equals 94,985 before
+    fetching anything.
+  - **Program-version coverage is a check, not an assumption.** B0 puts the last Pump deploy at slot
+    433,095,571, 798,662 slots before the window opens — but B0 ran 2026-07-27 ~10:15 UTC and the
+    cutoff slot's block time is 12:19:42 UTC the same day, so the inventory misses the window's
+    final ~2 hours, and its ProgramData history has unverified archival completeness. B9d
+    re-verifies boundaries across `[433,894,233, 435,536,742]` and decodes version-aware if any
+    exists.
+- **Consequence:**
+  - **Two scope limits are stated in advance rather than discovered.** Curve histories are
+    address-indexed and their exhaustiveness for this window is *inherited* from B7h's different
+    window and regime, which `PLAN.md` says does not generalise; B9d must either run a
+    preregistered-sample recall check or publish an unhedged caveat. And reserve paths end at
+    graduation by construction, because post-migration PumpSwap activity need not touch the curve
+    address — 16 of the tradable population are affected and must be labelled truncated.
+  - **Cost is a gate, not a footnote.** ~10.6 continuous hours and ~0.95 GB at B6j's measured rate,
+    against a standing authorisation (Seq 121) of 4 min/hour for ~6.2 hours granted for B8b.
+    Freezing the method is free; running it is not, and the second does not follow from the first.
+  - A high classification-failure rate is a publishable result. Reporting a partial classification
+    as if it were complete is the recurring failure this project has documented twelve times.

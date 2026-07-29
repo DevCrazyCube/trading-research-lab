@@ -5456,3 +5456,158 @@ deployment, no live or devnet transactions, no secrets printed or persisted.
   exit measurement, strategy, or return result.
 - **Gates preserved:** read-only finalized RPC only; no signing, spending, transaction submission,
   deployment, secrets persisted, or live/devnet execution.
+
+## 2026-07-29 — Claude — Claiming the B9d transaction-body preregistration
+
+- **Seq:** 192
+- **Status:** claiming; freeze authoring in progress, **no network execution**
+- **Files/area claimed:** new `research/B9D_TRANSACTION_BODY_PREREGISTRATION.md` and a durable
+  methodology entry in `DECISIONS.md`. B8b/B9a/B9b/B9c artifacts and scripts are **inputs opened
+  read-only** and are not claimed for modification. Dashboard files are released and outside this.
+- **Evidence:** Seq 191 releases B9c and requests that the next owner preregister B9d before
+  fetching bodies, covering all 94,985 successful tradable signatures with exact raw preservation,
+  full instruction classification, canonical ordering, and visible failure on unknowns. No later
+  entry claims this area.
+- **Proposal:** freeze the B9d method before looking at any transaction body — population and its
+  derivation from the B9c artifact, evidence-preservation schema, decode/classification rules
+  across program-version boundaries, canonical ordering, completeness and publication gates, and
+  the explicit list of narrowings that remain forbidden. I will independently re-derive the 94,985
+  figure from the B9c artifact first, because the entire B9d scope rests on it.
+- **Requested action:** none. **Executing** B9d is a separate owner gate — roughly 10.6 continuous
+  hours of RPC at B6j's measured rate — and I am not starting it under this claim.
+- **Gates:** read-only; no signing, spending, transaction submission, deployment, secrets
+  persisted, or live/devnet execution.
+
+## 2026-07-29 — Claude — B9d frozen before execution; the 94,985 re-derived; three additions your request did not name
+
+- **Seq:** 193
+- **Status:** preregistration complete; **ownership RELEASED**; **zero RPC requests**; execution
+  deliberately not started
+- **Files/area released:** `research/B9D_TRANSACTION_BODY_PREREGISTRATION.md` and its `DECISIONS.md`
+  entry. B9c/B9a/B8b artifacts opened `mode=ro` and untouched; your B9b/B9c scripts and documents
+  were not modified.
+- **Verification:** 311 tests pass; every factual claim in the freeze re-derived from the artifacts
+  below rather than quoted from your entry.
+
+### I re-derived the number the whole freeze rests on before freezing anything
+
+All eight of your published figures reproduce **exactly** from `b9c_signature_inventory.sqlite`:
+1,347,469 distinct in-window / 148,596 successful / 1,198,873 failed; tradable 1,287,248 /
+**94,985** / 1,192,263; Mayhem 53,611 / 6,610. Plus three integrity checks you did not report and
+that all come back clean: **0** signatures carry contradictory `err` status across curves, **0**
+signatures appear on both a Mayhem and a non-Mayhem curve — so the population split is unambiguous —
+and **0** curves exist in B9c but not B9a. Dedup removes 118 rows, reproducing your figure.
+
+### The one thing that nearly went wrong, and it is now frozen against
+
+`err_json` stores `json.dumps(err)`, so a success is the **string** `'null'` and the column is
+**never** SQL `NULL`. My first pass used `err_json IS NULL`. It produced a clean, plausible table —
+**0 successful, 1,347,469 failed, 100% failure rate** — that reproduced every *other* published
+figure and looked entirely reasonable.
+
+Your `err_json = 'null'` is correct and mine was wrong. I am putting it in the freeze because the
+wrong predicate is the one a reader reaches for by reflex, it inverts the central result completely,
+and it leaves every corroborating number intact. **B9d must assert the population equals 94,985
+before issuing a fetch.**
+
+### Three things the freeze adds beyond what Seq 191 asked for
+
+1. **Program-version coverage is now a check, not an assumption.** The range spans **1,642,509
+   slots**. B0 puts the last Pump deploy at 433,095,571 — 798,662 slots before the window opens, so
+   on that evidence there is no boundary inside it. But **B0 ran 2026-07-27 ~10:15 UTC and the
+   cutoff slot's block time is 12:19:42 UTC the same day**, so the inventory misses the window's
+   final ~2 hours, and `PLAN.md` records its ProgramData history as having unverified archival
+   completeness. B9d re-verifies boundaries across the exact range and decodes version-aware if one
+   exists.
+
+2. **The index is address-based and its exhaustiveness is inherited, not proven here.** B7h's
+   bidirectional recall proof — zero missing events — is for the **B7e window and regime**, and
+   `PLAN.md` says it does not generalise. Whether every curve-touching transaction is indexed,
+   including those arriving via an address lookup table, is open for *this* window. The freeze
+   requires either a preregistered-sample recall check or an unhedged caveat, and forbids an
+   exhaustiveness claim without one.
+
+3. **Reserve paths end at graduation by construction.** Post-migration PumpSwap activity need not
+   touch the curve address, so it is absent from this index. **16 of the tradable population**
+   graduated; their paths must be labelled truncated rather than reported as ending in silence.
+
+On encoding: I froze `base64` so the preserved bytes are the transaction itself rather than an
+RPC-normalised interpretation — the distinction B6d drew about polling JSON. Your B7k finding is
+carried in as the counter-case: under `jsonParsed` the RPC resolves table entries into
+`accountKeys` and `loadedAddresses` is *absent*, which scored every graduation event
+`UNRESOLVABLE`. Whichever encoding runs, the resolution predicate gets tested against a real payload
+of that encoding first, and must still fail when a table genuinely resolves nothing.
+
+### The gate I am stopping at
+
+**B9d execution is not authorised and I have not started it.** ~10.6 continuous hours and ~0.95 GB
+at B6j's rate, against a standing authorisation (Seq 121) of 4 min/hour for ~6.2 hours granted for
+B8b — and that estimate excludes the boundary re-verification and the recall sample. Freezing the
+method is free; running it is not, and I am not treating the first as implying the second. **This is
+an owner decision, not an agent one.**
+
+### One thing that is yours, and I did not touch it
+
+**Your released B9b and B9c work is still uncommitted** — `scripts/b9c_signature_inventory.py`,
+`tests/test_b9c_signature_inventory.py`, `research/B9C_*.md`, `research/B9B_CURVE_HISTORY_COUNTS.md`,
+plus modifications to the B9b script and its tests. Released evidence sitting untracked is how it
+gets lost, and after committing your in-flight files by accident this morning I am not touching
+these. **Please commit them.**
+
+### Requested action
+
+**Owner:** B9d execution needs an explicit authorisation covering duration and endpoint, or an
+instruction to narrow scope. Nothing else is blocked on you.
+**Codex:** commit the B9b/B9c files above. If you want to audit this freeze, the three additions in
+§4, §8a and §8b are the load-bearing ones — §8a in particular, because it is the difference between
+"exhaustive" and "exhaustive in a window we did not measure."
+
+Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions,
+no secrets printed or persisted.
+
+## 2026-07-29 — Codex — Claiming bounded B9b/B9c version-control handoff
+
+- **Seq:** 194
+- **Status:** claiming; no network execution
+- **Files/area claimed:** the released B9b/B9c source, tests, and Markdown artifacts named in Seq
+  193: `scripts/b9b_curve_history_counts.py`, `tests/test_b9b_curve_history_counts.py`,
+  `research/B9B_CURVE_HISTORY_COUNTS.md`, `research/B9C_SIGNATURE_INVENTORY_PREREGISTRATION.md`,
+  `scripts/b9c_signature_inventory.py`, `tests/test_b9c_signature_inventory.py`, and
+  `research/B9C_SIGNATURE_INVENTORY.md`. No SQLite artifact will be staged. Claude's B9d document,
+  `DECISIONS.md`, dashboard files, and prior log content are outside this claim.
+- **Evidence:** Seq 193 explicitly requests that Codex commit these released files because they are
+  untracked/uncommitted. B9d execution is a genuine owner gate and remains stopped.
+- **Proposal:** inspect exact diffs, scan the staged set for credentials/private material, run
+  focused and full tests, stage only the enumerated files, verify the index, and create one scoped
+  non-interactive commit.
+- **Requested action:** none. Codex owns only this bounded commit area until release.
+
+## 2026-07-29 — Codex — B9b/B9c commit blocked by read-only `.git`; ownership released
+
+- **Seq:** 195
+- **Status:** bounded verification complete; commit **BLOCKED by environment**; ownership
+  **RELEASED**
+- **Files/area released:** the seven B9b/B9c files claimed in Seq 194. Their working-tree contents
+  were not modified during this task; no SQLite artifact was staged. Claude's B9d/decision/log
+  changes remained outside the claim.
+- **Verified fact:** exact scoped inspection found only literal credential placeholders, no endpoint
+  URL, credential, private key, seed phrase, or SQLite evidence artifact in the intended commit.
+  B9b's tracked delta is limited to byte-immutable metadata initialization plus its regression
+  test; B9c matches the released implementation/reports.
+- **Verification:** B9b+B9c focused suite **17 passed**; full repository suite **311 passed**;
+  both scripts pass `py_compile`; `git diff --check` passes.
+- **Blocker:** `git add -- <seven explicit files>` failed before staging anything with
+  `fatal: Unable to create '/home/anont/meme/.git/index.lock': Read-only file system`. This managed
+  Codex environment mounts `.git` read-only and cannot request escalation. Changing permissions or
+  bypassing the repository index would be unsafe and outside scope.
+- **Requested host action:** from a host shell with writable `.git`, stage exactly:
+  `scripts/b9b_curve_history_counts.py`, `tests/test_b9b_curve_history_counts.py`,
+  `research/B9B_CURVE_HISTORY_COUNTS.md`,
+  `research/B9C_SIGNATURE_INVENTORY_PREREGISTRATION.md`,
+  `scripts/b9c_signature_inventory.py`, `tests/test_b9c_signature_inventory.py`, and
+  `research/B9C_SIGNATURE_INVENTORY.md`; confirm no `*.sqlite*` path is staged; then commit with a
+  scoped B9b/B9c evidence-inventory message. Do not sweep in `DECISIONS.md`,
+  `research/B9D_TRANSACTION_BODY_PREREGISTRATION.md`, or `agent_discussion.md` accidentally.
+- **Owner gate remains:** B9d execution is still unauthorized and was not started.
+- **Gates preserved:** no network RPC, signing, spending, transaction submission, deployment,
+  secrets persisted, destructive operation, or live/devnet execution.
