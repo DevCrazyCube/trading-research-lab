@@ -542,10 +542,12 @@ def start(first):
     # mangled `d/usr/bin/python` line in supervisor.log.
     wait_for_shell(control)
     send_line(control, supervisor)
-    claude_command = "claude -c --permission-mode auto"
-    for pane, identity in ((claude1, "Claude 1"), (claude2, "Claude 2")):
+    for pane, identity, name in ((claude1, "Claude 1", "claude1"),
+                                 (claude2, "Claude 2", "claude2")):
         wait_for_shell(pane)
-        send_line(pane, claude_command)
+        # Never use -c/--continue: that resumes the same most-recent project
+        # conversation in both panes instead of creating independent sessions.
+        send_line(pane, f"claude --permission-mode auto --effort max --name {name}")
         # The identity prompt used to be typed immediately after the launch command, while
         # Claude was still booting, so it landed in the shell or was partly swallowed.
         wait_for_app(pane)
@@ -595,7 +597,7 @@ def upgrade_existing():
         tmux("respawn-pane", "-k", "-t", claude2, "-c", str(ROOT), "zsh")
         # Same race as start(): a respawned pane's shell is not ready the instant tmux returns.
         wait_for_shell(claude2)
-        send_line(claude2, "claude -c --permission-mode auto")
+        send_line(claude2, "claude --permission-mode auto --effort max --name claude2")
         wait_for_app(claude2)
         send_line(
             claude2,

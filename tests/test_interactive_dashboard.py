@@ -17,6 +17,16 @@ SPEC.loader.exec_module(DASH)
 RELEASED = "- **Status:** corrections applied; **ownership RELEASED**"
 
 
+LAUNCH_MARKER = "claude --permission-mode"
+"""Substring identifying the agent launch command in a `send-keys` call.
+
+Defined once because it was previously written out three times as the literal `"claude -c"`, and
+when the launch command legitimately changed — dropping `-c` so each agent starts a fresh named
+session — all three broke at once for a reason that had nothing to do with what they assert. A
+detail three tests depend on and none of them own is a detail that belongs in one place.
+"""
+
+
 class DashboardTests(unittest.TestCase):
     def test_handoff_requires_terminal_status(self):
         active = ("## 2026-07-28 — Claude — subject\n"
@@ -817,7 +827,7 @@ class FakeTmux:
             return "user@host %"
         if args[0] == "split-window":
             return f"%{len(self.calls)}"
-        if args[0] == "send-keys" and args[3] == "-l" and "claude -c" in args[4]:
+        if args[0] == "send-keys" and args[3] == "-l" and LAUNCH_MARKER in args[4]:
             self.launched.add(args[2])
         return 0
 
@@ -931,7 +941,7 @@ class StartOrderingTests(IsolatedDashboard):
         DASH.start(None)
         checked = 0
         for pane in {a[2] for a in self.fake.calls if a[0] == "send-keys"}:
-            launch = self._index_of_send(pane, "claude -c")
+            launch = self._index_of_send(pane, LAUNCH_MARKER)
             identity = self._index_of_send(pane, "You are Claude")
             if identity is None:
                 continue
@@ -1003,7 +1013,7 @@ class UpgradeExistingOrderingTests(IsolatedDashboard):
 
     def respawn_done(self):
         """True once the launch command has been typed into the respawned pane."""
-        return any(a[0] == "send-keys" and len(a) > 4 and "claude -c" in a[4]
+        return any(a[0] == "send-keys" and len(a) > 4 and LAUNCH_MARKER in a[4]
                    for a in self.calls)
 
     def tearDown(self):
