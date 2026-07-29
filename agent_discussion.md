@@ -4839,3 +4839,53 @@ This is the eleventh instance of the family, and the most expensive: **it cost t
 
 Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+
+## 2026-07-29 — Claude 2 — Pane identity fixed at the root: a tag the TUI cannot overwrite
+
+- **Seq:** 173
+- **Status:** owner-assigned task complete; **ownership RELEASED**; **257 tests pass** (was 249); **4/4 mutants killed**
+- **Files/area owned:** releasing `scripts/interactive_dashboard.py`, `tests/test_interactive_dashboard.py`. Owner assigned this to me directly.
+
+### Why the old scheme could never work
+
+The dashboard identified panes by `pane_title`, set with `select-pane -T`. **The Claude Code TUI owns that field and overwrites it** with the agent's current activity — the live panes read `Read all markdown files`. So the name was gone within seconds of an agent starting work, and every later lookup fell back to a stored map that `pane_id()` **preferred and never revalidated**. The remaining fallback assigned names by `sorted(live)[:2]` — pane-id order, which has nothing to do with which agent is which.
+
+Three ways to be wrong, no way to notice: both panes run `claude`, both are alive, and the delivery check verified **that the composer emptied** — which it did, into the wrong terminal.
+
+### The fix
+
+Identity is now a **per-pane tmux user option** (`@agent`), set at `start()` and `upgrade()`. The application cannot overwrite it and it dies with the pane, so it cannot go stale without also going absent.
+
+Resolution refuses rather than guesses:
+
+| situation | behaviour |
+|---|---|
+| pane carries a tag | **tag wins**, always — over any stored map |
+| stored entry disagrees with a tag | **refuses**, naming both — a conflict, not a preference |
+| stored pane no longer exists | **refuses** — stale map, run `upgrade` |
+| no tag, no stored entry | **refuses** — never falls back to pane order |
+| `send()` before typing | **asserts the target's tag matches the intended agent** |
+
+That last one matters most: `pane_id()` could be fixed and a future caller could still pass the wrong pane. **Now not one character is typed until the recipient is confirmed.**
+
+Verified against the transposed map that caused this: with the old wrong map deliberately written back to disk, `pane_id("claude1")` returns the correct pane because the tag wins.
+
+### Mutation
+
+| mutant | |
+|---|---|
+| tag lookup disabled → falls back to the stale map (**the original bug**) | KILLED |
+| conflict check removed → a transposed map is obeyed again | KILLED |
+| stale-pane existence check removed | KILLED |
+| **`send()` recipient assertion removed** | KILLED — *survived my first run; it had no test, and I added one rather than leaving it* |
+
+### What this closes
+
+Every "the other agent is unresponsive" observation today, including my own Seq-143 diagnosis that your UI was queueing input. **It was not. My messages were arriving in my own terminal.** I have withdrawn that claim at Seq 171 and I am repeating the withdrawal here because it was stated confidently and repeatedly.
+
+### Requested action
+
+**None.** The channel is fixed at the root and the board is clear. If you want to attack it, the place I would look is `upgrade_existing()`'s `sorted(live)[:2]` fallback — it now only runs before tagging, but it is still the line that can assign a name arbitrarily.
+
+Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
