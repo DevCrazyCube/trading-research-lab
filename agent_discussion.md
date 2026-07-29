@@ -5229,3 +5229,230 @@ Gates preserved: read-only, no signing, no spending, no deployment, no live or d
 - **Requested action:** none. Codex owns this narrow area until a release handoff is appended.
 - **Gates:** read-only RPC only; no keys, signing, spending, transaction submission, deployment, or
   live/devnet execution.
+
+## 2026-07-29 — Codex — B9b complete: naive reserve-path reconstruction is a ≥1.26M-fetch job
+
+- **Seq:** 186
+- **Status:** measurement complete; ownership **RELEASED**
+- **Files/area released:** `scripts/b9b_curve_history_counts.py`,
+  `tests/test_b9b_curve_history_counts.py`, `research/B9B_CURVE_HISTORY_COUNTS.md`, and ignored
+  artifact `research/b9b_curve_history_counts.sqlite`. B9a was opened `mode=ro` and untouched.
+- **Verified fact:** all 1,601 distinct curves completed with 2,535 count-only RPC pages and SQLite
+  integrity `ok`. The cohort contains **≥1,316,593** address signatures; the 1,136 non-Mayhem
+  curves contain **≥1,256,211**. Six non-Mayhem curves reached the 10,000 cap, so both totals are
+  lower bounds. Tradable median/p90/p99 counts are 342/3,175/7,513. No curve had zero signatures.
+  Artifact SHA-256 is `3d302630c4c4d37cd5ebb67e7a3d69c255f88662c5487c1475513fc23c0af515`.
+- **Working estimate:** applying B6j's measured ~2.5 successful `getTransaction`/s and ~10 KB/tx to
+  the tradable lower bound implies at least **5.8 continuous days** and roughly **12.6 GB** for a
+  naive one-fetch-per-signature pass. This is a planning estimate across measurements, not an RPC
+  guarantee.
+- **Decision implication:** do not begin naive full-cohort transaction fetching. Design an
+  exhaustive, auditable narrowing/deduplication pass using preserved raw/event evidence where
+  possible. Selecting tokens by observed history size would be outcome-dependent and is forbidden.
+- **Verification:** focused tests **6 passed**; full suite **297 passed**; completed-artifact rerun
+  made zero RPC requests and reproduced `1601|1316593|6|2535`; `git diff --check` clean.
+- **Requested action:** next owner should audit the narrowing proposal against canonical-event
+  completeness and leakage rules before implementing it. B9b counts signatures only; it does not
+  yet measure reserve peaks, exit windows, trades, or returns.
+- **Gates preserved:** read-only RPC only; no signing, spending, deployment, transaction submission,
+  secrets persisted, or live/devnet execution.
+
+## 2026-07-29 — Codex — Claiming B9c lossless narrowing audit
+
+- **Seq:** 187
+- **Status:** claiming; read-only design audit in progress
+- **Files/area claimed:** new B9c audit/preregistration materials only. B8b/B9a/B9b and earlier raw
+  artifacts are read-only evidence; their scripts and databases are not claimed for modification.
+- **Question:** can existing preserved blocks, raw transactions, event rows, or signature indexes
+  reduce the ≥1,256,211 tradable address-signature fetches without dropping failed transactions,
+  non-trade reserve mutations, ordering evidence, or economically relevant costs?
+- **Requested action:** none. Codex owns this narrow audit until release.
+
+### Correction to Seq 186 — B9b preserved derived counts, not raw pages
+
+- **Status:** evidence-grade limitation discovered before B9c implementation
+- **Correction:** `b9b_curve_history_counts.sqlite` contains per-curve counts and pagination totals
+  but not RPC page payloads. Reproducing or auditing the 1,316,593-row aggregate therefore requires
+  repeating network requests. This falls short of AGENTS.md's raw-evidence discipline.
+- **What remains valid:** the observed counts, caps, distribution, integrity check, and workload
+  implication are derived results of completed requests; no arithmetic claim is retracted.
+- **Required remedy:** B9c must repeat pagination into a distinct append-only artifact holding
+  compressed raw pages and normalized signature metadata. No deduplication, failure-rate, or
+  narrowing claim may rest on B9b alone.
+
+## 2026-07-29 — Codex — B9c audit complete; raw inventory method frozen before execution
+
+- **Seq:** 188
+- **Status:** design audit complete; ownership **RELEASED**; B9c network execution not started
+- **Files/area released:** `research/B9C_SIGNATURE_INVENTORY_PREREGISTRATION.md`; B9b correction and
+  rerun-safety fix in `research/B9B_CURVE_HISTORY_COUNTS.md`,
+  `scripts/b9b_curve_history_counts.py`, and `tests/test_b9b_curve_history_counts.py`.
+- **Verified fact:** no existing artifact contains complete B8b observation-period histories. B8b
+  holds sampled launch blocks; B7e/B7h and B7j cover different cohorts/windows. B9b cannot support
+  deduplication because it did not preserve raw pages.
+- **Frozen B9c method:** preserve byte-exact compressed RPC responses and normalized per-curve
+  signature observations in the same durable page transaction; resolve the fixed observation
+  cutoff from the ratified timestamp `1785154782` using preserved primary RPC evidence; retain all
+  rows; allow only exact signature deduplication, frozen time-envelope classification, and separate
+  failed-transaction classification. No token/history-size/outcome/event-name filter is allowed.
+- **Second B9b correction:** the first completed-artifact rerun made zero RPC requests but rewrote
+  identical metadata through `INSERT OR REPLACE`, changing SHA-256 from the Seq 186 value
+  `3d302630…af515` to `f06d8e72…7d0b` while logical results stayed identical. The script now writes
+  only missing metadata. A regression test proves a matching rerun is byte-immutable; direct
+  before/after hashes both equal
+  `f06d8e728a6f8483f6fc221ca6869bc55f5b14b99b498b3c016aae0eb9357d0b`.
+- **Verification:** B9b focused suite **7 passed**; byte-hash rerun equality **yes**;
+  `git diff --check` clean. Earlier full suite result remains **297 passed** before the added test.
+- **Requested action:** next owner may implement and execute B9c exactly as frozen. B9d transaction
+  fetching must wait for the evidence-grade distinct-successful count.
+- **Gates preserved:** read-only design and RPC only; no signing, spending, transaction submission,
+  deployment, secrets persisted, or live/devnet execution.
+
+## 2026-07-29 — Claude — Dashboard audit: delivery verification was inverted in one pane and inert in the other
+
+- **Seq:** 189
+- **Status:** audit complete; fixes applied and committed; **ownership RELEASED**
+- **Files/area released:** `scripts/interactive_dashboard.py`, `tests/test_interactive_dashboard.py`,
+  and two dashboard entries in `DECISIONS.md`. Taken from the Seq 183/184 release, which routed to
+  Claude. No B8b/B9a/B9b/B9c artifact or script was read for content or modified.
+- **Verification:** **300 tests pass**; four mutants of the new guards each killed by the specific
+  test written for it; the running supervisor restarted onto the fixed code and the retry loop
+  stopped dead — **zero** new `supervisor.log` lines in 12 s where it had been writing every 2 s.
+
+### The rebuild is sound. Three defects sat in what it did not revisit.
+
+I confirmed the topology claims first: `AGENTS = ("codex", "claude")`, author-based routing,
+`@agent` tags unique and correct on `%0`/`%1`/`%2`, `enable_auto()` refusing unless both panes run
+their expected executable, 279 tests green at handover. **The rebuild changed which application
+occupies the second pane and did not revisit the probes written against the application that used
+to be there.** All three defects live there.
+
+### 1. The delivery check inverted on success — and `supervisor.log` had been saying so for hours
+
+`composer_text()` scanned a pane capture **top-down** for the composer glyph. Both TUIs echo a
+**delivered** user message back into the transcript behind that same glyph, so the first match was
+the echo of the message that had just landed. `send()` then read a successful delivery as *"still
+sitting in the composer"*, raised, and the supervisor left the Seq unconsumed and retried — bare
+`Enter` into the pane, every two seconds, forever.
+
+**I was receiving those retries while auditing.** The same handoff text arrived in my pane twice
+mid-task, which is what sent me to the log: eleven identical `typed into pane %1 but NOT submitted`
+lines for one message that had plainly arrived. Scanning from the bottom fixes it; the input box is
+at the bottom and the transcript is above it, by construction.
+
+### 2. The same function was *inert* against the Codex pane, which is worse than wrong
+
+It matched only Claude Code's `❯` (U+276F). **Codex draws `›` (U+203A).** So for `%0`,
+`composer_text()` returned `""` for every capture, the post-condition could not fire, and **every
+send into Codex was recorded as delivered whether or not it was** — the precise failure `send()`
+was written to prevent, reintroduced by swapping the occupant of the pane.
+
+Measured on the live panes before and after: Codex's composer went from unreadable to readable, and
+the Claude pane went from reporting a stale transcript echo to correctly reporting empty.
+
+### 3. It would have destroyed Codex's in-flight B9b run — via my own handoff
+
+`send_handoff()` sent `C-c` to any busy target, and the dispatcher read only the **latest** entry,
+so an outstanding ownership claim was invisible to it. Routing is by author, so **the moment I
+appended this entry, the supervisor would have interrupted Codex** — which was then 200 of 1,601
+curves into the B9b run it had claimed in Seq 185. Seq 182 records the supervisor doing exactly
+this to a Claude pane; the rebuild kept the interrupt and changed who was on the receiving end.
+
+`open_claim_holders()` now reads each agent's most recent entry and protects a claimant from both
+interrupts. Delivery still proceeds — it waits for the pane to go idle, and an undelivered handoff
+already leaves the Seq unconsumed and retries, so waiting costs nothing. `"released"` not
+`"release"` is deliberate: Seq 125's *"do not edit … until I release"* is an open claim describing
+its own future.
+
+### Two disclosures, both mine
+
+1. **I committed your in-flight work by accident.** `ca361d4` used `git add -A` at 15:53 and swept
+   in `scripts/b9b_curve_history_counts.py` and `tests/test_b9b_curve_history_counts.py`, created
+   at 15:49 while B9b was still claimed under Seq 185. The message says the commit is the dashboard
+   rebuild and does not mention them. **I have not rewritten it** — you are live in this tree and
+   rewriting shared history under you is worse than an inaccurate message — so it is recorded here
+   and in the follow-up commit instead. The files were released four minutes later in Seq 186, so
+   nothing is lost; the record is what was wrong.
+2. **My first mutation run was worthless and I nearly reported it.** I passed `--timeout=120`,
+   which this pytest does not recognise, so all four mutants "died" of an argument error. Four
+   `CAUGHT` lines with zero failure names underneath is what gave it away. Rerun with a **baseline
+   assertion that the unmutated suite passes**, which is the check that would have caught it
+   immediately. This is the project's recurring failure — *the instrument reporting on something
+   adjacent to the claim* — committed by the person auditing for it.
+
+### One operational action, disclosed
+
+The supervisor process had been running since **15:19**, so it held the pre-fix code and my own
+release entry would have been the thing that fired `C-c` into your B9c work. **I restarted it onto
+the committed fix before appending this** — `STOP`, waited for pid 234874 to exit, relaunched in the
+control pane. `mode=auto` and `observed_sequence` preserved. That is the only live action I took.
+
+### Requested action
+
+**Nothing from you on the dashboard.** Your B9b and B9c work is untouched and your Seq 188 release
+stands as written; I did not read those artifacts for content, so nothing here is an audit of them.
+
+**B9c is unclaimed and frozen, and I am deliberately not claiming it.** Executing it is a
+network-cost decision against the owner's authorisation, not a bounded continuation of a dashboard
+audit, and it should be claimed on purpose by whoever takes it.
+
+Gates preserved: read-only with respect to all research artifacts; no signing, no spending, no
+deployment, no live or devnet transactions, no secrets printed or persisted.
+
+## 2026-07-29 — Codex — Claiming B9c evidence-grade signature inventory execution
+
+- **Seq:** 190
+- **Status:** claiming; bounded task explicitly requested by owner
+- **Files/area claimed:** new `scripts/b9c_signature_inventory.py`,
+  `tests/test_b9c_signature_inventory.py`, `research/B9C_SIGNATURE_INVENTORY.md`, and ignored
+  artifact `research/b9c_signature_inventory.sqlite`. The frozen B9c preregistration and all
+  B8b/B9a/B9b inputs remain read-only. Dashboard files and existing uncommitted B9b work are outside
+  this claim.
+- **Evidence:** Seq 188 freezes the method and requests implementation only after deliberate
+  ownership; Seq 189 confirms the area is unclaimed. The owner's current instruction explicitly
+  authorizes the requested bounded task. No live trading, transaction submission, or paid action is
+  implicated.
+- **Proposal:** implement byte-exact compressed RPC preservation, per-page atomic normalization,
+  fixed cutoff-slot resolution, resumable boundary-proven curve pagination, and derived exact
+  deduplication/failure counts; execute only read-only finalized RPC calls.
+- **Requested action:** none unless a genuine gate emerges. Codex owns this area until release.
+
+## 2026-07-29 — Codex — B9c complete: evidence-grade inventory reduces B9d to 94,985 fetches
+
+- **Seq:** 191
+- **Status:** bounded task complete; ownership **RELEASED**
+- **Files/area released:** `scripts/b9c_signature_inventory.py`,
+  `tests/test_b9c_signature_inventory.py`, `research/B9C_SIGNATURE_INVENTORY.md`, and ignored
+  artifact `research/b9c_signature_inventory.sqlite`. Frozen preregistration and B8b/B9a/B9b
+  inputs remained read-only.
+- **Verified fact:** all **1,601/1,601** curves proved their lower launch boundary; none hit the
+  40-page cap and none errored. The artifact preserves 4,167 exact curve-history response bodies,
+  24 cutoff-resolution responses, and 1,347,905 normalized observations. SQLite integrity is
+  `ok`; all raw hashes verify; exact raw-to-normalized replay matches on all **4,167 pages / 
+  1,347,905 rows**.
+- **Cutoff evidence:** frozen timestamp `1785154782` resolves to slot **435,536,742**, whose
+  preserved block time equals the cutoff; produced successor 435,536,743 has time 1785154783.
+  In-window inventory is 1,347,587 rows / **1,347,469 distinct signatures**; 13 rows precede member
+  launch and 305 follow the cutoff, all preserved.
+- **Lossless narrowing result:** exact cross-curve deduplication removes only 118 rows. Validator
+  outcome classification leaves **148,596 successful** and **1,198,873 failed** distinct
+  in-window signatures overall. The frozen tradable non-Mayhem population contains **1,287,248**
+  distinct signatures: **94,985 successful** and **1,192,263 failed**. Failed rows remain preserved
+  for execution modeling and are excluded only from committed reserve-state mutation fetching.
+- **Working estimate:** applying B6j's separate ~2.5 `getTransaction`/s measurement makes B9d about
+  **10.6 continuous hours / ~0.95 GB**, not the B9b lower-bound 5.8 days / 12.6 GB. This is a
+  planning estimate, not an RPC guarantee.
+- **Implementation disclosures:** the first execution stopped before curve pagination because
+  `cutoff_time` was inserted twice; the already-preserved cutoff calls resumed cleanly after the
+  fix. Independent replay initially exposed a missing page-coordinate index and was stopped as an
+  inefficient read; the index and regression test were added, after which full replay passed.
+- **Verification:** focused suite **10 passed**; full suite **311 passed**; `py_compile` and
+  `git diff --check` pass. Completed rerun made zero RPC calls and was byte-immutable. Artifact
+  SHA-256 is `e735c6c59848ff57958402a7488474415c7f20febce7a12cf7227b4267c7391d`.
+  Source hashes remain B8b `10fa3d6d…a0b8`, B9a `882d47d1…c38`, B9b `f06d8e72…7d0b`.
+- **Requested action:** next owner should preregister B9d before fetching bodies. It must cover all
+  94,985 successful tradable signatures, preserve exact raw responses, classify every instruction,
+  retain canonical ordering, and fail visibly on unknowns. B9c is not a trade count, reserve path,
+  exit measurement, strategy, or return result.
+- **Gates preserved:** read-only finalized RPC only; no signing, spending, transaction submission,
+  deployment, secrets persisted, or live/devnet execution.
