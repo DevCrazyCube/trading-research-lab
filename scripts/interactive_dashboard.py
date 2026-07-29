@@ -41,18 +41,86 @@ def has_session():
     return tmux("has-session", "-t", SESSION, check=False) == 0
 
 
+AGENT_TAG = "@agent"     # per-pane tmux user option: the one identity the TUI cannot overwrite
+
+
+def tag_pane(pane, name):
+    """Bind an agent name to a pane durably.
+
+    `pane_title` cannot carry this. The dashboard used to set it with `select-pane -T`, but the
+    Claude Code TUI *owns* that field and overwrites it with the agent's current activity — the
+    live panes read `Read all markdown files`, not `claude1`/`claude2`. A tmux **user option** is
+    per-pane, survives the application writing anything it likes, and dies with the pane.
+    """
+    tmux("set-option", "-p", "-t", pane, AGENT_TAG, name)
+
+
+def pane_agent(pane):
+    """The agent name bound to `pane`, or "" if it carries no tag."""
+    return tmux("show-options", "-p", "-t", pane, "-v", AGENT_TAG,
+                capture=True, check=False) or ""
+
+
+def live_panes():
+    """Pane ids in the dashboard session, or [] if they cannot be listed."""
+    rows = tmux("list-panes", "-t", SESSION, "-F", "#{pane_id}", capture=True, check=False)
+    return rows.split() if rows else []
+
+
+def tagged_panes():
+    """{agent name: pane id} for every pane carrying a tag.
+
+    Fail-soft: an unreadable pane list yields {} and resolution falls through to the stored map,
+    which is then validated. Raising here would make a transient tmux hiccup look like a missing
+    dashboard. It cannot reintroduce the Seq-171 defect, because the stored-map path still refuses
+    a pane whose tag names a different agent.
+    """
+    found = {}
+    for pane in live_panes():
+        name = pane_agent(pane)
+        if name:
+            found[name] = pane
+    return found
+
+
 def pane_id(title):
-    state = read_state()
-    stored = state.get("panes", {}).get(title)
+    """Resolve an agent name to its pane, refusing rather than guessing.
+
+    This function returned the wrong pane for hours and nothing noticed. It preferred a **stored**
+    map and never revalidated it, and its fallback matched on `pane_title`, which the TUI
+    overwrites. When the dashboard restarted and panes were recreated (%19/%20 -> %25/%26 ->
+    %28/%29) the stored map bound `claude1` to Claude 2's own pane, so **every handoff one agent
+    sent the other was typed into its own terminal.** Both panes run `claude` and both look alive,
+    so every downstream check passed. See `agent_discussion.md` Seq 171.
+
+    Order matters: the live tag wins over stored state, because the tag is a property of the pane
+    that exists now and the stored map is a memory of one that may not. A stored id that disagrees
+    with the tag is a **conflict, not a preference** - AGENTS.md forbids silently selecting the more
+    convenient claim, and here the convenient claim is the stale one.
+    """
+    live = tagged_panes()
+    if title in live:
+        return live[title]
+
+    stored = read_state().get("panes", {}).get(title)
     if stored:
+        # Untagged (a dashboard from before tagging existed). Accept it only if the pane is real
+        # and no *other* agent has claimed it, so a transposed map cannot survive contact.
+        panes = live_panes()
+        if panes and stored not in panes:
+            raise RuntimeError(
+                f"stored pane {stored} for {title!r} no longer exists. The map is stale; run "
+                f"`upgrade` to re-tag the panes rather than trusting it.")
+        owner = pane_agent(stored)
+        if owner and owner != title:
+            raise RuntimeError(
+                f"stored map says {title!r} is pane {stored}, but that pane is tagged {owner!r}. "
+                f"Refusing to send {title}'s handoff into {owner}'s terminal - this is the defect "
+                f"that made both agents hand off to themselves. Run `upgrade` to re-tag.")
         return stored
-    rows = tmux("list-panes", "-t", SESSION, "-F",
-                "#{pane_id}\t#{pane_title}", capture=True)
-    for row in rows.splitlines():
-        pane, pane_title = row.split("\t", 1)
-        if pane_title == title:
-            return pane
-    raise RuntimeError(f"dashboard pane {title!r} not found")
+    raise RuntimeError(
+        f"dashboard pane {title!r} not found: no pane carries the {AGENT_TAG} tag and no stored "
+        f"map entry exists. Run `upgrade` to tag the panes.")
 
 
 def read_state():
@@ -207,6 +275,14 @@ def send(agent, message):
     if agent not in AGENTS:
         raise ValueError(agent)
     target = pane_id(agent)
+    # Assert the recipient, not merely that something was delivered. The old post-condition checked
+    # that the composer emptied - which it did, because the text went somewhere real - and could not
+    # tell whose terminal it went into. A delivery check that cannot identify the recipient is why
+    # "Claude 1 is unresponsive" was diagnosed for hours while the messages were arriving here.
+    bound = pane_agent(target)
+    if bound and bound != agent:
+        raise RuntimeError(
+            f"refusing to send {agent!r}'s handoff into pane {target}, which is tagged {bound!r}")
     command = pane_command(target)
     if not command:
         raise RuntimeError(f"pane {target} for {agent!r} is gone; refusing to send")
@@ -442,12 +518,15 @@ def start(first):
     claude1 = tmux("display-message", "-p", "-t", f"{SESSION}:agents",
                    "#{pane_id}", capture=True)
     tmux("select-pane", "-t", claude1, "-T", "claude1")
+    tag_pane(claude1, "claude1")
     claude2 = tmux("split-window", "-d", "-h", "-p", "50", "-P", "-F", "#{pane_id}",
                   "-t", f"{SESSION}:agents", "-c", str(ROOT), "zsh", capture=True)
     tmux("select-pane", "-t", claude2, "-T", "claude2")
+    tag_pane(claude2, "claude2")
     control = tmux("split-window", "-d", "-v", "-f", "-p", "22", "-P", "-F", "#{pane_id}",
                    "-t", f"{SESSION}:agents", "-c", str(ROOT), "zsh", capture=True)
     tmux("select-pane", "-t", control, "-T", "control")
+    tag_pane(control, "control")
     tmux("set-option", "-t", SESSION, "mouse", "on")
     tmux("set-option", "-t", SESSION, "pane-border-status", "top")
     tmux("set-option", "-t", SESSION, "pane-border-format",
@@ -506,8 +585,12 @@ def upgrade_existing():
             claude1, claude2 = sorted(live)[:2]
     if not all((claude1, claude2, control)):
         raise RuntimeError("expected claude/codex/control panes in existing dashboard")
+    # Titles are cosmetic only: the TUI overwrites them. The tag is the identity.
     tmux("select-pane", "-t", claude1, "-T", "claude1")
     tmux("select-pane", "-t", claude2, "-T", "claude2")
+    tag_pane(claude1, "claude1")
+    tag_pane(claude2, "claude2")
+    tag_pane(control, "control")
     if rows_by_pane.get(claude2, ("", ""))[1] != "claude":
         tmux("respawn-pane", "-k", "-t", claude2, "-c", str(ROOT), "zsh")
         # Same race as start(): a respawned pane's shell is not ready the instant tmux returns.

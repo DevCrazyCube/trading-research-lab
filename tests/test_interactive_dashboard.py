@@ -115,6 +115,75 @@ class HandoffRoutingRegressionTests(unittest.TestCase):
             DASH.entry_author("## 2026-07-28 — Codex — subject naming Claude\n"), "codex")
 
 
+class PaneIdentityTests(unittest.TestCase):
+    """Pins the defect in `agent_discussion.md` Seq 171.
+
+    `pane_id()` preferred a **stored** map and never revalidated it, and its fallback matched on
+    `pane_title` — which the Claude Code TUI overwrites with the agent's current activity. When the
+    dashboard restarted and panes were recreated, the stored map bound `claude1` to Claude 2's own
+    pane, so **every handoff each agent sent the other was typed into its own terminal** for hours.
+    Both panes run `claude` and both look alive, so every downstream guard passed.
+
+    Identity now lives in a tmux per-pane user option, which the application cannot overwrite.
+    """
+
+    PANES = ["%28", "%29"]
+
+    def setUp(self):
+        self.originals = (DASH.tmux, DASH.read_state)
+        self.tags = {}
+        def fake_tmux(*args, capture=False, check=True):
+            if args[0] == "list-panes":
+                return "\n".join(self.PANES)
+            if args[0] == "show-options":
+                return self.tags.get(args[3], "")
+            if args[0] == "set-option":
+                self.tags[args[3]] = args[5] if len(args) > 5 else ""
+                return 0
+            return ""
+        DASH.tmux = fake_tmux
+        self.addCleanup(lambda: setattr(DASH, "tmux", self.originals[0]))
+        self.addCleanup(lambda: setattr(DASH, "read_state", self.originals[1]))
+
+    def stored(self, mapping):
+        DASH.read_state = lambda: {"panes": mapping}
+
+    def test_the_live_tag_wins_over_a_transposed_stored_map(self):
+        """The exact production failure: the stored map said claude1 was the other agent's pane."""
+        self.tags["%28"], self.tags["%29"] = "claude2", "claude1"
+        self.stored({"claude1": "%28", "claude2": "%29"})      # transposed, as it was on disk
+        self.assertEqual(DASH.pane_id("claude1"), "%29")
+        self.assertEqual(DASH.pane_id("claude2"), "%28")
+
+    def test_an_untagged_stored_pane_is_accepted(self):
+        """A dashboard predating tagging still works, so the fix is not a flag day."""
+        self.stored({"claude1": "%28"})
+        self.assertEqual(DASH.pane_id("claude1"), "%28")
+
+    def test_a_stored_pane_tagged_for_someone_else_is_refused(self):
+        self.tags["%28"] = "claude2"
+        self.stored({"claude1": "%28"})
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.pane_id("claude1")
+        self.assertIn("tagged", str(ctx.exception))
+
+    def test_a_stored_pane_that_no_longer_exists_is_refused(self):
+        self.stored({"claude1": "%99"})
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.pane_id("claude1")
+        self.assertIn("no longer exists", str(ctx.exception))
+
+    def test_no_tag_and_no_stored_entry_refuses_rather_than_guessing(self):
+        self.stored({})
+        with self.assertRaises(RuntimeError):
+            DASH.pane_id("claude1")
+
+    def test_tagging_round_trips(self):
+        DASH.tag_pane("%28", "claude2")
+        self.assertEqual(DASH.pane_agent("%28"), "claude2")
+        self.assertEqual(DASH.tagged_panes(), {"claude2": "%28"})
+
+
 class SendGuardTests(unittest.TestCase):
     """A dispatch that lands in a shell must fail loudly, not be recorded as delivered.
 
@@ -133,6 +202,32 @@ class SendGuardTests(unittest.TestCase):
     def tearDown(self):
         DASH.time.sleep = self.saved_sleep
         DASH.tmux, DASH.pane_id, DASH.write_state = self.originals
+
+    def test_send_refuses_a_pane_tagged_for_a_different_agent(self):
+        """The last line of defence for the Seq-171 defect.
+
+        `pane_id()` now resolves by tag, but `send()` must assert the recipient too: the old
+        post-condition only checked that the composer emptied, which it did — the text went into a
+        real terminal, just the wrong agent's. A delivery check that cannot identify the recipient
+        is why "the other agent is unresponsive" was diagnosed for hours.
+        """
+        saved = DASH.pane_agent
+        DASH.pane_agent = lambda pane: "claude2"
+        self.addCleanup(lambda: setattr(DASH, "pane_agent", saved))
+        DASH.tmux = self._tmux_with_command("claude")
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.send("claude1", "handoff")
+        self.assertIn("tagged", str(ctx.exception))
+        self.assertNotIn(("state", ), [(c[0],) for c in self.calls],
+                         "a refused send must not record a delivery")
+
+    def test_send_proceeds_when_the_tag_matches(self):
+        saved = DASH.pane_agent
+        DASH.pane_agent = lambda pane: "claude1"
+        self.addCleanup(lambda: setattr(DASH, "pane_agent", saved))
+        DASH.tmux = self._tmux_with_command("claude")
+        DASH.send("claude1", "handoff")
+        self.assertTrue(any(c[0] == "state" for c in self.calls))
 
     def _tmux_with_command(self, command, pane_text="❯ "):
         """`pane_text` models what capture-pane returns: the composer line, plus the busy marker
