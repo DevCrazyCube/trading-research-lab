@@ -232,6 +232,169 @@ class ClassificationTests(unittest.TestCase):
         self.assertIn(B9D.PUMP_PROGRAM, B9D.TARGET_PROGRAMS)
 
 
+class PinnedDecoderTests(unittest.TestCase):
+    """Offline decoder is bound to the exact local IDL and consumes payloads exactly."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.idl = B9D.load_pinned_idl(
+            str(ROOT / B9D.PUMP_IDL_PATH), B9D.PUMP_IDL_SHA256, B9D.PUMP_PROGRAM)
+
+    def instruction(self, name):
+        return next(entry for entry in self.idl["instructions"] if entry["name"] == name)
+
+    def test_real_pump_idl_is_exactly_pinned(self):
+        self.assertEqual(self.idl["address"], B9D.PUMP_PROGRAM)
+        self.assertEqual(B9D.sha256_file(str(ROOT / B9D.PUMP_IDL_PATH)), B9D.PUMP_IDL_SHA256)
+
+    def test_a_changed_idl_is_refused(self):
+        path = pathlib.Path(tempfile.mkdtemp()) / "idl.json"
+        path.write_text(json.dumps(self.idl) + "\n")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.load_pinned_idl(str(path), B9D.PUMP_IDL_SHA256, B9D.PUMP_PROGRAM)
+        self.assertIn("interface drift", str(ctx.exception))
+
+    def test_declared_discriminator_is_authoritative(self):
+        custom = {"instructions": [{"name": "buy", "discriminator": list(range(8))}]}
+        self.assertEqual(B9D.idl_instruction_map(custom), {bytes(range(8)).hex(): "buy"})
+
+    def test_real_sell_arguments_and_accounts_decode(self):
+        entry = self.instruction("sell")
+        data = bytes(entry["discriminator"]) + (7).to_bytes(8, "little") + (9).to_bytes(8, "little")
+        account_count = len(B9D.flatten_accounts(entry["accounts"]))
+        keys = [f"account-{index}" for index in range(account_count)] + ["remaining"]
+        decoded = B9D.decode_idl_instruction(self.idl, data, keys)
+        self.assertEqual(decoded["name"], "sell")
+        self.assertEqual(decoded["args"], {"amount": 7, "min_sol_output": 9})
+        self.assertEqual(decoded["accounts"]["global"], "account-0")
+        self.assertEqual(decoded["remaining_accounts"], ["remaining"])
+
+    def test_real_buy_defined_option_bool_decodes(self):
+        entry = self.instruction("buy")
+        data = (bytes(entry["discriminator"]) + (3).to_bytes(8, "little") +
+                (4).to_bytes(8, "little") + b"\x01")
+        keys = [f"a{index}" for index in range(len(B9D.flatten_accounts(entry["accounts"])))]
+        decoded = B9D.decode_idl_instruction(self.idl, data, keys)
+        self.assertEqual(decoded["args"],
+                         {"amount": 3, "max_sol_cost": 4, "track_volume": [True]})
+
+    def test_instruction_trailing_bytes_fail_exact_consumption(self):
+        entry = self.instruction("sell")
+        data = bytes(entry["discriminator"]) + b"\0" * 17
+        keys = ["a"] * len(B9D.flatten_accounts(entry["accounts"]))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_idl_instruction(self.idl, data, keys)
+        self.assertIn("unconsumed", str(ctx.exception))
+
+    def test_complete_event_decodes_from_real_layout(self):
+        event = next(entry for entry in self.idl["events"] if entry["name"] == "CompleteEvent")
+        pubkeys = [bytes([value]) * 32 for value in (1, 2, 3, 4)]
+        payload = (bytes(event["discriminator"]) + pubkeys[0] + pubkeys[1] + pubkeys[2] +
+                   (-5).to_bytes(8, "little", signed=True) + pubkeys[3])
+        name, decoded = B9D.decode_idl_event(self.idl, payload)
+        self.assertEqual(name, "CompleteEvent")
+        self.assertEqual(decoded["timestamp"], -5)
+        self.assertEqual(decoded["user"], B9D.base58(pubkeys[0]))
+        self.assertEqual(decoded["quote_mint"], B9D.base58(pubkeys[3]))
+
+    def test_trade_event_reserve_projection_is_exact_and_named(self):
+        fields = {"virtual_quote_reserves": 1, "virtual_token_reserves": 2,
+                  "real_quote_reserves": 3, "real_token_reserves": 4, "ignored": 5}
+        self.assertEqual(B9D.reserve_after_from_event("TradeEvent", fields), {
+            "virtual_quote_reserves": 1, "virtual_token_reserves": 2,
+            "real_quote_reserves": 3, "real_token_reserves": 4})
+        self.assertIsNone(B9D.reserve_after_from_event("CompleteEvent", fields))
+
+    def test_a_partial_target_map_is_still_refused(self):
+        """The gap Codex left visible in Seq 202 must stay refusable now that it is filled.
+
+        A missing IDL must never be able to masquerade as a run full of unknown-discriminator
+        failures, which would look like a finding about the chain rather than about the decoder.
+        """
+        pump_map = {B9D.PUMP_PROGRAM: B9D.idl_instruction_map(self.idl)}
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.require_all_target_idls(pump_map)
+        self.assertIn(B9D.PUMPSWAP_PROGRAM, str(ctx.exception))
+
+
+class PinnedPumpSwapIdlTests(unittest.TestCase):
+    """The PumpSwap interface is retrieved and pinned, never invented (AGENTS.md).
+
+    Source: `pump-fun/pump-public-docs` `idl/pump_amm.json` at commit
+    `9c82f61cb711b044a17f770ab8ce9f9bdf78f333`, retrieved 2026-07-29 — the same commit the Pump
+    IDL is pinned at and the one `research/B0_PUMPSWAP_PROGRAM_UPGRADE_INVENTORY.md` cites.
+    """
+
+    def setUp(self):
+        self.path = ROOT / B9D.PUMPSWAP_IDL_PATH
+        self.idl = json.loads(self.path.read_bytes())
+
+    def test_the_pinned_file_is_present_and_hashes_to_its_recorded_value(self):
+        self.assertTrue(self.path.exists(), "the pinned IDL must be committed, not fetched at run time")
+        self.assertEqual(B9D.sha256_file(str(self.path)), B9D.PUMPSWAP_IDL_SHA256)
+
+    def test_it_declares_the_expected_program_address(self):
+        self.assertEqual(self.idl["address"], B9D.PUMPSWAP_PROGRAM)
+        self.assertEqual(self.idl["metadata"]["name"], "pump_amm")
+
+    def test_hash_or_address_drift_fails_closed(self):
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.load_pinned_idl(str(self.path), "0" * 64, B9D.PUMPSWAP_PROGRAM)
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.load_pinned_idl(str(self.path), B9D.PUMPSWAP_IDL_SHA256, B9D.PUMP_PROGRAM)
+        self.assertIn("declares", str(ctx.exception))
+
+    def test_every_declared_discriminator_matches_the_anchor_derivation(self):
+        """Two independent derivations agreeing is what separates a retrieved IDL from a guess."""
+        for entry in self.idl["instructions"]:
+            derived = list(hashlib.sha256(f"global:{entry['name']}".encode()).digest()[:8])
+            self.assertEqual(entry["discriminator"], derived, entry["name"])
+        events = [e for e in self.idl.get("events", []) if "discriminator" in e]
+        self.assertTrue(events)
+        for entry in events:
+            derived = list(hashlib.sha256(f"event:{entry['name']}".encode()).digest()[:8])
+            self.assertEqual(entry["discriminator"], derived, entry["name"])
+
+    def test_the_instruction_map_is_complete_and_unambiguous(self):
+        mapping = B9D.idl_instruction_map(self.idl)
+        self.assertEqual(len(mapping), len(self.idl["instructions"]),
+                         "a collision would have been silently deduplicated")
+        self.assertEqual(len(mapping), 31)
+
+    def test_target_maps_cover_both_programs_and_do_not_collide_across_them(self):
+        maps = B9D.target_idl_maps(str(ROOT / B9D.PUMP_IDL_PATH), str(self.path))
+        self.assertEqual(set(maps), set(B9D.TARGET_PROGRAMS))
+        self.assertTrue(B9D.require_all_target_idls(maps))
+        # Programs may legitimately share an instruction name; the maps must stay separate so a
+        # PumpSwap discriminator can never resolve against the Pump interface.
+        self.assertIsNot(maps[B9D.PUMP_PROGRAM], maps[B9D.PUMPSWAP_PROGRAM])
+
+    def test_a_pumpswap_instruction_classifies_against_its_own_idl(self):
+        maps = B9D.target_idl_maps(str(ROOT / B9D.PUMP_IDL_PATH), str(self.path))
+        entry = next(i for i in self.idl["instructions"] if i["name"] == "sell")
+        data = bytes(entry["discriminator"]) + b"\x00" * 16
+        target, name, disc, reason = B9D.classify_instruction(B9D.PUMPSWAP_PROGRAM, data, maps)
+        self.assertEqual((target, name, reason), (True, "sell", None))
+        self.assertEqual(disc, bytes(entry["discriminator"]).hex())
+
+    def test_an_unknown_pumpswap_discriminator_still_fails_visibly(self):
+        maps = B9D.target_idl_maps(str(ROOT / B9D.PUMP_IDL_PATH), str(self.path))
+        target, name, disc, reason = B9D.classify_instruction(
+            B9D.PUMPSWAP_PROGRAM, bytes(range(8)) + b"\x00", maps)
+        self.assertTrue(target)
+        self.assertIsNone(name)
+        self.assertIn("unknown", reason)
+
+    def test_the_manifest_records_provenance_not_just_a_hash(self):
+        manifest = B9D.decoder_manifest(str(ROOT / B9D.PUMP_IDL_PATH), str(self.path))
+        self.assertEqual(manifest["pumpswap_idl_sha256"], B9D.PUMPSWAP_IDL_SHA256)
+        self.assertEqual(manifest["pumpswap_program"], B9D.PUMPSWAP_PROGRAM)
+        self.assertEqual(manifest["idl_source_commit"], "9c82f61cb711b044a17f770ab8ce9f9bdf78f333")
+        self.assertEqual(manifest["idl_access_date"], "2026-07-29")
+        self.assertNotIn("pumpswap_idl_status", manifest,
+                         "the MISSING_PINNED_IDL hard-failure marker must be gone, not falsified")
+
+
 class ArtifactTests(unittest.TestCase):
     """§5: schema, resume, and the immutability B9b's Seq 188 correction exists for."""
 
@@ -325,8 +488,15 @@ class ExecutionGateTests(unittest.TestCase):
         database = sqlite3.connect(directory / "a.sqlite")
         names = {row[0] for row in database.execute(
             "SELECT name FROM sqlite_master WHERE type='table'")}
+        metadata = dict(database.execute("SELECT key,value FROM metadata"))
         database.close()
         self.assertIn("raw_block_signatures", names)
+        self.assertEqual(metadata["pump_idl_sha256"], B9D.PUMP_IDL_SHA256)
+        # Both target interfaces are now pinned into the artifact, with provenance. An artifact
+        # that cannot say which interface revision decoded it is not auditable.
+        self.assertEqual(metadata["pumpswap_idl_sha256"], B9D.PUMPSWAP_IDL_SHA256)
+        self.assertEqual(metadata["idl_source_commit"], B9D.IDL_SOURCE_COMMIT)
+        self.assertNotIn("pumpswap_idl_status", metadata)
 
 
 if __name__ == "__main__":

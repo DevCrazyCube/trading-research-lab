@@ -15,6 +15,7 @@ import argparse
 import hashlib
 import json
 import sqlite3
+import struct
 import sys
 
 # Primary sources. Pinned by hash: a scaffold that silently accepts a different artifact would
@@ -34,6 +35,23 @@ SLOT_MAX = 435_536_000
 PUMP_PROGRAM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
 PUMPSWAP_PROGRAM = "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
 TARGET_PROGRAMS = (PUMP_PROGRAM, PUMPSWAP_PROGRAM)
+
+PUMP_IDL_PATH = "research/pump_idl_9c82f61.json"
+PUMP_IDL_SHA256 = "b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49"
+
+# Retrieved byte-exactly from the primary source on 2026-07-29, at the same pinned commit the Pump
+# IDL above is pinned at and that `research/B0_PUMPSWAP_PROGRAM_UPGRADE_INVENTORY.md` cites:
+#   https://raw.githubusercontent.com/pump-fun/pump-public-docs/
+#     9c82f61cb711b044a17f770ab8ce9f9bdf78f333/idl/pump_amm.json
+# The file declares `address` = PUMPSWAP_PROGRAM, and all 31 instruction and 25 event
+# discriminators it declares equal the Anchor derivations sha256("global:"/"event:" + name)[:8]
+# with zero mismatches and zero collisions — two independent derivations agreeing, which is what
+# distinguishes a retrieved interface from a plausible-looking one.
+PUMPSWAP_IDL_PATH = "research/pump_amm_idl_9c82f61.json"
+PUMPSWAP_IDL_SHA256 = "6b5c7ec4e5ef9742fa99dc57b0d75b1031b379bba02a7e1b3c5a4cad68d77e56"
+IDL_SOURCE_COMMIT = "9c82f61cb711b044a17f770ab8ce9f9bdf78f333"
+IDL_SOURCE_REPO = "https://github.com/pump-fun/pump-public-docs"
+IDL_ACCESS_DATE = "2026-07-29"
 
 SCHEMA_VERSION = "b9d-v1"
 
@@ -55,6 +73,24 @@ def sha256_file(path, chunk=1 << 20):
             if not block:
                 return digest.hexdigest()
             digest.update(block)
+
+
+def load_pinned_idl(path, expected_sha256, expected_program):
+    """Load exactly one pinned interface; hash/address mismatch is fatal."""
+    actual = sha256_file(path)
+    if actual != expected_sha256:
+        raise FreezeViolation(
+            f"IDL {path} hashes {actual}, pinned {expected_sha256}; refusing interface drift")
+    with open(path, "rb") as handle:
+        raw = handle.read()
+    try:
+        idl = json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise FreezeViolation(f"pinned IDL {path} is not valid JSON: {error}") from error
+    if idl.get("address") != expected_program:
+        raise FreezeViolation(
+            f"IDL {path} declares {idl.get('address')}, expected {expected_program}")
+    return idl
 
 
 def assert_sources(b9c_path=B9C_PATH, b9a_path=B9A_PATH):
@@ -331,19 +367,276 @@ def idl_instruction_map(idl):
     Derived, never hardcoded: an invented instruction list would be exactly the fabricated
     interface AGENTS.md forbids. The caller supplies the pinned IDL; this only hashes its names.
     """
-    names = [entry["name"] for entry in idl.get("instructions", [])]
-    if not names:
+    entries = idl.get("instructions", [])
+    if not entries:
         raise FreezeViolation(
             "pinned IDL declares no instructions; refusing to classify against an empty interface")
     mapping = {}
-    for name in names:
-        digest = hashlib.sha256(f"global:{name}".encode()).digest()[:8].hex()
+    for entry in entries:
+        name = entry["name"]
+        declared = entry.get("discriminator")
+        if declared is None:
+            digest = hashlib.sha256(f"global:{name}".encode()).digest()[:8].hex()
+        else:
+            if len(declared) != 8 or any(not isinstance(value, int) or not 0 <= value <= 255
+                                         for value in declared):
+                raise FreezeViolation(f"IDL instruction {name!r} has invalid discriminator")
+            digest = bytes(declared).hex()
         if digest in mapping:
             raise FreezeViolation(
                 f"discriminator collision between {mapping[digest]!r} and {name!r} in the pinned "
                 "IDL; classification would be ambiguous")
         mapping[digest] = name
     return mapping
+
+
+BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
+
+def base58(raw):
+    value = int.from_bytes(raw, "big")
+    encoded = ""
+    while value:
+        value, remainder = divmod(value, 58)
+        encoded = BASE58_ALPHABET[remainder] + encoded
+    zeros = len(raw) - len(raw.lstrip(b"\0"))
+    return "1" * zeros + (encoded or "")
+
+
+class BorshReader:
+    """Small fail-closed Borsh reader for types declared by the pinned IDL."""
+
+    def __init__(self, data):
+        self.data = memoryview(data)
+        self.offset = 0
+
+    def take(self, size):
+        if size < 0 or self.offset + size > len(self.data):
+            raise FreezeViolation(
+                f"Borsh payload truncated at offset {self.offset}, need {size}, "
+                f"have {len(self.data) - self.offset}")
+        out = bytes(self.data[self.offset:self.offset + size])
+        self.offset += size
+        return out
+
+    def integer(self, width, signed=False):
+        return int.from_bytes(self.take(width), "little", signed=signed)
+
+    def remaining(self):
+        return len(self.data) - self.offset
+
+
+def idl_types(idl):
+    return {entry["name"]: entry["type"] for entry in idl.get("types", [])}
+
+
+def decode_borsh(reader, type_spec, types):
+    if isinstance(type_spec, str):
+        integers = {"u8": (1, False), "u16": (2, False), "u32": (4, False),
+                    "u64": (8, False), "i8": (1, True), "i16": (2, True),
+                    "i32": (4, True), "i64": (8, True)}
+        if type_spec in integers:
+            return reader.integer(*integers[type_spec])
+        if type_spec == "bool":
+            value = reader.integer(1)
+            if value not in (0, 1):
+                raise FreezeViolation(f"invalid Borsh bool byte {value}")
+            return bool(value)
+        if type_spec == "pubkey":
+            return base58(reader.take(32))
+        if type_spec == "string":
+            length = reader.integer(4)
+            try:
+                return reader.take(length).decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise FreezeViolation(f"invalid UTF-8 Borsh string: {error}") from error
+        raise FreezeViolation(f"unsupported IDL scalar type {type_spec!r}")
+    if not isinstance(type_spec, dict) or len(type_spec) != 1:
+        raise FreezeViolation(f"unsupported IDL type specification {type_spec!r}")
+    kind, value = next(iter(type_spec.items()))
+    if kind == "option":
+        tag = reader.integer(1)
+        if tag == 0:
+            return None
+        if tag != 1:
+            raise FreezeViolation(f"invalid Borsh option tag {tag}")
+        return decode_borsh(reader, value, types)
+    if kind == "vec":
+        count = reader.integer(4)
+        return [decode_borsh(reader, value, types) for _ in range(count)]
+    if kind == "array":
+        child, count = value
+        return [decode_borsh(reader, child, types) for _ in range(count)]
+    if kind == "defined":
+        name = value["name"] if isinstance(value, dict) else value
+        if name not in types:
+            raise FreezeViolation(f"IDL references missing defined type {name!r}")
+        return decode_defined(reader, name, types[name], types)
+    raise FreezeViolation(f"unsupported composite IDL type {kind!r}")
+
+
+def decode_defined(reader, name, definition, types):
+    kind = definition.get("kind")
+    if kind == "struct":
+        fields = definition.get("fields", [])
+        if fields and isinstance(fields[0], str):
+            return [decode_borsh(reader, field, types) for field in fields]
+        return {field["name"]: decode_borsh(reader, field["type"], types)
+                for field in fields}
+    if kind == "enum":
+        index = reader.integer(1)
+        variants = definition.get("variants", [])
+        if index >= len(variants):
+            raise FreezeViolation(f"enum {name} variant {index} is out of range")
+        variant = variants[index]
+        if variant.get("fields"):
+            raise FreezeViolation(f"enum {name} variant fields are not implemented")
+        return variant["name"]
+    raise FreezeViolation(f"unsupported defined type {name!r} kind {kind!r}")
+
+
+def instruction_entries(idl):
+    return {bytes(entry.get("discriminator") or
+                  hashlib.sha256(f"global:{entry['name']}".encode()).digest()[:8]): entry
+            for entry in idl.get("instructions", [])}
+
+
+def flatten_accounts(entries):
+    flattened = []
+    for entry in entries:
+        if "accounts" in entry:
+            flattened.extend(flatten_accounts(entry["accounts"]))
+        else:
+            flattened.append(entry)
+    return flattened
+
+
+def decode_idl_instruction(idl, data, account_keys):
+    """Decode one target instruction and require exact argument consumption."""
+    if len(data) < 8:
+        raise FreezeViolation("target instruction data is shorter than its discriminator")
+    entry = instruction_entries(idl).get(bytes(data[:8]))
+    if entry is None:
+        raise FreezeViolation(f"unknown target discriminator {bytes(data[:8]).hex()}")
+    reader = BorshReader(data[8:])
+    types = idl_types(idl)
+    args = {arg["name"]: decode_borsh(reader, arg["type"], types)
+            for arg in entry.get("args", [])}
+    if reader.remaining():
+        raise FreezeViolation(
+            f"{entry['name']} leaves {reader.remaining()} unconsumed argument bytes")
+    declared_accounts = flatten_accounts(entry.get("accounts", []))
+    if len(account_keys) < len(declared_accounts):
+        raise FreezeViolation(
+            f"{entry['name']} needs {len(declared_accounts)} accounts, got {len(account_keys)}")
+    accounts = {spec["name"]: account_keys[index]
+                for index, spec in enumerate(declared_accounts)}
+    return {"name": entry["name"], "args": args, "accounts": accounts,
+            "remaining_accounts": list(account_keys[len(declared_accounts):])}
+
+
+def event_entries(idl):
+    types = idl_types(idl)
+    out = {}
+    for event in idl.get("events", []):
+        discriminator = event.get("discriminator")
+        if discriminator is None or len(discriminator) != 8:
+            raise FreezeViolation(f"IDL event {event.get('name')!r} lacks an 8-byte discriminator")
+        name = event["name"]
+        if name not in types:
+            raise FreezeViolation(f"IDL event {name!r} has no matching declared type")
+        key = bytes(discriminator)
+        if key in out:
+            raise FreezeViolation(f"duplicate IDL event discriminator {key.hex()}")
+        out[key] = (name, types[name])
+    return out
+
+
+def decode_idl_event(idl, payload):
+    """Decode discriminator + Borsh event bytes with exact payload consumption."""
+    if len(payload) < 8:
+        raise FreezeViolation("event payload shorter than discriminator")
+    event = event_entries(idl).get(bytes(payload[:8]))
+    if event is None:
+        raise FreezeViolation(f"unknown event discriminator {bytes(payload[:8]).hex()}")
+    name, definition = event
+    reader = BorshReader(payload[8:])
+    value = decode_defined(reader, name, definition, idl_types(idl))
+    if reader.remaining():
+        raise FreezeViolation(f"{name} leaves {reader.remaining()} unconsumed event bytes")
+    return name, value
+
+
+def reserve_after_from_event(name, fields):
+    """Return exact post-instruction quote/token reserves only for TradeEvent."""
+    if name != "TradeEvent":
+        return None
+    required = ("virtual_quote_reserves", "virtual_token_reserves",
+                "real_quote_reserves", "real_token_reserves")
+    missing = [field for field in required if field not in fields]
+    if missing:
+        raise FreezeViolation(f"TradeEvent lacks reserve field(s): {', '.join(missing)}")
+    return {field: fields[field] for field in required}
+
+
+def decoder_manifest(pump_path=PUMP_IDL_PATH, pumpswap_path=PUMPSWAP_IDL_PATH):
+    """Offline decoder state: both target interfaces, each pinned by hash and declared address.
+
+    The PumpSwap entry was the `MISSING_PINNED_IDL_HARD_FAILURE` gap Codex left deliberately
+    visible in Seq 202 rather than filling with an invented map. It is now a retrieved pin, with
+    provenance recorded here and written into artifact metadata: an interface without a source
+    URL, commit and access date is not pinned, it is merely present.
+    """
+    pump = load_pinned_idl(pump_path, PUMP_IDL_SHA256, PUMP_PROGRAM)
+    pumpswap = load_pinned_idl(pumpswap_path, PUMPSWAP_IDL_SHA256, PUMPSWAP_PROGRAM)
+    return {
+        "pump_idl_path": pump_path,
+        "pump_idl_sha256": PUMP_IDL_SHA256,
+        "pump_program": pump["address"],
+        "pumpswap_idl_path": pumpswap_path,
+        "pumpswap_idl_sha256": PUMPSWAP_IDL_SHA256,
+        "pumpswap_program": pumpswap["address"],
+        "idl_source_repo": IDL_SOURCE_REPO,
+        "idl_source_commit": IDL_SOURCE_COMMIT,
+        "idl_access_date": IDL_ACCESS_DATE,
+    }
+
+
+def target_idl_maps(pump_path=PUMP_IDL_PATH, pumpswap_path=PUMPSWAP_IDL_PATH):
+    """{program id: {discriminator hex: instruction name}} for every target program.
+
+    Built in one place so a caller cannot classify against a partial set by accident and then
+    record unknown-discriminator failures that are really missing-IDL failures.
+    """
+    maps = {
+        PUMP_PROGRAM: idl_instruction_map(
+            load_pinned_idl(pump_path, PUMP_IDL_SHA256, PUMP_PROGRAM)),
+        PUMPSWAP_PROGRAM: idl_instruction_map(
+            load_pinned_idl(pumpswap_path, PUMPSWAP_IDL_SHA256, PUMPSWAP_PROGRAM)),
+    }
+    require_all_target_idls(maps)
+    return maps
+
+
+def require_all_target_idls(idl_maps):
+    missing = [program for program in TARGET_PROGRAMS if program not in idl_maps]
+    if missing:
+        raise FreezeViolation(
+            "target decoder map missing pinned IDL(s): " + ", ".join(missing))
+    return True
+
+
+def record_decoder_manifest(database, manifest):
+    """Write missing keys once; refuse metadata drift on resume."""
+    present = dict(database.execute("SELECT key,value FROM metadata"))
+    for key, value in manifest.items():
+        value = str(value)
+        if key in present and present[key] != value:
+            raise FreezeViolation(
+                f"decoder metadata drift for {key}: {present[key]!r} != {value!r}")
+        if key not in present:
+            database.execute("INSERT INTO metadata VALUES (?,?)", (key, value))
+    return True
 
 
 def classify_instruction(program_id, data, idl_maps):
@@ -400,9 +693,11 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.command == "verify":
         digests = assert_sources(args.b9c, args.b9a)
+        manifest = decoder_manifest()
         signatures, slots = frozen_population(args.b9c, args.b9a)
         print(json.dumps({
             "sources_ok": digests,
+            "decoder": manifest,
             "signatures": len(signatures),
             "slots": len(slots),
             "slot_range": [min(slots), max(slots)],
@@ -414,6 +709,7 @@ def main(argv=None):
         try:
             schema(database)
             refuse_if_complete(database)
+            record_decoder_manifest(database, decoder_manifest())
             database.commit()
         finally:
             database.close()
