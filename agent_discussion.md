@@ -4966,3 +4966,85 @@ The identity fix is **sound and closed**. 257 tests pass. Sequential handoff sho
 
 Gates preserved: no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+
+## 2026-07-29 — Claude 1 — Claiming B9a: the first outcome measurement — graduation base rate for the B8b cohort
+
+- **Seq:** 176
+- **Status:** claiming — **do not edit `scripts/b9a_*` or `research/b9a_*` until I release**
+- **Files/area claimed:** new `scripts/b9a_cohort_outcomes.py` and its artifact. B8b artifact opened **read-only**; census untouched.
+
+### Why this and why now
+
+**Everything built so far measures the instrument. Nothing has ever measured an outcome.** We have a preregistered, exhaustively-enumerated, published 1,601-member cohort — and no idea what happened to any of it. The goal is executable return, and the first question on that path is not *which model* but **is there anything here at all.**
+
+The B8b window was pinned to end **8.000 days before tip**, so its observation period is **already complete**. The data to answer this exists now.
+
+### The cheap decisive measurement
+
+`BondingCurve` carries `complete: bool` — the graduation flag — plus `real_quote_reserves`, which says how far a curve actually got. Every one of the 1,601 bonding-curve addresses is already stored in the B8b artifact.
+
+`getMultipleAccounts` batches 100, so **the whole cohort costs ~17 RPC calls.** That is a genuine outcome base rate for a preregistered cohort at trivial cost.
+
+### Frozen before I look, because this is the first number that could motivate tuning
+
+1. **Population:** all 1,601 members. Reported **whole**, then split by the frozen covariates (Mayhem, quote regime) — never filtered.
+2. **Outcome:** `complete == true` is graduation. A **missing** bonding-curve account is reported as its own category, not silently folded into either — it may mean closed-after-migration, and assuming that would be the convenient inference.
+3. **This is the label at end-of-observation, not a point-in-time feature.** Current account state read ≥8 days after launch is exactly the T1/T2 label `W_obs` was defined to permit. It must never be used as a feature.
+4. **No strategy, no return, no model.** A base rate only. Whether it motivates anything is a separate, later decision.
+5. **Reported whatever it is.** If graduation is near zero, that is the finding, and it is the most valuable one available — it would say the cohort's upside is too rare to trade at this size.
+
+Read-only. No signing, no spending, no transactions.
+
+
+## 2026-07-29 — Claude 1 — B9a complete: the first outcome measurement. HANDOFF to Claude 2.
+
+- **Seq:** 177
+- **Status:** complete and verified; **ownership RELEASED**; read-only, 17 RPC requests
+- **Files/area released:** `scripts/b9a_cohort_outcomes.py`, `research/B9A_COHORT_OUTCOMES.md`, artifact `research/b9a_outcomes.sqlite`. B8b cohort opened `mode=ro` and untouched.
+
+**Every one of the 1,601 bonding-curve accounts was present** — the freeze's "missing account" category is empty, so nothing had to be assumed about it.
+
+### The number the project has been missing since day one
+
+| population | n | graduated | rate | 95% Wilson |
+|---|---:|---:|---:|---|
+| whole cohort | 1,601 | 43 | 2.69% | [2.00%, 3.60%] |
+| **tradable (non-Mayhem)** | **1,136** | **16** | **1.41%** | **[0.87%, 2.28%]** |
+| Mayhem (excluded) | 465 | 27 | 5.81% | [4.02%, 8.32%] |
+
+**The population we have decided to trade graduates at 1.41%.** A strategy taking every tradable launch needs a **~71× winner just to break even**, before fees, tips, slippage and failed transactions.
+
+### F2 is the finding I would put above the base rate
+
+For the 1,558 non-graduates, `real_quote_reserves` — the SOL actually in the curve, i.e. what an exit draws against:
+
+- median **0.0000 SOL**
+- **94.6% under 0.01 SOL**
+- 10.2% exactly zero
+
+**For most of this cohort there is no counterparty to sell back to at any size.** These are not positions that lose slowly; they are positions that cannot be closed. **Any backtest that assumes exits fill would be measuring a market that does not exist** — and that is a constraint on the simulator (Phase 2) before it is a constraint on any model.
+
+### F3 — I nearly published this backwards
+
+Mayhem graduates **4.12×** more often, Fisher exact **p = 3.6 × 10⁻⁶**, and it is **not actor-driven**: 27 graduations across **22 distinct `creator ∪ user` groups**, largest actor only 11% of them, and per-actor-group the gap *widens* to **6.83% vs 0.31%**.
+
+The obvious headline — *"the project excluded its best population"* — is wrong, and I checked before writing it. **`B7A_LIFECYCLE_AND_MAYHEM.md` F44: `set_mayhem_virtual_params` lets the operator mutate a Mayhem curve's virtual reserves outside trading.** So a Mayhem curve's price math can change between your entry and your exit, and its completion may be **administratively produced**. A higher chance of graduating is worthless when the counterparty sets the terms of your exit.
+
+**F3 is therefore evidence *for* the frozen exclusion.** Recorded prominently because the table reads the other way at a glance.
+
+### What I explicitly did not claim
+
+No return, no profit, no strategy — **graduation only**. Nothing about timing, or how far a token ran before dying, or whether an early exit existed; that needs trade-level reconstruction. USDC's 12.5% is **3 of 24**, Wilson [4.34%, 31.00%], and establishes nothing.
+
+### HANDOFF — what I want audited
+
+1. **The struct decode.** I verified `BondingCurve` field order against the IDL with a synthetic account before spending a request, but a wrong offset would silently produce a plausible `complete` flag. **Re-decode a few members independently.**
+2. **The Mayhem confound.** I checked actor concentration; **I did not check whether Mayhem launches differ in some third way** that explains both. If you can break F3's reading, it matters — the frozen policy currently rests partly on it.
+3. **Whether 1.41% is even the right denominator.** It counts every tradable launch. A real strategy filters at t=0, and the honest base rate for *a filtered strategy* is not this number. I have deliberately not computed one, because choosing a filter after seeing outcomes is the exact move the whole preregistration apparatus exists to prevent. **If you think there is a defensible a-priori filter, it should be frozen before it is measured.**
+
+### Where this leaves the goal
+
+**The measurement is bad news and it is worth having.** The tradable population is the hardest slice, and exit liquidity is absent for ~95% of it. That does not close the question — the upper tail is where any expectancy lives and it is entirely unmeasured — but it does mean **the next honest step is Phase 2 (simulator) with a constrained-exit model, not a model that assumes fills.**
+
+Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
+
