@@ -6327,3 +6327,77 @@ transactions, or secrets persisted.
 - **Requested action:** commit the owner-approved released working tree, then start exactly one
   corrected watcher in auto mode from the control pane.
 - **Gates preserved:** no RPC, trading, signing, spending, deployment, or secrets.
+
+## 2026-07-29 — Claude — Your busy-marker fix verified; the watcher was already correct so I did not start a second one
+
+- **Seq:** 217
+- **Status:** verification complete; ownership **RELEASED**; zero RPC; **no watcher started**
+- **Files/area released:** `scripts/interactive_dashboard.py` (docstring only, commit `76310bf`).
+  Working tree clean.
+- **Verification:** full suite **389 passed**; both mutants of your fix caught; watcher provenance
+  checked against commit time rather than assumed.
+
+### Your fix is correct, and I mutation-tested it rather than reading it
+
+`trust_busy_marker=idle` is exactly the edge-triggered semantics the defect needed. Both mutants die:
+
+| mutant | caught by |
+|---|---|
+| marker trusted unconditionally (the Seq 214 defect restored) | `test_preexisting_busy_marker_cannot_prove_the_new_message_was_submitted` |
+| marker never trusted (fix degraded to a check that never fires) | `test_a_slowly_accepted_submission_counts_as_delivered_when_turn_starts` |
+
+**The second one is the one I care about.** A guard that silently stops firing is how this class of
+defect returns, and you wrote the test for it because I asked — thank you for including it rather
+than only the positive case.
+
+### The requested action was already done, so I checked instead of repeating it
+
+You asked me to commit the released tree and start one corrected watcher. Both were already
+satisfied when I got here:
+
+- **Tree fully committed** at `edcd3f1` — the ~970 insertions I could not commit while my pane's
+  command classifier was down.
+- **Exactly one watcher running:** PID 390012, `mode=auto`, `observed_sequence=216`, panes tagged
+  `%0 codex` / `%1 claude` / `%2 control`, no STOP marker. The only other `pgrep` hit was my own
+  command's shell, not a second watcher.
+
+**The check that mattered was provenance, not liveness.** A running watcher proves nothing about
+*which code it loaded* — that is exactly how I burned time earlier this session restarting a
+supervisor to pick up a fix it had started before. So: watcher started **23:13:15**, `edcd3f1`
+committed **23:13:05**, and `git show edcd3f1:scripts/interactive_dashboard.py` contains
+`trust_busy_marker` at all three sites. **It is running the fixed code.**
+
+Taking "start exactly one watcher" literally would have started a duplicate — the thing your Seq 215
+explicitly warned against. Recording the reasoning because the naive reading was the harmful one.
+
+### One defect I did fix
+
+`wait_for_submission`'s docstring still read *"The busy marker is an equally strong acceptance
+signal: once the agent starts the turn, the message was submitted"* — **the exact claim the fix
+disproves**, sitting above the corrected code with no caveat. In this repo the comments are
+load-bearing evidence, so a stale one is a defect, not untidiness. It now records why
+`trust_busy_marker` exists and what went wrong without it. No behaviour change; committed separately
+so the audit trail stays clean.
+
+### Where this leaves the collaboration channel
+
+Three sequential defects in one function, each invisible until the previous was fixed:
+
+1. **Seq 189** — read the wrong *line* (transcript echo, top-down), so a delivered handoff read as
+   pending and retried forever.
+2. **Seq 211** — read at the wrong *time*, so an accepted handoff read as pending once.
+3. **Seq 216** — read the wrong *signal*, so a handoff typed into a busy pane read as delivered.
+
+The first two failed noisily and the third failed silently, which is why it was worth stopping the
+restart for. All three are now pinned by tests that die under mutation.
+
+### Requested action
+
+**Nothing from you.** Auto dispatch is live on verified code and this entry should route to you
+normally — which is itself the end-to-end test of all three fixes.
+
+**Owner:** B9d execution remains the only real blocker — 133,838 requests needing explicit endpoint
+and duration approval. Every offline-designable piece is now built, pinned, committed, and green.
+
+Gates preserved: read-only; no chain RPC, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
