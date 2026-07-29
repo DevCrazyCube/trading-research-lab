@@ -456,3 +456,45 @@ The two do not imply each other. A user-ratified decision can remain provisional
   topology. Codex uses the owner-specified no-approval, workspace-write command with its startup
   update check disabled. Environments that mount Codex's state database read-only fail visibly
   and require that command to be launched from the host terminal.
+
+## 2026-07-29 — Composer detection is per-application and read from the bottom of the pane
+
+- **Status:** implementation policy adopted in `scripts/interactive_dashboard.py`.
+- **Decision:** `composer_text()` scans a pane's capture from the **last** line upward and
+  recognises both agents' prompt glyphs — Claude Code's `❯` (U+276F) and Codex's `›` (U+203A).
+  Any probe of a pane's *user interface*, not just this one, must be checked against both
+  applications before the two-model topology can rely on it.
+- **Reason:** Both TUIs echo a **delivered** user message back into the transcript behind the same
+  glyph the composer uses, so a top-down scan returned the echo of the message that had just
+  landed. `send()`'s post-condition then read a successful delivery as "still sitting in the
+  composer", raised, and the supervisor left the Seq unconsumed and retried forever, pressing bare
+  Enter into the pane each pass; `supervisor.log` holds eleven identical "typed into pane %1 but
+  NOT submitted" lines for one delivered handoff. Matching only Claude's glyph was the same defect
+  inverted: for the Codex pane `composer_text()` returned `""` for every capture, so the
+  post-condition was not wrong but **inert**, and every send into Codex was recorded as delivered
+  whether or not it was. The one-Codex/one-Claude rebuild changed which application occupies the
+  second pane without revisiting the Claude-specific probes written against it.
+- **Consequence:** Delivery verification is live in both panes and stops inverting on success. An
+  empty Codex composer reports its greyed placeholder rather than `""`; that is harmless for the
+  only caller, which asks whether a prefix of the pending text appears in the message being sent.
+
+## 2026-07-29 — An open ownership claim protects an agent from supervisor interrupts
+
+- **Status:** implementation policy adopted in `scripts/interactive_dashboard.py`.
+- **Decision:** Before dispatching, the supervisor computes `open_claim_holders()` — the agents
+  whose most recent `agent_discussion.md` entry claims ownership and has not released it. Neither
+  the outgoing `active_agent` interrupt nor `send_handoff`'s busy-target interrupt may send `C-c`
+  to such an agent. Delivery still proceeds; it simply waits for the pane to go idle.
+- **Reason:** AGENTS.md makes a claim binding until its author releases it, but the dispatcher read
+  only the *latest* entry, so an outstanding claim was invisible to it. Routing is by author, so
+  the moment either agent appends a release the other is handed work — and `agent_busy()` cannot
+  distinguish stale UI state from claimed work in flight. Seq 182 records the supervisor
+  interrupting an active Claude for exactly this reason; the rebuild changed the topology and kept
+  the interrupt, leaving the same edge live against a Codex pane 200 curves into a claimed B9b run.
+  Waiting costs little, because an undelivered handoff already leaves the Seq unconsumed and
+  retries; destroying a colleague's in-flight measurement to deliver a message sooner is the worse
+  trade, and AGENTS.md requires preserving work over convenience.
+- **Consequence:** An agent that claims an area and then stops writing entries will not be
+  interrupted by the supervisor at all. That is intended — the release entry is what ends a claim —
+  but it means a genuinely stuck claimant needs the explicit `interrupt` command, which is
+  unchanged and remains available to the owner.

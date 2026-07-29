@@ -255,7 +255,8 @@ BUSY_MARKER = "esc to interrupt"
 SUBMIT_SETTLE = 0.6        # let the TUI redraw before reading the composer back
 PENDING_MATCH = 24         # prefix long enough to be ours, short enough to survive wrapping
 INTERRUPT_TIMEOUT = 20.0
-COMPOSER_PROMPT = "❯"
+COMPOSER_PROMPTS = ("❯", "›")   # Claude Code, Codex — different applications, different glyphs
+NBSP = " "                           # both TUIs pad the prompt with it
 
 
 def agent_busy(pane):
@@ -272,13 +273,29 @@ def agent_busy(pane):
 def composer_text(pane):
     """Whatever is sitting unsent in the agent's input box, or "" when it is empty.
 
-    The composer is the `❯` line inside the input border. If our message is still there after we
-    pressed Enter, the keystrokes were typed but never submitted.
+    Scanned from the BOTTOM. Both TUIs also echo *delivered* user messages into the transcript
+    behind the same glyph, so the first match from the top is an old message, not the live
+    composer. That inverted `send()`'s post-condition: a handoff that had actually landed read
+    back as "still in the composer", `send()` raised, the supervisor left the Seq unconsumed and
+    retried forever, pressing bare Enter into the pane each time. `supervisor.log` holds eleven
+    identical "typed into pane %1 but NOT submitted" lines for one delivered message. The composer
+    is the last such line by construction: the input box is at the bottom, the transcript above it.
+
+    Both prompt glyphs are recognised because the two panes are no longer the same application.
+    Claude Code draws `\u276f` and Codex draws `\u203a`. Matching only Claude's meant this returned
+    "" for every Codex pane, so the post-condition there was not merely wrong, it was inert, and
+    every send into Codex was recorded as delivered whether or not it was. A verification that
+    cannot fail is the exact failure this function exists to detect.
+
+    An empty Codex composer holds greyed placeholder text rather than nothing. That is harmless
+    for the only caller, which asks whether a prefix of what sits here appears in the message it
+    is trying to deliver; a placeholder never does.
     """
-    for line in pane_text(pane).splitlines():
+    for line in reversed(pane_text(pane).splitlines()):
         stripped = line.strip()
-        if stripped.startswith(COMPOSER_PROMPT):
-            return stripped[len(COMPOSER_PROMPT):].replace(" ", " ").strip()
+        for prompt in COMPOSER_PROMPTS:
+            if stripped.startswith(prompt):
+                return stripped[len(prompt):].replace(NBSP, " ").strip()
     return ""
 
 
@@ -361,16 +378,22 @@ def send(agent, message):
                 last_send_pane_command=command, last_send_waited_for_idle=idle)
 
 
-def send_handoff(agent, message):
+def send_handoff(agent, message, interrupt_busy=True):
     """Interrupt stale UI work, then deliver a handoff into a clean turn.
 
     The interrupt is only issued when the agent is actually busy — C-c into an idle pane clears a
     composer the operator may be using. The flat `time.sleep(0.25)` that used to follow it was a
     fixed sleep against an unbounded wait, the same defect as the `start()` race: if the interrupt
     had not settled in 250 ms, the text went into a still-busy composer and was lost.
+
+    `interrupt_busy=False` for an agent holding an open ownership claim. "Busy" cannot distinguish
+    stale UI work from claimed work in flight, and the two deserve opposite treatment: destroying a
+    colleague's in-flight measurement to deliver a message a few minutes sooner is the worse trade,
+    and waiting costs nothing because an undelivered handoff already leaves the Seq unconsumed and
+    retries. See `open_claim_holders`.
     """
     target = pane_id(agent)
-    if agent_busy(target):
+    if interrupt_busy and agent_busy(target):
         tmux("send-keys", "-t", target, "C-c")
         wait_for_idle(target, timeout=INTERRUPT_TIMEOUT)
     send(agent, message)
@@ -496,10 +519,18 @@ def entry_author(entry):
     return parts[1].lower() if len(parts) >= 2 else ""
 
 
+def entry_status(entry):
+    """The lowercased '- **Status:**' line of an entry, or "" when it has none."""
+    return next((line.lower() for line in entry.splitlines()
+                 if line.startswith("- **Status:**")), "")
+
+
+RELEASE_WORDS = ("handoff", "released", "complete")
+
+
 def handoff_target(entry, active_agent=None):
-    status_line = next((line.lower() for line in entry.splitlines()
-                        if line.startswith("- **Status:**")), "")
-    if not any(word in status_line for word in ("handoff", "released", "complete")):
+    status_line = entry_status(entry)
+    if not any(word in status_line for word in RELEASE_WORDS):
         return None
     author = entry_author(entry)
     if "codex" in author:
@@ -507,6 +538,44 @@ def handoff_target(entry, active_agent=None):
     if "claude" in author:
         return "codex"
     return None
+
+
+def entry_blocks(text):
+    """Every '## ' entry in the log, in file order."""
+    starts = [m.start() for m in re.finditer(r"^## ", text, re.MULTILINE)]
+    return [text[start:end] for start, end in zip(starts, starts[1:] + [len(text)])]
+
+
+def open_claim_holders(text=None):
+    """Agents whose most recent log entry claims ownership and has not released it.
+
+    AGENTS.md makes an ownership claim binding until its author appends a release, but the
+    supervisor only ever looked at the *latest* entry, so an open claim was invisible to it. That
+    is what made the interrupt below destructive: routing is by author, so the moment either agent
+    appends a release the other is handed work — and if that other agent is mid-run on something it
+    claimed, `send_handoff` read "busy" as stale UI work and sent C-c into it. Seq 182 records the
+    supervisor doing exactly this to a Claude pane; the rebuild changed the topology and kept the
+    interrupt, so the same edge was live against a Codex pane holding an open B9b claim.
+
+    Only each agent's own most recent entry counts, so a claim released later does not linger.
+    "released" rather than "release" is deliberate: a claim reading "do not edit ... until I
+    release" is an open claim describing its own future, not a closed one.
+    """
+    if text is None:
+        text = DISCUSSION.read_text()
+    holders, seen = set(), set()
+    for block in reversed(entry_blocks(text)):
+        author = entry_author(block)
+        name = next((agent for agent in AGENTS if agent in author), None)
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        status = entry_status(block)
+        if "claim" in status and not any(word in status for word in RELEASE_WORDS):
+            holders.add(name)
+        if len(seen) == len(AGENTS):
+            break
+    return holders
 
 
 def supervisor_loop(interval=2.0):
@@ -545,11 +614,15 @@ def supervisor_loop(interval=2.0):
                     message = ("Read the latest handoff in agent_discussion.md, follow AGENTS.md, "
                                "claim ownership, perform the requested bounded task, verify it, "
                                "then append a release/handoff entry. Stop for genuine user gates.")
+                    # An agent holding an open claim is working under the ownership protocol, not
+                    # sitting on stale UI state. Neither interrupt may touch it.
+                    protected = open_claim_holders()
                     source = state.get("active_agent")
-                    if source in AGENTS and source != target:
+                    if source in AGENTS and source != target and source not in protected:
                         tmux("send-keys", "-t", pane_id(source), "C-c")
                     try:
-                        send_handoff(target, message)
+                        send_handoff(target, message,
+                                     interrupt_busy=target not in protected)
                     except RuntimeError as exc:
                         # A busy CLI is transient. Keep the sequence unconsumed so the next loop
                         # retries; never let one undeliverable handoff kill the supervisor.

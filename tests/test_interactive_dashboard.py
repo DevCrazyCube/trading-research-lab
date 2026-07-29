@@ -132,6 +132,57 @@ class HandoffRoutingRegressionTests(unittest.TestCase):
             DASH.entry_author("## 2026-07-28 — Codex — subject naming Claude\n"), "codex")
 
 
+class OpenClaimTests(unittest.TestCase):
+    """An ownership claim is binding until its author releases it, and the supervisor must see it.
+
+    Routing is by author, so the moment either agent appends a release the other is handed work.
+    The dispatcher only ever read the *latest* entry, so an outstanding claim was invisible to it
+    and `send_handoff` read the claimant's "busy" as stale UI work worth a C-c. Seq 182 records
+    the supervisor doing this to a Claude pane mid-handoff.
+    """
+
+    def entry(self, author, seq, status):
+        return f"## 2026-07-29 — {author} — subject\n- **Seq:** {seq}\n- **Status:** {status}\n\n"
+
+    def holders(self, *entries):
+        return DASH.open_claim_holders("".join(entries))
+
+    def test_a_claim_without_a_release_is_open(self):
+        self.assertEqual(
+            self.holders(self.entry("Codex", 1, "claiming; measurement in progress")), {"codex"})
+
+    def test_a_later_release_by_the_same_author_closes_it(self):
+        self.assertEqual(
+            self.holders(self.entry("Codex", 1, "ownership claim; in progress"),
+                         self.entry("Codex", 2, "complete; ownership **RELEASED**")), set())
+
+    def test_only_the_authors_most_recent_entry_counts(self):
+        """A release followed by a fresh claim is open again; order, not presence, decides."""
+        self.assertEqual(
+            self.holders(self.entry("Codex", 1, "complete; ownership **RELEASED**"),
+                         self.entry("Codex", 2, "claiming the next measurement")), {"codex"})
+
+    def test_a_claim_describing_its_own_future_release_is_still_open(self):
+        """Seq 125's real wording. "until I release" is a promise, not a release."""
+        self.assertEqual(
+            self.holders(self.entry("Claude 2", 1,
+                                    "claiming — do not edit `scripts/b8b_*` until I release")),
+            {"claude"})
+
+    def test_both_agents_can_hold_claims_at_once(self):
+        self.assertEqual(
+            self.holders(self.entry("Codex", 1, "claiming area A"),
+                         self.entry("Claude", 2, "claiming area B")), {"codex", "claude"})
+
+    def test_an_author_with_no_entries_holds_nothing(self):
+        self.assertEqual(
+            self.holders(self.entry("Codex", 1, "complete; ownership **RELEASED**")), set())
+
+    def test_the_real_log_is_parsed_without_error(self):
+        """The production log is 5,000 lines of historically irregular formatting."""
+        self.assertTrue(DASH.open_claim_holders().issubset(set(DASH.AGENTS)))
+
+
 class PaneIdentityTests(unittest.TestCase):
     """Pins the defect in `agent_discussion.md` Seq 171.
 
@@ -369,6 +420,80 @@ class SendGuardTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             DASH.send("claude3", "handoff")
         self.assertEqual(self.calls, [])
+
+    def test_a_delivered_message_echoed_into_the_transcript_is_not_read_as_pending(self):
+        """The live defect behind eleven identical "NOT submitted" lines in supervisor.log.
+
+        Claude Code echoes a *delivered* user message back into the transcript behind the same
+        `❯` glyph the composer uses. Reading the first match from the top therefore found the
+        echo of the message that had just landed, so `send()` raised, the supervisor left the Seq
+        unconsumed, and it retried the same delivered handoff forever.
+        """
+        message = "Read the latest handoff in agent_discussion.md and continue"
+        delivered = (f"❯ {message}\n"                     # transcript echo: already delivered
+                     "\n  ⎿  the agent's reply\n"
+                     "────────────────────────\n"
+                     "❯ \n"                               # the live composer, empty
+                     "────────────────────────\n"
+                     "  ⏵⏵ auto mode on")
+        DASH.tmux = self._tmux_with_command("claude", pane_text=delivered)
+        self.assertEqual(DASH.composer_text("%9"), "")
+        DASH.send("codex", message)                       # must not raise
+        self.assertEqual(len([c for c in self.calls if c[0] == "state"]), 1,
+                         "a delivered handoff must be recorded, not retried forever")
+
+    def test_a_draft_below_an_old_echo_is_still_seen(self):
+        """The boundary: scanning from the bottom must not blind the check to a real draft."""
+        message = "Read the latest handoff in agent_discussion.md and continue"
+        DASH.tmux = self._tmux_with_command(
+            "claude", pane_text=f"❯ an older message\n────\n❯ {message}\n────")
+        self.assertEqual(DASH.composer_text("%9"), message)
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.send("codex", message)
+        self.assertIn("NOT submitted", str(ctx.exception))
+
+    def test_the_codex_composer_prompt_is_recognised(self):
+        """Codex draws `›` (U+203A), not Claude Code's `❯` (U+276F).
+
+        Matching only Claude's glyph made the post-condition *inert* for the Codex pane rather
+        than wrong: `composer_text()` returned "" for every capture, so an undelivered handoff was
+        recorded as delivered. A check that cannot fail is worse than one that fails loudly.
+        """
+        message = "Read the latest handoff in agent_discussion.md and continue"
+        DASH.tmux = self._tmux_with_command("codex", pane_text=f"› {message}\n────")
+        self.assertEqual(DASH.composer_text("%9"), message)
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.send("claude", message)
+        self.assertIn("NOT submitted", str(ctx.exception))
+        self.assertEqual([c for c in self.calls if c[0] == "state"], [],
+                         "an undelivered handoff into Codex must not be recorded as delivered")
+
+    def _busy_pane(self):
+        """A pane that reports busy forever, with the idle wait stubbed so tests stay fast."""
+        DASH.tmux = self._tmux_with_command(
+            "claude", pane_text=f"⏵⏵ auto mode on · {DASH.BUSY_MARKER}\n❯ ")
+        saved, DASH.wait_for_idle = DASH.wait_for_idle, lambda pane, **kw: False
+        self.addCleanup(lambda: setattr(DASH, "wait_for_idle", saved))
+
+    def test_a_handoff_is_not_forced_into_an_agent_holding_an_open_claim(self):
+        """C-c into a busy pane cannot tell stale UI work from claimed work in flight."""
+        self._busy_pane()
+        try:
+            DASH.send_handoff("codex", "handoff", interrupt_busy=False)
+        except RuntimeError:
+            pass                                   # delivery may still refuse; not what is asserted
+        self.assertEqual([c for c in self.sent_keys() if "C-c" in c[1]], [],
+                         "an agent holding an open claim must never be interrupted")
+
+    def test_a_busy_agent_without_a_claim_is_still_interrupted(self):
+        """The boundary: the protection must be the claim, not merely being busy."""
+        self._busy_pane()
+        try:
+            DASH.send_handoff("codex", "handoff")
+        except RuntimeError:
+            pass
+        self.assertTrue([c for c in self.sent_keys() if "C-c" in c[1]],
+                        "stale UI work is still cleared before a handoff")
 
 
 class SequenceAllocationTests(unittest.TestCase):
@@ -718,7 +843,8 @@ class SupervisorResilienceTests(IsolatedDashboard):
 
         saved_stop, DASH.STOP = DASH.STOP, Sentinel()
         saved_handoff, DASH.send_handoff = DASH.send_handoff, handoff
-        saved_tmux, DASH.tmux = DASH.tmux, lambda *a, **k: 0
+        self.tmux_calls = []
+        saved_tmux, DASH.tmux = DASH.tmux, lambda *a, **k: self.tmux_calls.append(a) or 0
         saved_pane, DASH.pane_id = DASH.pane_id, lambda agent: "%9"
         captured = io.StringIO()
         try:
@@ -730,7 +856,7 @@ class SupervisorResilienceTests(IsolatedDashboard):
         return captured.getvalue()
 
     def test_an_undeliverable_handoff_does_not_kill_the_supervisor(self):
-        def refuse(agent, message):
+        def refuse(agent, message, interrupt_busy=True):
             raise RuntimeError("agent is mid-turn")
 
         output = self.run_one_iteration(refuse)          # must not propagate
@@ -738,7 +864,7 @@ class SupervisorResilienceTests(IsolatedDashboard):
                       "an undeliverable handoff must be reported, not swallowed silently")
 
     def test_an_undeliverable_handoff_leaves_the_sequence_unconsumed_so_it_retries(self):
-        def refuse(agent, message):
+        def refuse(agent, message, interrupt_busy=True):
             raise RuntimeError("agent is mid-turn")
 
         self.run_one_iteration(refuse)
@@ -748,11 +874,40 @@ class SupervisorResilienceTests(IsolatedDashboard):
     def test_a_delivered_handoff_consumes_the_sequence_and_moves_ownership(self):
         """The other side of the boundary: a working dispatch must still advance."""
         delivered = []
-        self.run_one_iteration(lambda agent, message: delivered.append(agent))
+        self.run_one_iteration(
+            lambda agent, message, interrupt_busy=True: delivered.append(agent))
         self.assertEqual(delivered, ["codex"])
         state = DASH.read_state()
         self.assertEqual(state["observed_sequence"], 2)
         self.assertEqual(state["active_agent"], "codex")
+
+    def dispatch_with_codex_status(self, status):
+        """One dispatch pass whose target, Codex, last wrote an entry with `status`."""
+        DASH.DISCUSSION.write_text(
+            f"## d — Codex — earlier\n- **Seq:** 1\n- **Status:** {status}\n\n"
+            "## d — Claude — released\n- **Seq:** 2\n- **Status:** released\n", encoding="utf-8")
+        DASH.write_state(observed_sequence=1)
+        seen = {}
+        self.run_one_iteration(
+            lambda agent, message, interrupt_busy=True: seen.update(interrupt=interrupt_busy))
+        return seen["interrupt"]
+
+    def test_the_dispatcher_does_not_interrupt_a_target_holding_an_open_claim(self):
+        """The live case: Codex mid-run on a claimed B9b measurement when Claude released."""
+        self.assertIs(self.dispatch_with_codex_status("claiming; in progress"), False)
+
+    def test_the_dispatcher_still_interrupts_a_target_with_no_open_claim(self):
+        self.assertIs(self.dispatch_with_codex_status("complete; ownership released"), True)
+
+    def test_a_source_holding_an_open_claim_is_not_interrupted_either(self):
+        """`active_agent` is interrupted when work moves on. A claim protects it there too."""
+        DASH.DISCUSSION.write_text(
+            "## d — Claude — claiming\n- **Seq:** 1\n- **Status:** claiming area A\n\n"
+            "## d — Codex — released\n- **Seq:** 2\n- **Status:** released\n", encoding="utf-8")
+        DASH.write_state(active_agent="claude", observed_sequence=1)
+        self.run_one_iteration(lambda agent, message, interrupt_busy=True: None)
+        self.assertEqual([c for c in self.tmux_calls if "C-c" in c], [],
+                         "the outgoing agent's claimed work must survive the handoff too")
 
 
 class PendingComposerTests(IsolatedDashboard):
