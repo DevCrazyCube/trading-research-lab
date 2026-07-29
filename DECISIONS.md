@@ -370,6 +370,25 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Consequence:** An interrupted candidate path now leaves a truthful partial record instead of a
   misleading empty one. The final table contents of a completed run are unchanged.
 
+## 2026-07-29 — Agent-pane identity upgrades fail closed on ambiguity
+
+- **Status:** implementation policy adopted in `scripts/interactive_dashboard.py`.
+- **Decision:** Claude 1/Claude 2 routing uses unique live tmux `@agent` pane tags. During legacy
+  dashboard upgrade, an untagged pane may be migrated only from an explicit, non-conflicting
+  legacy title. Two anonymous Claude panes are never assigned by pane id, sort order, position, or
+  current TUI title. Duplicate tags, unknown tags, role collisions, and tag/title conflicts abort
+  the upgrade before any identity tag or handoff is written.
+- **Reason:** Pane titles are cosmetic and Claude overwrites them with activity text. The earlier
+  routing incident persisted because a guessed/stale mapping looked healthy: both panes ran the
+  same executable, so downstream liveness checks could not distinguish self-delivery from a real
+  handoff. Seq 173's claim that the current tags were inverted was separately retracted in Seq 175
+  after the reporting agent corrected its own identity; that retraction proves the live mapping is
+  currently correct, but it does not justify retaining a migration path that can create a new
+  authoritative mapping from anonymous pane order.
+- **Consequence:** Existing correctly-tagged dashboards upgrade in place even when the TUI has
+  replaced their titles. Ambiguous legacy dashboards must be restarted or explicitly identified;
+  the tool refuses to convert uncertainty into durable routing state.
+
 ## 2026-07-28 — `W_launch` = 24 hours, `W_obs` = 8 days (RATIFIED)
 
 - **Status:** accepted
@@ -420,3 +439,20 @@ The two do not imply each other. A user-ratified decision can remain provisional
   - **B8b remains fully valid as the cohort it was authorised to be.** Burning it does not retract the enumeration, the census, or anything computed under the frozen rule. It forbids one thing: using this window's contents to choose or justify a *later* window.
   - The burned-range list is now **seven** entries. Any future preregistration must check disjointness against all of them and fail closed, per freeze §6.1.
   - This burn is triggered by the census **existing**, not by anyone acting on it. It applies from 2026-07-28 regardless of whether the numbers are ever read.
+
+## 2026-07-29 — Interactive handoffs use one Codex pane and one Claude pane
+
+- **Status:** implementation policy adopted in `scripts/interactive_dashboard.py`.
+- **Decision:** The dashboard has exactly two agent roles, `codex` and `claude`, plus a control
+  pane. Released work routes to the other model from the author field in the append-only handoff
+  log. Pane identity remains bound by the durable tmux `@agent` tag. Startup requires the expected
+  foreground executable to remain alive through initialisation before reporting success.
+- **Reason:** Two identical Claude executables made identity and self-delivery failures hard to
+  observe, while the owner explicitly selected one Codex and one Claude. Author-based routing is
+  deterministic after restarts and does not depend on stale `active_agent` state. The stability
+  check closes the observed failure where Codex briefly started, exited, and its identity prompt
+  was typed into the returned shell.
+- **Consequence:** Legacy two-Claude sessions must be restarted rather than guessed into the new
+  topology. Codex uses the owner-specified no-approval, workspace-write command with its startup
+  update check disabled. Environments that mount Codex's state database read-only fail visibly
+  and require that command to be launched from the host terminal.

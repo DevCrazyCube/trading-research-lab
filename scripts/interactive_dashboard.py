@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Manage a tmux dashboard containing two sequential Claude CLIs."""
+"""Manage a tmux dashboard containing one Codex CLI and one Claude CLI."""
 import argparse
 import json
 import os
@@ -25,7 +25,14 @@ DISCUSSION = ROOT / "agent_discussion.md"
 # maximum. The note must be separated from the digits by whitespace, so `84x` still fails to
 # match rather than silently parsing as 84.
 SEQ_RE = re.compile(r"^- \*\*Seq:\*\* (\d+)(?:\s+.*)?$", re.MULTILINE)
-AGENTS = ("claude1", "claude2")
+AGENTS = ("codex", "claude")
+AGENT_COMMANDS = {
+    "claude": "claude --permission-mode auto --effort max --name claude",
+}
+AGENT_IDENTITIES = {
+    "codex": "You are Codex",
+    "claude": "You are Claude",
+}
 
 
 def tmux(*args, capture=False, check=True):
@@ -79,6 +86,14 @@ def tagged_panes():
     for pane in live_panes():
         name = pane_agent(pane)
         if name:
+            if name not in (*AGENTS, "control"):
+                raise RuntimeError(
+                    f"pane {pane} carries unknown {AGENT_TAG} identity {name!r}; refusing to "
+                    "route by an identity the dashboard does not recognise")
+            if name in found:
+                raise RuntimeError(
+                    f"duplicate {AGENT_TAG} identity {name!r} on panes {found[name]} and "
+                    f"{pane}; refusing to guess which occupant is authoritative")
             found[name] = pane
     return found
 
@@ -142,6 +157,7 @@ def write_state(**updates):
 
 
 SHELLS = ("zsh", "bash", "sh", "dash", "fish")
+SHELL_COMMAND = ("zsh", "-i")
 
 
 def pane_command(pane):
@@ -195,15 +211,38 @@ def wait_for_shell(pane, timeout=30.0, poll=0.25):
         "a shell prompt", timeout=timeout, poll=poll)
 
 
-def wait_for_app(pane, timeout=90.0, poll=0.25):
-    """Wait until a pane is running something other than a shell.
+def wait_for_app(pane, expected=None, timeout=90.0, poll=0.25):
+    """Wait until a pane is running the expected agent application.
 
     Used after typing a launch command: the application has replaced the shell only once
     `pane_current_command` stops naming a shell. Until then, anything typed lands in the shell.
     """
-    return wait_for_pane(
-        pane, lambda command, text: command.lower() not in SHELLS,
-        "an application to replace the shell", timeout=timeout, poll=poll)
+    expected = expected.lower() if expected else None
+    command = wait_for_pane(
+        pane,
+        lambda command, text: (command.lower() == expected if expected
+                               else command.lower() not in SHELLS),
+        f"the {expected or 'agent'} application to replace the shell",
+        timeout=timeout, poll=poll)
+    # Seeing the executable once only proves it started, not that it survived initialisation.
+    # Codex can briefly replace the shell and then exit on a state-DB error; the old start path
+    # sent its identity prompt into the returned shell and still reported success.
+    time.sleep(0.5)
+    current = pane_command(pane)
+    if expected and current.lower() != expected:
+        raise RuntimeError(
+            f"{expected} started in pane {pane} but exited during initialisation "
+            f"(current command {current!r}); refusing to report a working dashboard")
+    return current or command
+
+
+def agent_command(name):
+    if name == "codex":
+        return (f"codex --no-alt-screen -C {ROOT} "
+                "-a never -s workspace-write "
+                "-c sandbox_workspace_write.network_access=true "
+                "-c check_for_update_on_startup=false")
+    return AGENT_COMMANDS[name]
 
 
 def send_line(pane, text):
@@ -342,6 +381,22 @@ def interrupt(agent):
     print(f"interrupt sent to {agent}")
 
 
+def enable_auto():
+    """Enable dispatch only when both tagged agent panes are genuinely running."""
+    if not has_session():
+        raise RuntimeError(f"tmux session {SESSION!r} does not exist")
+    stopped = {agent: pane_command(pane_id(agent)) for agent in AGENTS}
+    stopped = {agent: command for agent, command in stopped.items()
+               if command.lower() != agent}
+    if stopped:
+        details = ", ".join(f"{agent}={command or 'gone'}" for agent, command in stopped.items())
+        raise RuntimeError(
+            f"automatic handoffs require both agents alive ({details}); launch the missing "
+            "agent before enabling auto mode")
+    write_state(mode="auto", owner="supervisor")
+    print("automatic handoffs enabled: codex <-> claude")
+
+
 def latest_entry():
     text = DISCUSSION.read_text()
     matches = list(SEQ_RE.finditer(text))
@@ -446,10 +501,11 @@ def handoff_target(entry, active_agent=None):
                         if line.startswith("- **Status:**")), "")
     if not any(word in status_line for word in ("handoff", "released", "complete")):
         return None
-    if "claude" in entry_author(entry):
-        # Claude 1 and Claude 2 are deliberately sequential. Route a released
-        # entry to the other terminal, never to the terminal that just released.
-        return "claude2" if active_agent == "claude1" else "claude1"
+    author = entry_author(entry)
+    if "codex" in author:
+        return "claude"
+    if "claude" in author:
+        return "codex"
     return None
 
 
@@ -514,17 +570,17 @@ def start(first):
     if has_session():
         raise RuntimeError(f"tmux session {SESSION!r} already exists")
     tmux("new-session", "-d", "-s", SESSION, "-c", str(ROOT), "-n", "agents",
-         "zsh")
-    claude1 = tmux("display-message", "-p", "-t", f"{SESSION}:agents",
+         *SHELL_COMMAND)
+    codex = tmux("display-message", "-p", "-t", f"{SESSION}:agents",
                    "#{pane_id}", capture=True)
-    tmux("select-pane", "-t", claude1, "-T", "claude1")
-    tag_pane(claude1, "claude1")
-    claude2 = tmux("split-window", "-d", "-h", "-p", "50", "-P", "-F", "#{pane_id}",
-                  "-t", f"{SESSION}:agents", "-c", str(ROOT), "zsh", capture=True)
-    tmux("select-pane", "-t", claude2, "-T", "claude2")
-    tag_pane(claude2, "claude2")
+    tmux("select-pane", "-t", codex, "-T", "codex")
+    tag_pane(codex, "codex")
+    claude = tmux("split-window", "-d", "-h", "-p", "50", "-P", "-F", "#{pane_id}",
+                  "-t", f"{SESSION}:agents", "-c", str(ROOT), *SHELL_COMMAND, capture=True)
+    tmux("select-pane", "-t", claude, "-T", "claude")
+    tag_pane(claude, "claude")
     control = tmux("split-window", "-d", "-v", "-f", "-p", "22", "-P", "-F", "#{pane_id}",
-                   "-t", f"{SESSION}:agents", "-c", str(ROOT), "zsh", capture=True)
+                   "-t", f"{SESSION}:agents", "-c", str(ROOT), *SHELL_COMMAND, capture=True)
     tmux("select-pane", "-t", control, "-T", "control")
     tag_pane(control, "control")
     tmux("set-option", "-t", SESSION, "mouse", "on")
@@ -534,7 +590,7 @@ def start(first):
     tmux("set-option", "-t", SESSION, "status-left",
          "#[bold] meme-agents #[default]")
     write_state(mode="manual", owner="none", status="starting", observed_sequence=latest_entry()[0],
-                panes={"claude1": claude1, "claude2": claude2, "control": control},
+                panes={"codex": codex, "claude": claude, "control": control},
                 active_agent=None)
     supervisor = (f"{sys.executable} {Path(__file__).resolve()} run "
                   f">>{LOG} 2>&1 &")
@@ -542,31 +598,29 @@ def start(first):
     # mangled `d/usr/bin/python` line in supervisor.log.
     wait_for_shell(control)
     send_line(control, supervisor)
-    for pane, identity, name in ((claude1, "Claude 1", "claude1"),
-                                 (claude2, "Claude 2", "claude2")):
+    for pane, name in ((codex, "codex"), (claude, "claude")):
         wait_for_shell(pane)
-        # Never use -c/--continue: that resumes the same most-recent project
-        # conversation in both panes instead of creating independent sessions.
-        send_line(pane, f"claude --permission-mode auto --effort max --name {name}")
+        send_line(pane, agent_command(name))
         # The identity prompt used to be typed immediately after the launch command, while
         # Claude was still booting, so it landed in the shell or was partly swallowed.
-        wait_for_app(pane)
+        wait_for_app(pane, name)
         send_line(
             pane,
-            f"You are {identity}. Work sequentially: edit only when explicitly handed ownership, use maximum available effort, and record a handoff in agent_discussion.md when done.")
+            f"{AGENT_IDENTITIES[name]}. Work sequentially: edit only when explicitly handed "
+            "ownership, follow AGENTS.md, and record a handoff in agent_discussion.md when done.")
     tmux("select-pane", "-t", control)
     if first:
         # Previously a fixed 1s sleep, then `send()` - whose Seq-73 guard refuses a pane still at
         # a shell prompt. Claude takes far longer than 1s to boot, so this path reliably raised
         # "refusing to send a handoff into a shell": the guard was right and the caller was wrong.
-        wait_for_app(pane_id(first))
+        wait_for_app(pane_id(first), first)
         send(first, "Read AGENTS.md and agent_discussion.md, then continue the latest active handoff."
                     " Preserve ownership rules and stop for genuine user gates.")
     print(f"started interactive dashboard: tmux attach -t {SESSION}")
 
 
 def upgrade_existing():
-    """Convert an older codex/claude dashboard in place, preserving the session."""
+    """Repair an explicitly identified Codex/Claude dashboard in place."""
     if not has_session():
         raise RuntimeError(f"tmux session {SESSION!r} does not exist; use start")
     rows = tmux("list-panes", "-t", SESSION,
@@ -577,48 +631,72 @@ def upgrade_existing():
         pane, title, command = row.split("\t", 2)
         panes[title] = pane
         rows_by_pane[pane] = (title, command)
-    claude1 = panes.get("claude1") or panes.get("claude")
-    claude2 = panes.get("claude2") or panes.get("codex")
-    control = panes.get("control")
-    if not (claude1 and claude2):
-        live = [pane for pane, (title, command) in rows_by_pane.items()
-                if pane != control and command == "claude"]
-        if len(live) >= 2:
-            claude1, claude2 = sorted(live)[:2]
-    if not all((claude1, claude2, control)):
-        raise RuntimeError("expected claude/codex/control panes in existing dashboard")
+
+    # A live per-pane tag is authoritative.  Titles are accepted only for a legacy, untagged
+    # dashboard whose old names are still explicit.  Never assign two anonymous Claude panes by
+    # pane id/order: that was the last remaining path by which an uncertain guess could be turned
+    # into an authoritative tag and make both agents hand work back to themselves.
+    tagged = {}
+    for pane in rows_by_pane:
+        name = pane_agent(pane)
+        if not name:
+            continue
+        if name not in (*AGENTS, "control"):
+            raise RuntimeError(
+                f"pane {pane} carries unknown {AGENT_TAG} identity {name!r}; refusing upgrade")
+        if name in tagged:
+            raise RuntimeError(
+                f"duplicate {AGENT_TAG} identity {name!r} on panes {tagged[name]} and {pane}; "
+                "refusing upgrade")
+        tagged[name] = pane
+
+    codex = tagged.get("codex") or panes.get("codex")
+    claude = tagged.get("claude") or panes.get("claude")
+    control = tagged.get("control") or panes.get("control")
+    if not all((codex, claude, control)):
+        raise RuntimeError(
+            "cannot identify codex/claude/control without guessing. Existing tags or explicit "
+            "titles are required; restart the dashboard instead of assigning panes by order")
+    if len({codex, claude, control}) != 3:
+        raise RuntimeError("conflicting dashboard identities resolve more than one role to a pane")
+    for name, pane in (("codex", codex), ("claude", claude),
+                       ("control", control)):
+        owner = pane_agent(pane)
+        if owner and owner != name:
+            raise RuntimeError(
+                f"upgrade resolved {name!r} to pane {pane}, but that pane is tagged {owner!r}; "
+                "refusing to overwrite a conflicting live identity")
     # Titles are cosmetic only: the TUI overwrites them. The tag is the identity.
-    tmux("select-pane", "-t", claude1, "-T", "claude1")
-    tmux("select-pane", "-t", claude2, "-T", "claude2")
-    tag_pane(claude1, "claude1")
-    tag_pane(claude2, "claude2")
+    tmux("select-pane", "-t", codex, "-T", "codex")
+    tmux("select-pane", "-t", claude, "-T", "claude")
+    tag_pane(codex, "codex")
+    tag_pane(claude, "claude")
     tag_pane(control, "control")
-    if rows_by_pane.get(claude2, ("", ""))[1] != "claude":
-        tmux("respawn-pane", "-k", "-t", claude2, "-c", str(ROOT), "zsh")
-        # Same race as start(): a respawned pane's shell is not ready the instant tmux returns.
-        wait_for_shell(claude2)
-        send_line(claude2, "claude --permission-mode auto --effort max --name claude2")
-        wait_for_app(claude2)
-        send_line(
-            claude2,
-            "You are Claude 2. Work sequentially: edit only when explicitly handed ownership, use maximum available effort, and record a handoff in agent_discussion.md when done.")
+    for name, pane in (("codex", codex), ("claude", claude)):
+        if rows_by_pane.get(pane, ("", ""))[1] != name:
+            tmux("respawn-pane", "-k", "-t", pane, "-c", str(ROOT), *SHELL_COMMAND)
+            wait_for_shell(pane)
+            send_line(pane, agent_command(name))
+            wait_for_app(pane, name)
+            send_line(pane, f"{AGENT_IDENTITIES[name]}. Follow AGENTS.md and the sequential "
+                            "ownership protocol in agent_discussion.md.")
     STOP.touch()
     time.sleep(0.3)
     write_state(mode="manual", owner="none", active_agent=None, status="starting",
                 observed_sequence=latest_entry()[0],
-                panes={"claude1": claude1, "claude2": claude2, "control": control})
+                panes={"codex": codex, "claude": claude, "control": control})
     supervisor = f"{sys.executable} {Path(__file__).resolve()} run >>{LOG} 2>&1 &"
     tmux("send-keys", "-t", control, "-l", supervisor)
     tmux("send-keys", "-t", control, "Enter")
     tmux("select-pane", "-t", control)
-    print("upgraded existing dashboard to claude1 + claude2")
+    print("upgraded existing dashboard to codex + claude")
 
 
 def main():
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
     start_parser = sub.add_parser("start")
-    start_parser.add_argument("--first", choices=AGENTS, default="claude1")
+    start_parser.add_argument("--first", choices=AGENTS, default="claude")
     sub.add_parser("upgrade")
     sub.add_parser("run")
     sub.add_parser("status")
@@ -639,7 +717,7 @@ def main():
     elif args.command == "take":
         write_state(mode="manual", owner=args.agent, active_agent=args.agent); tmux("select-pane", "-t", pane_id(args.agent)); print(f"manual control: {args.agent}")
     elif args.command == "release": write_state(mode="manual", owner="none", active_agent=None); print("manual control released")
-    elif args.command == "auto": write_state(mode="auto", owner="supervisor"); print("automatic handoffs enabled")
+    elif args.command == "auto": enable_auto()
     elif args.command == "pause": write_state(mode="manual", owner="none"); print("automatic handoffs paused")
     elif args.command == "send": send(args.agent, " ".join(args.message))
     elif args.command == "interrupt": interrupt(args.agent)

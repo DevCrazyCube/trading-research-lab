@@ -3031,6 +3031,39 @@ Owner authorisation for the run is already recorded (Seq 121, 4 min/hour, ~6.2 h
 
 Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+## 2026-07-29 — Codex — One-Codex/one-Claude dashboard rebuilt and verified
+
+- **Seq:** 183
+- **Status:** implementation complete; ownership **RELEASED**
+- **Files/area released:** `scripts/interactive_dashboard.py`,
+  `tests/test_interactive_dashboard.py`, and the dashboard decision in `DECISIONS.md`.
+- **Verified fact:** `python -m pytest -q` passes **278 tests**. The live tmux session has unique
+  `@agent` tags for `codex`, `claude`, and `control`; Claude and the supervisor are running.
+- **Verified limitation:** the owner-specified Codex command exits only when launched through this
+  managed agent sandbox because `/home/anont/.codex/state_5.sqlite` is mounted read-only. Startup
+  now detects that exit instead of reporting success.
+- **Requested action:** attach with `tmux attach -t meme-agents`, select the `codex` pane, and run
+  `codex --no-alt-screen -C /home/anont/meme -a never -s workspace-write -c sandbox_workspace_write.network_access=true -c check_for_update_on_startup=false` from the host terminal context.
+
+## 2026-07-29 — Codex — One-Codex/one-Claude dashboard rebuild claimed
+
+- **Seq:** 182
+- **Status:** ownership claim; implementation in progress
+- **Files/area owned:** **CLAIMING** `scripts/interactive_dashboard.py` and `tests/test_interactive_dashboard.py`. Existing uncommitted identity-tag safety changes in both files are preserved and incorporated, not overwritten. No B9/B8 research artifact is claimed.
+- **Context:** The owner explicitly requested exactly one Codex and one Claude dashboard and asked that the code be verified because the supervisor has accumulated repeated routing/identity fixes. The current implementation still hardcodes two Claude agents and its automatic supervisor interrupted the active Claude while a new B9b handoff was being delivered. Automatic dispatch is paused during replacement.
+- **Evidence:** Live topology before the change is `%0 @agent=claude1`, `%1 @agent=claude2`, `%2 @agent=control`; `AGENTS = ("claude1", "claude2")`; `start()` launches two Claude CLIs. Existing focused tests cover identity tags and fail-closed delivery but encode the obsolete two-Claude topology.
+- **Proposal:** Convert roles to `codex` and `claude`, launch their actual CLIs, route sequential handoffs by entry author, preserve durable pane tags and fail-closed delivery, test start/upgrade/restart/identity/routing, then replace the live session only after tests pass.
+- **Requested action:** Claude continues no dashboard edits. No signing, spending, deployment, or live/devnet transaction is involved.
+
+## 2026-07-29 — Codex — Claude 1/Claude 2 upgrade identity hardening claimed
+
+- **Seq:** 181
+- **Status:** ownership claim; implementation in progress
+- **Files/area owned:** **CLAIMING** `scripts/interactive_dashboard.py`, `tests/test_interactive_dashboard.py`, and a narrow durable-policy entry in `DECISIONS.md`. No research artifact or agent pane will be edited or messaged.
+- **Context:** The live dashboard is presently correct (`%0 @agent=claude1`, `%1 @agent=claude2`). Seq 173's inversion report was retracted in Seq 175 because the reporting agent misidentified itself. A separate latent defect remains: `upgrade_existing()` can assign two untagged Claude panes by sorted pane id when cosmetic titles have been overwritten, then make that guess authoritative by tagging the panes.
+- **Proposal:** Remove pane-order guessing, reject duplicate/unknown identity tags, prefer unique live tags, and allow legacy migration only from explicit non-conflicting legacy titles. Ambiguity must fail before any tag or message is written.
+- **Requested action:** None. Codex will add focused regression tests, run the dashboard suite and repo suite, then release. No signing, spending, deployment, live/devnet transaction, or secret action.
+
 
 ## 2026-07-28 — Claude 2 — Claiming the B8b scanner
 
@@ -5160,3 +5193,39 @@ The four failures were the uncommitted launch-command change: dropping `-c` so e
 
 Gates preserved: read-only, no signing, no spending, no deployment, no live or devnet transactions, no secrets printed or persisted.
 
+## 2026-07-29 — Codex — Dashboard release correction at physical log tail
+
+- **Seq:** 184
+- **Status:** implementation complete; ownership **RELEASED**; operational host step remains
+- **Correction:** Seq 183 was appended beside the Seq 182 claim rather than at the physical end
+  of this historically non-chronological file. This tail entry is authoritative for supervisor
+  observation; no earlier entry was deleted or rewritten.
+- **Verified fact:** the dashboard now defines only `codex` and `claude`; routes a released Codex
+  entry to Claude and a released Claude entry to Codex; pins the exact owner-selected Codex launch
+  command; checks that an application survives initialisation; and refuses to enable auto mode
+  unless both tagged panes run their expected executables. The focused suite passes **71 tests**.
+- **Environment limitation:** the live Claude pane and supervisor run, but this managed Codex
+  process cannot launch a nested Codex TUI against `/home/anont/.codex/state_5.sqlite`, which the
+  sandbox mounts read-only. The live Codex pane is therefore a shell. From the owner's host
+  terminal, attach to `meme-agents`, launch the exact command already recorded in Seq 183, then run
+  `python scripts/interactive_dashboard.py auto`. The latter now verifies both processes before
+  enabling sequential automatic handoffs.
+
+## 2026-07-29 — Codex — Claiming B9b reserve-path reconstruction sizing
+
+- **Seq:** 185
+- **Status:** claiming; bounded read-only measurement in progress
+- **Files/area claimed:** new `scripts/b9b_curve_history_counts.py`,
+  `tests/test_b9b_curve_history_counts.py`, and `research/B9B_CURVE_HISTORY_COUNTS.md` plus a new
+  resumable B9b artifact. Existing B9a/B8b artifacts are inputs opened read-only and remain
+  untouched. Dashboard files are explicitly outside this claim.
+- **Evidence:** Seq 180 identifies `getSignaturesForAddress` count-only pagination across the 1,601
+  B8b bonding curves as the next bounded measurement needed before committing to full TradeEvent
+  reconstruction. B9a ownership was released in Seq 178; no later entry claims this area.
+- **Proposal:** enumerate the frozen cohort exactly, persist each curve's paginated signature count
+  with visible errors/censoring, then report the actual transaction-fetch upper bound and
+  distribution. This sizes work only; address signatures are not yet Pump trades or executable
+  returns.
+- **Requested action:** none. Codex owns this narrow area until a release handoff is appended.
+- **Gates:** read-only RPC only; no keys, signing, spending, transaction submission, deployment, or
+  live/devnet execution.

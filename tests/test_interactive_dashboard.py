@@ -17,7 +17,7 @@ SPEC.loader.exec_module(DASH)
 RELEASED = "- **Status:** corrections applied; **ownership RELEASED**"
 
 
-LAUNCH_MARKER = "claude --permission-mode"
+LAUNCH_MARKERS = ("codex --no-alt-screen", "claude --permission-mode")
 """Substring identifying the agent launch command in a `send-keys` call.
 
 Defined once because it was previously written out three times as the literal `"claude -c"`, and
@@ -28,6 +28,13 @@ detail three tests depend on and none of them own is a detail that belongs in on
 
 
 class DashboardTests(unittest.TestCase):
+    def test_codex_launch_command_is_the_owner_selected_command(self):
+        self.assertEqual(
+            DASH.agent_command("codex"),
+            "codex --no-alt-screen -C /home/anont/meme -a never -s workspace-write "
+            "-c sandbox_workspace_write.network_access=true "
+            "-c check_for_update_on_startup=false")
+
     def test_handoff_requires_terminal_status(self):
         active = ("## 2026-07-28 — Claude — subject\n"
                   "- **Seq:** 1\n"
@@ -35,20 +42,20 @@ class DashboardTests(unittest.TestCase):
                   "- **Requested action:** wait")
         self.assertIsNone(DASH.handoff_target(active))
 
-    def test_routes_released_entries_between_claudes(self):
+    def test_routes_released_claude_entry_to_codex(self):
         entry = ("## 2026-07-28 — Claude — done\n"
                  "- **Seq:** 2\n"
                  "- **Status:** review; ownership released\n"
                  "- **Requested action:** continue")
-        self.assertEqual(DASH.handoff_target(entry, "claude1"), "claude2")
-        self.assertEqual(DASH.handoff_target(entry, "claude2"), "claude1")
+        self.assertEqual(DASH.handoff_target(entry, "codex"), "codex")
+        self.assertEqual(DASH.handoff_target(entry, "claude"), "codex")
 
-    def test_unowned_handoff_starts_with_claude1(self):
+    def test_unowned_handoff_starts_with_codex(self):
         entry = ("## 2026-07-28 — Claude — done\n"
                  "- **Seq:** 3\n"
                  "- **Status:** implementation + handoff\n"
                  "- **Requested action:** continue")
-        self.assertEqual(DASH.handoff_target(entry, None), "claude1")
+        self.assertEqual(DASH.handoff_target(entry, None), "codex")
 
 
 class HandoffRoutingRegressionTests(unittest.TestCase):
@@ -79,7 +86,7 @@ class HandoffRoutingRegressionTests(unittest.TestCase):
         self.assertEqual(sequence, 2)
         self.assertTrue(entry.startswith("## 2026-07-28 — Claude — second"),
                         "entry must start at the heading, not at the Seq line")
-        self.assertEqual(DASH.handoff_target(entry, "claude1"), "claude2",
+        self.assertEqual(DASH.handoff_target(entry, "codex"), "codex",
                          "the shape latest_entry() returns must route")
 
     def test_routes_when_body_never_mentions_the_author(self):
@@ -94,9 +101,9 @@ class HandoffRoutingRegressionTests(unittest.TestCase):
         body = entry.split("\n", 1)[1].lower()
         self.assertNotIn("claude", body,
                          "fixture must not name the author outside the heading")
-        self.assertEqual(DASH.handoff_target(entry, "claude1"), "claude2")
-        self.assertEqual(DASH.handoff_target(entry, "claude2"), "claude1")
-        self.assertEqual(DASH.handoff_target(entry, None), "claude1")
+        self.assertEqual(DASH.handoff_target(entry, "codex"), "codex")
+        self.assertEqual(DASH.handoff_target(entry, "claude"), "codex")
+        self.assertEqual(DASH.handoff_target(entry, None), "codex")
 
     def test_does_not_route_an_entry_whose_subject_merely_names_claude(self):
         """The old fallback would misroute this: another author, subject naming Claude."""
@@ -104,19 +111,19 @@ class HandoffRoutingRegressionTests(unittest.TestCase):
                  "- **Seq:** 63\n"
                  + RELEASED + "\n"
                  "- Claude should pick this up next.\n")
-        self.assertIsNone(DASH.handoff_target(entry, "claude1"))
-        self.assertIsNone(DASH.handoff_target(entry, None))
+        self.assertEqual(DASH.handoff_target(entry, "codex"), "claude")
+        self.assertEqual(DASH.handoff_target(entry, None), "claude")
 
     def test_author_parsing_fails_closed(self):
         for heading in ("## no author field here", "## 2026-07-28", ""):
             entry = heading + "\n- **Seq:** 9\n" + RELEASED + "\n"
-            self.assertIsNone(DASH.handoff_target(entry, "claude1"), repr(heading))
+            self.assertIsNone(DASH.handoff_target(entry, "codex"), repr(heading))
 
     def test_status_gate_still_required(self):
         entry = ("## 2026-07-28 — Claude — still working\n"
                  "- **Seq:** 5\n"
                  "- **Status:** implementation ownership\n")
-        self.assertIsNone(DASH.handoff_target(entry, "claude1"))
+        self.assertIsNone(DASH.handoff_target(entry, "codex"))
 
     def test_entry_author_extracts_the_author_field_only(self):
         self.assertEqual(
@@ -130,7 +137,7 @@ class PaneIdentityTests(unittest.TestCase):
 
     `pane_id()` preferred a **stored** map and never revalidated it, and its fallback matched on
     `pane_title` — which the Claude Code TUI overwrites with the agent's current activity. When the
-    dashboard restarted and panes were recreated, the stored map bound `claude1` to Claude 2's own
+    dashboard restarted and panes were recreated, the stored map bound `codex` to Claude 2's own
     pane, so **every handoff each agent sent the other was typed into its own terminal** for hours.
     Both panes run `claude` and both look alive, so every downstream guard passed.
 
@@ -159,39 +166,51 @@ class PaneIdentityTests(unittest.TestCase):
         DASH.read_state = lambda: {"panes": mapping}
 
     def test_the_live_tag_wins_over_a_transposed_stored_map(self):
-        """The exact production failure: the stored map said claude1 was the other agent's pane."""
-        self.tags["%28"], self.tags["%29"] = "claude2", "claude1"
-        self.stored({"claude1": "%28", "claude2": "%29"})      # transposed, as it was on disk
-        self.assertEqual(DASH.pane_id("claude1"), "%29")
-        self.assertEqual(DASH.pane_id("claude2"), "%28")
+        """The exact production failure: the stored map said codex was the other agent's pane."""
+        self.tags["%28"], self.tags["%29"] = "claude", "codex"
+        self.stored({"codex": "%28", "claude": "%29"})      # transposed, as it was on disk
+        self.assertEqual(DASH.pane_id("codex"), "%29")
+        self.assertEqual(DASH.pane_id("claude"), "%28")
 
     def test_an_untagged_stored_pane_is_accepted(self):
         """A dashboard predating tagging still works, so the fix is not a flag day."""
-        self.stored({"claude1": "%28"})
-        self.assertEqual(DASH.pane_id("claude1"), "%28")
+        self.stored({"codex": "%28"})
+        self.assertEqual(DASH.pane_id("codex"), "%28")
 
     def test_a_stored_pane_tagged_for_someone_else_is_refused(self):
-        self.tags["%28"] = "claude2"
-        self.stored({"claude1": "%28"})
+        self.tags["%28"] = "claude"
+        self.stored({"codex": "%28"})
         with self.assertRaises(RuntimeError) as ctx:
-            DASH.pane_id("claude1")
+            DASH.pane_id("codex")
         self.assertIn("tagged", str(ctx.exception))
 
     def test_a_stored_pane_that_no_longer_exists_is_refused(self):
-        self.stored({"claude1": "%99"})
+        self.stored({"codex": "%99"})
         with self.assertRaises(RuntimeError) as ctx:
-            DASH.pane_id("claude1")
+            DASH.pane_id("codex")
         self.assertIn("no longer exists", str(ctx.exception))
 
     def test_no_tag_and_no_stored_entry_refuses_rather_than_guessing(self):
         self.stored({})
         with self.assertRaises(RuntimeError):
-            DASH.pane_id("claude1")
+            DASH.pane_id("codex")
 
     def test_tagging_round_trips(self):
-        DASH.tag_pane("%28", "claude2")
-        self.assertEqual(DASH.pane_agent("%28"), "claude2")
-        self.assertEqual(DASH.tagged_panes(), {"claude2": "%28"})
+        DASH.tag_pane("%28", "claude")
+        self.assertEqual(DASH.pane_agent("%28"), "claude")
+        self.assertEqual(DASH.tagged_panes(), {"claude": "%28"})
+
+    def test_duplicate_live_identity_tags_are_refused(self):
+        self.tags["%28"] = self.tags["%29"] = "codex"
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.tagged_panes()
+        self.assertIn("duplicate", str(ctx.exception))
+
+    def test_unknown_live_identity_tag_is_refused(self):
+        self.tags["%28"] = "claude3"
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.tagged_panes()
+        self.assertIn("unknown", str(ctx.exception))
 
 
 class SendGuardTests(unittest.TestCase):
@@ -222,21 +241,21 @@ class SendGuardTests(unittest.TestCase):
         is why "the other agent is unresponsive" was diagnosed for hours.
         """
         saved = DASH.pane_agent
-        DASH.pane_agent = lambda pane: "claude2"
+        DASH.pane_agent = lambda pane: "claude"
         self.addCleanup(lambda: setattr(DASH, "pane_agent", saved))
         DASH.tmux = self._tmux_with_command("claude")
         with self.assertRaises(RuntimeError) as ctx:
-            DASH.send("claude1", "handoff")
+            DASH.send("codex", "handoff")
         self.assertIn("tagged", str(ctx.exception))
         self.assertNotIn(("state", ), [(c[0],) for c in self.calls],
                          "a refused send must not record a delivery")
 
     def test_send_proceeds_when_the_tag_matches(self):
         saved = DASH.pane_agent
-        DASH.pane_agent = lambda pane: "claude1"
+        DASH.pane_agent = lambda pane: "codex"
         self.addCleanup(lambda: setattr(DASH, "pane_agent", saved))
         DASH.tmux = self._tmux_with_command("claude")
-        DASH.send("claude1", "handoff")
+        DASH.send("codex", "handoff")
         self.assertTrue(any(c[0] == "state" for c in self.calls))
 
     def _tmux_with_command(self, command, pane_text="❯ "):
@@ -259,7 +278,7 @@ class SendGuardTests(unittest.TestCase):
             self.calls.clear()
             DASH.tmux = self._tmux_with_command(shell)
             with self.assertRaises(RuntimeError) as ctx:
-                DASH.send("claude1", "handoff")
+                DASH.send("codex", "handoff")
             self.assertIn("refusing", str(ctx.exception))
             self.assertEqual(self.sent_keys(), [], "must not send keys at all")
             self.assertEqual([c for c in self.calls if c[0] == "state"], [],
@@ -268,17 +287,17 @@ class SendGuardTests(unittest.TestCase):
     def test_refuses_when_the_pane_is_gone(self):
         DASH.tmux = self._tmux_with_command("")
         with self.assertRaises(RuntimeError) as ctx:
-            DASH.send("claude1", "handoff")
+            DASH.send("codex", "handoff")
         self.assertIn("gone", str(ctx.exception))
         self.assertEqual([c for c in self.calls if c[0] == "state"], [])
 
     def test_sends_and_records_when_an_agent_is_running(self):
         DASH.tmux = self._tmux_with_command("claude")
-        DASH.send("claude1", "handoff")
+        DASH.send("codex", "handoff")
         self.assertEqual(len(self.sent_keys()), 2, "literal text then Enter")
         state = [c for c in self.calls if c[0] == "state"]
         self.assertEqual(len(state), 1)
-        self.assertEqual(state[0][1]["last_target"], "claude1")
+        self.assertEqual(state[0][1]["last_target"], "codex")
         self.assertEqual(state[0][1]["last_send_pane_command"], "claude")
 
     def test_refuses_when_the_message_is_left_sitting_in_the_composer(self):
@@ -291,7 +310,7 @@ class SendGuardTests(unittest.TestCase):
         message = "Read the latest handoff in agent_discussion.md and continue"
         DASH.tmux = self._tmux_with_command("claude", pane_text=f"❯ {message}")
         with self.assertRaises(RuntimeError) as ctx:
-            DASH.send("claude1", message)
+            DASH.send("codex", message)
         self.assertIn("NOT submitted", str(ctx.exception))
         self.assertEqual([c for c in self.calls if c[0] == "state"], [],
                          "a message still in the composer is not a delivery")
@@ -299,13 +318,13 @@ class SendGuardTests(unittest.TestCase):
     def test_an_empty_composer_after_sending_counts_as_delivered(self):
         """The other side of the boundary: over-strictness here would break every real handoff."""
         DASH.tmux = self._tmux_with_command("claude", pane_text="❯ ")
-        DASH.send("claude1", "handoff")
+        DASH.send("codex", "handoff")
         self.assertEqual(len([c for c in self.calls if c[0] == "state"]), 1)
 
     def test_someone_elses_draft_text_is_not_mistaken_for_ours(self):
         """A composer holding unrelated text must not fail the send - it is not our message."""
         DASH.tmux = self._tmux_with_command("claude", pane_text="❯ some unrelated draft")
-        DASH.send("claude1", "a completely different handoff message")
+        DASH.send("codex", "a completely different handoff message")
         self.assertEqual(len([c for c in self.calls if c[0] == "state"]), 1)
 
     def test_waits_for_the_agent_to_finish_before_typing(self):
@@ -324,7 +343,7 @@ class SendGuardTests(unittest.TestCase):
             return 0
 
         DASH.tmux = fake
-        DASH.send("claude1", "handoff")
+        DASH.send("codex", "handoff")
         first_send = order.index("send-keys")
         self.assertGreaterEqual(order[:first_send].count("poll"), 3,
                                 "must poll until idle before typing")
@@ -341,7 +360,7 @@ class SendGuardTests(unittest.TestCase):
     def test_handoff_only_interrupts_an_agent_that_is_actually_busy(self):
         """C-c into an idle pane clears a composer the operator may be using."""
         DASH.tmux = self._tmux_with_command("claude", pane_text="❯ ")
-        DASH.send_handoff("claude1", "handoff")
+        DASH.send_handoff("codex", "handoff")
         interrupts = [c for c in self.sent_keys() if "C-c" in c[1]]
         self.assertEqual(interrupts, [], "an idle agent must not be interrupted")
 
@@ -668,7 +687,7 @@ class SupervisorResilienceTests(IsolatedDashboard):
 
     def setUp(self):
         super().setUp()
-        DASH.write_state(mode="auto", owner="supervisor", active_agent="claude2",
+        DASH.write_state(mode="auto", owner="supervisor", active_agent="claude",
                          observed_sequence=1)
         DASH.DISCUSSION.write_text(
             "## d — Claude — released\n- **Seq:** 2\n- **Status:** released\n", encoding="utf-8")
@@ -730,10 +749,10 @@ class SupervisorResilienceTests(IsolatedDashboard):
         """The other side of the boundary: a working dispatch must still advance."""
         delivered = []
         self.run_one_iteration(lambda agent, message: delivered.append(agent))
-        self.assertEqual(delivered, ["claude1"])
+        self.assertEqual(delivered, ["codex"])
         state = DASH.read_state()
         self.assertEqual(state["observed_sequence"], 2)
-        self.assertEqual(state["active_agent"], "claude1")
+        self.assertEqual(state["active_agent"], "codex")
 
 
 class PendingComposerTests(IsolatedDashboard):
@@ -766,7 +785,7 @@ class PendingComposerTests(IsolatedDashboard):
         message = "Read the latest handoff in agent_discussion.md and continue the work."
         self.arrange(pending=message[:40], idle=True)
         with self.assertRaises(RuntimeError):
-            DASH.send("claude1", message)        # post-condition still sees it pending
+            DASH.send("codex", message)        # post-condition still sees it pending
         typed = [a for a in self.sent if len(a) > 3 and a[3] == "-l"]
         self.assertEqual(typed, [], "the message must not be typed again on top of itself")
         self.assertTrue(any(a[-1] == "Enter" for a in self.sent), "the draft must be submitted")
@@ -775,7 +794,7 @@ class PendingComposerTests(IsolatedDashboard):
         message = "Read the latest handoff in agent_discussion.md and continue the work."
         self.arrange(pending=message[:40], idle=False)
         with self.assertRaises(RuntimeError) as ctx:
-            DASH.send("claude1", message)
+            DASH.send("codex", message)
         self.assertIn("pending", str(ctx.exception))
         self.assertEqual([a for a in self.sent if a[-1] == "Enter"], [],
                          "pressing Enter into a busy agent is what created the draft to begin with")
@@ -784,7 +803,7 @@ class PendingComposerTests(IsolatedDashboard):
         """The boundary that keeps this safe: unrelated composer text must not suppress the send."""
         self.arrange(pending="a note the owner was typing", idle=True)
         try:
-            DASH.send("claude1", "Read the latest handoff in agent_discussion.md and continue.")
+            DASH.send("codex", "Read the latest handoff in agent_discussion.md and continue.")
         except RuntimeError:
             pass                                  # post-condition may still fire; not the point
         typed = [a for a in self.sent if len(a) > 3 and a[3] == "-l"]
@@ -803,7 +822,7 @@ class FakeTmux:
         self.calls = []
         self.shell_polls = collections.defaultdict(lambda: shell_polls)
         self.app_polls = collections.defaultdict(lambda: app_polls)
-        self.launched = set()
+        self.launched = {}
 
     def __call__(self, *args, capture=False, check=True):
         self.calls.append(args)
@@ -817,7 +836,7 @@ class FakeTmux:
                 if self.app_polls[pane] > 0:
                     self.app_polls[pane] -= 1
                     return "zsh"                        # app has not replaced the shell yet
-                return "claude"
+                return self.launched[pane]
             return "zsh"
         if args[0] == "capture-pane":
             pane = args[3]
@@ -827,8 +846,10 @@ class FakeTmux:
             return "user@host %"
         if args[0] == "split-window":
             return f"%{len(self.calls)}"
-        if args[0] == "send-keys" and args[3] == "-l" and LAUNCH_MARKER in args[4]:
-            self.launched.add(args[2])
+        if args[0] == "send-keys" and args[3] == "-l":
+            for agent, marker in zip(DASH.AGENTS, LAUNCH_MARKERS):
+                if marker in args[4]:
+                    self.launched[args[2]] = agent
         return 0
 
     def sends_to(self, pane):
@@ -892,13 +913,13 @@ class ReadinessWaitTests(IsolatedDashboard):
     def test_wait_for_app_waits_for_the_shell_to_be_replaced(self):
         fake = FakeTmux(shell_polls=0, app_polls=2)
         DASH.tmux = fake
-        fake.launched.add("%1")
+        fake.launched["%1"] = "claude"
         self.assertEqual(DASH.wait_for_app("%1"), "claude")
 
     def test_wait_for_app_times_out_while_a_shell_persists(self):
         fake = FakeTmux(shell_polls=0, app_polls=10 ** 6)
         DASH.tmux = fake
-        fake.launched.add("%1")
+        fake.launched["%1"] = "claude"
         with self.assertRaises(RuntimeError):
             DASH.wait_for_app("%1", timeout=0.0)
 
@@ -941,8 +962,9 @@ class StartOrderingTests(IsolatedDashboard):
         DASH.start(None)
         checked = 0
         for pane in {a[2] for a in self.fake.calls if a[0] == "send-keys"}:
-            launch = self._index_of_send(pane, LAUNCH_MARKER)
-            identity = self._index_of_send(pane, "You are Claude")
+            launch = next((self._index_of_send(pane, marker) for marker in LAUNCH_MARKERS
+                           if self._index_of_send(pane, marker) is not None), None)
+            identity = self._index_of_send(pane, "You are ")
             if identity is None:
                 continue
             self.assertIsNotNone(launch, f"{pane} got an identity prompt with no launch command")
@@ -961,7 +983,7 @@ class StartOrderingTests(IsolatedDashboard):
         """The old `time.sleep(1); send(first, ...)` reliably tripped the Seq-73 shell guard."""
         slept = []
         DASH.time.sleep = slept.append
-        DASH.start("claude1")
+        DASH.start("codex")
         self.assertEqual([s for s in slept if s >= 1], [],
                          "readiness must be polled, not slept through")
         literal = [a[4] for a in self.fake.calls
@@ -997,8 +1019,8 @@ class UpgradeExistingOrderingTests(IsolatedDashboard):
             if args[0] == "has-session":
                 return 0
             if args[0] == "list-panes":
-                return ("%1\tclaude1\tclaude\n"
-                        "%2\tclaude2\tzsh\n"          # not running an agent: triggers respawn
+                return ("%1\tcodex\tcodex\n"
+                        "%2\tclaude\tzsh\n"          # not running an agent: triggers respawn
                         "%3\tcontrol\tzsh")
             if args[0] == "capture-pane":
                 if self.blank_captures > 0:
@@ -1013,7 +1035,8 @@ class UpgradeExistingOrderingTests(IsolatedDashboard):
 
     def respawn_done(self):
         """True once the launch command has been typed into the respawned pane."""
-        return any(a[0] == "send-keys" and len(a) > 4 and LAUNCH_MARKER in a[4]
+        return any(a[0] == "send-keys" and len(a) > 4
+                   and any(marker in a[4] for marker in LAUNCH_MARKERS)
                    for a in self.calls)
 
     def tearDown(self):
@@ -1029,6 +1052,62 @@ class UpgradeExistingOrderingTests(IsolatedDashboard):
                     if a[0] == "capture-pane" and respawn < i < first_send]
         self.assertTrue(captures,
                         "keys were typed into the respawned pane with no readiness check")
+
+
+class UpgradeExistingIdentityTests(IsolatedDashboard):
+    """An upgrade must never manufacture authoritative identities from pane order."""
+
+    dash = DASH
+
+    def setUp(self):
+        super().setUp()
+        self.saved_tmux, self.saved_sleep = DASH.tmux, DASH.time.sleep
+        DASH.time.sleep = lambda _s: None
+        self.calls = []
+        self.tags = {}
+
+    def tearDown(self):
+        DASH.tmux, DASH.time.sleep = self.saved_tmux, self.saved_sleep
+        super().tearDown()
+
+    def install(self, rows):
+        def fake(*args, capture=False, check=True):
+            self.calls.append(args)
+            if args[0] == "has-session":
+                return 0
+            if args[0] == "list-panes":
+                return rows
+            if args[0] == "show-options":
+                return self.tags.get(args[3], "")
+            if args[0] == "set-option":
+                self.tags[args[3]] = args[5]
+                return 0
+            return 0
+        DASH.tmux = fake
+
+    def test_two_anonymous_claude_panes_are_not_assigned_by_sorted_id(self):
+        self.install("%8\tRead markdown\tclaude\n%3\tResearching\tclaude\n"
+                     "%9\tcontrol\tzsh")
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.upgrade_existing()
+        self.assertIn("without guessing", str(ctx.exception))
+        self.assertFalse(any(call[0] == "set-option" for call in self.calls),
+                         "ambiguity must fail before a guessed identity is made authoritative")
+
+    def test_unique_live_tags_override_misleading_cosmetic_titles(self):
+        self.tags = {"%8": "codex", "%3": "claude", "%9": "control"}
+        self.install("%8\tResearching B9\tcodex\n%3\tRead all markdown\tclaude\n"
+                     "%9\tanything\tzsh")
+        DASH.upgrade_existing()
+        self.assertEqual(self.tags,
+                         {"%8": "codex", "%3": "claude", "%9": "control"})
+
+    def test_conflicting_tag_and_legacy_title_is_refused(self):
+        self.tags = {"%8": "claude"}
+        self.install("%8\tcodex\tclaude\n%3\tclaude\tclaude\n%9\tcontrol\tzsh")
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.upgrade_existing()
+        self.assertIn("conflicting", str(ctx.exception))
 
 
 if __name__ == "__main__":
