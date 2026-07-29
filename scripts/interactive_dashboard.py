@@ -314,8 +314,15 @@ def wait_for_submission(pane, message, trust_busy_marker):
     """Wait for the draft to clear or the TUI to begin the submitted turn.
 
     Claude Code may leave submitted text visible in the composer for longer than one redraw. A
-    one-shot 0.6 s read therefore reported accepted handoffs as pending. The busy marker is an
-    equally strong acceptance signal: once the agent starts the turn, the message was submitted.
+    one-shot 0.6 s read therefore reported accepted handoffs as pending.
+
+    `trust_busy_marker` is the caller's observation that the pane was **idle immediately before
+    submission**, and it is load-bearing. The busy marker only proves acceptance if it appeared
+    *because of* our Enter; a marker that was already there proves nothing. Read level-triggered, it
+    let a handoff typed into a still-busy pane — where `wait_for_idle` timed out and returned False
+    without raising — return "accepted" on the first poll without ever reading the composer, and
+    `send()` then recorded a delivery that had not happened. See Seq 214/216. After an idle-wait
+    timeout, composer clearance is therefore the sole acceptance proof.
     """
     pending = ""
     for attempt in range(SUBMIT_POLLS):
