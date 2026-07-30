@@ -199,6 +199,58 @@ class OpenClaimTests(unittest.TestCase):
         self.assertTrue(DASH.open_claim_holders().issubset(set(DASH.AGENTS)))
 
 
+class TmuxErrorReportingTests(unittest.TestCase):
+    """A failing side-effect command must report tmux's own message, not crash in the handler.
+
+    stderr was piped only when `capture=True`, so a failing `send-keys` left `result.stderr` as
+    None and the error path raised `AttributeError: 'NoneType' object has no attribute 'strip'`.
+    The real tmux message went to the terminal instead of into the exception, and a genuine
+    delivery failure surfaced as an unrelated crash. Reproduced during a live handoff.
+    """
+
+    def setUp(self):
+        self.saved = DASH.subprocess.run
+        self.addCleanup(lambda: setattr(DASH.subprocess, "run", self.saved))
+
+    def fake(self, returncode, stderr, stdout=""):
+        class Result:
+            pass
+
+        def run(argv, **kwargs):
+            result = Result()
+            result.returncode = returncode
+            # Mirror the real contract: stdout is piped only when asked, stderr always.
+            # Model subprocess faithfully: a stream is only populated when it was piped.
+            # An earlier version of this fake set stderr unconditionally, so reverting the
+            # production code to the buggy `stderr=... if capture else None` changed nothing and
+            # the mutant survived. The fake has to reproduce the mechanism, not the symptom.
+            result.stdout = stdout if kwargs.get("stdout") is not None else None
+            result.stderr = stderr if kwargs.get("stderr") is not None else None
+            return result
+
+        DASH.subprocess.run = run
+
+    def test_a_failing_side_effect_command_reports_tmux_stderr(self):
+        self.fake(1, "not in a mode\n")
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.tmux("send-keys", "-t", "%0", "-l", "text")
+        message = str(ctx.exception)
+        self.assertIn("not in a mode", message, "tmux's own message must reach the caller")
+        self.assertIn("exit 1", message)
+
+    def test_a_failure_with_no_stderr_still_names_the_command(self):
+        self.fake(3, "")
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.tmux("select-pane", "-t", "%9")
+        self.assertIn("select-pane", str(ctx.exception))
+        self.assertIn("exit 3", str(ctx.exception))
+
+    def test_success_still_returns_stdout_only_when_captured(self):
+        self.fake(0, "", stdout="  %1  ")
+        self.assertEqual(DASH.tmux("display-message", "-p", "x", capture=True), "%1")
+        self.assertEqual(DASH.tmux("send-keys", "-t", "%0"), 0)
+
+
 class PaneIdentityTests(unittest.TestCase):
     """Pins the defect in `agent_discussion.md` Seq 171.
 
@@ -574,6 +626,20 @@ class SendGuardTests(unittest.TestCase):
         self.assertIn("NOT submitted", str(ctx.exception))
         self.assertEqual([c for c in self.calls if c[0] == "state"], [],
                          "an undelivered handoff into Codex must not be recorded as delivered")
+
+    def test_a_staged_paste_gets_exactly_one_second_enter(self):
+        message = "Direct handoff with a sufficiently distinctive body"
+        DASH.tmux = self._tmux_with_command("claude", pane_text=f"❯ {message}")
+        self.assertTrue(DASH.retry_staged_submission("%15", message))
+        enters = [c for c in self.sent_keys() if "Enter" in c[1]]
+        self.assertEqual(len(enters), 1)
+
+    def test_a_busy_turn_never_gets_the_second_enter(self):
+        message = "Direct handoff with a sufficiently distinctive body"
+        DASH.tmux = self._tmux_with_command(
+            "claude", pane_text=f"❯ {message}\n{DASH.BUSY_MARKER}")
+        self.assertFalse(DASH.retry_staged_submission("%15", message))
+        self.assertEqual(self.sent_keys(), [])
 
     def _busy_pane(self):
         """A pane that reports busy forever, with the idle wait stubbed so tests stay fast."""

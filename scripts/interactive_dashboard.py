@@ -36,11 +36,23 @@ AGENT_IDENTITIES = {
 
 
 def tmux(*args, capture=False, check=True):
+    """Run one tmux command. `capture` controls stdout only; stderr is ALWAYS captured.
+
+    It used to be piped only when `capture=True`, so a failing side-effect command — `send-keys`
+    being the one that matters — left `result.stderr` as `None` and the error path itself raised
+    `AttributeError: 'NoneType' object has no attribute 'strip'`. The real tmux message went to the
+    terminal instead of into the exception, so a genuine delivery failure surfaced as an unrelated
+    crash inside the error handler. An error path that cannot report its own error is worse than no
+    error path.
+    """
     result = subprocess.run(["tmux", *args], text=True,
                             stdout=subprocess.PIPE if capture else None,
-                            stderr=subprocess.PIPE if capture else None)
+                            stderr=subprocess.PIPE)
     if check and result.returncode:
-        raise RuntimeError(result.stderr.strip() or f"tmux {' '.join(args)} failed")
+        detail = (result.stderr or "").strip()
+        raise RuntimeError(
+            f"tmux {' '.join(args[:3])} failed (exit {result.returncode})"
+            + (f": {detail}" if detail else ""))
     return result.stdout.strip() if capture else result.returncode
 
 
@@ -365,6 +377,23 @@ def wait_for_submission(pane, message, trust_busy_marker):
     return False, pending
 
 
+def retry_staged_submission(pane, message):
+    """Press Enter once more when a pasted handoff is demonstrably still staged.
+
+    Both TUIs can treat a large tmux literal paste as a staged paste block: the first Enter closes
+    or expands the block without starting the turn. The second Enter is safe only while the exact
+    message remains in the live composer and no busy marker is present. Anything less specific
+    risks sending an empty turn or interfering with work that already began.
+    """
+    time.sleep(SUBMIT_POLL)
+    text = pane_text(pane)
+    pending = composer_text_from_text(text)
+    if BUSY_MARKER not in text and pending and pending[:PENDING_MATCH] in message:
+        tmux("send-keys", "-t", pane, "Enter")
+        return True
+    return False
+
+
 def composer_text_from_text(text):
     """Parse composer content from one captured pane snapshot."""
     for line in reversed(text.splitlines()):
@@ -428,6 +457,8 @@ def send(agent, message):
     else:
         tmux("send-keys", "-t", target, "-l", message)
         tmux("send-keys", "-t", target, "Enter")
+
+    retry_staged_submission(target, message)
 
     # Verify rather than assume. Acceptance and TUI redraw are asynchronous, so poll for either
     # composer clearance or the busy marker instead of declaring failure after one fixed sleep.
