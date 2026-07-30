@@ -8424,3 +8424,74 @@ secrets persisted. No profitability claim is made.
   account, variant 2, then the ProgramData pubkey. Deriving it costs one extra call per program and
   removes this entire error class rather than this one instance of it.
 - **Requested action:** none, but **hold the two authorized calls until this is corrected.**
+
+## 2026-07-30 — Claude — Boundary collector audited: it would have queried the wrong account. Advice: WAIT.
+
+- **Seq:** 273
+- **Status:** audit complete; ownership **RELEASED**; **zero network calls**; the live collector's
+  single-writer lock was **not touched**
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
+- **Verification:** **534 passed + 8 subtests**, diff-check clean. **Thirteen mutants, all caught** —
+  after five genuine survivors and four *false* survivors caused by a defect in my own harness.
+
+### The defect: one missing character, pointing at a different account
+
+| | address | chars |
+|---|---|---:|
+| B0 inventory | `6naEzKeUuFh1Jeeu51NXQgr5q`**`k`**`XgXtc9WKNct4xynVJc` | 44 |
+| shipped code | `6naEzKeUuFh1Jeeu51NXQgr5qXgXtc9WKNct4xynVJc` | 43 |
+
+**Both base58-decode to valid 32-byte pubkeys** — `55f7282e…` versus `017b6f09…`. Neither a length
+check nor base58 validation can catch this, because the truncated string is a perfectly well-formed
+address *for something else*. Most likely it would have failed closed on "account is absent"; the
+bad case is if that address happened to be a loader-owned variant-3 account, in which case the
+collector would have written `program_version` coverage from **another program's** deploy slot.
+
+Corrected from the primary source. The new test **re-reads both literals from the B0 inventories**
+rather than restating them, so code and measurement cannot drift apart silently.
+
+**The deeper point:** the address is never bound to the program it describes. B0's own method
+derives it — `getAccountInfo` on the *program* account, variant 2, then the ProgramData pubkey.
+That costs one extra call per program and removes the entire error class instead of this instance.
+I did not implement it; it is a design call for you.
+
+### Five guards had no coverage
+
+Truncation, absent account, strict base64, replay hash re-verification, and the stored-error-payload
+check. The existing header cases asserted only that *a* `FreezeViolation` was raised, so an
+overlapping guard could stand in for a deleted one — they now assert **which** guard fired.
+
+Strict base64 is the subtle one: non-validating `b64decode` **silently drops** invalid characters,
+so a corrupt payload can still yield a long-enough buffer and a plausible slot. The truncation check
+does not cover it; only `validate=True` does.
+
+### A defect in my own instrument
+
+My mutation harness counted only lines starting `FAILED`. `pytest-subtests` reports subtest failures
+as **`SUBFAIL`**, so **four mutants that were correctly caught got reported as survivors.** I nearly
+wrote up four of your guards as untested when they were fine. Fixed to key on the run outcome, and
+every figure above is from the corrected harness.
+
+### Advice: WAIT. Do not restart the collector.
+
+Measured now: **49,844 / 94,985 bodies (52.5%)**, ~45,141 remaining, **≈12.5 h** at the 1.0 req/s you
+measured.
+
+**The two boundary calls buy nothing today, because decoding is blocked on collection anyway.**
+`decode_artifact` needs the complete 94,985 population *and* the version map; collection is the
+longer pole by half a day. Restarting a live authorized run — deliberately breaking the single-writer
+invariant that exists to prevent exactly that — to save zero wall-clock time is a bad trade,
+especially on a run already disrupted once by the overload stop.
+
+**The one real cost of waiting, quantified:** a Pump upgrade landing in the next 12.5 h would push
+§4 onto the loader-history path. Using B0's measured 13.36-day mean interval, that is **≈3.8%**. And
+it is not a failure — it is the path §4 specifies, and the collector already refuses to invent
+coverage in that case.
+
+**Run `collect-boundary` in the natural gap after collection completes and before decoding.** The
+lock is free by construction then, no restart is required, and `context_slot >= CUTOFF_SLOT` is
+satisfied trivially. If an unplanned interruption happens first, that is a zero-cost window — take
+it then.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
+transactions, or secrets persisted. No profitability claim is made.
