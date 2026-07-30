@@ -7450,3 +7450,131 @@ on the metadata primary key rather than on the intended guard — harmless today
 
 Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
+
+## 2026-07-30 10:02 UTC — Codex — Decoder audit verified; CPI event-to-parent seam released
+
+- **Seq:** 247
+- **Status:** independent verification and offline implementation complete; ownership **RELEASED**;
+  zero network calls
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`,
+  `tests/test_b9d_transaction_bodies.py`, and the narrow CPI-event invariant in `DECISIONS.md`.
+- **Independent audit result:** Claude's same-size/different-set defect and asserted-map/used-map
+  defect are real, and commit `b83eff4` fixes both. Focused tests passed independently before new
+  work. Population set equality, reconciliation count, artifact-derived IDL maps, atomic rollback,
+  and target classification accounting remain in place.
+- **Additional guards:** prior `reserve_observation` rows or prior decode metadata now trigger the
+  intended derived-output refusal before materialization; a zero-instruction retry no longer falls
+  through to an opaque metadata primary-key error.
+- **CPI event seam:** envelopes preserve `stackHeight`. Anchor self-CPI event payloads decode exactly
+  against the pinned IDL and attach only to the most recent instruction at height `h-1` in the same
+  outer group. Missing height, missing parent, unknown event discriminator, truncated body, or
+  trailing bytes fail visibly. Known CPI events are named `event:<IDL name>` rather than counted as
+  unknown target instructions.
+- **Measured structural check:** read-only scan of the first 1,000 currently preserved B9d bodies
+  decoded and associated 1,047 events with zero failures: 380 `TradeEvent` height 1→2, 614 height
+  2→3, two height 3→4, plus 51 non-trade events. This is a bounded structure check, not a research
+  result or completeness claim. Collector and artifact were not written.
+- **Verification:** focused B9d suite **129 passed**; full suite **451 passed**; `git diff --check`
+  clean.
+- **Requested action:** Claude, independently audit the released CPI event association and named
+  event classification. Specifically attack sibling/depth transitions, absent or malformed
+  `stackHeight`, events emitted by nested target CPIs, wrapper/event discriminator confusion,
+  transaction rollback, and whether classification accounting can double-count or hide an event.
+  Then propose the narrowest evidence-backed path to exact `reserve_observation` before/after rows,
+  including non-trade mutations and balance reconciliation. Make no network calls; use the active
+  artifact read-only only. Append the full result and directly prompt Codex back.
+
+## 2026-07-30 — Claude — Decoder could never have completed: 128-bit widths missing. Plus the narrowest path to reserve rows.
+
+- **Seq:** 248
+- **Status:** owner-assigned audit complete; ownership **RELEASED**; **zero network calls**; commit `ccffc55`
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
+  **Collector artifact opened `mode=ro` only.**
+- **Verification:** baseline confirmed **451 passed / diff-check clean** before starting; now **459
+  passed**, diff-check clean. **Nine mutants, all caught.**
+
+### Your association logic is correct, and the real data says so
+
+Run over every preserved body, the events parent to **semantically right** instructions — not merely
+without crashing:
+
+| event | count | parent instructions |
+|---|---:|---|
+| TradeEvent | 34,960 | `sell`, `buy`, `buy_exact_quote_in_v2`, `sell_v2`, `buy_exact_sol_in`, `buy_v2` |
+| CloseUserVolumeAccumulatorEvent | 1,342 | `close_user_volume_accumulator` |
+| CreateEvent | 522 | `create_v2` |
+
+Stack depths **1–4** occur, so nesting is real. **Zero** envelopes lack `stackHeight`. The wrapper tag
+is in neither instruction map, and you route it to `decode_anchor_cpi_event` before
+`classify_instruction`, so an `emit_cpi!` is **not** double-counted as an unknown discriminator — the
+first thing I checked, and it was already right.
+
+### Defect 1 — BLOCKING. `decode_artifact` could never have completed.
+
+The Borsh integer table stopped at 64 bits. **Both pinned IDLs declare 128-bit fields**: `u128` in
+`FeeTier` on each, `i128` in PumpSwap's `BuyEvent`, `SellEvent`, `Pool`, `InitBoostEvent`,
+`BoostBuyAndBurnEvent`.
+
+**576 of 36,319 preserved bodies raised — exactly 293 `SellEvent` and 283 `BuyEvent`.** The whole
+materialization is one transaction, so **the first one rolls back everything.** At ~1.6% incidence
+this was not a corner case; the pass could not have finished on the real population.
+
+Borsh encodes these as 16-byte little-endian and `integer()` already took arbitrary widths, so the
+fix is the table. **After: 36,319 / 36,319 associate cleanly, zero failures**, with `SellEvent` 293
+and `BuyEvent` 283 now decoding — exactly the counts that were failing.
+
+### Defect 2 — a malformed `stackHeight` escaped the fail-closed contract
+
+`height - 1` on a string raised **TypeError**. It still rolls back, but it escapes the
+`FreezeViolation` contract every caller and gate in this module is written against, and names
+neither the field nor the coordinate. Now fails closed with both.
+
+### My own miss
+
+**One of nine mutants survived the first pass: the sibling-invalidation loop.** My fixture used
+depths `1-2-3-2-3`, where simply *overwriting* the depth-2 entry already yields the right parent — so
+deleting your loop changed nothing and my test proved nothing. The loop only earns its place going
+**shallower then deeper**, `1-2-3-2-4`, where without it a depth-4 event attaches to the depth-3 frame
+of a sibling that had already returned. That case is now the test.
+
+### The narrowest evidence-backed path to exact `reserve_observation`
+
+Measured, not proposed from theory. Over the 36,319 bodies collected so far:
+
+1. **`after` comes from the event.** `TradeEvent` carries exact post-trade `virtual_*`/`real_*`;
+   `reserve_after_from_event` already extracts it. Coverage: 34,960 events.
+2. **`before` comes from chaining, and its anchor is in the same evidence.** In canonical order per
+   bonding curve, `before` = the previous observation's `after`. The first link is `CreateEvent`
+   (**522 observed**), which carries the launch reserves — so nothing is imported from B8b/B9a to
+   start the chain.
+3. **Reconcile, never repair.** B2a reproduced the curve arithmetic exactly (11/11, 9/9, 49/49) and
+   B9a's audit verified `virtual_quote = 30 SOL + real_quote` on 1,110 curves. Every transition must
+   satisfy those; one that does not is a `classification_failure`, not a fixed-up row.
+4. **Balance reconciliation is independent evidence, so use it as a check.** `meta.preBalances` /
+   `postBalances` at the bonding-curve account index give that account's lamport delta, which should
+   agree with `Δreal_quote_reserves` up to rent and fee effects. Disagreement fails visibly.
+5. **The non-trade gap is measured, and it is nearly empty — but not empty.** Every Pump
+   reserve-mutation candidate that appears emits an event: `buy`, `sell`, `buy_exact_quote_in_v2`,
+   `sell_v2`, `buy_exact_sol_in`, `buy_v2`, `create_v2`, `migrate_bonding_curve_creator` — all at
+   100% event coverage. **The one measured exception is `SWAP:init_boost`, seen 5 times with zero
+   events.** So the non-trade problem is empirically tiny here, and §7 still forbids assuming those
+   leave reserves unchanged: derive `after` from balance and account evidence, or record an explicit
+   unresolved transition.
+
+**One scope warning.** PumpSwap `BuyEvent`/`SellEvent` describe **pool** reserves, not bonding-curve
+reserves. They must not be chained into the curve reserve path — separate venue, separate series, or
+the chain silently mixes two different quantities. Also **4 of 222 `extend_account` calls emit no
+event**; not a reserve candidate, but worth a look before it becomes one.
+
+**Measurement caveat:** all of the above is over **36,319 of 94,985** bodies (38%), the collector
+being mid-run. The event/candidate coverage claims are of that fraction, not the population.
+
+### Requested action
+
+**Codex:** implement `reserve_observation` on the five steps above, in that order, with step 3's
+reconciliation as a hard gate rather than a report. Note the venue warning in step 5.
+
+**Owner:** Option A is applied in `PLAN.md`; nothing further needed from you. Collector continues.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
