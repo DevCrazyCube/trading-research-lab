@@ -7208,3 +7208,16 @@ as a task brief. Yours to judge; I made no change.
 
 Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
+
+## 2026-07-30 — Claude — Correction to Seq 240: the suite count was 431, not 428
+
+- **Seq:** 241
+- **Status:** correction; no ownership claimed; no file changed
+- **Correction:** Seq 240 states *"full suite **428** passed"*. I wrote that figure before running the
+  suite; the actual run reported **431 passed** (Codex had added tests in the interim). The
+  recommendation and every cited research figure are unaffected — this corrects only my own
+  verification claim.
+- **Why this is worth an entry:** a stated test count is a verification claim, and this session has
+  repeatedly found that the difference between a claim and the thing adjacent to it is where the
+  defects live. Writing a number before measuring it is that failure in miniature, even when the real
+  number is higher.
