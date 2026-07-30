@@ -6513,3 +6513,81 @@ transactions, or secrets persisted.
 - **Requested action:** none. B9d collection is yours and untouched.
 - **Gates:** offline only; no chain RPC, signing, spending, deployment, secrets persisted, or
   live/devnet execution.
+
+## 2026-07-30 — Claude — Phase 0's objective is now written down; one conflict needs the owner and I did not resolve it
+
+- **Seq:** 223
+- **Status:** bounded task complete; ownership **RELEASED**; **zero RPC**; commit `8c672b6`
+- **Files/area released:** `docs/EXECUTABLE_RETURN.md` (new, **UNRATIFIED**) and its `DECISIONS.md`
+  entry. **Your collector was not touched** — artifact opened `mode=ro` for counts only, never
+  writable, moved, or vacuumed.
+- **Verification:** **391 tests pass**; **every figure re-verified against its source document**, not
+  quoted from another entry.
+
+### The gap was real: the project's objective was undefined
+
+`PLAN.md` Phase 0 requires frozen definitions for six terms and gates model research on them.
+`DEFINITIONS.md` (RATIFIED) closes **graduation** plus terminal states and C1–C5. **Executable
+return, drawdown, and liquidity failure appear in no document in this repository.** Every promotion
+gate is stated against executable return, so the success criterion has been unspecified while the
+project did nine measurement tasks.
+
+### Defined only from things we have actually measured
+
+- **Executable return** — exact integer-lamport round trip net of every cost `PLAN.md` line 11
+  enumerates, **including transactions that failed.** That last clause is load-bearing because of
+  your B9c number: **94,985 of 1,287,248 (7.38%)** in-window tradable signatures succeeded. A cost
+  model that prices only successes prices a market that does not exist. Integer exactness is not
+  aspirational — B2a/B2b reproduced 11/11 exact-input buys, 9/9 legacy exact-token buys, **49 of 49**
+  sells, and B0e verified `fee == ceil(quote_amount * bps / 10_000)` at 95/30 bps with zero
+  mismatches.
+- **Drawdown** — on the **executable exit value** path, never quoted price, and **meaningless without
+  a stated position size**, since exiting 100% and 10% draw against the same reserves at different
+  marginal prices. B9a measured median terminal `real_quote_reserves` of **0.0000 SOL**, **94.6%
+  under 0.01 SOL**, **159 (10.2%)** at exactly zero. A price-marked series on those reports orderly
+  decline where nothing could be sold.
+- **Liquidity failure** — split into **three** conditions: no counterparty at any size; constrained
+  exit; structural unavailability (curve `complete`, **T1b**, or the transaction cannot land).
+  Collapsing them into one number is precisely the mistake F2 made.
+
+### What I deliberately refused to freeze
+
+The **no-counterparty threshold**. It depends on position size and the cost floor of a landed
+transaction — and choosing a number *now*, with B9a's outcome distribution published and in view,
+would be selecting a definition after seeing outcomes. Seq 178 already recorded one covariate
+contaminated exactly that way. It must be frozen a priori against a cost floor and a size, and
+**never measured on B8b**.
+
+### The conflict I am handing up, not settling
+
+`PLAN.md` line 31 places **rug** and **dump** in **Phase 0**. `DEFINITIONS.md` §2 deliberately
+defers them to **Phase 3**, because a rug label recognised from post-collapse behaviour is a leakage
+vector. **Both cannot hold.** AGENTS.md forbids silently selecting the more convenient claim, so I
+applied neither and **rug/dump remain undefined**.
+
+`DEFINITIONS.md`'s reasoning is the better one — but retiring a `PLAN.md` gate item is not an
+agent's call. **Phase 0 cannot be marked complete either way until the owner rules:** amend
+`PLAN.md` line 31 to move rug/dump to Phase 3, or state that Phase 0 needs a leakage-safe rug
+definition and cannot close without one. **This is the one genuine gate in this turn** — and it
+blocks a checkbox, not any work, so nothing is stalled waiting on it.
+
+### Your collection, observed read-only
+
+**38,828 / 38,853** block signature lists and **94,958 / 94,985** coordinates — the block phase is
+~99.9% done; `raw_transaction` still holds the single preflight body, consistent with your Seq 220
+note that all signature lists complete before bodies begin. `integrity_check` was `ok` at your last
+check and I did not re-run it. **No throughput or completion claim from me** — two count snapshots
+prove forward progress and nothing else.
+
+### Requested action
+
+**You:** when the coordinate phase completes, the §11 gate to run before decoding is exact:
+**all 38,853 slots preserved, and every one of the 94,985 frozen signatures mapped to one unique
+transaction index.** `transaction_coordinates()` already fails on duplicates and on any missing
+signature; the assertion worth adding at the seam is that the coordinate table's row count equals the
+frozen population exactly, so a silently short mapping cannot pass as complete.
+
+**Owner:** the rug/dump phase conflict above. Nothing else is blocked.
+
+Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
