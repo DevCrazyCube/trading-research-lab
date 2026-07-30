@@ -8290,3 +8290,72 @@ secrets persisted. No profitability claim is made.
   a **completely empty** derived set. `decoded_at_unix` stops a *pre-decode* artifact passing
   vacuously, but not a decode pass that produced zero rows — the same vacuous pass one step later.
 - **Requested action:** none.
+
+## 2026-07-30 — Claude — Derived verifier audited: it had no missing-direction check. Next gate is §4 boundary evidence.
+
+- **Seq:** 269
+- **Status:** audit complete; ownership **RELEASED**; **zero network calls**; artifact read-only
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
+- **Verification:** **522 passed**, diff-check clean. **Fifteen mutants over every guard, all
+  caught** — after two survived and two were never tested at all.
+
+### The defect: every check ran derived → parent
+
+`verify_decoded_artifact` checked orphans in one direction only. **A decoder that skipped
+transactions produces no orphans and passes.** Reproduced twice:
+
+- two fetched bodies with instruction rows for only one → **PASSED**;
+- an entirely empty derived set → **PASSED**.
+
+`decoded_at_unix` stops a *pre-decode* artifact passing vacuously, but not a decode pass that
+produced **nothing** — the same vacuous pass one step later. A transaction always carries at least
+one instruction, so a preserved body with no instruction row is missing derived evidence rather than
+an empty transaction. The verifier now requires every `transaction_coordinate` signature to appear
+in `instruction`.
+
+### What the mutation sweep found in the rest
+
+Thirteen of fifteen guards were genuinely defended. Two were not, and two anchors matched **two
+sites each**, so those mutants never ran at all:
+
+- **a null after-state was accepted** — no fixture had one;
+- **ordering by curve alone survived**, because the contiguity fixture was persisted in canonical
+  order and so could not distinguish *replay* order from *insertion* order. The new case persists a
+  later coordinate **first**, so a non-canonical replay reports a valid chain as non-contiguous.
+
+That second one is the more interesting: contiguity is only meaningful in canonical order, and a
+fixture written in that order tests the ORDER BY not at all.
+
+### The next gate, and it is the critical path
+
+**There is no boundary collector.** Measured just now: `intervals_from_boundary_evidence()` — the
+pure §4 logic — exists and is tested; the `raw_boundary_response` and `program_version` schema
+exists; **nothing fetches the evidence and nothing populates the table.** Both are at **0 rows**.
+
+`decode_artifact` calls `program_version_rows` → `assert_boundary_coverage`, which fails on an empty
+map. **So the decoder cannot run at all, no matter how far collection gets.** That is the binding
+constraint, not the remaining 49% of bodies.
+
+**Offline, buildable now:** the fetch-and-persist wiring — preserve `getAccountInfo` on each
+ProgramData account into `raw_boundary_response`, decode the last-deploy slot, feed the existing
+`intervals_from_boundary_evidence()`, write `program_version`. All the judgement is already written
+and tested; only the plumbing is missing, and it unit-tests offline against synthetic responses.
+
+**Already authorized to run, and it is tiny.** Seq 218's authorization explicitly covered "required
+boundary/preflight calls". §4's first branch means this is **~2 `getAccountInfo` calls, not a
+history walk**: B0 puts the Pump last deploy at **433,095,571**, which is **798,662 slots before**
+the range opens at 433,894,233 — and since that is the most recent deployment that ever happened,
+current account state alone proves none occurred inside the range. Only if the live value has moved
+past the range start does the loader-history path become necessary.
+
+ProgramData accounts are on record: Pump `B5MvUwXdiW1NMM6QFFD3ssPKBujD4zMohncbM73Z2BQu`,
+PumpSwap `6naEzKeUuFh1Jeeu51NXQgr5qkXgXtc9WKNct4xynVJc`.
+
+### Disclosure
+
+My commit message says "520 tests pass"; the measured run was **522**. I composed the sentence
+before reading the result — **fifth time this session**. The remedy I keep writing down is the one I
+keep not applying: measure, read, then write.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
+transactions, or secrets persisted. No profitability claim is made.
