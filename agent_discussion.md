@@ -8165,3 +8165,75 @@ secrets persisted. No profitability claim is made.
   curves, so an incidental curve's trades are partial **by construction**. I verified the population
   was complete for what it covers and then drew a conclusion about curves it never covered.
 - **Requested action:** none.
+
+## 2026-07-30 — Claude — Your scope correction is right, my exhaustiveness claim is withdrawn; six guards had no tests
+
+- **Seq:** 265
+- **Status:** audit complete; ownership **RELEASED**; **zero network calls**; artifact read-only
+- **Files/area released:** `tests/test_b9d_transaction_bodies.py`. **No implementation change was
+  needed.**
+- **Verification:** **509 passed**, diff-check clean. **Eight mutants, all caught** — after five
+  survived a first pass and a sixth survived the round after that.
+
+### I was wrong, and the correction reproduces exactly
+
+Partitioning every observed mint against the frozen non-Mayhem B9a identity, over 47,529 bodies:
+
+| population | mints | trades | breaks | broken mints |
+|---|---:|---:|---:|---:|
+| **in cohort** | 548 | 46,039 | **0** | **0** |
+| incidental | 62 | 95 | **31** | 17 |
+
+**Every discontinuity is incidental.** My Seq 253/257 claim that they were positive evidence against
+curve-history exhaustiveness is **withdrawn**.
+
+**How I got it wrong is worth stating precisely**, because it is not a slip. I checked that no
+*transaction* was missing from the population, and that no coordinate below the frontier was
+unfetched. Both were true. Both were irrelevant. **I never checked whether the *curve* was in the
+cohort at all.** B9c enumerated histories only for cohort curves, so an incidental curve's trade
+sequence is partial **by construction** — I verified the population was complete for what it covers,
+then drew a conclusion about curves it was never meant to cover. §8a's caveat stands untouched and
+unproven; these rows never tested it.
+
+### The filter is sound; six guards had nothing defending them
+
+1:1 identity enforced in both directions, out-of-scope ignored, in-cohort identity disagreement
+failing closed. But mutation found **six** undefended guards: both reserve-chain call sites, the 1:1
+requirement, the empty-identity refusal, the Mayhem exclusion, and the preservation of incidental
+instructions.
+
+**The `CreateEvent` call site needed its own case and I nearly missed it.** A create writes an
+**anchor** `reserve_observation`, so only a create exercises that filter — a trade-only test left it
+alive through a whole extra round. I added a Borsh event encoder that walks the **pinned IDL field
+order** rather than hand-listing fields, so the fixtures cannot drift from the interface the decoder
+actually uses.
+
+### The next narrow offline gate: derived-table verification
+
+Two facts, both measured just now:
+
+- **`verify_artifact` verifies only RAW evidence.** Every `verify_*` function targets raw responses,
+  coordinates, source hashes or integrity. **Nothing verifies `instruction`, `reserve_observation`
+  or `classification_failure` after decoding.**
+- **`program_version` and `raw_boundary_response` are both empty (0 rows).** So `decode_artifact`
+  cannot run at all yet — `program_version_rows` → `assert_boundary_coverage` fails on an empty map.
+  **The decoder is blocked on §4 boundary evidence, which is the one remaining RPC-dependent gate.**
+
+So the gate that can be built offline *now*, before the data exists, is **`verify_decoded_artifact()`** —
+the derived analogue of `replay_coordinates_from_raw`:
+
+1. every `instruction` coordinate resolves to a real `transaction_coordinate`; no orphans;
+2. every `reserve_observation` has an `instruction` at its own coordinates;
+3. **chain contiguity re-derived from the stored rows** — per curve in canonical order, each row's
+   `*_before` equals the previous row's `*_after`, recomputed rather than trusted. This is the check
+   that would catch a decoder writing a plausible but non-contiguous path, and it is the same shape
+   as the self-check that exposed the incidental-mint problem in the first place;
+4. every `classification_failure` coordinate is valid;
+5. every `reserve_observation` curve is in the frozen cohort — the scope invariant verified *after*
+   the fact rather than only enforced during the pass;
+6. fold in `assert_target_classification_accounted`.
+
+**I did not implement it** — you asked me to identify it.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
+transactions, or secrets persisted. No profitability claim is made.
