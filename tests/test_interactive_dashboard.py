@@ -440,7 +440,8 @@ class SendGuardTests(unittest.TestCase):
 
     def test_waits_for_the_agent_to_finish_before_typing(self):
         """Busy first, then idle: nothing may be typed until the turn in flight has ended."""
-        states = [f"⏵⏵ auto mode on · {DASH.BUSY_MARKER} · ← 1 agent\n❯ "] * 3 + ["❯ "]
+        states = ([f"❯ \n⏵⏵ auto mode on · {DASH.BUSY_MARKER} · ← 1 agent"] * 3
+                  + ["❯ \n⏵⏵ auto mode on"])
         order = []
 
         def fake(*args, capture=False, check=True):
@@ -465,8 +466,54 @@ class SendGuardTests(unittest.TestCase):
         DASH.tmux = self._tmux_with_command("claude", pane_text="ran in (51s) earlier\n❯ ")
         self.assertFalse(DASH.agent_busy("%15"))
         DASH.tmux = self._tmux_with_command(
-            "claude", pane_text=f"⏵⏵ auto mode on · {DASH.BUSY_MARKER}\n❯ ")
+            "claude", pane_text=f"❯ \n⏵⏵ auto mode on · {DASH.BUSY_MARKER}")
         self.assertTrue(DASH.agent_busy("%15"))
+
+    def test_a_captured_status_line_in_the_transcript_is_not_busy(self):
+        """The stall this fix exists for, reproduced from the real pane contents.
+
+        Codex's pane held a *captured copy of Claude's* status line at line 48 of 60, left by its
+        own dashboard diagnostics — Claude Code's format, in Codex's pane, while Codex's own status
+        line read `gpt-5.6-sol default`. A whole-pane search therefore reported an idle Codex as
+        busy **permanently**, and once `send()` refused to type into a busy pane, no handoff could
+        reach it again. It only cleared when that text scrolled away.
+        """
+        pane_text = (
+            "  ⏵⏵ auto mode on (shift+tab to cycle) · esc to interrupt · ← 1 agent\n"
+            "\n"
+            "────────────────────────\n"
+            "› Use /skills to list available skills\n"
+            "────────────────────────\n"
+            "  gpt-5.6-sol default · ~/meme")
+        DASH.tmux = self._tmux_with_command("codex", pane_text=pane_text)
+        self.assertFalse(DASH.agent_busy("%0"),
+                         "a captured status line above the composer is transcript, not liveness")
+
+    def test_the_status_region_stops_at_the_last_composer_prompt(self):
+        """The boundary: the fix must not blind the probe to a genuinely live status line."""
+        live = "old esc to interrupt echo\n❯ \n⏵⏵ auto mode on · esc to interrupt"
+        self.assertIn("esc to interrupt", DASH.status_region(live).splitlines()[-1])
+        self.assertNotIn("echo", DASH.status_region(live))
+        # No prompt visible at all: bounded tail, never the whole scrollback.
+        self.assertEqual(DASH.status_region("a\nb\nc\nd\ne\nf"), "c\nd\ne\nf")
+
+    def test_the_LAST_prompt_is_the_composer_when_the_transcript_echoes_earlier_ones(self):
+        """Both TUIs echo delivered messages behind the prompt glyph (Seq 189), so a pane can hold
+        several. Anchoring on the first would drag stale text back into the region."""
+        pane_text = ("❯ an earlier delivered handoff\n"
+                     "  ⏵⏵ auto mode on · esc to interrupt · ← 1 agent\n"
+                     "────────────────────────\n"
+                     "❯ \n"
+                     "  ⏵⏵ auto mode on (shift+tab to cycle)")
+        DASH.tmux = self._tmux_with_command("claude", pane_text=pane_text)
+        self.assertFalse(DASH.agent_busy("%1"),
+                         "the marker sits above the LIVE composer, so it is transcript")
+
+    def test_a_busy_marker_quoted_in_our_own_composer_text_is_not_liveness(self):
+        """Handoffs in this project quote the marker verbatim; the composer is input, not status."""
+        DASH.tmux = self._tmux_with_command(
+            "claude", pane_text=f"❯ my handoff mentions {DASH.BUSY_MARKER} verbatim\n⏵⏵ auto mode on")
+        self.assertFalse(DASH.agent_busy("%1"))
 
     def test_handoff_only_interrupts_an_agent_that_is_actually_busy(self):
         """C-c into an idle pane clears a composer the operator may be using."""
@@ -531,7 +578,7 @@ class SendGuardTests(unittest.TestCase):
     def _busy_pane(self):
         """A pane that reports busy forever, with the idle wait stubbed so tests stay fast."""
         DASH.tmux = self._tmux_with_command(
-            "claude", pane_text=f"⏵⏵ auto mode on · {DASH.BUSY_MARKER}\n❯ ")
+            "claude", pane_text=f"❯ \n⏵⏵ auto mode on · {DASH.BUSY_MARKER}")
         saved, DASH.wait_for_idle = DASH.wait_for_idle, lambda pane, **kw: False
         self.addCleanup(lambda: setattr(DASH, "wait_for_idle", saved))
 

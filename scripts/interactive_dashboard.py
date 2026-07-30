@@ -260,15 +260,43 @@ COMPOSER_PROMPTS = ("❯", "›")   # Claude Code, Codex — different applicati
 NBSP = " "                           # both TUIs pad the prompt with it
 
 
+def status_region(text):
+    """The pane's live status area: everything at or below the last composer prompt.
+
+    The composer is the bottom-most prompt line and the status line sits under it, so anything
+    above it is transcript. Splitting there is what lets a status-line probe stop matching history.
+    Falls back to the last few lines when no prompt is visible, so a pane running something other
+    than an agent TUI still gets a bounded region rather than the whole scrollback.
+    """
+    lines = text.splitlines()
+    for index in range(len(lines) - 1, -1, -1):
+        stripped = lines[index].strip()
+        if any(stripped.startswith(prompt) for prompt in COMPOSER_PROMPTS):
+            # Below the composer, exclusive. The composer line itself is *our own text* — a handoff
+            # quoting the busy marker would otherwise read as liveness.
+            return "\n".join(lines[index + 1:])
+    return "\n".join(lines[-4:])
+
+
 def agent_busy(pane):
     """True while the agent is mid-turn.
 
-    Anchored on Claude Code's own status-line hint, which is present exactly while a turn is in
-    flight and absent when the agent is waiting for input. Deliberately NOT the elapsed-timer
-    pattern `(51s ...)`: that can appear in ordinary transcript text, and a check that matches
-    something merely adjacent to the claim is the error this project has hit eight times.
+    Anchored on the TUI's status-line hint, which is present exactly while a turn is in flight, and
+    read **only from the status region** — not the whole capture.
+
+    A whole-pane substring search is unsound and it stalled the channel for real. Codex's pane held
+    a *captured copy of Claude's* status line at line 48 of 60, left there by its own dashboard
+    diagnostics — literal text `auto mode on (shift+tab to cycle) · esc to interrupt`, in Claude
+    Code's format, while Codex's own status line read `gpt-5.6-sol default`. `agent_busy` therefore
+    returned True for an idle Codex **permanently**, and once `send()` began refusing to type into a
+    busy pane, no handoff could ever be delivered to it again. Not transient: it only cleared when
+    that text scrolled away.
+
+    The original docstring guarded against exactly this shape for the elapsed-timer pattern and
+    left the general case open. A marker that can appear in transcript is transcript-matchable no
+    matter which marker it is; the fix is the region, not the string.
     """
-    return BUSY_MARKER in pane_text(pane)
+    return BUSY_MARKER in status_region(pane_text(pane))
 
 
 def composer_text(pane):
