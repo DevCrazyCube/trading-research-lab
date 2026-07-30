@@ -593,3 +593,44 @@ The two do not imply each other. A user-ratified decision can remain provisional
   only a query-free endpoint reference is recorded. This authorizes read-only historical evidence
   collection only. It does not authorize wallets, signing, transaction submission, spending,
   deployment, or live/devnet trading, whose PLAN gates remain binding.
+
+## 2026-07-30 — Phase 0's objective definitions drafted; the rug/dump phase conflict is an OPEN OWNER DECISION
+
+- **Status:** **proposal, NOT ratified.** Full text: `docs/EXECUTABLE_RETURN.md` v0.1. No parameter
+  is frozen by it and nothing in it may be treated as adopted because it exists.
+- **Gap it addresses:** `PLAN.md` Phase 0 requires frozen definitions for "rug, dump, graduation,
+  executable return, drawdown, and liquidity failure", and gates model research on labels and
+  evaluation protocol being documented. `docs/DEFINITIONS.md` (RATIFIED v0.3) closes **graduation**
+  and the censoring rules. **Executable return, drawdown and liquidity failure were defined in no
+  document in this repository** — so the objective every promotion gate is stated against was
+  unspecified while Phase 1 measurement proceeded.
+- **Proposed definitions, grounded only in measured quantities:**
+  - **Executable return** as an exact integer-lamport round trip net of every cost `PLAN.md` line 11
+    enumerates, explicitly **including transactions that failed** — B9c measured only **94,985 of
+    1,287,248 (7.38%)** distinct in-window tradable signatures as successful, so a cost model
+    pricing only successes prices a market that does not exist. Integer exactness is not aspirational:
+    B2a/B2b reproduced 11/11 exact-input buys, 9/9 legacy exact-token buys and **49/49** sells, and
+    B0e verified `fee == ceil(quote_amount * bps / 10_000)` at 95/30 bps with zero mismatches.
+  - **Drawdown** on the **executable exit value** path, never on quoted price, and meaningless
+    without a stated position size. B9a measured median terminal `real_quote_reserves` of
+    **0.0000 SOL** with **94.6% under 0.01 SOL**; a price-marked series there reports orderly
+    decline where nothing could be sold.
+  - **Liquidity failure** split into three conditions — no counterparty at any size, constrained
+    exit, and structural unavailability (curve `complete`, T1b, or the transaction cannot land.)
+    Reporting them as one number is the mistake B9a's F2 made.
+- **Deliberately NOT frozen, and why:** the "no counterparty at any size" threshold depends on
+  position size and the cost floor of a landed transaction. Choosing a number now, with B9a's
+  outcome distribution already published and in view, would be selecting a definition after seeing
+  outcomes — the exact move preregistration exists to prevent, and Seq 178 already recorded one
+  covariate contaminated this way. It must be frozen a priori and **never measured on B8b**.
+- **OPEN CONFLICT REQUIRING THE OWNER.** `PLAN.md` line 31 places **rug** and **dump** in Phase 0.
+  `DEFINITIONS.md` §2 deliberately defers them to Phase 3, because a rug label recognised from
+  post-collapse behaviour is a leakage vector. **Both cannot hold.** AGENTS.md forbids silently
+  selecting the more convenient claim, so neither was applied and rug/dump remain undefined. The
+  owner must either amend `PLAN.md` line 31 to move them to Phase 3, or state that Phase 0 requires
+  a leakage-safe rug definition and cannot close without one. **Phase 0 cannot be marked complete
+  either way until this is resolved.**
+- **Consequence:** the objective is now written down and auditable, and its unmeasured components
+  (landing, contention, tip and slippage distributions; the reserve path B9d is collecting) are named
+  rather than assumed. No return, drawdown or liquidity figure may be computed for the B8b cohort
+  until B9d publishes the reserve path.
