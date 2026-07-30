@@ -415,6 +415,21 @@ def transaction_body_coordinates(database, require_complete=True):
         "SELECT signature,slot FROM transaction_coordinate ORDER BY slot,transaction_index"))
 
 
+def assert_raw_transaction_population(database, expected_signatures=EXPECTED_SIGNATURES):
+    """Fail closed unless every frozen signature has one preserved raw transaction body.
+
+    `raw_transaction.signature` is a primary key, so exact row count establishes uniqueness. The
+    coordinate seam separately proves that the frozen population itself has exactly 94,985 unique
+    signatures. Together these keep an interrupted collector from looking decoder-ready.
+    """
+    body_count = database.execute("SELECT count(*) FROM raw_transaction").fetchone()[0]
+    if body_count != expected_signatures:
+        raise FreezeViolation(
+            f"raw body phase is incomplete: {body_count:,}/{expected_signatures:,} transaction "
+            "bodies; refusing to make the artifact available for decoding")
+    return True
+
+
 # ---------------------------------------------------------------------------------------------
 # §4 upgrade-boundary coverage and the fail-closed version map
 # ---------------------------------------------------------------------------------------------
@@ -1140,6 +1155,12 @@ def collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PAT
             transaction_count += 1
             if progress_every and transaction_count % progress_every == 0:
                 print(f"transactions +{transaction_count}; latest slot {slot}", flush=True)
+
+        # `--max-transactions` is an explicitly partial, resumable probe. Only an unbounded
+        # production pass may claim raw collection returned successfully, and it must carry every
+        # frozen body before any later decoder orchestration can treat the artifact as ready.
+        if max_transactions is None:
+            assert_raw_transaction_population(database)
         return {"blocks_added": block_count, "transactions_added": transaction_count,
                 "blocks_total": database.execute(
                     "SELECT count(*) FROM raw_block_signatures").fetchone()[0],

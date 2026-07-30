@@ -705,6 +705,24 @@ class ArtifactTests(unittest.TestCase):
                          [("a", 7), ("b", 7)])
         database.close()
 
+    def test_raw_body_phase_refuses_a_silently_short_population(self):
+        database = self.artifact()
+        B9D.store_raw(database, "raw_transaction", "signature", "a",
+                      "getTransaction", ["a"], b"one", received_at=1)
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.assert_raw_transaction_population(database, expected_signatures=2)
+        self.assertIn("1/2 transaction bodies", str(ctx.exception))
+        self.assertIn("refusing to make the artifact available for decoding", str(ctx.exception))
+        database.close()
+
+    def test_raw_body_phase_accepts_the_exact_population(self):
+        database = self.artifact()
+        for signature in ("a", "b"):
+            B9D.store_raw(database, "raw_transaction", "signature", signature,
+                          "getTransaction", [signature], signature.encode(), received_at=1)
+        self.assertTrue(B9D.assert_raw_transaction_population(database, expected_signatures=2))
+        database.close()
+
     def test_two_instructions_cannot_share_a_canonical_key(self):
         database = self.artifact()
         row = (5, 0, 1, -1, "sig", B9D.PUMP_PROGRAM, "aa", "buy", 1, "[]", 24)
@@ -761,8 +779,9 @@ class CoordinateSeamWiringTests(unittest.TestCase):
         database.close()
 
     def collect(self, **kwargs):
+        max_transactions = kwargs.pop("max_transactions", 0)
         return B9D.collect_raw_population(
-            "https://unused.invalid", str(self.path), max_transactions=0,
+            "https://unused.invalid", str(self.path), max_transactions=max_transactions,
             progress_every=0, **kwargs)
 
     def test_an_unbounded_run_refuses_to_start_bodies_on_a_short_population(self):
@@ -778,6 +797,27 @@ class CoordinateSeamWiringTests(unittest.TestCase):
         preregistration relies on for shape verification.
         """
         summary = self.collect(max_slots=1)
+        self.assertEqual(summary["transactions_added"], 0)
+        self.assertEqual(self.requested, [])
+
+    def test_an_unbounded_return_refuses_a_short_raw_body_population(self):
+        """Pin the raw-body guard's production call site, not only its helper.
+
+        The coordinate gate is replaced with an empty, already-complete iterable to isolate the
+        next seam. With no bodies to fetch, an unbounded collector reaches the return boundary and
+        must still reject the short raw table without making a network request.
+        """
+        saved = B9D.transaction_body_coordinates
+        B9D.transaction_body_coordinates = lambda database, require_complete=True: []
+        self.addCleanup(lambda: setattr(B9D, "transaction_body_coordinates", saved))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.collect(max_slots=None, max_transactions=None)
+        self.assertIn("raw body phase is incomplete", str(ctx.exception))
+        self.assertEqual(self.requested, [], "it must refuse without any network call")
+
+    def test_a_bounded_body_probe_deliberately_bypasses_the_raw_completion_gate(self):
+        """The reverse mutation: partial body probes must remain resumable."""
+        summary = self.collect(max_slots=1, max_transactions=0)
         self.assertEqual(summary["transactions_added"], 0)
         self.assertEqual(self.requested, [])
 
