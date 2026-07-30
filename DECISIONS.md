@@ -650,3 +650,33 @@ The two do not imply each other. A user-ratified decision can remain provisional
   wire message. A non-terminal coordination entry with a real `Requested action` is also delivered
   immediately; `none`, audit-only notes, and active ownership claims remain log-only. Handoffs may
   wait for a long turn to finish, but they do not corrupt or terminate either conversation.
+
+## 2026-07-30 — Boundary coverage derives ProgramData identity before reading its header
+
+- **Status:** accepted implementation of B9d preregistration §4; live execution remains under the
+  existing Seq 218 authorization and the artifact's single-writer lock.
+- **Decision:** first fetch each executable program account with finalized `getAccountInfo` and a
+  36-byte slice, decode upgradeable-loader variant 2 and its embedded ProgramData pubkey, and require
+  equality with the primary-source inventory. Then fetch only that derived account with a 12-byte
+  slice containing ProgramData variant and current last-deploy slot. Preserve both byte-exact
+  responses; require contexts at or beyond the cutoff, loader ownership, executable/non-executable
+  state as appropriate, and variants 2/3. Feed only the decoded deploy slot into the frozen interval
+  derivation.
+- **Reason:** current ProgramData state is sufficient only when its most recent deploy is at or
+  before the observation-range start; then no later deployment can lie inside the range. Fetching a
+  multi-megabyte program body adds no evidence about the header and creates avoidable RPC volume.
+- **Failure branch:** if either current last-deploy slot is newer than the range start, preserve the
+  response but write no false coverage. The separately specified loader-history path is then
+  required. Existing raw responses and version rows are immutable and must reproduce exactly on
+  resume.
+- **Consequence:** `collect-boundary` supplies the missing wiring from preserved primary evidence
+  to `program_version`. It is resumable and bounded to four sliced account calls on the expected
+  branch. This prevents a valid-but-mistyped ProgramData address from proving coverage for a
+  different account—the exact defect caught in the first implementation.
+  It cannot run concurrently with the active body collector because both mutate the same evidence
+  artifact under the single-writer invariant.
+- **Publication verification:** `verify_artifact()` independently reconstructs the two exact request
+  identities per program, rechecks compressed bytes and hashes, decodes both loader headers, binds
+  Program and ProgramData evidence keys to their correct roles, and reproduces context/deploy
+  metadata from the preserved responses. A key that merely exists elsewhere in the table is not
+  provenance; cross-program and cross-role references fail closed.

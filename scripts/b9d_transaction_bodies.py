@@ -653,24 +653,76 @@ def assert_boundary_evidence_complete(database):
     if not completed:
         raise FreezeViolation(
             "boundary_completed_at_unix is absent; the §4 upgrade-boundary check has not completed")
-    stored_keys = {row[0] for row in database.execute(
-        "SELECT request_key FROM raw_boundary_response")}
     for program_id in TARGET_PROGRAMS:
-        responses = database.execute(
-            "SELECT count(*) FROM raw_boundary_response WHERE program_id=?",
-            (program_id,)).fetchone()[0]
-        if responses != 2:
+        programdata_address = PROGRAMDATA_ACCOUNTS[program_id]
+        requests = (
+            (program_id, 36, f"boundary_program_evidence_key:{program_id}"),
+            (programdata_address, 12, None),
+        )
+        rows = database.execute(
+            "SELECT request_key,method,params_json,response_sha256,raw_zlib "
+            "FROM raw_boundary_response WHERE program_id=?", (program_id,)).fetchall()
+        if len(rows) != 2:
             raise FreezeViolation(
-                f"{program_id}: {responses} preserved boundary response(s), expected 2 — the "
+                f"{program_id}: {len(rows)} preserved boundary response(s), expected 2 — the "
                 "Program account that derives ProgramData, and the ProgramData header")
-        binding = database.execute(
-            "SELECT value FROM metadata WHERE key=?",
-            (f"boundary_program_evidence_key:{program_id}",)).fetchone()
-        if not binding or binding[0] not in stored_keys:
+        stored = {row[0]: row for row in rows}
+        decoded = []
+        for address, slice_length, binding_metadata_key in requests:
+            params = [address, {"encoding": "base64", "commitment": "finalized",
+                                "dataSlice": {"offset": 0, "length": slice_length}}]
+            expected_key = boundary_request_key(program_id, "getAccountInfo", params)
+            row = stored.get(expected_key)
+            if row is None or row[1:3] != (
+                    "getAccountInfo", json.dumps(params, separators=(",", ":"))):
+                raise FreezeViolation(
+                    f"{program_id}: preserved boundary evidence does not contain the exact "
+                    f"{slice_length}-byte request for {address}")
+            try:
+                raw = zlib.decompress(row[4])
+            except zlib.error as error:
+                raise FreezeViolation(
+                    f"{program_id}: boundary response {expected_key} is not valid zlib") from error
+            if hashlib.sha256(raw).hexdigest() != row[3]:
+                raise FreezeViolation(
+                    f"{program_id}: boundary response {expected_key} hash mismatch")
+            try:
+                payload = json.loads(raw)
+            except json.JSONDecodeError as error:
+                raise FreezeViolation(
+                    f"{program_id}: boundary response {expected_key} is not JSON") from error
+            if "error" in payload or "result" not in payload:
+                raise FreezeViolation(
+                    f"{program_id}: boundary response {expected_key} is not a successful result")
+            if binding_metadata_key:
+                binding = database.execute(
+                    "SELECT value FROM metadata WHERE key=?", (binding_metadata_key,)).fetchone()
+                if not binding or binding[0] != expected_key:
+                    raise FreezeViolation(
+                        f"{program_id}: program-binding evidence key {binding and binding[0]!r} "
+                        f"does not name its preserved Program request {expected_key}")
+            decoded.append((expected_key, payload["result"]))
+        program_header = decode_program_header(decoded[0][1], program_id)
+        if program_header["programdata_address"] != programdata_address:
             raise FreezeViolation(
-                f"{program_id}: recorded program-binding evidence key {binding and binding[0]!r} "
-                "does not resolve to a preserved response")
-        program_version_rows(database, program_id)
+                f"{program_id}: preserved Program derives {program_header['programdata_address']}, "
+                f"not inventory ProgramData {programdata_address}")
+        programdata_header = decode_programdata_header(decoded[1][1], programdata_address)
+        versions = program_version_rows(database, program_id)
+        if any(row["evidence_key"] != decoded[1][0] for row in versions):
+            raise FreezeViolation(
+                f"{program_id}: version coverage does not name its preserved ProgramData response")
+        expected_metadata = {
+            f"boundary_program_context_slot:{program_id}": program_header["context_slot"],
+            f"boundary_context_slot:{program_id}": programdata_header["context_slot"],
+            f"boundary_last_deploy_slot:{program_id}": programdata_header["last_deploy_slot"],
+        }
+        for key, expected in expected_metadata.items():
+            actual = database.execute(
+                "SELECT value FROM metadata WHERE key=?", (key,)).fetchone()
+            if not actual or actual[0] != str(expected):
+                raise FreezeViolation(
+                    f"{program_id}: boundary metadata {key} does not reproduce preserved evidence")
     return True
 
 

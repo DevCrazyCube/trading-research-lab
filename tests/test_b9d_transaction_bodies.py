@@ -2451,22 +2451,41 @@ class PublicationGateTests(unittest.TestCase):
         pins = {B9D.PUMP_PROGRAM: (B9D.PUMP_IDL_PATH, B9D.PUMP_IDL_SHA256),
                 B9D.PUMPSWAP_PROGRAM: (B9D.PUMPSWAP_IDL_PATH, B9D.PUMPSWAP_IDL_SHA256)}
         for program, (idl_path, digest) in pins.items():
+            programdata = B9D.PROGRAMDATA_ACCOUNTS[program]
+            context_slot, deploy_slot = B9D.CUTOFF_SLOT + 1, low - 1
+            program_header = (2).to_bytes(4, "little") + B9D.base58_decode(programdata)
+            programdata_header = (3).to_bytes(4, "little") + deploy_slot.to_bytes(8, "little")
+            evidence = (
+                (program, 36, {"context": {"slot": context_slot}, "value": {
+                    "owner": B9D.UPGRADEABLE_LOADER, "executable": True,
+                    "data": [base64.b64encode(program_header).decode(), "base64"]}}),
+                (programdata, 12, {"context": {"slot": context_slot}, "value": {
+                    "owner": B9D.UPGRADEABLE_LOADER, "executable": False,
+                    "data": [base64.b64encode(programdata_header).decode(), "base64"]}}),
+            )
             keys = []
-            for role in ("program", "programdata"):
-                raw = json.dumps({"result": {"role": role, "program": program}}).encode()
-                key = f"{role}:{program}"
+            for address, slice_length, result in evidence:
+                params = [address, {"encoding": "base64", "commitment": "finalized",
+                                    "dataSlice": {"offset": 0, "length": slice_length}}]
+                raw = json.dumps({"result": result}).encode()
+                key = B9D.boundary_request_key(program, "getAccountInfo", params)
                 keys.append(key)
                 database.execute(
                     "INSERT INTO raw_boundary_response (request_key,program_id,method,params_json,"
                     "received_at_unix,response_sha256,raw_zlib) VALUES (?,?,?,?,?,?,?)",
-                    (key, program, "getAccountInfo", "[]", 0.0,
+                    (key, program, "getAccountInfo", json.dumps(params, separators=(",", ":")), 0.0,
                      hashlib.sha256(raw).hexdigest(), zlib.compress(raw, 6)))
             database.execute(
                 "INSERT INTO metadata VALUES (?,?)",
                 (f"boundary_program_evidence_key:{program}", keys[0]))
+            for key, value in (
+                    (f"boundary_program_context_slot:{program}", context_slot),
+                    (f"boundary_context_slot:{program}", context_slot),
+                    (f"boundary_last_deploy_slot:{program}", deploy_slot)):
+                database.execute("INSERT INTO metadata VALUES (?,?)", (key, str(value)))
             database.execute(
                 "INSERT INTO program_version VALUES (?,?,?,?,?,?,?,?)",
-                (program, low, high, idl_path, digest, low - 1, keys[1], "covered"))
+                (program, low, high, idl_path, digest, deploy_slot, keys[1], "covered"))
         database.execute("INSERT INTO metadata VALUES ('boundary_completed_at_unix','1')")
 
     def open(self):
@@ -2652,7 +2671,145 @@ class PublicationGateTests(unittest.TestCase):
                              (f"boundary_program_evidence_key:{B9D.PUMP_PROGRAM}",))
         with self.assertRaises(B9D.FreezeViolation) as ctx:
             B9D.verify_artifact(database, check_sources=False)
-        self.assertIn("does not resolve to a preserved response", str(ctx.exception))
+        self.assertIn("does not name its preserved Program request", str(ctx.exception))
+
+    def test_cross_program_or_wrong_role_provenance_is_refused(self):
+        """An existing key is insufficient: it must name this program's exact request and role."""
+        database = self.open()
+        pump_key = database.execute(
+            "SELECT value FROM metadata WHERE key=?",
+            (f"boundary_program_evidence_key:{B9D.PUMP_PROGRAM}",)).fetchone()[0]
+        swap_key = database.execute(
+            "SELECT value FROM metadata WHERE key=?",
+            (f"boundary_program_evidence_key:{B9D.PUMPSWAP_PROGRAM}",)).fetchone()[0]
+        with database:
+            database.execute("UPDATE metadata SET value=? WHERE key=?", (
+                swap_key, f"boundary_program_evidence_key:{B9D.PUMP_PROGRAM}"))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("does not name its preserved Program request", str(ctx.exception))
+        with database:
+            database.execute("UPDATE metadata SET value=? WHERE key=?", (
+                pump_key, f"boundary_program_evidence_key:{B9D.PUMP_PROGRAM}"))
+            database.execute("UPDATE program_version SET evidence_key=? WHERE program_id=?", (
+                pump_key, B9D.PUMP_PROGRAM))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("does not name its preserved ProgramData response", str(ctx.exception))
+
+    def boundary_row_key(self, program, address, slice_length):
+        """The request_key a correctly-filed row for this exact call would carry."""
+        params = [address, {"encoding": "base64", "commitment": "finalized",
+                            "dataSlice": {"offset": 0, "length": slice_length}}]
+        return B9D.boundary_request_key(program, "getAccountInfo", params)
+
+    def replace_boundary_response(self, database, key, payload):
+        """Rewrite one preserved response *and* its digest, so the row stays self-consistent."""
+        raw = json.dumps(payload).encode()
+        with database:
+            database.execute(
+                "UPDATE raw_boundary_response SET raw_zlib=?, response_sha256=? WHERE request_key=?",
+                (zlib.compress(raw, 6), hashlib.sha256(raw).hexdigest(), key))
+
+    def test_a_row_whose_key_disagrees_with_its_own_request_columns_is_refused(self):
+        """`request_key` is a hash OF the request identity, but nothing recomputes it from the row.
+
+        Every other tamper test moves the *pointer* — the binding metadata or the version
+        `evidence_key`. Those are caught because the lookup then misses. This is the case the
+        lookup cannot catch: the row is filed under the correct Program-request key while its own
+        `method`/`params_json` columns describe a different call, so `stored.get(expected_key)`
+        finds it and provenance rests on a key that its own contents contradict. Mutating the
+        column cross-check to a no-op left all 211 tests in this file passing before this existed.
+        """
+        database = self.open()
+        key = self.boundary_row_key(B9D.PUMP_PROGRAM, B9D.PUMP_PROGRAM, 36)
+        with database:
+            database.execute(
+                "UPDATE raw_boundary_response SET params_json=? WHERE request_key=?",
+                (json.dumps([B9D.PUMP_PROGRAM, {"encoding": "base64"}], separators=(",", ":")),
+                 key))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("does not contain the exact", str(ctx.exception))
+
+    def test_a_boundary_response_whose_bytes_do_not_match_its_digest_is_refused(self):
+        """The stored digest is what makes the preserved bytes evidence rather than a copy.
+
+        The replacement here stays valid JSON with a usable header, so nothing downstream would
+        notice: only a hash check separates preserved evidence from edited evidence.
+
+        Through `verify_artifact` the refusal comes from `verify_raw_hashes`, which sweeps this
+        table before the boundary gate runs — so the boundary gate's own hash check is defence in
+        depth, not the only line. It is asserted directly here because that is the only place it is
+        reachable: neutering it leaves `verify_artifact` behaviour unchanged, which is exactly why
+        it read as untested.
+        """
+        database = self.open()
+        key = self.boundary_row_key(B9D.PUMP_PROGRAM, B9D.PUMP_PROGRAM, 36)
+        stored = database.execute(
+            "SELECT raw_zlib FROM raw_boundary_response WHERE request_key=?", (key,)).fetchone()[0]
+        payload = json.loads(zlib.decompress(stored))
+        payload["result"]["context"]["slot"] += 1
+        with database:                                   # digest deliberately left as it was
+            database.execute("UPDATE raw_boundary_response SET raw_zlib=? WHERE request_key=?",
+                             (zlib.compress(json.dumps(payload).encode(), 6), key))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("preserved bytes hash", str(ctx.exception))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.assert_boundary_evidence_complete(database)
+        self.assertIn("hash mismatch", str(ctx.exception))
+
+    def test_a_preserved_rpc_error_is_not_boundary_evidence(self):
+        """A preserved failure is still a preserved response. It must not satisfy the gate."""
+        database = self.open()
+        key = self.boundary_row_key(B9D.PUMP_PROGRAM, B9D.PUMP_PROGRAM, 36)
+        self.replace_boundary_response(
+            database, key, {"error": {"code": -32004, "message": "block not available"}})
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("not a successful result", str(ctx.exception))
+
+    def test_a_program_account_deriving_a_different_programdata_is_refused(self):
+        """The Program account is what *proves* the ProgramData address; it cannot be assumed.
+
+        Here the response is internally consistent — correct request key, correct digest, a
+        well-formed variant-2 header — and names the OTHER target's ProgramData. Only the
+        derivation check ties the preserved header back to the inventory address.
+        """
+        database = self.open()
+        key = self.boundary_row_key(B9D.PUMP_PROGRAM, B9D.PUMP_PROGRAM, 36)
+        header = ((2).to_bytes(4, "little")
+                  + B9D.base58_decode(B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMPSWAP_PROGRAM]))
+        self.replace_boundary_response(database, key, {"result": {
+            "context": {"slot": B9D.CUTOFF_SLOT + 1},
+            "value": {"owner": B9D.UPGRADEABLE_LOADER, "executable": True,
+                      "data": [base64.b64encode(header).decode(), "base64"]}}})
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("not inventory ProgramData", str(ctx.exception))
+
+    def test_boundary_metadata_must_reproduce_the_preserved_headers(self):
+        """Each recorded slot must be re-derivable from the raw response, not merely present.
+
+        Checked one field at a time: a single guard covering three keys can be satisfied by
+        whichever one the fixture happens to exercise.
+        """
+        database = self.open()
+        for key in (f"boundary_program_context_slot:{B9D.PUMP_PROGRAM}",
+                    f"boundary_context_slot:{B9D.PUMP_PROGRAM}",
+                    f"boundary_last_deploy_slot:{B9D.PUMP_PROGRAM}"):
+            with self.subTest(metadata=key):
+                saved = database.execute(
+                    "SELECT value FROM metadata WHERE key=?", (key,)).fetchone()[0]
+                with database:
+                    database.execute("UPDATE metadata SET value=? WHERE key=?",
+                                     (str(int(saved) + 1), key))
+                with self.assertRaises(B9D.FreezeViolation) as ctx:
+                    B9D.verify_artifact(database, check_sources=False)
+                self.assertIn("does not reproduce preserved evidence", str(ctx.exception))
+                with database:
+                    database.execute("UPDATE metadata SET value=? WHERE key=?", (saved, key))
 
     def test_a_present_but_invalid_version_map_is_refused(self):
         """Preserved responses and a completion marker are not enough: the intervals themselves
