@@ -288,6 +288,209 @@ class BoundaryEvidenceDerivationTests(unittest.TestCase):
             self.derive(self.HIGH + 1, in_range=[self.HIGH + 500], history_complete=True)
         self.assertIn("outside", str(ctx.exception))
 
+
+class ProgramDataAddressTests(unittest.TestCase):
+    """The addresses are transcribed from measurements; a transcription error is invisible.
+
+    The PumpSwap value shipped with one `k` missing. That 43-character string still base58-decodes
+    to a valid 32-byte pubkey — `017b6f09…` rather than `55f7282e…` — so it would have fetched a
+    DIFFERENT account, and neither a length check nor base58 validation could have caught it. This
+    test re-reads both literals from the B0 inventories instead of restating them, so the code and
+    the measurement cannot drift apart silently.
+    """
+
+    SOURCES = {
+        B9D.PUMP_PROGRAM: "research/B0_PUMP_PROGRAM_UPGRADE_INVENTORY.md",
+        B9D.PUMPSWAP_PROGRAM: "research/B0_PUMPSWAP_PROGRAM_UPGRADE_INVENTORY.md",
+    }
+
+    def test_programdata_addresses_match_the_b0_inventories(self):
+        import re
+        for program, source in self.SOURCES.items():
+            text = (ROOT / source).read_text()
+            expected = B9D.PROGRAMDATA_ACCOUNTS[program]
+            self.assertIn(expected, text,
+                          f"{program} ProgramData address is not the one {source} measured")
+            # And it must be the only ProgramData-shaped literal claimed by that document, so a
+            # near-miss cannot pass by appearing somewhere incidental.
+            claimed = re.search(
+                r"ProgramData account is\s*\n?`([1-9A-HJ-NP-Za-km-z]{32,44})`", text)
+            if claimed:
+                self.assertEqual(claimed.group(1), expected)
+
+    def test_each_address_is_a_distinct_32_byte_pubkey(self):
+        decoded = {program: B9D.base58_decode(address)
+                   for program, address in B9D.PROGRAMDATA_ACCOUNTS.items()}
+        for program, raw in decoded.items():
+            self.assertEqual(len(raw), 32, program)
+        self.assertEqual(len(set(decoded.values())), len(decoded),
+                         "the two programs must not share a ProgramData account")
+
+    def test_a_truncated_address_still_decodes_and_so_length_is_not_a_check(self):
+        """Pins why the document comparison above is the test, and a format check is not."""
+        good = "6naEzKeUuFh1Jeeu51NXQgr5qkXgXtc9WKNct4xynVJc"
+        truncated = good.replace("qkXgXtc9", "qXgXtc9")
+        self.assertEqual(len(B9D.base58_decode(truncated)), 32,
+                         "a dropped character yields another well-formed pubkey")
+        self.assertNotEqual(B9D.base58_decode(good), B9D.base58_decode(truncated))
+
+
+class BoundaryCollectorTests(unittest.TestCase):
+    class Response:
+        def __init__(self, raw): self.raw = raw
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def read(self): return self.raw
+
+    def setUp(self):
+        self.path = pathlib.Path(tempfile.mkdtemp()) / "boundary.sqlite"
+        self.database = B9D.connect(str(self.path))
+        B9D.schema(self.database)
+        self.addCleanup(self.database.close)
+
+    def raw(self, request_id, deploy_slot, **overrides):
+        header = (3).to_bytes(4, "little") + deploy_slot.to_bytes(8, "little")
+        value = {"owner": B9D.UPGRADEABLE_LOADER, "executable": False,
+                 "data": [base64.b64encode(header).decode(), "base64"], "space": 10_000}
+        value.update(overrides.pop("value", {}))
+        result = {"context": {"slot": B9D.CUTOFF_SLOT + 100}, "value": value}
+        result.update(overrides)
+        return json.dumps({"jsonrpc": "2.0", "id": request_id, "result": result}).encode()
+
+    def opener(self, raws, calls):
+        def open_request(request, timeout):
+            calls.append(json.loads(request.data))
+            return self.Response(raws.pop(0))
+        return open_request
+
+    def test_two_sliced_programdata_headers_persist_exact_evidence_and_coverage(self):
+        raws = [self.raw(1, 433_095_571), self.raw(2, 433_112_355)]
+        calls = []
+        summary = B9D.collect_boundary_evidence(
+            self.database, "https://rpc.invalid", opener=self.opener(raws, calls))
+        self.assertEqual(len(summary), 2)
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM raw_boundary_response").fetchone()[0], 2)
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM program_version WHERE coverage='covered'").fetchone()[0], 2)
+        self.assertEqual([call["params"][1]["dataSlice"] for call in calls],
+                         [{"offset": 0, "length": 12}] * 2)
+        self.assertTrue(all(row[0] == B9D.OBSERVATION_RANGE[0] for row in
+            self.database.execute("SELECT from_slot FROM program_version")))
+        # Resume replays preserved bytes and makes no RPC request.
+        replay = B9D.collect_boundary_evidence(
+            self.database, "https://rpc.invalid",
+            opener=lambda *args: self.fail("replay attempted network"))
+        self.assertTrue(all(item["replayed"] for item in replay.values()))
+
+    def test_programdata_header_requires_finalized_context_owner_variant_and_shape(self):
+        good = json.loads(self.raw(1, 1))["result"]
+        self.assertEqual(B9D.decode_programdata_header(
+            good, "address")["last_deploy_slot"], 1)
+        cases = [
+            {**good, "context": {"slot": B9D.CUTOFF_SLOT - 1}},
+            {**good, "value": {**good["value"], "owner": "wrong"}},
+            {**good, "value": {**good["value"], "data": [base64.b64encode(
+                (2).to_bytes(4, "little") + bytes(8)).decode(), "base64"]}},
+            {**good, "value": {**good["value"], "data": ["!!!", "base64"]}},
+        ]
+        for result in cases:
+            with self.subTest(result=result):
+                with self.assertRaises(B9D.FreezeViolation):
+                    B9D.decode_programdata_header(result, "address")
+
+    def test_each_header_failure_names_its_own_check(self):
+        """The existing cases only assert *a* FreezeViolation, so an overlapping check could cover
+        for a deleted one. These assert WHICH guard fired, and cover the ones no case reached."""
+        good = json.loads(self.raw(1, 1))["result"]
+        short = base64.b64encode((3).to_bytes(4, "little") + bytes(4)).decode()
+        cases = [
+            ({**good, "value": None}, "account is absent"),
+            ({**good, "value": {**good["value"], "data": [short, "base64"]}}, "truncated"),
+            ({**good, "context": {"slot": B9D.CUTOFF_SLOT - 1}}, "before required cutoff"),
+            ({**good, "value": {**good["value"], "owner": "wrong"}}, "owner/executable"),
+        ]
+        for result, expected in cases:
+            with self.subTest(expected=expected):
+                with self.assertRaises(B9D.FreezeViolation) as ctx:
+                    B9D.decode_programdata_header(result, "address")
+                self.assertIn(expected, str(ctx.exception))
+
+    def test_strict_base64_is_what_rejects_a_corrupt_payload(self):
+        """Non-validating base64 silently DROPS invalid characters, so a corrupt payload can still
+        yield a long-enough buffer and decode to a plausible slot. The truncation check does not
+        cover this; only validate=True does."""
+        header = (3).to_bytes(4, "little") + (999).to_bytes(8, "little") + bytes(8)
+        corrupt = base64.b64encode(header).decode()[:-4] + "!!" + base64.b64encode(header).decode()[-4:]
+        self.assertGreaterEqual(len(base64.b64decode(corrupt)), 12,
+                                "fixture must survive NON-validating decode, or it proves nothing")
+        good = json.loads(self.raw(1, 1))["result"]
+        result = {**good, "value": {**good["value"], "data": [corrupt, "base64"]}}
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_programdata_header(result, "address")
+        self.assertIn("invalid base64", str(ctx.exception))
+
+    def test_replay_reverifies_the_stored_hash_and_rejects_a_stored_error(self):
+        """Resume trusts persisted bytes; both the hash and the payload shape must be re-checked."""
+        raws = [self.raw(1, 433_095_571), self.raw(2, 433_112_355)]
+        B9D.collect_boundary_evidence(
+            self.database, "https://rpc.invalid", opener=self.opener(raws, []))
+        # Corrupt the preserved bytes without touching the recorded digest.
+        self.database.execute(
+            "UPDATE raw_boundary_response SET raw_zlib=? WHERE program_id=?",
+            (zlib.compress(b'{"result":{}}', 6), B9D.PUMP_PROGRAM))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.collect_boundary_evidence(
+                self.database, "https://rpc.invalid",
+                opener=lambda *a: self.fail("replay attempted network"))
+        self.assertIn("hash mismatch", str(ctx.exception))
+        # Now make the bytes self-consistent but a JSON-RPC error rather than a result.
+        error_payload = json.dumps({"jsonrpc": "2.0", "id": 1,
+                                    "error": {"code": -32602, "message": "bad"}}).encode()
+        self.database.execute(
+            "UPDATE raw_boundary_response SET raw_zlib=?, response_sha256=? WHERE program_id=?",
+            (zlib.compress(error_payload, 6), hashlib.sha256(error_payload).hexdigest(),
+             B9D.PUMP_PROGRAM))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.collect_boundary_evidence(
+                self.database, "https://rpc.invalid",
+                opener=lambda *a: self.fail("replay attempted network"))
+        self.assertIn("not a successful result", str(ctx.exception))
+
+    def test_recent_deploy_is_preserved_but_does_not_create_false_coverage(self):
+        raws = [self.raw(1, B9D.OBSERVATION_RANGE[0] + 1)]
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.collect_boundary_evidence(
+                self.database, "https://rpc.invalid", opener=self.opener(raws, []))
+        self.assertIn("loader history", str(ctx.exception))
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM raw_boundary_response").fetchone()[0], 1)
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM program_version").fetchone()[0], 0)
+
+    def test_existing_version_rows_must_equal_the_replayed_evidence(self):
+        raws = [self.raw(1, 433_095_571), self.raw(2, 433_112_355)]
+        B9D.collect_boundary_evidence(
+            self.database, "https://rpc.invalid", opener=self.opener(raws, []))
+        self.database.execute(
+            "UPDATE program_version SET deploy_slot=1 WHERE program_id=?", (B9D.PUMP_PROGRAM,))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.collect_boundary_evidence(
+                self.database, "https://rpc.invalid", opener=lambda *args: self.fail("network"))
+        self.assertIn("disagree", str(ctx.exception))
+
+    def test_replayed_raw_boundary_request_identity_is_immutable(self):
+        raws = [self.raw(1, 433_095_571), self.raw(2, 433_112_355)]
+        B9D.collect_boundary_evidence(
+            self.database, "https://rpc.invalid", opener=self.opener(raws, []))
+        self.database.execute(
+            "UPDATE raw_boundary_response SET method='different' WHERE program_id=?",
+            (B9D.PUMP_PROGRAM,))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.collect_boundary_evidence(
+                self.database, "https://rpc.invalid", opener=lambda *args: self.fail("network"))
+        self.assertIn("request identity drift", str(ctx.exception))
+
     def test_the_schema_carries_boundary_evidence_and_the_version_map(self):
         path = pathlib.Path(tempfile.mkdtemp()) / "b9d.sqlite"
         database = B9D.connect(str(path))

@@ -13,6 +13,7 @@ transaction.
 """
 import argparse
 import base64
+import binascii
 import contextlib
 import fcntl
 import hashlib
@@ -44,6 +45,19 @@ SLOT_MAX = 435_536_000
 PUMP_PROGRAM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
 PUMPSWAP_PROGRAM = "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
 TARGET_PROGRAMS = (PUMP_PROGRAM, PUMPSWAP_PROGRAM)
+UPGRADEABLE_LOADER = "BPFLoaderUpgradeab1e11111111111111111111111"
+# Transcribed from the B0 inventories, which measured them against mainnet:
+#   research/B0_PUMP_PROGRAM_UPGRADE_INVENTORY.md
+#   research/B0_PUMPSWAP_PROGRAM_UPGRADE_INVENTORY.md
+# The PumpSwap value was transcribed with one `k` missing, giving a 43-character string that still
+# base58-decodes to a perfectly valid but DIFFERENT 32-byte pubkey (017b6f09… instead of 55f7282e…).
+# Neither a length check nor base58 validation can catch that class of error, which is why
+# `test_programdata_addresses_match_the_b0_inventories` re-reads both literals from those documents
+# rather than restating them.
+PROGRAMDATA_ACCOUNTS = {
+    PUMP_PROGRAM: "B5MvUwXdiW1NMM6QFFD3ssPKBujD4zMohncbM73Z2BQu",
+    PUMPSWAP_PROGRAM: "6naEzKeUuFh1Jeeu51NXQgr5qkXgXtc9WKNct4xynVJc",
+}
 ANCHOR_EVENT_CPI_TAG = bytes.fromhex("e445a52e51cb9a1d")
 
 PUMP_IDL_PATH = "research/pump_idl_9c82f61.json"
@@ -802,6 +816,39 @@ def intervals_from_boundary_evidence(program_id, last_deploy_slot, in_range_depl
                               "evidence_key": evidence_key, "coverage": "uncovered"})
         cursor = edge
     return intervals
+
+
+def decode_programdata_header(result, programdata_address, min_context_slot=CUTOFF_SLOT):
+    """Decode the upgradeable-loader ProgramData tag and current last-deploy slot exactly."""
+    if not isinstance(result, dict) or not isinstance(result.get("context"), dict):
+        raise FreezeViolation(f"{programdata_address}: getAccountInfo context is absent")
+    context_slot = result["context"].get("slot")
+    if (isinstance(context_slot, bool) or not isinstance(context_slot, int) or
+            context_slot < min_context_slot):
+        raise FreezeViolation(
+            f"{programdata_address}: finalized account context slot {context_slot!r} is before "
+            f"required cutoff {min_context_slot:,}")
+    value = result.get("value")
+    if not isinstance(value, dict):
+        raise FreezeViolation(f"{programdata_address}: ProgramData account is absent")
+    if value.get("owner") != UPGRADEABLE_LOADER or value.get("executable") is not False:
+        raise FreezeViolation(
+            f"{programdata_address}: account owner/executable state is not ProgramData")
+    encoded = value.get("data")
+    if not (isinstance(encoded, list) and len(encoded) == 2 and encoded[1] == "base64" and
+            isinstance(encoded[0], str)):
+        raise FreezeViolation(f"{programdata_address}: account data is not [base64,'base64']")
+    try:
+        data = base64.b64decode(encoded[0], validate=True)
+    except (ValueError, binascii.Error) as error:
+        raise FreezeViolation(f"{programdata_address}: invalid base64 account data") from error
+    if len(data) < 12:
+        raise FreezeViolation(f"{programdata_address}: ProgramData header is truncated")
+    variant, last_deploy_slot = struct.unpack_from("<IQ", data)
+    if variant != 3:
+        raise FreezeViolation(
+            f"{programdata_address}: upgradeable-loader state variant is {variant}, expected 3")
+    return {"context_slot": context_slot, "last_deploy_slot": last_deploy_slot}
 
 
 def reconcile_slot(signature, coordinate_slot, transaction_slot):
@@ -2236,6 +2283,95 @@ def store_raw(database, table, key_column, key, method, params, raw, received_at
     return True
 
 
+def boundary_request_key(program_id, method, params):
+    canonical = json.dumps(
+        [program_id, method, params], sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def collect_boundary_evidence(database, endpoint, opener=None):
+    """Preserve current ProgramData headers and materialize the conservative §4 version map.
+
+    This implements only the frozen current-state branch. If a last-deploy slot is newer than the
+    observation-range start, the response remains preserved but the function fails and explicitly
+    requires the separately specified loader-history path.
+    """
+    schema(database)
+    pins = {
+        PUMP_PROGRAM: (PUMP_IDL_PATH, PUMP_IDL_SHA256),
+        PUMPSWAP_PROGRAM: (PUMPSWAP_IDL_PATH, PUMPSWAP_IDL_SHA256),
+    }
+    summaries = {}
+    for request_id, program_id in enumerate(TARGET_PROGRAMS, 1):
+        address = PROGRAMDATA_ACCOUNTS[program_id]
+        method = "getAccountInfo"
+        params = [address, {"encoding": "base64", "commitment": "finalized",
+                            "dataSlice": {"offset": 0, "length": 12}}]
+        key = boundary_request_key(program_id, method, params)
+        existing = database.execute(
+            "SELECT program_id,method,params_json,raw_zlib,response_sha256 "
+            "FROM raw_boundary_response WHERE request_key=?",
+            (key,)).fetchone()
+        if existing:
+            expected_params = json.dumps(params, separators=(",", ":"))
+            if existing[:3] != (program_id, method, expected_params):
+                raise FreezeViolation(f"raw_boundary_response {key} request identity drift")
+            raw = zlib.decompress(existing[3])
+            if hashlib.sha256(raw).hexdigest() != existing[4]:
+                raise FreezeViolation(f"raw_boundary_response {key} hash mismatch")
+            payload = json.loads(raw)
+            if "error" in payload or "result" not in payload:
+                raise FreezeViolation(f"stored boundary response {key} is not a successful result")
+            result = payload["result"]
+        else:
+            raw, result = rpc_request(
+                endpoint, method, params, request_id=request_id, opener=opener)
+            with database:
+                database.execute(
+                    "INSERT INTO raw_boundary_response "
+                    "(request_key,program_id,method,params_json,received_at_unix,response_sha256,"
+                    "raw_zlib) VALUES (?,?,?,?,?,?,?)",
+                    (key, program_id, method, json.dumps(params, separators=(",", ":")),
+                     time.time(), hashlib.sha256(raw).hexdigest(), zlib.compress(raw, 6)))
+
+        header = decode_programdata_header(result, address)
+        idl_path, idl_sha256 = pins[program_id]
+        intervals = intervals_from_boundary_evidence(
+            program_id, header["last_deploy_slot"], [], idl_path, idl_sha256, key)
+        intervals = assert_boundary_coverage(program_id, intervals)
+        expected = [(
+            row["program_id"], row["from_slot"], row["to_slot"], row["idl_path"],
+            row["idl_sha256"], row["deploy_slot"], row["evidence_key"], row["coverage"])
+            for row in intervals]
+        present = list(database.execute(
+            "SELECT program_id,from_slot,to_slot,idl_path,idl_sha256,deploy_slot,evidence_key,"
+            "coverage FROM program_version WHERE program_id=? ORDER BY from_slot", (program_id,)))
+        if present and present != expected:
+            raise FreezeViolation(
+                f"{program_id}: persisted program_version rows disagree with boundary evidence")
+        with database:
+            if not present:
+                database.executemany(
+                    "INSERT INTO program_version VALUES (?,?,?,?,?,?,?,?)", expected)
+            for metadata_key, metadata_value in (
+                    (f"boundary_context_slot:{program_id}", header["context_slot"]),
+                    (f"boundary_last_deploy_slot:{program_id}", header["last_deploy_slot"]),
+                    ("boundary_endpoint_reference", endpoint_reference(endpoint))):
+                old = database.execute(
+                    "SELECT value FROM metadata WHERE key=?", (metadata_key,)).fetchone()
+                if old and old[0] != str(metadata_value):
+                    raise FreezeViolation(f"boundary metadata drift for {metadata_key}")
+                database.execute(
+                    "INSERT OR IGNORE INTO metadata VALUES (?,?)",
+                    (metadata_key, str(metadata_value)))
+        summaries[program_id] = {**header, "evidence_key": key, "replayed": bool(existing)}
+    with database:
+        database.execute(
+            "INSERT OR IGNORE INTO metadata VALUES ('boundary_completed_at_unix',?)",
+            (str(time.time()),))
+    return summaries
+
+
 REQUIRED_META_FIELDS = ("err", "fee", "innerInstructions", "preBalances", "postBalances",
                         "preTokenBalances", "postTokenBalances", "logMessages")
 
@@ -2419,6 +2555,10 @@ def main(argv=None):
     run.add_argument("--max-transactions", type=int)
     run.add_argument("--progress-every", type=int, default=100)
     run.add_argument("--calls-per-second", type=float, default=2.5)
+    boundary = sub.add_parser(
+        "collect-boundary", help="authorized read-only: preserve §4 ProgramData headers")
+    boundary.add_argument("output")
+    boundary.add_argument("--rpc-env", default="SOLANA_RPC_URL")
     audit = sub.add_parser(
         "verify-artifact",
         help="offline: run every §11 publication gate against a collected artifact")
@@ -2441,6 +2581,18 @@ def main(argv=None):
                         help="skip source-artifact hashing only; never skips an evidence gate")
 
     args = parser.parse_args(argv)
+    if args.command == "collect-boundary":
+        endpoint = os.environ.get(args.rpc_env)
+        if not endpoint:
+            raise FreezeViolation(f"{args.rpc_env} is not set")
+        with collector_lock(args.output):
+            database = connect(args.output)
+            try:
+                summary = collect_boundary_evidence(database, endpoint)
+            finally:
+                database.close()
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
     if args.command == "verify-decoded-artifact":
         database = connect(args.path, readonly=True)
         try:
