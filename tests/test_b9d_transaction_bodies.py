@@ -919,6 +919,158 @@ class EnvelopeParsingTests(unittest.TestCase):
         self.assertEqual(keys, sorted(keys), "envelope order must already be canonical order")
 
 
+class DecoderOrchestrationTests(unittest.TestCase):
+    """Complete raw bodies become one canonical, fail-visible instruction stream."""
+
+    SLOT = B9D.SLOT_MIN
+
+    def setUp(self):
+        self.path = pathlib.Path(tempfile.mkdtemp()) / "decode.sqlite"
+        self.database = B9D.connect(str(self.path))
+        B9D.schema(self.database)
+        self.addCleanup(self.database.close)
+        for program, path, digest in (
+                (B9D.PUMP_PROGRAM, B9D.PUMP_IDL_PATH, B9D.PUMP_IDL_SHA256),
+                (B9D.PUMPSWAP_PROGRAM, B9D.PUMPSWAP_IDL_PATH, B9D.PUMPSWAP_IDL_SHA256)):
+            self.database.execute(
+                "INSERT INTO program_version VALUES (?,?,?,?,?,?,?,?)",
+                (program, B9D.OBSERVATION_RANGE[0], B9D.OBSERVATION_RANGE[1], path,
+                 digest, self.SLOT - 1, f"evidence:{program}", "covered"))
+        self.saved_verify = B9D.verify_artifact
+        self.verify_calls = 0
+
+        def verified(*args, **kwargs):
+            self.verify_calls += 1
+            return {"integrity": "ok"}
+
+        B9D.verify_artifact = verified
+        self.addCleanup(lambda: setattr(B9D, "verify_artifact", self.saved_verify))
+
+    def add_body(self, signature, transaction_index, instructions, meta=None):
+        keys = [B9D.base58_decode(B9D.PUMP_PROGRAM), bytes(range(32))]
+        result = as_result(build_transaction(keys, instructions), meta=meta, slot=self.SLOT)
+        raw = json.dumps({"jsonrpc": "2.0", "id": 1, "result": result}).encode()
+        self.database.execute(
+            "INSERT INTO transaction_coordinate VALUES (?,?,?)",
+            (signature, self.SLOT, transaction_index))
+        B9D.store_raw(self.database, "raw_transaction", "signature", signature,
+                      "getTransaction", [signature], raw, received_at=1)
+
+    def known(self, name="buy"):
+        """A REAL discriminator from the pinned Pump IDL, plus its name.
+
+        Fabricated maps are no longer accepted: the classifier is derived from the revision the
+        artifact's own program_version rows declare, so a test map that is not that revision is
+        refused. Using a real instruction keeps the test honest about what it exercises.
+        """
+        idl = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
+        entry = next(i for i in idl["instructions"] if i["name"] == name)
+        return bytes(entry["discriminator"]), name
+
+    def test_materializes_outer_and_inner_coordinates_and_records_unknown_target(self):
+        known, known_name = self.known()
+        unknown = b"unknown!"
+        meta = {"innerInstructions": [{"index": 0, "instructions": [{
+            "programIdIndex": 0, "accounts": [1], "data": B9D.base58(unknown)}]}]}
+        self.add_body("sig", 3, [(0, [1], known)], meta)
+        summary = B9D.decode_artifact(self.database, check_sources=False)
+        self.assertEqual(self.verify_calls, 1, "publication verification is a precondition")
+        self.assertEqual(summary["instructions"], 2)
+        self.assertEqual(summary["target_instructions"], 2)
+        self.assertEqual(summary["classification_failures"], 1)
+        rows = self.database.execute(
+            "SELECT outer_index,inner_index,idl_name,discriminator FROM instruction "
+            "ORDER BY slot,transaction_index,outer_index,inner_index").fetchall()
+        self.assertEqual(rows, [(0, -1, known_name, known.hex()),
+                                (0, 0, None, unknown.hex())])
+        failure = self.database.execute(
+            "SELECT signature,outer_index,inner_index,reason FROM classification_failure").fetchone()
+        self.assertEqual(failure[:3], ("sig", 0, 0))
+        self.assertIn("unknown", failure[3])
+
+    def test_existing_derived_rows_are_never_mixed_or_overwritten(self):
+        self.database.execute(
+            "INSERT INTO instruction VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (self.SLOT, 0, 0, -1, "old", "program", None, None, 0, "[]", 0))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_artifact(self.database, check_sources=False)
+        self.assertIn("refusing to mix or overwrite", str(ctx.exception))
+
+    def test_intervals_declaring_two_revisions_cannot_build_one_map(self):
+        """Defence in depth, unreachable via decode_artifact because program_version_rows already
+        binds every interval to the single pin. Tested directly so the guard is not merely present.
+        """
+        low, high = B9D.OBSERVATION_RANGE
+        rows = [{"program_id": B9D.PUMP_PROGRAM, "from_slot": low, "to_slot": low + 10,
+                 "idl_path": B9D.PUMP_IDL_PATH, "idl_sha256": B9D.PUMP_IDL_SHA256,
+                 "coverage": "covered"},
+                {"program_id": B9D.PUMP_PROGRAM, "from_slot": low + 11, "to_slot": high,
+                 "idl_path": "research/other.json", "idl_sha256": "b" * 64,
+                 "coverage": "covered"}]
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.interval_idl_maps({B9D.PUMP_PROGRAM: rows})
+        self.assertIn("distinct revisions", str(ctx.exception))
+
+    def test_a_fabricated_decoder_map_is_refused(self):
+        """Reproduced defect: the intervals were validated against the module pins while
+        classification used a separately supplied map. A fabricated map produced a row labelled
+        `totally_invented_instruction`, zero classification failures, and metadata still naming the
+        pinned revision — asserted and used were different objects."""
+        fake = bytes(range(200, 208))
+        self.add_body("sig", 0, [(0, [], fake)])
+        fabricated = {B9D.PUMP_PROGRAM: {fake.hex(): "totally_invented_instruction"},
+                      B9D.PUMPSWAP_PROGRAM: {}}
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_artifact(self.database, check_sources=False, idl_maps=fabricated)
+        self.assertIn("unattributable", str(ctx.exception))
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM instruction").fetchone()[0], 0)
+
+    def test_the_map_is_derived_from_the_declared_revision(self):
+        """The boundary: an unknown target discriminator must still be recorded, not refused."""
+        fake = bytes(range(200, 208))
+        self.add_body("sig", 0, [(0, [], fake)])
+        summary = B9D.decode_artifact(self.database, check_sources=False)
+        self.assertEqual(summary["classification_failures"], 1)
+        self.assertEqual(self.database.execute(
+            "SELECT idl_name,target FROM instruction").fetchone(), (None, 1))
+
+    def test_an_unnamed_unaccounted_target_row_rolls_the_whole_pass_back(self):
+        """If classify_instruction ever stops returning a reason, the rows must not commit."""
+        known, _ = self.known()
+        self.add_body("sig", 0, [(0, [], bytes(range(200, 208)))])
+        saved = B9D.classify_instruction
+        B9D.classify_instruction = lambda program, data, maps: (True, None, "aa", None)
+        self.addCleanup(lambda: setattr(B9D, "classify_instruction", saved))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_artifact(self.database, check_sources=False)
+        self.assertIn("neither named nor recorded", str(ctx.exception))
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM instruction").fetchone()[0], 0,
+            "the accounting assertion runs inside the transaction, so nothing commits")
+
+    def test_boundary_coverage_is_checked_before_any_derived_write(self):
+        self.database.execute(
+            "DELETE FROM program_version WHERE program_id=?", (B9D.PUMPSWAP_PROGRAM,))
+        self.add_body("sig", 0, [(0, [], self.known()[0])])
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_artifact(self.database, check_sources=False)
+        self.assertIn("no boundary evidence covers", str(ctx.exception))
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM instruction").fetchone()[0], 0)
+
+    def test_a_covered_but_different_revision_is_not_decoded_with_the_current_map(self):
+        self.database.execute(
+            "UPDATE program_version SET idl_sha256=? WHERE program_id=?",
+            ("0" * 64, B9D.PUMP_PROGRAM))
+        self.add_body("sig", 0, [(0, [], self.known()[0])])
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_artifact(self.database, check_sources=False)
+        self.assertIn("different revision", str(ctx.exception))
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM instruction").fetchone()[0], 0)
+
+
 class PublicationGateTests(unittest.TestCase):
     """§11 gates PUBLICATION, where the collection seams gate collection.
 
@@ -1068,6 +1220,59 @@ class PublicationGateTests(unittest.TestCase):
         with self.assertRaises(B9D.FreezeViolation) as ctx:
             B9D.verify_source_artifacts(database)
         self.assertIn("which evidence it was built from", str(ctx.exception))
+
+    def test_same_size_but_different_signature_sets_is_refused(self):
+        """Reproduced defect: both seams count rows, so two tables of equal size over DIFFERENT
+        sets passed every gate. `verify_body_slots` reconciled only the intersection and returned a
+        smaller number nothing compared, and `decode_artifact` then decoded that intersection,
+        reported success and wrote `decoded_at_unix`."""
+        database = self.open()
+        with database:
+            # Replace one body with an orphan: still exactly 2 bodies and 2 coordinates.
+            database.execute("DELETE FROM raw_transaction WHERE signature='sigB'")
+            self.store(database, "raw_transaction", "signature", "sigOrphan",
+                       self.transaction_body(999))
+        self.assertEqual(  # sizes still match, which is why counting was not enough
+            database.execute("SELECT count(*) FROM raw_transaction").fetchone()[0],
+            database.execute("SELECT count(*) FROM transaction_coordinate").fetchone()[0])
+        B9D.assert_raw_transaction_population(database)
+        B9D.assert_coordinate_population(database)
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.assert_body_population_matches(database)
+        message = str(ctx.exception)
+        self.assertIn("same size but not the same set", message)
+        self.assertIn("1 coordinate(s) have no preserved body", message)
+        self.assertIn("1 preserved body(ies) have no coordinate", message)
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.verify_artifact(database, check_sources=False)
+
+    def test_a_missing_body_alone_is_refused(self):
+        """Separated from the orphan case: my first regression test had both at once, so either
+        half of `if missing or orphan` alone still fired and a mutation proved it."""
+        database = self.open()
+        with database:
+            database.execute("DELETE FROM raw_transaction WHERE signature='sigB'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.assert_body_population_matches(database)
+        self.assertIn("1 coordinate(s) have no preserved body", str(ctx.exception))
+
+    def test_an_orphan_body_alone_is_refused(self):
+        database = self.open()
+        with database:
+            database.execute("DELETE FROM transaction_coordinate WHERE signature='sigB'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.assert_body_population_matches(database)
+        self.assertIn("1 preserved body(ies) have no coordinate", str(ctx.exception))
+
+    def test_a_short_reconciliation_count_is_asserted_not_merely_returned(self):
+        """The number was already computed; nothing compared it to the population."""
+        database = self.open()
+        saved = B9D.verify_body_slots
+        B9D.verify_body_slots = lambda db: B9D.EXPECTED_SIGNATURES - 1
+        self.addCleanup(lambda: setattr(B9D, "verify_body_slots", saved))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("bodies reconciled against their coordinates", str(ctx.exception))
 
     def test_a_failing_integrity_check_is_refused(self):
         """A corrupt page store cannot be produced reliably in a test, so the gate is driven

@@ -553,6 +553,33 @@ def verify_body_slots(database):
     return checked
 
 
+def assert_body_population_matches(database):
+    """The coordinate and body signature SETS must be identical, not merely the same size.
+
+    Both population seams count rows. Two tables can each hold exactly 94,985 unique signatures over
+    **different sets** — one coordinate never fetched, one orphan body from an unrelated slot — and
+    every other §11 gate still passes: the hashes verify, the coordinate replay covers the block
+    bodies, and `verify_body_slots` simply reconciles the smaller intersection and returns a smaller
+    number that nothing compared against the population. Reproduced before this was written:
+    `decode_artifact` then decoded only the intersection, reported success, and wrote
+    `decoded_at_unix`, leaving a partial artifact looking publication-ready.
+    """
+    missing = database.execute(
+        "SELECT count(*) FROM transaction_coordinate c "
+        "LEFT JOIN raw_transaction t ON t.signature = c.signature "
+        "WHERE t.signature IS NULL").fetchone()[0]
+    orphan = database.execute(
+        "SELECT count(*) FROM raw_transaction t "
+        "LEFT JOIN transaction_coordinate c ON c.signature = t.signature "
+        "WHERE c.signature IS NULL").fetchone()[0]
+    if missing or orphan:
+        raise FreezeViolation(
+            f"coordinate and body populations are the same size but not the same set: "
+            f"{missing:,} coordinate(s) have no preserved body and {orphan:,} preserved body(ies) "
+            "have no coordinate; refusing to decode an intersection and call it the population")
+    return True
+
+
 def verify_source_artifacts(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH):
     """§11: no completed source artifact changed hash since the run recorded it."""
     recorded = dict(database.execute(
@@ -586,9 +613,18 @@ def verify_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH, check_source
     summary = {"integrity": verify_integrity(database)}
     assert_coordinate_population(database)
     assert_raw_transaction_population(database)
+    assert_body_population_matches(database)
     summary["raw_hashes"] = verify_raw_hashes(database)
     summary["coordinates_replayed"] = replay_coordinates_from_raw(database)
-    summary["body_slots_reconciled"] = verify_body_slots(database)
+    reconciled = verify_body_slots(database)
+    # Assert the count, not just record it. A returned number nobody compares is how the set
+    # mismatch above stayed invisible: it reported 1 against a population of 2 and passed.
+    expected = EXPECTED_SIGNATURES
+    if reconciled != expected:
+        raise FreezeViolation(
+            f"only {reconciled:,} of {expected:,} bodies reconciled against their coordinates; "
+            "the artifact is not the frozen population")
+    summary["body_slots_reconciled"] = reconciled
     if check_sources:
         summary["sources"] = verify_source_artifacts(database, b9c_path, b9a_path)
     return summary
@@ -1327,6 +1363,161 @@ def classify_instruction(program_id, data, idl_maps):
     return True, name, discriminator, None
 
 
+def program_version_rows(database, program_id):
+    """Load and validate the frozen interface intervals for one target program."""
+    columns = ("program_id", "from_slot", "to_slot", "idl_path", "idl_sha256",
+               "deploy_slot", "evidence_key", "coverage")
+    rows = [dict(zip(columns, row)) for row in database.execute(
+        "SELECT program_id,from_slot,to_slot,idl_path,idl_sha256,deploy_slot,evidence_key,coverage "
+        "FROM program_version WHERE program_id=? ORDER BY from_slot", (program_id,))]
+    rows = assert_boundary_coverage(program_id, rows)
+    expected = {
+        PUMP_PROGRAM: (PUMP_IDL_PATH, PUMP_IDL_SHA256),
+        PUMPSWAP_PROGRAM: (PUMPSWAP_IDL_PATH, PUMPSWAP_IDL_SHA256),
+    }[program_id]
+    mismatched = [row for row in rows
+                  if (row["idl_path"], row["idl_sha256"]) != expected]
+    if mismatched:
+        first = mismatched[0]
+        raise FreezeViolation(
+            f"{program_id}: covered interval {first['from_slot']}..{first['to_slot']} names "
+            f"{first['idl_path']} at {first['idl_sha256']}, but this decoder loaded "
+            f"{expected[0]} at {expected[1]}; version-aware coverage is not permission to decode "
+            "with a different revision")
+    return rows
+
+
+def interval_idl_maps(intervals):
+    """Discriminator maps loaded from the revision each program's own intervals declare.
+
+    `program_version_rows` has already asserted that every covered interval names one revision and
+    that it equals this decoder's pin, so this cannot load a surprise. The point is provenance: the
+    map used to classify is derived from the artifact's declared `idl_path`/`idl_sha256`, so a row's
+    `idl_name` is attributable to a revision recorded in the artifact rather than to whatever
+    happened to be in memory.
+    """
+    maps = {}
+    for program, rows in intervals.items():
+        declared = {(row["idl_path"], row["idl_sha256"]) for row in rows
+                    if row["coverage"] == "covered"}
+        if len(declared) != 1:
+            raise FreezeViolation(
+                f"{program}: covered intervals declare {len(declared)} distinct revisions; a single "
+                "decoder pass cannot attribute its output to more than one")
+        path, digest = declared.pop()
+        maps[program] = idl_instruction_map(load_pinned_idl(path, digest, program))
+    return maps
+
+
+def assert_target_classification_accounted(database):
+    """Every target instruction is either named or has a failure row at its own coordinates.
+
+    `classify_instruction` guarantees this by construction today. Asserting it means a later change
+    that stops returning a `reason` cannot silently produce unnamed, unaccounted target rows — the
+    "97% classified" failure §11 warns about, arriving as absence rather than as a number.
+    """
+    unaccounted = database.execute(
+        "SELECT count(*) FROM instruction i WHERE i.target = 1 AND i.idl_name IS NULL "
+        "AND NOT EXISTS (SELECT 1 FROM classification_failure f "
+        "  WHERE f.slot = i.slot AND f.transaction_index = i.transaction_index "
+        "    AND f.outer_index = i.outer_index AND f.inner_index = i.inner_index)").fetchone()[0]
+    if unaccounted:
+        raise FreezeViolation(
+            f"{unaccounted:,} target instruction(s) are neither named nor recorded as a "
+            "classification failure; they would vanish from both the results and the failure count")
+    return True
+
+
+def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
+                    check_sources=True, idl_maps=None):
+    """Materialize the canonical instruction stream from a complete raw artifact.
+
+    All publication gates and both target-program boundary maps are checked before the first
+    derived write. The materialization is one transaction: a decode error rolls the whole attempt
+    back, while unknown target discriminators are preserved in both `instruction` and
+    `classification_failure` rather than dropped. Existing derived rows are refused so a retry
+    cannot silently mix decoder revisions.
+    """
+    verification = verify_artifact(
+        database, b9c_path=b9c_path, b9a_path=b9a_path, check_sources=check_sources)
+    refuse_if_complete(database)
+    intervals = {program: program_version_rows(database, program)
+                 for program in TARGET_PROGRAMS}
+    # Build the classifier from the revision the ARTIFACT declares, so what is asserted and what is
+    # used are the same object. Previously the intervals were validated against the module pins
+    # while classification used a separately supplied map: passing a fabricated map produced a row
+    # labelled with an invented instruction name, zero classification failures, and metadata still
+    # naming the pinned revision. Reproduced before this changed.
+    derived = interval_idl_maps(intervals)
+    if idl_maps is not None and idl_maps != derived:
+        raise FreezeViolation(
+            "supplied idl_maps disagree with the revision this artifact's program_version rows "
+            "declare; a decoder map that is not the declared revision makes every idl_name in the "
+            "output unattributable")
+    maps = derived
+    require_all_target_idls(maps)
+
+    existing_instructions = database.execute("SELECT count(*) FROM instruction").fetchone()[0]
+    existing_failures = database.execute(
+        "SELECT count(*) FROM classification_failure").fetchone()[0]
+    if existing_instructions or existing_failures:
+        raise FreezeViolation(
+            "derived instruction tables are not empty: refusing to mix or overwrite decoder "
+            f"output ({existing_instructions} instruction rows, {existing_failures} failures)")
+
+    instruction_count = target_count = failure_count = 0
+    with database:
+        rows = database.execute(
+            "SELECT c.signature,c.slot,c.transaction_index,t.raw_zlib "
+            "FROM transaction_coordinate c JOIN raw_transaction t USING(signature) "
+            "ORDER BY c.slot,c.transaction_index")
+        for signature, slot, transaction_index, blob in rows:
+            result = raw_result(blob)
+            if result is None:
+                raise FreezeViolation(f"{signature}: preserved transaction response has null result")
+            for envelope in envelope_instructions(result):
+                program_id = envelope["program_id"]
+                if program_id in TARGET_PROGRAMS:
+                    # Resolve every target instruction at its own slot. Full-range coverage is a
+                    # precondition above; this per-row lookup prevents a later refactor from using
+                    # a nearest or current revision by accident.
+                    resolve_version(program_id, slot, intervals[program_id])
+                target, name, discriminator, reason = classify_instruction(
+                    program_id, envelope["data"], maps)
+                coordinates = (slot, transaction_index, envelope["outer_index"],
+                               envelope["inner_index"])
+                database.execute(
+                    "INSERT INTO instruction "
+                    "(slot,transaction_index,outer_index,inner_index,signature,program_id,"
+                    "discriminator,idl_name,target,accounts_json,data_len) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                    coordinates + (signature, program_id, discriminator, name, int(target),
+                                   json.dumps(envelope["accounts"], separators=(",", ":")),
+                                   len(envelope["data"])))
+                instruction_count += 1
+                target_count += int(target)
+                if reason is not None:
+                    database.execute(
+                        "INSERT INTO classification_failure "
+                        "(signature,slot,transaction_index,outer_index,inner_index,program_id,"
+                        "discriminator,reason,context_json) VALUES (?,?,?,?,?,?,?,?,?)",
+                        (signature,) + coordinates + (program_id, discriminator, reason,
+                         json.dumps({"data_len": len(envelope["data"])},
+                                    separators=(",", ":"))))
+                    failure_count += 1
+        database.execute(
+            "INSERT INTO metadata(key,value) VALUES ('decoded_at_unix',?)",
+            (str(time.time()),))
+        database.execute(
+            "INSERT INTO metadata(key,value) VALUES ('decoder_classification_failures',?)",
+            (str(failure_count),))
+        # Inside the transaction, so a violation rolls the whole materialization back rather than
+        # leaving accounted and unaccounted rows committed together.
+        assert_target_classification_accounted(database)
+    return {"verification": verification, "instructions": instruction_count,
+            "target_instructions": target_count, "classification_failures": failure_count}
+
+
 # ---------------------------------------------------------------------------------------------
 # Authorized read-only evidence collection (§10; owner authorization Seq 218)
 # ---------------------------------------------------------------------------------------------
@@ -1547,8 +1738,24 @@ def main(argv=None):
     audit.add_argument("--b9a", default=B9A_PATH)
     audit.add_argument("--skip-sources", action="store_true",
                        help="skip source-artifact hashing only; never skips an evidence gate")
+    decode = sub.add_parser(
+        "decode", help="offline: verify a complete artifact and materialize canonical instructions")
+    decode.add_argument("path")
+    decode.add_argument("--b9c", default=B9C_PATH)
+    decode.add_argument("--b9a", default=B9A_PATH)
+    decode.add_argument("--skip-sources", action="store_true",
+                        help="skip source-artifact hashing only; never skips an evidence gate")
 
     args = parser.parse_args(argv)
+    if args.command == "decode":
+        database = connect(args.path)
+        try:
+            summary = decode_artifact(database, args.b9c, args.b9a,
+                                      check_sources=not args.skip_sources)
+        finally:
+            database.close()
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
     if args.command == "verify-artifact":
         # Read-only by construction: publication verification must never be able to repair the
         # evidence it is checking, and the live collector owns the file while it runs.
