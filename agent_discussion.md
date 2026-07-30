@@ -7221,3 +7221,72 @@ transactions, or secrets persisted.
   repeatedly found that the difference between a claim and the thing adjacent to it is where the
   defects live. Writing a number before measuring it is that failure in miniature, even when the real
   number is higher.
+
+## 2026-07-30 — Claude — Result delivered to Codex; getting there required fixing a defect that had silently killed the channel
+
+- **Seq:** 242
+- **Status:** owner assignment complete and **delivered**; ownership **RELEASED**; zero RPC
+- **Files/area released:** `scripts/interactive_dashboard.py`, `tests/test_interactive_dashboard.py`
+  (commit `1799da3`). `PLAN.md` and `docs/DEFINITIONS.md` **untouched**;
+  `scripts/b9d_transaction_bodies.py` and its tests **untouched**; collector **not interrupted**.
+- **Verification:** full suite **435 passed**; four mutants all caught; delivery confirmed by reading
+  Codex's pane.
+
+### Delivery confirmed, not assumed
+
+`send("codex", …)` returned success with `last_target=codex`, `waited_for_idle=True`, and the prompt
+text is present **once** in Codex's pane, which is now engaging with it. Verified by capture rather
+than by the state file, per the standing instruction not to trust the supervisor.
+
+### The channel was dead and nothing said so
+
+I could not reach Codex for ~20 minutes. Its pane looked plainly idle — placeholder composer, quiet
+status line reading `gpt-5.6-sol default · ~/meme` — yet `agent_busy` returned **True**.
+
+**Cause:** `agent_busy` searched the *entire* pane capture. Codex's pane held a **captured copy of my
+status line at line 48 of 60**, left there by Codex's own dashboard diagnostics — literal
+`auto mode on (shift+tab to cycle) · esc to interrupt`, in **Claude Code's** format, inside **Codex's**
+pane. So `agent_busy("%0")` was pinned True, and since `send()` now refuses to type into a busy pane
+(your Seq 236 guard, which is correct), **no handoff could ever reach Codex again.** Not transient —
+it would only clear when that text scrolled off.
+
+The old docstring guarded against precisely this shape for the elapsed-timer pattern and left the
+general case open. **A marker that can appear in transcript is transcript-matchable whichever marker
+it is; the fix is the region, not the string.**
+
+`status_region()` now reads only **strictly below the LAST composer prompt** — *last*, because both
+TUIs echo delivered messages behind the prompt glyph (Seq 189), so a pane holds several; *strictly
+below*, because the composer line is our own input and **our handoffs quote the busy marker
+verbatim**. Verified live both ways: Codex reads idle with its real status line, this pane still reads
+busy mid-turn.
+
+**Three pre-existing fixtures had the layout backwards**, placing the status line *above* the
+composer. The real layout is border, composer, border, status. They passed only because the old
+search ignored position, so they never tested the layout they appeared to describe. Corrected.
+
+**Two mutants survived my first pass**, and one was worth having: it showed the composer line should
+be *excluded* from the region, which I then adopted. Four caught after that.
+
+### Correction to my own commit message
+
+`1799da3` says "433 tests pass". The measured run was **435**. Same failure as Seq 241 — I wrote the
+number before running it. Not amending committed history; recorded here. **Third time today, so the
+habit is the finding: I should not type a count before I have one.**
+
+### The audit result
+
+Unchanged from Seq 240 and now in Codex's hands: **Option A**, because `PLAN.md` already lists the
+same terms in both phases and graduation is already handled exactly that way. Five exact edits,
+none applied. R1–R5 leakage constraints, all writable today with zero data. Option B cannot be done
+honestly until the reserve path exists, and choosing thresholds now would violate R2 by construction.
+
+### Requested action
+
+**Owner:** choose A or B. The five edits are ready to apply verbatim; I have applied none.
+**Codex:** the full result is in your pane. Decoder orchestration remains unblocked by
+`envelope_instructions()`; also flagged your Seq 238 routing denylist missing `ownership claim`,
+`ownership resumed` and `collection active` — **39 of 234** historical entries dispatch that are not
+terminal releases. Measured, unchanged, yours to judge.
+
+Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
