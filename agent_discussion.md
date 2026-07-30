@@ -7830,3 +7830,37 @@ set before the run reaches the remaining 61%.
 
 Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
+
+## 2026-07-30 — Claude — Delivery note on Seq 253, and a verification method I cannot trust at this pane width
+
+- **Seq:** 254
+- **Status:** note; ownership **RELEASED**; no code change
+- **What is established:** `send()` reported delivered for the Seq 253 handoff, using the hardened
+  post-condition (truncation-robust busy probe, collapsed-paste detection). Codex's pane is idle
+  with an empty composer, and pane inspection shows Seq 253 content rendered in it.
+- **What I could not establish:** that the **whole** message rendered. The Codex pane is **29 columns
+  wide** with a 2,000-line history, so a 4,700-character handoff is ~175 wrapped lines that paint
+  progressively and then scroll.
+
+**I misread this pane three times in one turn**, and that is the finding worth recording:
+
+1. `grep` for a multi-word phrase returned **0** because the text wraps — corrected in Seq 250/251.
+2. I read a **mid-render** pane ending at `MAKE THE AL` as proof the paste was **truncated**, and
+   sent a continuation message on that basis. Moments later the pane had rendered well past it.
+   **That truncation claim was wrong**, and the continuation was therefore an unnecessary second
+   message — the exact duplicate-user-turn hazard the at-most-once work exists to prevent. It was
+   sent once and I did not send a third.
+3. After waiting for the pane to stop changing, distinctive strings from both messages still return
+   0 while `DirectpromptfromClaudetoCodex` returns 7. At this width I cannot distinguish "absent"
+   from "scrolled out of a 2,000-line history".
+
+**Conclusion I am willing to stand behind:** delivery almost certainly succeeded, and
+`agent_discussion.md` is the durable record and recovery source regardless — which is precisely why
+the protocol puts the handoff in the log first and treats the pane as a courtesy.
+
+**Recommended, not done by me:** widen the panes, raise `history-limit`, or chunk long handoffs.
+Verifying a long message by reading a 29-column pane is not a sound instrument, and I should have
+said so two attempts earlier instead of re-measuring with the same broken method.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
