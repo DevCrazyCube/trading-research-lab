@@ -683,6 +683,28 @@ class ArtifactTests(unittest.TestCase):
             database.execute("INSERT INTO transaction_coordinate VALUES ('b',7,0)")
         database.close()
 
+    def test_coordinate_phase_refuses_a_silently_short_population(self):
+        database = self.artifact()
+        database.execute("INSERT INTO raw_block_signatures VALUES (7,'getBlock','[]',0,'h',x'00')")
+        database.execute("INSERT INTO transaction_coordinate VALUES ('a',7,0)")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.transaction_body_coordinates(database)
+        self.assertIn("1/38,853 block signature lists", str(ctx.exception))
+        self.assertIn("1/94,985 transaction coordinates", str(ctx.exception))
+        self.assertIn("refusing to start transaction-body collection", str(ctx.exception))
+        database.close()
+
+    def test_coordinate_phase_accepts_the_exact_frozen_shape(self):
+        database = self.artifact()
+        database.execute("INSERT INTO raw_block_signatures VALUES (7,'getBlock','[]',0,'h',x'00')")
+        database.executemany(
+            "INSERT INTO transaction_coordinate VALUES (?,?,?)", (("a", 7, 0), ("b", 7, 1)))
+        self.assertTrue(B9D.assert_coordinate_population(
+            database, expected_slots=1, expected_signatures=2))
+        self.assertEqual(B9D.transaction_body_coordinates(database, require_complete=False),
+                         [("a", 7), ("b", 7)])
+        database.close()
+
     def test_two_instructions_cannot_share_a_canonical_key(self):
         database = self.artifact()
         row = (5, 0, 1, -1, "sig", B9D.PUMP_PROGRAM, "aa", "buy", 1, "[]", 24)
@@ -690,6 +712,74 @@ class ArtifactTests(unittest.TestCase):
         with self.assertRaises(sqlite3.IntegrityError):
             database.execute("INSERT INTO instruction VALUES (?,?,?,?,?,?,?,?,?,?,?)", row)
         database.close()
+
+
+class CoordinateSeamWiringTests(unittest.TestCase):
+    """The seam guard is only worth anything if the production call site actually passes it.
+
+    `assert_coordinate_population` and `transaction_body_coordinates` were already covered, but
+    nothing asserted that `collect_raw_population` requests the check on an unbounded run. Mutating
+    its argument to `require_complete=False` left the whole suite green while un-gating production —
+    the guard was tested and its wiring was not. These tests exercise the real function.
+
+    Hermetic: source hashing and the frozen-population read are stubbed, every block is already
+    preserved so the block loop issues nothing, and `max_transactions=0` stops the body loop before
+    its first request. `rpc_request` is replaced with a raiser, so any network attempt fails loudly.
+    """
+
+    SLOTS = (500, 501)
+
+    def setUp(self):
+        self.dir = pathlib.Path(tempfile.mkdtemp())
+        self.path = self.dir / "b9d.sqlite"
+        self.requested = []
+
+        grouped = {slot: [f"sig{slot}"] for slot in self.SLOTS}
+        saved = (B9D.assert_sources, B9D.frozen_population_by_slot, B9D.rpc_request)
+
+        def refuse(*args, **kwargs):
+            self.requested.append(args)
+            raise AssertionError("a network request was attempted; the test is not hermetic")
+
+        B9D.assert_sources = lambda *a, **k: {}
+        B9D.frozen_population_by_slot = lambda *a, **k: grouped
+        B9D.rpc_request = refuse
+        self.addCleanup(lambda: setattr(B9D, "assert_sources", saved[0]))
+        self.addCleanup(lambda: setattr(B9D, "frozen_population_by_slot", saved[1]))
+        self.addCleanup(lambda: setattr(B9D, "rpc_request", saved[2]))
+
+        # Every slot already preserved, with one coordinate each: a deliberately short population.
+        database = B9D.connect(str(self.path))
+        B9D.schema(database)
+        with database:
+            for slot in self.SLOTS:
+                database.execute(
+                    "INSERT INTO raw_block_signatures VALUES (?,?,?,?,?,?)",
+                    (slot, "getBlock", "[]", 0.0, "h" * 64, b"\x00"))
+                database.execute("INSERT INTO transaction_coordinate VALUES (?,?,?)",
+                                 (f"sig{slot}", slot, 0))
+        database.close()
+
+    def collect(self, **kwargs):
+        return B9D.collect_raw_population(
+            "https://unused.invalid", str(self.path), max_transactions=0,
+            progress_every=0, **kwargs)
+
+    def test_an_unbounded_run_refuses_to_start_bodies_on_a_short_population(self):
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.collect(max_slots=None)
+        self.assertIn("coordinate phase is incomplete", str(ctx.exception))
+        self.assertEqual(self.requested, [], "it must refuse before any network call")
+
+    def test_a_bounded_probe_deliberately_bypasses_the_completeness_gate(self):
+        """The boundary that keeps the guard honest: probes must stay resumable.
+
+        Without this, the fix could degrade into a gate that blocks the bounded probes the
+        preregistration relies on for shape verification.
+        """
+        summary = self.collect(max_slots=1)
+        self.assertEqual(summary["transactions_added"], 0)
+        self.assertEqual(self.requested, [])
 
 
 class ExecutionGateTests(unittest.TestCase):

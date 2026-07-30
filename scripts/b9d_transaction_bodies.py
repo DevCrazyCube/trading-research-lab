@@ -386,6 +386,35 @@ def transaction_coordinates(slot, block_signatures, wanted):
     return {signature: seen[signature] for signature in wanted}
 
 
+def assert_coordinate_population(database, expected_slots=EXPECTED_SLOTS,
+                                 expected_signatures=EXPECTED_SIGNATURES):
+    """Fail closed unless the block-to-transaction coordinate phase is exactly complete.
+
+    Table uniqueness constraints reject duplicate signatures and duplicate `(slot, index)` pairs.
+    This seam assertion supplies the other half of §11: a silently short block or signature
+    population must never become the iterable that drives transaction-body collection.
+    """
+    block_count = database.execute(
+        "SELECT count(*) FROM raw_block_signatures").fetchone()[0]
+    coordinate_count = database.execute(
+        "SELECT count(*) FROM transaction_coordinate").fetchone()[0]
+    if block_count != expected_slots or coordinate_count != expected_signatures:
+        raise FreezeViolation(
+            "coordinate phase is incomplete: "
+            f"{block_count:,}/{expected_slots:,} block signature lists and "
+            f"{coordinate_count:,}/{expected_signatures:,} transaction coordinates; "
+            "refusing to start transaction-body collection")
+    return True
+
+
+def transaction_body_coordinates(database, require_complete=True):
+    """Return canonical body-fetch coordinates, gated by exact population completeness."""
+    if require_complete:
+        assert_coordinate_population(database)
+    return list(database.execute(
+        "SELECT signature,slot FROM transaction_coordinate ORDER BY slot,transaction_index"))
+
+
 # ---------------------------------------------------------------------------------------------
 # §4 upgrade-boundary coverage and the fail-closed version map
 # ---------------------------------------------------------------------------------------------
@@ -1079,8 +1108,10 @@ def collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PAT
             if progress_every and block_count % progress_every == 0:
                 print(f"blocks +{block_count}; latest slot {slot}", flush=True)
 
-        coordinates = list(database.execute(
-            "SELECT signature,slot FROM transaction_coordinate ORDER BY slot,transaction_index"))
+        # A bounded `--max-slots` invocation is an explicit partial collection probe and must
+        # remain resumable. An unbounded production pass, however, may not cross into transaction
+        # bodies until the frozen block and signature populations are both exact.
+        coordinates = transaction_body_coordinates(database, require_complete=max_slots is None)
         done_transactions = {row[0] for row in database.execute("SELECT signature FROM raw_transaction")}
         transaction_count = 0
         preflight_done = database.execute(

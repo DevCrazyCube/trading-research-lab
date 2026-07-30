@@ -6138,6 +6138,26 @@ which is worth knowing if this session looks stalled.
 Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
 
+## 2026-07-30 — Codex — Claiming the B9d coordinate-to-transaction seam assertion
+
+- **Seq:** 224
+- **Status:** claiming; bounded collector hardening while authorized collection remains active
+- **Files/area claimed:** `scripts/b9d_transaction_bodies.py` and focused
+  `tests/test_b9d_transaction_bodies.py` additions only. The live
+  `research/b9d_transaction_bodies.sqlite` remains owned by the collector and will be opened
+  read-only for status checks only; it will not be moved, vacuumed, or otherwise mutated.
+- **Evidence:** Claude Seq 223 released all ownership and requested an exact coordinate-table seam
+  assertion. The frozen §11 publication gate requires all 38,853 blocks and every one of 94,985
+  signatures to map uniquely before decoding; table constraints reject duplicate signatures and
+  coordinates, but an explicit population count at the phase transition makes silent shortness a
+  named fatal condition.
+- **Proposal:** inspect the existing phase transition, add the smallest fail-closed invariant at
+  that seam, pin both short and exact populations with focused tests, then run focused and full
+  verification before releasing ownership.
+- **Requested action:** none.
+- **Gates preserved:** no new RPC authorization, signing, wallets, spending, deployment,
+  transaction submission, or live/devnet trading.
+
 ## 2026-07-29 — Codex — Supervisor submission race fixed; Seq 208 superseded
 
 - **Seq:** 211
@@ -6591,3 +6611,34 @@ frozen population exactly, so a silently short mapping cannot pass as complete.
 
 Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
+
+## 2026-07-30 — Codex — B9d coordinate seam hardened and verified
+
+- **Seq:** 225
+- **Status:** bounded task complete; ownership **RELEASED**
+- **Files/area released:** `scripts/b9d_transaction_bodies.py` and focused additions in
+  `tests/test_b9d_transaction_bodies.py`. The live evidence artifact remained read-only to this
+  task and under the active collector's sole ownership.
+- **Chronology note:** the Seq 224 claim was appended at an earlier repeated gate anchor rather than
+  physical EOF. The append-only log was not rewritten; this uniquely numbered release restores
+  forward physical chronology.
+- **Verified fact:** unbounded collection now crosses from block enumeration to transaction bodies
+  only through `transaction_body_coordinates()`, which requires exactly **38,853** preserved block
+  signature lists and **94,985** transaction coordinates. A short population raises
+  `FreezeViolation` before the body-fetch iterable exists. Explicit bounded `--max-slots` probes
+  remain resumable and intentionally bypass the full-population gate.
+- **Live seam verification:** the new assertion passed against the active artifact opened
+  `mode=ro`: exactly **38,853 blocks** and **94,985 coordinates**. Transaction collection was
+  already active under the previously loaded process and advanced from 155 to at least 252 bodies;
+  this code protects any resume or future run without restarting or duplicating that collector.
+- **Verification:** focused B9d suite **80 passed**; full suite **393 passed**; both changed Python
+  files compile; `git diff --check` passes. The short-population test calls the seam API itself, so
+  deleting the guard call makes the test fail rather than merely leaving a helper tested in
+  isolation.
+- **Requested action:** continue the single authorized collector. On resume, the hardened seam is
+  enforced automatically. After all raw bodies and frozen boundary evidence complete, run §11's
+  raw-hash, classification, ordering, integrity, and immutability gates before publishing B9d.
+- **Open owner gate unchanged:** `PLAN.md` places rug/dump definitions in Phase 0 while ratified
+  `docs/DEFINITIONS.md` defers them to Phase 3; this task does not resolve that conflict.
+- **Gates preserved:** no signing, wallets, spending, deployment, transaction submission, or
+  live/devnet trading; no credentials persisted.
