@@ -42,12 +42,19 @@ class DashboardTests(unittest.TestCase):
                   "- **Requested action:** wait")
         self.assertIsNone(DASH.handoff_target(active))
 
-    def test_explicit_coordination_request_routes_without_terminal_status(self):
+    def test_explicit_coordination_request_without_terminal_status_is_log_only(self):
         entry = ("## 2026-07-30 — Codex — hello\n"
                  "- **Seq:** 9\n"
                  "- **Status:** test message; no ownership claimed\n"
                  "- **Requested action:** Please acknowledge receipt.\n")
-        self.assertEqual(DASH.handoff_target(entry), "claude")
+        self.assertIsNone(DASH.handoff_target(entry))
+
+    def test_active_status_variants_never_route_as_task_briefs(self):
+        for status in ("ownership claim", "ownership resumed", "collection active"):
+            entry = ("## 2026-07-30 — Codex — active\n- **Seq:** 9\n"
+                     f"- **Status:** {status}\n"
+                     "- **Requested action:** Claude should review later.\n")
+            self.assertIsNone(DASH.handoff_target(entry), status)
 
     def test_no_action_and_claim_entries_remain_log_only(self):
         no_action = ("## 2026-07-30 — Codex — note\n- **Seq:** 10\n"
@@ -521,6 +528,24 @@ class SendGuardTests(unittest.TestCase):
             "claude", pane_text=f"❯ \n⏵⏵ auto mode on · {DASH.BUSY_MARKER}")
         self.assertTrue(DASH.agent_busy("%15"))
 
+    def test_a_collapsed_paste_in_the_composer_is_not_a_delivery(self):
+        """Codex renders a long paste as `[Pasted Content 3356]` instead of echoing it, so the
+        prefix comparison against the message never matched and an UNSENT handoff read as
+        delivered. Together with the truncated-marker defect this lost a whole handoff silently.
+        """
+        message = "Direct prompt from Claude to Codex. " + "detail " * 200
+        DASH.tmux = self._tmux_with_command(
+            "codex", pane_text="› [Pasted Content 3356]\n  gpt-5.6-sol default")
+        saved, DASH.wait_for_idle = DASH.wait_for_idle, lambda pane, **kw: True
+        self.addCleanup(lambda: setattr(DASH, "wait_for_idle", saved))
+        saved_poll, DASH.SUBMIT_POLLS = DASH.SUBMIT_POLLS, 1
+        self.addCleanup(lambda: setattr(DASH, "SUBMIT_POLLS", saved_poll))
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.send("codex", message)
+        self.assertIn("NOT submitted", str(ctx.exception))
+        self.assertEqual([c for c in self.calls if c[0] == "state"], [],
+                         "a collapsed paste must not be recorded as a delivery")
+
     def test_a_captured_status_line_in_the_transcript_is_not_busy(self):
         """The stall this fix exists for, reproduced from the real pane contents.
 
@@ -540,6 +565,26 @@ class SendGuardTests(unittest.TestCase):
         DASH.tmux = self._tmux_with_command("codex", pane_text=pane_text)
         self.assertFalse(DASH.agent_busy("%0"),
                          "a captured status line above the composer is transcript, not liveness")
+
+    def test_a_status_line_truncated_by_a_narrow_pane_is_still_busy(self):
+        """Reproduced live at 29 columns. The pane read `• Working (36s • esc to inte…` — visibly
+        working — while `agent_busy` returned False, so `send()` typed a 4,700 character handoff
+        into a busy composer, the Enter was eaten, and the delivery was RECORDED AS SUCCESSFUL.
+        """
+        narrow = "› Use /skills to list availa\n  • Working (36s • esc to inte…"
+        DASH.tmux = self._tmux_with_command("codex", pane_text=narrow)
+        self.assertTrue(DASH.agent_busy("%0"))
+
+    def test_an_idle_narrow_pane_is_not_reported_busy_forever(self):
+        """The boundary that stops the fix deadlocking delivery.
+
+        An IDLE narrow pane also renders an ellipsis, so any "truncated therefore busy" rule would
+        report every narrow pane busy forever — the same permanent stall as the whole-pane search,
+        arriving from the other direction.
+        """
+        idle = "› Use /skills to list availa\n  gpt-5.6-sol default · ~/me…"
+        DASH.tmux = self._tmux_with_command("codex", pane_text=idle)
+        self.assertFalse(DASH.agent_busy("%0"))
 
     def test_the_status_region_stops_at_the_last_composer_prompt(self):
         """The boundary: the fix must not blind the probe to a genuinely live status line."""
@@ -1043,6 +1088,16 @@ class SupervisorResilienceTests(IsolatedDashboard):
         self.run_one_iteration(refuse)
         self.assertEqual(DASH.read_state()["observed_sequence"], 1,
                          "consuming the sequence would record a handoff that was never delivered")
+
+    def test_a_post_submit_uncertainty_is_consumed_and_never_replayed(self):
+        def uncertain(agent, message, interrupt_busy=True):
+            raise DASH.DeliveryUncertain("submitted text still visible")
+
+        output = self.run_one_iteration(uncertain)
+        self.assertIn("delivery uncertain", output)
+        state = DASH.read_state()
+        self.assertEqual(state["observed_sequence"], 2)
+        self.assertEqual(state["delivery_uncertain_sequence"], 2)
 
     def test_a_delivered_handoff_consumes_the_sequence_and_moves_ownership(self):
         """The other side of the boundary: a working dispatch must still advance."""

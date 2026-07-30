@@ -264,6 +264,23 @@ def send_line(pane, text):
 
 
 BUSY_MARKER = "esc to interrupt"
+# Both TUIs truncate their status line to the pane width with an ellipsis. At 29 columns the hint
+# rendered as `esc to inte…`, so the full marker did not match and `agent_busy` reported an
+# obviously-working Codex (`• Working (36s • esc to inte…`) as IDLE. `send()` then typed a 4,700
+# character handoff into a busy composer, the Enter was eaten, and the delivery was recorded as
+# successful. Matching a prefix short enough to survive that truncation is the fix; it stays
+# specific because it is only ever searched inside the status region, never the transcript.
+#
+# KNOWN LIMIT, stated rather than guessed at: a pane narrow enough to truncate below this prefix
+# would read as idle again. No "truncated therefore busy" rule is used, because an IDLE narrow pane
+# also renders an ellipsis, so that rule reports every narrow pane busy forever and deadlocks
+# delivery — the same permanent stall fixed earlier today from the other direction. The liveness
+# probe is a courtesy; the guarantee is the post-condition in `send()`, which reads the composer
+# back and refuses to record a delivery it cannot see land.
+BUSY_MARKER_PREFIX = "esc to int"
+# Codex collapses a long paste into `[Pasted Content 3356]` rather than echoing the text, so a
+# prefix comparison against the message can never match and an unsent handoff looked delivered.
+PASTED_COLLAPSE = "[Pasted Content"
 SUBMIT_POLL = 0.2          # TUI acceptance/redraw is asynchronous
 SUBMIT_POLLS = 25          # five-second bounded post-condition window
 PENDING_MATCH = 24         # prefix long enough to be ours, short enough to survive wrapping
@@ -308,7 +325,7 @@ def agent_busy(pane):
     left the general case open. A marker that can appear in transcript is transcript-matchable no
     matter which marker it is; the fix is the region, not the string.
     """
-    return BUSY_MARKER in status_region(pane_text(pane))
+    return BUSY_MARKER_PREFIX in status_region(pane_text(pane))
 
 
 def composer_text(pane):
@@ -370,6 +387,14 @@ def wait_for_submission(pane, message, trust_busy_marker):
         if trust_busy_marker and BUSY_MARKER in text:
             return True, ""
         pending = composer_text_from_text(text)
+        # Codex renders a long paste as `[Pasted Content 3356]` instead of echoing it, so a prefix
+        # comparison against the message never matched and an UNSENT handoff read as delivered.
+        # A collapsed paste sitting in the composer is exactly the failure this check exists for.
+        if PASTED_COLLAPSE in pending:
+            if attempt + 1 < SUBMIT_POLLS:
+                time.sleep(SUBMIT_POLL)
+                continue
+            return False, pending
         if not pending or pending[:PENDING_MATCH] not in message:
             return True, pending
         if attempt + 1 < SUBMIT_POLLS:
@@ -402,6 +427,14 @@ def composer_text_from_text(text):
             if stripped.startswith(prompt):
                 return stripped[len(prompt):].replace(NBSP, " ").strip()
     return ""
+
+
+class DeliveryUncertain(RuntimeError):
+    """The handoff was submitted, but the receiving TUI did not prove acceptance in time.
+
+    Unlike a pre-delivery busy refusal, retrying this state is unsafe because the first submission
+    may already be a user turn in the recipient's transcript.
+    """
 
 
 def send(agent, message):
@@ -464,7 +497,7 @@ def send(agent, message):
     # composer clearance or the busy marker instead of declaring failure after one fixed sleep.
     submitted, pending = wait_for_submission(target, message, trust_busy_marker=idle)
     if not submitted:
-        raise RuntimeError(
+        raise DeliveryUncertain(
             f"handoff to {agent!r} was typed into pane {target} but NOT submitted — it is still "
             f"sitting in the composer ({pending[:60]!r}...). The agent was "
             f"{'busy past the wait timeout' if not idle else 'not consuming input'}. Not recording "
@@ -621,7 +654,6 @@ def entry_status(entry):
 
 
 RELEASE_WORDS = ("handoff", "released", "complete")
-NO_ACTIONS = ("none", "no action", "nothing requested")
 
 
 def entry_requested_action(entry):
@@ -636,15 +668,12 @@ def entry_requested_action(entry):
 
 def handoff_target(entry, active_agent=None):
     status_line = entry_status(entry)
-    # Terminal releases and explicit cross-agent requests both need immediate pane delivery.
-    # A claim/in-progress entry is audit state, not a task for the other agent, even if its prose
-    # contains a future requested action.
+    # Only terminal releases route automatically. Explicit mid-work requests are written to the
+    # audit log but must be delivered directly by their author. The earlier requested-action
+    # widening routed 39 historical non-terminal entries, including `ownership claim`, `ownership
+    # resumed`, and `collection active`, as fresh task briefs.
     terminal = any(word in status_line for word in RELEASE_WORDS)
-    explicit_request = (bool(entry_requested_action(entry))
-                        and "claiming" not in status_line
-                        and "in progress" not in status_line
-                        and "implementation ownership" not in status_line)
-    if not (terminal or explicit_request):
+    if not terminal:
         return None
     author = entry_author(entry)
     if "codex" in author:
@@ -748,6 +777,15 @@ def supervisor_loop(interval=2.0):
                     # unconsumed and retry after it becomes idle.
                     try:
                         send_handoff(target, message, interrupt_busy=False)
+                    except DeliveryUncertain as exc:
+                        # Text was already submitted. Retrying can deliver the same user turn
+                        # repeatedly — Seq 248 reached Codex five times while the cursor stayed at
+                        # 247. Quarantine the uncertainty and consume the sequence; the append-only
+                        # log remains the recovery source.
+                        print(f"handoff delivery uncertain for {target}: {exc}", flush=True)
+                        write_state(active_agent=target, owner=target,
+                                    delivery_uncertain_sequence=current,
+                                    observed_sequence=current)
                     except RuntimeError as exc:
                         # A busy CLI is transient. Keep the sequence unconsumed so the next loop
                         # retries; never let one undeliverable handoff kill the supervisor.
