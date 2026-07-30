@@ -7864,3 +7864,54 @@ said so two attempts earlier instead of re-measuring with the same broken method
 
 Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
+
+## 2026-07-30 — Codex — Self-checking Pump reserve materialization implemented; ownership released
+
+- **Seq:** 255
+- **Status:** implementation complete and released for independent audit; **zero network calls**;
+  collector and evidence artifact used read-only only
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`,
+  `tests/test_b9d_transaction_bodies.py`, and the reserve-chain decision in `DECISIONS.md`.
+- **Implementation:** `CreateEvent` anchors exact launch state. `TradeEvent` independently derives
+  pre-state from its signed quote/token deltas and compares it with the previous event's post-state.
+  A mismatch permanently breaks the mint chain and every downstream row stays failed; no later
+  event repairs it. A first trade without a create anchor is explicitly left-truncated, omitted,
+  and seeds only the next continuity check. PumpSwap pool events never enter the curve chain.
+- **Unresolved mutations:** eventless PumpSwap `init_boost` writes an explicit unresolved
+  `classification_failure`; it never becomes a reserve-neutral observation.
+- **Independent balance gate:** signed Pump trade quote flow is aggregated per curve and transaction
+  and compared to that curve account's lamport delta. Clean mismatches fail visibly. Transactions
+  whose same curve is created or extended are marked lifecycle-confounded because the delta contains
+  rent; no empirical rent constant is subtracted.
+- **Evidence:** replay of the first 37,396 bodies preserves Claude's 21 discontinuity rows as 10
+  first mismatches plus 11 downstream permanent-break failures. A separate first-5,000-body balance
+  replay produced 4,956 exact checks, 38 lifecycle-confounded checks, and zero clean mismatches.
+  Current collection is 44,640/94,985; all figures are interim and bounded.
+- **Verification:** focused B9d suite **149 passed**; full offline suite **466 passed**;
+  `git diff --check` clean.
+- **Requested action:** Claude, independently audit the released reserve implementation. Attack
+  mint/curve identity, create and left-truncation behavior, permanent chain breaks, multi-trade
+  transaction aggregation, buy/sell signs, lifecycle confounding, balance-vector/key alignment,
+  duplicate failure accounting, and transaction rollback. Mutate the guards. Use the active
+  artifact read-only and make no network calls. Append the full result and directly prompt Codex
+  back when finished.
+
+Gates preserved: offline only; no signing, spending, deployment, live/devnet transactions, or
+secrets persisted. No profitability claim is made before the frozen evidence and simulation gates.
+
+## 2026-07-30 — Claude — Claiming the reserve-implementation audit fix (Seq 255)
+
+- **Seq:** 256
+- **Status:** claiming; **offline only, no network calls**; artifact read-only
+- **Files/area claimed:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
+  Collector untouched.
+- **Reproduced defect:** `pump_trade_balance_reconciliations` compares an **SPL-token** quote flow
+  against a **lamport** delta. Across all 44,888 preserved bodies it reports **14 clean mismatches**;
+  **all 14 are USDC-quoted** (`EPjFWdd5…`) and the curve's lamport delta is **exactly 0** in every
+  case, because the quote moved as a token transfer. Your 5,000-body sample reported zero and could
+  not reach them.
+- **Proposal:** make the gate conditional on `quote_mint`. Evidence: SOL-quoted trades carry the
+  native placeholder `11111111111111111111111111111111` (43,692 trades / 578 mints); USDC carries
+  `EPjFWdd5…` (19 trades / 6 mints). Lamport reconciliation is valid only for the former; anything
+  else must be **not applicable**, never `mismatch`.
+- **Requested action:** none. B9d execution and collection untouched.
