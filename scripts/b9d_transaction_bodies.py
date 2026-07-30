@@ -13,6 +13,8 @@ transaction.
 """
 import argparse
 import base64
+import contextlib
+import fcntl
 import hashlib
 import json
 import os
@@ -1190,6 +1192,28 @@ def decode_idl_instruction(idl, data, account_keys):
             "remaining_accounts": list(account_keys[len(declared_accounts):])}
 
 
+def idl_instruction_account_roles(idl, data, account_keys):
+    """Resolve a known instruction's declared account roles without claiming its args decode.
+
+    Reserve identity needs the `bonding_curve` account, not argument values. Some preserved trade
+    payloads classify by their pinned discriminator but are shorter than the current IDL argument
+    layout; forcing a full Borsh arg decode here would reject usable account evidence or tempt a
+    fabricated repair. Account order is independently explicit in the IDL and still fails closed
+    when the discriminator or required account list is unavailable.
+    """
+    if len(data) < 8:
+        raise FreezeViolation("target instruction data is shorter than its discriminator")
+    entry = instruction_entries(idl).get(bytes(data[:8]))
+    if entry is None:
+        raise FreezeViolation(f"unknown target discriminator {bytes(data[:8]).hex()}")
+    declared = flatten_accounts(entry.get("accounts", []))
+    if len(account_keys) < len(declared):
+        raise FreezeViolation(
+            f"{entry['name']} needs {len(declared)} accounts, got {len(account_keys)}")
+    return entry["name"], {spec["name"]: account_keys[index]
+                           for index, spec in enumerate(declared)}
+
+
 def event_entries(idl):
     types = idl_types(idl)
     out = {}
@@ -1289,6 +1313,190 @@ def reserve_after_from_event(name, fields):
     if missing:
         raise FreezeViolation(f"TradeEvent lacks reserve field(s): {', '.join(missing)}")
     return {field: fields[field] for field in required}
+
+
+# The native placeholder Pump reports as `quote_mint` for SOL-quoted curves. Measured across the
+# preserved bodies: 43,692 trades over 578 mints carry it, and 19 trades over 6 mints carry USDC.
+NATIVE_QUOTE_MINT = "11111111111111111111111111111111"
+
+RESERVE_FIELDS = ("virtual_quote_reserves", "virtual_token_reserves",
+                  "real_quote_reserves", "real_token_reserves")
+
+
+def curve_state_from_create(fields):
+    """Exact launch state carried by Pump `CreateEvent`; real quote starts at zero."""
+    required = ("virtual_quote_reserves", "virtual_token_reserves", "real_token_reserves")
+    missing = [field for field in required if field not in fields]
+    if missing:
+        raise FreezeViolation(f"CreateEvent lacks reserve field(s): {', '.join(missing)}")
+    state = {"virtual_quote_reserves": fields["virtual_quote_reserves"],
+             "virtual_token_reserves": fields["virtual_token_reserves"],
+             "real_quote_reserves": 0,
+             "real_token_reserves": fields["real_token_reserves"]}
+    if any(not isinstance(value, int) or value < 0 for value in state.values()):
+        raise FreezeViolation(f"CreateEvent carries invalid reserve state {state}")
+    return state
+
+
+def curve_states_from_trade(fields):
+    """Derive one Pump trade's exact pre-state independently from its event post-state/deltas."""
+    required = RESERVE_FIELDS + ("quote_amount", "token_amount", "is_buy")
+    missing = [field for field in required if field not in fields]
+    if missing:
+        raise FreezeViolation(f"TradeEvent lacks reserve/delta field(s): {', '.join(missing)}")
+    after = {field: fields[field] for field in RESERVE_FIELDS}
+    quote, token, is_buy = fields["quote_amount"], fields["token_amount"], fields["is_buy"]
+    if (isinstance(quote, bool) or not isinstance(quote, int) or
+            isinstance(token, bool) or not isinstance(token, int) or
+            not isinstance(is_buy, bool)):
+        raise FreezeViolation("TradeEvent reserve deltas have invalid types")
+    direction = 1 if is_buy else -1
+    before = {
+        "virtual_quote_reserves": after["virtual_quote_reserves"] - direction * quote,
+        "virtual_token_reserves": after["virtual_token_reserves"] + direction * token,
+        "real_quote_reserves": after["real_quote_reserves"] - direction * quote,
+        "real_token_reserves": after["real_token_reserves"] + direction * token,
+    }
+    if any(not isinstance(value, int) or value < 0 for value in (*before.values(), *after.values())):
+        raise FreezeViolation(f"TradeEvent derives invalid reserve state before={before} after={after}")
+    return before, after
+
+
+def advance_curve_chain(chains, bonding_curve, event_name, fields):
+    """Advance one self-checking Pump curve chain, or return a permanent break reason.
+
+    Returns `(before, after, reason)`. Once broken, a curve is never repaired by a later matching
+    event: the missing transition remains missing evidence.
+    """
+    current = chains.get(bonding_curve)
+    if event_name == "CreateEvent":
+        after = curve_state_from_create(fields)
+        if current is not None:
+            current["broken"] = True
+            return None, None, "duplicate CreateEvent would replace an existing curve anchor"
+        chains[bonding_curve] = {"state": after, "broken": False}
+        return None, after, None
+    if event_name != "TradeEvent":
+        return None, None, None
+    derived_before, after = curve_states_from_trade(fields)
+    if current is None:
+        # Left truncation is visible, but it is not the same as a continuity mismatch. Preserve the
+        # observed post-state so the NEXT event can be checked two independent ways. The first
+        # trade itself gets no reserve row because its chain-derived before-state is unavailable.
+        chains[bonding_curve] = {"state": after, "broken": False, "anchored": False}
+        return None, None, (
+            "first TradeEvent has no preceding CreateEvent anchor in the frozen evidence; "
+            "left-truncated observation omitted, subsequent continuity remains testable")
+    if current["broken"]:
+        return None, None, "curve reserve chain was previously broken and cannot be repaired"
+    if current["state"] != derived_before:
+        expected = current["state"]
+        current["broken"] = True
+        return None, None, (
+            "curve reserve continuity mismatch: previous after does not equal event-derived before; "
+            f"previous={expected}, derived={derived_before}")
+    current["state"] = after
+    return derived_before, after, None
+
+
+def unresolved_eventless_reserve_transition(program_id, instruction_name, has_event, meta):
+    """Explicit unresolved record for the measured eventless PumpSwap reserve candidate."""
+    if program_id != PUMPSWAP_PROGRAM or instruction_name != "init_boost" or has_event:
+        return None
+    return {
+        "reason": ("reserve transition unresolved: eventless PumpSwap init_boost must not be "
+                   "assumed reserve-neutral"),
+        "context": {"pre_balances": len((meta or {}).get("preBalances") or []),
+                    "post_balances": len((meta or {}).get("postBalances") or []),
+                    "venue": "pumpswap_pool"},
+    }
+
+
+def pump_trade_balance_reconciliations(result, associated_events, pump_idl, envelopes):
+    """Reconcile aggregate Pump trade quote flow to each curve account's lamport delta.
+
+    A create or account extension in the same transaction changes the curve's rent-funded lamport
+    balance independently of reserves. Those rows are returned as ``confounded`` rather than being
+    silently adjusted by an observed rent constant. Unconfounded disagreement is a hard,
+    attributable reconciliation failure for the caller to persist.
+    """
+    expected = {}
+    coordinates = {}
+    quote_mints = {}
+    for parent, _, event in associated_events:
+        if parent["program_id"] != PUMP_PROGRAM or event["name"] != "TradeEvent":
+            continue
+        _, roles = idl_instruction_account_roles(pump_idl, parent["data"], parent["accounts"])
+        curve = roles.get("bonding_curve")
+        if not curve:
+            raise FreezeViolation("Pump TradeEvent parent has no bonding_curve account role")
+        fields = event["fields"]
+        quote = fields.get("quote_amount")
+        is_buy = fields.get("is_buy")
+        if isinstance(quote, bool) or not isinstance(quote, int) or not isinstance(is_buy, bool):
+            raise FreezeViolation("TradeEvent balance reconciliation has invalid quote delta")
+        expected[curve] = expected.get(curve, 0) + (quote if is_buy else -quote)
+        coordinates.setdefault(curve, (parent["outer_index"], parent["inner_index"]))
+        # A curve's LAMPORT delta is evidence about its quote flow only when the quote IS lamports.
+        quote_mints.setdefault(curve, set()).add(fields.get("quote_mint"))
+
+    if not expected:
+        return []
+    meta = result.get("meta") or {}
+    message = parse_message(base64.b64decode(result["transaction"][0]))
+    keys = resolve_account_keys(message, meta)
+    pre, post = meta.get("preBalances"), meta.get("postBalances")
+    if not (isinstance(pre, list) and isinstance(post, list) and
+            len(pre) == len(post) == len(keys)):
+        raise FreezeViolation(
+            "transaction balance vectors do not match the resolved account-key population")
+
+    confounded = set()
+    for envelope in envelopes:
+        if envelope["program_id"] != PUMP_PROGRAM:
+            continue
+        try:
+            name, roles = idl_instruction_account_roles(
+                pump_idl, envelope["data"], envelope["accounts"])
+        except FreezeViolation:
+            # Anchor CPI event wrappers are not Pump instructions in the IDL.
+            if envelope["data"].startswith(ANCHOR_EVENT_CPI_TAG):
+                continue
+            raise
+        if name == "create_v2" and roles.get("bonding_curve") in expected:
+            confounded.add(roles["bonding_curve"])
+        if name == "extend_account" and roles.get("account") in expected:
+            confounded.add(roles["account"])
+
+    rows = []
+    for curve, reserve_delta in expected.items():
+        indexes = [index for index, key in enumerate(keys) if key == curve]
+        if len(indexes) != 1:
+            raise FreezeViolation(
+                f"bonding curve {curve} occurs {len(indexes)} times in resolved account keys")
+        lamport_delta = post[indexes[0]] - pre[indexes[0]]
+        mints = quote_mints.get(curve, set())
+        if mints != {NATIVE_QUOTE_MINT}:
+            # Reproduced across all 44,888 preserved bodies: every one of the 14 "clean mismatches"
+            # was a USDC-quoted curve whose lamport delta was EXACTLY 0, because the quote moved as
+            # an SPL token transfer. Comparing token flow against lamports measures the wrong
+            # quantity, and reporting it as a mismatch manufactures reconciliation failures while
+            # making a real one indistinguishable from a USDC trade. `preTokenBalances` /
+            # `postTokenBalances` on the curve's quote token account is the correct independent
+            # evidence here; until that exists this is unresolved, never reconciled and never failed.
+            status = "not_applicable_non_sol_quote"
+        elif curve in confounded:
+            status = "confounded_by_account_lifecycle"
+        elif lamport_delta == reserve_delta:
+            status = "exact"
+        else:
+            status = "mismatch"
+        rows.append({"bonding_curve": curve, "expected_reserve_delta": reserve_delta,
+                     "lamport_delta": lamport_delta, "status": status,
+                     "quote_mints": sorted(m for m in mints if m),
+                     "outer_index": coordinates[curve][0],
+                     "inner_index": coordinates[curve][1]})
+    return rows
 
 
 RESERVE_STATE_ACCOUNTS = {
@@ -1540,13 +1748,19 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
     }
     decode_metadata = dict(database.execute(
         "SELECT key,value FROM metadata WHERE key IN "
-        "('decoded_at_unix','decoder_classification_failures')"))
+        "('decoded_at_unix','decoder_classification_failures',"
+        "'reserve_reconciliation_failures','reserve_balance_exact',"
+        "'reserve_balance_confounded','reserve_balance_failures')"))
     if any(existing.values()) or decode_metadata:
         raise FreezeViolation(
             "derived decoder output already exists: refusing to mix or overwrite a prior pass "
             f"(rows={existing}, metadata_keys={sorted(decode_metadata)})")
 
     instruction_count = target_count = failure_count = 0
+    reserve_count = reserve_failure_count = 0
+    balance_exact_count = balance_confounded_count = balance_failure_count = 0
+    curve_chains = {}
+    mint_to_curve = {}
     with database:
         rows = database.execute(
             "SELECT c.signature,c.slot,c.transaction_index,t.raw_zlib "
@@ -1560,7 +1774,8 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
             # Decode and parent every Anchor CPI event before writing this transaction. This is the
             # reserve-evidence seam: a malformed event or ambiguous stack relation rolls back the
             # pass rather than becoming an unknown instruction or attaching to a nearby trade.
-            associate_cpi_events(envelopes, idls)
+            associated_events = associate_cpi_events(envelopes, idls)
+            event_parent_ids = {id(parent) for parent, _, _ in associated_events}
             for envelope in envelopes:
                 program_id = envelope["program_id"]
                 if program_id in TARGET_PROGRAMS:
@@ -1597,17 +1812,130 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                          json.dumps({"data_len": len(envelope["data"])},
                                     separators=(",", ":"))))
                     failure_count += 1
+                unresolved = unresolved_eventless_reserve_transition(
+                    program_id, name, id(envelope) in event_parent_ids, result.get("meta"))
+                if unresolved is not None:
+                    database.execute(
+                        "INSERT INTO classification_failure "
+                        "(signature,slot,transaction_index,outer_index,inner_index,program_id,"
+                        "discriminator,reason,context_json) VALUES (?,?,?,?,?,?,?,?,?)",
+                        (signature,) + coordinates + (program_id, discriminator,
+                         unresolved["reason"],
+                         json.dumps(unresolved["context"], separators=(",", ":"))))
+                    failure_count += 1
+                    reserve_failure_count += 1
+            for parent, event_envelope, decoded_event in associated_events:
+                if parent["program_id"] != PUMP_PROGRAM or decoded_event["name"] not in (
+                        "CreateEvent", "TradeEvent"):
+                    continue
+                fields = decoded_event["fields"]
+                if decoded_event["name"] == "CreateEvent":
+                    bonding_curve = fields.get("bonding_curve")
+                    mint = fields.get("mint")
+                    if not mint:
+                        raise FreezeViolation("CreateEvent has no mint identity")
+                    previous_curve = mint_to_curve.setdefault(mint, bonding_curve)
+                    if previous_curve != bonding_curve:
+                        raise FreezeViolation(
+                            f"mint {mint} maps to bonding curves {previous_curve} and "
+                            f"{bonding_curve}; reserve identity is ambiguous")
+                else:
+                    mint = fields.get("mint")
+                    if not mint:
+                        raise FreezeViolation("TradeEvent has no mint identity")
+                    _, account_roles = idl_instruction_account_roles(
+                        idls[PUMP_PROGRAM], parent["data"], parent["accounts"])
+                    account_curve = account_roles.get("bonding_curve")
+                    bonding_curve = mint_to_curve.get(mint) or account_curve
+                if not bonding_curve:
+                    raise FreezeViolation(
+                        f"{decoded_event['name']} parent at ({parent['outer_index']},"
+                        f"{parent['inner_index']}) has no bonding_curve identity")
+                before, after, reserve_reason = advance_curve_chain(
+                    curve_chains, mint, decoded_event["name"], fields)
+                parent_coordinates = (slot, transaction_index, parent["outer_index"],
+                                      parent["inner_index"])
+                if reserve_reason is not None:
+                    database.execute(
+                        "INSERT INTO classification_failure "
+                        "(signature,slot,transaction_index,outer_index,inner_index,program_id,"
+                        "discriminator,reason,context_json) VALUES (?,?,?,?,?,?,?,?,?)",
+                        (signature,) + parent_coordinates + (PUMP_PROGRAM,
+                         parent["data"][:8].hex(), f"reserve chain: {reserve_reason}",
+                         json.dumps({"bonding_curve": bonding_curve,
+                                     "event_outer_index": event_envelope["outer_index"],
+                                     "event_inner_index": event_envelope["inner_index"]},
+                                    separators=(",", ":"))))
+                    failure_count += 1
+                    reserve_failure_count += 1
+                    continue
+                evidence = json.dumps(
+                    {"kind": f"anchor_cpi:{decoded_event['name']}",
+                     "event_outer_index": event_envelope["outer_index"],
+                     "event_inner_index": event_envelope["inner_index"],
+                     "chain_check": "anchor" if before is None else "previous_after=event_before"},
+                    separators=(",", ":"), sort_keys=True)
+                database.execute(
+                    "INSERT INTO reserve_observation "
+                    "(slot,transaction_index,outer_index,inner_index,bonding_curve,"
+                    "virtual_quote_before,virtual_token_before,real_quote_before,real_token_before,"
+                    "virtual_quote_after,virtual_token_after,real_quote_after,real_token_after,"
+                    "evidence) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    parent_coordinates + (bonding_curve,
+                        *(before[field] if before is not None else None for field in RESERVE_FIELDS),
+                        *(after[field] for field in RESERVE_FIELDS), evidence))
+                reserve_count += 1
+            for reconciliation in pump_trade_balance_reconciliations(
+                    result, associated_events, idls[PUMP_PROGRAM], envelopes):
+                status = reconciliation["status"]
+                if status == "exact":
+                    balance_exact_count += 1
+                elif status == "confounded_by_account_lifecycle":
+                    balance_confounded_count += 1
+                else:
+                    balance_failure_count += 1
+                    reserve_failure_count += 1
+                    failure_count += 1
+                    coordinates = (slot, transaction_index,
+                                   reconciliation["outer_index"],
+                                   reconciliation["inner_index"])
+                    reason = (
+                        "reserve balance reconciliation unresolved: quote is not lamports for this "
+                        "curve, so its lamport delta is not evidence about quote flow; "
+                        "pre/postTokenBalances on the quote token account are required"
+                        if status == "not_applicable_non_sol_quote" else
+                        "reserve balance reconciliation mismatch: unconfounded bonding-curve "
+                        "lamport delta does not equal aggregate TradeEvent quote delta")
+                    database.execute(
+                        "INSERT INTO classification_failure "
+                        "(signature,slot,transaction_index,outer_index,inner_index,program_id,"
+                        "discriminator,reason,context_json) VALUES (?,?,?,?,?,?,?,?,?)",
+                        (signature,) + coordinates + (PUMP_PROGRAM, None, reason,
+                         json.dumps(reconciliation, separators=(",", ":"), sort_keys=True)))
         database.execute(
             "INSERT INTO metadata(key,value) VALUES ('decoded_at_unix',?)",
             (str(time.time()),))
         database.execute(
             "INSERT INTO metadata(key,value) VALUES ('decoder_classification_failures',?)",
             (str(failure_count),))
+        database.execute(
+            "INSERT INTO metadata(key,value) VALUES ('reserve_reconciliation_failures',?)",
+            (str(reserve_failure_count),))
+        for key, value in (
+                ("reserve_balance_exact", balance_exact_count),
+                ("reserve_balance_confounded", balance_confounded_count),
+                ("reserve_balance_failures", balance_failure_count)):
+            database.execute("INSERT INTO metadata(key,value) VALUES (?,?)", (key, str(value)))
         # Inside the transaction, so a violation rolls the whole materialization back rather than
         # leaving accounted and unaccounted rows committed together.
         assert_target_classification_accounted(database)
     return {"verification": verification, "instructions": instruction_count,
-            "target_instructions": target_count, "classification_failures": failure_count}
+            "target_instructions": target_count, "classification_failures": failure_count,
+            "reserve_observations": reserve_count,
+            "reserve_reconciliation_failures": reserve_failure_count,
+            "reserve_balance_exact": balance_exact_count,
+            "reserve_balance_confounded": balance_confounded_count,
+            "reserve_balance_failures": balance_failure_count}
 
 
 # ---------------------------------------------------------------------------------------------
@@ -1624,7 +1952,7 @@ def endpoint_reference(endpoint):
 
 
 def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None, retries=8):
-    """Return byte-exact response plus parsed result; RPC errors are fatal and preserved by caller."""
+    """Return byte-exact response plus parsed result; transient overload backs off and retries."""
     request_body = json.dumps({"jsonrpc": "2.0", "id": request_id, "method": method,
                                "params": params}, separators=(",", ":")).encode()
     request = urllib.request.Request(endpoint, data=request_body,
@@ -1634,7 +1962,6 @@ def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None,
         try:
             with transport(request, timeout=timeout) as response:
                 raw = response.read()
-            break
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as error:
             retryable = not isinstance(error, urllib.error.HTTPError) or error.code in (
                 408, 429, 500, 502, 503, 504)
@@ -1645,15 +1972,25 @@ def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None,
             retry_after = headers.get("Retry-After") if headers is not None else None
             delay = float(retry_after) if retry_after and retry_after.isdigit() else min(30, 2 ** attempt)
             time.sleep(delay)
-    try:
-        payload = json.loads(raw)
-    except json.JSONDecodeError as error:
-        raise FreezeViolation(f"{method} returned non-JSON bytes: {error}") from error
-    if payload.get("error") is not None:
-        raise FreezeViolation(f"{method} RPC error: {payload['error']}")
-    if "result" not in payload:
-        raise FreezeViolation(f"{method} response lacks result")
-    return raw, payload["result"]
+            continue
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError as error:
+            raise FreezeViolation(f"{method} returned non-JSON bytes: {error}") from error
+        rpc_error = payload.get("error")
+        if rpc_error is not None:
+            message = str(rpc_error.get("message", "")) if isinstance(rpc_error, dict) else ""
+            overloaded = (isinstance(rpc_error, dict) and rpc_error.get("code") == -32603
+                          and "overload" in message.lower())
+            if overloaded and attempt < retries:
+                time.sleep(min(30, 2 ** attempt))
+                continue
+            raise FreezeViolation(
+                f"{method} RPC error after {attempt + 1} attempt(s): {rpc_error}")
+        if "result" not in payload:
+            raise FreezeViolation(f"{method} response lacks result")
+        return raw, payload["result"]
+    raise FreezeViolation(f"{method} exhausted its retry loop without a response")
 
 
 def store_raw(database, table, key_column, key, method, params, raw, received_at=None):
@@ -1711,9 +2048,43 @@ def initialize_run(database, endpoint, digests):
     database.commit()
 
 
+@contextlib.contextmanager
+def collector_lock(output):
+    """Exclusive process lock for the artifact's single writer.
+
+    A second collector can snapshot `done_transactions` and race the first one to the same next
+    signature. The loser then sees different byte-exact JSON-RPC response bytes (at minimum the
+    response id) and fails as apparent evidence drift. More importantly, the frozen single-writer
+    invariant was not enforced. The sidecar is coordination state only; evidence stays in SQLite.
+    """
+    lock_path = f"{output}.collector.lock"
+    handle = open(lock_path, "a+b")
+    try:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise FreezeViolation(
+                f"another collector already holds the single-writer lock {lock_path}") from error
+        yield
+    finally:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        finally:
+            handle.close()
+
+
 def collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                            max_slots=None, max_transactions=None, progress_every=100,
                            calls_per_second=2.5):
+    with collector_lock(output):
+        return _collect_raw_population(
+            endpoint, output, b9c_path, b9a_path, max_slots, max_transactions,
+            progress_every, calls_per_second)
+
+
+def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
+                            max_slots=None, max_transactions=None, progress_every=100,
+                            calls_per_second=2.5):
     """Resumably preserve block coordinates and transaction response bodies; no decoding yet."""
     # §11: this must be the first observable action on an existing output. In particular it comes
     # before source hashing/population scans and before the writable `connect()` that sets WAL and

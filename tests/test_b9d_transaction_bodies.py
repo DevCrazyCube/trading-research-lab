@@ -626,6 +626,90 @@ class PinnedPumpSwapIdlTests(unittest.TestCase):
                          "the MISSING_PINNED_IDL hard-failure marker must be gone, not falsified")
 
 
+class RpcRetryTests(unittest.TestCase):
+    class Response:
+        def __init__(self, raw):
+            self.raw = raw
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return self.raw
+
+    def setUp(self):
+        self.saved_sleep = B9D.time.sleep
+        B9D.time.sleep = lambda delay: None
+        self.addCleanup(lambda: setattr(B9D.time, "sleep", self.saved_sleep))
+
+    def test_service_overload_json_rpc_error_retries_then_returns_exact_success_bytes(self):
+        overloaded = json.dumps({"jsonrpc": "2.0", "id": 1, "error": {
+            "code": -32603, "message": "Service overloaded"}}).encode()
+        success = json.dumps({"jsonrpc": "2.0", "id": 1, "result": {"slot": 7}}).encode()
+        responses = [overloaded, overloaded, success]
+        calls = []
+
+        def opener(request, timeout):
+            calls.append(request)
+            return self.Response(responses.pop(0))
+
+        raw, result = B9D.rpc_request(
+            "https://unused.invalid", "getTransaction", ["sig"], opener=opener, retries=2)
+        self.assertEqual(raw, success)
+        self.assertEqual(result, {"slot": 7})
+        self.assertEqual(len(calls), 3)
+
+    def test_non_overload_rpc_error_is_fatal_without_retry(self):
+        error = json.dumps({"jsonrpc": "2.0", "id": 1, "error": {
+            "code": -32000, "message": "invalid request"}}).encode()
+        calls = []
+
+        def opener(request, timeout):
+            calls.append(request)
+            return self.Response(error)
+
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.rpc_request(
+                "https://unused.invalid", "getTransaction", ["sig"], opener=opener, retries=8)
+        self.assertIn("after 1 attempt", str(ctx.exception))
+        self.assertEqual(len(calls), 1)
+
+    def test_persistent_overload_fails_after_the_bounded_attempt_count(self):
+        overloaded = json.dumps({"jsonrpc": "2.0", "id": 1, "error": {
+            "code": -32603, "message": "Service overloaded"}}).encode()
+        calls = []
+
+        def opener(request, timeout):
+            calls.append(request)
+            return self.Response(overloaded)
+
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.rpc_request(
+                "https://unused.invalid", "getTransaction", ["sig"], opener=opener, retries=2)
+        self.assertIn("after 3 attempt", str(ctx.exception))
+        self.assertEqual(len(calls), 3)
+
+
+class CollectorLockTests(unittest.TestCase):
+    def test_a_second_writer_is_refused_while_the_first_holds_the_artifact_lock(self):
+        output = str(pathlib.Path(tempfile.mkdtemp()) / "artifact.sqlite")
+        with B9D.collector_lock(output):
+            with self.assertRaises(B9D.FreezeViolation) as ctx:
+                with B9D.collector_lock(output):
+                    self.fail("second collector entered the critical section")
+        self.assertIn("single-writer lock", str(ctx.exception))
+
+    def test_lock_is_released_after_failure_inside_the_critical_section(self):
+        output = str(pathlib.Path(tempfile.mkdtemp()) / "artifact.sqlite")
+        with self.assertRaises(RuntimeError):
+            with B9D.collector_lock(output):
+                raise RuntimeError("fixture")
+        with B9D.collector_lock(output):
+            pass
+
 class ArtifactTests(unittest.TestCase):
     """§5: schema, resume, and the immutability B9b's Seq 188 correction exists for."""
 
@@ -803,6 +887,264 @@ def build_transaction(keys, instructions, version="legacy", lookups=()):
 def as_result(raw, meta=None, version="legacy", slot=1):
     return {"slot": slot, "version": version, "meta": meta or {},
             "transaction": [base64.b64encode(raw).decode(), "base64"]}
+
+
+class CurveReserveChainTests(unittest.TestCase):
+    CREATE = {"virtual_quote_reserves": 30_000, "virtual_token_reserves": 1_000_000,
+              "real_token_reserves": 800_000}
+
+    def trade(self, before, quote, token, is_buy):
+        direction = 1 if is_buy else -1
+        return {"virtual_quote_reserves": before["virtual_quote_reserves"] + direction * quote,
+                "virtual_token_reserves": before["virtual_token_reserves"] - direction * token,
+                "real_quote_reserves": before["real_quote_reserves"] + direction * quote,
+                "real_token_reserves": before["real_token_reserves"] - direction * token,
+                "quote_amount": quote, "token_amount": token, "is_buy": is_buy}
+
+    def test_create_anchors_and_buy_sell_each_reconstruct_the_exact_previous_state(self):
+        chains = {}
+        _, launch, reason = B9D.advance_curve_chain(chains, "curve", "CreateEvent", self.CREATE)
+        self.assertIsNone(reason)
+        self.assertEqual(launch["real_quote_reserves"], 0)
+        buy = self.trade(launch, quote=100, token=250, is_buy=True)
+        before, after, reason = B9D.advance_curve_chain(chains, "curve", "TradeEvent", buy)
+        self.assertEqual(before, launch)
+        self.assertIsNone(reason)
+        sell = self.trade(after, quote=40, token=75, is_buy=False)
+        before2, after2, reason = B9D.advance_curve_chain(chains, "curve", "TradeEvent", sell)
+        self.assertEqual(before2, after)
+        self.assertEqual(chains["curve"]["state"], after2)
+        self.assertIsNone(reason)
+
+    def test_missing_anchor_is_left_truncated_but_the_next_transition_can_self_check(self):
+        chains = {}
+        launch = B9D.curve_state_from_create(self.CREATE)
+        trade = self.trade(launch, quote=100, token=250, is_buy=True)
+        self.assertIn("no preceding CreateEvent", B9D.advance_curve_chain(
+            chains, "curve", "TradeEvent", trade)[2])
+        next_trade = self.trade(B9D.curve_states_from_trade(trade)[1],
+                                quote=40, token=75, is_buy=False)
+        before, after, reason = B9D.advance_curve_chain(
+            chains, "curve", "TradeEvent", next_trade)
+        self.assertIsNone(reason)
+        self.assertEqual(before, B9D.curve_states_from_trade(trade)[1])
+        self.assertEqual(chains["curve"]["state"], after)
+
+    def test_continuity_mismatch_breaks_and_preserves_the_prior_state_for_evidence(self):
+        chains = {}
+        _, launch, _ = B9D.advance_curve_chain(chains, "curve", "CreateEvent", self.CREATE)
+        wrong = self.trade({**launch, "virtual_quote_reserves": launch["virtual_quote_reserves"] + 1},
+                           quote=100, token=250, is_buy=True)
+        before, after, reason = B9D.advance_curve_chain(chains, "curve", "TradeEvent", wrong)
+        self.assertIsNone(before)
+        self.assertIsNone(after)
+        self.assertIn("continuity mismatch", reason)
+        self.assertEqual(chains["curve"]["state"], launch)
+        self.assertTrue(chains["curve"]["broken"])
+
+    def test_invalid_delta_types_and_negative_derived_reserves_fail_visibly(self):
+        launch = B9D.curve_state_from_create(self.CREATE)
+        invalid = self.trade(launch, quote=100, token=250, is_buy=True)
+        invalid["is_buy"] = "yes"
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.curve_states_from_trade(invalid)
+        negative = self.trade(launch, quote=launch["virtual_quote_reserves"] + 1,
+                              token=1, is_buy=False)
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.curve_states_from_trade(negative)
+
+    def test_account_roles_resolve_without_claiming_a_truncated_argument_payload_decoded(self):
+        idl = {"instructions": [{"name": "trade", "discriminator": list(range(8)),
+                                 "accounts": [{"name": "bonding_curve"}],
+                                 "args": [{"name": "amount", "type": "u64"}]}]}
+        data = bytes(range(8))  # discriminator only: full arg decode must fail
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.decode_idl_instruction(idl, data, ["curve"])
+        name, roles = B9D.idl_instruction_account_roles(idl, data, ["curve"])
+        self.assertEqual((name, roles), ("trade", {"bonding_curve": "curve"}))
+
+    def test_eventless_init_boost_is_unresolved_and_kept_out_of_the_curve_series(self):
+        unresolved = B9D.unresolved_eventless_reserve_transition(
+            B9D.PUMPSWAP_PROGRAM, "init_boost", False,
+            {"preBalances": [1] * 14, "postBalances": [2] * 14})
+        self.assertIn("must not be assumed reserve-neutral", unresolved["reason"])
+        self.assertEqual(unresolved["context"], {
+            "pre_balances": 14, "post_balances": 14, "venue": "pumpswap_pool"})
+        self.assertIsNone(B9D.unresolved_eventless_reserve_transition(
+            B9D.PUMPSWAP_PROGRAM, "init_boost", True, {}))
+        self.assertIsNone(B9D.unresolved_eventless_reserve_transition(
+            B9D.PUMP_PROGRAM, "buy", False, {}))
+
+    def balance_case(self, quote_mint, pre=1_000, post=1_100):
+        idl = {"instructions": [
+            {"name": "buy", "discriminator": [1] * 8,
+             "accounts": [{"name": "bonding_curve"}], "args": []}]}
+        parent = {"program_id": B9D.PUMP_PROGRAM, "data": bytes([1]) * 8,
+                  "accounts": ["curve"], "outer_index": 1, "inner_index": -1}
+        event = {"name": "TradeEvent",
+                 "fields": {"quote_amount": 100, "is_buy": True, "quote_mint": quote_mint}}
+        result = {"transaction": [base64.b64encode(b"ignored").decode(), "base64"],
+                  "meta": {"preBalances": [pre], "postBalances": [post]}}
+        saved = (B9D.parse_message, B9D.resolve_account_keys)
+        B9D.parse_message = lambda _: {"lookups": [], "static_keys": ["curve"]}
+        B9D.resolve_account_keys = lambda message, meta: ["curve"]
+        self.addCleanup(lambda: setattr(B9D, "parse_message", saved[0]))
+        self.addCleanup(lambda: setattr(B9D, "resolve_account_keys", saved[1]))
+        return B9D.pump_trade_balance_reconciliations(result, [(parent, {}, event)], idl, [parent])
+
+    def test_the_native_quote_placeholder_is_the_measured_literal(self):
+        """A symbolic constant no test pins can be changed to anything. Measured across the
+        preserved bodies: 43,692 trades over 578 mints carry this exact value as quote_mint."""
+        self.assertEqual(B9D.NATIVE_QUOTE_MINT, "11111111111111111111111111111111")
+        self.assertNotEqual(B9D.NATIVE_QUOTE_MINT,
+                            "So11111111111111111111111111111111111111112",
+                            "Pump reports the native placeholder, not the wrapped-SOL mint")
+
+    def test_a_broken_chain_is_never_repaired_by_a_later_matching_event(self):
+        """The permanent-break guard. A later event that happens to line up must NOT resume the
+        chain: the missing transition is missing evidence, not a gap to be closed."""
+        chains = {}
+        launch = {"virtual_quote_reserves": 30, "virtual_token_reserves": 100,
+                  "real_token_reserves": 100}
+        B9D.advance_curve_chain(chains, "mint", "CreateEvent", launch)
+        broken = {"virtual_quote_reserves": 999, "virtual_token_reserves": 1, "is_buy": True,
+                  "real_quote_reserves": 999, "real_token_reserves": 1,
+                  "quote_amount": 1, "token_amount": 1}
+        _, _, reason = B9D.advance_curve_chain(chains, "mint", "TradeEvent", broken)
+        self.assertIn("continuity mismatch", reason)
+        # A subsequent event that IS internally consistent with the broken post-state must still fail.
+        follow = dict(broken)
+        _, _, reason = B9D.advance_curve_chain(chains, "mint", "TradeEvent", follow)
+        self.assertIn("previously broken", reason)
+        self.assertIn("cannot be repaired", reason)
+
+    def test_a_duplicate_create_event_breaks_rather_than_reanchoring(self):
+        """Re-anchoring on a second CreateEvent would silently discard everything before it."""
+        chains = {}
+        launch = {"virtual_quote_reserves": 30, "virtual_token_reserves": 100,
+                  "real_token_reserves": 100}
+        B9D.advance_curve_chain(chains, "mint", "CreateEvent", launch)
+        _, after, reason = B9D.advance_curve_chain(chains, "mint", "CreateEvent", launch)
+        self.assertIsNone(after)
+        self.assertIn("duplicate CreateEvent", reason)
+        self.assertTrue(chains["mint"]["broken"], "the curve must be poisoned, not re-anchored")
+
+    def test_a_curve_appearing_twice_in_the_resolved_keys_is_refused(self):
+        """Two positions means two candidate lamport deltas; picking either would be a guess."""
+        idl = {"instructions": [
+            {"name": "buy", "discriminator": [1] * 8,
+             "accounts": [{"name": "bonding_curve"}], "args": []}]}
+        parent = {"program_id": B9D.PUMP_PROGRAM, "data": bytes([1]) * 8,
+                  "accounts": ["curve"], "outer_index": 1, "inner_index": -1}
+        event = {"name": "TradeEvent", "fields": {
+            "quote_amount": 100, "is_buy": True, "quote_mint": B9D.NATIVE_QUOTE_MINT}}
+        result = {"transaction": [base64.b64encode(b"x").decode(), "base64"],
+                  "meta": {"preBalances": [1, 2], "postBalances": [3, 4]}}
+        saved = (B9D.parse_message, B9D.resolve_account_keys)
+        B9D.parse_message = lambda _: {"lookups": [], "static_keys": ["curve", "curve"]}
+        B9D.resolve_account_keys = lambda message, meta: ["curve", "curve"]
+        self.addCleanup(lambda: setattr(B9D, "parse_message", saved[0]))
+        self.addCleanup(lambda: setattr(B9D, "resolve_account_keys", saved[1]))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.pump_trade_balance_reconciliations(result, [(parent, {}, event)], idl, [parent])
+        self.assertIn("occurs 2 times", str(ctx.exception))
+
+    def test_balance_vectors_shorter_than_the_resolved_keys_are_refused(self):
+        """The alignment gate. preBalances/postBalances are indexed by the RESOLVED key list, so a
+        length disagreement means every index past the static keys could address a different
+        account — the same misalignment class as the address-table lookup check."""
+        idl = {"instructions": [
+            {"name": "buy", "discriminator": [1] * 8,
+             "accounts": [{"name": "bonding_curve"}], "args": []}]}
+        parent = {"program_id": B9D.PUMP_PROGRAM, "data": bytes([1]) * 8,
+                  "accounts": ["curve"], "outer_index": 1, "inner_index": -1}
+        event = {"name": "TradeEvent", "fields": {
+            "quote_amount": 100, "is_buy": True, "quote_mint": B9D.NATIVE_QUOTE_MINT}}
+        result = {"transaction": [base64.b64encode(b"x").decode(), "base64"],
+                  "meta": {"preBalances": [1_000], "postBalances": [1_100]}}
+        saved = (B9D.parse_message, B9D.resolve_account_keys)
+        B9D.parse_message = lambda _: {"lookups": [], "static_keys": ["curve"]}
+        B9D.resolve_account_keys = lambda message, meta: ["curve", "loaded_via_lookup_table"]
+        self.addCleanup(lambda: setattr(B9D, "parse_message", saved[0]))
+        self.addCleanup(lambda: setattr(B9D, "resolve_account_keys", saved[1]))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.pump_trade_balance_reconciliations(result, [(parent, {}, event)], idl, [parent])
+        self.assertIn("do not match the resolved account-key population", str(ctx.exception))
+
+    def test_a_non_lamport_quote_is_not_applicable_never_a_mismatch(self):
+        """Reproduced across all 44,888 preserved bodies: every one of the 14 'clean mismatches'
+        was a USDC-quoted curve whose lamport delta was EXACTLY 0, because the quote moved as an
+        SPL token transfer. Comparing token flow to lamports measures the wrong quantity, and
+        calling it a mismatch manufactures failures while hiding what a real one would look like.
+        """
+        usdc = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        rows = self.balance_case(usdc, pre=1_000, post=1_000)   # lamports do not move at all
+        self.assertEqual(rows[0]["status"], "not_applicable_non_sol_quote")
+        self.assertEqual(rows[0]["quote_mints"], [usdc])
+        # It must not be rescued into "exact" by a lamport delta that happens to agree, either.
+        self.assertEqual(self.balance_case(usdc)[0]["status"], "not_applicable_non_sol_quote")
+
+    def test_a_lamport_quote_still_reconciles_exactly(self):
+        """The boundary: the fix must not disable the gate for the 43,692 SOL-quoted trades."""
+        self.assertEqual(self.balance_case(B9D.NATIVE_QUOTE_MINT)[0]["status"], "exact")
+        self.assertEqual(self.balance_case(B9D.NATIVE_QUOTE_MINT, post=1_101)[0]["status"],
+                         "mismatch")
+
+    def test_a_curve_mixing_quote_mints_in_one_transaction_is_not_reconciled(self):
+        """Ambiguity fails closed rather than picking whichever mint appeared first."""
+        idl = {"instructions": [
+            {"name": "buy", "discriminator": [1] * 8,
+             "accounts": [{"name": "bonding_curve"}], "args": []}]}
+        parent = {"program_id": B9D.PUMP_PROGRAM, "data": bytes([1]) * 8,
+                  "accounts": ["curve"], "outer_index": 1, "inner_index": -1}
+        def event(mint):
+            return {"name": "TradeEvent", "fields": {
+                "quote_amount": 50, "is_buy": True, "quote_mint": mint}}
+        result = {"transaction": [base64.b64encode(b"ignored").decode(), "base64"],
+                  "meta": {"preBalances": [1_000], "postBalances": [1_100]}}
+        saved = (B9D.parse_message, B9D.resolve_account_keys)
+        B9D.parse_message = lambda _: {"lookups": [], "static_keys": ["curve"]}
+        B9D.resolve_account_keys = lambda message, meta: ["curve"]
+        self.addCleanup(lambda: setattr(B9D, "parse_message", saved[0]))
+        self.addCleanup(lambda: setattr(B9D, "resolve_account_keys", saved[1]))
+        rows = B9D.pump_trade_balance_reconciliations(
+            result,
+            [(parent, {}, event(B9D.NATIVE_QUOTE_MINT)), (parent, {}, event("USDCmint"))],
+            idl, [parent])
+        self.assertEqual(rows[0]["status"], "not_applicable_non_sol_quote")
+
+    def test_balance_reconciliation_gates_clean_trades_and_marks_rent_confounding(self):
+        idl = {"instructions": [
+            {"name": "buy", "discriminator": [1] * 8,
+             "accounts": [{"name": "bonding_curve"}], "args": []},
+            {"name": "create_v2", "discriminator": [2] * 8,
+             "accounts": [{"name": "bonding_curve"}], "args": []},
+        ]}
+        parent = {"program_id": B9D.PUMP_PROGRAM, "data": bytes([1]) * 8,
+                  "accounts": ["curve"], "outer_index": 1, "inner_index": -1}
+        # quote_mint is load-bearing: the lamport gate is only valid when the quote IS lamports.
+        event = {"name": "TradeEvent",
+                 "fields": {"quote_amount": 100, "is_buy": True,
+                            "quote_mint": B9D.NATIVE_QUOTE_MINT}}
+        result = {"transaction": [base64.b64encode(b"ignored").decode(), "base64"],
+                  "meta": {"preBalances": [1_000], "postBalances": [1_100]}}
+        original_parse, original_resolve = B9D.parse_message, B9D.resolve_account_keys
+        B9D.parse_message = lambda _: {"lookups": [], "static_keys": ["curve"]}
+        B9D.resolve_account_keys = lambda message, meta: ["curve"]
+        try:
+            rows = B9D.pump_trade_balance_reconciliations(
+                result, [(parent, {}, event)], idl, [parent])
+            self.assertEqual(rows[0]["status"], "exact")
+            result["meta"]["postBalances"] = [1_101]
+            self.assertEqual(B9D.pump_trade_balance_reconciliations(
+                result, [(parent, {}, event)], idl, [parent])[0]["status"], "mismatch")
+            create = {"program_id": B9D.PUMP_PROGRAM, "data": bytes([2]) * 8,
+                      "accounts": ["curve"], "outer_index": 0, "inner_index": -1}
+            self.assertEqual(B9D.pump_trade_balance_reconciliations(
+                result, [(parent, {}, event)], idl, [create, parent])[0]["status"],
+                "confounded_by_account_lifecycle")
+        finally:
+            B9D.parse_message, B9D.resolve_account_keys = original_parse, original_resolve
 
 
 class EnvelopeParsingTests(unittest.TestCase):
