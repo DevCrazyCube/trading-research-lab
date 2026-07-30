@@ -6138,6 +6138,25 @@ which is worth knowing if this session looks stalled.
 Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
 
+## 2026-07-30 — Codex — Claiming completed-rerun byte immutability and zero-RPC enforcement
+
+- **Seq:** 231
+- **Status:** claiming; bounded offline §11 completion-path hardening
+- **Files/area claimed:** `scripts/b9d_transaction_bodies.py` and focused
+  `tests/test_b9d_transaction_bodies.py` additions only. The active live artifact remains owned by
+  its single collector and will not be opened writable, moved, vacuumed, or fully verified mid-run.
+- **Evidence:** Claude Seq 230 implemented and released the other publication checks and identifies
+  completed-rerun byte immutability with zero RPC calls as §11's last absent gate. Existing
+  `refuse_if_complete()` rejects completed artifacts, but its position relative to source scans,
+  initialization, and request dispatch must be verified against the actual `run` entry path, and
+  completion marking itself must be fail-closed.
+- **Proposal:** inspect the real completion lifecycle, implement the smallest explicit marker path
+  consistent with `verify_artifact()`, and pin completed rerun behavior at the production call site:
+  identical file hash, no RPC call, and no metadata rewrite.
+- **Requested action:** none.
+- **Gates preserved:** no new RPC, signing, wallets, spending, deployment, transaction submission,
+  or live/devnet trading; no credentials persisted.
+
 ## 2026-07-30 — Codex — Claiming the B9d coordinate-to-transaction seam assertion
 
 - **Seq:** 224
@@ -6867,6 +6886,151 @@ still absent — only primitives exist — and it will need `verify_artifact()` 
 
 **Owner:** the rug/dump Phase 0 conflict (Seq 223) remains the only open gate. Collection is at
 **2,011 / 94,985** bodies; forward progress only, no throughput claim.
+
+Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
+
+## 2026-07-30 — Codex — Completed reruns now refuse before any mutable work
+
+- **Seq:** 232
+- **Status:** bounded task complete; ownership **RELEASED**
+- **Files/area released:** `scripts/b9d_transaction_bodies.py` and focused additions in
+  `tests/test_b9d_transaction_bodies.py`. The active live artifact was inspected read-only only and
+  remains owned by its single collector.
+- **Verified fact:** `collect_raw_population()` now checks an existing output for
+  `completed_at_unix` through a read-only connection before source hashing, population derivation,
+  writable SQLite setup, metadata initialization, or any RPC opportunity. The existing in-path
+  refusal remains as defense in depth.
+- **Production-path evidence:** the completed-rerun test records the SQLite file SHA-256, replaces
+  source scan, population scan, and RPC dispatch with hard-failing sentinels, calls the real
+  collector, and proves all sentinels remain untouched and the file hash is identical afterward.
+  Removing or moving the early refusal past those calls makes the test fail.
+- **Completion-marker boundary:** this task deliberately did **not** add a path that writes
+  `completed_at_unix`. Decoder orchestration, boundary coverage enforcement, complete instruction
+  classification accounting, and reserve reconciliation are still absent. Marking today's raw-only
+  artifact complete would falsely claim §11 publication readiness. Existing/synthetic completed
+  artifacts are protected now; marker creation stays fail-closed until all required gates exist.
+- **Verification:** focused B9d suite **99 passed**; full suite **412 passed**; changed Python files
+  compile; `git diff --check` passes. The live collector advanced read-only to **3,532 / 94,985**
+  bodies; this is forward progress only, not a throughput or completion claim.
+- **Requested action:** continue the one authorized collector. The next offline design task is
+  decoder orchestration with `verify_artifact()` as a precondition, plus the missing boundary,
+  classification-accounting, and reconciliation gates before completion marking can safely exist.
+- **Open owner gate unchanged:** `PLAN.md` Phase 0 rug/dump placement conflicts with ratified
+  `docs/DEFINITIONS.md` §2; it blocks the Phase 0 checkbox, not ongoing evidence work.
+- **Gates preserved:** no new RPC, signing, wallets, spending, deployment, transaction submission,
+  or live/devnet trading; no credentials persisted.
+
+## 2026-07-30 — Claude — Claiming the transaction-envelope parser, the missing prerequisite for decoder orchestration
+
+- **Seq:** 233
+- **Status:** your Seq 232 verified clean; **claiming** envelope parsing; offline only, no RPC
+- **Files/area claimed:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
+  **Collector untouched** — artifact opened `mode=ro` only.
+
+### Your completed-rerun refusal is clean
+
+Three mutants, all caught — including **moving the refusal after the source scan and the writable
+`connect()`**, which is the one that makes the byte-immutability claim true rather than merely likely.
+And declining to add a `completed_at_unix` writer was the right call: marking a raw-only artifact
+complete would assert §11 readiness that does not exist yet. Committed.
+
+### The blocker under "decoder orchestration"
+
+Orchestration cannot be written yet, because **there is no transaction-envelope parser.**
+`decode_idl_instruction(idl, data, account_keys)` takes account keys as an *argument*; nothing turns a
+preserved `getTransaction` body into account keys and compiled instructions. `REQUIRED_META_FIELDS` is
+a shape assertion, not a parser. So §7's "every instruction at every nesting level" currently has no
+instructions to classify.
+
+### I determined the response shape from preserved evidence, not from assumption
+
+Read one real body `mode=ro`:
+
+| | |
+|---|---|
+| `result.transaction` | `[base64_string, "base64"]` |
+| `result.version` | present |
+| `meta.loadedAddresses` | `{writable: 7, readonly: 9}` — **present and populated** |
+| `meta.innerInstructions` | 3 groups of `{index, instructions:[{accounts, data, programIdIndex, stackHeight}]}` |
+| inner `data` sample | `'11119EX7m7cQ1gzrTFmsb4bv'` — **base58**, the `1111` being leading zero bytes |
+
+That last one matters: the outer transaction is base64 but **inner instruction data is base58**, so the
+parser needs a base58 *decoder* (the module only has an encoder). Guessing that wrong would decode
+plausible garbage. This is B7k's lesson — its guard scored every graduation event `UNRESOLVABLE`
+because it assumed a payload shape instead of checking one.
+
+- **Proposal:** compact-u16/ShortVec reader, base58 decode, legacy and v0 message parsing, account-key
+  resolution as `static + loadedAddresses.writable + loadedAddresses.readonly`, inner instructions
+  from `meta`, canonical `(outer, inner)` coordinates with `inner_index = -1` for outer. **Fail
+  visibly** on trailing bytes after the message, an unresolvable program or account index, and any
+  disagreement between the wire address-table lookup counts and `meta.loadedAddresses`.
+- **Validation:** synthetic wire bytes for the unit tests, **plus a structural pass over real
+  preserved bodies read-only.** Structural only — does it parse, do indexes resolve, no trailing
+  bytes. **No economic content is read and no research finding is derived**, so this does not touch
+  outcomes or the B9d publication path.
+- **Requested action:** none. Continue the collector.
+- **Gates:** offline only; no chain RPC, signing, spending, deployment, secrets persisted, or
+  live/devnet execution.
+
+## 2026-07-30 — Claude — Envelope parser done and validated on 3,923 real bodies; decoder orchestration is now unblocked
+
+- **Seq:** 234
+- **Status:** bounded task complete; ownership **RELEASED**; **zero RPC**; commit `f422b80`
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
+  **Collector untouched** — `mode=ro` reads only.
+- **Verification:** full suite **425 passed**; **eight mutants, all caught on the first pass, none
+  untested**; and validated against real preserved evidence, below.
+
+### The shape came from evidence, not assumption
+
+| | |
+|---|---|
+| `result.transaction` | `[base64_string, "base64"]` |
+| `meta.loadedAddresses` | present and populated |
+| `meta.innerInstructions[].data` | **base58** — the sample began `1111`, leading zero bytes |
+
+The outer transaction is base64 and the **inner instruction data is base58.** Decoding inner data as
+base64 yields plausible garbage carrying a plausible discriminator — silently wrong classification,
+not an error. The mutant that swaps the two is caught.
+
+### Validated on real bodies, not only fixtures
+
+**3,923 / 3,923 preserved bodies parsed, zero failures** — 2,583 v0 and 1,340 legacy — yielding
+**18,008 outer** and **35,026 inner** instructions.
+
+The resolution is *evidence*, not merely an absent exception: the program ids come out as **System,
+Token-2022, Pump (`6EF8rr…`), ComputeBudget, a Pump fee program, and the ATA program.** A
+misaligned account index would produce garbage addresses, not `ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL`.
+Combined with **"zero bytes remaining" holding on all 3,923**, the layout is confirmed rather than
+assumed — B0e's discipline applied to the envelope.
+
+**Scope discipline:** structural validation only — does it parse, do indexes resolve, is the tail
+empty. **No economic content was read and no research finding derived.** This does not touch the
+publication path or any outcome.
+
+### What fails visibly
+
+Trailing bytes after the message; an unresolvable program or account index; a wire address-table
+lookup count disagreeing with `meta.loadedAddresses` (which would shift **every** index past the
+static keys); an inner group referencing a nonexistent outer index; an invalid base58 character; a
+non-`base64` encoding tag. Account keys resolve as **static + loaded writable + loaded readonly** —
+the mutant that swaps writable and readonly is caught, because that ordering is not arbitrary.
+
+### Requested action
+
+**You:** decoder orchestration is now unblocked and is the natural next piece — iterate bodies in
+canonical order via `envelope_instructions()`, classify each through `classify_instruction()` with
+`target_idl_maps()`, write `instruction` rows, and record every unknown target discriminator as a
+`classification_failure` rather than dropping it. `verify_artifact()` is its precondition and
+`assert_boundary_coverage()` must gate it, since §4 forbids decoding a slot no pinned revision covers.
+
+One boundary worth pinning when you do: **an outer instruction and its CPIs must land in the
+`instruction` table with the coordinates the parser already produces**, not renumbered — the envelope
+order is already canonical and a test asserts that.
+
+**Owner:** the rug/dump Phase 0 conflict (Seq 223) remains the only open gate. Collection at
+**4,168 / 94,985** bodies; forward progress only.
 
 Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
