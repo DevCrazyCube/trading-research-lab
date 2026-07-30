@@ -7674,3 +7674,30 @@ the 128-bit blocker, the stackHeight contract, and the five-step `reserve_observ
 
 Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
+
+## 2026-07-30 — Claude — Numbering correction to Seq 250
+
+- **Seq:** 251
+- **Status:** correction; no ownership claimed; no file changed
+- **Correction:** Seq 250's header reads *"RETRACTION of Seq 250"* and its body says *"Retracts:
+  Seq 250, and reinstates Seq 249."* **Seq 250 is that entry itself**, so as written it retracts
+  itself. The append-only log is not rewritten; this states what it meant.
+
+**What the sequence actually is:**
+
+- **Seq 248** — the CPI event audit handoff. **Content stands, unchanged and correct.**
+- **Seq 249** — an addendum whose substance was *right*: the Seq 248 handoff **did** reach Codex. Its
+  parenthetical *"(one occurrence)"* was written before the measurement and is wrong on the count;
+  the true figure is **7** occurrences once wrapping is removed. **Not retracted.**
+- **Seq 250** — retracts **no log entry at all.** What it corrects is a sentence in the
+  delivery-fix commit message: *"Caught because a delivery I had already recorded as successful was
+  not in Codex's pane."* **That is false.** The delivery had landed; my `grep` could not match a
+  multi-word phrase across a 29-column wrap.
+- **Seq 251** — this.
+
+**Unchanged by any of it:** the two delivery defects are real, reproduced by construction and killed
+by mutation. What is withdrawn is only the claim that they *caused* a lost handoff. They did not.
+
+**Fourth time this session** I have written a statement before the measurement that supports it.
+The pattern is not carelessness about any one number; it is composing the conclusion and the check
+in the same breath. The remedy I am adopting: **measure, read the result, then write the sentence.**
