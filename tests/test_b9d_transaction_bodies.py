@@ -357,24 +357,107 @@ class BoundaryCollectorTests(unittest.TestCase):
         result.update(overrides)
         return json.dumps({"jsonrpc": "2.0", "id": request_id, "result": result}).encode()
 
+    def raw_program(self, request_id, programdata_address, **overrides):
+        header = (2).to_bytes(4, "little") + B9D.base58_decode(programdata_address)
+        value = {"owner": B9D.UPGRADEABLE_LOADER, "executable": True,
+                 "data": [base64.b64encode(header).decode(), "base64"], "space": 36}
+        value.update(overrides.pop("value", {}))
+        result = {"context": {"slot": B9D.CUTOFF_SLOT + 100}, "value": value}
+        result.update(overrides)
+        return json.dumps({"jsonrpc": "2.0", "id": request_id, "result": result}).encode()
+
+    def boundary_raws(self, pump_deploy=433_095_571, swap_deploy=433_112_355):
+        return [self.raw_program(1, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM]),
+                self.raw(2, pump_deploy),
+                self.raw_program(3, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMPSWAP_PROGRAM]),
+                self.raw(4, swap_deploy)]
+
     def opener(self, raws, calls):
         def open_request(request, timeout):
             calls.append(json.loads(request.data))
             return self.Response(raws.pop(0))
         return open_request
 
+    def addressed_opener(self, by_address, calls):
+        """Serve responses BY REQUESTED ADDRESS rather than positionally.
+
+        A positional opener cannot tell which account was asked for, so pointing the ProgramData
+        query at the program's own address still consumed the same canned response and the whole
+        program-to-ProgramData binding could be deleted without any test noticing. A mutation
+        proved exactly that.
+        """
+        def open_request(request, timeout):
+            body = json.loads(request.data)
+            calls.append(body)
+            address = body["params"][0]
+            if address not in by_address:
+                raise AssertionError(f"unexpected getAccountInfo for {address}")
+            return self.Response(by_address[address])
+        return open_request
+
+    def test_the_programdata_query_targets_the_DERIVED_account(self):
+        """The binding only means something if the second query goes to the derived address.
+
+        Served by address rather than positionally: a mutant pointing the ProgramData query at the
+        program's own address now asks for an account this fixture refuses to answer, instead of
+        silently receiving the next canned response.
+        """
+        by_address = {
+            B9D.PUMP_PROGRAM: self.raw_program(1, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM]),
+            B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM]: self.raw(2, 433_095_571),
+            B9D.PUMPSWAP_PROGRAM: self.raw_program(
+                3, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMPSWAP_PROGRAM]),
+            B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMPSWAP_PROGRAM]: self.raw(4, 433_112_355),
+        }
+        calls = []
+        B9D.collect_boundary_evidence(
+            self.database, "https://rpc.invalid", opener=self.addressed_opener(by_address, calls))
+        requested = [(call["params"][0], call["params"][1]["dataSlice"]["length"])
+                     for call in calls]
+        self.assertEqual(requested, [
+            (B9D.PUMP_PROGRAM, 36),
+            (B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM], 12),
+            (B9D.PUMPSWAP_PROGRAM, 36),
+            (B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMPSWAP_PROGRAM], 12),
+        ], "program account at 36 bytes, then the DERIVED ProgramData at 12")
+
+    def test_a_stale_program_account_context_is_refused(self):
+        """The freshness check exists on both headers; only the ProgramData one had a test."""
+        good = json.loads(self.raw_program(1, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM]))["result"]
+        stale = {**good, "context": {"slot": B9D.CUTOFF_SLOT - 1}}
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_program_header(stale, B9D.PUMP_PROGRAM)
+        self.assertIn("before required cutoff", str(ctx.exception))
+        self.assertEqual(
+            B9D.decode_program_header(good, B9D.PUMP_PROGRAM)["programdata_address"],
+            B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM])
+
+    def test_boundary_metadata_drift_is_refused_on_replay(self):
+        """Preserved provenance must not be silently rewritten by a later run."""
+        B9D.collect_boundary_evidence(
+            self.database, "https://rpc.invalid",
+            opener=self.opener(self.boundary_raws(), []))
+        self.database.execute(
+            "UPDATE metadata SET value='999' WHERE key=?",
+            (f"boundary_last_deploy_slot:{B9D.PUMP_PROGRAM}",))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.collect_boundary_evidence(
+                self.database, "https://rpc.invalid",
+                opener=lambda *a: self.fail("replay attempted network"))
+        self.assertIn("boundary metadata drift", str(ctx.exception))
+
     def test_two_sliced_programdata_headers_persist_exact_evidence_and_coverage(self):
-        raws = [self.raw(1, 433_095_571), self.raw(2, 433_112_355)]
+        raws = self.boundary_raws()
         calls = []
         summary = B9D.collect_boundary_evidence(
             self.database, "https://rpc.invalid", opener=self.opener(raws, calls))
         self.assertEqual(len(summary), 2)
         self.assertEqual(self.database.execute(
-            "SELECT count(*) FROM raw_boundary_response").fetchone()[0], 2)
+            "SELECT count(*) FROM raw_boundary_response").fetchone()[0], 4)
         self.assertEqual(self.database.execute(
             "SELECT count(*) FROM program_version WHERE coverage='covered'").fetchone()[0], 2)
         self.assertEqual([call["params"][1]["dataSlice"] for call in calls],
-                         [{"offset": 0, "length": 12}] * 2)
+                         [{"offset": 0, "length": 36}, {"offset": 0, "length": 12}] * 2)
         self.assertTrue(all(row[0] == B9D.OBSERVATION_RANGE[0] for row in
             self.database.execute("SELECT from_slot FROM program_version")))
         # Resume replays preserved bytes and makes no RPC request.
@@ -382,6 +465,40 @@ class BoundaryCollectorTests(unittest.TestCase):
             self.database, "https://rpc.invalid",
             opener=lambda *args: self.fail("replay attempted network"))
         self.assertTrue(all(item["replayed"] for item in replay.values()))
+
+    def test_program_provenance_metadata_names_the_preserved_program_query(self):
+        calls = []
+        summary = B9D.collect_boundary_evidence(
+            self.database, "https://rpc.invalid",
+            opener=self.opener(self.boundary_raws(), calls))
+        for program_id in B9D.TARGET_PROGRAMS:
+            program_key = summary[program_id]["program_evidence_key"]
+            stored = self.database.execute(
+                "SELECT program_id,params_json FROM raw_boundary_response WHERE request_key=?",
+                (program_key,)).fetchone()
+            self.assertEqual(stored[0], program_id)
+            params = json.loads(stored[1])
+            self.assertEqual(params[0], program_id)
+            self.assertEqual(params[1]["dataSlice"], {"offset": 0, "length": 36})
+            self.assertEqual(self.database.execute(
+                "SELECT value FROM metadata WHERE key=?",
+                (f"boundary_program_evidence_key:{program_id}",)).fetchone()[0], program_key)
+
+    def test_second_program_failure_preserves_partial_evidence_without_completion(self):
+        wrong_swap = self.raw_program(
+            3, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM])
+        raws = [self.raw_program(1, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM]),
+                self.raw(2, 433_095_571), wrong_swap]
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.collect_boundary_evidence(
+                self.database, "https://rpc.invalid", opener=self.opener(raws, []))
+        self.assertIn("live Program account derives ProgramData", str(ctx.exception))
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM raw_boundary_response").fetchone()[0], 3)
+        self.assertEqual(self.database.execute(
+            "SELECT program_id FROM program_version").fetchall(), [(B9D.PUMP_PROGRAM,)])
+        self.assertIsNone(self.database.execute(
+            "SELECT value FROM metadata WHERE key='boundary_completed_at_unix'").fetchone())
 
     def test_programdata_header_requires_finalized_context_owner_variant_and_shape(self):
         good = json.loads(self.raw(1, 1))["result"]
@@ -398,6 +515,39 @@ class BoundaryCollectorTests(unittest.TestCase):
             with self.subTest(result=result):
                 with self.assertRaises(B9D.FreezeViolation):
                     B9D.decode_programdata_header(result, "address")
+
+    def test_program_header_derives_the_programdata_address_and_binds_the_query(self):
+        expected = B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM]
+        good = json.loads(self.raw_program(1, expected))["result"]
+        self.assertEqual(B9D.decode_program_header(
+            good, B9D.PUMP_PROGRAM)["programdata_address"], expected)
+        wrong = self.raw_program(1, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMPSWAP_PROGRAM])
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.collect_boundary_evidence(
+                self.database, "https://rpc.invalid", opener=self.opener([wrong], []))
+        self.assertIn("live Program account derives ProgramData", str(ctx.exception))
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM raw_boundary_response").fetchone()[0], 1,
+            "the contradicting primary response remains preserved")
+
+    def test_program_header_requires_executable_variant_two_and_exact_base64(self):
+        expected = B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM]
+        good = json.loads(self.raw_program(1, expected))["result"]
+        short = base64.b64encode((2).to_bytes(4, "little") + bytes(8)).decode()
+        cases = [
+            ({**good, "value": None}, "account is absent"),
+            ({**good, "value": {**good["value"], "executable": False}}, "not Program"),
+            ({**good, "value": {**good["value"], "data": [short, "base64"]}}, "truncated"),
+            ({**good, "value": {**good["value"], "data": [base64.b64encode(
+                (3).to_bytes(4, "little") + bytes(32)).decode(), "base64"]}}, "expected 2"),
+            ({**good, "value": {**good["value"], "data": ["!!!!", "base64"]}},
+             "invalid base64"),
+        ]
+        for result, expected_message in cases:
+            with self.subTest(expected_message=expected_message):
+                with self.assertRaises(B9D.FreezeViolation) as ctx:
+                    B9D.decode_program_header(result, B9D.PUMP_PROGRAM)
+                self.assertIn(expected_message, str(ctx.exception))
 
     def test_each_header_failure_names_its_own_check(self):
         """The existing cases only assert *a* FreezeViolation, so an overlapping check could cover
@@ -432,7 +582,7 @@ class BoundaryCollectorTests(unittest.TestCase):
 
     def test_replay_reverifies_the_stored_hash_and_rejects_a_stored_error(self):
         """Resume trusts persisted bytes; both the hash and the payload shape must be re-checked."""
-        raws = [self.raw(1, 433_095_571), self.raw(2, 433_112_355)]
+        raws = self.boundary_raws()
         B9D.collect_boundary_evidence(
             self.database, "https://rpc.invalid", opener=self.opener(raws, []))
         # Corrupt the preserved bytes without touching the recorded digest.
@@ -458,18 +608,19 @@ class BoundaryCollectorTests(unittest.TestCase):
         self.assertIn("not a successful result", str(ctx.exception))
 
     def test_recent_deploy_is_preserved_but_does_not_create_false_coverage(self):
-        raws = [self.raw(1, B9D.OBSERVATION_RANGE[0] + 1)]
+        raws = [self.raw_program(1, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM]),
+                self.raw(2, B9D.OBSERVATION_RANGE[0] + 1)]
         with self.assertRaises(B9D.FreezeViolation) as ctx:
             B9D.collect_boundary_evidence(
                 self.database, "https://rpc.invalid", opener=self.opener(raws, []))
         self.assertIn("loader history", str(ctx.exception))
         self.assertEqual(self.database.execute(
-            "SELECT count(*) FROM raw_boundary_response").fetchone()[0], 1)
+            "SELECT count(*) FROM raw_boundary_response").fetchone()[0], 2)
         self.assertEqual(self.database.execute(
             "SELECT count(*) FROM program_version").fetchone()[0], 0)
 
     def test_existing_version_rows_must_equal_the_replayed_evidence(self):
-        raws = [self.raw(1, 433_095_571), self.raw(2, 433_112_355)]
+        raws = self.boundary_raws()
         B9D.collect_boundary_evidence(
             self.database, "https://rpc.invalid", opener=self.opener(raws, []))
         self.database.execute(
@@ -480,7 +631,7 @@ class BoundaryCollectorTests(unittest.TestCase):
         self.assertIn("disagree", str(ctx.exception))
 
     def test_replayed_raw_boundary_request_identity_is_immutable(self):
-        raws = [self.raw(1, 433_095_571), self.raw(2, 433_112_355)]
+        raws = self.boundary_raws()
         B9D.collect_boundary_evidence(
             self.database, "https://rpc.invalid", opener=self.opener(raws, []))
         self.database.execute(
@@ -2289,7 +2440,34 @@ class PublicationGateTests(unittest.TestCase):
                        self.transaction_body(self.SLOT_B))
             database.execute("INSERT INTO metadata VALUES ('b9c_sha256',?)", (B9D.B9C_SHA256,))
             database.execute("INSERT INTO metadata VALUES ('b9a_sha256',?)", (B9D.B9A_SHA256,))
+            self.add_boundary_evidence(database)
         database.close()
+
+    def add_boundary_evidence(self, database):
+        """§11 requires the upgrade-boundary check to have completed and be preserved, so a
+        genuinely complete artifact must carry it. Two responses per program -- the Program account
+        that derives ProgramData, and the ProgramData header -- plus full covered intervals."""
+        low, high = B9D.OBSERVATION_RANGE
+        pins = {B9D.PUMP_PROGRAM: (B9D.PUMP_IDL_PATH, B9D.PUMP_IDL_SHA256),
+                B9D.PUMPSWAP_PROGRAM: (B9D.PUMPSWAP_IDL_PATH, B9D.PUMPSWAP_IDL_SHA256)}
+        for program, (idl_path, digest) in pins.items():
+            keys = []
+            for role in ("program", "programdata"):
+                raw = json.dumps({"result": {"role": role, "program": program}}).encode()
+                key = f"{role}:{program}"
+                keys.append(key)
+                database.execute(
+                    "INSERT INTO raw_boundary_response (request_key,program_id,method,params_json,"
+                    "received_at_unix,response_sha256,raw_zlib) VALUES (?,?,?,?,?,?,?)",
+                    (key, program, "getAccountInfo", "[]", 0.0,
+                     hashlib.sha256(raw).hexdigest(), zlib.compress(raw, 6)))
+            database.execute(
+                "INSERT INTO metadata VALUES (?,?)",
+                (f"boundary_program_evidence_key:{program}", keys[0]))
+            database.execute(
+                "INSERT INTO program_version VALUES (?,?,?,?,?,?,?,?)",
+                (program, low, high, idl_path, digest, low - 1, keys[1], "covered"))
+        database.execute("INSERT INTO metadata VALUES ('boundary_completed_at_unix','1')")
 
     def open(self):
         database = B9D.connect(str(self.path))
@@ -2441,6 +2619,60 @@ class PublicationGateTests(unittest.TestCase):
         with self.assertRaises(B9D.FreezeViolation) as ctx:
             B9D.verify_artifact(database, check_sources=False)
         self.assertIn("bodies reconciled against their coordinates", str(ctx.exception))
+
+    def test_an_artifact_with_no_boundary_evidence_is_refused(self):
+        """§11 requires the upgrade-boundary check to have completed and be preserved. Nothing
+        verified it: an artifact with ZERO boundary evidence passed every gate, and
+        `boundary_completed_at_unix` was written but never consumed — unlike `decoded_at_unix`,
+        which `verify_decoded_artifact` requires. Reproduced before the gate was added."""
+        database = self.open()
+        with database:
+            database.execute("DELETE FROM raw_boundary_response")
+            database.execute("DELETE FROM program_version")
+            database.execute("DELETE FROM metadata WHERE key='boundary_completed_at_unix'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("has not completed", str(ctx.exception))
+
+    def test_a_half_collected_boundary_is_refused(self):
+        """One program's evidence present, the other's missing."""
+        database = self.open()
+        with database:
+            database.execute("DELETE FROM raw_boundary_response WHERE program_id=?",
+                             (B9D.PUMPSWAP_PROGRAM,))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("expected 2", str(ctx.exception))
+
+    def test_binding_evidence_must_resolve_to_a_preserved_response(self):
+        """Provenance that points at nothing is not provenance."""
+        database = self.open()
+        with database:
+            database.execute("UPDATE metadata SET value='missing-key' WHERE key=?",
+                             (f"boundary_program_evidence_key:{B9D.PUMP_PROGRAM}",))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("does not resolve to a preserved response", str(ctx.exception))
+
+    def test_a_present_but_invalid_version_map_is_refused(self):
+        """Preserved responses and a completion marker are not enough: the intervals themselves
+        must still re-check coverage and the pinned revision. Without this, a version map naming a
+        different IDL revision, or leaving a gap in the range, passed the boundary gate."""
+        database = self.open()
+        with database:
+            database.execute("UPDATE program_version SET idl_sha256=? WHERE program_id=?",
+                             ("0" * 64, B9D.PUMP_PROGRAM))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("different revision", str(ctx.exception))
+        with database:                                    # and a gap in the covered range
+            database.execute("UPDATE program_version SET idl_sha256=?, to_slot=? "
+                             "WHERE program_id=?",
+                             (B9D.PUMP_IDL_SHA256, B9D.OBSERVATION_RANGE[1] - 10,
+                              B9D.PUMP_PROGRAM))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("no boundary evidence covers", str(ctx.exception))
 
     def test_a_failing_integrity_check_is_refused(self):
         """A corrupt page store cannot be produced reliably in a test, so the gate is driven

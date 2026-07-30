@@ -636,7 +636,46 @@ def verify_integrity(database):
     return "ok"
 
 
-def verify_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH, check_sources=True):
+def assert_boundary_evidence_complete(database):
+    """§11: "the upgrade-boundary check completed and is preserved".
+
+    Nothing verified this. An artifact with **zero** boundary evidence passed `verify_artifact`
+    entirely, and `boundary_completed_at_unix` was written but never consumed — unlike
+    `decoded_at_unix`, which `verify_decoded_artifact` requires. Reproduced before this was added.
+
+    Each target program must contribute two preserved responses — the Program account that derives
+    its ProgramData address, and the ProgramData header itself — and its recorded binding evidence
+    must point at a response that is actually stored. `program_version_rows` then re-checks full
+    range coverage and the pinned-revision binding, so an empty or partial map cannot pass.
+    """
+    completed = database.execute(
+        "SELECT value FROM metadata WHERE key='boundary_completed_at_unix'").fetchone()
+    if not completed:
+        raise FreezeViolation(
+            "boundary_completed_at_unix is absent; the §4 upgrade-boundary check has not completed")
+    stored_keys = {row[0] for row in database.execute(
+        "SELECT request_key FROM raw_boundary_response")}
+    for program_id in TARGET_PROGRAMS:
+        responses = database.execute(
+            "SELECT count(*) FROM raw_boundary_response WHERE program_id=?",
+            (program_id,)).fetchone()[0]
+        if responses != 2:
+            raise FreezeViolation(
+                f"{program_id}: {responses} preserved boundary response(s), expected 2 — the "
+                "Program account that derives ProgramData, and the ProgramData header")
+        binding = database.execute(
+            "SELECT value FROM metadata WHERE key=?",
+            (f"boundary_program_evidence_key:{program_id}",)).fetchone()
+        if not binding or binding[0] not in stored_keys:
+            raise FreezeViolation(
+                f"{program_id}: recorded program-binding evidence key {binding and binding[0]!r} "
+                "does not resolve to a preserved response")
+        program_version_rows(database, program_id)
+    return True
+
+
+def verify_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH, check_sources=True,
+                    check_boundary=True):
     """Every §11 gate that can be checked offline, in one pass. Raises on the first failure.
 
     Deliberately not a boolean-returning "health check": a gate that can be read as "mostly fine"
@@ -658,6 +697,8 @@ def verify_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH, check_source
             f"only {reconciled:,} of {expected:,} bodies reconciled against their coordinates; "
             "the artifact is not the frozen population")
     summary["body_slots_reconciled"] = reconciled
+    if check_boundary:
+        summary["boundary"] = assert_boundary_evidence_complete(database)
     if check_sources:
         summary["sources"] = verify_source_artifacts(database, b9c_path, b9a_path)
     return summary
@@ -849,6 +890,38 @@ def decode_programdata_header(result, programdata_address, min_context_slot=CUTO
         raise FreezeViolation(
             f"{programdata_address}: upgradeable-loader state variant is {variant}, expected 3")
     return {"context_slot": context_slot, "last_deploy_slot": last_deploy_slot}
+
+
+def decode_program_header(result, program_id, min_context_slot=CUTOFF_SLOT):
+    """Decode an executable upgradeable-loader Program account and its ProgramData pubkey."""
+    if not isinstance(result, dict) or not isinstance(result.get("context"), dict):
+        raise FreezeViolation(f"{program_id}: getAccountInfo context is absent")
+    context_slot = result["context"].get("slot")
+    if (isinstance(context_slot, bool) or not isinstance(context_slot, int) or
+            context_slot < min_context_slot):
+        raise FreezeViolation(
+            f"{program_id}: finalized account context slot {context_slot!r} is before required "
+            f"cutoff {min_context_slot:,}")
+    value = result.get("value")
+    if not isinstance(value, dict):
+        raise FreezeViolation(f"{program_id}: executable program account is absent")
+    if value.get("owner") != UPGRADEABLE_LOADER or value.get("executable") is not True:
+        raise FreezeViolation(f"{program_id}: account owner/executable state is not Program")
+    encoded = value.get("data")
+    if not (isinstance(encoded, list) and len(encoded) == 2 and encoded[1] == "base64" and
+            isinstance(encoded[0], str)):
+        raise FreezeViolation(f"{program_id}: program account data is not [base64,'base64']")
+    try:
+        data = base64.b64decode(encoded[0], validate=True)
+    except (ValueError, binascii.Error) as error:
+        raise FreezeViolation(f"{program_id}: invalid base64 program account data") from error
+    if len(data) < 36:
+        raise FreezeViolation(f"{program_id}: Program header is truncated")
+    variant = struct.unpack_from("<I", data)[0]
+    if variant != 2:
+        raise FreezeViolation(
+            f"{program_id}: upgradeable-loader state variant is {variant}, expected 2")
+    return {"context_slot": context_slot, "programdata_address": base58(data[4:36])}
 
 
 def reconcile_slot(signature, coordinate_slot, transaction_slot):
@@ -2289,8 +2362,45 @@ def boundary_request_key(program_id, method, params):
     return hashlib.sha256(canonical).hexdigest()
 
 
+def preserved_boundary_account(
+        database, endpoint, program_id, address, slice_length, request_id, opener=None):
+    """Fetch once or replay one immutable sliced getAccountInfo response."""
+    method = "getAccountInfo"
+    params = [address, {"encoding": "base64", "commitment": "finalized",
+                        "dataSlice": {"offset": 0, "length": slice_length}}]
+    key = boundary_request_key(program_id, method, params)
+    existing = database.execute(
+        "SELECT program_id,method,params_json,raw_zlib,response_sha256 "
+        "FROM raw_boundary_response WHERE request_key=?", (key,)).fetchone()
+    if existing:
+        expected_params = json.dumps(params, separators=(",", ":"))
+        if existing[:3] != (program_id, method, expected_params):
+            raise FreezeViolation(f"raw_boundary_response {key} request identity drift")
+        raw = zlib.decompress(existing[3])
+        if hashlib.sha256(raw).hexdigest() != existing[4]:
+            raise FreezeViolation(f"raw_boundary_response {key} hash mismatch")
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError as error:
+            raise FreezeViolation(f"stored boundary response {key} is not JSON") from error
+        if "error" in payload or "result" not in payload:
+            raise FreezeViolation(f"stored boundary response {key} is not a successful result")
+        result = payload["result"]
+    else:
+        raw, result = rpc_request(
+            endpoint, method, params, request_id=request_id, opener=opener)
+        with database:
+            database.execute(
+                "INSERT INTO raw_boundary_response "
+                "(request_key,program_id,method,params_json,received_at_unix,response_sha256,"
+                "raw_zlib) VALUES (?,?,?,?,?,?,?)",
+                (key, program_id, method, json.dumps(params, separators=(",", ":")),
+                 time.time(), hashlib.sha256(raw).hexdigest(), zlib.compress(raw, 6)))
+    return result, key, bool(existing)
+
+
 def collect_boundary_evidence(database, endpoint, opener=None):
-    """Preserve current ProgramData headers and materialize the conservative §4 version map.
+    """Derive ProgramData identities, preserve both headers, and materialize the §4 map.
 
     This implements only the frozen current-state branch. If a last-deploy slot is newer than the
     observation-range start, the response remains preserved but the function fails and explicitly
@@ -2302,38 +2412,18 @@ def collect_boundary_evidence(database, endpoint, opener=None):
         PUMPSWAP_PROGRAM: (PUMPSWAP_IDL_PATH, PUMPSWAP_IDL_SHA256),
     }
     summaries = {}
-    for request_id, program_id in enumerate(TARGET_PROGRAMS, 1):
-        address = PROGRAMDATA_ACCOUNTS[program_id]
-        method = "getAccountInfo"
-        params = [address, {"encoding": "base64", "commitment": "finalized",
-                            "dataSlice": {"offset": 0, "length": 12}}]
-        key = boundary_request_key(program_id, method, params)
-        existing = database.execute(
-            "SELECT program_id,method,params_json,raw_zlib,response_sha256 "
-            "FROM raw_boundary_response WHERE request_key=?",
-            (key,)).fetchone()
-        if existing:
-            expected_params = json.dumps(params, separators=(",", ":"))
-            if existing[:3] != (program_id, method, expected_params):
-                raise FreezeViolation(f"raw_boundary_response {key} request identity drift")
-            raw = zlib.decompress(existing[3])
-            if hashlib.sha256(raw).hexdigest() != existing[4]:
-                raise FreezeViolation(f"raw_boundary_response {key} hash mismatch")
-            payload = json.loads(raw)
-            if "error" in payload or "result" not in payload:
-                raise FreezeViolation(f"stored boundary response {key} is not a successful result")
-            result = payload["result"]
-        else:
-            raw, result = rpc_request(
-                endpoint, method, params, request_id=request_id, opener=opener)
-            with database:
-                database.execute(
-                    "INSERT INTO raw_boundary_response "
-                    "(request_key,program_id,method,params_json,received_at_unix,response_sha256,"
-                    "raw_zlib) VALUES (?,?,?,?,?,?,?)",
-                    (key, program_id, method, json.dumps(params, separators=(",", ":")),
-                     time.time(), hashlib.sha256(raw).hexdigest(), zlib.compress(raw, 6)))
-
+    for program_index, program_id in enumerate(TARGET_PROGRAMS):
+        program_result, program_key, program_replayed = preserved_boundary_account(
+            database, endpoint, program_id, program_id, 36, program_index * 2 + 1, opener)
+        program_header = decode_program_header(program_result, program_id)
+        address = program_header["programdata_address"]
+        recorded_address = PROGRAMDATA_ACCOUNTS[program_id]
+        if address != recorded_address:
+            raise FreezeViolation(
+                f"{program_id}: live Program account derives ProgramData {address}, primary-source "
+                f"inventory records {recorded_address}; refusing an unbound boundary query")
+        result, key, programdata_replayed = preserved_boundary_account(
+            database, endpoint, program_id, address, 12, program_index * 2 + 2, opener)
         header = decode_programdata_header(result, address)
         idl_path, idl_sha256 = pins[program_id]
         intervals = intervals_from_boundary_evidence(
@@ -2355,7 +2445,10 @@ def collect_boundary_evidence(database, endpoint, opener=None):
                     "INSERT INTO program_version VALUES (?,?,?,?,?,?,?,?)", expected)
             for metadata_key, metadata_value in (
                     (f"boundary_context_slot:{program_id}", header["context_slot"]),
+                    (f"boundary_program_context_slot:{program_id}",
+                     program_header["context_slot"]),
                     (f"boundary_last_deploy_slot:{program_id}", header["last_deploy_slot"]),
+                    (f"boundary_program_evidence_key:{program_id}", program_key),
                     ("boundary_endpoint_reference", endpoint_reference(endpoint))):
                 old = database.execute(
                     "SELECT value FROM metadata WHERE key=?", (metadata_key,)).fetchone()
@@ -2364,7 +2457,10 @@ def collect_boundary_evidence(database, endpoint, opener=None):
                 database.execute(
                     "INSERT OR IGNORE INTO metadata VALUES (?,?)",
                     (metadata_key, str(metadata_value)))
-        summaries[program_id] = {**header, "evidence_key": key, "replayed": bool(existing)}
+        summaries[program_id] = {
+            **header, "programdata_address": address, "program_evidence_key": program_key,
+            "evidence_key": key,
+            "replayed": program_replayed and programdata_replayed}
     with database:
         database.execute(
             "INSERT OR IGNORE INTO metadata VALUES ('boundary_completed_at_unix',?)",
