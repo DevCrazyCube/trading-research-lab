@@ -1346,9 +1346,15 @@ class CurveReserveChainTests(unittest.TestCase):
         self.assertIn("no mint identity", str(ctx.exception))
 
     def balance_case(self, quote_mint, pre=1_000, post=1_100,
-                     event_mint=None, cohort_identity=None):
+                     event_mint=None, cohort_identity=None, confounder=None,
+                     confounder_account="curve", parent_role="bonding_curve",
+                     event_overrides=None):
         idl = {"instructions": [
             {"name": "buy", "discriminator": [1] * 8,
+             "accounts": [{"name": parent_role}], "args": []},
+            {"name": "extend_account", "discriminator": [2] * 8,
+             "accounts": [{"name": "account"}], "args": []},
+            {"name": "create_v2", "discriminator": [3] * 8,
              "accounts": [{"name": "bonding_curve"}], "args": []}]}
         parent = {"program_id": B9D.PUMP_PROGRAM, "data": bytes([1]) * 8,
                   "accounts": ["curve"], "outer_index": 1, "inner_index": -1}
@@ -1356,6 +1362,13 @@ class CurveReserveChainTests(unittest.TestCase):
                  "fields": {"quote_amount": 100, "is_buy": True, "quote_mint": quote_mint}}
         if event_mint is not None:
             event["fields"]["mint"] = event_mint
+        event["fields"].update(event_overrides or {})
+        envelopes = [parent]
+        if confounder is not None:
+            envelopes.append({
+                "program_id": B9D.PUMP_PROGRAM,
+                "data": bytes([{"extend_account": 2, "create_v2": 3}[confounder]]) * 8,
+                "accounts": [confounder_account], "outer_index": 2, "inner_index": -1})
         result = {"transaction": [base64.b64encode(b"ignored").decode(), "base64"],
                   "meta": {"preBalances": [pre], "postBalances": [post]}}
         saved = (B9D.parse_message, B9D.resolve_account_keys)
@@ -1364,7 +1377,53 @@ class CurveReserveChainTests(unittest.TestCase):
         self.addCleanup(lambda: setattr(B9D, "parse_message", saved[0]))
         self.addCleanup(lambda: setattr(B9D, "resolve_account_keys", saved[1]))
         return B9D.pump_trade_balance_reconciliations(
-            result, [(parent, {}, event)], idl, [parent], cohort_identity)
+            result, [(parent, {}, event)], idl, envelopes, cohort_identity)
+
+    def test_confounded_requires_a_named_same_transaction_confounder_on_that_curve(self):
+        """`confounded` must be earned by concrete evidence, never used as a soft `mismatch`.
+
+        The same disagreeing trade is run four ways. Only a `create_v2` or `extend_account` in the
+        SAME transaction naming the SAME account may downgrade it; a lifecycle instruction on some
+        other account leaves the disagreement standing. Dropping the `extend_account` arm left the
+        whole file passing before this, so half the confounder rule was unverified.
+        """
+        clean = self.balance_case(B9D.NATIVE_QUOTE_MINT, pre=1_000, post=1_050)
+        self.assertEqual(clean[0]["status"], "mismatch",
+                         "a clean disagreement must not be absorbed into confounded")
+        for confounder in ("extend_account", "create_v2"):
+            with self.subTest(confounder=confounder):
+                rows = self.balance_case(B9D.NATIVE_QUOTE_MINT, pre=1_000, post=1_050,
+                                         confounder=confounder)
+                self.assertEqual(rows[0]["status"], "confounded_by_account_lifecycle")
+        elsewhere = self.balance_case(B9D.NATIVE_QUOTE_MINT, pre=1_000, post=1_050,
+                                      confounder="extend_account",
+                                      confounder_account="some_other_account")
+        self.assertEqual(elsewhere[0]["status"], "mismatch",
+                         "a lifecycle instruction on another account explains nothing here")
+
+    def test_a_trade_event_parent_without_a_curve_role_fails_closed(self):
+        """A TradeEvent under a Pump instruction that touches no curve is anomalous evidence.
+
+        Same program and a valid parent, but the parent's IDL account roles have no
+        `bonding_curve`, so there is no account whose lamport delta could be reconciled. It must
+        raise rather than reconcile against whatever role happens to be first.
+        """
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.balance_case(B9D.NATIVE_QUOTE_MINT, parent_role="global")
+        self.assertIn("no bonding_curve account role", str(ctx.exception))
+
+    def test_a_non_integer_quote_or_non_bool_direction_fails_closed(self):
+        """The signed delta is built from these two fields, so their types are load-bearing.
+
+        A string quote would concatenate rather than add, and a truthy non-bool direction would
+        silently pick `buy`. Both are fail-closed contracts on caller-supplied event fields.
+        """
+        for overrides in ({"quote_amount": "100"}, {"quote_amount": True},
+                          {"is_buy": 1}, {"is_buy": None}):
+            with self.subTest(overrides=overrides):
+                with self.assertRaises(B9D.FreezeViolation) as ctx:
+                    self.balance_case(B9D.NATIVE_QUOTE_MINT, event_overrides=overrides)
+                self.assertIn("invalid quote delta", str(ctx.exception))
 
     def test_balance_gate_ignores_incidental_bundled_curve_events(self):
         rows = self.balance_case(
