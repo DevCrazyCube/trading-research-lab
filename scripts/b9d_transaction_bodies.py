@@ -386,14 +386,20 @@ def transaction_coordinates(slot, block_signatures, wanted):
     return {signature: seen[signature] for signature in wanted}
 
 
-def assert_coordinate_population(database, expected_slots=EXPECTED_SLOTS,
-                                 expected_signatures=EXPECTED_SIGNATURES):
+def assert_coordinate_population(database, expected_slots=None, expected_signatures=None):
     """Fail closed unless the block-to-transaction coordinate phase is exactly complete.
+
+    The expected values resolve from the module constants **at call time**, not as default
+    arguments. Bound as defaults they were frozen at import, so patching `EXPECTED_SLOTS` appeared
+    to work and silently did nothing — a trap for anyone testing this gate.
 
     Table uniqueness constraints reject duplicate signatures and duplicate `(slot, index)` pairs.
     This seam assertion supplies the other half of §11: a silently short block or signature
     population must never become the iterable that drives transaction-body collection.
     """
+    expected_slots = EXPECTED_SLOTS if expected_slots is None else expected_slots
+    expected_signatures = (EXPECTED_SIGNATURES if expected_signatures is None
+                           else expected_signatures)
     block_count = database.execute(
         "SELECT count(*) FROM raw_block_signatures").fetchone()[0]
     coordinate_count = database.execute(
@@ -415,19 +421,159 @@ def transaction_body_coordinates(database, require_complete=True):
         "SELECT signature,slot FROM transaction_coordinate ORDER BY slot,transaction_index"))
 
 
-def assert_raw_transaction_population(database, expected_signatures=EXPECTED_SIGNATURES):
+def assert_raw_transaction_population(database, expected_signatures=None):
     """Fail closed unless every frozen signature has one preserved raw transaction body.
+
+    Resolved at call time, not as a default argument — see `assert_coordinate_population`.
 
     `raw_transaction.signature` is a primary key, so exact row count establishes uniqueness. The
     coordinate seam separately proves that the frozen population itself has exactly 94,985 unique
     signatures. Together these keep an interrupted collector from looking decoder-ready.
     """
+    expected_signatures = (EXPECTED_SIGNATURES if expected_signatures is None
+                           else expected_signatures)
     body_count = database.execute("SELECT count(*) FROM raw_transaction").fetchone()[0]
     if body_count != expected_signatures:
         raise FreezeViolation(
             f"raw body phase is incomplete: {body_count:,}/{expected_signatures:,} transaction "
             "bodies; refusing to make the artifact available for decoding")
     return True
+
+
+# ---------------------------------------------------------------------------------------------
+# §11 publication gates. The seams above gate COLLECTION; these gate PUBLICATION.
+# ---------------------------------------------------------------------------------------------
+
+RAW_TABLES = (("raw_transaction", "signature"),
+              ("raw_block_signatures", "slot"),
+              ("raw_boundary_response", "request_key"))
+
+
+def verify_raw_hashes(database, tables=RAW_TABLES):
+    """Re-verify every preserved response against its recorded SHA-256.
+
+    `store_raw` records `sha256(raw)` of the **uncompressed** response and stores
+    `zlib.compress(raw)`, so verification decompresses and re-hashes. Bit rot, a truncated write, or
+    a hand-edited row all surface here rather than downstream as a decode error, and the hash is the
+    only thing that makes the stored bytes *evidence* rather than bytes.
+    """
+    counts = {}
+    for table, key_column in tables:
+        verified = 0
+        for key, digest, blob in database.execute(
+                f"SELECT {key_column}, response_sha256, raw_zlib FROM {table}"):
+            try:
+                raw = zlib.decompress(blob)
+            except zlib.error as error:
+                raise FreezeViolation(
+                    f"{table} {key}: preserved bytes do not decompress ({error})") from error
+            actual = hashlib.sha256(raw).hexdigest()
+            if actual != digest:
+                raise FreezeViolation(
+                    f"{table} {key}: preserved bytes hash {actual}, recorded {digest}")
+            verified += 1
+        counts[table] = verified
+    return counts
+
+
+def raw_result(blob):
+    """The JSON-RPC `result` from one preserved response body."""
+    return json.loads(zlib.decompress(blob)).get("result")
+
+
+def replay_coordinates_from_raw(database):
+    """Re-derive every transaction index from the preserved block bodies and require agreement.
+
+    This is the load-bearing gate, and the analogue of B9c's raw-to-normalized replay. Everything
+    downstream orders reserve paths by `transaction_index`, and that column is *derived*. Checking
+    the row count only proves rows exist; re-deriving the index from the preserved `getBlock`
+    response proves the number stored is the number the chain reported. A wrong index would produce
+    a plausible reserve path in the wrong order, which is exactly the failure a count cannot see.
+    """
+    stored = {}
+    for signature, slot, index in database.execute(
+            "SELECT signature, slot, transaction_index FROM transaction_coordinate"):
+        stored.setdefault(slot, {})[signature] = index
+
+    replayed = 0
+    for slot, blob in database.execute("SELECT slot, raw_zlib FROM raw_block_signatures"):
+        expected = stored.get(slot)
+        if expected is None:
+            continue
+        result = raw_result(blob)
+        signatures = (result or {}).get("signatures")
+        if signatures is None:
+            raise FreezeViolation(
+                f"slot {slot}: preserved getBlock response carries no `signatures` list, so no "
+                "transaction index can be re-derived from it")
+        derived = transaction_coordinates(slot, signatures, list(expected))
+        for signature, index in expected.items():
+            if derived[signature] != index:
+                raise FreezeViolation(
+                    f"slot {slot} {signature}: stored transaction_index {index} but the preserved "
+                    f"block body places it at {derived[signature]}; canonical ordering would be "
+                    "wrong and every reserve path derived from it with it")
+            replayed += 1
+    missing = sum(len(v) for v in stored.values()) - replayed
+    if missing:
+        raise FreezeViolation(
+            f"{missing:,} coordinate(s) have no preserved block body to replay against")
+    return replayed
+
+
+def verify_body_slots(database):
+    """§6: every preserved body's own reported slot must match its coordinate."""
+    checked = 0
+    for signature, slot, blob in database.execute(
+            "SELECT c.signature, c.slot, t.raw_zlib FROM transaction_coordinate c "
+            "JOIN raw_transaction t ON t.signature = c.signature"):
+        result = raw_result(blob)
+        if result is None:
+            raise FreezeViolation(f"{signature}: preserved transaction response has a null result")
+        reconcile_slot(signature, slot, result.get("slot"))
+        checked += 1
+    return checked
+
+
+def verify_source_artifacts(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH):
+    """§11: no completed source artifact changed hash since the run recorded it."""
+    recorded = dict(database.execute(
+        "SELECT key, value FROM metadata WHERE key IN ('b9c_sha256','b9a_sha256')"))
+    if not recorded:
+        raise FreezeViolation(
+            "artifact records no source hashes; it cannot prove which evidence it was built from")
+    for key, path in (("b9c_sha256", b9c_path), ("b9a_sha256", b9a_path)):
+        actual = sha256_file(path)
+        if recorded.get(key) != actual:
+            raise FreezeViolation(
+                f"{path} now hashes {actual}, but this artifact was built against "
+                f"{recorded.get(key)}; a source artifact changed after the run")
+    return recorded
+
+
+def verify_integrity(database):
+    row = database.execute("PRAGMA integrity_check").fetchone()
+    if not row or row[0] != "ok":
+        raise FreezeViolation(f"SQLite integrity_check returned {row[0] if row else None!r}")
+    return "ok"
+
+
+def verify_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH, check_sources=True):
+    """Every §11 gate that can be checked offline, in one pass. Raises on the first failure.
+
+    Deliberately not a boolean-returning "health check": a gate that can be read as "mostly fine"
+    is a gate that gets waived. Either the artifact is publishable evidence or the call raises and
+    names which property failed.
+    """
+    summary = {"integrity": verify_integrity(database)}
+    assert_coordinate_population(database)
+    assert_raw_transaction_population(database)
+    summary["raw_hashes"] = verify_raw_hashes(database)
+    summary["coordinates_replayed"] = replay_coordinates_from_raw(database)
+    summary["body_slots_reconciled"] = verify_body_slots(database)
+    if check_sources:
+        summary["sources"] = verify_source_artifacts(database, b9c_path, b9a_path)
+    return summary
 
 
 # ---------------------------------------------------------------------------------------------
@@ -1185,8 +1331,27 @@ def main(argv=None):
     run.add_argument("--max-transactions", type=int)
     run.add_argument("--progress-every", type=int, default=100)
     run.add_argument("--calls-per-second", type=float, default=2.5)
+    audit = sub.add_parser(
+        "verify-artifact",
+        help="offline: run every §11 publication gate against a collected artifact")
+    audit.add_argument("path")
+    audit.add_argument("--b9c", default=B9C_PATH)
+    audit.add_argument("--b9a", default=B9A_PATH)
+    audit.add_argument("--skip-sources", action="store_true",
+                       help="skip source-artifact hashing only; never skips an evidence gate")
 
     args = parser.parse_args(argv)
+    if args.command == "verify-artifact":
+        # Read-only by construction: publication verification must never be able to repair the
+        # evidence it is checking, and the live collector owns the file while it runs.
+        database = connect(args.path, readonly=True)
+        try:
+            summary = verify_artifact(database, args.b9c, args.b9a,
+                                      check_sources=not args.skip_sources)
+        finally:
+            database.close()
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
     if args.command == "verify":
         digests = assert_sources(args.b9c, args.b9a)
         manifest = decoder_manifest()

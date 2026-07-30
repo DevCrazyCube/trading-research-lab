@@ -13,6 +13,7 @@ import pathlib
 import sqlite3
 import tempfile
 import unittest
+import zlib
 
 ROOT = pathlib.Path(__file__).parents[1]
 SPEC = importlib.util.spec_from_file_location(
@@ -730,6 +731,182 @@ class ArtifactTests(unittest.TestCase):
         with self.assertRaises(sqlite3.IntegrityError):
             database.execute("INSERT INTO instruction VALUES (?,?,?,?,?,?,?,?,?,?,?)", row)
         database.close()
+
+
+class PublicationGateTests(unittest.TestCase):
+    """§11 gates PUBLICATION, where the collection seams gate collection.
+
+    Built on a tiny complete artifact: the population constants are patched down so a two-signature
+    fixture counts as exact, which keeps the gates themselves under test rather than the numbers.
+    """
+
+    SLOT_A, SLOT_B = 700, 701
+
+    def setUp(self):
+        self.dir = pathlib.Path(tempfile.mkdtemp())
+        self.path = self.dir / "b9d.sqlite"
+        saved = (B9D.EXPECTED_SLOTS, B9D.EXPECTED_SIGNATURES)
+        B9D.EXPECTED_SLOTS, B9D.EXPECTED_SIGNATURES = 2, 2
+        self.addCleanup(lambda: setattr(B9D, "EXPECTED_SLOTS", saved[0]))
+        self.addCleanup(lambda: setattr(B9D, "EXPECTED_SIGNATURES", saved[1]))
+        self.build()
+
+    def block_body(self, signatures):
+        return json.dumps({"jsonrpc": "2.0", "id": 1,
+                           "result": {"signatures": signatures}}).encode()
+
+    def transaction_body(self, slot):
+        return json.dumps({"jsonrpc": "2.0", "id": 1,
+                           "result": {"slot": slot, "meta": {"err": None}}}).encode()
+
+    def store(self, database, table, key_column, key, raw):
+        database.execute(
+            f"INSERT INTO {table} ({key_column},method,params_json,received_at_unix,"
+            "response_sha256,raw_zlib) VALUES (?,?,?,?,?,?)",
+            (key, "m", "[]", 0.0, hashlib.sha256(raw).hexdigest(), zlib.compress(raw, 6)))
+
+    def build(self):
+        database = B9D.connect(str(self.path))
+        B9D.schema(database)
+        with database:
+            # sigA is second in its block, so a replay that ignored position would still pass a
+            # count check but fail here.
+            self.store(database, "raw_block_signatures", "slot", self.SLOT_A,
+                       self.block_body(["other", "sigA"]))
+            self.store(database, "raw_block_signatures", "slot", self.SLOT_B,
+                       self.block_body(["sigB"]))
+            database.execute("INSERT INTO transaction_coordinate VALUES ('sigA',?,1)", (self.SLOT_A,))
+            database.execute("INSERT INTO transaction_coordinate VALUES ('sigB',?,0)", (self.SLOT_B,))
+            self.store(database, "raw_transaction", "signature", "sigA",
+                       self.transaction_body(self.SLOT_A))
+            self.store(database, "raw_transaction", "signature", "sigB",
+                       self.transaction_body(self.SLOT_B))
+            database.execute("INSERT INTO metadata VALUES ('b9c_sha256',?)", (B9D.B9C_SHA256,))
+            database.execute("INSERT INTO metadata VALUES ('b9a_sha256',?)", (B9D.B9A_SHA256,))
+        database.close()
+
+    def open(self):
+        database = B9D.connect(str(self.path))
+        self.addCleanup(database.close)
+        return database
+
+    def test_a_complete_consistent_artifact_passes_every_gate(self):
+        summary = B9D.verify_artifact(self.open(), check_sources=False)
+        self.assertEqual(summary["integrity"], "ok")
+        self.assertEqual(summary["raw_hashes"]["raw_transaction"], 2)
+        self.assertEqual(summary["raw_hashes"]["raw_block_signatures"], 2)
+        self.assertEqual(summary["coordinates_replayed"], 2)
+        self.assertEqual(summary["body_slots_reconciled"], 2)
+
+    def test_a_tampered_response_body_fails_its_hash(self):
+        database = self.open()
+        with database:
+            database.execute("UPDATE raw_transaction SET raw_zlib=? WHERE signature='sigA'",
+                             (zlib.compress(b'{"result":{"slot":700}}', 6),))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_raw_hashes(database)
+        self.assertIn("recorded", str(ctx.exception))
+
+    def test_bytes_that_do_not_decompress_fail_visibly(self):
+        database = self.open()
+        with database:
+            database.execute("UPDATE raw_transaction SET raw_zlib=? WHERE signature='sigA'",
+                             (b"not zlib at all",))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_raw_hashes(database)
+        self.assertIn("do not decompress", str(ctx.exception))
+
+    def test_a_wrong_transaction_index_is_caught_by_replay_not_by_counting(self):
+        """The gate that matters: the index is derived, and every reserve path is ordered by it."""
+        database = self.open()
+        with database:
+            database.execute(
+                "UPDATE transaction_coordinate SET transaction_index=0 WHERE signature='sigA'")
+        self.assertEqual(  # the count is still exactly right, so no population seam fires
+            database.execute("SELECT count(*) FROM transaction_coordinate").fetchone()[0], 2)
+        B9D.assert_coordinate_population(database)
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.replay_coordinates_from_raw(database)
+        self.assertIn("places it at 1", str(ctx.exception))
+
+    def test_a_coordinate_with_no_preserved_block_body_fails(self):
+        database = self.open()
+        with database:
+            database.execute("DELETE FROM raw_block_signatures WHERE slot=?", (self.SLOT_A,))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.replay_coordinates_from_raw(database)
+        self.assertIn("no preserved block body", str(ctx.exception))
+
+    def test_a_block_response_without_a_signature_list_fails(self):
+        database = self.open()
+        raw = json.dumps({"result": {"blockhash": "x"}}).encode()
+        with database:
+            database.execute(
+                "UPDATE raw_block_signatures SET raw_zlib=?, response_sha256=? WHERE slot=?",
+                (zlib.compress(raw, 6), hashlib.sha256(raw).hexdigest(), self.SLOT_A))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.replay_coordinates_from_raw(database)
+        self.assertIn("no `signatures` list", str(ctx.exception))
+
+    def test_a_body_reporting_a_different_slot_is_refused(self):
+        database = self.open()
+        raw = self.transaction_body(self.SLOT_A + 999)
+        with database:
+            database.execute(
+                "UPDATE raw_transaction SET raw_zlib=?, response_sha256=? WHERE signature='sigA'",
+                (zlib.compress(raw, 6), hashlib.sha256(raw).hexdigest()))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_body_slots(database)
+        self.assertIn("disagreeing", str(ctx.exception))
+
+    def test_an_incomplete_artifact_cannot_reach_the_evidence_gates(self):
+        database = self.open()
+        with database:
+            database.execute("DELETE FROM raw_transaction WHERE signature='sigB'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_artifact(database, check_sources=False)
+        self.assertIn("raw body phase is incomplete", str(ctx.exception))
+
+    def test_a_changed_source_artifact_is_refused(self):
+        database = self.open()
+        with database:
+            database.execute("UPDATE metadata SET value='deadbeef' WHERE key='b9c_sha256'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_source_artifacts(database)
+        self.assertIn("changed after the run", str(ctx.exception))
+
+    def test_an_artifact_recording_no_sources_cannot_prove_its_provenance(self):
+        database = self.open()
+        with database:
+            database.execute("DELETE FROM metadata WHERE key LIKE '%_sha256'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_source_artifacts(database)
+        self.assertIn("which evidence it was built from", str(ctx.exception))
+
+    def test_a_failing_integrity_check_is_refused(self):
+        """A corrupt page store cannot be produced reliably in a test, so the gate is driven
+        directly. Without this, deleting the check changed nothing observable."""
+        class Cursor:
+            def fetchone(self):
+                return ("*** in database main *** wrong # of entries in index",)
+
+        class Corrupt:
+            def execute(self, sql):
+                return Cursor()
+
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.verify_integrity(Corrupt())
+        self.assertIn("integrity_check", str(ctx.exception))
+        self.assertEqual(B9D.verify_integrity(self.open()), "ok")
+
+    def test_the_cli_opens_the_artifact_read_only(self):
+        """Publication verification must not be able to repair the evidence it checks."""
+        opened = []
+        saved = B9D.connect
+        B9D.connect = lambda path, readonly=False: opened.append(readonly) or saved(path, readonly)
+        self.addCleanup(lambda: setattr(B9D, "connect", saved))
+        B9D.main(["verify-artifact", str(self.path), "--skip-sources"])
+        self.assertEqual(opened, [True])
 
 
 class CoordinateSeamWiringTests(unittest.TestCase):
