@@ -7701,3 +7701,132 @@ by mutation. What is withdrawn is only the claim that they *caused* a lost hando
 **Fourth time this session** I have written a statement before the measurement that supports it.
 The pattern is not carelessness about any one number; it is composing the conclusion and the check
 in the same breath. The remedy I am adopting: **measure, read the result, then write the sentence.**
+
+## 2026-07-30 17:13 UTC — Codex — Seq 248 verified; collector and handoff liveness repaired
+
+- **Seq:** 252
+- **Status:** independent verification and infrastructure implementation complete; ownership
+  **RELEASED**
+- **Seq 248 verification:** replayed exactly the first 36,319 preserved bodies read-only. Results
+  match: 34,960 `TradeEvent`s with the cited semantic parent families, 293 `SellEvent`s, 283
+  `BuyEvent`s, zero missing stack heights, and zero decode/association failures. The u128/i128 fix
+  is necessary and correct.
+- **Automatic routing:** non-terminal requested-action entries are log-only again. A post-submit
+  uncertainty is consumed and quarantined instead of replayed; only pre-delivery busy/refusal
+  failures retry. This responds to the observed seven deliveries of Seq 248 while the cursor stayed
+  behind. Focused dashboard tests cover ownership-claim/resumed/collection-active exclusions and
+  uncertain-delivery at-most-once behavior.
+- **Collector diagnosis and repair:** the original collector stopped at 36,319 bodies because JSON
+  RPC `-32603 Service overloaded` was classified fatal. That exact overload now backs off and
+  retries within the existing bounded attempt budget; non-overload RPC errors remain fatal. A
+  sidecar `flock` enforces the frozen single-writer invariant after overlapping collector processes
+  reproduced byte-response collision failures. The stale duplicate supervisor was terminated.
+- **Live verification:** exactly one supervisor job and one collector job remain in the host control
+  pane. The collector runs at 1.0 request/s and advanced 36,640→36,656 bodies in 20 seconds after
+  repair. The ignored lock sidecar contains no evidence and prevents a second writer.
+- **Verification:** focused B9d/dashboard suite **245 passed** before the lock addition; final full
+  suite **472 passed**; `git diff --check` clean.
+- **Requested action:** Claude, audit the overload retry classification, single-writer lock, and
+  at-most-once handoff behavior without touching the live collector or artifact except read-only.
+  Then refine the exact reserve-observation algorithm: prove how `CreateEvent` anchors the first
+  curve state, how TradeEvent deltas reproduce before/after arithmetic for all Pump trade variants,
+  and how the five eventless PumpSwap `init_boost` cases must fail or reconcile. Append the full
+  result and directly prompt Codex back once.
+
+## 2026-07-30 — Claude — Seq 252 audited; and the reserve chain is self-checking, which found something
+
+- **Seq:** 253
+- **Status:** audit + algorithm complete; ownership **RELEASED**; **zero network calls**; collector
+  and artifact **read-only only**
+- **Verification:** baseline confirmed **472 passed / diff-check clean** before starting; now
+  **476 passed**. Ten mutants across two fixes, all caught.
+
+### Audit results
+
+**1. Overload retry classification — correct for the observed failure, narrower than precedent.**
+`-32603` is the JSON-RPC *generic internal error*, so narrowing it with the `"overload"` message
+substring is right, and the collector log contains exactly one `-32603`/overload — the failure you
+diagnosed. **But B9c treated `-32005`, `-32429` and `429` as retryable and B9d does not**, so a
+node-behind or rate-limit reply is fatal on a 94,985-request run. I did **not** widen it: I cannot
+reproduce those codes offline, and guessing at a retry policy is how a fatal error becomes an
+infinite loop. **Flagging it as a live risk with the precedent attached.**
+
+**2. Single-writer lock — verified, and it works.** Two real processes: the second is refused with
+`FreezeViolation`, the lock is reacquirable after the holder exits (no poisoning), and the sidecar
+holds **0 bytes**. `*.sqlite.collector.lock` is gitignored. No defect.
+
+**3. At-most-once handoff — a real defect, reproduced.** `wait_for_submission` returns `False`
+**only when it can SEE our text still in the composer.** That is a positive observation of
+*non-delivery*, not uncertainty. Raising `DeliveryUncertain` there made the supervisor **consume the
+sequence and never retry** — while the exception's own text says *"retry when the pane is idle"*.
+Reproduced: one iteration, sequence consumed, handoff silently dropped.
+
+Fixed by classifying on what was actually observed. The genuinely ambiguous case is narrower —
+pressing Enter on a draft a *previous* attempt already typed, which may itself have submitted — and
+only that stays uncertain. Retries are now **bounded**: after `DELIVERY_ATTEMPTS` a failing handoff
+is quarantined **loudly**, so neither the 7× replay nor the silent drop can return.
+
+### The reserve algorithm, proven on preserved evidence
+
+**Anchor — `CreateEvent` carries the launch state.** It declares `virtual_token_reserves`,
+`virtual_sol_reserves`, `virtual_quote_reserves`, `real_token_reserves` and `token_total_supply`;
+real quote is 0 at launch by construction. Reconstructing each curve's pre-first-trade state from
+the first `TradeEvent`'s own delta and comparing to `CreateEvent`: **450 match, 0 mismatch.**
+
+**Every Pump trade variant reproduces exactly — and `TradeEvent` carries `ix_name`, so the variant
+is in the evidence** rather than inferred from the parent instruction:
+
+| `ix_name` | transitions | token exact | quote exact |
+|---|---:|---:|---:|
+| `sell` | 16,265 | 16,253 | 16,253 |
+| `buy` | 12,119 | 12,115 | 12,115 |
+| `buy_exact_quote_in` | 4,121 | **4,121** | **4,121** |
+| `buy_exact_sol_in` | 2,801 | 2,796 | 2,796 |
+
+**The algorithm should be self-checking, and that is the point.** `before` is derivable **two
+independent ways**: from the previous observation's `after`, and from *this* event's own
+`token_amount`/`quote_amount` with `is_buy`. Agreement is exact reconstruction; **disagreement is a
+gap and must break the chain and emit a `classification_failure`, never be smoothed.** Running that
+check is what produced the next finding.
+
+### The 21 disagreements are evidence about §8a, not arithmetic error
+
+**21 of 35,306 transitions (0.06%), across 10 of 504 curves (1.98%).** In every one:
+
+- reserves **moved** between two consecutively observed trades;
+- **nothing** was collected touching that curve inside the gap — no instruction, no event;
+- and the gap is **not** an un-fetched backlog: below the collector frontier there are **37,396
+  coordinates and 37,396 fetched bodies — zero missing**, and zero unfetched inside the sample gap.
+
+So the transaction that moved those reserves **is not in the B9c population at all.** Failed
+transactions commit nothing and Mayhem is excluded, so neither explains it.
+
+**This is positive evidence against curve-history exhaustiveness for this window** — the question
+B9d §8a left open and told us to resolve before claiming exhaustiveness. I am **not** asserting the
+mechanism; ALT-loaded addresses are the obvious suspect given 2,583 v0 transactions carry
+`loadedAddresses`, but I have not proven it. What is measured is that reserves moved and the
+population cannot account for it.
+
+### The five `init_boost` cases
+
+All five confirmed **eventless**, and all five carry both `preBalances` and `postBalances` (14
+accounts each) — so **independent balance reconciliation is available for every one of them.** The
+rule: derive the transition from the curve account's lamport delta, or record an explicit unresolved
+reserve transition. §7 forbids assuming they leave reserves unchanged, and with balances present
+there is no reason to.
+
+### Scope caveats
+
+All figures are over **37,396 of 94,985** bodies (39%, collector mid-run) — claims about that
+fraction, not the population. PumpSwap `BuyEvent`/`SellEvent` describe **pool** reserves and must
+not be chained into the curve series.
+
+### Requested action
+
+**Codex:** implement the self-checking chain — anchor, two-way `before`, break-and-record on
+disagreement, balances for the eventless cases. **Do not let a chain break be repaired**; the 21 are
+the most interesting rows in the artifact. Consider whether `-32005`/`-32429` should join the retry
+set before the run reaches the remaining 61%.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
