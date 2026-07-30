@@ -1902,13 +1902,14 @@ class EnvelopeParsingTests(unittest.TestCase):
         self.assertEqual(keys, sorted(keys), "envelope order must already be canonical order")
 
 
-def encode_pump_event(event_name, **overrides):
+def encode_pump_event(event_name, idl_path=None, **overrides):
     """Borsh-encode a real Pump event from the PINNED IDL field order.
 
     Built by walking the IDL rather than hand-listing fields, so it cannot drift from the interface
-    the decoder actually uses. Only the fields a test cares about need overriding.
+    the decoder actually uses. Only the fields a test cares about need overriding. `idl_path`
+    selects which pinned program's events to encode, so the same walker builds PumpSwap events.
     """
-    idl = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
+    idl = json.loads((ROOT / (idl_path or B9D.PUMP_IDL_PATH)).read_bytes())
     fields = next(t for t in idl["types"] if t["name"] == event_name)["type"]["fields"]
     out = bytearray()
     for field in fields:
@@ -1935,6 +1936,11 @@ def encode_pump_event(event_name, **overrides):
 
 def encode_trade_event(**overrides):
     return encode_pump_event("TradeEvent", **overrides)
+
+
+def encode_pumpswap_event(event_name, **overrides):
+    """The same walker against the PumpSwap pinned IDL, for cross-program isolation tests."""
+    return encode_pump_event(event_name, idl_path=B9D.PUMPSWAP_IDL_PATH, **overrides)
 
 
 class ReserveScopeTests(unittest.TestCase):
@@ -2165,8 +2171,10 @@ class DecoderOrchestrationTests(unittest.TestCase):
         B9D.verify_artifact = verified
         self.addCleanup(lambda: setattr(B9D, "verify_artifact", self.saved_verify))
 
-    def add_body(self, signature, transaction_index, instructions, meta=None):
-        keys = [B9D.base58_decode(B9D.PUMP_PROGRAM), bytes(range(32))]
+    def add_body(self, signature, transaction_index, instructions, meta=None, program=None,
+                 programs=None):
+        names = programs or [program or B9D.PUMP_PROGRAM]
+        keys = [B9D.base58_decode(name) for name in names] + [bytes(range(32))]
         result = as_result(build_transaction(keys, instructions), meta=meta, slot=self.SLOT)
         raw = json.dumps({"jsonrpc": "2.0", "id": 1, "result": result}).encode()
         self.database.execute(
@@ -2208,6 +2216,117 @@ class DecoderOrchestrationTests(unittest.TestCase):
         B9D.tradable_cohort_identity = lambda *a, **k: cohort
         self.addCleanup(lambda: setattr(B9D, "tradable_cohort_identity", saved))
         return B9D.decode_artifact(self.database, check_sources=False)
+
+    def test_a_pumpswap_pool_event_cannot_enter_a_pump_bonding_curve_chain(self):
+        """Cross-program isolation, asserted rather than inherited from a name-space coincidence.
+
+        The reserve gate admits an event on its PARENT's program plus the event NAME; the event's
+        own program is never checked. Today that is sufficient only because the two pinned IDLs
+        share no `TradeEvent`/`CreateEvent` -- see the disjointness test, which fails if a future
+        pin changes that. Here a PumpSwap `BuyEvent` is emitted under a PumpSwap parent and must
+        produce no reserve row at all. Deleting the gate makes this decode fail outright, which is
+        how it is held.
+        """
+        swap_idl = json.loads((ROOT / B9D.PUMPSWAP_IDL_PATH).read_bytes())
+        buy = bytes(next(i for i in swap_idl["instructions"] if i["name"] == "buy")
+                    ["discriminator"])
+        event = encode_pumpswap_event("BuyEvent")
+        meta = {"innerInstructions": [{"index": 0, "instructions": [
+            {"programIdIndex": 0, "accounts": [], "data": B9D.base58(event), "stackHeight": 2}]}]}
+        self.add_body("sig-swap", 0, [(0, [1], buy)], meta, program=B9D.PUMPSWAP_PROGRAM)
+        B9D.decode_artifact(self.database, check_sources=False)
+        self.assertEqual(
+            self.database.execute("SELECT count(*) FROM reserve_observation").fetchone()[0], 0,
+            "a PumpSwap pool event must never materialize a Pump bonding-curve reserve row")
+        names = [r[0] for r in self.database.execute("SELECT idl_name FROM instruction")]
+        self.assertIn("event:BuyEvent", names, "the event must still be recorded, just not banked")
+
+    def test_a_pump_trade_event_under_a_pumpswap_parent_is_not_banked(self):
+        """A wrong SEMANTIC parent, with everything else valid and in-cohort.
+
+        The event is a genuine Pump `TradeEvent` for a cohort mint, so the name filter admits it
+        and the cohort check would pass; the only thing standing between it and a reserve row is
+        that its observed parent is a PumpSwap instruction. Reserves are a property of the Pump
+        bonding curve the parent instruction touched, so banking a trade against a parent that
+        never touched a curve would attribute reserves to an instruction that cannot have produced
+        them. This is the case that holds the parent-program half of the gate: without it, the
+        decode fails outright trying to read Pump account roles out of a PumpSwap instruction.
+        """
+        swap_idl = json.loads((ROOT / B9D.PUMPSWAP_IDL_PATH).read_bytes())
+        swap_buy = bytes(next(i for i in swap_idl["instructions"] if i["name"] == "buy")
+                         ["discriminator"])
+        mint, curve = "So11111111111111111111111111111111111111112", "CurveForCohortMint1111111"
+        event = encode_trade_event(mint=mint, is_buy=True, quote_amount=0, token_amount=0,
+                                   quote_mint=B9D.NATIVE_QUOTE_MINT, ix_name="buy")
+        meta = {"preBalances": [0, 0, 1_000], "postBalances": [0, 0, 1_000],
+                "innerInstructions": [{"index": 0, "instructions": [
+                    {"programIdIndex": 1, "accounts": [], "data": B9D.base58(event),
+                     "stackHeight": 2}]}]}
+        self.add_body("sig-mixed", 0, [(0, [2], swap_buy)], meta,
+                      programs=[B9D.PUMPSWAP_PROGRAM, B9D.PUMP_PROGRAM])
+        saved = B9D.tradable_cohort_identity
+        B9D.tradable_cohort_identity = lambda *a, **k: {mint: curve}
+        self.addCleanup(lambda: setattr(B9D, "tradable_cohort_identity", saved))
+        B9D.decode_artifact(self.database, check_sources=False)
+        self.assertEqual(
+            self.database.execute("SELECT count(*) FROM reserve_observation").fetchone()[0], 0,
+            "a Pump event whose parent is a PumpSwap instruction must not bank a reserve row")
+
+    def test_a_non_trade_pump_event_is_not_banked_as_a_reserve_observation(self):
+        """The other half of the same gate: right program, right parent, wrong KIND of event.
+
+        A `CompleteEvent` for a cohort mint under a real Pump parent carries no reserve fields.
+        Only `CreateEvent` and `TradeEvent` state reserves, so anything else must pass through as a
+        recorded instruction and bank nothing -- not a reserve row, and not a failure row either,
+        since there is nothing wrong with the transaction.
+        """
+        buy, _ = self.known("buy")
+        mint = "So11111111111111111111111111111111111111112"
+        curve = B9D.base58(bytes(range(32)))          # the account the parent's role resolves to
+        event = encode_pump_event("CompleteEvent", mint=mint, bonding_curve=curve)
+        idl = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
+        roles = [a["name"] for a in next(i for i in idl["instructions"]
+                                         if i["name"] == "buy")["accounts"]]
+        meta = {"preBalances": [0, 1_000], "postBalances": [0, 1_000],
+                "innerInstructions": [{"index": 0, "instructions": [
+                    {"programIdIndex": 0, "accounts": [], "data": B9D.base58(event),
+                     "stackHeight": 2}]}]}
+        self.add_body("sig-complete", 0, [(0, [1] * len(roles), buy)], meta)
+        saved = B9D.tradable_cohort_identity
+        B9D.tradable_cohort_identity = lambda *a, **k: {mint: curve}
+        self.addCleanup(lambda: setattr(B9D, "tradable_cohort_identity", saved))
+        summary = B9D.decode_artifact(self.database, check_sources=False)
+        self.assertEqual(summary["reserve_observations"], 0)
+        self.assertEqual(summary["classification_failures"], 0)
+
+    def test_the_two_pinned_idls_share_no_reserve_bearing_event_name(self):
+        """The isolation above rests on this, so it must fail loudly if a pin changes.
+
+        `decode_anchor_cpi_event` resolves an event name against the EVENT's own program IDL, while
+        the reserve gate filters on the PARENT's program and the decoded name. If PumpSwap ever
+        declares a `TradeEvent` or `CreateEvent`, those two facts stop composing and the gate needs
+        an explicit event-program check.
+        """
+        pump = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
+        swap = json.loads((ROOT / B9D.PUMPSWAP_IDL_PATH).read_bytes())
+        swap_names = {e["name"] for e in swap.get("events", [])}
+        self.assertEqual(swap_names & {"CreateEvent", "TradeEvent"}, set())
+        self.assertTrue({"CreateEvent", "TradeEvent"} <= {e["name"] for e in pump["events"]})
+
+    def test_an_event_decoder_without_the_pinned_idl_refuses(self):
+        """Asserted directly: `decode_artifact` always supplies both target IDLs, so this guard is
+        unreachable through it and no output-based test can hold it."""
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_anchor_cpi_event(B9D.PUMP_PROGRAM, encode_trade_event(), {})
+        self.assertIn("missing pinned IDL", str(ctx.exception))
+
+    def test_a_trade_event_missing_reserve_fields_refuses(self):
+        """Also direct: the pinned layout always yields these four, so only a revision change or a
+        caller passing a partial mapping can reach it. It must not return partial reserves."""
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.reserve_after_from_event("TradeEvent", {"virtual_quote_reserves": 1})
+        self.assertIn("lacks reserve field(s)", str(ctx.exception))
+        self.assertIsNone(B9D.reserve_after_from_event("CompleteEvent", {}))
 
     def test_every_target_instruction_is_resolved_at_its_own_slot(self):
         """§4 asks for the interface in force AT each instruction's slot, not per transaction.
