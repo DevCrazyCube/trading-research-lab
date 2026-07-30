@@ -12,6 +12,7 @@ collector remains read-only, resumable, and credential-redacting; it does not si
 transaction.
 """
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -823,6 +824,192 @@ def base58(raw):
         encoded = BASE58_ALPHABET[remainder] + encoded
     zeros = len(raw) - len(raw.lstrip(b"\0"))
     return "1" * zeros + (encoded or "")
+
+
+def base58_decode(text):
+    """Inverse of `base58`. Needed because inner instruction data arrives base58-encoded.
+
+    The outer transaction is base64 under `encoding: "base64"`, but `meta.innerInstructions[].data`
+    is base58 — confirmed against a preserved body, whose sample began `1111`, i.e. leading zero
+    bytes. Decoding it as base64 would yield plausible garbage with a plausible discriminator.
+    """
+    value = 0
+    for character in text:
+        index = BASE58_ALPHABET.find(character)
+        if index < 0:
+            raise FreezeViolation(f"invalid base58 character {character!r} in instruction data")
+        value = value * 58 + index
+    zeros = len(text) - len(text.lstrip("1"))
+    body = value.to_bytes((value.bit_length() + 7) // 8, "big") if value else b""
+    return b"\0" * zeros + body
+
+
+# ---------------------------------------------------------------------------------------------
+# Transaction envelope parsing (§7's prerequisite: there are no instructions to classify without it)
+# ---------------------------------------------------------------------------------------------
+
+def compact_u16(data, offset):
+    """Read a ShortVec length. Returns `(value, next_offset)`.
+
+    Solana encodes vector lengths as 1-3 bytes, 7 bits each, high bit continuing.
+    """
+    value = shift = 0
+    for _ in range(3):
+        if offset >= len(data):
+            raise FreezeViolation("truncated compact-u16 length prefix")
+        byte = data[offset]
+        offset += 1
+        value |= (byte & 0x7F) << shift
+        if not byte & 0x80:
+            return value, offset
+        shift += 7
+    raise FreezeViolation("compact-u16 length prefix exceeded three bytes")
+
+
+def parse_message(raw):
+    """Parse a serialised transaction into its version, static keys and compiled instructions.
+
+    Wire format, in order: signatures, then the message. A versioned message is prefixed by a byte
+    with the high bit set carrying the version; a legacy message begins directly with its header.
+    After the instructions, a v0 message carries its address-table lookups.
+
+    **Trailing bytes are fatal.** B0e's `TradeEvent` decode established "zero bytes remaining" as
+    the discipline that distinguishes a correct layout from one that merely starts correctly, and a
+    parser that ignores the tail cannot tell a v0 message from a legacy one it misread.
+    """
+    offset = 0
+    signature_count, offset = compact_u16(raw, offset)
+    offset += 64 * signature_count
+    if offset > len(raw):
+        raise FreezeViolation("truncated signature section")
+
+    version = "legacy"
+    if raw[offset] & 0x80:
+        version = raw[offset] & 0x7F
+        offset += 1
+
+    header = tuple(raw[offset:offset + 3])
+    if len(header) != 3:
+        raise FreezeViolation("truncated message header")
+    offset += 3
+
+    key_count, offset = compact_u16(raw, offset)
+    static_keys = []
+    for _ in range(key_count):
+        chunk = raw[offset:offset + 32]
+        if len(chunk) != 32:
+            raise FreezeViolation("truncated static account key")
+        static_keys.append(base58(chunk))
+        offset += 32
+    offset += 32                                    # recent blockhash
+
+    instruction_count, offset = compact_u16(raw, offset)
+    instructions = []
+    for _ in range(instruction_count):
+        if offset >= len(raw):
+            raise FreezeViolation("truncated instruction")
+        program_index = raw[offset]
+        offset += 1
+        account_count, offset = compact_u16(raw, offset)
+        accounts = list(raw[offset:offset + account_count])
+        if len(accounts) != account_count:
+            raise FreezeViolation("truncated instruction account index list")
+        offset += account_count
+        data_length, offset = compact_u16(raw, offset)
+        data = raw[offset:offset + data_length]
+        if len(data) != data_length:
+            raise FreezeViolation("truncated instruction data")
+        offset += data_length
+        instructions.append({"program_index": program_index, "accounts": accounts, "data": data})
+
+    lookups = []
+    if version != "legacy":
+        lookup_count, offset = compact_u16(raw, offset)
+        for _ in range(lookup_count):
+            offset += 32                            # the table account itself
+            writable_count, offset = compact_u16(raw, offset)
+            writable = list(raw[offset:offset + writable_count])
+            offset += writable_count
+            readonly_count, offset = compact_u16(raw, offset)
+            readonly = list(raw[offset:offset + readonly_count])
+            offset += readonly_count
+            if len(writable) != writable_count or len(readonly) != readonly_count:
+                raise FreezeViolation("truncated address table lookup index list")
+            lookups.append({"writable": writable, "readonly": readonly})
+
+    if offset != len(raw):
+        raise FreezeViolation(
+            f"{len(raw) - offset} byte(s) remain after parsing the message; the layout was not "
+            "fully consumed and a partially-correct parse is not a parse")
+    return {"version": version, "header": header, "static_keys": static_keys,
+            "instructions": instructions, "lookups": lookups}
+
+
+def resolve_account_keys(message, meta):
+    """Full account key list: static keys, then loaded writable, then loaded readonly.
+
+    That order is what instruction account indexes are relative to. The wire lookup counts and
+    `meta.loadedAddresses` are cross-checked against each other, so a message whose tables were
+    resolved into a different number of addresses than it requested fails rather than silently
+    shifting every index past the static keys.
+    """
+    loaded = meta.get("loadedAddresses") or {}
+    writable = list(loaded.get("writable") or [])
+    readonly = list(loaded.get("readonly") or [])
+    requested = sum(len(entry["writable"]) + len(entry["readonly"]) for entry in message["lookups"])
+    if requested != len(writable) + len(readonly):
+        raise FreezeViolation(
+            f"message requests {requested} address-table address(es) but meta.loadedAddresses "
+            f"supplies {len(writable) + len(readonly)}; every account index past the static keys "
+            "would be misaligned")
+    return message["static_keys"] + writable + readonly
+
+
+def envelope_instructions(result):
+    """Every instruction in one preserved body, in canonical order, with resolved program ids.
+
+    Yields dicts carrying `outer_index`, `inner_index` (**-1 for an outer instruction**, so it sorts
+    before its own CPIs per §6), `program_id`, `data` bytes and resolved `accounts`. Inner
+    instructions come from `meta.innerInstructions`, whose `data` is base58.
+    """
+    encoded = result.get("transaction")
+    if not (isinstance(encoded, list) and len(encoded) == 2 and encoded[1] == "base64"):
+        raise FreezeViolation(
+            "preserved transaction is not a [base64, 'base64'] pair; the frozen encoding is "
+            f"base64 and this body carries {encoded[1] if isinstance(encoded, list) else type(encoded).__name__!r}")
+    meta = result.get("meta") or {}
+    message = parse_message(base64.b64decode(encoded[0]))
+    keys = resolve_account_keys(message, meta)
+
+    def resolve(index, what, outer, inner):
+        if not 0 <= index < len(keys):
+            raise FreezeViolation(
+                f"{what} index {index} at ({outer},{inner}) is outside the {len(keys)} resolved "
+                "account keys; refusing to attribute an instruction to an unknown program")
+        return keys[index]
+
+    inner_groups = {group["index"]: group.get("instructions") or []
+                    for group in (meta.get("innerInstructions") or [])}
+    rows = []
+    for outer_index, instruction in enumerate(message["instructions"]):
+        rows.append({
+            "outer_index": outer_index, "inner_index": -1,
+            "program_id": resolve(instruction["program_index"], "program", outer_index, -1),
+            "data": instruction["data"],
+            "accounts": [resolve(i, "account", outer_index, -1) for i in instruction["accounts"]]})
+        for inner_index, inner in enumerate(inner_groups.get(outer_index, [])):
+            rows.append({
+                "outer_index": outer_index, "inner_index": inner_index,
+                "program_id": resolve(inner["programIdIndex"], "program", outer_index, inner_index),
+                "data": base58_decode(inner.get("data") or ""),
+                "accounts": [resolve(i, "account", outer_index, inner_index)
+                             for i in inner.get("accounts") or []]})
+    unexpected = set(inner_groups) - set(range(len(message["instructions"])))
+    if unexpected:
+        raise FreezeViolation(
+            f"meta.innerInstructions references outer index(es) {sorted(unexpected)} that the "
+            "message does not contain")
+    return rows
 
 
 class BorshReader:

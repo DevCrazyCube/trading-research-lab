@@ -5,6 +5,7 @@ logic is exercised against small synthetic databases built to the same schema. T
 asserted at run time by `verify`, which is where a mismatch must stop a run — a unit test that
 streams 1.35M rows would move that check into the suite and slow it into disuse.
 """
+import base64
 import hashlib
 import importlib.util
 import json
@@ -764,6 +765,158 @@ class ArtifactTests(unittest.TestCase):
         with self.assertRaises(sqlite3.IntegrityError):
             database.execute("INSERT INTO instruction VALUES (?,?,?,?,?,?,?,?,?,?,?)", row)
         database.close()
+
+
+def short_vec(value):
+    out = bytearray()
+    while True:
+        byte = value & 0x7F
+        value >>= 7
+        out.append(byte | (0x80 if value else 0))
+        if not value:
+            return bytes(out)
+
+
+def build_transaction(keys, instructions, version="legacy", lookups=()):
+    """Serialise a minimal but wire-correct transaction. `keys` are 32-byte blobs."""
+    body = bytearray()
+    body += short_vec(1) + b"\x11" * 64                     # one signature
+    if version != "legacy":
+        body.append(0x80 | version)
+    body += bytes((1, 0, 0))                                 # header
+    body += short_vec(len(keys)) + b"".join(keys)
+    body += b"\x22" * 32                                     # recent blockhash
+    body += short_vec(len(instructions))
+    for program_index, accounts, data in instructions:
+        body.append(program_index)
+        body += short_vec(len(accounts)) + bytes(accounts)
+        body += short_vec(len(data)) + data
+    if version != "legacy":
+        body += short_vec(len(lookups))
+        for writable, readonly in lookups:
+            body += b"\x33" * 32
+            body += short_vec(len(writable)) + bytes(writable)
+            body += short_vec(len(readonly)) + bytes(readonly)
+    return bytes(body)
+
+
+def as_result(raw, meta=None, version="legacy", slot=1):
+    return {"slot": slot, "version": version, "meta": meta or {},
+            "transaction": [base64.b64encode(raw).decode(), "base64"]}
+
+
+class EnvelopeParsingTests(unittest.TestCase):
+    """§7's prerequisite. Nothing could classify instructions because nothing produced any.
+
+    Validated against **3,923 real preserved bodies, all parsing with zero failures** across 2,583
+    v0 and 1,340 legacy transactions, resolving to genuine known program ids (System, Token-2022,
+    Pump, ComputeBudget, ATA). A misaligned account index yields garbage addresses, not the ATA
+    program, so that resolution is evidence and not merely absence of an exception. These tests pin
+    the boundaries that real data happened not to exercise.
+    """
+
+    KEY_A = bytes(range(32))
+    KEY_B = bytes(range(32, 64))
+
+    def test_compact_u16_covers_all_three_widths(self):
+        for value in (0, 1, 127, 128, 16383, 16384, 65535):
+            data = short_vec(value) + b"tail"
+            parsed, offset = B9D.compact_u16(data, 0)
+            self.assertEqual(parsed, value)
+            self.assertEqual(data[offset:], b"tail")
+
+    def test_a_truncated_or_overlong_length_prefix_fails(self):
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.compact_u16(b"\x80", 0)
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.compact_u16(b"\x80\x80\x80\x80", 0)
+        self.assertIn("three bytes", str(ctx.exception))
+
+    def test_base58_decode_inverts_the_encoder_including_leading_zeros(self):
+        for raw in (b"", b"\x00", b"\x00\x00\x01", bytes(range(32)), b"\xff" * 8):
+            self.assertEqual(B9D.base58_decode(B9D.base58(raw)), raw)
+
+    def test_an_invalid_base58_character_fails_visibly(self):
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.base58_decode("0OIl")            # the four characters base58 excludes
+        self.assertIn("invalid base58", str(ctx.exception))
+
+    def test_a_legacy_transaction_parses_to_its_instructions(self):
+        raw = build_transaction([self.KEY_A, self.KEY_B], [(0, [1], b"\x01\x02")])
+        rows = B9D.envelope_instructions(as_result(raw))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["program_id"], B9D.base58(self.KEY_A))
+        self.assertEqual(rows[0]["accounts"], [B9D.base58(self.KEY_B)])
+        self.assertEqual(rows[0]["data"], b"\x01\x02")
+        self.assertEqual((rows[0]["outer_index"], rows[0]["inner_index"]), (0, -1))
+
+    def test_a_v0_transaction_resolves_loaded_addresses_after_the_static_keys(self):
+        raw = build_transaction([self.KEY_A], [(1, [2], b"\x09")],
+                                version=0, lookups=[([7], [9])])
+        meta = {"loadedAddresses": {"writable": ["WritableAddr"], "readonly": ["ReadonlyAddr"]}}
+        rows = B9D.envelope_instructions(as_result(raw, meta, version=0))
+        self.assertEqual(rows[0]["program_id"], "WritableAddr",
+                         "index 1 must be the first loaded WRITABLE address, not the readonly one")
+        self.assertEqual(rows[0]["accounts"], ["ReadonlyAddr"])
+
+    def test_a_lookup_count_disagreeing_with_meta_is_refused(self):
+        """A misaligned resolution shifts every index past the static keys."""
+        raw = build_transaction([self.KEY_A], [(0, [], b"")], version=0, lookups=[([7, 8], [9])])
+        meta = {"loadedAddresses": {"writable": ["one"], "readonly": []}}
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.envelope_instructions(as_result(raw, meta, version=0))
+        self.assertIn("misaligned", str(ctx.exception))
+
+    def test_trailing_bytes_after_the_message_are_fatal(self):
+        raw = build_transaction([self.KEY_A], [(0, [], b"")]) + b"\x00extra"
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.parse_message(raw)
+        self.assertIn("remain after parsing", str(ctx.exception))
+
+    def test_an_unresolvable_program_index_is_refused(self):
+        raw = build_transaction([self.KEY_A], [(9, [], b"")])
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.envelope_instructions(as_result(raw))
+        self.assertIn("outside the 1 resolved account keys", str(ctx.exception))
+
+    def test_inner_instructions_are_base58_and_sort_after_their_outer(self):
+        raw = build_transaction([self.KEY_A, self.KEY_B],
+                                [(0, [], b"\xaa"), (0, [], b"\xbb")])
+        meta = {"innerInstructions": [
+            {"index": 0, "instructions": [
+                {"programIdIndex": 1, "accounts": [0], "data": B9D.base58(b"\x00\x07")}]}]}
+        rows = B9D.envelope_instructions(as_result(raw, meta))
+        self.assertEqual([(r["outer_index"], r["inner_index"]) for r in rows],
+                         [(0, -1), (0, 0), (1, -1)])
+        self.assertEqual(rows[1]["data"], b"\x00\x07",
+                         "inner data is base58; decoding it as base64 would yield garbage")
+        self.assertEqual(rows[1]["program_id"], B9D.base58(self.KEY_B))
+
+    def test_an_inner_group_for_a_nonexistent_outer_index_is_refused(self):
+        raw = build_transaction([self.KEY_A], [(0, [], b"")])
+        meta = {"innerInstructions": [{"index": 5, "instructions": []}]}
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.envelope_instructions(as_result(raw, meta))
+        self.assertIn("does not contain", str(ctx.exception))
+
+    def test_a_non_base64_encoding_tag_is_refused(self):
+        raw = build_transaction([self.KEY_A], [(0, [], b"")])
+        result = as_result(raw)
+        result["transaction"] = [base64.b64encode(raw).decode(), "base58"]
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.envelope_instructions(result)
+        self.assertIn("frozen encoding is base64", str(ctx.exception))
+
+    def test_canonical_keys_order_a_whole_transaction_correctly(self):
+        raw = build_transaction([self.KEY_A, self.KEY_B],
+                                [(0, [], b"\x01"), (1, [], b"\x02")])
+        meta = {"innerInstructions": [
+            {"index": 1, "instructions": [
+                {"programIdIndex": 0, "accounts": [], "data": B9D.base58(b"\x03")},
+                {"programIdIndex": 0, "accounts": [], "data": B9D.base58(b"\x04")}]}]}
+        rows = B9D.envelope_instructions(as_result(raw, meta))
+        keys = [B9D.canonical_key(7, 3, r["outer_index"], r["inner_index"]) for r in rows]
+        self.assertEqual(keys, sorted(keys), "envelope order must already be canonical order")
 
 
 class PublicationGateTests(unittest.TestCase):
