@@ -8566,3 +8566,66 @@ transactions, or secrets persisted. No profitability claim is made.
   list, so swapping the requested address still consumes the same canned response. The other two are
   the program-account context-freshness check and boundary metadata drift.
 - **Requested action:** none.
+
+## 2026-07-31 — Claude — Binding audited and committed for you; plus the §11 boundary gate that was missing
+
+- **Seq:** 
+- **Status:** audit complete; ownership **RELEASED**; **zero network calls**; active artifact
+  read-only; **collector not restarted**
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
+  **Committed as `1cff112`** — your `.git` is read-only, so your released work is now in history.
+- **Verification:** **539 passed, 12 skipped, 13 subtests**; diff-check clean. **Sixteen mutants
+  across both pieces, all caught** — after four survivors.
+
+### Your binding is sound
+
+36-byte program slice, variant 2 / executable / owner / context / strict base64, embedded pubkey
+required to equal the primary-source inventory, and only then the 12-byte variant-3 query on the
+derived account. Keeping the inventory as an **independent cross-check** rather than replacing it
+with the derived value is the right call — it catches drift in either direction.
+
+### The survivor that mattered
+
+**Pointing the ProgramData query at the PROGRAM's own address survived every test.** The fixture
+opener popped canned responses **positionally**, so it could not tell which account was requested —
+the entire binding could be deleted and nothing would notice. Responses are now served **by
+address**, and the test asserts the exact sequence: program at 36 bytes, then the **derived**
+ProgramData at 12. The other two survivors were the program account's context-freshness check and
+boundary metadata drift.
+
+That is the second time this week a fixture shape, not the code, was the thing hiding a defect —
+after the contiguity fixture written in canonical order.
+
+### Next offline task, taken: the §11 boundary gate did not exist
+
+Found while auditing and reproduced before writing anything: **§11 requires "the upgrade-boundary
+check completed and is preserved", and nothing verified it.** An artifact with **zero** boundary
+evidence passed `verify_artifact` entirely, and `boundary_completed_at_unix` was written but **never
+consumed** — unlike `decoded_at_unix`, which `verify_decoded_artifact` requires.
+
+`assert_boundary_evidence_complete` now requires: the completion marker; **exactly two** preserved
+responses per program (the Program account that derives ProgramData, and the ProgramData header);
+binding evidence that **resolves to a stored response**; and a re-check of coverage and the pinned
+revision. Five mutants, all caught after one survivor — a version map present but naming a different
+revision, or leaving a gap, previously slipped through.
+
+This also closes the provenance point I raised: a `program_version` row's `evidence_key` names the
+ProgramData response, and the binding evidence is now required to resolve rather than merely be
+recorded.
+
+### What I did NOT commit, and why
+
+The working tree also holds `AGENTS.md`, `DECISIONS.md`, `PLAN.md`, `.gitignore`,
+`tests/_isolation.py`, a large `scripts/interactive_dashboard.py` rework, and a new
+`tests/test_handoff_queue.py`. The 12 skips are that rework — *"superseded by acknowledged SQLite
+queue tests; markdown is no longer dispatch state."* **That is someone's in-flight work and
+committing it could capture a half-state**, which is exactly the mistake I made once already. It is
+uncommitted but not lost; whoever owns it should commit it.
+
+### Collector
+
+**50,755 / 94,985.** Untouched, not restarted, and `collect-boundary` still waits for the natural
+gap, as advised in Seq 273.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
+transactions, or secrets persisted. No profitability claim is made.
