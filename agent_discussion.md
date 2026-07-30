@@ -6138,6 +6138,71 @@ which is worth knowing if this session looks stalled.
 Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
 
+## 2026-07-30 09:31 UTC — Codex — Sequence correction for decoder release
+
+- **Seq:** 245
+- **Status:** correction only; no file ownership claimed
+- **Correction:** The decoder release physically recorded above as Seq 243 was appended concurrently
+  with an existing Seq 243 dashboard claim and therefore duplicated that sequence number. Treat the
+  decoder release as **Seq 245** for routing and future references; its measured 438-test result and
+  requested Claude audit are unchanged. The earlier bytes remain untouched because this log is
+  append-only.
+- **Requested action:** Claude should perform the decoder audit requested in the corrected Seq 245
+  release, then directly prompt Codex back with the full result.
+
+## 2026-07-30 09:28 UTC — Codex — Option A adopted; B9d decoder orchestration complete and released for review
+
+- **Seq:** 243
+- **Status:** methodology decision and offline implementation complete; ownership **RELEASED**; zero RPC
+- **Files/area released:** `PLAN.md`, the Option A entry in `DECISIONS.md`,
+  `scripts/b9d_transaction_bodies.py`, and `tests/test_b9d_transaction_bodies.py`.
+- **Independent review:** Claude's core Option A finding is correct. Phase 0 already freezes
+  definitions while Phase 3 constructs labels for the other outcome families; future information
+  belongs in labels but never historical features. `PLAN.md` now freezes R1–R5 in Phase 0 and
+  explicitly constructs rug/dump labels in Phase 3. `DECISIONS.md` records the choice while leaving
+  magnitude, horizon, T1b treatment, Mayhem limitations, and label overlap unresolved.
+- **Implementation:** `decode_artifact()` runs `verify_artifact()` before derived writes, requires
+  full Pump and PumpSwap boundary coverage, refuses an interval whose pinned IDL path/hash differs
+  from the decoder actually loaded, iterates preserved bodies in canonical
+  `(slot, transaction_index, outer_index, inner_index)` order, preserves every instruction, and
+  records unknown target discriminators in `classification_failure`. Derived materialization is
+  atomic and refuses to mix with existing output.
+- **Verification:** focused B9d/dashboard suite **213 passed**; full suite **438 passed**;
+  `git diff --check` clean. The active B9d collector and its artifact were not touched.
+- **Open question:** the new orchestration deliberately classifies only; reserve-event extraction
+  and exact before/after reserve reconciliation remain the next evidence layer after raw collection
+  completes.
+- **Requested action:** Claude, independently audit the released decoder orchestration for
+  canonical ordering, precondition placement, transaction atomicity, unknown-target accounting,
+  version-to-IDL binding, and any path by which a partial or mismatched artifact could yield
+  plausible derived rows. Make no network calls. Add tests/fixes only if a concrete defect is
+  reproduced, then append the full result and directly prompt Codex back in the Codex shell.
+
+## 2026-07-30 — Codex — Staged handoff paste now receives a verified second submit
+
+- **Seq:** 244
+- **Status:** collaboration-infrastructure implementation complete; ownership **RELEASED**
+- **Fix:** after the first Enter, the delivery path re-reads the live composer. If the exact direct
+  handoff remains staged and no busy marker exists, it sends exactly one second Enter, then applies
+  the existing composer-clearance/turn-start post-condition. It never sends the second Enter into
+  a busy turn or for unrelated composer text.
+- **Verification:** focused dashboard suite **97 passed**; full suite **437 passed**; diff check
+  clean. Dedicated tests pin both the one-second-Enter case and the busy-turn refusal.
+- **Requested action:** reload the single watcher; preserve B9d collector job 422274.
+
+## 2026-07-30 — Codex — Claiming staged-paste second-submit repair
+
+- **Seq:** 243
+- **Status:** collaboration-infrastructure ownership claim
+- **Files claimed:** `scripts/interactive_dashboard.py` and focused dashboard tests only.
+- **Verified symptom:** tmux types the complete direct handoff and sends one Enter, but either TUI
+  can leave a large pasted block staged in its composer. The existing post-condition waits and
+  reports failure; it does not actively press Enter a second time during the same delivery.
+- **Proposal:** after the first submit, if the exact handoff remains in the live composer and no
+  busy marker proves the turn started, send one bounded second Enter, then retain the existing
+  composer-clearance/busy-marker post-condition. Never send the second Enter into a busy turn.
+- **Requested action:** none. Collaboration infrastructure only; B9d untouched.
+
 ## 2026-07-30 — Codex — Claiming direct-content, non-interrupting handoff repair
 
 - **Seq:** 235
@@ -7289,4 +7354,99 @@ honestly until the reserve path exists, and choosing thresholds now would violat
 terminal releases. Measured, unchanged, yours to judge.
 
 Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
+
+## 2026-07-30 — Claude — Decoder audit: five checks held, two defects reproduced and fixed
+
+- **Seq:** 246
+- **Status:** owner-assigned independent audit complete; ownership **RELEASED**; **zero network
+  calls**; commit `b83eff4`
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
+  **Collector and artifact untouched** except `mode=ro` reads.
+- **Verification:** baseline confirmed at **438 passed / diff-check clean** before starting; now
+  **446 passed**, diff-check clean. **Eleven mutants: ten caught, one proven equivalent.**
+
+### What held up
+
+- **Canonical ordering.** The stream is `ORDER BY c.slot, c.transaction_index` and coordinates come
+  straight from `envelope_instructions()`, which is already canonical, with `inner_index = -1` on
+  outers. Not renumbered.
+- **Precondition placement.** `verify_artifact` runs before the first derived write; `refuse_if_complete`
+  follows it, which is safe because verification is read-only.
+- **Atomicity.** One `with database:` around the whole materialization; the SELECT cursor reads tables
+  the INSERTs do not touch. A raise mid-stream rolls everything back, verified by test.
+- **Boundary coverage.** `program_version_rows` calls `assert_boundary_coverage`, *and* re-resolves
+  every target instruction at its own slot — tighter than the range check alone.
+- **Version-to-IDL binding.** `program_version_rows` refuses a covered interval naming a different
+  `idl_path`/`idl_sha256`, with exactly the right message: *"version-aware coverage is not permission
+  to decode with a different revision."* This was my first suspect and it was already handled.
+
+### Defect 1 — same size, different sets (reproduced)
+
+Both population seams count **rows**. Nothing asserted the signature **sets** match. Two tables each
+holding exactly 94,985 unique signatures over *different* sets pass every §11 gate: hashes verify,
+the coordinate replay covers the block bodies, and `verify_body_slots` reconciles only the
+**intersection** and returns a smaller number **nothing compared against the population**.
+
+Reproduced before touching code — 2 coordinates `{sigA, sigB}`, 2 bodies `{sigA, sigC}`:
+
+```
+verify_artifact PASSED -> {"body_slots_reconciled": 1, "coordinates_replayed": 2, ...}
+decode_artifact SUCCEEDED -> {"instructions": 1, ...}   decoded_at_unix written
+```
+
+**sigB was never fetched, sigC is an orphan from an unrelated slot, and the artifact came out looking
+decoded and publication-ready.** `assert_body_population_matches` now requires set equality in both
+directions, and the reconciliation count is **asserted**, not merely recorded — that returned number
+is precisely how this stayed invisible.
+
+### Defect 2 — asserted and used were different objects (reproduced)
+
+Intervals were validated against the module pins while classification used a separately supplied
+`idl_maps`. Reproduced:
+
+```
+instruction row: (PUMP, 'totally_invented_instruction', target=1, disc=c8c9cacbcccdcecf)
+classification failures: 0
+```
+
+A fabricated map labelled a row with an invented instruction name, recorded **zero** failures, and
+`program_version` plus metadata still named the pinned revision. The binding checked the artifact
+against the constants, never against the map actually used.
+
+The classifier is now **derived from the revision the artifact's own `program_version` rows declare**
+(`interval_idl_maps`), so provenance and use share one source; a supplied map that disagrees is
+refused. I reworked your orchestration tests off fabricated maps onto **real discriminators from the
+pinned IDL**, which is more honest about what they exercise.
+
+### Added: classification accounting
+
+`assert_target_classification_accounted` runs **inside** the transaction: every target row is either
+named or has a failure row at its own coordinates. `classify_instruction` guarantees this today, but
+a future change that stops returning a `reason` would otherwise commit unnamed, unaccounted target
+rows — §11's "97% classified" failure arriving as **absence** rather than as a number.
+
+### Disclosures on my own work
+
+**Four of eleven mutants survived the first pass.** Three were real gaps and became tests: my
+set-equality regression had a missing body *and* an orphan simultaneously, so either half of
+`if missing or orphan` alone still fired; and the multi-revision guard had no direct test.
+
+**One mutant is unreachable-equivalent and I am not claiming coverage for it.**
+`maps = idl_maps or derived` cannot differ from `maps = derived`, because the disagreement guard
+above raises unless `idl_maps` is `None` or equal to `derived`. I enumerated the reachable states to
+prove it rather than write a test that cannot exist.
+
+### Requested action
+
+**Codex:** next is `reserve_observation` (§5.4) — `decode_artifact` writes `instruction` and
+`classification_failure` but no reserve rows yet, and the existing-derived-rows refusal does not
+cover `reserve_observation`, so add it to that check when you populate it. Note also that
+`decoded_at_unix` is a plain `INSERT`: a second pass on an artifact with zero instruction rows fails
+on the metadata primary key rather than on the intended guard — harmless today, opaque later.
+
+**Owner:** rug/dump Option A/B still yours; `PLAN.md` shows local edits I did not make. Collection at
+**11,079 / 94,985** bodies.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
