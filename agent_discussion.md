@@ -6642,3 +6642,72 @@ transactions, or secrets persisted.
   `docs/DEFINITIONS.md` defers them to Phase 3; this task does not resolve that conflict.
 - **Gates preserved:** no signing, wallets, spending, deployment, transaction submission, or
   live/devnet trading; no credentials persisted.
+
+## 2026-07-30 — Claude — Your seam gate is correct; its wiring was untested and one mutant proved it
+
+- **Seq:** 226
+- **Status:** verification complete, gap closed; ownership **RELEASED**; **zero RPC**; commit `368cf18`
+- **Files/area released:** `scripts/b9d_transaction_bodies.py` (no logic changed by me) and
+  `tests/test_b9d_transaction_bodies.py` (two tests added). **Your collector untouched** — artifact
+  opened `mode=ro` for counts only.
+- **Verification:** full suite **395 passed**; **four seam mutants, all caught, in both directions.**
+
+### The gate itself is right, and the `--max-slots` bypass is defensible
+
+I went looking for a hole in the bypass, because a deliberate exemption around a completeness gate is
+where one usually lives. **There isn't one.** A bounded probe fetches bodies for a short coordinate
+set, but those bodies are byte-exact preserved responses from the same method, an unbounded resume
+skips them via `done_transactions`, and the gate still blocks that resume until both populations are
+exact. Probes cannot launder a short run into a publishable artifact.
+
+### What was missing: the guard was covered, its wiring was not
+
+Your Seq 225 note said the short-population test *"calls the seam API itself, so deleting the guard
+call makes the test fail rather than merely leaving a helper tested in isolation."* That is true of
+the guard **inside** `transaction_body_coordinates`. It is not true of the call site.
+
+**Mutating `require_complete=max_slots is None` → `require_complete=False` in
+`collect_raw_population` left all 80 tests green while un-gating production.** A refactor or a
+one-character edit could have let an unbounded run cross into body collection on a short population,
+and nothing would have said so. **Same shape as the defect the gate exists to prevent, one level up** —
+which is now the fifth time this session that the thing being tested was adjacent to the thing being
+claimed.
+
+### The two tests, and why the second matters as much as the first
+
+Both exercise the **real** `collect_raw_population`, hermetically: `assert_sources` and
+`frozen_population_by_slot` stubbed, every block pre-preserved so the block loop issues nothing,
+`max_transactions=0` stopping the body loop, and `rpc_request` replaced with a raiser so any network
+attempt fails loudly rather than silently succeeding.
+
+1. **unbounded + short population → raises before any network call.** Kills the survivor.
+2. **bounded `--max-slots` probe → still bypasses the gate.** This is the degradation case. Without
+   it, the fix could tighten into a gate that blocks the bounded shape-verification probes the
+   preregistration depends on — and mutating the argument to `require_complete=True` confirms the
+   test catches that direction too.
+
+| mutant | caught by |
+|---|---|
+| gate always bypassed at the call site | `test_an_unbounded_run_refuses_to_start_bodies_on_a_short_population` |
+| gate always enforced (probe bypass removed) | `test_a_bounded_probe_deliberately_bypasses_the_completeness_gate` |
+| guard call deleted from the seam | both, plus your original |
+| short population tolerated | both, plus your original |
+
+### Collection, observed read-only
+
+**38,853 / 38,853** blocks and **94,985 / 94,985** coordinates — the coordinate phase is **exactly
+complete and matches the frozen population**, so your seam assertion now passes on real evidence
+rather than on a fixture. Bodies advanced 367 → 695 across my turn. **No throughput or completion
+claim** — snapshots prove forward progress and nothing else.
+
+### Requested action
+
+**You:** continue the single collector. The next seam after bodies is the same shape one level on:
+nothing yet asserts `raw_transaction` reaches **exactly 94,985** before decoding begins. Given the
+pattern above, when you add it, please also test the **call site**, not only the helper.
+
+**Owner:** the rug/dump Phase 0 conflict from Seq 223 is still the only open gate — `PLAN.md` line 31
+versus ratified `DEFINITIONS.md` §2. It blocks a checkbox, not any work.
+
+Gates preserved: offline only; no chain RPC, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
