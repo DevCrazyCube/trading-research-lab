@@ -975,7 +975,24 @@ class CurveReserveChainTests(unittest.TestCase):
         self.assertIsNone(B9D.unresolved_eventless_reserve_transition(
             B9D.PUMP_PROGRAM, "buy", False, {}))
 
-    def balance_case(self, quote_mint, pre=1_000, post=1_100):
+    def test_incidental_bundled_pump_events_are_outside_the_frozen_curve_scope(self):
+        identity = {"cohort_mint": "cohort_curve"}
+        self.assertIsNone(B9D.cohort_curve_for_event(
+            identity, "bundled_other_mint", "other_curve", "TradeEvent"))
+        self.assertEqual(B9D.cohort_curve_for_event(
+            identity, "cohort_mint", "cohort_curve", "TradeEvent"), "cohort_curve")
+
+    def test_in_scope_event_must_match_the_frozen_mint_curve_identity(self):
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.cohort_curve_for_event(
+                {"mint": "frozen_curve"}, "mint", "other_curve", "TradeEvent")
+        self.assertIn("frozen frozen_curve", str(ctx.exception))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.cohort_curve_for_event({"mint": "curve"}, None, "curve", "CreateEvent")
+        self.assertIn("no mint identity", str(ctx.exception))
+
+    def balance_case(self, quote_mint, pre=1_000, post=1_100,
+                     event_mint=None, cohort_identity=None):
         idl = {"instructions": [
             {"name": "buy", "discriminator": [1] * 8,
              "accounts": [{"name": "bonding_curve"}], "args": []}]}
@@ -983,6 +1000,8 @@ class CurveReserveChainTests(unittest.TestCase):
                   "accounts": ["curve"], "outer_index": 1, "inner_index": -1}
         event = {"name": "TradeEvent",
                  "fields": {"quote_amount": 100, "is_buy": True, "quote_mint": quote_mint}}
+        if event_mint is not None:
+            event["fields"]["mint"] = event_mint
         result = {"transaction": [base64.b64encode(b"ignored").decode(), "base64"],
                   "meta": {"preBalances": [pre], "postBalances": [post]}}
         saved = (B9D.parse_message, B9D.resolve_account_keys)
@@ -990,7 +1009,14 @@ class CurveReserveChainTests(unittest.TestCase):
         B9D.resolve_account_keys = lambda message, meta: ["curve"]
         self.addCleanup(lambda: setattr(B9D, "parse_message", saved[0]))
         self.addCleanup(lambda: setattr(B9D, "resolve_account_keys", saved[1]))
-        return B9D.pump_trade_balance_reconciliations(result, [(parent, {}, event)], idl, [parent])
+        return B9D.pump_trade_balance_reconciliations(
+            result, [(parent, {}, event)], idl, [parent], cohort_identity)
+
+    def test_balance_gate_ignores_incidental_bundled_curve_events(self):
+        rows = self.balance_case(
+            B9D.NATIVE_QUOTE_MINT, event_mint="other_mint",
+            cohort_identity={"cohort_mint": "curve"})
+        self.assertEqual(rows, [])
 
     def test_the_native_quote_placeholder_is_the_measured_literal(self):
         """A symbolic constant no test pins can be changed to anything. Measured across the
@@ -1522,6 +1548,99 @@ class EnvelopeParsingTests(unittest.TestCase):
         self.assertEqual(keys, sorted(keys), "envelope order must already be canonical order")
 
 
+def encode_pump_event(event_name, **overrides):
+    """Borsh-encode a real Pump event from the PINNED IDL field order.
+
+    Built by walking the IDL rather than hand-listing fields, so it cannot drift from the interface
+    the decoder actually uses. Only the fields a test cares about need overriding.
+    """
+    idl = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
+    fields = next(t for t in idl["types"] if t["name"] == event_name)["type"]["fields"]
+    out = bytearray()
+    for field in fields:
+        spec, name = field["type"], field["name"]
+        value = overrides.get(name)
+        if spec == "pubkey":
+            out += B9D.base58_decode(value) if value else bytes(32)
+        elif spec == "bool":
+            out += bytes([1 if value else 0])
+        elif spec == "string":
+            text = (value or "").encode()
+            out += len(text).to_bytes(4, "little") + text
+        elif isinstance(spec, str) and spec.startswith(("u", "i")):
+            width = int(spec[1:]) // 8
+            out += int(value or 0).to_bytes(width, "little", signed=spec.startswith("i"))
+        elif isinstance(spec, dict) and "vec" in spec:
+            out += (0).to_bytes(4, "little")          # empty vec
+        else:
+            raise AssertionError(f"unhandled TradeEvent field type {spec!r}")
+    discriminator = bytes(next(e for e in idl["events"]
+                               if e["name"] == event_name)["discriminator"])
+    return B9D.ANCHOR_EVENT_CPI_TAG + discriminator + bytes(out)
+
+
+def encode_trade_event(**overrides):
+    return encode_pump_event("TradeEvent", **overrides)
+
+
+class ReserveScopeTests(unittest.TestCase):
+    """§ scope: reserve paths are materialized only for the frozen non-Mayhem B9a cohort.
+
+    Incidental Pump trades ride along in transactions fetched for a COHORT curve. B9c never
+    enumerated their curve histories, so their observed trade sequences are partial by
+    construction. Treating them as cohort paths manufactures discontinuities: measured over 47,529
+    bodies, in-cohort mints show 46,039 trades and ZERO breaks while 62 incidental mints show 95
+    trades and 31 breaks. Every discontinuity was incidental.
+    """
+
+    COHORT_MINT = "So11111111111111111111111111111111111111112"
+    COHORT_CURVE = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+    OTHER_MINT = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+
+    def test_identity_must_be_one_to_one_and_non_empty(self):
+        """A mint mapping to two curves, or two mints to one curve, makes 'in scope' ambiguous."""
+        import sqlite3 as sql
+        directory = pathlib.Path(tempfile.mkdtemp())
+        def build(rows):
+            path = directory / f"b9a{len(rows)}{rows}.sqlite"
+            with sql.connect(path) as con:
+                con.execute("CREATE TABLE outcome (mint TEXT, bonding_curve TEXT, "
+                            "is_mayhem_mode INTEGER)")
+                con.executemany("INSERT INTO outcome VALUES (?,?,0)", rows)
+            return str(path)
+        with self.assertRaises(B9D.FreezeViolation) as ctx:          # two mints, one curve
+            B9D.tradable_cohort_identity(build([("m1", "c1"), ("m2", "c1")]))
+        self.assertIn("one-to-one", str(ctx.exception))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:          # empty scope
+            B9D.tradable_cohort_identity(build([]))
+        self.assertIn("empty", str(ctx.exception))
+        self.assertEqual(B9D.tradable_cohort_identity(build([("m1", "c1")])), {"m1": "c1"})
+
+    def test_mayhem_curves_are_outside_the_reserve_scope(self):
+        """The frozen exclusion is a safety policy; reserve materialization must honour it."""
+        import sqlite3 as sql
+        path = pathlib.Path(tempfile.mkdtemp()) / "b9a.sqlite"
+        with sql.connect(path) as con:
+            con.execute("CREATE TABLE outcome (mint TEXT, bonding_curve TEXT, "
+                        "is_mayhem_mode INTEGER)")
+            con.executemany("INSERT INTO outcome VALUES (?,?,?)",
+                            [("tradable", "curveA", 0), ("mayhem", "curveB", 1)])
+        identity = B9D.tradable_cohort_identity(str(path))
+        self.assertEqual(identity, {"tradable": "curveA"})
+        self.assertIsNone(B9D.cohort_curve_for_event(identity, "mayhem", "curveB", "TradeEvent"))
+
+    def test_an_incidental_mint_is_ignored_and_a_cohort_mismatch_fails(self):
+        identity = {self.COHORT_MINT: self.COHORT_CURVE}
+        self.assertIsNone(
+            B9D.cohort_curve_for_event(identity, self.OTHER_MINT, "anything", "TradeEvent"))
+        self.assertEqual(
+            B9D.cohort_curve_for_event(identity, self.COHORT_MINT, self.COHORT_CURVE, "TradeEvent"),
+            self.COHORT_CURVE)
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.cohort_curve_for_event(identity, self.COHORT_MINT, "wrong_curve", "TradeEvent")
+        self.assertIn("frozen", str(ctx.exception))
+
+
 class DecoderOrchestrationTests(unittest.TestCase):
     """Complete raw bodies become one canonical, fail-visible instruction stream."""
 
@@ -1569,6 +1688,88 @@ class DecoderOrchestrationTests(unittest.TestCase):
         idl = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
         entry = next(i for i in idl["instructions"] if i["name"] == name)
         return bytes(entry["discriminator"]), name
+
+    def decode_with_trade(self, mint, cohort, curve_role_key=None):
+        """Run the real decode_artifact over one `buy` carrying a TradeEvent for `mint`."""
+        buy, _ = self.known("buy")
+        idl = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
+        roles = [a["name"] for a in next(i for i in idl["instructions"]
+                                         if i["name"] == "buy")["accounts"]]
+        curve_position = roles.index("bonding_curve")
+        # Account index 1 is the non-program key; point the bonding_curve role at it.
+        accounts = [1] * len(roles)
+        event = encode_trade_event(mint=mint, is_buy=True, quote_amount=0, token_amount=0,
+                                   quote_mint=B9D.NATIVE_QUOTE_MINT, ix_name="buy")
+        # Two resolved keys, so the balance vectors must be length 2. A zero-quote trade means the
+        # curve's lamport delta is 0 and reconciles exactly.
+        meta = {"preBalances": [0, 1_000], "postBalances": [0, 1_000],
+                "innerInstructions": [{"index": 0, "instructions": [
+                    {"programIdIndex": 0, "accounts": [], "data": B9D.base58(event),
+                     "stackHeight": 2}]}]}
+        self.add_body("sig", 0, [(0, accounts, buy)], meta)
+        saved = B9D.tradable_cohort_identity
+        B9D.tradable_cohort_identity = lambda *a, **k: cohort
+        self.addCleanup(lambda: setattr(B9D, "tradable_cohort_identity", saved))
+        return B9D.decode_artifact(self.database, check_sources=False)
+
+    def test_an_incidental_mint_produces_no_reserve_row_and_no_chain_failure(self):
+        """The scope fix. An incidental curve's history was never enumerated by B9c, so its trade
+        sequence is partial by construction; materializing it manufactures discontinuities. Both
+        call sites survived mutation until this test existed."""
+        incidental = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        self.decode_with_trade(incidental, cohort={"SomeOtherMint": "SomeOtherCurve"})
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM reserve_observation").fetchone()[0], 0)
+        reserve_failures = self.database.execute(
+            "SELECT count(*) FROM classification_failure WHERE reason LIKE 'reserve%'").fetchone()[0]
+        self.assertEqual(reserve_failures, 0, "an out-of-scope curve is not a reserve failure")
+
+    def test_an_incidental_create_event_does_not_anchor_a_curve(self):
+        """A CreateEvent writes an ANCHOR reserve_observation, so an unfiltered incidental create
+        would materialize a reserve row for a curve outside the frozen cohort. The TradeEvent
+        filter alone does not cover this: only a create exercises it."""
+        create_ix, _ = self.known("create_v2")
+        idl = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
+        roles = [a["name"] for a in next(i for i in idl["instructions"]
+                                         if i["name"] == "create_v2")["accounts"]]
+        incidental = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        curve = B9D.base58(bytes(range(32)))
+        event = encode_pump_event(
+            "CreateEvent", mint=incidental, bonding_curve=curve,
+            virtual_quote_reserves=30, virtual_token_reserves=100, real_token_reserves=100,
+            quote_mint=B9D.NATIVE_QUOTE_MINT, name="n", symbol="s", uri="u")
+        meta = {"preBalances": [0, 1_000], "postBalances": [0, 1_000],
+                "innerInstructions": [{"index": 0, "instructions": [
+                    {"programIdIndex": 0, "accounts": [], "data": B9D.base58(event),
+                     "stackHeight": 2}]}]}
+        self.add_body("sig", 0, [(0, [1] * len(roles), create_ix)], meta)
+        saved = B9D.tradable_cohort_identity
+        B9D.tradable_cohort_identity = lambda *a, **k: {"SomeOtherMint": "SomeOtherCurve"}
+        self.addCleanup(lambda: setattr(B9D, "tradable_cohort_identity", saved))
+        B9D.decode_artifact(self.database, check_sources=False)
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM reserve_observation").fetchone()[0], 0,
+            "an incidental create must not anchor a curve outside the frozen cohort")
+
+    def test_incidental_instructions_are_still_fully_preserved(self):
+        """Only the incomplete reserve PATH is excluded; the evidence itself must remain."""
+        incidental = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        summary = self.decode_with_trade(incidental, cohort={"SomeOtherMint": "SomeOtherCurve"})
+        rows = self.database.execute(
+            "SELECT program_id,idl_name FROM instruction ORDER BY outer_index,inner_index").fetchall()
+        self.assertEqual([r[1] for r in rows], ["buy", "event:TradeEvent"],
+                         "the incidental instruction and its event stay in the instruction table")
+        self.assertEqual(summary["instructions"], 2)
+
+    def test_a_cohort_mint_does_produce_a_reserve_row(self):
+        """The boundary: the filter must not silently exclude the cohort it exists to materialize."""
+        cohort_mint = "So11111111111111111111111111111111111111112"
+        keys = [B9D.base58_decode(B9D.PUMP_PROGRAM), bytes(range(32))]
+        curve = B9D.base58(keys[1])
+        self.decode_with_trade(cohort_mint, cohort={cohort_mint: curve})
+        self.assertEqual(self.database.execute(
+            "SELECT count(*) FROM classification_failure WHERE reason LIKE 'reserve chain%'"
+        ).fetchone()[0], 1, "a first trade without a create anchor is left-truncated, and recorded")
 
     def test_materializes_outer_and_inner_coordinates_and_records_unknown_target(self):
         known, known_name = self.known()
