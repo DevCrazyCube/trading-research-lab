@@ -11,6 +11,7 @@
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
+*.sqlite.collector.lock
 
 # Runtime state and caches
 .autonomy/

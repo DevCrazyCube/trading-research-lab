@@ -50,7 +50,12 @@ If these files conflict, stop and resolve the conflict explicitly. Never silentl
 ## Collaboration
 
 - Use `agent_discussion.md` as an append-only decision and handoff log between Codex and Claude.
+- Treat `agent_discussion.md` as a human audit log, never as the delivery queue. For every release,
+  use `python scripts/interactive_dashboard.py handoff <codex|claude> --subject '<subject>'
+  --message '<complete immutable task brief>'`; do not append a handoff manually.
+- On a `HANDOFF <id>` notification, immediately run
+  `python scripts/interactive_dashboard.py receive <codex|claude> <id>`. That database
+  acknowledgement is the only proof of receipt; visible terminal text is not proof.
 - Identify author, UTC timestamp, status, evidence, proposal, questions, and requested action.
 - Do not treat another model's assertion as verified merely because it is confidently written.
 - Only one agent should edit a given implementation area at a time. Record ownership before parallel work.
-

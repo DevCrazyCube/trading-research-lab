@@ -1,22 +1,36 @@
 #!/usr/bin/env python3
 """Manage a tmux dashboard containing one Codex CLI and one Claude CLI."""
 import argparse
+import contextlib
+from datetime import datetime, timezone
+import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
 import re
 import signal
+import sqlite3
 import subprocess
 import sys
 import time
+import uuid
 
-ROOT = Path(__file__).resolve().parents[1]
-RUNTIME = ROOT / ".autonomy" / "interactive"
+ROOT = Path(os.environ.get("DASHBOARD_ROOT", Path(__file__).resolve().parents[1]))
+RUNTIME = Path(os.environ.get("DASHBOARD_RUNTIME", ROOT / ".autonomy" / "interactive"))
 STATE = RUNTIME / "state.json"
 LOG = RUNTIME / "supervisor.log"
 STOP = RUNTIME / "STOP"
-SESSION = "meme-agents"
-DISCUSSION = ROOT / "agent_discussion.md"
+QUEUE_DB = RUNTIME / "handoffs.sqlite"
+SUPERVISOR_LOCK = RUNTIME / "supervisor.lock"
+HANDOFF_LOCK = RUNTIME / "handoff.lock"
+SESSION = os.environ.get("DASHBOARD_SESSION", "meme-agents")
+TMUX_SOCKET = os.environ.get("DASHBOARD_TMUX_SOCKET")
+# No tmux command issued here is long-running -- they query or poke a local server. Ten seconds is
+# far above any healthy call and still bounds the supervisor loop. See `tmux`.
+TMUX_TIMEOUT_SECONDS = float(os.environ.get("DASHBOARD_TMUX_TIMEOUT", "10"))
+TMUX_TIMEOUT_RETURNCODE = 124   # the shell convention, for `check=False` callers reading a code
+DISCUSSION = Path(os.environ.get("DASHBOARD_DISCUSSION", ROOT / "agent_discussion.md"))
 # A Seq line may carry a trailing note, and every collision fix in the log does:
 #   - **Seq:** 94  _(collision fix: appended as a duplicate Seq 84 ...)_
 # Requiring end-of-line straight after the digits made all six such entries invisible to the
@@ -33,6 +47,227 @@ AGENT_IDENTITIES = {
     "codex": "You are Codex",
     "claude": "You are Claude",
 }
+NOTIFY_AFTER_SECONDS = 30
+HEARTBEAT_STALE_SECONDS = 10
+
+
+def queue_connect():
+    """Open and migrate the durable handoff queue."""
+    RUNTIME.mkdir(parents=True, exist_ok=True)
+    db = sqlite3.connect(QUEUE_DB, timeout=10, isolation_level=None)
+    db.row_factory = sqlite3.Row
+    db.execute("PRAGMA journal_mode=WAL")
+    db.execute("PRAGMA synchronous=FULL")
+    db.executescript("""
+        CREATE TABLE IF NOT EXISTS handoff (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            created_at REAL NOT NULL,
+            sender TEXT NOT NULL CHECK(sender IN ('codex','claude')),
+            target TEXT NOT NULL CHECK(target IN ('codex','claude')),
+            subject TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            payload_sha256 TEXT NOT NULL,
+            audit_seq INTEGER NOT NULL UNIQUE,
+            state TEXT NOT NULL CHECK(state IN
+                ('preparing','queued','notified','acknowledged','failed')),
+            notify_count INTEGER NOT NULL DEFAULT 0,
+            last_notified_at REAL,
+            acknowledged_at REAL,
+            last_error TEXT
+        );
+        CREATE TABLE IF NOT EXISTS supervisor (
+            singleton INTEGER PRIMARY KEY CHECK(singleton = 1),
+            instance_id TEXT,
+            pid INTEGER,
+            heartbeat_at REAL,
+            started_at REAL
+        );
+        INSERT OR IGNORE INTO supervisor(singleton) VALUES (1);
+        CREATE TABLE IF NOT EXISTS protocol_notice (
+            agent TEXT PRIMARY KEY CHECK(agent IN ('codex','claude')),
+            version INTEGER NOT NULL,
+            notified_at REAL NOT NULL
+        );
+    """)
+    return db
+
+
+@contextlib.contextmanager
+def exclusive_file_lock(path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a+") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        yield handle
+
+
+def audit_marker(message_id):
+    """The idempotence marker for one handoff's audit entry.
+
+    The trailing newline is load-bearing. Without it `- **Handoff-ID:** 1` is a SUBSTRING of
+    `- **Handoff-ID:** 12`, so `_append_audit_once` treated a later entry as proof that an earlier
+    one had already been written. Recovering a handoff interrupted while `preparing` then flipped it
+    to `queued` — delivering it — while writing NO audit entry at all. Reproduced end-to-end.
+    `audit_entry` always terminates this line with a newline, so matching it is exact.
+
+    The notification format got this right: `HANDOFF {id}:` carries a colon, so `HANDOFF 12:` does
+    not match `HANDOFF 1:`. The delimiter was simply missing here.
+    """
+    return f"- **Handoff-ID:** {message_id}\n"
+
+
+def audit_entry(row):
+    stamp = datetime.fromtimestamp(row["created_at"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    sender = row["sender"].title()
+    return (
+        f"\n## {stamp} — {sender} — {row['subject']}\n\n"
+        f"- **Seq:** {row['audit_seq']}\n"
+        f"- **Handoff-ID:** {row['id']}\n"
+        f"- **Status:** handoff queued; ownership **RELEASED**\n"
+        f"- **Evidence / task brief:** {row['payload']}\n"
+        f"- **Requested action:** {row['target'].title()} should claim handoff {row['id']}, "
+        "perform and verify the bounded task, then hand back with this command.\n"
+    )
+
+
+def _append_audit_once(row):
+    marker = audit_marker(row["id"])
+    existing = DISCUSSION.read_text(encoding="utf-8") if DISCUSSION.exists() else ""
+    if marker in existing:
+        return
+    with DISCUSSION.open("a", encoding="utf-8") as handle:
+        handle.write(audit_entry(row))
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def recover_preparing(db=None):
+    """Finish any handoff interrupted between DB reservation and audit append."""
+    own = db is None
+    db = db or queue_connect()
+    try:
+        with exclusive_file_lock(HANDOFF_LOCK):
+            rows = db.execute("SELECT * FROM handoff WHERE state='preparing' ORDER BY id").fetchall()
+            for row in rows:
+                _append_audit_once(row)
+                db.execute("UPDATE handoff SET state='queued' WHERE id=? AND state='preparing'",
+                           (row["id"],))
+        return len(rows)
+    finally:
+        if own:
+            db.close()
+
+
+def create_handoff(sender, subject, payload):
+    """Recoverably atomically append an audit record and enqueue one direct handoff."""
+    sender = sender.lower()
+    if sender not in AGENTS:
+        raise ValueError(f"unknown sender {sender!r}")
+    subject, payload = subject.strip(), payload.strip()
+    if not subject or not payload:
+        raise ValueError("handoff subject and payload must be non-empty")
+    target = "claude" if sender == "codex" else "codex"
+    db = queue_connect()
+    try:
+        with exclusive_file_lock(HANDOFF_LOCK):
+            recoverable = db.execute(
+                "SELECT * FROM handoff WHERE state='preparing' ORDER BY id").fetchall()
+            for row in recoverable:
+                _append_audit_once(row)
+                db.execute("UPDATE handoff SET state='queued' WHERE id=?", (row["id"],))
+            used = all_sequences()
+            logged = max(used) if used else 0
+            allocated = db.execute("SELECT COALESCE(MAX(audit_seq),0) FROM handoff").fetchone()[0]
+            seq = max(logged, allocated) + 1
+            now = time.time()
+            digest = hashlib.sha256(payload.encode()).hexdigest()
+            db.execute("BEGIN IMMEDIATE")
+            cursor = db.execute(
+                "INSERT INTO handoff(created_at,sender,target,subject,payload,payload_sha256,"
+                "audit_seq,state) VALUES(?,?,?,?,?,?,?,'preparing')",
+                (now, sender, target, subject, payload, digest, seq))
+            message_id = cursor.lastrowid
+            db.execute("COMMIT")
+            row = db.execute("SELECT * FROM handoff WHERE id=?", (message_id,)).fetchone()
+            _append_audit_once(row)
+            db.execute("UPDATE handoff SET state='queued' WHERE id=? AND state='preparing'",
+                       (message_id,))
+            return message_id, seq, target
+    except Exception:
+        if db.in_transaction:
+            db.execute("ROLLBACK")
+        raise
+    finally:
+        db.close()
+
+
+def receive_handoff(agent, message_id):
+    """Acknowledge one addressed message and return its immutable task payload."""
+    db = queue_connect()
+    try:
+        db.execute("BEGIN IMMEDIATE")
+        row = db.execute("SELECT * FROM handoff WHERE id=?", (message_id,)).fetchone()
+        if row is None:
+            raise RuntimeError(f"handoff {message_id} does not exist")
+        if row["target"] != agent:
+            raise RuntimeError(f"handoff {message_id} is addressed to {row['target']}, not {agent}")
+        if hashlib.sha256(row["payload"].encode()).hexdigest() != row["payload_sha256"]:
+            raise RuntimeError(f"handoff {message_id} payload integrity check failed")
+        if row["state"] == "preparing":
+            # Its audit entry has not been written yet. Acknowledging here would deliver a handoff
+            # that never reaches the audit log, which is the second path to the silent loss the
+            # marker fix closes. `recover-queue` finishes the append and marks it queued.
+            raise RuntimeError(
+                f"handoff {message_id} is still preparing; run `recover-queue` first so its audit "
+                "entry is written before it is acknowledged")
+        if row["state"] == "acknowledged":
+            # Idempotent on purpose: a re-sent notification must not be punished with an error, and
+            # must not overwrite the original acknowledgement time.
+            db.execute("COMMIT")
+            return row
+        db.execute("UPDATE handoff SET state='acknowledged', acknowledged_at=? WHERE id=?",
+                   (time.time(), message_id))
+        db.execute("COMMIT")
+        return row
+    except Exception:
+        if db.in_transaction:
+            db.execute("ROLLBACK")
+        raise
+    finally:
+        db.close()
+
+
+def queue_status():
+    db = queue_connect()
+    try:
+        return {
+            "messages": [dict(row) for row in db.execute(
+                "SELECT id,sender,target,subject,state,notify_count,last_notified_at,"
+                "acknowledged_at,last_error FROM handoff ORDER BY id")],
+            "supervisor": dict(db.execute("SELECT * FROM supervisor WHERE singleton=1").fetchone()),
+        }
+    finally:
+        db.close()
+
+
+def dashboard_status():
+    result = read_state()
+    for obsolete in (
+        "observed_sequence", "delivery_attempts", "delivery_uncertain_sequence",
+        "delivery_quarantined_sequence", "last_message_at", "last_send_pane_command",
+        "last_send_waited_for_idle", "last_target", "duplicate_sequences",
+    ):
+        result.pop(obsolete, None)
+    queued = queue_status()
+    supervisor = queued["supervisor"]
+    heartbeat = supervisor.get("heartbeat_at")
+    supervisor["healthy"] = bool(
+        supervisor.get("instance_id") and heartbeat and
+        time.time() - heartbeat <= HEARTBEAT_STALE_SECONDS)
+    supervisor["heartbeat_age_seconds"] = (
+        round(time.time() - heartbeat, 3) if heartbeat else None)
+    result["queue"] = queued["messages"]
+    result["supervisor"] = supervisor
+    return result
 
 
 def tmux(*args, capture=False, check=True):
@@ -44,10 +279,27 @@ def tmux(*args, capture=False, check=True):
     terminal instead of into the exception, so a genuine delivery failure surfaced as an unrelated
     crash inside the error handler. An error path that cannot report its own error is worse than no
     error path.
+
+    Every call is bounded by `TMUX_TIMEOUT_SECONDS`. It used to be unbounded, and `subprocess.run`
+    with no timeout waits forever: a tmux command that never returns — pointed at a socket whose
+    server is not up, tmux is starting one, or the server is wedged — froze the supervisor inside
+    its own main loop. Nothing detects that. The supervisor is the thing that writes the heartbeat,
+    so a supervisor blocked here stops dispatching handoffs AND stops recording that it stopped;
+    `status` keeps reporting the last heartbeat until it goes stale, with no error anywhere. A
+    bounded failure that the loop can catch and report is strictly better than a silent freeze.
     """
-    result = subprocess.run(["tmux", *args], text=True,
-                            stdout=subprocess.PIPE if capture else None,
-                            stderr=subprocess.PIPE)
+    command = ["tmux"] + (["-L", TMUX_SOCKET] if TMUX_SOCKET else []) + list(args)
+    try:
+        result = subprocess.run(command, text=True,
+                                stdout=subprocess.PIPE if capture else None,
+                                stderr=subprocess.PIPE,
+                                timeout=TMUX_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        # `subprocess.run` kills the child and reaps it before re-raising, so nothing is left behind.
+        if check:
+            raise RuntimeError(
+                f"tmux {' '.join(args[:3])} did not return within {TMUX_TIMEOUT_SECONDS}s")
+        return TMUX_TIMEOUT_RETURNCODE
     if check and result.returncode:
         detail = (result.stderr or "").strip()
         raise RuntimeError(
@@ -162,6 +414,12 @@ def read_state():
 def write_state(**updates):
     RUNTIME.mkdir(parents=True, exist_ok=True)
     state = read_state()
+    for obsolete in (
+        "observed_sequence", "delivery_attempts", "delivery_uncertain_sequence",
+        "delivery_quarantined_sequence", "last_message_at", "last_send_pane_command",
+        "last_send_waited_for_idle", "last_target", "duplicate_sequences",
+    ):
+        state.pop(obsolete, None)
     state.update(updates, updated_at=int(time.time()))
     temporary = STATE.with_suffix(".tmp")
     temporary.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n")
@@ -414,7 +672,8 @@ def retry_staged_submission(pane, message):
     time.sleep(SUBMIT_POLL)
     text = pane_text(pane)
     pending = composer_text_from_text(text)
-    if BUSY_MARKER not in text and pending and pending[:PENDING_MATCH] in message:
+    staged = pending and (pending[:PENDING_MATCH] in message or PASTED_COLLAPSE in pending)
+    if BUSY_MARKER not in text and staged:
         tmux("send-keys", "-t", pane, "Enter")
         return True
     return False
@@ -754,87 +1013,157 @@ def open_claim_holders(text=None):
     return holders
 
 
-def supervisor_loop(interval=2.0):
-    RUNTIME.mkdir(parents=True, exist_ok=True)
-    STOP.unlink(missing_ok=True)
-    sequence, _ = latest_entry()
-    # Preserve the persisted cursor across supervisor restarts. Initializing to the
-    # current latest sequence would silently skip a handoff written while the
-    # supervisor was down (the exact failure mode seen after Seq 71).
-    persisted = read_state().get("observed_sequence")
-    baseline = persisted if isinstance(persisted, int) else sequence
-    write_state(status="running", supervisor_pid=os.getpid(), observed_sequence=baseline)
-    # A supervisor running in manual mode forwards nothing while reporting `status: running`.
-    # Say so rather than leave it to whoever thinks to read the state file.
-    if read_state().get("mode") != "auto":
-        print("WARNING supervisor is running with automatic handoffs DISABLED (mode is not "
-              "'auto'); no released entry will be dispatched until you run: "
-              "python scripts/interactive_dashboard.py auto", flush=True)
+def compact_notification(row):
+    """Small, stable TUI input; the task body never travels through terminal paste."""
+    return (f"HANDOFF {row['id']}: run python scripts/interactive_dashboard.py receive "
+            f"{row['target']} {row['id']}")
+
+
+def notify_next(db):
+    """Notify at most the oldest unacknowledged message, without blocking on a TUI."""
+    row = db.execute(
+        "SELECT * FROM handoff WHERE state IN ('queued','notified') ORDER BY id LIMIT 1"
+    ).fetchone()
+    if row is None:
+        return False
+    now = time.time()
     try:
-        while not STOP.exists():
-            state = read_state()
-            current, entry = latest_entry()
-            # Surface Seq collisions loudly. They do not break dispatch, because latest_entry()
-            # takes the last match in file order rather than the maximum — which is precisely why
-            # four accumulated in one session unnoticed. Report on change only, so the log does
-            # not fill with repeats of a known condition.
-            dupes = duplicate_sequences()
-            if dupes != state.get("duplicate_sequences"):
-                write_state(duplicate_sequences=dupes)
-                if dupes:
-                    print(f"WARNING duplicate Seq values in agent_discussion.md: {dupes}",
-                          flush=True)
-            if state.get("mode") == "auto" and current > state.get("observed_sequence", 0):
-                target = handoff_target(entry, state.get("active_agent"))
-                if target:
-                    message = handoff_message(entry, target)
-                    # Automatic handoffs never interrupt either conversation. A bounded turn
-                    # ends naturally; if the receiver is still working, leave the sequence
-                    # unconsumed and retry after it becomes idle.
-                    try:
-                        send_handoff(target, message, interrupt_busy=False)
-                    except DeliveryUncertain as exc:
-                        # Text was already submitted. Retrying can deliver the same user turn
-                        # repeatedly — Seq 248 reached Codex five times while the cursor stayed at
-                        # 247. Quarantine the uncertainty and consume the sequence; the append-only
-                        # log remains the recovery source.
-                        print(f"handoff delivery uncertain for {target}: {exc}", flush=True)
-                        write_state(active_agent=target, owner=target,
-                                    delivery_uncertain_sequence=current,
-                                    observed_sequence=current)
-                    except RuntimeError as exc:
-                        # A busy CLI is transient. Keep the sequence unconsumed so the next loop
-                        # retries; never let one undeliverable handoff kill the supervisor.
-                        #
-                        # Bounded, though. Seq 248 reached Codex seven times while the cursor stayed
-                        # at 247, because the post-condition was producing false negatives. Those
-                        # causes are fixed, but an unbounded retry on an unknown future false
-                        # negative would replay a user turn indefinitely. After DELIVERY_ATTEMPTS
-                        # the sequence is quarantined LOUDLY rather than dropped silently — the
-                        # append-only log stays the recovery source either way.
-                        attempts = state.get("delivery_attempts", {})
-                        attempts = dict(attempts) if isinstance(attempts, dict) else {}
-                        count = attempts.get(str(current), 0) + 1
-                        attempts[str(current)] = count
-                        if count >= DELIVERY_ATTEMPTS:
-                            print(f"WARNING handoff to {target} for Seq {current} failed {count} "
-                                  f"times and is being quarantined, not retried: {exc}", flush=True)
-                            write_state(delivery_attempts=attempts,
-                                        delivery_quarantined_sequence=current,
-                                        observed_sequence=current)
-                        else:
-                            print(f"handoff pending for {target} (attempt {count}): {exc}",
-                                  flush=True)
-                            write_state(delivery_attempts=attempts)
-                    else:
-                        write_state(active_agent=target, owner=target, observed_sequence=current)
-                else:
-                    write_state(observed_sequence=current)
-            time.sleep(interval)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        write_state(status="stopped", supervisor_pid=None)
+        pane = pane_id(row["target"])
+        staged = composer_text(pane).strip()
+        if row["state"] == "notified" and staged.startswith(f"HANDOFF {row['id']}:"):
+            tmux("send-keys", "-t", pane, "Enter")
+            db.execute("UPDATE handoff SET last_notified_at=? WHERE id=?", (now, row["id"]))
+            print(f"submitted staged notification for handoff {row['id']} with Enter; awaiting ack",
+                  flush=True)
+            return True
+        if row["last_notified_at"] and now - row["last_notified_at"] < NOTIFY_AFTER_SECONDS:
+            return False
+        command = pane_command(pane)
+        if command in SHELLS or not command:
+            if command in SHELLS:
+                send_line(pane, agent_command(row["target"]))
+                print(f"relaunching {row['target']} before handoff {row['id']}", flush=True)
+            return False
+        if command != row["target"]:
+            raise RuntimeError(f"pane runs {command!r}, expected {row['target']!r}")
+        if agent_busy(pane) or composer_text(pane).strip():
+            return False
+        send_line(pane, compact_notification(row))
+        db.execute(
+            "UPDATE handoff SET state='notified',notify_count=notify_count+1,"
+            "last_notified_at=?,last_error=NULL WHERE id=?", (now, row["id"]))
+        print(f"notified {row['target']} of handoff {row['id']}; awaiting DB acknowledgement",
+              flush=True)
+        return True
+    except RuntimeError as exc:
+        db.execute("UPDATE handoff SET last_error=? WHERE id=?", (str(exc), row["id"]))
+        print(f"handoff {row['id']} remains queued: {exc}", flush=True)
+        return False
+
+
+_ANNOUNCE_ERRORS = {}
+
+
+def announce_protocol(db, version=1):
+    """Tell each existing live TUI about the queue once, but only at a clean idle prompt.
+
+    A pending notice is logged ON CHANGE, never once per iteration. The same condition persists for
+    as long as the pane is missing or busy, and at a 0.05 s test interval that printed twice per
+    tick: enough to fill an undrained stdout pipe and wedge the supervisor mid-write. The existing
+    duplicate-Seq warning already uses report-on-change for exactly this reason, and
+    `supervisor.log` still holds 1,290 identical copies of an older unthrottled message.
+    """
+    for agent in AGENTS:
+        row = db.execute("SELECT version FROM protocol_notice WHERE agent=?", (agent,)).fetchone()
+        if row and row["version"] >= version:
+            continue
+        try:
+            pane = pane_id(agent)
+            if pane_command(pane) != agent or agent_busy(pane) or composer_text(pane).strip():
+                continue
+            send_line(
+                pane,
+                "Dashboard protocol upgraded. Read the Collaboration section of AGENTS.md now. "
+                "For every release, do not append markdown manually: run `python "
+                f"scripts/interactive_dashboard.py handoff {agent} --subject 'short subject' "
+                "--message 'complete verified task brief'`. On HANDOFF <id>, run its receive "
+                "command immediately; that acknowledgement activates the task.")
+            db.execute("INSERT INTO protocol_notice(agent,version,notified_at) VALUES(?,?,?) "
+                       "ON CONFLICT(agent) DO UPDATE SET version=excluded.version,"
+                       "notified_at=excluded.notified_at", (agent, version, time.time()))
+            print(f"announced queue protocol v{version} to idle {agent}", flush=True)
+            _ANNOUNCE_ERRORS.pop(agent, None)
+        except RuntimeError as exc:
+            if _ANNOUNCE_ERRORS.get(agent) != str(exc):
+                _ANNOUNCE_ERRORS[agent] = str(exc)
+                print(f"protocol notice for {agent} pending: {exc}", flush=True)
+
+
+def supervisor_loop(interval=2.0):
+    """Singleton, heartbeat-backed queue dispatcher.
+
+    It never parses markdown and never treats screen text as proof of delivery. Queue progress
+    occurs only when the receiver runs `receive`, which commits a machine-readable acknowledgement.
+    """
+    RUNTIME.mkdir(parents=True, exist_ok=True)
+    instance = uuid.uuid4().hex
+    with SUPERVISOR_LOCK.open("a+") as lock:
+        try:
+            # This `flock` was missing: the body was `pass`, so `except BlockingIOError` was
+            # unreachable and the singleton was decorative. Every second supervisor started
+            # normally -- N loops writing heartbeats over each other, each dispatching from the
+            # same queue into the same panes, and `wait_for_supervisor_release` (which DOES flock)
+            # returning instantly because no one ever held the lock. LOCK_NB is what makes this a
+            # rejection rather than a wait: a second supervisor must fail loudly, not queue up.
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise RuntimeError("another interactive supervisor already holds the singleton lock")
+        # Only now, holding the lock. Clearing STOP before the singleton check let a REJECTED second
+        # supervisor cancel a shutdown already requested of the running one: `stop` creates STOP,
+        # the live loop is about to see it, and an unrelated `run` attempt deletes it on its way to
+        # failing. The shutdown was then silently lost.
+        STOP.unlink(missing_ok=True)
+        db = queue_connect()
+        recover_preparing(db)
+        started = time.time()
+        db.execute("UPDATE supervisor SET instance_id=?,pid=?,heartbeat_at=?,started_at=? "
+                   "WHERE singleton=1", (instance, os.getpid(), started, started))
+        write_state(status="running", supervisor_pid=os.getpid(), supervisor_instance=instance)
+        if read_state().get("mode") != "auto":
+            print("WARNING supervisor is healthy but automatic handoffs DISABLED (paused)",
+                  flush=True)
+        try:
+            while not STOP.exists():
+                now = time.time()
+                db.execute("UPDATE supervisor SET heartbeat_at=? WHERE singleton=1 AND instance_id=?",
+                           (now, instance))
+                announce_protocol(db)
+                if read_state().get("mode") == "auto":
+                    notify_next(db)
+                time.sleep(interval)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            db.execute("UPDATE supervisor SET instance_id=NULL,pid=NULL,heartbeat_at=? "
+                       "WHERE singleton=1 AND instance_id=?", (time.time(), instance))
+            db.close()
+            write_state(status="stopped", supervisor_pid=None, supervisor_instance=None)
+
+
+def wait_for_supervisor_exit(timeout=10.0):
+    """Wait for the singleton lock, not a namespace-dependent PID or fixed sleep."""
+    deadline = time.monotonic() + timeout
+    RUNTIME.mkdir(parents=True, exist_ok=True)
+    with SUPERVISOR_LOCK.open("a+") as lock:
+        while True:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(lock, fcntl.LOCK_UN)
+                return
+            except BlockingIOError:
+                if time.monotonic() >= deadline:
+                    raise RuntimeError("supervisor did not release its singleton lock in time")
+                time.sleep(0.05)
 
 
 def start(first):
@@ -879,15 +1208,18 @@ def start(first):
         send_line(
             pane,
             f"{AGENT_IDENTITIES[name]}. Work sequentially: edit only when explicitly handed "
-            "ownership, follow AGENTS.md, and record a handoff in agent_discussion.md when done.")
+            "ownership and follow AGENTS.md. Never append a release manually. When done run "
+            f"`python scripts/interactive_dashboard.py handoff {name} --subject 'short subject' "
+            "--message 'complete verified task brief for the other agent'`.")
     tmux("select-pane", "-t", control)
     if first:
         # Previously a fixed 1s sleep, then `send()` - whose Seq-73 guard refuses a pane still at
         # a shell prompt. Claude takes far longer than 1s to boot, so this path reliably raised
         # "refusing to send a handoff into a shell": the guard was right and the caller was wrong.
         wait_for_app(pane_id(first), first)
-        send(first, "Read AGENTS.md and agent_discussion.md, then continue the latest active handoff."
-                    " Preserve ownership rules and stop for genuine user gates.")
+        send_line(pane_id(first), "Read AGENTS.md. Wait for a HANDOFF <id> notification; do not "
+                  "infer work from the latest Markdown entry. Acknowledge with the supplied "
+                  "receive command before starting.")
     print(f"started interactive dashboard: tmux attach -t {SESSION}")
 
 
@@ -951,9 +1283,10 @@ def upgrade_existing():
             send_line(pane, agent_command(name))
             wait_for_app(pane, name)
             send_line(pane, f"{AGENT_IDENTITIES[name]}. Follow AGENTS.md and the sequential "
-                            "ownership protocol in agent_discussion.md.")
+                            "ownership protocol. Use the dashboard `handoff` and `receive` commands; "
+                            "do not use markdown as a work queue.")
     STOP.touch()
-    time.sleep(0.3)
+    wait_for_supervisor_exit()
     write_state(mode="manual", owner="none", active_agent=None, status="starting",
                 observed_sequence=latest_entry()[0],
                 panes={"codex": codex, "claude": claude, "control": control})
@@ -977,6 +1310,14 @@ def main():
     sub.add_parser("auto")
     sub.add_parser("pause")
     message = sub.add_parser("send"); message.add_argument("agent", choices=AGENTS); message.add_argument("message", nargs="+")
+    handoff = sub.add_parser("handoff")
+    handoff.add_argument("sender", choices=AGENTS)
+    handoff.add_argument("--subject", required=True)
+    handoff.add_argument("--message", required=True)
+    receive = sub.add_parser("receive")
+    receive.add_argument("agent", choices=AGENTS)
+    receive.add_argument("message_id", type=int)
+    sub.add_parser("recover-queue")
     interrupt_parser = sub.add_parser("interrupt"); interrupt_parser.add_argument("agent", choices=AGENTS)
     sub.add_parser("stop")
     sub.add_parser("next-seq")    # atomic Seq allocation for agents appending entries
@@ -984,14 +1325,24 @@ def main():
     args = parser.parse_args()
     if args.command == "start": start(args.first)
     elif args.command == "upgrade": upgrade_existing()
-    elif args.command == "run": supervisor_loop()
-    elif args.command == "status": print(json.dumps(read_state(), indent=2, sort_keys=True))
+    elif args.command == "run": supervisor_loop(float(os.environ.get("DASHBOARD_INTERVAL", "2")))
+    elif args.command == "status": print(json.dumps(dashboard_status(), indent=2, sort_keys=True))
     elif args.command == "take":
         write_state(mode="manual", owner=args.agent, active_agent=args.agent); tmux("select-pane", "-t", pane_id(args.agent)); print(f"manual control: {args.agent}")
     elif args.command == "release": write_state(mode="manual", owner="none", active_agent=None); print("manual control released")
     elif args.command == "auto": enable_auto()
     elif args.command == "pause": write_state(mode="manual", owner="none"); print("automatic handoffs paused")
     elif args.command == "send": send(args.agent, " ".join(args.message))
+    elif args.command == "handoff":
+        message_id, seq, target = create_handoff(args.sender, args.subject, args.message)
+        print(f"handoff {message_id} queued for {target} (audit Seq {seq})")
+    elif args.command == "receive":
+        row = receive_handoff(args.agent, args.message_id)
+        print(f"HANDOFF {row['id']} ACKNOWLEDGED: {row['sender']} -> {row['target']}")
+        print(f"SUBJECT: {row['subject']}")
+        print(row["payload"])
+    elif args.command == "recover-queue":
+        print(f"recovered {recover_preparing()} preparing handoff(s)")
     elif args.command == "interrupt": interrupt(args.agent)
     elif args.command == "next-seq": print(next_sequence())
     elif args.command == "check-seq":

@@ -543,6 +543,9 @@ class SendGuardTests(unittest.TestCase):
         with self.assertRaises(RuntimeError) as ctx:
             DASH.send("codex", message)
         self.assertIn("NOT submitted", str(ctx.exception))
+        enters = [c for c in self.sent_keys() if "Enter" in c[1]]
+        self.assertEqual(len(enters), 2,
+                         "a collapsed Claude-to-Codex paste must receive the second Enter")
         self.assertEqual([c for c in self.calls if c[0] == "state"], [],
                          "a collapsed paste must not be recorded as a delivery")
 
@@ -675,6 +678,14 @@ class SendGuardTests(unittest.TestCase):
     def test_a_staged_paste_gets_exactly_one_second_enter(self):
         message = "Direct handoff with a sufficiently distinctive body"
         DASH.tmux = self._tmux_with_command("claude", pane_text=f"❯ {message}")
+        self.assertTrue(DASH.retry_staged_submission("%15", message))
+        enters = [c for c in self.sent_keys() if "Enter" in c[1]]
+        self.assertEqual(len(enters), 1)
+
+    def test_a_collapsed_codex_paste_gets_the_second_enter(self):
+        message = "Direct handoff from Claude to Codex. " + "detail " * 200
+        DASH.tmux = self._tmux_with_command(
+            "codex", pane_text="› [Pasted Content 3356]\n  gpt-5.6-sol default")
         self.assertTrue(DASH.retry_staged_submission("%15", message))
         enters = [c for c in self.sent_keys() if "Enter" in c[1]]
         self.assertEqual(len(enters), 1)
@@ -1013,6 +1024,7 @@ class ProductionSafetyTests(unittest.TestCase):
         self.assertGreaterEqual(len(before), 5, "protected set should cover the core documents")
 
 
+@unittest.skip("superseded by acknowledged SQLite queue tests; markdown is no longer dispatch state")
 class SupervisorResilienceTests(IsolatedDashboard):
     """An undeliverable handoff must not kill the dispatcher, and must not be recorded as sent.
 
@@ -1459,8 +1471,8 @@ class StartOrderingTests(IsolatedDashboard):
                          "readiness must be polled, not slept through")
         literal = [a[4] for a in self.fake.calls
                    if a[0] == "send-keys" and len(a) > 4 and a[3] == "-l"]
-        self.assertTrue(any("continue the latest active handoff" in text for text in literal),
-                        "the first dispatch must still be delivered")
+        self.assertTrue(any("Wait for a HANDOFF <id> notification" in text for text in literal),
+                        "startup must explain acknowledged queue activation")
 
     def _index_of_send(self, pane, needle):
         for i, a in enumerate(self.fake.calls):

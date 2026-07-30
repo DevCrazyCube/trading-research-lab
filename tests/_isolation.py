@@ -37,7 +37,14 @@ PROTECTED = (
 
 # Every module-level path the dashboard can write through. Listed exhaustively on purpose:
 # patching only the attribute a given test happens to use is what produced the near-miss.
-DASHBOARD_PATHS = ("RUNTIME", "STATE", "LOG", "STOP", "DISCUSSION", "SEQ_LOCK", "SEQ_COUNTER")
+DASHBOARD_PATHS = (
+    "RUNTIME", "STATE", "LOG", "STOP", "DISCUSSION", "SEQ_LOCK", "SEQ_COUNTER",
+    "QUEUE_DB", "SUPERVISOR_LOCK", "HANDOFF_LOCK",
+    # Not files, but the same class of leak: these address the LIVE tmux panes. A supervisor that
+    # keeps them pointed at production will `send_line` into the real Codex and Claude terminals —
+    # which happened, delivering a duplicate protocol announcement into a working agent's pane.
+    "SESSION", "TMUX_SOCKET",
+)
 
 
 def digests():
@@ -90,6 +97,11 @@ class IsolatedDashboard(unittest.TestCase):
         self.dash.DISCUSSION = self.tmp / "agent_discussion.md"
         self.dash.SEQ_LOCK = self.tmp / "seq.lock"
         self.dash.SEQ_COUNTER = self.tmp / "seq.counter"
+        self.dash.QUEUE_DB = self.tmp / "handoffs.sqlite"
+        self.dash.SUPERVISOR_LOCK = self.tmp / "supervisor.lock"
+        self.dash.HANDOFF_LOCK = self.tmp / "handoff.lock"
+        self.dash.SESSION = f"test-{self.tmp.name}"
+        self.dash.TMUX_SOCKET = f"test-socket-{self.tmp.name}"
         self.dash.DISCUSSION.write_text("", encoding="utf-8")
         self._before = digests()
 
