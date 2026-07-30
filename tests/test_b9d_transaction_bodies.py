@@ -1641,6 +1641,149 @@ class ReserveScopeTests(unittest.TestCase):
         self.assertIn("frozen", str(ctx.exception))
 
 
+class DerivedArtifactVerificationTests(unittest.TestCase):
+    def setUp(self):
+        directory = pathlib.Path(tempfile.mkdtemp())
+        self.database = B9D.connect(str(directory / "derived.sqlite"))
+        B9D.schema(self.database)
+        self.addCleanup(self.database.close)
+        self.b9a = directory / "b9a.sqlite"
+        with sqlite3.connect(self.b9a) as con:
+            con.execute("CREATE TABLE outcome (mint TEXT, bonding_curve TEXT, "
+                        "is_mayhem_mode INTEGER)")
+            con.execute("INSERT INTO outcome VALUES ('mint','curve',0)")
+        self.database.executemany("INSERT INTO metadata VALUES (?,?)", [
+            ("decoded_at_unix", "1"), ("decoder_classification_failures", "0")])
+        self.database.execute("INSERT INTO transaction_coordinate VALUES ('sig',1,0)")
+        self.add_instruction(0)
+        self.add_reserve(0, (None,) * 4, (10, 20, 30, 40))
+
+    def add_instruction(self, outer, signature="sig", slot=1, transaction_index=0,
+                        target=1, name="buy"):
+        self.database.execute(
+            "INSERT INTO instruction VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (slot, transaction_index, outer, -1, signature, B9D.PUMP_PROGRAM, "00", name,
+             target, "[]", 1))
+
+    def add_reserve(self, outer, before, after, curve="curve"):
+        self.database.execute(
+            "INSERT INTO reserve_observation VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (1, 0, outer, -1, curve, *before, *after, "{}"))
+
+    def verify(self):
+        return B9D.verify_decoded_artifact(self.database, str(self.b9a))
+
+    def test_valid_persisted_rows_replay(self):
+        self.assertEqual(self.verify(), {"instructions": 1, "reserve_observations": 1,
+                                        "classification_failures": 0, "reserve_curves": 1})
+
+    def test_an_incomplete_after_state_fails(self):
+        """A null in the after-state makes the row unusable as the next row's before-state."""
+        self.database.execute("UPDATE reserve_observation SET real_token_after=NULL")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("incomplete after-state", str(ctx.exception))
+
+    def test_the_chain_is_replayed_in_canonical_order_not_insertion_order(self):
+        """Rows are persisted in decode order, but contiguity is only meaningful in CANONICAL
+        order. Insert a later coordinate FIRST: ordering by curve alone would replay them as
+        stored and report a valid chain as non-contiguous."""
+        self.database.execute("DELETE FROM reserve_observation")
+        self.add_instruction(1)
+        self.add_instruction(2)
+        # Persisted out of order: outer 2 before outer 1.
+        self.add_reserve(2, (20, 30, 40, 50), (30, 40, 50, 60))
+        self.add_reserve(1, (10, 20, 30, 40), (20, 30, 40, 50))
+        self.add_reserve(0, (None,) * 4, (10, 20, 30, 40))
+        summary = self.verify()
+        self.assertEqual(summary["reserve_observations"], 3,
+                         "a contiguous chain stored out of order must still replay cleanly")
+
+    def test_a_preserved_transaction_that_decoded_into_nothing_fails(self):
+        """The MISSING direction. Every other check runs derived -> parent, so a decoder that
+        skipped transactions produces no orphans and passes. Reproduced with two fetched bodies and
+        rows for only one; a transaction always carries at least one instruction, so a body with no
+        instruction row is missing derived evidence."""
+        self.database.execute("INSERT INTO transaction_coordinate VALUES ('sig2',1,1)")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("produced no instruction row", str(ctx.exception))
+
+    def test_an_entirely_empty_derived_set_fails(self):
+        """`decoded_at_unix` stops a PRE-decode artifact passing vacuously, but not a decode pass
+        that produced nothing — the same vacuous pass one step later."""
+        self.database.execute("DELETE FROM reserve_observation")
+        self.database.execute("DELETE FROM instruction")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("produced no instruction row", str(ctx.exception))
+
+    def test_instruction_coordinate_and_signature_orphans_fail(self):
+        self.add_instruction(1, signature="wrong")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("instruction row", str(ctx.exception))
+
+    def test_reserve_observation_requires_a_parent_instruction(self):
+        self.add_reserve(9, (1, 2, 3, 4), (2, 3, 4, 5))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("no target Pump parent instruction", str(ctx.exception))
+
+    def test_reserve_chain_contiguity_is_rederived_from_rows(self):
+        self.add_instruction(1)
+        self.add_reserve(1, (11, 20, 30, 40), (12, 21, 31, 41))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("non-contiguous", str(ctx.exception))
+
+    def test_partial_before_or_after_state_fails(self):
+        self.database.execute("UPDATE reserve_observation SET virtual_quote_before=1")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("partially-null", str(ctx.exception))
+        self.database.execute(
+            "UPDATE reserve_observation SET virtual_quote_before=NULL,virtual_quote_after=-1")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("negative reserve", str(ctx.exception))
+
+    def test_classification_failure_requires_matching_signed_instruction(self):
+        self.database.execute(
+            "INSERT INTO classification_failure "
+            "(signature,slot,transaction_index,outer_index,inner_index,reason) "
+            "VALUES ('wrong',1,0,0,-1,'bad')")
+        self.database.execute(
+            "UPDATE metadata SET value='1' WHERE key='decoder_classification_failures'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("classification failure row", str(ctx.exception))
+
+    def test_failure_metadata_and_target_accounting_are_replayed(self):
+        self.database.execute("UPDATE instruction SET target=1,idl_name=NULL")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("neither named nor recorded", str(ctx.exception))
+        self.database.execute("UPDATE instruction SET target=1,idl_name='buy'")
+        self.database.execute(
+            "UPDATE metadata SET value='9' WHERE key='decoder_classification_failures'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("metadata disagrees", str(ctx.exception))
+
+    def test_reserve_curve_must_be_in_frozen_tradable_scope(self):
+        self.database.execute("UPDATE reserve_observation SET bonding_curve='incidental'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("outside the frozen tradable cohort", str(ctx.exception))
+
+    def test_absent_decoder_completion_marker_is_not_an_empty_success(self):
+        self.database.execute("DELETE FROM metadata WHERE key='decoded_at_unix'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.verify()
+        self.assertIn("no completed decoder pass", str(ctx.exception))
+
+
 class DecoderOrchestrationTests(unittest.TestCase):
     """Complete raw bodies become one canonical, fail-visible instruction stream."""
 
