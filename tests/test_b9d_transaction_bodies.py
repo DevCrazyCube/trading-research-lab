@@ -655,6 +655,39 @@ class ArtifactTests(unittest.TestCase):
         self.assertIn("never be overwritten", str(ctx.exception))
         database.close()
 
+    def test_a_completed_rerun_is_byte_immutable_and_makes_zero_rpc_calls(self):
+        """§11 at the production call site, including the ordering of the refusal.
+
+        The completed marker must be discovered through a read-only open before source scans,
+        population derivation, writable SQLite pragmas, or an RPC request can occur.
+        """
+        database = self.artifact()
+        with database:
+            database.execute("INSERT INTO metadata VALUES ('completed_at_unix','1')")
+        database.close()
+        before = B9D.sha256_file(self.path)
+        touched = []
+        saved = (B9D.assert_sources, B9D.frozen_population_by_slot, B9D.rpc_request)
+
+        def forbidden(name):
+            def call(*args, **kwargs):
+                touched.append(name)
+                raise AssertionError(f"completed rerun reached forbidden {name}")
+            return call
+
+        B9D.assert_sources = forbidden("source scan")
+        B9D.frozen_population_by_slot = forbidden("population scan")
+        B9D.rpc_request = forbidden("RPC")
+        self.addCleanup(lambda: setattr(B9D, "assert_sources", saved[0]))
+        self.addCleanup(lambda: setattr(B9D, "frozen_population_by_slot", saved[1]))
+        self.addCleanup(lambda: setattr(B9D, "rpc_request", saved[2]))
+
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.collect_raw_population("https://unused.invalid", str(self.path))
+        self.assertIn("already marked complete", str(ctx.exception))
+        self.assertEqual(touched, [])
+        self.assertEqual(B9D.sha256_file(self.path), before)
+
     def test_a_partial_artifact_is_resumable_and_not_refused(self):
         database = self.artifact()
         database.execute("INSERT INTO metadata VALUES ('started_at_unix','1')")

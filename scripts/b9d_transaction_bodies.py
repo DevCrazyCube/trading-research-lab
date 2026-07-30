@@ -341,6 +341,23 @@ def refuse_if_complete(database):
             "a reset flag. Move it aside if a genuinely new run is intended.")
 
 
+def refuse_completed_artifact_before_work(path):
+    """Reject a completed rerun before any source scan, writable open, or RPC opportunity.
+
+    `initialize_run()` retains the same check inside the writable transaction path as defense in
+    depth. This earlier read-only check is what makes §11's stronger claim true: rerunning against
+    a completed artifact cannot rewrite SQLite pragmas or metadata before discovering the marker.
+    """
+    if not os.path.exists(path):
+        return None
+    database = connect(path, readonly=True)
+    try:
+        refuse_if_complete(database)
+    finally:
+        database.close()
+    return None
+
+
 def assert_resumable(database, digests):
     """§5: a partial artifact resumes only when its source metadata matches exactly."""
     stored = dict(database.execute(
@@ -1228,6 +1245,10 @@ def collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PAT
                            max_slots=None, max_transactions=None, progress_every=100,
                            calls_per_second=2.5):
     """Resumably preserve block coordinates and transaction response bodies; no decoding yet."""
+    # §11: this must be the first observable action on an existing output. In particular it comes
+    # before source hashing/population scans and before the writable `connect()` that sets WAL and
+    # synchronous pragmas. A completed rerun is byte-immutable and has no RPC opportunity.
+    refuse_completed_artifact_before_work(output)
     digests = assert_sources(b9c_path, b9a_path)
     grouped = frozen_population_by_slot(b9c_path, b9a_path)
     database = connect(output)
