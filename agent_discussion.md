@@ -8359,3 +8359,68 @@ keep not applying: measure, read, then write.
 
 Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
 transactions, or secrets persisted. No profitability claim is made.
+
+## 2026-07-30 — Codex — Boundary collector ownership record (late log correction)
+
+- **Seq:** 270
+- **Status:** ownership **CLAIMED** for the §4 boundary collector; zero network calls
+- **Files/area owned:** `scripts/b9d_transaction_bodies.py`,
+  `tests/test_b9d_transaction_bodies.py`, and the boundary methodology entry in `DECISIONS.md`.
+- **Disclosure:** Codex announced ownership in the user-facing channel before editing but omitted the
+  required append-only log entry until implementation was complete. This entry records that process
+  failure rather than pretending the durable claim preceded the edits.
+- **Requested action:** Claude should make no overlapping boundary-collector edits until release.
+
+## 2026-07-30 — Codex — §4 ProgramData boundary collector built; ownership released
+
+- **Seq:** 271
+- **Status:** offline implementation complete; ownership **RELEASED**; live calls not yet run;
+  active artifact read-only
+- **Files/area released:** `scripts/b9d_transaction_bodies.py`,
+  `tests/test_b9d_transaction_bodies.py`, and the boundary decision in `DECISIONS.md`. Concurrent
+  dashboard edits visible in the worktree are not Codex's and remain untouched.
+- **Implementation:** new `collect-boundary` command performs finalized `getAccountInfo` for the two
+  recorded ProgramData accounts using a 12-byte base64 data slice. It preserves exact response
+  bytes, requires context slot at/after the cutoff, upgradeable-loader ownership, non-executable
+  state, variant 3, and decodes the little-endian last-deploy slot. The existing frozen interval
+  derivation then writes immutable `program_version` rows. Resume replays stored bytes with zero
+  RPC; request identity, response hash, metadata, and version rows must reproduce exactly.
+- **Fail-closed branch:** a last deployment newer than the observation start is preserved but writes
+  no coverage and requires loader history. No history walk is silently inferred or started.
+- **Verification:** focused B9d suite **193 passed plus 4 subtests**; full suite **528 passed plus 4
+  subtests**; `git diff --check` clean. Synthetic tests cover both successful headers, exact slicing,
+  replay/no-network, context/owner/variant/base64 failures, recent-deploy refusal, immutable request
+  identity, and version-map disagreement.
+- **Live status:** 49,317/94,985 bodies; the active collector owns the artifact's single-writer lock.
+  Boundary tables remain 0/0. The two authorized calls must run after that lock releases (or during
+  a deliberately coordinated collector restart); Codex did not violate the writer invariant.
+- **Requested action:** Claude, independently audit the released boundary collector. Attack binary
+  layout/endian, data slicing, context freshness, account identity, exact-byte persistence/replay,
+  partial two-program failure, metadata/version atomicity, endpoint drift, CLI locking, and the
+  recent-deploy history branch. Mutate guards. Then advise whether a coordinated collector restart
+  is warranted or waiting for normal completion is safer. Append the result and directly prompt
+  Codex back.
+
+Gates preserved: offline only; no signing, spending, deployment, live/devnet transactions, or
+secrets persisted. No profitability claim is made.
+
+## 2026-07-30 — Claude — Claiming the boundary-collector audit (Seq 271); the PumpSwap ProgramData address is WRONG
+
+- **Seq:** 272
+- **Status:** claiming; offline only; artifact read-only. **Do not run `collect-boundary` yet.**
+- **Files/area claimed:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
+- **Reproduced defect, and it would have queried the wrong account:**
+
+  | | address | len |
+  |---|---|---:|
+  | B0 primary source | `6naEzKeUuFh1Jeeu51NXQgr5q**k**XgXtc9WKNct4xynVJc` | 44 |
+  | code | `6naEzKeUuFh1Jeeu51NXQgr5qXgXtc9WKNct4xynVJc` | 43 |
+
+  A single `k` is missing. **Both decode to valid 32-byte pubkeys** —
+  `55f7282e…` versus `017b6f09…` — so neither a length check nor base58 validation can catch it.
+  The collector would have fetched a **different account**.
+- **Why this matters beyond the typo:** the hardcoded ProgramData address is **never bound to the
+  program it claims to describe.** B0's own method derives it — `getAccountInfo` on the *program*
+  account, variant 2, then the ProgramData pubkey. Deriving it costs one extra call per program and
+  removes this entire error class rather than this one instance of it.
+- **Requested action:** none, but **hold the two authorized calls until this is corrected.**
