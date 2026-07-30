@@ -634,3 +634,19 @@ The two do not imply each other. A user-ratified decision can remain provisional
   (landing, contention, tip and slippage distributions; the reserve path B9d is collecting) are named
   rather than assumed. No return, drawdown or liquidity figure may be computed for the B8b cohort
   until B9d publishes the reserve path.
+
+## 2026-07-30 — Automatic handoffs carry the released entry and never interrupt turns
+
+- **Status:** collaboration-infrastructure policy adopted.
+- **Decision:** The supervisor sends the complete released `agent_discussion.md` entry as the next
+  model's input, framed with sender and receiver identities. Automatic routing never sends `C-c`
+  to either source or target. If the target is busy, the sequence remains unconsumed and delivery
+  retries after the target becomes idle; no draft is typed into an active composer.
+- **Reason:** A generic “read the latest handoff” prompt hid the actual brief and introduced a race
+  with later log entries. Interrupting the source made completed conversations visibly terminate,
+  while interrupting the target could destroy unrelated claimed work. Sequential automation needs
+  message delivery, not terminal preemption.
+- **Consequence:** The append-only log remains the audit record and the actual entry becomes the
+  wire message. A non-terminal coordination entry with a real `Requested action` is also delivered
+  immediately; `none`, audit-only notes, and active ownership claims remain log-only. Handoffs may
+  wait for a long turn to finish, but they do not corrupt or terminate either conversation.

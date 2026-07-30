@@ -42,6 +42,22 @@ class DashboardTests(unittest.TestCase):
                   "- **Requested action:** wait")
         self.assertIsNone(DASH.handoff_target(active))
 
+    def test_explicit_coordination_request_routes_without_terminal_status(self):
+        entry = ("## 2026-07-30 — Codex — hello\n"
+                 "- **Seq:** 9\n"
+                 "- **Status:** test message; no ownership claimed\n"
+                 "- **Requested action:** Please acknowledge receipt.\n")
+        self.assertEqual(DASH.handoff_target(entry), "claude")
+
+    def test_no_action_and_claim_entries_remain_log_only(self):
+        no_action = ("## 2026-07-30 — Codex — note\n- **Seq:** 10\n"
+                     "- **Status:** evidence note\n- **Requested action:** none\n")
+        claim = ("## 2026-07-30 — Codex — claim\n- **Seq:** 11\n"
+                 "- **Status:** claiming; in progress\n"
+                 "- **Requested action:** Claude should review later\n")
+        self.assertIsNone(DASH.handoff_target(no_action))
+        self.assertIsNone(DASH.handoff_target(claim))
+
     def test_routes_released_claude_entry_to_codex(self):
         entry = ("## 2026-07-28 — Claude — done\n"
                  "- **Seq:** 2\n"
@@ -410,7 +426,9 @@ class SendGuardTests(unittest.TestCase):
         DASH.tmux = fake
         with self.assertRaises(RuntimeError) as ctx:
             DASH.send("codex", message)
-        self.assertIn("NOT submitted", str(ctx.exception))
+        self.assertIn("still working", str(ctx.exception))
+        self.assertEqual(self.sent_keys(), [],
+                         "a busy target must receive neither draft text nor Enter")
         self.assertEqual([c for c in self.calls if c[0] == "state"], [],
                          "pre-existing busy state must not consume the handoff sequence")
 
@@ -917,8 +935,13 @@ class SupervisorResilienceTests(IsolatedDashboard):
         """The other side of the boundary: a working dispatch must still advance."""
         delivered = []
         self.run_one_iteration(
-            lambda agent, message, interrupt_busy=True: delivered.append(agent))
-        self.assertEqual(delivered, ["codex"])
+            lambda agent, message, interrupt_busy=True:
+                delivered.append((agent, message, interrupt_busy)))
+        self.assertEqual(delivered[0][0], "codex")
+        self.assertFalse(delivered[0][2], "automatic routing must never interrupt the receiver")
+        self.assertIn("## d — Claude — released", delivered[0][1])
+        self.assertIn("- **Status:** released", delivered[0][1])
+        self.assertNotIn("Read the latest handoff", delivered[0][1])
         state = DASH.read_state()
         self.assertEqual(state["observed_sequence"], 2)
         self.assertEqual(state["active_agent"], "codex")
@@ -938,8 +961,8 @@ class SupervisorResilienceTests(IsolatedDashboard):
         """The live case: Codex mid-run on a claimed B9b measurement when Claude released."""
         self.assertIs(self.dispatch_with_codex_status("claiming; in progress"), False)
 
-    def test_the_dispatcher_still_interrupts_a_target_with_no_open_claim(self):
-        self.assertIs(self.dispatch_with_codex_status("complete; ownership released"), True)
+    def test_the_dispatcher_never_interrupts_a_target_with_no_open_claim(self):
+        self.assertIs(self.dispatch_with_codex_status("complete; ownership released"), False)
 
     def test_a_source_holding_an_open_claim_is_not_interrupted_either(self):
         """`active_agent` is interrupted when work moves on. A claim protects it there too."""
@@ -950,6 +973,13 @@ class SupervisorResilienceTests(IsolatedDashboard):
         self.run_one_iteration(lambda agent, message, interrupt_busy=True: None)
         self.assertEqual([c for c in self.tmux_calls if "C-c" in c], [],
                          "the outgoing agent's claimed work must survive the handoff too")
+
+    def test_the_source_is_never_interrupted_even_without_an_open_claim(self):
+        DASH.DISCUSSION.write_text(
+            "## d — Codex — released\n- **Seq:** 2\n- **Status:** released\n", encoding="utf-8")
+        DASH.write_state(active_agent="codex", observed_sequence=1)
+        self.run_one_iteration(lambda agent, message, interrupt_busy=True: None)
+        self.assertEqual([c for c in self.tmux_calls if "C-c" in c], [])
 
 
 class PendingComposerTests(IsolatedDashboard):

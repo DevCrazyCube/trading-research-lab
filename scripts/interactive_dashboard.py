@@ -386,6 +386,10 @@ def send(agent, message):
     # relaying our messages by hand.
     idle = wait_for_idle(target)
     pending_before = composer_text(target)
+    if not idle and not (pending_before and pending_before[:PENDING_MATCH] in message):
+        raise RuntimeError(
+            f"{agent!r} is still working in pane {target}; automatic routing will wait rather "
+            "than interrupt the turn or type a draft into its active composer")
     if pending_before and pending_before[:PENDING_MATCH] in message:
         # A previous attempt reached the composer but the agent was still busy. Do not append a
         # duplicate; submit the existing draft once the pane is idle.
@@ -558,11 +562,30 @@ def entry_status(entry):
 
 
 RELEASE_WORDS = ("handoff", "released", "complete")
+NO_ACTIONS = ("none", "no action", "nothing requested")
+
+
+def entry_requested_action(entry):
+    """A real requested action, or "" for audit-only/no-action entries."""
+    line = next((line for line in entry.splitlines()
+                 if line.startswith("- **Requested action:**")), "")
+    action = line.split(":**", 1)[1].strip() if ":**" in line else ""
+    if not action or any(action.lower().startswith(value) for value in NO_ACTIONS):
+        return ""
+    return action
 
 
 def handoff_target(entry, active_agent=None):
     status_line = entry_status(entry)
-    if not any(word in status_line for word in RELEASE_WORDS):
+    # Terminal releases and explicit cross-agent requests both need immediate pane delivery.
+    # A claim/in-progress entry is audit state, not a task for the other agent, even if its prose
+    # contains a future requested action.
+    terminal = any(word in status_line for word in RELEASE_WORDS)
+    explicit_request = (bool(entry_requested_action(entry))
+                        and "claiming" not in status_line
+                        and "in progress" not in status_line
+                        and "implementation ownership" not in status_line)
+    if not (terminal or explicit_request):
         return None
     author = entry_author(entry)
     if "codex" in author:
@@ -570,6 +593,23 @@ def handoff_target(entry, active_agent=None):
     if "claude" in author:
         return "codex"
     return None
+
+
+def handoff_message(entry, target):
+    """Frame the released entry itself as the next agent's input.
+
+    The log remains the audit record, but the receiver should not have to translate a generic
+    "read the latest" instruction back into the actual work. Supplying the immutable entry also
+    avoids a race where another entry is appended between detection and the receiver reading it.
+    """
+    sender = entry_author(entry) or "the other agent"
+    return (
+        f"Direct handoff from {sender} to {target}. The complete released handoff follows. "
+        "Treat it as the task brief, verify its claims independently, follow AGENTS.md, claim "
+        "ownership before editing, and append your own release when finished. Do not ask routine "
+        "questions; make safe in-scope assumptions.\n\n"
+        f"--- BEGIN HANDOFF ---\n{entry.rstrip()}\n--- END HANDOFF ---"
+    )
 
 
 def entry_blocks(text):
@@ -643,18 +683,12 @@ def supervisor_loop(interval=2.0):
             if state.get("mode") == "auto" and current > state.get("observed_sequence", 0):
                 target = handoff_target(entry, state.get("active_agent"))
                 if target:
-                    message = ("Read the latest handoff in agent_discussion.md, follow AGENTS.md, "
-                               "claim ownership, perform the requested bounded task, verify it, "
-                               "then append a release/handoff entry. Stop for genuine user gates.")
-                    # An agent holding an open claim is working under the ownership protocol, not
-                    # sitting on stale UI state. Neither interrupt may touch it.
-                    protected = open_claim_holders()
-                    source = state.get("active_agent")
-                    if source in AGENTS and source != target and source not in protected:
-                        tmux("send-keys", "-t", pane_id(source), "C-c")
+                    message = handoff_message(entry, target)
+                    # Automatic handoffs never interrupt either conversation. A bounded turn
+                    # ends naturally; if the receiver is still working, leave the sequence
+                    # unconsumed and retry after it becomes idle.
                     try:
-                        send_handoff(target, message,
-                                     interrupt_busy=target not in protected)
+                        send_handoff(target, message, interrupt_busy=False)
                     except RuntimeError as exc:
                         # A busy CLI is transient. Keep the sequence unconsumed so the next loop
                         # retries; never let one undeliverable handoff kill the supervisor.
