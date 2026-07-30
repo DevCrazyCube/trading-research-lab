@@ -849,6 +849,7 @@ class EnvelopeParsingTests(unittest.TestCase):
         self.assertEqual(rows[0]["accounts"], [B9D.base58(self.KEY_B)])
         self.assertEqual(rows[0]["data"], b"\x01\x02")
         self.assertEqual((rows[0]["outer_index"], rows[0]["inner_index"]), (0, -1))
+        self.assertEqual(rows[0]["stack_height"], 1)
 
     def test_a_v0_transaction_resolves_loaded_addresses_after_the_static_keys(self):
         raw = build_transaction([self.KEY_A], [(1, [2], b"\x09")],
@@ -891,6 +892,140 @@ class EnvelopeParsingTests(unittest.TestCase):
         self.assertEqual(rows[1]["data"], b"\x00\x07",
                          "inner data is base58; decoding it as base64 would yield garbage")
         self.assertEqual(rows[1]["program_id"], B9D.base58(self.KEY_B))
+
+    def test_cpi_event_attaches_by_stack_height_not_nearest_name(self):
+        idl = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
+        trade = next(event for event in idl["events"] if event["name"] == "TradeEvent")
+        # Use the real discriminator but a truncated body: association happens only after exact
+        # event decoding, so this must fail rather than attach plausible garbage.
+        payload = B9D.ANCHOR_EVENT_CPI_TAG + bytes(trade["discriminator"])
+        envelopes = [{"outer_index": 0, "inner_index": -1, "stack_height": 1,
+                      "program_id": B9D.PUMP_PROGRAM, "data": b"ordinary", "accounts": []},
+                     {"outer_index": 0, "inner_index": 0, "stack_height": 2,
+                      "program_id": B9D.PUMP_PROGRAM, "data": payload, "accounts": []}]
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.associate_cpi_events(envelopes, {B9D.PUMP_PROGRAM: idl})
+        self.assertIn("truncated", str(ctx.exception))
+
+    def test_event_without_stack_height_is_ambiguous_not_guessed(self):
+        envelopes = [{"outer_index": 0, "inner_index": 0, "stack_height": None,
+                      "program_id": B9D.PUMP_PROGRAM,
+                      "data": B9D.ANCHOR_EVENT_CPI_TAG + b"anything", "accounts": []}]
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.associate_cpi_events(envelopes, {})
+        self.assertIn("ambiguous", str(ctx.exception))
+
+    def test_exact_cpi_event_decodes_and_attaches_to_its_stack_parent(self):
+        discriminator = bytes.fromhex("0102030405060708")
+        idl = {"events": [{"name": "MeasuredEvent", "discriminator": list(discriminator)}],
+               "types": [{"name": "MeasuredEvent", "type": {"kind": "struct", "fields": [
+                   {"name": "value", "type": "u64"}]}}]}
+        parent = {"outer_index": 0, "inner_index": -1, "stack_height": 1,
+                  "program_id": B9D.PUMP_PROGRAM, "data": b"parent", "accounts": []}
+        event = {"outer_index": 0, "inner_index": 0, "stack_height": 2,
+                 "program_id": B9D.PUMP_PROGRAM,
+                 "data": B9D.ANCHOR_EVENT_CPI_TAG + discriminator + (7).to_bytes(8, "little"),
+                 "accounts": []}
+        associated = B9D.associate_cpi_events(
+            [parent, event], {B9D.PUMP_PROGRAM: idl})
+        self.assertEqual(len(associated), 1)
+        self.assertIs(associated[0][0], parent)
+        self.assertIs(associated[0][1], event)
+        self.assertEqual(associated[0][2], {"name": "MeasuredEvent", "fields": {"value": 7}})
+
+    def envelope(self, outer, inner, height, data=b"ordinary", program=None):
+        return {"outer_index": outer, "inner_index": inner, "stack_height": height,
+                "program_id": program or B9D.PUMP_PROGRAM, "data": data, "accounts": []}
+
+    MEASURED = bytes.fromhex("0102030405060708")
+    SIMPLE_IDL = {"events": [{"name": "MeasuredEvent", "discriminator": list(MEASURED)}],
+                  "types": [{"name": "MeasuredEvent", "type": {"kind": "struct", "fields": [
+                      {"name": "value", "type": "u64"}]}}]}
+
+    def event_data(self, value=7):
+        return B9D.ANCHOR_EVENT_CPI_TAG + self.MEASURED + value.to_bytes(8, "little")
+
+    def test_128_bit_integers_decode(self):
+        """Both pinned IDLs declare them: u128 in FeeTier, i128 in PumpSwap Buy/Sell events.
+
+        Omitting them made 576 of 36,319 preserved bodies raise -- 293 SellEvent and 283 BuyEvent --
+        and since the materialization is one transaction, the first of them rolled the entire pass
+        back. Decode could never have completed on the real population.
+        """
+        for spec, value in (("u128", (1 << 127) + 5), ("i128", -(1 << 100)),
+                            ("i128", 0), ("u128", 0)):
+            raw = value.to_bytes(16, "little", signed=spec == "i128")
+            reader = B9D.BorshReader(raw)
+            self.assertEqual(B9D.decode_borsh(reader, spec, {}), value, spec)
+            self.assertEqual(reader.remaining(), 0, "128-bit widths consume exactly 16 bytes")
+
+    def test_the_real_pumpswap_sell_event_type_decodes(self):
+        """The concrete blocker, driven from the pinned IDL rather than a fixture."""
+        idl = json.loads((ROOT / B9D.PUMPSWAP_IDL_PATH).read_bytes())
+        fields = next(t for t in idl["types"] if t["name"] == "SellEvent")["type"]["fields"]
+        self.assertIn("i128", [f["type"] for f in fields if isinstance(f["type"], str)],
+                      "fixture is pointless if SellEvent stops carrying an i128")
+        for field in fields:
+            if isinstance(field["type"], str):
+                B9D.decode_borsh(B9D.BorshReader(b"\x00" * 64), field["type"], B9D.idl_types(idl))
+
+    def test_a_non_integer_stack_height_fails_closed(self):
+        """It raised TypeError, which still rolls back but escapes the FreezeViolation contract
+        every caller and gate in this module is written against, and names no field."""
+        for bad in ("2", 2.5, [2]):
+            with self.assertRaises(B9D.FreezeViolation) as ctx:
+                B9D.associate_cpi_events(
+                    [self.envelope(0, -1, 1), self.envelope(0, 0, bad)], self.SIMPLE_IDL and {})
+            self.assertIn("is not an integer", str(ctx.exception))
+
+    def test_a_later_sibling_does_not_inherit_the_previous_siblings_child(self):
+        """Depth 1-2-3-2-3: the second depth-3 event belongs to the SECOND depth-2 instruction."""
+        first_sibling = self.envelope(0, 1, 2)
+        second_sibling = self.envelope(0, 3, 2)
+        envelopes = [self.envelope(0, -1, 1), first_sibling,
+                     self.envelope(0, 2, 3, self.event_data(1)),
+                     second_sibling,
+                     self.envelope(0, 4, 3, self.event_data(2))]
+        out = B9D.associate_cpi_events(envelopes, {B9D.PUMP_PROGRAM: self.SIMPLE_IDL})
+        self.assertEqual([(p["inner_index"], d["fields"]["value"]) for p, _, d in out],
+                         [(1, 1), (3, 2)])
+
+    def test_a_stale_deeper_frame_from_a_previous_sibling_is_not_reused(self):
+        """Depth 1-2-3-2-4. Overwriting alone is not enough and a mutation proved it.
+
+        My first sibling test used 1-2-3-2-3, where simply overwriting the depth-2 entry already
+        gives the right parent, so deleting the invalidation loop changed nothing. The loop only
+        earns its place when execution goes SHALLOWER and then DEEPER than before: without it, the
+        depth-4 event would attach to the depth-3 frame of a sibling that had already returned.
+        """
+        envelopes = [self.envelope(0, -1, 1), self.envelope(0, 0, 2),
+                     self.envelope(0, 1, 3),          # first sibling's child, later stale
+                     self.envelope(0, 2, 2),          # back out to a second sibling
+                     self.envelope(0, 3, 4, self.event_data())]
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.associate_cpi_events(envelopes, {B9D.PUMP_PROGRAM: self.SIMPLE_IDL})
+        self.assertIn("has no observed parent", str(ctx.exception))
+
+    def test_a_depth_jump_has_no_parent_and_is_refused(self):
+        envelopes = [self.envelope(0, -1, 1), self.envelope(0, 0, 3, self.event_data())]
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.associate_cpi_events(envelopes, {B9D.PUMP_PROGRAM: self.SIMPLE_IDL})
+        self.assertIn("has no observed parent", str(ctx.exception))
+
+    def test_a_nested_target_cpi_parents_to_its_own_depth(self):
+        """Real bodies reach depth 4, so nesting is not hypothetical."""
+        nested = self.envelope(0, 0, 2)
+        envelopes = [self.envelope(0, -1, 1), nested,
+                     self.envelope(0, 1, 3, self.event_data(9))]
+        out = B9D.associate_cpi_events(envelopes, {B9D.PUMP_PROGRAM: self.SIMPLE_IDL})
+        self.assertEqual(len(out), 1)
+        self.assertIs(out[0][0], nested, "the event belongs to the depth-2 caller, not the outer")
+
+    def test_events_in_different_outer_groups_do_not_cross_parent(self):
+        envelopes = [self.envelope(0, -1, 1), self.envelope(1, -1, 1),
+                     self.envelope(1, 0, 2, self.event_data(4))]
+        out = B9D.associate_cpi_events(envelopes, {B9D.PUMP_PROGRAM: self.SIMPLE_IDL})
+        self.assertEqual(out[0][0]["outer_index"], 1)
 
     def test_an_inner_group_for_a_nonexistent_outer_index_is_refused(self):
         raw = build_transaction([self.KEY_A], [(0, [], b"")])
@@ -994,6 +1129,24 @@ class DecoderOrchestrationTests(unittest.TestCase):
             (self.SLOT, 0, 0, -1, "old", "program", None, None, 0, "[]", 0))
         with self.assertRaises(B9D.FreezeViolation) as ctx:
             B9D.decode_artifact(self.database, check_sources=False)
+        self.assertIn("refusing to mix or overwrite", str(ctx.exception))
+
+    def test_existing_reserve_rows_are_part_of_the_same_derived_output_guard(self):
+        self.database.execute(
+            "INSERT INTO reserve_observation "
+            "(slot,transaction_index,outer_index,inner_index,bonding_curve,evidence) "
+            "VALUES (?,?,?,?,?,?)", (self.SLOT, 0, 0, -1, "curve", "fixture"))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_artifact(self.database, check_sources=False)
+        self.assertIn("reserve_observation", str(ctx.exception))
+        self.assertIn("refusing to mix or overwrite", str(ctx.exception))
+
+    def test_prior_decode_metadata_is_refused_even_when_derived_tables_are_empty(self):
+        self.database.execute(
+            "INSERT INTO metadata VALUES ('decoded_at_unix','1')")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_artifact(self.database, check_sources=False)
+        self.assertIn("decoded_at_unix", str(ctx.exception))
         self.assertIn("refusing to mix or overwrite", str(ctx.exception))
 
     def test_intervals_declaring_two_revisions_cannot_build_one_map(self):

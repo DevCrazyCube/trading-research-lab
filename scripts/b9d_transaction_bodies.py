@@ -42,6 +42,7 @@ SLOT_MAX = 435_536_000
 PUMP_PROGRAM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
 PUMPSWAP_PROGRAM = "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
 TARGET_PROGRAMS = (PUMP_PROGRAM, PUMPSWAP_PROGRAM)
+ANCHOR_EVENT_CPI_TAG = bytes.fromhex("e445a52e51cb9a1d")
 
 PUMP_IDL_PATH = "research/pump_idl_9c82f61.json"
 PUMP_IDL_SHA256 = "b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49"
@@ -1030,12 +1031,14 @@ def envelope_instructions(result):
     for outer_index, instruction in enumerate(message["instructions"]):
         rows.append({
             "outer_index": outer_index, "inner_index": -1,
+            "stack_height": 1,
             "program_id": resolve(instruction["program_index"], "program", outer_index, -1),
             "data": instruction["data"],
             "accounts": [resolve(i, "account", outer_index, -1) for i in instruction["accounts"]]})
         for inner_index, inner in enumerate(inner_groups.get(outer_index, [])):
             rows.append({
                 "outer_index": outer_index, "inner_index": inner_index,
+                "stack_height": inner.get("stackHeight"),
                 "program_id": resolve(inner["programIdIndex"], "program", outer_index, inner_index),
                 "data": base58_decode(inner.get("data") or ""),
                 "accounts": [resolve(i, "account", outer_index, inner_index)
@@ -1077,9 +1080,16 @@ def idl_types(idl):
 
 def decode_borsh(reader, type_spec, types):
     if isinstance(type_spec, str):
+        # 128-bit widths are declared by BOTH pinned IDLs and are not optional: `u128` appears in
+        # `FeeTier` on each, and `i128` in PumpSwap's `BuyEvent`, `SellEvent`, `Pool`,
+        # `InitBoostEvent` and `BoostBuyAndBurnEvent`. Omitting them made 576 of 36,319 preserved
+        # bodies raise — 293 SellEvent and 283 BuyEvent — and since the whole materialization is one
+        # transaction, the first of them rolled back the entire pass. Decode could never complete.
+        # Borsh encodes them as 16-byte little-endian, which `integer()` already handles.
         integers = {"u8": (1, False), "u16": (2, False), "u32": (4, False),
-                    "u64": (8, False), "i8": (1, True), "i16": (2, True),
-                    "i32": (4, True), "i64": (8, True)}
+                    "u64": (8, False), "u128": (16, False),
+                    "i8": (1, True), "i16": (2, True),
+                    "i32": (4, True), "i64": (8, True), "i128": (16, True)}
         if type_spec in integers:
             return reader.integer(*integers[type_spec])
         if type_spec == "bool":
@@ -1210,6 +1220,63 @@ def decode_idl_event(idl, payload):
     if reader.remaining():
         raise FreezeViolation(f"{name} leaves {reader.remaining()} unconsumed event bytes")
     return name, value
+
+
+def decode_anchor_cpi_event(program_id, data, idls):
+    """Decode one Anchor `emit_cpi!` self-CPI, or return `None` for an ordinary instruction.
+
+    The observed layout is `[8-byte event instruction tag][8-byte event discriminator][Borsh]`.
+    A matching wrapper tag on a target program is never treated as an unknown instruction: its
+    event discriminator and body must decode exactly against that program's pinned IDL.
+    """
+    if program_id not in TARGET_PROGRAMS or not data.startswith(ANCHOR_EVENT_CPI_TAG):
+        return None
+    if program_id not in idls:
+        raise FreezeViolation(f"event decoder missing pinned IDL for {program_id}")
+    name, fields = decode_idl_event(idls[program_id], data[len(ANCHOR_EVENT_CPI_TAG):])
+    return {"name": name, "fields": fields}
+
+
+def associate_cpi_events(envelopes, idls):
+    """Associate decoded CPI events with the invoking instruction using observed stack heights.
+
+    Solana's inner-instruction list is execution order. An event self-CPI at height `h` belongs to
+    the most recent instruction at `h-1` in the same outer group. Missing heights or a missing
+    parent are ambiguity, never grounds to attach the event to the nearest target by name.
+    Returns `(parent_envelope, event_envelope, decoded_event)` tuples.
+    """
+    parents, out = {}, []
+    for envelope in envelopes:
+        height = envelope.get("stack_height")
+        # A malformed height must fail the same way every other bad field does. Left unchecked, a
+        # string height reached `height - 1` and raised TypeError — which still rolls back, but
+        # escapes the FreezeViolation contract every caller and gate in this module is written
+        # against, and names neither the field nor the coordinate.
+        if height is not None and (isinstance(height, bool) or not isinstance(height, int)):
+            raise FreezeViolation(
+                f"stackHeight {height!r} at ({envelope['outer_index']},{envelope['inner_index']}) "
+                "is not an integer; CPI depth cannot be compared and the event's parent would be "
+                "guessed")
+        if height is None:
+            if (envelope["program_id"] in TARGET_PROGRAMS and
+                    envelope["data"].startswith(ANCHOR_EVENT_CPI_TAG)):
+                raise FreezeViolation(
+                    "target CPI event has no stackHeight; its mutating parent is ambiguous")
+            continue
+        decoded = decode_anchor_cpi_event(envelope["program_id"], envelope["data"], idls)
+        if decoded is not None:
+            parent = parents.get((envelope["outer_index"], height - 1))
+            if parent is None:
+                raise FreezeViolation(
+                    f"event {decoded['name']} at ({envelope['outer_index']},"
+                    f"{envelope['inner_index']}) stack height {height} has no observed parent at "
+                    f"height {height - 1}")
+            out.append((parent, envelope, decoded))
+        parents[(envelope["outer_index"], height)] = envelope
+        # A later sibling at this height invalidates descendants from the prior sibling.
+        for key in [key for key in parents if key[0] == envelope["outer_index"] and key[1] > height]:
+            del parents[key]
+    return out
 
 
 def reserve_after_from_event(name, fields):
@@ -1387,6 +1454,21 @@ def program_version_rows(database, program_id):
     return rows
 
 
+def interval_idls(intervals):
+    """Pinned IDL documents loaded from the revision each program's intervals declare."""
+    documents = {}
+    for program, rows in intervals.items():
+        declared = {(row["idl_path"], row["idl_sha256"]) for row in rows
+                    if row["coverage"] == "covered"}
+        if len(declared) != 1:
+            raise FreezeViolation(
+                f"{program}: covered intervals declare {len(declared)} distinct revisions; a single "
+                "decoder pass cannot attribute its output to more than one")
+        path, digest = declared.pop()
+        documents[program] = load_pinned_idl(path, digest, program)
+    return documents
+
+
 def interval_idl_maps(intervals):
     """Discriminator maps loaded from the revision each program's own intervals declare.
 
@@ -1396,17 +1478,8 @@ def interval_idl_maps(intervals):
     `idl_name` is attributable to a revision recorded in the artifact rather than to whatever
     happened to be in memory.
     """
-    maps = {}
-    for program, rows in intervals.items():
-        declared = {(row["idl_path"], row["idl_sha256"]) for row in rows
-                    if row["coverage"] == "covered"}
-        if len(declared) != 1:
-            raise FreezeViolation(
-                f"{program}: covered intervals declare {len(declared)} distinct revisions; a single "
-                "decoder pass cannot attribute its output to more than one")
-        path, digest = declared.pop()
-        maps[program] = idl_instruction_map(load_pinned_idl(path, digest, program))
-    return maps
+    return {program: idl_instruction_map(idl)
+            for program, idl in interval_idls(intervals).items()}
 
 
 def assert_target_classification_accounted(database):
@@ -1448,7 +1521,8 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
     # while classification used a separately supplied map: passing a fabricated map produced a row
     # labelled with an invented instruction name, zero classification failures, and metadata still
     # naming the pinned revision. Reproduced before this changed.
-    derived = interval_idl_maps(intervals)
+    idls = interval_idls(intervals)
+    derived = {program: idl_instruction_map(idl) for program, idl in idls.items()}
     if idl_maps is not None and idl_maps != derived:
         raise FreezeViolation(
             "supplied idl_maps disagree with the revision this artifact's program_version rows "
@@ -1457,13 +1531,20 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
     maps = derived
     require_all_target_idls(maps)
 
-    existing_instructions = database.execute("SELECT count(*) FROM instruction").fetchone()[0]
-    existing_failures = database.execute(
-        "SELECT count(*) FROM classification_failure").fetchone()[0]
-    if existing_instructions or existing_failures:
+    existing = {
+        "instruction": database.execute("SELECT count(*) FROM instruction").fetchone()[0],
+        "classification_failure": database.execute(
+            "SELECT count(*) FROM classification_failure").fetchone()[0],
+        "reserve_observation": database.execute(
+            "SELECT count(*) FROM reserve_observation").fetchone()[0],
+    }
+    decode_metadata = dict(database.execute(
+        "SELECT key,value FROM metadata WHERE key IN "
+        "('decoded_at_unix','decoder_classification_failures')"))
+    if any(existing.values()) or decode_metadata:
         raise FreezeViolation(
-            "derived instruction tables are not empty: refusing to mix or overwrite decoder "
-            f"output ({existing_instructions} instruction rows, {existing_failures} failures)")
+            "derived decoder output already exists: refusing to mix or overwrite a prior pass "
+            f"(rows={existing}, metadata_keys={sorted(decode_metadata)})")
 
     instruction_count = target_count = failure_count = 0
     with database:
@@ -1475,15 +1556,26 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
             result = raw_result(blob)
             if result is None:
                 raise FreezeViolation(f"{signature}: preserved transaction response has null result")
-            for envelope in envelope_instructions(result):
+            envelopes = envelope_instructions(result)
+            # Decode and parent every Anchor CPI event before writing this transaction. This is the
+            # reserve-evidence seam: a malformed event or ambiguous stack relation rolls back the
+            # pass rather than becoming an unknown instruction or attaching to a nearby trade.
+            associate_cpi_events(envelopes, idls)
+            for envelope in envelopes:
                 program_id = envelope["program_id"]
                 if program_id in TARGET_PROGRAMS:
                     # Resolve every target instruction at its own slot. Full-range coverage is a
                     # precondition above; this per-row lookup prevents a later refactor from using
                     # a nearest or current revision by accident.
                     resolve_version(program_id, slot, intervals[program_id])
-                target, name, discriminator, reason = classify_instruction(
-                    program_id, envelope["data"], maps)
+                event = decode_anchor_cpi_event(program_id, envelope["data"], idls)
+                if event is None:
+                    target, name, discriminator, reason = classify_instruction(
+                        program_id, envelope["data"], maps)
+                else:
+                    target, name = True, f"event:{event['name']}"
+                    discriminator = envelope["data"][:8].hex()
+                    reason = None
                 coordinates = (slot, transaction_index, envelope["outer_index"],
                                envelope["inner_index"])
                 database.execute(
