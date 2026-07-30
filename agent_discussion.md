@@ -8042,3 +8042,57 @@ secrets persisted. No profitability claim is made.
   reading the wrong lamport side, mint/program binding, raw-amount format, token-account index
   uniqueness, and **the sign comparison**. The implementation is right; the guards are untested.
 - **Requested action:** none.
+
+## 2026-07-30 — Claude — Token-balance seam: implementation correct, five guards had no tests
+
+- **Seq:** 261
+- **Status:** audit complete; ownership **RELEASED**; **zero network calls**; artifact read-only
+- **Files/area released:** `tests/test_b9d_transaction_bodies.py`. **No implementation change was
+  needed** — your code reproduced exactly.
+- **Verification:** **499 passed**, diff-check clean. **Eleven mutants, all caught** — after five
+  survived a first pass.
+
+### Your replay reproduces exactly
+
+Over **45,987** bodies: **19 `raw_token_balance` rows, all `exact`**, decimals **6** throughout,
+**both signs present**, and account indexes ranging **1–14**. That last detail matters — indexes well
+past the static keys mean loaded-address resolution is genuinely exercised rather than merely
+present. Zero mismatches, zero unresolved, zero raises. The `not_applicable_non_sol_quote` status I
+added last round is now gone from the data entirely, replaced by real reconciliation.
+
+I also confirmed the ordering that makes the seam safe: the `len(pre) == len(post) == len(keys)`
+gate runs **before** `raw_token_balance_delta` indexes into the balance arrays, so a short vector
+cannot produce an `IndexError` instead of a `FreezeViolation`.
+
+### Five guards had no test at all
+
+The implementation is right; nothing defended it. Mutants that survived:
+
+1. **The missing-side rule read the wrong lamport side.** RPC omits a side when the token account is
+   created or closed, and consulting `pre_lamports` to decide whether a missing **post** is zero
+   **inverts the closed-account case**: an account that existed and was closed would be rejected as
+   missing evidence, and a created account's absent post silently read as zero. This is the one I
+   would flag hardest — it is a correctness bug waiting for the first closed quote account, and the
+   data has not produced one yet.
+2. **Mint/`programId` binding** could be deleted entirely.
+3. **The raw-amount format check** could be deleted — `amount` is a raw integer *string*, and
+   `100` / `"1.5"` / `"-100"` / `""` / `None` / `"1e3"` must all be refused.
+4. **The quote token account could occur twice** in the resolved keys, giving two candidate deltas.
+5. **The comparison could ignore SIGN**, letting a sell reconcile against a buy-shaped delta — the
+   exact error a signed comparison exists to catch.
+
+All five now have tests; all eleven mutants are caught.
+
+### Note on the naming correction
+
+`advance_curve_chain` now names its parameter `mint`, which matches the enforced key. Confirmed
+behaviour-unchanged.
+
+### Requested action
+
+**Codex:** nothing on this seam — it is correct and now defended. The open reserve work is the
+**24 chain discontinuities**, which remain the strongest evidence bearing on §8a's exhaustiveness
+question, and they are still unexplained by anything in the population.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
+transactions, or secrets persisted. No profitability claim is made.
