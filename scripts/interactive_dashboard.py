@@ -285,6 +285,7 @@ SUBMIT_POLL = 0.2          # TUI acceptance/redraw is asynchronous
 SUBMIT_POLLS = 25          # five-second bounded post-condition window
 PENDING_MATCH = 24         # prefix long enough to be ours, short enough to survive wrapping
 INTERRUPT_TIMEOUT = 20.0
+DELIVERY_ATTEMPTS = 5   # bounded retries before a failing handoff is quarantined loudly
 COMPOSER_PROMPTS = ("❯", "›")   # Claude Code, Codex — different applications, different glyphs
 NBSP = " "                           # both TUIs pad the prompt with it
 
@@ -480,7 +481,8 @@ def send(agent, message):
         raise RuntimeError(
             f"{agent!r} is still working in pane {target}; automatic routing will wait rather "
             "than interrupt the turn or type a draft into its active composer")
-    if pending_before and pending_before[:PENDING_MATCH] in message:
+    resubmitted_existing_draft = bool(pending_before and pending_before[:PENDING_MATCH] in message)
+    if resubmitted_existing_draft:
         # A previous attempt reached the composer but the agent was still busy. Do not append a
         # duplicate; submit the existing draft once the pane is idle.
         if not idle:
@@ -497,11 +499,25 @@ def send(agent, message):
     # composer clearance or the busy marker instead of declaring failure after one fixed sleep.
     submitted, pending = wait_for_submission(target, message, trust_busy_marker=idle)
     if not submitted:
-        raise DeliveryUncertain(
+        # `wait_for_submission` returns False only when it can SEE our text still sitting in the
+        # composer. That is a positive observation of NON-delivery, not uncertainty, and the two
+        # must not share an exception class: the supervisor consumes the sequence on uncertainty,
+        # so classifying an observed non-delivery as uncertain silently DROPS the handoff — while
+        # this very message tells the reader to retry. Reproduced before this changed.
+        #
+        # The one genuinely ambiguous case is pressing Enter on a draft a PREVIOUS attempt had
+        # already typed: that attempt may itself have submitted, so a second Enter can duplicate a
+        # user turn. Only that stays uncertain.
+        failure = (
             f"handoff to {agent!r} was typed into pane {target} but NOT submitted — it is still "
             f"sitting in the composer ({pending[:60]!r}...). The agent was "
-            f"{'busy past the wait timeout' if not idle else 'not consuming input'}. Not recording "
-            f"a delivery that did not happen; retry when the pane is idle.")
+            f"{'busy past the wait timeout' if not idle else 'not consuming input'}.")
+        if resubmitted_existing_draft:
+            raise DeliveryUncertain(
+                failure + " A previous attempt had already typed this draft, so submitting it "
+                "again could duplicate a user turn. Not retrying.")
+        raise RuntimeError(
+            failure + " Not recording a delivery that did not happen; retry when it is idle.")
     write_state(last_target=agent, last_message_at=int(time.time()),
                 last_send_pane_command=command, last_send_waited_for_idle=idle)
 
@@ -789,7 +805,27 @@ def supervisor_loop(interval=2.0):
                     except RuntimeError as exc:
                         # A busy CLI is transient. Keep the sequence unconsumed so the next loop
                         # retries; never let one undeliverable handoff kill the supervisor.
-                        print(f"handoff pending for {target}: {exc}", flush=True)
+                        #
+                        # Bounded, though. Seq 248 reached Codex seven times while the cursor stayed
+                        # at 247, because the post-condition was producing false negatives. Those
+                        # causes are fixed, but an unbounded retry on an unknown future false
+                        # negative would replay a user turn indefinitely. After DELIVERY_ATTEMPTS
+                        # the sequence is quarantined LOUDLY rather than dropped silently — the
+                        # append-only log stays the recovery source either way.
+                        attempts = state.get("delivery_attempts", {})
+                        attempts = dict(attempts) if isinstance(attempts, dict) else {}
+                        count = attempts.get(str(current), 0) + 1
+                        attempts[str(current)] = count
+                        if count >= DELIVERY_ATTEMPTS:
+                            print(f"WARNING handoff to {target} for Seq {current} failed {count} "
+                                  f"times and is being quarantined, not retried: {exc}", flush=True)
+                            write_state(delivery_attempts=attempts,
+                                        delivery_quarantined_sequence=current,
+                                        observed_sequence=current)
+                        else:
+                            print(f"handoff pending for {target} (attempt {count}): {exc}",
+                                  flush=True)
+                            write_state(delivery_attempts=attempts)
                     else:
                         write_state(active_agent=target, owner=target, observed_sequence=current)
                 else:

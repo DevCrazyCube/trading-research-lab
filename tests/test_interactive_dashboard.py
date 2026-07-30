@@ -1099,6 +1099,81 @@ class SupervisorResilienceTests(IsolatedDashboard):
         self.assertEqual(state["observed_sequence"], 2)
         self.assertEqual(state["delivery_uncertain_sequence"], 2)
 
+    def test_an_observed_non_delivery_is_retried_not_quarantined(self):
+        """Reproduced defect: `wait_for_submission` returns False only when it can SEE our text
+        still in the composer. That is a positive observation of NON-delivery, not uncertainty, and
+        classifying it as uncertain made the supervisor consume the sequence and never retry —
+        while the exception's own text told the reader to retry. The handoff was silently dropped.
+        """
+        def observed_failure(agent, message, interrupt_busy=True):
+            raise RuntimeError("typed into pane %9 but NOT submitted — still in the composer")
+
+        self.run_one_iteration(observed_failure)
+        state = DASH.read_state()
+        self.assertEqual(state["observed_sequence"], 1,
+                         "an observed non-delivery must leave the sequence for the next attempt")
+        self.assertIsNone(state.get("delivery_quarantined_sequence"))
+        self.assertEqual(state["delivery_attempts"], {"2": 1})
+
+    def test_repeated_failures_are_quarantined_loudly_rather_than_replayed_forever(self):
+        """The other boundary. Seq 248 reached Codex seven times while the cursor stayed at 247,
+        so an unbounded retry is not acceptable either; it must stop, and say so."""
+        def observed_failure(agent, message, interrupt_busy=True):
+            raise RuntimeError("still in the composer")
+
+        for attempt in range(1, DASH.DELIVERY_ATTEMPTS):
+            output = self.run_one_iteration(observed_failure)
+            self.assertEqual(DASH.read_state()["observed_sequence"], 1, f"attempt {attempt}")
+            self.assertIn("handoff pending", output)
+        output = self.run_one_iteration(observed_failure)
+        state = DASH.read_state()
+        self.assertIn("quarantined", output)
+        self.assertEqual(state["observed_sequence"], 2, "it stops after the bound")
+        self.assertEqual(state["delivery_quarantined_sequence"], 2)
+
+    def drive_send(self, message, texts):
+        """Run the real `send()` against a scripted sequence of pane captures."""
+        seen = iter(texts)
+        last = [texts[-1]]
+
+        def fake(*args, capture=False, check=True):
+            if args[0] == "display-message":
+                return "claude"
+            if args[0] == "capture-pane":
+                last[0] = next(seen, last[0])
+                return last[0]
+            return 0
+
+        saved = (DASH.tmux, DASH.pane_id, DASH.SUBMIT_POLLS, DASH.wait_for_idle)
+        DASH.tmux = fake
+        DASH.pane_id = lambda agent: "%9"
+        DASH.SUBMIT_POLLS = 1
+        DASH.wait_for_idle = lambda pane, **kw: True
+        self.addCleanup(lambda: setattr(DASH, "tmux", saved[0]))
+        self.addCleanup(lambda: setattr(DASH, "pane_id", saved[1]))
+        self.addCleanup(lambda: setattr(DASH, "SUBMIT_POLLS", saved[2]))
+        self.addCleanup(lambda: setattr(DASH, "wait_for_idle", saved[3]))
+        with self.assertRaises(RuntimeError) as ctx:
+            DASH.send("codex", message)
+        return ctx.exception
+
+    def test_a_freshly_typed_message_left_in_the_composer_is_retryable_not_uncertain(self):
+        """Drives the real `send()`. Stubbing send_handoff and grepping the source both let the
+        misclassification survive mutation; only exercising the classification catches it."""
+        message = "Direct handoff from codex to claude. " + "body " * 30
+        error = self.drive_send(message, ["❯ \n⏵⏵ auto mode on", f"❯ {message}\n⏵⏵ auto mode on"])
+        self.assertNotIsInstance(error, DASH.DeliveryUncertain,
+                                 "we can SEE it unsent, so this is observed, not uncertain")
+        self.assertIn("retry when it is idle", str(error))
+
+    def test_resubmitting_a_draft_a_previous_attempt_typed_is_uncertain(self):
+        """The narrow genuinely-ambiguous case: that earlier attempt may itself have submitted."""
+        message = "Direct handoff from codex to claude. " + "body " * 30
+        stuck = f"❯ {message}\n⏵⏵ auto mode on"
+        error = self.drive_send(message, [stuck, stuck])
+        self.assertIsInstance(error, DASH.DeliveryUncertain)
+        self.assertIn("duplicate a user turn", str(error))
+
     def test_a_delivered_handoff_consumes_the_sequence_and_moves_ownership(self):
         """The other side of the boundary: a working dispatch must still advance."""
         delivered = []
