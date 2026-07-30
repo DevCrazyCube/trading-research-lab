@@ -1,4 +1,6 @@
+import contextlib
 import importlib.util
+import io
 import json
 import os
 import pathlib
@@ -127,6 +129,64 @@ class HandoffQueueTests(IsolatedDashboard):
              DASH.composer_text, DASH.send_line) = saved
         self.assertIn(f"HANDOFF {first}", seen[0])
         self.assertNotIn(f"HANDOFF {second}", seen[0])
+
+    def test_a_placeholder_hint_is_not_a_draft_and_does_not_block_delivery(self):
+        """Codex renders a dim placeholder inside an EMPTY composer.
+
+        `capture-pane -p` strips the dimming, so "Explain this codebase" was read as an unsent
+        draft. `notify_next` refuses to type over a draft, so it declined every iteration, in
+        silence, against a fully idle agent. Two handoffs sat undelivered until it was traced by
+        hand. An exact match is the placeholder; anything longer is a real draft and must still
+        block delivery.
+        """
+        self.assertEqual(DASH.composer_text_from_text("› Explain this codebase"), "")
+        self.assertEqual(
+            DASH.composer_text_from_text("› Explain this codebase in more detail"),
+            "Explain this codebase in more detail")
+
+        message_id, _, _ = DASH.create_handoff("claude", "one", "first")
+        seen = []
+        saved = (DASH.pane_id, DASH.pane_command, DASH.agent_busy, DASH.pane_text, DASH.send_line)
+        DASH.pane_id = lambda agent: "%1"
+        DASH.pane_command = lambda pane: "codex"
+        DASH.agent_busy = lambda pane: False
+        DASH.pane_text = lambda pane: "› Explain this codebase\n  gpt-5.6-sol default · ~/meme"
+        DASH.send_line = lambda pane, text: seen.append(text)
+        try:
+            db = DASH.queue_connect()
+            self.assertTrue(DASH.notify_next(db),
+                            "an idle agent showing only its placeholder must be notified")
+            db.close()
+        finally:
+            (DASH.pane_id, DASH.pane_command, DASH.agent_busy,
+             DASH.pane_text, DASH.send_line) = saved
+        self.assertIn(f"HANDOFF {message_id}", seen[0])
+
+    def test_an_undeliverable_handoff_reports_why_instead_of_stalling_silently(self):
+        """The stall was invisible, which is why it lasted. A refusal must name its reason."""
+        message_id, _, _ = DASH.create_handoff("claude", "one", "first")
+        DASH._NOTIFY_SKIPS.clear()
+        self.addCleanup(DASH._NOTIFY_SKIPS.clear)
+        saved = (DASH.pane_id, DASH.pane_command, DASH.agent_busy, DASH.pane_text, DASH.send_line)
+        DASH.pane_id = lambda agent: "%1"
+        DASH.pane_command = lambda pane: "codex"
+        DASH.agent_busy = lambda pane: False
+        DASH.pane_text = lambda pane: "› a genuine unsent draft"
+        DASH.send_line = lambda pane, text: self.fail("must not type over a real draft")
+        reported = io.StringIO()
+        try:
+            db = DASH.queue_connect()
+            with contextlib.redirect_stdout(reported):
+                self.assertFalse(DASH.notify_next(db))
+                self.assertFalse(DASH.notify_next(db))   # unchanged reason: reported once
+            db.close()
+        finally:
+            (DASH.pane_id, DASH.pane_command, DASH.agent_busy,
+             DASH.pane_text, DASH.send_line) = saved
+        lines = [line for line in reported.getvalue().splitlines() if line.strip()]
+        self.assertEqual(len(lines), 1, f"report-on-change, not per-poll spam: {lines}")
+        self.assertIn(f"handoff {message_id} waiting", lines[0])
+        self.assertIn("unsent draft", lines[0])
 
     def test_staged_matching_notification_gets_enter_not_a_second_copy(self):
         message_id, _, _ = DASH.create_handoff("claude", "one", "first")

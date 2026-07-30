@@ -544,6 +544,17 @@ SUBMIT_POLLS = 25          # five-second bounded post-condition window
 PENDING_MATCH = 24         # prefix long enough to be ours, short enough to survive wrapping
 INTERRUPT_TIMEOUT = 20.0
 DELIVERY_ATTEMPTS = 5   # bounded retries before a failing handoff is quarantined loudly
+# An EMPTY composer is not blank on screen. Codex renders a dim placeholder hint after its prompt
+# glyph, and `capture-pane -p` strips the dimming, so the hint is indistinguishable from a typed
+# draft. `notify_next` refuses to send while the composer holds text, so it read "Explain this
+# codebase" as an unsent draft and declined -- silently, every iteration, forever. Two handoffs sat
+# queued against an idle agent with nothing in the log to say why.
+#
+# Matched EXACTLY, against the whole composer: a real draft that merely begins with these words is
+# still a draft, and must still block delivery.
+COMPOSER_PLACEHOLDERS = frozenset({
+    "Explain this codebase",
+})
 COMPOSER_PROMPTS = ("❯", "›")   # Claude Code, Codex — different applications, different glyphs
 NBSP = " "                           # both TUIs pad the prompt with it
 
@@ -685,7 +696,8 @@ def composer_text_from_text(text):
         stripped = line.strip()
         for prompt in COMPOSER_PROMPTS:
             if stripped.startswith(prompt):
-                return stripped[len(prompt):].replace(NBSP, " ").strip()
+                content = stripped[len(prompt):].replace(NBSP, " ").strip()
+                return "" if content in COMPOSER_PLACEHOLDERS else content
     return ""
 
 
@@ -1019,6 +1031,9 @@ def compact_notification(row):
             f"{row['target']} {row['id']}")
 
 
+_NOTIFY_SKIPS = {}   # handoff id -> last reported reason it could not be delivered
+
+
 def notify_next(db):
     """Notify at most the oldest unacknowledged message, without blocking on a TUI."""
     row = db.execute(
@@ -1046,8 +1061,19 @@ def notify_next(db):
             return False
         if command != row["target"]:
             raise RuntimeError(f"pane runs {command!r}, expected {row['target']!r}")
-        if agent_busy(pane) or composer_text(pane).strip():
+        # Report the refusal, once per distinct reason. This branch used to return False in total
+        # silence, so a handoff that could never be delivered was indistinguishable in the log from
+        # one that had been. Report-on-change keeps a genuinely busy agent from spamming the log at
+        # the poll interval while still making a permanent stall visible the moment it starts.
+        staged_now = composer_text(pane).strip()
+        if agent_busy(pane) or staged_now:
+            reason = (f"{row['target']} is working" if agent_busy(pane)
+                      else f"{row['target']} has an unsent draft in its composer: {staged_now[:60]!r}")
+            if _NOTIFY_SKIPS.get(row["id"]) != reason:
+                _NOTIFY_SKIPS[row["id"]] = reason
+                print(f"handoff {row['id']} waiting: {reason}", flush=True)
             return False
+        _NOTIFY_SKIPS.pop(row["id"], None)
         send_line(pane, compact_notification(row))
         db.execute(
             "UPDATE handoff SET state='notified',notify_count=notify_count+1,"
