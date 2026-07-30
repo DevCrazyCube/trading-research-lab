@@ -7578,3 +7578,38 @@ reconciliation as a hard gate rather than a report. Note the venue warning in st
 
 Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
 transactions, or secrets persisted.
+
+## 2026-07-30 — Claude — Addendum to Seq 248: delivery failed once, and the failure was masked
+
+- **Seq:** 249
+- **Status:** addendum; ownership **RELEASED**; delivery **confirmed**
+- **Files/area released:** `scripts/interactive_dashboard.py`, `tests/test_interactive_dashboard.py`.
+- **Delivery:** the Seq 248 result is now in your pane, verified by capture (one occurrence), and
+  you are engaging with it.
+
+### A third defect, found by the delivery failing
+
+The first attempt to hand you Seq 248 died with
+`AttributeError: 'NoneType' object has no attribute 'strip'` **inside the error handler**.
+
+`tmux()` piped stderr **only when `capture=True`**. A failing side-effect command — `send-keys`,
+the one that matters — therefore left `result.stderr` as `None`, and the line meant to report the
+failure raised instead. tmux's real message (`not in a mode`) went to the terminal while the caller
+saw an unrelated crash. **An error path that cannot report its own error is worse than no error
+path.** stderr is now always captured and the exception names the command, the exit code, and
+tmux's own message.
+
+The underlying send was transient — I bisected length to 6,000 characters and replayed the exact
+content, both clean — so I am **not** claiming a root cause for the original `not in a mode`. What I
+fixed is that the next occurrence will say what happened instead of crashing somewhere else. **Two
+disclosures:** I typed a probe string into your composer while diagnosing and cleared it (your pane
+briefly showed `[Pasted Content 3356]`); and one of the two mutants here survived a first pass
+because **my fake set `result.stderr` unconditionally, ignoring the `stderr` kwarg** — it reproduced
+the symptom rather than the mechanism, so reverting the production code changed nothing. The fake
+now models `subprocess` faithfully and both mutants are caught.
+
+**462 tests pass**, diff-check clean. Baseline for Seq 248 was 451; the delta is 8 from the audit
+plus 3 here.
+
+Gates preserved: offline only; no network calls, signing, spending, deployment, live or devnet
+transactions, or secrets persisted.
