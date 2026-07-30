@@ -2209,6 +2209,45 @@ class DecoderOrchestrationTests(unittest.TestCase):
         self.addCleanup(lambda: setattr(B9D, "tradable_cohort_identity", saved))
         return B9D.decode_artifact(self.database, check_sources=False)
 
+    def test_every_target_instruction_is_resolved_at_its_own_slot(self):
+        """§4 asks for the interface in force AT each instruction's slot, not per transaction.
+
+        The call site discards `resolve_version`'s return value -- it is an assertion, not a
+        lookup, because `interval_idls` separately forces a single revision per program. That makes
+        it invisible to output-based tests: deleting the call entirely left all 216 tests in this
+        file passing. So the contract is asserted directly here, per instruction, with the slot it
+        was resolved at.
+        """
+        buy, _ = self.known("buy")
+        self.add_body("sig-a", 0, [(0, [1], buy), (0, [1], buy)])
+        seen = []
+        real = B9D.resolve_version
+
+        def spy(program_id, slot, intervals):
+            seen.append((program_id, slot))
+            return real(program_id, slot, intervals)
+
+        B9D.resolve_version = spy
+        self.addCleanup(lambda: setattr(B9D, "resolve_version", real))
+        B9D.decode_artifact(self.database, check_sources=False)
+        self.assertEqual(seen, [(B9D.PUMP_PROGRAM, self.SLOT)] * 2,
+                         "each target instruction must be resolved, at its own slot")
+
+    def test_a_target_instruction_outside_every_interval_is_refused(self):
+        """And the assertion is reachable, not decorative.
+
+        Nothing bounds a stored coordinate slot to the observation range at decode time --
+        `assert_population` checks SLOT_MIN..SLOT_MAX only over the derived population, never over
+        `transaction_coordinate`. So a body past the cutoff reaches the decoder, and this per-row
+        check is the thing that refuses to attribute it to the nearest pinned revision.
+        """
+        buy, _ = self.known("buy")
+        self.SLOT = B9D.CUTOFF_SLOT + 1
+        self.add_body("sig-late", 0, [(0, [1], buy)])
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.decode_artifact(self.database, check_sources=False)
+        self.assertIn("no version interval contains slot", str(ctx.exception))
+
     def test_an_incidental_mint_produces_no_reserve_row_and_no_chain_failure(self):
         """The scope fix. An incidental curve's history was never enumerated by B9c, so its trade
         sequence is partial by construction; materializing it manufactures discontinuities. Both
