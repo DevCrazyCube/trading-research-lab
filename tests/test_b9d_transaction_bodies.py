@@ -1071,7 +1071,7 @@ class CurveReserveChainTests(unittest.TestCase):
             B9D.pump_trade_balance_reconciliations(result, [(parent, {}, event)], idl, [parent])
         self.assertIn("do not match the resolved account-key population", str(ctx.exception))
 
-    def test_a_non_lamport_quote_is_not_applicable_never_a_mismatch(self):
+    def test_a_non_lamport_quote_without_account_roles_is_unresolved_never_lamport_exact(self):
         """Reproduced across all 44,888 preserved bodies: every one of the 14 'clean mismatches'
         was a USDC-quoted curve whose lamport delta was EXACTLY 0, because the quote moved as an
         SPL token transfer. Comparing token flow to lamports measures the wrong quantity, and
@@ -1079,10 +1079,11 @@ class CurveReserveChainTests(unittest.TestCase):
         """
         usdc = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
         rows = self.balance_case(usdc, pre=1_000, post=1_000)   # lamports do not move at all
-        self.assertEqual(rows[0]["status"], "not_applicable_non_sol_quote")
+        self.assertEqual(rows[0]["status"], "unresolved_non_sol_quote_account")
         self.assertEqual(rows[0]["quote_mints"], [usdc])
         # It must not be rescued into "exact" by a lamport delta that happens to agree, either.
-        self.assertEqual(self.balance_case(usdc)[0]["status"], "not_applicable_non_sol_quote")
+        self.assertEqual(self.balance_case(usdc)[0]["status"],
+                         "unresolved_non_sol_quote_account")
 
     def test_a_lamport_quote_still_reconciles_exactly(self):
         """The boundary: the fix must not disable the gate for the 43,692 SOL-quoted trades."""
@@ -1111,7 +1112,132 @@ class CurveReserveChainTests(unittest.TestCase):
             result,
             [(parent, {}, event(B9D.NATIVE_QUOTE_MINT)), (parent, {}, event("USDCmint"))],
             idl, [parent])
-        self.assertEqual(rows[0]["status"], "not_applicable_non_sol_quote")
+        self.assertEqual(rows[0]["status"], "unresolved_mixed_quote_mints")
+
+    def token_balance_case(self, post_amount="100", pre_entries=None, post_entries=None,
+                           pre_lamports=0, post_lamports=2_000_000, is_buy=True,
+                           duplicate_quote_key=False):
+        usdc = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        token_program = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        idl = {"instructions": [{"name": "buy_v2", "discriminator": [3] * 8,
+            "accounts": [{"name": "bonding_curve"}, {"name": "quote_mint"},
+                         {"name": "quote_token_program"},
+                         {"name": "associated_quote_bonding_curve"}], "args": []}]}
+        parent = {"program_id": B9D.PUMP_PROGRAM, "data": bytes([3]) * 8,
+                  "accounts": ["curve", usdc, token_program, "quote_account"],
+                  "outer_index": 1, "inner_index": -1}
+        event = {"name": "TradeEvent", "fields": {
+            "quote_amount": 100, "is_buy": is_buy, "quote_mint": usdc}}
+        def entry(amount, decimals=6):
+            return {"accountIndex": 1, "mint": usdc, "programId": token_program,
+                    "uiTokenAmount": {"amount": amount, "decimals": decimals,
+                                      "uiAmount": 999999}}
+        meta = {"preBalances": [1_000, pre_lamports],
+                "postBalances": [1_000, post_lamports],
+                "preTokenBalances": [] if pre_entries is None else pre_entries,
+                "postTokenBalances": [entry(post_amount)] if post_entries is None else post_entries}
+        result = {"transaction": [base64.b64encode(b"ignored").decode(), "base64"], "meta": meta}
+        saved = (B9D.parse_message, B9D.resolve_account_keys)
+        keys = (["curve", "quote_account", "quote_account"] if duplicate_quote_key
+                else ["curve", "quote_account"])
+        if duplicate_quote_key:
+            meta["preBalances"] = meta["preBalances"] + [pre_lamports]
+            meta["postBalances"] = meta["postBalances"] + [post_lamports]
+        B9D.parse_message = lambda _: {"lookups": [], "static_keys": keys}
+        B9D.resolve_account_keys = lambda message, ignored: keys
+        self.addCleanup(lambda: setattr(B9D, "parse_message", saved[0]))
+        self.addCleanup(lambda: setattr(B9D, "resolve_account_keys", saved[1]))
+        return B9D.pump_trade_balance_reconciliations(
+            result, [(parent, {}, event)], idl, [parent])
+
+    def test_non_sol_quote_reconciles_exact_raw_units_and_ignores_ui_amount(self):
+        row = self.token_balance_case()[0]
+        self.assertEqual(row["status"], "exact")
+        self.assertEqual(row["evidence_kind"], "raw_token_balance")
+        self.assertEqual(row["quote_token_delta"], 100)
+        self.assertEqual(row["quote_token_decimals"], 6)
+        self.assertEqual(self.token_balance_case(post_amount="101")[0]["status"], "mismatch")
+
+    def test_missing_token_side_is_zero_only_when_the_account_lamports_are_zero(self):
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.token_balance_case(pre_lamports=1)
+        self.assertIn("omits live quote token account", str(ctx.exception))
+
+    def test_a_closed_token_account_reads_its_own_lamport_side(self):
+        """The missing-side rule must consult the SAME side it is filling in.
+
+        RPC omits a side when the token account is created or closed. Reading `pre_lamports` to
+        decide whether a missing POST is zero inverts the closed-account case: an account that
+        existed and was closed (pre lamports > 0, post lamports 0) would be rejected as missing
+        evidence, and a created account's absent post would be silently read as zero. A mutation
+        swapping the sides survived every existing test.
+        """
+        usdc = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        program = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        pre_entry = {"accountIndex": 1, "mint": usdc, "programId": program,
+                     "uiTokenAmount": {"amount": "100", "decimals": 6}}
+        # Closed in this transaction: pre side present, post side omitted, post lamports zero.
+        rows = self.token_balance_case(
+            pre_entries=[pre_entry], post_entries=[], is_buy=False,
+            pre_lamports=2_000_000, post_lamports=0)
+        self.assertEqual(rows[0]["quote_token_delta"], -100)
+        self.assertEqual(rows[0]["status"], "exact")
+
+    def test_a_wrong_mint_or_token_program_is_refused(self):
+        """The entry at the right index must also BE the quote account we resolved."""
+        usdc = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        program = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        for mint, token_program in ((usdc, "OtherTokenProgram111111111111111111111111111"),
+                                    ("OtherMint1111111111111111111111111111111111", program)):
+            entry = {"accountIndex": 1, "mint": mint, "programId": token_program,
+                     "uiTokenAmount": {"amount": "100", "decimals": 6}}
+            with self.assertRaises(B9D.FreezeViolation) as ctx:
+                self.token_balance_case(post_entries=[entry])
+            self.assertIn("expected", str(ctx.exception))
+
+    def test_a_malformed_raw_token_amount_is_refused(self):
+        """`amount` is a raw integer STRING. Anything else is not evidence."""
+        usdc = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        program = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        for amount in (100, "1.5", "-100", "", None, "1e3"):
+            entry = {"accountIndex": 1, "mint": usdc, "programId": program,
+                     "uiTokenAmount": {"amount": amount, "decimals": 6}}
+            with self.assertRaises(B9D.FreezeViolation) as ctx:
+                self.token_balance_case(post_entries=[entry])
+            self.assertIn("invalid raw token amount", str(ctx.exception), repr(amount))
+
+    def test_a_quote_token_account_appearing_twice_is_refused(self):
+        """Two positions means two candidate deltas; picking either would be a guess."""
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.token_balance_case(duplicate_quote_key=True)
+        self.assertIn("occurs 2 times", str(ctx.exception))
+
+    def test_a_sign_flipped_token_delta_is_a_mismatch_not_a_match(self):
+        """A sell whose token account GAINED the quote must not reconcile.
+
+        Comparing magnitudes would let a sell pass against a buy-shaped delta, which is exactly the
+        error the signed comparison exists to catch.
+        """
+        rows = self.token_balance_case(post_amount="100", is_buy=False)
+        self.assertEqual(rows[0]["expected_reserve_delta"], -100)
+        self.assertEqual(rows[0]["quote_token_delta"], 100)
+        self.assertEqual(rows[0]["status"], "mismatch")
+
+    def test_duplicate_token_balance_entries_and_decimal_drift_fail_closed(self):
+        usdc = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        program = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        def entry(amount, decimals):
+            return {"accountIndex": 1, "mint": usdc, "programId": program,
+                    "uiTokenAmount": {"amount": amount, "decimals": decimals}}
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.token_balance_case(pre_entries=[entry("0", 6), entry("0", 6)])
+        self.assertIn("duplicate entries", str(ctx.exception))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.token_balance_case(pre_entries=[entry("0", 5)])
+        self.assertIn("drifting decimals", str(ctx.exception))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.token_balance_case(pre_entries=[None])
+        self.assertIn("non-object token-balance entry", str(ctx.exception))
 
     def test_balance_reconciliation_gates_clean_trades_and_marks_rent_confounding(self):
         idl = {"instructions": [
