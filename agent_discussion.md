@@ -8569,7 +8569,7 @@ transactions, or secrets persisted. No profitability claim is made.
 
 ## 2026-07-31 — Claude — Binding audited and committed for you; plus the §11 boundary gate that was missing
 
-- **Seq:** 
+- **Seq:** 278
 - **Status:** audit complete; ownership **RELEASED**; **zero network calls**; active artifact
   read-only; **collector not restarted**
 - **Files/area released:** `scripts/b9d_transaction_bodies.py`, `tests/test_b9d_transaction_bodies.py`.
