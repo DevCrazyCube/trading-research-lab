@@ -43,20 +43,32 @@ FreezeViolation = B9D.FreezeViolation
 # Reserve-chain discontinuities are governed by B9e. They are validated here for coordinates and
 # attribution, then reported separately and excluded from every B9f ceiling, so a curve break is
 # never counted twice against two different gates.
-DELEGATED_CATEGORY = "reserve_chain"
+DELEGATED_CATEGORY = B9D.FAILURE_RESERVE_CHAIN
 DELEGATED_PREFIX = "reserve chain: "
 
-# Stable categories, matched by prefix against the reasons `b9d_transaction_bodies` emits. Each is
-# pinned by a test that generates the reason through the real producer, so a rewording fails this
-# suite rather than silently becoming an unrecognised category -- or worse, a recognised one.
+# The class is READ FROM THE `category` COLUMN, which the decoder writes at the moment it knows it.
+# Names come from B9d's own constants so the two cannot drift apart by editing one file.
+#
+# The prose prefixes below are a CROSS-CHECK, not the classification: a row whose stated category
+# disagrees with its own message is refused. Prose alone was the earlier design and it is weaker in
+# both directions -- a reworded message silently changes a class, and a message that happens to
+# match a prefix is counted as something it is not.
 FAILURE_CATEGORIES = (
-    ("short_discriminator", "target instruction data too short to carry a discriminator"),
-    ("unknown_discriminator", "unknown "),
-    ("eventless_reserve_candidate", "reserve transition unresolved: eventless PumpSwap"),
-    ("balance_unresolved", "reserve balance reconciliation unresolved:"),
-    ("balance_mismatch", "reserve balance reconciliation mismatch:"),
+    (B9D.FAILURE_SHORT_DISCRIMINATOR,
+     "target instruction data too short to carry a discriminator"),
+    (B9D.FAILURE_UNKNOWN_DISCRIMINATOR, "unknown "),
+    (B9D.FAILURE_EVENTLESS_RESERVE, "reserve transition unresolved: eventless PumpSwap"),
+    (B9D.FAILURE_BALANCE_UNRESOLVED, "reserve balance reconciliation unresolved:"),
+    (B9D.FAILURE_BALANCE_MISMATCH, "reserve balance reconciliation mismatch:"),
 )
 CATEGORY_NAMES = tuple(name for name, _ in FAILURE_CATEGORIES)
+
+# Ratified in `research/B9F_FAILURE_COVERAGE_PREREGISTRATION.md` §5 BEFORE any full decode pass, and
+# frozen from correctness invariants rather than fitted counts: every category is zero. Each one is
+# a statement that some part of the instruction stream was not understood or not reconciled, and
+# the remedy is repairing the evidence -- pinning the interface that explains a discriminator,
+# resolving the quote identity -- not tolerating a quota of them.
+RATIFIED_CEILINGS = {name: 0 for name in CATEGORY_NAMES}
 
 
 def categorise(reason):
@@ -132,24 +144,63 @@ def failure_coverage(database):
             "no target instructions are present; a failure-coverage rate over an empty population "
             "is vacuous rather than clean")
 
+    if "category" not in {row[1] for row in database.execute(
+            "PRAGMA table_info(classification_failure)")}:
+        raise FreezeViolation(
+            "classification_failure has no `category` column: this artifact predates machine-"
+            "readable failure classes. Run `migrate_failure_categories` and re-decode; the "
+            "categories are deliberately not reconstructed from prose after the fact")
+
     counts = {name: 0 for name in CATEGORY_NAMES}
     counts[DELEGATED_CATEGORY] = 0
-    unrecognised = []
-    for reason, total in database.execute(
-            "SELECT reason,count(*) FROM classification_failure GROUP BY reason ORDER BY reason"):
-        category = categorise(reason or "")
+    legacy = unrecognised = 0
+    disagreements = []
+    for category, reason, total in database.execute(
+            "SELECT category,reason,count(*) FROM classification_failure "
+            "GROUP BY category,reason ORDER BY category,reason"):
         if category is None:
-            unrecognised.append((reason, total))
+            legacy += total
+            continue
+        if category not in counts:
+            unrecognised += total
+            continue
+        # The decoder stated the class; the message must agree with it. Disagreement means one of
+        # the two was edited without the other, and there is no way to tell which is right.
+        if categorise(reason or "") != category:
+            disagreements.append((category, reason, total))
             continue
         counts[category] += total
-    if unrecognised:
-        reason, total = unrecognised[0]
+
+    if legacy:
         raise FreezeViolation(
-            f"{len(unrecognised):,} failure reason(s) match no declared category, covering "
-            f"{sum(n for _, n in unrecognised):,} row(s); first {reason!r} x{total:,}. An "
-            "uncategorised failure class is exactly what this gate exists to refuse")
+            f"{legacy:,} classification failure(s) carry no category; they were written before the "
+            "column existed. Re-decode rather than backfilling: a class inferred from prose after "
+            "the fact is a guess wearing a fact's column name")
+    if unrecognised:
+        raise FreezeViolation(
+            f"{unrecognised:,} classification failure(s) declare a category outside "
+            f"{sorted(counts)}. An uncategorised failure class is exactly what this gate refuses; "
+            "there is no `other` bucket by design")
+    if disagreements:
+        category, reason, total = disagreements[0]
+        raise FreezeViolation(
+            f"{len(disagreements):,} failure class(es) disagree with their own message; first "
+            f"category {category!r} on reason {reason!r} x{total:,}, which reads as "
+            f"{categorise(reason or '')!r}")
 
     persisted = database.execute("SELECT count(*) FROM classification_failure").fetchone()[0]
+    # Bidirectional reconciliation, the other direction from `assert_no_silent_target_instruction`:
+    # the decoder's own tally must agree with what is on disk. A pass that recorded a count and
+    # then wrote a different number of rows has lost failures somewhere between the two.
+    recorded = database.execute(
+        "SELECT value FROM metadata WHERE key='decoder_classification_failures'").fetchone()
+    if recorded is None:
+        raise FreezeViolation(
+            "decoder_classification_failures metadata is absent; the failure population cannot be "
+            "reconciled against the pass that produced it")
+    if recorded[0] != str(persisted):
+        raise FreezeViolation(
+            f"decoder recorded {recorded[0]} classification failures, {persisted:,} are persisted")
     # Structural invariant rather than a live check: every grouped reason either increments a
     # category or lands in `unrecognised`, which raises above. Kept so that stops being true
     # loudly. The reachable guard is the refusal directly above it.
@@ -204,16 +255,29 @@ def assert_failure_coverage(database, ceilings=None):
     return coverage
 
 
+def assert_publication_gate(database):
+    """The ratified §5 gate, applied with no caller-supplied ceilings.
+
+    `assert_failure_coverage` stays parameterised so the gate can be exercised at other settings in
+    tests. Publication must not route through numbers chosen at a call site.
+    """
+    return assert_failure_coverage(database, dict(RATIFIED_CEILINGS))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("artifact", help="path to the B9d evidence artifact (opened read-only)")
     parser.add_argument("--ceilings", default=None,
-                        help='ratified ceilings as JSON, e.g. \'{"unknown_discriminator": 0}\'')
+                        help='ceilings as JSON, e.g. \'{"unknown_discriminator": 0}\'')
+    parser.add_argument("--publication-gate", action="store_true",
+                        help="apply the ratified §5 ceilings; overrides --ceilings")
     args = parser.parse_args(argv)
 
     database = B9D.connect(args.artifact, readonly=True)
     try:
-        if args.ceilings is None:
+        if args.publication_gate:
+            report = assert_publication_gate(database)
+        elif args.ceilings is None:
             report = failure_coverage(database)
         else:
             report = assert_failure_coverage(database, json.loads(args.ceilings))

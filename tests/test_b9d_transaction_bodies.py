@@ -2513,6 +2513,32 @@ class DecoderOrchestrationTests(unittest.TestCase):
         self.assertIn("lacks reserve field(s)", str(ctx.exception))
         self.assertIsNone(B9D.reserve_after_from_event("CompleteEvent", {}))
 
+    def test_the_decoder_states_a_machine_readable_category_for_every_failure(self):
+        """The downstream coverage gate reads `category`, not prose.
+
+        A column the decoder forgets to populate is worse than no column: the gate would refuse
+        every row as legacy, or -- if it fell back to prose -- would quietly reconstruct a guess.
+        So the real decode path is asserted to write it, and to write one the gate recognises.
+        """
+        self.add_body("sig-unknown", 0, [(0, [1], bytes(range(8)) + b"\x00" * 8)])
+        B9D.decode_artifact(self.database, check_sources=False)
+        rows = self.database.execute(
+            "SELECT category,reason FROM classification_failure").fetchall()
+        self.assertTrue(rows, "an unknown discriminator must be recorded, not dropped")
+        for category, reason in rows:
+            with self.subTest(reason=reason[:48]):
+                self.assertEqual(category, B9D.FAILURE_UNKNOWN_DISCRIMINATOR)
+                self.assertIn(category, B9D.FAILURE_CATEGORIES)
+
+    def test_a_short_target_instruction_is_categorised_as_such(self):
+        """The short-data case is distinguished from an unknown discriminator by the absence of a
+        discriminator, not by a second lookup."""
+        self.add_body("sig-short", 0, [(0, [1], b"\x01\x02")])
+        B9D.decode_artifact(self.database, check_sources=False)
+        categories = [row[0] for row in self.database.execute(
+            "SELECT category FROM classification_failure")]
+        self.assertEqual(categories, [B9D.FAILURE_SHORT_DISCRIMINATOR])
+
     def test_every_target_instruction_is_resolved_at_its_own_slot(self):
         """§4 asks for the interface in force AT each instruction's slot, not per transaction.
 

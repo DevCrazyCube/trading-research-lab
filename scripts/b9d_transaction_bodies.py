@@ -60,6 +60,21 @@ PROGRAMDATA_ACCOUNTS = {
 }
 ANCHOR_EVENT_CPI_TAG = bytes.fromhex("e445a52e51cb9a1d")
 
+# Machine-readable classification-failure classes, written into `classification_failure.category`
+# at every insert site. The downstream coverage gate reads this column instead of parsing `reason`,
+# so rewording a message cannot silently move a row between classes -- or, worse, leave it matching
+# a class it does not belong to. `reason` stays human-facing.
+FAILURE_SHORT_DISCRIMINATOR = "short_discriminator"
+FAILURE_UNKNOWN_DISCRIMINATOR = "unknown_discriminator"
+FAILURE_EVENTLESS_RESERVE = "eventless_reserve_candidate"
+FAILURE_RESERVE_CHAIN = "reserve_chain"
+FAILURE_BALANCE_UNRESOLVED = "balance_unresolved"
+FAILURE_BALANCE_MISMATCH = "balance_mismatch"
+FAILURE_CATEGORIES = frozenset({
+    FAILURE_SHORT_DISCRIMINATOR, FAILURE_UNKNOWN_DISCRIMINATOR, FAILURE_EVENTLESS_RESERVE,
+    FAILURE_RESERVE_CHAIN, FAILURE_BALANCE_UNRESOLVED, FAILURE_BALANCE_MISMATCH,
+})
+
 PUMP_IDL_PATH = "research/pump_idl_9c82f61.json"
 PUMP_IDL_SHA256 = "b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49"
 
@@ -346,7 +361,11 @@ def schema(database):
             program_id TEXT,
             discriminator TEXT,
             reason TEXT NOT NULL,
-            context_json TEXT
+            context_json TEXT,
+            -- Machine-readable failure class. Written explicitly at every insert site so the
+            -- downstream coverage gate does not have to infer a class from prose. NULL means a row
+            -- written before this column existed; B9f REFUSES those rather than guessing.
+            category TEXT
         );
         CREATE INDEX IF NOT EXISTS instruction_signature ON instruction(signature);
         CREATE INDEX IF NOT EXISTS instruction_program ON instruction(program_id);
@@ -1592,6 +1611,7 @@ def unresolved_eventless_reserve_transition(program_id, instruction_name, has_ev
     if program_id != PUMPSWAP_PROGRAM or instruction_name != "init_boost" or has_event:
         return None
     return {
+        "category": FAILURE_EVENTLESS_RESERVE,
         "reason": ("reserve transition unresolved: eventless PumpSwap init_boost must not be "
                    "assumed reserve-neutral"),
         "context": {"pre_balances": len((meta or {}).get("preBalances") or []),
@@ -1984,6 +2004,23 @@ def assert_target_classification_accounted(database):
     return True
 
 
+def migrate_failure_categories(database):
+    """Add `classification_failure.category` to an artifact written before the column existed.
+
+    Deliberately does NOT backfill. A category inferred from prose after the fact is a guess
+    wearing the same column name as a fact, and the whole point of the column is that the decoder
+    stated the class at the moment it knew it. Legacy rows keep NULL and the coverage gate refuses
+    them, which forces a re-decode rather than a reconstruction.
+
+    Returns True if the column was added, False if it was already present. Safe to call twice.
+    """
+    columns = {row[1] for row in database.execute("PRAGMA table_info(classification_failure)")}
+    if "category" in columns:
+        return False
+    database.execute("ALTER TABLE classification_failure ADD COLUMN category TEXT")
+    return True
+
+
 def verify_decoded_artifact(database, b9a_path=B9A_PATH):
     """Independently verify persisted derived rows after a decoder pass.
 
@@ -2196,10 +2233,15 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                     database.execute(
                         "INSERT INTO classification_failure "
                         "(signature,slot,transaction_index,outer_index,inner_index,program_id,"
-                        "discriminator,reason,context_json) VALUES (?,?,?,?,?,?,?,?,?)",
+                        "discriminator,reason,context_json,category) "
+                        "VALUES (?,?,?,?,?,?,?,?,?,?)",
                         (signature,) + coordinates + (program_id, discriminator, reason,
                          json.dumps({"data_len": len(envelope["data"])},
-                                    separators=(",", ":"))))
+                                    separators=(",", ":")),
+                         # `classify_instruction` returns a discriminator only when it read one, so
+                         # its absence IS the short-data case rather than a second lookup.
+                         FAILURE_UNKNOWN_DISCRIMINATOR if discriminator is not None
+                         else FAILURE_SHORT_DISCRIMINATOR))
                     failure_count += 1
                 unresolved = unresolved_eventless_reserve_transition(
                     program_id, name, id(envelope) in event_parent_ids, result.get("meta"))
@@ -2207,10 +2249,12 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                     database.execute(
                         "INSERT INTO classification_failure "
                         "(signature,slot,transaction_index,outer_index,inner_index,program_id,"
-                        "discriminator,reason,context_json) VALUES (?,?,?,?,?,?,?,?,?)",
+                        "discriminator,reason,context_json,category) "
+                        "VALUES (?,?,?,?,?,?,?,?,?,?)",
                         (signature,) + coordinates + (program_id, discriminator,
                          unresolved["reason"],
-                         json.dumps(unresolved["context"], separators=(",", ":"))))
+                         json.dumps(unresolved["context"], separators=(",", ":")),
+                         unresolved["category"]))
                     failure_count += 1
                     reserve_failure_count += 1
             for parent, event_envelope, decoded_event in associated_events:
@@ -2252,13 +2296,15 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                     database.execute(
                         "INSERT INTO classification_failure "
                         "(signature,slot,transaction_index,outer_index,inner_index,program_id,"
-                        "discriminator,reason,context_json) VALUES (?,?,?,?,?,?,?,?,?)",
+                        "discriminator,reason,context_json,category) "
+                        "VALUES (?,?,?,?,?,?,?,?,?,?)",
                         (signature,) + parent_coordinates + (PUMP_PROGRAM,
                          parent["data"][:8].hex(), f"reserve chain: {reserve_reason}",
                          json.dumps({"bonding_curve": bonding_curve,
                                      "event_outer_index": event_envelope["outer_index"],
                                      "event_inner_index": event_envelope["inner_index"]},
-                                    separators=(",", ":"))))
+                                    separators=(",", ":")),
+                         FAILURE_RESERVE_CHAIN))
                     failure_count += 1
                     reserve_failure_count += 1
                     continue
@@ -2307,9 +2353,12 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                     database.execute(
                         "INSERT INTO classification_failure "
                         "(signature,slot,transaction_index,outer_index,inner_index,program_id,"
-                        "discriminator,reason,context_json) VALUES (?,?,?,?,?,?,?,?,?)",
+                        "discriminator,reason,context_json,category) "
+                        "VALUES (?,?,?,?,?,?,?,?,?,?)",
                         (signature,) + coordinates + (PUMP_PROGRAM, None, reason,
-                         json.dumps(reconciliation, separators=(",", ":"), sort_keys=True)))
+                         json.dumps(reconciliation, separators=(",", ":"), sort_keys=True),
+                         FAILURE_BALANCE_UNRESOLVED if status.startswith("unresolved_")
+                         else FAILURE_BALANCE_MISMATCH))
         database.execute(
             "INSERT INTO metadata(key,value) VALUES ('decoded_at_unix',?)",
             (str(time.time()),))

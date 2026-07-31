@@ -736,3 +736,28 @@ The two do not imply each other. A user-ratified decision can remain provisional
   the real producer in `b9d_transaction_bodies`, so a rewording fails the suite rather than
   silently creating an unrecognised category or matching an existing one and being counted as
   something it is not.
+
+## 2026-07-31 — Failure classes are stated by the decoder, not inferred from its prose
+
+- **Decision:** `classification_failure` carries a machine-readable `category` column, written at
+  every insert site from constants in `scripts/b9d_transaction_bodies.py`. The B9f coverage gate
+  reads that column. Prose matching is retained only as a cross-check: a row whose stated category
+  disagrees with its own message is refused, because one of the two was edited without the other
+  and there is no way to tell which is right.
+- **Ratified ceilings (B9f §5):** zero for every category — `short_discriminator`,
+  `unknown_discriminator`, `eventless_reserve_candidate`, `balance_unresolved`, `balance_mismatch`.
+  Frozen from correctness invariants rather than fitted counts: each category is a statement that
+  part of the instruction stream was not understood or not reconciled, and the remedy is repairing
+  the evidence, never raising the ceiling. `reserve_chain` is delegated to B9e and may not be given
+  a B9f ceiling.
+- **Legacy rows are refused, never backfilled.** `migrate_failure_categories` adds the column
+  reproducibly and deliberately leaves existing rows NULL, so a migrated legacy artifact is still
+  refused and the operator re-decodes. A category inferred from prose after the fact is a guess
+  wearing a fact's column name, and backfilling would resolve the refusal by inventing exactly the
+  facts the column exists to record.
+- **Reconciliation is bidirectional:** every failure resolves to a parent target instruction, every
+  unnamed target instruction has a failure, and the persisted row count must equal the decoder's own
+  `decoder_classification_failures` tally.
+- **Verification requirement:** the decode path itself is tested to populate `category` with a value
+  the gate recognises, and the ratified ceilings are pinned against the preregistration document, so
+  relaxing either fails the suite rather than passing quietly.

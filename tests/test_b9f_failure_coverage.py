@@ -19,6 +19,7 @@ SPEC.loader.exec_module(B9F)
 B9D = B9F.B9D
 
 ZERO_CEILINGS = {name: 0 for name in B9F.CATEGORY_NAMES}
+_UNSET = object()
 
 
 class FailureFixture(unittest.TestCase):
@@ -29,6 +30,7 @@ class FailureFixture(unittest.TestCase):
         B9D.schema(self.database)
         self.addCleanup(self.database.close)
         self.next_index = 0
+        self.sync_metadata()
 
     def add_instruction(self, target=1, idl_name="buy", program_id=None):
         self.next_index += 1
@@ -41,14 +43,27 @@ class FailureFixture(unittest.TestCase):
              idl_name, target, "[]", 16))
         return (700, index, 0, -1, f"sig-{index}")
 
-    def add_failure(self, reason, coordinates=None, signature=None):
+    def add_failure(self, reason, coordinates=None, signature=None, category=_UNSET):
+        """Insert a failure. `category` defaults to the one its own message implies."""
         slot, index, outer, inner, sig = coordinates or self.add_instruction(idl_name=None)
+        if category is _UNSET:
+            category = B9F.categorise(reason)
         self.database.execute(
             "INSERT INTO classification_failure (signature,slot,transaction_index,outer_index,"
-            "inner_index,program_id,discriminator,reason,context_json) VALUES (?,?,?,?,?,?,?,?,?)",
+            "inner_index,program_id,discriminator,reason,context_json,category) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?)",
             (signature or sig, slot, index, outer, inner, B9D.PUMP_PROGRAM, "00" * 8, reason,
-             "{}"))
+             "{}", category))
+        self.sync_metadata()
         return (slot, index, outer, inner, sig)
+
+    def sync_metadata(self):
+        """Keep `decoder_classification_failures` honest, as a real decode pass would."""
+        total = self.database.execute(
+            "SELECT count(*) FROM classification_failure").fetchone()[0]
+        self.database.execute(
+            "INSERT INTO metadata(key,value) VALUES ('decoder_classification_failures',?) "
+            "ON CONFLICT(key) DO UPDATE SET value=excluded.value", (str(total),))
 
 
 class CategoryVocabularyTests(unittest.TestCase):
@@ -117,11 +132,84 @@ class CoverageTests(FailureFixture):
         self.add_instruction(idl_name="buy")
         self.assertEqual(B9F.failure_coverage(self.database)["target_instructions"], 1)
 
-    def test_an_uncategorised_failure_class_is_refused(self):
-        self.add_failure("a brand new kind of problem nobody declared")
+    def test_a_legacy_row_without_a_category_is_refused_not_reconstructed(self):
+        """Rows written before the column existed are refused, and deliberately not backfilled.
+
+        A category inferred from prose after the fact is a guess wearing a fact's column name. The
+        whole value of the column is that the decoder stated the class at the moment it knew it, so
+        the remedy is a re-decode.
+        """
+        self.add_failure("a brand new kind of problem nobody declared", category=None)
         with self.assertRaises(B9D.FreezeViolation) as ctx:
             B9F.failure_coverage(self.database)
-        self.assertIn("match no declared category", str(ctx.exception))
+        self.assertIn("carry no category", str(ctx.exception))
+
+    def test_a_category_outside_the_declared_set_is_refused(self):
+        """There is no `other` bucket: that is where a not-understood class stops being noticed."""
+        self.add_failure(B9F.FAILURE_CATEGORIES[0][1], category="something_new")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9F.failure_coverage(self.database)
+        self.assertIn("declare a category outside", str(ctx.exception))
+
+    def test_a_category_that_disagrees_with_its_own_message_is_refused(self):
+        """Column and prose are two independent statements of the same fact.
+
+        If they disagree, one was edited without the other and there is no way to tell which is
+        right -- so the row is refused rather than silently trusting whichever the code reads first.
+        """
+        self.add_failure(B9F.FAILURE_CATEGORIES[1][1] + "Pump discriminator ab",
+                         category=B9D.FAILURE_BALANCE_MISMATCH)
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9F.failure_coverage(self.database)
+        self.assertIn("disagree with their own message", str(ctx.exception))
+
+    def test_an_artifact_without_the_category_column_is_refused_and_migratable(self):
+        """The migration adds the column reproducibly and MUST NOT backfill.
+
+        Backfilling would resolve the refusal by inventing the very facts the column exists to
+        record. A migrated legacy artifact must therefore still be refused, so the operator
+        re-decodes instead of shipping reconstructed classes.
+        """
+        self.add_failure(B9F.FAILURE_CATEGORIES[0][1])         # a pre-existing legacy row
+        self.database.execute("ALTER TABLE classification_failure RENAME TO legacy_failure")
+        self.database.execute(
+            "CREATE TABLE classification_failure AS SELECT id,signature,slot,transaction_index,"
+            "outer_index,inner_index,program_id,discriminator,reason,context_json "
+            "FROM legacy_failure")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9F.failure_coverage(self.database)
+        self.assertIn("no `category` column", str(ctx.exception))
+
+        self.assertTrue(B9D.migrate_failure_categories(self.database))
+        self.assertFalse(B9D.migrate_failure_categories(self.database), "must be idempotent")
+        self.assertIn("category", {row[1] for row in self.database.execute(
+            "PRAGMA table_info(classification_failure)")})
+        self.assertEqual(
+            [row[0] for row in self.database.execute(
+                "SELECT category FROM classification_failure")], [None],
+            "the migration must not invent categories for rows written before the column")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9F.failure_coverage(self.database)
+        self.assertIn("carry no category", str(ctx.exception))
+
+    def test_a_decoder_tally_that_disagrees_with_persisted_rows_is_refused(self):
+        """The other direction of the reconciliation: a pass that recorded one count and wrote a
+        different number of rows lost failures somewhere between the two."""
+        self.add_instruction(idl_name="buy")
+        self.add_failure(B9F.FAILURE_CATEGORIES[0][1])
+        self.database.execute(
+            "UPDATE metadata SET value='7' WHERE key='decoder_classification_failures'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9F.failure_coverage(self.database)
+        self.assertIn("recorded 7 classification failures", str(ctx.exception))
+
+    def test_a_missing_decoder_tally_is_refused(self):
+        self.add_instruction(idl_name="buy")
+        self.database.execute(
+            "DELETE FROM metadata WHERE key='decoder_classification_failures'")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9F.failure_coverage(self.database)
+        self.assertIn("metadata is absent", str(ctx.exception))
 
     def test_reserve_chain_failures_are_reported_separately_and_never_double_counted(self):
         self.add_instruction(idl_name="buy")
@@ -203,6 +291,22 @@ class CeilingTests(FailureFixture):
             self.database, dict(ZERO_CEILINGS, unknown_discriminator=1))
         self.assertEqual(report["counts"]["unknown_discriminator"], 1)
 
+    def test_the_ratified_publication_gate_admits_nothing(self):
+        """Every ceiling is zero, so a single failure of any category fails the gate.
+
+        That is the intended severity: each category is a statement that part of the instruction
+        stream was not understood or not reconciled, and the remedy is repairing the evidence.
+        """
+        self.assertEqual(set(B9F.RATIFIED_CEILINGS), set(B9F.CATEGORY_NAMES))
+        self.assertEqual(set(B9F.RATIFIED_CEILINGS.values()), {0})
+        self.add_instruction(idl_name="buy")
+        self.assertEqual(B9F.assert_publication_gate(self.database)["counts"],
+                         {name: 0 for name in B9F.CATEGORY_NAMES})
+        self.add_failure(B9F.FAILURE_CATEGORIES[1][1] + "Pump discriminator ab")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9F.assert_publication_gate(self.database)
+        self.assertIn("unknown_discriminator=1 exceeds 0", str(ctx.exception))
+
     def test_a_delegated_failure_does_not_consume_any_categorys_ceiling(self):
         self.add_instruction(idl_name="buy")
         self.add_failure(B9F.DELEGATED_PREFIX + "curve reserve chain was previously broken")
@@ -249,11 +353,14 @@ class PreregistrationDocumentTests(unittest.TestCase):
         self.assertIn("### Verified facts", text)
         self.assertIn("### Open questions", text)
 
-    def test_the_document_still_declares_the_ceilings_unratified(self):
-        """If this starts failing because someone ratified them, update it in the same commit that
-        wires the numbers into the code -- not separately."""
+    def test_the_document_states_the_same_ceilings_the_code_applies(self):
+        """The document is where the decision is ratified and the code is where it is enforced.
+        If they drift, the preregistration stops describing the gate that actually runs."""
         text = self.PATH.read_text(encoding="utf-8")
-        self.assertIn("NOT ratified", text)
+        for name, ceiling in B9F.RATIFIED_CEILINGS.items():
+            with self.subTest(category=name):
+                self.assertRegex(text, rf"{name}:\s+{ceiling}\b")
+        self.assertIn("RATIFIED", text)
 
 
 if __name__ == "__main__":

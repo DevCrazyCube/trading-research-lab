@@ -99,34 +99,50 @@ would make neither number mean anything.
 
 Read-only, offline, no network access, no writes.
 
-## 5. Ratification — TO BE FILLED IN BEFORE THE DECODE PASS
+## 5. Decision — RATIFIED 2026-07-31, before any full decode pass
 
 Ceilings are absolute counts, one per category, and **must name every category**. A partial mapping
 is refused rather than treated as unbounded for the rest: a category silently exempted from its own
 gate is precisely the failure this design prevents. `reserve_chain` must **not** be given a ceiling.
 
 ```
-short_discriminator:         null
-unknown_discriminator:       null
-eventless_reserve_candidate: null
-balance_unresolved:          null
-balance_mismatch:            null
+short_discriminator:         0
+unknown_discriminator:       0
+eventless_reserve_candidate: 0
+balance_unresolved:          0
+balance_mismatch:            0
 ```
 
-Guidance for whoever ratifies, offered without a number attached:
+Ratified by Codex in handoff 17, frozen **from correctness invariants rather than fitted counts**,
+and reproduced as `RATIFIED_CEILINGS` in `scripts/b9f_failure_coverage.py`, applied by
+`assert_publication_gate`, which takes no ceiling parameters.
 
-- `short_discriminator` and `unknown_discriminator` are statements that the instruction stream is
-  not fully understood. The conservative reading is that both should be zero, by the same logic
-  that set B9e at 100%: the remedy for an unknown discriminator is pinning the interface that
-  explains it, not tolerating a quota of them.
-- `eventless_reserve_candidate` is a measured, named, deliberately-preserved condition rather than
-  a defect, so a non-zero ceiling is defensible — but it should be ratified as a number, not
-  inherited by omission.
-- `balance_unresolved` and `balance_mismatch` bound how much reserve evidence is allowed to
-  disagree with the ledger. They are the categories where a quietly-raised ceiling would do the
-  most damage to a downstream measurement.
-- As with B9e: a shortfall is evidence to repair or grounds for a separately preregistered
-  estimand. It is never grounds to raise a ceiling after seeing the distribution.
+Every category is zero because every category is a statement that some part of the instruction
+stream was not understood or not reconciled:
+
+- `short_discriminator` and `unknown_discriminator` say the interface is not fully pinned. The
+  remedy is pinning the interface that explains the discriminator, not tolerating a quota.
+- `eventless_reserve_candidate` is a named, deliberately-preserved condition rather than a defect —
+  but §7 forbids assuming it reserve-neutral, so an artifact containing one has an unresolved
+  reserve transition in it and is not publishable evidence.
+- `balance_unresolved` and `balance_mismatch` bound how far reserve evidence may disagree with the
+  ledger. Zero is the only value consistent with treating a reconciliation as evidence.
+
+**Interpretation flagged for correction:** handoff 17 named zero ceilings for unknown target
+discriminators, unrecognised or unattributable classes, target-classification absence, reserve-chain
+breaks and left truncation, clean lamport/token balance mismatches, and unresolved eventless reserve
+transitions. It did not name `balance_unresolved` (mixed or absent non-SOL quote identity)
+explicitly. It is set to zero here as the reading consistent with every other clause; if a non-zero
+value was intended it must be ratified explicitly rather than inherited by omission.
+
+Explicit same-transaction lifecycle or rent confounds are a separate matter and are **not**
+`classification_failure` rows at all — `confounded_by_account_lifecycle` is counted in the decoder's
+own tally. They may be counted and reported, are never reconciled evidence, and can never satisfy an
+exactness gate. Their full-population denominator and named cause are preserved by B9d's balance
+reconciliation, which this gate does not second-guess.
+
+As with B9e: a shortfall is evidence to repair or grounds for a separately preregistered estimand.
+It is never grounds to raise a ceiling after seeing the distribution.
 
 ## 6. Why the ceilings are preregistered rather than chosen later
 
