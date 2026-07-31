@@ -179,6 +179,49 @@ class DecodeReadinessTests(ReadinessFixture):
             self.ready()
         self.assertIn("derived decoder output already exists", str(ctx.exception))
 
+    def test_diagnosis_reports_every_check_instead_of_stopping_at_the_first(self):
+        """The pre-boundary run expects the boundary to fail; it must still show everything else.
+
+        A fail-closed gate is right immediately before decode and useless before boundary
+        collection -- it would report the boundary and hide whether anything else is also wrong.
+        """
+        database = self.open()
+        with database:
+            database.execute("DELETE FROM raw_boundary_response")
+            database.execute("DELETE FROM metadata WHERE key='boundary_completed_at_unix'")
+        report = B9G.diagnose_readiness(database, str(self.path))
+        self.assertFalse(report["ready"])
+        self.assertEqual(sorted(report["checks"]), sorted(B9G.READINESS_CHECKS))
+        self.assertFalse(report["checks"]["structural_verification"]["passed"])
+        for name in ("collector_lock_unheld", "collection_sealed", "nothing_decoded_yet"):
+            with self.subTest(check=name):
+                self.assertTrue(report["checks"][name]["passed"],
+                                "a boundary failure must not mask the other checks")
+
+    def test_diagnosis_continues_past_an_EARLY_failure(self):
+        """The first check failing must not hide the rest.
+
+        The boundary case above fails the LAST check, so an early-exit bug would still look right.
+        Here the very first check fails -- a collector is holding the lock -- and the remaining
+        three must still be reported, which is the whole difference between a diagnosis and a gate.
+        """
+        holder = self.lock_path.open("a+b")
+        self.addCleanup(holder.close)
+        fcntl.flock(holder.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        with self.bounded():
+            report = B9G.diagnose_readiness(self.open(), str(self.path))
+        self.assertFalse(report["ready"])
+        self.assertEqual(sorted(report["checks"]), sorted(B9G.READINESS_CHECKS))
+        self.assertFalse(report["checks"]["collector_lock_unheld"]["passed"])
+        for name in ("collection_sealed", "nothing_decoded_yet", "structural_verification"):
+            with self.subTest(check=name):
+                self.assertTrue(report["checks"][name]["passed"])
+
+    def test_diagnosis_of_a_ready_artifact_agrees_with_the_gate(self):
+        report = B9G.diagnose_readiness(self.open(), str(self.path))
+        self.assertTrue(report["ready"])
+        self.assertTrue(all(entry["passed"] for entry in report["checks"].values()))
+
     def test_a_missing_lock_file_is_reported_not_treated_as_readiness(self):
         """Absence of a lock file means nothing can hold it, not that collection happened."""
         self.lock_path.unlink()

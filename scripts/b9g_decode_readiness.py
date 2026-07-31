@@ -136,20 +136,61 @@ def assert_decode_ready(database, artifact_path, b9c_path=None, b9a_path=None):
     }
 
 
+READINESS_CHECKS = ("collector_lock_unheld", "collection_sealed", "nothing_decoded_yet",
+                    "structural_verification")
+
+
+def diagnose_readiness(database, artifact_path, b9c_path=None, b9a_path=None):
+    """Report every check instead of stopping at the first failure.
+
+    The runbook runs readiness twice: once before boundary collection, where the boundary check is
+    EXPECTED to fail and the point is to see everything else, and once after, where it must pass.
+    A fail-closed gate is right for the second and useless for the first -- it would report the
+    boundary and hide whether anything else is also wrong.
+
+    This never replaces `assert_decode_ready`. `ready` is true here only if every check passed, and
+    the gate is still what the runbook gates on.
+    """
+    results = {}
+
+    def record(name, check):
+        try:
+            check()
+            results[name] = {"passed": True, "detail": None}
+        except FreezeViolation as error:
+            results[name] = {"passed": False, "detail": str(error)}
+
+    record("collector_lock_unheld", lambda: assert_collector_lock_unheld(artifact_path))
+    record("collection_sealed", lambda: assert_collection_complete(database))
+    record("nothing_decoded_yet", lambda: assert_nothing_decoded_yet(database))
+    record("structural_verification", lambda: B9D.verify_artifact(
+        database,
+        **({"b9c_path": b9c_path} if b9c_path else {}),
+        **({"b9a_path": b9a_path} if b9a_path else {})))
+    return {"ready": all(entry["passed"] for entry in results.values()), "checks": results}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("artifact", help="path to the B9d evidence artifact (opened read-only)")
     parser.add_argument("--b9c", default=None, help="override the pinned B9c source path")
     parser.add_argument("--b9a", default=None, help="override the pinned B9a source path")
+    parser.add_argument("--diagnose", action="store_true",
+                        help="report every check instead of stopping at the first failure; use "
+                             "for the pre-boundary run, where the boundary is expected to fail")
     args = parser.parse_args(argv)
 
     database = B9D.connect(args.artifact, readonly=True)
     try:
-        report = assert_decode_ready(database, args.artifact, args.b9c, args.b9a)
+        if args.diagnose:
+            report = diagnose_readiness(database, args.artifact, args.b9c, args.b9a)
+        else:
+            report = assert_decode_ready(database, args.artifact, args.b9c, args.b9a)
     finally:
         database.close()
     print(json.dumps(report, indent=2, sort_keys=True))
-    return 0
+    # A diagnosis still exits non-zero when something failed: it explains more, it does not excuse.
+    return 0 if report.get("ready") else 1
 
 
 if __name__ == "__main__":
