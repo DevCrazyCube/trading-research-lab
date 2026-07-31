@@ -1467,6 +1467,65 @@ class CurveReserveChainTests(unittest.TestCase):
         self.assertEqual(elsewhere[0]["status"], "mismatch",
                          "a lifecycle instruction on another account explains nothing here")
 
+    def boost_case(self, pool_base=1_000, pool_quote=2_000, vault_base=None, vault_quote=None,
+                   with_creation=True, drop_balances=False):
+        """A PumpSwap graduation shape: create_pool + CreatePoolEvent + eventless init_boost."""
+        idl = json.loads((ROOT / B9D.PUMPSWAP_IDL_PATH).read_bytes())
+        init = next(i for i in idl["instructions"] if i["name"] == "init_boost")
+        roles = [a["name"] for a in B9D.flatten_accounts(init["accounts"])]
+        accounts = [f"acct{n}" for n in range(len(roles))]
+        boost = {"program_id": B9D.PUMPSWAP_PROGRAM,
+                 "data": bytes(init["discriminator"]) + b"\x00" * 8,
+                 "accounts": accounts, "outer_index": 2, "inner_index": 36}
+        envelopes = [boost]
+        if with_creation:
+            envelopes.insert(0, {
+                "program_id": B9D.PUMPSWAP_PROGRAM,
+                "data": encode_pumpswap_event("CreatePoolEvent", pool_base_amount=pool_base,
+                                              pool_quote_amount=pool_quote),
+                "accounts": [], "outer_index": 2, "inner_index": 34})
+        base_index = roles.index("pool_base_token_account")
+        quote_index = roles.index("pool_quote_token_account")
+        result = {"transaction": [base64.b64encode(b"ignored").decode(), "base64"],
+                  "meta": {"postTokenBalances": [] if drop_balances else [
+                      {"accountIndex": base_index, "uiTokenAmount": {
+                          "amount": str(pool_base if vault_base is None else vault_base)}},
+                      {"accountIndex": quote_index, "uiTokenAmount": {
+                          "amount": str(pool_quote if vault_quote is None else vault_quote)}}]}}
+        saved = (B9D.parse_message, B9D.resolve_account_keys)
+        B9D.parse_message = lambda _: {}
+        B9D.resolve_account_keys = lambda message, meta: accounts
+        self.addCleanup(lambda: setattr(B9D, "parse_message", saved[0]))
+        self.addCleanup(lambda: setattr(B9D, "resolve_account_keys", saved[1]))
+        return B9D.pool_creation_resolves_eventless_boost(
+            boost, envelopes, result, {B9D.PUMPSWAP_PROGRAM: idl})
+
+    def test_an_eventless_boost_is_resolved_only_by_a_reconciling_pool_creation(self):
+        """§7 forbids ASSUMING reserve-neutrality. It does not forbid proving the post-state.
+
+        `init_boost` runs after `create_pool` in the same transaction, so if the pool vaults still
+        hold exactly what `CreatePoolEvent` declared, nothing between them moved the reserves.
+        Measured on the frozen artifact: 12 of 12 eventless init_boost instructions reconcile this
+        way, to the token.
+        """
+        proof = self.boost_case()
+        self.assertIsNotNone(proof)
+        self.assertEqual(proof["resolved_by"], "create_pool_reconciliation")
+        self.assertEqual((proof["pool_base_amount"], proof["pool_quote_amount"]), (1_000, 2_000))
+        self.assertEqual(proof["venue"], "pumpswap_pool")
+
+    def test_an_eventless_boost_stays_unresolved_when_the_evidence_does_not_prove_it(self):
+        """Every way the proof can fail must leave the failure standing, or the exemption becomes
+        the assumption §7 refuses."""
+        with self.subTest(case="no pool creation in the transaction"):
+            self.assertIsNone(self.boost_case(with_creation=False))
+        with self.subTest(case="base vault moved after creation"):
+            self.assertIsNone(self.boost_case(vault_base=999))
+        with self.subTest(case="quote vault moved after creation"):
+            self.assertIsNone(self.boost_case(vault_quote=1))
+        with self.subTest(case="vault balance absent from the transaction"):
+            self.assertIsNone(self.boost_case(drop_balances=True))
+
     def test_a_trade_event_parent_without_a_curve_role_fails_closed(self):
         """A TradeEvent under a Pump instruction that touches no curve is anomalous evidence.
 
@@ -2404,6 +2463,28 @@ class DecoderOrchestrationTests(unittest.TestCase):
         self.assertEqual(breaks, [], "a canonically continuous history must record no chain break")
         self.assertEqual(summary["reserve_observations"], 3,
                          "the anchor and both trades must each bank a reserve observation")
+
+    def test_an_unproven_eventless_boost_still_records_a_failure_after_decode(self):
+        """The call site, not just the resolver.
+
+        Resolver-only tests let a mutation that suppresses EVERY eventless failure survive, because
+        nothing exercised the decode loop's use of it. Here an `init_boost` runs with no
+        CreatePoolEvent to reconcile against, so §7's refusal must stand and the row must be
+        recorded.
+        """
+        swap_idl = json.loads((ROOT / B9D.PUMPSWAP_IDL_PATH).read_bytes())
+        init = next(i for i in swap_idl["instructions"] if i["name"] == "init_boost")
+        roles = B9D.flatten_accounts(init["accounts"])
+        self.add_body("sig-boost", 0,
+                      [(0, [1] * len(roles), bytes(init["discriminator"]) + b"\x00" * 8)],
+                      program=B9D.PUMPSWAP_PROGRAM)
+        summary = B9D.decode_artifact(self.database, check_sources=False)
+        rows = self.database.execute(
+            "SELECT category,reason FROM classification_failure").fetchall()
+        self.assertEqual([r[0] for r in rows], [B9D.FAILURE_EVENTLESS_RESERVE],
+                         "an unproven eventless init_boost must remain a recorded failure")
+        self.assertIn("must not be assumed reserve-neutral", rows[0][1])
+        self.assertEqual(summary["reserve_eventless_resolved"], 0)
 
     def test_a_pumpswap_pool_event_cannot_enter_a_pump_bonding_curve_chain(self):
         """Cross-program isolation, asserted rather than inherited from a name-space coincidence.

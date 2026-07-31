@@ -1620,6 +1620,80 @@ def unresolved_eventless_reserve_transition(program_id, instruction_name, has_ev
     }
 
 
+POOL_RESERVE_ROLES = ("pool_base_token_account", "pool_quote_token_account")
+
+
+def pool_creation_resolves_eventless_boost(envelope, envelopes, result, idls):
+    """Resolve an eventless PumpSwap reserve candidate FROM EVIDENCE, or return None.
+
+    §7 forbids assuming an eventless instruction reserve-neutral. It does not forbid PROVING the
+    pool's post-state, and the graduation transactions that carry `init_boost` do exactly that from
+    two independent preserved sources:
+
+    1. A sibling `CreatePoolEvent` states `pool_base_amount` / `pool_quote_amount`.
+    2. The transaction's own `postTokenBalances` state the pool vaults' end-of-transaction amounts.
+
+    `init_boost` executes AFTER `create_pool` inside the same transaction, so if the vaults still
+    hold exactly what `create_pool` declared, nothing between them moved the reserves -- including
+    `init_boost`. That is a reconciliation, not an assumption, and it fails closed: no sibling
+    event, a missing vault balance, or any disagreement returns None and the unresolved failure
+    stands.
+
+    Measured on the frozen artifact: 12 of 12 eventless `init_boost` instructions sit in
+    `migrate_v2 -> create_pool -> CreatePoolEvent -> init_boost -> CompletePumpAmmMigrationEvent`
+    graduations, all 12 reconcile exactly, and all 12 create their boost vault empty.
+
+    Returns the evidence on success. PumpSwap pool quantities stay in this record and are never
+    written into a Pump bonding-curve reserve chain.
+    """
+    creation = None
+    for candidate in envelopes:
+        if candidate["outer_index"] != envelope["outer_index"]:
+            continue
+        decoded = decode_anchor_cpi_event(candidate["program_id"], candidate["data"], idls)
+        if decoded is not None and decoded["name"] == "CreatePoolEvent":
+            if creation is not None:
+                return None            # two pool creations in one outer group: not determinate
+            creation = decoded["fields"]
+    if creation is None:
+        return None
+
+    meta = result.get("meta") or {}
+    try:
+        keys = resolve_account_keys(
+            parse_message(base64.b64decode(result["transaction"][0])), meta)
+    except (FreezeViolation, ValueError, KeyError, IndexError):
+        return None
+    balances = {row.get("accountIndex"): row for row in (meta.get("postTokenBalances") or [])}
+
+    idl = idls.get(PUMPSWAP_PROGRAM)
+    if idl is None:
+        return None
+    try:
+        name, roles = idl_instruction_account_roles(idl, envelope["data"], envelope["accounts"])
+    except FreezeViolation:
+        return None
+
+    observed = {}
+    for role, declared in zip(POOL_RESERVE_ROLES, ("pool_base_amount", "pool_quote_amount")):
+        account = roles.get(role)
+        indexes = [index for index, key in enumerate(keys) if key == account]
+        if len(indexes) != 1:
+            return None
+        entry = balances.get(indexes[0])
+        amount = (entry or {}).get("uiTokenAmount", {}).get("amount")
+        if not isinstance(amount, str) or not amount.isdigit():
+            return None
+        if int(amount) != creation.get(declared):
+            return None                # the vaults moved after creation: NOT resolved
+        observed[role] = int(amount)
+
+    return {"resolved_by": "create_pool_reconciliation", "instruction": name,
+            "pool_base_amount": observed[POOL_RESERVE_ROLES[0]],
+            "pool_quote_amount": observed[POOL_RESERVE_ROLES[1]],
+            "venue": "pumpswap_pool"}
+
+
 def raw_token_balance_delta(meta, keys, account, mint, token_program):
     """Return one token account's exact raw-unit delta from RPC token-balance evidence.
 
@@ -2188,7 +2262,7 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
             "derived decoder output already exists: refusing to mix or overwrite a prior pass "
             f"(rows={existing}, metadata_keys={sorted(decode_metadata)})")
 
-    instruction_count = target_count = failure_count = 0
+    instruction_count = target_count = failure_count = resolved_eventless_count = 0
     reserve_count = reserve_failure_count = 0
     balance_exact_count = balance_confounded_count = balance_failure_count = 0
     curve_chains = {}
@@ -2251,6 +2325,16 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                     failure_count += 1
                 unresolved = unresolved_eventless_reserve_transition(
                     program_id, name, id(envelope) in event_parent_ids, result.get("meta"))
+                if unresolved is not None:
+                    # Resolve it only if the transaction PROVES the pool post-state: a sibling
+                    # CreatePoolEvent whose stated reserves still equal the vaults at the end of
+                    # the transaction. Anything short of that leaves the failure standing, so §7's
+                    # refusal to assume reserve-neutrality is intact.
+                    proof = pool_creation_resolves_eventless_boost(
+                        envelope, envelopes, result, idls)
+                    if proof is not None:
+                        unresolved = None
+                        resolved_eventless_count += 1
                 if unresolved is not None:
                     database.execute(
                         "INSERT INTO classification_failure "
@@ -2377,7 +2461,12 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
         for key, value in (
                 ("reserve_balance_exact", balance_exact_count),
                 ("reserve_balance_confounded", balance_confounded_count),
-                ("reserve_balance_failures", balance_failure_count)):
+                ("reserve_balance_failures", balance_failure_count),
+                # Recorded, not silent: an eventless candidate that was RESOLVED by evidence is a
+                # measurement, and a reader must be able to see how many there were without
+                # re-deriving it. Zero failures plus zero resolutions is a different artifact from
+                # zero failures because twelve were proven.
+                ("reserve_eventless_resolved", resolved_eventless_count)):
             database.execute("INSERT INTO metadata(key,value) VALUES (?,?)", (key, str(value)))
         # Inside the transaction, so a violation rolls the whole materialization back rather than
         # leaving accounted and unaccounted rows committed together.
@@ -2388,7 +2477,8 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
             "reserve_reconciliation_failures": reserve_failure_count,
             "reserve_balance_exact": balance_exact_count,
             "reserve_balance_confounded": balance_confounded_count,
-            "reserve_balance_failures": balance_failure_count}
+            "reserve_balance_failures": balance_failure_count,
+            "reserve_eventless_resolved": resolved_eventless_count}
 
 
 # ---------------------------------------------------------------------------------------------
