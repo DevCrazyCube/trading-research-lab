@@ -786,3 +786,28 @@ The two do not imply each other. A user-ratified decision can remain provisional
   and a check that can acquire the lock can stop the thing it is inspecting.
 - **Verification requirement:** the held-lock test is time-bounded, so a regression to a blocking
   probe fails with a diagnosis instead of wedging the suite.
+
+## 2026-07-31 — The post-collection runbook is executable data, and its order is tested
+
+- **Decision:** the ten-step post-collection order is frozen in `scripts/b9h_runbook.py` as an
+  ordered tuple, not as prose in a handoff. The rehearsal executes the real functions in that order
+  against a synthetic complete artifact and records what it actually ran; the test compares the
+  trace to the tuple, so swapping or dropping a step fails.
+- **Frozen order:** collector exits naturally -> seal under the free lock -> raw-body backup ->
+  collect-boundary -> raw verify plus B9g readiness -> sealed raw+boundary backup -> atomic decode
+  -> verify_decoded_artifact -> B9f measure then zero-ceiling gate -> B9e measure then 100% gate.
+- **Why the order is the substance:** each step exists to make a specific later step recoverable.
+  The raw-body backup precedes the boundary write so a failed boundary fetch has clean state to
+  return to. The sealed backup precedes decode because it is the only state a failed decode may
+  restore from. Readiness precedes decode because `refuse_if_complete` makes a decode over partial
+  evidence permanent.
+- **Recovery policy:** boundary or readiness failure restores the pre-boundary backup; decode or
+  gate failure restores only the sealed raw+boundary backup. A gate failure is never resolved by
+  moving a threshold.
+- **Backups are verified when taken, not when needed.** `backup_artifact` refuses to overwrite an
+  earlier recovery point and hashes the copy against the source; `restore_artifact` re-verifies the
+  backup still hashes to what it did when taken. A backup nobody hashed is a backup nobody can
+  trust, and the moment you need it is the worst time to find out.
+- **Verification requirement:** the rehearsal proves an injected mid-decode failure leaves no
+  derived rows and leaves the artifact byte-identical to the sealed backup, and that running decode
+  or readiness out of order is refused by the functions themselves rather than only by convention.
