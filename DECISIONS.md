@@ -710,3 +710,29 @@ The two do not imply each other. A user-ratified decision can remain provisional
   tests that generate each reserve-chain reason through the real function, and the preregistered
   numbers are pinned against the document, so lowering the threshold or widening the eligible set
   fails the suite rather than passing quietly.
+
+## 2026-07-31 — The instruction stream is bounded by category, not described after the fact
+
+- **Decision:** before any measurement consumes the B9d instruction stream, every persisted
+  `classification_failure` must fall into exactly one declared category — `short_discriminator`,
+  `unknown_discriminator`, `eventless_reserve_candidate`, `balance_unresolved`, `balance_mismatch`
+  — with reserve-chain discontinuities delegated to B9e. Each category carries a ceiling
+  preregistered before decoding. Specified in `research/B9F_FAILURE_COVERAGE_PREREGISTRATION.md`
+  and enforced by `assert_failure_coverage` in `scripts/b9f_failure_coverage.py`. Ceilings are
+  currently unset and the gate is fail-closed until they are ratified.
+- **No `other` bucket, ever.** A reason matching no declared category raises. An `other` bucket is
+  where an unrecognised failure class goes to stop being noticed, and a growing bucket of
+  not-understood instructions is indistinguishable from a healthy one once it has a name.
+- **The denominator is the target instruction population**, never the observed failures. A rate
+  whose denominator is the failures themselves cannot fall, so it measures nothing.
+- **Every target instruction is either named or explained.** A target row with no `idl_name` and no
+  failure at its coordinates was neither understood nor reported, and is invisible to any check
+  that walks the failure table, because there is nothing there to walk. This is the invariant the
+  gate exists for; the rates are secondary.
+- **A partial ceiling mapping is refused** rather than treated as unbounded for the categories it
+  omits, and `reserve_chain` may not be given a B9f ceiling at all — charging one curve break
+  against two gates makes neither number mean anything.
+- **Verification requirement:** each category is pinned by a test that generates its reason through
+  the real producer in `b9d_transaction_bodies`, so a rewording fails the suite rather than
+  silently creating an unrecognised category or matching an existing one and being counted as
+  something it is not.
