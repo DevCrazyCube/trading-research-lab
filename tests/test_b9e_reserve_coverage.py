@@ -203,6 +203,65 @@ class ClassificationTests(CoverageFixture):
         self.assertIn("identity is ambiguous", str(ctx.exception))
 
 
+    def test_no_curve_is_classified_twice_even_with_evidence_of_several_kinds(self):
+        """Statuses partition the cohort; they do not tag it.
+
+        A curve carrying an anchor, observations, a truncation notice AND a break must consume
+        exactly one slot in the tally. If classification ever became additive, coverage could
+        exceed the cohort size and the fraction could exceed 1.
+        """
+        self.set_cohort("busy", "quiet")
+        self.add_observation("busy", anchor=True)
+        self.add_observation("busy")
+        self.add_chain_failure("busy", B9E.LEFT_TRUNCATED_REASON + " in the frozen evidence")
+        self.add_chain_failure("busy", B9E.BREAK_REASONS[1])
+        coverage = B9E.cohort_reserve_coverage(self.database)
+        self.assertEqual(sum(coverage["counts"].values()), 2)
+        self.assertEqual(len(coverage["statuses"]), 2)
+        self.assertEqual(coverage["counts"]["broken"], 1)
+        self.assertLessEqual(coverage["counts"]["anchored_complete"], 1)
+
+    def test_incidental_non_cohort_curves_neither_count_nor_dilute(self):
+        """Bundled incidental Pump activity is out of scope by construction.
+
+        B9c never enumerated those curve histories, so the decoder skips them and they produce no
+        rows. They must also not enter the denominator: an incidental curve is not a cohort curve
+        with missing evidence, it is not a member at all. Counting them would understate coverage
+        exactly as counting only observed curves would overstate it.
+        """
+        self.set_cohort("member")
+        self.add_observation("member", anchor=True)
+        coverage = B9E.cohort_reserve_coverage(self.database)
+        self.assertEqual(coverage["cohort_curves"], 1)
+        self.assertEqual(coverage["counts"]["anchored_complete"], 1)
+        self.assertNotIn("incidental-curve", coverage["statuses"])
+        # And if incidental evidence ever DID reach the tables, it is refused rather than absorbed.
+        self.add_observation("incidental-curve", anchor=True)
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9E.cohort_reserve_coverage(self.database)
+        self.assertIn("outside the frozen cohort", str(ctx.exception))
+
+    def test_discontinuities_are_reported_in_canonical_ledger_order(self):
+        """The report names the coordinate of the FIRST break on a curve.
+
+        "First" is only meaningful in canonical ledger order; ordering by rowid would name whichever
+        row the decoder happened to write first. Inserted here deliberately out of order.
+        """
+        self.set_cohort("curve")
+        self.add_observation("curve", anchor=True)
+        for slot, index in ((900, 5), (700, 2), (700, 1), (800, 9)):
+            self.database.execute(
+                "INSERT INTO classification_failure (signature,slot,transaction_index,outer_index,"
+                "inner_index,program_id,discriminator,reason,context_json) "
+                "VALUES (?,?,?,?,?,?,?,?,?)",
+                (f"sig-{slot}-{index}", slot, index, 0, -1, B9D.PUMP_PROGRAM, "00" * 8,
+                 B9E.RESERVE_CHAIN_PREFIX + B9E.BREAK_REASONS[1], json.dumps(
+                     {"bonding_curve": "curve"})))
+        failures = B9E.cohort_reserve_coverage(self.database)["failures"]["curve"]
+        self.assertEqual([entry["coordinates"][:2] for entry in failures],
+                         [[700, 1], [700, 2], [800, 9], [900, 5]])
+
+
 class RatificationTests(CoverageFixture):
 
     def complete_cohort(self, complete, absent):
@@ -255,6 +314,36 @@ class RatificationTests(CoverageFixture):
                     B9E.assert_reserve_coverage(self.database, minimum, ["anchored_complete"])
                 self.assertIn("fraction in (0, 1]", str(ctx.exception))
 
+    def test_the_ratified_publication_gate_demands_the_whole_cohort(self):
+        """§5 as ratified: 100% anchored_complete, and only anchored_complete is eligible.
+
+        A single curve short of the cohort fails closed. That is the intended severity -- the
+        remedy is repairing the missing evidence or preregistering a different estimand over a
+        different cohort, never lowering this number to whatever the artifact turned out to be.
+        """
+        self.assertEqual(B9E.RATIFIED_MINIMUM_ANCHORED_COMPLETE, 1.0)
+        self.assertEqual(B9E.RATIFIED_ELIGIBLE_STATUSES, ("anchored_complete",))
+        self.complete_cohort(complete=4, absent=0)
+        report = B9E.assert_publication_gate(self.database)
+        self.assertEqual(report["anchored_complete_fraction"], 1.0)
+        self.assertEqual(report["eligible_curves"], 4)
+
+        self.set_cohort(*[f"ok-{n}" for n in range(4)], "one-more")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9E.assert_publication_gate(self.database)
+        self.assertIn("below the preregistered minimum", str(ctx.exception))
+
+    def test_a_left_truncated_curve_alone_cannot_satisfy_the_publication_gate(self):
+        """Left-truncated histories are internally continuous but are not launch-anchored, and the
+        ratified eligible set excludes them. Admitting them is a decision for a separate
+        preregistration, not something a caller can do by passing a different status list here."""
+        self.set_cohort("truncated")
+        self.add_observation("truncated")
+        self.add_chain_failure("truncated", B9E.LEFT_TRUNCATED_REASON + " in the frozen evidence")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9E.assert_publication_gate(self.database)
+        self.assertIn("below the preregistered minimum", str(ctx.exception))
+
     def test_eligible_curves_counts_every_ratified_status(self):
         self.set_cohort("complete", "truncated", "absent")
         self.add_observation("complete", anchor=True)
@@ -304,15 +393,28 @@ class PreregistrationDocumentTests(unittest.TestCase):
 
     PATH = ROOT / "research" / "B9E_RESERVE_COVERAGE_PREREGISTRATION.md"
 
-    def test_the_document_exists_and_still_declares_the_threshold_unratified(self):
+    def test_the_document_states_the_same_thresholds_the_code_applies(self):
+        """The document is where the decision is ratified and the code is where it is enforced.
+        If they drift, the preregistration stops describing the gate that actually runs."""
         text = self.PATH.read_text(encoding="utf-8")
-        self.assertIn("minimum_anchored_complete_fraction: null", text)
-        self.assertIn("eligible_statuses:                  null", text)
+        self.assertIn(
+            f"minimum_anchored_complete_fraction: {B9E.RATIFIED_MINIMUM_ANCHORED_COMPLETE}", text)
+        self.assertIn(f'eligible_statuses:                  {list(B9E.RATIFIED_ELIGIBLE_STATUSES)}'
+                      .replace("'", '"'), text)
         for status in B9E.STATUSES:
             self.assertIn(f"`{status}`", text, "every status the code assigns must be defined")
 
+    def test_the_document_records_no_measured_outcome_counts(self):
+        """It was written before any decode pass and must stay that way: a preregistration that
+        acquires results can be revised to match them without anyone noticing."""
+        text = self.PATH.read_text(encoding="utf-8")
+        self.assertIn("no measured outcome counts", text)
+        self.assertIn("### Verified facts", text)
+        self.assertIn("### Open questions", text)
+
     def test_the_document_names_the_gate_it_preregisters(self):
         text = self.PATH.read_text(encoding="utf-8")
+        self.assertIn("assert_publication_gate", text)
         self.assertIn("assert_reserve_coverage", text)
         self.assertIn("scripts/b9e_reserve_coverage.py", text)
 

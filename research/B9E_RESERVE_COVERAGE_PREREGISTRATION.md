@@ -1,10 +1,33 @@
 # B9e — Cohort reserve-coverage gate (preregistration)
 
-**Status:** drafted, **threshold NOT ratified**. The gate is fail-closed until §5 is filled in by
-the owner. Nothing downstream may consume B9d reserve paths before that happens.
+**Status:** ratified 2026-07-31 (§5), before any decode pass over the completed B9d artifact. This
+ordering is the entire point of the document; see §6.
 
-**Author:** Claude. **Date drafted:** 2026-07-31, before any decode pass over the completed B9d
-artifact. This ordering is the entire point of the document; see §6.
+**Author:** Claude. **Threshold ratified by:** Codex, handoff 13.
+
+**This document contains no measured outcome counts, by construction** — it was written while the
+collector was still running and no decode pass had been executed. Measured distributions belong in
+a separate results document, so that this one cannot be quietly revised to match them.
+
+### Verified facts
+
+- `advance_curve_chain` refuses to advance a curve past a break, so a broken chain yields **missing**
+  observations rather than inconsistent ones (`scripts/b9d_transaction_bodies.py`).
+- `verify_decoded_artifact` verifies structure and the continuity of rows that exist, and asserts
+  observed curves are a subset of the frozen cohort. It asserts nothing about how many cohort curves
+  have a history.
+- `cohort_curve_for_event` returns `None` for mints outside the frozen cohort, so incidental bundled
+  Pump activity produces no reserve rows at all.
+- Reserve-chain outcomes are persisted as `classification_failure` rows whose `reason` is prefixed
+  `reserve chain: ` and whose `context_json` names the `bonding_curve`.
+
+### Open questions
+
+- Whether `left_truncated` histories are admissible for an estimand that does not depend on launch
+  state. Excluded here; would require its own preregistration (§5).
+- What the actual coverage distribution is. Unknown at ratification time and deliberately so.
+- Whether a shortfall is repairable by extending collection, or is inherent to the freeze's slot
+  window. Not answerable before the gate runs.
 
 ---
 
@@ -83,25 +106,34 @@ rewording in B9d therefore fails the B9e suite instead of silently reclassifying
 The measurement is pure SQL plus arithmetic over an artifact opened **read-only**. It performs no
 network access and writes nothing.
 
-## 5. Ratification — TO BE FILLED IN BEFORE THE DECODE PASS
-
-Both fields are `null`. `assert_reserve_coverage` raises `FreezeViolation` while either is unset,
-so an unratified gate cannot pass by default.
+## 5. Decision — RATIFIED 2026-07-31, before any decode pass
 
 ```
-minimum_anchored_complete_fraction: null   # e.g. 0.90 — of the FULL cohort, not of observed curves
-eligible_statuses:                  null   # e.g. ["anchored_complete"]
+minimum_anchored_complete_fraction: 1.0                    # of the FULL cohort
+eligible_statuses:                  ["anchored_complete"]
 ```
 
-Guidance for whoever ratifies, not a recommendation with a number attached:
+Ratified by Codex in handoff 13 and reproduced as `RATIFIED_MINIMUM_ANCHORED_COMPLETE` and
+`RATIFIED_ELIGIBLE_STATUSES` in `scripts/b9e_reserve_coverage.py`, applied by
+`assert_publication_gate`, which takes no threshold parameters so publication cannot route through
+a number chosen at a call site.
 
-- The denominator must be the **full cohort**, never the set of curves that produced rows. A
-  fraction over observed curves is exactly the biased quantity this gate exists to detect.
-- `left_truncated` histories are internally continuous and may be legitimate for measurements that
-  do not depend on launch state. Admitting them is a defensible choice; admitting them *silently*
-  is not, which is why the eligible set is preregistered rather than inferred at analysis time.
-- `broken` must never be eligible. Its hole is at a known coordinate and any statistic over it is
-  computed across a discontinuity.
+The decision is deliberately conservative:
+
+- **Publication requires the whole frozen cohort to be `anchored_complete`.** A single curve short
+  fails closed.
+- **Full-history downstream reserve measurements are eligible only on `anchored_complete` curves.**
+- **A shortfall is never grounds to lower this number.** The remedy is repairing the missing
+  evidence, or preregistering a different estimand over a separately preregistered cohort. A
+  threshold that moves to meet the result is a description of the result, not a gate on it.
+- The denominator is the **full cohort**, never the curves that produced rows. A fraction over
+  observed curves is exactly the biased quantity this gate exists to detect.
+- `broken` may never be declared eligible under any future preregistration: its hole is at a known
+  coordinate, so any statistic over it is computed across a discontinuity.
+
+`left_truncated` histories are internally continuous and would be admissible for an estimand that
+does not depend on launch state. Admitting them is therefore a defensible *future* decision, but it
+requires its own preregistration; it is excluded here.
 
 ## 6. Why the threshold is preregistered rather than chosen later
 
@@ -110,9 +142,15 @@ distribution turned out to be, and the gate will pass by construction. It would 
 description of the result wearing the costume of a check. The number must be committed to while it
 can still fail.
 
-The same reasoning forbids me from choosing it myself: selecting the minimum acceptable coverage is
-a decision about what evidence the project is willing to act on, which is a ratification decision,
-not an implementation detail. The code is written and tested; the number is left to the owner.
+The same reasoning is why the implementer did not choose it. Selecting the minimum acceptable
+coverage is a decision about what evidence the project is willing to act on — ratification, not
+implementation. The classifier and gate were written and tested with both fields unset and
+fail-closed; the number in §5 was then supplied by Codex, still before any decode pass. Neither
+party has seen the distribution.
+
+`assert_reserve_coverage` remains parameterised so the gate can be exercised at other settings in
+tests. Publication does not use it directly: `assert_publication_gate` takes no threshold arguments
+at all, so no call site can quietly substitute its own.
 
 ## 7. What this gate does not do
 

@@ -57,6 +57,14 @@ BREAK_REASONS = (
 # Ordered: the first match wins, so a curve that is both left-truncated and later broken is broken.
 STATUSES = ("broken", "left_truncated", "anchored_complete", "absent")
 
+# Ratified in `research/B9E_RESERVE_COVERAGE_PREREGISTRATION.md` §5 BEFORE any decode pass, and
+# deliberately conservative: publication requires the WHOLE frozen cohort to be anchored_complete.
+# Anything less is missing evidence to be repaired, or a separately preregistered estimand over a
+# separately preregistered cohort. It is never grounds to lower this number -- a threshold that
+# moves to meet the result is a description of the result, not a gate on it.
+RATIFIED_MINIMUM_ANCHORED_COMPLETE = 1.0
+RATIFIED_ELIGIBLE_STATUSES = ("anchored_complete",)
+
 
 def cohort_curves(b9a_path=None):
     """The frozen cohort's bonding curves, refusing an ambiguous mint -> curve identity."""
@@ -75,7 +83,12 @@ def chain_failures_by_curve(database):
     for curve, reason, slot, index, outer, inner in database.execute(
             "SELECT json_extract(context_json,'$.bonding_curve'),reason,"
             "slot,transaction_index,outer_index,inner_index "
-            "FROM classification_failure WHERE reason LIKE ?", (RESERVE_CHAIN_PREFIX + "%",)):
+            "FROM classification_failure WHERE reason LIKE ? "
+            # Canonical ledger order, not insertion order. The report names the coordinate of the
+            # FIRST discontinuity on a curve, and "first" is only meaningful in ledger order --
+            # rowid order would name whichever row the decoder happened to write first.
+            "ORDER BY slot,transaction_index,outer_index,inner_index",
+            (RESERVE_CHAIN_PREFIX + "%",)):
         if not curve:
             raise FreezeViolation(
                 f"reserve-chain failure at ({slot},{index},{outer},{inner}) names no bonding "
@@ -198,6 +211,17 @@ def assert_reserve_coverage(database, minimum_anchored_complete_fraction=None,
     return coverage
 
 
+def assert_publication_gate(database, b9a_path=None):
+    """The ratified §5 gate, applied with no caller-supplied thresholds.
+
+    Deliberately takes no threshold parameters. `assert_reserve_coverage` stays parameterised so
+    the gate itself can be tested at other settings, but publication must not route through a
+    number someone chose at the call site.
+    """
+    return assert_reserve_coverage(database, RATIFIED_MINIMUM_ANCHORED_COMPLETE,
+                                   RATIFIED_ELIGIBLE_STATUSES, b9a_path)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("artifact", help="path to the B9d evidence artifact (opened read-only)")
@@ -206,13 +230,17 @@ def main(argv=None):
                         help="ratified minimum fraction; omit to measure without gating")
     parser.add_argument("--eligible", default=None,
                         help="comma-separated ratified eligible statuses")
+    parser.add_argument("--publication-gate", action="store_true",
+                        help="apply the ratified §5 thresholds; overrides the two flags above")
     parser.add_argument("--per-curve", action="store_true",
                         help="include the full per-curve status map")
     args = parser.parse_args(argv)
 
     database = B9D.connect(args.artifact, readonly=True)
     try:
-        if args.minimum_anchored_complete is None and args.eligible is None:
+        if args.publication_gate:
+            report = assert_publication_gate(database, args.b9a)
+        elif args.minimum_anchored_complete is None and args.eligible is None:
             report = cohort_reserve_coverage(database, args.b9a)
         else:
             report = assert_reserve_coverage(

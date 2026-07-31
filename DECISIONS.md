@@ -680,3 +680,33 @@ The two do not imply each other. A user-ratified decision can remain provisional
   Program and ProgramData evidence keys to their correct roles, and reproduces context/deploy
   metadata from the preserved responses. A key that merely exists elsewhere in the table is not
   provenance; cross-program and cross-role references fail closed.
+
+## 2026-07-31 — Reserve coverage is measured against the frozen cohort, not the surviving rows
+
+- **Decision:** before any B9d reserve path may be consumed by a measurement, every frozen
+  non-Mayhem cohort curve is classified into exactly one of `broken`, `left_truncated`,
+  `anchored_complete`, or `absent`, and publication requires **all** of them to be
+  `anchored_complete`. Only `anchored_complete` curves are eligible for full-history reserve
+  measurements. Preregistered in `research/B9E_RESERVE_COVERAGE_PREREGISTRATION.md` §5 and enforced
+  by `assert_publication_gate` in `scripts/b9e_reserve_coverage.py`.
+- **Why the cohort is the denominator:** a broken chain does not produce inconsistent rows, it
+  produces **missing** ones, because `advance_curve_chain` refuses to advance past a break. The
+  survivors are self-consistent and pass every structural gate. Measuring over "curves that have
+  reserve paths" is therefore measuring over the curves whose histories happened to survive
+  decoding — a selection rule correlated with trading activity, bundling and left truncation, which
+  is to say with the behaviour under study. A curve that produced nothing is invisible in the
+  artifact and appears only because the cohort names it.
+- **Why the threshold cannot move:** a shortfall is missing evidence to repair, or grounds for a
+  separately preregistered estimand over a separately preregistered cohort. It is never grounds to
+  lower the number. A threshold set after the distribution is known would be set to whatever the
+  distribution turned out to be, and would pass by construction — a description of the result
+  wearing the costume of a check. `broken` may never be declared eligible under any future
+  preregistration, because its hole is at a known coordinate and any statistic over it is computed
+  across a discontinuity.
+- **Separation of duties:** the classifier and gate were implemented and tested with both thresholds
+  unset and fail-closed; the numbers were then ratified separately, still before any decode pass.
+  Neither party had seen the distribution.
+- **Verification requirement:** the gate's coupling to `advance_curve_chain`'s wording is pinned by
+  tests that generate each reserve-chain reason through the real function, and the preregistered
+  numbers are pinned against the document, so lowering the threshold or widening the eligible set
+  fails the suite rather than passing quietly.
