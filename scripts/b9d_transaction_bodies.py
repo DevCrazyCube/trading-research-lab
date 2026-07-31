@@ -2607,6 +2607,33 @@ def initialize_run(database, endpoint, digests):
     database.commit()
 
 
+COLLECTION_COMPLETE_KEY = "collection_completed_at_unix"
+
+
+def mark_collection_complete(database, now=None):
+    """Record, immutably, that raw collection finished against the exact frozen population.
+
+    Written ONLY after the population assertions pass, so the marker cannot mean "the collector
+    stopped" -- it means "the collector stopped having preserved exactly the frozen set". Those are
+    different claims and a resumable collector makes the difference matter: it exits for many
+    reasons, most of which are not completion.
+
+    Immutable by construction. A second call returns the first value rather than rewriting it, so a
+    later partial state cannot re-stamp an artifact as freshly complete.
+    """
+    assert_coordinate_population(database)
+    assert_raw_transaction_population(database)
+    assert_body_population_matches(database)
+    existing = database.execute(
+        "SELECT value FROM metadata WHERE key=?", (COLLECTION_COMPLETE_KEY,)).fetchone()
+    if existing:
+        return existing[0]
+    value = str(time.time() if now is None else now)
+    database.execute("INSERT INTO metadata(key,value) VALUES (?,?)",
+                     (COLLECTION_COMPLETE_KEY, value))
+    return value
+
+
 @contextlib.contextmanager
 def collector_lock(output):
     """Exclusive process lock for the artifact's single writer.

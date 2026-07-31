@@ -761,3 +761,28 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Verification requirement:** the decode path itself is tested to populate `category` with a value
   the gate recognises, and the ratified ceilings are pinned against the preregistration document, so
   relaxing either fails the suite rather than passing quietly.
+
+## 2026-07-31 — Decode readiness is established before decoding, not inferred from row counts
+
+- **Decision:** `scripts/b9g_decode_readiness.py` is a single fail-closed offline command that must
+  pass immediately before any decode pass. It requires: the single-writer collector lock is unheld;
+  an immutable `collection_completed_at_unix` marker is present; no derived rows or decoder metadata
+  exist yet; and the full structural verification (exact population, source hashes, boundary
+  completeness and version coverage) passes.
+- **Why row counts are not enough:** the collector is resumable, so it exits for many reasons and
+  most of them are not completion. An artifact caught mid-run has a self-consistent PREFIX of the
+  frozen population — every gate comparing rows to other rows passes, and the counts are exactly
+  what resuming changes. `mark_collection_complete` therefore writes its marker only after the
+  population assertions pass, so the marker means "completed having preserved the frozen set"
+  rather than "stopped". It is immutable: a second call returns the first value, so a later partial
+  state cannot re-stamp the artifact.
+- **Boundary ORDER is explicitly not checked, correcting an earlier proposal of mine.** Boundary
+  evidence is collected after the bodies on purpose, to preserve the single-writer invariant. It
+  need only complete before decode: finalized current ProgramData evidence whose latest deploy slot
+  precedes the observation start proves no in-range upgrade regardless of fetch order. B9g checks
+  boundary completeness, never boundary ordering.
+- **The readiness probe never takes the lock it is testing.** It probes non-blockingly and refuses
+  while the lock is held. A readiness check that can block on the lock will eventually acquire it,
+  and a check that can acquire the lock can stop the thing it is inspecting.
+- **Verification requirement:** the held-lock test is time-bounded, so a regression to a blocking
+  probe fails with a diagnosis instead of wedging the suite.
