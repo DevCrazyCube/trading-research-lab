@@ -1418,6 +1418,8 @@ class CurveReserveChainTests(unittest.TestCase):
             {"name": "extend_account", "discriminator": [2] * 8,
              "accounts": [{"name": "account"}], "args": []},
             {"name": "create_v2", "discriminator": [3] * 8,
+             "accounts": [{"name": "bonding_curve"}], "args": []},
+            {"name": "create", "discriminator": [4] * 8,
              "accounts": [{"name": "bonding_curve"}], "args": []}]}
         parent = {"program_id": B9D.PUMP_PROGRAM, "data": bytes([1]) * 8,
                   "accounts": ["curve"], "outer_index": 1, "inner_index": -1}
@@ -1430,7 +1432,8 @@ class CurveReserveChainTests(unittest.TestCase):
         if confounder is not None:
             envelopes.append({
                 "program_id": B9D.PUMP_PROGRAM,
-                "data": bytes([{"extend_account": 2, "create_v2": 3}[confounder]]) * 8,
+                "data": bytes([{"extend_account": 2, "create_v2": 3,
+                                "create": 4}[confounder]]) * 8,
                 "accounts": [confounder_account], "outer_index": 2, "inner_index": -1})
         result = {"transaction": [base64.b64encode(b"ignored").decode(), "base64"],
                   "meta": {"preBalances": [pre], "postBalances": [post]}}
@@ -1453,7 +1456,7 @@ class CurveReserveChainTests(unittest.TestCase):
         clean = self.balance_case(B9D.NATIVE_QUOTE_MINT, pre=1_000, post=1_050)
         self.assertEqual(clean[0]["status"], "mismatch",
                          "a clean disagreement must not be absorbed into confounded")
-        for confounder in ("extend_account", "create_v2"):
+        for confounder in ("extend_account", "create_v2", "create"):
             with self.subTest(confounder=confounder):
                 rows = self.balance_case(B9D.NATIVE_QUOTE_MINT, pre=1_000, post=1_050,
                                          confounder=confounder)

@@ -47,17 +47,24 @@ RUNBOOK = (
      "detail": "recoverable raw-body backup, taken BEFORE the remaining boundary write"},
     {"step": 4, "name": "collect_boundary", "offline": False,
      "detail": "collect-boundary under the free single-writer lock; the only network step"},
-    {"step": 5, "name": "verify_and_readiness", "offline": True,
-     "detail": "raw verification plus the fail-closed B9g readiness gate"},
-    {"step": 6, "name": "backup_sealed_raw_and_boundary", "offline": True,
-     "detail": "second canonical backup, hashed; the only state a failed decode may restore from"},
-    {"step": 7, "name": "atomic_decode", "offline": True,
+    # Inserted after a real decode reached its first missing-column write and rolled back. The
+    # migration MUST precede the canonical backup below, or the backup preserves a schema the
+    # decode cannot use -- restoring it would reproduce the same failure.
+    {"step": 5, "name": "migrate_failure_categories", "offline": True,
+     "detail": "add classification_failure.category under the free lock; never backfills"},
+    {"step": 6, "name": "verify_and_readiness", "offline": True,
+     "detail": "raw verification plus the fail-closed B9g readiness gate, which refuses a "
+               "pre-migration schema"},
+    {"step": 7, "name": "backup_sealed_raw_and_boundary", "offline": True,
+     "detail": "second canonical backup, hashed, of the MIGRATED artifact; the only state a "
+               "failed decode may restore from"},
+    {"step": 8, "name": "atomic_decode", "offline": True,
      "detail": "one transaction; any error rolls the whole pass back"},
-    {"step": 8, "name": "verify_decoded", "offline": True,
+    {"step": 9, "name": "verify_decoded", "offline": True,
      "detail": "verify_decoded_artifact over the derived rows"},
-    {"step": 9, "name": "b9f_gate", "offline": True,
+    {"step": 10, "name": "b9f_gate", "offline": True,
      "detail": "measure classification-failure coverage, then apply the ratified zero ceilings"},
-    {"step": 10, "name": "b9e_gate", "offline": True,
+    {"step": 11, "name": "b9e_gate", "offline": True,
      "detail": "measure cohort reserve coverage, then apply the ratified 100% threshold"},
 )
 STEP_NAMES = tuple(entry["name"] for entry in RUNBOOK)

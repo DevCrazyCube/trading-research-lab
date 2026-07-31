@@ -155,6 +155,11 @@ class RunbookRehearsal(unittest.TestCase):
         with database:
             B9DT.PublicationGateTests.add_boundary_evidence(None, database)
 
+        self.step("migrate_failure_categories")
+        database = self.open()
+        with database:
+            B9D.migrate_failure_categories(database)
+
         self.step("verify_and_readiness")
         results["readiness"] = B9G.assert_decode_ready(self.open(), str(self.path))
 
@@ -303,8 +308,14 @@ class RunbookRehearsal(unittest.TestCase):
         self.assertEqual(set(B9H.STEP_NAMES) - offline,
                          {"collector_exits_naturally", "collect_boundary"},
                          "only the collector's exit and the network call are unrehearsable")
-        self.assertEqual(len(B9H.RUNBOOK), 10)
-        self.assertEqual([entry["step"] for entry in B9H.RUNBOOK], list(range(1, 11)))
+        self.assertEqual(len(B9H.RUNBOOK), 11)
+        self.assertEqual([entry["step"] for entry in B9H.RUNBOOK], list(range(1, 12)))
+        # The migration must precede the canonical pre-decode backup, or the backup preserves a
+        # schema the decode cannot use and restoring it reproduces the same failure.
+        self.assertLess(B9H.STEP_NAMES.index("migrate_failure_categories"),
+                        B9H.STEP_NAMES.index("backup_sealed_raw_and_boundary"))
+        self.assertLess(B9H.STEP_NAMES.index("migrate_failure_categories"),
+                        B9H.STEP_NAMES.index("verify_and_readiness"))
 
 
 if __name__ == "__main__":

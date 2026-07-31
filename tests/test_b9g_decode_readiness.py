@@ -179,6 +179,35 @@ class DecodeReadinessTests(ReadinessFixture):
             self.ready()
         self.assertIn("derived decoder output already exists", str(ctx.exception))
 
+    def test_a_pre_migration_schema_is_refused_before_decode_not_during(self):
+        """The omission this gate shipped with, and the real decode paid for.
+
+        An artifact predating `classification_failure.category` passed readiness, so a full decode
+        over 94,985 bodies started, reached its first failure write, and rolled back. Nothing was
+        lost -- the rollback worked -- but the fact was knowable before the first row was read.
+        """
+        database = self.open()
+        with database:
+            database.execute("ALTER TABLE classification_failure RENAME TO legacy_failure")
+            database.execute(
+                "CREATE TABLE classification_failure AS SELECT id,signature,slot,"
+                "transaction_index,outer_index,inner_index,program_id,discriminator,reason,"
+                "context_json FROM legacy_failure")
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            self.ready()
+        self.assertIn("no `category` column", str(ctx.exception))
+
+        report = B9G.diagnose_readiness(self.open(), str(self.path))
+        self.assertFalse(report["ready"])
+        self.assertFalse(report["checks"]["decode_schema_current"]["passed"])
+        self.assertTrue(report["checks"]["collection_sealed"]["passed"],
+                        "a schema shortfall must not mask the other checks")
+
+        # And the migration makes it ready again, which is what the runbook step does.
+        with database:
+            self.assertTrue(B9D.migrate_failure_categories(database))
+        self.assertTrue(self.ready()["ready"])
+
     def test_diagnosis_reports_every_check_instead_of_stopping_at_the_first(self):
         """The pre-boundary run expects the boundary to fail; it must still show everything else.
 

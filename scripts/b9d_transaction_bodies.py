@@ -1747,7 +1747,13 @@ def pump_trade_balance_reconciliations(
             if envelope["data"].startswith(ANCHOR_EVENT_CPI_TAG):
                 continue
             raise
-        if name == "create_v2" and roles.get("bonding_curve") in expected:
+        # Both creation instructions, not just the current one. The legacy `create` carries the
+        # same `bonding_curve` role and funds the same rent, so omitting it recorded the launch
+        # rent as an UNCONFOUNDED reconciliation mismatch. Measured on the real artifact: one
+        # cohort curve created by legacy `create` in the same transaction as its first buy, whose
+        # lamport delta exceeded the trade quote delta by exactly 1,691,280 -- the rent-exempt
+        # minimum for the 115-byte BondingCurve account, to the lamport.
+        if name in ("create", "create_v2") and roles.get("bonding_curve") in expected:
             confounded.add(roles["bonding_curve"])
         if name == "extend_account" and roles.get("account") in expected:
             confounded.add(roles["account"])

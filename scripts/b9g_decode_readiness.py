@@ -99,6 +99,29 @@ def assert_collection_complete(database):
     return marker[0]
 
 
+def assert_decode_schema_current(database):
+    """The artifact's schema must already carry everything the decode pass writes.
+
+    Added after this gate let a real decode start against an artifact that predated
+    `classification_failure.category`. The decode ran, hit the missing column part-way through, and
+    rolled back — correctly, and with nothing lost, but it burned a full pass over 94,985 bodies to
+    discover a fact that was knowable before the first row was read.
+
+    Readiness is the place to know it. A schema shortfall is not a decode failure, it is an
+    artifact that was never ready, and the migration must happen BEFORE the canonical pre-decode
+    backup so the backup captures the schema the decode will actually use.
+    """
+    columns = {row[1] for row in database.execute(
+        "PRAGMA table_info(classification_failure)")}
+    if "category" not in columns:
+        raise FreezeViolation(
+            "classification_failure has no `category` column: this artifact predates machine-"
+            "readable failure classes and a decode pass would fail part-way through. Run "
+            "`migrate_failure_categories` under the free collector lock, then re-take the "
+            "pre-decode backup so it captures the migrated schema")
+    return True
+
+
 def assert_nothing_decoded_yet(database):
     """A partially materialised derived stream means a previous pass ran and did not finish."""
     populated = {}
@@ -121,6 +144,7 @@ def assert_decode_ready(database, artifact_path, b9c_path=None, b9a_path=None):
     """Every readiness condition, in one fail-closed pass. Raises on the first failure."""
     lock_present = assert_collector_lock_unheld(artifact_path)
     marker = assert_collection_complete(database)
+    assert_decode_schema_current(database)
     assert_nothing_decoded_yet(database)
     # The heavy structural verification last: it is the slowest, and the three checks above are
     # what distinguish "not ready yet" from "broken", which is a more useful thing to be told first.
@@ -136,8 +160,8 @@ def assert_decode_ready(database, artifact_path, b9c_path=None, b9a_path=None):
     }
 
 
-READINESS_CHECKS = ("collector_lock_unheld", "collection_sealed", "nothing_decoded_yet",
-                    "structural_verification")
+READINESS_CHECKS = ("collector_lock_unheld", "collection_sealed", "decode_schema_current",
+                    "nothing_decoded_yet", "structural_verification")
 
 
 def diagnose_readiness(database, artifact_path, b9c_path=None, b9a_path=None):
@@ -162,6 +186,7 @@ def diagnose_readiness(database, artifact_path, b9c_path=None, b9a_path=None):
 
     record("collector_lock_unheld", lambda: assert_collector_lock_unheld(artifact_path))
     record("collection_sealed", lambda: assert_collection_complete(database))
+    record("decode_schema_current", lambda: assert_decode_schema_current(database))
     record("nothing_decoded_yet", lambda: assert_nothing_decoded_yet(database))
     record("structural_verification", lambda: B9D.verify_artifact(
         database,
