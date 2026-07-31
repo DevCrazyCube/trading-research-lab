@@ -1307,6 +1307,69 @@ class CurveReserveChainTests(unittest.TestCase):
         with self.assertRaises(B9D.FreezeViolation):
             B9D.curve_states_from_trade(negative)
 
+    def test_the_launch_anchor_defines_real_quote_as_zero_rather_than_reading_it(self):
+        """`real_quote_reserves: 0` is a claim about launch, not a copy of a field.
+
+        The pinned `CreateEvent` carries no `real_quote_reserves` at all -- it has
+        virtual_quote, virtual_token, real_token and virtual_sol -- so reading the field instead
+        of asserting zero is invisible today. It stops being invisible the moment a revision adds
+        one, and the anchor would silently start a chain at a non-zero real quote that every
+        subsequent trade is then checked against. Pinned by passing a value that must be ignored.
+        """
+        polluted = dict(self.CREATE, real_quote_reserves=12_345)
+        self.assertEqual(B9D.curve_state_from_create(polluted)["real_quote_reserves"], 0)
+
+    def test_an_anchor_with_missing_or_impossible_reserve_state_fails_closed(self):
+        """A CreateEvent is the origin every later trade is verified against, so a malformed one
+        must raise rather than seed a chain with a KeyError-shaped hole or a negative reserve."""
+        for field in ("virtual_quote_reserves", "virtual_token_reserves", "real_token_reserves"):
+            with self.subTest(missing=field):
+                partial = {k: v for k, v in self.CREATE.items() if k != field}
+                with self.assertRaises(B9D.FreezeViolation) as ctx:
+                    B9D.curve_state_from_create(partial)
+                self.assertIn("lacks reserve field(s)", str(ctx.exception))
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.curve_state_from_create(dict(self.CREATE, real_token_reserves=-1))
+        self.assertIn("invalid reserve state", str(ctx.exception))
+
+    def test_a_trade_missing_reserve_or_delta_fields_fails_closed(self):
+        """Both halves matter: the post-state fields ARE the after-state, and the deltas are what
+        reconstruct the before-state independently of the chain."""
+        complete = self.trade(B9D.curve_state_from_create(self.CREATE),
+                              quote=100, token=250, is_buy=True)
+        for field in ("real_quote_reserves", "token_amount", "is_buy"):
+            with self.subTest(missing=field):
+                partial = {k: v for k, v in complete.items() if k != field}
+                with self.assertRaises(B9D.FreezeViolation) as ctx:
+                    B9D.curve_states_from_trade(partial)
+                self.assertIn("lacks reserve/delta field(s)", str(ctx.exception))
+
+    def test_a_left_truncated_chain_is_never_repaired_by_a_later_anchor(self):
+        """Left truncation is missing evidence, and a CreateEvent arriving afterwards is not a fix.
+
+        A chain that began mid-history has an unobserved prefix; anchoring it later would assert a
+        launch state for a curve already known to have traded, and every subsequent row would
+        inherit that fiction. The chain must break instead -- permanently, so no later matching
+        event can quietly resume it.
+        """
+        chains = {}
+        launch = B9D.curve_state_from_create(self.CREATE)
+        first = self.trade(launch, quote=100, token=250, is_buy=True)
+        _, _, reason = B9D.advance_curve_chain(chains, "mint", "TradeEvent", first)
+        self.assertIn("no preceding CreateEvent", reason)
+
+        _, _, anchor_reason = B9D.advance_curve_chain(chains, "mint", "CreateEvent", self.CREATE)
+        self.assertIn("duplicate CreateEvent", anchor_reason)
+        self.assertTrue(chains["mint"]["broken"])
+
+        # And the break is terminal: a perfectly continuous next trade still cannot advance.
+        follow_on = self.trade(B9D.curve_states_from_trade(first)[1],
+                               quote=10, token=20, is_buy=False)
+        before, after, broken_reason = B9D.advance_curve_chain(
+            chains, "mint", "TradeEvent", follow_on)
+        self.assertEqual((before, after), (None, None))
+        self.assertIn("cannot be repaired", broken_reason)
+
     def test_account_roles_resolve_without_claiming_a_truncated_argument_payload_decoded(self):
         idl = {"instructions": [{"name": "trade", "discriminator": list(range(8)),
                                  "accounts": [{"name": "bonding_curve"}],
@@ -2275,6 +2338,69 @@ class DecoderOrchestrationTests(unittest.TestCase):
         B9D.tradable_cohort_identity = lambda *a, **k: cohort
         self.addCleanup(lambda: setattr(B9D, "tradable_cohort_identity", saved))
         return B9D.decode_artifact(self.database, check_sources=False)
+
+    def test_chain_progression_follows_canonical_coordinates_not_signature_order(self):
+        """The chain is order-sensitive, so what defines the order is load-bearing evidence.
+
+        Two trades on one curve, in two transactions at the same slot: the continuation is at
+        transaction_index 1, and its signature sorts BEFORE the anchor's. Ordered canonically the
+        history is continuous. Ordered any other way -- signature, insertion, rowid -- the
+        continuation arrives first, finds no anchor, and the whole curve is recorded as broken.
+        Swapping the decode loop's ORDER BY to `c.signature` left all 231 tests passing before
+        this, so nothing held the one clause that makes a reserve history mean anything.
+        """
+        buy, _ = self.known("buy")
+        idl = json.loads((ROOT / B9D.PUMP_IDL_PATH).read_bytes())
+        roles = [a["name"] for a in next(i for i in idl["instructions"]
+                                         if i["name"] == "buy")["accounts"]]
+        mint = "So11111111111111111111111111111111111111112"
+        curve = B9D.base58(bytes(range(32)))
+        launch = {"virtual_quote_reserves": 30_000, "virtual_token_reserves": 1_000_000,
+                  "real_quote_reserves": 0, "real_token_reserves": 800_000}
+
+        def trade_event(before, quote, token):
+            return encode_pump_event(
+                "TradeEvent", mint=mint, is_buy=True, quote_amount=quote, token_amount=token,
+                quote_mint=B9D.NATIVE_QUOTE_MINT,
+                virtual_quote_reserves=before["virtual_quote_reserves"] + quote,
+                virtual_token_reserves=before["virtual_token_reserves"] - token,
+                real_quote_reserves=before["real_quote_reserves"] + quote,
+                real_token_reserves=before["real_token_reserves"] - token)
+
+        def inner(outer_index, *events):
+            # One event per outer instruction: `reserve_observation` is uniquely keyed on the
+            # PARENT coordinates plus the curve, so an anchor and a trade sharing a parent would
+            # collide -- itself a fail-closed property, just not the one under test here.
+            return {"index": outer_index, "instructions": [
+                {"programIdIndex": 0, "accounts": [], "data": B9D.base58(payload),
+                 "stackHeight": 2} for payload in events]}
+
+        create = encode_pump_event(
+            "CreateEvent", mint=mint, bonding_curve=curve,
+            virtual_quote_reserves=launch["virtual_quote_reserves"],
+            virtual_token_reserves=launch["virtual_token_reserves"],
+            real_token_reserves=launch["real_token_reserves"])
+        after_first = dict(launch, virtual_quote_reserves=30_100, virtual_token_reserves=999_750,
+                           real_quote_reserves=100, real_token_reserves=799_750)
+        # "b-anchor" sorts AFTER "a-continuation": signature order reverses the true history.
+        self.add_body("b-anchor", 0,
+                      [(0, [1] * len(roles), buy), (0, [1] * len(roles), buy)],
+                      {"preBalances": [0, 1_000], "postBalances": [0, 1_100],
+                       "innerInstructions": [inner(0, create),
+                                             inner(1, trade_event(launch, 100, 250))]})
+        self.add_body("a-continuation", 1, [(0, [1] * len(roles), buy)],
+                      {"preBalances": [0, 1_100], "postBalances": [0, 1_150],
+                       "innerInstructions": [inner(0, trade_event(after_first, 50, 120))]})
+        saved = B9D.tradable_cohort_identity
+        B9D.tradable_cohort_identity = lambda *a, **k: {mint: curve}
+        self.addCleanup(lambda: setattr(B9D, "tradable_cohort_identity", saved))
+
+        summary = B9D.decode_artifact(self.database, check_sources=False)
+        breaks = [r[0] for r in self.database.execute(
+            "SELECT reason FROM classification_failure WHERE reason LIKE 'reserve chain:%'")]
+        self.assertEqual(breaks, [], "a canonically continuous history must record no chain break")
+        self.assertEqual(summary["reserve_observations"], 3,
+                         "the anchor and both trades must each bank a reserve observation")
 
     def test_a_pumpswap_pool_event_cannot_enter_a_pump_bonding_curve_chain(self):
         """Cross-program isolation, asserted rather than inherited from a name-space coincidence.
