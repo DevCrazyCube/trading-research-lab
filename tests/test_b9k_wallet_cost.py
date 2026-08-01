@@ -119,6 +119,22 @@ class ReconcileTests(unittest.TestCase):
         with self.assertRaisesRegex(B9D.FreezeViolation, "resolved account keys"):
             B9K.reconcile_transaction(result)
 
+    def test_the_module_shares_one_freeze_violation_class_with_its_decoder(self):
+        """Loading b9d twice yields two distinct FreezeViolation classes.
+
+        `except FreezeViolation` in b9k would then not catch what b9j raises, so the
+        undecodable-instruction handler would never fire and a full run would die on the one
+        transaction it exists to categorise. It did. This test file rebinds both modules to a
+        single instance, which MASKED the defect -- so the identity is asserted on the modules as
+        imported, not as this file has arranged them.
+        """
+        fresh_spec = importlib.util.spec_from_file_location(
+            "b9k_fresh", ROOT / "scripts" / "b9k_wallet_cost.py")
+        fresh = importlib.util.module_from_spec(fresh_spec)
+        fresh_spec.loader.exec_module(fresh)
+        self.assertIs(fresh.FreezeViolation, fresh.B9J.FreezeViolation)
+        self.assertIs(fresh.B9D, fresh.B9J.B9D)
+
     def test_categories_are_exhaustive(self):
         """Every transaction lands in exactly one bucket, so a coverage fraction means something."""
         self.assertEqual(set(B9K.CATEGORIES),

@@ -40,8 +40,13 @@ def _load(name, filename):
     return module
 
 
-B9D = _load("b9d_transaction_bodies", "b9d_transaction_bodies.py")
+# Load B9j first and take ITS b9d instance, rather than loading a second one. Loading b9d twice
+# yields two module objects and therefore two distinct FreezeViolation CLASSES, so `except
+# FreezeViolation` here would not catch what b9j raises -- the undecodable-instruction handler
+# below would never fire and the whole run would die on the one transaction it exists to
+# categorise. That is exactly what happened on the first full-population run.
 B9J = _load("b9j_system_instructions", "b9j_system_instructions.py")
+B9D = B9J.B9D
 FreezeViolation = B9D.FreezeViolation
 
 CATEGORIES = ("exact", "undecodable_system", "unattributed_movement")
