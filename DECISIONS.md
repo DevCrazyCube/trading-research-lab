@@ -1023,3 +1023,27 @@ The two do not imply each other. A user-ratified decision can remain provisional
   gross-based reproduction and fell back to the quote base survived unit tests of the fee function;
   it is now held by an integration test whose fixture is chosen so the two bases give DIFFERENT
   fees, since most grosses cannot tell them apart.
+
+## 2026-08-01 — Initial trading regime and operator-UI boundary are frozen
+
+- **Initial regime:** entries are limited to SOL-paired, non-Mayhem Pump launches whose bonding
+  curve is open at the decision instant. These are point-in-time predicates. A token may not be
+  excluded because it later graduates, migrates, fails, or becomes illiquid; those are outcomes and
+  execution risks. PumpSwap is not an initial entry venue.
+- **Exit boundary:** the first simulator models executable Pump exits while the curve remains open.
+  If a position reaches curve completion before exit, it becomes unavailable rather than receiving
+  an invented mark or assumed seamless migration. A PumpSwap exit path may be added only after its
+  reserves, fees, ordering, and wallet costs pass the same gates.
+- **Reason:** this is the narrowest regime supported by the published B9d curve paths without using
+  Mayhem or USDC observations that have different mechanics. Restricting to the currently 50.29%
+  wallet-cost-exact transactions is rejected because that selection depends on transaction shape
+  and rent-reclaim behavior; it would bias the evaluation. SPL Token decoding must close that gap.
+- **Automation boundary:** models or fixed policies may score opportunities, but deterministic code
+  owns eligibility, sizing, risk vetoes, transaction construction, and kill switches. An LLM is not
+  in the live signing or discretionary execution loop.
+- **Operator UI:** build the product UI on a stable read-only simulator/shadow API, not directly on
+  research tables. It must show mode, feed health, opportunities and explanations, executable-cost
+  assumptions, positions, intended-versus-observed fills, reconciliation, drawdown, and hard risk
+  controls. Signing material stays outside the browser. Full UI implementation waits until the
+  simulator result schema is stable; this prevents duplicating research arithmetic in presentation
+  code while making the UI a required product milestone rather than an afterthought.

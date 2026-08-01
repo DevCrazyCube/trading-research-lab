@@ -32,7 +32,10 @@ Numeric thresholds remain research hypotheses until supported by data. They must
 - [x] Freeze the leakage constraints R1–R5 that every future rug/dump outcome label must satisfy.
   Rug/dump label construction remains in Phase 3; Phase 0 freezes the constraints, not outcome
   thresholds that cannot yet be selected without contaminated calibration.
-- [ ] Choose initial regime: likely SOL-paired, non-Mayhem bonding-curve launches only.
+- [x] Initial regime frozen: SOL-paired, non-Mayhem Pump bonding-curve launches while the curve is
+  open at decision time. Later graduation/migration is an outcome and execution risk, never an
+  exclusion chosen with future knowledge. Initial entries are Pump-only; PumpSwap is not an entry
+  venue, and any post-graduation exit remains unavailable until separately validated.
 - [ ] Define point-in-time and leakage rules.
 - [ ] Define capital, position, daily-loss, and kill-switch policies.
 - [ ] Obtain appropriate Netherlands/EU legal and tax advice before live operation.
@@ -59,6 +62,8 @@ Gate: deterministic replay; complete classified decode accounting; exact integer
 - [ ] Replay observed ordering and empirical latency distributions.
 - [ ] Model failures, expiration, compute fees, tips, slippage, migration, and constrained exits.
 - [ ] Produce optimistic, executable, and stressed outcomes.
+- [ ] Expose a stable read-only result/API schema for the operator UI; research calculations remain
+  in the simulator rather than being reimplemented in the browser.
 
 Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reproduce eligible observations exactly at integer precision. Stochastic landing, contention, failure, and fill distributions reproduce forward observations within separately documented statistical tolerances.
 
@@ -89,6 +94,9 @@ Gate: statistically credible improvement over baselines under executable and str
 - [ ] Preserve each feature vector, model version, decision, rejection reason, and intended order.
 - [ ] Compare intended, simulated, and observable fills.
 - [ ] Exercise feed failures, RPC disagreement, signer failure, and emergency shutdown.
+- [ ] Ship the operator UI for overview, opportunities, explanations, positions, reconciliation,
+  and hard risk controls. Keep signing material outside the browser and distinguish research,
+  shadow, paper, and live modes unmistakably.
 
 Gate: stable forward performance and operational reliability; no retrospective decision rewriting.
 
