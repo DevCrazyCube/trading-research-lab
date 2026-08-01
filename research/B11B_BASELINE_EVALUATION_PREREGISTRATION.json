@@ -1,0 +1,181 @@
+{
+  "preregistration_id": "b11b-baseline-evaluation-2026-08-02",
+  "supersedes": null,
+  "applies_to_window": {
+    "preregistration_id": "b11a-fresh-cohort-2026-08-02",
+    "file_sha256": "5faabb33ad317240824450a9b8a3a4026137a04e4457b4767e95488a5c469ac0",
+    "canonical_sha256": "ae4d2f0351aaba193fe7d87cde8cd68ce83aa8d21515d4d20af0a158f8dafe9f",
+    "launch_window_first_slot_inclusive": 435569150,
+    "launch_window_last_slot_inclusive": 435772750,
+    "observation_cutoff_slot_inclusive": 437211659
+  },
+  "purpose": "Freeze the t0 feature contract, the hard veto set, the policy set, the metric set, the primary result and the unlock evidence BEFORE any label on the B11a window exists. This is a BASELINE / PIPELINE evaluation: it establishes what the machinery produces with no learned component at all, so that any future model has something honest to be measured against. Committed before the materializer was ever run, so no feature, transform, policy, horizon or metric here could have been chosen by looking at a distribution.",
+  "committed_before_any_feature_materialization": true,
+  "b11a_composition_inspected": false,
+
+  "model": {
+    "model_family": "none",
+    "learned_parameters": 0,
+    "fitted_thresholds": 0,
+    "note": "There is no trained model in this evaluation and no threshold fitted to any data. Every policy below is executable at t0 from frozen rules alone. A future evaluation that introduces a model requires its own preregistration and a model artifact hash frozen before unlock."
+  },
+
+  "feature_contract": {
+    "version": "1.0.0",
+    "source_restriction": "Only fields published by the pinned Pump IDL revision in force at the decision slot, read from the curve's own CreateEvent and from any TradeEvent for the same curve at a canonical coordinate at or before t0. Nothing else is admissible — not price feeds, not metadata fetched off chain, not aggregates over other curves.",
+    "t0_is_always_inside_the_launch_transaction": "PROVEN, not assumed. t0 is the first transaction-terminal state (b10b select_t0). The CreateEvent's transaction contains at least one observation for the curve, so the first transaction-terminal observation is necessarily within it. Verified over the burned-development corpus: 1136 of 1136 curves have t0 in the launch transaction, 0 in a later one. This is what makes the creator-initial-buy fact observable at t0 rather than a look into the future.",
+    "no_transform_selection": "No log, bucket, rank, quantile, ratio-to-cohort or standardisation appears below. Choosing any of those requires looking at a distribution, and looking at a distribution to choose a transform is feature selection with outcomes one join away. The single subtraction present is an accounting identity, not a transform.",
+    "no_strings_rule": "Every feature value is an integer, a boolean, or null. NO STRING MAY APPEAR IN THE FEATURE BLOCK, ever. This is the structural form of the no-identity-as-predictor rule: a mint, a creator, a URI or a symbol cannot enter a model that only accepts numbers, and the rule is checkable without knowing which strings happen to be identities.",
+    "features": [
+      {"name": "t0_is_launch_instruction", "type": "boolean", "meaning": "t0 is the CreateEvent itself, i.e. the launch transaction carried no trade on this curve"},
+      {"name": "launch_transaction_trade_count", "type": "small_integer", "meaning": "trades on this curve at or before t0, all necessarily inside the launch transaction"},
+      {"name": "creator_initial_buy_present", "type": "boolean", "meaning": "a TradeEvent at or before t0 whose user equals the CreateEvent creator and whose is_buy is true"},
+      {"name": "creator_initial_buy_quote_lamports", "type": "lamports", "meaning": "summed quote spent by the creator at or before t0; 0 when absent"},
+      {"name": "creator_initial_buy_token_units", "type": "token_units", "meaning": "summed tokens received by the creator at or before t0; 0 when absent"},
+      {"name": "t0_virtual_quote_lamports", "type": "lamports"},
+      {"name": "t0_virtual_token_units", "type": "token_units"},
+      {"name": "t0_real_quote_lamports", "type": "lamports"},
+      {"name": "t0_real_token_units", "type": "token_units"},
+      {"name": "launch_real_token_units", "type": "token_units", "meaning": "real token reserve published by the CreateEvent"},
+      {"name": "tokens_left_curve_units", "type": "token_units", "meaning": "launch_real_token_units - t0_real_token_units; an accounting identity, not a chosen transform"},
+      {"name": "token_total_supply_units", "type": "token_units"},
+      {"name": "is_cashback_enabled", "type": "boolean"},
+      {"name": "fee_bps_observed", "type": "basis_points_or_null"},
+      {"name": "creator_fee_bps_observed", "type": "basis_points_or_null"},
+      {"name": "cashback_fee_bps_observed", "type": "basis_points_or_null"},
+      {"name": "buyback_fee_bps_observed", "type": "basis_points_or_null"}
+    ],
+    "grouping_identities_never_features": {
+      "fields": ["mint", "bonding_curve", "creator", "create_user", "t0_user"],
+      "permitted_use": "grouping and split construction only, per R5 (creator union user)",
+      "forbidden_use": "any predictive use, including as a categorical level, a hash bucket, an embedding, or a rate encoded from history"
+    }
+  },
+
+  "hard_vetoes": {
+    "note": "Already implied by the frozen regime; named here so a policy cannot quietly widen it. Every veto is a point-in-time predicate on t0 state and the stated order. None has a fitted threshold.",
+    "vetoes": [
+      {"code": "V1_non_sol_quote", "condition": "t0 quote_mint is not the native SOL sentinel", "enforced_by": "b10a.assert_eligible_state"},
+      {"code": "V2_mayhem_mode", "condition": "t0 mayhem_mode is true", "enforced_by": "b10a.assert_eligible_state"},
+      {"code": "V3_curve_complete_at_t0", "condition": "the curve is already complete at t0", "enforced_by": "b10a.price_entry"},
+      {"code": "V4_incomplete_state", "condition": "any required curve-state field is absent at t0", "enforced_by": "b10a.assert_eligible_state"},
+      {"code": "V5_mixed_regime_within_curve", "condition": "the curve's observations disagree on quote mint or Mayhem mode", "enforced_by": "b10b_path_dataset regime classification"},
+      {"code": "V6_order_exceeds_real_token_reserve", "condition": "the order would take more tokens than the real reserve holds", "enforced_by": "b10a.price_entry"},
+      {"code": "V7_order_buys_zero_tokens", "condition": "the order buys zero tokens at these reserves", "enforced_by": "b10a.price_entry"},
+      {"code": "V8_unsupported_program_version", "condition": "no pinned IDL revision covers the decision slot", "enforced_by": "b9d pinned-IDL loading; abort branch A2 of the B11a freeze"}
+    ],
+    "default": "A curve failing any veto is NOT entered by any policy, and still produces label rows under its no-decision reason so the cohort denominator is preserved."
+  },
+
+  "policies": {
+    "note": "All non-adaptive, all executable at t0, none carrying a fitted threshold. No top-k, no quantile, no rank, no rate estimated from the cohort.",
+    "order_size_lamports": 100000000,
+    "order_size_justification": "0.1 SOL, unchanged from the B10a/B10b/B10c plumbing runs. Reusing the existing size means no size was chosen with this window in view.",
+    "set": [
+      {"id": "P0_do_nothing", "enters": "never", "role": "degenerate reference; its result is identically zero and is reported to prove the accounting does not manufacture value from an empty book"},
+      {"id": "P1_all_eligible_fixed_size", "enters": "every curve passing all vetoes", "role": "PRIMARY. The reference the pipeline produces with no selection whatsoever; any future selective policy must beat this to have shown anything"},
+      {"id": "P2_mint_hash_random_control", "enters": "every non-vetoed curve whose deterministic mint hash falls in the frozen half", "seed": "b11b-random-control-2026-08-02", "rule": "int(sha256(seed_utf8 + mint_utf8).hexdigest(), 16) % 2 == 0", "rate_numerator": 1, "rate_denominator": 2, "role": "negative control for PLUMBING, not a performance comparator: a random subset of P1 has the same expected outcome as P1, so a divergence beyond grouped uncertainty indicates an accounting artefact rather than an edge", "rate_justification": "one half maximises the control's sample size while remaining a strict subset; it is not tuned and no other rate was evaluated"},
+      {"id": "P3_creator_initial_buy_present", "enters": "non-vetoed curves where creator_initial_buy_present is true", "role": "categorical partition arm; observable at t0 by the proof above"},
+      {"id": "P4_creator_initial_buy_absent", "enters": "non-vetoed curves where creator_initial_buy_present is false", "role": "the complementary arm"}
+    ],
+    "invariants": [
+      "entries(P0) == 0",
+      "entries(P3) + entries(P4) == entries(P1)",
+      "entries(P2) is a subset of entries(P1)",
+      "no policy consults any observation after t0",
+      "no policy consults any other curve"
+    ]
+  },
+
+  "horizons": {
+    "note": "The four inherited from B10c, UNCHANGED. No horizon is added, removed or reparameterised here.",
+    "set": [
+      {"name": "h_1000_slots", "kind": "slot_horizon", "slots": 1000},
+      {"name": "h_10000_slots", "kind": "slot_horizon", "slots": 10000},
+      {"name": "h_10_observations", "kind": "observation_horizon", "count": 10},
+      {"name": "administrative_window_end", "kind": "administrative_window_end"}
+    ],
+    "label_semantics": "B10c STATE-IN-FORCE semantics exclusively: a slot horizon is valued at the LAST evaluable observation at or before t0+H. This is NOT b10b's slot_horizon exit rule, which fires at the FIRST reachable exit at or after t0+H. The two answer different questions - what was the position worth at H, versus when would a strategy have exited - and a result computed under one and reported under the other would be a different number wearing the same name. Any evaluation output must name which it used; this one uses B10c."
+  },
+
+  "primary_result": {
+    "policy": "P1_all_eligible_fixed_size",
+    "policy_justification": "The baseline whose whole purpose is to have no selection in it. P0 is degenerate, P2 is a plumbing control, and P3/P4 are arms of a partition whose union is P1 - so P1 is the only member of the set that answers 'what does this pipeline produce'.",
+    "horizon": "h_1000_slots",
+    "horizon_justification": "Operational meaning plus a prior document, never a burned return. 1,000 slots is about 7 minutes at the measured 2.3934 slots/s, which brackets the roughly 4.4-minute median time to graduation reported in the 2026 Pump.fun study already cited in DOCUMENTATION.md. A launch-entry decision is resolved inside that span or not at all. The number itself is inherited unchanged from B10b/B10c, so no new horizon was chosen; only one of four already-frozen horizons was designated primary.",
+    "metric": "capital_weighted_net_return",
+    "metric_justification": "It is what an operator actually experiences on a book of fixed-size positions, it is exact integer arithmetic with no float anywhere, and its denominator is deployed capital rather than a count, so one large position cannot hide behind many tiny ones.",
+    "reported_only_with": [
+      "the full disposition census over the whole cohort",
+      "the worst-case lower bound",
+      "the grouped jackknife range over creator union user"
+    ],
+    "reported_alone_is_forbidden": "The metric is computed over MARKED rows only. Quoting it without the census would be quoting a number conditioned on markedness, and markedness correlates with the outcomes it is describing."
+  },
+
+  "multiplicity": {
+    "family_definition": "non-degenerate policies x horizons",
+    "family_size": 16,
+    "members": "P1, P2, P3, P4 crossed with the four horizons",
+    "control": "One primary result is the headline. Every other cell is secondary, reported only in a table, and MAY NOT be promoted to primary after the fact. Any future inferential claim over this family uses a Bonferroni-corrected alpha of 0.05/16 = 0.003125.",
+    "no_test_in_this_pass": "No significance test, confidence interval or p-value is computed in this evaluation. Grouped uncertainty is reported as an assumption-free jackknife range instead."
+  },
+
+  "metrics": {
+    "denominator_rule": "Every metric states the WHOLE cohort as its denominator. A curve that was vetoed, that produced no decision, or whose horizon is censored is counted in the cohort census and contributes zero deployed capital. Filtering the cohort down to the rows that happen to carry a value is the single most common way a backtest flatters itself, and it is forbidden here.",
+    "censoring_rule": "A right-censored, structurally-unavailable or no-observed-state row has a NULL value and is NEVER counted as a loss, a zero, or a minus one inside any metric. It is counted in its own disposition bucket.",
+    "definitions": [
+      {"name": "cohort_curves", "kind": "count", "over": "whole cohort"},
+      {"name": "entered_positions", "kind": "count"},
+      {"name": "deployed_capital_lamports", "kind": "exact_integer", "meaning": "sum of entry outlay over entered positions"},
+      {"name": "disposition_census", "kind": "counts", "buckets": ["marked_at_horizon", "right_censored", "structural_exit_unavailable", "no_observed_state_in_window", "no_decision"], "must_sum_to": "cohort_curves"},
+      {"name": "total_net_lamports", "kind": "exact_integer", "over": "marked rows only"},
+      {"name": "capital_weighted_net_return", "kind": "exact_reduced_rational", "formula": "sum(net_return_numerator_i * (capital_denominator_i / g_i)) is NOT used; the metric is sum(net_lamports_i) / sum(capital_denominator_lamports_i) over marked rows, reduced by gcd", "over": "marked rows only"},
+      {"name": "worst_case_lower_bound_return", "kind": "exact_reduced_rational", "formula": "(sum(net_lamports over marked) - sum(deployed capital over entered-but-not-marked)) / sum(capital_denominator over all entered)", "meaning": "every entered position without an observed value is assigned a total loss. A BOUND, explicitly labelled, never an estimate. No upper bound exists: an unobserved value is bounded below by zero and not above."},
+      {"name": "median_position_return", "kind": "exact_reduced_rational", "over": "marked rows only", "meaning": "robust summary; exact rational ordering, no float comparison"},
+      {"name": "median_position_max_drawdown", "kind": "exact_reduced_rational_or_null", "over": "marked rows with a defined drawdown ratio"},
+      {"name": "worst_position_max_drawdown", "kind": "exact_reduced_rational_or_null"},
+      {"name": "capacity_positions_fully_executable", "kind": "count", "meaning": "marked rows at liquidity L0_full_size_executable; the fraction of the book that could actually be closed at the stated size"},
+      {"name": "capacity_positions_size_constrained", "kind": "count", "meaning": "marked rows at L2_size_constrained"},
+      {"name": "grouped_uncertainty", "kind": "jackknife", "grouping": "creator union user (R5 floor)", "reported": ["group_count", "largest_group_position_share_rational", "leave_one_group_out_min_return", "leave_one_group_out_max_return"], "meaning": "assumption-free. Recompute the primary metric with each group removed in turn; the range says how much of the result rests on any single actor cluster. Directly addresses the PLAN.md promotion criterion that results must not be dominated by one creator or wallet cluster."}
+    ],
+    "no_float_rule": "No metric may be represented as a floating-point number at any point, including intermediate ordering. Rationals are compared as cross-multiplied integers."
+  },
+
+  "pass_fail_evidence": {
+    "note": "These decide whether the EVALUATION IS VALID, not whether the strategy is good. A baseline evaluation that fails any of them produces no interpretable number at all.",
+    "requirements": [
+      {"id": "E1", "requirement": "label rows equal cohort curves times horizons, exactly"},
+      {"id": "E2", "requirement": "zero arithmetic errors under independent recomputation of every row"},
+      {"id": "E3", "requirement": "byte-identical rerun; determinism hash reproduces"},
+      {"id": "E4", "requirement": "zero leakage violations: feature/grouping partition holds, no string in any feature block, no observation after t0 reachable by the materializer, and all four B10c R1 mechanisms hold on every row"},
+      {"id": "E5", "requirement": "the coverage partition sums to the observation total"},
+      {"id": "E6", "requirement": "the b9e, b9f and b10a gates pass on the fresh corpus"},
+      {"id": "E7", "requirement": "every policy invariant holds"},
+      {"id": "E8", "requirement": "grouped jackknife computed over creator union user, with group count and largest-group share reported"}
+    ],
+    "on_failure": "Report the failure and compute no headline number. A valid-looking metric from an invalid pipeline is worse than no metric."
+  },
+
+  "unlock_evidence": {
+    "note": "The exact evidence B11a orchestration must require before any B11a composition, path, label or return figure may be computed. Until all of it exists, b11a plan_pipeline must keep results locked.",
+    "requirements": [
+      {"id": "U1", "requirement": "this preregistration is committed and its file and canonical SHA-256 are recorded in DECISIONS.md"},
+      {"id": "U2", "requirement": "model_family is none for this evaluation; any evaluation introducing a model instead requires that model's artifact hash frozen and recorded BEFORE unlock"},
+      {"id": "U3", "requirement": "B11a collection is complete and the E6 gates have passed"},
+      {"id": "U4", "requirement": "a DECISIONS.md entry names both the B11a window hashes and these B11b hashes and declares the unlock"},
+      {"id": "U5", "requirement": "no feature, veto, policy, horizon, metric or primary designation has changed since U1; the hashes prove it"}
+    ],
+    "evaluation_only_rule": "B11a IS EVALUATION DATA AND MAY NEVER TUNE A POLICY. Once labels are revealed, no policy, feature, veto, horizon, metric or primary designation may be changed in response. A change after reveal requires a new preregistration AND a new window; B11a is then burned and joins the register.",
+    "b10c_enum_still_locked": "This document does NOT authorise extending b10c's window_status enum. That remains a separate decision, gated on U1 through U5."
+  },
+
+  "prohibited_in_this_pass": [
+    "computing any B11a composition, count, feature distribution, path result, label or return",
+    "fitting any model, threshold, rate or transform to any data",
+    "inspecting any feature distribution, on any window, for any purpose",
+    "adding a top-k, quantile, rank or otherwise adaptive policy",
+    "reporting a burned-window return distribution",
+    "UI, server, live RPC, signing, spending, or paid data subscription"
+  ]
+}
