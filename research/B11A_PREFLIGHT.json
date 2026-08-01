@@ -1,0 +1,140 @@
+{
+  "composition_queried": false,
+  "endpoint_reference": "https://mainnet.helius-rpc.com/",
+  "frozen_window": {
+    "disjoint_from_every_burned_range": true,
+    "disjointness_scope": "checked for BOTH the launch window and the full observation span [launch_window_first_slot_inclusive, observation_cutoff_slot_inclusive]",
+    "launch_window_first_slot_inclusive": 435569150,
+    "launch_window_last_slot_inclusive": 435772750,
+    "observation_cutoff_slot_inclusive": 437211659,
+    "observation_window_end_slot": 437211659
+  },
+  "maturity": {
+    "action": "WAIT. The window is not moved, not shortened and not re-placed (abort branch A3)",
+    "cutoff_slot": 437211659,
+    "estimate_basis": "2.3934 slots/s measured on 438 consecutive B7j blocks over 183 s; an estimate, not a commitment",
+    "estimated_wait_days": 2.69,
+    "estimated_wait_seconds": 232765,
+    "mature": false,
+    "slots_remaining": 557100,
+    "tip_slot": 436654559
+  },
+  "methods_called": [
+    "getSlot"
+  ],
+  "pipeline": [
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": false,
+      "kind": "collection",
+      "note": "exhaustive CreateEvent enumeration over the launch window (C4); no filtering",
+      "numbers_withheld": false,
+      "permitted_before_unlock": true,
+      "runnable": false,
+      "script": "b7d_create_enumerator.py",
+      "stage": "enumerate_creates"
+    },
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": false,
+      "kind": "collection",
+      "note": "per-curve signature pages, raw responses preserved byte-exact",
+      "numbers_withheld": false,
+      "permitted_before_unlock": true,
+      "runnable": false,
+      "script": "b9c_signature_inventory.py",
+      "stage": "signature_inventory"
+    },
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": false,
+      "kind": "collection",
+      "note": "raw transaction bodies preserved before any decode",
+      "numbers_withheld": false,
+      "permitted_before_unlock": true,
+      "runnable": false,
+      "script": "b9d_transaction_bodies.py",
+      "stage": "transaction_bodies"
+    },
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": false,
+      "kind": "collection",
+      "note": "upgrade-boundary evidence for both programs; abort branch A2 is decided here",
+      "numbers_withheld": false,
+      "permitted_before_unlock": true,
+      "runnable": false,
+      "script": "b9d_transaction_bodies.py --boundary",
+      "stage": "program_boundary"
+    },
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": false,
+      "kind": "collection",
+      "note": "pinned-IDL decode and reserve reconstruction",
+      "numbers_withheld": false,
+      "permitted_before_unlock": true,
+      "runnable": false,
+      "script": "b9d_transaction_bodies.py --decode",
+      "stage": "decode_and_reserves"
+    },
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": true,
+      "kind": "gate",
+      "note": "must pass or fail before the data is usable; its counts describe the window",
+      "numbers_withheld": true,
+      "permitted_before_unlock": true,
+      "runnable": false,
+      "script": "b9e_reserve_coverage.py",
+      "stage": "reserve_coverage_gate"
+    },
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": true,
+      "kind": "gate",
+      "note": "as above",
+      "numbers_withheld": true,
+      "permitted_before_unlock": true,
+      "runnable": false,
+      "script": "b9f_failure_coverage.py",
+      "stage": "failure_coverage_gate"
+    },
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": true,
+      "kind": "gate",
+      "note": "integer replay must reproduce this window's trades exactly",
+      "numbers_withheld": true,
+      "permitted_before_unlock": true,
+      "runnable": false,
+      "script": "b10a_simulator_kernel.py --gate",
+      "stage": "simulator_replay_gate"
+    },
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": true,
+      "kind": "results",
+      "note": "path marks and drawdowns are outcomes",
+      "numbers_withheld": true,
+      "permitted_before_unlock": false,
+      "runnable": false,
+      "script": "b10b_path_dataset.py",
+      "stage": "position_paths"
+    },
+    {
+      "blocked_reason": "the frozen observation cutoff is not mature; waiting does not move the window (abort branch A3)",
+      "emits_composition": true,
+      "kind": "results",
+      "note": "labels are the thing that must stay sealed until models and thresholds are frozen",
+      "numbers_withheld": true,
+      "permitted_before_unlock": false,
+      "runnable": false,
+      "script": "b10c_label_corpus.py",
+      "stage": "outcome_labels"
+    }
+  ],
+  "preregistration_canonical_sha256": "ae4d2f0351aaba193fe7d87cde8cd68ce83aa8d21515d4d20af0a158f8dafe9f",
+  "preregistration_file_sha256": "5faabb33ad317240824450a9b8a3a4026137a04e4457b4767e95488a5c469ac0",
+  "preregistration_id": "b11a-fresh-cohort-2026-08-02"
+}

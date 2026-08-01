@@ -85,6 +85,14 @@ These are study-specific results, not universal base rates:
   instead would be censoring against a window that was never collected. The label materializer
   requires the stated end and refuses a preregistration that disagrees with the artifact.
 
+- **B11a verified fact — the burned-range register has seven entries and their maximum inclusive
+  endpoint is 435,569,149** (B7c trade-only gap sample). Normalising is not cosmetic: a half-open
+  `[a, b)` source range contributes `b-1`, and where a document's burn *statement* is wider than the
+  code range it describes — B7b scanned `range(435566652, 435566690)` but declared slots
+  435,566,652–435,566,690 burned — **the wider statement governs**, because the reading that keeps a
+  slot out of evaluation is the safe one. Getting either convention backwards moves the whole fresh
+  window. See `research/B11A_FRESH_COHORT_PREREGISTRATION.md`.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)

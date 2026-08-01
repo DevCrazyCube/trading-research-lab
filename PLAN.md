@@ -36,6 +36,15 @@ Numeric thresholds remain research hypotheses until supported by data. They must
   open at decision time. Later graduation/migration is an outcome and execution risk, never an
   exclusion chosen with future knowledge. Initial entries are Pump-only; PumpSwap is not an entry
   venue, and any post-graduation exit remains unavailable until separately validated.
+- [x] **First FRESH evaluation window preregistered before inspection**
+  (`research/B11A_FRESH_COHORT_PREREGISTRATION.json`, committed alone before any chain query;
+  `research/B11A_PREFLIGHT_AND_ORCHESTRATION.md`). Launch window **435,569,150 – 435,772,750**,
+  observation cutoff **437,211,659**, every endpoint derived mechanically from the seven burned
+  ranges and the B8b/B9d geometry inherited unchanged in slots. Disjointness machine-checked and
+  failing closed. Preflight (one `getSlot`, no composition query) found the cutoff **not mature:
+  557,100 slots remaining, about 2.69 days**; the window was not moved or shortened. Collection is
+  planned and locked, and every path/label stage is refused until models, horizons and thresholds
+  are frozen. **This is evaluation data, not tuning data.**
 - [ ] Define point-in-time and leakage rules.
 - [ ] Define capital, position, daily-loss, and kill-switch policies.
 - [ ] Obtain appropriate Netherlands/EU legal and tax advice before live operation.

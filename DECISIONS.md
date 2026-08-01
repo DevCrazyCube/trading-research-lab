@@ -1292,3 +1292,63 @@ The two do not imply each other. A user-ratified decision can remain provisional
   model, baseline or feature vector. Rug/dump remain unconstructed and need their own preregistration
   on a fresh window. The economic L1 threshold stays unfrozen. The stochastic half of the Phase 2
   gate is untouched, so every value remains **simulated, not executable**.
+
+## 2026-08-02 — Window 435,569,150–435,772,750 is the FIRST FRESH EVALUATION COHORT (B11a)
+
+- **Status:** preregistration frozen and committed **alone, before any chain or RPC query**
+  (commit `b764898`), then verified and preflighted in a separate commit. Not yet collected.
+- **Decision:** the fresh cohort is the launch window `[435,569,150, 435,772,750]` inclusive, with
+  observation cutoff `437,211,659` inclusive. Freeze:
+  `research/B11A_FRESH_COHORT_PREREGISTRATION.json`, file SHA-256
+  `5faabb33ad317240824450a9b8a3a4026137a04e4457b4767e95488a5c469ac0`, canonical SHA-256
+  `ae4d2f0351aaba193fe7d87cde8cd68ce83aa8d21515d4d20af0a158f8dafe9f`. Marked `fresh_preregistered`.
+- **Why this exists:** every cohort this project has is burned, so R3 could not be satisfied by any
+  existing window and no model could have been evaluated honestly on anything. B10c established in
+  code that the current corpus IS the burned B8b cohort. This is the first clean window.
+- **Derived, never chosen.** Launch start = `max(inclusive_last over the seven burned ranges) + 1` =
+  435,569,149 + 1. Launch span and observation span are inherited from B8b/B9d **unchanged and in
+  slots** — re-deriving them from a slot rate would make the window's size depend on how fast the
+  network happens to be running, which is a property of the regime under evaluation. No candidate
+  window was inspected and rejected, and no endpoint was adjusted for yield, regime, activity,
+  outcomes, convenience or collection cost.
+- **Normalisation is load-bearing.** A half-open `[a, b)` source range contributes `b-1`, and where
+  a document's burn STATEMENT is wider than the code range it describes — B7b scanned
+  `range(435566652, 435566690)` but declared 435,566,652–435,566,690 burned — the wider statement
+  governs. Getting either convention backwards moves the whole window.
+- **Preflight result: NOT mature.** One `getSlot` at finalized commitment, no composition query.
+  Tip 436,654,559 against a cutoff of 437,211,659: **557,100 slots remaining, about 2.69 days** at
+  the measured 2.3934 slots/s (an estimate; the slot count is the exact quantity). **The window was
+  not moved, shortened, split or re-placed** — abort branch A3. Receipt in
+  `research/B11A_PREFLIGHT.json`, endpoint recorded as scheme and host only.
+- **Adopted:** the preflight may call `getSlot` and nothing else. The restriction is an ALLOWLIST,
+  not a denylist: a denylist would have to anticipate every method that leaks composition, while an
+  allowlist anticipates nothing. `getSignaturesForAddress`, `getBlock` and anything invented later
+  are refused by not being `getSlot`.
+- **Adopted:** the pipeline is declared with two independent flags per stage —
+  `permitted_before_unlock` and `emits_composition`. Gates may run before unlock because data that
+  has not been gated cannot be shipped, but only their pass/fail survives; a count is a description
+  of the window. **Collection counts are composition too**: enumerating the cohort produces its
+  membership list, and "there are N launches" describes the window. Only the program-boundary probe
+  is composition-free, because an upgrade slot is a property of the program. B10b and B10c stages
+  are refused entirely until results are unlocked.
+- **B10c's `window_status` enum is deliberately NOT extended.** It must keep refusing
+  `fresh_preregistered` until a separate decision entry records that models, horizons and thresholds
+  were frozen first. Extending it now would open a path to revealing this window's labels before
+  anything is frozen against them, which is the single failure the preregistration exists to
+  prevent. A test pins the refusal.
+- **Consequence — the burned-range list stays at seven.** This window is NOT burned; it is
+  authorised evaluation data. It becomes burned the moment any census, yield, regime split, actor
+  concentration, path result, label or return figure is computed on it before models, horizons and
+  thresholds are frozen and recorded here (abort branch A7). There is no eighth window queued behind
+  it.
+- **Verification:** 23 mutants, 22 killed — including half-open normalised as inclusive, B7b read as
+  half-open, the start landing on the last burned slot, both spans off by one, a widened allowlist,
+  the maturity boundary off by one, results runnable before unlock, and a credentialed URL surviving
+  into the receipt. **One survivor is recorded rather than papered over:** deleting the
+  observation-span disjointness check changes nothing observable, because the start rule makes it
+  redundant by construction. An attempt to kill it by adding an explicit start-rule invariant
+  produced *unreachable* code, and that invariant was **removed** — a check that cannot fire makes a
+  file look more careful than it is. 45 tests in the suite.
+- **Ratified by:** the Codex directive of handoff 68. **Owner review not separately obtained.**
+- **NOT authorised by this decision:** Yellowstone or any paid forward capture, UI, server, model,
+  signal, baseline, live transaction, signing or spending. Credentials remain environment-only.
