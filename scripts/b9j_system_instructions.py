@@ -147,13 +147,24 @@ def system_lamports_moved(decoded):
     return None if field is None else decoded["fields"][field]
 
 
-def survey(database, limit=None, progress=None):
-    """Decode every System instruction in the artifact. Raises on the first one that will not."""
+def survey(database, limit=None, progress=None, strict=True):
+    """Decode every System instruction in the artifact.
+
+    `strict` raises on the first instruction that will not decode, which is what a gate wants.
+    With `strict=False` the refusal is ENUMERATED instead: the instruction is recorded with its
+    signature, coordinates and reason, and counted separately. That is not a tolerance -- nothing
+    is decoded leniently and no trailing byte is accepted. It exists so the population can be
+    measured, and so a reconciliation can mark the containing transaction unreconcilable by name
+    rather than crashing on it or, worse, silently skipping it.
+
+    Measured over the full artifact: 412,028 System instructions, 2 undecodable.
+    """
     assert_abi_source_pinned()
     query = "SELECT signature FROM transaction_coordinate ORDER BY signature"
     if limit:
         query += f" LIMIT {int(limit)}"
-    report = {"transactions": 0, "system_instructions": 0, "by_variant": {}, "lamports_by_variant": {}}
+    report = {"transactions": 0, "system_instructions": 0, "by_variant": {},
+              "lamports_by_variant": {}, "undecodable": []}
     for (signature,) in database.execute(query):
         raw = database.execute(
             "SELECT raw_zlib FROM raw_transaction WHERE signature=?", (signature,)).fetchone()[0]
@@ -165,7 +176,14 @@ def survey(database, limit=None, progress=None):
             try:
                 decoded = decode_system_instruction(envelope["data"])
             except FreezeViolation as error:
-                raise FreezeViolation(f"{signature}: {error}") from error
+                if strict:
+                    raise FreezeViolation(f"{signature}: {error}") from error
+                report["undecodable"].append({
+                    "signature": signature, "outer_index": envelope["outer_index"],
+                    "inner_index": envelope["inner_index"],
+                    "data_length": len(envelope["data"]), "reason": str(error)})
+                report["system_instructions"] += 1
+                continue
             report["system_instructions"] += 1
             report["by_variant"][decoded["name"]] = report["by_variant"].get(decoded["name"], 0) + 1
             moved = system_lamports_moved(decoded)
@@ -182,10 +200,14 @@ def main(argv=None):
     parser.add_argument("artifact")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--progress", type=int, default=None)
+    parser.add_argument("--enumerate-undecodable", action="store_true",
+                        help="record instructions that will not decode instead of raising; the "
+                             "decoder stays strict, only the survey continues")
     args = parser.parse_args(argv)
     database = B9D.connect(args.artifact, readonly=True)
     try:
-        report = survey(database, args.limit, args.progress)
+        report = survey(database, args.limit, args.progress,
+                        strict=not args.enumerate_undecodable)
     finally:
         database.close()
     print(json.dumps(report, indent=2, sort_keys=True))

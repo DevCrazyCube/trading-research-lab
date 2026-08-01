@@ -140,5 +140,47 @@ class RefusalTests(unittest.TestCase):
         self.assertEqual(B9J.system_lamports_moved(transfer_with_seed), 9)
 
 
+class SurveyStrictnessTests(unittest.TestCase):
+    """Enumerating a refusal is not the same as tolerating it."""
+
+    def setUp(self):
+        import json, tempfile
+        self.b9d = B9D
+        self.path = pathlib.Path(tempfile.mkdtemp()) / "sys.sqlite"
+        self.database = B9D.connect(str(self.path))
+        B9D.schema(self.database)
+        self.addCleanup(self.database.close)
+        # A CreateAccount carrying four trailing zero bytes -- the exact shape found twice in the
+        # frozen artifact, out of 412,028 System instructions.
+        payload = encode(0, struct.pack("<QQ", 2_039_280, 165) + PUBKEY) + bytes(4)
+        self.assertEqual(len(payload), 56)
+        keys = [B9D.base58_decode(B9J.SYSTEM_PROGRAM), bytes(range(32))]
+        raw = json.dumps({"result": B9DT.as_result(
+            B9DT.build_transaction(keys, [(0, [1], payload)]), slot=700)}).encode()
+        with self.database:
+            self.database.execute(
+                "INSERT INTO raw_transaction (signature,method,params_json,received_at_unix,"
+                "response_sha256,raw_zlib) VALUES ('sig','m','[]',1.0,?,?)",
+                (B9D.hashlib.sha256(raw).hexdigest(), B9D.zlib.compress(raw, 6)))
+            self.database.execute("INSERT INTO transaction_coordinate VALUES ('sig',700,0)")
+
+    def test_strict_survey_refuses_trailing_data(self):
+        with self.assertRaisesRegex(B9D.FreezeViolation, "trailing byte"):
+            B9J.survey(self.database)
+
+    def test_enumerating_records_the_refusal_and_never_decodes_it(self):
+        """The instruction is counted and located, not parsed. Nothing is accepted leniently."""
+        report = B9J.survey(self.database, strict=False)
+        self.assertEqual(len(report["undecodable"]), 1)
+        entry = report["undecodable"][0]
+        self.assertEqual((entry["signature"], entry["data_length"]), ("sig", 56))
+        self.assertIn("trailing byte", entry["reason"])
+        self.assertEqual(report["system_instructions"], 1)
+        self.assertEqual(report["by_variant"], {},
+                         "an undecodable instruction must not be counted as a decoded variant")
+        self.assertEqual(report["lamports_by_variant"], {},
+                         "and its lamports must never be attributed")
+
+
 if __name__ == "__main__":
     unittest.main()
