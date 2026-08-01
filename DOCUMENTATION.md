@@ -55,6 +55,21 @@ These are study-specific results, not universal base rates:
   burned cohort window only; it is not a universal RPC guarantee. See
   `research/B7H_BONDING_CURVE_RECALL.md`.
 
+- **B10b verified facts (frozen B9d artifact, 1,136 curves, 94,389 reserve observations).** Two
+  structural properties of this venue that a position-path evaluator must respect, both measured
+  rather than assumed. See `research/B10B_OBSERVED_PATH_VALIDATION.md`.
+  - **A state that exists only part-way through another party's transaction is not a state we could
+    trade against**, because our own transaction cannot land inside theirs. **1,121 transactions**
+    carry more than one reserve observation on the same curve (1,033 with two, 88 with three), so
+    **1,209 of 94,389** observations are not transaction-terminal. Separately, **910 of 1,136
+    curves** publish a mid-transaction launch state, because the launch transaction also carries the
+    creator's own first buy.
+  - **`CompleteEvent` fires at an inner index after the trade that completed the curve.** A trade
+    observation in the completing transaction therefore describes a curve already finished before
+    anything of ours could follow it. Treating completion as effective only from the *next*
+    instruction would publish exactly one tradable state per completed curve that never existed for
+    us, and it would be the highest-valued state on that curve's whole path.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)

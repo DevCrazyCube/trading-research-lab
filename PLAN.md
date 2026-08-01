@@ -69,6 +69,20 @@ Gate: deterministic replay; complete classified decode accounting; exact integer
   slippage are caller-supplied or refused — never defaulted. **The stochastic half of the Phase 2
   gate is untouched: no landing, contention, failure or fill distribution is calibrated, so every
   result is labelled SIMULATED and none is executable.**
+- [x] **Second bounded slice implemented and measured** (`scripts/b10b_position_path.py`,
+  `scripts/b10b_path_dataset.py`, `docs/POSITION_PATH_SCHEMA.md`,
+  `research/B10B_OBSERVED_PATH_VALIDATION.md`). A canonical **observed-state** position path
+  evaluator: one entry priced by B10a at t0, then an executable-size-constrained exit mark at every
+  later canonical observation for the same mint, with drawdown on realisable net exit value,
+  liquidity states, reason codes, and caller-stated horizon/exit-rule outcomes that right-censor
+  rather than score. Measured over the full 1,136-curve canonical reserve corpus: **1,136/1,136
+  curves in strictly increasing canonical order, 884 paths evaluated over 91,296 marks, zero
+  arithmetic errors**, a coverage partition summing exactly to 94,389 observations, and a
+  byte-identical rebuild and re-validation. **Distinct schema label `SIMULATED_OBSERVED_PATH`**,
+  because the later states are OBSERVED — from a world without our hypothetical trade — and are
+  never called counterfactual. No reserve delta is added to any later state and no observed order
+  is replayed: no trade variant makes that provably valid. **No profitability figure is computed
+  and no entry is selected.** The stochastic Phase 2 gate remains untouched.
 - [ ] Implement exact integer quote, fee, and rounding behavior by protocol version.
 - [ ] Replay observed ordering and empirical latency distributions.
 - [ ] Model failures, expiration, compute fees, tips, slippage, migration, and constrained exits.

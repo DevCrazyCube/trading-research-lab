@@ -1169,3 +1169,57 @@ The two do not imply each other. A user-ratified decision can remain provisional
   scenario in this kernel is calibrated; "optimistic", "base" and "stressed" are deliberately absent
   as names because they would imply a measured distribution that does not exist. Until forward data
   exists, every computed return is **simulated, not executable**.
+
+## 2026-08-02 — Phase 2 second slice: an observed-state position path evaluator
+
+- **Implemented:** `scripts/b10b_position_path.py` (engine) and `scripts/b10b_path_dataset.py`
+  (corpus and validation), with a versioned read-only schema (`docs/POSITION_PATH_SCHEMA.md`
+  v1.0.0) and a measured report (`research/B10B_OBSERVED_PATH_VALIDATION.md`). Pure offline
+  library — no server, UI, model, signal, wallet, signing or live RPC.
+- **The contract is deliberately narrow, and the label enforces it.** Every record carries
+  `SIMULATED_OBSERVED_PATH`, not b10a's `SIMULATED`. The later reserve observations came from a
+  world in which our hypothetical trade never happened; they are an *observed-state scenario
+  diagnostic*, never a counterfactual replay. B10a's entry impact is preserved at t0 and our own
+  exit impact is priced against each observed state, but the **persistence of our entry impact and
+  other participants' response to it are not modelled, and the sign of that bias is not claimed** —
+  their observed order sizes are not invariant to reserves they never saw.
+- **Counterfactual replay was refused with a reason, not out of caution.** No trade variant makes
+  it valid: exact-input buys pin the quote, legacy buys pin the tokens, sells pin the tokens, and
+  each carries a signed slippage bound the shifted price may violate — in which case the observed
+  transaction **would have failed and the observation would not exist**. No reserve delta is added
+  to any later state, no order is replayed, no small-impact assumption is made, and there is no
+  tolerance anywhere in the module.
+- **An exit cannot land inside another party's transaction.** 1,121 transactions carry more than
+  one reserve observation on the same curve, so 1,209 of 94,389 observations are not
+  transaction-terminal and are recorded, never priced. t0 is advanced to the first
+  transaction-terminal state, which for **910 of 1,136 curves** is past the launch instruction
+  because the launch transaction also carries the creator's own first buy.
+- **Completion applies from its transaction, inclusive.** `CompleteEvent` fires after the trade
+  that completed the curve, so an exclusive comparison would publish one tradable state per
+  completed curve that never existed for us — and it would sit at the top of the curve.
+- **`L1m_no_executable_size` is explicitly NOT the economic L1 of `docs/EXECUTABLE_RETURN.md` §3.**
+  That threshold stays unfrozen; `L1m` is the mechanical arithmetic floor beneath it and chooses no
+  threshold. The drawdown ratio is an exact integer pair, never a float, and is withheld entirely
+  when the peak is not strictly positive — an undefined ratio is not a small one.
+- **Right-censoring is a first-class outcome.** A rule that does not fire within the observation
+  window is `right_censored` (`DEFINITIONS.md` C1) — not a loss, not a win, not a zero. A curve that
+  completes first is `structurally_unavailable`. 551 of 884 paths right-censor on a 10,000-slot
+  horizon; scoring those would report on the observation window, not the market.
+- **Measured validation gate:** 1,136/1,136 curves in strictly increasing canonical order; 884
+  paths over 91,296 evaluated marks; **zero arithmetic errors**; a coverage partition summing
+  exactly to 94,389 observations; a byte-identical corpus rebuild and two byte-identical validation
+  runs. The corpus's 753 out-of-regime observations equal b10a's independently measured 743
+  out-of-regime trades plus their 10 `CreateEvent`s — the two modules agree on the regime boundary
+  rather than each defining its own, and a test pins the equality.
+- **Verification:** 15 mutants, 3 survived first, and each survivor changed the code rather than
+  only the tests — the entry feature view was not proven to be what `decide_entry` actually hands
+  over, the completion comparison was inline and untested at transaction granularity, and the
+  coverage partition check could not be made to report failure. After extracting `is_complete_at`
+  and `coverage_partition_error` and pinning the feature view at the call site: **15 of 15 killed.**
+- **Ratified by:** measurement over the full frozen population under the Codex directive of handoff
+  64. **Owner review not separately obtained.**
+- **Explicitly NOT claimed.** No profitability figure, expectancy, win rate or strategy result is
+  computed, and no entry is selected: one fixed order size is applied to every eligible curve so the
+  corpus exercises the evaluator rather than being searched for a rule. The stochastic half of the
+  `PLAN.md` Phase 2 gate — landing, contention, failure and fill distributions against forward
+  observations — remains untouched, so every value here is **simulated, not executable**.
