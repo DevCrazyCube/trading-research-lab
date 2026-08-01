@@ -57,8 +57,17 @@ FreezeViolation = B9D.FreezeViolation
 CATEGORIES = ("exact", "undecodable_instruction", "unattributed_movement")
 
 
-def reconcile_transaction(result):
+def pinned_idls():
+    """Both target IDLs, through the SHA-256-verifying loader."""
+    return {B9D.PUMP_PROGRAM: B9D.load_pinned_idl(
+                B9D.PUMP_IDL_PATH, B9D.PUMP_IDL_SHA256, B9D.PUMP_PROGRAM),
+            B9D.PUMPSWAP_PROGRAM: B9D.load_pinned_idl(
+                B9D.PUMPSWAP_IDL_PATH, B9D.PUMPSWAP_IDL_SHA256, B9D.PUMPSWAP_PROGRAM)}
+
+
+def reconcile_transaction(result, idls=None):
     """Attribute the fee payer's lamport delta. Returns a category and the evidence behind it."""
+    idls = idls if idls is not None else pinned_idls()
     meta = result.get("meta") or {}
     pre, post = meta.get("preBalances"), meta.get("postBalances")
     if not isinstance(pre, list) or not isinstance(post, list) or len(pre) != len(post) or not pre:
@@ -76,6 +85,7 @@ def reconcile_transaction(result):
         raise FreezeViolation(f"transaction fee is not a non-negative integer: {fee!r}")
 
     sent = received = 0
+    trade_attributed = 0
     undecodable = []
     # Lamports credited to each account by decoded System instructions during this transaction.
     # An account created and closed in the SAME transaction has a pre-balance of 0 and a
@@ -130,6 +140,33 @@ def reconcile_transaction(result):
         if destination == payer:
             received += lamports
 
+    # Program-owned trade flows. On a SELL the curve pays the user directly, because a program may
+    # move lamports on accounts it owns, so no System or Token instruction records it. On a BUY the
+    # quote and fees travel as System transfers and are ALREADY counted above -- attributing them
+    # again would double-count. Measured on 6,000 transactions with a single native-quote trade:
+    # 2,964 buys already reconcile exactly, while 2,405 of 2,504 unattributed sells have a residual
+    # of exactly -(quote - fees). Direction decides, and the event's own `user` field binds the
+    # movement to an account rather than assuming the payer was the trader.
+    for envelope in B9D.envelope_instructions(result):
+        event = B9D.decode_anchor_cpi_event(envelope["program_id"], envelope["data"], idls)
+        if event is None or event["name"] != "TradeEvent":
+            continue
+        fields = event["fields"]
+        if fields.get("quote_mint") != B9D.NATIVE_QUOTE_MINT:
+            continue          # raw token flows stay separate by mint and are never added to lamports
+        if fields.get("user") != payer:
+            continue          # someone else's trade in a bundled transaction
+        if fields.get("is_buy"):
+            continue          # already carried by decoded System transfers
+        proceeds = (fields["quote_amount"] - fields["fee"] - fields["creator_fee"]
+                    - fields["cashback"])
+        if proceeds < 0:
+            raise FreezeViolation(
+                f"sell proceeds are negative ({proceeds}); fees exceed the quote and the "
+                "attribution would invent lamports")
+        received += proceeds
+        trade_attributed += 1
+
     attributed = fee + sent - received
     residual = payer_debit - attributed
     if undecodable:
@@ -143,7 +180,8 @@ def reconcile_transaction(result):
     # naming them after one program would misdescribe what they hold.
     record = {"category": category, "payer_debit": payer_debit, "fee": fee,
               "attributed_sent": sent, "attributed_received": received,
-              "attributed": attributed, "residual": residual}
+              "attributed": attributed, "residual": residual,
+              "trade_flows_attributed": trade_attributed}
     if category == "undecodable_instruction":
         record["undecodable"] = undecodable
     elif category == "unattributed_movement":
@@ -162,6 +200,7 @@ def reconcile_transaction(result):
 def reconcile_artifact(database, limit=None, progress=None):
     """Reconcile every preserved transaction. Categories are exhaustive; nothing is dropped."""
     B9J.assert_abi_source_pinned()
+    idls = pinned_idls()
     query = "SELECT signature FROM transaction_coordinate ORDER BY signature"
     if limit:
         query += f" LIMIT {int(limit)}"
@@ -170,7 +209,7 @@ def reconcile_artifact(database, limit=None, progress=None):
     for (signature,) in database.execute(query):
         raw = database.execute(
             "SELECT raw_zlib FROM raw_transaction WHERE signature=?", (signature,)).fetchone()[0]
-        record = reconcile_transaction(B9D.raw_result(raw))
+        record = reconcile_transaction(B9D.raw_result(raw), idls)
         report["transactions"] += 1
         report["by_category"][record["category"]] += 1
         if record["category"] != "exact":

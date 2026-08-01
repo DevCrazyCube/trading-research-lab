@@ -121,6 +121,68 @@ class ReconcileTests(unittest.TestCase):
                          "the rent refund is attributed, and to the payer")
         self.assertEqual(record["residual"], 0, "so nothing is left unexplained")
 
+    def trade_result(self, is_buy, quote, fee, creator, cashback, user_is_payer=True,
+                     quote_mint=None):
+        """One native-quote TradeEvent under a Pump parent, with no System movement at all."""
+        payer = bytes(range(32))
+        keys = [payer, B9D.base58_decode(B9D.PUMP_PROGRAM)]
+        event = B9DT.encode_pump_event(
+            "TradeEvent", mint="So11111111111111111111111111111111111111112",
+            is_buy=is_buy, quote_amount=quote, token_amount=1,
+            quote_mint=quote_mint or B9D.NATIVE_QUOTE_MINT,
+            user=B9D.base58(payer if user_is_payer else bytes(range(1, 33))),
+            fee=fee, fee_basis_points=95, creator_fee=creator, creator_fee_basis_points=30,
+            cashback=cashback, cashback_fee_basis_points=0)
+        meta = {"innerInstructions": [{"index": 0, "instructions": [
+            {"programIdIndex": 1, "accounts": [], "data": B9D.base58(event), "stackHeight": 2}]}]}
+        proceeds = quote - fee - creator - cashback
+        pre, post = [10_000_000, 0], [10_000_000 - 100 + (proceeds if not is_buy else 0), 0]
+        raw = B9DT.build_transaction(keys, [(1, [0], bytes(8))])
+        result = B9DT.as_result(raw, meta=dict(meta, preBalances=pre, postBalances=post), slot=700)
+        result["meta"]["fee"] = 100
+        return result
+
+    def test_sell_proceeds_are_attributed_because_no_system_instruction_carries_them(self):
+        """On a sell the curve pays the user directly -- a program moving lamports on an account it
+        owns. Measured: 2,405 of 2,504 unattributed sells had a residual of exactly -(quote-fees)."""
+        record = B9K.reconcile_transaction(self.trade_result(False, 1_000_000, 9_500, 3_000, 0))
+        self.assertEqual(record["category"], "exact")
+        self.assertEqual(record["attributed_received"], 1_000_000 - 9_500 - 3_000)
+        self.assertEqual(record["trade_flows_attributed"], 1)
+
+    def test_buy_quote_is_never_attributed_because_system_transfers_already_carry_it(self):
+        """The double-count this guard exists to prevent. Buys already reconcile exactly through
+        decoded System transfers -- 2,964 of them in the discriminating sample."""
+        record = B9K.reconcile_transaction(self.trade_result(True, 1_000_000, 9_500, 3_000, 0))
+        self.assertEqual(record["trade_flows_attributed"], 0,
+                         "attributing a buy would count its quote twice")
+        self.assertEqual(record["attributed_received"], 0)
+
+    def test_another_users_trade_in_the_same_transaction_is_not_attributed_to_the_payer(self):
+        """Account-bound, via the event's own `user` field. A bundled transaction may carry trades
+        that are not the payer's, and crediting them would invent proceeds."""
+        record = B9K.reconcile_transaction(
+            self.trade_result(False, 1_000_000, 9_500, 3_000, 0, user_is_payer=False))
+        self.assertEqual(record["trade_flows_attributed"], 0)
+        self.assertEqual(record["attributed_received"], 0)
+
+    def test_a_non_native_quote_trade_never_contributes_to_lamports(self):
+        """Raw token units are not lamports and must never be summed into them."""
+        record = B9K.reconcile_transaction(self.trade_result(
+            False, 1_000_000, 9_500, 3_000, 0,
+            quote_mint="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"))
+        self.assertEqual(record["trade_flows_attributed"], 0)
+        self.assertEqual(record["attributed_received"], 0)
+
+    def test_fees_exceeding_the_quote_are_refused_rather_than_inventing_lamports(self):
+        """Negative proceeds would credit the payer with money that never moved.
+
+        It cannot happen in the frozen artifact, but a future revision that changed the fee split
+        could produce it, and a silent negative would quietly reduce every measured cost.
+        """
+        with self.assertRaisesRegex(B9D.FreezeViolation, "sell proceeds are negative"):
+            B9K.reconcile_transaction(self.trade_result(False, 1_000, 900, 900, 0))
+
     def test_a_missing_or_invalid_fee_is_refused(self):
         keys = [bytes(range(32)), bytes(range(1, 33)), B9D.base58_decode(SYSTEM)]
         raw = B9DT.build_transaction(keys, [(2, [0, 1], system_transfer(1))])
