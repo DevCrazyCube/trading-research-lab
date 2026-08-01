@@ -124,14 +124,53 @@ The first was confirmed by computing the hash locally, which is what established
 
 ## Still not covered
 
-**SPL Token tag 45.** The one remaining undecodable instruction class. Always 10 bytes, shape
-`2d 01 <u64 little-endian>`, with the u64 varying between occurrences (100,000,000 and others). It
-is on the CLASSIC Token program, not Token-2022, and 45 is outside that program's pinned 0..24
-range. It is refused rather than assumed inert, and accounts for the residual 1.74% of transactions
-categorised `undecodable_instruction`.
+### SPL Token tag 45 — the bounded unknown, stated exactly (investigated 2026-08-01)
 
-Identifying it needs a source that documents this discriminator on `Tokenkeg…`; nothing in
-`spl-token-interface` 2.0.0 or `spl-token-2022` 11.0.0 defines it.
+The one remaining undecodable instruction class: 1,654 instructions, the entire residual 1.74% of
+transactions categorised `undecodable_instruction`. It is refused rather than assumed inert.
+
+**Forensics, measured over 8,000 transactions.** Every occurrence, without exception:
+
+| property | observed value |
+| --- | --- |
+| data length | 10 bytes, always |
+| layout | `2d 01 <u64 little-endian>` — e.g. `2d0184b6f70e00000000` → 250,516,100 |
+| accounts | exactly 3, with `accounts[1] == accounts[2]`, resolving to `[X, payer, payer]` |
+| nesting | always an inner CPI at `stackHeight` 2 — never a top-level instruction |
+| enclosing program | Jupiter (`JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4`) in every observed case |
+
+**Program resolution was verified rather than assumed**, because "the decoder is pointed at the
+wrong program" is the cheaper explanation and had to be eliminated first. For a worked example the
+raw inner instruction carries `programIdIndex = 16`, and index 16 falls within the **17 static
+account keys** — so it is *not* resolved through an address lookup table, where a resolution bug
+would plausibly hide. It resolves to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA` directly.
+Sibling instructions in the same CPI group decode as ordinary Tokenkeg tags (`03` Transfer),
+which corroborates the resolution independently.
+
+**The authoritative negative result.** The vendored `spl_token_interface_2.0.0_instruction.rs`
+unpack table handles tags `0..=24` and ends in
+`_ => return Err(TokenError::InvalidInstruction.into())`. It contains no occurrence of `45`,
+`0x2d`, or `45u8`. Version 3.0.0 was diffed against it and adds no variant. Nothing in
+`spl-token-2022` 11.0.0 defines tag 45 on the classic program either.
+
+**A behavioural check that argues against the obvious guess.** The payload shape invites reading
+the u64 as a transfer amount. It is not: across 134 occurrences the u64 equals an observed
+token-balance delta in only **14** cases and does not in **120**. So the shape-based reading is not
+merely unproven, it is contradicted. This is recorded because it is the inference most likely to be
+made by the next reader.
+
+**The unresolved contradiction, stated rather than smoothed over.** These transactions *succeeded*.
+The pinned ABI would have rejected tag 45 with `InvalidInstruction`. Both cannot be true of the same
+program, so one of the following holds, and this project cannot currently distinguish them:
+
+1. the deployed `Tokenkeg…` program accepts instructions the published interface crate does not
+   describe — the crate is the interface, not the binary; or
+2. the resolution is wrong in some way not excluded by the static-key check above.
+
+Deciding between them needs evidence this project does not have offline: the deployed program's own
+source at its deployed version, or a dump of the program account. **No semantics are assigned, and
+the decoder continues to refuse.** Assigning "probably a transfer" here would convert an open
+question into a silent, confident error in every wallet cost that touches it.
 
 ## What these pins do NOT cover
 
