@@ -123,6 +123,31 @@ def transaction_evidence(result, idls):
     }
 
 
+# The execution path this project can actually submit: a Pump bonding-curve trade the simulator
+# constructs itself. `DECISIONS.md` 2026-08-01 freezes entries to Pump only, and PumpSwap is not an
+# initial entry venue -- it is here because it is pinned and appears in preserved bodies, not
+# because it is an entry route.
+#
+# `pfee` is in this set for a measured reason, not a convenient one: it executes inside **every**
+# Pump trade CPI subtree (93,448 of 93,448). Pump itself invokes it, so it is on the direct route
+# whether or not we route through anything. Including it here is therefore a statement that it is
+# UNAVOIDABLE, and is the opposite of calling it pinned -- it is the one unpinned program the cost
+# model cannot escape, which is precisely why it is the top evidence gap.
+DIRECT_ROUTE_PROGRAMS = frozenset(PINNED_PROGRAMS | {PUMP_FEE_PROGRAM})
+
+
+def is_direct_route(evidence):
+    """True when a transaction is confined to the executable direct Pump route.
+
+    **This is a diagnostic, never a population filter.** `DECISIONS.md` (2026-08-01) explicitly
+    rejected restricting the evaluation population to wallet-cost-exact transactions because that
+    selection depends on transaction shape and would bias the evaluation; selecting on route is the
+    same move and is equally forbidden. Its legitimate use is to measure where the cost model is
+    complete -- which is a statement about OUR route, not about which historical decisions count.
+    """
+    return not (set(evidence["programs"]) - DIRECT_ROUTE_PROGRAMS)
+
+
 def is_pump_fee_only(evidence):
     """True when `pfee` is the ONLY unpinned program present.
 

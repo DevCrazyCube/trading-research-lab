@@ -123,6 +123,39 @@ class PinnedProgramTests(unittest.TestCase):
             B9M.THIRD_PARTY_PROGRAM)
 
 
+class DirectRouteTests(unittest.TestCase):
+    """The direct route is what the simulator can submit; measured at 99.716% exact."""
+
+    def route(self, programs):
+        return {"trade_count": 1, "quote_mints": [NATIVE], "programs": set(programs),
+                "unpinned_programs": sorted(set(programs) - B9M.PINNED_PROGRAMS)}
+
+    def test_a_pump_only_transaction_is_on_the_direct_route(self):
+        self.assertTrue(B9M.is_direct_route(self.route(
+            {B9D.PUMP_PROGRAM, "11111111111111111111111111111111", B9M.PUMP_FEE_PROGRAM})))
+
+    def test_an_aggregator_takes_a_transaction_off_the_direct_route(self):
+        """Jupiter and the other 61 unpinned programs never appear inside a Pump trade subtree, so
+        their presence means the transaction routed around the path we would submit."""
+        self.assertFalse(B9M.is_direct_route(self.route(
+            {B9D.PUMP_PROGRAM, SOME_UNPINNED, B9M.PUMP_FEE_PROGRAM})))
+
+    def test_pfee_does_not_take_a_transaction_off_the_direct_route(self):
+        """Measured: pfee executes inside 93,448 of 93,448 Pump trade CPI subtrees.
+
+        Pump invokes it itself, so treating its presence as 'routed' would classify every Pump
+        trade in existence as off-route and make the direct route empty.
+        """
+        self.assertIn(B9M.PUMP_FEE_PROGRAM, B9M.DIRECT_ROUTE_PROGRAMS)
+        self.assertTrue(B9M.is_direct_route(self.route({B9D.PUMP_PROGRAM, B9M.PUMP_FEE_PROGRAM})))
+
+    def test_being_on_the_direct_route_does_not_make_pfee_pinned(self):
+        """The two sets must stay distinct. pfee is unavoidable AND unpinned -- that combination is
+        the top evidence gap, and collapsing the sets would hide it."""
+        self.assertNotIn(B9M.PUMP_FEE_PROGRAM, B9M.PINNED_PROGRAMS)
+        self.assertTrue(B9M.DIRECT_ROUTE_PROGRAMS - B9M.PINNED_PROGRAMS)
+
+
 class ExhaustivenessTests(unittest.TestCase):
 
     def test_a_partition_that_loses_a_transaction_is_refused(self):
