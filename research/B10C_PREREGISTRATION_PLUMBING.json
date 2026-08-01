@@ -1,0 +1,28 @@
+{
+  "preregistration_id": "b10c-plumbing-2026-08-02",
+  "window_status": "burned_development",
+  "purpose": "Validate B10c label plumbing, accounting, referential integrity, determinism and leakage separation on a window that is already burned. THIS IS NOT A RESEARCH PREREGISTRATION. No threshold, horizon, class or count produced under it may be carried into any evaluation, used to place a later window, or cited as a finding. Every CreateEvent in the corpus falls inside [433894233, 434097833], which DECISIONS.md burned on 2026-07-28 and which R3 forbids measuring or tuning a label on. The horizons below are carried over unchanged from the B10b plumbing run of 2026-08-02 rather than re-selected, precisely so that no horizon in this file was chosen after seeing a label distribution.",
+  "observation_window_end_slot": 435536742,
+  "observation_window_end_source": "b9d_transaction_bodies.sqlite metadata key cutoff_slot; the collection's own recorded end, not an inference from the maximum observed slot",
+  "horizons": [
+    {
+      "name": "h_1000_slots",
+      "kind": "slot_horizon",
+      "slots": 1000
+    },
+    {
+      "name": "h_10000_slots",
+      "kind": "slot_horizon",
+      "slots": 10000
+    },
+    {
+      "name": "h_10_observations",
+      "kind": "observation_horizon",
+      "count": 10
+    },
+    {
+      "name": "administrative_window_end",
+      "kind": "administrative_window_end"
+    }
+  ]
+}

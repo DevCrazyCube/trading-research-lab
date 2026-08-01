@@ -99,6 +99,16 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
 - [ ] Calculate raw and cluster-adjusted concentration.
 - [ ] Create executable return, drawdown-first, dump hazard, rug/dump, graduation, and liquidity
   labels, each satisfying the Phase 0 leakage constraints R1–R5.
+  - **Label materializer built and measured, on a BURNED window** (`scripts/b10c_outcome_labels.py`,
+    `scripts/b10c_label_corpus.py`, `docs/OUTCOME_LABEL_SCHEMA.md`,
+    `research/B10C_LABEL_MATERIALIZATION.md`). One row per preregistered decision × horizon over
+    B10b path records, with an exact-rational return and drawdown, explicit horizon geometry,
+    censoring reasons, R5 grouping keys and evidence hashes. R1 is enforced structurally in four
+    independent ways. **4,544 rows = 1,136 curves × 4 horizons, zero arithmetic errors, coverage
+    preserved for every curve including the 252 we would not have entered, byte-identical reruns.**
+    **The B9d/B10b corpus IS the B8b cohort, burned 2026-07-28, so R3 forbids measuring or tuning
+    any label on it: no return distribution is computed and none may be.** No rug/dump threshold,
+    profitability class or success label is constructed, and no split, model or baseline exists.
 - [ ] Add timestamped metadata/social observations without retroactive leakage.
 
 Gate: label audit demonstrates that no post-decision information enters features.

@@ -335,6 +335,15 @@ COVERAGE_BUCKETS = ("on_out_of_regime_curves", "on_curves_without_a_later_observ
                     "supplied_to_evaluator")
 
 
+def select_t0(states):
+    """Index of the decision state: the first state a transaction of OURS could have faced.
+
+    Extracted so that every consumer selects t0 the same way. A second module choosing t0 by its
+    own rule would silently label a different decision than the one the path priced.
+    """
+    return next((i for i, state in enumerate(states) if state["is_transaction_terminal"]), None)
+
+
 def coverage_partition_error(coverage):
     """`None` when the buckets partition the corpus, an error record when they do not.
 
@@ -432,8 +441,7 @@ def validate(derived, limit=None, progress=None):
         # t0 must itself be a state we could have traded against, for the same reason every mark
         # must be: a launch transaction that also carries the creator's own first buy publishes a
         # mid-transaction launch state that no transaction of ours could ever have faced.
-        t0_position = next(
-            (i for i, state in enumerate(states) if state["is_transaction_terminal"]), None)
+        t0_position = select_t0(states)
         if t0_position is None:
             report["curves"]["no_transaction_terminal_state"] += 1
             report["coverage"]["on_curves_without_a_later_observation"] += len(states)

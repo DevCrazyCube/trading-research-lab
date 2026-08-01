@@ -1223,3 +1223,72 @@ The two do not imply each other. A user-ratified decision can remain provisional
   corpus exercises the evaluator rather than being searched for a rule. The stochastic half of the
   `PLAN.md` Phase 2 gate — landing, contention, failure and fill distributions against forward
   observations — remains untouched, so every value here is **simulated, not executable**.
+
+## 2026-08-02 — Phase 3 slice: a leakage-safe simulated outcome label materializer
+
+- **Implemented:** `scripts/b10c_outcome_labels.py` (engine) and `scripts/b10c_label_corpus.py`
+  (identities and corpus run), with a versioned read-only schema (`docs/OUTCOME_LABEL_SCHEMA.md`
+  v1.0.0), a committed preregistration (`research/B10C_PREREGISTRATION_PLUMBING.json`) and a
+  measured report (`research/B10C_LABEL_MATERIALIZATION.md`). Pure offline library — no server, UI,
+  model, signal, split, baseline, wallet, signing or live RPC.
+- **The corpus is the burned B8b cohort, and that governs everything here.** All 1,136 `CreateEvent`s
+  fall inside `[433,894,233, 434,097,833]`, burned 2026-07-28, and R3 forbids measuring or tuning a
+  label on it. So `window_status` is a required preregistration field whose ONLY accepted value is
+  `burned_development` — adding another requires a decision entry naming a fresh disjoint window —
+  every row carries it, and **the corpus runner refuses to compute or report a return
+  distribution**, stating `returns: NOT COMPUTED` in its own output. Reporting it would be measuring
+  a label on a burned window whether or not anybody called the number a finding.
+- **R1 is enforced structurally in four independent ways**, because in a label table the question
+  and the answer sit in the same row: a declared field partition that refuses any undeclared key;
+  `build_decision_facts` having no path/mark/result/horizon parameter, pinned by a signature test; a
+  reference-graph walk at the merge seam refusing any row whose decision half can reach a mark; and
+  the decision block being asserted identical across every horizon of one decision. Measured:
+  1,136/1,136 constant decision blocks, 4,544/4,544 rows partitioned and mark-free.
+- **A slot horizon labels the STATE IN FORCE at `t0+H`, not the next trade after it.** R1 fixes the
+  label window at `(t0, t0+H]`; taking the first observation after the target would label "the value
+  whenever this token next traded", which moves with how quiet the token went. This deliberately
+  differs from B10b's `slot_horizon` *exit rule* — B10b right-censored 551 of 884 at 10,000 slots,
+  B10c censors none — because the two answer different questions and conflating them would have
+  discarded 843 labels.
+- **"Nothing traded inside the window" is a distinct status, not censoring.**
+  `no_observed_state_in_window` (105 rows) is kept out of `right_censored` because the window covers
+  the horizon; what is missing is a state our own entry has not already changed. Folding them
+  together would hide our unmodelled impact behind window geometry.
+- **Absence is never a number.** Every censored, unavailable, no-observed-state and no-decision row
+  carries NULL for every value field — never zero, never minus one — and must state a reason; the
+  arithmetic check refuses both a zero slipped in and an absence with no reason. Every curve
+  produces rows including the 252 we would not have entered, because conditioning on evaluability
+  would select on tradability, which correlates with the outcomes a model would be asked to predict.
+- **No default horizon exists anywhere in the module** and a test asserts the absence. Horizons come
+  from a preregistration carrying an identifier and a purpose, whose SHA-256 is stamped on every
+  row. Value-selected horizons (`net_value_at_or_below/above`, `first_full_size_exit`) are **refused
+  by name with their reason**: an exit instant chosen by an outcome property is an oracle exit
+  embedding a decision no strategy could have made at t0.
+- **Adopted:** return is `EXECUTABLE_RETURN.md` §1 exactly — `(Q_out - Q_in - C)/(Q_in + C)` with C
+  every entry and exit cost — as an exact integer pair in lowest terms, never a float, re-derived by
+  a second route so a double-counted cost is caught. Drawdown is recomputed **to the horizon**, not
+  taken from the path record, because a label at H must not see past H.
+- **Adopted:** the observation window end is the `cutoff_slot = 435,536,742` the collection recorded
+  about itself, not the maximum observed slot. `materialize` takes it as a required parameter and
+  refuses a preregistration that disagrees; censoring against an uncollected window would report
+  geometry that never existed.
+- **Measured gate:** 4,544 rows = 1,136 curves × 4 horizons exactly, 0 arithmetic errors over all
+  4,544, 2,994/2,994 marks found in the corpus they cite, 1,642/1,642 slot-horizon rows citing a
+  state at or before their own target, two byte-identical runs. Cross-checks: the observation
+  horizon and the administrative horizon reproduce B10b's independently implemented rule engine
+  exactly (469/408/7 and 883/1).
+- **Verification:** 28 mutants. The first 20 were killed immediately, which was treated as
+  suspicious rather than reassuring; a harder set aimed at the seams no test walked directly saw
+  **4 of 8 survive**, and each survivor changed the code rather than only the tests — the
+  reachability check and the field-partition check were tested but their call sites were not, the
+  create-precedes-t0 proof sat beside the row construction as a droppable line, and the window-end
+  cross-check lived in `main` where no test reached it. The ordering proof is now inside
+  `identity_row` so dropping the check drops the row, and the window end is now a required
+  parameter of `materialize`. **28 of 28 killed after.** 922 tests pass repository-wide.
+- **Ratified by:** measurement over the full frozen population under the Codex directive of handoff
+  66. **Owner review not separately obtained.**
+- **Explicitly NOT claimed.** No return distribution, expectancy, win rate, profitability class or
+  success label — a test asserts no field name contains a verdict. No entry selected, no split,
+  model, baseline or feature vector. Rug/dump remain unconstructed and need their own preregistration
+  on a fresh window. The economic L1 threshold stays unfrozen. The stochastic half of the Phase 2
+  gate is untouched, so every value remains **simulated, not executable**.

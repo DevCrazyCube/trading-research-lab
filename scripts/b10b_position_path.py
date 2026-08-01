@@ -248,7 +248,12 @@ def _reachable_object_ids(root, limit=10_000, keep=False):
 
 # Everything the entry feature view's object graph is allowed to contain. A container of any other
 # kind is a route to whatever it holds, and the future is the thing most worth holding.
-ALLOWED_VIEW_TYPES = (types.MappingProxyType, dict, int, str, bool)
+#
+# `None` is on the list because it has no referents at all and so cannot be a route to anything.
+# It does NOT thereby become an acceptable feature: `entry_feature_view` still refuses a t0 field
+# whose value is None, by a separate per-field check. This list governs the reachability walk,
+# which downstream callers (b10c) also run over records that legitimately carry nulls.
+ALLOWED_VIEW_TYPES = (types.MappingProxyType, dict, int, str, bool, type(None))
 
 
 def entry_feature_view(t0_state, observations=()):

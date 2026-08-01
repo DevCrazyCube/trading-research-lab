@@ -70,6 +70,21 @@ These are study-specific results, not universal base rates:
     instruction would publish exactly one tradable state per completed curve that never existed for
     us, and it would be the highest-valued state on that curve's whole path.
 
+- **B10c verified fact — the B9d/B10b corpus is the burned B8b cohort.** All **1,136 of 1,136**
+  `CreateEvent`s in the reserve corpus fall inside `[433,894,233, 434,097,833]`, the window
+  `DECISIONS.md` burned on 2026-07-28. **R3 therefore applies to every label computed on it: it may
+  never be measured or tuned there.** This is not a caveat on B10c; it is a constraint that predates
+  it, and it is enforced in code — `window_status` is a required preregistration field whose only
+  accepted value is `burned_development`, and the corpus runner refuses to compute a return
+  distribution. Any future label work needs a fresh preregistered window disjoint from all burned
+  ranges. See `research/B10C_LABEL_MATERIALIZATION.md`.
+
+- **B10c verified fact — the observation window's end is recorded evidence, not an inference.** The
+  `b9d` artifact states `cutoff_slot = 435,536,742` in its own metadata. Right-censoring is a claim
+  about window geometry (C1/C2), so a censoring decision made against the maximum *observed* slot
+  instead would be censoring against a window that was never collected. The label materializer
+  requires the stated end and refuses a preregistration that disagrees with the artifact.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)
