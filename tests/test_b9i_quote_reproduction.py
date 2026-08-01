@@ -32,11 +32,50 @@ class QuoteReproductionTests(unittest.TestCase):
         self.assertEqual(B9I.reproduce_fees(dict(common, ix_name="buy_exact_sol_in")), {})
 
     def test_bare_unestablished_fee_name_fails_closed(self):
+        """The bare-string guard is the point here: `set("fee_exact_input")` iterates into
+        characters and would fail OPEN on exactly the call a caller is most likely to write."""
         with self.assertRaisesRegex(B9I.FreezeViolation, "cannot be reproduced"):
-            B9I.assert_unestablished_not_requested("buyback_fee")
+            B9I.assert_unestablished_not_requested("fee_exact_input")
         with self.assertRaisesRegex(B9I.FreezeViolation, "cannot be reproduced"):
             B9I.assert_unestablished_not_requested(["fee_exact_input"])
         self.assertTrue(B9I.assert_unestablished_not_requested(["fee", "creator_fee"]))
+
+    def test_the_buyback_fee_is_no_longer_unestablished(self):
+        """Resolved 2026-08-01. It must now reproduce rather than refuse."""
+        self.assertNotIn("buyback_fee", B9I.UNESTABLISHED_FEES)
+        self.assertTrue(B9I.assert_unestablished_not_requested(["buyback_fee"]))
+
+
+class BuybackFeeTests(unittest.TestCase):
+    """`floor(fee * bps / 10000)` -- exact on 93,448/93,448 across the full population."""
+
+    def fields(self, fee, bps=5000, observed=None):
+        return {"fee": fee, "buyback_fee_basis_points": bps,
+                "buyback_fee": fee * bps // 10000 if observed is None else observed}
+
+    def test_the_rounding_is_floor_and_not_ceil(self):
+        """This is the whole finding. At 5,000 bps an ODD fee is where the two disagree, and
+        `ceil` matching ~half the population was the signature of the wrong mode -- it read as an
+        unidentified base for two handoffs."""
+        predicted, observed = B9I.reproduce_buyback_fee(self.fields(101))
+        self.assertEqual((predicted, observed), (50, 50))
+        self.assertEqual(B9I.ceil_div(101 * 5000, 10000), 51)
+
+    def test_an_even_fee_cannot_tell_the_two_roundings_apart(self):
+        """So a fixture with an even fee would let a `ceil` mutant survive."""
+        self.assertEqual(B9I.reproduce_buyback_fee(self.fields(100))[0],
+                         B9I.ceil_div(100 * 5000, 10000))
+
+    def test_a_missing_or_negative_field_is_refused_rather_than_defaulted(self):
+        for broken in ({"fee": None}, {"buyback_fee_basis_points": None},
+                       {"fee": -1}, {"buyback_fee": True}):
+            with self.subTest(broken=broken):
+                with self.assertRaisesRegex(B9I.FreezeViolation, "never defaulted"):
+                    B9I.reproduce_buyback_fee(dict(self.fields(101), **broken))
+
+    def test_a_rate_outside_the_basis_point_range_is_refused(self):
+        with self.assertRaisesRegex(B9I.FreezeViolation, "outside 0..10000"):
+            B9I.reproduce_buyback_fee(self.fields(101, bps=10_001))
 
     def test_an_unrecognised_instruction_stops_the_run(self):
         """A path with no pinned arithmetic must never fall through to a default.
@@ -155,7 +194,7 @@ class ReproduceArtifactLoopTests(unittest.TestCase):
         self.b9d.schema(self.database)
         self.addCleanup(self.database.close)
 
-    def build(self, gross, quote, fee, creator):
+    def build(self, gross, quote, fee, creator, buyback_bps=0, buyback=0):
         """One exact-input buy whose fees reconcile ONLY against the gross-derived base."""
         idl = self.b9d.load_pinned_idl(
             self.b9d.PUMP_IDL_PATH, self.b9d.PUMP_IDL_SHA256, self.b9d.PUMP_PROGRAM)
@@ -167,6 +206,7 @@ class ReproduceArtifactLoopTests(unittest.TestCase):
             ix_name="buy_exact_sol_in", fee_basis_points=95, fee=fee,
             creator_fee_basis_points=30, creator_fee=creator,
             cashback_fee_basis_points=0, cashback=0,
+            buyback_fee_basis_points=buyback_bps, buyback_fee=buyback,
             virtual_quote_reserves=30_000_000_000, virtual_token_reserves=1_073_000_000_000_000,
             real_quote_reserves=0, real_token_reserves=0)
         keys = [self.b9d.base58_decode(self.b9d.PUMP_PROGRAM), bytes(range(32))]
@@ -189,6 +229,37 @@ class ReproduceArtifactLoopTests(unittest.TestCase):
                 (30_000_000_000, 1_073_000_000_000_000,
                  json.dumps({"kind": "anchor_cpi:TradeEvent",
                              "event_outer_index": 0, "event_inner_index": 0})))
+
+    def test_the_buyback_fee_is_reproduced_by_the_loop_with_floor(self):
+        """The loop, not just the function -- a mutant that never calls it survives unit tests.
+
+        The fixture's fee is deliberately ODD: at 5,000 bps floor and ceil differ only there, so an
+        even fee would let a `ceil` mutant through the very test written to catch it.
+        """
+        gross = 100_000  # yields fee 939 -- odd, so floor 469 != ceil 470
+        net = gross * 10000 // (10000 + 95 + 30)
+        fee, creator = -(-net * 95 // 10000), -(-net * 30 // 10000)
+        self.assertEqual(fee % 2, 1, "fixture must use an odd fee or it cannot discriminate")
+        self.build(gross, gross - fee - creator, fee, creator,
+                   buyback_bps=5000, buyback=fee * 5000 // 10000)
+        bucket = B9I.reproduce_artifact(self.database)["fees"]["buyback_fee"]
+        self.assertEqual((bucket["exact"], bucket["n"]), (1, 1))
+
+    def test_the_loop_actually_predicts_the_buyback_rather_than_echoing_it(self):
+        """A loop that sets predicted = observed reports 1/1 and looks perfect.
+
+        Mutation found exactly that mutant alive against the agreeing-fixture test above, which is
+        the same way the gross-input reproduction was once faked. The only fixture that can tell
+        the two apart is one whose OBSERVED buyback is wrong: a real prediction disagrees and
+        reports 0/1, an echo agrees with itself and reports 1/1.
+        """
+        gross = 100_000
+        net = gross * 10000 // (10000 + 95 + 30)
+        fee, creator = -(-net * 95 // 10000), -(-net * 30 // 10000)
+        self.build(gross, gross - fee - creator, fee, creator,
+                   buyback_bps=5000, buyback=fee * 5000 // 10000 + 7)
+        bucket = B9I.reproduce_artifact(self.database)["fees"]["buyback_fee"]
+        self.assertEqual((bucket["exact"], bucket["n"]), (0, 1))
 
     def test_the_report_separates_what_was_offered_from_what_was_debited(self):
         """`spendable_*` is a CAP, so gross offered and lamports debited are different quantities.

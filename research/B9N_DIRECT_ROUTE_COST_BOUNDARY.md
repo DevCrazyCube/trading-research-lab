@@ -136,12 +136,47 @@ trade at the decision instant's reserves. Flagged as an owner decision, not chan
 | cashback | pinned `TradeEvent` field | **exact** |
 | base signature fee | 5,000 lamports/signature | deterministic |
 | ATA rent | `2,039,280`, refunded on close | deterministic; point-in-time predicate on whether the ATA exists |
-| **buyback fee** | base unknown — matches `ceil(fee·bps/10000)` on only 46,500 of 93,253 | **UNRESOLVED** |
+| **buyback fee** | `floor(fee · bps / 10000)` — base is the protocol `fee`, rounding FLOOR | **RESOLVED 2026-08-01**, exact 93,253/93,253 |
+| **`pfee` program movement** | both its accounts are `writable = False` in the pinned Pump IDL | **RESOLVED 2026-08-01** — cannot move lamports on this route |
+| fee tier table | `fee_basis_points` constant at 95 across all 93,448 observations in-window | **in-window only**; a tier crossing needs `FeeConfig` |
 | priority fee | our choice; *level required to land* unmeasured | **UNMEASURED** |
 | Jito tip | unmeasured | **UNMEASURED** |
 | slippage under competition | unmeasured | **UNMEASURED** |
 | failed-transaction fees | 1,192,263 of 1,287,248 in-window signatures failed | **UNMEASURED** for our own submissions |
-| `pfee` program movement | present in 100% of trades, ABI unpinned | **UNRESOLVED** |
+
+### 4b-i. The two gaps that were blocking ratification, and how they closed
+
+**Buyback fee base — resolved.** `buyback_fee == floor(fee · buyback_fee_basis_points / 10000)`,
+exact on **93,253/93,253** through the B9i gate and **93,448/93,448** over every decoded
+`TradeEvent`. The base is the protocol `fee`; the rounding is **floor**, and it is the only fee in
+the module that does not use `ceil`. The long-standing *"matches `ceil` on 46,500 of 93,253 —
+essentially half"* was never evidence of an unknown base: at 5,000 bps `ceil` and `floor` agree
+exactly when `fee` is even, so ~50% is the signature of the wrong rounding mode. B9i's
+`unestablished` bucket is now **empty** on the full population.
+
+**`pfee` — resolved for cost, not pinned as an ABI.** See `research/B9O_PFEE_ROUTE_SEMANTICS.md`.
+The already-pinned Pump IDL declares `fee_config` and `fee_program` as **`writable = False`** on all
+six trade instructions, and those are exactly the two accounts the fee CPI receives. The runtime
+forbids modifying a non-writable account's lamports, so `pfee` **cannot move lamports on the direct
+route** whatever its instruction set is — a structural guarantee, corroborated by 12,022/12,022
+unchanged balance observations. Its ABI remains unpinned and unknown discriminators stay
+fail-closed; that is sufficient because the ABI is not needed for cost.
+
+### 4b-ii. Preregistered conservative defaults
+
+Frozen **before** any return is computed, so they cannot be tuned to an outcome:
+
+| policy | default | why conservative |
+| --- | --- | --- |
+| protocol fee | 95 bps | the only value observed; a tier crossing fails closed instead |
+| creator/cashback 30 bps | per-token, from the token's own observations | **constant within every one of 1,110 mints** — 0 vary, so it is a point-in-time token property, not a per-trade unknown |
+| buyback fee | `floor(fee · 5000/10000)` | exact, no default needed |
+| base fee | 5,000 lamports per signature | deterministic |
+| ATA rent | charge `2,039,280` on entry; **assume no refund** on exit | refusing to credit the reclaim understates proceeds |
+| priority fee | charge a non-zero floor; **never assume zero** | zero priority fee is the optimistic extreme |
+| Jito tip | charge if modelled; never credit | unmeasured |
+| failed submissions | charge base + priority fee for each modelled failure | only 7.38% of in-window signatures succeeded |
+| direct-route residuals | **ignore the 92** | all negative, so ignoring them overstates cost; bounded ≤0.0234 SOL per affected trade |
 
 ### 4c. Fail-closed rules
 
@@ -164,18 +199,32 @@ Rule 4 and rule 6 are the ones that make the difference between a cost model and
 
 ### 4d. What the contract does not cover
 
-- **`pfee` semantics.** On 100% of trades, unpinned. Until pinned, no wallet-cost claim on the
-  direct route is complete — 99.716% is the ceiling this gap imposes, and the 0.284% is bounded at
-  ≤0.0234 SOL per affected trade, all in the conservative direction.
 - **Landing, contention, tips, slippage.** `PLAN.md` Phase 2 holds these to forward observations.
-  Until then any return computed is **simulated, not executable**, and must be labelled so.
-- **The buyback fee base**, unresolved on every path.
+  Until then any return computed is **simulated, not executable**, and must be labelled so. This is
+  the largest remaining gap by far, and no amount of decode work closes it — it needs forward data.
+- **The fee tier table.** `fee_basis_points` is constant at 95 across all 93,448 in-window
+  observations, so no tier lookup is exercised here. Pricing a trade whose market cap crosses a
+  `FeeTier.market_cap_lamports_threshold`, or any trade outside this window, needs the `FeeConfig`
+  account, of which this project holds no snapshots.
+- **The 92 direct-route residuals.** Bounded at ≤0.0234 SOL per affected trade and all negative, so
+  the conservative default (ignore them) overstates cost. Their cause is still open: `pfee` is now
+  excluded, so they must originate in Pump's own writable accounts.
 - **`Q_out` path effects** — the reserve path between entry and exit, which B9d exists to measure.
 
-## 5. Recommended next step
+## 5. Status of the two blocking gaps
 
-Pin `pfee`'s ABI from an authoritative source. It is one program, it is on every trade, and it is
-the only unpinned code on the executable route. The 62-ABI campaign is not needed and should not be
-started.
+Both are closed, so the contract is no longer blocked on decode work:
+
+| gap | status |
+| --- | --- |
+| buyback fee base | **RESOLVED** — `floor(fee·bps/10000)`, exact 93,253/93,253 |
+| `pfee` route semantics | **RESOLVED for cost** — structurally cannot move lamports on this route |
+
+**The 62-ABI campaign is not needed and should not be started.**
+
+What remains before a return may be called *executable* rather than *simulated* is forward
+measurement of landing, contention, tips and slippage — a Phase 2 gate against forward observations,
+not a decode problem. Ratification of §4 as project policy is an owner decision; this document
+proposes it and does not assume it.
 
 No profitability claim is made and nothing here is a trading recommendation.

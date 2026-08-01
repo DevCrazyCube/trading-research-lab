@@ -1047,3 +1047,45 @@ The two do not imply each other. A user-ratified decision can remain provisional
   controls. Signing material stays outside the browser. Full UI implementation waits until the
   simulator result schema is stable; this prevents duplicating research arithmetic in presentation
   code while making the UI a required product milestone rather than an afterthought.
+
+## 2026-08-01 — The two route-wide cost gaps are closed; cost prices our route, not the observed trader's
+
+- **Buyback fee base — established.** `buyback_fee == floor(fee * buyback_fee_basis_points / 10000)`.
+  The base is the protocol `fee`; the rounding is **FLOOR**, the only fee in `b9i` that is not
+  `ceil`. Exact on **93,253/93,253** through the B9i gate and **93,448/93,448** over every decoded
+  `TradeEvent`. `b9i`'s `unestablished` bucket is now empty on the full population.
+- **Why it looked unidentifiable for three handoffs:** it was recorded as *"matches
+  `ceil(fee*bps/10000)` on 46,500 of 93,253 — essentially half — so whatever base it uses is not
+  established."* That near-50% was never evidence of an unknown base. At the observed 5,000 bps,
+  `ceil` and `floor` agree exactly when `fee` is even, so ~half is precisely what testing the wrong
+  rounding mode produces. The base had been correct all along.
+- **`pfee` cannot move lamports on the direct Pump route.** The already-pinned Pump IDL declares
+  `fee_config` and `fee_program` with `writable = False` on all six trade instructions, and those
+  are exactly the two accounts its CPI receives. The Solana runtime forbids modifying a
+  non-writable account's lamports, so this holds whatever `pfee`'s instruction set is — a
+  structural guarantee, not a generalisation from traffic. Corroborated by 12,022/12,022 unchanged
+  balance observations over 6,011 CPIs. **Its ABI remains unpinned** and unknown discriminators stay
+  fail-closed; the ABI is not needed for cost. Scope is the direct route only — on routed
+  transactions `pfee` appears with 11/13/19/20 accounts whose writability is not established.
+- **No broad router-ABI campaign.** Of the 62 unpinned programs, only `pfee` ever executes inside a
+  Pump trade's CPI subtree. The other 61 are outer-level routers and cannot enter a transaction we
+  construct.
+- **Cost is a function of market state and our own order, never of the observed trader's route.**
+  `docs/EXECUTABLE_RETURN.md` §1 previously drew `Q_in` *"from the entry transaction's own balance
+  evidence"*; 62,621 of 94,985 observed transactions routed through an aggregator, so that imported
+  router costs on a path the frozen regime forbids. Amended: eligibility is a point-in-time
+  predicate on the token, cost is a deterministic function of the transaction *we* would construct.
+  Dropping routed observations instead would be selecting on realized transaction structure, which
+  the 2026-08-01 regime entry already rejected.
+- **Conservative defaults are preregistered before any return is computed** in
+  `research/B9N_DIRECT_ROUTE_COST_BOUNDARY.md` §4b-ii — ATA rent charged with no refund assumed,
+  priority fee never assumed zero, failed submissions charged, and the 92 direct-route residuals
+  ignored (all negative, so ignoring them overstates cost, bounded ≤0.0234 SOL per affected trade).
+- **The 30 bps creator/cashback split is a per-token property.** Constant within **all 1,110 mints**;
+  zero vary between trades. So it is determinable at decision time rather than a per-trade unknown.
+- **Ratified by:** measurement over the full frozen population plus the already-pinned Pump IDL,
+  under the Codex directive of handoff 58. **Owner review not separately obtained** for adopting §4
+  as project policy; the simulator remains unimplemented and gated.
+- **Still open, and not closed by any of the above:** landing probability, contention, priority-fee
+  and tip levels required to land, and realised slippage — Phase 2, against forward observations.
+  Until those are measured, any computed return is **simulated, not executable**.

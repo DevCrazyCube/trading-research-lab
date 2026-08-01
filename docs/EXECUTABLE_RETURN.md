@@ -43,9 +43,23 @@ where every term is an **exact integer lamport quantity** actually realised on c
 
 | term | meaning |
 |---|---|
-| `Q_in` | quote lamports debited to acquire the position, from the entry transaction's own balance evidence |
-| `Q_out` | quote lamports credited on exit, at the reserves in force **at exit time** |
+| `Q_in` | quote lamports debited by **our own constructed direct Pump transaction**, priced against the reserve state reconstructed at the decision instant |
+| `Q_out` | quote lamports credited by **our own constructed direct Pump exit**, at the reserves in force **at exit time** |
 | `C` | every cost enumerated below, including the cost of transactions that failed |
+
+**Amended 2026-08-01 (`research/B9N_DIRECT_ROUTE_COST_BOUNDARY.md`).** `Q_in` previously read
+*"from the entry transaction's own balance evidence"* — i.e. from whatever transaction happened to
+be observed. That is the wrong quantity, and measurably so: **62,621 of 94,985 observed transactions
+routed through an aggregator**, so their debits include router fees on a path this project's frozen
+regime forbids it from taking (`PLAN.md` line 37: *"Initial entries are Pump-only"*). Pricing those
+debits would import a cost we would never pay.
+
+The correction is not to drop those observations — that would be selecting on realized transaction
+structure, which `DECISIONS.md` (2026-08-01) already rejected as biasing the evaluation. It is that
+**cost is a function of market state and our own order, never of the observed trader's route.**
+Eligibility is a point-in-time predicate on the token; cost is a deterministic function of the
+transaction *we* would construct. Because cost never reads realized structure, every eligible
+decision is priced and no selection arises.
 
 **Three properties are definitional, not implementation details.**
 

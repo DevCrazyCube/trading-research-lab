@@ -38,12 +38,27 @@ WHAT IS NOT ESTABLISHED, and is therefore refused rather than approximated:
   the protocol fee misses 103, creator_fee 20, cashback 3, each short by exactly 1 lamport. The fee
   there is taken from a gross input the event never states, so the base is not in evidence and a
   near-miss is not a reproduction.
-- the buyback fee, on every path. Its declared 5,000 bps matches `ceil(fee*bps/10000)` on 46,500 of
-  93,253 -- essentially half -- so whatever base it uses is not established.
 
 Those are reported under `unestablished` and never silently approximated. Asking this gate to
 certify one raises. That is the point: a fee this artifact cannot reproduce is a fee a trading
 system must not assume it can predict.
+
+RESOLVED 2026-08-01 -- the buyback fee, previously listed as unestablished:
+
+    buyback_fee == floor(fee * buyback_fee_basis_points / 10000)
+
+reproduces every observation, on every path, with zero misses. Its base is the protocol `fee` and
+its rounding is FLOOR. Two denominators, stated separately because they are different populations:
+**93,253 of 93,253** through this module's gate (observations carrying a published reserve path),
+and **93,448 of 93,448** over every decoded `TradeEvent` in the artifact.
+
+The earlier "matches `ceil(fee*bps/10000)` on 46,500 of 93,253 -- essentially half" was not evidence
+of an unknown base. It is exactly what testing `ceil` produces when the truth is `floor`: at the
+observed 5,000 bps the two agree only when `fee` is even, which is about half of observations. The
+near-50% was the signature of the wrong rounding mode, and it read as an unidentified base.
+
+With it resolved, the gate's `unestablished` bucket is now EMPTY on the full population: every fee
+component the artifact publishes reproduces exactly.
 """
 import argparse
 import importlib.util
@@ -80,8 +95,12 @@ ESTABLISHED_FEES = (("fee", "fee_basis_points"),
 FEE_ESTABLISHED_ON = LEGACY_BUYS + SELLS
 # Components whose base is NOT in evidence. Named so the refusal is explicit rather than an
 # omission somebody later reads as an oversight.
-UNESTABLISHED_FEES = ("fee_exact_input", "creator_fee_exact_input", "cashback_exact_input",
-                      "buyback_fee")
+UNESTABLISHED_FEES = ("fee_exact_input", "creator_fee_exact_input", "cashback_exact_input")
+
+# The buyback fee, resolved 2026-08-01: base is the protocol `fee`, rounding is FLOOR, exact on
+# 93,448/93,448. Unlike every other fee in this module it does NOT use `ceil_div` -- that difference
+# is the whole finding, so it is written as its own function rather than a flag on a shared one.
+BUYBACK_FEE = ("buyback_fee", "buyback_fee_basis_points")
 
 
 def ceil_div(numerator, denominator):
@@ -218,6 +237,27 @@ def reproduce_fees(fields):
     return out
 
 
+def reproduce_buyback_fee(fields):
+    """The buyback fee: `floor(fee * buyback_fee_basis_points / 10000)`. Returns (pred, obs).
+
+    FLOOR, not the `ceil_div` every other fee in this module uses. Reproduces 93,448/93,448 across
+    the full population on every path; `ceil` reproduces 46,597 of the same 93,448 TradeEvents, which is simply
+    the subset where `fee * bps` divides 10000 exactly.
+    """
+    fee, bps = fields.get("fee"), fields.get(BUYBACK_FEE[1])
+    observed = fields.get(BUYBACK_FEE[0])
+    for label, value in (("fee", fee), (BUYBACK_FEE[1], bps), (BUYBACK_FEE[0], observed)):
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise FreezeViolation(
+                f"TradeEvent {label} is absent or not a non-negative integer: {value!r}; buyback "
+                "evidence must be stated by the event, never defaulted")
+    if bps < 0 or bps > 10000:
+        raise FreezeViolation(
+            f"buyback_fee_basis_points {bps} is outside 0..10000; refusing to price a fee rate the "
+            "event cannot mean")
+    return (fee * bps) // 10000, observed
+
+
 def assert_unestablished_not_requested(components):
     """A caller must not ask this gate to certify a fee whose base is not in evidence.
 
@@ -231,8 +271,9 @@ def assert_unestablished_not_requested(components):
     if requested:
         raise FreezeViolation(
             f"{requested} cannot be reproduced from pinned evidence: the protocol fee on "
-            "exact-input buys is taken from a gross input the event does not state, and the "
-            "buyback base is not established. They are reported, never certified")
+            "exact-input buys is taken from a gross input the event does not state. They are "
+            "reported, never certified. (The buyback fee WAS on this list and was resolved on "
+            "2026-08-01: floor(fee*bps/10000), exact on 93,253/93,253.)")
     return True
 
 
@@ -352,14 +393,14 @@ def reproduce_artifact(database, limit=None, progress=None):
             bucket["n"] += 1
             bucket["exact"] += pred == obs
 
-        # Reported, never certified.
-        fee_bps, fee = fields.get("fee_basis_points"), fields.get("fee")
-        buyback, buyback_bps = fields.get("buyback_fee"), fields.get("buyback_fee_basis_points")
-        if isinstance(buyback, int) and isinstance(buyback_bps, int):
-            bucket = report["unestablished"].setdefault(
-                "buyback_fee", {"n": 0, "matches_fee_form": 0})
-            bucket["n"] += 1
-            bucket["matches_fee_form"] += buyback == ceil_div(fee * buyback_bps, 10000)
+        # Established 2026-08-01: floor, base `fee`, exact on the full population. Counted as an
+        # exact reproduction like every other established component, not as a "matches form" tally.
+        buyback_pred, buyback_obs = reproduce_buyback_fee(fields)
+        bucket = report["fees"].setdefault(
+            "buyback_fee", {"n": 0, "exact": 0,
+                            "scope": "all paths; FLOOR of fee * bps, not ceil"})
+        bucket["n"] += 1
+        bucket["exact"] += buyback_pred == buyback_obs
         if progress and report["observations"] % progress == 0:
             print(f"  {report['observations']:,} reproduced", file=sys.stderr, flush=True)
     return report
