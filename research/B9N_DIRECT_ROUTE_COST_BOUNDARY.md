@@ -4,8 +4,18 @@ Measured 2026-08-01 over the **full frozen population, all 94,985 transactions**
 Artifact read-only, zero network calls, collector not restarted, **no simulator implementation
 started**.
 
-Status: **UNRATIFIED PROPOSAL.** `DECISIONS.md` remains authoritative. §4 is a proposal for the
-owner to accept, amend or reject; nothing in it is frozen by this document existing.
+Status: **§4 adopted 2026-08-01** after the last blocker closed — see
+`research/B9P_CONSTRUCTED_ROUTE_AUDIT.md`, which reconciles all 92 direct-route residuals exactly
+and finds **zero** inside the Pump trade subtree. Recorded in `DECISIONS.md`; owner review was not
+separately obtained, and the simulator remains unimplemented and gated.
+
+**A correction to §3 of this document.** It reported 92 residuals as an open cost gap on the direct
+route, and proposed ignoring them as *conservative*. Codex was right that conservative direction
+alone does not satisfy `PLAN.md`'s Phase 1 gate, whose literal text is *no unexplained* cost
+divergence. They are now explained — each is caused by an instruction our constructed transaction
+would not contain — so the gate is met on our route by explanation, not by bounding. The predicate
+in §2 was also too loose: it tested the program set, not whether the transaction is a trade at all.
+See B9p.
 
 ## 1. The question
 

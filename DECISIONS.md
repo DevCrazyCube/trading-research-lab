@@ -1089,3 +1089,42 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Still open, and not closed by any of the above:** landing probability, contention, priority-fee
   and tip levels required to land, and realised slippage — Phase 2, against forward observations.
   Until those are measured, any computed return is **simulated, not executable**.
+
+## 2026-08-01 — The direct-route cost contract is adopted; every residual on our route is explained
+
+- **All 92 direct-route residuals are causally explained and exactly reconciled**
+  (`research/B9P_CONSTRUCTED_ROUTE_AUDIT.md`, full population, no sampling):
+  `A_outside_constructed_route 92, B_inside_trade_subtree 0, C_insufficient 0`. **Zero lie inside
+  the Pump trade subtree**, so no unexplained cost divergence remains on the route we would execute.
+- **Why this was needed rather than the previous "bounded and conservative" answer.** `PLAN.md`'s
+  Phase 1 gate reads *no unexplained* reserve, cost, ordering or slot-coverage divergence. A bound
+  in the safe direction is not an explanation, and adopting the contract on that basis would have
+  read the gate as something weaker than it says.
+- **The cause is `close_user_volume_accumulator`**, present in 91 of the 92. It sends the user's
+  volume-accumulator PDA's entire balance to the user, and nothing in a trade records it. The credit
+  is the balance **at close**, not the pre-transaction balance: 32 of the 92 have a pre-balance of
+  zero because the accumulator is created and closed in the same transaction, and still refund full
+  rent. Reconstructed from pinned semantics only — pre-balance, decoded System credits, and the
+  pinned `TradeEvent.cashback` — and order-independently. The 92nd is a creator harvesting PumpSwap
+  fees, reconciled against `CollectCoinCreatorFeeEvent.coin_creator_fee`.
+- **One double-count was resolved from evidence rather than tolerance.** On 3 transactions the
+  cashback reaches the accumulator by an explicit System transfer and so appears both as a decoded
+  System credit and as the event field. It arrives by exactly one mechanism per transaction; the
+  guard counts it once. No tolerance was introduced anywhere, and a one-lamport miss is still
+  reported as a blocker rather than accepted.
+- **"Direct route" is redefined by SHAPE, not by program set.** A transaction is an instance of our
+  route only if it contains **exactly one** Pump trade at outer level. The previous program-only
+  predicate admitted a fee-harvest transaction containing no trade, whose 11.115 SOL residual was
+  18x the combined total of the other 91 — it dominated a trade-cost diagnostic while not being a
+  trade. Companion instructions default to *not ours*; adopting an unrecognised instruction would
+  silently take a stranger's lamport movement as our cost.
+- **Adopted:** the direct-route cost contract in `research/B9N_DIRECT_ROUTE_COST_BOUNDARY.md` §4,
+  including its preregistered conservative defaults.
+- **Ratified by:** measurement over the full frozen population under the Codex directive of handoff
+  60, verified by 7 mutants including the two it named — accepting optional companions, and hiding
+  an in-subtree divergence. **Owner review not separately obtained.**
+- **Explicitly NOT closed by this.** Routed transactions still carry 4,870 unattributed and 1,654
+  undecodable observations; they are not our route and are not claimed to be explained. Landing
+  probability, contention, priority-fee and tip levels, and realised slippage remain unmeasured and
+  need forward observation — until then any computed return is **simulated, not executable**. The
+  simulator remains unimplemented.
