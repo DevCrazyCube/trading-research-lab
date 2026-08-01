@@ -28,7 +28,10 @@ Numeric thresholds remain research hypotheses until supported by data. They must
 
 ### Phase 0 — research specification
 
-- [ ] Freeze definitions for rug, dump, graduation, executable return, drawdown, and liquidity failure.
+- [ ] Freeze definitions for graduation, executable return, drawdown, and liquidity failure.
+- [x] Freeze the leakage constraints R1–R5 that every future rug/dump outcome label must satisfy.
+  Rug/dump label construction remains in Phase 3; Phase 0 freezes the constraints, not outcome
+  thresholds that cannot yet be selected without contaminated calibration.
 - [ ] Choose initial regime: likely SOL-paired, non-Mayhem bonding-curve launches only.
 - [ ] Define point-in-time and leakage rules.
 - [ ] Define capital, position, daily-loss, and kill-switch policies.
@@ -64,7 +67,8 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
 - [ ] Build point-in-time creator, trader, funder, and token histories.
 - [ ] Create probabilistic wallet clusters with evidence and confidence.
 - [ ] Calculate raw and cluster-adjusted concentration.
-- [ ] Create executable return, drawdown-first, dump hazard, graduation, and liquidity labels.
+- [ ] Create executable return, drawdown-first, dump hazard, rug/dump, graduation, and liquidity
+  labels, each satisfying the Phase 0 leakage constraints R1–R5.
 - [ ] Add timestamped metadata/social observations without retroactive leakage.
 
 Gate: label audit demonstrates that no post-decision information enters features.

@@ -28,7 +28,7 @@ instruction-specific formulas. Two new live samples were taken:
 - 6 blocks: 47 events, with 10 multi-event mint chains.
 
 For exact-input buys, T3 uses the official IDL equation above with the event's reserve-changing
-`sol_amount`. For legacy exact-token `buy`, the observed reserve input was tested against
+`sol_amount`. For legacy exact-token `buy`, the original sample tested the observed reserve input against
 `ceil(token_amount * virtual_quote / (virtual_tokens - token_amount))`.
 
 ## Results
@@ -43,14 +43,32 @@ The 12-block run initially tested the IDL's documented reverse-quote `+1` form a
 `buy`; 46/46 mismatched because that formula belongs to quoting an exact-input instruction in
 reverse, not to legacy `buy`'s reserve delta. A second run compared the plausible integer reverse
 forms explicitly: all 9 legacy buys matched `ceil(ratio)` (equivalently `floor(ratio)+1` when the
-division has a remainder), and none required an additional lamport.
+division has a remainder). That sample had no exactly divisible ratio and therefore could not
+determine whether the extra lamport was conditional.
+
+## Full-population correction — 2026-08-01
+
+The published B9d reserve path contains 31,397 legacy buys and one decisive exact-division
+observation (signature
+`4sbHFQcTD6UJvsYdfKmjJCQt5Y28HC1uX8wGfKLJW36nEgKWJEJ8erHRMhtnAFr4me5ZTyVoReUGnfSjnNpddvVy`,
+slot 433,988,917): the ratio is exactly 7,000,000,000 lamports and the observed quote amount is
+7,000,000,001. Therefore the legacy exact-token buy expression is:
+
+```
+floor(token_amount * virtual_quote / (virtual_tokens - token_amount)) + 1
+```
+
+Across the full published population, `ceil` reproduces 31,396/31,397 legacy buys; the corrected
+`floor + 1` expression reproduces 31,397/31,397. This supersedes only the legacy-buy rounding claim
+above; the exact-input formula and the documented scope limitations remain unchanged.
 
 ## Conclusion
 
-B2a F19 is resolved for the sampled current-regime SOL paths. The mismatches were caused by using
+B2a F19 is resolved for the published current-regime SOL paths. The mismatches were caused by using
 the wrong integer expression and by conflating exact-input with exact-output instruction
-semantics—not by approximate arithmetic. Exact reconstruction remains mandatory and now succeeds
-for sampled sells, exact-input buys, legacy buys, fee calculations, and non-Mayhem reserve chains.
+semantics—not by approximate arithmetic. Exact reconstruction remains mandatory. The full B9d
+population establishes exact trade-quantity reproduction for sells, exact-input buys, and legacy
+buys. Fee reproduction is established only where its input base is preserved; see the B9i gate.
 
 The Phase 2 precondition is still not generally complete: USDC/other quote-mint paths require the
 same checks using `quote_*` fields, Mayhem requires non-trade reserve mutations, and current-version

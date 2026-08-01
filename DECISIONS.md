@@ -635,6 +635,65 @@ The two do not imply each other. A user-ratified decision can remain provisional
   rather than assumed. No return, drawdown or liquidity figure may be computed for the B8b cohort
   until B9d publishes the reserve path.
 
+## 2026-07-30 — Rug/dump constraints freeze in Phase 0; label construction remains in Phase 3
+
+- **Status:** accepted project-methodology decision; thresholds remain explicitly unfrozen.
+- **Ratified by:** owner continuity directive on 2026-07-30, implemented after independent Codex
+  review of Claude's owner-ready Option A audit (`docs/PHASE0_RUG_DUMP_RECOMMENDATION.md`).
+- **Decision:** Phase 0 freezes the following constraints for every future rug/dump outcome label;
+  Phase 3 constructs the labels after a fresh preregistered cohort and appropriate path evidence
+  exist.
+  - **R1 — point-in-time separation:** fix decision instant `t0` at the feature-vector timestamp;
+    the label window is `(t0, t0+H]`, and no feature may read an observation made after `t0`.
+  - **R2 — no outcome-informed definition:** freeze every definition and threshold before measuring
+    it on an evaluation cohort.
+  - **R3 — burned-cohort exclusion:** never measure or tune the label on B8b; use a fresh
+    preregistered window disjoint from every burned range.
+  - **R4 — horizon geometry:** members unable to reach horizon `H` are right-censored, never dropped
+    or labelled negative.
+  - **R5 — actor grouping:** split at least by `creator ∪ user`; funding-cluster leakage remains an
+    unmeasured superset and therefore an open gate.
+- **Evidence:** `PLAN.md` already separates Phase 0 definition from Phase 3 construction for
+  graduation, executable return, drawdown, and liquidity labels. A future outcome is valid label
+  evidence but is forbidden from the historical feature vector. A full rug/dump threshold cannot
+  be selected honestly yet because it needs magnitude and horizon choices informed by reserve-path
+  evidence B9d has not published; B8b's outcomes are already visible and burned.
+- **Consequence:** the prior wording conflict is resolved without inventing thresholds. T1b,
+  Mayhem exclusion, overlap with liquidity-failure labels, horizon `H`, and whether rug is one label
+  or several remain open questions for Phase 3. This decision does not authorize model research,
+  live execution, or treating post-decision state as a feature.
+
+## 2026-07-30 — Anchor CPI events are decoded and parented before reserve materialization
+
+- **Status:** accepted offline decoding invariant; reserve reconstruction remains incomplete.
+- **Decision:** A target self-CPI beginning with Anchor event tag `e445a52e51cb9a1d` is decoded
+  exactly as `[event tag][IDL event discriminator][Borsh body]` against the pinned program revision.
+  It is recorded as a named event instruction, not an unknown target discriminator. Its mutating
+  parent is the most recent instruction at stack height `h-1` within the same outer instruction;
+  missing stack height or parent is a visible failure, never a nearest-name guess.
+- **Evidence:** Read-only validation on the first 1,000 preserved B9d bodies decoded and associated
+  1,047 CPI events with zero failures: 380 `TradeEvent`s from height 1→2, 614 from 2→3, two from
+  3→4, and 51 non-trade events. This is a bounded point-in-time structural observation, not a
+  completeness or economic result.
+- **Consequence:** Event post-state evidence can now be attributed to the actual invoking
+  instruction across nested CPI. `reserve_observation` remains unpopulated until exact pre-state,
+  non-trade mutation, and transaction balance reconciliation are implemented; event presence alone
+  never proves complete reserve coverage.
+
+## 2026-07-30 — Automatic handoffs are terminal-only and post-submit uncertainty is at-most-once
+
+- **Status:** collaboration-infrastructure policy adopted after a live duplicate-delivery failure.
+- **Decision:** Only entries whose status is a terminal handoff/release/completion route
+  automatically. A failure proven to occur before typing remains retryable. Once the text has been
+  submitted but TUI acceptance is uncertain, the sequence is quarantined and consumed rather than
+  replayed; the append-only discussion log remains the recovery source.
+- **Evidence:** Seq 248 reached Codex repeatedly while supervisor state remained at observed Seq
+  247. The earlier requested-action widening also classified 39 historical non-terminal entries,
+  including ownership claims/resumptions and active collection, as task briefs.
+- **Consequence:** automatic delivery prefers at-most-once behavior after submission, preventing a
+  prompt flood. Explicit mid-work requests must be directly prompted by their author; completed
+  assignments continue to route automatically.
+
 ## 2026-07-30 — Automatic handoffs carry the released entry and never interrupt turns
 
 - **Status:** collaboration-infrastructure policy adopted.
@@ -650,6 +709,75 @@ The two do not imply each other. A user-ratified decision can remain provisional
   wire message. A non-terminal coordination entry with a real `Requested action` is also delivered
   immediately; `none`, audit-only notes, and active ownership claims remain log-only. Handoffs may
   wait for a long turn to finish, but they do not corrupt or terminate either conversation.
+  When a large literal paste remains staged after the first Enter, the sender issues exactly one
+  second Enter only if the same handoff is still in the live composer and no busy marker exists.
+
+## 2026-07-30 — Bonding-curve reserve paths are anchored, self-checking, and irreparable after gaps
+
+- **Status:** accepted offline reconstruction invariant; publication remains gated on completion of
+  the frozen B9d body population.
+- **Decision:** Pump `CreateEvent` supplies the launch anchor. Each later Pump `TradeEvent` supplies
+  an exact post-state and independently derives its pre-state from its signed token/quote deltas.
+  The derived pre-state must equal the preceding observed post-state. A disagreement emits a
+  `classification_failure`, permanently breaks that curve's chain, and is never smoothed or
+  repaired by a later matching event. PumpSwap pool reserves remain a separate quantity.
+- **Balance evidence:** Aggregate signed `TradeEvent.quote_amount` per curve and transaction must
+  equal that curve account's lamport delta when no account-lifecycle instruction touches it.
+  `create_v2` and `extend_account` transactions are explicitly marked confounded because their
+  lamport delta also contains rent funding; no measured rent constant is subtracted as a repair.
+  For non-SOL quotes, lamports are inapplicable: resolve the pinned IDL's
+  `associated_quote_bonding_curve` role and compare exact raw `preTokenBalances`/
+  `postTokenBalances` units for the declared quote mint and token program. UI amounts are never
+  evidence; missing sides mean zero only when that account's corresponding lamport balance is zero.
+- **Evidence:** On the first 37,396 preserved bodies, independent replay found 21 discontinuity
+  rows across 10 curves. The implementation preserves the first 10 mismatches and the 11 downstream
+  rows as permanent-break failures. In a separate first-5,000-body balance replay, 4,956 curve-
+  transaction checks were exact and 38 were lifecycle-confounded, with zero clean mismatches.
+  These are bounded interim measurements, not full-population results.
+- **Subsequent verification:** On 45,745 preserved bodies, 43,448 native-quote checks and all 19
+  non-SOL quote checks reconciled exactly; 677 native checks were lifecycle-confounded and no
+  unexplained mismatch remained. This remains an interim snapshot while collection is active.
+- **Consequence:** `reserve_observation` contains only evidence-supported Pump curve states.
+  Left-truncated first trades and eventless PumpSwap `init_boost` remain explicit unresolved rows.
+  Final counts and any exhaustiveness claim wait for all 94,985 bodies and publication gates.
+
+## 2026-07-30 — Reserve paths are materialized only for frozen B8b cohort identities
+
+- **Status:** accepted scope correction after independent offline replay.
+- **Decision:** keep every decoded instruction/event in the canonical instruction stream, but build
+  `reserve_observation`, reserve continuity failures, and balance reconciliations only for the
+  pinned B9a non-Mayhem `mint → bonding_curve` population. An in-scope mint naming a different
+  curve fails closed; an out-of-cohort mint is an incidental bundled instruction, not a partial
+  cohort history to publish.
+- **Evidence:** At 47,181 preserved bodies, the frozen cohort contained 45,691 decoded Pump trades
+  with **zero** consecutive four-field reserve discontinuities. All 31 apparent discontinuities
+  occurred among 95 trades on mints absent from B9a. Those histories were never enumerated by B9c;
+  treating them as exhaustive manufactured the gap by construction. See
+  `research/B9D_RESERVE_SCOPE_AUDIT.md`.
+- **Correction:** Earlier interim statements treating 21/24 discontinuities as positive evidence
+  against B9c cohort-history exhaustiveness were wrong in scope and are superseded. §8a's original
+  conservative caveat remains: address-index recall is unproven for this window, but these rows do
+  not test it.
+- **Consequence:** publication no longer mixes deliberately partial incidental paths into the B8b
+  result. This correction does not authorize a post-hoc recall experiment or relax any completeness
+  gate.
+
+## 2026-07-30 — Persisted decoder output has an independent publication verifier
+
+- **Status:** accepted offline publication invariant; executable after boundary evidence permits a
+  complete decode.
+- **Decision:** decoder success and its in-memory counters are not publication evidence.
+  `verify_decoded_artifact()` independently checks persisted instruction-to-transaction identity,
+  reserve-to-target-Pump parent identity, classification-failure coordinates and counts, frozen
+  curve scope, target classification accounting, complete/nonnegative reserve states, and canonical
+  per-curve `previous after == current before` continuity.
+- **Reason:** raw artifact verification covered no derived table. A plausible but corrupted reserve
+  series, orphan row, incidental curve, or missing classification failure could therefore survive
+  decoding and be consumed downstream without an independent gate.
+- **Consequence:** publication must run both raw `verify_artifact()` and derived
+  `verify_decoded_artifact()` read-only. The latter refuses a missing `decoded_at_unix` marker, so an
+  empty not-yet-decoded artifact cannot pass vacuously. This does not bypass §4 boundary collection;
+  the active artifact still cannot decode until program-version evidence exists.
 
 ## 2026-07-30 — Boundary coverage derives ProgramData identity before reading its header
 
@@ -680,6 +808,28 @@ The two do not imply each other. A user-ratified decision can remain provisional
   Program and ProgramData evidence keys to their correct roles, and reproduces context/deploy
   metadata from the preserved responses. A key that merely exists elsewhere in the table is not
   provenance; cross-program and cross-role references fail closed.
+
+## 2026-07-31 — Agent handoffs use an acknowledged SQLite queue
+
+- **Status:** accepted operational architecture; unrelated research and trading gates unchanged.
+- **Decision:** `agent_discussion.md` is an append-only human audit log, not a work queue. The
+  dashboard `handoff` command stores an immutable, checksummed message in SQLite as `preparing`,
+  durably appends a unique handoff marker to the audit log, then promotes it to `queued`. Startup
+  recovery completes a preparation interrupted at either boundary idempotently. Strict
+  cross-resource ACID is impossible between SQLite and a Markdown file; this recoverable two-phase
+  protocol provides the required no-loss/no-duplicate outcome.
+- **Delivery:** the supervisor injects only a compact message ID plus a `receive` command into the
+  addressed idle agent. Full task text never travels through terminal paste. A notification is not
+  delivery: only the receiver's target-bound, checksum-verifying SQLite acknowledgement advances
+  the queue. The oldest unacknowledged message blocks later messages, preserving sequential work.
+- **Lifecycle:** one process holds a filesystem singleton lock and writes a database heartbeat.
+  Status reports heartbeat health rather than trusting a PID across namespaces. An exited agent is
+  relaunched in its tagged pane; notifications are nonblocking and retain errors for inspection.
+- **Reason:** screen scraping, composer glyph detection, markdown file order, and `send-keys` exit
+  status repeatedly produced unsent drafts, duplicate turns, silent quarantine, and dead or
+  duplicated supervisors. None of those signals can establish that an agent received a task.
+- **Verification requirement:** queue state/recovery/target/integrity tests plus isolated real-tmux
+  Enter delivery and supervisor lock/crash-restart tests are required for behavior changes.
 
 ## 2026-07-31 — Reserve coverage is measured against the frozen cohort, not the surviving rows
 

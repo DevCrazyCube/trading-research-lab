@@ -12,6 +12,12 @@
 *.sqlite-wal
 *.sqlite-shm
 *.sqlite.collector.lock
+# Artifact backups: each is 3.7-4.4 GB and there are currently fourteen of them. They were
+# untracked but NOT ignored, so a single `git add -A` would have tried to commit ~26 GB -- and
+# this repository has already been bitten once by `git add -A` sweeping in files it should not.
+*.bak
+*.bak-wal
+*.bak-shm
 
 # Runtime state and caches
 .autonomy/

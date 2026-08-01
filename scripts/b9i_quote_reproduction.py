@@ -276,7 +276,13 @@ def main(argv=None):
     parser.add_argument("--progress", type=int, default=None)
     parser.add_argument("--gate", action="store_true",
                         help="fail closed unless every trade reproduces exactly")
+    parser.add_argument(
+        "--require-fees", default="",
+        help="comma-separated fee components the caller requires this gate to certify; "
+             "unestablished components fail closed")
     args = parser.parse_args(argv)
+    required_fees = tuple(name.strip() for name in args.require_fees.split(",") if name.strip())
+    assert_unestablished_not_requested(required_fees)
     database = B9D.connect(args.artifact, readonly=True)
     try:
         report = (assert_quote_reproduction(database, args.limit, args.progress) if args.gate

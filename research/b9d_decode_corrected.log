@@ -1,0 +1,25 @@
+{
+  "classification_failures": 12,
+  "instructions": 1311796,
+  "reserve_balance_confounded": 1315,
+  "reserve_balance_exact": 91649,
+  "reserve_balance_failures": 0,
+  "reserve_observations": 94389,
+  "reserve_reconciliation_failures": 12,
+  "target_instructions": 200812,
+  "verification": {
+    "body_slots_reconciled": 94985,
+    "boundary": true,
+    "coordinates_replayed": 94985,
+    "integrity": "ok",
+    "raw_hashes": {
+      "raw_block_signatures": 38853,
+      "raw_boundary_response": 4,
+      "raw_transaction": 94985
+    },
+    "sources": {
+      "b9a_sha256": "882d47d19a331e805be5796cd7d8ab616c7af65391bd327e0221d3c51c4edc38",
+      "b9c_sha256": "e735c6c59848ff57958402a7488474415c7f20febce7a12cf7227b4267c7391d"
+    }
+  }
+}
