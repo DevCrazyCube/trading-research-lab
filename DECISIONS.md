@@ -992,3 +992,34 @@ The two do not imply each other. A user-ratified decision can remain provisional
   constant is hard-coded; IDLs load through the SHA-256-verifying `load_pinned_idl`.
 - **Verification requirement:** the exactly-divisible legacy buy is a regression test in its own
   right, because it is the single observation in the corpus that distinguishes the two forms.
+
+## 2026-08-01 — The exact-input fee base is the parent instruction's own pinned gross argument
+
+- **Decision:** the protocol, creator and cashback fees on exact-input buys are reproduced from the
+  GROSS input the parent instruction states, not from the quote that reaches reserves. Both
+  exact-input instructions declare it as their first pinned `u64` argument —
+  `buy_exact_sol_in.spendable_sol_in` and `buy_exact_quote_in_v2.spendable_quote_in` — so the base
+  is decoded evidence, never an inferred constant. The program takes the fee-inclusive net,
+  `net = floor(gross * 10000 / (10000 + fee_bps + creator_bps + cashback_bps))`, and charges each
+  component `ceil(net * its_bps / 10000)`.
+- **What this closed:** reproducing those fees from the quote is short by exactly one lamport on
+  roughly 0.5% of exact-input buys, which is why all three were `unestablished`. With the gross
+  decoded, all three reproduce EXACTLY across the whole published population: 93,253 of 93,253,
+  where previously only the 72,450 legacy buy and sell observations were certifiable.
+- **Fail-closed on layout, not just value:** the gross is read only when the parent's discriminator
+  is in the pinned IDL AND its first argument still matches the pinned name and `u64` type. A
+  revision that renames or retypes it would still yield a plausible integer at that offset, and a
+  wrong base is a wrong fee that still looks like a reproduction.
+- **The decomposition is reported, not required.** `gross == quote + fee + creator + cashback` holds
+  on 20,800 of 20,803; three `buy_exact_quote_in` observations leave exactly one lamport whose
+  destination is not in evidence. Requiring it would fail an artifact whose quotes and fees all
+  reproduce exactly, and tolerating a residue of "1" would be inventing a tolerance to fit the
+  observation. It is published with its residue, and `assert_gross_identity_residue` lets a caller
+  enforce it under a bound the caller states.
+- **Still unestablished, and deliberately not guessed:** the buyback fee, whose declared 5,000 bps
+  matches `ceil(fee*bps/10000)` on 46,500 of 93,253 — essentially half — so its base is unknown on
+  every path.
+- **Verification requirement:** the loop, not only the functions. A mutant that never called the
+  gross-based reproduction and fell back to the quote base survived unit tests of the fee function;
+  it is now held by an integration test whose fixture is chosen so the two bases give DIFFERENT
+  fees, since most grosses cannot tell them apart.
