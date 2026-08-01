@@ -811,3 +811,34 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Verification requirement:** the rehearsal proves an injected mid-decode failure leaves no
   derived rows and leaves the artifact byte-identical to the sealed backup, and that running decode
   or readiness out of order is refused by the functions themselves rather than only by convention.
+
+## 2026-08-01 — The legacy Pump buy takes floor+1, not ceil, and fees are unreproducible on exact-input buys
+
+- **Correction to a ratified document.** `research/B2B_OFFICIAL_BUY_FORMULA.md` concluded that the
+  legacy exact-token `buy` reserve input is `ceil(t*vq / (vt-t))`, noting parenthetically that this
+  equals `floor(ratio)+1` "when the division has a remainder". The two forms differ ONLY when the
+  division is exact, and none of B2b's 9 samples divided exactly — so that sample could not select
+  between them. It is now measured over the full frozen population: 31,397 legacy buys, exactly one
+  exactly-divisible (slot 433,988,917, remainder zero), and it moved the extra lamport —
+  `ceil` 7,000,000,000 against an observed 7,000,000,001. **The program adds the lamport
+  unconditionally.** ceil reproduces 31,396/31,397; floor+1 reproduces 31,397/31,397. B2b should be
+  amended; this entry records the measurement that forces it.
+- **Why this is worth a decision entry rather than a bug fix:** a one-in-31,397 boundary is exactly
+  the kind of discrepancy a sample cannot find and a full population can. It is also the kind that
+  a trading system would hit eventually and silently mis-size against. The lesson is the sampling
+  one, not the arithmetic one: an integer rounding form must be selected on the boundary case, or
+  it is not selected at all.
+- **No fee component is reproducible on exact-input buys.** Measured over all 20,803: the protocol
+  fee misses 103, `creator_fee` 20, `cashback` 3 — every one short by exactly one lamport. The fee
+  there is taken from a gross input the `TradeEvent` never states, so the base is not in evidence.
+  All three are therefore `unestablished` on those instructions rather than nearly-right, and
+  `reproduce_fees` returns nothing rather than certifying arithmetic it cannot do. On legacy `buy`
+  and `sell` all three are exact across all 72,450 observations.
+- **The buyback fee is unestablished everywhere.** Its declared 5,000 bps matches
+  `ceil(fee*bps/10000)` on 46,500 of 93,253 — essentially half — so its base is unknown and it is
+  reported, never certified.
+- **Gate:** `scripts/b9i_quote_reproduction.py` requires exact integer reproduction of every
+  published trade from the B9e-gated reserve path plus the event's own stated basis points. No fee
+  constant is hard-coded; IDLs load through the SHA-256-verifying `load_pinned_idl`.
+- **Verification requirement:** the exactly-divisible legacy buy is a regression test in its own
+  right, because it is the single observation in the corpus that distinguishes the two forms.
