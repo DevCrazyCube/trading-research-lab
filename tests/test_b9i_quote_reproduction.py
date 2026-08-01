@@ -204,10 +204,36 @@ class ReproduceArtifactLoopTests(unittest.TestCase):
         quote = gross - fee - creator
         self.build(gross, quote, fee, creator)
         report = B9I.reproduce_artifact(self.database)
-        debit = report["gross_input"]["user_debit_lamports"]
+        bucket = report["gross_input"]["by_quote_mint"][self.b9d.NATIVE_QUOTE_MINT]
+        debit = bucket["protocol_debit_raw_quote"]
         self.assertEqual(debit, quote + fee + creator)
-        self.assertEqual(report["gross_input"]["gross_offered_lamports"], gross)
+        self.assertEqual(bucket["gross_offered_raw_quote"], gross)
+        self.assertEqual(bucket["n"], 1)
         self.assertGreaterEqual(gross, debit, "the cap can never be less than what was debited")
+
+    def test_an_exact_input_event_without_a_quote_mint_fails_closed(self):
+        """Units are only lamports for the native mint, so an unknown mint means unknown units.
+
+        Silently bucketing it would put SPL raw units and lamports in one total -- a number that
+        looks plausible and means nothing. Guarded, but untested until a mutation showed the
+        refusal could be deleted without any test noticing.
+        """
+        gross = 100_079
+        net = gross * 10000 // (10000 + 95 + 30)
+        fee, creator = -(-net * 95 // 10000), -(-net * 30 // 10000)
+        self.build(gross, gross - fee - creator, fee, creator)
+        real = self.b9d.decode_anchor_cpi_event
+
+        def stripped(program_id, data, idls):
+            decoded = real(program_id, data, idls)
+            if decoded and decoded["name"] == "TradeEvent":
+                decoded["fields"].pop("quote_mint", None)
+            return decoded
+
+        self.b9d.decode_anchor_cpi_event = stripped
+        self.addCleanup(lambda: setattr(self.b9d, "decode_anchor_cpi_event", real))
+        with self.assertRaisesRegex(B9I.FreezeViolation, "no quote_mint"):
+            B9I.reproduce_artifact(self.database)
 
     def test_exact_input_fees_are_reproduced_from_the_gross_by_the_loop(self):
         """These fees do NOT reconcile against the quote base, so a loop that fell back to it

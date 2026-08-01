@@ -315,15 +315,25 @@ def reproduce_artifact(database, limit=None, progress=None):
             residue = gross - accounted
             report["gross_input"]["n"] += 1
             report["gross_input"]["identity_exact"] += residue == 0
-            # The actual user debit is the ACCOUNTED sum, not the gross. `spendable_*` is a cap:
+            # The actual protocol-side debit is the ACCOUNTED sum, not the gross. `spendable_*`
+            # is a cap:
             # where the fee-inclusive division leaves a remainder, that remainder is never
             # transferred. Verified on all three residue observations in the frozen artifact -- no
             # account moves by +/-1 lamport in any of them, and the payer's debit decomposes
             # exactly into quote + fees + rent + transaction fee with the gross playing no part.
-            report["gross_input"]["user_debit_lamports"] = (
-                report["gross_input"].get("user_debit_lamports", 0) + accounted)
-            report["gross_input"]["gross_offered_lamports"] = (
-                report["gross_input"].get("gross_offered_lamports", 0) + gross)
+            # Quote units are lamports only for the native quote mint. Preserve the mint boundary
+            # so SOL and SPL-token raw units can never be summed into a plausible nonsense total.
+            quote_mint = fields.get("quote_mint")
+            if not isinstance(quote_mint, str) or not quote_mint:
+                raise FreezeViolation(
+                    f"{signature}: exact-input TradeEvent has no quote_mint; debit units unknown")
+            by_mint = report["gross_input"].setdefault("by_quote_mint", {})
+            mint_bucket = by_mint.setdefault(
+                quote_mint, {"n": 0, "gross_offered_raw_quote": 0,
+                             "protocol_debit_raw_quote": 0})
+            mint_bucket["n"] += 1
+            mint_bucket["gross_offered_raw_quote"] += gross
+            mint_bucket["protocol_debit_raw_quote"] += accounted
             if residue:
                 report["gross_input"].setdefault("residues", {})
                 key = str(residue)
