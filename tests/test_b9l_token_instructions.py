@@ -47,16 +47,56 @@ class PinTests(unittest.TestCase):
 
 class RefusalTests(unittest.TestCase):
 
-    def test_token_2022_extension_discriminators_are_refused(self):
-        """Observed in the artifact: tags 45 and 210. They are above the pinned range.
+    def test_token_2022_extensions_decode_and_are_established_non_moving(self):
+        """Established from the pinned source, not assumed.
 
-        Refusing them is the point. Assuming an unpinned extension moves no lamports is exactly
-        the silent under-count this work exists to prevent.
+        The token_metadata and metadata_pointer processors in spl-token-2022 11.0.0 contain no
+        reference to lamports at all, so these are decoded and recorded as non-moving rather than
+        being refused or silently skipped.
         """
-        for tag in (25, 45, 210, 255):
+        for tag, name in ((29, "Reallocate"), (39, "MetadataPointerExtension"),
+                          (44, "PausableExtension")):
             with self.subTest(tag=tag):
-                with self.assertRaisesRegex(B9D.FreezeViolation, "outside the pinned SPL Token"):
-                    B9L.decode_token_instruction(bytes([tag]))
+                decoded = B9L.decode_token_instruction(bytes([tag]))
+                self.assertEqual(decoded["name"], name)
+                self.assertFalse(decoded["moves_lamports"])
+
+    def test_withdraw_excess_lamports_refuses_loudly_rather_than_being_assumed_inert(self):
+        """Tag 38 DOES move lamports -- processor.rs mutates source and destination balances -- and
+        it never appears in the frozen artifact.
+
+        Its amount is the balance above rent exemption and is not in the instruction data, so the
+        first time one occurs it must stop the run rather than be attributed as zero.
+        """
+        self.assertIn(38, B9L.TOKEN_2022_LAMPORT_MOVING)
+        with self.assertRaisesRegex(B9D.FreezeViolation, "WithdrawExcessLamports moves lamports"):
+            B9L.decode_token_instruction(bytes([38]))
+
+    def test_metadata_interface_discriminators_decode_by_their_eight_bytes(self):
+        """These are routed by an 8-byte interface discriminator, not a one-byte enum tag.
+
+        `d7e4a6e45464567b` is reproduced locally as
+        sha256("spl_token_metadata_interface:update_the_authority")[:8], which is how the scheme
+        was confirmed without trusting any single source.
+        """
+        import hashlib
+        self.assertEqual(
+            hashlib.sha256(b"spl_token_metadata_interface:update_the_authority").digest()[:8].hex(),
+            "d7e4a6e45464567b")
+        for discriminator, name in B9L.TOKEN_METADATA_INTERFACE.items():
+            with self.subTest(name=name):
+                decoded = B9L.decode_token_instruction(bytes.fromhex(discriminator) + b"\x00" * 4)
+                self.assertEqual(decoded["name"], name)
+                self.assertFalse(decoded["moves_lamports"])
+
+    def test_a_discriminator_matching_nothing_pinned_is_refused(self):
+        """Tag 45 and 255 match no SPL tag, no Token-2022 extension, and no interface
+        discriminator. Assuming such an instruction moves no lamports is the silent under-count
+        this work exists to prevent."""
+        for tag in (45, 255):
+            with self.subTest(tag=tag):
+                with self.assertRaisesRegex(B9D.FreezeViolation, "matches no"):
+                    B9L.decode_token_instruction(bytes([tag]) + b"\x00" * 8)
 
     def test_empty_data_is_refused(self):
         with self.assertRaisesRegex(B9D.FreezeViolation, "no discriminator"):

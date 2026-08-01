@@ -30,6 +30,8 @@ TOKEN_PROGRAMS = (TOKEN_PROGRAM, TOKEN_2022_PROGRAM)
 
 TOKEN_ABI_SOURCE = "research/spl_token_interface_2.0.0_instruction.rs"
 TOKEN_ABI_SOURCE_SHA256 = "7f6f247b549e11d07c83059bad918bb2d0a78824867f961a10b239a9880a1a15"
+TOKEN_2022_ABI_SOURCE = "research/spl_token_2022_11.0.0_pod_instruction.rs"
+TOKEN_2022_CRATE_SHA256 = "2f0e045d23300c8c9f57e52fa7a1103a20a707cc02080db929c2ff09044aa06a"
 TOKEN_CRATE_SHA256 = "8c564ac05a7c8d8b12e988a37d82695b5ba4db376d07ea98bc4882c81f96c7f3"
 
 # Declaration order is the wire discriminator, a single u8 -- unlike the System program's u32.
@@ -43,6 +45,37 @@ TOKEN_INSTRUCTIONS = {
     21: "GetAccountDataSize", 22: "InitializeImmutableOwner", 23: "AmountToUiAmount",
     24: "UiAmountToAmount",
 }
+
+# Token-2022 extension instructions, tags 25..44, from the pinned spl-token-2022 11.0.0
+# `PodTokenInstruction` enum. Token-2022 shares tags 0..24 with SPL Token and adds these above.
+TOKEN_2022_EXTENSIONS = {
+    25: "InitializeMintCloseAuthority", 26: "TransferFeeExtension",
+    27: "ConfidentialTransferExtension", 28: "DefaultAccountStateExtension", 29: "Reallocate",
+    30: "MemoTransferExtension", 31: "CreateNativeMint", 32: "InitializeNonTransferableMint",
+    33: "InterestBearingMintExtension", 34: "CpiGuardExtension", 35: "InitializePermanentDelegate",
+    36: "TransferHookExtension", 37: "ConfidentialTransferFeeExtension",
+    38: "WithdrawExcessLamports", 39: "MetadataPointerExtension", 40: "GroupPointerExtension",
+    41: "GroupMemberPointerExtension", 42: "ConfidentialMintBurnExtension",
+    43: "ScaledUiAmountExtension", 44: "PausableExtension",
+}
+
+# Instructions routed through Token-2022 by an 8-byte interface discriminator rather than a
+# one-byte enum tag. Their leading byte falls outside 0..44, which is how they are told apart.
+# `update_the_authority` was confirmed by computing sha256("spl_token_metadata_interface:
+# update_the_authority")[:8] locally -- it reproduces d7e4a6e45464567b exactly. The initialize
+# discriminator is identified from its own payload, which carries a u32-prefixed name, symbol and
+# URI in that order, observed as "sol has nuggies" / "nuggies" / an https URI.
+TOKEN_METADATA_INTERFACE = {
+    "d2e11ea258b84d8d": "TokenMetadataInitialize",
+    "d7e4a6e45464567b": "TokenMetadataUpdateAuthority",
+}
+
+# WithdrawExcessLamports is the ONLY extension that moves lamports, established from the pinned
+# source: `processor.rs` mutates source and destination lamports for it, while the token_metadata
+# and metadata_pointer processors contain no reference to lamports at all. It does NOT appear in
+# the frozen artifact -- so it is pinned, refused loudly if it ever shows up, and never silently
+# treated as inert.
+TOKEN_2022_LAMPORT_MOVING = frozenset({38})
 
 # The only pinned variant that moves lamports, and where it sends them. `CloseAccount` transfers
 # the closed account's ENTIRE balance, so the amount is not in the instruction data -- it is the
@@ -84,12 +117,27 @@ def decode_token_instruction(data):
     if not data:
         raise FreezeViolation("Token instruction has no discriminator byte")
     tag = data[0]
-    if tag not in TOKEN_INSTRUCTIONS:
-        raise FreezeViolation(
-            f"Token instruction discriminator {tag} is outside the pinned SPL Token ABI (0..24). "
-            "Token-2022 extension instructions live above that range and are not covered by this "
-            "pin; refusing to assume one moves no lamports")
-    return {"tag": tag, "name": TOKEN_INSTRUCTIONS[tag], "moves_lamports": tag == CLOSE_ACCOUNT}
+    if tag in TOKEN_INSTRUCTIONS:
+        return {"tag": tag, "name": TOKEN_INSTRUCTIONS[tag],
+                "moves_lamports": tag == CLOSE_ACCOUNT}
+    if tag in TOKEN_2022_EXTENSIONS:
+        if tag in TOKEN_2022_LAMPORT_MOVING:
+            raise FreezeViolation(
+                f"{TOKEN_2022_EXTENSIONS[tag]} moves lamports and has never been observed in this "
+                "artifact; its amount is the account balance above rent exemption, which is not in "
+                "the instruction data. Refusing to attribute it without establishing that first")
+        return {"tag": tag, "name": TOKEN_2022_EXTENSIONS[tag], "moves_lamports": False}
+    discriminator = data[:8].hex()
+    if discriminator in TOKEN_METADATA_INTERFACE:
+        # Routed by 8-byte interface discriminator. The token_metadata processor in the pinned
+        # source contains no lamport handling, so these are established as non-moving rather than
+        # assumed so.
+        return {"tag": tag, "name": TOKEN_METADATA_INTERFACE[discriminator],
+                "moves_lamports": False, "discriminator": discriminator}
+    raise FreezeViolation(
+        f"Token instruction discriminator {tag} (first eight bytes {discriminator}) matches no "
+        "pinned SPL Token tag, Token-2022 extension tag, or metadata-interface discriminator; "
+        "refusing to assume it moves no lamports")
 
 
 def close_account_movement(envelope, keys, pre_balances):
