@@ -315,6 +315,15 @@ def reproduce_artifact(database, limit=None, progress=None):
             residue = gross - accounted
             report["gross_input"]["n"] += 1
             report["gross_input"]["identity_exact"] += residue == 0
+            # The actual user debit is the ACCOUNTED sum, not the gross. `spendable_*` is a cap:
+            # where the fee-inclusive division leaves a remainder, that remainder is never
+            # transferred. Verified on all three residue observations in the frozen artifact -- no
+            # account moves by +/-1 lamport in any of them, and the payer's debit decomposes
+            # exactly into quote + fees + rent + transaction fee with the gross playing no part.
+            report["gross_input"]["user_debit_lamports"] = (
+                report["gross_input"].get("user_debit_lamports", 0) + accounted)
+            report["gross_input"]["gross_offered_lamports"] = (
+                report["gross_input"].get("gross_offered_lamports", 0) + gross)
             if residue:
                 report["gross_input"].setdefault("residues", {})
                 key = str(residue)

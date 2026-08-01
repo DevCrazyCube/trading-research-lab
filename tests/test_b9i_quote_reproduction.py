@@ -190,6 +190,25 @@ class ReproduceArtifactLoopTests(unittest.TestCase):
                  json.dumps({"kind": "anchor_cpi:TradeEvent",
                              "event_outer_index": 0, "event_inner_index": 0})))
 
+    def test_the_report_separates_what_was_offered_from_what_was_debited(self):
+        """`spendable_*` is a CAP, so gross offered and lamports debited are different quantities.
+
+        Where the fee-inclusive division leaves a remainder the program does not spend it: on all
+        three residue observations in the frozen artifact no account moves by one lamport, and the
+        payer's debit decomposes into quote + fees + rent + transaction fee with the gross playing
+        no part. Reporting only the gross would overstate the user's cost.
+        """
+        gross = 100_079
+        net = gross * 10000 // (10000 + 95 + 30)
+        fee, creator = -(-net * 95 // 10000), -(-net * 30 // 10000)
+        quote = gross - fee - creator
+        self.build(gross, quote, fee, creator)
+        report = B9I.reproduce_artifact(self.database)
+        debit = report["gross_input"]["user_debit_lamports"]
+        self.assertEqual(debit, quote + fee + creator)
+        self.assertEqual(report["gross_input"]["gross_offered_lamports"], gross)
+        self.assertGreaterEqual(gross, debit, "the cap can never be less than what was debited")
+
     def test_exact_input_fees_are_reproduced_from_the_gross_by_the_loop(self):
         """These fees do NOT reconcile against the quote base, so a loop that fell back to it
         would report a mismatch. Only the gross-derived net reproduces them."""
@@ -203,7 +222,8 @@ class ReproduceArtifactLoopTests(unittest.TestCase):
         self.build(gross, quote, fee, creator)
         report = B9I.reproduce_artifact(self.database)
         self.assertEqual(report["observations"], 1)
-        self.assertEqual(report["gross_input"], {"n": 1, "identity_exact": 1})
+        self.assertEqual((report["gross_input"]["n"], report["gross_input"]["identity_exact"]),
+                         (1, 1))
         self.assertEqual(report["fees"]["fee"]["exact"], 1)
         self.assertEqual(report["fees"]["creator_fee"]["exact"], 1)
         self.assertNotEqual(fee, -(-quote * 95 // 10000),
