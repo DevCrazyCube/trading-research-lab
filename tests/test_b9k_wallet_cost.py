@@ -51,7 +51,7 @@ class ReconcileTests(unittest.TestCase):
         result["meta"]["fee"] = 100
         record = B9K.reconcile_transaction(result)
         self.assertEqual(record["category"], "exact")
-        self.assertEqual((record["payer_debit"], record["system_sent"], record["residual"]),
+        self.assertEqual((record["payer_debit"], record["attributed_sent"], record["residual"]),
                          (600, 500, 0))
 
     def test_lamports_the_payer_receives_reduce_the_attributed_cost(self):
@@ -64,7 +64,7 @@ class ReconcileTests(unittest.TestCase):
         result["meta"]["fee"] = 100
         record = B9K.reconcile_transaction(result)
         self.assertEqual(record["category"], "exact")
-        self.assertEqual((record["system_received"], record["system_sent"]), (700, 0))
+        self.assertEqual((record["attributed_received"], record["attributed_sent"]), (700, 0))
         self.assertEqual(record["payer_debit"], -600, "a net credit is a negative debit")
         self.assertEqual(record["residual"], 0)
 
@@ -97,8 +97,29 @@ class ReconcileTests(unittest.TestCase):
             raw, meta={"preBalances": [10_000, 0, 1], "postBalances": [9_900, 0, 1]}, slot=700)
         result["meta"]["fee"] = 100
         record = B9K.reconcile_transaction(result)
-        self.assertEqual(record["category"], "undecodable_system")
+        self.assertEqual(record["category"], "undecodable_instruction")
         self.assertIn("trailing byte", record["undecodable"][0]["reason"])
+
+    def test_rent_reclaim_from_a_closed_token_account_is_attributed(self):
+        """The movement no System instruction records.
+
+        CloseAccount is executed by the Token program on an account it owns, so the payer's refund
+        is invisible to System decoding. It is the residual of exactly -2,039,280 that appeared
+        3,213 times across the population before this was attributed.
+        """
+        token = B9D.base58_decode(B9K.B9L.TOKEN_PROGRAM)
+        keys = [bytes(range(32)), bytes(range(1, 33)), token]
+        # accounts[0] closed, accounts[1] destination (the payer), accounts[2] owner
+        raw = B9DT.build_transaction(keys, [(2, [1, 0, 0], bytes([9]))])
+        result = B9DT.as_result(
+            raw, meta={"preBalances": [10_000, 2_039_280, 1],
+                       "postBalances": [10_000 - 100 + 2_039_280, 0, 1]}, slot=700)
+        result["meta"]["fee"] = 100
+        record = B9K.reconcile_transaction(result)
+        self.assertEqual(record["category"], "exact")
+        self.assertEqual(record["attributed_received"], 2_039_280,
+                         "the rent refund is attributed, and to the payer")
+        self.assertEqual(record["residual"], 0, "so nothing is left unexplained")
 
     def test_a_missing_or_invalid_fee_is_refused(self):
         keys = [bytes(range(32)), bytes(range(1, 33)), B9D.base58_decode(SYSTEM)]
@@ -138,7 +159,7 @@ class ReconcileTests(unittest.TestCase):
     def test_categories_are_exhaustive(self):
         """Every transaction lands in exactly one bucket, so a coverage fraction means something."""
         self.assertEqual(set(B9K.CATEGORIES),
-                         {"exact", "undecodable_system", "unattributed_movement"})
+                         {"exact", "undecodable_instruction", "unattributed_movement"})
 
 
 if __name__ == "__main__":

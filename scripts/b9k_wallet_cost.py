@@ -46,10 +46,15 @@ def _load(name, filename):
 # below would never fire and the whole run would die on the one transaction it exists to
 # categorise. That is exactly what happened on the first full-population run.
 B9J = _load("b9j_system_instructions", "b9j_system_instructions.py")
+B9L = _load("b9l_token_instructions", "b9l_token_instructions.py")
 B9D = B9J.B9D
+# One b9d instance across all three, for the reason in the comment above: distinct module objects
+# mean distinct FreezeViolation classes and handlers that never fire.
+B9L.B9D = B9D
+B9L.FreezeViolation = B9D.FreezeViolation
 FreezeViolation = B9D.FreezeViolation
 
-CATEGORIES = ("exact", "undecodable_system", "unattributed_movement")
+CATEGORIES = ("exact", "undecodable_instruction", "unattributed_movement")
 
 
 def reconcile_transaction(result):
@@ -72,6 +77,12 @@ def reconcile_transaction(result):
 
     sent = received = 0
     undecodable = []
+    # Lamports credited to each account by decoded System instructions during this transaction.
+    # An account created and closed in the SAME transaction has a pre-balance of 0 and a
+    # post-balance of 0, yet CloseAccount still moves its rent -- so the pre-balance is the wrong
+    # basis and the balance vector alone cannot see the movement at all. The funding instruction
+    # can.
+    credited = {}
     for envelope in B9D.envelope_instructions(result):
         if envelope["program_id"] != B9J.SYSTEM_PROGRAM:
             continue
@@ -94,20 +105,46 @@ def reconcile_transaction(result):
             sent += moved
         if accounts[1] == payer:
             received += moved
+        credited[accounts[1]] = credited.get(accounts[1], 0) + moved
+
+    # Rent reclaim: CloseAccount sends the closed account's entire balance to accounts[1], and the
+    # Token program does it on an account it owns, so no System instruction records it. This is the
+    # movement that leaves the residual at exactly -2,039,280 across thousands of transactions.
+    for envelope in B9D.envelope_instructions(result):
+        if envelope["program_id"] not in B9L.TOKEN_PROGRAMS:
+            continue
+        try:
+            token = B9L.decode_token_instruction(envelope["data"])
+        except FreezeViolation as error:
+            undecodable.append({"outer_index": envelope["outer_index"],
+                                "inner_index": envelope["inner_index"], "reason": str(error)})
+            continue
+        if not token["moves_lamports"]:
+            continue
+        source, destination, lamports = B9L.close_account_movement(envelope, keys, pre)
+        # Balance at close, not before the transaction: add what decoded System instructions put
+        # into the account after it started.
+        lamports += credited.pop(source, 0)
+        if source == payer:
+            sent += lamports
+        if destination == payer:
+            received += lamports
 
     attributed = fee + sent - received
     residual = payer_debit - attributed
     if undecodable:
-        category = "undecodable_system"
+        category = "undecodable_instruction"
     elif residual == 0:
         category = "exact"
     else:
         category = "unattributed_movement"
 
+    # `attributed_*` rather than `system_*`: these now include Token CloseAccount rent reclaim, so
+    # naming them after one program would misdescribe what they hold.
     record = {"category": category, "payer_debit": payer_debit, "fee": fee,
-              "system_sent": sent, "system_received": received,
+              "attributed_sent": sent, "attributed_received": received,
               "attributed": attributed, "residual": residual}
-    if category == "undecodable_system":
+    if category == "undecodable_instruction":
         record["undecodable"] = undecodable
     elif category == "unattributed_movement":
         # Name the accounts carrying the unattributed movement. A residual with no accounts behind
