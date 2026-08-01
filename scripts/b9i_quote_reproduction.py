@@ -109,6 +109,44 @@ def ceil_div(numerator, denominator):
     return -(-numerator // denominator)
 
 
+# The three pinned curve formulas, as pure functions of the before-state.
+#
+# They are exposed rather than inlined because the Phase 2 simulator must price a HYPOTHETICAL
+# order, which is the same arithmetic run forward instead of checked against an observation. One
+# implementation, reproduced exactly against the full artifact, is the point: a simulator carrying
+# its own copy of these would drift from the gate that validates them.
+
+def tokens_out_for_exact_quote_in(virtual_quote, virtual_token, quote_in):
+    """Exact-input buy: quote lamports in, tokens out."""
+    if quote_in <= 0:
+        raise FreezeViolation(f"exact-input buy needs a positive quote input, got {quote_in}")
+    return (quote_in - 1) * virtual_token // (virtual_quote + quote_in - 1)
+
+
+def quote_in_for_exact_tokens_out(virtual_quote, virtual_token, tokens_out):
+    """Legacy exact-token buy: tokens out, quote lamports in.
+
+    floor+1, NOT ceil. The two agree whenever the division leaves a remainder, so a sample
+    containing no exactly-divisible trade cannot tell them apart -- which is why B2b's 9 samples
+    selected `ceil`. The frozen corpus holds 31,397 legacy buys and exactly ONE that divides
+    exactly; it moved the extra lamport, so the program adds it unconditionally.
+    ceil: 31,396/31,397. floor+1: 31,397/31,397.
+    """
+    denominator = virtual_token - tokens_out
+    if denominator <= 0:
+        raise FreezeViolation(
+            f"legacy buy consumes the whole virtual token reserve ({tokens_out} of "
+            f"{virtual_token}); the quote is undefined")
+    return tokens_out * virtual_quote // denominator + 1
+
+
+def quote_out_for_tokens_in(virtual_quote, virtual_token, tokens_in):
+    """Sell: tokens in, quote lamports out."""
+    if tokens_in < 0:
+        raise FreezeViolation(f"sell needs a non-negative token input, got {tokens_in}")
+    return tokens_in * virtual_quote // (virtual_token + tokens_in)
+
+
 def reproduce_trade(before_virtual_quote, before_virtual_token, fields):
     """Recompute the trade's own quantities from the published before-state.
 
@@ -124,26 +162,20 @@ def reproduce_trade(before_virtual_quote, before_virtual_token, fields):
     if fields.get("is_buy") is True:
         if name in EXACT_INPUT_BUYS:
             return ("tokens_out",
-                    (quote - 1) * before_virtual_token // (before_virtual_quote + quote - 1),
+                    tokens_out_for_exact_quote_in(
+                        before_virtual_quote, before_virtual_token, quote),
                     token)
         if name in LEGACY_BUYS:
-            # floor+1, NOT ceil. The two agree whenever the division leaves a remainder, so a
-            # sample containing no exactly-divisible trade cannot tell them apart -- which is why
-            # B2b's 9 samples selected `ceil`. The frozen corpus holds 31,397 legacy buys and
-            # exactly ONE that divides exactly; it moved the extra lamport, so the program adds it
-            # unconditionally. ceil: 31,396/31,397. floor+1: 31,397/31,397.
-            denominator = before_virtual_token - token
-            if denominator <= 0:
-                raise FreezeViolation(
-                    f"legacy buy consumes the whole virtual token reserve "
-                    f"({token} of {before_virtual_token}); the quote is undefined")
-            return ("net_quote", token * before_virtual_quote // denominator + 1, quote)
+            return ("net_quote",
+                    quote_in_for_exact_tokens_out(
+                        before_virtual_quote, before_virtual_token, token),
+                    quote)
         raise FreezeViolation(
             f"buy instruction {name!r} has no pinned quote arithmetic; exact-input and exact-token "
             "buys use different formulas and must not share one")
     if name in SELLS:
         return ("quote_out",
-                token * before_virtual_quote // (before_virtual_token + token),
+                quote_out_for_tokens_in(before_virtual_quote, before_virtual_token, token),
                 quote)
     raise FreezeViolation(f"sell instruction {name!r} has no pinned quote arithmetic")
 

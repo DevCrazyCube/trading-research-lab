@@ -58,6 +58,17 @@ Gate: deterministic replay; complete classified decode accounting; exact integer
 
 ### Phase 2 — simulator
 
+- [x] **First bounded slice implemented and measured** (`scripts/b10a_simulator_kernel.py`,
+  `docs/SIMULATOR_RESULT_SCHEMA.md`). Deterministic direct-Pump kernel with a versioned read-only
+  result schema, reusing B9i's proven integer functions rather than duplicating them. Replay gate:
+  **92,510 of 92,510 eligible observed direct Pump trades reproduce at exact integer precision,
+  zero mismatches** (743 out-of-regime observations counted and skipped). Entry and exit are direct
+  Pump only; Mayhem, non-SOL quotes, a completed curve, oversize orders against the real reserve,
+  and incomplete state all fail closed. Post-decision reserve state cannot reach entry pricing, and
+  that boundary is structural rather than conventional. Priority fee, tip, landing, latency and
+  slippage are caller-supplied or refused — never defaulted. **The stochastic half of the Phase 2
+  gate is untouched: no landing, contention, failure or fill distribution is calibrated, so every
+  result is labelled SIMULATED and none is executable.**
 - [ ] Implement exact integer quote, fee, and rounding behavior by protocol version.
 - [ ] Replay observed ordering and empirical latency distributions.
 - [ ] Model failures, expiration, compute fees, tips, slippage, migration, and constrained exits.

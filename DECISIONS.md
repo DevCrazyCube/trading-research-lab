@@ -1128,3 +1128,44 @@ The two do not imply each other. A user-ratified decision can remain provisional
   probability, contention, priority-fee and tip levels, and realised slippage remain unmeasured and
   need forward observation — until then any computed return is **simulated, not executable**. The
   simulator remains unimplemented.
+
+## 2026-08-01 — Phase 2 first slice: a deterministic direct-Pump simulator kernel
+
+- **Implemented:** `scripts/b10a_simulator_kernel.py` with a versioned read-only result schema
+  (`docs/SIMULATOR_RESULT_SCHEMA.md`, v1.0.0). Pure library — no server, UI, model, signal, wallet,
+  signing or live RPC.
+- **Measured validation gate:** every eligible observed direct Pump trade replays at exact integer
+  precision — `net_quote` 31,132/31,132, `quote_out` 40,717/40,717, `tokens_out` 20,661/20,661,
+  **92,510/92,510, zero mismatches**. 743 out-of-regime observations (non-SOL quote or Mayhem) are
+  counted in `skipped_out_of_regime`, not silently dropped. Rows are read in canonical order
+  (`slot, transaction_index, outer_index, inner_index`); database insertion order is never used.
+- **The kernel reuses B9i's functions rather than copying them.** `b9i` was refactored to expose
+  `tokens_out_for_exact_quote_in`, `quote_in_for_exact_tokens_out` and `quote_out_for_tokens_in`
+  as pure functions, with `reproduce_trade` delegating to them. A simulator carrying a private copy
+  of a formula drifts from the gate that validates it, and the drift is invisible until it matters.
+- **Three refusals are definitional, not configuration.** No execution parameter is ever invented —
+  a cost policy missing `priority_fee_lamports` is refused, because absence is not zero and zero is
+  the most optimistic assumption available. No post-decision state reaches entry pricing —
+  `price_entry` has no parameter for a later state, which is structural rather than a convention.
+  No result is ever labelled executable — every record carries `SIMULATED` and `uncalibrated`.
+- **The size guard is against the REAL reserve, not the virtual one.** The curve formula approaches
+  the virtual reserve asymptotically and never reaches it, so a virtual-reserve check looks like a
+  size guard and never fires however large the order. This was written wrong first and caught by
+  its own test.
+- **The buyback fee is reported, never charged.** It is a split of the protocol fee, not an
+  addition; the pinned gross identity carries no buyback term, so charging it would take half the
+  protocol fee twice. The field is named `buyback_fee_reported_not_charged`.
+- **ATA rent is charged on entry with no refund, by contract.** Failed attempts cost
+  `base_fee + priority_fee` each. Exit proceeds may be negative and are reported, never clamped.
+- **Verification:** 8 mutants, all killed — including one that survived first. A `ceil` buyback
+  mutant passed because the fixture's fee was EVEN, and floor and ceil agree on every even fee at
+  5,000 bps. That is the second time the same even-fee trap has been walked into; the fixture now
+  asserts its own fee is odd. A pairing defect in the first gate run also produced a spurious
+  389,217,712-lamport mismatch, which was the gate's own bug and not the venue's.
+- **Ratified by:** measurement over the full frozen population under the Codex directive of handoff
+  62. **Owner review not separately obtained.**
+- **NOT claimed, explicitly.** The stochastic half of the `PLAN.md` Phase 2 gate — landing,
+  contention, failure and fill distributions against forward observations — is untouched. No
+  scenario in this kernel is calibrated; "optimistic", "base" and "stressed" are deliberately absent
+  as names because they would imply a measured distribution that does not exist. Until forward data
+  exists, every computed return is **simulated, not executable**.
