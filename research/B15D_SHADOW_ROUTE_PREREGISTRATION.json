@@ -1,0 +1,147 @@
+{
+  "preregistration_id": "B15D_SHADOW_ROUTE_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (handoff 120)",
+  "status": "FROZEN. Committed alone, before any shadow entry is priced and before any subsequent shadow outcome is read.",
+  "purpose": "Freeze one SIMULATED_SHADOW execution route, its exact integer cost scenarios, its observation-delay scenarios, and the rules by which a delayed hypothetical entry may be priced.",
+  "committed_before_any_pricing": true,
+  "committed_before_reading_any_shadow_outcome": true,
+
+  "route": {
+    "route_id": "direct_standard_rpc_v1",
+    "description": "a single transaction submitted through a standard RPC endpoint. No Jito, no bundle, no auction, no private relay.",
+    "operator_decision": true,
+    "tip_lamports": 0,
+    "tip_is_an_operator_route_choice_not_an_inference": {
+      "statement": "tip is ZERO because this route DOES NOT SEND TIPS, and that is a decision about the route rather than a reading of the evidence.",
+      "why_this_matters": "B15c recorded tip as UNAVAILABLE because no tip-account set was declared, and unavailable is not zero. Here the zero is legitimate for the opposite reason: there is nothing to observe because nothing would be sent. The tip-account list stays empty on purpose, and if this route were ever changed to a bundle path this zero would become an inference again and would have to go back to unavailable.",
+      "tip_account_set": []
+    },
+    "executable": false,
+    "no_landing_guarantee": "NO SCENARIO HERE ESTIMATES A LANDING PROBABILITY. A cost scenario says what a transaction would have cost if it landed; it says nothing whatever about whether it would have."
+  },
+
+  "cost_evidence_basis": {
+    "source": "research/B15C_COST_CONTEXT.json",
+    "preregistration_canonical_sha256": "53a26143486e1d62eeefa985460b96ee438451e4ad843a646d4dde89012eeea9",
+    "nature": "the observed costs of OTHER traders' transactions, calibration evidence and not a price this route is promised",
+    "no_double_counting": {
+      "rule": "B10a takes base_fee_lamports and priority_fee_lamports SEPARATELY and sums them itself. The scenarios below therefore carry the PRIORITIZATION distribution, never the total-fee distribution.",
+      "the_trap": "B15c publishes both. Feeding total_fee as priority_fee would charge the base fee twice.",
+      "also_not_composable": "B15c's total p50 is 53,000 and its priority p50 is 100,000. Those are separate order statistics over different subsets (410 and 376 observations); the median of totals is not the base fee plus the median of priorities, and the two figures must never be added or reconciled against each other."
+    }
+  },
+
+  "cost_scenarios": [
+    {
+      "scenario_id": "optimistic",
+      "base_fee_lamports": 5000,
+      "priority_fee_lamports": 1000,
+      "priority_basis": "B15c prioritization p10 over 376 observations",
+      "tip_lamports": 0,
+      "ata_rent_lamports": 2039280,
+      "failed_attempts": 0,
+      "failed_attempts_basis": "explicitly chosen: an uncongested route landing first try"
+    },
+    {
+      "scenario_id": "base",
+      "base_fee_lamports": 5000,
+      "priority_fee_lamports": 100000,
+      "priority_basis": "B15c prioritization p50 over 376 observations",
+      "tip_lamports": 0,
+      "ata_rent_lamports": 2039280,
+      "failed_attempts": 0,
+      "failed_attempts_basis": "explicitly chosen: landing first try at the median priority others paid"
+    },
+    {
+      "scenario_id": "stressed",
+      "base_fee_lamports": 5000,
+      "priority_fee_lamports": 1000000,
+      "priority_basis": "B15c prioritization p90 over 376 observations",
+      "tip_lamports": 0,
+      "ata_rent_lamports": 2039280,
+      "failed_attempts": 1,
+      "failed_attempts_basis": "explicitly chosen: ONE failed attempt paid for before landing. Chosen as a stress, not measured — this route has never submitted anything, so no failure rate exists to observe. It is stated so a reader can see the assumption rather than find it embedded in a total."
+    }
+  ],
+  "base_fee_derivation": "5000 lamports per signature, one signature on this route, per solana.com/docs/core/fees accessed 2026-08-03",
+
+  "ata_rent": {
+    "lamports": 2039280,
+    "account_size_bytes": 165,
+    "account_kind": "SPL token account, the associated token account the buyer must hold",
+    "source": "getMinimumBalanceForRentExemption(165) against the configured mainnet endpoint",
+    "accessed": "2026-08-03",
+    "refundable": false,
+    "why_charged": "B10a charges it as ata_rent_charged_never_refunded. The rent is recoverable only by closing the account, which this shadow never does and never models.",
+    "if_unavailable": "had the endpoint not answered, this field would be UNAVAILABLE and every scenario using it would be unpriced. It is not defaulted."
+  },
+
+  "pump_fee_inputs": {
+    "source": "the point-in-time decoded TradeEvent of each launch transaction, through the pinned IDL research/pump_idl_9c82f61.json",
+    "fields": ["fee_basis_points", "creator_fee_basis_points", "cashback_fee_basis_points", "buyback_fee_basis_points"],
+    "observed_in_b15c": "fee_basis_points took the values 95 and 0 across the calibration sample",
+    "rule": "read per launch from that launch's own evidence, never assumed from another launch and never taken from a current config snapshot"
+  },
+
+  "delay_scenarios": {
+    "unit": "slots",
+    "values": [1, 2, 4],
+    "meaning": "a DECISION-TO-PRICING delay: the entry is priced against the first canonical reserve observation at or after t0 + delay",
+    "explicitly_not": "a measured landing latency. This shadow has never submitted a transaction and cannot measure decision-to-landing without doing so, which it will not do.",
+    "basis": "chosen as a small explicit grid. No frozen project grid applies: B11b's horizons are OUTCOME horizons measured after entry, not delays before it, and reusing them here would give a decision delay the authority of a number chosen for something else.",
+    "not_outcome_derived": true,
+    "zero_delay_excluded": "a zero-slot delay would price against the launch instant itself, which is the state a real decision could not yet have acted on"
+  },
+
+  "materialization_rules": {
+    "eligible_input": "a B15b launch whose t0 state is complete and which passes every B11b hard veto",
+    "observation_selection": "the FIRST canonical observation of this curve at or after t0 + delay_slots, in (slot, transaction_index, outer_index, inner_index) order",
+    "terminal_snapshot_forbidden": "a later or current state may never stand in for the delayed entry state. If the delayed state cannot be reconstructed exactly from evidence, the candidate is REFUSED, not approximated.",
+    "backfill_permitted": "the specific transaction carrying the needed observation may be fetched read-only; nothing later than it may be read",
+    "order": {"side": "buy", "quote_lamports": 100000000, "policy_id": "P1_all_eligible_fixed_size"},
+    "order_size_justification": "0.1 SOL, unchanged from B10a/B10b/B10c/B11b/B15a. No size was chosen with this route in view."
+  },
+
+  "candidate_statuses": [
+    {"status": "priced", "meaning": "the delayed state was reconstructed exactly and B10a priced the order"},
+    {"status": "refused", "meaning": "B10a refused the order at the delayed state; the refusal reason is recorded"},
+    {"status": "stale", "meaning": "no observation of this curve exists at or after t0 + delay within the recorded evidence"},
+    {"status": "unavailable", "meaning": "the delayed state could not be reconstructed exactly"}
+  ],
+  "preserve_every_candidate": {
+    "rule": "every candidate is recorded under every scenario, including those that are stale, unavailable or refused",
+    "why": "a materializer that keeps only what it could price reports the subset that happened to work, and that subset is not a random one — the curves with no later observation are disproportionately the ones that died immediately"
+  },
+
+  "immutability": {
+    "feed_only_and_superseded_decisions": "never rewritten; B15a and B15b are read-only from here",
+    "artifact_root": "research/b15d"
+  },
+
+  "no_outcome_yet": {
+    "rule": "this stage publishes NO profit, NO exit, NO realised return and NO performance figure",
+    "reason": "an entry price is not a result, and nothing here has been held, exited or marked",
+    "outcomes_are_a_later_stage": true
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "tips or any spending",
+    "estimating a landing probability",
+    "using a terminal or current snapshot as the delayed entry state",
+    "inferring any cost component that is not stated here",
+    "reading any shadow outcome before this document was committed",
+    "publishing a profit, exit or realised figure at this stage"
+  ],
+
+  "status_locks": {
+    "label": "SIMULATED_SHADOW",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "refused_status_names": ["executable", "live", "profitable", "production_ready", "validated", "guaranteed", "quoted", "will_land"]
+  }
+}
