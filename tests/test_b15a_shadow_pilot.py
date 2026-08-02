@@ -196,10 +196,43 @@ class TestDecoding(Temp):
         self.assertEqual(PILOT.DECODE_DECODED, status, error)
         self.assertEqual(17, len(fields))
 
-    def test_a_foreign_payload_is_not_a_create(self):
+    def test_a_log_framed_create_decodes_without_the_event_cpi_tag(self):
+        """The framing that actually arrives, and the one that was missing.
+
+        `Program data:` log lines carry `discriminator || payload` directly. The event-CPI tag only
+        prefixes inner-instruction data. Requiring the tag made the running pilot examine 739
+        program-data payloads and match none of them.
+        """
+        tagged = FIXTURES.create_payload()
+        untagged = tagged[len(PILOT.EVENT_TAG):]
+        status, fields, error = PILOT.decode_create(untagged, self.b7d, self.disc,
+                                                    self.create_type, self.types)
+        self.assertEqual(PILOT.DECODE_DECODED, status, error)
+        self.assertEqual(17, len(fields))
+
+    def test_both_framings_decode_to_the_same_event(self):
+        tagged = FIXTURES.create_payload()
+        untagged = tagged[len(PILOT.EVENT_TAG):]
+        first = PILOT.decode_create(tagged, self.b7d, self.disc, self.create_type, self.types)
+        second = PILOT.decode_create(untagged, self.b7d, self.disc, self.create_type, self.types)
+        self.assertEqual(first, second)
+
+    def test_a_payload_shorter_than_a_discriminator_is_not_a_create(self):
+        status, _f, _e = PILOT.decode_create(b"\x1b\x72", self.b7d, self.disc,
+                                             self.create_type, self.types)
+        self.assertEqual(PILOT.DECODE_NOT_CREATE, status)
+
+    def test_a_foreign_event_is_unknown_not_merely_absent(self):
+        """The semantics the log framing corrected.
+
+        Every `Program data:` payload is a candidate event, so one whose discriminator does not
+        match is an event we do not recognise — `unknown_event` — and it is counted. Calling it
+        `not_a_create` would drop the whole of Pump's other event traffic out of the census.
+        `not_a_create` now means only "too short to carry a discriminator at all".
+        """
         status, _fields, _error = PILOT.decode_create(b"\x00" * 40, self.b7d, self.disc,
                                                       self.create_type, self.types)
-        self.assertEqual(PILOT.DECODE_NOT_CREATE, status)
+        self.assertEqual(PILOT.DECODE_UNKNOWN, status)
 
     def test_an_unknown_event_is_named_unknown_not_failed(self):
         status, _fields, _error = PILOT.decode_create(PILOT.EVENT_TAG + b"\x00" * 40, self.b7d,

@@ -278,10 +278,23 @@ def program_data_payloads(logs):
 
 
 def decode_create(payload, b7d, discriminator, create_type, types):
-    """One payload to a CreateEvent, or a status saying why not. Never a partial guess."""
-    if not payload.startswith(EVENT_TAG):
+    """One payload to a CreateEvent, or a status saying why not. Never a partial guess.
+
+    TWO framings, because the same event reaches us two different ways and only one of them was
+    handled at first:
+
+    - **Inner-instruction data** carries the Anchor event-CPI tag `e445a52e51cb9a1d` and then the
+      discriminator. That is what B7d reads, because it reads inner instructions.
+    - **`Program data:` log lines carry the discriminator directly, with no tag.** This transport
+      reads logs, so this is the framing that actually arrives.
+
+    Requiring the tag meant the running pilot examined 739 program-data payloads and matched none
+    of them: it recorded everything faithfully and could never have detected a single launch. The
+    check that looked strictest was the one that made the pilot blind.
+    """
+    body = payload[len(EVENT_TAG):] if payload.startswith(EVENT_TAG) else payload
+    if len(body) < len(discriminator):
         return DECODE_NOT_CREATE, None, None
-    body = payload[len(EVENT_TAG):]
     if not body.startswith(discriminator):
         return DECODE_UNKNOWN, None, None
     try:
