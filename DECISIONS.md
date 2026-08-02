@@ -1586,3 +1586,56 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **NOT claimed:** operational readiness, any live feed, or any real data in the interface. The
   layout has now been rendered and inspected at both widths by both agents; the owner has not seen
   it.
+
+## 2026-08-02 — Point-in-time histories publish lower bounds, never totals (B13a)
+
+- **Status:** Phase 3 foundation implemented offline (`scripts/b13a_history.py`,
+  `scripts/b13a_history_corpus.py`, `docs/HISTORY_SCHEMA.md`,
+  `research/B13A_HISTORY_FOUNDATION.md`). **B11a not queried, enumerated or read**; B11b, B12a and
+  B12b unchanged; no model, baseline, threshold or cluster.
+- **Decision — the boundary is the canonical coordinate, inclusive at t0 and exclusive one
+  coordinate later.** Insertion order is never consulted. The rule is published on every record and
+  a record carrying any other text is refused. **A judgement flagged for audit:** a looser reading
+  would admit the remainder of t0's own transaction, since that transaction completes before any
+  order of ours could land — B10b's own argument. The stricter reading was taken because an event
+  wrongly dropped costs information while an event wrongly admitted costs correctness.
+- **Adopted — every count is named `_observed` and declared a lower bound.** A bounded window cannot
+  know what preceded it, so `prior_launch_count_observed == 0` is a fact about the window and not
+  the claim "this creator has never launched before". A test refuses any field name that states a
+  total; `counts_are_lower_bounds` is asserted equal to `coverage.left_truncated`;
+  `actor_seen_in_window` separates "seen and did nothing" from "not seen"; and
+  `require_complete_history` **fails closed** for any policy needing a true count. Using a truncated
+  history as though its counts were totals must be an explicit act, never an omission.
+- **Adopted — direction is kept exact and separate everywhere**: buys and sells, quote and token,
+  inbound and outbound funding. A net figure hides a wallet that cycled a hundred SOL through one
+  curve behind one that never traded.
+- **Adopted — no string in any feature block**, the same rule as the B11b feature contract; identity
+  and feature field sets are declared, disjoint, and the disjointness check takes its field sets as
+  arguments so it is reachable rather than a guard nobody can make fire.
+- **Adopted — subject consistency is checked.** The subject's declared creator and bonding curve
+  must match its launch event's. A caller passing the wrong creator would otherwise receive a
+  well-formed history full of zeros, which is the most convincing possible way to be wrong. **The
+  check caught the project's own new test fixture disagreeing with itself the moment it was added.**
+- **Adopted — clusters are not inferred.** Funding edges are published raw with direction, source,
+  destination, amount, coordinate and provenance. Entity resolution, its confidence and its leakage
+  are a separate task; **funding-cluster leakage remains an open gate**.
+- **Measured on the burned B8b corpus, plumbing only:** 44,438 events — 1,136 launches, 16
+  completions, 7,718 trades and **35,568 funding edges decoded from the pinned System ABI** — with
+  25/25 subjects respecting the boundary, keeping identities out of features and producing
+  order-independent results, and zero errors. **No feature value, distribution, correlation or
+  label association was computed, on any window**: a history is one join away from an outcome.
+- **Verification:** 31 mutants, 30 killed. Three survived the first run and each was a genuine gap —
+  no test distinguished a completion belonging to another creator, the disjointness check could
+  never fire, and no fixture placed two events at an identical coordinate so the ordering tiebreak
+  was untested. **One equivalent mutant is disclosed rather than removed:** deleting
+  `assert_history` from `build_as_of_history` changes nothing observable, because no caller input
+  can make that self-check fire; it is kept for the class of future edit it would catch. 62 tests,
+  1,281 repository-wide.
+- **Consequence — the cohort-based collection plan is specified and NOT executed.** Histories will
+  be collected only for B11a's own enumerated actors and tokens, under a lookback preregistered in
+  slots before it is measured, with a completeness gate stated in advance, coverage published per
+  actor rather than per cohort, and no history inspected before the labels are. **None of its
+  parameters may be chosen by looking at an observed history**, and the lookback is deliberately not
+  chosen in this pass.
+- **Ratified by:** the Codex directive of handoff 78. **Owner review not separately obtained.**
+- **NOT claimed:** any model, threshold, cluster, feature distribution or operational readiness.

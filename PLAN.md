@@ -110,7 +110,21 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
 
 ### Phase 3 — wallet intelligence and labels
 
-- [ ] Build point-in-time creator, trader, funder, and token histories.
+- [~] **Point-in-time history foundation built; cohort collection specified, not executed**
+  (`scripts/b13a_history.py`, `scripts/b13a_history_corpus.py`, `docs/HISTORY_SCHEMA.md`,
+  `research/B13A_HISTORY_FOUNDATION.md`). Immutable canonical event schema (launch, trade,
+  completion, funding transfer, each with source evidence hashes) and a pure as-of-t0 materializer
+  for creator, trader/user, token and funding-edge histories. **Only events whose canonical
+  coordinate is at or before t0 enter**, inclusive at t0 and exclusive one coordinate later, never
+  insertion order. **Every count is named `_observed` and declared a lower bound**, because a
+  bounded window cannot know what preceded it; `require_complete_history` fails closed for any
+  policy needing a total. Identity strings never enter a feature block. Measured on the burned B8b
+  corpus: 44,438 events including **35,568 funding edges decoded from the pinned System ABI**,
+  25/25 subjects with the boundary respected, identities kept out of features and results
+  independent of arrival order, zero errors — **and no feature value, distribution or correlation
+  reported, on any window**. 31 mutants, 30 killed, one disclosed as equivalent. Clusters are NOT
+  inferred and funding-cluster leakage remains an open gate. The cohort-based collection plan,
+  including a preregistered lookback and completeness gate, is specified and awaits B11a unlocking.
 - [ ] Create probabilistic wallet clusters with evidence and confidence.
 - [ ] Calculate raw and cluster-adjusted concentration.
 - [ ] Create executable return, drawdown-first, dump hazard, rug/dump, graduation, and liquidity

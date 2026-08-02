@@ -100,6 +100,13 @@ These are study-specific results, not universal base rates:
   makes "the creator bought at launch" a point-in-time t0 fact rather than a look into the future,
   and it is the reason that feature is admissible at all. See `research/B11B_BASELINE_PLUMBING.md`.
 
+- **B13a verified fact — funding edges are recoverable from the frozen artifact.** Decoding System
+  instructions against the pinned ABI over a bounded slice of the burned corpus (60 curves' worth of
+  transactions) yielded **35,568 transfer edges** carrying source, destination, amount, canonical
+  coordinate and provenance. Funding-edge evidence therefore exists in this project's data; entity
+  resolution over it does not, and **funding-cluster leakage remains an open gate**. See
+  `research/B13A_HISTORY_FOUNDATION.md`.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)
