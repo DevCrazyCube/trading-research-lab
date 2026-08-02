@@ -40,21 +40,43 @@ copy of either rule would be a second check that fires only when the first alrea
 results stages — a declaration that drifted from what it describes reads like a guarantee and
 guarantees nothing.
 
-## Stage wiring — two stages are NOT ready
+## Stage wiring — repaired, and `launch_ready_for_collection: true`
 
-`--dry-run` reports `launch_ready_for_collection: false`. Two stages cannot be pointed at the
-isolated `research/b11a/` directory through their own interfaces:
+B9c and B9d read exactly four columns from a B9a-shaped source — `mint`, `bonding_curve`,
+`launch_slot`, `is_mayhem_mode`. All four are identity or regime facts, and all four are in B7d's
+`create_event`. Established by reading their SQL, not assumed.
 
-| stage | why |
+`build_cohort` is therefore a **local stage** (offline, no network, no evidence produced) that runs
+`b11d_cohort_adapter` between the enumeration and its consumers. See `B11D_COHORT_ADAPTER` in
+`research/B11C_WATCHER_AND_COHORT.md` for what it refuses to do.
+
+`b9d run` now takes `--b9c`/`--b9a`, and b9d distinguishes **burned** from **fresh** sources: the
+pinned hashes and frozen counts describe the burned corpus and are not applied to a fresh window,
+which must verify itself as a cohort artifact instead. **A mixed burned/fresh pair is refused** —
+that collects one window's signatures under another window's identity map, and neither artifact
+shows a sign of it afterwards.
+
+The `Q11_stage_wiring_unresolved` guard remains for the next stage that is not wired, and is tested
+against an injected unresolved command.
+
+## Liveness — a stored state is not a running process
+
+`--status` used to read the state file and ask nothing else, so a supervisor that died on Tuesday
+would still have reported `waiting_for_maturity` on Friday. It now reports **three independent
+signals** and publishes the stored value separately as `reported_state`:
+
+| signal | why |
 | --- | --- |
-| `signature_inventory` | `--source`/`--database` are explicit, but the script expects a **B9a-shaped** cohort schema while this window's population comes from the B7d enumerator. The compatibility has never been demonstrated |
-| `transaction_bodies` | `b9d run` reads its population from the module-level `B9C_PATH`/`B9A_PATH` constants and **accepts no override**, so it would collect this window against the **burned** corpus's inventory. Only `verify`, `decode` and `verify-artifact` take `--b9c`/`--b9a` |
+| the pid is running **this** watcher | matched on `scripts/b11c_maturity_watcher.py` **and** `--watch`, because a test runner invoked on `tests/test_b11c_maturity_watcher.py` carries the module name in its own argv |
+| the instance lock is actually held | acquiring it means nobody does |
+| the heartbeat is fresh | within three poll intervals; one missed poll is a slow endpoint, three is a process that is not polling |
 
-At maturity the watcher runs what it can prove — the A2 probe and the create enumeration — and then
-**quarantines** with `Q11_stage_wiring_unresolved`. Running an unresolved stage would either collect
-into the burned corpus's paths or read the burned corpus as this window's population, and both
-destroy an artifact that cannot be recollected. Resolving this needs a separate, reviewed change to
-the collection scripts.
+All three agreeing is `alive`; none is `dead`; anything in between is `stale`, because signals that
+disagree are never "running normally". The watcher writes its **own** pidfile under the lock and
+removes it on a clean exit, so a leftover pidfile means a crash.
+
+`archive_run` moves a superseded run's state and pidfile aside — never erases — and refuses to
+archive a run with completed stage receipts.
 
 ## Durability
 
@@ -92,9 +114,18 @@ exist inside sealed artifacts and their own logs; the supervisor publishes stage
 ```
 python scripts/b11c_maturity_watcher.py --dry-run   # offline plan, no network
 python scripts/b11c_maturity_watcher.py --verify    # offline verification only
-python scripts/b11c_maturity_watcher.py --status    # redacted operator status
+python scripts/b11c_maturity_watcher.py --status    # liveness + redacted operator status
 python scripts/b11c_maturity_watcher.py --watch     # the watcher
 ```
+
+Launched detached via `scripts/b11c_watcher_entrypoint.sh`, run inside a `tmux` session named
+`b11a-watcher`. The entrypoint sources `.env` **itself** rather than taking the URL as an argument
+or via `tmux new-session -e`: anything on a command line lands in a process argv, where `ps` shows
+it to every user on the box.
+
+Note that a tmux session inherits the **server's** environment, not the launching client's — so a
+session started against an already-running server sees none of what the client exported. That is
+why the entrypoint sources the file rather than relying on inheritance.
 
 ## Not covered
 
