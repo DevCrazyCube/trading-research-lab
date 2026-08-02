@@ -45,3 +45,8 @@ research/b15a/logs/
 research/b15b/rpc_exchanges.jsonl
 research/b15b/backfill.sqlite
 research/b15b/logs/
+
+# B15c calibration runtime.
+research/b15c/rpc_exchanges.jsonl
+research/b15c/calibration.sqlite
+research/b15c/logs/
