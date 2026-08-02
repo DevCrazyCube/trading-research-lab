@@ -446,7 +446,16 @@ def status(db_path=DB_PATH, include_figures=None):
         censored = connection.execute(
             "SELECT COUNT(*) FROM position WHERE status=?", (STATUS_CENSORED,)).fetchone()[0]
         figures = None
-        cohort_complete = bool(total) and censored == 0
+        # The FROZEN definition: complete when every cell is either mature or explicitly
+        # right-censored against the evidence read. My first implementation gated on
+        # `censored == 0`, which is stricter than the document it implements and would have
+        # withheld figures the freeze permits — and permanently, since a live feed always has
+        # curves that have not yet reached a horizon. Censoring is a terminal disposition here,
+        # not an unfinished one, which is exactly why the censoring RATE is published beside every
+        # figure: a censored cell may still mature as more evidence arrives, and a reader has to
+        # see how much of the cohort is missing before reading anything into what is present.
+        settled = (mature or 0) + censored
+        cohort_complete = bool(total) and settled >= total
         if include_figures is None:
             include_figures = cohort_complete
         if include_figures and exited:
@@ -478,6 +487,17 @@ def status(db_path=DB_PATH, include_figures=None):
         "by_horizon": by_horizon,
         "top_reasons": by_reason,
         "figures_withheld_until_cohort_complete": figures is None,
+        # Published beside the figures, never below them. The censored cells are not a random
+        # sample — a curve with no observation at its horizon is disproportionately one that
+        # stopped trading — so an observed-only figure always flatters, and by this much.
+        "censoring": {
+            "right_censored_cells": censored,
+            "exited_cells": exited,
+            "censored_share_numerator": censored,
+            "censored_share_denominator": total,
+            "note": "censored cells carry no return and are never scored as losses. They may "
+                    "mature as later evidence arrives.",
+        },
         "figures": figures,
         "no_aggregation_across_scenarios": True,
         "censored_never_scored_as_loss": True,

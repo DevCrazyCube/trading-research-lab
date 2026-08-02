@@ -339,11 +339,31 @@ class TestEndToEnd(Temp):
         B15E.run(raw_path=raw, b15d_path=b15d, work_dir=self.work)
         self.assertEqual(before, (raw.read_bytes(), b15d.read_bytes()))
 
-    def test_figures_are_withheld_until_the_cohort_is_complete(self):
+    def test_completeness_follows_the_frozen_definition_not_a_stricter_one(self):
+        """Complete when every cell is mature OR explicitly right-censored.
+
+        The first implementation gated on `censored == 0`, stricter than the document it
+        implements, which would have withheld figures permanently — a live feed always has curves
+        that have not yet reached a horizon.
+        """
         self._run([frame("S1", 1100)])
         report = B15E.status(db_path=self.work / "shadow_paths.sqlite")
-        self.assertFalse(report["cohort_complete"])
-        self.assertTrue(report["figures_withheld_until_cohort_complete"])
+        settled = report["mature_cells"] + report["by_status"].get(B15E.STATUS_CENSORED, 0)
+        self.assertEqual(report["cells"], settled)
+        self.assertTrue(report["cohort_complete"])
+
+    def test_the_censoring_rate_is_published_beside_the_figures(self):
+        """An observed-only figure always flatters, and a reader must see by how much."""
+        self._run([frame("S1", 1100)])
+        report = B15E.status(db_path=self.work / "shadow_paths.sqlite")
+        censoring = report["censoring"]
+        self.assertGreater(censoring["right_censored_cells"], 0)
+        self.assertEqual(report["cells"], censoring["censored_share_denominator"])
+        self.assertIn("never scored as losses", censoring["note"])
+
+    def test_figures_are_withheld_when_nothing_has_exited(self):
+        self._run([frame("S1", 1100)], cells=self._cells(status="refused"))
+        report = B15E.status(db_path=self.work / "shadow_paths.sqlite")
         self.assertIsNone(report["figures"])
 
     def test_the_status_line_is_redacted_and_labelled(self):
