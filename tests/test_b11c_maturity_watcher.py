@@ -528,8 +528,13 @@ class CompositionTests(unittest.TestCase):
     def test_the_status_publishes_stage_state_and_nothing_else(self):
         harness = Harness(self, [CUTOFF])
         harness.watch_all(poll_seconds=1, max_iterations=1)
-        view = W.status(harness.paths["state_path"], harness.paths["receipt_dir"])
-        self.assertEqual(view["state"], W.STATE_ALL_STAGES_COMPLETE)
+        view = W.status(harness.paths["state_path"], harness.paths["receipt_dir"],
+                        harness.directory / "watcher.pid", harness.directory / "lock")
+        # No process is running once the harness returns, so the live state is `dead` and the
+        # stored value is published separately. That is the whole point of the split.
+        self.assertEqual(view["liveness"], W.LIVENESS_DEAD)
+        self.assertEqual(view["state"], W.LIVENESS_DEAD)
+        self.assertEqual(view["reported_state"], W.STATE_ALL_STAGES_COMPLETE)
         self.assertEqual(sorted(view["stages_completed"]), sorted(W.RUN_ORDER))
         self.assertEqual(view["stages_remaining"], [])
 
@@ -841,6 +846,16 @@ class LockTests(unittest.TestCase):
             with self.assertRaisesRegex(W.WatcherRefused, "already holds"):
                 with W.InstanceLock(path):
                     pass
+
+    def test_the_watcher_writes_its_own_pidfile_under_the_lock(self):
+        """A pidfile written by the launching shell can name a process that never started, or
+        outlive one that did."""
+        directory = pathlib.Path(tempfile.mkdtemp(prefix="b11c-pid-"))
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        lock, pid = directory / "supervisor.lock", directory / "watcher.pid"
+        with W.InstanceLock(lock, pid):
+            self.assertEqual(int(pid.read_text().strip()), os.getpid())
+        self.assertFalse(pid.exists(), "a clean exit removes the pidfile it wrote")
 
     def test_the_lock_is_released_on_exit(self):
         directory = pathlib.Path(tempfile.mkdtemp(prefix="b11c-lock-"))

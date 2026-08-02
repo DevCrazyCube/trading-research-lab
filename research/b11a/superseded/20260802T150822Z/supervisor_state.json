@@ -1,0 +1,27 @@
+{
+  "composition_published": false,
+  "cutoff_slot_inclusive": 437211659,
+  "endpoint": "https://mainnet.helius-rpc.com",
+  "last_poll_at": 1785683052,
+  "last_tip_slot": 436788093,
+  "manifest_sha256": "d00105c817cfef6fa6e31b68aa9730c08f0058c079309cd79e5e64c099bbf3ab",
+  "poll_seconds": 300,
+  "polls": 7,
+  "preregistration_canonical_sha256": "ae4d2f0351aaba193fe7d87cde8cd68ce83aa8d21515d4d20af0a158f8dafe9f",
+  "quarantine": null,
+  "results_unlocked": false,
+  "run_order": [
+    "program_boundary",
+    "enumerate_creates",
+    "signature_inventory",
+    "transaction_bodies",
+    "decode_and_reserves",
+    "reserve_coverage_gate",
+    "failure_coverage_gate",
+    "simulator_replay_gate"
+  ],
+  "schema_version": "1.0.0",
+  "stage_in_flight": null,
+  "stages_completed": [],
+  "state": "waiting_for_maturity"
+}

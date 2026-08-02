@@ -641,8 +641,9 @@ class InstanceLock:
     is released by the kernel when the holder dies.
     """
 
-    def __init__(self, path=LOCK_PATH):
+    def __init__(self, path=LOCK_PATH, pid_path=PID_PATH):
         self.path = pathlib.Path(path)
+        self.pid_path = pathlib.Path(pid_path)
         self.handle = None
 
     def __enter__(self):
@@ -661,6 +662,11 @@ class InstanceLock:
             raise
         self.handle.write(f"{os.getpid()}\n")
         self.handle.flush()
+        # The watcher writes its OWN pidfile, under the lock it already holds. A pidfile written by
+        # the launching shell can name a process that never started, or survive one that did and
+        # died; this one exists only while a process that took the lock is alive to have written it.
+        pathlib.Path(self.pid_path).parent.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(self.pid_path).write_text(f"{os.getpid()}\n")
         return self
 
     def __exit__(self, *_exception):
@@ -669,6 +675,12 @@ class InstanceLock:
             fcntl.flock(self.handle.fileno(), fcntl.LOCK_UN)
             self.handle.close()
             self.handle = None
+        # Removed on a clean exit so a stale pidfile never outlives the process that wrote it. A
+        # crash leaves it behind, which is exactly why liveness needs three signals and not one.
+        try:
+            self.pid_path.unlink()
+        except OSError:
+            pass
         return False
 
 
