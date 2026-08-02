@@ -1419,3 +1419,67 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 70. **Owner review not separately obtained.**
 - **NOT authorised:** model fitting, UI, server, live RPC, signing, spending, paid subscription, or
   any computation on the B11a window.
+
+## 2026-08-02 — The risk veto is a fail-closed library above the policy, and may never resize (B12a)
+
+- **Status:** implemented offline library (`scripts/b12a_risk_governor.py`,
+  `docs/RISK_DECISION_SCHEMA.md`, `research/B12A_RISK_GOVERNOR.md`). No server, UI, model, signal,
+  wallet, key, transport, signing, submission or live RPC. **B11b unaltered and B11a still locked**,
+  both asserted by tests.
+- **Decision — the governor approves the exact proposed order or rejects it. There is no third
+  outcome.** A governor that quietly shrinks a proposal to fit a limit changes the thing being
+  evaluated: the policy proposed 0.1 SOL, the book received 0.03 SOL, and every return, drawdown
+  and capacity figure downstream then describes a strategy nobody wrote. `order_was_resized` is on
+  every record, always false, and a record invariant refuses one where it is not. A test also scans
+  for `suggested_size`-style fields, because the tempting way back in is to suggest a size rather
+  than apply one.
+- **Adopted — fail closed in three separately tested senses.** The empty reason list is the only
+  thing that approves. Every config, health, portfolio and proposal field is required, **no
+  financial limit defaults to zero or to infinity**, and an unknown config key is refused because a
+  misspelled limit is an absent limit wearing a plausible name. Any unexpected exception becomes a
+  refusal: a bug can stop this system and can never open it.
+- **Adopted — one limit rule everywhere: a limit is the largest permitted value, and strictly
+  exceeding it rejects.** That holds even for the daily realised loss, where "limit reached"
+  colloquially suggests otherwise; consistency beats colloquialism when the alternative is two rules
+  nobody can remember. Every limit is tested at cap-1, cap and cap+1.
+- **Adopted — both clocks are checked for staleness.** Slots stop advancing during an outage while
+  the wall clock keeps running, and a stalled provider can replay an old slot under a fresh
+  timestamp; checking one is checking neither. Evidence dated after the current instant is
+  conflicting evidence, not fresh evidence.
+- **Adopted — an unverifiable drawdown rejects.** A peak of zero is not evidence of no decline, and
+  a limit that cannot be checked has not been passed.
+- **Adopted — eligibility is delegated to `b11b.evaluate_vetoes`, not reimplemented.** A governor
+  admitting a different set of curves than the evaluation contract would make every evaluated result
+  unachievable in practice. A test asserts the veto-to-reason mapping is total in both directions
+  and that no curve formula appears in the governor.
+- **Adopted — all reasons reported, in a frozen precedence.** Controls are EVALUATED grouped by
+  concern and REPORTED ordered by severity, and the two orders differ deliberately so that emitting
+  reasons in computation order produces visibly wrong output. `order_reasons` takes the precedence
+  as a parameter so a test can prove the sort follows that tuple rather than insertion order or an
+  alphabetical coincidence.
+- **Adopted — no state between calls.** `apply_approved` returns a NEW portfolio snapshot and never
+  mutates its input; the caller threads it. Pending orders count toward every exposure limit because
+  they will become positions, and a re-submitted `proposal_id` is a duplicate rather than a
+  double-count. Two orders that each fit alone and together do not is the concurrency failure a
+  limit exists to prevent, and it is tested end to end.
+- **Every cap is caller-supplied and `operator_unratified`.** No treasury or risk authorization
+  exists, so the ratification enum accepts nothing else; adding a value requires a decision entry
+  here. Every record carries `approval_is_simulation_only` and `NO_SIGNING_OR_SUBMISSION`.
+- **Two defects the first version had, both found by tests rather than inspection.** (1) The record
+  did not publish the realised-PnL and peak/current figures the loss and drawdown controls read, so
+  an operator could see that those passed but not against what — and the decision hash was blind to
+  both, meaning two materially different books produced a byte-identical record. A `portfolio_risk`
+  block now carries them plus the current drawdown as an exact reduced pair. (2) Per-creator
+  position counting was under-tested: a mutant counting every position against every creator
+  survived, which would have turned the concentration limit into a tighter copy of the global one,
+  silently and in the conservative direction.
+- **Verification:** 36 mutants, all killed. Four survived the first run; two were my mutants being
+  wrong rather than the code being right (a `() or f(...)` mutation that still called `f`, and an
+  anchor matching two sites) and were retargeted, and two were real test gaps — the creator count
+  above, and a fail-open mutant that survived because the existing test provoked a fault with bad
+  input, which validation catches on a different path from the generic handler. A third gap appeared
+  when the unknown-key mutant survived: the misspelling test renamed a required field, so the
+  missing-field check fired first. 76 tests in the suite, 1,112 repository-wide.
+- **Ratified by:** the Codex directive of handoff 72. **Owner review not separately obtained.**
+- **NOT authorised:** execution, routing, submission, retry, cancellation, settlement, exit-side
+  risk, any model, or any live or devnet transaction.

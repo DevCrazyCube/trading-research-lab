@@ -134,6 +134,19 @@ Live Geyser/Yellowstone ──────┘                         |
                                 separately authorized execution + risk services
 ```
 
+**Implemented so far, and where the risk veto actually sits.** `scripts/b12a_risk_governor.py`
+(`docs/RISK_DECISION_SCHEMA.md`) is the "risk veto" box, built as a **deterministic, fail-closed
+library above the policy rather than inside it**. It consumes a candidate order, the exact curve
+state, a portfolio snapshot, a health snapshot and an explicit `RiskConfig`, and returns approve-or-
+reject with ordered reason codes.
+
+The load-bearing architectural choice: **it may not resize an order.** A governor that shrinks a
+proposal to fit a limit changes the thing being evaluated, so every return and drawdown figure
+downstream would describe a strategy nobody wrote. Two outcomes only, never three. It also holds no
+state between calls — the caller threads the portfolio snapshot — so concurrent proposals are
+accounted for without a mutable global, and it holds no wallet, key or transport: every record
+carries `NO_SIGNING_OR_SUBMISSION`.
+
 ### Historical ingestion
 
 Use Jetstreamer for bounded historical backfills. Write a custom Rust plugin that filters and decodes Pump, PumpSwap, fee, Mayhem, Token/Token-2022, associated-token, system-transfer, compute-budget, and relevant tip instructions.

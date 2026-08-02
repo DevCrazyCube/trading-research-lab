@@ -140,7 +140,18 @@ Gate: label audit demonstrates that no post-decision information enters features
 - [ ] Establish do-nothing, random, momentum, and curve-progress baselines.
 - [ ] Start with logistic, tree, calibration, and survival models.
 - [ ] Use purged chronological walk-forward evaluation and grouped uncertainty estimates.
-- [ ] Put a deterministic risk veto above all model entries.
+- [x] **Deterministic risk veto implemented above any model** (`scripts/b12a_risk_governor.py`,
+  `docs/RISK_DECISION_SCHEMA.md`, `research/B12A_RISK_GOVERNOR.md`). Fail-closed library: eleven
+  control families (kill switch, emergency state, evidence completeness/conflict/version/staleness
+  in both slots and wall-clock, regime eligibility delegated to B11b, reserve capacity, order size,
+  total and pending exposure, open-position and per-creator concentration, daily realised loss, and
+  realizable-portfolio drawdown), 24 reason codes in a frozen precedence with all reasons reported.
+  **It never resizes a proposal** — approve the exact order or reject it — because a governor that
+  silently shrinks an order changes the thing being evaluated. Integer lamports and exact rationals
+  only, no float; no limit defaults to zero or infinity; every unexpected failure refuses rather
+  than approves; no state between calls. Measured: **36/36 mutants killed**, 76 tests.
+  **Every cap is caller-supplied and `operator_unratified`** until treasury/risk authorization, and
+  every record carries `NO_SIGNING_OR_SUBMISSION`.
 - [ ] Evaluate net expectancy, drawdown, calibration, capacity, and regime stability.
 
 Gate: statistically credible improvement over baselines under executable and stressed simulation.
