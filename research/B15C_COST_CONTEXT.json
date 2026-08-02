@@ -1,0 +1,74 @@
+{
+  "artifact_kind": "cost_context",
+  "artifact_sha256": "3082f6ed39213527702e5efb92b0a2d9fe054af25862eca9b207368a04621804",
+  "blockers_that_keep_u04": [
+    {
+      "component": "tip_lamports",
+      "what_would_resolve_it": "an operator-stated list of tip accounts, recorded with its source",
+      "why": "the tip-account set is not declared, and the frozen evidence rule records a tip only against an explicitly declared set. Guessing which addresses are tip accounts would turn an unknown into a number."
+    },
+    {
+      "component": "execution_latency",
+      "what_would_resolve_it": "a caller-stated latency assumption, or a measurement of decision-to-landing that this shadow does not and cannot make without submitting",
+      "why": "the only latency this system measured is its OWN RPC round trip for a backfill request, which is not the latency between a decision and a landed transaction. Reporting one as the other would be a measurement of the wrong thing wearing the right name."
+    }
+  ],
+  "components_available": {
+    "base_fee": true,
+    "execution_latency": false,
+    "prioritization_fee": true,
+    "tip": false,
+    "total_fee": true
+  },
+  "conclusion": "U04_cost_inputs_unstated STANDS. Two of the four required inputs remain unavailable, so no P1 hypothetical entry is priced and no entry is proposed.",
+  "empirical_finding_meta_fee": {
+    "agreed": 376,
+    "agreement_rate": "376/376",
+    "checked": 376,
+    "conclusion": "meta.fee equals base_fee + prioritization_fee exactly, on every row where both were independently derivable. Established by arithmetic on observed transactions rather than taken from documentation.",
+    "question": "the primary source does not state whether meta.fee contains both base and prioritization fee"
+  },
+  "executable": false,
+  "frozen_after_sample_completed": true,
+  "frozen_rule_finding": {
+    "arguable_refinement": "an absent SetComputeUnitPrice arguably PROVES a zero prioritization fee, since no price was requested",
+    "observation": "34 of 410 rows carry a SetComputeUnitLimit with no SetComputeUnitPrice",
+    "under_the_frozen_rule": "prioritization fee is UNAVAILABLE for those rows, because the freeze requires both instructions",
+    "why_not_changed_here": "that is a change to a frozen rule, and a rule refined after seeing which rows it excluded is a rule chosen by the data. It belongs in a superseding preregistration, not in this run."
+  },
+  "label": "SIMULATED_SHADOW",
+  "not_a_quote": "these are the observed costs of OTHER traders' transactions. They are calibration evidence, not a price we are promised and not a landing probability at any quantile.",
+  "preregistration_canonical_sha256": "53a26143486e1d62eeefa985460b96ee438451e4ad843a646d4dde89012eeea9",
+  "preregistration_id": "B15C_COST_CALIBRATION_V1",
+  "prioritization_fee_lamports": {
+    "base_p50_lamports": 100000,
+    "executable": false,
+    "label": "SIMULATED_SHADOW",
+    "maximum_lamports": 138700000,
+    "meaning": "the observed cost of OTHER traders' transactions. Calibration evidence, not a quote, not a landing probability, and not a price we are promised.",
+    "minimum_lamports": 0,
+    "observations": 376,
+    "optimistic_p10_lamports": 1000,
+    "stressed_p90_lamports": 1000000
+  },
+  "sample": {
+    "excluded": 0,
+    "exclusions": {},
+    "fetched": 400,
+    "in_population": 40343,
+    "included": 410,
+    "sampled_by_hash_modulus_8": 5007
+  },
+  "schema_version": "1.0.0",
+  "total_fee_lamports": {
+    "base_p50_lamports": 53000,
+    "executable": false,
+    "label": "SIMULATED_SHADOW",
+    "maximum_lamports": 138705000,
+    "meaning": "the observed cost of OTHER traders' transactions. Calibration evidence, not a quote, not a landing probability, and not a price we are promised.",
+    "minimum_lamports": 5000,
+    "observations": 410,
+    "optimistic_p10_lamports": 5000,
+    "stressed_p90_lamports": 1005000
+  }
+}

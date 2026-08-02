@@ -444,11 +444,14 @@ def run(limit=None, raw_path=B15A_RAW, work_dir=WORK_DIR, opener=None, sleeper=t
     target = min(stopping["sample_target"], limit or stopping["sample_target"])
     already = {row[0] for row in connection.execute("SELECT signature FROM observation")} | \
               {row[0] for row in connection.execute("SELECT signature FROM exclusion")}
-    candidates = [row for row in population(raw_path, decoder)
+    everything = population(raw_path, decoder)
+    candidates = [row for row in everything
                   if is_sampled(row["signature"], sampling["sampling_modulus"],
                                 sampling["seed_string"])]
-    counts = {"in_population": None, "sampled": len(candidates), "fetched": 0, "included": 0,
-              "excluded": 0, "duplicates_skipped": 0}
+    # Published so the sample can be sized by a reader. A sample that reports only what it kept is
+    # a sample nobody can size.
+    counts = {"in_population": len(everything), "sampled": len(candidates), "fetched": 0,
+              "included": 0, "excluded": 0, "duplicates_skipped": 0}
     exclusions = {}
     latencies = []
     interval = rate["min_interval_ms"] / 1000.0
