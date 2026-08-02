@@ -2230,3 +2230,52 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 96. **Owner review not separately obtained.**
 - **NOT done:** no B10b paths, no B10c labels, no B11b evaluation, no outcome stage, no label
   enumeration unlock. **U4 and U5 remain a later explicit decision after collection.**
+
+## 2026-08-02 — An adapter, not a fabricated B9a; and a status that can see death (B11c/B11d, handoff 99)
+
+- **Decision:** the fresh window's cohort is derived by `b11d_cohort_adapter` from the B7d
+  enumeration, carrying exactly the four columns B9c and B9d read — `mint`, `bonding_curve`,
+  `launch_slot`, `is_mayhem_mode` — established by reading their SQL rather than assumed. The real
+  table is `cohort_identity`; `outcome` is a VIEW over it so the consumers' SQL works unchanged.
+- **Why not manufacture a B9a.** The tempting repair is a table called `outcome` with the identity
+  columns filled and the rest null. Every gate downstream would run, and fabricated results would
+  sit underneath a collection nobody could later distinguish from a real one. The table carries one
+  column the view does not — `create_signature` — which is provenance and is also what proves the
+  view is a projection rather than the table renamed; before it existed, `SELECT *` and the explicit
+  column list produced identical views and neither guard could be driven.
+- **Nothing is filtered.** Every create becomes a member, mayhem included: a cohort selected on any
+  property of what happened afterwards is a cohort selected on the answer. Integrity failures
+  **abort the build** rather than dropping rows, because a dropped row is a filter nobody declared.
+  Coverage is asserted: every slot in the declared window visited and resolved, and any decode error
+  aborts — an unscanned slot is a create nobody looked for.
+- **Burned pins describe one corpus and no other.** b9d now distinguishes burned from fresh sources:
+  burned keeps the pinned hashes and the frozen counts (94,985 signatures over 38,853 slots), fresh
+  applies neither and must verify itself as a cohort artifact, and a **mixed pair is refused** —
+  that collects one window's signatures under another window's identity map with no sign afterwards.
+  A fresh population that derives nothing is still refused: its two sources do not agree.
+- **A status that reads a file and asks nothing else cannot see death.** `--status` would have
+  reported `waiting_for_maturity` indefinitely for a process that died days earlier. It now reports
+  three independent signals and publishes the stored value separately as `reported_state`. **The pid
+  check is the subtle one:** matching the module name in a command line answers "yes" for a test
+  runner invoked on the test file — including the process asking the question — so it matches the
+  script path and `--watch` together, and the test uses the test process itself as the adversary.
+- **A correction to the prompting handoff.** Handoff 99 reported the watcher dead. It was alive:
+  PPID 1, holding its flock, polls advancing on schedule. The liveness claim was not correct on the
+  facts — but the defect underneath it was real, and the only reason the status was not misreporting
+  is that the process happened to still be running. **A check that is right by luck is worth
+  fixing.** The durability concern was fair too, and it now runs in a detached tmux session.
+- **Two launch lessons, recorded because both were silent:** a tmux session inherits the SERVER's
+  environment rather than the launching client's, so the first attempts died instantly with
+  `SOLANA_RPC_URL is not set`; and `tmux new-session -e VAR=value` puts the value in a process argv
+  where `ps` shows it to every user. The entrypoint sources `.env` itself, and a sweep across
+  `/proc` confirms no process exposes the credential.
+- **Verification:** 80 mutants across two sweeps, 80 killed, **none disclosed**. Four survivors were
+  resolved by making guards real rather than by weakening tests, including adding the provenance
+  column that made the view guards drivable. 2,109 passing repository-wide.
+- **Running, verified from a separate shell:** pid 542344 in tmux `b11a-watcher`, liveness alive on
+  all three signals, polls 3→4 in 260 s at a 300 s interval, tip 436,789,600 with 422,059 slots
+  remaining, endpoint `https://mainnet.helius-rpc.com`, no credential anywhere, no receipts, no
+  artifacts. The superseded pre-repair run is archived under `research/b11a/superseded/`, not erased.
+- **Ratified by:** the Codex directive of handoff 99. **Owner review not separately obtained.**
+- **NOT done:** no collection, no composition queried or published, no result stage, no label, no
+  unlock. U4 and U5 remain a later explicit decision.

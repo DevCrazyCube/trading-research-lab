@@ -342,29 +342,27 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
   metric value or return distribution reported**. 84 tests, 108 subtests; 65 mutants, 65 killed,
   none disclosed. No model fitted, no window eligible, no B11a outcome read.
 
-- [~] **B11a maturity watcher RUNNING; collection wiring blocked on two stages**
-  (`scripts/b11c_maturity_watcher.py`, `docs/MATURITY_WATCHER.md`). A durable supervisor that waits
-  for the frozen cutoff **437,211,659** on a **finalized** `getSlot` through B11a's one-method
-  allowlist, then runs the frozen collection stages once each with the **A2 program-boundary probe
-  first** — it costs no composition, and if version coverage cannot be proven there is nothing worth
-  collecting. Reverifies the preregistration's file and canonical hashes, the document against the
-  burned-range register, git ancestry and an 11-file manifest of every stage script and pinned IDL,
-  on start and on every resume. `flock` single instance, atomic state writes, one receipt per stage,
-  completed stages must be a true **prefix** of the run order, and a stage interrupted mid-flight
-  **quarantines rather than resumes** because a partial artifact is not a checkpoint. Bounded
-  retries for transport hiccups; anything else quarantines immediately. Thirteen quarantine codes.
-  The endpoint is recorded as **scheme://host only** and every durable write is scanned against the
-  live secrets, **fatally rather than by redaction**. Composition is refused as a *number keyed by a
-  window word*, so the pipeline's own stage names pass. Results stages are unreachable through a
-  single enforcement — B11a's own `assert_stage_permitted`. 69 tests, 94 subtests; 42 mutants, 42
-  killed, none disclosed. **LAUNCHED** read-only at a 300 s interval; verified one `getSlot` poll,
-  `waiting_for_maturity`, no credential in state or logs, no receipts and no artifacts.
-  **BLOCKING for collection:** `launch_ready_for_collection` is **false** — `b9c` expects a
-  B9a-shaped cohort schema while this window's population comes from B7d, and `b9d run` reads its
-  population from module constants with **no override**, so it would collect against the burned
-  corpus. At maturity the watcher runs the A2 probe and the create enumeration and then quarantines
-  with `Q11_stage_wiring_unresolved`. Resolving this needs a separate reviewed change to the
-  collection scripts, before the cutoff.
+- [~] **B11a maturity watcher RUNNING durably; collection wiring REPAIRED**
+  (`scripts/b11c_maturity_watcher.py`, `scripts/b11d_cohort_adapter.py`,
+  `scripts/b11c_watcher_entrypoint.sh`, `docs/MATURITY_WATCHER.md`,
+  `research/B11C_WATCHER_AND_COHORT.md`). Waits for the frozen cutoff **437,211,659** on a
+  **finalized** `getSlot` through B11a's one-method allowlist, then runs the frozen stages once each
+  with the **A2 probe first**. **Wiring repaired:** B9c and B9d read exactly four columns from a
+  B9a-shaped source — mint, bonding_curve, launch_slot, is_mayhem_mode, all identity or regime,
+  established by reading their SQL — so `b11d_cohort_adapter` derives those from the B7d enumeration
+  exhaustively with **no outcome manufactured and nothing filtered**; the real table is
+  `cohort_identity` (plus create-event provenance) and `outcome` is a VIEW exposing the four columns
+  the consumers query. `b9d run` now takes `--b9c`/`--b9a`, and b9d distinguishes **burned** from
+  **fresh** sources so the pinned hashes and frozen counts are never applied to a fresh window; a
+  **mixed pair is refused**. `--dry-run` reports **`launch_ready_for_collection: true`**.
+  **Liveness repaired:** `--status` reports alive/dead/stale from three independent signals — the
+  pid running *this* watcher (matched on script path and `--watch`, since a test runner carries the
+  module name in its own argv), the lock actually held, and a heartbeat within three intervals — and
+  publishes the stored value separately as `reported_state`. The watcher writes its own pidfile
+  under the lock; `archive_run` moves a superseded run aside and never erases. 85 + 34 tests; 80
+  mutants across two sweeps, 80 killed, none disclosed. **RUNNING** in detached tmux session
+  `b11a-watcher`, verified from a separate shell: liveness alive, polls advancing, no credential in
+  any argv/state/log, no receipts, no artifacts.
 
 Gate: label audit demonstrates that no post-decision information enters features.
 
