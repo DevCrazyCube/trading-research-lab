@@ -2176,3 +2176,57 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **NOT claimed and NOT done:** no model fitted, no real metric, no return distribution, no
   threshold, no eligible window, and no B11a outcome read — this module opens no file and connects
   to no database, asserted against its own source.
+
+## 2026-08-02 — The watcher waits on a finalized slot and quarantines rather than mis-collecting (B11c, handoff 96)
+
+- **Decision:** a durable unattended supervisor polls `getSlot` at **finalized** through B11a's
+  one-method allowlist every 300 s, and at the frozen cutoff runs the frozen collection stages once
+  each with the **A2 program-boundary probe first**. It is **running** as of this entry.
+- **Finalized, and exactly the cutoff.** A processed or confirmed slot can be rolled back, and a
+  window opened on a slot that later disappears was opened on nothing. One slot early is early.
+- **The A2 probe first** because an upgrade boundary is a property of the program rather than of the
+  window, so it costs no composition — and if version coverage cannot be proven there is nothing
+  worth collecting.
+- **BLOCKING FINDING, surfaced by the dry-run planner rather than at maturity:** the existing
+  collection scripts are wired to the burned corpus. `b9d run` reads its population from the
+  module-level `B9C_PATH`/`B9A_PATH` constants and accepts **no override**; `b9c` expects a
+  B9a-shaped cohort while this window's population comes from B7d. Running either unchanged would
+  collect this window into the burned corpus's paths or read the burned corpus as this window's
+  population, and both destroy an artifact that cannot be recollected. The watcher therefore reports
+  `launch_ready_for_collection: false`, runs what it can prove — the A2 probe and the create
+  enumeration — and **quarantines** with `Q11_stage_wiring_unresolved`. Resolving it needs a
+  separate reviewed change to the collection scripts before the cutoff.
+- **Stopping beats guessing.** Every quarantine condition is one where continuing would risk a
+  one-shot resource: a stage interrupted mid-flight quarantines rather than resuming, because a
+  partial artifact is not a checkpoint and this process cannot tell an interrupted run from a
+  corrupted one. Completed stages must be a true **prefix** of the run order — `["simulator_replay_
+  gate"]` alone is in run order and is not a prefix, which means every earlier stage was skipped.
+- **A match on a secret is fatal, not redacted.** The endpoint is recorded as `scheme://host`
+  because the configured URL carries its key in the query string. Every durable write is scanned
+  against the live environment secrets, and a hit refuses the write — a redaction that fails
+  silently looks exactly like one that worked.
+- **A composition leak is a NUMBER keyed by a window word**, not the word appearing anywhere. The
+  stage `enumerate_creates` is a name; a scan that fired on the pipeline's own vocabulary would be
+  switched off within a week.
+- **One enforcement for the results lock**, B11a's own `assert_stage_permitted` with
+  `results_unlocked=False`, which already encodes both maturity and the lock. Two local copies of
+  the same rule were removed during the sweep for being unfireable behind it; `FORBIDDEN_STAGES`
+  stays as a published declaration and is asserted to equal the pipeline's own results stages — a
+  declaration that drifted from what it describes reads like a guarantee and guarantees nothing.
+- **A bug the tests caught before launch:** `run_stage` called `write_state` without a path, so it
+  wrote to the **real** `research/b11a/supervisor_state.json` during tests. A stray quarantined
+  state file was left behind, which a real run would have refused to start against. Every path is
+  now a parameter, and a test asserts it.
+- **Verification:** 42 mutants, 42 killed, **none disclosed**. Thirteen first-run survivors were
+  almost all guards protecting constants that nothing could drive; `verify_preregistration`,
+  `verify_git_ancestry` and `verify_stage_order` are now parameterised so each is reachable, and one
+  duplicate endpoint comparison was **removed** because B11a's `assert_matches_preregistration` is
+  exactly that check. 69 tests, 94 subtests; **2,054 passing repository-wide**.
+- **Launch, verified:** running read-only at 300 s. One `getSlot` poll observed, state
+  `waiting_for_maturity`, tip 436,783,843 with 427,816 slots remaining, endpoint recorded as
+  `https://mainnet.helius-rpc.com` with no query, **no credential in state or logs**, no receipts and
+  no collection artifacts. Authorized read-only research collection; no paid service, no
+  transaction, no signing.
+- **Ratified by:** the Codex directive of handoff 96. **Owner review not separately obtained.**
+- **NOT done:** no B10b paths, no B10c labels, no B11b evaluation, no outcome stage, no label
+  enumeration unlock. **U4 and U5 remain a later explicit decision after collection.**

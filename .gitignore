@@ -23,3 +23,12 @@
 .autonomy/
 __pycache__/
 *.pyc
+
+# B11c watcher runtime state. Logs and receipts may reference collection artifacts and the
+# supervisor state changes every poll; neither belongs in history.
+research/b11a/supervisor_state.json
+research/b11a/supervisor_state.json.tmp
+research/b11a/supervisor.lock
+research/b11a/watcher.pid
+research/b11a/logs/
+research/b11a/receipts/

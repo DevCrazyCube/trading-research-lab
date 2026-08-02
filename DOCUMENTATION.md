@@ -206,6 +206,19 @@ These are study-specific results, not universal base rates:
   raises the *earlier* class — an ancestor — so code catching only the newest one silently misses
   the checks it inherited.
 
+- **B11c verified fact — the existing collection scripts are wired to the burned corpus, not to a
+  fresh window.** `b9d run` reads its population from the module-level `B9C_PATH`/`B9A_PATH`
+  constants and accepts no override (only `verify`, `decode` and `verify-artifact` take
+  `--b9c`/`--b9a`), and `b9c` defaults to and expects a B9a-shaped cohort. Pointing the B11a window
+  at them unchanged would either collect into the burned corpus's paths or read the burned corpus as
+  this window's population. Found by writing the supervisor's dry-run planner, not at maturity. See
+  `docs/MATURITY_WATCHER.md`.
+
+- **B11c design fact — a composition leak is a number keyed by a window word, not the word itself.**
+  The stage `enumerate_creates` contains "creates"; a scan that fired on the pipeline's own
+  vocabulary would be switched off within a week. The check therefore looks at keys whose value is
+  an integer, which catches `{"curves": 1234}` and lets a stage name through.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)
