@@ -314,6 +314,34 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
   three reasons, zero errors, **no metric reported**. 129 tests, 152 subtests; 96 mutants, 96
   killed, none disclosed. No model fitted, no window eligible, B11a never accessed.
 
+- [~] **Exact evaluation harness; every headline published on two bases, nothing fitted**
+  (`scripts/b14b_evaluation.py`, `scripts/b14b_evaluation_fixtures.py`,
+  `docs/EVALUATION_SCHEMA.md`, `research/B14B_EVALUATION_HARNESS.md`). Exact integer and
+  gcd-reduced-rational metrics — deployed capital, total net P&L, capital-weighted return, paired
+  model-minus-baseline P&L, pairwise concordance, Brier, calibration bins, maximum drawdown,
+  capacity/exposure and whole-cohort bucket counts — with **no float anywhere**. **Every headline
+  figure is published on BOTH bases at once**: `observed_evaluable` and
+  `whole_cohort_worst_case`, because rows that fail to produce an outcome are not a random sample
+  and a mean over the survivors answers a question nobody asked; a report with one basis, or a
+  headline metric on one basis alone, is refused, and neither may be labelled as the other.
+  **Censoring is refused three ways** — at the door (a non-marked side carrying a realised figure or
+  a class label), in the specification (every recoding treatment refused by name, and an invented
+  one refused for not being declared) and in the arithmetic (censored capital moves between the two
+  bases by exactly the censored amount). A declined decision deployed nothing and so cannot lose
+  anything. **The paired cohort is exactly the rows both sides produced**, a caller-supplied one is
+  refused, and the evaluability asymmetry is published; order size, horizon and cost policy live on
+  the row so a per-side difference is unrepresentable. Concordance counts only pairs whose outcomes
+  differ; Brier sums as one rational; drawdown comes from the published path, not the endpoints.
+  **Jackknife leaves out whole identity groups** from the split plan and is a spread, never a
+  p-value. **Multiplicity binds the frozen family of 16 and B11b's frozen primary cell**; a shrunken
+  family and a promoted secondary are both refused. No default metric, class threshold, calibration
+  bin edge, censoring treatment, worst-case rule or performance cutoff. Status locked to
+  `synthetic_plumbing_only` / `not_evaluated`; `publication_grade` refused and the refusal names the
+  **still-open funding-cluster gate**. Measured on synthetic rows only: 11 rows, 7 paired,
+  asymmetry both ways, 2/2 bases, 3/3 headline metrics, 7/7 refusals verified, zero errors, **no
+  metric value or return distribution reported**. 84 tests, 108 subtests; 65 mutants, 65 killed,
+  none disclosed. No model fitted, no window eligible, no B11a outcome read.
+
 Gate: label audit demonstrates that no post-decision information enters features.
 
 ### Phase 4 — models and policy

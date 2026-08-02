@@ -192,6 +192,20 @@ These are study-specific results, not universal base rates:
   lets the same person appear under two labels and sit on both sides of a split while every check
   passes, so R5 pools them and closes the graph transitively.
 
+- **B14b design fact — a headline over the evaluable rows is survivorship, and the rows that fail
+  are not a random sample.** A curve with no observed state is one nothing traded against; a
+  structurally unavailable exit is one the book could not absorb. Those are the outcomes that went
+  wrong in ways the pipeline could not price, so dropping them and reporting the mean of what
+  remains is exactly the selection that makes a strategy look good on paper. Every headline is
+  therefore published on two bases, and the distance between them is the size of what nobody knows.
+  See `research/B14B_EVALUATION_HARNESS.md`.
+
+- **B14b design fact — refusals form a chain across this project's modules, so callers must catch
+  the base.** `EvaluationRefused` ⊂ `ArtifactRefused` ⊂ `SplitRefused` ⊂ `VectorRefused` ⊂
+  `ConcentrationRefused` ⊂ … ⊂ `FreezeViolation`. A module that re-exports an earlier validator
+  raises the *earlier* class — an ancestor — so code catching only the newest one silently misses
+  the checks it inherited.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)

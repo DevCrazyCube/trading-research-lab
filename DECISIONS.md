@@ -2110,3 +2110,69 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 92. **Owner review not separately obtained.**
 - **NOT claimed and NOT done:** no model fitted, no weights, no algorithm implementation, no metric,
   no threshold, no cluster, no eligible window, and B11a was never accessed.
+
+## 2026-08-02 — Every headline is published twice, or not at all (B14b, handoff 94)
+
+- **Decision:** every headline evaluation figure is published on **two bases at once** —
+  `observed_evaluable` over the rows that produced an outcome, and `whole_cohort_worst_case` with
+  every unevaluable at-risk row assigned a total loss of its deployed capital. A report carrying one
+  basis is refused; a headline metric present on one basis and absent from the other is refused; and
+  neither may be labelled as the other.
+- **Why:** a headline computed on the rows that happened to be evaluable is survivorship, and it
+  always flatters. The rows that fail are **not a random sample** — a curve with no observed state
+  is one nothing traded against, a structurally unavailable exit is one the book could not absorb.
+  Those are the outcomes that went wrong in ways the pipeline could not price. Neither basis is the
+  answer: the truth lies between them, and **the distance between them is the size of what nobody
+  knows**, which makes it the most informative number in the report. A test asserts the two
+  genuinely differ on the fixture corpus, because if they ever collapsed together, mislabelling one
+  as the other would be invisible.
+- **Censoring is refused three ways**, because it can arrive three ways: at the door (a non-marked
+  side carrying a realised figure or a class label — an outcome nobody observed has no class); in
+  the specification (`recode_as_zero`, `recode_as_loss`, `impute_median`, `drop_silently` and
+  `carry_forward` refused **by name**, an invented one refused for not being declared); and in the
+  arithmetic (censored capital must move between the two bases by exactly the censored amount).
+  A decision the policy **declined** is a fourth thing: it deployed nothing, so it cannot lose
+  anything even under the worst case.
+- **Selection on evaluability is the pairing's own leak.** The paired cohort is *exactly* the rows
+  where both sides produced an outcome, a caller-supplied one is refused, and the asymmetry is
+  published rather than resolved. Order size, horizon and cost policy live on the **row**, making a
+  per-side difference unrepresentable rather than merely checked.
+- **Exactness where it is load-bearing:** Brier sums as one rational over a common denominator, not
+  a mean of rounded terms; concordance counts only pairs whose **outcomes differ**, since two
+  identical outcomes cannot rank each other and counting them would let a model that separates
+  nothing score one half by default; maximum drawdown comes from the published path, and the fixture
+  holds a path that fell to −700,000 and recovered to +10,000, where endpoint arithmetic reports no
+  drawdown at all.
+- **Jackknife leaves out whole identity groups**, not rows: rows sharing a creator or a trader are
+  not independent, and leaving one row out leaves the rest of that actor's behaviour in — narrowing
+  the spread in the flattering direction. It is a **spread and never a p-value**, and a test greps
+  the output to keep it so.
+- **Multiplicity binds the frozen family (16) and B11b's frozen primary cell.** A family that shrank
+  between preregistration and evaluation shrinks the correction with it, the cheapest way to make a
+  secondary cell look primary; promoting a secondary after the numbers are in is choosing the
+  hypothesis to match the result.
+- **Nothing has a default** — metric, class threshold, calibration bin edge, censoring treatment,
+  worst-case rule. There is no performance-cutoff field at all, because nobody has earned a "good
+  enough" line. Calibration edges must name the folds they were chosen on: edges chosen by looking
+  at the evaluation fold are edges fitted to the answer.
+- **Status locked** to `synthetic_plumbing_only` / `not_evaluated`; `publication_grade` is refused
+  and the refusal names the **still-open funding-cluster gate**.
+- **Measured on synthetic rows only:** 11 rows, 11 groups, 7 paired, one evaluability asymmetry each
+  way, 2/2 bases, 3/3 headline metrics on both, 7/7 refusals verified, zero errors. **No metric
+  value or return distribution appears**, and the enforcing test scans field *names* rather than raw
+  JSON, since hex digests match metric words by coincidence.
+- **Verification:** 65 mutants, 65 killed, **none disclosed**. Of five first-run survivors, one was
+  dead code **removed** (a zero-return branch for non-at-risk sides that `assert_side` already
+  guarantees), two were fixture weaknesses (both sides deployed identical capital, so a return
+  divided by the wrong denominator was the same number; and no test drove an *undeclared* censoring
+  treatment as distinct from a refused-by-name one), and two were properties the report does not
+  expose, now driven directly — canonical row ordering and the fixtures using one module graph — on
+  the same reasoning as B13d's tiebreak. 84 tests, 108 subtests; **1,985 passing repository-wide**.
+- **A property of the project written down at last:** refusals form a chain across modules, so a
+  module re-exporting an earlier validator raises the *ancestor* class. A caller catching only the
+  newest class silently misses the checks it inherited; **catch the project base**. Tested in both
+  directions.
+- **Ratified by:** the Codex directive of handoff 94. **Owner review not separately obtained.**
+- **NOT claimed and NOT done:** no model fitted, no real metric, no return distribution, no
+  threshold, no eligible window, and no B11a outcome read — this module opens no file and connects
+  to no database, asserted against its own source.
