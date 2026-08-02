@@ -54,3 +54,7 @@ research/b15c/logs/
 # B15d shadow entry runtime.
 research/b15d/shadow_entries.sqlite
 research/b15d/logs/
+
+# B15e shadow path runtime.
+research/b15e/shadow_paths.sqlite
+research/b15e/logs/
