@@ -1,0 +1,144 @@
+{
+  "preregistration_id": "B15A_SHADOW_PILOT_V1",
+  "supersedes": null,
+  "date": "2026-08-02",
+  "author": "Claude (handoff 112)",
+  "status": "FROZEN. Committed alone, before any code connects to any endpoint and before a single frame exists.",
+  "purpose": "Freeze the pilot window, the stopping rule, the record schemas, the decision vocabulary and the prohibitions for a live Pump launch SHADOW observer that never signs, never submits and never spends.",
+  "committed_before_first_connection": true,
+  "committed_before_any_frame_recorded": true,
+
+  "what_this_is": "A passive observer of public Solana log notifications. It records what it saw, when it saw it, what it could and could not decode, and what the FROZEN B11b P1 policy would hypothetically have proposed. Nothing it produces is an order, an execution, or a claim of profit.",
+
+  "isolation": {
+    "artifact_root": "research/b15a",
+    "may_not_read_or_write": ["research/b11a", "research/b9a_outcomes", "research/b9c_signature_inventory.sqlite", "research/b9d_transaction_bodies.sqlite", "research/b10b_observed_paths"],
+    "may_not_modify": "any file in the B11c integrity manifest",
+    "reason": "the frozen B11a corpus and the running collection must be untouchable from here; a shadow pilot that can write into the evaluation window is not a shadow"
+  },
+
+  "transport": {
+    "method": "logsSubscribe",
+    "protocol": "websocket, RFC 6455, implemented on the standard library because no dependency may be added",
+    "commitments_permitted": ["processed", "confirmed"],
+    "commitment_recorded_per_frame": true,
+    "endpoint_receipt": "scheme and host only, never the path or query",
+    "credential": "environment only; never an argument, never written to any artifact"
+  },
+
+  "fidelity_limitation": {
+    "headline": "THIS IS NOT GEYSER FIDELITY AND MAY NEVER BE DESCRIBED AS SUCH.",
+    "unavailable_evidence": [
+      "orphaned/forked slots — a log notification carries no reorg signal, so a launch observed here may later not exist on the canonical chain and this pilot cannot tell",
+      "account updates — no pre/post account state arrives, so reserves at the decision instant are not observable from the feed alone",
+      "slot-dead notifications — a skipped or dead slot is invisible, so a gap cannot be distinguished from silence",
+      "guaranteed delivery — logsSubscribe is best-effort; a dropped notification leaves no trace in the stream"
+    ],
+    "consequence": "every count this pilot produces is a LOWER BOUND on what happened, and every gap it records is a lower bound on what it missed. No completeness claim may be made from it."
+  },
+
+  "window_and_stopping_rule": {
+    "starts_at": "the first successful subscription confirmation, recorded as session_started_wall_unix and session_started_monotonic_ns",
+    "runs_until_first_of": [
+      {"rule": "wall_clock_hours", "value": 72},
+      {"rule": "observed_launch_records", "value": 5000}
+    ],
+    "extension_forbidden": true,
+    "extension_forbidden_reason": "a pilot extended after its operator has seen the numbers is a pilot whose length was chosen by the numbers",
+    "early_stop_permitted_only_for": [
+      "an explicit operator stop",
+      "a declared fault: credential absent, endpoint refusing, artifact path unwritable, or a decode-contract mismatch"
+    ],
+    "early_stop_must_be_recorded": true,
+    "no_result_may_be_reported_before": "the stopping rule fires or a declared fault stops the pilot"
+  },
+
+  "schemas": {
+    "raw_frame": {
+      "immutable": true,
+      "storage": "append-only JSONL; a line once written is never edited or deleted",
+      "fields": ["frame_seq", "session_id", "subscription_id", "received_wall_unix", "received_monotonic_ns", "commitment", "slot", "signature", "raw_notification_json", "raw_sha256"],
+      "note": "raw_notification_json is the provider's payload EXACTLY as delivered. Everything else in this system is derived from it and can be recomputed; it cannot."
+    },
+    "session": {
+      "fields": ["session_id", "endpoint_scheme_host", "commitment", "started_wall_unix", "started_monotonic_ns", "subscription_id", "ended_wall_unix", "end_reason", "frames_received", "reconnect_index"]
+    },
+    "connection_event": {
+      "fields": ["event_seq", "session_id", "kind", "wall_unix", "monotonic_ns", "detail"],
+      "kinds": ["connect_attempt", "subscribed", "heartbeat_sent", "heartbeat_received", "gap_suspected", "disconnected", "reconnect_scheduled", "fault"]
+    },
+    "launch": {
+      "fields": ["launch_seq", "session_id", "frame_seq", "signature", "slot", "mint", "bonding_curve", "creator", "user", "is_mayhem_mode", "quote_mint", "decoded_wall_unix", "decoded_monotonic_ns", "decode_status", "decode_error", "backfill_status", "backfill_wall_unix", "backfill_monotonic_ns", "evidence_sha256"],
+      "decode_statuses": ["decoded", "unknown_event", "decode_failed", "not_a_create"]
+    },
+    "decision": {
+      "fields": ["decision_seq", "launch_seq", "policy_id", "decided_wall_unix", "decided_monotonic_ns", "observation_to_decision_ns", "feature_availability", "policy_result", "reason_code", "hypothetical_quote_lamports", "simulated_entry", "outcome_placeholder", "evidence_sha256"],
+      "policy_results": ["shadow_entry_proposed", "no_shadow_entry"],
+      "hypothetical_only": true,
+      "outcome_placeholder": "always null in this pilot; the field exists so a later pass can fill it without changing the schema"
+    }
+  },
+
+  "policy": {
+    "policy_id": "P1_all_eligible_fixed_size",
+    "source": "the FROZEN B11b policy definition, re-instantiated; no B11b figure is imported",
+    "hypothetical_size_lamports": 100000000,
+    "size_justification": "0.1 SOL, unchanged from B10a/B10b/B10c/B11b. Reusing the existing size means no size was chosen with this pilot in view.",
+    "vetoes": "the exact B11b hard veto set, applied unchanged",
+    "risk_governor": "B12a semantics applied where inputs are available; its ratification stays operator_unratified",
+    "unknown_input_rule": "unknown, stale or incomplete input means NO SHADOW ENTRY with a reason code. Never a default, never an assumed value, never a zero."
+  },
+
+  "reason_codes": [
+    {"code": "S01_feed_only_no_reserves", "meaning": "reserves at the decision instant are not observable from logs alone and backfill did not supply them"},
+    {"code": "S02_backfill_unavailable", "meaning": "the launch transaction could not be retrieved"},
+    {"code": "S03_decode_incomplete", "meaning": "the create payload did not decode under the pinned IDL"},
+    {"code": "S04_veto", "meaning": "a B11b hard veto fired; the specific veto is recorded"},
+    {"code": "S05_risk_governor_rejected", "meaning": "B12a rejected the hypothetical proposal; the governor's own reason is recorded"},
+    {"code": "S06_stale_observation", "meaning": "the decision instant is further from the observation instant than the declared freshness bound"},
+    {"code": "S07_session_degraded", "meaning": "a gap or reconnect makes this observation's completeness unknown"},
+    {"code": "S08_outside_pilot_window", "meaning": "the stopping rule has already fired"}
+  ],
+
+  "freshness_bound_ns": 30000000000,
+  "freshness_bound_justification": "30 seconds, measured on the MONOTONIC clock. Chosen before any latency was observed, so it cannot have been fitted to the distribution it bounds. A decision older than this is recorded as stale rather than acted on hypothetically.",
+
+  "passive_measurements": [
+    {"name": "feed_latency_ns", "definition": "frame received monotonic minus the provider's slot-implied instant where derivable; otherwise inter-frame arrival statistics only", "honest_limitation": "logsSubscribe carries no provider send timestamp, so absolute one-way latency is NOT measurable; what is measurable is arrival spacing and observation-to-decision time"},
+    {"name": "reconnect_rate", "definition": "reconnects per session hour"},
+    {"name": "gap_rate", "definition": "suspected gaps per session hour, from slot discontinuity in observed frames"},
+    {"name": "backfill_success_rate", "definition": "retrieved launch transactions over attempted"},
+    {"name": "backfill_latency_ns", "definition": "monotonic time from decode to backfill completion"},
+    {"name": "decode_unknown_rate", "definition": "unknown_event plus decode_failed over all candidate frames"},
+    {"name": "observation_to_decision_ns", "definition": "monotonic time from frame receipt to policy result"}
+  ],
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind, in memory, in a file, or in an environment variable read by this pilot",
+    "signing anything",
+    "constructing a transaction",
+    "submitting a transaction",
+    "tips, priority fees, or any spending",
+    "external messaging of any kind",
+    "any claim that a result is executable, live, profitable or production ready",
+    "fitting any model",
+    "adding any window to B14c eligible_windows",
+    "reading or writing the B11a corpus",
+    "altering or restarting the B11c watcher or any manifest-pinned file"
+  ],
+
+  "status_locks": {
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "publication_grade": false,
+    "b14c_eligible_windows_unchanged": true,
+    "refused_status_names": ["executable", "live", "profitable", "production_ready", "validated", "geyser_fidelity", "complete"]
+  },
+
+  "operator_status_command": {
+    "redacted": true,
+    "publishes": ["session identity", "liveness", "uptime", "frames received", "reconnects", "gaps", "decode status counts", "decision counts by reason code", "the stopping rule and progress toward it"],
+    "never_publishes": ["any credential", "the endpoint path or query", "any mint, curve, creator or signature", "any hypothetical size or simulated figure"],
+    "never_publishes_reason": "a status line is read by people and pasted into places; identities and figures do not belong in one"
+  }
+}
