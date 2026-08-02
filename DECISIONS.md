@@ -1693,3 +1693,66 @@ The two do not imply each other. A user-ratified decision can remain provisional
   B13b. **Owner review not separately obtained.**
 - **NOT claimed:** any cluster, lookback, feature distribution or model. B11a was not queried,
   enumerated or read; no baseline changed.
+
+## 2026-08-02 — Association evidence, never association conclusions (B13b, handoff 82)
+
+- **Decision:** the actor-association layer is an **evidence ledger** with
+  `confidence_status = "uncalibrated_evidence_only"`. It publishes pairwise observations with
+  coordinates and source hashes, and it emits no cluster, no entity, no merge, no probability, no
+  score and no "same owner" claim.
+- **Why:** the tempting chain is one short step — shared funder, therefore same actor, therefore
+  higher concentration, therefore riskier — and by the fourth arrow every judgement has turned into
+  a number that looks like a measurement. A cluster is **indistinguishable from an observation**
+  once it is in a record: `prior_launch_count_observed` says where it came from, `cluster_id` does
+  not, and three phases later nobody remembers which was inferred.
+- **Four refusals are structural, not promised.**
+  1. **A link must be witnessed.** Every evidence item names its `witness_addresses` and every item
+     must name both endpoints, so A—B evidence witnesses {A,B}, B—C witnesses {B,C}, and no A—C link
+     can be written from them. Non-transitivity is a property of the data structure.
+  2. **Exact identity is a separate relation type** requiring `address_a == address_b` and admitting
+     only equality evidence — the wall between "they transacted" and "they are the same".
+  3. **Nothing calibrated may enter, by name or by type.** Any field whose NAME contains `cluster`,
+     `probability`, `same_owner`, `score`, `merge`, `posterior`, `component`, `entity_id`,
+     `likelihood` or `calibrat` is refused at any depth, and no float may appear anywhere.
+  4. **The clustering operations exist in order to refuse.** All five raise `ClusterRefused`, a
+     distinct subclass, because an absent operation invites a caller to write their own.
+- **Each evidence kind carries what it does not mean**, and that half travels on the record: a
+  direct transfer is evidence of a transfer and nothing else; a shared funder is a shared
+  counterparty, not common control; co-occurrence is being named, not acting; co-signing is a shared
+  action, weaker than shared control. **The kinds overlap and are therefore not independent** — a
+  transfer is also a co-occurrence — which is recorded on the item and is one more reason these
+  counts may never be summed into a score.
+- **`unknown` counts AGAINST a link.** A shared service wallet is the obvious false link, so absence
+  of a known service role is not evidence of absence of a service. Registering an address explicitly
+  as `unknown` is refused: unknown is what absence already means. Under today's data no role is
+  established, so **every measured link carries counter-evidence** — the correct output, not a gap.
+- **Direction is never dropped and never netted**, and incompleteness propagates from B13a with
+  `require_complete_neighbourhood` failing closed per address against that address's own t0.
+- **Measured, structural counts only:** 270 links and 10,988 evidence items over 12 focus addresses
+  at 5 instants of the burned corpus; 5/5 on boundary, witnessing, counter-evidence, identity
+  containment and order independence; 60/60 neighbourhoods refused; 5/5 refusing operations verified
+  to refuse; zero errors. **Focus addresses are chosen by first appearance in canonical order, never
+  by degree** — selecting the most connected wallets would pick the population on the very quantity
+  the ledger measures. No association degree or distribution was computed. `E05` is disclosed as
+  unexercised by this corpus and covered by fixtures instead.
+- **Verification:** 53 mutants, 53 killed, **none disclosed as equivalent**. Nine survived the first
+  run: six were genuine gaps (one-way repetition collapsed to two-way, the ledger-level confidence
+  status, canonical link ordering as distinct from mere determinism, the evidence derivation's own
+  tiebreak, and the corpus runner's focus selection and gate conditions). **Three were redundant
+  checks and were removed rather than disclosed** — a duplicate no-evidence check, a ledger-level
+  transitivity call that could never fire behind the strictly stronger per-item rule, and gate
+  conditions inlined where only a full corpus run could reach them. The last became a pure
+  `gate_failures` function: a gate whose conditions can only be exercised by running the whole
+  corpus is a gate nobody can show works. 98 tests, 62 subtests; **1,406 passing repository-wide**.
+- **Consequence — the clustering gate is now concrete.** Before any cluster may be inferred, a
+  preregistration must settle the merge rule and threshold before the cohort is enumerated; how a
+  cluster is invalidated when a service role appears on one of its links; **funding-cluster
+  leakage**, still open, since a cluster fitted on a population chosen with outcomes visible encodes
+  which actors mattered even when every edge predates t0; and what a cluster claims when its
+  neighbourhood is incomplete — today all 60 measured ones are.
+- **Not chosen, deliberately:** the lookback (in slots), the repetition threshold, any probability
+  calibration and any merge threshold. Each needs its own preregistration written before the actors
+  it applies to are known, and none may be picked by looking at an observed ledger.
+- **Ratified by:** the Codex directive of handoff 82. **Owner review not separately obtained.**
+- **NOT claimed:** any cluster, model, threshold, degree distribution or label association. B11a was
+  not queried, enumerated or read; no baseline changed.

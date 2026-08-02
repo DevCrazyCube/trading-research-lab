@@ -134,6 +134,29 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
   equivalent. Clusters are NOT
   inferred and funding-cluster leakage remains an open gate. The cohort-based collection plan,
   including a preregistered lookback and completeness gate, is specified and awaits B11a unlocking.
+
+- [~] **Actor association EVIDENCE LEDGER built; clustering still gated**
+  (`scripts/b13b_association.py`, `scripts/b13b_association_corpus.py`,
+  `docs/ASSOCIATION_SCHEMA.md`, `research/B13B_ASSOCIATION_LEDGER.md`). A pure point-in-time ledger
+  of pairwise evidence over B13a identity roles and raw funding edges: six typed evidence kinds
+  (exact address equality, direct transfer, shared funder, repeated counterparty, co-occurrence,
+  co-signing launch roles), each carrying what it does NOT mean, each with canonical coordinates at
+  or before t0 and a source hash per observation. **Four refusals are structural**: every link must
+  be witnessed by evidence naming BOTH endpoints, so A—B plus B—C cannot manufacture A—C; exact
+  identity is a separate relation type from association; any field whose NAME asserts a cluster,
+  probability, score or owner is refused anywhere at any depth, and no float may appear; and
+  `cluster_id`, `connected_component`, `merge_addresses`, `association_probability` and
+  `cluster_adjusted_concentration` all exist and all raise. `confidence_status` is
+  `uncalibrated_evidence_only` throughout. Counter-evidence is mandatory and an **unknown service
+  role raises the flag rather than lowering it**, because a shared service wallet is the obvious
+  false link. Incompleteness propagates from B13a and `require_complete_neighbourhood` fails closed
+  per address. Measured on the burned corpus, structural counts only: 270 links and 10,988 evidence
+  items over 12 focus addresses at 5 instants, 5/5 on boundary, witnessing, counter-evidence,
+  identity containment and order independence, 60/60 neighbourhoods refused, 5/5 refusing
+  operations verified to refuse, zero errors — **and no association degree or distribution
+  reported, on any window**. 53 mutants, 53 killed, none disclosed. **The lookback, repetition
+  threshold, probability calibration and merge threshold are specified and NOT chosen**; each needs
+  its own preregistration before the actors it applies to are known. Clusters are NOT
 - [ ] Create probabilistic wallet clusters with evidence and confidence.
 - [ ] Calculate raw and cluster-adjusted concentration.
 - [ ] Create executable return, drawdown-first, dump hazard, rug/dump, graduation, and liquidity

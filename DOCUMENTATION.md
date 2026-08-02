@@ -117,6 +117,18 @@ These are study-specific results, not universal base rates:
   and only a pinned fixture exposed it. Undecodable payloads are therefore a real, rare and
   permanent condition of this data, not a hypothetical.
 
+- **B13b design fact — a cluster is indistinguishable from an observation once it is in a record.**
+  `prior_launch_count_observed` says where it came from; `cluster_id` does not. That asymmetry is
+  why the association ledger publishes evidence and refuses conclusions, and why the refusal is
+  enforced on **field names** rather than values: a field called `cluster_id` holding `"none"` still
+  teaches the next reader that clusters are something this record has. See
+  `research/B13B_ASSOCIATION_LEDGER.md`.
+
+- **B13b design fact — overlapping evidence is not independent evidence.** Every direct transfer
+  between two addresses is also a co-occurrence in the same transaction, so one observation can
+  produce several evidence items of different kinds. The ledger records the overlap on the item
+  itself; summing these counts into a score would count one event as several corroborating ones.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)
