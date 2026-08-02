@@ -1,0 +1,10 @@
+{
+  "archived_at": "20260802T160400Z",
+  "composition_published": false,
+  "moved": [
+    "/home/anont/meme/research/b11a/superseded/20260802T160400Z/supervisor_state.json",
+    "/home/anont/meme/research/b11a/superseded/20260802T160400Z/supervisor.lock"
+  ],
+  "reason": "manifest drift after pre-stage defect fixes; zero stages completed; controlled relaunch authorized by Codex",
+  "stages_completed": []
+}
