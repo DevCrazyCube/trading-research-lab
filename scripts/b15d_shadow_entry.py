@@ -171,6 +171,57 @@ def assert_no_double_count(scenario, cost_context):
 # Observations — canonical order, from recorded evidence only
 # --------------------------------------------------------------------------------------------
 
+def observations_by_mint(raw_path, mints, decoder, trade_discriminator, min_slot_by_mint=None):
+    """Every recorded TradeEvent on the curves of interest, in canonical order, in ONE pass.
+
+    Written as one pass on purpose. The obvious shape — a helper that scans the log for a single
+    mint, called once per launch — is O(launches x log size), and against a 1.1 GB log and five
+    hundred launches it does not finish. Reading the evidence once and bucketing by mint is the
+    same answer at a fraction of the work.
+
+    Only mints of interest are retained, and only observations at or after each curve's own
+    earliest useful slot, so memory is bounded by the launches being priced rather than by the log.
+    """
+    mints = set(mints)
+    min_slot_by_mint = min_slot_by_mint or {}
+    buckets = {mint: {} for mint in mints}
+    with pathlib.Path(raw_path).open() as handle:
+        for line in handle:
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            params = (record.get("raw_notification_json", {}).get("params") or {}).get("result") \
+                or {}
+            value = params.get("value") or {}
+            if value.get("err") is not None:
+                continue
+            slot = (params.get("context") or {}).get("slot")
+            signature = value.get("signature")
+            payloads, _skipped = PILOT.program_data_payloads(value.get("logs"))
+            for index, payload in enumerate(payloads):
+                body = payload[len(PILOT.EVENT_TAG):] \
+                    if payload.startswith(PILOT.EVENT_TAG) else payload
+                if len(body) < 8 or body[:8].hex() != trade_discriminator:
+                    continue
+                try:
+                    fields = decoder["b7d"].read_struct(
+                        decoder["b7d"].Cursor(body[8:]), decoder["types"]["TradeEvent"],
+                        decoder["types"])
+                except Exception:                                         # noqa: BLE001
+                    continue
+                mint = fields.get("mint")
+                if mint not in mints:
+                    continue
+                floor = min_slot_by_mint.get(mint)
+                if floor is not None and slot is not None and slot < floor:
+                    continue
+                buckets[mint][(slot, signature, index)] = {
+                    "slot": slot, "signature": signature, "log_index": index, "fields": fields}
+    return {mint: [rows[key] for key in sorted(rows, key=lambda k: (k[0], k[1], k[2]))]
+            for mint, rows in buckets.items()}
+
+
 def curve_observations(raw_path, mint, decoder, trade_discriminator):
     """Every recorded TradeEvent on one curve, in canonical order.
 
@@ -354,11 +405,19 @@ def run(limit=None, raw_path=B15A_RAW, b15b_path=B15B_DB, work_dir=WORK_DIR,
     trade = next(bytes(e["discriminator"]).hex() for e in idl["events"]
                  if e["name"] == "TradeEvent")
     launches = eligible_launches(b15b_path, limit)
+    # ONE pass over the raw log covering every launch at once. Scanning per launch was
+    # O(launches x log size) and did not finish against a 1.1 GB log with five hundred launches.
+    smallest_delay = min(delays)
+    floors = {}
+    for _signature, t0_slot, mint in launches:
+        floor = t0_slot + smallest_delay
+        floors[mint] = min(floors.get(mint, floor), floor)
+    index = observations_by_mint(raw_path, {row[2] for row in launches}, decoder, trade, floors)
     counts = {"launches": len(launches), "cells": 0}
     by_status = {}
     by_cell = {}
     for signature, t0_slot, mint in launches:
-        observations = curve_observations(raw_path, mint, decoder, trade)
+        observations = index.get(mint, [])
         for scenario in scenarios:
             policy = cost_policy(scenario)
             for delay in delays:
@@ -414,11 +473,24 @@ def _price(state, observation, policy, order_spec):
     priced = dict(empty)
     priced.update(schedule)
     priced["tokens_out"] = result.get("tokens_out")
-    costs = result.get("costs") or {}
-    execution = sum(value for key, value in costs.items()
-                    if isinstance(value, int) and key != "failed_attempts")
-    priced["execution_cost_lamports"] = execution
-    priced["total_outlay_lamports"] = order_spec["quote_lamports"] + execution
+    # Read the figures B10a COMPUTED, and refuse if they are absent.
+    #
+    # The first version summed `result.get("costs") or {}`. B10a's key is `execution_costs`, so the
+    # get returned an empty dict, the sum returned 0, and every one of 5,352 priced cells recorded
+    # an execution cost of zero — three scenarios costing 2.0, 2.1 and 4.0 million lamports all
+    # reported as free, with nothing raised. Summing an absent structure to zero is precisely the
+    # zero-by-absence this project refuses everywhere else, and it slipped in through `or {}`.
+    costs = result.get("execution_costs")
+    if not isinstance(costs, dict) or "total" not in costs:
+        raise ShadowEntryRefused(
+            "the pricing result carries no execution_costs.total; a missing cost structure is not "
+            "a cost of zero")
+    if "lamports_out_of_wallet" not in result:
+        raise ShadowEntryRefused("the pricing result carries no lamports_out_of_wallet")
+    priced["execution_cost_lamports"] = costs["total"]
+    # B10a's own total outlay, which includes the curve fees. Re-deriving it as quote + execution
+    # would silently drop them.
+    priced["total_outlay_lamports"] = result["lamports_out_of_wallet"]
     assert_no_float(priced)
     return STATUS_PRICED, None, priced
 

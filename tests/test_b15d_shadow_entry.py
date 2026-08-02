@@ -352,6 +352,64 @@ class TestPricingEndToEnd(Temp):
         self.assertEqual(0, row[3], "the route sends no tip")
         self.assertEqual(2039280, row[4])
 
+    def test_a_priced_cell_charges_the_scenario_it_was_priced_under(self):
+        """The defect this replaced: every priced cell recorded an execution cost of ZERO.
+
+        The code summed `result.get("costs") or {}`; B10a's key is `execution_costs`, so the get
+        returned an empty dict and the sum returned 0. Three scenarios costing 2.0, 2.1 and 4.0
+        million lamports all reported as free, and nothing was raised — zero by absence, arriving
+        through `or {}`.
+        """
+        self._run([frame(f"S{slot}", slot) for slot in (1001, 1002, 1004)])
+        connection = sqlite3.connect(self.work / "shadow_entries.sqlite")
+        rows = dict(connection.execute(
+            "SELECT scenario_id, MIN(execution_cost_lamports) FROM candidate "
+            "WHERE status='priced' GROUP BY 1"))
+        connection.close()
+        expected = {}
+        for scenario in self.document["cost_scenarios"]:
+            expected[scenario["scenario_id"]] = (
+                scenario["base_fee_lamports"] + scenario["priority_fee_lamports"]
+                + scenario["tip_lamports"] + scenario["ata_rent_lamports"]
+                + scenario["failed_attempts"] * (scenario["base_fee_lamports"]
+                                                 + scenario["priority_fee_lamports"]))
+        self.assertEqual(expected, rows)
+        for scenario_id, cost in rows.items():
+            with self.subTest(scenario=scenario_id):
+                self.assertGreater(cost, 0, "a priced entry is never free")
+
+    def test_the_three_scenarios_cost_differently(self):
+        """If they all cost the same, the scenario grid is decoration."""
+        self._run([frame(f"S{slot}", slot) for slot in (1001, 1002, 1004)])
+        connection = sqlite3.connect(self.work / "shadow_entries.sqlite")
+        costs = {row[0] for row in connection.execute(
+            "SELECT DISTINCT execution_cost_lamports FROM candidate WHERE status='priced'")}
+        connection.close()
+        self.assertEqual(3, len(costs), f"expected three distinct scenario costs, got {costs}")
+
+    def test_the_total_outlay_includes_the_curve_fees(self):
+        """B10a's own lamports_out_of_wallet, not quote plus execution, which drops the fees."""
+        self._run([frame(f"S{slot}", slot) for slot in (1001, 1002, 1004)])
+        connection = sqlite3.connect(self.work / "shadow_entries.sqlite")
+        row = connection.execute(
+            "SELECT quote_lamports, execution_cost_lamports, total_outlay_lamports FROM candidate "
+            "WHERE status='priced' LIMIT 1").fetchone()
+        connection.close()
+        self.assertGreater(row[2], row[0] + row[1],
+                           "total outlay must exceed quote + execution by the curve fees")
+
+    def test_a_result_without_execution_costs_stops_the_run_rather_than_recording_zero(self):
+        """A broken pricing contract is not one bad candidate, it is a bad run.
+
+        Recording it as a `refused` row among thousands would bury it. The whole run stops so the
+        contract violation is the thing the operator sees.
+        """
+        original = B10A.price_entry
+        self.addCleanup(lambda: setattr(B10A, "price_entry", original))
+        B10A.price_entry = lambda *a, **k: {"tokens_out": 1}
+        with self.assertRaisesRegex(Refused, "not\\s+a cost of zero"):
+            self._run([frame(f"S{slot}", slot) for slot in (1001, 1002, 1004)])
+
     def test_stale_candidates_are_preserved_not_dropped(self):
         """The curves with no later observation are disproportionately the ones that died."""
         counts = self._run([frame("S1", 1000)])
