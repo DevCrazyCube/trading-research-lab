@@ -50,3 +50,7 @@ research/b15b/logs/
 research/b15c/rpc_exchanges.jsonl
 research/b15c/calibration.sqlite
 research/b15c/logs/
+
+# B15d shadow entry runtime.
+research/b15d/shadow_entries.sqlite
+research/b15d/logs/
