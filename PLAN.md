@@ -205,6 +205,38 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
   credential, no vendor selected**; future adapter and credential/privacy rules are specified. The
   burned corpus and B11a were never opened.
 
+- [~] **Exact point-in-time concentration foundation built; no thresholds, no clusters**
+  (`scripts/b13d_concentration.py`, `scripts/b13d_concentration_fixtures.py`,
+  `docs/CONCENTRATION_SCHEMA.md`, `research/B13D_CONCENTRATION_FOUNDATION.md`). Raw concentration
+  over an as-of-t0 holder-balance snapshot in exact integers and gcd-reduced rationals — **no float
+  anywhere**. **Every share is published under BOTH denominators**: total supply (ranking every
+  account, including the curve's) and circulating user (the SUM of user-role balances, ranking user
+  accounts only), because concentration is whatever the denominator says it is and publishing one
+  of them is a choice made on the reader's behalf. The circulating denominator is a sum of
+  inclusions, never supply minus exclusions — a sum names what it included, a subtraction hides
+  what it removed — and each view states its own `scope_roles` since the two differ in numerator as
+  well. Outputs: holder counts, top-1/5/10 with `entries_available`/`entries_counted` so a short
+  top-k says so, a Herfindahl as one exact ratio `Σbᵢ²/D²`, per-role balances for all six roles, and
+  a creator share scoped exactly like its denominator. **Unknown is never a user** — counting it as
+  one would enlarge the denominator and shrink every share, the flattering direction. **Accounts are
+  never collapsed to owners without exact evidence for every account**: one unresolved account
+  blocks it, because it could belong to the largest holder and a top-1 without it is a lower bound.
+  Full reconciliation fails closed on duplicate accounts, negative balances, a second mint, mixed
+  decimals, missing roles, unresolved owners naming an owner, accounts exceeding supply, and a
+  complete enumeration with a residual; **the residual is published, zero-balance accounts are kept,
+  and an empty denominator is undefined rather than zero**. Point-in-time is strict: a later holder
+  state cannot be backfilled. **Cluster adjustment is structurally unavailable** —
+  `cluster_adjusted_concentration` and `connected_components` always raise, no artifact type is
+  accepted, the record carries no cluster field at all, and a B13b association ledger passed as a
+  cluster map gets its own refusal naming what it is. Measured on synthetic fixtures only: 9
+  snapshots, 33 accounts, 9/9 on reconciliation, both-denominator publication, exact rationals,
+  top-k monotonicity, role accounting, hash stability and order independence; 3/3 later snapshots
+  refused; all three cluster refusals verified; zero errors — **and no concentration value or
+  distribution reported**. Arithmetic checked against `fractions.Fraction` as an independent oracle.
+  75 mutants, 75 killed, none disclosed. **No RPC queried, no threshold/veto/profitability class/rug
+  label chosen**; future token-account capture requirements are specified. The burned corpus and
+  B11a were never opened.
+
 Gate: label audit demonstrates that no post-decision information enters features.
 
 ### Phase 4 — models and policy

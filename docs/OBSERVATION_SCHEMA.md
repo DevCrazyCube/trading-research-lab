@@ -100,9 +100,14 @@ we had already received turns the answer into `Absent(deleted)`.
 
 ## Absence is not zero and not false
 
-`Absent` carries a reason — `unknown`, `unavailable`, `deleted`, `not_yet_known` — and calling
-`bool()` on it **raises**. A sentinel that quietly evaluates to `False` is how "we never received a
-price" becomes "the price was nothing". Test for it with `is_absent()`.
+`Absent` carries a reason — `unknown`, `unavailable`, `deleted`, `not_yet_known`, `undefined` — and
+calling `bool()` on it **raises**. A sentinel that quietly evaluates to `False` is how "we never
+received a price" becomes "the price was nothing".
+
+`undefined` is not merely missing: it is a value that cannot exist, such as a share of an empty
+denominator. Reporting that as zero would be the most confident possible way to be wrong.
+
+Test for absence with `is_absent()`.
 
 ## A ticker is not a token
 

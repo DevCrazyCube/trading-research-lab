@@ -141,6 +141,19 @@ These are study-specific results, not universal base rates:
   than live trading can ever be, because live trading does not get to un-see things. Data hygiene
   applied retroactively is leakage.
 
+- **B13d design fact — concentration is a ratio, and the denominator does all the work.** A curve
+  holding 800M of 1B units makes a 120M holder either 12% (of total supply) or 60% (of circulating
+  user balances). Both are exactly right and they support opposite conclusions, so publishing one of
+  them is a silent choice on the reader's behalf. Every share is therefore published under both, and
+  the circulating denominator is built by summing inclusions rather than subtracting exclusions —
+  a sum names what it included. See `research/B13D_CONCENTRATION_FOUNDATION.md`.
+
+- **B13d design fact — the direction of an error decides which default is safe.** Counting an
+  unknown-role balance as a user balance enlarges the denominator and shrinks every share: the
+  flattering direction. A rule that errs toward "this token looks fine" is not a rule, so unknown is
+  excluded by construction, negative balances are refused rather than clamped, and one unresolved
+  account blocks owner-level collapsing entirely.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)

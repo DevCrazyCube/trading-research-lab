@@ -1828,3 +1828,79 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 84. **Owner review not separately obtained.**
 - **NOT claimed:** any model, score, sentiment, embedding, probability, price transform or
   distribution. The burned corpus was not opened and B11a was not queried, enumerated or read.
+
+## 2026-08-02 — Both denominators, always (B13d, handoff 86)
+
+- **Decision:** every concentration share is published under **both** the total-supply and the
+  circulating-user denominator, in exact gcd-reduced rationals, and a record carrying only one is
+  refused. The circulating denominator is the **sum of user-role balances**, never supply minus
+  exclusions, and each view publishes its own `scope_roles` because the two differ in numerator as
+  well as denominator.
+- **Why:** concentration is not a hard measurement, it is a ratio, and the denominator does all the
+  work. A curve holding 800M of 1B units makes a 120M holder either 12% or 60%; both figures are
+  exactly right and they support opposite conclusions. Publishing one is a choice made silently on
+  the reader's behalf, and it is the easiest place in this project to produce a number that
+  flatters. A sum names what it included; a subtraction hides what it removed, so the record asserts
+  that the published circulating denominator equals the user-role total — that mismatch is the shape
+  an exclusion takes when it hides.
+- **The direction of the error decides the default.** Counting `unknown` as `user` would enlarge the
+  denominator and shrink every share: the flattering direction. A rule that errs toward "this token
+  looks fine" is not a rule. So unknown is excluded from circulating by construction, negative
+  balances are refused rather than clamped (clamping turns a broken decode into a plausible holder),
+  zero-balance accounts are kept in the enumeration and out of the holder count, and the supply
+  residual is published rather than absorbed.
+- **Accounts are never collapsed to owners without exact evidence for every account.** One
+  unresolved account blocks it entirely: it could belong to the largest holder, so a top-1 computed
+  without it is a lower bound wearing the costume of a measurement — and a lower bound published as
+  a share is what later gets compared against a threshold. The creator share follows the same rule
+  and adds one: its numerator is scoped exactly like its denominator, or a creator holding through
+  an excluded role would produce a share above one.
+- **Exact arithmetic.** Gcd-reduced rationals, cross-multiplied comparisons, no float anywhere: a
+  raw supply of 10^15 units does not survive a double. The Herfindahl is one ratio `Σbᵢ²/D²`, not a
+  sum of squared ratios — summing rounded squares is where a float implementation loses the small
+  holders entirely. The tests check the arithmetic against `fractions.Fraction`, an oracle
+  independent of the implementation, rather than against constants copied after a run.
+- **Undefined is not zero.** A token whose whole supply sits in the curve has no circulating-user
+  share; the block is `defined: false` and carries no `top_1` rather than a `0/1`. `select_snapshot`
+  returns `Absent(not_yet_known)` when nothing exists at or before t0, with the detail saying that
+  not knowing the concentration is not the same as it being low. This pass added a fifth reason,
+  `undefined`, to B13c's absence vocabulary for values that cannot exist rather than merely being
+  missing.
+- **Point-in-time is strict.** A later holder state cannot be backfilled: the balances that existed
+  after a decision are not the balances it was made against.
+- **Cluster adjustment is structurally unavailable.** It is the most dangerous number this project
+  could publish — it looks like a measurement, it moves in the direction that justifies action, and
+  every input to it is a judgement. Both operations always raise,
+  `ACCEPTED_CLUSTER_ARTIFACT_TYPES` is empty (not "none supplied" but "no type is acceptable yet"),
+  and **the record carries no cluster field at all**, since a field named for a quantity we refuse
+  to compute teaches the next reader that we compute it. A **B13b association ledger passed as a
+  cluster map gets its own refusal naming what it is** — it declares itself uncalibrated, its links
+  explicitly do not assert common control, and passing it here would launder "we do not know" into
+  a merge. It is recognised by self-declaration OR by shape, each path tested alone.
+- **Measured on synthetic fixtures only:** 9 snapshots, 33 accounts; 9/9 on reconciliation,
+  both-denominator publication, exact rationals, top-k monotonicity, role accounting, hash stability
+  and order independence; 3/3 later snapshots refused; owner-collapse refusal, zero-balance
+  preservation, undefined denominator and published residual each exercised; all three cluster
+  refusals verified; zero errors. **No concentration value appears in the report** and a test walks
+  it for any numerator/denominator pair to prove that.
+- **Verification:** 75 mutants, 75 killed, **none disclosed as equivalent**. Five survived the first
+  run and all were genuine gaps: the per-role account-count sum, the two ledger-recognition paths
+  only ever exercised together, the denominator rule on the computed record, and the ranking
+  tiebreak. The tiebreak is unobservable through the published sums today, so rather than disclose
+  it as equivalent the test drives `_sorted_balances` directly — **a sort key nobody can observe
+  today is a sort key that silently stops working tomorrow**, and the first field to publish a
+  ranking would inherit a non-deterministic record. 87 tests, 81 subtests; **1,591 passing
+  repository-wide**.
+- **Not chosen, deliberately:** any concentration threshold, veto, profitability class or rug label.
+  A concentration figure is a measurement; everything downstream of it is a decision.
+- **No RPC was queried.** Future token-account capture requirements are specified in advance:
+  enumeration completeness asserted or denied with a residual; the snapshot atomic at one slot,
+  since balances read across a range are not a snapshot of anything and a transfer between two reads
+  can appear twice or vanish; owner resolution from the account data rather than inferred from
+  transfer history; roles from a pinned roster cited per account; the declared supply from the mint
+  account at the same slot, or the residual measures a disagreement between two sources; capture
+  cohort-scoped like B13a's plan; credentials environment-only with the endpoint hashed into
+  provenance.
+- **Ratified by:** the Codex directive of handoff 86. **Owner review not separately obtained.**
+- **NOT claimed:** any model, threshold, cluster, component, label or real concentration value. The
+  burned corpus was not opened and B11a was not queried, enumerated or read.

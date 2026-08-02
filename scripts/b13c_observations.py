@@ -123,7 +123,11 @@ ABSENT_UNKNOWN = "unknown"
 ABSENT_UNAVAILABLE = "unavailable"
 ABSENT_DELETED = "deleted"
 ABSENT_NOT_YET_KNOWN = "not_yet_known"
-ABSENT_REASONS = (ABSENT_UNKNOWN, ABSENT_UNAVAILABLE, ABSENT_DELETED, ABSENT_NOT_YET_KNOWN)
+# Not merely missing: a value that cannot exist. A share of an empty denominator is undefined, and
+# reporting it as zero would be the most confident possible way to be wrong.
+ABSENT_UNDEFINED = "undefined"
+ABSENT_REASONS = (ABSENT_UNKNOWN, ABSENT_UNAVAILABLE, ABSENT_DELETED, ABSENT_NOT_YET_KNOWN,
+                  ABSENT_UNDEFINED)
 
 
 def absent(reason, detail):
