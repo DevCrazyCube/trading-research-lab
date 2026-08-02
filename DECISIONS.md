@@ -1639,3 +1639,57 @@ The two do not imply each other. A user-ratified decision can remain provisional
   chosen in this pass.
 - **Ratified by:** the Codex directive of handoff 78. **Owner review not separately obtained.**
 - **NOT claimed:** any model, threshold, cluster, feature distribution or operational readiness.
+
+## 2026-08-02 — Untruncated geometry is not completeness (B13a, handoff 80)
+
+- **Decision:** a point-in-time history may not claim complete evidence on the strength of window
+  geometry alone. Every coverage carries a `decode_accounting` that must **partition** exactly three
+  ways — transactions, System instructions, and lamport-moving instructions — and every piece of
+  evidence that was *lost rather than absent* is listed in `unresolved` with a full canonical
+  coordinate, one of four declared reason codes and a non-empty detail. `complete = True` is refused
+  while anything is unresolved.
+- **Why:** the previous coverage measured how far the window reached and nothing about whether what
+  lay inside it was read. A payload the extractor cannot decode produces no event, and an absent
+  event is indistinguishable from an event that never happened — the exact confusion the rest of the
+  module exists to prevent, arriving one level below where it was being checked. A funding edge lost
+  to a decode failure does not announce itself; it surfaces later as a cluster that is not there.
+  **Sums rather than counters**, because a counter can be forgotten at one `continue` and a
+  partition that must add up cannot be.
+- **Per-subject poisoning, not per-window.** An unresolved instruction at or before a subject's t0
+  poisons that subject, since the edge it would have produced is precisely the one its history is
+  missing. One after t0 does not, since it cannot have removed anything that decision could have
+  seen. Poisoning every subject for a failure none could have seen would be fail-closed in form and
+  useless in substance. `D03`/`D04` are transaction-level failures and sort at `outer = inner = -1`,
+  before the transaction's first instruction, because an unreadable body may have held an edge
+  anywhere inside it.
+- **Failures are coded, not boolean.** `C01`–`C04` name which kind of incompleteness applies;
+  "incomplete" tells an operator nothing about what to fix.
+- **A real production bug the pinned fixture found:** `except B9D.FreezeViolation` never matched,
+  because `b9j`'s `FreezeViolation` reached directly is a **different class object** from the one
+  reached through B13a's chain — each module here loads its own dependency graph by path. An
+  undecodable payload would have escaped as an unhandled crash instead of being recorded. A test now
+  asserts the two classes are distinct, so the bug cannot return silently the day the loader changes.
+- **Why the corpus would never have caught it:** the full b9j survey — **94,985 transactions,
+  412,028 System instructions** — contains exactly **two** undecodable payloads, both padded
+  `CreateAccount` bodies in signature `5nYDQmEz8Zdj…xY4U` at `(433968746, 858)`, outer 2 / inner 0
+  and outer 2 / inner 2. Neither is in the 60-curve slice, so the gate reports `undecodable: 0` and
+  always would have. Both coordinates are pinned.
+- **Measured, structural counts only:** the burned slice accounts for 36,869 System instructions
+  (35,568 moving + 1,301 non-moving + 0 undecodable) across 7,712 transactions (all with bodies),
+  0 unresolved, and **completeness refused for 25/25 subjects** — refused on geometry alone, since
+  nothing was lost. The history hash chain is byte-identical to the pre-correction run, so the
+  accounting added evidence about the extraction without changing the extraction.
+- **Verification:** 54 mutants, 52 killed. Of the 23 added on this seam, six survived the first run
+  and **five were genuine gaps** — `assert_coverage` required the accounting without validating it,
+  `completeness_failures` was never driven with it absent, the code assertions checked set
+  membership rather than which code was reported, and the two never-observed moving buckets and two
+  transaction-level failures had no test at all. The moving classification was extracted into a pure
+  `classify_moving_instruction` so the buckets real data has never produced can be driven directly.
+  **Two equivalent mutants are disclosed rather than removed** (`assert_history` and the extractor's
+  own `assert_decode_accounting`): no caller input can make either self-check fire, but both fire
+  the moment the code around them changes — unlike the b10b check that was deleted for being
+  unreachable under any future edit. 89 tests, 240 subtests; **1,308 passing repository-wide**.
+- **Ratified by:** the Codex directive of handoff 80, which named this a blocking defect before
+  B13b. **Owner review not separately obtained.**
+- **NOT claimed:** any cluster, lookback, feature distribution or model. B11a was not queried,
+  enumerated or read; no baseline changed.

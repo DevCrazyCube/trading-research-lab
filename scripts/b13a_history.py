@@ -89,7 +89,50 @@ EVENT_FIELDS = {
 }
 
 COVERAGE_FIELDS = ("first_slot", "last_slot", "source_population", "left_truncated",
-                   "right_truncated", "complete", "provenance_sha256")
+                   "right_truncated", "complete", "provenance_sha256", "decode_accounting")
+
+# --------------------------------------------------------------------------------------------
+# Decode accounting: the seam where absence of evidence becomes evidence of absence
+# --------------------------------------------------------------------------------------------
+#
+# A funding edge that could not be decoded looks exactly like a funding edge that does not exist.
+# Window geometry cannot tell the two apart, so a window that is untruncated but partially
+# undecodable would publish `complete: True` and let a policy read a missing edge as "this wallet
+# was never funded". That is the seam this accounting closes: every System instruction is placed in
+# exactly one bucket, the buckets are asserted to sum, and anything unresolved is carried with its
+# coordinate so completeness can be judged PER SUBJECT rather than per window.
+
+D01_UNDECODABLE_SYSTEM_PAYLOAD = "D01_undecodable_system_payload"
+D02_MOVING_TRANSFER_WITHOUT_ADDRESSES = "D02_moving_transfer_without_addresses"
+D03_MISSING_RAW_BODY = "D03_missing_raw_body"
+D04_MISSING_TRANSACTION_COORDINATE = "D04_missing_transaction_coordinate"
+UNRESOLVED_REASON_CODES = (D01_UNDECODABLE_SYSTEM_PAYLOAD,
+                           D02_MOVING_TRANSFER_WITHOUT_ADDRESSES,
+                           D03_MISSING_RAW_BODY,
+                           D04_MISSING_TRANSACTION_COORDINATE)
+
+DECODE_ACCOUNTING_FIELDS = (
+    "transactions_required", "transactions_with_body", "transactions_missing_body",
+    "transactions_missing_coordinate",
+    "system_instructions_total", "decoded_moving", "decoded_non_moving", "undecodable",
+    "edges_emitted", "moving_self_transfer", "moving_without_addresses",
+    "unresolved",
+)
+
+# A transaction-level failure has no instruction coordinate, because the instructions are exactly
+# what is missing. It is recorded at (slot, transaction_index, -1, -1), which sorts before every
+# instruction in that transaction — the conservative placement, since a body we cannot read may
+# have contained an edge at any point within it.
+TRANSACTION_LEVEL_OUTER_INDEX = -1
+TRANSACTION_LEVEL_INNER_INDEX = -1
+
+C01_WINDOW_LEFT_TRUNCATED = "C01_window_left_truncated"
+C02_WINDOW_RIGHT_TRUNCATED = "C02_window_right_truncated"
+C03_DECODE_ACCOUNTING_ABSENT = "C03_decode_accounting_absent"
+C04_UNRESOLVED_EVIDENCE_AT_OR_BEFORE_T0 = "C04_unresolved_evidence_at_or_before_t0"
+COMPLETENESS_REASON_CODES = (C01_WINDOW_LEFT_TRUNCATED, C02_WINDOW_RIGHT_TRUNCATED,
+                             C03_DECODE_ACCOUNTING_ABSENT,
+                             C04_UNRESOLVED_EVIDENCE_AT_OR_BEFORE_T0)
 
 SECTIONS = ("creator", "user", "token", "funding")
 
@@ -235,6 +278,86 @@ def at_or_before(events, t0_key):
 # Coverage
 # --------------------------------------------------------------------------------------------
 
+def assert_decode_accounting(accounting):
+    """Every System instruction in exactly one bucket, and the buckets must sum.
+
+    Asserted rather than trusted, because the failure this guards against is silent by
+    construction: an instruction that quietly falls out of the walk produces no edge, and no edge
+    is indistinguishable from no funding.
+    """
+    if not isinstance(accounting, dict):
+        raise HistoryRefused(
+            f"decode accounting must be a mapping, got {type(accounting).__name__}")
+    missing = [field for field in DECODE_ACCOUNTING_FIELDS if field not in accounting]
+    if missing:
+        raise HistoryRefused(f"decode accounting does not state {missing}")
+    unknown = [field for field in accounting if field not in DECODE_ACCOUNTING_FIELDS]
+    if unknown:
+        raise HistoryRefused(f"decode accounting carries undeclared fields {sorted(unknown)}")
+    for field in DECODE_ACCOUNTING_FIELDS:
+        if field == "unresolved":
+            continue
+        _non_negative_int(f"decode accounting {field}", accounting[field])
+
+    transactions = (accounting["transactions_with_body"]
+                    + accounting["transactions_missing_body"]
+                    + accounting["transactions_missing_coordinate"])
+    if transactions != accounting["transactions_required"]:
+        raise HistoryRefused(
+            f"transaction accounting sums to {transactions} but "
+            f"{accounting['transactions_required']} were required; a body that is neither present "
+            "nor recorded missing is one nobody will look for")
+    instructions = (accounting["decoded_moving"] + accounting["decoded_non_moving"]
+                    + accounting["undecodable"])
+    if instructions != accounting["system_instructions_total"]:
+        raise HistoryRefused(
+            f"instruction accounting sums to {instructions} but "
+            f"{accounting['system_instructions_total']} System instructions were seen")
+    moving = (accounting["edges_emitted"] + accounting["moving_self_transfer"]
+              + accounting["moving_without_addresses"])
+    if moving != accounting["decoded_moving"]:
+        raise HistoryRefused(
+            f"lamport-moving accounting sums to {moving} but {accounting['decoded_moving']} "
+            "instructions moved lamports; a movement that produced neither an edge nor a recorded "
+            "reason is an edge that vanished")
+
+    unresolved = accounting["unresolved"]
+    if not isinstance(unresolved, list):
+        raise HistoryRefused("decode accounting unresolved must be a list")
+    expected = (accounting["undecodable"] + accounting["moving_without_addresses"]
+                + accounting["transactions_missing_body"]
+                + accounting["transactions_missing_coordinate"])
+    if len(unresolved) != expected:
+        raise HistoryRefused(
+            f"{len(unresolved)} unresolved items recorded but the counts imply {expected}; the "
+            "evidence for a failure is the only thing that lets a later reader judge it")
+    for position, item in enumerate(unresolved):
+        if not isinstance(item, dict):
+            raise HistoryRefused(f"unresolved[{position}] is not a mapping")
+        if item.get("reason_code") not in UNRESOLVED_REASON_CODES:
+            raise HistoryRefused(
+                f"unresolved[{position}] reason {item.get('reason_code')!r} is not one of "
+                f"{list(UNRESOLVED_REASON_CODES)}")
+        if not isinstance(item.get("detail"), str) or not item["detail"]:
+            raise HistoryRefused(f"unresolved[{position}] states no detail")
+        coordinate = item.get("coordinate")
+        if not isinstance(coordinate, dict) or set(coordinate) != set(COORDINATE_FIELDS):
+            raise HistoryRefused(
+                f"unresolved[{position}] must carry a full canonical coordinate, so a subject "
+                "whose decision predates the failure is not poisoned by it")
+        for field in COORDINATE_FIELDS:
+            value = coordinate[field]
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise HistoryRefused(f"unresolved[{position}] coordinate {field} is not an integer")
+    return accounting
+
+
+def unresolved_before(accounting, boundary):
+    """Unresolved evidence at or before `boundary`. Everything later cannot poison this subject."""
+    return [item for item in accounting["unresolved"]
+            if tuple(item["coordinate"][field] for field in COORDINATE_FIELDS) <= tuple(boundary)]
+
+
 def assert_coverage(coverage):
     """What the window can and cannot know, stated by the caller and never inferred."""
     if not isinstance(coverage, dict):
@@ -255,6 +378,13 @@ def assert_coverage(coverage):
         raise HistoryRefused(
             "coverage claims to be complete while also truncated; a truncated window is exactly "
             "the one whose counts are lower bounds")
+    accounting = assert_decode_accounting(coverage["decode_accounting"])
+    if coverage["complete"] and accounting["unresolved"]:
+        raise HistoryRefused(
+            f"coverage claims to be complete while {len(accounting['unresolved'])} pieces of "
+            "evidence are unresolved. Untruncated geometry is not completeness: an instruction "
+            "that would not decode produces no edge, and no edge is indistinguishable from no "
+            "funding")
     if not isinstance(coverage["source_population"], str) or not coverage["source_population"]:
         raise HistoryRefused("coverage must name its source population")
     if not isinstance(coverage["provenance_sha256"], str) or not coverage["provenance_sha256"]:
@@ -262,20 +392,54 @@ def assert_coverage(coverage):
     return coverage
 
 
+def completeness_failures(record):
+    """Stable reason codes for why this SUBJECT's history does not rest on complete evidence.
+
+    Per subject, not per window, and deliberately so. A decode failure at a coordinate after this
+    decision cannot have removed anything this decision could have seen, so it must not poison it —
+    while any unresolved instruction at or before t0 must, because the edge it would have produced
+    is exactly the one the history is missing.
+
+    Codes rather than a bare False: "incomplete" tells an operator nothing about what to fix.
+    """
+    coverage, failures = record["coverage"], []
+    if coverage["left_truncated"]:
+        failures.append({"reason_code": C01_WINDOW_LEFT_TRUNCATED,
+                         "detail": "the window does not reach back far enough to know what "
+                                   "preceded it"})
+    if coverage["right_truncated"]:
+        failures.append({"reason_code": C02_WINDOW_RIGHT_TRUNCATED,
+                         "detail": "the window ends before the population it describes"})
+    accounting = coverage.get("decode_accounting")
+    if not accounting:
+        failures.append({"reason_code": C03_DECODE_ACCOUNTING_ABSENT,
+                         "detail": "no decode accounting, so silent evidence loss cannot be "
+                                   "ruled out"})
+        return failures
+    boundary = tuple(record["as_of"][field] for field in COORDINATE_FIELDS)
+    poisoning = unresolved_before(accounting, boundary)
+    if poisoning:
+        failures.append({
+            "reason_code": C04_UNRESOLVED_EVIDENCE_AT_OR_BEFORE_T0,
+            "detail": f"{len(poisoning)} pieces of evidence at or before t0 could not be resolved, "
+                      "so an edge this history should contain may be missing",
+            "first_unresolved": poisoning[0]})
+    return failures
+
+
 def require_complete_history(record):
     """Fail closed for any policy that needs a true count rather than an observed one.
 
-    Deliberately a separate call. Building a history over a truncated window is legitimate and
-    useful; USING one as though its counts were totals is not, and the difference has to be an
-    explicit act rather than an omission.
+    Deliberately a separate call. Building a history over a truncated or partially undecodable
+    window is legitimate and useful; USING one as though its counts were totals is not, and the
+    difference has to be an explicit act rather than an omission.
     """
-    coverage = record["coverage"]
-    if not coverage["complete"] or coverage["left_truncated"] or coverage["right_truncated"]:
+    failures = completeness_failures(record)
+    if failures:
         raise HistoryRefused(
-            "this history is over a truncated window, so every count in it is a lower bound. A "
-            f"policy that needs the true count cannot use it. Coverage: complete="
-            f"{coverage['complete']}, left_truncated={coverage['left_truncated']}, "
-            f"right_truncated={coverage['right_truncated']}")
+            "this history does not rest on complete evidence, so every count in it is a lower "
+            "bound and a policy needing the true count cannot use it: "
+            + "; ".join(f"{f['reason_code']} — {f['detail']}" for f in failures))
     return True
 
 

@@ -63,9 +63,68 @@ the event's own hash, so the order is deterministic without being arbitrary.
 ## Coverage
 
 Caller-supplied and never inferred: `first_slot`, `last_slot`, `source_population`,
-`left_truncated`, `right_truncated`, `complete`, `provenance_sha256`. Absence is refusal. Coverage
-claiming to be complete *and* truncated is refused — a truncated window is exactly the one whose
-counts are lower bounds.
+`left_truncated`, `right_truncated`, `complete`, `provenance_sha256`, `decode_accounting`. Absence
+is refusal. Coverage claiming to be complete *and* truncated is refused — a truncated window is
+exactly the one whose counts are lower bounds.
+
+## Decode accounting — untruncated geometry is not completeness
+
+The first version of this schema described coverage purely as **window geometry**: how far back the
+window reached and how far forward. That silently equated "the window has the right shape" with
+"everything inside it was read", and those are different claims. A payload the extractor cannot
+decode produces no event, and an absent event is indistinguishable from an event that never
+happened — which is precisely the confusion the rest of this module exists to prevent, arriving one
+level below where it was being checked.
+
+So every coverage now carries a `decode_accounting` that must partition, exactly, three ways:
+
+| partition | identity |
+| --- | --- |
+| transactions | `transactions_required = transactions_with_body + transactions_missing_body + transactions_missing_coordinate` |
+| System instructions | `system_instructions_total = decoded_moving + decoded_non_moving + undecodable` |
+| lamport-moving instructions | `decoded_moving = edges_emitted + moving_self_transfer + moving_without_addresses` |
+
+Sums, not counters. A counter can be forgotten at one `continue`; a partition that must add up
+cannot be, because the arithmetic fails the moment an instruction falls out of the accounting.
+
+`unresolved` lists every piece of evidence that was **lost rather than absent**, each carrying a
+full canonical coordinate, a declared reason code and a non-empty detail:
+
+| code | meaning |
+| --- | --- |
+| `D01_undecodable_system_payload` | the pinned ABI refused the payload |
+| `D02_moving_transfer_without_addresses` | lamports demonstrably moved, endpoints not in the account list |
+| `D03_missing_raw_body` | the coordinate is known, the transaction body is not preserved |
+| `D04_missing_transaction_coordinate` | no coordinate row for a transaction the window requires |
+
+Its length must equal the count the partitions imply, so a reason recorded without a count — or a
+count without a reason — is refused.
+
+`D03` and `D04` are failures of a whole transaction rather than one instruction, and they are
+recorded at the sentinel coordinate `outer_index = inner_index = -1`. A body we could not read may
+have held an edge anywhere inside it, so it must sort **before** the transaction's first
+instruction, never after it.
+
+**`complete = True` is refused while anything is unresolved**, regardless of geometry.
+
+## Completeness is per subject, and says why
+
+`completeness_failures(record)` returns stable reason codes rather than a bare `False`, because
+"incomplete" tells an operator nothing about what to fix:
+
+| code | meaning |
+| --- | --- |
+| `C01_window_left_truncated` | the window does not reach back far enough |
+| `C02_window_right_truncated` | the window ends before the population it describes |
+| `C03_decode_accounting_absent` | silent evidence loss cannot be ruled out |
+| `C04_unresolved_evidence_at_or_before_t0` | an edge this history should contain may be missing |
+
+C04 is judged **per subject against that subject's own t0**, using the same inclusive boundary as
+every other comparison in this module. A decode failure at a coordinate *after* a decision cannot
+have removed anything that decision could have seen, so it must not poison it; an unresolved
+instruction at or before t0 must, because the edge it would have produced is exactly the one the
+history is missing. Poisoning every subject for a failure none of them could have seen would be
+fail-closed in form and useless in substance.
 
 ## Sections
 
@@ -109,6 +168,9 @@ Nothing is joined into an entity. Cluster inference and confidence are a later t
 the costume of a fact, and a test scans the record for one.
 
 ## Determinism
+
+The decode accounting is inside `history_sha256`, so two histories built over the same window with
+different amounts of evidence lost cannot hash identically.
 
 Canonical JSON with sorted keys; `history_sha256` over everything else; `source_hash_chain_sha256`
 over the provenance of exactly the events inside the boundary, so an event past t0 cannot even

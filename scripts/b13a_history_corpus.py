@@ -112,41 +112,110 @@ def build_event_stream(source, corpus, limit=None, progress=None):
         if progress and position % progress == 0:
             print(f"  {position:,} curves", file=sys.stderr, flush=True)
 
-    events.extend(_transfer_events(source, sorted(transactions), counts))
-    return events, counts
+    transfers, accounting = _transfer_events(source, sorted(transactions))
+    events.extend(transfers)
+    counts["transfer"] = len(transfers)
+    return events, counts, accounting
 
 
-def _transfer_events(source, transactions, counts):
-    """Funding edges from decoded System instructions, with source and destination as published.
+MOVING_WITH_EDGE = "edges_emitted"
+MOVING_SELF_TRANSFER = "moving_self_transfer"
+MOVING_WITHOUT_ADDRESSES = "moving_without_addresses"
 
-    The amount comes from the pinned System ABI and the two addresses from the instruction's own
-    resolved account list. Nothing is inferred: a transfer of N lamports from A to B is exactly
-    that, and whether it is funding, a tip or a refund is not something this module claims to know.
+
+def classify_moving_instruction(accounts):
+    """Which bucket a lamport-moving System instruction belongs in.
+
+    Pure, and separated out so the two failure buckets can be tested without a database. Real data
+    has produced neither so far, which is exactly why they need a test: a path that never runs is
+    a path nobody notices breaking.
     """
+    if len(accounts) < 2:
+        # Lamports demonstrably moved but the endpoints are not in the account list. A LOST edge,
+        # not an absent one.
+        return MOVING_WITHOUT_ADDRESSES
+    if accounts[0] == accounts[1]:
+        return MOVING_SELF_TRANSFER
+    return MOVING_WITH_EDGE
+
+
+def _transfer_events(source, transactions):
+    """Funding edges plus a full accounting of everything that did NOT become one.
+
+    The earlier version of this function caught an undecodable System payload and simply produced
+    no edge. That is the failure Codex found: a missing edge and an absent edge look identical, so
+    a window with untruncated geometry could publish `complete: True` while quietly omitting
+    transfers, and a policy would then read the omission as "this wallet was never funded".
+
+    Now every System instruction lands in exactly one bucket, every failure keeps its canonical
+    coordinate and reason, and the buckets are asserted to sum. **No edge is ever invented** — the
+    fix is to publish the loss, not to guess what was lost.
+    """
+    accounting = {field: 0 for field in B13A.DECODE_ACCOUNTING_FIELDS if field != "unresolved"}
+    accounting["unresolved"] = []
+    accounting["transactions_required"] = len(transactions)
     out = []
+
+    def unresolved(reason, slot, transaction_index, outer_index, inner_index, detail):
+        accounting["unresolved"].append({
+            "reason_code": reason,
+            "coordinate": {"slot": slot, "transaction_index": transaction_index,
+                           "outer_index": outer_index, "inner_index": inner_index},
+            "detail": detail})
+
     for slot, transaction_index in transactions:
         row = source.execute(
             "SELECT signature FROM transaction_coordinate WHERE slot=? AND transaction_index=?",
             (slot, transaction_index)).fetchone()
         if row is None:
+            accounting["transactions_missing_coordinate"] += 1
+            unresolved(B13A.D04_MISSING_TRANSACTION_COORDINATE, slot, transaction_index,
+                       B13A.TRANSACTION_LEVEL_OUTER_INDEX, B13A.TRANSACTION_LEVEL_INNER_INDEX,
+                       "no signature is recorded for this transaction coordinate")
             continue
         raw = source.execute(
             "SELECT raw_zlib FROM raw_transaction WHERE signature=?", (row[0],)).fetchone()
         if raw is None:
+            accounting["transactions_missing_body"] += 1
+            unresolved(B13A.D03_MISSING_RAW_BODY, slot, transaction_index,
+                       B13A.TRANSACTION_LEVEL_OUTER_INDEX, B13A.TRANSACTION_LEVEL_INNER_INDEX,
+                       f"{row[0]}: no preserved transaction body")
             continue
+        accounting["transactions_with_body"] += 1
+
         for instruction in B9D.envelope_instructions(B9D.raw_result(raw[0])):
             if instruction["program_id"] != SYSTEM_PROGRAM:
                 continue
+            accounting["system_instructions_total"] += 1
             try:
                 decoded = B9J.decode_system_instruction(instruction["data"])
-            except B9D.FreezeViolation:
-                # An undecodable System payload is reported by b9j's own survey; here it simply
-                # yields no edge. Inventing one from the account list would be exactly the guess
-                # that module refuses to make.
+            # B9J.FreezeViolation, not B9D's. Each module in this repository loads its own
+            # dependency graph by path, so `b9j`'s FreezeViolation is a DIFFERENT class object from
+            # the one reached through B13A's chain — an `except` on the wrong one never matches and
+            # the decode failure escapes as a crash. The pinned-fixture test found exactly that.
+            except B9J.FreezeViolation as error:
+                accounting["undecodable"] += 1
+                unresolved(B13A.D01_UNDECODABLE_SYSTEM_PAYLOAD, slot, transaction_index,
+                           instruction["outer_index"], instruction["inner_index"],
+                           f"{row[0]}: {error}")
                 continue
             moved = B9J.system_lamports_moved(decoded)
+            if not moved:
+                # A variant that cannot move lamports, or one that moved none. Resolved: there was
+                # never an edge here to lose.
+                accounting["decoded_non_moving"] += 1
+                continue
+            accounting["decoded_moving"] += 1
             accounts = instruction.get("accounts") or []
-            if not moved or len(accounts) < 2 or accounts[0] == accounts[1]:
+            bucket = classify_moving_instruction(accounts)
+            accounting[bucket] += 1
+            if bucket == MOVING_WITHOUT_ADDRESSES:
+                unresolved(B13A.D02_MOVING_TRANSFER_WITHOUT_ADDRESSES, slot, transaction_index,
+                           instruction["outer_index"], instruction["inner_index"],
+                           f"{row[0]}: {decoded['name']} moved {moved} lamports but names "
+                           f"{len(accounts)} accounts")
+                continue
+            if bucket == MOVING_SELF_TRANSFER:
                 continue
             out.append({
                 "kind": B13A.EVENT_TRANSFER, "from_address": accounts[0],
@@ -156,8 +225,8 @@ def _transfer_events(source, transactions, counts):
                 "inner_index": instruction["inner_index"],
                 "source_sha256": _source_hash("system", row[0], instruction["outer_index"],
                                               instruction["inner_index"])})
-            counts["transfer"] += 1
-    return out
+    B13A.assert_decode_accounting(accounting)
+    return out, accounting
 
 
 def check(source_path, corpus_path, limit=None, progress=None, subjects=25):
@@ -165,7 +234,8 @@ def check(source_path, corpus_path, limit=None, progress=None, subjects=25):
     source = B9D.connect(str(source_path), readonly=True)
     corpus = sqlite3.connect(f"file:{corpus_path}?mode=ro", uri=True)
     try:
-        events, counts = build_event_stream(source, corpus, limit=limit, progress=progress)
+        events, counts, accounting = build_event_stream(
+            source, corpus, limit=limit, progress=progress)
         ordered, digests = B13A.ordered_events(events)
         coverage = {
             "first_slot": min(e["slot"] for e in ordered),
@@ -175,6 +245,7 @@ def check(source_path, corpus_path, limit=None, progress=None, subjects=25):
             # bound on the truth, never the truth.
             "left_truncated": True, "right_truncated": True, "complete": False,
             "provenance_sha256": B10BD.content_hash(corpus),
+            "decode_accounting": accounting,
         }
         report = {
             "schema_version": B13A.SCHEMA_VERSION,
@@ -186,6 +257,11 @@ def check(source_path, corpus_path, limit=None, progress=None, subjects=25):
             "identity_kept_out_of_features": 0,
             "order_independent": 0,
             "coverage_declared_incomplete": coverage["complete"] is False,
+            "decode_accounting": {k: v for k, v in accounting.items() if k != "unresolved"},
+            "unresolved_evidence": len(accounting["unresolved"]),
+            "unresolved_reason_codes": sorted(
+                {item["reason_code"] for item in accounting["unresolved"]}),
+            "completeness_refused_for_every_subject": 0,
             "feature_values_reported": False,
             "feature_values_reported_reason":
                 "a history is one join away from an outcome; a distribution inspected here is a "
@@ -234,6 +310,11 @@ def check(source_path, corpus_path, limit=None, progress=None, subjects=25):
                 report["order_independent"] += 1
             else:
                 report["errors"].append({"bonding_curve": curve, "error": "order dependent"})
+            # A truncated, partially-decoded window must refuse every policy that needs a total.
+            try:
+                B13A.require_complete_history(record)
+            except B10B.FreezeViolation:
+                report["completeness_refused_for_every_subject"] += 1
             hashes.append(record["history_sha256"])
 
         digest = hashlib.sha256()
@@ -251,6 +332,9 @@ def assert_clean(source_path, corpus_path, limit=None, progress=None, subjects=2
     report = check(source_path, corpus_path, limit=limit, progress=progress, subjects=subjects)
     if report["errors"]:
         raise HistoryRefused(f"{len(report['errors'])} integrity errors: {report['errors'][:5]}")
+    if report["completeness_refused_for_every_subject"] != report["subjects_checked"]:
+        raise HistoryRefused(
+            "a truncated window let a completeness check pass; that is the seam this pass closed")
     for field in ("boundary_respected", "identity_kept_out_of_features", "order_independent"):
         if report[field] != report["subjects_checked"]:
             raise HistoryRefused(f"{field} held for only {report[field]} of "

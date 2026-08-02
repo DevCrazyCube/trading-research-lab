@@ -104,8 +104,18 @@ These are study-specific results, not universal base rates:
   instructions against the pinned ABI over a bounded slice of the burned corpus (60 curves' worth of
   transactions) yielded **35,568 transfer edges** carrying source, destination, amount, canonical
   coordinate and provenance. Funding-edge evidence therefore exists in this project's data; entity
-  resolution over it does not, and **funding-cluster leakage remains an open gate**. See
-  `research/B13A_HISTORY_FOUNDATION.md`.
+  resolution over it does not, and **funding-cluster leakage remains an open gate**. Every System
+  instruction in that slice is accounted for — 36,869 = 35,568 lamport-moving + 1,301 non-moving +
+  0 undecodable — so the edge count is a partition of the evidence rather than a tally of whatever
+  happened to decode. See `research/B13A_HISTORY_FOUNDATION.md`.
+
+- **B13a measured fact — undecodable System payloads exist, at a density no corpus run would
+  catch.** Surveying the whole b9j artifact (**94,985 transactions, 412,028 System instructions**)
+  found exactly **two** payloads the pinned ABI refuses, both padded `CreateAccount` bodies (52 of
+  56 bytes decoded, 4 trailing) in one transaction at coordinate `(433968746, 858)`. Two in 412,028
+  is the density at which a corpus gate proves nothing: the handling path for them was crashing,
+  and only a pinned fixture exposed it. Undecodable payloads are therefore a real, rare and
+  permanent condition of this data, not a hypothetical.
 
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)

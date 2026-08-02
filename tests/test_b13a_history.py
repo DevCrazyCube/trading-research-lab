@@ -60,10 +60,34 @@ def transfer(slot, sender, recipient, lamports, **kw):
                  lamports=lamports, **kw)
 
 
+def accounting(**overrides):
+    """A fully resolved decode accounting: every System instruction placed, nothing unresolved."""
+    base = {"transactions_required": 3, "transactions_with_body": 3,
+            "transactions_missing_body": 0, "transactions_missing_coordinate": 0,
+            "system_instructions_total": 5, "decoded_moving": 3, "decoded_non_moving": 2,
+            "undecodable": 0, "edges_emitted": 2, "moving_self_transfer": 1,
+            "moving_without_addresses": 0, "unresolved": []}
+    base.update(overrides)
+    return base
+
+
+def unresolved_item(reason=None, slot=150, tx=0, outer=0, inner=-1, detail="synthetic failure"):
+    return {"reason_code": reason or B13A.D01_UNDECODABLE_SYSTEM_PAYLOAD,
+            "coordinate": {"slot": slot, "transaction_index": tx, "outer_index": outer,
+                           "inner_index": inner},
+            "detail": detail}
+
+
 def coverage(**overrides):
     base = {"first_slot": 100, "last_slot": 900, "source_population": "synthetic fixture",
             "left_truncated": True, "right_truncated": False, "complete": False,
-            "provenance_sha256": "c" * 64}
+            "provenance_sha256": "c" * 64, "decode_accounting": accounting()}
+    base.update(overrides)
+    return base
+
+
+def complete_coverage(**overrides):
+    base = coverage(left_truncated=False, right_truncated=False, complete=True)
     base.update(overrides)
     return base
 
@@ -228,7 +252,7 @@ class LowerBoundTests(unittest.TestCase):
             self.assertTrue(record["sections"][section]["features"]["counts_are_lower_bounds"])
 
     def test_a_complete_window_says_its_counts_are_not(self):
-        record = build(cover=coverage(left_truncated=False, right_truncated=False, complete=True))
+        record = build(cover=complete_coverage())
         for section in B13A.SECTIONS:
             self.assertFalse(record["sections"][section]["features"]["counts_are_lower_bounds"])
 
@@ -243,8 +267,7 @@ class LowerBoundTests(unittest.TestCase):
             B13A.require_complete_history(build())
 
     def test_the_same_policy_passes_on_a_complete_window(self):
-        self.assertTrue(B13A.require_complete_history(
-            build(cover=coverage(left_truncated=False, right_truncated=False, complete=True))))
+        self.assertTrue(B13A.require_complete_history(build(cover=complete_coverage())))
 
     def test_an_unseen_actor_is_marked_unseen_rather_than_reported_as_zero_activity(self):
         """Zero observed is a fact about the window. 'Never done this' is a claim about the world,
@@ -266,6 +289,175 @@ class LowerBoundTests(unittest.TestCase):
                 broken = {k: v for k, v in coverage().items() if k != field}
                 with self.assertRaisesRegex(B13A.HistoryRefused, "does not state"):
                     B13A.assert_coverage(broken)
+
+
+class DecodeCompletenessTests(unittest.TestCase):
+    """The seam where absence of evidence becomes evidence of absence.
+
+    A funding edge that could not be decoded looks exactly like a funding edge that does not exist.
+    Window geometry cannot tell the two apart, so untruncated geometry alone must never be allowed
+    to mean complete.
+    """
+
+    def test_the_accounting_partition_must_sum(self):
+        cases = {
+            "transactions": accounting(transactions_with_body=2),
+            "instructions": accounting(decoded_non_moving=1),
+            "lamport movements": accounting(edges_emitted=1),
+        }
+        for label, broken in cases.items():
+            with self.subTest(label=label):
+                with self.assertRaises(B13A.HistoryRefused):
+                    B13A.assert_decode_accounting(broken)
+
+    def test_a_resolved_accounting_passes(self):
+        self.assertTrue(B13A.assert_decode_accounting(accounting()))
+
+    def test_every_accounting_field_is_required(self):
+        for field in B13A.DECODE_ACCOUNTING_FIELDS:
+            with self.subTest(field=field):
+                broken = {k: v for k, v in accounting().items() if k != field}
+                with self.assertRaisesRegex(B13A.HistoryRefused, "does not state"):
+                    B13A.assert_decode_accounting(broken)
+
+    def test_the_unresolved_list_must_match_the_counts(self):
+        with self.assertRaisesRegex(B13A.HistoryRefused, "unresolved items recorded"):
+            B13A.assert_decode_accounting(accounting(undecodable=1, system_instructions_total=6))
+
+    def test_every_unresolved_item_carries_a_coordinate_and_a_reason(self):
+        base = accounting(undecodable=1, system_instructions_total=6,
+                          unresolved=[unresolved_item()])
+        self.assertTrue(B13A.assert_decode_accounting(base))
+        for mangle in ({"reason_code": "D99_invented"}, {"detail": ""},
+                       {"coordinate": {"slot": 1}}):
+            with self.subTest(mangle=sorted(mangle)):
+                broken = accounting(undecodable=1, system_instructions_total=6,
+                                    unresolved=[dict(unresolved_item(), **mangle)])
+                with self.assertRaises(B13A.HistoryRefused):
+                    B13A.assert_decode_accounting(broken)
+
+    def test_untruncated_geometry_alone_cannot_claim_completeness(self):
+        """The exact defect this pass closed: a window with perfect geometry and a payload that
+        would not decode used to publish complete, and a missing edge then reads as no funding."""
+        with self.assertRaisesRegex(B13A.HistoryRefused, "Untruncated geometry is not completeness"):
+            B13A.assert_coverage(complete_coverage(
+                decode_accounting=accounting(undecodable=1, system_instructions_total=6,
+                                             unresolved=[unresolved_item()])))
+
+    def test_a_history_with_no_decode_accounting_is_refused(self):
+        with self.assertRaisesRegex(B13A.HistoryRefused, "does not state"):
+            B13A.assert_coverage({k: v for k, v in coverage().items()
+                                  if k != "decode_accounting"})
+
+    def test_coverage_validates_the_accounting_it_carries(self):
+        """Requiring the field is not the same as checking it. A coverage carrying an accounting
+        whose buckets do not sum must be refused by `assert_coverage` itself."""
+        with self.assertRaisesRegex(B13A.HistoryRefused, "instruction accounting sums"):
+            B13A.assert_coverage(coverage(decode_accounting=accounting(decoded_non_moving=1)))
+
+    def test_an_absent_accounting_is_its_own_completeness_failure(self):
+        """Reached by a hand-built record rather than a built one, because `assert_coverage`
+        refuses to let a built record get here — which is the point of having both checks."""
+        record = build()
+        record["coverage"] = {k: v for k, v in record["coverage"].items()
+                              if k != "decode_accounting"}
+        codes = [f["reason_code"] for f in B13A.completeness_failures(record)]
+        self.assertIn(B13A.C03_DECODE_ACCOUNTING_ABSENT, codes)
+        with self.assertRaisesRegex(B13A.HistoryRefused, "C03_decode_accounting_absent"):
+            B13A.require_complete_history(record)
+
+    def test_each_kind_of_incompleteness_reports_its_own_code(self):
+        """A generic failure tells an operator nothing about what to fix, so the codes have to be
+        distinguishable and not merely present in the declared set."""
+        cases = {
+            B13A.C01_WINDOW_LEFT_TRUNCATED: coverage(left_truncated=True, right_truncated=False),
+            B13A.C02_WINDOW_RIGHT_TRUNCATED: coverage(left_truncated=False, right_truncated=True),
+        }
+        for expected, cover in cases.items():
+            with self.subTest(expected=expected):
+                codes = [f["reason_code"] for f in B13A.completeness_failures(build(cover=cover))]
+                self.assertEqual(codes, [expected])
+
+    def test_an_unresolved_instruction_at_or_before_t0_poisons_the_subject(self):
+        poisoned = complete_coverage(
+            complete=False,
+            decode_accounting=accounting(
+                undecodable=1, system_instructions_total=6,
+                unresolved=[unresolved_item(slot=450)]))
+        record = build(cover=poisoned)
+        codes = [f["reason_code"] for f in B13A.completeness_failures(record)]
+        self.assertEqual(codes, [B13A.C04_UNRESOLVED_EVIDENCE_AT_OR_BEFORE_T0])
+        with self.assertRaisesRegex(B13A.HistoryRefused, "C04_unresolved"):
+            B13A.require_complete_history(record)
+
+    def test_an_unresolved_instruction_after_t0_cannot_poison_the_subject(self):
+        """A failure at a coordinate after this decision cannot have removed anything the decision
+        could have seen. Letting it fail the subject would make one late corruption unusable
+        evidence for every earlier decision in the window."""
+        later = complete_coverage(
+            complete=False,
+            decode_accounting=accounting(
+                undecodable=1, system_instructions_total=6,
+                unresolved=[unresolved_item(slot=800)]))
+        record = build(cover=later)
+        self.assertEqual(B13A.completeness_failures(record), [])
+        self.assertTrue(B13A.require_complete_history(record))
+
+    def test_the_boundary_for_poisoning_is_inclusive_at_t0(self):
+        at_t0 = unresolved_item(slot=500, tx=0, outer=4, inner=-1)
+        one_after = unresolved_item(slot=500, tx=0, outer=4, inner=0)
+        for item, expected in ((at_t0, [B13A.C04_UNRESOLVED_EVIDENCE_AT_OR_BEFORE_T0]),
+                               (one_after, [])):
+            with self.subTest(coordinate=item["coordinate"]):
+                record = build(cover=complete_coverage(
+                    complete=False,
+                    decode_accounting=accounting(undecodable=1, system_instructions_total=6,
+                                                 unresolved=[item])))
+                self.assertEqual([f["reason_code"] for f in B13A.completeness_failures(record)],
+                                 expected)
+
+    def test_failures_are_reported_as_stable_codes_not_a_bare_false(self):
+        record = build()
+        failures = B13A.completeness_failures(record)
+        self.assertTrue(failures)
+        for failure in failures:
+            self.assertIn(failure["reason_code"], B13A.COMPLETENESS_REASON_CODES)
+            self.assertTrue(failure["detail"])
+
+    def test_a_zero_edge_but_fully_decoded_history_is_complete(self):
+        """No funding edges AND nothing unresolved is a real finding: this actor was not funded
+        within the window. That is the case the seam exists to keep distinguishable."""
+        events = [e for e in stream() if e["kind"] != B13A.EVENT_TRANSFER]
+        record = build(events, cover=complete_coverage(
+            decode_accounting=accounting(edges_emitted=0, decoded_moving=1,
+                                         moving_self_transfer=1,
+                                         system_instructions_total=3)))
+        funding = record["sections"]["funding"]["features"]
+        self.assertEqual(funding["inbound_edge_count_observed"], 0)
+        self.assertEqual(funding["outbound_edge_count_observed"], 0)
+        self.assertFalse(funding["actor_seen_in_window"])
+        self.assertFalse(funding["counts_are_lower_bounds"])
+        self.assertTrue(B13A.require_complete_history(record))
+
+    def test_the_decode_accounting_travels_inside_the_history_hash(self):
+        baseline = build()
+        moved = build(cover=coverage(decode_accounting=accounting(
+            undecodable=1, system_instructions_total=6, unresolved=[unresolved_item(slot=800)])))
+        self.assertNotEqual(baseline["history_sha256"], moved["history_sha256"])
+
+    def test_a_transaction_level_failure_sorts_before_every_instruction_in_it(self):
+        """A body we cannot read may have held an edge at any point inside it, so it is recorded at
+        outer -1 and poisons any subject at or after that transaction."""
+        missing = unresolved_item(reason=B13A.D03_MISSING_RAW_BODY, slot=500, tx=0,
+                                  outer=B13A.TRANSACTION_LEVEL_OUTER_INDEX,
+                                  inner=B13A.TRANSACTION_LEVEL_INNER_INDEX,
+                                  detail="no preserved body")
+        record = build(cover=complete_coverage(
+            complete=False,
+            decode_accounting=accounting(transactions_required=4, transactions_missing_body=1,
+                                         unresolved=[missing])))
+        self.assertEqual([f["reason_code"] for f in B13A.completeness_failures(record)],
+                         [B13A.C04_UNRESOLVED_EVIDENCE_AT_OR_BEFORE_T0])
 
 
 class IdentityLeakageTests(unittest.TestCase):
@@ -566,6 +758,159 @@ class RecordContractTests(unittest.TestCase):
                           "def predict", "score("):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, code)
+
+
+class TransferExtractionTests(unittest.TestCase):
+    """The two failure buckets real data has never produced, and the two the database can.
+
+    A path that never runs is a path nobody notices breaking, so both are driven directly.
+    """
+
+    def setUp(self):
+        self.corpus = _load("b13a_history_corpus", "b13a_history_corpus.py")
+
+    def test_a_moving_transfer_is_bucketed_by_its_account_list(self):
+        classify = self.corpus.classify_moving_instruction
+        self.assertEqual(classify([]), self.corpus.MOVING_WITHOUT_ADDRESSES)
+        self.assertEqual(classify(["only-one"]), self.corpus.MOVING_WITHOUT_ADDRESSES)
+        self.assertEqual(classify(["same", "same"]), self.corpus.MOVING_SELF_TRANSFER)
+        self.assertEqual(classify(["from", "to"]), self.corpus.MOVING_WITH_EDGE)
+        self.assertEqual(classify(["from", "to", "extra"]), self.corpus.MOVING_WITH_EDGE)
+
+    def test_every_bucket_is_a_declared_accounting_field(self):
+        for bucket in (self.corpus.MOVING_WITH_EDGE, self.corpus.MOVING_SELF_TRANSFER,
+                       self.corpus.MOVING_WITHOUT_ADDRESSES):
+            self.assertIn(bucket, B13A.DECODE_ACCOUNTING_FIELDS)
+
+    def empty_source(self, with_coordinate=False):
+        import sqlite3
+        database = sqlite3.connect(":memory:")
+        database.executescript(
+            "CREATE TABLE transaction_coordinate (signature TEXT, slot INTEGER,"
+            " transaction_index INTEGER);"
+            "CREATE TABLE raw_transaction (signature TEXT, raw_zlib BLOB);")
+        if with_coordinate:
+            database.execute("INSERT INTO transaction_coordinate VALUES ('sigA', 500, 7)")
+        return database
+
+    def test_a_missing_raw_body_is_recorded_not_skipped(self):
+        edges, acc = self.corpus._transfer_events(self.empty_source(True), [(500, 7)])
+        self.assertEqual(edges, [])
+        self.assertTrue(B13A.assert_decode_accounting(acc))
+        self.assertEqual(acc["transactions_missing_body"], 1)
+        self.assertEqual(len(acc["unresolved"]), 1)
+        item = acc["unresolved"][0]
+        self.assertEqual(item["reason_code"], B13A.D03_MISSING_RAW_BODY)
+        self.assertEqual(item["coordinate"]["slot"], 500)
+        self.assertEqual(item["coordinate"]["outer_index"],
+                         B13A.TRANSACTION_LEVEL_OUTER_INDEX)
+
+    def test_a_missing_transaction_coordinate_is_recorded_not_skipped(self):
+        edges, acc = self.corpus._transfer_events(self.empty_source(False), [(500, 7)])
+        self.assertEqual(edges, [])
+        self.assertTrue(B13A.assert_decode_accounting(acc))
+        self.assertEqual(acc["transactions_missing_coordinate"], 1)
+        self.assertEqual(acc["unresolved"][0]["reason_code"],
+                         B13A.D04_MISSING_TRANSACTION_COORDINATE)
+
+    def test_a_transaction_level_failure_is_recorded_before_every_instruction_in_it(self):
+        """A body we cannot read may have held an edge anywhere inside it, so it must sort before
+        the transaction's first instruction rather than after it."""
+        self.assertEqual(B13A.TRANSACTION_LEVEL_OUTER_INDEX, -1)
+        self.assertEqual(B13A.TRANSACTION_LEVEL_INNER_INDEX, -1)
+        _, acc = self.corpus._transfer_events(self.empty_source(True), [(500, 7)])
+        failure = acc["unresolved"][0]["coordinate"]
+        self.assertLess(
+            tuple(failure[f] for f in B13A.COORDINATE_FIELDS), (500, 7, 0, -1))
+
+
+class KnownUndecodableTests(unittest.TestCase):
+    """The two real anomalies, pinned so they cannot quietly disappear.
+
+    `b9j` measured exactly two undecodable System instructions across 412,028 in the whole
+    artifact, both padded `CreateAccount` payloads carrying four trailing bytes, both in one
+    transaction. They are the concrete instance of the seam Codex found: before this pass they
+    produced no edge and no record, which is indistinguishable from there being no edge to produce.
+    """
+
+    ARTIFACT = ROOT / "research" / "b9d_transaction_bodies.sqlite"
+    SIGNATURE = ("5nYDQmEz8ZdjB1YHyZxqxq5wab2r1YarQtEkJTadxy9EWfS1PP7PymUJ349TAzoYfVUo7"
+                 "cmCdMWohvTDnUw6xY4U")
+    COORDINATE = (433_968_746, 858)
+    UNDECODABLE_AT = ((2, 0), (2, 2))
+
+    def setUp(self):
+        if not self.ARTIFACT.exists():
+            self.skipTest("frozen artifact not present")
+        self.corpus = _load("b13a_history_corpus", "b13a_history_corpus.py")
+
+    def test_the_two_padded_create_accounts_are_recorded_not_dropped(self):
+        source = self.corpus.B9D.connect(str(self.ARTIFACT), readonly=True)
+        try:
+            edges, accounting = self.corpus._transfer_events(source, [self.COORDINATE])
+        finally:
+            source.close()
+        self.assertTrue(B13A.assert_decode_accounting(accounting))
+        self.assertEqual(accounting["undecodable"], 2)
+        undecodable = [item for item in accounting["unresolved"]
+                       if item["reason_code"] == B13A.D01_UNDECODABLE_SYSTEM_PAYLOAD]
+        self.assertEqual(len(undecodable), 2)
+        found = {(item["coordinate"]["outer_index"], item["coordinate"]["inner_index"])
+                 for item in undecodable}
+        self.assertEqual(found, set(self.UNDECODABLE_AT))
+        for item in undecodable:
+            self.assertEqual(item["coordinate"]["slot"], self.COORDINATE[0])
+            self.assertIn("trailing byte", item["detail"])
+            self.assertIn(self.SIGNATURE, item["detail"])
+
+    def test_the_extractor_catches_the_class_b9j_actually_raises(self):
+        """Every module here loads its own dependency graph by path, so the same-named exception is
+        a DIFFERENT class object depending on which chain you reach it through. An `except` on the
+        wrong one never matches and the decode failure escapes as a crash — which is what the
+        pinned fixture above found."""
+        source = (ROOT / "scripts" / "b13a_history_corpus.py").read_text()
+        self.assertIn("except B9J.FreezeViolation as error:", source)
+        self.assertNotIn("except B9D.FreezeViolation as error:", source)
+        self.assertIsNot(self.corpus.B9J.FreezeViolation, self.corpus.B9D.FreezeViolation)
+
+    def test_a_window_containing_them_can_never_be_declared_complete(self):
+        source = self.corpus.B9D.connect(str(self.ARTIFACT), readonly=True)
+        try:
+            _, accounting = self.corpus._transfer_events(source, [self.COORDINATE])
+        finally:
+            source.close()
+        with self.assertRaisesRegex(B13A.HistoryRefused, "Untruncated geometry is not completeness"):
+            B13A.assert_coverage(complete_coverage(decode_accounting=accounting))
+
+    def test_a_subject_deciding_after_them_is_refused_a_completeness_claim(self):
+        source = self.corpus.B9D.connect(str(self.ARTIFACT), readonly=True)
+        try:
+            _, accounting = self.corpus._transfer_events(source, [self.COORDINATE])
+        finally:
+            source.close()
+        after = event(B13A.EVENT_TRADE, self.COORDINATE[0] + 1, mint=SUBJECT_MINT, user=USER,
+                      is_buy=True, quote_lamports=1, token_units=1)
+        record = B13A.build_as_of_history(
+            [launch(self.COORDINATE[0] - 1, SUBJECT_MINT, source="u")], SUBJECT, after,
+            complete_coverage(complete=False, first_slot=1, last_slot=10 ** 9,
+                              decode_accounting=accounting))
+        self.assertEqual([f["reason_code"] for f in B13A.completeness_failures(record)],
+                         [B13A.C04_UNRESOLVED_EVIDENCE_AT_OR_BEFORE_T0])
+
+    def test_a_subject_deciding_before_them_is_not_poisoned(self):
+        source = self.corpus.B9D.connect(str(self.ARTIFACT), readonly=True)
+        try:
+            _, accounting = self.corpus._transfer_events(source, [self.COORDINATE])
+        finally:
+            source.close()
+        before = event(B13A.EVENT_TRADE, self.COORDINATE[0] - 1, mint=SUBJECT_MINT, user=USER,
+                       is_buy=True, quote_lamports=1, token_units=1)
+        record = B13A.build_as_of_history(
+            [launch(self.COORDINATE[0] - 2, SUBJECT_MINT, source="u")], SUBJECT, before,
+            complete_coverage(complete=False, first_slot=1, last_slot=10 ** 9,
+                              decode_accounting=accounting))
+        self.assertEqual(B13A.completeness_failures(record), [])
+        self.assertTrue(B13A.require_complete_history(record))
 
 
 class CorpusRunnerTests(unittest.TestCase):

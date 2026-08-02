@@ -1,6 +1,6 @@
 # B13a — point-in-time actor and token history, and the plan for collecting it properly
 
-Date: 2026-08-02. Author: Claude (handoff 78). Offline library and report only.
+Date: 2026-08-02. Author: Claude (handoffs 78, 80). Offline library and report only.
 Code: `scripts/b13a_history.py`, `scripts/b13a_history_corpus.py`.
 Schema: `docs/HISTORY_SCHEMA.md`. Tests: `tests/test_b13a_history.py`.
 
@@ -72,6 +72,62 @@ the most convincing possible way to be wrong, because nothing about the record w
 fixture named a bonding curve the launch helper did not generate. That is the argument for the
 check; the same mistake in a caller would have produced silent zeros.
 
+## 5b. The seam handoff 80 closed — untruncated geometry is not completeness
+
+Codex's review found a blocking defect before B13b, and it was a real one. Section 3 above argues
+carefully that a bounded window cannot know what preceded it — and then measured completeness
+purely as **window geometry**. That equates "the window has the right shape" with "everything
+inside it was read". A payload the extractor cannot decode produces no event, and an absent event
+is indistinguishable from an event that never happened. The exact confusion this module exists to
+prevent, one level below where it was being checked. A funding edge lost to a decode failure does
+not announce itself; it shows up later as a cluster that isn't there.
+
+**Sums, not counters.** Every coverage now carries a `decode_accounting` that must partition
+exactly three ways — transactions, System instructions, and lamport-moving instructions. A counter
+can be forgotten at one `continue`; a partition that must add up cannot be, because the arithmetic
+fails the moment an instruction falls out of the accounting. Evidence that was *lost* rather than
+absent is listed in `unresolved` with a full coordinate, one of four declared reason codes and a
+detail, and the list length must equal the count the partitions imply.
+
+`complete = True` is now refused while anything is unresolved, whatever the geometry says.
+
+**The poisoning boundary is per subject.** An unresolved instruction at or before a subject's t0
+poisons that subject, because the edge it would have produced is precisely the one its history is
+missing. One after t0 does not, because it cannot have removed anything that decision could have
+seen. Poisoning every subject for a failure none of them could have seen would be fail-closed in
+form and useless in substance.
+
+### A production bug the pinned fixture found, which the corpus never would have
+
+Writing a test that pins a genuinely undecodable payload exposed a crash on the path that was
+supposed to record one:
+
+```python
+except B9D.FreezeViolation as error:     # never matches
+except B9J.FreezeViolation as error:     # the class actually raised
+```
+
+Every module here loads its own dependency graph by path, so `b9j`'s `FreezeViolation` reached
+directly is a **different class object** from the one reached through B13a's chain. The `except`
+silently matched nothing, and an undecodable payload would have escaped as an unhandled crash
+rather than being recorded as unresolved evidence.
+
+The burned corpus would never have caught it. A full survey of the b9j artifact — **94,985
+transactions, 412,028 System instructions** — contains exactly **two** undecodable payloads, both
+padded `CreateAccount` bodies (52 of 56 bytes decoded, 4 trailing) in signature
+`5nYDQmEz8Zdj…xY4U` at coordinate `(433968746, 858)`, outer 2 / inner 0 and outer 2 / inner 2.
+Neither is in the 60-curve slice, so the gate reports `undecodable: 0` and always would have. Two
+in 412,028 is exactly the density at which a corpus run proves nothing and a pinned fixture proves
+everything. The two coordinates are now pinned in the tests, along with an assertion that the two
+`FreezeViolation` classes really are distinct — otherwise the test would pass again the day the
+loader changed and the bug came back.
+
+Two failure buckets have never occurred in real data at all: a lamport-moving transfer whose
+endpoints are not in its account list, and a self-transfer. The classification was extracted into a
+pure `classify_moving_instruction` so both can be driven directly, and the two transaction-level
+failures are driven against an in-memory database holding a coordinate with no body, and no
+coordinate at all. A path that never runs is a path nobody notices breaking.
+
 ## 6. Measured — plumbing integrity on the burned B8b corpus
 
 ```
@@ -91,6 +147,14 @@ python scripts/b13a_history_corpus.py research/b9d_transaction_bodies.sqlite \
 | identity kept out of features | **25 / 25** |
 | result independent of arrival order | **25 / 25** |
 | errors | **0** |
+| System instructions accounted for (bounded slice) | **36,869 = 35,568 moving + 1,301 non-moving + 0 undecodable** |
+| transactions accounted for | **7,712 = 7,712 with body + 0 missing body + 0 missing coordinate** |
+| unresolved evidence | **0** |
+| completeness refused for every subject | **25 / 25** |
+
+The last row is the point. The window is truncated by construction, so no subject's history rests
+on complete evidence and every one of them refuses a policy that would need a true count. The
+accounting says the refusal is about geometry alone — nothing in this slice was lost.
 
 **No feature value appears in that report and none may.** A history is one join away from an
 outcome, and a distribution inspected here is a transform chosen with the answer in view. The
@@ -101,9 +165,9 @@ instruction's own resolved account list. Nothing is inferred: a transfer of N la
 is exactly that, and whether it is funding, a tip or a refund is not something this module claims to
 know.
 
-## 7. Verification — 31 mutants, 30 killed, one disclosed
+## 7. Verification — 54 mutants, 52 killed, two disclosed
 
-62 tests, 217 subtests; **1,281 passing repository-wide**.
+89 tests, 240 subtests.
 
 Covering every failure mode named in the directive: boundary equality (4), past outcome after t0
 (1), self-inclusion (2), left truncation treated as zero (5), identity leakage (3), duplicate events
@@ -116,12 +180,29 @@ could never fire; and no fixture placed two events at an identical coordinate, s
 that makes ordering deterministic was untested. All three now have tests, and the disjointness check
 takes its field sets as arguments so it is reachable.
 
-**One equivalent mutant, disclosed rather than removed.** Deleting `assert_history` from
-`build_as_of_history` changes nothing observable: coverage is validated earlier and the sections are
-assembled internally from that validated input, so no caller input can make the self-check fire.
-`assert_history` is separately and thoroughly tested when called directly. It is kept because it
-would catch a future edit that adds a feature field without updating the contract — the exact class
-of error it exists for.
+The handoff-80 sweep added 23 mutants on the completeness seam: each of the three partition sums,
+the unresolved-list length check, coordinate and reason-code validation, the refusal to claim
+completeness with anything unresolved, each of the four `C0x` codes, the poisoning boundary made
+exclusive and made slot-only, a failure after t0 made to poison, the transaction-level sentinel
+moved inside the transaction, each accounting bucket silently skipped, and the wrong
+`FreezeViolation` class.
+
+**Six survived the first run of that batch and five were genuine gaps**: `assert_coverage` required
+the accounting field without validating it; `completeness_failures` was never driven with the
+accounting absent; the code assertions checked membership in the declared set rather than which
+code was reported; and the two never-observed moving buckets and the two transaction-level failures
+had no test at all. All five now have tests, and the moving classification became a pure function
+so it can be driven without a database.
+
+**Two equivalent mutants, disclosed rather than removed.** Deleting `assert_history` from
+`build_as_of_history`, and deleting the extractor's own `assert_decode_accounting` before it
+returns, both change nothing observable: in each case the data is assembled internally from
+already-validated input, so no caller input can make the self-check fire. Both functions are
+separately and thoroughly tested when called directly. They are kept because they would catch a
+future edit that adds a field or a `continue` without updating the contract — the exact class of
+error they exist for. This is a different judgement from the b10b case, where an unreachable check
+was **deleted**: that one could never fire for any future edit either, whereas these two fire the
+moment the code around them changes.
 
 ## 8. The cohort-based collection plan, specified now and not yet executed
 

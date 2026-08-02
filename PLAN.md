@@ -122,7 +122,16 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
   corpus: 44,438 events including **35,568 funding edges decoded from the pinned System ABI**,
   25/25 subjects with the boundary respected, identities kept out of features and results
   independent of arrival order, zero errors — **and no feature value, distribution or correlation
-  reported, on any window**. 31 mutants, 30 killed, one disclosed as equivalent. Clusters are NOT
+  reported, on any window**. **Handoff 80 closed a decode-completeness seam**: coverage measured
+  window geometry only, so a payload the extractor could not decode produced no event and an absent
+  event was indistinguishable from one that never happened. Coverage now carries a
+  `decode_accounting` that must partition three ways (transactions, System instructions,
+  lamport-moving instructions), lists every piece of lost evidence with a coordinate and a reason
+  code, refuses `complete` while anything is unresolved, and poisons a subject only when the
+  unresolved coordinate is at or before *that subject's* t0. The pinned fixture found a real
+  production crash — `except B9D.FreezeViolation` never matched the `B9J.FreezeViolation` actually
+  raised, because each module loads its own graph by path. 54 mutants, 52 killed, two disclosed as
+  equivalent. Clusters are NOT
   inferred and funding-cluster leakage remains an open gate. The cohort-based collection plan,
   including a preregistered lookback and completeness gate, is specified and awaits B11a unlocking.
 - [ ] Create probabilistic wallet clusters with evidence and confidence.
