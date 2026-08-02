@@ -1,0 +1,166 @@
+{
+  "preregistration_id": "B15C_COST_CALIBRATION_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (handoff 118)",
+  "status": "FROZEN. Committed alone, before any cost transaction is fetched and before any scenario value exists.",
+  "purpose": "Freeze the sampling rule, the stopping rule, the exact cost decomposition, the exclusion accounting and the scenario derivation for a contemporaneous execution-cost calibration built from observed successful Pump buys.",
+  "committed_before_any_cost_fetch": true,
+  "committed_before_any_scenario_value_exists": true,
+
+  "what_this_is_not": {
+    "headline": "Observed costs of OTHER traders are calibration evidence. They are not a guarantee that any route we might choose would land, and they are not a price we are promised.",
+    "consequences": [
+      "every scenario is labelled SIMULATED_SHADOW and is non-executable",
+      "no transaction is constructed, simulated or sent at any point",
+      "a quantile of what others paid is not a quote"
+    ]
+  },
+
+  "primary_sources": [
+    {
+      "url": "https://solana.com/docs/core/fees",
+      "accessed": "2026-08-03",
+      "semantics_taken": [
+        "base fee is 5,000 lamports per signature",
+        "prioritization fee is ceil(compute_unit_price_micro_lamports * compute_unit_limit / 1000000) lamports",
+        "the prioritization fee uses the REQUESTED compute unit limit, not the units consumed",
+        "default compute unit limit is 200,000 per instruction; maximum 1,400,000 per transaction"
+      ],
+      "not_answered_by_the_source": "whether meta.fee in getTransaction includes both components",
+      "how_that_is_resolved": "EMPIRICALLY, from this sample: for every transaction where both components are independently derivable, base + prioritization is compared against meta.fee and the agreement rate is published. A documented claim would be weaker than the arithmetic."
+    },
+    {
+      "url": "pinned IDL research/pump_idl_9c82f61.json",
+      "accessed": "pinned in-repo",
+      "semantics_taken": [
+        "TradeEvent publishes fee, fee_basis_points, creator_fee, creator_fee_basis_points, cashback, cashback_fee_basis_points, buyback_fee and buyback_fee_basis_points as exact integers"
+      ]
+    }
+  ],
+
+  "population": {
+    "source": "research/b15a/raw_frames.jsonl, the append-only provider payloads",
+    "definition": "a transaction is IN POPULATION when it carries no error and at least one Pump TradeEvent with is_buy true",
+    "outcome_independence": "membership is decided by the transaction's own content only. No outcome, no price move, no profit figure and no later state may influence it — and none exists in this system to influence it with.",
+    "identity": "the transaction signature; a signature appears at most once"
+  },
+
+  "sampling_rule": {
+    "method": "deterministic systematic hash sample",
+    "selector": "include the signature when int(sha256('b15c:' + signature).hexdigest(), 16) % sampling_modulus == 0",
+    "sampling_modulus": 8,
+    "seed_string": "b15c:",
+    "why_not_first_n": "taking the first N in canonical order samples the earliest minutes of the feed, and fees move with congestion. A hash sample is time-neutral and reproducible from the signature alone.",
+    "why_deterministic": "a seeded RNG would make the sample depend on a library's implementation; integer arithmetic on a hash cannot drift between versions",
+    "reproducible_without_this_run": true
+  },
+
+  "stopping_rule": {
+    "sample_target": 400,
+    "runs_until_first_of": ["sample_target reached", "population exhausted"],
+    "max_requests_per_run": 1000,
+    "extension_forbidden_without_superseding_preregistration": true,
+    "extension_forbidden_reason": "a sample enlarged after its quantiles were seen is a sample whose size was chosen by the quantiles"
+  },
+
+  "rate_policy": {
+    "max_requests_per_second": 2,
+    "min_interval_ms": 500,
+    "max_concurrent_requests": 1,
+    "max_attempts_per_signature": 4,
+    "backoff_seconds": [1, 3, 9],
+    "inherited_from": "B15B_LAUNCH_BACKFILL_V1, unchanged"
+  },
+
+  "cost_components": [
+    {"name": "total_fee_lamports", "source": "meta.fee", "exact": true},
+    {"name": "signature_count", "source": "transaction.signatures length", "exact": true},
+    {"name": "base_fee_lamports", "derivation": "5000 * signature_count", "exact": true},
+    {"name": "compute_units_consumed", "source": "meta.computeUnitsConsumed", "exact": true},
+    {"name": "compute_unit_limit", "source": "ComputeBudget SetComputeUnitLimit instruction data", "available_only_when_present": true},
+    {"name": "compute_unit_price_micro_lamports", "source": "ComputeBudget SetComputeUnitPrice instruction data", "available_only_when_present": true},
+    {"name": "prioritization_fee_lamports", "derivation": "ceil(compute_unit_price_micro_lamports * compute_unit_limit / 1000000)", "available_only_when": "both the limit and the price instructions are present"},
+    {"name": "tip_lamports", "evidence_rule": "a System Program transfer whose destination is in an EXPLICITLY DECLARED tip-account set", "default_set": [], "when_set_is_empty": "tip is UNAVAILABLE, never zero"},
+    {"name": "pump_protocol_fee_lamports", "source": "TradeEvent.fee", "exact": true},
+    {"name": "pump_creator_fee_lamports", "source": "TradeEvent.creator_fee", "exact": true},
+    {"name": "pump_cashback_lamports", "source": "TradeEvent.cashback", "exact": true},
+    {"name": "pump_buyback_fee_lamports", "source": "TradeEvent.buyback_fee", "exact": true},
+    {"name": "backfill_latency_ns", "source": "this worker's own monotonic clock around the request", "exact": true}
+  ],
+
+  "zero_by_absence_is_forbidden": {
+    "rule": "a component that is not published by the evidence is UNAVAILABLE and is recorded as such with a reason. It is never recorded as zero.",
+    "why": "zero is a measurement meaning 'this cost was not incurred'. Absent means 'we cannot say'. A transaction with no SetComputeUnitPrice instruction pays no prioritization fee, but a transaction whose instructions we failed to parse might have paid a large one, and the two must not share a value.",
+    "distinguished": {
+      "no_compute_budget_instruction_present": "prioritization_fee is 0 AND provably so, because the fee is defined by those instructions and their absence is evidence",
+      "instructions_present_but_undecodable": "prioritization_fee is UNAVAILABLE with reason C03"
+    }
+  },
+
+  "decomposition_check": {
+    "identity": "base_fee_lamports + prioritization_fee_lamports == total_fee_lamports",
+    "applied_when": "both components are derivable",
+    "on_disagreement": "the row is recorded with reason C05_decomposition_mismatch and is EXCLUDED from the scenario sample; it is not adjusted to fit",
+    "why_published": "the agreement rate is the empirical answer to what meta.fee contains, and a decomposition that never disagrees is one nobody checked"
+  },
+
+  "exclusion_codes": [
+    {"code": "C01_transaction_failed", "meaning": "the transaction carries an error"},
+    {"code": "C02_no_buy_trade_event", "meaning": "no Pump TradeEvent with is_buy true"},
+    {"code": "C03_compute_budget_undecodable", "meaning": "a ComputeBudget instruction is present but its data did not parse"},
+    {"code": "C04_rpc_exhausted", "meaning": "bounded retries used without a response"},
+    {"code": "C05_decomposition_mismatch", "meaning": "base plus prioritization did not equal meta.fee"},
+    {"code": "C06_duplicate_signature", "meaning": "the signature was already sampled"},
+    {"code": "C07_response_inconsistent", "meaning": "signature or slot in the response disagrees with the recorded frame"}
+  ],
+  "exclusion_accounting": "every exclusion is counted by code and published. A sample that reports only what it kept is a sample nobody can size.",
+
+  "scenario_derivation": {
+    "frozen_after_the_sample_completes": true,
+    "derived_from": "the observed distribution of total_fee_lamports over the included sample",
+    "scenarios": [
+      {"name": "optimistic", "statistic": "p10"},
+      {"name": "base", "statistic": "p50"},
+      {"name": "stressed", "statistic": "p90"}
+    ],
+    "statistic_rule": "exact integer order statistics by index, no interpolation between neighbours",
+    "why_no_interpolation": "an interpolated quantile invents a value no transaction actually paid",
+    "outcome_tuning_structurally_impossible": "no outcome, realised return or profit figure exists anywhere in B15a or B15b, so there is nothing for a scenario to be tuned against. This is stated as a fact about the system, not as a promise about conduct.",
+    "no_scenario_value_appears_in_this_document": true
+  },
+
+  "hypothetical_route_vs_observed": {
+    "rule": "the observed cost of another trader's transaction is NOT the cost of a route we might choose",
+    "recorded_separately": true,
+    "our_route_is": "unpriced. No route is constructed, and no landing probability is claimed at any quantile."
+  },
+
+  "isolation": {
+    "artifact_root": "research/b15c",
+    "reads": ["research/b15a/raw_frames.jsonl (append-only, read-only)", "research/b15b/backfill.sqlite (read-only)"],
+    "may_not_write": ["research/b15a", "research/b15b", "research/b11a", "every file in the B11c integrity manifest"],
+    "concurrency": "B15a and B15b keep running; both are read through immutable evidence or read-only snapshots"
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing anything",
+    "constructing a transaction",
+    "simulating a transaction",
+    "submitting a transaction",
+    "tips, priority fees, or any spending",
+    "inferring a missing cost component as zero",
+    "letting any outcome, return or profit figure influence a scenario",
+    "extending the sample after seeing its quantiles",
+    "claiming a landing probability or an executable price"
+  ],
+
+  "status_locks": {
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "scenario_label": "SIMULATED_SHADOW",
+    "executable": false,
+    "refused_status_names": ["executable", "live", "profitable", "production_ready", "validated", "guaranteed", "quoted"]
+  }
+}
