@@ -71,7 +71,19 @@ LOCK_PATH = WORK_DIR / "supervisor.lock"
 RECEIPT_DIR = WORK_DIR / "receipts"
 LOG_DIR = WORK_DIR / "logs"
 
+PID_PATH = WORK_DIR / "watcher.pid"
+ARCHIVE_DIR = WORK_DIR / "superseded"
+
 RPC_ENV_VAR = "SOLANA_RPC_URL"
+
+# How many poll intervals a heartbeat may lag before the run is stale. Three, because one missed
+# poll is a slow endpoint and three in a row is a process that is not polling.
+HEARTBEAT_TOLERANCE_INTERVALS = 3
+
+LIVENESS_ALIVE = "alive"
+LIVENESS_DEAD = "dead"
+LIVENESS_STALE = "stale"
+LIVENESS_NOT_STARTED = "not_started"
 
 # Conservative. The cutoff does not move, so polling faster buys nothing and only adds load.
 DEFAULT_POLL_SECONDS = 300
@@ -113,9 +125,14 @@ QUARANTINE_CODES = (Q01_PREREGISTRATION_DRIFT, Q02_SCRIPT_MANIFEST_DRIFT, Q03_GI
 # The A2 probe runs FIRST. An upgrade boundary is a property of the program, not of the window, so
 # it costs no composition — and if version coverage cannot be proven there is no point collecting
 # anything at all.
-RUN_ORDER = ("program_boundary", "enumerate_creates", "signature_inventory", "transaction_bodies",
-             "decode_and_reserves", "reserve_coverage_gate", "failure_coverage_gate",
-             "simulator_replay_gate")
+RUN_ORDER = ("program_boundary", "enumerate_creates", "build_cohort", "signature_inventory",
+             "transaction_bodies", "decode_and_reserves", "reserve_coverage_gate",
+             "failure_coverage_gate", "simulator_replay_gate")
+
+# Stages that are not part of B11a's frozen pipeline because they touch no network and produce no
+# evidence: they only reshape what an earlier stage already collected. Declared here so
+# `verify_stage_order` can accept them by name rather than by exception, and asserted offline.
+LOCAL_STAGES = ("build_cohort",)
 
 # Stages that must never be schedulable here, whatever a future edit does to the order above.
 FORBIDDEN_STAGES = ("position_paths", "outcome_labels")
@@ -130,6 +147,7 @@ MANIFEST_FILES = (
     "scripts/b9e_reserve_coverage.py",
     "scripts/b9f_failure_coverage.py",
     "scripts/b10a_simulator_kernel.py",
+    "scripts/b11d_cohort_adapter.py",
     "research/pump_idl_9c82f61.json",
     "research/pump_amm_idl_9c82f61.json",
     "research/B11A_FRESH_COHORT_PREREGISTRATION.json",
@@ -325,8 +343,11 @@ def verify_stage_order(order=RUN_ORDER):
     # that fires only when this one already has. FORBIDDEN_STAGES stays as a published declaration
     # and is checked against the pipeline below — a different property.
     for name in order:
+        if name in LOCAL_STAGES:
+            continue
         if name not in known:
-            raise WatcherRefused(f"{name!r} is not a stage of the frozen pipeline")
+            raise WatcherRefused(
+                f"{name!r} is neither a stage of the frozen pipeline nor a declared local stage")
         try:
             B11A.assert_stage_permitted(name, mature=True, results_unlocked=False)
         except B11A.WindowRefused as error:
@@ -372,6 +393,16 @@ def stage_commands(work_dir=WORK_DIR):
             "wiring": "resolved",
             "note": "A2 probe; output path and RPC env are both explicit arguments",
         },
+        "build_cohort": {
+            "argv": [sys.executable, "scripts/b11d_cohort_adapter.py", "build",
+                     "--source", str(directory / "b11a_creates.sqlite"),
+                     "--output", str(directory / "b11a_cohort.sqlite")],
+            "wiring": "resolved",
+            "local": True,
+            "note": "offline: derives the identity-and-regime cohort B9c and B9d need from the "
+                    "B7d enumeration. Carries mint, bonding_curve, launch_slot and is_mayhem_mode "
+                    "and nothing else; manufactures no outcome",
+        },
         "enumerate_creates": {
             "argv": [sys.executable, "scripts/b7d_create_enumerator.py",
                      "--start-slot", str(first), "--end-slot", str(last + 1),
@@ -382,35 +413,34 @@ def stage_commands(work_dir=WORK_DIR):
         },
         "signature_inventory": {
             "argv": [sys.executable, "scripts/b9c_signature_inventory.py",
-                     "--source", str(directory / "b11a_creates.sqlite"),
+                     "--source", str(directory / "b11a_cohort.sqlite"),
                      "--database", str(directory / "b11a_signatures.sqlite")],
-            "wiring": "unresolved",
-            "note": "--source and --database are explicit, but the script expects a B9a-shaped "
-                    "cohort schema and this window's population comes from the B7d enumerator. "
-                    "The schema compatibility has never been demonstrated, and assuming it would "
-                    "be assuming the shape of the one artifact this window depends on",
+            "wiring": "resolved",
+            "note": "reads the cohort artifact, whose `outcome` view answers b9c's query exactly. "
+                    "Compatibility demonstrated by test rather than assumed",
         },
         "transaction_bodies": {
             "argv": [sys.executable, "scripts/b9d_transaction_bodies.py", "run",
-                     str(directory / "b11a_bodies.sqlite"), "--rpc-env", RPC_ENV_VAR],
-            "wiring": "unresolved",
-            "note": "the `run` subcommand reads its population from the module-level B9C_PATH and "
-                    "B9A_PATH constants and accepts no override, so it would collect this window "
-                    "against the BURNED corpus's inventory. Only `verify`, `decode` and "
-                    "`verify-artifact` take --b9c/--b9a",
+                     str(directory / "b11a_bodies.sqlite"), "--rpc-env", RPC_ENV_VAR,
+                     "--b9c", str(directory / "b11a_signatures.sqlite"),
+                     "--b9a", str(directory / "b11a_cohort.sqlite")],
+            "wiring": "resolved",
+            "note": "the run subcommand now takes --b9c and --b9a; both name fresh paths, which "
+                    "puts b9d in fresh-source mode where the burned pins and counts do not apply "
+                    "and the cohort must verify itself instead",
         },
         "decode_and_reserves": {
             "argv": [sys.executable, "scripts/b9d_transaction_bodies.py", "decode",
                      str(directory / "b11a_bodies.sqlite"),
                      "--b9c", str(directory / "b11a_signatures.sqlite"),
-                     "--b9a", str(directory / "b11a_creates.sqlite")],
+                     "--b9a", str(directory / "b11a_cohort.sqlite")],
             "wiring": "resolved",
             "note": "decode accepts --b9c and --b9a overrides",
         },
         "reserve_coverage_gate": {
             "argv": [sys.executable, "scripts/b9e_reserve_coverage.py",
                      str(directory / "b11a_bodies.sqlite"),
-                     "--b9a", str(directory / "b11a_creates.sqlite")],
+                     "--b9a", str(directory / "b11a_cohort.sqlite")],
             "wiring": "resolved",
             "note": "artifact positional and --b9a override are explicit",
         },
@@ -480,6 +510,124 @@ def initial_state(window, manifest, poll_seconds):
 def write_state(state, path=STATE_PATH):
     assert_no_composition(state, "supervisor state")
     return atomic_write_json(path, state, "supervisor state")
+
+
+# --------------------------------------------------------------------------------------------
+# Liveness
+# --------------------------------------------------------------------------------------------
+
+def process_is_this_watcher(pid):
+    """Alive AND actually this watcher. A pidfile alone proves nothing.
+
+    A PID is reused within days on a busy machine, so `kill -0` succeeding says only that SOMETHING
+    is running under that number. The command line is what distinguishes our watcher from whatever
+    inherited its slot.
+
+    Matched on the SCRIPT PATH and the `--watch` flag together, not on the module name alone: a
+    test runner invoked on `tests/test_b11c_maturity_watcher.py` carries that name in its own argv,
+    and a liveness check that answers "yes" for the process asking the question is worse than
+    none.
+    """
+    if not pid:
+        return False
+    try:
+        # /proc is the authority here, and it answers both questions at once: a dead pid has no
+        # entry, and a live one shows what it is actually running. A separate `os.kill(pid, 0)`
+        # probe would only fire in cases this read already covers.
+        cmdline = pathlib.Path(f"/proc/{int(pid)}/cmdline").read_bytes().decode("utf-8", "replace")
+    except (OSError, ValueError):
+        return False
+    return ("scripts/b11c_maturity_watcher.py" in cmdline) and ("--watch" in cmdline)
+
+
+def lock_is_held(path=LOCK_PATH):
+    """Whether somebody holds the instance lock. Acquiring it means nobody does."""
+    import fcntl
+    path = pathlib.Path(path)
+    if not path.exists():
+        return False
+    try:
+        handle = open(path, "r+")
+    except OSError:
+        return False
+    try:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        return False
+    except OSError:
+        return True
+    finally:
+        handle.close()
+
+
+def read_pid(path=PID_PATH):
+    path = pathlib.Path(path)
+    if not path.exists():
+        return None
+    try:
+        return int(path.read_text().strip())
+    except (ValueError, OSError):
+        return None
+
+
+def liveness(state, pid_path=PID_PATH, lock_path=LOCK_PATH, now=None):
+    """Is a watcher actually running, on three independent signals.
+
+    A stored state of `waiting_for_maturity` says what the process was doing when it last wrote,
+    not that it is still doing it. Reporting the stored value as current is how a supervisor that
+    died on Tuesday still says "waiting" on Friday.
+    """
+    now = int(time.time()) if now is None else now
+    if state is None:
+        return {"liveness": LIVENESS_NOT_STARTED, "pid": None, "pid_alive": False,
+                "lock_held": False, "heartbeat_age_seconds": None, "heartbeat_fresh": False}
+    pid = read_pid(pid_path)
+    alive = process_is_this_watcher(pid)
+    held = lock_is_held(lock_path)
+    last = state.get("last_poll_at")
+    interval = state.get("poll_seconds") or DEFAULT_POLL_SECONDS
+    age = None if last is None else now - last
+    fresh = age is not None and age <= interval * HEARTBEAT_TOLERANCE_INTERVALS
+    if alive and held and fresh:
+        verdict = LIVENESS_ALIVE
+    elif not alive and not held:
+        verdict = LIVENESS_DEAD
+    else:
+        # Some signals agree and others do not: a held lock with no heartbeat, or a live process
+        # that has stopped writing. Neither is "running normally", and calling it alive would be
+        # the guess this whole module exists to avoid.
+        verdict = LIVENESS_STALE
+    return {"liveness": verdict, "pid": pid, "pid_alive": alive, "lock_held": held,
+            "heartbeat_age_seconds": age, "heartbeat_fresh": fresh,
+            "heartbeat_tolerance_seconds": interval * HEARTBEAT_TOLERANCE_INTERVALS}
+
+
+def archive_run(reason, work_dir=WORK_DIR, state_path=STATE_PATH, pid_path=PID_PATH,
+                archive_dir=ARCHIVE_DIR, stamp=None):
+    """Move a superseded run's state and pidfile aside. Never erase.
+
+    A failed launch is evidence about how the supervisor behaves, and deleting it would remove the
+    only record that it happened. Refused if any stage completed: an archived run with receipts is
+    a collection somebody may still need.
+    """
+    done = completed_stages(pathlib.Path(work_dir) / "receipts")
+    if done:
+        raise WatcherRefused(
+            f"refusing to archive a run with completed stages {done}; its receipts are the record "
+            "of a collection that cannot be repeated")
+    stamp = stamp or time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    destination = pathlib.Path(archive_dir) / stamp
+    destination.mkdir(parents=True, exist_ok=True)
+    moved = []
+    for path in (pathlib.Path(state_path), pathlib.Path(pid_path)):
+        if path.exists():
+            target = destination / path.name
+            os.replace(path, target)
+            moved.append(str(target))
+    note = {"reason": reason, "archived_at": stamp, "moved": moved,
+            "stages_completed": [], "composition_published": False}
+    atomic_write_json(destination / "superseded.json", note, "archive note")
+    return note
 
 
 # --------------------------------------------------------------------------------------------
@@ -726,14 +874,21 @@ def dry_run_plan(poll_seconds=DEFAULT_POLL_SECONDS, work_dir=WORK_DIR):
     return plan
 
 
-def status(state_path=STATE_PATH, receipt_dir=RECEIPT_DIR):
+def status(state_path=STATE_PATH, receipt_dir=RECEIPT_DIR, pid_path=PID_PATH,
+           lock_path=LOCK_PATH):
     """What an operator may see. Stage state and pass/fail; never a count."""
     state = read_state(state_path)
+    signals = liveness(state, pid_path, lock_path)
     if state is None:
-        return {"state": "not_started", "composition_published": False}
+        return {"state": LIVENESS_NOT_STARTED, "liveness": LIVENESS_NOT_STARTED,
+                "reported_state": None, "composition_published": False, **signals}
     done = completed_stages(receipt_dir)
     view = {
-        "state": state["state"],
+        # What is TRUE NOW. The stored value is what the process was doing when it last wrote, and
+        # publishing that as current is how a supervisor that died on Tuesday still says "waiting"
+        # on Friday.
+        "state": state["state"] if signals["liveness"] == LIVENESS_ALIVE else signals["liveness"],
+        "reported_state": state["state"],
         "cutoff_slot_inclusive": state["cutoff_slot_inclusive"],
         "last_tip_slot": state["last_tip_slot"],
         "slots_remaining": (None if state["last_tip_slot"] is None
@@ -747,6 +902,7 @@ def status(state_path=STATE_PATH, receipt_dir=RECEIPT_DIR):
         "quarantine": state["quarantine"],
         "results_unlocked": False,
         "composition_published": False,
+        **signals,
     }
     assert_no_composition(state, "the state behind status")
     assert_no_secret(view, "status")

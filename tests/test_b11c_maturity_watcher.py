@@ -98,16 +98,16 @@ class MaturityTests(unittest.TestCase):
         state = harness.watch_all(poll_seconds=1, max_iterations=1)
         self.assertEqual(state["state"], W.STATE_ALL_STAGES_COMPLETE)
 
-    def test_at_maturity_the_real_pipeline_stops_at_the_first_unresolved_stage(self):
-        """The honest current state: the A2 probe and the create enumeration are wired, and the
-        signature inventory is not. The watcher runs what it can prove and stops rather than
-        guessing at the rest."""
+    def test_at_maturity_the_real_pipeline_runs_every_stage_in_order(self):
+        """Every stage is wired now. The A2 probe first, then the enumeration, then the cohort
+        adapter that the two repaired stages consume."""
         harness = Harness(self, [CUTOFF])
-        with self.assertRaisesRegex(W.Quarantined, W.Q11_STAGE_WIRING_UNRESOLVED):
-            harness.watch(poll_seconds=1, max_iterations=1)
-        self.assertEqual([argv[1] for argv in harness.ran],
-                         ["scripts/b9d_transaction_bodies.py",
-                          "scripts/b7d_create_enumerator.py"])
+        harness.watch(poll_seconds=1, max_iterations=1)
+        scripts = [argv[1] for argv in harness.ran]
+        self.assertEqual(scripts[:3], ["scripts/b9d_transaction_bodies.py",
+                                       "scripts/b7d_create_enumerator.py",
+                                       "scripts/b11d_cohort_adapter.py"])
+        self.assertEqual(len(scripts), len(W.RUN_ORDER))
 
     def test_the_maturity_test_is_b11as_own(self):
         self.assertFalse(B11A.maturity(CUTOFF - 1)["mature"])
@@ -251,10 +251,12 @@ class StageOrderTests(unittest.TestCase):
         self.assertEqual(W.RUN_ORDER[0], "program_boundary")
         self.assertEqual(W.verify_stage_order()[0], "program_boundary")
 
-    def test_every_stage_is_a_frozen_permitted_stage(self):
+    def test_every_stage_is_a_frozen_permitted_stage_or_a_declared_local_one(self):
         known = {stage["stage"]: stage for stage in B11A.PIPELINE}
         for name in W.RUN_ORDER:
             with self.subTest(stage=name):
+                if name in W.LOCAL_STAGES:
+                    continue
                 self.assertIn(name, known)
                 self.assertTrue(known[name]["permitted_before_unlock"])
 
@@ -277,7 +279,7 @@ class StageOrderTests(unittest.TestCase):
             "must run first": ["enumerate_creates", "program_boundary"] + good[2:],
             "appears twice": good + [good[1]],
             "may never be scheduled": good + ["position_paths"],
-            "not a stage of the frozen pipeline": good + ["invented_stage"],
+            "nor a declared local stage": good + ["invented_stage"],
         }
         for expected, order in cases.items():
             with self.subTest(expected=expected):
@@ -336,19 +338,64 @@ class StageOrderTests(unittest.TestCase):
 class WiringTests(unittest.TestCase):
     """A stage that cannot be pointed at the B11a directory is quarantined, not guessed at."""
 
-    def test_the_planner_reports_the_unresolved_stages(self):
+    def test_the_planner_reports_the_pipeline_ready(self):
         plan = W.dry_run_plan()
-        self.assertFalse(plan["launch_ready_for_collection"])
-        self.assertIn("transaction_bodies", plan["stages_unresolved"])
-        self.assertIn("signature_inventory", plan["stages_unresolved"])
+        self.assertEqual(plan["stages_unresolved"], [])
+        self.assertTrue(plan["launch_ready_for_collection"])
+
+    def test_an_unresolved_stage_is_reported_by_the_planner(self):
+        """Every stage is resolved today, so the reporter is driven with an injected unresolved
+        command — otherwise the function that decides launch-readiness is never exercised on the
+        case it exists for."""
+        commands = W.stage_commands(pathlib.Path("/tmp/b11a-iso"))
+        commands["transaction_bodies"] = dict(commands["transaction_bodies"],
+                                              wiring="unresolved")
+        self.assertEqual(W.unresolved_stages(commands), ["transaction_bodies"])
+        self.assertEqual(W.unresolved_stages(W.stage_commands(pathlib.Path("/tmp/b11a-iso"))), [])
+
+    def test_the_cohort_adapter_runs_before_the_stages_that_consume_it(self):
+        order = list(W.RUN_ORDER)
+        self.assertLess(order.index("enumerate_creates"), order.index("build_cohort"))
+        self.assertLess(order.index("build_cohort"), order.index("signature_inventory"))
+        self.assertLess(order.index("build_cohort"), order.index("transaction_bodies"))
+
+    def test_every_consumer_is_pointed_at_the_cohort_artifact(self):
+        commands = W.stage_commands(pathlib.Path("/tmp/b11a-iso"))
+        for stage in ("signature_inventory", "transaction_bodies", "decode_and_reserves",
+                      "reserve_coverage_gate"):
+            with self.subTest(stage=stage):
+                joined = " ".join(commands[stage]["argv"])
+                self.assertIn("b11a_cohort.sqlite", joined)
+
+    def test_b9d_run_now_names_both_fresh_sources(self):
+        """The defect this handoff repaired: without them the run subcommand falls back to the
+        burned module constants."""
+        argv = W.stage_commands(pathlib.Path("/tmp/b11a-iso"))["transaction_bodies"]["argv"]
+        self.assertIn("--b9c", argv)
+        self.assertIn("--b9a", argv)
+        for index, part in enumerate(argv):
+            if part in ("--b9c", "--b9a"):
+                with self.subTest(option=part):
+                    self.assertTrue(argv[index + 1].startswith("/tmp/b11a-iso"))
+
+    def test_the_local_adapter_stage_makes_no_network_call(self):
+        commands = W.stage_commands()
+        for name in W.LOCAL_STAGES:
+            with self.subTest(stage=name):
+                self.assertNotIn("--rpc-env", commands[name]["argv"])
+                self.assertTrue(commands[name].get("local"))
 
     def test_an_unresolved_stage_quarantines_rather_than_running(self):
+        """Every shipped stage is resolved now, so the refusal is driven with an injected
+        unresolved command — the guard must still be there for the next stage that is not."""
         harness = Harness(self, [CUTOFF])
         commands = W.stage_commands(harness.directory)
+        unresolved = dict(commands["transaction_bodies"], wiring="unresolved",
+                          note="an injected unresolved stage")
         state = W.initial_state(W.verify_preregistration(), W.build_manifest(), 1)
         state["endpoint"] = W.endpoint_receipt(URL)
         with self.assertRaisesRegex(W.Quarantined, W.Q11_STAGE_WIRING_UNRESOLVED):
-            W.run_stage("transaction_bodies", commands["transaction_bodies"], state,
+            W.run_stage("transaction_bodies", unresolved, state,
                         runner=harness.runner, log_dir=harness.paths["log_dir"],
                         receipt_dir=harness.paths["receipt_dir"],
                         state_path=harness.paths["state_path"])
@@ -650,6 +697,137 @@ class IsolationTests(unittest.TestCase):
         for receipt in W.RUN_ORDER:
             with self.subTest(stage=receipt):
                 self.assertTrue((harness.paths["receipt_dir"] / f"{receipt}.json").exists())
+
+
+class LivenessTests(unittest.TestCase):
+    """A stored state says what the process was doing when it last wrote, not that it still is."""
+
+    def setUp(self):
+        self.dir = pathlib.Path(tempfile.mkdtemp(prefix="b11c-live-"))
+        self.addCleanup(shutil.rmtree, self.dir, ignore_errors=True)
+        self.state_path = self.dir / "state.json"
+        self.pid_path = self.dir / "watcher.pid"
+        self.lock_path = self.dir / "supervisor.lock"
+
+    def write_state(self, **overrides):
+        state = {"state": W.STATE_WAITING, "poll_seconds": 300,
+                 "last_poll_at": int(__import__("time").time()), "polls": 3,
+                 "last_tip_slot": CUTOFF - 100, "cutoff_slot_inclusive": CUTOFF,
+                 "stage_in_flight": None, "quarantine": None,
+                 "endpoint": "https://rpc.invalid", "results_unlocked": False,
+                 "composition_published": False}
+        state.update(overrides)
+        self.state_path.write_text(json.dumps(state))
+        return state
+
+    def test_a_dead_process_is_never_reported_as_waiting(self):
+        """The defect this exists for: a supervisor that died on Tuesday still saying 'waiting' on
+        Friday, because status read a file and asked nothing else."""
+        state = self.write_state()
+        self.pid_path.write_text("999999")
+        view = W.status(self.state_path, self.dir / "receipts", self.pid_path, self.lock_path)
+        self.assertEqual(view["liveness"], W.LIVENESS_DEAD)
+        self.assertEqual(view["state"], W.LIVENESS_DEAD)
+        self.assertEqual(view["reported_state"], state["state"])
+
+    def test_a_pidfile_alone_is_not_proof(self):
+        self.write_state()
+        self.pid_path.write_text("999999")
+        signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
+                             self.lock_path)
+        self.assertFalse(signals["pid_alive"])
+        self.assertFalse(signals["lock_held"])
+
+    def test_a_reused_pid_running_something_else_is_not_our_watcher(self):
+        """A PID is reused within days; kill -0 succeeding says only that SOMETHING is there.
+
+        This test process is itself the sharpest case: pytest's argv contains
+        `tests/test_b11c_maturity_watcher.py`, so a check matching the module name alone would
+        answer "yes" for the process asking the question."""
+        self.write_state()
+        self.pid_path.write_text(str(os.getpid()))
+        self.assertFalse(W.process_is_this_watcher(os.getpid()))
+        signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
+                             self.lock_path)
+        self.assertIn(signals["liveness"], (W.LIVENESS_DEAD, W.LIVENESS_STALE))
+
+    def test_a_stale_heartbeat_is_not_alive(self):
+        import time as _time
+        self.write_state(last_poll_at=int(_time.time()) - 5_000)
+        self.pid_path.write_text("999999")
+        signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
+                             self.lock_path)
+        self.assertFalse(signals["heartbeat_fresh"])
+        self.assertNotEqual(signals["liveness"], W.LIVENESS_ALIVE)
+
+    def test_a_held_lock_with_no_heartbeat_is_stale_not_alive(self):
+        """Signals that disagree are never 'running normally'."""
+        import time as _time
+        self.write_state(last_poll_at=int(_time.time()) - 5_000)
+        with W.InstanceLock(self.lock_path):
+            self.pid_path.write_text("999999")
+            signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
+                                 self.lock_path)
+        self.assertTrue(signals["lock_held"])
+        self.assertEqual(signals["liveness"], W.LIVENESS_STALE)
+
+    def test_no_state_at_all_reports_not_started(self):
+        view = W.status(self.dir / "absent.json", self.dir / "receipts", self.pid_path,
+                        self.lock_path)
+        self.assertEqual(view["liveness"], W.LIVENESS_NOT_STARTED)
+        self.assertEqual(view["state"], W.LIVENESS_NOT_STARTED)
+
+    def test_an_empty_log_is_not_evidence_of_anything(self):
+        """The watcher writes state, not chatter, so an empty log says nothing either way. The
+        heartbeat is what carries the signal."""
+        self.write_state()
+        (self.dir / "logs").mkdir(exist_ok=True)
+        (self.dir / "logs" / "watcher.stdout.log").write_text("")
+        self.pid_path.write_text("999999")
+        self.assertEqual(
+            W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
+                       self.lock_path)["liveness"], W.LIVENESS_DEAD)
+
+    def test_the_three_signals_are_reported_individually(self):
+        self.write_state()
+        self.pid_path.write_text("999999")
+        signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
+                             self.lock_path)
+        for field in ("pid_alive", "lock_held", "heartbeat_fresh", "heartbeat_age_seconds"):
+            with self.subTest(field=field):
+                self.assertIn(field, signals)
+
+
+class ArchiveTests(unittest.TestCase):
+    """A failed launch is evidence about how the supervisor behaves; never erase it."""
+
+    def setUp(self):
+        self.dir = pathlib.Path(tempfile.mkdtemp(prefix="b11c-arch-"))
+        self.addCleanup(shutil.rmtree, self.dir, ignore_errors=True)
+        self.state = self.dir / "state.json"
+        self.pid = self.dir / "watcher.pid"
+        self.state.write_text(json.dumps({"state": W.STATE_WAITING}))
+        self.pid.write_text("999999")
+
+    def test_a_superseded_run_is_moved_aside_not_deleted(self):
+        note = W.archive_run("stale launch", work_dir=self.dir, state_path=self.state,
+                             pid_path=self.pid, archive_dir=self.dir / "superseded",
+                             stamp="20260802T000000Z")
+        self.assertFalse(self.state.exists())
+        self.assertFalse(self.pid.exists())
+        archived = self.dir / "superseded" / "20260802T000000Z"
+        self.assertTrue((archived / "state.json").exists())
+        self.assertTrue((archived / "watcher.pid").exists())
+        self.assertEqual(note["reason"], "stale launch")
+
+    def test_a_run_with_completed_stages_is_never_archived(self):
+        receipts = self.dir / "receipts"
+        receipts.mkdir()
+        (receipts / "program_boundary.json").write_text(
+            json.dumps({"stage": "program_boundary", "completed": True}))
+        with self.assertRaisesRegex(W.WatcherRefused, "cannot be repeated"):
+            W.archive_run("x", work_dir=self.dir, state_path=self.state, pid_path=self.pid,
+                          archive_dir=self.dir / "superseded")
 
 
 class LockTests(unittest.TestCase):

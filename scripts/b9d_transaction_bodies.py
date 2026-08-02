@@ -132,17 +132,71 @@ def load_pinned_idl(path, expected_sha256, expected_program):
     return idl
 
 
-def assert_sources(b9c_path=B9C_PATH, b9a_path=B9A_PATH):
-    """Both source artifacts must hash to their pinned values. Mismatch is a hard stop."""
+SOURCE_MODE_BURNED = "burned"
+SOURCE_MODE_FRESH = "fresh"
+
+
+def source_mode(b9c_path=B9C_PATH, b9a_path=B9A_PATH):
+    """Both sources burned, or both fresh. A mixture is refused.
+
+    A fresh inventory against the burned cohort — or the reverse — is the swap that would collect
+    one window's signatures under another window's identity map, and neither artifact would show a
+    sign of it afterwards.
+    """
+    burned = (str(b9c_path) == B9C_PATH, str(b9a_path) == B9A_PATH)
+    if all(burned):
+        return SOURCE_MODE_BURNED
+    if not any(burned):
+        return SOURCE_MODE_FRESH
+    raise FreezeViolation(
+        f"b9c={b9c_path} and b9a={b9a_path} mix a burned source with a fresh one. That collects "
+        "one window's signatures under another window's identity map, and neither artifact shows a "
+        "sign of it afterwards")
+
+
+def assert_sources(b9c_path=B9C_PATH, b9a_path=B9A_PATH, expected=None):
+    """Burned sources must hash to their pinned values; fresh ones must prove what they are.
+
+    The pins belong to the burned corpus and to nothing else. A fresh cohort cannot satisfy them
+    and must not be exempted either, so it carries its own provenance and is verified through
+    `b11d_cohort_adapter.assert_fresh_cohort` — which refuses anything that does not declare itself
+    an identity-and-regime artifact with a matching population hash.
+    """
+    mode = SOURCE_MODE_BURNED if expected is not None else source_mode(b9c_path, b9a_path)
     digests = {}
-    for path, expected in ((b9c_path, B9C_SHA256), (b9a_path, B9A_SHA256)):
-        actual = sha256_file(path)
-        if actual != expected:
-            raise FreezeViolation(
-                f"{path} hashes {actual}, pinned {expected}; refusing to run B9d against an "
-                "artifact that is not the one the freeze was written for")
-        digests[path] = actual
+    if mode == SOURCE_MODE_BURNED:
+        # `expected` is injectable so the pinned-hash branch stays drivable: with the real defaults
+        # the files hash correctly and a mismatch cannot be provoked, and a branch nothing can
+        # provoke is a branch nobody can show works.
+        pins = expected if expected is not None else {b9c_path: B9C_SHA256, b9a_path: B9A_SHA256}
+        for path, expected_digest in pins.items():
+            actual = sha256_file(path)
+            if actual != expected_digest:
+                raise FreezeViolation(
+                    f"{path} hashes {actual}, pinned {expected_digest}; refusing to run B9d "
+                    "against an "
+                    "artifact that is not the one the freeze was written for")
+            digests[path] = actual
+        return digests
+    adapter = _cohort_adapter()
+    try:
+        adapter.assert_fresh_cohort(b9a_path)
+    except adapter.CohortRefused as error:
+        raise FreezeViolation(
+            f"{b9a_path} is not a verified fresh cohort artifact: {error}") from error
+    for path in (b9c_path, b9a_path):
+        digests[path] = sha256_file(path)
     return digests
+
+
+def _cohort_adapter():
+    import importlib.util
+    here = os.path.dirname(os.path.abspath(__file__))
+    spec = importlib.util.spec_from_file_location(
+        "b11d_cohort_adapter", os.path.join(here, "b11d_cohort_adapter.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def frozen_population(b9c_path=B9C_PATH, b9a_path=B9A_PATH, assert_counts=True):
@@ -184,7 +238,7 @@ def frozen_population(b9c_path=B9C_PATH, b9a_path=B9A_PATH, assert_counts=True):
             f"{null_slots} in-window rows carry a null slot; §6 needs a slot for every signature "
             "to locate its transaction index, and a null slot is 'unknown', never dropped")
     if assert_counts:
-        assert_population(signatures, slots)
+        assert_population(signatures, slots, mode=source_mode(b9c_path, b9a_path))
     return signatures, slots
 
 
@@ -233,8 +287,20 @@ def frozen_population_by_slot(b9c_path=B9C_PATH, b9a_path=B9A_PATH, assert_count
     return {slot: sorted(values) for slot, values in grouped.items()}
 
 
-def assert_population(signatures, slots):
-    """§3 and §6: the derived population must be exactly what the freeze fixed."""
+def assert_population(signatures, slots, mode=SOURCE_MODE_BURNED):
+    """§3 and §6: the derived population must be exactly what the freeze fixed.
+
+    The pinned counts describe the BURNED population. A fresh window has its own, unknown until it
+    is collected, so applying these to it would refuse every correct run. What still holds for both
+    is that the population must be non-empty and must carry a slot for every signature — a fresh
+    run that derived nothing is a run whose sources do not agree.
+    """
+    if mode == SOURCE_MODE_FRESH:
+        if not signatures or not slots:
+            raise FreezeViolation(
+                "the fresh population is empty; the inventory and the cohort do not agree about a "
+                "single in-window signature, and collecting nothing is not a successful run")
+        return True
     if len(signatures) != EXPECTED_SIGNATURES:
         raise FreezeViolation(
             f"population derived {len(signatures):,} signatures, frozen at "
@@ -2871,6 +2937,10 @@ def main(argv=None):
     run = sub.add_parser("run", help="authorized read-only resumable raw evidence collection")
     run.add_argument("output")
     run.add_argument("--rpc-env", default="SOLANA_RPC_URL")
+    # Explicit, because the defaults are the BURNED corpus. A fresh window must name its own
+    # sources or it would collect against the wrong population without any sign of it.
+    run.add_argument("--b9c", default=B9C_PATH)
+    run.add_argument("--b9a", default=B9A_PATH)
     run.add_argument("--max-slots", type=int)
     run.add_argument("--max-transactions", type=int)
     run.add_argument("--progress-every", type=int, default=100)
@@ -2969,7 +3039,7 @@ def main(argv=None):
     if not endpoint:
         raise SystemExit(f"missing RPC endpoint environment variable {args.rpc_env}")
     result = collect_raw_population(
-        endpoint, args.output, max_slots=args.max_slots,
+        endpoint, args.output, b9c_path=args.b9c, b9a_path=args.b9a, max_slots=args.max_slots,
         max_transactions=args.max_transactions, progress_every=args.progress_every,
         calls_per_second=args.calls_per_second)
     print(json.dumps(result, sort_keys=True))

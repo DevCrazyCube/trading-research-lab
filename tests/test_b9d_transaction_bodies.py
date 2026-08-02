@@ -130,11 +130,79 @@ class SourceHashTests(unittest.TestCase):
         self.dir = pathlib.Path(tempfile.mkdtemp())
 
     def test_a_source_whose_hash_moved_is_refused(self):
+        """The pinned-hash branch, driven by injecting the pins: with the real defaults the files
+        hash correctly and a mismatch cannot be provoked."""
         fake = self.dir / "b9c.sqlite"
         fake.write_bytes(b"not the artifact")
         with self.assertRaises(B9D.FreezeViolation) as ctx:
-            B9D.assert_sources(str(fake), str(fake))
+            B9D.assert_sources(str(fake), str(fake), expected={str(fake): "0" * 64})
         self.assertIn("refusing", str(ctx.exception))
+
+    def test_a_fresh_path_that_is_not_a_cohort_artifact_is_refused(self):
+        """Non-default paths route to the fresh branch, where the artifact must say what it is."""
+        fake = self.dir / "fresh.sqlite"
+        fake.write_bytes(b"not the artifact")
+        with self.assertRaisesRegex(B9D.FreezeViolation, "not a verified fresh cohort"):
+            B9D.assert_sources(str(fake), str(fake))
+
+    def test_mixing_a_burned_source_with_a_fresh_one_is_refused(self):
+        """One window's signatures under another window's identity map, with no sign afterwards."""
+        for b9c, b9a in ((str(self.dir / "fresh.sqlite"), B9D.B9A_PATH),
+                         (B9D.B9C_PATH, str(self.dir / "fresh.sqlite"))):
+            with self.subTest(b9c=b9c, b9a=b9a):
+                with self.assertRaisesRegex(B9D.FreezeViolation, "mix a burned source"):
+                    B9D.source_mode(b9c, b9a)
+
+    def test_the_run_subcommand_passes_its_fresh_sources_to_the_collector(self):
+        """Without this the CLI would parse --b9c/--b9a and quietly drop them, leaving the
+        collector on its burned module constants — which is the defect this handoff repaired."""
+        seen = {}
+
+        def capture(endpoint, output, **kwargs):
+            seen.update(kwargs)
+            seen["output"] = output
+            return {"captured": True}
+
+        original = B9D.collect_raw_population
+        previous = os.environ.get("B9D_TEST_RPC")
+        os.environ["B9D_TEST_RPC"] = "https://rpc.invalid/"
+        try:
+            B9D.collect_raw_population = capture
+            B9D.main(["run", "/tmp/b11a-out.sqlite", "--rpc-env", "B9D_TEST_RPC",
+                      "--b9c", "/tmp/fresh-b9c.sqlite", "--b9a", "/tmp/fresh-b9a.sqlite"])
+        finally:
+            B9D.collect_raw_population = original
+            if previous is None:
+                os.environ.pop("B9D_TEST_RPC", None)
+            else:
+                os.environ["B9D_TEST_RPC"] = previous
+        self.assertEqual(seen["b9c_path"], "/tmp/fresh-b9c.sqlite")
+        self.assertEqual(seen["b9a_path"], "/tmp/fresh-b9a.sqlite")
+        self.assertEqual(seen["output"], "/tmp/b11a-out.sqlite")
+
+    def test_the_run_subcommand_defaults_to_the_burned_sources(self):
+        """Unchanged for the burned corpus: the options are additive, not a behaviour change."""
+        seen = {}
+
+        def capture(endpoint, output, **kwargs):
+            seen.update(kwargs)
+            return {}
+
+        original = B9D.collect_raw_population
+        os.environ["B9D_TEST_RPC"] = "https://rpc.invalid/"
+        try:
+            B9D.collect_raw_population = capture
+            B9D.main(["run", "/tmp/b9d-out.sqlite", "--rpc-env", "B9D_TEST_RPC"])
+        finally:
+            B9D.collect_raw_population = original
+            os.environ.pop("B9D_TEST_RPC", None)
+        self.assertEqual(seen["b9c_path"], B9D.B9C_PATH)
+        self.assertEqual(seen["b9a_path"], B9D.B9A_PATH)
+
+    def test_the_burned_defaults_are_still_the_burned_mode(self):
+        self.assertEqual(B9D.source_mode(), B9D.SOURCE_MODE_BURNED)
+        self.assertEqual(B9D.source_mode("a/fresh.sqlite", "b/fresh.sqlite"),
+                         B9D.SOURCE_MODE_FRESH)
 
     def test_sha256_file_matches_hashlib(self):
         blob = self.dir / "blob"
