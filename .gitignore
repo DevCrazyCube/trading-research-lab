@@ -39,3 +39,9 @@ research/b15a/raw_frames.jsonl
 research/b15a/shadow.sqlite
 research/b15a/pilot.lock
 research/b15a/logs/
+
+# B15b backfill runtime. The RPC exchange log and the derived database are live evidence,
+# preserved on disk and never rewritten, but not source.
+research/b15b/rpc_exchanges.jsonl
+research/b15b/backfill.sqlite
+research/b15b/logs/
