@@ -154,6 +154,20 @@ These are study-specific results, not universal base rates:
   excluded by construction, negative balances are refused rather than clamped, and one unresolved
   account blocks owner-level collapsing entirely.
 
+- **B13e verified fact — the fresh window's lookback overlap with burned territory decays to
+  exactly zero at the observation cutoff.** Because B11a starts one slot after the maximum burned
+  endpoint (435,569,149) and the reused lookback equals the observation span (1,642,509), a decision
+  at the observation cutoff 437,211,659 looks back precisely to 435,569,150 — the fresh window's
+  first slot. Nobody arranged that; it falls out of the arithmetic. A corollary worth knowing: the
+  slot immediately before the fresh window is itself burned, so "just before t0" is never an
+  unburned fixture. See `research/B13E_LOOKBACK_PREREGISTRATION.md`.
+
+- **B13e design fact — a parameter is only frozen if something notices when it thaws, and only the
+  values held in two places can be cross-checked.** The document's hash pins everything; beyond
+  that, code re-checks only what it holds its own independent copy of (the lookback, its operands,
+  the burned-role table), because those can disagree without the document changing. Re-reading a
+  value the hash already fixes would add a check no input can make fire.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)

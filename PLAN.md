@@ -237,6 +237,31 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
   label chosen**; future token-account capture requirements are specified. The burned corpus and
   B11a were never opened.
 
+- [~] **History collection contract preregistered and enforced; nothing collected**
+  (`research/B13E_LOOKBACK_PREREGISTRATION.md` committed ALONE and first,
+  `scripts/b13e_collection_contract.py`, `docs/COLLECTION_CONTRACT.md`). The actor/token history
+  **lookback is 1,642,509 slots = B9D_CUTOFF_SLOT − B8B_WINDOW_START_SLOT**, the same quantity B11a
+  already inherited as `observation_span_slots` — **reused, not chosen**, because the only histories
+  available to look at are the burned ones whose outcomes are already measured. Defined and applied
+  in slots and **never translated to wall-clock time** (`hours_of_lookback` raises). Per decision:
+  `[max(0, t0_slot − 1,642,509), t0 coordinate]`, **slot-wise at the lower bound and
+  coordinate-wise at the upper** — the upper is a leakage boundary and must be exact to the
+  instruction, the lower is a coverage boundary because a coordinate-exact one would make the window
+  length depend on where inside a slot the decision fell. Clamped at genesis with `left_truncated`
+  set; **a short source reports incomplete and never shifts the start**. **Burned events may be
+  prior CONTEXT; burned members may never be examples, labels, tuning data or performance
+  evidence** — a burned curve may appear in a feature and never in a metric — and excluding burned
+  context entirely is itself refused, since a creator who demonstrably launched must not be reported
+  as having none. Cohort is B11a's enumeration exactly, after maturity and U3; `QueryGuard` is
+  permission rather than a client and the module imports nothing that could reach a network.
+  Coverage is **per actor and never averaged** — the overall verdict is an AND, `coverage_fraction`
+  raises, and one short actor makes the collection incomplete. Pagination exhaustion must be proved
+  (a page cap is not exhaustion), decode accounting is asserted rather than trusted, snapshots must
+  be atomic at one slot, methods are allowlisted, and credentials are refused rather than redacted.
+  Eleven abort codes declared identically in document and code. 102 tests, 103 subtests; 67 mutants,
+  67 killed, none disclosed. **No RPC, no enumeration, no collection, no cluster/probability/
+  threshold**, and B11b's frozen baseline is untouched.
+
 Gate: label audit demonstrates that no post-decision information enters features.
 
 ### Phase 4 — models and policy

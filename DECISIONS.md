@@ -1904,3 +1904,74 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 86. **Owner review not separately obtained.**
 - **NOT claimed:** any model, threshold, cluster, component, label or real concentration value. The
   burned corpus was not opened and B11a was not queried, enumerated or read.
+
+## 2026-08-02 — The history lookback is reused geometry, frozen before any actor is known (B13e, handoff 88)
+
+- **Decision:** the actor/token history lookback is **1,642,509 slots**, computed as
+  `B9D_CUTOFF_SLOT − B8B_WINDOW_START_SLOT` — the same quantity B11a already inherited as
+  `observation_span_slots`. Applied per decision as `[max(0, t0_slot − 1,642,509), t0 coordinate]`.
+- **Why reuse rather than choose:** a lookback picked after seeing how far back actor histories
+  happen to run is a lookback picked for its results, and the only histories available to look at
+  are the burned ones whose outcomes have already been measured. Reusing geometry the project is
+  already committed to removes the choice entirely — there is no version of this number that could
+  have been made larger or smaller by anything observed. A round number in hours would have been
+  worse twice over: it would have been chosen, and it would need a slot-to-wall-clock conversion
+  that is itself an estimate with error.
+- **Never translated to wall-clock time.** Slot production varies, so a wall-clock lookback is a
+  different number of slots on every day it is applied, and a parameter whose length depends on
+  network conditions is not frozen. `hours_of_lookback()` exists and raises.
+- **The bounds are asymmetric on purpose.** The upper bound is a **leakage** boundary: exact to the
+  instruction, inclusive at t0. The lower bound is a **coverage** boundary at slot granularity,
+  because half a slot of lookback is not a meaningful quantity and a coordinate-exact lower bound
+  would make the window's length depend on where inside a slot the decision fell — two decisions one
+  instruction apart would get measurably different histories for no defensible reason.
+- **Genesis clamps, and the clamp is truncation.** `max(0, …)` never computes a negative slot, and a
+  clamped window sets `left_truncated`; reporting it complete would claim knowledge of a period
+  before the chain existed.
+- **A short source reports incomplete and never shifts the start.** Moving the start up to whatever
+  a provider happened to have would redefine the parameter per actor, so "no prior launches" would
+  mean a different lookback for each — and the actors with the least history would get the shortest
+  window, which is exactly backwards.
+- **Burned events may be CONTEXT; burned members may never be EVIDENCE.** The lookback reaches deep
+  into burned ranges for most fresh decisions, and those events genuinely happened first, so
+  excluding them would report a zero that is a collection artefact presented as a fact about the
+  creator. But a burned member may never be an evaluated subject, a label, tuning data or
+  performance evidence. **A burned curve may appear in a FEATURE and may never appear in a METRIC.**
+  Both directions are checked: promoting burned data to evidence is refused, and so is dropping
+  burned context from a window that admits it.
+- **A mechanical property nobody arranged:** because B11a starts one slot after the maximum burned
+  endpoint and the lookback equals the observation span, the burned overlap decays to exactly zero
+  at the observation cutoff — a decision at 437,211,659 looks back precisely to 435,569,150, the
+  fresh window's first slot. A test pins it so changing either constant breaks visibly. Corollary:
+  the slot immediately before the fresh window is itself burned.
+- **Coverage is per actor and averaging is refused outright.** The overall verdict is an AND, never
+  a mean: an average is exactly the statistic that hides the single actor whose history is missing,
+  and there is no percentage to pick because picking one would require averaging.
+  `coverage_fraction()` raises.
+- **Two commits, in order.** The preregistration was committed **alone and first**; the validator
+  came second. A parameter committed alongside the machinery that consumes it can always be claimed
+  to have been adjusted until the machinery worked, and the git ancestry is the only evidence
+  otherwise — so a test asserts the document's commit is an ancestor of the module's.
+- **What is pinned versus what is cross-checked.** The document's hash pins every parameter. Beyond
+  that, code re-checks exactly one class of value: **anything it holds its own independent copy of**
+  — the lookback, its two operands, and the burned-role table — because those can disagree with the
+  document without the document changing. Values only the document states are deliberately **not**
+  re-read: a second check on a value the hash already fixes could never fire, and a check that
+  cannot fire is worse than no check. Three such re-reads were removed during the mutation sweep for
+  exactly that reason.
+- **Also enforced:** cohort is B11a's enumeration exactly (wider selects on what the broader
+  population contained, narrower on collectability, which correlates with activity); no query before
+  maturity and U3, since before that the cohort is unknown and a run would have chosen its own
+  population; `QueryGuard` is permission rather than a client and holds no endpoint; pagination
+  exhaustion must be **proved** and a page cap is not exhaustion; decode accounting is asserted
+  rather than trusted; snapshots must be atomic at one slot; methods are allowlisted rather than
+  denylisted, because the next client version adds one nobody thought to forbid; credentials are
+  refused rather than redacted, since a redaction that fails silently looks like one that worked.
+- **Verification:** 67 mutants, 67 killed, **none disclosed**. 102 tests, 103 subtests; **1,693
+  passing repository-wide**. The eleven first-run survivors included four checks that could not
+  fire — three document re-reads and a redundant sort — which were **removed** rather than
+  disclosed, and one inert mutant that was rewritten to be observable.
+- **Ratified by:** the Codex directive of handoff 88. **Owner review not separately obtained.**
+- **NOT claimed and NOT done:** no RPC call, no B11a unlock, enumeration or inspection, no history
+  collected, no cluster, probability, threshold or label, and no change to B11b's frozen no-model
+  baseline evaluation.
