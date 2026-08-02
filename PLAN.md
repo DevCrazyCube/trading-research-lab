@@ -287,6 +287,33 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
   available vector and is kept as a tripwire). **No model fitted, no corpus read, no feature value
   or distribution reported**, and B11b's frozen baseline is untouched.
 
+### Phase 4 — training and evaluation plumbing
+
+- [~] **Leakage-safe split planner and immutable model-artifact envelope; nothing fitted**
+  (`scripts/b14a_split_planner.py`, `scripts/b14a_model_artifact.py`,
+  `scripts/b14a_split_fixtures.py`, `docs/SPLIT_AND_ARTIFACT_SCHEMA.md`,
+  `research/B14A_SPLIT_AND_ARTIFACT.md`). Strictly chronological walk-forward folds with
+  caller-required preregistered ranges and **no default train/validation/test range, purge or
+  embargo**. **The purge is computed on `label_window_end_slot`, never on t0**: a decision taken
+  safely before a boundary can still be labelled by the period it is evaluated against, and t0
+  cannot see that. Measured against the earliest evaluation instant, since chronology makes the
+  test-segment branch unreachable. **R5 groups by the transitive closure of EXACT identity equality
+  with creator and user POOLED** — an address that creates one token and trades another is one
+  address, so separate role-spaces would let the same person sit on both sides — and a group
+  spanning two segments is dropped whole rather than split. **A censored outcome may not carry a
+  label value at all** and is excluded, never recoded. `row_evidence_sha256` binds the plan to the
+  rows it planned, so the corpus cannot be swapped underneath it. The artifact envelope binds
+  feature contract and **order** hashes, label/split hashes, target/horizon, algorithm identifier,
+  explicitly declared hyperparameters, seed, train-only transforms and calibration, training row and
+  evidence hashes, and the code/environment manifest; inference fails closed on twelve coded
+  mismatches. **No default algorithm, hyperparameter, transform, metric or threshold; no float
+  anywhere; performance locked to `not_evaluated` and B11a eligibility permanently false.**
+  **Funding-cluster leakage is an explicit OPEN GATE**: only `research_plumbing_only` is attainable,
+  no cluster artifact type is accepted, and a B13b ledger offered to close it gets its own refusal.
+  Measured on synthetic rows only: 22 rows, 19 identity groups, 9/4/4 assigned, 5 excluded across
+  three reasons, zero errors, **no metric reported**. 129 tests, 152 subtests; 96 mutants, 96
+  killed, none disclosed. No model fitted, no window eligible, B11a never accessed.
+
 Gate: label audit demonstrates that no post-decision information enters features.
 
 ### Phase 4 — models and policy

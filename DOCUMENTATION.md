@@ -180,6 +180,18 @@ These are study-specific results, not universal base rates:
   (`slots_since_launch`, `slots_since_previous_launch`) carry the same information without the
   calendar, so no absolute slot is admitted as a feature.
 
+- **B14a design fact — the split leak that t0 cannot see.** A decision at slot 1,950 sits safely
+  inside a training range ending at 2,000, while its outcome is observed to 2,550 — inside a
+  validation segment beginning at 2,500. The row is labelled by the period it is evaluated against,
+  and nothing about its t0 says so. The purge is therefore computed on the label window end, and the
+  fixture corpus holds two rows with the same t0 and different label windows so a test can show t0
+  alone cannot separate them. See `research/B14A_SPLIT_AND_ARTIFACT.md`.
+
+- **B14a design fact — creator and user must share one identity space.** An address that creates one
+  token and trades another is one address. A grouping that keeps creator-space and user-space apart
+  lets the same person appear under two labels and sit on both sides of a split while every check
+  passes, so R5 pools them and closes the graph transitively.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)

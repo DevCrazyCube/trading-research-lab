@@ -2036,3 +2036,77 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 90. **Owner review not separately obtained.**
 - **NOT claimed and NOT done:** no model fitted, no transform selected, no window named, no corpus
   read, no feature value or distribution reported, and no change to B11b's frozen baseline.
+
+## 2026-08-02 — The purge is computed on the label window, and identities are pooled (B14a, handoff 92)
+
+- **Decision:** walk-forward folds are strictly chronological with caller-supplied preregistered
+  ranges; a training row survives only if `label_window_end_slot + purge_slots < first evaluation
+  slot`; a later training segment admits a row only if `t0_slot >= previous_evaluation_last_slot +
+  embargo_slots`; and rows are grouped by the transitive closure of exact identity equality over the
+  **pooled** set of creator and user addresses.
+- **Why the purge is on the label window and never on t0:** a decision at slot 1,950 sits safely
+  inside a training range ending at 2,000 while its outcome is observed to 2,550, inside a
+  validation segment starting at 2,500. The row is labelled by the very period it is evaluated
+  against, and **nothing about its t0 says so**. This is what "sort by t0 and cut" produces every
+  time, and it leaves no trace. The fixture corpus holds two rows with the *same* t0 and different
+  label windows so a test can demonstrate that t0 alone cannot separate them.
+- **The purge measures against the earliest evaluation instant.** Chronology is enforced, so
+  validation always precedes test and a window reaching test has already reached validation; the
+  per-segment loop carried a branch that could never fire and was **removed** rather than disclosed.
+- **Why creator and user share one identity space:** an address that creates one token and trades
+  another is one address. Separate role-spaces would let the same person appear under two labels and
+  sit on both sides of a boundary while every check passed. The closure is transitive — A—B through
+  a shared creator and B—C through a shared user put all three in one group — and the fixture holds
+  exactly that bridge with nothing linking A to C directly, so a non-transitive implementation fails
+  visibly.
+- **A group spanning two segments is dropped whole.** Splitting it would put an actor's own future
+  in their training set; keeping the larger half would select on which side happened to have more
+  rows. The group key derives from the sorted membership, not from whichever union-find root was
+  picked, so two identical groupings cannot look different.
+- **A censored outcome may not carry a label value at all** — refused at the door, so the recoding
+  cannot happen before the planner sees the row. Recoding "we stopped looking" as "it went to
+  nothing" does not add noise; it adds a systematic mass of false negatives concentrated on exactly
+  the rows whose observation was cut short.
+- **No defaults, and the refusal says why.** A split boundary chosen after seeing which side scored
+  better is the oldest mistake in this field, and a module supplying one would have made that choice
+  for everybody who ever used it.
+- **A plan must say which rows it planned.** The sweep found that changing a row's t0 did not change
+  the plan hash, because the plan stored only identifiers — the corpus underneath could have been
+  swapped entirely while the hash stayed identical, and an artifact bound to it would inherit the
+  blindness. `row_evidence_sha256` now hashes the rows themselves.
+- **The artifact envelope is not a model.** It binds the feature contract and **order** hashes,
+  label and split hashes, target/horizon, algorithm identifier, explicitly declared hyperparameters,
+  seed, train-only transforms and calibration, training row/evidence hashes and the
+  code/environment manifest — every one of which is invisible in the weights. Three refusals: no
+  default anything (a hyperparameter must be declared by name before it may carry a value, so a
+  later one is *undeclared* rather than a new default, and a declared name with no value is a
+  default hiding in the algorithm); no transform or calibration fitted outside training folds (a
+  probability calibrated on the evaluation fold is calibrated against the answer); and no
+  performance claim — the status is locked, `seal_artifact` takes no argument for it, and every
+  claim status is refused **by name**, since a status nobody listed is a status somebody invents.
+- **No float anywhere, hyperparameters included.** The same value serialised on two machines can
+  differ in its last bits, so two artifacts that are the same model hash differently — or two
+  different models hash the same. Rationals travel as named integer pairs.
+- **Funding-cluster leakage is an explicit OPEN GATE.** Only `research_plumbing_only` is attainable;
+  `ACCEPTED_CLUSTER_ARTIFACT_TYPES` is empty. The honest statement of the limit: **two actors can be
+  one person without sharing an address**, so a split this planner calls clean may still put one
+  operator on both sides. A B13b ledger offered to close the gate gets its own refusal naming that
+  it declares itself uncalibrated and that its links explicitly do not assert common control.
+- **A bug in the fixtures that the tests found:** the fixture module loaded the planner and the
+  artifact envelope as two separate module graphs, so each had its own `SplitRefused` and the gate's
+  `except` around an artifact call would have caught nothing — reporting clean while missing every
+  artifact refusal. That is the fourth appearance of this module-identity trap in the project, and
+  it was caught only because a test asserted on the exception class.
+- **Measured on synthetic rows only:** 22 rows, 19 identity groups, largest group 3 (the bridge),
+  9/4/4 assigned, 5 excluded across censored, purged and spanning reasons; order-independent; all
+  gated statuses refused; zero errors. **No metric appears in the report**, and the test that
+  enforces that scans field *names* rather than raw JSON — the report carries hex digests, and a
+  substring search over those matches `f1` and `auc` by coincidence.
+- **Verification:** 96 mutants, 96 killed, **none disclosed**. Of nine first-run survivors, two were
+  unfireable code **removed** (the per-segment purge branch, and a duplicate-assignment check
+  sitting behind a range check that always fired first — now reordered so it can fire and gives the
+  better message), six were genuine test gaps, and one was an inert mutant rewritten to be
+  observable. 129 tests, 152 subtests; **1,901 passing repository-wide**.
+- **Ratified by:** the Codex directive of handoff 92. **Owner review not separately obtained.**
+- **NOT claimed and NOT done:** no model fitted, no weights, no algorithm implementation, no metric,
+  no threshold, no cluster, no eligible window, and B11a was never accessed.
