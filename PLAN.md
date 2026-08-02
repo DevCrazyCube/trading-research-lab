@@ -124,6 +124,19 @@ Gate: label audit demonstrates that no post-decision information enters features
 
 ### Phase 4 — models and policy
 
+- [x] **Baseline evaluation contract frozen before any fresh label exists**
+  (`research/B11B_BASELINE_EVALUATION_PREREGISTRATION.json`, committed alone;
+  `docs/BASELINE_EVALUATION_SCHEMA.md`, `research/B11B_BASELINE_PLUMBING.md`). `model_family:
+  none`, zero learned parameters, zero fitted thresholds. Frozen in advance: a 17-field t0 feature
+  contract in which **no string may appear**, eight hard vetoes cross-checked against B10a's actual
+  refusals, five non-adaptive policies (do-nothing, all-eligible fixed 0.1 SOL, a frozen-seed
+  mint-hash random control, and the two arms of the creator-initial-buy partition), the four B10c
+  horizons unchanged, whole-cohort metric definitions with no censored-as-loss shortcut, the single
+  primary result, family size 16, eight validity requirements and five unlock requirements.
+  Measured: **1,136/1,136 t0 feature records materialized on the burned-development corpus with
+  zero leakage violations and no distribution inspected**; 31/31 mutants killed. Momentum and
+  curve-progress baselines are NOT included — both would need a threshold, and no threshold may be
+  chosen before labels exist. **Results are locked: U3 fails because nothing has been collected.**
 - [ ] Establish do-nothing, random, momentum, and curve-progress baselines.
 - [ ] Start with logistic, tree, calibration, and survival models.
 - [ ] Use purged chronological walk-forward evaluation and grouped uncertainty estimates.

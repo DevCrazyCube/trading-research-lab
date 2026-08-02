@@ -1352,3 +1352,70 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 68. **Owner review not separately obtained.**
 - **NOT authorised by this decision:** Yellowstone or any paid forward capture, UI, server, model,
   signal, baseline, live transaction, signing or spending. Credentials remain environment-only.
+
+## 2026-08-02 — Baseline evaluation contract frozen before any fresh label exists (B11b)
+
+- **Status:** preregistration committed **alone** (`dc96132`) before the feature materializer was
+  written; implementation committed separately. No B11a composition, count, feature distribution,
+  path result, label or return has been computed, and that window has still never been queried.
+- **Decision:** the first evaluation on the B11a window is a **BASELINE / PIPELINE** evaluation with
+  `model_family: none`, zero learned parameters and zero fitted thresholds. Freeze:
+  `research/B11B_BASELINE_EVALUATION_PREREGISTRATION.json`, file SHA-256
+  `55263060716e99500a097f11260c047d03dbf16c4779a37b3f159d55592cb220`, canonical SHA-256
+  `90b159fb4f7492c98571429855c7939d95654c15543e891aaaee279bdf4c506d`.
+- **Adopted — the no-string rule.** Every t0 feature value is an integer, a boolean or null, and
+  **no string may appear in a feature block**. That is the structural form of "identities group,
+  never predict", and its virtue is being checkable without anyone having to notice which strings
+  happen to be identities. It is not sufficient alone — a `creator_hash_bucket` integer would pass
+  it — so `FEATURE_FIELDS` is pinned as an exact tuple by a test and adding any field fails.
+- **Adopted — no transform was selected, because selecting one requires looking.** No log, bucket,
+  rank, quantile or standardisation appears. The only arithmetic in the feature set is one
+  accounting identity. No feature distribution has been inspected on any window, including the
+  burned one; the materializer ran over 1,136 curves and reports only that it worked.
+- **Verified fact:** t0 is inside the launch transaction for **1,136 of 1,136** curves, which is
+  what makes "the creator bought at launch" a t0 fact rather than a peek. "The creator's first buy
+  ever" would be a look into the future and is not offered.
+- **Adopted — five non-adaptive policies:** do-nothing; all-eligible fixed 0.1 SOL (**primary**); a
+  mint-hash random control with seed `b11b-random-control-2026-08-02` at a frozen rate of 1/2, whose
+  role is artefact detection rather than performance comparison; and the two arms of the
+  creator-initial-buy partition. No top-k, quantile or rank. Only the control reads an identity, as
+  deterministic noise. Invariants enforced: P0 empty, P3 ⊎ P4 = P1, P2 ⊆ P1. **Momentum and
+  curve-progress baselines are deliberately absent: both need a threshold, and no threshold may be
+  chosen before labels exist.**
+- **Adopted — eight hard vetoes** cross-checked against what `b10a.price_entry` actually refuses,
+  so the list is the regime rather than documentation. An unstated program-version check is refused,
+  because an unstated check is not a passed one.
+- **Adopted — B10c state-in-force label semantics exclusively**, named in every metric record and
+  refused if anything else. B10b's `slot_horizon` exit rule fires at the FIRST reachable exit at or
+  after t0+H; B10c values the LAST observation at or before it. On the burned corpus those differ
+  enormously, and a number computed under one and reported under the other would be a different
+  quantity wearing the same name.
+- **Adopted — whole-cohort denominators and no censored-as-loss shortcut.** Vetoed, declined and
+  censored curves are all counted and contribute zero capital; `not_entered_by_policy` is kept
+  separate from the pipeline's own `no_decision`. Censored rows carry NULL and never enter the
+  headline. An explicitly named `worst_case_lower_bound_return` assigns them a total loss as a
+  **bound**; there is no matching upper bound, because an unobserved value is bounded below by zero
+  and not above. Grouped uncertainty is a leave-one-group-out jackknife over `creator ∪ user`, which
+  makes the `PLAN.md` no-domination criterion computable without a distributional assumption. No
+  float appears anywhere; ratios are exact reduced integer pairs compared by cross-multiplication.
+- **Adopted — the primary result is designated before it exists:** `P1 × h_1000_slots ×
+  capital_weighted_net_return`, on operational meaning and a prior document (1,000 slots is ~7
+  minutes, bracketing the ~4.4-minute median graduation time already in `DOCUMENTATION.md`), never
+  on a burned return. The horizon number is inherited unchanged; only the designation is new. Family
+  size **16** declared now; secondary cells may not be promoted afterwards; no test is computed.
+- **Adopted — the unlock evidence B11a must require:** U1 this preregistration committed with both
+  hashes recorded here; U2 `model_family: none` or a model artifact hash frozen first; U3 collection
+  complete and gates passed; U4 a decision entry naming both window and evaluation hashes; U5 the
+  on-disk contract still hashing to what was frozen. **U3 fails today — nothing has been collected,
+  so results are locked**, and b10c's `window_status` enum stays locked with them.
+- **Adopted — B11a is evaluation data and may never tune a policy.** Once labels are revealed, no
+  feature, veto, policy, horizon, metric or primary designation may change in response. That
+  requires a new preregistration AND a new window, and B11a would then be burned.
+- **Verification:** 31 mutants across the seven named failure classes, all killed. One survived
+  first — the feature/identity disjointness check read the module constants, which are disjoint, so
+  it could never fire. It became `assert_disjoint_contract(feature_fields, grouping_fields)`, taking
+  its inputs as arguments so a test can hand it overlapping sets: a guard nobody can make fire is a
+  guard nobody can show works. 69 tests in the suite, 1,036 repository-wide.
+- **Ratified by:** the Codex directive of handoff 70. **Owner review not separately obtained.**
+- **NOT authorised:** model fitting, UI, server, live RPC, signing, spending, paid subscription, or
+  any computation on the B11a window.
