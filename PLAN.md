@@ -173,6 +173,38 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
     profitability class or success label is constructed, and no split, model or baseline exists.
 - [ ] Add timestamped metadata/social observations without retroactive leakage.
 
+- [~] **External observation ledger built; no collection performed**
+  (`scripts/b13c_observations.py`, `scripts/b13c_observation_fixtures.py`,
+  `docs/OBSERVATION_SCHEMA.md`, `research/B13C_EXTERNAL_OBSERVATIONS.md`). An immutable,
+  leakage-safe record of off-chain observations — token metadata, social posts, news articles,
+  timestamped financial quotes and configuration facts — each carrying provider, provider
+  observation id, query-spec hash, payload digest and byte length, fetch session and provenance,
+  decoder name and version, licence and retention status, mapping evidence, and **four clocks kept
+  apart**: event time, publication time, receipt time (wall **and** monotonic) and the on-chain
+  effective coordinate. **The availability rule requires both clocks**: an item is feature-eligible
+  at t0 only if we RECEIVED it at or before t0 AND its claimed publication instant is at or before
+  t0 — receipt alone admits a future-dated item, publication alone admits the backfill. Unavailable
+  and ambiguous clocks yield an unusable `Absent`, never a guess, and a claim carries the width of
+  its own uncertainty so a date without a time is read at the latest instant it could mean.
+  **Corrections, edits and deletions are new observations and never rewrite history**: as-of replay
+  returns the version a decision actually knew and preserves every prior one, and a deletion
+  received after t0 does not reach back and remove the text an earlier decision saw. `Absent`
+  carries a reason and **raises on `bool()`** — unknown, unavailable, deleted and not-yet-known are
+  four facts and none is zero. **A ticker is not a token**: exact mint/account binding is separated
+  from name matches and provider claims, and `require_exact_binding` fails closed. Financial values
+  live with their unit, quote asset, basis and effective time and never in a feature block; mixing
+  units fails closed rather than converting, and the freshness bound belongs to the caller with a
+  stated rationale. Licence and retention are checked against each other with `unknown` failing
+  closed to hash-only. `sentiment`, `embedding`, `engagement_score`, `source_credibility`,
+  `market_cap` and `call_language_model` all exist and all raise; **no language model is in the
+  decision path**. Measured on synthetic fixtures only: 16 observations, 13 revision chains, 5
+  replay instants, 80 observation-instant judgements, 13/13 chains validated, 5/5 on backfill
+  refusal, deletion non-rewriting, version preservation and order independence, 6/6 refusing
+  computations verified, zero errors — **and no content, distribution or derived quantity
+  reported**. 76 mutants, 76 killed, none disclosed. **No network collection, no adapter, no
+  credential, no vendor selected**; future adapter and credential/privacy rules are specified. The
+  burned corpus and B11a were never opened.
+
 Gate: label audit demonstrates that no post-decision information enters features.
 
 ### Phase 4 — models and policy

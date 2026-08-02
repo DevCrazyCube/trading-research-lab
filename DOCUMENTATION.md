@@ -129,6 +129,18 @@ These are study-specific results, not universal base rates:
   produce several evidence items of different kinds. The ledger records the overlap on the item
   itself; summing these counts into a score would count one event as several corroborating ones.
 
+- **B13c design fact — external data has a second clock, and that is where leakage hides.** An
+  article's publication date can be genuinely before t0 while we did not have it until long after;
+  every field a naive schema records checks out, and the only thing wrong lives in a clock nobody
+  wrote down. Eligibility therefore requires receipt AND publication at or before t0, because
+  neither implies the other: receipt alone admits a future-dated item, publication alone admits the
+  backfill. See `research/B13C_EXTERNAL_OBSERVATIONS.md`.
+
+- **B13c design fact — a deletion received after a decision must not reach back.** Replaying an
+  earlier decision without a post that was withdrawn later would make the backtest quietly better
+  than live trading can ever be, because live trading does not get to un-see things. Data hygiene
+  applied retroactively is leakage.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)

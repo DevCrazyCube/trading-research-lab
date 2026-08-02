@@ -1756,3 +1756,75 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 82. **Owner review not separately obtained.**
 - **NOT claimed:** any cluster, model, threshold, degree distribution or label association. B11a was
   not queried, enumerated or read; no baseline changed.
+
+## 2026-08-02 — External observations are judged by two clocks, not one (B13c, handoff 84)
+
+- **Decision:** an off-chain observation is feature-eligible at t0 **if and only if** we received it
+  at or before t0's wall instant **and** its claimed publication instant is at or before t0's. Both
+  halves are required, the rule text travels on every record, and a record carrying any other text
+  is refused.
+- **Why:** on-chain leakage is one comparison, because a coordinate either precedes t0 or does not.
+  External data has a **second clock**, and that is where the leak hides. An article published last
+  Tuesday but fetched today has a genuine publication date, and every field a naive schema records
+  checks out; the only thing wrong is that we did not have it, and that fact lives nowhere except a
+  clock nobody wrote down. Backfilling is the most natural mistake in this area and produces a
+  backtest that is right for a reason that will never repeat. Neither half of the rule implies the
+  other: receipt alone admits a provider's future-dated item, publication alone admits the backfill.
+- **Unavailable and ambiguous are different facts and both are unusable.** A clock we never got has
+  no reading; a local timestamp with no timezone has a reading nobody can bound. Guessing a zone
+  would invent the very thing being checked. Claims carry the **width of their own uncertainty**, so
+  a date without a time is read at the latest instant it could mean and becomes usable at the end of
+  its day rather than the start — arithmetic on a recorded interval, not a remembered policy.
+- **The slot-to-wall join is refused, not derived.** A chain coordinate carries no wall time and the
+  mapping between them is itself an observation with error, so the caller supplies the decision
+  instant's wall time and says where it came from. Deriving one here would hide a source of error
+  inside a leakage check.
+- **Both receipt clocks are recorded, and the pairing does real work.** A wall clock can legitimately
+  jump — NTP, a suspend, a timezone mistake — so it cannot detect reordering; a monotonic clock can,
+  and one running backwards inside a fetch session is refused.
+- **History is never rewritten. A deletion received after t0 does not reach back.** Corrections,
+  edits, deletions and restores are new observations in a linked revision chain; as-of replay returns
+  the version a decision actually knew and keeps every prior one. Replaying Tuesday without a post
+  withdrawn on Wednesday would make the backtest quietly better than live trading can ever be,
+  because live trading does not get to un-see things. **Data hygiene applied retroactively is
+  leakage.**
+- **`Absent` raises on `bool()`.** Unknown, unavailable, deleted and not-yet-known are four facts and
+  none of them is zero; a sentinel that quietly evaluated to False is how "we never received a price"
+  becomes "the price was nothing".
+- **A ticker is not a token.** Exact mint/account binding — which must name an address *and* show
+  where it was found — is separated from name matches and from a provider's bare claim, and
+  `require_exact_binding` fails closed, with an explicit waiver for questions that are not about a
+  token at all.
+- **A value never travels without its unit.** Financial values live with unit, quote asset, basis and
+  effective time and are kept out of the feature block entirely, because a number that can be
+  separated from its unit eventually will be. Mixed units fail closed rather than converting: a
+  conversion needs a rate, and a rate is itself a timestamped observation nobody supplied. The
+  freshness bound belongs to the caller and must arrive with a rationale — no default is offered,
+  because a module that supplied one would have chosen a threshold for everybody.
+- **Licence `unknown` fails closed to hash-only.** Storing raw text under a licence nobody has read
+  is a decision nobody made.
+- **Nothing is derived.** `sentiment`, `embedding`, `engagement_score`, `source_credibility`,
+  `market_cap` and `call_language_model` all exist and all raise; any field whose *name* asserts such
+  a quantity is refused at any depth, and no float may appear. **`LLM_IN_DECISION_PATH` is False** —
+  a model in the path would make every decision unreproducible, unauditable at the instant it
+  mattered, and dependent on a remote service that changes without notice.
+- **Measured on synthetic fixtures only:** 16 observations, 13 revision chains, 5 replay instants,
+  80 observation-instant judgements (30 eligible, 50 refused across four reason codes); 13/13 chains
+  validated, 16/16 hashes stable, 5/5 on backfill refusal, deletion non-rewriting, version
+  preservation and order independence; reused-identifier and unit-mixing refusals verified; 6/6
+  refusing computations verified; zero errors. **No content appears in the report and a test greps
+  it to prove that.** `restore` is disclosed as unexercised by the corpus and covered by unit tests.
+- **Verification:** 76 mutants, 76 killed, **none disclosed as equivalent**. Five survived the first
+  run and all five were genuine gaps: no fixture built an ambiguous claim that also stated a
+  precision, or an unavailable claim still carrying a reading; the feature contract was never driven
+  with an extra or missing field; and no test supplied a malformed effective coordinate. 98 tests,
+  228 subtests; **1,504 passing repository-wide**.
+- **No collection was performed.** No network call, no adapter, no credential, no vendor selected,
+  nothing purchased. Future adapter rules are specified in advance: credentials environment-only and
+  never persisted, query specs pinned by hash, receipt clocks taken at the adapter boundary before
+  parsing, licence and retention decided per provider before the first fetch, author handles kept as
+  evidence and never as features, and an adapter that cannot record a receipt time may not be used
+  at all.
+- **Ratified by:** the Codex directive of handoff 84. **Owner review not separately obtained.**
+- **NOT claimed:** any model, score, sentiment, embedding, probability, price transform or
+  distribution. The burned corpus was not opened and B11a was not queried, enumerated or read.
