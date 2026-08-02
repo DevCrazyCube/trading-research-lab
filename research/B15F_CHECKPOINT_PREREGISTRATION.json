@@ -1,0 +1,147 @@
+{
+  "preregistration_id": "B15F_CHECKPOINT_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (handoff 124)",
+  "status": "FROZEN. Committed alone, before any account checkpoint query is made and before any checkpoint exists.",
+  "purpose": "Freeze a PROSPECTIVE point-in-time bonding-curve account checkpoint protocol: which targets are scheduled, when, what context-slot geometry is admissible, how late is too late, and what may never be repaired retrospectively.",
+  "committed_before_any_account_query": true,
+
+  "prospective_only": {
+    "rule": "a checkpoint may be scheduled ONLY for a target slot that has not yet passed at the moment of scheduling",
+    "already_missed_targets_stay_censored": true,
+    "distinct_reason": "pre_checkpoint_protocol",
+    "why": "filling a missed historical target with current account state would present today's reserves as the reserves at a moment that has gone. The censoring in B15e is a fact about what was observable then, and this protocol does not retroactively make it observable. Every existing missed target keeps its own reason so the two populations can never be confused."
+  },
+
+  "latency_audit": {
+    "measured_before_designing": true,
+    "nominal_slot_seconds_numerator": 2,
+    "nominal_slot_seconds_denominator": 5,
+    "h_1000_slots_lands_seconds_after_entry": 400,
+    "h_10000_slots_lands_seconds_after_entry": 4000,
+    "current_worst_case_chain_seconds": {
+      "b15a_decode": 0,
+      "b15b_backfill_loop": 300,
+      "b15d_entry_loop": 600,
+      "b15e_path_loop": 900,
+      "entry_priced_by": 900
+    },
+    "finding": "h_1000_slots is STRUCTURALLY UNREACHABLE under the existing cadence. Its target lands 400 seconds after the entry slot while an entry is not priced until up to 900 seconds later, so the target has already passed by roughly 500 seconds before anything downstream knows the position exists. h_10000_slots at 4,000 seconds is reachable.",
+    "consequence_for_design": "scheduling MUST be decoupled from pricing. A checkpoint is scheduled the moment B15a decodes a launch, because t0_slot alone determines every slot-addressable target; the entry pricing can catch up afterwards."
+  },
+
+  "scheduling": {
+    "trigger": "a decoded CreateEvent in B15a's launch table",
+    "source": "research/b15a/shadow.sqlite, read-only, the small indexed launch table",
+    "never_rescans_the_raw_log": "the gigabyte append-only log is not read by this protocol at all",
+    "target_slot_formula": "t0_slot + delay_slots + horizon_slots",
+    "target_is_NOMINAL": {
+      "statement": "this target uses the NOMINAL entry slot t0 + delay, not B15d's ACTUAL entry observation slot, because the actual one is not known until the entry is priced and by then the target has passed.",
+      "consequence": "checkpoint targets differ from B15e's targets and the two populations are NEVER mixed or compared. A checkpoint is not a repair of a B15e cell; it is a separate, prospective observation.",
+      "why_acceptable": "the nominal slot is the earliest instant a decision could have acted, which is the same basis B15d's delay grid uses"
+    },
+    "schedulable_horizons": ["h_1000_slots", "h_10000_slots"],
+    "unschedulable_horizons": {
+      "h_10_observations": "not slot-addressable in advance; the tenth observation's slot is unknown until it happens",
+      "administrative_window_end": "a boundary rather than a target, and unknown until the record ends"
+    },
+    "delay_grid": [1, 2, 4],
+    "delay_grid_source": "B15D_SHADOW_ROUTE_V1, unchanged",
+    "horizon_source": "B11b / B10c identifiers, unchanged",
+    "no_silent_change": "neither the entry delay grid nor the outcome horizons are altered by this document"
+  },
+
+  "one_query_per_shared_state": {
+    "rule": "ONE getAccountInfo per (launch, delay, horizon). The three cost scenarios share it.",
+    "why": "the chain does not know about our cost scenarios. The account state at a target slot is one fact, and querying it three times would be three requests for the same answer.",
+    "scenario_costs_applied_separately": "each of the three frozen route scenarios prices its own exit from that one shared state"
+  },
+
+  "context_slot_geometry": {
+    "defined_before_any_result": true,
+    "admissible_when": "context_slot >= target_slot AND context_slot - target_slot <= max_lateness_slots",
+    "max_lateness_slots": 150,
+    "max_lateness_justification": "150 slots is about 60 seconds at the nominal rate. Chosen before any checkpoint was taken, so it cannot have been widened to admit results that arrived late. It is a tolerance for scheduler jitter and RPC round trip, not a licence to accept a stale answer.",
+    "context_before_target": "retry, bounded",
+    "max_attempts": 6,
+    "retry_interval_slots": 25,
+    "too_late_is_refused": "a response whose context slot exceeds the target by more than max_lateness_slots is REFUSED with C_LATE and never used. The reserves it reports are not the reserves at the target.",
+    "no_current_state_substitution": "under no circumstance is a later or current account state recorded as the state at the target"
+  },
+
+  "account_decoding": {
+    "program": "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+    "account_name": "BondingCurve",
+    "discriminator": "17b7f83760d8ac60",
+    "source": "the pinned IDL research/pump_idl_9c82f61.json; no browser scrape and no third-party layout",
+    "fields_used": ["virtual_token_reserves", "virtual_quote_reserves", "real_token_reserves", "real_quote_reserves", "complete", "is_mayhem_mode", "quote_mint"],
+    "note": "the account publishes real_quote_reserves and complete directly — the two fields the log feed structurally cannot supply. That is why a checkpoint can price an exit where an observation-only path cannot.",
+    "owner_must_be_the_program": true,
+    "discriminator_mismatch_is_refused": "an account whose first eight bytes are not the pinned discriminator is refused with C_SCHEMA, never parsed on the assumption that it is probably right"
+  },
+
+  "refusal_codes": [
+    {"code": "C_LATE", "meaning": "the response's context slot exceeds the target by more than max_lateness_slots"},
+    {"code": "C_EARLY_EXHAUSTED", "meaning": "the context slot never reached the target within the bounded retries"},
+    {"code": "C_ACCOUNT_MISSING", "meaning": "getAccountInfo returned null; the account does not exist at that commitment"},
+    {"code": "C_ACCOUNT_CLOSED", "meaning": "the account exists with zero lamports or zero-length data"},
+    {"code": "C_WRONG_OWNER", "meaning": "the account is not owned by the pinned program"},
+    {"code": "C_SCHEMA", "meaning": "the discriminator does not match the pinned BondingCurve discriminator"},
+    {"code": "C_DECODE", "meaning": "the account data did not decode under the pinned layout"},
+    {"code": "C_COMPLETE", "meaning": "the curve is complete at the target; no bonding-curve exit is priced"},
+    {"code": "C_MIGRATED", "meaning": "migration evidence; no post-graduation exit is priced"},
+    {"code": "C_RPC_EXHAUSTED", "meaning": "bounded retries used without a usable response"},
+    {"code": "C_PRE_CHECKPOINT_PROTOCOL", "meaning": "the target had already passed when this protocol began; it stays censored and is never filled"}
+  ],
+  "every_refusal_is_visible": "the raw response or error is preserved append-only, the code is recorded, and no checkpoint row is written with a substituted value",
+
+  "idempotence_and_recovery": {
+    "identity": "(entry_signature, delay_slots, horizon) is unique; one checkpoint per cell",
+    "restart_safe": "a schedule row is written BEFORE the target passes and carries its own state, so a restart resumes from the durable schedule rather than from memory",
+    "cannot_duplicate": "the unique index makes a second checkpoint for the same identity impossible",
+    "cannot_miss_on_restart": "a scheduled target that has not yet been attempted is still due after a restart; one that has been refused keeps its refusal",
+    "demonstrated_on_synthetic_clocks": "a test drives a synthetic slot clock past a target and asserts the target was scheduled before it passed, and that a restart mid-flight neither duplicates nor drops it"
+  },
+
+  "rate_policy": {
+    "max_requests_per_second": 2,
+    "min_interval_ms": 500,
+    "scheduler_poll_seconds": 20,
+    "scheduler_poll_justification": "20 seconds is 50 slots at the nominal rate, comfortably inside the 150-slot lateness tolerance. Fast enough that a target is not missed, slow enough that the poll itself is negligible RPC.",
+    "rpc_budget": "one slot poll per scheduler tick, plus one getAccountInfo per scheduled cell. No other request is made and the raw log is never rescanned."
+  },
+
+  "publication": {
+    "publishable_now": ["schedule counts", "checkpoint coverage counts", "refusal counts by code", "censoring counts"],
+    "not_publishable_yet": ["any profitability figure", "any comparison or mixture with B15e's retrospective sums"],
+    "no_retrospective_mix": "B15e's exit-after-target figures and B15f's checkpoint figures are separate populations with different target definitions. They are never combined, averaged or presented in one column.",
+    "label": "SIMULATED_SHADOW_CHECKPOINT"
+  },
+
+  "still_unmeasured": {
+    "market_impact": "unmeasured. The account state at the target is the state of a curve our hypothetical trade never touched.",
+    "landing_probability": "unmeasured, for both the entry and the exit"
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "scheduling a checkpoint for a target that has already passed",
+    "using current or later account state as the state at a target",
+    "widening max_lateness_slots after seeing a result",
+    "mixing checkpoint figures with B15e's retrospective figures",
+    "changing the frozen entry delay grid or the frozen outcome horizons",
+    "rescanning the raw log",
+    "claiming profitability, executability or a landing probability"
+  ],
+
+  "status_locks": {
+    "label": "SIMULATED_SHADOW_CHECKPOINT",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "refused_status_names": ["executable", "live", "profitable", "production_ready", "validated", "guaranteed"]
+  }
+}
