@@ -70,10 +70,150 @@ ALLOWED_STATUS_LEVELS = (STATUS_RESEARCH, STATUS_SIMULATED)
 FORBIDDEN_STATUS_LEVEL = "EXECUTABLE"
 
 SNAPSHOT_FIELDS = (
-    "snapshot_schema_version", "status_banner", "overview", "pipeline", "windows", "strategy",
-    "opportunities", "simulated_positions", "portfolio", "evidence", "config", "provenance",
-    "snapshot_sha256",
+    "snapshot_schema_version", "display_format", "status_banner", "overview", "pipeline",
+    "windows", "strategy", "opportunities", "simulated_positions", "portfolio", "evidence",
+    "config", "provenance", "snapshot_sha256",
 )
+
+# --------------------------------------------------------------------------------------------
+# Display-only strings: derived here, with integer arithmetic, and included in the hash
+# --------------------------------------------------------------------------------------------
+#
+# The console must not divide. But an operator reading `306788560` and `[3834857, 12500000]` is
+# doing the arithmetic in their head instead, which is worse: it is the same computation, performed
+# by the person least able to check it and most likely to be tired.
+#
+# So the adapter publishes the human-readable form too, derived by INTEGER arithmetic, versioned,
+# and hashed with everything else. The raw value stays beside it and stays authoritative.
+
+DISPLAY_FORMAT_VERSION = "1.0.0"
+LAMPORTS_PER_SOL = 1_000_000_000
+SOL_DECIMALS = 9
+PERCENT_MARKER = "\u2248"          # a leading "approximately" sign, on every percent
+PERCENT_DECIMALS = 2
+
+DISPLAY_RULES = {
+    "version": DISPLAY_FORMAT_VERSION,
+    "sol": f"exact. lamports // {LAMPORTS_PER_SOL} and the remainder as {SOL_DECIMALS} fixed "
+           "decimals, so every lamport is shown and nothing is rounded. Digits are never trimmed: "
+           "a fixed width cannot be mistaken for a rounded one.",
+    "percent": f"NOT exact. The magnitude is truncated toward zero to {PERCENT_DECIMALS} decimal "
+               f"places by integer division, so |displayed| <= |exact| < |displayed| + 0.01, and "
+               f"every percent carries a leading {PERCENT_MARKER}. The exact pair beside it is "
+               "authoritative.",
+    "raw_is_authoritative": "Every display string sits next to the integer or exact pair it was "
+                            "derived from. If they ever disagree, the raw value is correct and the "
+                            "snapshot is broken.",
+}
+
+
+def sol_display_key(key):
+    """`quote_lamports` -> `quote_sol_display`."""
+    return key[: -len("_lamports")] + "_sol_display"
+
+
+def percent_display_key(key):
+    """`current_drawdown_ratio` -> `current_drawdown_percent_display`; `net_return` -> ...."""
+    base = key[: -len("_ratio")] if key.endswith("_ratio") else key
+    return base + "_percent_display"
+
+
+def format_sol(lamports):
+    """Exact SOL from integer lamports. `divmod`, never a float, never a rounding."""
+    if lamports is None:
+        return None
+    if isinstance(lamports, bool) or not isinstance(lamports, int):
+        raise SnapshotRefused(f"cannot format {lamports!r} as SOL; lamports are integers")
+    negative = lamports < 0
+    whole, remainder = divmod(-lamports if negative else lamports, LAMPORTS_PER_SOL)
+    return f"{'-' if negative else ''}{whole:,}.{remainder:0{SOL_DECIMALS}d} SOL"
+
+
+def format_percent(pair):
+    """A bounded percent from an exact rational, by integer division only.
+
+    Truncated toward zero in MAGNITUDE, so the sign never flips and the displayed figure is never
+    further from zero than the truth. A reader who treats it as exact is wrong by less than 0.01
+    percentage points, in a direction the rule states.
+    """
+    if pair is None:
+        return None
+    if not isinstance(pair, (list, tuple)) or len(pair) != 2:
+        raise SnapshotRefused(f"cannot format {pair!r} as a percent; expected an exact pair")
+    numerator, denominator = pair
+    for value in (numerator, denominator):
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise SnapshotRefused(f"exact pair {pair!r} is not two integers")
+    if denominator == 0:
+        raise SnapshotRefused("a rational with a zero denominator has no percent")
+    negative = (numerator < 0) != (denominator < 0)
+    scale = 10 ** (PERCENT_DECIMALS + 2)
+    scaled = (abs(numerator) * scale) // abs(denominator)
+    whole, fraction = divmod(scaled, 10 ** PERCENT_DECIMALS)
+    return (f"{PERCENT_MARKER} {'-' if negative and scaled else ''}{whole:,}."
+            f"{fraction:0{PERCENT_DECIMALS}d}%")
+
+
+def with_display(mapping):
+    """Return `mapping` plus a display string beside every lamport field and every exact pair."""
+    enriched = dict(mapping)
+    for key, value in list(mapping.items()):
+        if key.endswith("_display"):
+            continue
+        if key.endswith("_lamports"):
+            enriched[sol_display_key(key)] = format_sol(value)
+        elif isinstance(value, (list, tuple)) and len(value) == 2 and all(
+                isinstance(item, int) and not isinstance(item, bool) for item in value):
+            enriched[percent_display_key(key)] = format_percent(value)
+        elif value is None and key in NULLABLE_PAIR_FIELDS:
+            enriched[percent_display_key(key)] = None
+    return enriched
+
+
+# Fields that hold an exact pair OR null. Without naming them, a null would silently lose its
+# display sibling and the totality check below could not tell absence from oversight.
+NULLABLE_PAIR_FIELDS = frozenset({
+    "current_drawdown_ratio", "max_portfolio_drawdown_ratio", "utilisation",
+    "net_return", "max_drawdown_ratio",
+})
+
+
+def assert_display_consistent(node, where="snapshot"):
+    """Every display string re-derives from the raw value beside it, and vice versa.
+
+    Total in both directions: a display string with no raw sibling is an unsourced number on an
+    operator's screen, and a raw field with no display string is a silent gap where the console
+    would show nothing.
+    """
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key.endswith("_lamports"):
+                display = sol_display_key(key)
+                if display not in node:
+                    raise SnapshotRefused(f"{where}.{key} has no {display} beside it")
+                if node[display] != format_sol(value):
+                    raise SnapshotRefused(
+                        f"{where}.{display} is {node[display]!r} but {key} formats to "
+                        f"{format_sol(value)!r}; the raw value is authoritative and they disagree")
+            elif key in NULLABLE_PAIR_FIELDS or (
+                    isinstance(value, list) and len(value) == 2
+                    and all(isinstance(i, int) and not isinstance(i, bool) for i in value)):
+                display = percent_display_key(key)
+                if display not in node:
+                    raise SnapshotRefused(f"{where}.{key} has no {display} beside it")
+                if node[display] != format_percent(value):
+                    raise SnapshotRefused(
+                        f"{where}.{display} disagrees with the exact pair beside it")
+            elif key.endswith("_sol_display"):
+                raw = key[: -len("_sol_display")] + "_lamports"
+                if raw not in node:
+                    raise SnapshotRefused(f"{where}.{key} has no {raw} to be derived from")
+            for child_key, child in ((key, value),):
+                assert_display_consistent(child, f"{where}.{child_key}")
+    elif isinstance(node, (list, tuple)):
+        for index, value in enumerate(node):
+            assert_display_consistent(value, f"{where}[{index}]")
+    return True
 
 # Substrings that must never appear in any string a snapshot carries. A snapshot is the artifact
 # most likely to be pasted into a chat window, an issue tracker or a screenshot.
@@ -281,6 +421,7 @@ def assert_snapshot(snapshot):
     assert_no_secret(snapshot)
     assert_no_executable_claim(snapshot)
     assert_consistent(snapshot)
+    assert_display_consistent(snapshot)
     return snapshot
 
 
@@ -317,7 +458,7 @@ def build_snapshot(*, risk_decisions, portfolio, config, health, pipeline, windo
             raise SnapshotRefused(
                 f"risk decision schema {decision['schema_version']} is not "
                 f"{B12A.SCHEMA_VERSION}; the console would render fields it cannot vouch for")
-        opportunities.append({
+        opportunities.append(with_display({
             "proposal_id": decision["proposal"]["proposal_id"],
             "mint": decision["grouping"]["mint"],
             "bonding_curve": decision["grouping"]["bonding_curve"],
@@ -330,37 +471,43 @@ def build_snapshot(*, risk_decisions, portfolio, config, health, pipeline, windo
                 None if decision["exposure_after"] is None
                 else decision["exposure_after"]["total_exposure_lamports"]),
             "decision_sha256": decision["decision_sha256"],
-        })
+        }))
 
     exposure = B12A.exposure_snapshot(portfolio, creator="")
-    limits = [
-        {"name": "total_exposure_lamports", "limit": config["max_total_exposure_lamports"],
-         "used": exposure["total_exposure_lamports"],
+    limits = [with_display(entry) for entry in (
+        {"name": "total_exposure", "unit": "lamports",
+         "limit_lamports": config["max_total_exposure_lamports"],
+         "used_lamports": exposure["total_exposure_lamports"],
          "utilisation": _utilisation(exposure["total_exposure_lamports"],
                                      config["max_total_exposure_lamports"])},
-        {"name": "pending_exposure_lamports", "limit": config["max_pending_exposure_lamports"],
-         "used": exposure["pending_exposure_lamports"],
+        {"name": "pending_exposure", "unit": "lamports",
+         "limit_lamports": config["max_pending_exposure_lamports"],
+         "used_lamports": exposure["pending_exposure_lamports"],
          "utilisation": _utilisation(exposure["pending_exposure_lamports"],
                                      config["max_pending_exposure_lamports"])},
-        {"name": "open_positions", "limit": config["max_open_positions"],
-         "used": exposure["position_count"],
+        {"name": "open_positions", "unit": "count",
+         "limit_count": config["max_open_positions"],
+         "used_count": exposure["position_count"],
          "utilisation": _utilisation(exposure["position_count"],
                                      config["max_open_positions"])},
-        {"name": "max_order_lamports", "limit": config["max_order_lamports"],
-         "used": None, "utilisation": None},
-    ]
+        # No "used" for a per-order cap: it is a bound on the NEXT order, not a running total, and
+        # publishing a zero here would invite reading it as headroom.
+        {"name": "max_single_order", "unit": "lamports",
+         "limit_lamports": config["max_order_lamports"],
+         "used_lamports": None, "utilisation": None},
+    )]
 
-    positions = [{
+    positions = [with_display({
         "mint": entry["mint"], "creator": entry["creator"],
         "deployed_lamports": entry["deployed_lamports"],
         # Realisable value is a research figure that the portfolio snapshot may or may not carry.
         # Absent means unknown, and unknown is rendered as unknown rather than as zero.
         "realizable_net_lamports": entry.get("realizable_net_lamports"),
-    } for entry in portfolio["open_positions"]]
+    }) for entry in portfolio["open_positions"]]
 
     marked = []
     for entry in simulated_positions:
-        marked.append({
+        marked.append(with_display({
             "mint": entry["mint"],
             "horizon_name": entry["horizon_name"],
             "outcome_status": entry["outcome_status"],
@@ -370,10 +517,11 @@ def build_snapshot(*, risk_decisions, portfolio, config, health, pipeline, windo
             "net_return": entry.get("net_return"),
             "max_drawdown_ratio": entry.get("max_drawdown_ratio"),
             "censoring_reason": entry.get("censoring_reason"),
-        })
+        }))
 
     snapshot = {
         "snapshot_schema_version": SCHEMA_VERSION,
+        "display_format": dict(DISPLAY_RULES),
         "status_banner": {
             "level": STATUS_SIMULATED if strategy["results_locked"] else STATUS_RESEARCH,
             "executable": False,
@@ -398,10 +546,10 @@ def build_snapshot(*, risk_decisions, portfolio, config, health, pipeline, windo
         "opportunities": opportunities,
         "simulated_positions": marked,
         "portfolio": {
-            "aggregates": exposure,
+            "aggregates": with_display(exposure),
             "positions": positions,
             "limits": limits,
-            "risk": {
+            "risk": with_display({
                 "realised_pnl_today_lamports": portfolio["realised_pnl_today_lamports"],
                 "max_daily_realised_loss_lamports":
                     config["max_daily_realised_loss_lamports"],
@@ -411,7 +559,7 @@ def build_snapshot(*, risk_decisions, portfolio, config, health, pipeline, windo
                     portfolio["current_realizable_portfolio_lamports"],
                 "current_drawdown_ratio": B12A.current_drawdown(portfolio),
                 "max_portfolio_drawdown_ratio": list(config["max_portfolio_drawdown_ratio"]),
-            },
+            }),
         },
         "evidence": {
             "evidence_slot": health["evidence_slot"], "current_slot": health["current_slot"],
@@ -447,7 +595,12 @@ SYNTHETIC_NOTE = (
 
 
 def build_demo_snapshot():
-    """A fully synthetic snapshot that exercises every state the console must render.
+    """A fully synthetic snapshot that exercises every state the console must render."""
+    return build_snapshot(**demo_components())
+
+
+def demo_components():
+    """The demo's inputs, exposed separately so a test can vary exactly one of them.
 
     Synthetic on purpose and labelled as such in the record itself: the fresh evaluation window has
     never been queried, and a demo fixture drawn from real data would be a composition inspection
@@ -562,14 +715,15 @@ def build_demo_snapshot():
          "blocked_reason": "results are locked until every unlock requirement is met",
          "numbers_withheld": True},
     ]
-    return build_snapshot(
-        risk_decisions=decisions, portfolio=portfolio, config=config, health=health,
-        pipeline=pipeline, windows=windows, strategy=strategy,
-        simulated_positions=simulated,
-        provenance={"synthetic": "true", "note": SYNTHETIC_NOTE,
-                    "simulator_schema": "b10a-1.0.0", "path_schema": "b10b-1.0.0",
-                    "label_schema": "b10c-1.0.0", "risk_schema": "b12a-1.0.0"},
-        status_detail=SYNTHETIC_NOTE)
+    return {
+        "risk_decisions": decisions, "portfolio": portfolio, "config": config, "health": health,
+        "pipeline": pipeline, "windows": windows, "strategy": strategy,
+        "simulated_positions": simulated,
+        "provenance": {"synthetic": "true", "note": SYNTHETIC_NOTE,
+                       "simulator_schema": "b10a-1.0.0", "path_schema": "b10b-1.0.0",
+                       "label_schema": "b10c-1.0.0", "risk_schema": "b12a-1.0.0"},
+        "status_detail": SYNTHETIC_NOTE,
+    }
 
 
 EMBED_OPEN = '<script type="application/json" id="demo-snapshot">'
@@ -583,6 +737,9 @@ def embed_demo(html_path, snapshot=None):
     with the adapter exactly until the first time somebody changed one of them.
     """
     snapshot = snapshot if snapshot is not None else build_demo_snapshot()
+    # Validated here as well as at build time: `embed_demo` accepts a caller-supplied snapshot, and
+    # the page is the last place a malformed record could still be displayed as if it were checked.
+    assert_snapshot(snapshot)
     path = pathlib.Path(html_path)
     html = path.read_text()
     start = html.find(EMBED_OPEN)

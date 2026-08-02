@@ -115,6 +115,16 @@ class SnapshotContractTests(unittest.TestCase):
                 with self.assertRaises(B12B.SnapshotRefused):
                     B12B.assert_snapshot(snapshot)
 
+    def test_a_secret_nested_inside_a_list_is_still_found(self):
+        """Most strings in a snapshot live in lists — warnings, reasons, positions — so a scanner
+        that only walks mappings would miss the places text actually accumulates."""
+        snapshot = demo()
+        snapshot["windows"] = dict(snapshot["windows"],
+                                   warnings=list(snapshot["windows"]["warnings"])
+                                   + ["rotate the api-key before launch"])
+        with self.assertRaises(B12B.SnapshotRefused):
+            B12B.assert_snapshot(snapshot)
+
     def test_a_url_with_embedded_credentials_is_refused(self):
         snapshot = demo()
         snapshot["provenance"] = dict(snapshot["provenance"],
@@ -169,10 +179,30 @@ class ConsistencyTests(unittest.TestCase):
         with self.assertRaisesRegex(B12B.SnapshotRefused, "calls itself fresh"):
             B12B.assert_snapshot(snapshot)
 
+    def test_either_clock_alone_makes_a_fresh_claim_false(self):
+        """Slots stop advancing during an outage while the wall clock keeps running, and a stalled
+        provider can replay an old slot under a fresh timestamp. A gate that reads one clock is a
+        gate that reads neither."""
+        for field, maximum in (("age_slots", "max_age_slots"),
+                               ("age_seconds", "max_age_seconds")):
+            with self.subTest(clock=field):
+                snapshot = demo()
+                snapshot["evidence"] = dict(snapshot["evidence"],
+                                            **{field: snapshot["evidence"][maximum] + 1})
+                with self.assertRaisesRegex(B12B.SnapshotRefused, "calls itself fresh"):
+                    B12B.assert_snapshot(snapshot)
+
     def test_an_approval_while_the_kill_switch_is_engaged_is_refused(self):
         snapshot = demo()
         self.assertGreater(snapshot["overview"]["opportunities_approved"], 0)
         snapshot["evidence"] = dict(snapshot["evidence"], kill_switch_engaged=True)
+        with self.assertRaisesRegex(B12B.SnapshotRefused, "halted or stale"):
+            B12B.assert_snapshot(snapshot)
+
+    def test_an_approval_while_the_emergency_stop_is_set_is_refused(self):
+        snapshot = demo()
+        self.assertGreater(snapshot["overview"]["opportunities_approved"], 0)
+        snapshot["evidence"] = dict(snapshot["evidence"], emergency_state=True)
         with self.assertRaisesRegex(B12B.SnapshotRefused, "halted or stale"):
             B12B.assert_snapshot(snapshot)
 
@@ -201,6 +231,14 @@ class ConsistencyTests(unittest.TestCase):
         snapshot = demo()
         snapshot["overview"] = dict(snapshot["overview"], opportunities_approved=99)
         with self.assertRaisesRegex(B12B.SnapshotRefused, "approval count disagrees"):
+            B12B.assert_snapshot(snapshot)
+
+    def test_an_overview_total_that_disagrees_with_the_list_is_refused(self):
+        """A headline count nobody can tie back to the rows underneath is the number an operator
+        reads and the list is the number that is true."""
+        snapshot = demo()
+        snapshot["overview"] = dict(snapshot["overview"], opportunities_total=99)
+        with self.assertRaisesRegex(B12B.SnapshotRefused, "total disagrees"):
             B12B.assert_snapshot(snapshot)
 
     def test_results_shown_unlocked_with_requirements_unmet_is_refused(self):
@@ -262,9 +300,132 @@ class UnknownIsNotZeroTests(unittest.TestCase):
             self.assertTrue(entry["censoring_reason"])
 
     def test_a_limit_with_no_meaningful_usage_is_null_not_zero(self):
+        """A per-order cap bounds the NEXT order, not a running total. Publishing zero used here
+        would invite reading it as headroom."""
         limits = {limit["name"]: limit for limit in demo()["portfolio"]["limits"]}
-        self.assertIsNone(limits["max_order_lamports"]["used"])
-        self.assertIsNone(limits["max_order_lamports"]["utilisation"])
+        self.assertIsNone(limits["max_single_order"]["used_lamports"])
+        self.assertIsNone(limits["max_single_order"]["used_sol_display"])
+        self.assertIsNone(limits["max_single_order"]["utilisation"])
+        self.assertIsNone(limits["max_single_order"]["utilisation_percent_display"])
+
+
+class DisplayFormattingTests(unittest.TestCase):
+    """Display strings exist so the operator is not the one doing the division in their head.
+
+    They are derived by integer arithmetic, versioned, hashed with everything else, and always sit
+    beside the raw value that remains authoritative.
+    """
+
+    def test_sol_amounts_are_exact_and_never_rounded(self):
+        cases = {
+            0: "0.000000000 SOL",
+            1: "0.000000001 SOL",
+            -1: "-0.000000001 SOL",
+            999_999_999: "0.999999999 SOL",
+            1_000_000_000: "1.000000000 SOL",
+            1_000_000_001: "1.000000001 SOL",
+            103_394_280: "0.103394280 SOL",
+            -12_500_000: "-0.012500000 SOL",
+            10 ** 18: "1,000,000,000.000000000 SOL",
+        }
+        for lamports, expected in cases.items():
+            with self.subTest(lamports=lamports):
+                self.assertEqual(B12B.format_sol(lamports), expected)
+
+    def test_one_lamport_always_changes_the_sol_string(self):
+        for base in (0, 1, 999_999_999, 1_000_000_000, 10 ** 18, -1, -1_000_000_000):
+            with self.subTest(base=base):
+                self.assertNotEqual(B12B.format_sol(base), B12B.format_sol(base + 1))
+
+    def test_an_unknown_amount_has_no_sol_string_rather_than_a_zero_one(self):
+        self.assertIsNone(B12B.format_sol(None))
+        self.assertIsNone(B12B.format_percent(None))
+
+    def test_a_non_integer_amount_is_refused_rather_than_coerced(self):
+        for bad in (1.0, "100", True):
+            with self.subTest(bad=bad):
+                with self.assertRaises(B12B.SnapshotRefused):
+                    B12B.format_sol(bad)
+
+    def test_percentages_are_truncated_toward_zero_and_marked_approximate(self):
+        cases = {
+            (1, 4): "\u2248 25.00%",
+            (0, 1): "\u2248 0.00%",
+            (1, 3): "\u2248 33.33%",
+            (-1, 3): "\u2248 -33.33%",
+            (2, 3): "\u2248 66.66%",
+            (-2, 3): "\u2248 -66.66%",
+            (-7, 100): "\u2248 -7.00%",
+            (1, 1_000_000): "\u2248 0.00%",
+            (10 ** 18, 3): "\u2248 33,333,333,333,333,333,333.33%",
+        }
+        for pair, expected in cases.items():
+            with self.subTest(pair=pair):
+                self.assertEqual(B12B.format_percent(list(pair)), expected)
+
+    def test_truncation_never_overstates_the_magnitude(self):
+        """The stated bound: |displayed| <= |exact| < |displayed| + 0.01. Checked by integer
+        cross-multiplication so the test itself uses no float either."""
+        for numerator, denominator in ((1, 3), (2, 3), (-2, 3), (99_999, 100_000), (1, 7),
+                                       (123_456_789, 1_000_000_007)):
+            with self.subTest(pair=(numerator, denominator)):
+                shown = B12B.format_percent([numerator, denominator])
+                digits = shown.replace("\u2248 ", "").replace("%", "").replace(",", "")
+                whole, fraction = digits.lstrip("-").split(".")
+                hundredths = int(whole) * 100 + int(fraction)
+                self.assertLessEqual(hundredths * abs(denominator),
+                                     abs(numerator) * 10_000)
+                self.assertGreater((hundredths + 1) * abs(denominator),
+                                   abs(numerator) * 10_000)
+
+    def test_a_zero_denominator_has_no_percent(self):
+        with self.assertRaises(B12B.SnapshotRefused):
+            B12B.format_percent([1, 0])
+
+    def test_the_formatting_rule_is_versioned_and_travels_with_the_snapshot(self):
+        rules = demo()["display_format"]
+        self.assertEqual(rules["version"], B12B.DISPLAY_FORMAT_VERSION)
+        self.assertIn("exact", rules["sol"])
+        self.assertIn("NOT exact", rules["percent"])
+        self.assertIn("the raw value is correct", rules["raw_is_authoritative"])
+        self.assertIn("authoritative", rules["percent"])
+
+    def test_display_strings_are_inside_the_hash(self):
+        snapshot = demo()
+        tampered = json.loads(B10B.canonical_json(snapshot))
+        tampered["portfolio"]["risk"]["realised_pnl_today_sol_display"] = "0.000000000 SOL"
+        self.assertNotEqual(B12B.snapshot_hash(snapshot), B12B.snapshot_hash(tampered))
+
+    def test_every_display_string_re_derives_from_the_value_beside_it(self):
+        self.assertTrue(B12B.assert_display_consistent(demo()))
+
+    def test_a_display_string_that_disagrees_with_its_raw_value_is_refused(self):
+        snapshot = demo()
+        snapshot["portfolio"]["positions"][0]["deployed_sol_display"] = "9.999999999 SOL"
+        with self.assertRaisesRegex(B12B.SnapshotRefused, "authoritative and they disagree"):
+            B12B.assert_snapshot(snapshot)
+
+    def test_a_percent_that_disagrees_with_its_exact_pair_is_refused(self):
+        snapshot = demo()
+        snapshot["portfolio"]["risk"]["current_drawdown_percent_display"] = "\u2248 99.00%"
+        with self.assertRaisesRegex(B12B.SnapshotRefused, "disagrees with the exact pair"):
+            B12B.assert_snapshot(snapshot)
+
+    def test_a_raw_value_with_no_display_string_beside_it_is_refused(self):
+        snapshot = demo()
+        del snapshot["portfolio"]["positions"][0]["deployed_sol_display"]
+        with self.assertRaisesRegex(B12B.SnapshotRefused, "has no deployed_sol_display"):
+            B12B.assert_snapshot(snapshot)
+
+    def test_a_display_string_with_no_raw_value_behind_it_is_refused(self):
+        snapshot = demo()
+        snapshot["overview"]["invented_sol_display"] = "1.000000000 SOL"
+        with self.assertRaisesRegex(B12B.SnapshotRefused, "to be derived from"):
+            B12B.assert_snapshot(snapshot)
+
+    def test_the_page_shows_the_raw_value_beside_every_display_string(self):
+        self.assertIn('raw.className = "raw"', SCRIPT_CODE)
+        self.assertIn(".raw::before { content: \"raw \"", HTML)
 
 
 class EmbeddedDemoTests(unittest.TestCase):
@@ -285,6 +446,27 @@ class EmbeddedDemoTests(unittest.TestCase):
             second = B12B.embed_demo(copy)
             self.assertEqual(first, second)
             self.assertEqual(body, copy.read_text())
+
+    def test_building_a_snapshot_validates_it_before_hashing_it(self):
+        """Otherwise the hash certifies a record nothing checked. Every other validation test calls
+        the checker directly, so only this one proves the builder calls it too."""
+        components = B12B.demo_components()
+        components["strategy"] = dict(components["strategy"], model_family="gbm")
+        with self.assertRaisesRegex(B12B.SnapshotRefused, "model artifact hash"):
+            B12B.build_snapshot(**components)
+
+    def test_embedding_refuses_a_payload_that_could_close_the_script_element(self):
+        """A closing tag inside the JSON would end the element early and turn data into markup —
+        the one way this page could execute something it was handed."""
+        with tempfile.TemporaryDirectory() as directory:
+            copy = pathlib.Path(directory) / "console.html"
+            shutil.copy(CONSOLE, copy)
+            hostile = demo()
+            hostile["windows"] = dict(hostile["windows"],
+                                      warnings=["</script><script>alert(1)</script>"])
+            with self.assertRaises(B12B.SnapshotRefused):
+                B12B.embed_demo(copy, hostile)
+            self.assertEqual(B12B.embedded_demo(copy), demo(), "the page must be left untouched")
 
     def test_the_embedded_payload_cannot_close_the_script_element(self):
         raw = HTML.split('<script type="application/json" id="demo-snapshot">')[1]
@@ -406,6 +588,21 @@ class AccessibilityAndResponsivenessTests(unittest.TestCase):
         self.assertIn("table.stack tr { display: block", HTML)
         self.assertIn('content: attr(data-label)', HTML)
 
+    def test_a_stacked_label_sits_above_its_value_rather_than_beside_it(self):
+        """A multi-line value — a wrapped mint, a two-line reason — otherwise leaves its label
+        floating against the middle of a block. Found by rendering at 390px, not by reading."""
+        self.assertIn("content: attr(data-label); display: block;", HTML)
+
+    def test_identifiers_have_a_width_floor_as_well_as_a_ceiling(self):
+        """Without a floor a neighbouring column squeezes a 44-character mint into four ragged
+        lines. Also found by rendering rather than by reading."""
+        self.assertIn("code.ident { display: inline-block; min-width: 20ch; max-width: 26ch;",
+                      HTML)
+
+    def test_values_break_at_natural_points_rather_than_mid_token(self):
+        self.assertNotIn("word-break: break-all", HTML)
+        self.assertIn("overflow-wrap: anywhere", HTML)
+
     def test_stacked_cells_carry_the_label_they_will_display(self):
         """Without `data-label` on every cell the mobile layout shows values with no headings."""
         self.assertIn('td.setAttribute("data-label", label)', SCRIPT)
@@ -438,7 +635,7 @@ class ConsoleBehaviourTests(unittest.TestCase):
     def test_unknown_is_never_rendered_as_zero(self):
         output = self.run_js(
             "console.log(JSON.stringify([formatInteger(null), formatInteger(undefined),"
-            " formatRatio(null), formatBoolean(null), truncateIdentity(null), formatInteger(0)]));")
+            " formatRatio(null), formatBoolean(null), identityText(null), formatInteger(0)]));")
         values = json.loads(output)
         self.assertEqual(values[:5], ["unknown"] * 5)
         self.assertEqual(values[5], "0", "a real zero must still print as zero")
@@ -485,14 +682,18 @@ class ConsoleBehaviourTests(unittest.TestCase):
             f"var snap = {payload};\nconsole.log(JSON.stringify(snapshotProblem(snap)));")
         self.assertEqual(json.loads(output), None)
 
-    def test_identity_truncation_keeps_both_ends(self):
+    def test_identifiers_are_shown_in_full_and_never_ellipsised(self):
+        """A truncated mint cannot be copied, pasted into an explorer, or compared against
+        anything. The only reason to shorten one is to make a table look tidier than the data is."""
+        mint = "MintSynth1111111111111111111111111111111111"
         output = self.run_js(
-            "console.log(JSON.stringify([truncateIdentity('short'),"
-            " truncateIdentity('MintSynth1111111111111111111111111111111111')]));")
+            "console.log(JSON.stringify([identityText('short'), identityText('" + mint + "'),"
+            " identityText(null)]));")
         values = json.loads(output)
         self.assertEqual(values[0], "short")
-        self.assertTrue(values[1].startswith("MintSynt"))
-        self.assertTrue(values[1].endswith("111111"))
+        self.assertEqual(values[1], mint)
+        self.assertEqual(values[2], "unknown")
+        self.assertNotIn("\u2026", SCRIPT_CODE, "no ellipsis may survive in the renderer")
 
 
 DOM_STUB = """
@@ -625,6 +826,33 @@ class ConsoleRenderTests(unittest.TestCase):
         classes = json.loads(output)
         self.assertEqual(sum(1 for c in classes if "on" in c.split()), 3,
                          "kill switch, stale evidence and locked results must all read as on")
+
+    def test_every_display_string_is_rendered_with_its_raw_value_beneath_it(self):
+        """The display string is a convenience; the raw value is the evidence. Both on screen."""
+        output = self.render(
+            "var nodes = __collect(__ids['positions-held-table']._tbody, []);"
+            "console.log(JSON.stringify(nodes.filter(function (n) {"
+            "  return n.classList._set.indexOf('raw') >= 0; })"
+            "  .map(function (n) { return n.textContent; })));")
+        raws = json.loads(output)
+        self.assertIn("103,394,280 lamports", raws)
+        self.assertTrue(any("96,100,000" in value for value in raws))
+
+    def test_sol_and_percent_strings_reach_the_page(self):
+        output = self.render(
+            "var nodes = __collect(__ids['limits-table']._tbody, []);"
+            "console.log(JSON.stringify(nodes.map(function (n) { return n.textContent; })));")
+        texts = " ".join(json.loads(output))
+        self.assertIn("1.000000000 SOL", texts)
+        self.assertIn("\u2248 30.67%", texts)
+        self.assertIn("306,788,560 lamports", texts)
+
+    def test_identifiers_reach_the_page_in_full(self):
+        mint = "MintSynth1111111111111111111111111111111111"
+        output = self.render(
+            "var nodes = __collect(__ids['positions-held-table']._tbody, []);"
+            "console.log(JSON.stringify(nodes.map(function (n) { return n.textContent; })));")
+        self.assertIn(mint, json.loads(output))
 
     def test_a_snapshot_claiming_to_be_executable_is_refused_at_render_time(self):
         bad = B12B.embedded_demo(CONSOLE)

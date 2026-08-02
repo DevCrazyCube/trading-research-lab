@@ -56,6 +56,26 @@ displayed as they arrive, and a test asserts the script contains no `toFixed`, `
    none, an overview count that disagrees with its list, results shown unlocked while requirements
    are unmet, or a named model with no frozen artifact hash.
 
+## Display strings: derived here, by integer arithmetic, and hashed
+
+The console must not divide. But an operator reading `306788560` and `[3834857, 12500000]` is doing
+the arithmetic in their head instead — the same computation, performed by the person least able to
+check it and most likely to be tired. So the adapter publishes the human-readable form too.
+
+| kind | rule | exact? |
+| --- | --- | --- |
+| `*_sol_display` | `lamports // 1_000_000_000` and the remainder as **9 fixed decimals** | **exact** — every lamport is shown, nothing is rounded, digits are never trimmed |
+| `*_percent_display` | magnitude truncated toward zero to **2 decimals** by integer division, prefixed `≈` | **not exact** — `|displayed| ≤ |exact| < |displayed| + 0.01` |
+
+`display_format` carries the version and both rules in the snapshot itself, so the rule travels
+with the values it governs.
+
+**Every display string sits beside the raw value it came from, and the raw value is authoritative.**
+`assert_display_consistent` re-derives every one and is **total in both directions**: a display
+string with no raw sibling is an unsourced number on an operator's screen, and a raw field with no
+display string is a silent gap where the console would show nothing. Display strings are inside the
+snapshot hash, so tampering with one changes it.
+
 ## Unknown is never zero
 
 Every optional numeric field is present and explicitly `null` when unknown — never omitted, never
@@ -92,6 +112,13 @@ they are equal.
 reaches the page only through `textContent`; `innerHTML`, `insertAdjacentHTML`, `document.write` and
 `eval` appear nowhere, because a mint or a censoring reason is data from a file and data from a file
 is never markup.
+
+**Layout defects found by rendering, not by reading.** Three were fixed after inspecting the page
+in headless Firefox at 1440px and 390px: 44-character identifiers were being squeezed into four
+ragged lines (the identifier cell now has a width floor as well as a ceiling); stacked-card labels
+sat beside multi-line values instead of above them; and stat values broke mid-token because of
+`word-break: break-all` (now `overflow-wrap: anywhere`). A fourth was a mislabelled column header
+reading "Utilisation (exact)" above a deliberately approximate percentage.
 
 **Accessibility and layout:** skip link, semantic landmarks, every section labelled by its heading,
 every table with a `<caption>`, column scopes and row headers, a `role="status"` live region for the

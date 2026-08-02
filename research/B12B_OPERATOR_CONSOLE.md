@@ -112,14 +112,53 @@ than inferring zero from an empty positions list. Passing zero because the book 
 category error that makes the governor reject every first trade and look broken; the behaviour is
 correct, so the fix belongs in what the caller supplies. **No behaviour changed.**
 
-## 9. Verification and limits
+## 9. Hardening pass (handoff 76)
 
-80 tests in this suite, 222 subtests; **1,192 passing repository-wide**. No mutation run was
-performed on this area: the substance here is what the artifacts *cannot* do, and those properties
-are asserted directly — by executing the page, by driving the server, and by scanning for absent
-capabilities — rather than by perturbing a decision function. That is a deliberate difference from
-B10a–B12a and is stated rather than glossed.
+**Mutation sweep — 42 mutants, all killed.** Six survived the first run and every one was a genuine
+gap, not an equivalent mutant: only the slot clock was exercised for staleness; the emergency stop
+was never tested against an approval; secrets were only planted in mappings, never in a list, which
+is where text actually accumulates; the overview *total* count was untested while the approved count
+was; nothing asserted that `build_snapshot` validates before hashing, so the hash could certify a
+record nothing checked; and the "payload cannot close the script element" guard had no test that
+could make it fire. All six now have tests, and `embed_demo` was hardened to validate whatever it is
+handed. **No equivalent mutants to disclose.**
 
-**Not claimed:** any operational readiness, any live feed, any real data in the interface, or any
-review of visual design by a human. The layout has been verified structurally and by execution, not
-by anybody looking at it.
+Ten further mutants were added for the display formatters and their consistency walker.
+
+**Real-browser inspection — three layout defects fixed, plus one mislabelled header.** Rendered in
+headless Firefox at 1440x3200 and 390x6000:
+
+1. A 44-character mint was squeezed into four ragged lines by its neighbouring columns. The
+   identifier cell now has a width **floor** as well as a ceiling.
+2. In the stacked mobile layout the `data-label` sat *beside* multi-line values, leaving the label
+   floating against the middle of a block. Labels are now block-level, above their value.
+3. `word-break: break-all` split "0.306788560 SOL" into "SO / L". Now `overflow-wrap: anywhere`,
+   which breaks at a space or underscore when there is one, with slightly wider stat boxes.
+4. The utilisation column header read "Utilisation (exact)" while leading with the deliberately
+   approximate percent. Renamed.
+
+None of these was visible from the source. That is the argument for the render pass.
+
+**Display strings.** SOL amounts are **exact** — integer `divmod`, nine fixed decimals, digits never
+trimmed so a fixed width cannot be mistaken for a rounded one. Percentages are **not** exact and say
+so: magnitude truncated toward zero to two decimals by integer division, prefixed `≈`, with the
+stated bound `|displayed| ≤ |exact| < |displayed| + 0.01` verified by a test that itself uses only
+integer cross-multiplication. Every display string sits beside its raw value, is re-derived by a
+walker that is total in both directions, and is inside the snapshot hash.
+
+**Identifiers are no longer truncated at all.** An ellipsised mint cannot be copied, pasted into an
+explorer, or compared against anything; the only reason to shorten one is to make a table look
+tidier than the data is. They wrap instead, in a monospace element that selects cleanly.
+
+## 10. Verification and limits
+
+107 tests in this suite, 260 subtests; **1,219 passing repository-wide**. 42 adapter mutants, all
+killed.
+
+The UI itself still has no mutation run, and that remains deliberate: the substance of the page is
+what it *cannot* do, asserted directly by executing it, driving the server and scanning for absent
+capabilities. The adapter — which has the same shape as the earlier decision modules — now does.
+
+**Not claimed:** any operational readiness, any live feed, or any real data in the interface. The
+layout has now been rendered and inspected at desktop and mobile widths by both agents; it has not
+been reviewed by the owner.

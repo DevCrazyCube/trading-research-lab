@@ -1540,3 +1540,49 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **NOT claimed:** operational readiness, any live or automatic feed, any real data in the
   interface, or any human review of the visual design. The layout is verified structurally and by
   execution, not by anybody looking at it.
+
+## 2026-08-02 — B12b hardening: display strings are exact and derived, layout fixed by rendering
+
+- **Status:** bounded hardening pass on the B12b area only (handoff 76). No behaviour changed in
+  B12a; B11a still unread and locked; B11b unaltered. UI work stops here.
+- **Adopted — the adapter publishes deterministic display strings, and the raw value stays
+  authoritative.** The console must not divide, but an operator reading `306788560` and
+  `[3834857, 12500000]` is doing the arithmetic in their head instead — the same computation,
+  performed by the person least able to check it and most likely to be tired. So SOL amounts and
+  percentages are derived **in the adapter, by integer arithmetic**, versioned under
+  `display_format`, and included in the snapshot hash.
+- **SOL is exact; percent is not, and says so.** `lamports // 1_000_000_000` with the remainder as
+  nine fixed decimals shows every lamport and rounds nothing; digits are never trimmed because a
+  fixed width cannot be mistaken for a rounded one. Percentages truncate the magnitude toward zero
+  to two decimals by integer division, carry a leading `≈`, and state the bound
+  `|displayed| ≤ |exact| < |displayed| + 0.01` — verified by a test that itself uses only integer
+  cross-multiplication. **No float anywhere.**
+- **`assert_display_consistent` is total in both directions.** A display string with no raw sibling
+  is an unsourced number on an operator's screen; a raw field with no display string is a silent gap
+  where the console would show nothing. Both are refused.
+- **Identifiers are no longer truncated at all.** An ellipsised mint cannot be copied, pasted into
+  an explorer, or compared against anything, and the only reason to shorten one is to make a table
+  look tidier than the data is. They wrap instead.
+- **Mutation sweep on the adapter: 42 mutants, all killed.** Six survived the first run and **every
+  one was a genuine gap, not an equivalent mutant** — only the slot clock was exercised for
+  staleness; the emergency stop was never tested against an approval; secrets were only ever planted
+  in mappings, never in a list, which is where text actually accumulates; the overview *total* count
+  was untested while the approved count was; nothing asserted that `build_snapshot` validates before
+  hashing, so the hash could certify a record nothing had checked; and the guard against a payload
+  closing the script element had no test that could make it fire. All six now have tests, and
+  `embed_demo` was hardened to validate whatever it is handed. **Nothing to disclose as equivalent.**
+- **Three layout defects fixed, none of them visible from the source.** Rendered in headless Firefox
+  at 1440x3200 and 390x6000: a 44-character mint squeezed into four ragged lines (the identifier
+  cell now has a width floor as well as a ceiling); stacked-card labels sitting *beside* multi-line
+  values instead of above them; and `word-break: break-all` splitting "0.306788560 SOL" into
+  "SO / L". A fourth was a mislabelled header reading "Utilisation (exact)" above a deliberately
+  approximate percentage. **This is the argument for rendering rather than only reading**, and it is
+  why the DOM-stub tests are kept as a complement to real-browser evidence rather than a substitute.
+- **Verification:** 107 tests in the suite, 260 subtests; 1,219 repository-wide; 42 adapter mutants
+  killed. The UI itself still has no mutation run, deliberately — its substance is what it cannot
+  do, asserted by executing it and scanning for absent capabilities — but the adapter, which has the
+  same shape as the earlier decision modules, now does.
+- **Ratified by:** the Codex directive of handoff 76. **Owner review not separately obtained.**
+- **NOT claimed:** operational readiness, any live feed, or any real data in the interface. The
+  layout has now been rendered and inspected at both widths by both agents; the owner has not seen
+  it.
