@@ -246,7 +246,15 @@ def assert_fresh_cohort(path):
     The marker is checked rather than the filename: a fresh artifact that cannot say what it is has
     not earned the right to stand where B9a stood.
     """
-    database = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        database = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    except sqlite3.Error as error:
+        # Read-only URI mode fails AT CONNECT for a path that does not exist, before any statement
+        # runs — so this cannot be caught by the per-statement handlers below. It escaped as a bare
+        # OperationalError, which meant b9d's `except CohortRefused` around this very call did not
+        # catch it: the wrapper that exists to turn a bad cohort into a refusal was silently
+        # inapplicable to the most ordinary bad cohort of all, one that is not there.
+        raise CohortRefused(f"cannot open {path}: {error}") from error
     try:
         try:
             metadata = dict(database.execute("SELECT key, value FROM metadata"))

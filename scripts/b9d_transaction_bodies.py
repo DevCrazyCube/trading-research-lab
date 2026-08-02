@@ -106,7 +106,17 @@ class FreezeViolation(RuntimeError):
 
 def sha256_file(path, chunk=1 << 20):
     digest = hashlib.sha256()
-    with open(path, "rb") as handle:
+    try:
+        handle = open(path, "rb")
+    except OSError as error:
+        # A source that is not there is a refusal like any other, and it has to be raised as one.
+        # It used to escape as a bare OSError, which is not a FreezeViolation, so every caller
+        # written to catch a refusal — `except FreezeViolation` — let it through as a traceback.
+        # The fresh window makes this reachable: the burned paths always exist, but a fresh source
+        # is one a previous stage was supposed to write, and "the previous stage wrote nothing" is
+        # the ordinary way a pipeline breaks.
+        raise FreezeViolation(f"cannot read {path}: {error}") from error
+    with handle:
         while True:
             block = handle.read(chunk)
             if not block:
