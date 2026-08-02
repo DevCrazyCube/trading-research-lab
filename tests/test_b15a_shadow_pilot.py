@@ -594,6 +594,159 @@ class TestOfflineSession(Temp):
         self.assertEqual(7, report["frames_received"] + 0 if False else report["raw_frames_on_disk"])
 
 
+class TestPopulationSeparation(Temp):
+    """The regression that ended a 72-hour pilot in minutes.
+
+    The stopping rule stops after 5,000 observed launches. Counting every Pump event as a launch
+    made the census read 814 when four launches had been seen, and 1,055 when ten had. A trade is
+    not a launch under any reading of the frozen document.
+    """
+
+    def setUp(self):
+        super().setUp()
+        previous = os.environ.get("SOLANA_RPC_URL")
+        os.environ["SOLANA_RPC_URL"] = "https://fixture.invalid/?api-key=synthetic"
+        self.addCleanup(_restore_env, "SOLANA_RPC_URL", previous)
+        self.session_dir = FIXTURES.run_offline_session(self.directory)
+        self.database = sqlite3.connect(self.session_dir / "shadow.sqlite")
+        self.addCleanup(self.database.close)
+
+    def test_the_launch_table_holds_only_launch_candidates(self):
+        statuses = {row[0] for row in
+                    self.database.execute("SELECT DISTINCT decode_status FROM launch")}
+        self.assertTrue(statuses <= set(PILOT.LAUNCH_CANDIDATE_STATUSES), statuses)
+        for status in PILOT.NON_LAUNCH_STATUSES:
+            self.assertNotIn(status, statuses)
+
+    def test_a_well_formed_trade_event_never_reaches_the_launch_table(self):
+        """The decisive case: right shape, right program, different discriminator."""
+        b7d, disc, create_type, types = PILOT.load_pinned_create_type()
+        status, fields, _error = PILOT.decode_create(FIXTURES.trade_payload(), b7d, disc,
+                                                     create_type, types)
+        self.assertEqual(PILOT.DECODE_UNKNOWN, status)
+        self.assertIn(status, PILOT.NON_LAUNCH_STATUSES)
+        self.assertIsNone(fields)
+
+    def test_non_launch_events_are_preserved_and_counted_separately(self):
+        census = dict(self.database.execute(
+            "SELECT decode_status, COUNT(*) FROM pump_event GROUP BY 1"))
+        self.assertTrue(census, "non-launch events must be preserved, not discarded")
+        self.assertTrue(set(census) <= set(PILOT.NON_LAUNCH_STATUSES), census)
+
+    def test_the_stopping_counter_counts_only_decoded_creates(self):
+        decoded = self.database.execute(
+            "SELECT COUNT(*) FROM launch WHERE decode_status=?",
+            (PILOT.DECODE_DECODED,)).fetchone()[0]
+        self.assertEqual(decoded, PILOT.observed_launch_count(self.database))
+        census = self.database.execute("SELECT COUNT(*) FROM pump_event").fetchone()[0]
+        self.assertGreater(census, 0)
+        self.assertLess(PILOT.observed_launch_count(self.database), decoded + census,
+                        "the counter must not absorb the non-launch census")
+
+    def test_one_decision_per_launch_and_no_others(self):
+        launches = self.database.execute("SELECT COUNT(*) FROM launch").fetchone()[0]
+        decisions = self.database.execute("SELECT COUNT(*) FROM decision").fetchone()[0]
+        self.assertEqual(launches, decisions)
+        self.assertGreater(launches, 0)
+
+    def test_the_invariants_hold_on_the_live_path(self):
+        self.assertTrue(PILOT.assert_population_invariants(self.database))
+
+    def test_a_contaminated_launch_table_is_refused(self):
+        """Plant a trade in the launch table and the invariant must fire."""
+        self.database.execute(
+            "INSERT INTO launch(session_id,frame_seq,decoded_wall_unix,decoded_monotonic_ns,"
+            "decode_status,evidence_sha256,create_key) VALUES ('s',1,0.0,0,?,'e','k1')",
+            (PILOT.DECODE_UNKNOWN,))
+        with self.assertRaisesRegex(Refused, "not launch candidates"):
+            PILOT.assert_population_invariants(self.database)
+
+    def test_a_launch_without_a_decision_is_refused(self):
+        self.database.execute(
+            "INSERT INTO launch(session_id,frame_seq,decoded_wall_unix,decoded_monotonic_ns,"
+            "decode_status,evidence_sha256,create_key) VALUES ('s',1,0.0,0,?,'e','k2')",
+            (PILOT.DECODE_DECODED,))
+        with self.assertRaisesRegex(Refused, "exactly one"):
+            PILOT.assert_population_invariants(self.database)
+
+    def test_an_orphan_decision_is_refused(self):
+        """Counts kept EQUAL on purpose, so the orphan check is the one under test.
+
+        Simply adding an orphan also unbalances the totals, and the count check fires first — the
+        orphan branch was a mutation survivor because nothing ever reached it.
+        """
+        victim = self.database.execute("SELECT decision_seq FROM decision LIMIT 1").fetchone()[0]
+        self.database.execute("DELETE FROM decision WHERE decision_seq=?", (victim,))
+        self.database.execute(
+            "INSERT INTO decision(launch_seq,policy_id,decided_wall_unix,decided_monotonic_ns,"
+            "observation_to_decision_ns,feature_availability,policy_result,evidence_sha256) "
+            "VALUES (999999,'p',0.0,0,0,'{}','no_shadow_entry','e')")
+        with self.assertRaisesRegex(Refused, "reference no launch"):
+            PILOT.assert_population_invariants(self.database)
+
+    def test_a_duplicate_launch_cannot_be_recorded(self):
+        """A redelivered notification after a reconnect must not inflate the count."""
+        key = PILOT.create_key("SigA", 1000, 0, {"mint": "M"})
+        self.assertEqual(key, PILOT.create_key("SigA", 1000, 0, {"mint": "M"}))
+        self.assertNotEqual(key, PILOT.create_key("SigA", 1000, 1, {"mint": "M"}))
+        before = self.database.execute("SELECT COUNT(*) FROM launch").fetchone()[0]
+        existing = self.database.execute(
+            "SELECT create_key FROM launch LIMIT 1").fetchone()[0]
+        self.database.execute(
+            "INSERT OR IGNORE INTO launch(session_id,frame_seq,decoded_wall_unix,"
+            "decoded_monotonic_ns,decode_status,evidence_sha256,create_key) "
+            "VALUES ('s',1,0.0,0,?,'e',?)", (PILOT.DECODE_DECODED, existing))
+        self.assertEqual(before,
+                         self.database.execute("SELECT COUNT(*) FROM launch").fetchone()[0])
+
+
+class TestReplay(Temp):
+    """Derived tables are a function of the raw log, so a derivation defect is repairable."""
+
+    def setUp(self):
+        super().setUp()
+        previous = os.environ.get("SOLANA_RPC_URL")
+        os.environ["SOLANA_RPC_URL"] = "https://fixture.invalid/?api-key=synthetic"
+        self.addCleanup(_restore_env, "SOLANA_RPC_URL", previous)
+        self.session_dir = FIXTURES.run_offline_session(self.directory)
+
+    def _replay(self):
+        return PILOT.replay(raw_path=self.session_dir / "raw_frames.jsonl",
+                            db_path=self.session_dir / "shadow.sqlite")
+
+    def test_replay_reproduces_the_same_launches(self):
+        database = sqlite3.connect(self.session_dir / "shadow.sqlite")
+        before = database.execute("SELECT COUNT(*) FROM launch WHERE decode_status='decoded'"
+                                  ).fetchone()[0]
+        database.close()
+        counts = self._replay()
+        self.assertEqual(before, counts["decoded"])
+        self.assertEqual(counts["decoded"], counts["decision_rows"])
+
+    def test_replay_is_idempotent(self):
+        first = self._replay()
+        second = self._replay()
+        self.assertEqual(first["decoded"], second["decoded"])
+        self.assertEqual(first["launch_rows"], second["launch_rows"])
+
+    def test_replay_never_touches_the_raw_log(self):
+        raw = self.session_dir / "raw_frames.jsonl"
+        before = raw.read_bytes()
+        self._replay()
+        self.assertEqual(before, raw.read_bytes(), "raw evidence must never be rewritten")
+
+    def test_replay_separates_the_populations(self):
+        counts = self._replay()
+        self.assertGreater(counts["non_launch_events"], 0)
+        self.assertEqual(counts["launch_rows"], counts["decoded"])
+        self.assertEqual(counts["observed_launches_for_stopping_rule"], counts["decoded"])
+
+    def test_replay_refuses_without_raw_evidence(self):
+        with self.assertRaisesRegex(Refused, "nothing to replay from"):
+            PILOT.replay(raw_path=self.directory / "absent.jsonl",
+                         db_path=self.session_dir / "shadow.sqlite")
+
+
 class TestTheGate(Temp):
     def test_launch_readiness_is_green_and_touches_no_network(self):
         report = FIXTURES.gate()

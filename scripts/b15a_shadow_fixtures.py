@@ -86,10 +86,20 @@ def notification(logs, slot=1000, signature="SyntheticSig", subscription=42, err
     })
 
 
+def trade_payload():
+    """A non-launch Pump event: the right shape, a different discriminator.
+
+    Modelled on what the live feed actually carries — TradeEvent outnumbered CreateEvent 29,110 to
+    233 in the first captured window — because a fixture whose only non-create is malformed cannot
+    show that a WELL-FORMED foreign event stays out of the launch table.
+    """
+    return bytes.fromhex("bddb7fd34ee661ee") + b"\x00" * 120
+
+
 def frames():
     """The stream a session sees: a subscription confirmation, then a deliberate mix."""
     payload = base64.b64encode(create_payload()).decode()
-    unknown = base64.b64encode(PILOT.EVENT_TAG + b"\x00" * 40).decode()
+    unknown = base64.b64encode(trade_payload()).decode()
     truncated = base64.b64encode(PILOT.EVENT_TAG + b"\x01" * 4).decode()
     return [
         json.dumps({"jsonrpc": "2.0", "result": 42, "id": 1}),          # subscription confirmed
@@ -227,16 +237,24 @@ def gate():
             "SELECT policy_result, reason_code, COUNT(*) FROM decision GROUP BY 1,2").fetchall()
         events = dict(database.execute(
             "SELECT kind, COUNT(*) FROM connection_event GROUP BY 1"))
+        non_launch = dict(database.execute(
+            "SELECT decode_status, COUNT(*) FROM pump_event GROUP BY 1"))
         sessions = database.execute("SELECT COUNT(*) FROM session").fetchone()[0]
         meta = dict(database.execute("SELECT key, value FROM metadata"))
         database.close()
 
         raw_lines = (work / "raw_frames.jsonl").read_text().strip().splitlines()
         decode_counts = dict(launches)
+        if any(status in PILOT.NON_LAUNCH_STATUSES for status in decode_counts):
+            findings.append(
+                f"the launch table holds non-launch statuses {sorted(decode_counts)}; a trade "
+                "counted as a launch ends a 72-hour pilot in minutes")
+        if not non_launch:
+            findings.append("no non-launch event was recorded; the separation is not exercised")
         if decode_counts.get(PILOT.DECODE_DECODED, 0) < 2:
             findings.append(f"the fixture decoded {decode_counts.get(PILOT.DECODE_DECODED, 0)} "
                             "CreateEvents; the decode path is not exercised")
-        if PILOT.DECODE_UNKNOWN not in decode_counts:
+        if PILOT.DECODE_UNKNOWN not in non_launch:
             findings.append("no unknown event was recorded; the unknown path is not exercised")
         if not any(result == PILOT.RESULT_NO_ENTRY for result, _reason, _count in decisions):
             findings.append("no refusal was recorded; the no-entry path is not exercised")
@@ -274,6 +292,7 @@ def gate():
             "sessions": sessions,
             "raw_frames_preserved": len(raw_lines),
             "decode_status_counts": decode_counts,
+            "non_launch_event_counts": non_launch,
             "decision_counts": [{"result": r, "reason": c, "count": n} for r, c, n in decisions],
             "connection_events": events,
             "status_sample": report,

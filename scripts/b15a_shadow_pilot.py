@@ -59,6 +59,22 @@ EXECUTION_SURFACE_TOKENS = ("sendTransaction", "signTransaction", "Keypair", "fr
                             "private_key", "secret_key", "sign_message", "PRIVATE_KEY",
                             "WALLET", "mnemonic", "seed_phrase", "requestAirdrop")
 
+# --------------------------------------------------------------------------------------------
+# Populations. The single most important distinction in this module.
+#
+# A LAUNCH CANDIDATE is a payload whose discriminator IS the CreateEvent discriminator. It either
+# decoded or it did not, and either way a launch was observed.
+#
+# A NON-LAUNCH EVENT is any other Pump event — overwhelmingly TradeEvent — or a payload too short
+# to carry a discriminator at all. It is preserved and counted, and it NEVER advances the
+# preregistered launch quota.
+#
+# Conflating them is not a cosmetic error. The frozen stopping rule ends the pilot after 5,000
+# observed launches; counting trades as launches ended a 72-hour pilot in minutes, and the census
+# said 814 launches when four had been seen.
+LAUNCH_CANDIDATE_STATUSES = ("decoded", "decode_failed")
+NON_LAUNCH_STATUSES = ("unknown_event", "not_a_create")
+
 DECODE_DECODED = "decoded"
 DECODE_UNKNOWN = "unknown_event"
 DECODE_FAILED = "decode_failed"
@@ -173,22 +189,47 @@ CREATE TABLE IF NOT EXISTS launch (
   decoded_wall_unix REAL NOT NULL, decoded_monotonic_ns INTEGER NOT NULL,
   decode_status TEXT NOT NULL, decode_error TEXT,
   backfill_status TEXT, backfill_wall_unix REAL, backfill_monotonic_ns INTEGER,
-  evidence_sha256 TEXT NOT NULL);
+  evidence_sha256 TEXT NOT NULL, create_key TEXT);
 CREATE TABLE IF NOT EXISTS decision (
   decision_seq INTEGER PRIMARY KEY AUTOINCREMENT, launch_seq INTEGER NOT NULL,
   policy_id TEXT NOT NULL, decided_wall_unix REAL NOT NULL, decided_monotonic_ns INTEGER NOT NULL,
   observation_to_decision_ns INTEGER NOT NULL, feature_availability TEXT NOT NULL,
   policy_result TEXT NOT NULL, reason_code TEXT, hypothetical_quote_lamports INTEGER,
   simulated_entry TEXT, outcome_placeholder TEXT, evidence_sha256 TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS pump_event (
+  event_seq INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT NOT NULL,
+  frame_seq INTEGER NOT NULL, signature TEXT, slot INTEGER, discriminator TEXT,
+  decode_status TEXT NOT NULL, observed_wall_unix REAL NOT NULL,
+  observed_monotonic_ns INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS launch_identity ON launch(create_key);
 """
 
 
 def open_database(path=DB_PATH):
     pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(path)
+    migrate(connection)
     connection.executescript(SCHEMA)
     connection.commit()
+    return connection
+
+
+def migrate(connection):
+    """Bring an artifact written by an earlier version up to the current schema.
+
+    `CREATE TABLE IF NOT EXISTS` does nothing to a table that already exists, so the column added
+    for launch identity has to be added explicitly. Migrating rather than recreating is the whole
+    point: the derived tables are rebuilt from raw evidence by `replay`, and raw evidence is never
+    discarded to make a schema change convenient.
+    """
+    existing = {row[1] for row in connection.execute("PRAGMA table_info(launch)")}
+    if existing and "create_key" not in existing:
+        connection.execute("ALTER TABLE launch ADD COLUMN create_key TEXT")
+        # Pre-migration rows carry no identity key. The unique index would collide them all on
+        # NULL — SQLite treats NULLs as distinct, so it does not, but they are also not deduped.
+        # `replay` rebuilds the table from raw evidence, which is where the keys come from.
+        connection.commit()
     return connection
 
 
@@ -407,6 +448,145 @@ def b11b_vetoes(fields, state=None):
 
 
 # --------------------------------------------------------------------------------------------
+# Replay — derived tables rebuilt from the immutable raw log
+# --------------------------------------------------------------------------------------------
+
+def replay(raw_path=RAW_PATH, db_path=DB_PATH, freshness_bound_ns=None, backfill=None):
+    """Rebuild `launch`, `decision` and `pump_event` from the raw frames. Raw is never touched.
+
+    This is why the raw log is append-only and holds the provider payload exactly as delivered:
+    every derived table is a function of it, so a defect in the derivation is repairable without
+    losing a single observation. The contaminated census that prompted this was rebuilt, not
+    discarded.
+    """
+    raw = pathlib.Path(raw_path)
+    if not raw.exists():
+        raise PilotRefused(f"no raw frame log at {raw}; there is nothing to replay from")
+    document = verify_preregistration()
+    freshness = document["freshness_bound_ns"] if freshness_bound_ns is None else freshness_bound_ns
+    connection = open_database(db_path)
+    b7d, discriminator, create_type, types = load_pinned_create_type()
+    decoder = {"b7d": b7d, "discriminator": discriminator, "create_type": create_type,
+               "types": types, "commitment": None}
+    # Derived only. `session` and `connection_event` describe the live connection and cannot be
+    # reconstructed from payloads, so they are left exactly as recorded.
+    connection.execute("DELETE FROM decision")
+    connection.execute("DELETE FROM launch")
+    connection.execute("DELETE FROM pump_event")
+    connection.commit()
+
+    counts = {"frames": 0, "failed_tx": 0, "launch_candidates": 0, "non_launch_events": 0,
+              "decoded": 0, "duplicates_ignored": 0}
+    with raw.open() as handle:
+        for line in handle:
+            record = json.loads(line)
+            counts["frames"] += 1
+            document_in = record["raw_notification_json"]
+            params = (document_in.get("params") or {}).get("result") or {}
+            value = params.get("value") or {}
+            slot = (params.get("context") or {}).get("slot")
+            signature = value.get("signature")
+            if value.get("err") is not None:
+                counts["failed_tx"] += 1
+                continue
+            payloads, _skipped = program_data_payloads(value.get("logs"))
+            for index, payload in enumerate(payloads):
+                status_code, fields, error = decode_create(
+                    payload, b7d, discriminator, create_type, types)
+                if status_code in NON_LAUNCH_STATUSES:
+                    counts["non_launch_events"] += 1
+                    connection.execute(
+                        "INSERT INTO pump_event(session_id,frame_seq,signature,slot,"
+                        "discriminator,decode_status,observed_wall_unix,observed_monotonic_ns) "
+                        "VALUES (?,?,?,?,?,?,?,?)",
+                        (record["session_id"], record["frame_seq"], signature, slot,
+                         payload[:8].hex(), status_code, record["received_wall_unix"],
+                         record["received_monotonic_ns"]))
+                    continue
+                counts["launch_candidates"] += 1
+                if status_code == DECODE_DECODED:
+                    counts["decoded"] += 1
+                key = create_key(signature, slot, index, fields)
+                evidence = {"session_id": record["session_id"],
+                            "frame_seq": record["frame_seq"], "signature": signature,
+                            "slot": slot, "decode_status": status_code, "fields": fields}
+                cursor = connection.execute(
+                    "INSERT OR IGNORE INTO launch(session_id,frame_seq,signature,slot,mint,"
+                    "bonding_curve,creator,user,is_mayhem_mode,quote_mint,decoded_wall_unix,"
+                    "decoded_monotonic_ns,decode_status,decode_error,backfill_status,"
+                    "evidence_sha256,create_key) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (record["session_id"], record["frame_seq"], signature, slot,
+                     (fields or {}).get("mint"), (fields or {}).get("bonding_curve"),
+                     (fields or {}).get("creator"), (fields or {}).get("user"),
+                     (fields or {}).get("is_mayhem_mode"), (fields or {}).get("quote_mint"),
+                     record["received_wall_unix"], record["received_monotonic_ns"], status_code,
+                     error, "not_attempted", evidence_hash(evidence), key))
+                if cursor.rowcount == 0:
+                    counts["duplicates_ignored"] += 1
+                    counts["launch_candidates"] -= 1
+                    if status_code == DECODE_DECODED:
+                        counts["decoded"] -= 1
+                    continue
+                launch_seq = cursor.lastrowid
+                state, missing = state_from_create_event(fields, slot)
+                availability = feature_availability(fields, "not_attempted", state, missing)
+                result, reason, detail = decide(fields, status_code, "not_attempted", 0,
+                                                freshness, False, state)
+                decision = {"launch_seq": launch_seq, "policy_id": B11B.PRIMARY_POLICY,
+                            "result": result, "reason": reason, "detail": detail}
+                connection.execute(
+                    "INSERT INTO decision(launch_seq,policy_id,decided_wall_unix,"
+                    "decided_monotonic_ns,observation_to_decision_ns,feature_availability,"
+                    "policy_result,reason_code,hypothetical_quote_lamports,simulated_entry,"
+                    "outcome_placeholder,evidence_sha256) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (launch_seq, B11B.PRIMARY_POLICY, record["received_wall_unix"],
+                     record["received_monotonic_ns"], 0,
+                     json.dumps(availability, sort_keys=True), result,
+                     reason if detail is None else f"{reason}:{detail}",
+                     B11B.ORDER_SIZE_LAMPORTS if result == RESULT_PROPOSED else None,
+                     None, None, evidence_hash(decision)))
+    connection.commit()
+    counts["launch_rows"] = connection.execute("SELECT COUNT(*) FROM launch").fetchone()[0]
+    counts["decision_rows"] = connection.execute("SELECT COUNT(*) FROM decision").fetchone()[0]
+    counts["observed_launches_for_stopping_rule"] = observed_launch_count(connection)
+    assert_population_invariants(connection)
+    connection.close()
+    return counts
+
+
+def assert_population_invariants(connection):
+    """The separation, checked rather than trusted, wherever the tables are written.
+
+    Four statements, each of which was false in the contaminated artifact:
+    every launch row is a launch candidate; every launch has exactly one decision; no non-launch
+    event is in the launch table; and the stopping-rule counter never exceeds the launch rows.
+    """
+    stray = connection.execute(
+        "SELECT COUNT(*) FROM launch WHERE decode_status NOT IN (?,?)",
+        LAUNCH_CANDIDATE_STATUSES).fetchone()[0]
+    if stray:
+        raise PilotRefused(
+            f"{stray} rows in the launch table are not launch candidates. A trade counted as a "
+            "launch ends a 72-hour pilot in minutes")
+    launches = connection.execute("SELECT COUNT(*) FROM launch").fetchone()[0]
+    decisions = connection.execute("SELECT COUNT(*) FROM decision").fetchone()[0]
+    if launches != decisions:
+        raise PilotRefused(
+            f"{launches} launches carry {decisions} decisions; a decision must exist for exactly "
+            "one observed launch and a launch must carry exactly one decision")
+    orphans = connection.execute(
+        "SELECT COUNT(*) FROM decision WHERE launch_seq NOT IN (SELECT launch_seq FROM launch)"
+    ).fetchone()[0]
+    if orphans:
+        raise PilotRefused(f"{orphans} decisions reference no launch")
+    # There was a check here that the stopping-rule counter does not exceed the launch rows. It
+    # could never fire: the counter is `COUNT(*) FROM launch WHERE decode_status='decoded'`, a SQL
+    # subset of the rows it was being compared against. A branch nothing can provoke reads as
+    # protection while providing none, so it is gone rather than standing as decoration.
+    return True
+
+
+# --------------------------------------------------------------------------------------------
 # Status — redacted by construction
 # --------------------------------------------------------------------------------------------
 
@@ -437,6 +617,13 @@ def status(db_path=DB_PATH, raw_path=RAW_PATH):
         results = dict(connection.execute(
             "SELECT policy_result, COUNT(*) FROM decision GROUP BY 1"))
         launches = connection.execute("SELECT COUNT(*) FROM launch").fetchone()[0]
+        decoded_launches = connection.execute(
+            "SELECT COUNT(*) FROM launch WHERE decode_status='decoded'").fetchone()[0]
+        non_launch = dict(connection.execute(
+            "SELECT decode_status, COUNT(*) FROM pump_event GROUP BY 1"))
+        top_discriminators = connection.execute(
+            "SELECT discriminator, COUNT(*) c FROM pump_event GROUP BY 1 ORDER BY c DESC LIMIT 5"
+        ).fetchall()
         backfills = dict(connection.execute(
             "SELECT COALESCE(backfill_status,'none'), COUNT(*) FROM launch GROUP BY 1"))
     finally:
@@ -461,14 +648,21 @@ def status(db_path=DB_PATH, raw_path=RAW_PATH):
         "raw_frames_on_disk": sum(1 for _ in open(raw_path)) if pathlib.Path(raw_path).exists()
         else 0,
         "connection_events": events,
-        "launch_records": launches,
+        "launch_candidate_records": launches,
+        "observed_launches_decoded": decoded_launches,
+        "non_launch_event_counts": non_launch,
+        "non_launch_events_total": sum(non_launch.values()),
+        "top_non_launch_discriminators": [{"discriminator": d, "count": c}
+                                          for d, c in top_discriminators],
         "decode_status_counts": decodes,
         "backfill_status_counts": backfills,
         "decision_results": results,
         "decision_reason_counts": reasons,
         "stopping_rule": {"wall_clock_hours": 72, "observed_launch_records": 5000,
                           "hours_elapsed": round(elapsed / 3600, 2),
-                          "launches_observed": launches},
+                          # Decoded creates ONLY. This read said 814 when four launches had been
+                          # seen, and would have ended a 72-hour pilot in minutes.
+                          "launches_observed": decoded_launches},
         "end_reason": current[3] if current else None,
     }
     assert_redacted(report)
@@ -508,9 +702,28 @@ def session_identity(wall, pid):
     return hashlib.sha256(f"b15a::{pid}::{wall:.6f}".encode()).hexdigest()[:16]
 
 
+def create_key(signature, slot, payload_index, fields):
+    """The identity of one observed launch, independent of when or how often it arrived."""
+    mint = (fields or {}).get("mint")
+    return hashlib.sha256(
+        f"{signature}|{slot}|{payload_index}|{mint}".encode()).hexdigest()
+
+
 def evidence_hash(record):
     return hashlib.sha256(
         json.dumps(record, sort_keys=True, separators=(",", ":"), default=str).encode()).hexdigest()
+
+
+def observed_launch_count(connection):
+    """The stopping rule's counter: positively decoded CreateEvents, and nothing else.
+
+    NOT `SELECT COUNT(*) FROM launch`. The rule ends the pilot after 5,000 observed launches, and
+    an observed launch is a launch — a CreateEvent that decoded. A trade is not a launch under any
+    reading of the frozen document, so counting one toward the quota is not an interpretation of
+    the rule, it is a different rule. This is a correction of the counter, not of the rule.
+    """
+    return connection.execute("SELECT COUNT(*) FROM launch WHERE decode_status=?",
+                              (DECODE_DECODED,)).fetchone()[0]
 
 
 def stopping_rule_reached(document, started_wall, launches):
@@ -555,26 +768,43 @@ def handle_frame(connection, raw, session_id, frame_seq, message, decoder, fresh
         return 0, 0                       # a failed transaction launched nothing
     payloads, _skipped = program_data_payloads(value.get("logs"))
     launches = decisions = 0
-    for payload in payloads:
+    for index, payload in enumerate(payloads):
         status_code, fields, error = decode_create(
             payload, decoder["b7d"], decoder["discriminator"], decoder["create_type"],
             decoder["types"])
-        if status_code == DECODE_NOT_CREATE:
+        if status_code in NON_LAUNCH_STATUSES:
+            # Preserved and counted, in its OWN population. This is the branch that used to fall
+            # through into the launch table and put 1,045 trades where ten launches belonged.
+            observed_wall, observed_mono = now()
+            connection.execute(
+                "INSERT INTO pump_event(session_id,frame_seq,signature,slot,discriminator,"
+                "decode_status,observed_wall_unix,observed_monotonic_ns) VALUES (?,?,?,?,?,?,?,?)",
+                (session_id, frame_seq, signature, slot, payload[:8].hex(), status_code,
+                 observed_wall, observed_mono))
             continue
         launches += 1
         decoded_wall, decoded_mono = now()
         record = {"session_id": session_id, "frame_seq": frame_seq, "signature": signature,
                   "slot": slot, "decode_status": status_code, "fields": fields}
+        # A launch is identified by what it IS, not by when we happened to see it. The unique index
+        # on this key makes a duplicate structurally impossible, so a redelivered notification
+        # after a reconnect, or a replay over frames already processed, cannot inflate the count.
+        key = create_key(signature, slot, index, fields)
         cursor = connection.execute(
-            "INSERT INTO launch(session_id,frame_seq,signature,slot,mint,bonding_curve,creator,"
-            "user,is_mayhem_mode,quote_mint,decoded_wall_unix,decoded_monotonic_ns,decode_status,"
-            "decode_error,backfill_status,evidence_sha256) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT OR IGNORE INTO launch(session_id,frame_seq,signature,slot,mint,bonding_curve,"
+            "creator,user,is_mayhem_mode,quote_mint,decoded_wall_unix,decoded_monotonic_ns,"
+            "decode_status,decode_error,backfill_status,evidence_sha256,create_key) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (session_id, frame_seq, signature, slot,
              (fields or {}).get("mint"), (fields or {}).get("bonding_curve"),
              (fields or {}).get("creator"), (fields or {}).get("user"),
              (fields or {}).get("is_mayhem_mode"), (fields or {}).get("quote_mint"),
              decoded_wall, decoded_mono, status_code, error,
-             "not_attempted" if backfill is None else None, evidence_hash(record)))
+             "not_attempted" if backfill is None else None, evidence_hash(record), key))
+        if cursor.rowcount == 0:
+            # Already recorded under this identity. Not an error and not a new launch.
+            launches -= 1
+            continue
         launch_seq = cursor.lastrowid
         backfill_status = "not_attempted"
         if backfill is not None and status_code == DECODE_DECODED and signature:
@@ -605,6 +835,7 @@ def handle_frame(connection, raw, session_id, frame_seq, message, decoder, fresh
              None, None, evidence_hash(decision)))
         decisions += 1
     connection.commit()
+    assert_population_invariants(connection)
     return launches, decisions
 
 
@@ -632,7 +863,7 @@ def run(commitment=DEFAULT_COMMITMENT, max_frames=None, transport=None, backfill
     freshness = document["freshness_bound_ns"]
 
     started_wall = time.time()
-    total_launches = connection.execute("SELECT COUNT(*) FROM launch").fetchone()[0]
+    total_launches = observed_launch_count(connection)
     stop = {"requested": False}
 
     def request_stop(_signum, _frame):
@@ -703,7 +934,7 @@ def run(commitment=DEFAULT_COMMITMENT, max_frames=None, transport=None, backfill
                     launches, _decisions = handle_frame(
                         connection, raw, session_id, raw.count + 1, message, decoder, freshness,
                         degraded, backfill)
-                    total_launches += launches
+                    total_launches = observed_launch_count(connection)
                     connection.execute("UPDATE session SET frames_received=? WHERE session_id=?",
                                        (frames, session_id))
                     connection.commit()
