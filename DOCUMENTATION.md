@@ -168,6 +168,18 @@ These are study-specific results, not universal base rates:
   the burned-role table), because those can disagree without the document changing. Re-reading a
   value the hash already fixes would add a check no input can make fire.
 
+- **B13f design fact — feature ORDER is part of a feature contract, not a presentation detail.**
+  Two vectors with the same fields in different positions are the same set and a different matrix,
+  and a model trained on one and scored on the other is wrong in every row while every set-equality
+  check passes. The contract therefore hashes the order, and the materializer compares
+  `list(features)` rather than `set(features)`. See `docs/FEATURE_VECTOR_SCHEMA.md`.
+
+- **B13f design fact — an absolute slot number is a calendar index, not a property of a token.** A
+  model given one can learn "later is better", which does not survive contact with a different
+  window and is a split leak in a time-ordered evaluation. The relative spans B13a already computes
+  (`slots_since_launch`, `slots_since_previous_launch`) carry the same information without the
+  calendar, so no absolute slot is admitted as a feature.
+
 - A 2026 Pump.fun study reported a median time to graduation of about 4.4 minutes among graduated tokens in its sample. Curve progress alone did not yield a profitable buy-and-hold rule; trading intensity and point-in-time creator/trader identity contained additional predictive information. [Study](https://arxiv.org/abs/2602.14860)
 - A WebSci 2025 Solana memecoin sample found more concentrated and structurally fragile transaction communities in rug-pull projects. [Study](https://faculty.washington.edu/weicaics/paper/papers/YueyaoLYHC2025.pdf)
 - Leakage is a central rug-detection risk: post-collapse signals cannot be used as early-warning features. [TM-RUGPULL](https://arxiv.org/abs/2602.21529)

@@ -262,6 +262,31 @@ Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reprod
   67 killed, none disclosed. **No RPC, no enumeration, no collection, no cluster/probability/
   threshold**, and B11b's frozen baseline is untouched.
 
+- [~] **Prospective feature contract frozen and materialized; no window eligible**
+  (`research/B13F_FEATURE_CONTRACT_PREREGISTRATION.md` committed ALONE and first,
+  `scripts/b13f_feature_vector.py`, `docs/FEATURE_VECTOR_SCHEMA.md`). An exact **ordered tuple of 99
+  raw point-in-time facts**, each already declared by an earlier contract: B11b's 17 t0 fields with
+  **names unchanged**, 26 B13a history counts and directional flows renamed `_in_lookback` over the
+  B13e 1,642,509-slot window so none reads as a lifetime total, and 56 B13d concentration fields
+  under **both** denominators with every rational flattened into **named integer numerator/
+  denominator pairs** so a later adapter cannot silently float-round them. **Not eligible for
+  B11a**: `eligible_windows` is empty, B11a gets its own refusal naming that its evaluation was
+  frozen as a no-model baseline over 17 fields, and that refusal is **unconditional** — it does not
+  consult the document, so a re-pinned contract still cannot get a vector out. A new
+  training/evaluation design must name a fresh window, state its split and **fit every transform on
+  training folds only**; nothing here is a fitted transform and there is nowhere to put one.
+  Excluded with stated reasons: B13b association evidence, clusters, B13c text/URLs/handles,
+  sentiment/engagement/market-cap transforms, ranks/quantiles/logs/normalisation, **absolute slot
+  numbers** (a calendar index a model learns "later is better" from), constants, and duplicates.
+  Missing inputs make the vector **unavailable with coded reasons and no feature block at all** —
+  never imputed, because a zero claims the thing did not happen and a median is fitted outside a
+  fold. Two genuinely optional field groups carry frozen availability rules and are `null` rather
+  than zero when unavailable, checked in both directions. **Order is part of the contract**:
+  `feature_order_sha256` hashes the order, not the set. 79 tests, 413 subtests; 62 mutants, 61
+  killed, **one disclosed equivalent** (`concentration_supply_residual_units` is always 0 in an
+  available vector and is kept as a tripwire). **No model fitted, no corpus read, no feature value
+  or distribution reported**, and B11b's frozen baseline is untouched.
+
 Gate: label audit demonstrates that no post-decision information enters features.
 
 ### Phase 4 — models and policy

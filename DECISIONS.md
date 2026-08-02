@@ -1975,3 +1975,64 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **NOT claimed and NOT done:** no RPC call, no B11a unlock, enumeration or inspection, no history
   collected, no cluster, probability, threshold or label, and no change to B11b's frozen no-model
   baseline evaluation.
+
+## 2026-08-02 — A 99-field feature contract frozen before the machinery, and eligible for nothing (B13f, handoff 90)
+
+- **Decision:** an exact **ordered tuple of 99 raw point-in-time facts** — B11b's 17 t0 fields with
+  names unchanged, 26 B13a history counts and directional flows renamed `_in_lookback`, and 56 B13d
+  concentration fields under both denominators. Committed **alone and first**; the materializer came
+  second, and a test asserts the contract's commit is an ancestor of the module's.
+- **Why the split, again:** a feature list committed alongside the machinery that computes it can
+  always be claimed to have been trimmed until the numbers came out well. The git ancestry is the
+  only evidence otherwise.
+- **Eligible for nothing, and explicitly not B11a.** `eligible_windows` is empty. B11a's evaluation
+  was frozen as a *no-model* baseline over 17 declared fields and its unlock evidence was written
+  against that; a 99-field vector there would evaluate something nobody preregistered on a window
+  whose maturity conditions were set for something else. **The B11a refusal is unconditional** — it
+  does not consult the document's own flag, so a contract re-pinned with `eligible_for_b11a: true`
+  still cannot produce one. Any future use requires a new design that names a fresh window, states
+  its split and **fits every transform on training folds only**; nothing here is a fitted transform
+  and there is deliberately nowhere to put one.
+- **Nothing is recomputed.** Every value is read from an already-validated B11b, B13a or B13d record
+  through that module's own validator, so an upstream change fails rather than silently diverging.
+- **Order is part of the contract.** `feature_order_sha256` hashes the order, not the set: two
+  vectors with the same fields in different positions are the same set and a different matrix, and
+  a model trained on one and scored on the other is wrong in every row while set-equality passes.
+- **Rationals travel as two named integers.** Never one `share` field — a single number is what a
+  later adapter float-rounds. After gcd reduction the pair no longer carries the magnitude, so
+  `*_units` travels alongside; the ratio and the scale are different facts.
+- **Exclusions, each with a reason rather than an omission:** B13b association evidence (declares
+  itself uncalibrated; admitting it turns "we do not know" into a weighted number), clusters, B13c
+  text/URLs/handles, sentiment/engagement/market-cap transforms, ranks/quantiles/logs/normalisation
+  (each fitted on a distribution, and a distribution computed outside a fold has already seen the
+  evaluation data), **every absolute slot number** (a calendar index a model learns "later is
+  better" from, which does not survive a different window), constants under a complete window, and
+  fields duplicating B11b's.
+- **Unavailable is not zero.** Seven coded reasons, and an unavailable vector carries **no feature
+  block at all** — `null`, not an empty dict, because an empty one invites a caller to fill it in. A
+  zero claims the thing did not happen; a median claims the subject was typical and is fitted
+  outside a fold; a missingness flag chosen because it improved a score is the outcome leaking in
+  through the door marked "handling missing data".
+- **Two genuinely optional field groups** (owner grouping, creator share) carry frozen availability
+  rules represented separately from their numeric fields, and are `null` rather than zero when
+  unavailable — a creator share of zero says the creator holds nothing, null says we cannot say, and
+  a model that cannot tell them apart will learn from the difference anyway. Both directions are
+  checked.
+- **Provenance is order-dependent on purpose.** Feature values are independent of input order;
+  evidence hashes are not, because they record the hash of the input actually consumed. Two
+  snapshots differing only in account order give identical features and different
+  `concentration_sha256`, and provenance that ignored that would be provenance of something else.
+- **Verification:** 62 mutants, **61 killed, one disclosed equivalent**. 79 tests, 413 subtests;
+  **1,772 passing repository-wide**. Of eleven first-run survivors, two were unfireable code that
+  was **removed** (a redundant residual clause B13d already guarantees, and a deep-copy that guarded
+  nothing observable — the no-mutation test is the reachable guard), eight were genuine gaps, and
+  one is the disclosed equivalent below.
+- **A known constant, disclosed rather than hidden:** `concentration_supply_residual_units` is
+  always 0 in any available vector, because an incomplete enumeration makes the vector unavailable
+  and B13d already refuses a complete enumeration with a residual. It is kept as a **tripwire**: if
+  a future edition relaxes the completeness rule the field is already in the frozen tuple and starts
+  carrying signal without forking the contract. A mutant hardcoding it to zero is therefore
+  equivalent.
+- **Ratified by:** the Codex directive of handoff 90. **Owner review not separately obtained.**
+- **NOT claimed and NOT done:** no model fitted, no transform selected, no window named, no corpus
+  read, no feature value or distribution reported, and no change to B11b's frozen baseline.
