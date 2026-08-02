@@ -71,7 +71,6 @@ LOCK_PATH = WORK_DIR / "supervisor.lock"
 RECEIPT_DIR = WORK_DIR / "receipts"
 LOG_DIR = WORK_DIR / "logs"
 
-PID_PATH = WORK_DIR / "watcher.pid"
 ARCHIVE_DIR = WORK_DIR / "superseded"
 
 RPC_ENV_VAR = "SOLANA_RPC_URL"
@@ -280,6 +279,28 @@ def build_manifest(files=MANIFEST_FILES):
 def manifest_hash(manifest):
     return hashlib.sha256(
         json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def assert_manifest_unchanged(state, state_path, manifest=None):
+    """The pinned scripts must still be the pinned scripts. Checked whenever it could have changed.
+
+    Called at start AND again the instant maturity arrives, because those are different moments and
+    the gap between them is the whole point. A run attests its manifest, then waits — here, on the
+    order of days — and only then executes the stages, as subprocesses that read whatever is on
+    disk at that moment. Verifying once before the wait attests the scripts that were there when
+    the waiting started, not the ones that end up running. Any edit landing during the wait would
+    have been collected under, and attested away by, a digest describing different code: exactly
+    the provenance lie the manifest exists to prevent, on the only path where it matters.
+    """
+    manifest = build_manifest() if manifest is None else manifest
+    if state["manifest_sha256"] == manifest_hash(manifest):
+        return manifest
+    state["state"] = STATE_QUARANTINED
+    state["quarantine"] = {"reason_code": Q02_SCRIPT_MANIFEST_DRIFT}
+    write_state(state, state_path)
+    raise Quarantined(
+        f"{Q02_SCRIPT_MANIFEST_DRIFT}: a stage script, IDL or the preregistration changed since "
+        "this run began. A stage script that changed is a stage that does something else now")
 
 
 def verify_preregistration(document=None):
@@ -560,8 +581,14 @@ def lock_is_held(path=LOCK_PATH):
         handle.close()
 
 
-def read_pid(path=PID_PATH):
-    path = pathlib.Path(path)
+def read_pid(lock_path=LOCK_PATH):
+    """The pid recorded in the lock file by whoever holds it.
+
+    The lock file is the record. A stale pid can outlive its process — the file is not removed on
+    exit — which is exactly why liveness pairs it with the flock and the heartbeat rather than
+    trusting it alone.
+    """
+    path = pathlib.Path(lock_path)
     if not path.exists():
         return None
     try:
@@ -570,7 +597,7 @@ def read_pid(path=PID_PATH):
         return None
 
 
-def liveness(state, pid_path=PID_PATH, lock_path=LOCK_PATH, now=None):
+def liveness(state, lock_path=LOCK_PATH, now=None):
     """Is a watcher actually running, on three independent signals.
 
     A stored state of `waiting_for_maturity` says what the process was doing when it last wrote,
@@ -581,7 +608,7 @@ def liveness(state, pid_path=PID_PATH, lock_path=LOCK_PATH, now=None):
     if state is None:
         return {"liveness": LIVENESS_NOT_STARTED, "pid": None, "pid_alive": False,
                 "lock_held": False, "heartbeat_age_seconds": None, "heartbeat_fresh": False}
-    pid = read_pid(pid_path)
+    pid = read_pid(lock_path)
     alive = process_is_this_watcher(pid)
     held = lock_is_held(lock_path)
     last = state.get("last_poll_at")
@@ -602,7 +629,7 @@ def liveness(state, pid_path=PID_PATH, lock_path=LOCK_PATH, now=None):
             "heartbeat_tolerance_seconds": interval * HEARTBEAT_TOLERANCE_INTERVALS}
 
 
-def archive_run(reason, work_dir=WORK_DIR, state_path=STATE_PATH, pid_path=PID_PATH,
+def archive_run(reason, work_dir=WORK_DIR, state_path=STATE_PATH, lock_path=LOCK_PATH,
                 archive_dir=ARCHIVE_DIR, stamp=None):
     """Move a superseded run's state and pidfile aside. Never erase.
 
@@ -619,7 +646,7 @@ def archive_run(reason, work_dir=WORK_DIR, state_path=STATE_PATH, pid_path=PID_P
     destination = pathlib.Path(archive_dir) / stamp
     destination.mkdir(parents=True, exist_ok=True)
     moved = []
-    for path in (pathlib.Path(state_path), pathlib.Path(pid_path)):
+    for path in (pathlib.Path(state_path), pathlib.Path(lock_path)):
         if path.exists():
             target = destination / path.name
             os.replace(path, target)
@@ -641,9 +668,8 @@ class InstanceLock:
     is released by the kernel when the holder dies.
     """
 
-    def __init__(self, path=LOCK_PATH, pid_path=PID_PATH):
+    def __init__(self, path=LOCK_PATH):
         self.path = pathlib.Path(path)
-        self.pid_path = pathlib.Path(pid_path)
         self.handle = None
 
     def __enter__(self):
@@ -660,13 +686,16 @@ class InstanceLock:
                     f"another watcher already holds {self.path}. Two supervisors would run every "
                     "stage twice against a window that can only be collected once")
             raise
+        # The pid goes in the LOCK FILE, not a second file beside it. One artifact, written under
+        # the lock by the process that holds it, so the pid and the lock can never disagree — and
+        # there is no separate path to get wrong.
+        #
+        # There WAS one, and it was wrong: `pid_path` defaulted to the module-level PID_PATH, which
+        # Python binds at import time, so a test passing only a temporary LOCK path still wrote to
+        # and then deleted the real watcher's pidfile. Rebinding the module global did not even
+        # help. The fix is to have no second path at all.
         self.handle.write(f"{os.getpid()}\n")
         self.handle.flush()
-        # The watcher writes its OWN pidfile, under the lock it already holds. A pidfile written by
-        # the launching shell can name a process that never started, or survive one that did and
-        # died; this one exists only while a process that took the lock is alive to have written it.
-        pathlib.Path(self.pid_path).parent.mkdir(parents=True, exist_ok=True)
-        pathlib.Path(self.pid_path).write_text(f"{os.getpid()}\n")
         return self
 
     def __exit__(self, *_exception):
@@ -675,12 +704,6 @@ class InstanceLock:
             fcntl.flock(self.handle.fileno(), fcntl.LOCK_UN)
             self.handle.close()
             self.handle = None
-        # Removed on a clean exit so a stale pidfile never outlives the process that wrote it. A
-        # crash leaves it behind, which is exactly why liveness needs three signals and not one.
-        try:
-            self.pid_path.unlink()
-        except OSError:
-            pass
         return False
 
 
@@ -886,11 +909,10 @@ def dry_run_plan(poll_seconds=DEFAULT_POLL_SECONDS, work_dir=WORK_DIR):
     return plan
 
 
-def status(state_path=STATE_PATH, receipt_dir=RECEIPT_DIR, pid_path=PID_PATH,
-           lock_path=LOCK_PATH):
+def status(state_path=STATE_PATH, receipt_dir=RECEIPT_DIR, lock_path=LOCK_PATH):
     """What an operator may see. Stage state and pass/fail; never a count."""
     state = read_state(state_path)
-    signals = liveness(state, pid_path, lock_path)
+    signals = liveness(state, lock_path)
     if state is None:
         return {"state": LIVENESS_NOT_STARTED, "liveness": LIVENESS_NOT_STARTED,
                 "reported_state": None, "composition_published": False, **signals}
@@ -942,15 +964,7 @@ def watch(url, poll_seconds=DEFAULT_POLL_SECONDS, transport=None, sleeper=time.s
     state = read_state(state_path) or initial_state(window, manifest, poll_seconds)
     if state.get("state") == STATE_QUARANTINED:
         raise Quarantined(f"the watcher is quarantined: {state.get('quarantine')}")
-    # Reverified on every start, not only the first: a manifest checked once is a manifest that
-    # stopped being checked.
-    if state["manifest_sha256"] != manifest_hash(manifest):
-        state["state"] = STATE_QUARANTINED
-        state["quarantine"] = {"reason_code": Q02_SCRIPT_MANIFEST_DRIFT}
-        write_state(state, state_path)
-        raise Quarantined(
-            f"{Q02_SCRIPT_MANIFEST_DRIFT}: a stage script, IDL or the preregistration changed since "
-            "this run began. A stage script that changed is a stage that does something else now")
+    assert_manifest_unchanged(state, state_path, manifest)
     if state["preregistration_canonical_sha256"] != window["preregistration_canonical_sha256"]:
         state["state"] = STATE_QUARANTINED
         state["quarantine"] = {"reason_code": Q01_PREREGISTRATION_DRIFT}
@@ -980,6 +994,10 @@ def watch(url, poll_seconds=DEFAULT_POLL_SECONDS, transport=None, sleeper=time.s
             sleeper(poll_seconds)
             continue
 
+        # Re-checked here, at the transition from waiting to running: this is the last instant
+        # before any stage executes, and everything between here and the start attestation was
+        # dead time in which the scripts could have moved.
+        assert_manifest_unchanged(state, state_path)
         state["state"] = STATE_RUNNING_STAGE
         write_state(state, state_path)
         while True:

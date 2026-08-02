@@ -188,6 +188,37 @@ class VerificationTests(unittest.TestCase):
             Harness(self, [CUTOFF - 1]).watch(
                 poll_seconds=1, max_iterations=1, **{k: v for k, v in harness.paths.items()})
 
+    def test_drift_during_the_wait_quarantines_before_any_stage_runs(self):
+        """The gap the start-of-run check cannot see.
+
+        A run attests its manifest, waits days for maturity, then executes the stages as
+        subprocesses that read whatever is on disk by then. Checking only at start attests the
+        scripts present when the WAITING began. An edit landing during the wait used to be
+        collected under, and attested away by, a digest describing different code.
+        """
+        harness = Harness(self, [CUTOFF - 1, CUTOFF])
+        real_build = W.build_manifest
+        self.addCleanup(lambda: setattr(W, "build_manifest", real_build))
+
+        def drift_while_it_sleeps(seconds):
+            harness.slept.append(seconds)
+            W.build_manifest = lambda files=W.MANIFEST_FILES: dict(real_build(files),
+                                                                   **{"scripts/edited.py": "0" * 64})
+
+        harness.sleeper = drift_while_it_sleeps
+        with self.assertRaisesRegex(W.Quarantined, W.Q02_SCRIPT_MANIFEST_DRIFT):
+            harness.watch(poll_seconds=1)
+        self.assertEqual([], harness.ran, "a stage ran under scripts the run never attested")
+        state = json.loads(harness.paths["state_path"].read_text())
+        self.assertEqual(W.STATE_QUARANTINED, state["state"])
+
+    def test_a_run_whose_scripts_hold_still_reaches_its_stages(self):
+        """The other half: the new check must not quarantine a run that did nothing wrong."""
+        harness = Harness(self, [CUTOFF - 1, CUTOFF])
+        state = harness.watch(poll_seconds=1)
+        self.assertEqual(W.STATE_ALL_STAGES_COMPLETE, state["state"])
+        self.assertEqual(len(W.RUN_ORDER), len(harness.ran))
+
     def test_preregistration_drift_quarantines_a_resumed_run(self):
         harness = Harness(self, [CUTOFF - 1])
         harness.watch(poll_seconds=1, max_iterations=1)
@@ -529,7 +560,7 @@ class CompositionTests(unittest.TestCase):
         harness = Harness(self, [CUTOFF])
         harness.watch_all(poll_seconds=1, max_iterations=1)
         view = W.status(harness.paths["state_path"], harness.paths["receipt_dir"],
-                        harness.directory / "watcher.pid", harness.directory / "lock")
+                        harness.directory / "supervisor.lock")
         # No process is running once the harness returns, so the live state is `dead` and the
         # stored value is published separately. That is the whole point of the split.
         self.assertEqual(view["liveness"], W.LIVENESS_DEAD)
@@ -711,7 +742,6 @@ class LivenessTests(unittest.TestCase):
         self.dir = pathlib.Path(tempfile.mkdtemp(prefix="b11c-live-"))
         self.addCleanup(shutil.rmtree, self.dir, ignore_errors=True)
         self.state_path = self.dir / "state.json"
-        self.pid_path = self.dir / "watcher.pid"
         self.lock_path = self.dir / "supervisor.lock"
 
     def write_state(self, **overrides):
@@ -729,17 +759,16 @@ class LivenessTests(unittest.TestCase):
         """The defect this exists for: a supervisor that died on Tuesday still saying 'waiting' on
         Friday, because status read a file and asked nothing else."""
         state = self.write_state()
-        self.pid_path.write_text("999999")
-        view = W.status(self.state_path, self.dir / "receipts", self.pid_path, self.lock_path)
+        self.lock_path.write_text("999999")
+        view = W.status(self.state_path, self.dir / "receipts", self.lock_path)
         self.assertEqual(view["liveness"], W.LIVENESS_DEAD)
         self.assertEqual(view["state"], W.LIVENESS_DEAD)
         self.assertEqual(view["reported_state"], state["state"])
 
     def test_a_pidfile_alone_is_not_proof(self):
         self.write_state()
-        self.pid_path.write_text("999999")
-        signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
-                             self.lock_path)
+        self.lock_path.write_text("999999")
+        signals = W.liveness(json.loads(self.state_path.read_text()), self.lock_path)
         self.assertFalse(signals["pid_alive"])
         self.assertFalse(signals["lock_held"])
 
@@ -750,18 +779,16 @@ class LivenessTests(unittest.TestCase):
         `tests/test_b11c_maturity_watcher.py`, so a check matching the module name alone would
         answer "yes" for the process asking the question."""
         self.write_state()
-        self.pid_path.write_text(str(os.getpid()))
+        self.lock_path.write_text(str(os.getpid()))
         self.assertFalse(W.process_is_this_watcher(os.getpid()))
-        signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
-                             self.lock_path)
+        signals = W.liveness(json.loads(self.state_path.read_text()), self.lock_path)
         self.assertIn(signals["liveness"], (W.LIVENESS_DEAD, W.LIVENESS_STALE))
 
     def test_a_stale_heartbeat_is_not_alive(self):
         import time as _time
         self.write_state(last_poll_at=int(_time.time()) - 5_000)
-        self.pid_path.write_text("999999")
-        signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
-                             self.lock_path)
+        self.lock_path.write_text("999999")
+        signals = W.liveness(json.loads(self.state_path.read_text()), self.lock_path)
         self.assertFalse(signals["heartbeat_fresh"])
         self.assertNotEqual(signals["liveness"], W.LIVENESS_ALIVE)
 
@@ -770,15 +797,12 @@ class LivenessTests(unittest.TestCase):
         import time as _time
         self.write_state(last_poll_at=int(_time.time()) - 5_000)
         with W.InstanceLock(self.lock_path):
-            self.pid_path.write_text("999999")
-            signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
-                                 self.lock_path)
+            signals = W.liveness(json.loads(self.state_path.read_text()), self.lock_path)
         self.assertTrue(signals["lock_held"])
         self.assertEqual(signals["liveness"], W.LIVENESS_STALE)
 
     def test_no_state_at_all_reports_not_started(self):
-        view = W.status(self.dir / "absent.json", self.dir / "receipts", self.pid_path,
-                        self.lock_path)
+        view = W.status(self.dir / "absent.json", self.dir / "receipts", self.lock_path)
         self.assertEqual(view["liveness"], W.LIVENESS_NOT_STARTED)
         self.assertEqual(view["state"], W.LIVENESS_NOT_STARTED)
 
@@ -788,16 +812,15 @@ class LivenessTests(unittest.TestCase):
         self.write_state()
         (self.dir / "logs").mkdir(exist_ok=True)
         (self.dir / "logs" / "watcher.stdout.log").write_text("")
-        self.pid_path.write_text("999999")
+        self.lock_path.write_text("999999")
         self.assertEqual(
-            W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
+            W.liveness(json.loads(self.state_path.read_text()),
                        self.lock_path)["liveness"], W.LIVENESS_DEAD)
 
     def test_the_three_signals_are_reported_individually(self):
         self.write_state()
-        self.pid_path.write_text("999999")
-        signals = W.liveness(json.loads(self.state_path.read_text()), self.pid_path,
-                             self.lock_path)
+        self.lock_path.write_text("999999")
+        signals = W.liveness(json.loads(self.state_path.read_text()), self.lock_path)
         for field in ("pid_alive", "lock_held", "heartbeat_fresh", "heartbeat_age_seconds"):
             with self.subTest(field=field):
                 self.assertIn(field, signals)
@@ -810,19 +833,19 @@ class ArchiveTests(unittest.TestCase):
         self.dir = pathlib.Path(tempfile.mkdtemp(prefix="b11c-arch-"))
         self.addCleanup(shutil.rmtree, self.dir, ignore_errors=True)
         self.state = self.dir / "state.json"
-        self.pid = self.dir / "watcher.pid"
+        self.lock = self.dir / "supervisor.lock"
         self.state.write_text(json.dumps({"state": W.STATE_WAITING}))
-        self.pid.write_text("999999")
+        self.lock.write_text("999999")
 
     def test_a_superseded_run_is_moved_aside_not_deleted(self):
         note = W.archive_run("stale launch", work_dir=self.dir, state_path=self.state,
-                             pid_path=self.pid, archive_dir=self.dir / "superseded",
+                             lock_path=self.lock, archive_dir=self.dir / "superseded",
                              stamp="20260802T000000Z")
         self.assertFalse(self.state.exists())
-        self.assertFalse(self.pid.exists())
+        self.assertFalse(self.lock.exists())
         archived = self.dir / "superseded" / "20260802T000000Z"
         self.assertTrue((archived / "state.json").exists())
-        self.assertTrue((archived / "watcher.pid").exists())
+        self.assertTrue((archived / "supervisor.lock").exists())
         self.assertEqual(note["reason"], "stale launch")
 
     def test_a_run_with_completed_stages_is_never_archived(self):
@@ -831,7 +854,7 @@ class ArchiveTests(unittest.TestCase):
         (receipts / "program_boundary.json").write_text(
             json.dumps({"stage": "program_boundary", "completed": True}))
         with self.assertRaisesRegex(W.WatcherRefused, "cannot be repeated"):
-            W.archive_run("x", work_dir=self.dir, state_path=self.state, pid_path=self.pid,
+            W.archive_run("x", work_dir=self.dir, state_path=self.state, lock_path=self.lock,
                           archive_dir=self.dir / "superseded")
 
 
@@ -847,15 +870,31 @@ class LockTests(unittest.TestCase):
                 with W.InstanceLock(path):
                     pass
 
-    def test_the_watcher_writes_its_own_pidfile_under_the_lock(self):
-        """A pidfile written by the launching shell can name a process that never started, or
-        outlive one that did."""
+    def test_the_pid_is_recorded_in_the_lock_file_itself(self):
+        """One artifact, written under the lock by the process holding it, so the pid and the lock
+        cannot disagree."""
         directory = pathlib.Path(tempfile.mkdtemp(prefix="b11c-pid-"))
         self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
-        lock, pid = directory / "supervisor.lock", directory / "watcher.pid"
-        with W.InstanceLock(lock, pid):
-            self.assertEqual(int(pid.read_text().strip()), os.getpid())
-        self.assertFalse(pid.exists(), "a clean exit removes the pidfile it wrote")
+        lock = directory / "supervisor.lock"
+        with W.InstanceLock(lock):
+            self.assertEqual(W.read_pid(lock), os.getpid())
+
+    def test_a_lock_on_a_temporary_path_touches_nothing_outside_it(self):
+        """The defect this replaced: a second `pid_path` argument defaulted to the module-level
+        real path, which Python binds at IMPORT time — so a test passing only a temporary lock path
+        still wrote to and then deleted the live watcher's pidfile, and rebinding the module global
+        did not even help. With one file there is no second path to get wrong."""
+        directory = pathlib.Path(tempfile.mkdtemp(prefix="b11c-iso-"))
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        before = sorted(p.name for p in directory.iterdir())
+        with W.InstanceLock(directory / "supervisor.lock"):
+            pass
+        after = sorted(p.name for p in directory.iterdir())
+        self.assertEqual(after, before + ["supervisor.lock"])
+        import inspect
+        parameters = inspect.signature(W.InstanceLock.__init__).parameters
+        self.assertEqual(list(parameters), ["self", "path"],
+                         "a second path parameter is a second path to get wrong")
 
     def test_the_lock_is_released_on_exit(self):
         directory = pathlib.Path(tempfile.mkdtemp(prefix="b11c-lock-"))
