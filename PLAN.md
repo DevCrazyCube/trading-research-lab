@@ -96,8 +96,15 @@ Gate: deterministic replay; complete classified decode accounting; exact integer
 - [ ] Replay observed ordering and empirical latency distributions.
 - [ ] Model failures, expiration, compute fees, tips, slippage, migration, and constrained exits.
 - [ ] Produce optimistic, executable, and stressed outcomes.
-- [ ] Expose a stable read-only result/API schema for the operator UI; research calculations remain
-  in the simulator rather than being reimplemented in the browser.
+- [x] **Read-only result schema exposed and consumed by a local console**
+  (`scripts/b12b_operator_snapshot.py`, `docs/OPERATOR_SNAPSHOT_SCHEMA.md`,
+  `ui/operator_console.html`, `research/B12B_OPERATOR_CONSOLE.md`). One versioned canonical
+  snapshot combining pipeline/gate status, outcome labels, proposals, risk decisions, portfolio
+  aggregates, evidence freshness, ratification and provenance. **Research calculations are not
+  reimplemented in the browser: the page performs no arithmetic on data at all**, displaying exact
+  integers and exact `[numerator, denominator]` pairs as they arrive. The adapter fails closed on
+  floats, undeclared fields, credential-shaped strings, executable claims, stale-calling-itself-
+  fresh, and every internal contradiction.
 
 Gate: deterministic reserve, quote, fee, rent, tip, and cost calculations reproduce eligible observations exactly at integer precision. Stochastic landing, contention, failure, and fill distributions reproduce forward observations within separately documented statistical tolerances.
 
@@ -162,6 +169,15 @@ Gate: statistically credible improvement over baselines under executable and str
 - [ ] Preserve each feature vector, model version, decision, rejection reason, and intended order.
 - [ ] Compare intended, simulated, and observable fills.
 - [ ] Exercise feed failures, RPC disagreement, signer failure, and emergency shutdown.
+- [~] **Local read-only console built; not operationally ready and not fed by any pipeline.**
+  Single self-contained file with no network primitive of any kind, no form, no control that could
+  submit/approve/sign/execute, no wallet surface and no telemetry. Sections: status banner,
+  kill-switch and halt state, overview, gate progress, opportunities with plain-language reasons,
+  strategy and window warnings, simulated paths with liquidity and censoring, portfolio exposure and
+  limits, evidence and provenance. Unknown values render as visibly unknown, never zero. Accessible
+  (landmarks, table captions and scopes, skip link, live region, reduced motion, both colour
+  schemes) and responsive. Verified by executing the page against a DOM stub, not only by reading
+  it. Synthetic fixture only. Reconciliation and any live feed remain unbuilt.
 - [ ] Ship the operator UI for overview, opportunities, explanations, positions, reconciliation,
   and hard risk controls. Keep signing material outside the browser and distinguish research,
   shadow, paper, and live modes unmistakably.

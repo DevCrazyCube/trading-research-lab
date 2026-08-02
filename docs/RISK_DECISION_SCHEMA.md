@@ -77,6 +77,18 @@ clock or a mislabelled snapshot, and either way freshness cannot be evaluated.
 **An unverifiable drawdown rejects.** A peak of zero is not evidence of no decline, and a limit that
 cannot be checked has not been passed.
 
+**What that means at genesis, stated because it is the case most likely to be got wrong.** The
+drawdown control reads **treasury net asset value**, not the sum of open positions. A system starting
+with an empty book has an empty `open_positions` list and a perfectly well-defined NAV — the capital
+available to trade. **The caller must supply a positive `peak_realizable_portfolio_lamports` and
+`current_realizable_portfolio_lamports` reflecting that treasury**, and must not infer zero from
+having no positions.
+
+Passing zero because the book is empty is not a conservative default; it is a category error that
+makes the governor reject every first trade with `R22_PORTFOLIO_DRAWDOWN_UNVERIFIABLE` and look
+broken. The behaviour is correct — a zero NAV genuinely cannot be checked for drawdown — so the fix
+belongs in what the caller supplies, not in this module.
+
 **Eligibility is delegated, not reimplemented.** `b11b.evaluate_vetoes` is called and its `V`-codes
 are mapped to `R`-codes. A governor that admitted a different set of curves than the evaluation
 contract would make every evaluated result unachievable in practice; a test asserts the mapping is

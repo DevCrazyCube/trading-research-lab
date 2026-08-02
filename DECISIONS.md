@@ -1483,3 +1483,60 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 72. **Owner review not separately obtained.**
 - **NOT authorised:** execution, routing, submission, retry, cancellation, settlement, exit-side
   risk, any model, or any live or devnet transaction.
+
+## 2026-08-02 — The operator console computes nothing, and cannot act (B12b)
+
+- **Status:** implemented offline (`scripts/b12b_operator_snapshot.py`,
+  `ui/operator_console.html`, `scripts/b12b_preview_server.py`,
+  `docs/OPERATOR_SNAPSHOT_SCHEMA.md`, `research/B12B_OPERATOR_CONSOLE.md`). This is the trading
+  system's operator view, **not** the collaboration dashboard. No dependency added. **B11a was not
+  read or computed on, B11b was unaltered, results remain locked on U3** — all asserted by tests.
+- **Decision — an adapter sits between the pipeline and the page, and the page performs no
+  arithmetic on data.** A console that divides two integers to show a percentage has quietly become
+  a second implementation of the metric, and the two will disagree on the day it matters. So the
+  adapter assembles, validates and hashes; the console formats exact integers and exact
+  `[numerator, denominator]` pairs. `1 / 4`, never `25%`. Tests assert the script contains no
+  `toFixed`, `Math.round`, `parseFloat`, `* 100` or `/ 100`.
+- **Adopted — the snapshot fails closed** on an executable claim (`EXECUTABLE` is not a value this
+  schema has), an approval contradicting the system's own halt or staleness state, an `is_stale`
+  flag disagreeing with its own clocks, a float at any depth, an undeclared field, anything
+  credential-shaped including a URL with embedded credentials, and every internal disagreement.
+- **Adopted — unknown is never zero.** Every optional numeric field is present and explicitly
+  `null`, never omitted and never substituted. The demo carries a position with an unknown
+  realisable value so the state is exercised, and a render test asserts the word *unknown* appears
+  where a `0` would be wrong while a real `0` still prints as `0`.
+- **Adopted — labels are a deterministic mapping from stable codes, and the code always travels
+  with the label.** All 24 risk reason codes are covered, asserted total. An unrecognised code
+  renders as `Unrecognised code (X)` and is never dropped: omitting a code shows a shorter list than
+  the truth, which is worse than showing one nobody can read yet.
+- **The console's safety is readable rather than trusted.** No `fetch`, `XMLHttpRequest`,
+  `WebSocket`, `EventSource`, beacon, worker, external resource, form, submit control, wallet
+  surface or telemetry, each scanned for. Data reaches the page only through `textContent`.
+- **Verified by executing the page, not only by reading it.** `node` is present, so the pure helpers
+  and the whole render path run against a minimal DOM stub written inside the test file; the tests
+  skip if `node` is absent rather than faking a pass. That caught what scanning cannot — every
+  element id the script addresses is asserted to exist, since a mistyped id silently yields `null`
+  and leaves a section blank.
+- **One test-side correction worth recording:** the console's own prose names every primitive it
+  refuses to use, so the first scanners reported the strictest file in the repository as the worst
+  one. Scanners now strip comments and read code only; otherwise documenting a safety property is
+  indistinguishable from violating it.
+- **The preview server is a preview, not an API.** Standard library only, loopback only, `GET`/`HEAD`
+  only with every other method `405` before reaching a handler, no path outside `ui/`, restrictive
+  CSP. There is no route that writes, mutates, approves, signs or submits. Live-checked.
+- **One source of truth for the demo:** `--embed` rewrites the console's embedded JSON from
+  `build_demo_snapshot()`, and tests assert the embedded copy, the standalone file and the adapter
+  agree, that embedding is idempotent, and that the payload cannot close the script element early.
+- **Documentation-only clarification to B12a**, as directed: the drawdown control reads **treasury
+  net asset value**, and genesis must supply a positive current and peak NAV rather than inferring
+  zero from an empty positions list. Passing zero because the book is empty is a category error that
+  makes the governor reject every first trade and look broken. **No behaviour changed.**
+- **Verification:** 80 tests, 222 subtests; 1,192 repository-wide. **No mutation run on this area**,
+  deliberately: the substance is what the artifacts *cannot* do, and those properties are asserted
+  directly — by executing the page, driving the server and scanning for absent capabilities — rather
+  than by perturbing a decision function. Recorded as a difference from B10a–B12a rather than
+  glossed.
+- **Ratified by:** the Codex directive of handoff 74. **Owner review not separately obtained.**
+- **NOT claimed:** operational readiness, any live or automatic feed, any real data in the
+  interface, or any human review of the visual design. The layout is verified structurally and by
+  execution, not by anybody looking at it.

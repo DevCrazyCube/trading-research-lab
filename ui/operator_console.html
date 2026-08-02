@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operator console — read-only research snapshot</title>
+<!--
+  READ-ONLY RESEARCH CONSOLE.
+
+  This file is deliberately self-contained: no stylesheet, script, font, image or analytics is
+  loaded from anywhere, and there is no fetch, XMLHttpRequest, WebSocket, EventSource, form action
+  or beacon in it. It can be opened straight from disk with the network cable pulled out and behave
+  identically. That is not a convenience — it is the property that makes "this page cannot leak a
+  snapshot and cannot touch a wallet" checkable by reading it rather than by trusting it.
+
+  It renders a snapshot produced by scripts/b12b_operator_snapshot.py. It computes nothing: every
+  figure was derived, checked and hashed by the code that owns it. A console that divides two
+  integers to show a percentage has quietly become a second implementation of the metric, and the
+  two will disagree on the day it matters. So there is no arithmetic on data here at all — exact
+  integers and exact [numerator, denominator] pairs are displayed as they arrive.
+-->
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel-2: #1c2129; --line: #30363d;
+    --text: #e6edf3; --muted: #9aa4b0; --accent: #58a6ff;
+    --ok: #4ac26b; --warn: #e3b341; --danger: #ff7b72; --unknown: #9aa4b0;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f6f8fa; --panel: #ffffff; --panel-2: #f0f3f6; --line: #d0d7de;
+      --text: #1f2328; --muted: #5a6470; --accent: #0757ba;
+      --ok: #16794a; --warn: #7d5000; --danger: #b32219; --unknown: #5a6470;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 var(--sans);
+  }
+  .skip {
+    position: absolute; left: -9999px; top: 0; z-index: 10;
+    background: var(--accent); color: #fff; padding: .6rem 1rem; border-radius: 0 0 6px 0;
+  }
+  .skip:focus { left: 0; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  header { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 1rem 1.1rem; }
+  h1 { font-size: 1.05rem; margin: 0 0 .15rem; letter-spacing: .01em; }
+  .sub { color: var(--muted); font-size: .82rem; margin: 0; }
+
+  .banner {
+    margin-top: .9rem; border: 1px solid var(--line); border-left: 5px solid var(--warn);
+    background: var(--panel-2); border-radius: 8px; padding: .75rem .9rem;
+  }
+  .banner .level {
+    font: 700 .74rem/1 var(--mono); letter-spacing: .14em; color: var(--warn);
+  }
+  .banner .headline { margin: .35rem 0 0; font-weight: 600; }
+  .banner .detail { margin: .3rem 0 0; color: var(--muted); font-size: .85rem; }
+
+  .halts { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .8rem; }
+  .pill {
+    display: inline-flex; align-items: center; gap: .45rem;
+    border: 1px solid var(--line); border-radius: 999px; padding: .34rem .8rem;
+    font: 600 .78rem/1.2 var(--sans); background: var(--panel-2);
+  }
+  .pill .dot { width: .6rem; height: .6rem; border-radius: 50%; background: var(--muted); }
+  .pill.on { border-color: var(--danger); color: var(--danger); }
+  .pill.on .dot { background: var(--danger); }
+  .pill.off { color: var(--ok); border-color: var(--line); }
+  .pill.off .dot { background: var(--ok); }
+
+  .source { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: .9rem; }
+  .source label { font-size: .82rem; color: var(--muted); }
+  button, input[type=file] {
+    font: inherit; font-size: .85rem; color: var(--text); background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 6px; padding: .4rem .7rem; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+
+  nav.sections { border-bottom: 1px solid var(--line); background: var(--panel); }
+  nav.sections ul { list-style: none; display: flex; flex-wrap: wrap; gap: .2rem;
+                    margin: 0; padding: 0 1.1rem .6rem; max-width: 1180px; margin: 0 auto; }
+  nav.sections a {
+    display: inline-block; padding: .3rem .6rem; border-radius: 6px;
+    color: var(--muted); text-decoration: none; font-size: .82rem;
+  }
+  nav.sections a:hover { color: var(--text); background: var(--panel-2); }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 1.1rem; display: grid; gap: 1.1rem; }
+  section {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1rem 1.05rem;
+  }
+  h2 { font-size: .95rem; margin: 0 0 .15rem; }
+  .note { color: var(--muted); font-size: .82rem; margin: 0 0 .8rem; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: .6rem; }
+  .stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+          padding: .6rem .7rem; }
+  .stat .k { color: var(--muted); font-size: .74rem; text-transform: uppercase;
+             letter-spacing: .06em; }
+  .stat .v { font: 600 1.1rem/1.3 var(--mono); margin-top: .2rem; word-break: break-all; }
+
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  caption { text-align: left; color: var(--muted); font-size: .8rem; padding-bottom: .45rem; }
+  th, td { text-align: left; padding: .48rem .55rem; border-bottom: 1px solid var(--line);
+           vertical-align: top; }
+  thead th { color: var(--muted); font-size: .74rem; text-transform: uppercase;
+             letter-spacing: .06em; font-weight: 600; }
+  tbody th { font-weight: 600; }
+  td.num, th.num { font-family: var(--mono); white-space: nowrap; }
+
+  code, .code { font-family: var(--mono); font-size: .78rem; color: var(--muted);
+                background: var(--panel-2); border: 1px solid var(--line);
+                border-radius: 4px; padding: .04rem .3rem; word-break: break-all; }
+  .unknown { color: var(--unknown); font-style: italic; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); } .danger { color: var(--danger); }
+  .tag { display: inline-block; border-radius: 4px; padding: .1rem .45rem;
+         font: 600 .74rem/1.5 var(--sans); border: 1px solid var(--line); }
+  .tag.approved { color: var(--ok); border-color: var(--ok); }
+  .tag.rejected { color: var(--danger); border-color: var(--danger); }
+  ul.reasons { margin: .2rem 0 0; padding-left: 1.05rem; }
+  ul.reasons li { margin-bottom: .3rem; }
+  ul.warnings { margin: 0; padding-left: 1.05rem; color: var(--warn); }
+  ul.warnings li { margin-bottom: .3rem; }
+
+  footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .8rem;
+           background: var(--panel); }
+
+  @media (max-width: 720px) {
+    .wrap, main { padding: .8rem; }
+    .stats { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+    table.stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden;
+                        clip: rect(0 0 0 0); white-space: nowrap; }
+    table.stack tr { display: block; border: 1px solid var(--line); border-radius: 8px;
+                     margin-bottom: .6rem; padding: .45rem .6rem; }
+    table.stack td, table.stack th { display: block; border: none; padding: .18rem 0; }
+    table.stack td::before {
+      content: attr(data-label) ": "; color: var(--muted); font-weight: 600;
+      text-transform: uppercase; font-size: .7rem; letter-spacing: .05em;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+                             transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header role="banner">
+  <div class="wrap">
+    <h1>Operator console <span class="code">read-only</span></h1>
+    <p class="sub">Renders one snapshot. Computes nothing. Cannot submit, approve, sign or execute anything.</p>
+
+    <div class="banner" id="banner" role="status" aria-live="polite">
+      <div class="level" id="banner-level">LOADING</div>
+      <p class="headline" id="banner-headline">Waiting for a snapshot.</p>
+      <p class="detail" id="banner-detail"></p>
+    </div>
+
+    <div class="halts" id="halts" aria-label="System halt state"></div>
+
+    <div class="source">
+      <label for="file">Load a snapshot JSON from this machine:</label>
+      <input type="file" id="file" accept=".json,application/json">
+      <button type="button" id="demo">Load embedded synthetic demo</button>
+      <span class="code" id="loaded-from">nothing loaded</span>
+    </div>
+  </div>
+</header>
+
+<nav class="sections" aria-label="Sections">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#opportunities">Opportunities</a></li>
+    <li><a href="#strategy">Strategy &amp; windows</a></li>
+    <li><a href="#positions">Simulated paths</a></li>
+    <li><a href="#portfolio">Portfolio &amp; limits</a></li>
+    <li><a href="#evidence">Evidence &amp; provenance</a></li>
+  </ul>
+</nav>
+
+<main id="main">
+  <section id="overview" aria-labelledby="overview-h">
+    <h2 id="overview-h">Overview</h2>
+    <p class="note">Counts as published by the snapshot. A value shown as <span class="unknown">unknown</span> is unknown, not zero.</p>
+    <div class="stats" id="overview-stats"></div>
+  </section>
+
+  <section id="pipeline" aria-labelledby="pipeline-h">
+    <h2 id="pipeline-h">Pipeline and gate progress</h2>
+    <p class="note" id="pipeline-note"></p>
+    <div class="table-wrap">
+      <table class="stack" id="pipeline-table">
+        <caption>Each stage, whether it may run now, and why not.</caption>
+        <thead><tr><th scope="col">Stage</th><th scope="col">Kind</th><th scope="col">Runnable</th><th scope="col">Counts</th><th scope="col">Blocked because</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="opportunities" aria-labelledby="opportunities-h">
+    <h2 id="opportunities-h">Opportunities</h2>
+    <p class="note">Every candidate the risk governor was asked about, with the exact order proposed and every reason it was refused. The governor never resizes an order.</p>
+    <div class="table-wrap">
+      <table class="stack" id="opportunities-table">
+        <caption>Risk decisions on candidate orders.</caption>
+        <thead><tr><th scope="col">Mint</th><th scope="col">Creator</th><th scope="col">Proposed</th><th scope="col">Decision</th><th scope="col">Reasons</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="strategy" aria-labelledby="strategy-h">
+    <h2 id="strategy-h">Strategy, baseline and window warnings</h2>
+    <p class="note" id="strategy-note"></p>
+    <div class="stats" id="strategy-stats"></div>
+    <h3 class="sub" id="warnings-h" style="margin-top:.9rem">Window warnings</h3>
+    <ul class="warnings" id="window-warnings" aria-labelledby="warnings-h"></ul>
+  </section>
+
+  <section id="positions" aria-labelledby="positions-h">
+    <h2 id="positions-h">Simulated position paths</h2>
+    <p class="note">Outcome labels from the observed-state path evaluator. Censored is not a loss, and an unavailable exit is not a zero.</p>
+    <div class="table-wrap">
+      <table class="stack" id="positions-table">
+        <caption>Simulated paths, liquidity state and censoring.</caption>
+        <thead><tr><th scope="col">Mint</th><th scope="col">Horizon</th><th scope="col">Outcome</th><th scope="col">Liquidity</th><th scope="col">Net return</th><th scope="col">Max drawdown</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="portfolio" aria-labelledby="portfolio-h">
+    <h2 id="portfolio-h">Portfolio exposure and risk limits</h2>
+    <p class="note">Exact integer lamports and exact ratios. Nothing on this page is computed in the browser.</p>
+    <div class="stats" id="portfolio-stats"></div>
+    <div class="table-wrap" style="margin-top:.9rem">
+      <table class="stack" id="limits-table">
+        <caption>Configured limits and current usage.</caption>
+        <thead><tr><th scope="col">Limit</th><th scope="col">Configured</th><th scope="col">Used</th><th scope="col">Utilisation (exact)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="table-wrap" style="margin-top:.9rem">
+      <table class="stack" id="positions-held-table">
+        <caption>Open positions.</caption>
+        <thead><tr><th scope="col">Mint</th><th scope="col">Creator</th><th scope="col">Deployed</th><th scope="col">Realisable net</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="evidence" aria-labelledby="evidence-h">
+    <h2 id="evidence-h">Evidence freshness and provenance</h2>
+    <p class="note">Both clocks are checked: slots stop advancing during an outage while the wall clock keeps running.</p>
+    <div class="stats" id="evidence-stats"></div>
+    <div class="table-wrap" style="margin-top:.9rem">
+      <table class="stack" id="provenance-table">
+        <caption>Provenance recorded by the snapshot.</caption>
+        <thead><tr><th scope="col">Source</th><th scope="col">Identifier</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer role="contentinfo">
+  <div class="wrap">
+    <p id="footer-note">This console is read-only. It holds no wallet, no key and no transport; it cannot sign, submit, cancel or modify anything, and it makes no network request of any kind.</p>
+    <p class="code" id="snapshot-hash">no snapshot loaded</p>
+  </div>
+</footer>
+
+<script type="application/json" id="demo-snapshot">{"config":{"config_sha256":"871e2fa566a37293fd7947d7858ab989e389f6e5dff993df7f4cb29c4d104cc0","config_version":"demo-unratified-1","ratification":"operator_unratified"},"evidence":{"age_seconds":2,"age_slots":3,"current_slot":435600003,"current_unix":1785600002,"emergency_state":false,"evidence_complete":true,"evidence_conflicting":false,"evidence_slot":435600000,"evidence_unix":1785600000,"is_stale":false,"kill_switch_engaged":false,"max_age_seconds":5,"max_age_slots":10,"program_version_supported":true},"opportunities":[{"bonding_curve":"CurveSynth4444444444444444444444444444444444","creator":"CreatorSynthA1111111111111111111111111111111","decision":"approved","decision_sha256":"3f7ab9ae33b019478459c919a883590df1dcf6d040d214222329e76680a1c8c9","exposure_after_lamports":406788560,"mint":"MintSynth4444444444444444444444444444444444","primary_reason":null,"proposal_id":"demo-1","quote_lamports":100000000,"reasons":[]},{"bonding_curve":"CurveSynth5555555555555555555555555555555555","creator":"CreatorSynthB2222222222222222222222222222222","decision":"rejected","decision_sha256":"19f82a3bd79d8d6a2c00931fbed7ccbb1f81cde5b42f418a85bd93f95796b8b4","exposure_after_lamports":null,"mint":"MintSynth5555555555555555555555555555555555","primary_reason":{"code":"R18_CREATOR_EXPOSURE_LIMIT_EXCEEDED","label":"Too much capital would be exposed to this one creator."},"proposal_id":"demo-2","quote_lamports":100000000,"reasons":[{"code":"R18_CREATOR_EXPOSURE_LIMIT_EXCEEDED","label":"Too much capital would be exposed to this one creator."},{"code":"R19_CREATOR_POSITION_LIMIT_EXCEEDED","label":"Too many positions would be held on this one creator."}]},{"bonding_curve":"CurveSynth6666666666666666666666666666666666","creator":"CreatorSynthA1111111111111111111111111111111","decision":"rejected","decision_sha256":"7d123175e46623d48fa12931dec1101e08fa6d6c26ec6e100847bcc1c41c7b4c","exposure_after_lamports":null,"mint":"MintSynth6666666666666666666666666666666666","primary_reason":{"code":"R10_CURVE_COMPLETE","label":"The bonding curve has already completed, so there is no curve trade to make."},"proposal_id":"demo-3","quote_lamports":100000000,"reasons":[{"code":"R10_CURVE_COMPLETE","label":"The bonding curve has already completed, so there is no curve trade to make."}]}],"overview":{"emergency_state":false,"kill_switch_engaged":false,"open_positions":2,"opportunities_approved":1,"opportunities_rejected":2,"opportunities_total":3,"pending_orders":1,"results_locked":true},"pipeline":[{"blocked_reason":"the frozen observation cutoff is not mature","kind":"collection","numbers_withheld":true,"runnable":false,"stage":"enumerate_creates"},{"blocked_reason":"the frozen observation cutoff is not mature","kind":"collection","numbers_withheld":true,"runnable":false,"stage":"transaction_bodies"},{"blocked_reason":"the frozen observation cutoff is not mature","kind":"gate","numbers_withheld":true,"runnable":false,"stage":"reserve_coverage_gate"},{"blocked_reason":"the frozen observation cutoff is not mature","kind":"gate","numbers_withheld":true,"runnable":false,"stage":"simulator_replay_gate"},{"blocked_reason":"results are locked until every unlock requirement is met","kind":"results","numbers_withheld":true,"runnable":false,"stage":"position_paths"},{"blocked_reason":"results are locked until every unlock requirement is met","kind":"results","numbers_withheld":true,"runnable":false,"stage":"outcome_labels"}],"portfolio":{"aggregates":{"creator_exposure_lamports":0,"creator_position_count":0,"open_deployed_lamports":206788560,"open_position_count":2,"pending_exposure_lamports":100000000,"pending_order_count":1,"position_count":3,"total_exposure_lamports":306788560},"limits":[{"limit":1000000000,"name":"total_exposure_lamports","used":306788560,"utilisation":[3834857,12500000]},{"limit":400000000,"name":"pending_exposure_lamports","used":100000000,"utilisation":[1,4]},{"limit":5,"name":"open_positions","used":3,"utilisation":[3,5]},{"limit":100000000,"name":"max_order_lamports","used":null,"utilisation":null}],"positions":[{"creator":"CreatorSynthA1111111111111111111111111111111","deployed_lamports":103394280,"mint":"MintSynth1111111111111111111111111111111111","realizable_net_lamports":96100000},{"creator":"CreatorSynthB2222222222222222222222222222222","deployed_lamports":103394280,"mint":"MintSynth2222222222222222222222222222222222","realizable_net_lamports":null}],"risk":{"current_drawdown_ratio":[3,50],"current_realizable_portfolio_lamports":940000000,"max_daily_realised_loss_lamports":500000000,"max_portfolio_drawdown_ratio":[1,4],"peak_realizable_portfolio_lamports":1000000000,"realised_pnl_today_lamports":-12500000}},"provenance":{"label_schema":"b10c-1.0.0","note":"SYNTHETIC DEMONSTRATION DATA. Every mint, creator, position and figure below is invented for interface development. No B11a composition was read and no outcome was computed.","path_schema":"b10b-1.0.0","risk_schema":"b12a-1.0.0","simulator_schema":"b10a-1.0.0","synthetic":"true"},"simulated_positions":[{"censoring_reason":null,"horizon_name":"h_1000_slots","liquidity_label":"Whole position could be sold at this state","liquidity_state":"L0_full_size_executable","max_drawdown_ratio":[1,20],"mint":"MintSynth1111111111111111111111111111111111","net_return":[-7,100],"outcome_label":"Valued at the horizon from an observed state","outcome_status":"marked_at_horizon"},{"censoring_reason":"The horizon lies beyond the recorded observation window.","horizon_name":"h_1000_slots","liquidity_label":null,"liquidity_state":null,"max_drawdown_ratio":null,"mint":"MintSynth2222222222222222222222222222222222","net_return":null,"outcome_label":"Not observable within the window \u2014 censored, not a loss","outcome_status":"right_censored"},{"censoring_reason":"The curve completed before the horizon.","horizon_name":"h_1000_slots","liquidity_label":"Curve trading has ended","liquidity_state":"L3_structural_unavailable","max_drawdown_ratio":null,"mint":"MintSynth3333333333333333333333333333333333","net_return":null,"outcome_label":"Curve completed; no exit venue in this regime","outcome_status":"structural_exit_unavailable"}],"snapshot_schema_version":"1.0.0","snapshot_sha256":"672b329e73f2542e645f4e4a86aa52857097f8c696f20c01b8183d1def384971","status_banner":{"detail":"SYNTHETIC DEMONSTRATION DATA. Every mint, creator, position and figure below is invented for interface development. No B11a composition was read and no outcome was computed.","executable":false,"headline":"Simulated research output. Nothing here has been executed.","level":"SIMULATED"},"strategy":{"fitted_thresholds":0,"label_semantics":"b10c_state_in_force_at_or_before_horizon","learned_parameters":0,"model_family":"none","primary_horizon":"h_1000_slots","primary_metric":"capital_weighted_net_return","primary_policy":"P1_all_eligible_fixed_size","results_locked":true,"unlock_note":"B11a collection is not complete, so no result may be computed on it.","unmet_unlock_requirements":["U3"]},"windows":{"burned_range_count":7,"fresh_window":{"launch_first_slot":435569150,"launch_last_slot":435772750,"observation_cutoff_slot":437211659,"queried":false,"status":"fresh_preregistered"},"warnings":["The development corpus is the burned B8b cohort; no return may be measured on it.","The fresh evaluation window has never been queried and is locked until every unlock requirement is met."]}}</script>
+
+<script>
+"use strict";
+
+/* ---------------------------------------------------------------------------
+   Pure helpers first, DOM wiring last. `boot()` runs only when a document
+   exists, so these functions can be exercised directly by a test runner
+   without a browser — a behaviour test beats a source-text assertion.
+   --------------------------------------------------------------------------- */
+
+var UNKNOWN = "unknown";
+
+/* Unknown is never zero. A console that prints 0 for a figure it does not have
+   is telling an operator something false in the most confident possible way. */
+function isUnknown(value) {
+  return value === null || value === undefined;
+}
+
+function formatInteger(value) {
+  if (isUnknown(value)) { return UNKNOWN; }
+  if (typeof value !== "number" || !Number.isInteger(value)) { return String(value); }
+  var negative = value < 0;
+  var digits = String(negative ? -value : value);
+  var grouped = "";
+  for (var i = 0; i < digits.length; i++) {
+    if (i > 0 && (digits.length - i) % 3 === 0) { grouped += ","; }
+    grouped += digits[i];
+  }
+  return (negative ? "-" : "") + grouped;
+}
+
+/* Exact rationals are shown as the pair they are. No division happens here:
+   turning 1/4 into "25%" would be arithmetic on research output, performed in
+   the one place nobody validates. */
+function formatRatio(pair) {
+  if (isUnknown(pair)) { return UNKNOWN; }
+  if (!Array.isArray(pair) || pair.length !== 2) { return String(pair); }
+  return formatInteger(pair[0]) + " / " + formatInteger(pair[1]);
+}
+
+function formatBoolean(value) {
+  if (isUnknown(value)) { return UNKNOWN; }
+  return value ? "yes" : "no";
+}
+
+function truncateIdentity(value) {
+  if (isUnknown(value)) { return UNKNOWN; }
+  var text = String(value);
+  return text.length <= 16 ? text : text.slice(0, 8) + "…" + text.slice(-6);
+}
+
+/* A code this build does not recognise is shown, never dropped. A console that
+   silently omits an unknown code shows a shorter list than the truth, which is
+   worse than showing a code nobody can read yet. */
+function describeCode(code, label) {
+  if (isUnknown(code)) { return UNKNOWN; }
+  if (typeof label === "string" && label.length > 0) { return label; }
+  return "Unrecognised code (" + String(code) + ")";
+}
+
+var LOCAL_LABELS = {
+  approved: "Approved by the risk governor",
+  rejected: "Rejected by the risk governor",
+  collection: "Collection",
+  gate: "Gate",
+  results: "Results"
+};
+
+function localLabel(code) {
+  if (isUnknown(code)) { return UNKNOWN; }
+  return Object.prototype.hasOwnProperty.call(LOCAL_LABELS, code)
+    ? LOCAL_LABELS[code]
+    : String(code) + " (unrecognised)";
+}
+
+/* The one client-side gate. The adapter already refuses to build an executable
+   claim; this refuses to render one that arrived some other way. */
+function snapshotProblem(snapshot) {
+  if (!snapshot || typeof snapshot !== "object") { return "That file is not a snapshot object."; }
+  if (!snapshot.status_banner) { return "That snapshot carries no status banner."; }
+  if (snapshot.status_banner.executable !== false) {
+    return "Refusing to render: this snapshot claims to be executable, and nothing in this project is.";
+  }
+  if (snapshot.status_banner.level !== "RESEARCH" && snapshot.status_banner.level !== "SIMULATED") {
+    return "Refusing to render: unknown status level " + String(snapshot.status_banner.level) + ".";
+  }
+  if (!snapshot.overview || !snapshot.evidence) { return "That snapshot is missing required sections."; }
+  return null;
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { isUnknown: isUnknown, formatInteger: formatInteger, formatRatio: formatRatio,
+                     formatBoolean: formatBoolean, truncateIdentity: truncateIdentity,
+                     describeCode: describeCode, localLabel: localLabel,
+                     snapshotProblem: snapshotProblem };
+}
+
+/* ---------------------------------------------------------------------------
+   DOM rendering. Every value reaches the page through textContent, never
+   innerHTML: a mint, a creator or a censoring reason is data from a file, and
+   data from a file is never markup.
+   --------------------------------------------------------------------------- */
+
+function boot() {
+  var $ = function (id) { return document.getElementById(id); };
+
+  function text(tag, value, className) {
+    var node = document.createElement(tag);
+    if (isUnknown(value)) {
+      node.textContent = UNKNOWN;
+      node.classList.add("unknown");
+    } else {
+      node.textContent = String(value);
+      if (className) { node.classList.add(className); }
+    }
+    return node;
+  }
+
+  function cell(value, label, options) {
+    var options2 = options || {};
+    var td = document.createElement("td");
+    td.setAttribute("data-label", label);
+    if (options2.numeric) { td.classList.add("num"); }
+    if (isUnknown(value)) {
+      var span = document.createElement("span");
+      span.className = "unknown";
+      span.textContent = UNKNOWN;
+      td.appendChild(span);
+    } else {
+      td.textContent = String(value);
+    }
+    return td;
+  }
+
+  function rowHeader(value, label) {
+    var th = document.createElement("th");
+    th.setAttribute("scope", "row");
+    th.setAttribute("data-label", label);
+    th.textContent = isUnknown(value) ? UNKNOWN : String(value);
+    if (isUnknown(value)) { th.classList.add("unknown"); }
+    return th;
+  }
+
+  function stat(container, key, value, tone) {
+    var box = document.createElement("div");
+    box.className = "stat";
+    box.appendChild(text("div", key)).className = "k";
+    var v = text("div", value);
+    v.classList.add("v");
+    if (tone) { v.classList.add(tone); }
+    box.appendChild(v);
+    container.appendChild(box);
+  }
+
+  function clear(node) { while (node.firstChild) { node.removeChild(node.firstChild); } }
+
+  function renderHalts(snapshot) {
+    var host = $("halts");
+    clear(host);
+    var flags = [
+      ["Kill switch", snapshot.evidence.kill_switch_engaged],
+      ["Emergency stop", snapshot.evidence.emergency_state],
+      ["Evidence stale", snapshot.evidence.is_stale],
+      ["Results locked", snapshot.overview.results_locked]
+    ];
+    flags.forEach(function (entry) {
+      var pill = document.createElement("span");
+      pill.className = "pill " + (entry[1] ? "on" : "off");
+      var dot = document.createElement("span");
+      dot.className = "dot";
+      pill.appendChild(dot);
+      pill.appendChild(document.createTextNode(entry[0] + ": " + formatBoolean(entry[1])));
+      host.appendChild(pill);
+    });
+  }
+
+  function renderOverview(snapshot) {
+    var host = $("overview-stats");
+    clear(host);
+    var o = snapshot.overview;
+    stat(host, "Opportunities", formatInteger(o.opportunities_total));
+    stat(host, "Approved", formatInteger(o.opportunities_approved),
+         o.opportunities_approved ? "ok" : null);
+    stat(host, "Rejected", formatInteger(o.opportunities_rejected),
+         o.opportunities_rejected ? "warn" : null);
+    stat(host, "Open positions", formatInteger(o.open_positions));
+    stat(host, "Pending orders", formatInteger(o.pending_orders));
+    stat(host, "Results locked", formatBoolean(o.results_locked),
+         o.results_locked ? "warn" : "ok");
+  }
+
+  function renderPipeline(snapshot) {
+    var body = $("pipeline-table").querySelector("tbody");
+    clear(body);
+    var runnable = 0;
+    snapshot.pipeline.forEach(function (stage) { if (stage.runnable) { runnable += 1; } });
+    $("pipeline-note").textContent =
+      formatInteger(runnable) + " of " + formatInteger(snapshot.pipeline.length) +
+      " stages may run now. Stages whose counts are withheld describe the window's composition, " +
+      "which stays sealed until every unlock requirement is met.";
+    snapshot.pipeline.forEach(function (stage) {
+      var tr = document.createElement("tr");
+      tr.appendChild(rowHeader(stage.stage, "Stage"));
+      tr.appendChild(cell(localLabel(stage.kind), "Kind"));
+      tr.appendChild(cell(formatBoolean(stage.runnable), "Runnable"));
+      tr.appendChild(cell(stage.numbers_withheld ? "withheld" : "shown", "Counts"));
+      tr.appendChild(cell(stage.blocked_reason, "Blocked because"));
+      body.appendChild(tr);
+    });
+  }
+
+  function renderOpportunities(snapshot) {
+    var body = $("opportunities-table").querySelector("tbody");
+    clear(body);
+    if (snapshot.opportunities.length === 0) {
+      var empty = document.createElement("tr");
+      var td = document.createElement("td");
+      td.setAttribute("colspan", "5");
+      td.className = "unknown";
+      td.textContent = "No candidates in this snapshot.";
+      empty.appendChild(td);
+      body.appendChild(empty);
+      return;
+    }
+    snapshot.opportunities.forEach(function (item) {
+      var tr = document.createElement("tr");
+      tr.appendChild(rowHeader(truncateIdentity(item.mint), "Mint"));
+      tr.appendChild(cell(truncateIdentity(item.creator), "Creator"));
+      tr.appendChild(cell(formatInteger(item.quote_lamports) + " lamports", "Proposed",
+                          { numeric: true }));
+
+      var decisionCell = document.createElement("td");
+      decisionCell.setAttribute("data-label", "Decision");
+      var tag = document.createElement("span");
+      tag.className = "tag " + (item.decision === "approved" ? "approved" : "rejected");
+      tag.textContent = localLabel(item.decision);
+      decisionCell.appendChild(tag);
+      tr.appendChild(decisionCell);
+
+      var reasonCell = document.createElement("td");
+      reasonCell.setAttribute("data-label", "Reasons");
+      if (!item.reasons || item.reasons.length === 0) {
+        var none = document.createElement("span");
+        none.className = "unknown";
+        none.textContent = "no objection recorded";
+        reasonCell.appendChild(none);
+      } else {
+        var list = document.createElement("ul");
+        list.className = "reasons";
+        item.reasons.forEach(function (reason) {
+          var li = document.createElement("li");
+          li.appendChild(document.createTextNode(describeCode(reason.code, reason.label) + " "));
+          var codeNode = document.createElement("code");
+          codeNode.textContent = String(reason.code);
+          li.appendChild(codeNode);
+          list.appendChild(li);
+        });
+        reasonCell.appendChild(list);
+      }
+      tr.appendChild(reasonCell);
+      body.appendChild(tr);
+    });
+  }
+
+  function renderStrategy(snapshot) {
+    var s = snapshot.strategy;
+    $("strategy-note").textContent =
+      "Model family: " + String(s.model_family) + ". " +
+      (s.model_family === "none"
+        ? "This is a baseline evaluation with no learned component and no fitted threshold."
+        : "A model is declared; its artifact hash must have been frozen before results were unlocked.");
+    var host = $("strategy-stats");
+    clear(host);
+    stat(host, "Primary policy", s.primary_policy);
+    stat(host, "Primary horizon", s.primary_horizon);
+    stat(host, "Primary metric", s.primary_metric);
+    stat(host, "Label semantics", s.label_semantics);
+    stat(host, "Learned parameters", formatInteger(s.learned_parameters));
+    stat(host, "Unlock requirements unmet",
+         (s.unmet_unlock_requirements || []).join(", ") || "none",
+         (s.unmet_unlock_requirements || []).length ? "warn" : "ok");
+
+    var warnings = $("window-warnings");
+    clear(warnings);
+    var list = (snapshot.windows && snapshot.windows.warnings) || [];
+    if (list.length === 0) {
+      warnings.appendChild(text("li", "No window warnings recorded.", "unknown"));
+    } else {
+      list.forEach(function (line) { warnings.appendChild(text("li", line)); });
+    }
+  }
+
+  function renderPositions(snapshot) {
+    var body = $("positions-table").querySelector("tbody");
+    clear(body);
+    snapshot.simulated_positions.forEach(function (item) {
+      var tr = document.createElement("tr");
+      tr.appendChild(rowHeader(truncateIdentity(item.mint), "Mint"));
+      tr.appendChild(cell(item.horizon_name, "Horizon"));
+
+      var outcome = document.createElement("td");
+      outcome.setAttribute("data-label", "Outcome");
+      outcome.appendChild(document.createTextNode(
+        describeCode(item.outcome_status, item.outcome_label) + " "));
+      var outcomeCode = document.createElement("code");
+      outcomeCode.textContent = String(item.outcome_status);
+      outcome.appendChild(outcomeCode);
+      if (item.censoring_reason) {
+        var why = document.createElement("div");
+        why.className = "note";
+        why.style.margin = ".25rem 0 0";
+        why.textContent = String(item.censoring_reason);
+        outcome.appendChild(why);
+      }
+      tr.appendChild(outcome);
+
+      tr.appendChild(cell(isUnknown(item.liquidity_state)
+        ? null
+        : describeCode(item.liquidity_state, item.liquidity_label), "Liquidity"));
+      tr.appendChild(cell(isUnknown(item.net_return) ? null : formatRatio(item.net_return),
+                          "Net return", { numeric: true }));
+      tr.appendChild(cell(isUnknown(item.max_drawdown_ratio)
+        ? null : formatRatio(item.max_drawdown_ratio), "Max drawdown", { numeric: true }));
+      body.appendChild(tr);
+    });
+  }
+
+  function renderPortfolio(snapshot) {
+    var p = snapshot.portfolio;
+    var host = $("portfolio-stats");
+    clear(host);
+    stat(host, "Total exposure", formatInteger(p.aggregates.total_exposure_lamports));
+    stat(host, "Pending exposure", formatInteger(p.aggregates.pending_exposure_lamports));
+    stat(host, "Positions", formatInteger(p.aggregates.position_count));
+    stat(host, "Realised P&L today", formatInteger(p.risk.realised_pnl_today_lamports),
+         p.risk.realised_pnl_today_lamports < 0 ? "danger" : "ok");
+    stat(host, "Current drawdown", formatRatio(p.risk.current_drawdown_ratio),
+         isUnknown(p.risk.current_drawdown_ratio) ? "warn" : null);
+    stat(host, "Drawdown limit", formatRatio(p.risk.max_portfolio_drawdown_ratio));
+
+    var limits = $("limits-table").querySelector("tbody");
+    clear(limits);
+    p.limits.forEach(function (limit) {
+      var tr = document.createElement("tr");
+      tr.appendChild(rowHeader(limit.name, "Limit"));
+      tr.appendChild(cell(formatInteger(limit.limit), "Configured", { numeric: true }));
+      tr.appendChild(cell(isUnknown(limit.used) ? null : formatInteger(limit.used), "Used",
+                          { numeric: true }));
+      tr.appendChild(cell(isUnknown(limit.utilisation) ? null : formatRatio(limit.utilisation),
+                          "Utilisation (exact)", { numeric: true }));
+      limits.appendChild(tr);
+    });
+
+    var held = $("positions-held-table").querySelector("tbody");
+    clear(held);
+    if (p.positions.length === 0) {
+      var tr0 = document.createElement("tr");
+      var td0 = document.createElement("td");
+      td0.setAttribute("colspan", "4");
+      td0.className = "unknown";
+      td0.textContent = "No open positions.";
+      tr0.appendChild(td0);
+      held.appendChild(tr0);
+    }
+    p.positions.forEach(function (item) {
+      var tr = document.createElement("tr");
+      tr.appendChild(rowHeader(truncateIdentity(item.mint), "Mint"));
+      tr.appendChild(cell(truncateIdentity(item.creator), "Creator"));
+      tr.appendChild(cell(formatInteger(item.deployed_lamports), "Deployed", { numeric: true }));
+      tr.appendChild(cell(isUnknown(item.realizable_net_lamports)
+        ? null : formatInteger(item.realizable_net_lamports), "Realisable net", { numeric: true }));
+      held.appendChild(tr);
+    });
+  }
+
+  function renderEvidence(snapshot) {
+    var e = snapshot.evidence;
+    var host = $("evidence-stats");
+    clear(host);
+    stat(host, "Age (slots)", formatInteger(e.age_slots) + " of " + formatInteger(e.max_age_slots),
+         e.age_slots > e.max_age_slots ? "danger" : "ok");
+    stat(host, "Age (seconds)",
+         formatInteger(e.age_seconds) + " of " + formatInteger(e.max_age_seconds),
+         e.age_seconds > e.max_age_seconds ? "danger" : "ok");
+    stat(host, "Stale", formatBoolean(e.is_stale), e.is_stale ? "danger" : "ok");
+    stat(host, "Evidence complete", formatBoolean(e.evidence_complete),
+         e.evidence_complete ? "ok" : "danger");
+    stat(host, "Evidence conflicting", formatBoolean(e.evidence_conflicting),
+         e.evidence_conflicting ? "danger" : "ok");
+    stat(host, "Program version supported", formatBoolean(e.program_version_supported),
+         e.program_version_supported ? "ok" : "danger");
+    stat(host, "Config ratification", snapshot.config.ratification, "warn");
+    stat(host, "Config version", snapshot.config.config_version);
+
+    var body = $("provenance-table").querySelector("tbody");
+    clear(body);
+    var keys = Object.keys(snapshot.provenance).sort();
+    if (keys.length === 0) {
+      var tr0 = document.createElement("tr");
+      var td0 = document.createElement("td");
+      td0.setAttribute("colspan", "2");
+      td0.className = "unknown";
+      td0.textContent = "No provenance recorded.";
+      tr0.appendChild(td0);
+      body.appendChild(tr0);
+    }
+    keys.forEach(function (key) {
+      var tr = document.createElement("tr");
+      tr.appendChild(rowHeader(key, "Source"));
+      tr.appendChild(cell(snapshot.provenance[key], "Identifier"));
+      body.appendChild(tr);
+    });
+  }
+
+  function renderBanner(snapshot) {
+    var level = snapshot.status_banner.level;
+    $("banner-level").textContent = String(level) + " · NOT EXECUTABLE";
+    $("banner-headline").textContent = String(snapshot.status_banner.headline);
+    $("banner-detail").textContent = String(snapshot.status_banner.detail || "");
+  }
+
+  function showProblem(message) {
+    $("banner-level").textContent = "CANNOT RENDER";
+    $("banner-headline").textContent = message;
+    $("banner-detail").textContent = "";
+    $("snapshot-hash").textContent = "no snapshot loaded";
+  }
+
+  function render(snapshot, origin) {
+    var problem = snapshotProblem(snapshot);
+    if (problem) { showProblem(problem); return; }
+    renderBanner(snapshot);
+    renderHalts(snapshot);
+    renderOverview(snapshot);
+    renderPipeline(snapshot);
+    renderOpportunities(snapshot);
+    renderStrategy(snapshot);
+    renderPositions(snapshot);
+    renderPortfolio(snapshot);
+    renderEvidence(snapshot);
+    $("loaded-from").textContent = origin;
+    $("snapshot-hash").textContent =
+      "snapshot sha256 " + String(snapshot.snapshot_sha256) +
+      " · schema " + String(snapshot.snapshot_schema_version);
+  }
+
+  function loadDemo() {
+    var node = document.getElementById("demo-snapshot");
+    try {
+      render(JSON.parse(node.textContent), "embedded synthetic demo");
+    } catch (error) {
+      showProblem("The embedded demo could not be parsed.");
+    }
+  }
+
+  $("demo").addEventListener("click", loadDemo);
+  $("file").addEventListener("change", function (event) {
+    var file = event.target.files && event.target.files[0];
+    if (!file) { return; }
+    var reader = new FileReader();
+    reader.onerror = function () { showProblem("That file could not be read."); };
+    reader.onload = function () {
+      try {
+        render(JSON.parse(String(reader.result)), "local file: " + file.name);
+      } catch (error) {
+        showProblem("That file is not valid JSON.");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  loadDemo();
+}
+
+if (typeof document !== "undefined") { boot(); }
+</script>
+</body>
+</html>

@@ -134,6 +134,16 @@ Live Geyser/Yellowstone ──────┘                         |
                                 separately authorized execution + risk services
 ```
 
+**The operator surface.** `ui/operator_console.html` (`docs/OPERATOR_SNAPSHOT_SCHEMA.md`) renders
+one canonical snapshot built by `scripts/b12b_operator_snapshot.py`. The architectural rule is that
+**the browser computes nothing**: a UI that divides two integers to show a percentage has become a
+second implementation of a research metric, and the two will disagree on the day it matters. So the
+adapter assembles, validates and hashes; the page formats exact integers and exact
+`[numerator, denominator]` pairs. It is a single self-contained file with no network primitive, no
+form, no control that could submit or sign, and no wallet surface — properties checkable by reading
+the file rather than by trusting it. It is **not operationally ready**: no pipeline feeds it and the
+only shipped fixture is synthetic.
+
 **Implemented so far, and where the risk veto actually sits.** `scripts/b12a_risk_governor.py`
 (`docs/RISK_DECISION_SCHEMA.md`) is the "risk veto" box, built as a **deterministic, fail-closed
 library above the policy rather than inside it**. It consumes a candidate order, the exact curve
