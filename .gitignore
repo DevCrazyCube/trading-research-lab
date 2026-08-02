@@ -32,3 +32,10 @@ research/b11a/supervisor.lock
 research/b11a/watcher.pid
 research/b11a/logs/
 research/b11a/receipts/
+
+# B15a shadow pilot runtime. Raw frames and the derived database are live mutable evidence, not
+# source: they are preserved on disk and never rewritten, but they do not belong in git.
+research/b15a/raw_frames.jsonl
+research/b15a/shadow.sqlite
+research/b15a/pilot.lock
+research/b15a/logs/
