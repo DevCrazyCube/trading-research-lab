@@ -1,0 +1,310 @@
+{
+  "preregistration_id": "B14C_MODEL_AND_SELECTION_V1",
+  "supersedes": null,
+  "date": "2026-08-02",
+  "author": "Claude (handoff 104)",
+  "status": "FROZEN. Committed alone, before any implementation, before any window is eligible, and before any fresh outcome exists.",
+  "purpose": "Freeze the candidate model families, the deterministic preprocessing, the missingness and abstention rules, the hyperparameter grids, the selection procedure and its tie-breaks, the calibration policy, and the comparison against the frozen B11b no-model policies.",
+  "committed_before_any_fit": true,
+  "committed_before_any_outcome_exists": true,
+  "b11a_composition_inspected": false,
+  "burned_outcome_distributions_inspected": false,
+
+  "binds_to": {
+    "feature_contract": {
+      "preregistration_id": "B13F_FEATURE_CONTRACT_V1",
+      "feature_contract_version": "1.0.0",
+      "feature_count": 99,
+      "binding": "the 99 fields, in the frozen feature_order, and nothing else"
+    },
+    "lookback": {
+      "preregistration_id": "B13E_LOOKBACK_V1",
+      "lookback_slots": 1642509
+    },
+    "split_contract": {
+      "module": "scripts/b14a_split_planner.py",
+      "schema_version": "1.0.0",
+      "grouping_rule": "R5_exact_identity_union_creator_and_user_pooled",
+      "purge_rule": "label_window_end_slot + purge_slots < first evaluation slot of the fold",
+      "embargo_rule": "t0_slot >= previous_evaluation_last_slot + embargo_slots",
+      "group_spanning_rule": "a group occupying two segments is dropped whole"
+    },
+    "artifact_contract": {
+      "module": "scripts/b14a_model_artifact.py",
+      "schema_version": "1.0.0",
+      "inference_compatibility_codes": ["I01", "I02", "I03", "I04", "I05", "I06", "I07", "I08", "I09", "I10", "I11", "I12"]
+    },
+    "evaluation_contract": {
+      "module": "scripts/b14b_evaluation.py",
+      "schema_version": "1.0.0",
+      "reporting_bases": ["observed_evaluable", "whole_cohort_worst_case"],
+      "both_bases_mandatory": true
+    },
+    "baseline_contract": {
+      "preregistration_id": "b11b-baseline-evaluation-2026-08-02",
+      "portable_elements": ["policy definitions P0-P4", "the four B10c horizons", "order_size_lamports", "metric definitions", "multiplicity family_size 16", "B10c state-in-force label semantics"],
+      "non_portable_elements": ["every figure B11b computes on the B11a window"]
+    }
+  },
+
+  "eligibility": {
+    "eligible_windows": [],
+    "b11a_eligible": false,
+    "b11a_eligible_reason": "B13F section 0 makes the 99-field contract ineligible for B11a permanently: B11a's maturity conditions and unlock evidence were written for a no-model baseline over a 17-field t0 contract. Introducing a 99-field vector there evaluates something nobody preregistered.",
+    "fitting_permitted": false,
+    "fitting_permitted_when": "a fresh window is named that is disjoint from every burned range AND from B11a, carries its own split plan under the B14a contract, and is added to eligible_windows by an explicit superseding preregistration",
+    "synthetic_fixtures_permitted": true
+  },
+
+  "target": {
+    "name": "profitable_at_horizon_after_costs",
+    "type": "boolean",
+    "definition": "net_pnl_lamports > 0 at the primary horizon under the frozen cost policy, for rows whose outcome bucket is marked_at_horizon",
+    "threshold_provenance": "zero is the break-even point defined by the cost policy, not a value selected from any outcome distribution. No quantile, rank or cohort-relative cutoff is used.",
+    "label_semantics": "B10c STATE_IN_FORCE, inherited unchanged from B11b",
+    "primary_horizon": "h_1000_slots",
+    "secondary_horizons": ["h_10000_slots", "h_10_observations", "administrative_window_end"],
+    "secondary_promotion_forbidden": true,
+    "censored_rows": "excluded under B14a X01_label_not_observed; never recoded as false, zero or loss"
+  },
+
+  "candidate_families": [
+    {
+      "index": 0,
+      "id": "F1_constant_prior",
+      "description": "predicts the training-fold base rate for every row",
+      "fitted_parameters": "one exact rational: positives over evaluable training rows",
+      "hyperparameter_names": [],
+      "grid_size": 1,
+      "role": "degenerate reference. If a family cannot beat it, the family learned nothing, and reporting it makes that visible instead of arguable."
+    },
+    {
+      "index": 1,
+      "id": "F2_single_threshold_stump",
+      "description": "one feature, one threshold, one direction; two leaves",
+      "fitted_parameters": "feature index, integer or rational threshold, direction, two exact rational leaf values",
+      "hyperparameter_names": [],
+      "grid_size": 1,
+      "role": "the simplest model that can use a feature at all; the honest floor for 'the vector carries signal'"
+    },
+    {
+      "index": 2,
+      "id": "F3_depth_limited_cart",
+      "description": "axis-aligned binary tree, exact rational Gini impurity, integer or rational thresholds, exact rational leaf values",
+      "fitted_parameters": "tree structure, thresholds, leaf values, per-node null direction",
+      "hyperparameter_names": ["max_depth", "min_samples_leaf"],
+      "grid": {"max_depth": [1, 2, 3], "min_samples_leaf": [32, 128, 512]},
+      "grid_size": 9,
+      "role": "bounded interaction structure while remaining exactly representable and fully auditable"
+    },
+    {
+      "index": 3,
+      "id": "F4_rational_gradient_boosted_stumps",
+      "description": "additive stumps over exact rational residuals, quantised to the declared fixed denominator after every round",
+      "fitted_parameters": "ordered stump list with quantised rational leaf increments",
+      "hyperparameter_names": ["rounds", "shrinkage_numerator", "shrinkage_denominator", "max_depth", "min_samples_leaf"],
+      "grid_note": "shrinkage is one rational, not two independent axes, so the grid is enumerated explicitly rather than as a cross product. A cross product over the numerator and denominator lists would silently be size 8 and would include shrinkages nobody preregistered.",
+      "grid_axes": {"rounds": [25, 100], "shrinkage_pairs": [[1, 10], [1, 4]], "max_depth": [1], "min_samples_leaf": [128]},
+      "grid_enumeration": [
+        {"rounds": 25, "shrinkage_numerator": 1, "shrinkage_denominator": 10, "max_depth": 1, "min_samples_leaf": 128},
+        {"rounds": 25, "shrinkage_numerator": 1, "shrinkage_denominator": 4, "max_depth": 1, "min_samples_leaf": 128},
+        {"rounds": 100, "shrinkage_numerator": 1, "shrinkage_denominator": 10, "max_depth": 1, "min_samples_leaf": 128},
+        {"rounds": 100, "shrinkage_numerator": 1, "shrinkage_denominator": 4, "max_depth": 1, "min_samples_leaf": 128}
+      ],
+      "grid_size": 4,
+      "role": "the one family with capacity beyond a shallow tree, bounded hard so its capacity is declared rather than discovered"
+    }
+  ],
+
+  "excluded_families": [
+    {"id": "logistic_regression", "reason": "real-valued coefficients are not exactly representable; the same fit serialises differently on two machines, so two identical models hash differently and two different models can hash the same"},
+    {"id": "neural_network_of_any_depth", "reason": "same float objection, plus no bounded declaration of capacity is possible in a grid this size"},
+    {"id": "support_vector_machine", "reason": "float coefficients; kernel choice is an undeclarable capacity knob"},
+    {"id": "random_forest", "reason": "bagging randomness multiplies the seed surface without adding auditability over F3/F4 at these depths"},
+    {"id": "k_nearest_neighbours", "reason": "the fitted object is the training set itself; a distance metric over 99 heterogeneous integer scales is an undeclared weighting"},
+    {"id": "any_ensemble_over_the_selected_model", "reason": "selecting a configuration and then averaging it with the runners-up is selection twice, and the second is unpriced"},
+    {"id": "monotone_constrained_variants", "reason": "a monotone direction per feature is a directional hypothesis, and we have no basis for one that was not obtained by looking at outcomes. Deferred, not refused: admissible only under a superseding preregistration that states each direction and its prior justification."}
+  ],
+
+  "arithmetic": {
+    "no_float_anywhere": true,
+    "representation": "integers and gcd-reduced rationals as named integer numerator/denominator pairs",
+    "fixed_quantisation_denominator": 1000000000000,
+    "quantisation_rule": "round half to even against the fixed denominator, applied after every boosting round so denominators cannot grow without bound",
+    "impurity": "exact rational Gini; no float comparison at any split",
+    "comparison_rule": "rationals compared by integer cross-multiplication only"
+  },
+
+  "preprocessing": {
+    "note": "Every rule here is either fold-free or fitted on training folds of the bound split plan only. Nothing is fitted on validation, calibration-holdout or test.",
+    "scaling": "none",
+    "standardisation": "none",
+    "normalisation": "none",
+    "log_or_rank_or_quantile_transform": "none",
+    "one_hot_or_target_encoding": "none",
+    "feature_selection": "none. All 99 fields are offered to every family; a family that ignores a field does so by fitting, not by a selection step that saw the data first.",
+    "rational_pair_handling": {
+      "rule": "a numerator/denominator pair is ONE feature of rational type. A split compares the exact rational by integer cross-multiplication. A split on a numerator alone is refused: a numerator without its denominator is not a quantity.",
+      "pairs": [
+        ["concentration_total_supply_top_1_share_numerator", "concentration_total_supply_top_1_share_denominator"],
+        ["concentration_total_supply_top_5_share_numerator", "concentration_total_supply_top_5_share_denominator"],
+        ["concentration_total_supply_top_10_share_numerator", "concentration_total_supply_top_10_share_denominator"],
+        ["concentration_total_supply_herfindahl_numerator", "concentration_total_supply_herfindahl_denominator"],
+        ["concentration_circulating_user_top_1_share_numerator", "concentration_circulating_user_top_1_share_denominator"],
+        ["concentration_circulating_user_top_5_share_numerator", "concentration_circulating_user_top_5_share_denominator"],
+        ["concentration_circulating_user_top_10_share_numerator", "concentration_circulating_user_top_10_share_denominator"],
+        ["concentration_circulating_user_herfindahl_numerator", "concentration_circulating_user_herfindahl_denominator"],
+        ["concentration_owner_total_supply_top_1_share_numerator", "concentration_owner_total_supply_top_1_share_denominator"],
+        ["concentration_owner_circulating_user_top_1_share_numerator", "concentration_owner_circulating_user_top_1_share_denominator"],
+        ["concentration_creator_total_supply_share_numerator", "concentration_creator_total_supply_share_denominator"],
+        ["concentration_creator_circulating_user_share_numerator", "concentration_creator_circulating_user_share_denominator"]
+      ],
+      "pair_count": 12,
+      "zero_denominator_rule": "a pair whose denominator is zero is null for that row, never zero; the share does not exist"
+    },
+    "threshold_candidate_rule": "candidate split points are the midpoints between consecutive DISTINCT values observed in the TRAINING FOLDS ONLY, expressed exactly as rationals. Deriving candidates from all rows would let the evaluation fold choose where the model may cut.",
+    "fitted_transforms_declared_to_the_artifact": ["threshold_candidate_sets", "null_direction_per_node", "training_fold_feature_ranges", "calibration_map"]
+  },
+
+  "missingness": {
+    "principle": "unavailable is not zero, and no value is ever imputed",
+    "row_level": "a row whose feature vector is unavailable under B13F V01-V07 produces no training row and no prediction; at inference it abstains under A01",
+    "field_level": {
+      "rule": "a null in a governed optional field is routed down a dedicated third branch at each node; the branch direction is fitted on training folds only",
+      "governed_by": ["concentration_owner_grouping_available", "concentration_creator_share_available"],
+      "availability_flags_are_features": true,
+      "note": "the availability flags are fields 70 and 93 of the frozen contract, so the model can see 'we cannot say' as itself rather than inferring it from a substituted number"
+    },
+    "refused_by_name": ["impute_zero", "impute_mean", "impute_median", "impute_mode", "carry_forward", "back_fill", "knn_impute", "mice", "iterative_impute", "indicator_plus_zero", "drop_column_if_any_null", "drop_row_silently"],
+    "refusal_reason": "a zero claims the thing did not happen, a median claims this subject was typical and is fitted on a distribution, and a missingness encoding chosen because it improved a score is the outcome entering through the door marked handling missing data"
+  },
+
+  "selection": {
+    "fit_on": "training folds only",
+    "select_on": "validation folds only",
+    "test_fold_touches": 1,
+    "test_fold_rule": "the test fold is scored exactly once, with exactly one configuration, after the selected configuration's artifact hash has been recorded",
+    "cross_validation": "walk-forward only. No k-fold shuffling, no repeated CV, no re-use of any evaluation row.",
+    "primary_metric": {
+      "name": "brier_score_exact_rational",
+      "direction": "lower_is_better",
+      "computation": "summed as one rational over a common denominator, never a mean of rounded terms",
+      "justification": "it is a proper scoring rule, so it cannot be improved by miscalibration; it is threshold-free, so no decision threshold is chosen during selection; and it is exactly computable as a rational."
+    },
+    "forbidden_selection_metrics": [
+      {"name": "realised_capital_weighted_return", "reason": "selecting on realised return over a validation fold selects the configuration that happened to catch that fold's few largest winners"},
+      {"name": "any_metric_requiring_a_decision_threshold", "reason": "the threshold becomes a second, unpriced selection"},
+      {"name": "any_metric_computed_on_the_test_fold", "reason": "that is not selection, it is fitting to the answer"}
+    ],
+    "tie_breaks_in_strict_order": [
+      "1. lower exact Brier on the validation folds",
+      "2. fewer fitted parameters",
+      "3. lower family index in the frozen order F1 < F2 < F3 < F4",
+      "4. lower grid index in the frozen enumeration order of that family"
+    ],
+    "tie_break_property": "the order is total and deterministic, so no tie is ever resolved at random or by whichever configuration was enumerated first by accident",
+    "family_accounting": {
+      "configurations_per_horizon": 15,
+      "horizons": 4,
+      "model_selection_family_size": 60,
+      "primary_horizon_family_size": 15,
+      "baseline_family_size": 16,
+      "rule": "the model family and the B11b baseline family are counted separately and neither absorbs the other. Any future inferential claim over the model family uses a Bonferroni-corrected alpha of 0.05/60.",
+      "no_test_in_this_design": "no significance test, confidence interval or p-value is computed. Grouped uncertainty is an assumption-free jackknife spread over the split plan's exact-identity groups."
+    }
+  },
+
+  "calibration": {
+    "method": "isotonic_pava_exact_rational",
+    "is_selectable": false,
+    "is_selectable_reason": "making calibration an option doubles the family and invites choosing it because it scored better",
+    "fitted_on": "a dedicated calibration sub-fold, chronologically last within the training segment and disjoint from the fitting sub-folds",
+    "never_fitted_on": ["validation folds", "test fold", "any fold used to fit the model"],
+    "never_fitted_on_reason": "a probability calibrated on the evaluation fold is calibrated against the answer; B14a I10 refuses it and this states the same rule where a reader will look for it",
+    "min_calibration_bin": 64,
+    "monotone": true,
+    "excluded_methods": [
+      {"id": "platt_scaling", "reason": "requires float coefficients"},
+      {"id": "temperature_scaling", "reason": "requires a float temperature"},
+      {"id": "histogram_binning_with_chosen_edges", "reason": "the edges are a fitted choice and B14b already requires preregistered edges naming their folds"}
+    ]
+  },
+
+  "abstention": {
+    "principle": "an abstention is a declared non-decision, counted in the census, deploying no capital. It is never a prediction of the negative class.",
+    "maps_to_evaluation_bucket": "no_decision",
+    "at_risk": false,
+    "codes": [
+      {"code": "A01_vector_unavailable", "condition": "the feature vector is unavailable for any B13F reason V01-V07"},
+      {"code": "A02_required_denominator_zero", "condition": "a rational-pair denominator required by a split on the selected model's path is zero"},
+      {"code": "A03_inference_incompatible", "condition": "any B14a inference-compatibility refusal I01-I12"},
+      {"code": "A04_feature_out_of_training_range", "condition": "a feature used by a split on the selected model's path takes a value outside the closed interval observed for it in the training folds"},
+      {"code": "A05_unfitted_null_branch", "condition": "a null arrives at a node whose training folds contained no nulls for that feature, so no null direction was ever fitted"},
+      {"code": "A06_window_not_eligible", "condition": "the inference window is not in eligible_windows, which currently means every window"}
+    ],
+    "out_of_distribution_rationale": "a tree predicts an out-of-range value from a leaf whose support never contained anything like it. That is an extrapolation the fit never saw, and recording it as an abstention keeps it in the census instead of dressing it as a prediction.",
+    "abstention_rate_is_not_a_knob": true,
+    "abstention_rate_rule": "no threshold governs the abstention rate, and it may not be adjusted after any result is seen. The rate is reported per code."
+  },
+
+  "leakage_constraints": [
+    "C01 every transform, threshold candidate set, calibration map and training-range record is fitted on training folds of the bound split plan only",
+    "C02 grouping is B14a R5 exact-identity union with creator and user pooled; a group occupying two segments is dropped whole",
+    "C03 purge is computed on label_window_end_slot, never on t0",
+    "C04 embargo applies after every evaluation segment",
+    "C05 chronology is strict: train_last < validation_first <= validation_last < test_first, and touching segments are refused",
+    "C06 no absolute slot number is a feature; B13F already excludes them",
+    "C07 no identity is a feature under any encoding, including a hash bucket or an embedding",
+    "C08 B13b association evidence never enters, as a feature or as a grouping",
+    "C09 no cluster artifact is accepted; ACCEPTED_CLUSTER_ARTIFACT_TYPES is empty and the funding-cluster gate stays open",
+    "C10 the test fold is touched once, with one configuration, after the selection is hashed",
+    "C11 no outcome, label or post-t0 path state is visible to any feature or transform",
+    "C12 no threshold, bin edge or cutoff is taken from a burned outcome distribution"
+  ],
+
+  "comparison_against_b11b": {
+    "comparator_policies": ["P1_all_eligible_fixed_size", "P0_do_nothing", "P2_mint_hash_random_control"],
+    "primary_comparator": "P1_all_eligible_fixed_size",
+    "primary_comparator_reason": "P1 is the reference the pipeline produces with no selection whatsoever, which is exactly what a selective model must beat to have shown anything",
+    "instantiation_rule": "the B11b POLICY DEFINITIONS are re-instantiated on the same eligible window, the same rows and the same split plan as the model. They are rules, carry no fitted parameter and import nothing from B11a.",
+    "forbidden_comparison": {
+      "id": "cross_window_comparison",
+      "description": "comparing a model scored on a future window against the figures B11b computes on B11a",
+      "reason": "the two numbers come from different windows, so their difference measures the windows, not the model. Refused by name."
+    },
+    "pairing": "B14b paired comparison: exactly the rows where both sides produce an outcome, never a caller-supplied cohort",
+    "mandatory_published_figures": [
+      "every headline on both bases, observed_evaluable and whole_cohort_worst_case",
+      "model_evaluable_only and baseline_evaluable_only counts and their difference",
+      "model entry count and baseline entry count",
+      "abstention counts per code",
+      "grouped jackknife spread over the split plan's exact-identity groups"
+    ],
+    "entry_count_rationale": "a model that abstains heavily can post a better per-position figure while deploying almost nothing. Publishing both entry counts and both bases makes that visible rather than arguable.",
+    "evidence_statement": {
+      "what_would_count_as_evidence": "the selected configuration beats P1 on the primary metric on the test fold, on BOTH bases, by more than the grouped jackknife spread",
+      "is_a_pass_fail_gate": false,
+      "why_not": "no publication threshold is preregistered because nobody here has earned a good-enough line, and the funding-cluster leakage gate remains open regardless of any figure"
+    }
+  },
+
+  "status_locks": {
+    "performance_status": "not_evaluated",
+    "publication_grade": false,
+    "model_eligible": false,
+    "eligible_for_b11a": false,
+    "refused_status_names": ["evaluated", "executable", "profitable", "production_ready", "validated", "live", "publication_grade"],
+    "u4_u5": "untouched; still require a separate explicit decision after collection"
+  },
+
+  "prohibited_in_this_pass": [
+    "fitting any model on any real data",
+    "inspecting B11a composition",
+    "querying any outcome",
+    "selecting any threshold from a burned outcome distribution",
+    "unlocking U4 or U5",
+    "signing, submitting or trading",
+    "altering or restarting the live watcher",
+    "adding any dependency"
+  ]
+}
