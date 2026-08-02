@@ -1,0 +1,148 @@
+{
+  "preregistration_id": "B15E_SHADOW_PATH_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (handoff 122)",
+  "status": "FROZEN. Committed alone, before any later return was inspected and before any exit was priced.",
+  "purpose": "Freeze the shadow position/outcome protocol: which later observations form a path, which rule selects the exit at each horizon, what the exit costs, how censoring is handled, and what may be published and when.",
+  "committed_before_inspecting_any_later_return": true,
+  "committed_before_any_exit_was_priced": true,
+
+  "what_this_is_not": {
+    "headline": "SIMULATED_OBSERVED_PATH. The later states used here come from a world in which our hypothetical trade never happened.",
+    "consequences": [
+      "our own market impact is UNMEASURED and is not modelled. A real 0.1 SOL buy would have moved the reserves that every later observation reports, and every exit priced against them is therefore priced against a curve that our entry never touched.",
+      "landing probability remains unmeasured for both the entry and the exit",
+      "this is not counterfactual execution and may never be described as a backtest of a strategy that traded"
+    ],
+    "label": "SIMULATED_OBSERVED_PATH"
+  },
+
+  "horizon_rule": {
+    "identifiers_reused_from": "B11b / B10c",
+    "identifiers": ["h_1000_slots", "h_10000_slots", "h_10_observations", "administrative_window_end"],
+    "primary": "h_1000_slots",
+    "primary_not_selected_from_performance": "h_1000_slots is B11b's frozen primary and is adopted unchanged. No horizon was chosen by looking at how any of them scored, and none had been computed when this document was committed.",
+    "selection_rule": "B10b slot_horizon EXIT semantics: the FIRST canonical observation at or after t0_entry + H",
+    "THIS_IS_NOT_B10C_STATE_IN_FORCE": {
+      "statement": "B11b froze B10c STATE-IN-FORCE for its labels — the LAST evaluable observation at or BEFORE t0+H. This document uses the OTHER rule, and names it, because the two answer different questions and B11b itself warns that a result computed under one and reported under the other is a different number wearing the same name.",
+      "why_the_exit_rule_is_correct_here": "B11b marks what a position was WORTH at H. This document models actually SELLING, and a sale cannot happen at a price that has already passed. The first reachable observation at or after the target is the earliest instant a seller could have acted.",
+      "consequence": "figures produced here are NOT comparable to B11b's labels and must never be placed in the same column as them"
+    },
+    "observation_horizon_rule": "h_10_observations selects the 10th canonical observation strictly after the entry observation",
+    "administrative_window_end_rule": "the last canonical observation recorded for the curve; it is a boundary, not a target, and a path reaching it is not thereby mature"
+  },
+
+  "path_construction": {
+    "source": "later live TradeEvent observations for the SAME mint, from B15a's append-only raw log",
+    "ordering": "canonical (slot, transaction_index, outer_index, inner_index); log order within a transaction is execution order",
+    "starts_after": "the entry observation of that B15d cell, strictly",
+    "no_future_at_entry": "no observation at or before the entry observation may enter the path, and a test asserts it",
+    "duplicates": "keyed by identity so a frame redelivered after a reconnect collapses rather than becoming a second observation"
+  },
+
+  "exit_route": {
+    "route_id": "direct_standard_rpc_v1",
+    "same_route_as_entry": true,
+    "tip_lamports": 0,
+    "tip_is_an_operator_route_choice": "this route does not send tips, on the exit exactly as on the entry",
+    "base_fee_lamports": 5000,
+    "ata_rent_lamports": 0,
+    "ata_rent_excluded_because": "the associated token account was created and charged at ENTRY, where B10a books it as ata_rent_charged_never_refunded. Charging it again on the exit would double-count the same rent. It is excluded because it was already paid, NOT because it is free.",
+    "sell_priority_is_a_caller_stated_assumption": {
+      "statement": "the priority-fee values below are REUSED from B15c's buy calibration. That is a CALLER-STATED ROUTE ASSUMPTION, not an empirical claim about sells.",
+      "why_it_is_not_evidence": "B15c sampled Pump BUY transactions. Sell congestion, sell priority bidding and sell timing were never observed, so no sell distribution exists in this project. Reusing the buy quantiles is a stated assumption a reader can reject; presenting them as measured sell costs would be a fabrication.",
+      "what_would_replace_it": "a calibration sample of observed Pump SELL transactions, preregistered separately"
+    }
+  },
+
+  "exit_cost_scenarios": [
+    {"scenario_id": "optimistic", "base_fee_lamports": 5000, "priority_fee_lamports": 1000,
+     "tip_lamports": 0, "ata_rent_lamports": 0, "failed_attempts": 0},
+    {"scenario_id": "base", "base_fee_lamports": 5000, "priority_fee_lamports": 100000,
+     "tip_lamports": 0, "ata_rent_lamports": 0, "failed_attempts": 0},
+    {"scenario_id": "stressed", "base_fee_lamports": 5000, "priority_fee_lamports": 1000000,
+     "tip_lamports": 0, "ata_rent_lamports": 0, "failed_attempts": 1}
+  ],
+  "scenario_pairing_rule": {
+    "rule": "an exit is priced under the SAME scenario id as its entry, always",
+    "no_mixing": "an optimistic entry is never paired with a stressed exit. Mixing scenarios produces a figure that describes no coherent world and flatters or damns arbitrarily.",
+    "no_aggregation": "the three scenarios are never averaged, blended or summarised into one number"
+  },
+
+  "sell_fee_schedule": {
+    "source": "the point-in-time TradeEvent at the exit observation, through the pinned IDL",
+    "fields": ["fee_basis_points", "creator_fee_basis_points", "cashback_fee_basis_points", "buyback_fee_basis_points"],
+    "never_reused_from_entry": "the schedule is read at the EXIT instant, because the program version in force can differ from the one at entry and B15c observed more than one fee_basis_points value in a single sample"
+  },
+
+  "censoring": {
+    "right_censored_when": "no canonical observation exists at or after the horizon target",
+    "primary_metric_rule": "a censored cell is EXCLUDED from the primary metric and counted in its own bucket. It is NEVER scored as a loss, a zero or a total loss.",
+    "worst_case_published_separately": "per B14b, a whole-cohort worst-case basis is published alongside, in which every censored at-risk cell is assigned the worst admissible outcome. The two bases are never merged and neither is labelled as the other.",
+    "why_two_bases": "the censored cells are not a random sample — a curve with no later observation is disproportionately one that died — so the observed-only figure always flatters"
+  },
+
+  "exit_availability_reasons": [
+    {"code": "E01_no_observation_at_horizon", "meaning": "right-censored; the horizon was never reached in recorded evidence"},
+    {"code": "E02_curve_complete", "meaning": "the curve completed at or before the exit instant; B10a makes the exit structurally unavailable"},
+    {"code": "E03_migrated", "meaning": "a migration event was observed; no post-graduation exit is priced by this document"},
+    {"code": "E04_incomplete_state", "meaning": "the exit observation does not publish every required reserve"},
+    {"code": "E05_liquidity_unavailable", "meaning": "B10a refused the exit at those reserves"},
+    {"code": "E06_entry_not_priced", "meaning": "the entry cell was refused, stale or unavailable, so there is no position to exit"},
+    {"code": "E07_unknown_event", "meaning": "an event on this curve did not decode under the pinned IDL"},
+    {"code": "E08_session_gap", "meaning": "a reconnect or gap makes the completeness of this path unknown"}
+  ],
+
+  "post_graduation": {
+    "rule": "NO exit is priced after a curve completes or migrates",
+    "why": "the position moves to a different venue with different mechanics that this project has never validated. Pricing it on the bonding curve after completion would be pricing a trade that could not be made."
+  },
+
+  "denominators": {
+    "rule": "every B15d cell enters the denominator, including refused, stale and unavailable entry cells",
+    "why": "a cohort narrowed to the cells that produced a number is a cohort selected on having produced one, and the entries that could not be priced are disproportionately the launches that went wrong immediately"
+  },
+
+  "maturity_condition": {
+    "cell_is_mature_when": "a canonical observation exists at or after entry_slot + horizon_slots, or the exit is unavailable for a reason that will not change with time (E02, E03, E06)",
+    "cohort_is_complete_when": "every cell is either mature or explicitly right-censored with the recorded evidence exhausted",
+    "publication_order": {
+      "always_publishable": ["structural counts", "maturity counts", "reason counts", "coverage counts"],
+      "publishable_only_when_mature": ["exact net return", "maximum drawdown", "entry and exit coverage figures"],
+      "never_publishable_here": ["any profitability claim", "any executable claim", "any landing probability", "any aggregate across scenarios"]
+    }
+  },
+
+  "arithmetic": {
+    "exact_integers_and_rationals_only": true,
+    "no_float_anywhere": true,
+    "net_return_definition": "exit proceeds minus total entry outlay minus exit execution cost, in lamports, as an exact integer",
+    "drawdown_definition": "largest peak-to-trough fall along the published observed path, in lamports, computed on the path rather than on the endpoints",
+    "no_fee_double_counting": "entry costs are B10a's lamports_out_of_wallet at entry; exit costs are B10a's exit execution costs plus the exit curve fees. ATA rent appears once, at entry."
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "claiming profitability, executability or a landing probability",
+    "modelling our own market impact as zero, or presenting an unimpacted path as an impacted one",
+    "scoring a censored cell as a loss in the primary metric",
+    "dropping a refused or stale entry cell from a denominator",
+    "pairing an entry scenario with a different exit scenario",
+    "aggregating across scenarios",
+    "pricing an exit after completion or migration",
+    "reusing B11b's B10c state-in-force labels as if comparable to these exit-rule figures"
+  ],
+
+  "status_locks": {
+    "label": "SIMULATED_OBSERVED_PATH",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "market_impact": "unmeasured",
+    "landing_probability": "unmeasured",
+    "refused_status_names": ["executable", "live", "profitable", "production_ready", "validated", "backtested", "guaranteed"]
+  }
+}
