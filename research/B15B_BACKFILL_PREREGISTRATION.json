@@ -1,0 +1,143 @@
+{
+  "preregistration_id": "B15B_LAUNCH_BACKFILL_V1",
+  "supersedes": null,
+  "date": "2026-08-02",
+  "author": "Claude (handoff 116)",
+  "status": "FROZEN. Committed alone, before any live RPC request is made and before the worker exists.",
+  "purpose": "Freeze the evidence rules, the provability determination, the rate and stopping policy, and the record schemas for a read-only selective backfill of B15a decoded launch transactions.",
+  "committed_before_any_rpc_request": true,
+  "reads_only": true,
+
+  "provability_determination": {
+    "note": "Settled OFFLINE from the pinned IDL and the project's own derivation, before any transaction was fetched. Fetching first and deciding afterwards is how a rule gets chosen to match what the data happened to allow.",
+    "real_quote": {
+      "provable_when": "the launch transaction carries at least one TradeEvent on this curve",
+      "derivation": "real_quote_reserves of the LAST TradeEvent on this curve in canonical (slot, transaction_index, outer_index, inner_index) order within the transaction",
+      "evidence": "TradeEvent publishes real_sol_reserves and real_quote_reserves; CreateEvent publishes neither",
+      "unprovable_when": "the launch transaction carries no TradeEvent on this curve",
+      "unprovable_reason_code": "U01_real_quote_not_published",
+      "why_not_zero": "a freshly created curve very probably holds no quote, but 'very probably' is an assumption and the freeze forbids assumptions. Post-balances would require knowing the rent-exempt minimum to subtract, which is a second assumption."
+    },
+    "complete": {
+      "provable": true,
+      "derivation": "b10b_path_dataset.is_complete_at applied with completions scanned WITHIN the launch transaction: a CompleteEvent for this curve at or before t0 makes it true, absence makes it false",
+      "why_absence_is_proof_here": "the curve is CREATED in this transaction, so no earlier transaction could have completed it. Absence of a CompleteEvent in the only transaction that could contain one is evidence, not an assumption. This is the project's own rule, not a new one.",
+      "unprovable_reason_code": "U02_completion_ambiguous",
+      "unprovable_when": "two CompleteEvents for one curve appear, which b10b already refuses as impossible"
+    },
+    "consequence": "Backfill unlocks t0 state exactly for launches whose transaction carries a trade — in B11b's vocabulary, those with a creator initial buy. Launches with no trade in the launch transaction keep a no-entry decision with U01, permanently and correctly."
+  },
+
+  "transport": {
+    "method": "getTransaction",
+    "protocol": "HTTPS JSON-RPC, read-only",
+    "encoding": "jsonParsed with maxSupportedTransactionVersion 0",
+    "commitment": "confirmed",
+    "endpoint_receipt": "scheme and host only",
+    "credential": "environment only; never an argument, never written to any artifact"
+  },
+
+  "rate_and_stopping_policy": {
+    "max_requests_per_second": 2,
+    "min_interval_ms": 500,
+    "max_concurrent_requests": 1,
+    "rate_justification": "conservative and fixed before any throughput was observed, so it cannot have been tuned up after seeing that the endpoint tolerated more. One request at a time keeps ordering and retry accounting simple enough to audit.",
+    "max_attempts_per_signature": 4,
+    "backoff_seconds": [1, 3, 9],
+    "retryable_markers": ["timed out", "timeout", "temporarily unavailable", "connection reset", "too many requests", "429", "502", "503", "504"],
+    "non_retryable_is_terminal": true,
+    "max_requests_per_run": 5000,
+    "stopping_rule": "a run ends when the pending set is exhausted, when max_requests_per_run is reached, or on an explicit operator stop",
+    "extension_forbidden_without_superseding_preregistration": true
+  },
+
+  "isolation": {
+    "artifact_root": "research/b15b",
+    "reads": ["research/b15a/shadow.sqlite (read-only, decoded launch signatures only)"],
+    "may_not_write": ["research/b15a", "research/b11a", "every file in the B11c integrity manifest"],
+    "concurrency": "B15a keeps recording while this runs. B15a is opened read-only and never written, so an append-only recorder and a read-only reader cannot conflict."
+  },
+
+  "schemas": {
+    "rpc_exchange": {
+      "immutable": true,
+      "storage": "append-only JSONL; a line once written is never edited or deleted",
+      "fields": ["exchange_seq", "signature", "attempt", "endpoint_scheme_host", "request_json", "requested_wall_unix", "requested_monotonic_ns", "received_wall_unix", "received_monotonic_ns", "http_status", "response_json_or_error", "raw_sha256", "outcome"],
+      "outcomes": ["retrieved", "rpc_error", "transport_error", "not_found"]
+    },
+    "backfill": {
+      "fields": ["signature", "launch_seq", "slot", "mint", "bonding_curve", "attempts", "status", "unavailable_reason", "latency_ns", "context_slot", "commitment", "evidence_sha256", "backfilled_at_wall_unix"],
+      "statuses": ["retrieved", "unavailable", "failed"]
+    },
+    "t0_state": {
+      "fields": ["signature", "virtual_quote", "virtual_token", "real_quote", "real_token", "quote_mint", "mayhem_mode", "complete", "slot", "trade_count_in_launch_tx", "provenance", "missing_fields", "evidence_sha256"],
+      "note": "every field derived only from events inside the launch transaction, decoded with the pinned IDL through the shared decoder"
+    },
+    "decision_v2": {
+      "fields": ["decision_seq", "launch_seq", "version", "supersedes_decision_seq", "policy_id", "decided_wall_unix", "decided_monotonic_ns", "evidence_basis", "feature_availability", "policy_result", "reason_code", "hypothetical_quote_lamports", "simulated_entry", "outcome_placeholder", "evidence_sha256"],
+      "evidence_bases": ["feed_only", "backfilled_transaction"],
+      "history_rule": "a feed-only decision is NEVER rewritten. A backfilled decision is a new row at version 2 naming the row it supersedes, and exactly one decision is CURRENT per decoded launch."
+    }
+  },
+
+  "failure_rules": [
+    {"code": "F01_signature_mismatch", "condition": "the response's transaction signature is not the one requested"},
+    {"code": "F02_slot_mismatch", "condition": "the response's slot disagrees with the slot B15a recorded"},
+    {"code": "F03_mint_mismatch", "condition": "the CreateEvent in the response names a different mint than B15a recorded"},
+    {"code": "F04_transaction_failed", "condition": "the transaction carries an error; a failed transaction launched nothing"},
+    {"code": "F05_no_create_event", "condition": "the response carries no CreateEvent for this curve"},
+    {"code": "F06_conflicting_events", "condition": "two CreateEvents for one curve, or two CompleteEvents, in one transaction"},
+    {"code": "F07_stale_response", "condition": "the response's context slot precedes the launch slot"},
+    {"code": "F08_database_locked", "condition": "the artifact could not be written"},
+    {"code": "F09_unknown_discriminator_in_curve_events", "condition": "an event on this curve does not decode under the pinned IDL"}
+  ],
+  "failure_rule": "every one of these FAILS VISIBLY: the exchange is preserved, the backfill row records the code, and the decision is not advanced. None is downgraded to a warning and none produces a partial state.",
+
+  "unavailable_reasons": [
+    {"code": "U01_real_quote_not_published", "meaning": "no TradeEvent in the launch transaction, so real_quote is not published by any event in it"},
+    {"code": "U02_completion_ambiguous", "meaning": "conflicting completion evidence"},
+    {"code": "U03_rpc_exhausted", "meaning": "the bounded retries were used without a response"},
+    {"code": "U04_cost_inputs_unstated", "meaning": "fee, priority fee, tip or latency were not supplied by the caller, so an executable entry cannot be priced"}
+  ],
+
+  "policy_on_backfilled_state": {
+    "policy_id": "P1_all_eligible_fixed_size",
+    "hypothetical_size_lamports": 100000000,
+    "vetoes": "B11b's own evaluate_vetoes, called unchanged on the rematerialized t0 state",
+    "simulated_entry": "B10a's own pricing, on the rematerialized state, only when every input it requires is present",
+    "cost_inputs": {
+      "rule": "fee, priority fee, tip and latency must be CALLER-STATED or the entry is unavailable",
+      "never_defaulted": true,
+      "reason": "a default cost is a number nobody measured standing where a measurement belongs, and it flatters every figure computed downstream"
+    },
+    "still_hypothetical": true,
+    "no_profit_published": "exits and outcomes are a later shadow stage; this preregistration publishes no realised figure and no profit"
+  },
+
+  "idempotence": {
+    "rule": "re-running the worker over the same signatures must produce the same rows and no duplicates",
+    "key": "signature is unique in the backfill table; the rpc_exchange log is append-only and grows",
+    "replay_safe_under_concurrent_recording": true
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing anything",
+    "constructing a transaction",
+    "submitting a transaction",
+    "tips, priority fees, or any spending",
+    "writing to research/b15a or research/b11a",
+    "altering or restarting the B15a recorder or the B11c watcher",
+    "assuming a value for any field the evidence does not publish",
+    "reading state later than the launch transaction",
+    "using a terminal or current snapshot in place of point-in-time evidence",
+    "publishing any profit, executable or live claim"
+  ],
+
+  "status_locks": {
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "publication_grade": false,
+    "refused_status_names": ["executable", "live", "profitable", "production_ready", "validated", "complete"]
+  }
+}
