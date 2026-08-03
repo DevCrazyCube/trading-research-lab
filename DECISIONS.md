@@ -2279,3 +2279,47 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Ratified by:** the Codex directive of handoff 99. **Owner review not separately obtained.**
 - **NOT done:** no collection, no composition queried or published, no result stage, no label, no
   unlock. U4 and U5 remain a later explicit decision.
+
+## 2026-08-04 — The tested 0.1 SOL direct-RPC launch snipe is rejected on cost and liquidity, and on nothing wider (B15Q, handoff 158)
+
+- **Status:** accepted, for the tested configuration only
+- **Ratified by:** agent-proposed (Codex directive of handoff 158; owner review not separately
+  obtained)
+- **Decision:** Reject the **current tested configuration** — a 100,000,000-lamport (0.1 SOL)
+  direct-RPC launch snipe entered 1, 2 or 4 slots after launch and exited at 1,000 or 10,000 slots —
+  on cost and liquidity grounds. Do **not** generalize the rejection to other position sizes, venues,
+  entry delays, exit horizons, reactive books, or strategies.
+- **Evidence:** `research/B15Q_CLEAN_REPLICATION_FINDING.md`, from the immutable artifact
+  `research/b15q/replication.json`
+  (sha256 `45644bc852d8ab15640bb852ee862e311167f58ea0b589ffb2d35410742c0f6b`), preregistered alone at
+  `b116f0f` before any figure was computed, and independently audited at handoff 154 with every
+  published figure recomputed from stored evidence and **0 mismatching fields**.
+  - On 5,000 consecutive launches with fees decoded from each launch's own transaction, the round
+    trip is negative at the median in **all eighteen** scenario×horizon×delay groups: −10,735,986 to
+    −15,002,651 lamports on a 100,000,000-lamport position, with 96.48%–98.81% of priced cells at or
+    below zero.
+  - External liquidity capacity — what the **observed** book could absorb, excluding reserves our own
+    buy would have added — has a median of **12 to 15 lamports**, against a position roughly seven
+    million times larger. Only 9.9%–17.9% of cells could absorb the full position.
+  - The median net is negative at every size on the frozen grid and worsens monotonically with size.
+- **Reason:** No estimate of landing probability is required to reach this conclusion. Landing
+  probability scales exposure to an opportunity that is negative at the median and, on roughly 90% of
+  cells, not executable at this size at all — so a higher landing rate makes this configuration
+  worse, not better. The figures are already generous to the strategy: the counterfactual credits our
+  own buy's contribution to the exit reserves, and on 86.5% of priced cells the observed book could
+  not pay for the sale at all.
+- **Consequence:** This configuration is not promoted and is not a candidate for any later
+  authorization. It is **not** evidence against the venue, against launch-time entry in general, or
+  in favour of any alternative size — measuring a different configuration requires its own
+  preregistration and its own evidence.
+- **Limitations preserved, and none of them are closed by this entry:** landing probability and
+  competitor response are **unmeasured** (the assumption is `UNREACTING_ORDER_FLOW`, and the
+  self-impact diagnostic is a lower bound on that error, formable on only 13.5% of cells); 904 of
+  5,000 members published no fee basis points at t0 and are absent as coverage, never filled from a
+  later trade; the h_1000_slots and h_10000_slots populations **differ** (4,163–4,229 cells per delay
+  against 5,000, the gap concentrated in the earliest launches through prospective-only scheduling),
+  so the gap between their medians is not a horizon effect; and **no return, expected value, profit
+  or probability of any outcome is claimed**.
+- **NOT done:** nothing was signed, simulated, submitted or spent; no threshold, model gate or live
+  worker was touched; the B15O artifact recording the empty-population result stands unedited beside
+  this one.

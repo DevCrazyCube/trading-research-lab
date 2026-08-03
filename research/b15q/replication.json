@@ -1,0 +1,2897 @@
+{
+  "b15o_is_untouched": "B15O is a separate artifact and is neither edited, replaced nor re-run",
+  "b15p_manifest": {
+    "complete": true,
+    "distinct_schedules": [
+      {
+        "buyback_fee_bps": 5000,
+        "cashback_fee_bps": 30,
+        "creator_fee_bps": 0,
+        "fee_bps": 95,
+        "members": 2259
+      },
+      {
+        "buyback_fee_bps": 5000,
+        "cashback_fee_bps": 0,
+        "creator_fee_bps": 30,
+        "fee_bps": 95,
+        "members": 1147
+      },
+      {
+        "buyback_fee_bps": 0,
+        "cashback_fee_bps": 0,
+        "creator_fee_bps": 30,
+        "fee_bps": 95,
+        "members": 679
+      },
+      {
+        "buyback_fee_bps": 0,
+        "cashback_fee_bps": 30,
+        "creator_fee_bps": 0,
+        "fee_bps": 95,
+        "members": 11
+      }
+    ],
+    "executable": false,
+    "execution_status": "never_executed",
+    "label": "NATIVE_FEE_BACKFILL",
+    "latency_ns": {
+      "max": 6601616933,
+      "mean_floor": 204143097,
+      "min": 126969824
+    },
+    "member_set_sha256": "661f953a3aa995abe9a013e69da080f71bad212666a40610d859764b2855a296",
+    "members": 5000,
+    "performance_status": "not_evaluated",
+    "refusals": {
+      "P_NO_TRADE_EVENT": 904
+    },
+    "remaining": 0,
+    "replayed_schedules": 4096,
+    "schema_version": "1.0.0",
+    "states": {
+      "refused": 904,
+      "retrieved": 4096
+    },
+    "terminal": 5000
+  },
+  "comparison": {
+    "nature": "DESCRIPTIVE ONLY",
+    "no_pass_threshold": "no tolerance, agreement criterion or hypothesis test exists here",
+    "no_pooling": "the populations are never combined, averaged or presented as one",
+    "operands": [
+      "B15L V1",
+      "B15M V1",
+      "B15O (zero priced cells)"
+    ],
+    "quantities": {
+      "b15l": [
+        "priced cells per (scenario, horizon, delay)",
+        "the count and share of cells whose naive observed-book exit could be priced",
+        "the median self-impact per horizon",
+        "the median counterfactual net per group",
+        "the count and share at or below zero",
+        "the refusal census by code"
+      ],
+      "b15m": [
+        "exact integer capacity order statistics per (horizon, delay)",
+        "zero-capacity count and share",
+        "cap-hit count and share",
+        "the curve-resolution floor",
+        "liquidity-executable and non-negative counts per grid size",
+        "the refusal census by code"
+      ]
+    }
+  },
+  "dependency_audit": {
+    "all_declared": true,
+    "decisive_check": "the runtime path guard",
+    "forbidden_references": {
+      "b15a_shadow_pilot.py": [
+        "b15a"
+      ],
+      "b15b_backfill.py": [
+        "b15a",
+        "b15b"
+      ],
+      "b15c_cost_calibration.py": [
+        "b15a",
+        "b15b"
+      ],
+      "b15d_shadow_entry.py": [
+        "b15a",
+        "b15b"
+      ],
+      "b15e_shadow_path.py": [
+        "b15a",
+        "b15b"
+      ],
+      "b15f_checkpoint.py": [
+        "b15a",
+        "b15b",
+        "b15f"
+      ],
+      "b15g_checkpoint_join.py": [
+        "b15a",
+        "b15b",
+        "b15f"
+      ],
+      "b15h_prospective_entry.py": [
+        "b15a",
+        "b15b",
+        "b15f"
+      ],
+      "b15j_raw_retention.py": [
+        "b15a"
+      ],
+      "b15l_counterfactual_roundtrip.py": [
+        "b15b",
+        "b15f"
+      ]
+    }
+  },
+  "executable": false,
+  "execution_status": "never_executed",
+  "label": "CLEAN_CLOSED_REPLICATION",
+  "materialized_at_wall_unix": 1785792711.139905,
+  "performance_status": "not_evaluated",
+  "population": {
+    "entry_checkpoints": 14485,
+    "exit_checkpoints": 27586,
+    "exit_checkpoints_withheld_pending_confirmation": 0,
+    "fee_schedules": 4096,
+    "first_member": {
+      "mint": "2yFFz4j9255knYDHo42e2BKis7r65QdSDT2q1gripump",
+      "signature": "5oHsFbXa6iaeRSu4dNJQaxRSJbF3ycCDQW4wiFAeXUKcQFdNBdffLt724paEnWD1rMyEhiR4J4k3bgT6kiMe642B",
+      "t0_slot": 436984368
+    },
+    "last_member": {
+      "mint": "8HTn38zyZbupVfwjBQ9cHfnN8u2iNpQ3hQv5BnKNpump",
+      "signature": "4R128E14BATYDEKffzTKjzP1vcVPCT6uM6eBvxf9YSp4TeiskiUq7FWeKvezZSYGbWZ3YJxDx45LxZBWXTWNaRjH",
+      "t0_slot": 437008666
+    },
+    "member_set_sha256": "661f953a3aa995abe9a013e69da080f71bad212666a40610d859764b2855a296",
+    "members": 5000,
+    "members_without_a_t0_fee_schedule": 904,
+    "members_without_a_t0_fee_schedule_share_pct": 18,
+    "t0_fee_unavailability_is_coverage_not_failure": "these launches published no fee basis points in their own launch transaction, so no retry can supply one; a fee from a later trade would be evidence from after the decision instant and is never used",
+    "t0_fee_unavailable_by_reason": {
+      "P_NO_TRADE_EVENT": 904
+    }
+  },
+  "published_operands": {
+    "b15l_v1": {
+      "document": "research/B15L_COUNTERFACTUAL_FINDING.md",
+      "sha256": "795377ec22af47154e18a9f491e44532ab3b27fb7b570771f8031f46ff4095d6"
+    },
+    "b15m_v1": {
+      "document": "research/B15M_LIQUIDITY_CAPACITY_FINDING.md",
+      "sha256": "7fdd13af3f0714030c432527540d5e3600e02c8e95788693c33f510a687f7962"
+    },
+    "b15o": {
+      "document": "research/b15o/replication.json",
+      "sha256": "394eeb5a62b05471569c8d6406e18fd4a8f7fd7e454925186628ce294e958e5b"
+    }
+  },
+  "replicated": {
+    "b15l_counterfactual": {
+      "assumption": "UNREACTING_ORDER_FLOW",
+      "by_scenario_horizon_delay": {
+        "base|h_10000_slots|1": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 3225,
+            "max": 458090720,
+            "median": -11192651,
+            "min": -91607005,
+            "p25": -35639938,
+            "p75": -4749281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 3273,
+          "self_impact_lamports_diagnostic": {
+            "cells": 325,
+            "max": 3859977,
+            "median": 428782,
+            "min": 46047,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "base|h_10000_slots|2": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 3210,
+            "max": 458090720,
+            "median": -11184778,
+            "min": -91607005,
+            "p25": -35006473,
+            "p75": -4749281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 3258,
+          "self_impact_lamports_diagnostic": {
+            "cells": 327,
+            "max": 3859977,
+            "median": 420584,
+            "min": 46047,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "base|h_10000_slots|4": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 3202,
+            "max": 427538539,
+            "median": -11007580,
+            "min": -91607005,
+            "p25": -34884900,
+            "p75": -4749281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 3252,
+          "self_impact_lamports_diagnostic": {
+            "cells": 323,
+            "max": 3332641,
+            "median": 429712,
+            "min": 46047,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "base|h_1000_slots|1": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 2670,
+            "max": 465120597,
+            "median": -10933986,
+            "min": -91607005,
+            "p25": -34117193,
+            "p75": -4749281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 2762,
+          "self_impact_lamports_diagnostic": {
+            "cells": 482,
+            "max": 4181821,
+            "median": 516361,
+            "min": 47725,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "base|h_1000_slots|2": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 2634,
+            "max": 465120597,
+            "median": -10933986,
+            "min": -91607005,
+            "p25": -33456159,
+            "p75": -4749281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 2726,
+          "self_impact_lamports_diagnostic": {
+            "cells": 485,
+            "max": 4181821,
+            "median": 514207,
+            "min": 47725,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "base|h_1000_slots|4": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 2607,
+            "max": 395442336,
+            "median": -10933986,
+            "min": -91607005,
+            "p25": -33493878,
+            "p75": -4749281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 2702,
+          "self_impact_lamports_diagnostic": {
+            "cells": 483,
+            "max": 3619880,
+            "median": 523681,
+            "min": 47725,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "optimistic|h_10000_slots|1": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 3225,
+            "max": 458288720,
+            "median": -10994651,
+            "min": -91409005,
+            "p25": -35441938,
+            "p75": -4551281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 3273,
+          "self_impact_lamports_diagnostic": {
+            "cells": 325,
+            "max": 3859977,
+            "median": 428782,
+            "min": 46047,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "optimistic|h_10000_slots|2": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 3210,
+            "max": 458288720,
+            "median": -10986778,
+            "min": -91409005,
+            "p25": -34808473,
+            "p75": -4551281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 3258,
+          "self_impact_lamports_diagnostic": {
+            "cells": 327,
+            "max": 3859977,
+            "median": 420584,
+            "min": 46047,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "optimistic|h_10000_slots|4": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 3202,
+            "max": 427736539,
+            "median": -10809580,
+            "min": -91409005,
+            "p25": -34686900,
+            "p75": -4551281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 3252,
+          "self_impact_lamports_diagnostic": {
+            "cells": 323,
+            "max": 3332641,
+            "median": 429712,
+            "min": 46047,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "optimistic|h_1000_slots|1": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 2669,
+            "max": 465318597,
+            "median": -10735986,
+            "min": -91409005,
+            "p25": -33919193,
+            "p75": -4551281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 2762,
+          "self_impact_lamports_diagnostic": {
+            "cells": 482,
+            "max": 4181821,
+            "median": 516361,
+            "min": 47725,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "optimistic|h_1000_slots|2": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 2634,
+            "max": 465318597,
+            "median": -10735986,
+            "min": -91409005,
+            "p25": -33258159,
+            "p75": -4551281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 2726,
+          "self_impact_lamports_diagnostic": {
+            "cells": 485,
+            "max": 4181821,
+            "median": 514207,
+            "min": 47725,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "optimistic|h_1000_slots|4": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 2607,
+            "max": 395640336,
+            "median": -10735986,
+            "min": -91409005,
+            "p25": -33295878,
+            "p75": -4551281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 2702,
+          "self_impact_lamports_diagnostic": {
+            "cells": 483,
+            "max": 3619880,
+            "median": 523681,
+            "min": 47725,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "stressed|h_10000_slots|1": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 3234,
+            "max": 454280720,
+            "median": -15002651,
+            "min": -95417005,
+            "p25": -39449938,
+            "p75": -8559281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 3273,
+          "self_impact_lamports_diagnostic": {
+            "cells": 325,
+            "max": 3859977,
+            "median": 428782,
+            "min": 46047,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "stressed|h_10000_slots|2": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 3219,
+            "max": 454280720,
+            "median": -14994778,
+            "min": -95417005,
+            "p25": -38816473,
+            "p75": -8559281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 3258,
+          "self_impact_lamports_diagnostic": {
+            "cells": 327,
+            "max": 3859977,
+            "median": 420584,
+            "min": 46047,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "stressed|h_10000_slots|4": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 3211,
+            "max": 423728539,
+            "median": -14817580,
+            "min": -95417005,
+            "p25": -38694900,
+            "p75": -8559281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 3252,
+          "self_impact_lamports_diagnostic": {
+            "cells": 323,
+            "max": 3332641,
+            "median": 429712,
+            "min": 46047,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "stressed|h_1000_slots|1": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 2680,
+            "max": 461310597,
+            "median": -14743986,
+            "min": -95417005,
+            "p25": -37927193,
+            "p75": -8559281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 2762,
+          "self_impact_lamports_diagnostic": {
+            "cells": 482,
+            "max": 4181821,
+            "median": 516361,
+            "min": 47725,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "stressed|h_1000_slots|2": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 2645,
+            "max": 461310597,
+            "median": -14743986,
+            "min": -95417005,
+            "p25": -37266159,
+            "p75": -8559281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 2726,
+          "self_impact_lamports_diagnostic": {
+            "cells": 485,
+            "max": 4181821,
+            "median": 514207,
+            "min": 47725,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        },
+        "stressed|h_1000_slots|4": {
+          "assumption": "UNREACTING_ORDER_FLOW",
+          "counterfactual_net_lamports": {
+            "cells_at_or_below_zero": 2619,
+            "max": 391632336,
+            "median": -14743986,
+            "min": -95417005,
+            "p25": -37303878,
+            "p75": -8559281
+          },
+          "executable": false,
+          "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+          "priced_cells": 2702,
+          "self_impact_lamports_diagnostic": {
+            "cells": 483,
+            "max": 3619880,
+            "median": 523681,
+            "min": 47725,
+            "note": "the difference our own order makes to the exit; a diagnostic, never a selection criterion"
+          }
+        }
+      },
+      "censoring_statement": "conditioned on B15O's frozen 5,000 launches, which descend from B15i's own observations and from no closed recorder; a cell is absent when its B15i entry checkpoint is missing, when its B15N exit checkpoint is missing or withheld pending chain confirmation, or when its launch transaction published no fee basis points at t0 and therefore has no admissible fee schedule",
+      "competitor_response": "unmeasured",
+      "delays": [
+        1,
+        2,
+        4
+      ],
+      "executable": false,
+      "execution_status": "never_executed",
+      "horizons": [
+        "h_1000_slots",
+        "h_10000_slots"
+      ],
+      "inherited_censoring_statement_superseded": {
+        "false_for_this_population": true,
+        "statement": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market",
+        "why": "it names B15f scheduling from B15a; the B15Q population descends from neither"
+      },
+      "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+      "landing_probability": "unmeasured",
+      "performance_status": "not_evaluated",
+      "population": {
+        "entry_checkpoints": 14485,
+        "exit_checkpoints": 27586,
+        "fee_schedules": 4096
+      },
+      "position_lamports": 100000000,
+      "refusals": {
+        "L_COMPLETE_AT_ENTRY": 381,
+        "L_COMPLETE_BY_EXIT": 417,
+        "L_MAYHEM": 11277,
+        "L_NON_NATIVE_QUOTE": 135,
+        "L_NO_ENTRY_CHECKPOINT": 2979,
+        "L_NO_FEE_SCHEDULE": 13650
+      },
+      "schema_version": "1.0.0",
+      "update_rule": {
+        "mismatches": 0,
+        "pairs_checked": 93253,
+        "rule": "d_virtual == d_real on both sides"
+      }
+    },
+    "b15m_capacity": {
+      "capacity_by_horizon_delay": {
+        "h_10000_slots|1": {
+          "cap_hit_cells": 325,
+          "cap_hit_note": "a cap-hit capacity is at least the ceiling and was not measured further; it is never reported as equal to it",
+          "cells": 3273,
+          "circular_liquidity_dependence_cells": 0,
+          "circular_liquidity_dependence_note": "the exit was payable only out of reserves our own purchase had added; an exit funded by one's own entry is not liquidity",
+          "circular_liquidity_dependence_vacuous": "the frozen condition requires an external capacity of exactly zero, and no cell in any group reached it: every book supported at least a few lamports. The condition is reported as measured, at zero, and the quantity below was added afterwards to measure what it was reaching for",
+          "curve_resolution_floor_lamports": {
+            "cells": 3273,
+            "max": 2,
+            "median": 2,
+            "min": 2,
+            "p10": 2,
+            "p25": 2,
+            "p75": 2,
+            "p90": 2
+          },
+          "curve_resolution_floor_note": "the smallest input acquiring at least one token. The pinned exact-input formula carries (q - 1) in its numerator, so a one-lamport buy acquires nothing at any reserves. This is the curve's resolution, not a liquidity limit, and the capacity search runs above it because the admissible set is otherwise not a prefix",
+          "external_liquidity_capacity_lamports": {
+            "cells": 3273,
+            "max": 100000000,
+            "median": 13,
+            "min": 3,
+            "p10": 3,
+            "p25": 4,
+            "p75": 9878,
+            "p90": 96407428
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "self_funded_shortfall_cells": 2948,
+          "self_funded_shortfall_lamports": {
+            "cells": 2948,
+            "max": 99999997,
+            "median": 99999990,
+            "min": 396738,
+            "p10": 98999932,
+            "p25": 99999933,
+            "p75": 99999997,
+            "p90": 99999997
+          },
+          "self_funded_shortfall_note": "cells where B15L could price the exit but the EXTERNAL book could not support the full frozen position, and by how many lamports it fell short. Defined after seeing the frozen circular condition return zero, and labelled so that is visible rather than buried",
+          "zero_capacity_cells": 0
+        },
+        "h_10000_slots|2": {
+          "cap_hit_cells": 327,
+          "cap_hit_note": "a cap-hit capacity is at least the ceiling and was not measured further; it is never reported as equal to it",
+          "cells": 3258,
+          "circular_liquidity_dependence_cells": 0,
+          "circular_liquidity_dependence_note": "the exit was payable only out of reserves our own purchase had added; an exit funded by one's own entry is not liquidity",
+          "circular_liquidity_dependence_vacuous": "the frozen condition requires an external capacity of exactly zero, and no cell in any group reached it: every book supported at least a few lamports. The condition is reported as measured, at zero, and the quantity below was added afterwards to measure what it was reaching for",
+          "curve_resolution_floor_lamports": {
+            "cells": 3258,
+            "max": 2,
+            "median": 2,
+            "min": 2,
+            "p10": 2,
+            "p25": 2,
+            "p75": 2,
+            "p90": 2
+          },
+          "curve_resolution_floor_note": "the smallest input acquiring at least one token. The pinned exact-input formula carries (q - 1) in its numerator, so a one-lamport buy acquires nothing at any reserves. This is the curve's resolution, not a liquidity limit, and the capacity search runs above it because the admissible set is otherwise not a prefix",
+          "external_liquidity_capacity_lamports": {
+            "cells": 3258,
+            "max": 100000000,
+            "median": 13,
+            "min": 3,
+            "p10": 3,
+            "p25": 4,
+            "p75": 9878,
+            "p90": 100000000
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "self_funded_shortfall_cells": 2931,
+          "self_funded_shortfall_lamports": {
+            "cells": 2931,
+            "max": 99999997,
+            "median": 99999990,
+            "min": 396738,
+            "p10": 99010977,
+            "p25": 99999935,
+            "p75": 99999997,
+            "p90": 99999997
+          },
+          "self_funded_shortfall_note": "cells where B15L could price the exit but the EXTERNAL book could not support the full frozen position, and by how many lamports it fell short. Defined after seeing the frozen circular condition return zero, and labelled so that is visible rather than buried",
+          "zero_capacity_cells": 0
+        },
+        "h_10000_slots|4": {
+          "cap_hit_cells": 323,
+          "cap_hit_note": "a cap-hit capacity is at least the ceiling and was not measured further; it is never reported as equal to it",
+          "cells": 3252,
+          "circular_liquidity_dependence_cells": 0,
+          "circular_liquidity_dependence_note": "the exit was payable only out of reserves our own purchase had added; an exit funded by one's own entry is not liquidity",
+          "circular_liquidity_dependence_vacuous": "the frozen condition requires an external capacity of exactly zero, and no cell in any group reached it: every book supported at least a few lamports. The condition is reported as measured, at zero, and the quantity below was added afterwards to measure what it was reaching for",
+          "curve_resolution_floor_lamports": {
+            "cells": 3252,
+            "max": 2,
+            "median": 2,
+            "min": 2,
+            "p10": 2,
+            "p25": 2,
+            "p75": 2,
+            "p90": 2
+          },
+          "curve_resolution_floor_note": "the smallest input acquiring at least one token. The pinned exact-input formula carries (q - 1) in its numerator, so a one-lamport buy acquires nothing at any reserves. This is the curve's resolution, not a liquidity limit, and the capacity search runs above it because the admissible set is otherwise not a prefix",
+          "external_liquidity_capacity_lamports": {
+            "cells": 3252,
+            "max": 100000000,
+            "median": 12,
+            "min": 3,
+            "p10": 3,
+            "p25": 4,
+            "p75": 9878,
+            "p90": 96407428
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "self_funded_shortfall_cells": 2929,
+          "self_funded_shortfall_lamports": {
+            "cells": 2929,
+            "max": 99999997,
+            "median": 99999990,
+            "min": 396738,
+            "p10": 99011289,
+            "p25": 99999935,
+            "p75": 99999997,
+            "p90": 99999997
+          },
+          "self_funded_shortfall_note": "cells where B15L could price the exit but the EXTERNAL book could not support the full frozen position, and by how many lamports it fell short. Defined after seeing the frozen circular condition return zero, and labelled so that is visible rather than buried",
+          "zero_capacity_cells": 0
+        },
+        "h_1000_slots|1": {
+          "cap_hit_cells": 482,
+          "cap_hit_note": "a cap-hit capacity is at least the ceiling and was not measured further; it is never reported as equal to it",
+          "cells": 2762,
+          "circular_liquidity_dependence_cells": 0,
+          "circular_liquidity_dependence_note": "the exit was payable only out of reserves our own purchase had added; an exit funded by one's own entry is not liquidity",
+          "circular_liquidity_dependence_vacuous": "the frozen condition requires an external capacity of exactly zero, and no cell in any group reached it: every book supported at least a few lamports. The condition is reported as measured, at zero, and the quantity below was added afterwards to measure what it was reaching for",
+          "curve_resolution_floor_lamports": {
+            "cells": 2762,
+            "max": 2,
+            "median": 2,
+            "min": 2,
+            "p10": 2,
+            "p25": 2,
+            "p75": 2,
+            "p90": 2
+          },
+          "curve_resolution_floor_note": "the smallest input acquiring at least one token. The pinned exact-input formula carries (q - 1) in its numerator, so a one-lamport buy acquires nothing at any reserves. This is the curve's resolution, not a liquidity limit, and the capacity search runs above it because the admissible set is otherwise not a prefix",
+          "external_liquidity_capacity_lamports": {
+            "cells": 2762,
+            "max": 100000000,
+            "median": 15,
+            "min": 3,
+            "p10": 3,
+            "p25": 4,
+            "p75": 9883039,
+            "p90": 100000000
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "self_funded_shortfall_cells": 2280,
+          "self_funded_shortfall_lamports": {
+            "cells": 2280,
+            "max": 99999997,
+            "median": 99999991,
+            "min": 396738,
+            "p10": 93086890,
+            "p25": 99999933,
+            "p75": 99999997,
+            "p90": 99999997
+          },
+          "self_funded_shortfall_note": "cells where B15L could price the exit but the EXTERNAL book could not support the full frozen position, and by how many lamports it fell short. Defined after seeing the frozen circular condition return zero, and labelled so that is visible rather than buried",
+          "zero_capacity_cells": 0
+        },
+        "h_1000_slots|2": {
+          "cap_hit_cells": 485,
+          "cap_hit_note": "a cap-hit capacity is at least the ceiling and was not measured further; it is never reported as equal to it",
+          "cells": 2726,
+          "circular_liquidity_dependence_cells": 0,
+          "circular_liquidity_dependence_note": "the exit was payable only out of reserves our own purchase had added; an exit funded by one's own entry is not liquidity",
+          "circular_liquidity_dependence_vacuous": "the frozen condition requires an external capacity of exactly zero, and no cell in any group reached it: every book supported at least a few lamports. The condition is reported as measured, at zero, and the quantity below was added afterwards to measure what it was reaching for",
+          "curve_resolution_floor_lamports": {
+            "cells": 2726,
+            "max": 2,
+            "median": 2,
+            "min": 2,
+            "p10": 2,
+            "p25": 2,
+            "p75": 2,
+            "p90": 2
+          },
+          "curve_resolution_floor_note": "the smallest input acquiring at least one token. The pinned exact-input formula carries (q - 1) in its numerator, so a one-lamport buy acquires nothing at any reserves. This is the curve's resolution, not a liquidity limit, and the capacity search runs above it because the admissible set is otherwise not a prefix",
+          "external_liquidity_capacity_lamports": {
+            "cells": 2726,
+            "max": 100000000,
+            "median": 15,
+            "min": 3,
+            "p10": 3,
+            "p25": 4,
+            "p75": 9883049,
+            "p90": 100000000
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "self_funded_shortfall_cells": 2241,
+          "self_funded_shortfall_lamports": {
+            "cells": 2241,
+            "max": 99999997,
+            "median": 99999991,
+            "min": 396738,
+            "p10": 93489391,
+            "p25": 99999939,
+            "p75": 99999997,
+            "p90": 99999997
+          },
+          "self_funded_shortfall_note": "cells where B15L could price the exit but the EXTERNAL book could not support the full frozen position, and by how many lamports it fell short. Defined after seeing the frozen circular condition return zero, and labelled so that is visible rather than buried",
+          "zero_capacity_cells": 0
+        },
+        "h_1000_slots|4": {
+          "cap_hit_cells": 483,
+          "cap_hit_note": "a cap-hit capacity is at least the ceiling and was not measured further; it is never reported as equal to it",
+          "cells": 2702,
+          "circular_liquidity_dependence_cells": 0,
+          "circular_liquidity_dependence_note": "the exit was payable only out of reserves our own purchase had added; an exit funded by one's own entry is not liquidity",
+          "circular_liquidity_dependence_vacuous": "the frozen condition requires an external capacity of exactly zero, and no cell in any group reached it: every book supported at least a few lamports. The condition is reported as measured, at zero, and the quantity below was added afterwards to measure what it was reaching for",
+          "curve_resolution_floor_lamports": {
+            "cells": 2702,
+            "max": 2,
+            "median": 2,
+            "min": 2,
+            "p10": 2,
+            "p25": 2,
+            "p75": 2,
+            "p90": 2
+          },
+          "curve_resolution_floor_note": "the smallest input acquiring at least one token. The pinned exact-input formula carries (q - 1) in its numerator, so a one-lamport buy acquires nothing at any reserves. This is the curve's resolution, not a liquidity limit, and the capacity search runs above it because the admissible set is otherwise not a prefix",
+          "external_liquidity_capacity_lamports": {
+            "cells": 2702,
+            "max": 100000000,
+            "median": 15,
+            "min": 3,
+            "p10": 3,
+            "p25": 4,
+            "p75": 9883049,
+            "p90": 100000000
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "self_funded_shortfall_cells": 2219,
+          "self_funded_shortfall_lamports": {
+            "cells": 2219,
+            "max": 99999997,
+            "median": 99999991,
+            "min": 396738,
+            "p10": 94689926,
+            "p25": 99999945,
+            "p75": 99999997,
+            "p90": 99999997
+          },
+          "self_funded_shortfall_note": "cells where B15L could price the exit but the EXTERNAL book could not support the full frozen position, and by how many lamports it fell short. Defined after seeing the frozen circular condition return zero, and labelled so that is visible rather than buried",
+          "zero_capacity_cells": 0
+        }
+      },
+      "censoring_statement": "conditioned on B15O's frozen 5,000 launches, which descend from B15i's own observations and from no closed recorder; a cell is absent when its B15i entry checkpoint is missing, when its B15N exit checkpoint is missing or withheld pending chain confirmation, or when its launch transaction published no fee basis points at t0 and therefore has no admissible fee schedule",
+      "competitor_response": "unmeasured",
+      "executable": false,
+      "execution_status": "never_executed",
+      "grid_by_scenario_horizon_delay": {
+        "base|h_10000_slots|1": {
+          "by_size": {
+            "1000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 620,
+              "net_after_costs_lamports": {
+                "cells": 620,
+                "max": 2361693,
+                "median": -2465376,
+                "min": -3138574,
+                "p10": -2935889,
+                "p25": -2819993,
+                "p75": -2274348,
+                "p90": -2269377
+              },
+              "non_negative_cells": 4
+            },
+            "10000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 495,
+              "net_after_costs_lamports": {
+                "cells": 495,
+                "max": 43818214,
+                "median": -4860306,
+                "min": -11142382,
+                "p10": -9265045,
+                "p25": -8085559,
+                "p75": -2528220,
+                "p90": -2122099
+              },
+              "non_negative_cells": 28
+            },
+            "100000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 325,
+              "net_after_costs_lamports": {
+                "cells": 325,
+                "max": 454230743,
+                "median": -25866859,
+                "min": -91197884,
+                "p10": -74285015,
+                "p25": -61426727,
+                "p75": -5391767,
+                "p90": 7571124
+              },
+              "non_negative_cells": 47
+            },
+            "2500000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 582,
+              "net_after_costs_lamports": {
+                "cells": 582,
+                "max": 9276399,
+                "median": -2798954,
+                "min": -4472520,
+                "p10": -3969617,
+                "p25": -3687090,
+                "p75": -2312194,
+                "p90": -2296394
+              },
+              "non_negative_cells": 14
+            },
+            "25000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 435,
+              "net_after_costs_lamports": {
+                "cells": 435,
+                "max": 112743580,
+                "median": -9288218,
+                "min": -24482765,
+                "p10": -20199718,
+                "p25": -17078096,
+                "p75": -2959655,
+                "p90": -1317023
+              },
+              "non_negative_cells": 34
+            },
+            "5000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 560,
+              "net_after_costs_lamports": {
+                "cells": 560,
+                "max": 20796209,
+                "median": -3299905,
+                "min": -6695783,
+                "p10": -5728667,
+                "p25": -5106544,
+                "p75": -2375927,
+                "p90": -2311468
+              },
+              "non_negative_cells": 21
+            },
+            "50000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 384,
+              "net_after_costs_lamports": {
+                "cells": 384,
+                "max": 227152119,
+                "median": -16078519,
+                "min": -46718696,
+                "p10": -38247222,
+                "p25": -32604073,
+                "p75": -3662776,
+                "p90": 516642
+              },
+              "non_negative_cells": 40
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "base|h_10000_slots|2": {
+          "by_size": {
+            "1000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 619,
+              "net_after_costs_lamports": {
+                "cells": 619,
+                "max": 2361693,
+                "median": -2466595,
+                "min": -3138574,
+                "p10": -2947932,
+                "p25": -2820951,
+                "p75": -2274348,
+                "p90": -2269377
+              },
+              "non_negative_cells": 4
+            },
+            "10000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 497,
+              "net_after_costs_lamports": {
+                "cells": 497,
+                "max": 43818214,
+                "median": -4942861,
+                "min": -11142382,
+                "p10": -9428216,
+                "p25": -8125909,
+                "p75": -2530262,
+                "p90": -2122099
+              },
+              "non_negative_cells": 28
+            },
+            "100000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 327,
+              "net_after_costs_lamports": {
+                "cells": 327,
+                "max": 454230743,
+                "median": -28719130,
+                "min": -91197884,
+                "p10": -75464952,
+                "p25": -62267985,
+                "p75": -5393653,
+                "p90": 7571124
+              },
+              "non_negative_cells": 47
+            },
+            "2500000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 583,
+              "net_after_costs_lamports": {
+                "cells": 583,
+                "max": 9276399,
+                "median": -2816888,
+                "min": -4472520,
+                "p10": -4003052,
+                "p25": -3705087,
+                "p75": -2312194,
+                "p90": -2296394
+              },
+              "non_negative_cells": 14
+            },
+            "25000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 436,
+              "net_after_costs_lamports": {
+                "cells": 436,
+                "max": 112743580,
+                "median": -9297523,
+                "min": -24482765,
+                "p10": -20301910,
+                "p25": -17227784,
+                "p75": -2962750,
+                "p90": -1317023
+              },
+              "non_negative_cells": 34
+            },
+            "5000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 561,
+              "net_after_costs_lamports": {
+                "cells": 561,
+                "max": 20796209,
+                "median": -3325434,
+                "min": -6695783,
+                "p10": -5754075,
+                "p25": -5125101,
+                "p75": -2375927,
+                "p90": -2321244
+              },
+              "non_negative_cells": 21
+            },
+            "50000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 386,
+              "net_after_costs_lamports": {
+                "cells": 386,
+                "max": 227152119,
+                "median": -16324865,
+                "min": -46718696,
+                "p10": -38581415,
+                "p25": -32720335,
+                "p75": -3662783,
+                "p90": 516642
+              },
+              "non_negative_cells": 40
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "base|h_10000_slots|4": {
+          "by_size": {
+            "1000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 613,
+              "net_after_costs_lamports": {
+                "cells": 613,
+                "max": 2055123,
+                "median": -2461800,
+                "min": -3138574,
+                "p10": -2962874,
+                "p25": -2822843,
+                "p75": -2274348,
+                "p90": -2269213
+              },
+              "non_negative_cells": 4
+            },
+            "10000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 493,
+              "net_after_costs_lamports": {
+                "cells": 493,
+                "max": 40758325,
+                "median": -4894840,
+                "min": -11142382,
+                "p10": -9467582,
+                "p25": -8178553,
+                "p75": -2528220,
+                "p90": -2064013
+              },
+              "non_negative_cells": 28
+            },
+            "100000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 323,
+              "net_after_costs_lamports": {
+                "cells": 323,
+                "max": 424205898,
+                "median": -25866859,
+                "min": -91197884,
+                "p10": -75672950,
+                "p25": -64702587,
+                "p75": -5393653,
+                "p90": 7571124
+              },
+              "non_negative_cells": 48
+            },
+            "2500000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 578,
+              "net_after_costs_lamports": {
+                "cells": 578,
+                "max": 8510216,
+                "median": -2796788,
+                "min": -4472520,
+                "p10": -4043859,
+                "p25": -3707205,
+                "p75": -2312194,
+                "p90": -2296056
+              },
+              "non_negative_cells": 15
+            },
+            "25000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 429,
+              "net_after_costs_lamports": {
+                "cells": 429,
+                "max": 105118010,
+                "median": -9044156,
+                "min": -24482765,
+                "p10": -20591298,
+                "p25": -17227784,
+                "p75": -2915322,
+                "p90": -1146837
+              },
+              "non_negative_cells": 34
+            },
+            "5000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 557,
+              "net_after_costs_lamports": {
+                "cells": 557,
+                "max": 19264651,
+                "median": -3279219,
+                "min": -6695783,
+                "p10": -5824023,
+                "p25": -5145812,
+                "p75": -2375927,
+                "p90": -2321244
+              },
+              "non_negative_cells": 22
+            },
+            "50000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 381,
+              "net_after_costs_lamports": {
+                "cells": 381,
+                "max": 211981064,
+                "median": -15384524,
+                "min": -46718696,
+                "p10": -38942594,
+                "p25": -32720335,
+                "p75": -3662776,
+                "p90": 796121
+              },
+              "non_negative_cells": 42
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "base|h_1000_slots|1": {
+          "by_size": {
+            "1000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 772,
+              "net_after_costs_lamports": {
+                "cells": 772,
+                "max": 2432628,
+                "median": -2336075,
+                "min": -3133027,
+                "p10": -2899391,
+                "p25": -2678582,
+                "p75": -2274347,
+                "p90": -2150493
+              },
+              "non_negative_cells": 14
+            },
+            "10000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 674,
+              "net_after_costs_lamports": {
+                "cells": 674,
+                "max": 44524015,
+                "median": -3424595,
+                "min": -11086922,
+                "p10": -8900824,
+                "p25": -6714751,
+                "p75": -2505551,
+                "p90": -734073
+              },
+              "non_negative_cells": 61
+            },
+            "100000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 482,
+              "net_after_costs_lamports": {
+                "cells": 482,
+                "max": 460938776,
+                "median": -14401792,
+                "min": -90644361,
+                "p10": -69439905,
+                "p25": -54377017,
+                "p75": -4593253,
+                "p90": 42535936
+              },
+              "non_negative_cells": 90
+            },
+            "2500000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 731,
+              "net_after_costs_lamports": {
+                "cells": 731,
+                "max": 9453591,
+                "median": -2487730,
+                "min": -4458653,
+                "p10": -3902328,
+                "p25": -3338771,
+                "p75": -2312182,
+                "p90": -1918674
+              },
+              "non_negative_cells": 33
+            },
+            "25000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 613,
+              "net_after_costs_lamports": {
+                "cells": 613,
+                "max": 114493328,
+                "median": -5197569,
+                "min": -24344164,
+                "p10": -18942664,
+                "p25": -13970221,
+                "p75": -2880740,
+                "p90": 1890627
+              },
+              "non_negative_cells": 79
+            },
+            "5000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 720,
+              "net_after_costs_lamports": {
+                "cells": 720,
+                "max": 21150096,
+                "median": -2689490,
+                "min": -6668050,
+                "p10": -5555512,
+                "p25": -4416672,
+                "p75": -2375876,
+                "p90": -1554710
+              },
+              "non_negative_cells": 50
+            },
+            "50000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 563,
+              "net_after_costs_lamports": {
+                "cells": 563,
+                "max": 230602734,
+                "median": -8654710,
+                "min": -46441640,
+                "p10": -35721429,
+                "p25": -27382979,
+                "p75": -3522885,
+                "p90": 11994140
+              },
+              "non_negative_cells": 85
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "base|h_1000_slots|2": {
+          "by_size": {
+            "1000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 766,
+              "net_after_costs_lamports": {
+                "cells": 766,
+                "max": 2432628,
+                "median": -2339741,
+                "min": -3133027,
+                "p10": -2902553,
+                "p25": -2683162,
+                "p75": -2274347,
+                "p90": -2149363
+              },
+              "non_negative_cells": 14
+            },
+            "10000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 671,
+              "net_after_costs_lamports": {
+                "cells": 671,
+                "max": 44524015,
+                "median": -3498671,
+                "min": -11086922,
+                "p10": -8917022,
+                "p25": -6886317,
+                "p75": -2505551,
+                "p90": -715287
+              },
+              "non_negative_cells": 63
+            },
+            "100000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 485,
+              "net_after_costs_lamports": {
+                "cells": 485,
+                "max": 460938776,
+                "median": -14532671,
+                "min": -90644361,
+                "p10": -69807446,
+                "p25": -55535221,
+                "p75": -4644045,
+                "p90": 46679682
+              },
+              "non_negative_cells": 90
+            },
+            "2500000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 727,
+              "net_after_costs_lamports": {
+                "cells": 727,
+                "max": 9453591,
+                "median": -2531667,
+                "min": -4458653,
+                "p10": -3907915,
+                "p25": -3359036,
+                "p75": -2312183,
+                "p90": -1901513
+              },
+              "non_negative_cells": 35
+            },
+            "25000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 610,
+              "net_after_costs_lamports": {
+                "cells": 610,
+                "max": 114493328,
+                "median": -5245895,
+                "min": -24344164,
+                "p10": -19028532,
+                "p25": -14251777,
+                "p75": -2893070,
+                "p90": 3558484
+              },
+              "non_negative_cells": 79
+            },
+            "5000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 716,
+              "net_after_costs_lamports": {
+                "cells": 716,
+                "max": 21150096,
+                "median": -2781884,
+                "min": -6668050,
+                "p10": -5566686,
+                "p25": -4463039,
+                "p75": -2375879,
+                "p90": -1544565
+              },
+              "non_negative_cells": 51
+            },
+            "50000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 561,
+              "net_after_costs_lamports": {
+                "cells": 561,
+                "max": 230602734,
+                "median": -8654710,
+                "min": -46441640,
+                "p10": -35863811,
+                "p25": -27455131,
+                "p75": -3533104,
+                "p90": 12800483
+              },
+              "non_negative_cells": 84
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "base|h_1000_slots|4": {
+          "by_size": {
+            "1000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 756,
+              "net_after_costs_lamports": {
+                "cells": 756,
+                "max": 1734707,
+                "median": -2349356,
+                "min": -3133027,
+                "p10": -2903662,
+                "p25": -2693146,
+                "p75": -2274347,
+                "p90": -2140782
+              },
+              "non_negative_cells": 14
+            },
+            "10000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 662,
+              "net_after_costs_lamports": {
+                "cells": 662,
+                "max": 37550996,
+                "median": -3508692,
+                "min": -11086922,
+                "p10": -8969413,
+                "p25": -6961938,
+                "p75": -2505603,
+                "p90": -715287
+              },
+              "non_negative_cells": 62
+            },
+            "100000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 483,
+              "net_after_costs_lamports": {
+                "cells": 483,
+                "max": 391822456,
+                "median": -15072933,
+                "min": -90644361,
+                "p10": -71256470,
+                "p25": -55588065,
+                "p75": -4644045,
+                "p90": 38633927
+              },
+              "non_negative_cells": 93
+            },
+            "2500000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 719,
+              "net_after_costs_lamports": {
+                "cells": 719,
+                "max": 7709044,
+                "median": -2529931,
+                "min": -4458653,
+                "p10": -3921619,
+                "p25": -3387600,
+                "p75": -2312184,
+                "p90": -1899476
+              },
+              "non_negative_cells": 31
+            },
+            "25000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 606,
+              "net_after_costs_lamports": {
+                "cells": 606,
+                "max": 97086541,
+                "median": -5418158,
+                "min": -24344164,
+                "p10": -19176579,
+                "p25": -14322541,
+                "p75": -2882901,
+                "p90": 3424518
+              },
+              "non_negative_cells": 78
+            },
+            "5000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 708,
+              "net_after_costs_lamports": {
+                "cells": 708,
+                "max": 17661866,
+                "median": -2781369,
+                "min": -6668050,
+                "p10": -5594091,
+                "p25": -4503876,
+                "p75": -2375879,
+                "p90": -1544565
+              },
+              "non_negative_cells": 48
+            },
+            "50000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 556,
+              "net_after_costs_lamports": {
+                "cells": 556,
+                "max": 195874712,
+                "median": -8654710,
+                "min": -46441640,
+                "p10": -36470860,
+                "p25": -27142245,
+                "p75": -3503354,
+                "p90": 11994140
+              },
+              "non_negative_cells": 87
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "optimistic|h_10000_slots|1": {
+          "by_size": {
+            "1000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 620,
+              "net_after_costs_lamports": {
+                "cells": 620,
+                "max": 2559693,
+                "median": -2267376,
+                "min": -2940574,
+                "p10": -2737889,
+                "p25": -2621993,
+                "p75": -2076348,
+                "p90": -2071377
+              },
+              "non_negative_cells": 6
+            },
+            "10000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 495,
+              "net_after_costs_lamports": {
+                "cells": 495,
+                "max": 44016214,
+                "median": -4662306,
+                "min": -10944382,
+                "p10": -9067045,
+                "p25": -7887559,
+                "p75": -2330220,
+                "p90": -1924099
+              },
+              "non_negative_cells": 29
+            },
+            "100000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 325,
+              "net_after_costs_lamports": {
+                "cells": 325,
+                "max": 454428743,
+                "median": -25668859,
+                "min": -90999884,
+                "p10": -74087015,
+                "p25": -61228727,
+                "p75": -5193767,
+                "p90": 7769124
+              },
+              "non_negative_cells": 48
+            },
+            "2500000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 582,
+              "net_after_costs_lamports": {
+                "cells": 582,
+                "max": 9474399,
+                "median": -2600954,
+                "min": -4274520,
+                "p10": -3771617,
+                "p25": -3489090,
+                "p75": -2114194,
+                "p90": -2098394
+              },
+              "non_negative_cells": 16
+            },
+            "25000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 435,
+              "net_after_costs_lamports": {
+                "cells": 435,
+                "max": 112941580,
+                "median": -9090218,
+                "min": -24284765,
+                "p10": -20001718,
+                "p25": -16880096,
+                "p75": -2761655,
+                "p90": -1119023
+              },
+              "non_negative_cells": 36
+            },
+            "5000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 560,
+              "net_after_costs_lamports": {
+                "cells": 560,
+                "max": 20994209,
+                "median": -3101905,
+                "min": -6497783,
+                "p10": -5530667,
+                "p25": -4908544,
+                "p75": -2177927,
+                "p90": -2113468
+              },
+              "non_negative_cells": 22
+            },
+            "50000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 384,
+              "net_after_costs_lamports": {
+                "cells": 384,
+                "max": 227350119,
+                "median": -15880519,
+                "min": -46520696,
+                "p10": -38049222,
+                "p25": -32406073,
+                "p75": -3464776,
+                "p90": 714642
+              },
+              "non_negative_cells": 42
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "optimistic|h_10000_slots|2": {
+          "by_size": {
+            "1000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 619,
+              "net_after_costs_lamports": {
+                "cells": 619,
+                "max": 2559693,
+                "median": -2268595,
+                "min": -2940574,
+                "p10": -2749932,
+                "p25": -2622951,
+                "p75": -2076348,
+                "p90": -2071377
+              },
+              "non_negative_cells": 6
+            },
+            "10000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 497,
+              "net_after_costs_lamports": {
+                "cells": 497,
+                "max": 44016214,
+                "median": -4744861,
+                "min": -10944382,
+                "p10": -9230216,
+                "p25": -7927909,
+                "p75": -2332262,
+                "p90": -1924099
+              },
+              "non_negative_cells": 29
+            },
+            "100000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 327,
+              "net_after_costs_lamports": {
+                "cells": 327,
+                "max": 454428743,
+                "median": -28521130,
+                "min": -90999884,
+                "p10": -75266952,
+                "p25": -62069985,
+                "p75": -5195653,
+                "p90": 7769124
+              },
+              "non_negative_cells": 48
+            },
+            "2500000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 583,
+              "net_after_costs_lamports": {
+                "cells": 583,
+                "max": 9474399,
+                "median": -2618888,
+                "min": -4274520,
+                "p10": -3805052,
+                "p25": -3507087,
+                "p75": -2114194,
+                "p90": -2098394
+              },
+              "non_negative_cells": 16
+            },
+            "25000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 436,
+              "net_after_costs_lamports": {
+                "cells": 436,
+                "max": 112941580,
+                "median": -9099523,
+                "min": -24284765,
+                "p10": -20103910,
+                "p25": -17029784,
+                "p75": -2764750,
+                "p90": -1119023
+              },
+              "non_negative_cells": 36
+            },
+            "5000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 561,
+              "net_after_costs_lamports": {
+                "cells": 561,
+                "max": 20994209,
+                "median": -3127434,
+                "min": -6497783,
+                "p10": -5556075,
+                "p25": -4927101,
+                "p75": -2177927,
+                "p90": -2123244
+              },
+              "non_negative_cells": 22
+            },
+            "50000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 386,
+              "net_after_costs_lamports": {
+                "cells": 386,
+                "max": 227350119,
+                "median": -16126865,
+                "min": -46520696,
+                "p10": -38383415,
+                "p25": -32522335,
+                "p75": -3464783,
+                "p90": 714642
+              },
+              "non_negative_cells": 42
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "optimistic|h_10000_slots|4": {
+          "by_size": {
+            "1000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 613,
+              "net_after_costs_lamports": {
+                "cells": 613,
+                "max": 2253123,
+                "median": -2263800,
+                "min": -2940574,
+                "p10": -2764874,
+                "p25": -2624843,
+                "p75": -2076348,
+                "p90": -2071213
+              },
+              "non_negative_cells": 6
+            },
+            "10000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 493,
+              "net_after_costs_lamports": {
+                "cells": 493,
+                "max": 40956325,
+                "median": -4696840,
+                "min": -10944382,
+                "p10": -9269582,
+                "p25": -7980553,
+                "p75": -2330220,
+                "p90": -1866013
+              },
+              "non_negative_cells": 29
+            },
+            "100000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 323,
+              "net_after_costs_lamports": {
+                "cells": 323,
+                "max": 424403898,
+                "median": -25668859,
+                "min": -90999884,
+                "p10": -75474950,
+                "p25": -64504587,
+                "p75": -5195653,
+                "p90": 7769124
+              },
+              "non_negative_cells": 49
+            },
+            "2500000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 578,
+              "net_after_costs_lamports": {
+                "cells": 578,
+                "max": 8708216,
+                "median": -2598788,
+                "min": -4274520,
+                "p10": -3845859,
+                "p25": -3509205,
+                "p75": -2114194,
+                "p90": -2098056
+              },
+              "non_negative_cells": 17
+            },
+            "25000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 429,
+              "net_after_costs_lamports": {
+                "cells": 429,
+                "max": 105316010,
+                "median": -8846156,
+                "min": -24284765,
+                "p10": -20393298,
+                "p25": -17029784,
+                "p75": -2717322,
+                "p90": -948837
+              },
+              "non_negative_cells": 36
+            },
+            "5000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 557,
+              "net_after_costs_lamports": {
+                "cells": 557,
+                "max": 19462651,
+                "median": -3081219,
+                "min": -6497783,
+                "p10": -5626023,
+                "p25": -4947812,
+                "p75": -2177927,
+                "p90": -2123244
+              },
+              "non_negative_cells": 23
+            },
+            "50000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 381,
+              "net_after_costs_lamports": {
+                "cells": 381,
+                "max": 212179064,
+                "median": -15186524,
+                "min": -46520696,
+                "p10": -38744594,
+                "p25": -32522335,
+                "p75": -3464776,
+                "p90": 994121
+              },
+              "non_negative_cells": 44
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "optimistic|h_1000_slots|1": {
+          "by_size": {
+            "1000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 772,
+              "net_after_costs_lamports": {
+                "cells": 772,
+                "max": 2630628,
+                "median": -2138075,
+                "min": -2935027,
+                "p10": -2701391,
+                "p25": -2480582,
+                "p75": -2076347,
+                "p90": -1952493
+              },
+              "non_negative_cells": 15
+            },
+            "10000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 674,
+              "net_after_costs_lamports": {
+                "cells": 674,
+                "max": 44722015,
+                "median": -3226595,
+                "min": -10888922,
+                "p10": -8702824,
+                "p25": -6516751,
+                "p75": -2307551,
+                "p90": -536073
+              },
+              "non_negative_cells": 61
+            },
+            "100000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 482,
+              "net_after_costs_lamports": {
+                "cells": 482,
+                "max": 461136776,
+                "median": -14203792,
+                "min": -90446361,
+                "p10": -69241905,
+                "p25": -54179017,
+                "p75": -4395253,
+                "p90": 42733936
+              },
+              "non_negative_cells": 90
+            },
+            "2500000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 731,
+              "net_after_costs_lamports": {
+                "cells": 731,
+                "max": 9651591,
+                "median": -2289730,
+                "min": -4260653,
+                "p10": -3704328,
+                "p25": -3140771,
+                "p75": -2114182,
+                "p90": -1720674
+              },
+              "non_negative_cells": 34
+            },
+            "25000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 613,
+              "net_after_costs_lamports": {
+                "cells": 613,
+                "max": 114691328,
+                "median": -4999569,
+                "min": -24146164,
+                "p10": -18744664,
+                "p25": -13772221,
+                "p75": -2682740,
+                "p90": 2088627
+              },
+              "non_negative_cells": 79
+            },
+            "5000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 720,
+              "net_after_costs_lamports": {
+                "cells": 720,
+                "max": 21348096,
+                "median": -2491490,
+                "min": -6470050,
+                "p10": -5357512,
+                "p25": -4218672,
+                "p75": -2177876,
+                "p90": -1356710
+              },
+              "non_negative_cells": 50
+            },
+            "50000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 563,
+              "net_after_costs_lamports": {
+                "cells": 563,
+                "max": 230800734,
+                "median": -8456710,
+                "min": -46243640,
+                "p10": -35523429,
+                "p25": -27184979,
+                "p75": -3324885,
+                "p90": 12192140
+              },
+              "non_negative_cells": 85
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "optimistic|h_1000_slots|2": {
+          "by_size": {
+            "1000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 766,
+              "net_after_costs_lamports": {
+                "cells": 766,
+                "max": 2630628,
+                "median": -2141741,
+                "min": -2935027,
+                "p10": -2704553,
+                "p25": -2485162,
+                "p75": -2076347,
+                "p90": -1951363
+              },
+              "non_negative_cells": 15
+            },
+            "10000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 671,
+              "net_after_costs_lamports": {
+                "cells": 671,
+                "max": 44722015,
+                "median": -3300671,
+                "min": -10888922,
+                "p10": -8719022,
+                "p25": -6688317,
+                "p75": -2307551,
+                "p90": -517287
+              },
+              "non_negative_cells": 63
+            },
+            "100000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 485,
+              "net_after_costs_lamports": {
+                "cells": 485,
+                "max": 461136776,
+                "median": -14334671,
+                "min": -90446361,
+                "p10": -69609446,
+                "p25": -55337221,
+                "p75": -4446045,
+                "p90": 46877682
+              },
+              "non_negative_cells": 90
+            },
+            "2500000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 727,
+              "net_after_costs_lamports": {
+                "cells": 727,
+                "max": 9651591,
+                "median": -2333667,
+                "min": -4260653,
+                "p10": -3709915,
+                "p25": -3161036,
+                "p75": -2114183,
+                "p90": -1703513
+              },
+              "non_negative_cells": 36
+            },
+            "25000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 610,
+              "net_after_costs_lamports": {
+                "cells": 610,
+                "max": 114691328,
+                "median": -5047895,
+                "min": -24146164,
+                "p10": -18830532,
+                "p25": -14053777,
+                "p75": -2695070,
+                "p90": 3756484
+              },
+              "non_negative_cells": 79
+            },
+            "5000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 716,
+              "net_after_costs_lamports": {
+                "cells": 716,
+                "max": 21348096,
+                "median": -2583884,
+                "min": -6470050,
+                "p10": -5368686,
+                "p25": -4265039,
+                "p75": -2177879,
+                "p90": -1346565
+              },
+              "non_negative_cells": 51
+            },
+            "50000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 561,
+              "net_after_costs_lamports": {
+                "cells": 561,
+                "max": 230800734,
+                "median": -8456710,
+                "min": -46243640,
+                "p10": -35665811,
+                "p25": -27257131,
+                "p75": -3335104,
+                "p90": 12998483
+              },
+              "non_negative_cells": 84
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "optimistic|h_1000_slots|4": {
+          "by_size": {
+            "1000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 756,
+              "net_after_costs_lamports": {
+                "cells": 756,
+                "max": 1932707,
+                "median": -2151356,
+                "min": -2935027,
+                "p10": -2705662,
+                "p25": -2495146,
+                "p75": -2076347,
+                "p90": -1942782
+              },
+              "non_negative_cells": 16
+            },
+            "10000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 662,
+              "net_after_costs_lamports": {
+                "cells": 662,
+                "max": 37748996,
+                "median": -3310692,
+                "min": -10888922,
+                "p10": -8771413,
+                "p25": -6763938,
+                "p75": -2307603,
+                "p90": -517287
+              },
+              "non_negative_cells": 62
+            },
+            "100000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 483,
+              "net_after_costs_lamports": {
+                "cells": 483,
+                "max": 392020456,
+                "median": -14874933,
+                "min": -90446361,
+                "p10": -71058470,
+                "p25": -55390065,
+                "p75": -4446045,
+                "p90": 38831927
+              },
+              "non_negative_cells": 93
+            },
+            "2500000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 719,
+              "net_after_costs_lamports": {
+                "cells": 719,
+                "max": 7907044,
+                "median": -2331931,
+                "min": -4260653,
+                "p10": -3723619,
+                "p25": -3189600,
+                "p75": -2114184,
+                "p90": -1701476
+              },
+              "non_negative_cells": 33
+            },
+            "25000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 606,
+              "net_after_costs_lamports": {
+                "cells": 606,
+                "max": 97284541,
+                "median": -5220158,
+                "min": -24146164,
+                "p10": -18978579,
+                "p25": -14124541,
+                "p75": -2684901,
+                "p90": 3622518
+              },
+              "non_negative_cells": 79
+            },
+            "5000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 708,
+              "net_after_costs_lamports": {
+                "cells": 708,
+                "max": 17859866,
+                "median": -2583369,
+                "min": -6470050,
+                "p10": -5396091,
+                "p25": -4305876,
+                "p75": -2177879,
+                "p90": -1346565
+              },
+              "non_negative_cells": 50
+            },
+            "50000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 556,
+              "net_after_costs_lamports": {
+                "cells": 556,
+                "max": 196072712,
+                "median": -8456710,
+                "min": -46243640,
+                "p10": -36272860,
+                "p25": -26944245,
+                "p75": -3305354,
+                "p90": 12192140
+              },
+              "non_negative_cells": 87
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "stressed|h_10000_slots|1": {
+          "by_size": {
+            "1000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 620,
+              "net_after_costs_lamports": {
+                "cells": 620,
+                "max": -1448307,
+                "median": -6275376,
+                "min": -6948574,
+                "p10": -6745889,
+                "p25": -6629993,
+                "p75": -6084348,
+                "p90": -6079377
+              },
+              "non_negative_cells": 0
+            },
+            "10000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 495,
+              "net_after_costs_lamports": {
+                "cells": 495,
+                "max": 40008214,
+                "median": -8670306,
+                "min": -14952382,
+                "p10": -13075045,
+                "p25": -11895559,
+                "p75": -6338220,
+                "p90": -5932099
+              },
+              "non_negative_cells": 19
+            },
+            "100000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 325,
+              "net_after_costs_lamports": {
+                "cells": 325,
+                "max": 450420743,
+                "median": -29676859,
+                "min": -95007884,
+                "p10": -78095015,
+                "p25": -65236727,
+                "p75": -9201767,
+                "p90": 3761124
+              },
+              "non_negative_cells": 37
+            },
+            "2500000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 582,
+              "net_after_costs_lamports": {
+                "cells": 582,
+                "max": 5466399,
+                "median": -6608954,
+                "min": -8282520,
+                "p10": -7779617,
+                "p25": -7497090,
+                "p75": -6122194,
+                "p90": -6106394
+              },
+              "non_negative_cells": 4
+            },
+            "25000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 435,
+              "net_after_costs_lamports": {
+                "cells": 435,
+                "max": 108933580,
+                "median": -13098218,
+                "min": -28292765,
+                "p10": -24009718,
+                "p25": -20888096,
+                "p75": -6769655,
+                "p90": -5127023
+              },
+              "non_negative_cells": 27
+            },
+            "5000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 560,
+              "net_after_costs_lamports": {
+                "cells": 560,
+                "max": 16986209,
+                "median": -7109905,
+                "min": -10505783,
+                "p10": -9538667,
+                "p25": -8916544,
+                "p75": -6185927,
+                "p90": -6121468
+              },
+              "non_negative_cells": 10
+            },
+            "50000000": {
+              "cells": 3273,
+              "liquidity_executable_cells": 384,
+              "net_after_costs_lamports": {
+                "cells": 384,
+                "max": 223342119,
+                "median": -19888519,
+                "min": -50528696,
+                "p10": -42057222,
+                "p25": -36414073,
+                "p75": -7472776,
+                "p90": -3293358
+              },
+              "non_negative_cells": 32
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "stressed|h_10000_slots|2": {
+          "by_size": {
+            "1000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 619,
+              "net_after_costs_lamports": {
+                "cells": 619,
+                "max": -1448307,
+                "median": -6276595,
+                "min": -6948574,
+                "p10": -6757932,
+                "p25": -6630951,
+                "p75": -6084348,
+                "p90": -6079377
+              },
+              "non_negative_cells": 0
+            },
+            "10000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 497,
+              "net_after_costs_lamports": {
+                "cells": 497,
+                "max": 40008214,
+                "median": -8752861,
+                "min": -14952382,
+                "p10": -13238216,
+                "p25": -11935909,
+                "p75": -6340262,
+                "p90": -5932099
+              },
+              "non_negative_cells": 19
+            },
+            "100000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 327,
+              "net_after_costs_lamports": {
+                "cells": 327,
+                "max": 450420743,
+                "median": -32529130,
+                "min": -95007884,
+                "p10": -79274952,
+                "p25": -66077985,
+                "p75": -9203653,
+                "p90": 3761124
+              },
+              "non_negative_cells": 37
+            },
+            "2500000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 583,
+              "net_after_costs_lamports": {
+                "cells": 583,
+                "max": 5466399,
+                "median": -6626888,
+                "min": -8282520,
+                "p10": -7813052,
+                "p25": -7515087,
+                "p75": -6122194,
+                "p90": -6106394
+              },
+              "non_negative_cells": 4
+            },
+            "25000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 436,
+              "net_after_costs_lamports": {
+                "cells": 436,
+                "max": 108933580,
+                "median": -13107523,
+                "min": -28292765,
+                "p10": -24111910,
+                "p25": -21037784,
+                "p75": -6772750,
+                "p90": -5127023
+              },
+              "non_negative_cells": 27
+            },
+            "5000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 561,
+              "net_after_costs_lamports": {
+                "cells": 561,
+                "max": 16986209,
+                "median": -7135434,
+                "min": -10505783,
+                "p10": -9564075,
+                "p25": -8935101,
+                "p75": -6185927,
+                "p90": -6131244
+              },
+              "non_negative_cells": 10
+            },
+            "50000000": {
+              "cells": 3258,
+              "liquidity_executable_cells": 386,
+              "net_after_costs_lamports": {
+                "cells": 386,
+                "max": 223342119,
+                "median": -20134865,
+                "min": -50528696,
+                "p10": -42391415,
+                "p25": -36530335,
+                "p75": -7472783,
+                "p90": -3293358
+              },
+              "non_negative_cells": 32
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "stressed|h_10000_slots|4": {
+          "by_size": {
+            "1000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 613,
+              "net_after_costs_lamports": {
+                "cells": 613,
+                "max": -1754877,
+                "median": -6271800,
+                "min": -6948574,
+                "p10": -6772874,
+                "p25": -6632843,
+                "p75": -6084348,
+                "p90": -6079213
+              },
+              "non_negative_cells": 0
+            },
+            "10000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 493,
+              "net_after_costs_lamports": {
+                "cells": 493,
+                "max": 36948325,
+                "median": -8704840,
+                "min": -14952382,
+                "p10": -13277582,
+                "p25": -11988553,
+                "p75": -6338220,
+                "p90": -5874013
+              },
+              "non_negative_cells": 20
+            },
+            "100000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 323,
+              "net_after_costs_lamports": {
+                "cells": 323,
+                "max": 420395898,
+                "median": -29676859,
+                "min": -95007884,
+                "p10": -79482950,
+                "p25": -68512587,
+                "p75": -9203653,
+                "p90": 3761124
+              },
+              "non_negative_cells": 37
+            },
+            "2500000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 578,
+              "net_after_costs_lamports": {
+                "cells": 578,
+                "max": 4700216,
+                "median": -6606788,
+                "min": -8282520,
+                "p10": -7853859,
+                "p25": -7517205,
+                "p75": -6122194,
+                "p90": -6106056
+              },
+              "non_negative_cells": 4
+            },
+            "25000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 429,
+              "net_after_costs_lamports": {
+                "cells": 429,
+                "max": 101308010,
+                "median": -12854156,
+                "min": -28292765,
+                "p10": -24401298,
+                "p25": -21037784,
+                "p75": -6725322,
+                "p90": -4956837
+              },
+              "non_negative_cells": 26
+            },
+            "5000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 557,
+              "net_after_costs_lamports": {
+                "cells": 557,
+                "max": 15454651,
+                "median": -7089219,
+                "min": -10505783,
+                "p10": -9634023,
+                "p25": -8955812,
+                "p75": -6185927,
+                "p90": -6131244
+              },
+              "non_negative_cells": 11
+            },
+            "50000000": {
+              "cells": 3252,
+              "liquidity_executable_cells": 381,
+              "net_after_costs_lamports": {
+                "cells": 381,
+                "max": 208171064,
+                "median": -19194524,
+                "min": -50528696,
+                "p10": -42752594,
+                "p25": -36530335,
+                "p75": -7472776,
+                "p90": -3013879
+              },
+              "non_negative_cells": 32
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "stressed|h_1000_slots|1": {
+          "by_size": {
+            "1000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 772,
+              "net_after_costs_lamports": {
+                "cells": 772,
+                "max": -1377372,
+                "median": -6146075,
+                "min": -6943027,
+                "p10": -6709391,
+                "p25": -6488582,
+                "p75": -6084347,
+                "p90": -5960493
+              },
+              "non_negative_cells": 0
+            },
+            "10000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 674,
+              "net_after_costs_lamports": {
+                "cells": 674,
+                "max": 40714015,
+                "median": -7234595,
+                "min": -14896922,
+                "p10": -12710824,
+                "p25": -10524751,
+                "p75": -6315551,
+                "p90": -4544073
+              },
+              "non_negative_cells": 45
+            },
+            "100000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 482,
+              "net_after_costs_lamports": {
+                "cells": 482,
+                "max": 457128776,
+                "median": -18211792,
+                "min": -94454361,
+                "p10": -73249905,
+                "p25": -58187017,
+                "p75": -8403253,
+                "p90": 38725936
+              },
+              "non_negative_cells": 80
+            },
+            "2500000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 731,
+              "net_after_costs_lamports": {
+                "cells": 731,
+                "max": 5643591,
+                "median": -6297730,
+                "min": -8268653,
+                "p10": -7712328,
+                "p25": -7148771,
+                "p75": -6122182,
+                "p90": -5728674
+              },
+              "non_negative_cells": 12
+            },
+            "25000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 613,
+              "net_after_costs_lamports": {
+                "cells": 613,
+                "max": 110683328,
+                "median": -9007569,
+                "min": -28154164,
+                "p10": -22752664,
+                "p25": -17780221,
+                "p75": -6690740,
+                "p90": -1919373
+              },
+              "non_negative_cells": 59
+            },
+            "5000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 720,
+              "net_after_costs_lamports": {
+                "cells": 720,
+                "max": 17340096,
+                "median": -6499490,
+                "min": -10478050,
+                "p10": -9365512,
+                "p25": -8226672,
+                "p75": -6185876,
+                "p90": -5364710
+              },
+              "non_negative_cells": 24
+            },
+            "50000000": {
+              "cells": 2762,
+              "liquidity_executable_cells": 563,
+              "net_after_costs_lamports": {
+                "cells": 563,
+                "max": 226792734,
+                "median": -12464710,
+                "min": -50251640,
+                "p10": -39531429,
+                "p25": -31192979,
+                "p75": -7332885,
+                "p90": 8184140
+              },
+              "non_negative_cells": 74
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "stressed|h_1000_slots|2": {
+          "by_size": {
+            "1000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 766,
+              "net_after_costs_lamports": {
+                "cells": 766,
+                "max": -1377372,
+                "median": -6149741,
+                "min": -6943027,
+                "p10": -6712553,
+                "p25": -6493162,
+                "p75": -6084347,
+                "p90": -5959363
+              },
+              "non_negative_cells": 0
+            },
+            "10000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 671,
+              "net_after_costs_lamports": {
+                "cells": 671,
+                "max": 40714015,
+                "median": -7308671,
+                "min": -14896922,
+                "p10": -12727022,
+                "p25": -10696317,
+                "p75": -6315551,
+                "p90": -4525287
+              },
+              "non_negative_cells": 45
+            },
+            "100000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 485,
+              "net_after_costs_lamports": {
+                "cells": 485,
+                "max": 457128776,
+                "median": -18342671,
+                "min": -94454361,
+                "p10": -73617446,
+                "p25": -59345221,
+                "p75": -8454045,
+                "p90": 42869682
+              },
+              "non_negative_cells": 80
+            },
+            "2500000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 727,
+              "net_after_costs_lamports": {
+                "cells": 727,
+                "max": 5643591,
+                "median": -6341667,
+                "min": -8268653,
+                "p10": -7717915,
+                "p25": -7169036,
+                "p75": -6122183,
+                "p90": -5711513
+              },
+              "non_negative_cells": 12
+            },
+            "25000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 610,
+              "net_after_costs_lamports": {
+                "cells": 610,
+                "max": 110683328,
+                "median": -9055895,
+                "min": -28154164,
+                "p10": -22838532,
+                "p25": -18061777,
+                "p75": -6703070,
+                "p90": -251516
+              },
+              "non_negative_cells": 60
+            },
+            "5000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 716,
+              "net_after_costs_lamports": {
+                "cells": 716,
+                "max": 17340096,
+                "median": -6591884,
+                "min": -10478050,
+                "p10": -9376686,
+                "p25": -8273039,
+                "p75": -6185879,
+                "p90": -5354565
+              },
+              "non_negative_cells": 23
+            },
+            "50000000": {
+              "cells": 2726,
+              "liquidity_executable_cells": 561,
+              "net_after_costs_lamports": {
+                "cells": 561,
+                "max": 226792734,
+                "median": -12464710,
+                "min": -50251640,
+                "p10": -39673811,
+                "p25": -31265131,
+                "p75": -7343104,
+                "p90": 8990483
+              },
+              "non_negative_cells": 74
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        },
+        "stressed|h_1000_slots|4": {
+          "by_size": {
+            "1000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 756,
+              "net_after_costs_lamports": {
+                "cells": 756,
+                "max": -2075293,
+                "median": -6159356,
+                "min": -6943027,
+                "p10": -6713662,
+                "p25": -6503146,
+                "p75": -6084347,
+                "p90": -5950782
+              },
+              "non_negative_cells": 0
+            },
+            "10000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 662,
+              "net_after_costs_lamports": {
+                "cells": 662,
+                "max": 33740996,
+                "median": -7318692,
+                "min": -14896922,
+                "p10": -12779413,
+                "p25": -10771938,
+                "p75": -6315603,
+                "p90": -4525287
+              },
+              "non_negative_cells": 41
+            },
+            "100000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 483,
+              "net_after_costs_lamports": {
+                "cells": 483,
+                "max": 388012456,
+                "median": -18882933,
+                "min": -94454361,
+                "p10": -75066470,
+                "p25": -59398065,
+                "p75": -8454045,
+                "p90": 34823927
+              },
+              "non_negative_cells": 81
+            },
+            "2500000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 719,
+              "net_after_costs_lamports": {
+                "cells": 719,
+                "max": 3899044,
+                "median": -6339931,
+                "min": -8268653,
+                "p10": -7731619,
+                "p25": -7197600,
+                "p75": -6122184,
+                "p90": -5709476
+              },
+              "non_negative_cells": 11
+            },
+            "25000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 606,
+              "net_after_costs_lamports": {
+                "cells": 606,
+                "max": 93276541,
+                "median": -9228158,
+                "min": -28154164,
+                "p10": -22986579,
+                "p25": -18132541,
+                "p75": -6692901,
+                "p90": -385482
+              },
+              "non_negative_cells": 59
+            },
+            "5000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 708,
+              "net_after_costs_lamports": {
+                "cells": 708,
+                "max": 13851866,
+                "median": -6591369,
+                "min": -10478050,
+                "p10": -9404091,
+                "p25": -8313876,
+                "p75": -6185879,
+                "p90": -5354565
+              },
+              "non_negative_cells": 25
+            },
+            "50000000": {
+              "cells": 2702,
+              "liquidity_executable_cells": 556,
+              "net_after_costs_lamports": {
+                "cells": 556,
+                "max": 192064712,
+                "median": -12464710,
+                "min": -50251640,
+                "p10": -40280860,
+                "p25": -30952245,
+                "p75": -7313354,
+                "p90": 8184140
+              },
+              "non_negative_cells": 74
+            }
+          },
+          "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+          "no_size_is_selected": "the grid is reported in full, including sizes that fail; nothing here ranks or recommends a size"
+        }
+      },
+      "grid_lamports": [
+        1000000,
+        2500000,
+        5000000,
+        10000000,
+        25000000,
+        50000000,
+        100000000
+      ],
+      "inherited_censoring_statement_superseded": {
+        "false_for_this_population": true,
+        "statement": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market",
+        "why": "it names B15f scheduling from B15a; the B15Q population descends from neither"
+      },
+      "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+      "landing_probability": "unmeasured",
+      "performance_status": "not_evaluated",
+      "population": {
+        "admissible_cells": 17973,
+        "entry_checkpoints": 14485,
+        "exit_checkpoints": 27586,
+        "fee_schedules": 4096
+      },
+      "refusals": {
+        "M_NOT_IN_B15L_UNIVERSE": 9613
+      },
+      "schema_version": "1.0.0",
+      "search_ceiling_lamports": 100000000
+    }
+  },
+  "schema_version": "1.0.0"
+}
