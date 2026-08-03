@@ -733,10 +733,28 @@ class TestReconciliation(unittest.TestCase):
         self.assertEqual(counts[B15I.FORK_ORPHANED], 0)
         self.assertEqual(counts[B15I.FORK_UNRESOLVED], 2)
 
+    def test_reconcile_does_not_undo_a_confirmation_set_by_the_chain(self):
+        """The worker promoted and reconcile demoted it back 60 seconds later, every time.
+
+        Net progress was 8 promotions in five minutes where 600 were due, because only the orphan
+        half of a chain verdict was preserved.
+        """
+        self.harness.feed(_create_frame(200))
+        self.harness.connection.execute(
+            "UPDATE observation SET fork_state=?, chain_verdict=?",
+            (B15I.FORK_CONFIRMED, "confirmed"))
+        self.harness.connection.commit()
+        counts = B15I.reconcile(self.harness.connection, self.harness.lock,
+                                self._b15a([]), self.directory / "missing.sqlite")
+        self.assertEqual(counts[B15I.FORK_CONFIRMED], 1)
+        self.assertEqual(self.harness.connection.execute(
+            "SELECT fork_state FROM observation").fetchone()[0], B15I.FORK_CONFIRMED)
+
     def test_reconcile_does_not_undo_an_orphan_set_by_the_chain(self):
         self.harness.feed(_create_frame(200))
         self.harness.connection.execute(
-            "UPDATE observation SET fork_state=?", (B15I.FORK_ORPHANED,))
+            "UPDATE observation SET fork_state=?, chain_verdict=?",
+            (B15I.FORK_ORPHANED, "not_found"))
         self.harness.connection.commit()
         counts = B15I.reconcile(self.harness.connection, self.harness.lock,
                                 self._b15a([]), self.directory / "missing.sqlite")
@@ -815,6 +833,69 @@ class TestReconciliation(unittest.TestCase):
         self.assertEqual(states.get(B15I.FORK_ORPHANED), 1)     # the old one, past the margin
         # The recent one is still inside the margin and is left alone.
         self.assertEqual(states.get(B15I.FORK_UNCONFIRMED), 1)
+
+    def test_withdrawing_peer_orphans_returns_them_to_unresolved_not_confirmed(self):
+        """A verdict from a rule now known invalid is not evidence, and is not promoted either."""
+        self.harness.feed(_create_frame(200))
+        self.harness.connection.execute(
+            "UPDATE observation SET fork_state=?", (B15I.FORK_ORPHANED,))
+        self.harness.connection.commit()
+        withdrawn = B15I.withdraw_peer_orphans(self.harness.connection, self.harness.lock)
+        self.assertEqual(withdrawn, 1)
+        self.assertEqual(self.harness.connection.execute(
+            "SELECT fork_state FROM observation").fetchone()[0], B15I.FORK_UNRESOLVED)
+        recorded = dict(self.harness.connection.execute(
+            "SELECT key, value FROM metadata").fetchall())
+        self.assertIn("peer_orphan_verdicts_withdrawn", recorded)
+        self.assertIn("CONFIRMED ON CHAIN", recorded["peer_orphan_verdicts_withdrawn"])
+
+    def test_withdrawing_leaves_a_chain_sourced_orphan_alone(self):
+        self.harness.feed(_create_frame(200))
+        self.harness.connection.execute(
+            "UPDATE observation SET fork_state=?, orphan_source=?, chain_verdict=?",
+            (B15I.FORK_ORPHANED, "chain_not_found", "not_found"))
+        self.harness.connection.commit()
+        self.assertEqual(B15I.withdraw_peer_orphans(
+            self.harness.connection, self.harness.lock), 0)
+        self.assertEqual(self.harness.connection.execute(
+            "SELECT fork_state FROM observation").fetchone()[0], B15I.FORK_ORPHANED)
+
+    def test_a_chain_orphan_records_where_the_verdict_came_from(self):
+        import threading as _threading
+        self.harness.feed(_create_frame(200))
+        self.harness.feed(_create_frame(100_000, signature="Recent" + SIGNATURE[6:]))
+
+        def opener(request, timeout=None):
+            class Handle:
+                status = 200
+
+                def read(self_inner):
+                    return json.dumps({"result": None}).encode()
+
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, *_):
+                    return False
+            return Handle()
+
+        stop = _threading.Event()
+        thread = _threading.Thread(
+            target=B15I.confirmation_worker,
+            args=(self.harness.connection, self.harness.lock, stop, self.harness.counts,
+                  "https://x.invalid", opener, lambda _s: None, 0.01, 60, 1000.0),
+            daemon=True)
+        thread.start()
+        for _ in range(200):
+            row = self.harness.connection.execute(
+                "SELECT orphan_source FROM observation WHERE fork_state=?",
+                (B15I.FORK_ORPHANED,)).fetchone()
+            if row:
+                break
+            time.sleep(0.01)
+        stop.set()
+        thread.join(timeout=5)
+        self.assertEqual(row[0], "chain_not_found")
 
     def test_a_failed_confirmation_query_orphans_nothing(self):
         import threading as _threading

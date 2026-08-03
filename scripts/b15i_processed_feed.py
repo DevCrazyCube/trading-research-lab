@@ -223,7 +223,8 @@ CREATE TABLE IF NOT EXISTS observation (
   signature TEXT PRIMARY KEY, t0_slot INTEGER NOT NULL, mint TEXT, bonding_curve TEXT,
   observed_slot INTEGER NOT NULL, received_wall_unix REAL NOT NULL,
   received_monotonic_ns INTEGER NOT NULL, raw_sha256 TEXT NOT NULL,
-  fork_state TEXT NOT NULL, reconciled_at_wall_unix REAL,
+  fork_state TEXT NOT NULL, reconciled_at_wall_unix REAL, orphan_source TEXT,
+  chain_verdict TEXT,
   session_id TEXT, observed_after_gap INTEGER NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS session (
   session_id TEXT PRIMARY KEY, started_wall_unix REAL NOT NULL,
@@ -258,6 +259,7 @@ def open_database(path=DB_PATH):
             connection.execute(f"ALTER TABLE target ADD COLUMN {column} INTEGER")
     observed = {row[1] for row in connection.execute("PRAGMA table_info(observation)")}
     for column, definition in (("session_id", "TEXT"),
+                               ("orphan_source", "TEXT"), ("chain_verdict", "TEXT"),
                                ("observed_after_gap", "INTEGER NOT NULL DEFAULT 0")):
         if column not in observed:
             connection.execute(f"ALTER TABLE observation ADD COLUMN {column} {definition}")
@@ -616,12 +618,16 @@ def reconcile(connection, lock, b15a_path=B15A_DB, b15b_path=B15B_DB):
     now = time.time()
     with lock:
         rows = connection.execute(
-            "SELECT signature, t0_slot, fork_state FROM observation").fetchall()
-        for signature, _t0_slot, previous in rows:
+            "SELECT signature, t0_slot, fork_state, chain_verdict FROM observation").fetchall()
+        for signature, _t0_slot, previous, verdict in rows:
             if signature in confirmed:
                 state = FORK_CONFIRMED
-            elif previous == FORK_ORPHANED:
-                state = FORK_ORPHANED       # set by an independent query; never re-litigated here
+            elif verdict is not None:
+                # A verdict the CHAIN gave, in either direction, and this pass does not re-litigate
+                # it. Preserving only the orphan half demoted every chain-confirmed observation
+                # back to unresolved sixty seconds after the worker promoted it, so the worker
+                # made no net progress at all: 8 promotions in five minutes where 600 were due.
+                state = FORK_CONFIRMED if verdict == "confirmed" else FORK_ORPHANED
             else:
                 state = FORK_UNRESOLVED
             counts[state] += 1
@@ -630,6 +636,37 @@ def reconcile(connection, lock, b15a_path=B15A_DB, b15b_path=B15B_DB):
                 (state, now, signature))
         connection.commit()
     return counts
+
+
+def withdraw_peer_orphans(connection, lock):
+    """Reset every orphan verdict that was NOT reached by asking the chain.
+
+    B15k proved the rule those verdicts came from invalid: 200 of 200 launches absent from B15a
+    inside a window B15a had passed were confirmed on chain. A verdict produced by a rule now known
+    to be wrong is not evidence, and leaving it in place would let a withdrawn finding go on
+    excluding cells from pricing forever.
+
+    The withdrawal is recorded rather than silent, and the observations return to `unresolved` —
+    not to `confirmed`. They are re-decided by the chain, one query at a time.
+    """
+    with lock:
+        affected = connection.execute(
+            "SELECT COUNT(*) FROM observation WHERE fork_state=? AND chain_verdict IS NULL",
+            (FORK_ORPHANED,)).fetchone()[0]
+        connection.execute(
+            "UPDATE observation SET fork_state=?, reconciled_at_wall_unix=? "
+            "WHERE fork_state=? AND chain_verdict IS NULL",
+            (FORK_UNRESOLVED, time.time(), FORK_ORPHANED))
+        connection.execute(
+            "INSERT OR REPLACE INTO metadata(key,value) VALUES (?,?)",
+            ("peer_orphan_verdicts_withdrawn",
+             json.dumps({"count": affected, "at_wall_unix": time.time(),
+                         "reason": "B15K_COVERAGE_AUDIT_V1: 200 of 200 launches absent from B15a "
+                                   "inside a window B15a had passed were CONFIRMED ON CHAIN; the "
+                                   "peer-absence orphan rule is withdrawn",
+                         "returned_to": FORK_UNRESOLVED})))
+        connection.commit()
+    return affected
 
 
 def confirmation_worker(connection, lock, stop, counts, url, opener=None, sleeper=time.sleep,
@@ -670,8 +707,11 @@ def confirmation_worker(connection, lock, stop, counts, url, opener=None, sleepe
             try:
                 with lock:
                     connection.execute(
-                        "UPDATE observation SET fork_state=?, reconciled_at_wall_unix=? "
-                        "WHERE signature=?", (state, time.time(), signature))
+                        "UPDATE observation SET fork_state=?, reconciled_at_wall_unix=?, "
+                        "orphan_source=?, chain_verdict=? WHERE signature=?",
+                        (state, time.time(),
+                         "chain_not_found" if state == FORK_ORPHANED else None,
+                         "confirmed" if outcome else "not_found", signature))
                     connection.commit()
             except sqlite3.Error:
                 counts["worker_errors"] += 1
@@ -1013,12 +1053,18 @@ def main(argv=None):
     parser.add_argument("--seconds", type=int, default=None)
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--census-only", action="store_true")
+    parser.add_argument("--withdraw-peer-orphans", action="store_true",
+                        help="reset orphan verdicts not reached by asking the chain")
     parser.add_argument("--recover", action="store_true",
                         help="mark pending targets whose deadline passed while down")
     arguments = parser.parse_args(argv)
     if arguments.census_only:
         connection = open_database()
         print(json.dumps(census(connection), indent=2, sort_keys=True))
+        return 0
+    if arguments.withdraw_peer_orphans:
+        connection = open_database()
+        print(json.dumps({"withdrawn": withdraw_peer_orphans(connection, threading.Lock())}))
         return 0
     if arguments.recover:
         connection = open_database()
