@@ -63,3 +63,7 @@ research/b15e/logs/
 research/b15f/checkpoints.sqlite
 research/b15f/rpc_exchanges.jsonl
 research/b15f/logs/
+
+# B15g join runtime.
+research/b15g/checkpoint_join.sqlite
+research/b15g/logs/
