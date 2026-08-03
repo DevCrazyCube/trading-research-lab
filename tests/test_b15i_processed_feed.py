@@ -600,16 +600,25 @@ class TestReconciliation(unittest.TestCase):
             path.unlink()
         self.directory.rmdir()
 
-    def _b15a(self, signatures):
+    def _b15a(self, signatures, tip=100_000):
+        """A confirmed recorder holding `signatures` and having itself progressed to `tip`.
+
+        The tip is the point. Without it, a recorder that has not reached a slot yet and one that
+        reached it and saw nothing are indistinguishable, and they mean opposite things.
+        """
         import sqlite3
         path = self.directory / "shadow.sqlite"
         connection = sqlite3.connect(path)
         # Rebuilt, not appended to: this helper is called twice in one test, and a version that
         # accumulated would make the second call's assertion depend on the first call's rows.
-        connection.execute("CREATE TABLE IF NOT EXISTS launch(signature TEXT, decode_status TEXT)")
+        connection.execute(
+            "CREATE TABLE IF NOT EXISTS launch(signature TEXT, decode_status TEXT, slot INTEGER)")
+        connection.execute("CREATE TABLE IF NOT EXISTS pump_event(slot INTEGER)")
         connection.execute("DELETE FROM launch")
-        connection.executemany("INSERT INTO launch VALUES (?,'decoded')",
-                               [(s,) for s in signatures])
+        connection.execute("DELETE FROM pump_event")
+        connection.executemany("INSERT INTO launch VALUES (?,'decoded',?)",
+                               [(s, tip) for s in signatures])
+        connection.execute("INSERT INTO pump_event VALUES (?)", (tip,))
         connection.commit()
         connection.close()
         return path
@@ -622,27 +631,63 @@ class TestReconciliation(unittest.TestCase):
         self.assertEqual(self.harness.connection.execute(
             "SELECT fork_state FROM observation").fetchone()[0], B15I.FORK_CONFIRMED)
 
-    def test_an_uncorroborated_observation_is_never_promoted_by_age(self):
+    def test_an_uncorroborated_observation_the_recorder_passed_is_orphaned(self):
         self.harness.feed(_create_frame(200))
         self.harness.feed(_create_frame(1000, signature="Other" + SIGNATURE[5:]))
         counts = B15I.reconcile(self.harness.connection, self.harness.lock,
-                                self._b15a([]), self.directory / "missing.sqlite")
-        self.assertEqual(counts[B15I.FORK_ORPHANED], 1)     # the old one
-        self.assertEqual(counts[B15I.FORK_UNRESOLVED], 1)   # the recent one
+                                self._b15a([], tip=1000 + B15I.ORPHAN_MARGIN_SLOTS + 1),
+                                self.directory / "missing.sqlite")
+        self.assertEqual(counts[B15I.FORK_ORPHANED], 2)
         self.assertEqual(counts[B15I.FORK_CONFIRMED], 0)
+
+    def test_a_lagging_recorder_never_orphans_what_it_has_not_reached(self):
+        """B15a was found running 500 slots behind. Its silence there means nothing yet.
+
+        The rule keyed on our own newest observation called 112 launches orphaned that the
+        counterparty simply had not got to — laundering counterparty lag into a finding.
+        """
+        self.harness.feed(_create_frame(200))
+        self.harness.feed(_create_frame(5000, signature="Other" + SIGNATURE[5:]))
+        counts = B15I.reconcile(self.harness.connection, self.harness.lock,
+                                self._b15a([], tip=400),   # behind both, past neither by the margin
+                                self.directory / "missing.sqlite")
+        self.assertEqual(counts[B15I.FORK_ORPHANED], 0)
+        self.assertEqual(counts[B15I.FORK_UNRESOLVED], 2)
+
+    def test_the_furthest_behind_counterparty_sets_the_bar(self):
+        """A current recorder must not excuse orphaning what the other one has not reached."""
+        import sqlite3
+        self.harness.feed(_create_frame(200))
+        behind = self.directory / "backfill.sqlite"
+        connection = sqlite3.connect(behind)
+        connection.execute("CREATE TABLE backfill(signature TEXT, status TEXT, slot INTEGER)")
+        connection.execute("INSERT INTO backfill VALUES ('x','retrieved',150)")
+        connection.commit()
+        connection.close()
+        _confirmed, tip = B15I.counterparty_evidence(self._b15a([], tip=100_000), behind)
+        self.assertEqual(tip, 150)
+        counts = B15I.reconcile(self.harness.connection, self.harness.lock,
+                                self._b15a([], tip=100_000), behind)
+        self.assertEqual(counts[B15I.FORK_ORPHANED], 0)
 
     def test_a_recent_observation_is_unresolved_not_orphaned(self):
         self.harness.feed(_create_frame(200))
         counts = B15I.reconcile(self.harness.connection, self.harness.lock,
-                                self._b15a([]), self.directory / "missing.sqlite")
+                                self._b15a([], tip=250), self.directory / "missing.sqlite")
         self.assertEqual(counts[B15I.FORK_UNRESOLVED], 1)
 
-    def test_a_missing_counterparty_database_never_promotes(self):
+    def test_a_missing_counterparty_database_never_promotes_and_never_orphans(self):
         self.harness.feed(_create_frame(200))
         counts = B15I.reconcile(self.harness.connection, self.harness.lock,
                                 self.directory / "absent_a.sqlite",
                                 self.directory / "absent_b.sqlite")
         self.assertEqual(counts[B15I.FORK_CONFIRMED], 0)
+        # Unknown is not clean, and it is not dirty either: with no counterparty readable at all,
+        # nothing is orphaned on the strength of an absence nobody could check.
+        self.assertEqual(counts[B15I.FORK_ORPHANED], 0)
+        self.assertEqual(counts[B15I.FORK_UNRESOLVED], 1)
+        self.assertIsNone(B15I.counterparty_evidence(
+            self.directory / "absent_a.sqlite", self.directory / "absent_b.sqlite")[1])
 
     def test_only_confirmed_cells_are_counted_priceable(self):
         self.harness.feed(_create_frame(200))

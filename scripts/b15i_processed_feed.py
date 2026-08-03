@@ -72,6 +72,7 @@ TRIGGER_COMMITMENT = "processed"
 STATE_READ_COMMITMENT = "finalized"
 MAX_QUEUE_DEPTH = 4096
 SLOT_SECONDS = 0.4      # the nominal Solana slot; used ONLY to space retries, never as evidence
+ORPHAN_MARGIN_SLOTS = 300   # how far a confirmed recorder must be PAST a slot to call it orphaned
 
 LABEL = "SIMULATED_PROCESSED_FEED_PILOT"
 
@@ -471,6 +472,41 @@ def recover_pending(connection, lock, observed_slot):
 # Fork reconciliation
 # --------------------------------------------------------------------------------------------
 
+def counterparty_evidence(b15a_path=B15A_DB, b15b_path=B15B_DB):
+    """Confirmed signatures, and how far the confirmed recorders have themselves progressed.
+
+    The tip matters as much as the set. Without it, "not in the counterparty" and "the counterparty
+    has not got there yet" are the same observation, and the second one silently becomes the first.
+
+    A tip of None means no counterparty could be read at all, and nothing is ever orphaned on that
+    basis: unknown is not clean.
+    """
+    confirmed, tips = set(), []
+    sources = ((b15a_path, "SELECT signature FROM launch WHERE decode_status='decoded'",
+                ("SELECT MAX(slot) FROM pump_event", "SELECT MAX(slot) FROM launch")),
+               (b15b_path, "SELECT signature FROM backfill WHERE status='retrieved'",
+                ("SELECT MAX(slot) FROM backfill",)))
+    for path, signature_query, tip_queries in sources:
+        if not pathlib.Path(path).exists():
+            continue
+        source = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=30)
+        try:
+            confirmed |= {row[0] for row in source.execute(signature_query)}
+        except sqlite3.Error:
+            pass
+        for tip_query in tip_queries:
+            try:
+                value = source.execute(tip_query).fetchone()[0]
+            except sqlite3.Error:
+                continue
+            if value is not None:
+                tips.append(value)
+        source.close()
+    # The FURTHEST-BEHIND reachable counterparty sets the bar. Taking the max would let a recorder
+    # that is current excuse orphaning launches the other one has not reached.
+    return confirmed, (min(tips) if tips else None)
+
+
 def reconcile(connection, lock, b15a_path=B15A_DB, b15b_path=B15B_DB):
     """Promote a processed observation ONLY on an independent confirmed record.
 
@@ -478,30 +514,22 @@ def reconcile(connection, lock, b15a_path=B15A_DB, b15b_path=B15B_DB):
     with no confirmed counterpart stands as evidence of what processed showed, is marked orphaned,
     and is excluded from pricing.
     """
-    confirmed = set()
-    for path, query in ((b15a_path, "SELECT signature FROM launch WHERE decode_status='decoded'"),
-                        (b15b_path, "SELECT signature FROM backfill WHERE status='retrieved'")):
-        if not pathlib.Path(path).exists():
-            continue
-        source = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=30)
-        try:
-            confirmed |= {row[0] for row in source.execute(query)}
-        except sqlite3.Error:
-            pass
-        finally:
-            source.close()
+    confirmed, counterparty_tip = counterparty_evidence(b15a_path, b15b_path)
     counts = {FORK_CONFIRMED: 0, FORK_ORPHANED: 0, FORK_UNRESOLVED: 0}
     now = time.time()
     with lock:
         rows = connection.execute(
             "SELECT signature, t0_slot, fork_state FROM observation").fetchall()
-        newest = connection.execute("SELECT MAX(t0_slot) FROM observation").fetchone()[0] or 0
         for signature, t0_slot, _state in rows:
             if signature in confirmed:
                 state = FORK_CONFIRMED
-            elif newest - t0_slot > 300:
-                # Old enough that a confirmed record would have appeared. Orphaned is a finding,
-                # not a default: it says processed showed something confirmed never did.
+            elif counterparty_tip is not None and counterparty_tip - t0_slot > ORPHAN_MARGIN_SLOTS:
+                # Orphaned is a finding, not a default: it says the confirmed recorder got PAST
+                # this slot and never saw the launch. Measured against the COUNTERPARTY's own
+                # progress, never against our clock — B15a was found running 500 slots behind, and
+                # a rule keyed on our newest observation called 112 launches orphaned that the
+                # counterparty simply had not reached yet. Absence from a lagging feed is not
+                # evidence of absence.
                 state = FORK_ORPHANED
             else:
                 state = FORK_UNRESOLVED
