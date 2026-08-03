@@ -1,0 +1,132 @@
+{
+  "preregistration_id": "B15P_NATIVE_FEE_BACKFILL_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 150)",
+  "status": "FROZEN. Committed alone, before any getTransaction request is sent.",
+  "purpose": "Backfill launch-transaction fee schedules for exactly the frozen B15O 5,000-member set, from a path that touches no closed recorder, so the replication B15O could not perform becomes possible.",
+  "committed_before_any_rpc": true,
+
+  "why_this_exists": {
+    "the_measured_blocker": "B15O closed correctly and produced ZERO priced cells: 79,779 refusals for a missing fee schedule. B15L decodes fee basis points from B15b's preserved launch transactions, B15b's pending set reads B15a's shadow database, and B15a closed at exactly 5,000 launches whose maximum slot is 64,475 slots BEFORE B15O's first member. The overlap is zero and no future B15b run changes it.",
+    "the_error_being_corrected": "B15O's own preregistration listed its inputs as B15i entry and B15N exit checkpoints only and forbade B15a and B15f artifact paths by source scan. The scan passed because the dependency runs one hop further back through B15b, which is neither. The input list was incomplete and the scan was aimed one level too shallow. This document fixes the scan as well as the data path.",
+    "what_this_does_not_do": "it computes no strategy quantity of any kind. It produces fee schedules and nothing else."
+  },
+
+  "the_frozen_member_set": {
+    "source_of_authority": "the immutable B15O artifact",
+    "b15o_artifact_sha256": "394eeb5a62b05471569c8d6406e18fd4a8f7fd7e454925186628ce294e958e5b",
+    "member_set_sha256": "661f953a3aa995abe9a013e69da080f71bad212666a40610d859764b2855a296",
+    "member_set_hash_definition": "SHA-256 over json.dumps of the ordered list of {mint, signature, t0_slot} objects with sort_keys and (\",\", \":\") separators",
+    "size": 5000,
+    "honest_note_about_the_artifact": {
+      "what_it_records": "the canonical ordering rule, the size, the first member and the last member. It does NOT enumerate the roster.",
+      "consequence": "the roster cannot be read from the artifact and must be re-derived under the artifact's recorded rule from B15N's schedule, then VERIFIED against the artifact's pinned size, first member and last member. Any disagreement refuses.",
+      "why_that_is_still_the_artifact_as_authority": "the artifact constrains the derivation on three independent points and the derivation is deterministic, so exactly one roster satisfies it. That roster is hashed here, and from this moment the hash is the authority rather than the derivation.",
+      "measured_before_freezing": "the derivation was run, matched the artifact's first member, last member and count of 5,000, produced the same hash under a shuffled read of B15N's rows, and every one of the 5,000 is B15i fork_state confirmed"
+    },
+    "membership_never_changes": "no member is added, dropped, substituted or reordered. A member whose transaction cannot be retrieved or decoded is recorded as a refusal and remains a member.",
+    "requires_b15i_confirmed": "every member must have B15i fork_state confirmed at backfill time; one that does not is refused rather than fetched"
+  },
+
+  "forbidden_dependencies": {
+    "rule": "no data may flow from research/b15a, research/b15b or research/b15f into this study, directly or transitively",
+    "why_a_path_string_scan_is_not_enough": "B15h builds its exchange-log path as ROOT / \"research\" / \"b15b\" / \"rpc_exchanges.jsonl\", so the literal string \"b15b/rpc_exchanges.jsonl\" never appears in the source. A scan for assembled paths sails straight past it, which is exactly how B15O shipped with the dependency intact.",
+    "static_audit": {
+      "method": "walk the transitive module closure through the project's _load convention and scan each module for the forbidden DIRECTORY tokens as quoted literals, skipping each module's own forbidden-token declaration",
+      "measured_closure_at_freeze_time": "b7d_create_enumerator is the only clean root: every module in the b15h, b15l and b15n closures references at least one forbidden directory, because they all load b15a_shadow_pilot and it names its own work directory",
+      "declared_manifest": [
+        {"module": "b7d_create_enumerator.py", "forbidden_references": [], "role": "the pinned struct decoder, Cursor and read_struct"},
+        {"module": "b15a_shadow_pilot.py", "forbidden_references": ["b15a"], "role": "program_data_payloads and load_pinned_create_type, both pure functions of their arguments", "why_no_data_flows": "its b15a references are its own default work-directory constants; this study calls neither its replay nor its run and passes no path to it", "forbidden_functions_never_called": ["replay", "run", "status", "open_database"]},
+        {"module": "b15j_raw_retention.py", "forbidden_references": ["b15a"], "role": "loaded transitively by b15a_shadow_pilot", "why_no_data_flows": "this study calls nothing in it", "forbidden_functions_never_called": ["run", "status", "rotate", "compact_once"]}
+      ],
+      "an_undeclared_reference_refuses": "any module in the closure carrying a forbidden reference that is not in the manifest above stops the study"
+    },
+    "runtime_audit": {
+      "method": "every filesystem path this study opens is recorded, and a path under research/b15a, research/b15b or research/b15f refuses immediately",
+      "why_this_is_the_real_check": "a static manifest states an intention; the runtime record states what happened. This is the check that would have caught B15O, and it does not depend on how a path was spelled in source.",
+      "covers": ["builtins.open", "sqlite3.connect"]
+    }
+  },
+
+  "retrieval": {
+    "method": "getTransaction",
+    "commitment": "confirmed",
+    "max_supported_transaction_version": 0,
+    "max_requests_per_second": 2,
+    "rate_rationale": "the same ceiling B15F froze and B15N inherited. B15h was killed by HTTP 429 when a pool was left unbounded.",
+    "max_attempts_per_signature": 3,
+    "raw_preserved_before_decoding": {
+      "rule": "the request and the response, or the error, are appended to an append-only log BEFORE any field is decoded",
+      "why": "a decode that runs first and preserves second cannot be re-examined when the decode turns out to be wrong, which has happened twice in this project"
+    },
+    "endpoint_receipt": "scheme and host only; a full URL is never written to disk",
+    "no_secret_in_argv": "the credential is sourced from the environment in the entrypoint and never passed as an argument, because ps shows argv to every user on the box",
+    "resumable_and_idempotent": "a member already recorded terminal is not re-fetched; a restart resumes from the database and re-derives nothing from a feed",
+    "single_writer": "an exclusive lock file; a second process refuses rather than interleaving writes",
+    "explicit_states": ["retrieved", "not_found", "failed", "refused"]
+  },
+
+  "decoding": {
+    "logic": "the pinned decode B15h and B15L use: Program data log lines base64-decoded, the pinned TradeEvent discriminator from research/pump_idl_9c82f61.json, and b7d's read_struct over the pinned type",
+    "same_logic_different_source": "B15h couples that decode to B15b's exchange log. This study applies the identical decode to ITS OWN preserved responses, and a differential test asserts both produce the same schedule from the same transaction payload.",
+    "never_hardcoded": "no default fee schedule exists anywhere in this study. B15C observed fee_basis_points taking more than one value in a single sample, and a hardcoded 95/5/0/0 was already a real defect in B15F.",
+    "fields": ["fee_bps", "creator_fee_bps", "cashback_fee_bps", "buyback_fee_bps"],
+    "identity_agreement_required": {
+      "rule": "a schedule is accepted only if the retrieved transaction's own evidence agrees with the member on ALL of: signature, slot, mint, and the presence of an exactly decoded CreateEvent for that mint",
+      "why": "a transaction retrieved under one signature but describing another launch would attach one launch's fees to another, and nothing downstream could detect it"
+    },
+    "one_schedule_per_member": "exactly one schedule per member, or an explicit refusal. Two disagreeing schedules for one member refuse rather than one being chosen."
+  },
+
+  "completeness_gate": {
+    "rule": "the backfill is complete only when every one of the 5,000 members has a terminal record: a schedule, or a refusal naming its reason",
+    "replay": "every schedule must be reproducible from the preserved raw responses alone, and the check rebuilds them and compares field for field",
+    "hash": "the member set hash is verified before any request is sent and again before completeness is declared",
+    "partial_is_reported_as_partial": "a run that has not reached every member reports the count and the remainder, and never reports completeness"
+  },
+
+  "refusal_codes": [
+    {"code": "P_ARTIFACT_DRIFT", "meaning": "the B15O artifact no longer hashes to its pinned value"},
+    {"code": "P_MEMBER_SET_DRIFT", "meaning": "the derived roster no longer hashes to its pinned value, or disagrees with the artifact's size, first or last member"},
+    {"code": "P_NOT_CONFIRMED", "meaning": "a member's B15i fork_state is not confirmed"},
+    {"code": "P_FORBIDDEN_DEPENDENCY", "meaning": "a forbidden directory appeared in the module closure undeclared, or a forbidden path was opened at runtime"},
+    {"code": "P_NOT_FOUND", "meaning": "the node returned no confirmed transaction for the signature"},
+    {"code": "P_RPC_FAILED", "meaning": "the request did not complete within its bounded attempts"},
+    {"code": "P_NO_CREATE_EVENT", "meaning": "no exactly decoded CreateEvent in the transaction"},
+    {"code": "P_NO_TRADE_EVENT", "meaning": "no TradeEvent carrying fee basis points"},
+    {"code": "P_IDENTITY_MISMATCH", "meaning": "the transaction's signature, slot or mint disagrees with the member"},
+    {"code": "P_SCHEDULE_CONFLICT", "meaning": "two disagreeing schedules for one member"},
+    {"code": "P_INCOMPLETE_SCHEDULE", "meaning": "a fee field is absent; no default is substituted"},
+    {"code": "P_REPLAY_DIVERGED", "meaning": "a schedule could not be rebuilt from the preserved raw response"},
+    {"code": "P_LOCK_HELD", "meaning": "another writer holds the lock"},
+    {"code": "P_SECRET_IN_OUTPUT", "meaning": "credential material appeared in a record"}
+  ],
+
+  "publication": {
+    "always_publishable": ["member counts and terminal-state counts", "the refusal census", "the distinct fee schedules observed and their frequencies", "request counts, latency and rate", "the dependency audit result"],
+    "never_publishable_here": ["any return, profit or expected value", "any capacity or sizing figure", "any counterfactual quantity", "any comparison against B15L or B15M"],
+    "no_strategy_quantity_in_this_study": "this study ends at fee schedules. The replication that uses them is a separate, separately preregistered piece of work."
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "reading any path under research/b15a, research/b15b or research/b15f",
+    "hardcoding or defaulting any fee field",
+    "adding, dropping, substituting or reordering a member",
+    "modifying or re-running the B15O artifact",
+    "computing any strategy quantity",
+    "raising the two-requests-per-second ceiling",
+    "passing a credential on a command line",
+    "touching B11c, B11a, the B15i or B15N workers, or any worker cadence"
+  ],
+
+  "status_locks": {
+    "label": "NATIVE_FEE_BACKFILL",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
