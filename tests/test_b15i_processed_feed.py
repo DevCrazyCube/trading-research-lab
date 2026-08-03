@@ -705,6 +705,94 @@ class TestReconciliation(unittest.TestCase):
         self.assertEqual(report["priceable_cells"], 1)
 
 
+class TestSessionsAndReconnect(unittest.TestCase):
+    """A single read timeout used to end the pilot for good. These prove it no longer does."""
+
+    def setUp(self):
+        self.directory = pathlib.Path(f"b15i_ses_{self.id().split('.')[-1]}")
+        self.directory.mkdir(exist_ok=True)
+        # No monkeypatching of assert_isolated: the work directory below really does end in b15i
+        # and really is outside research/, so the gate passes on its own terms. A test that
+        # disables the gate to run is a test that stops proving the gate lets real work through.
+
+    def tearDown(self):
+        for path in sorted(self.directory.rglob("*")):
+            if path.is_file():
+                path.unlink()
+        for path in sorted(self.directory.rglob("*"), reverse=True):
+            if path.is_dir():
+                path.rmdir()
+        self.directory.rmdir()
+
+    class Transport:
+        """A socket that dies the way the live one did: a bare TimeoutError out of recv()."""
+
+        def __init__(self, scripts):
+            self.scripts = list(scripts)
+            self.current = None
+
+        def __call__(self, *_args, **_kwargs):
+            return self
+
+        def connect(self):
+            self.current = list(self.scripts.pop(0)) if self.scripts else []
+            return self
+
+        def send_json(self, _document):
+            return None
+
+        def recv(self):
+            if not self.current:
+                raise TimeoutError("The read operation timed out")
+            item = self.current.pop(0)
+            if isinstance(item, Exception):
+                raise item
+            return item
+
+        def close(self, code=1000):
+            return None
+
+    def _run(self, transport, **kwargs):
+        original = B15I.WS.WebSocket
+        B15I.WS.WebSocket = transport
+        try:
+            return B15I.run(url="https://example.invalid", ws_url="wss://example.invalid",
+                            work_dir=self.directory / "b15i", workers=1,
+                            opener=lambda *a, **k: (_ for _ in ()).throw(OSError("no rpc")),
+                            reconcile_interval=3600.0, **kwargs)
+        finally:
+            B15I.WS.WebSocket = original
+
+    def test_a_read_timeout_reconnects_instead_of_ending_the_pilot(self):
+        transport = self.Transport([[_create_frame(436_900_000, "SigOne" + "1" * 30)],
+                                    [_create_frame(436_900_100, "SigTwo" + "2" * 30)]])
+        counts, report = self._run(transport, max_sessions=2, reconnect_pause=0.0)
+        self.assertEqual(report["sessions"], 2)
+        self.assertEqual(report["reconnects"], 1)
+        self.assertEqual(counts["launches"], 2)     # the second session's frame was still read
+
+    def test_a_launch_first_seen_after_a_reconnect_carries_the_gap_provenance(self):
+        transport = self.Transport([[_create_frame(436_900_000, "SigOne" + "1" * 30)],
+                                    [_create_frame(436_900_100, "SigTwo" + "2" * 30)]])
+        _counts, report = self._run(transport, max_sessions=2, reconnect_pause=0.0)
+        self.assertEqual(report["observed_after_gap"], 1)
+        connection = B15I.open_database(self.directory / "b15i" / "processed_feed.sqlite")
+        rows = dict(connection.execute(
+            "SELECT signature, observed_after_gap FROM observation").fetchall())
+        connection.close()
+        self.assertEqual(rows["SigOne" + "1" * 30], 0)
+        self.assertEqual(rows["SigTwo" + "2" * 30], 1)
+
+    def test_the_fault_is_recorded_as_a_fault_not_smoothed_over(self):
+        transport = self.Transport([[_create_frame(436_900_000, "SigOne" + "1" * 30)]])
+        _counts, report = self._run(transport, max_sessions=1, reconnect_pause=0.0)
+        self.assertEqual(report["faults"], 1)
+        connection = B15I.open_database(self.directory / "b15i" / "processed_feed.sqlite")
+        (reason,) = connection.execute("SELECT end_reason FROM session").fetchone()
+        connection.close()
+        self.assertIn("TimeoutError", reason)
+
+
 class TestCensus(unittest.TestCase):
     def setUp(self):
         self.directory = pathlib.Path(f"b15i_cen_{self.id().split('.')[-1]}")

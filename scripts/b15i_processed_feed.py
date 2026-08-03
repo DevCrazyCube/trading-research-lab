@@ -220,7 +220,12 @@ CREATE TABLE IF NOT EXISTS observation (
   signature TEXT PRIMARY KEY, t0_slot INTEGER NOT NULL, mint TEXT, bonding_curve TEXT,
   observed_slot INTEGER NOT NULL, received_wall_unix REAL NOT NULL,
   received_monotonic_ns INTEGER NOT NULL, raw_sha256 TEXT NOT NULL,
-  fork_state TEXT NOT NULL, reconciled_at_wall_unix REAL);
+  fork_state TEXT NOT NULL, reconciled_at_wall_unix REAL,
+  session_id TEXT, observed_after_gap INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS session (
+  session_id TEXT PRIMARY KEY, started_wall_unix REAL NOT NULL,
+  started_monotonic_ns INTEGER NOT NULL, reconnect_index INTEGER NOT NULL,
+  commitment TEXT NOT NULL, ended_wall_unix REAL, end_reason TEXT, frames INTEGER);
 CREATE TABLE IF NOT EXISTS target (
   signature TEXT NOT NULL, delay_slots INTEGER NOT NULL, bonding_curve TEXT,
   target_slot INTEGER NOT NULL, lead_slots INTEGER NOT NULL,
@@ -247,6 +252,11 @@ def open_database(path=DB_PATH):
     existing = {row[1] for row in connection.execute("PRAGMA table_info(target)")}
     if "attempts" not in existing:
         connection.execute("ALTER TABLE target ADD COLUMN attempts INTEGER")
+    observed = {row[1] for row in connection.execute("PRAGMA table_info(observation)")}
+    for column, definition in (("session_id", "TEXT"),
+                               ("observed_after_gap", "INTEGER NOT NULL DEFAULT 0")):
+        if column not in observed:
+            connection.execute(f"ALTER TABLE observation ADD COLUMN {column} {definition}")
     connection.commit()
     return connection
 
@@ -278,7 +288,8 @@ class RawLog:
 # The feed thread — raw first, never an RPC call
 # --------------------------------------------------------------------------------------------
 
-def handle_frame(message, decoder, raw, connection, work_queue, document, counts, lock):
+def handle_frame(message, decoder, raw, connection, work_queue, document, counts, lock,
+                 session_id=None, after_gap=False):
     """One processed notification. Writes evidence, then enqueues. Never touches the network.
 
     The order is mandatory: raw frame, then launch identity, then enqueue. Dying between decode and
@@ -297,6 +308,7 @@ def handle_frame(message, decoder, raw, connection, work_queue, document, counts
     raw.append({"received_wall_unix": received_wall, "received_monotonic_ns": received_mono,
                 "commitment": TRIGGER_COMMITMENT, "observed_slot": observed_slot,
                 "signature": signature, "raw_notification_json": payload,
+                "session_id": session_id, "observed_after_gap": bool(after_gap),
                 "raw_sha256": raw_sha256})
     counts["frames"] += 1
     if value.get("err") is not None or observed_slot is None or not signature:
@@ -318,10 +330,10 @@ def handle_frame(message, decoder, raw, connection, work_queue, document, counts
             # 2. LAUNCH IDENTITY, durably, before any target refers to it.
             connection.execute(
                 "INSERT OR IGNORE INTO observation(signature,t0_slot,mint,bonding_curve,"
-                "observed_slot,received_wall_unix,received_monotonic_ns,raw_sha256,fork_state) "
-                "VALUES (?,?,?,?,?,?,?,?,?)",
+                "observed_slot,received_wall_unix,received_monotonic_ns,raw_sha256,fork_state,"
+                "session_id,observed_after_gap) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (signature, t0_slot, fields.get("mint"), curve, observed_slot, received_wall,
-                 received_mono, raw_sha256, FORK_UNCONFIRMED))
+                 received_mono, raw_sha256, FORK_UNCONFIRMED, session_id, int(bool(after_gap))))
             connection.commit()
         try:
             assert_after_activation(t0_slot, activation)
@@ -590,6 +602,13 @@ def census(connection, lock=None):
     report["captured_but_not_priceable"] = _query(
         "SELECT COUNT(*) FROM target t JOIN observation o ON o.signature=t.signature "
         "WHERE t.state='captured' AND o.fork_state<>'confirmed'")[0][0]
+    report["sessions"] = _query("SELECT COUNT(*) FROM session")[0][0]
+    report["reconnects"] = max(0, report["sessions"] - 1)
+    report["faults"] = _query(
+        "SELECT COUNT(*) FROM session WHERE end_reason IS NOT NULL AND end_reason<>'stopping' "
+        "AND end_reason<>'peer closed'")[0][0]
+    report["observed_after_gap"] = _query(
+        "SELECT COUNT(*) FROM observation WHERE observed_after_gap=1")[0][0]
     report["performance_status"] = "not_evaluated"
     report["execution_status"] = "never_executed"
     return report
@@ -640,7 +659,8 @@ def worker_loop(work_queue, url, connection, lock, decoder, document, counts, st
 
 
 def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opener=None,
-        websocket=None, max_frames=None, reconcile_interval=60.0):
+        websocket=None, max_frames=None, reconcile_interval=60.0, max_sessions=10**9,
+        reconnect_pause=1.0):
     """Subscribe at processed, write raw, enqueue, drain. Read-only against the chain throughout."""
     assert_no_execution_surface()
     assert_feed_thread_does_not_call_rpc()
@@ -685,29 +705,76 @@ def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opene
     for thread in threads:
         thread.start()
 
-    socket = websocket or WS.WebSocket(ws_url)
+    socket = None
     deadline = None if seconds is None else time.monotonic() + seconds
     try:
-        socket = socket.connect() or socket
-        socket.send_json({"jsonrpc": "2.0", "id": 1, "method": "logsSubscribe",
-                          "params": [{"mentions": [PILOT.PUMP_PROGRAM]},
-                                     {"commitment": TRIGGER_COMMITMENT}]})
+        # Sessions, not one connection. A single 30-second read timeout used to end the pilot for
+        # good: the raw TimeoutError from the socket escaped past `except WebSocketRefused` and
+        # unwound out of run(). A durable recorder that dies on the first quiet half-minute records
+        # a few good minutes and then a silence indistinguishable from a chain with no launches.
+        reconnect_index = 0
         while deadline is None or time.monotonic() < deadline:
             if max_frames is not None and counts["frames"] >= max_frames:
                 break
-            try:
-                message = socket.recv()
-            except WS.WebSocketRefused:
+            if reconnect_index >= max_sessions:
+                counts["end_reason"] = "max_sessions"
                 break
-            if message is None:
-                break
+            session_id = hashlib.sha256(
+                f"{time.time()}:{os.getpid()}:{reconnect_index}".encode()).hexdigest()[:32]
+            # The gap is recorded BEFORE the frames that follow it, so a launch first seen after a
+            # reconnect carries `observed_after_gap` for its whole life. Provenance that is only
+            # attached afterwards is provenance that a later pass can quietly drop.
+            with lock:
+                connection.execute(
+                    "INSERT INTO session(session_id,started_wall_unix,started_monotonic_ns,"
+                    "reconnect_index,commitment) VALUES (?,?,?,?,?)",
+                    (session_id, time.time(), time.monotonic_ns(), reconnect_index,
+                     TRIGGER_COMMITMENT))
+                connection.commit()
+            counts["sessions"] = reconnect_index + 1
+            counts["reconnects"] = reconnect_index
+            frames_here, end_reason = 0, "stopping"
             try:
-                handle_frame(message, create_decoder, raw, connection, work_queue, document,
-                             counts, lock)
-            except (json.JSONDecodeError, KeyError, TypeError, AttributeError) as error:
-                counts["worker_errors"] += 1
-                raw.append({"handler_error": f"{type(error).__name__}: {error}",
-                            "received_wall_unix": time.time()})
+                socket = (websocket if websocket is not None else WS.WebSocket(ws_url))
+                socket = socket.connect() or socket
+                socket.send_json({"jsonrpc": "2.0", "id": 1, "method": "logsSubscribe",
+                                  "params": [{"mentions": [PILOT.PUMP_PROGRAM]},
+                                             {"commitment": TRIGGER_COMMITMENT}]})
+                while deadline is None or time.monotonic() < deadline:
+                    if max_frames is not None and counts["frames"] >= max_frames:
+                        break
+                    message = socket.recv()
+                    if message is None:
+                        end_reason = "peer closed"
+                        break
+                    frames_here += 1
+                    try:
+                        handle_frame(message, create_decoder, raw, connection, work_queue,
+                                     document, counts, lock, session_id, reconnect_index > 0)
+                    except (json.JSONDecodeError, KeyError, TypeError, AttributeError) as error:
+                        counts["worker_errors"] += 1
+                        raw.append({"handler_error": f"{type(error).__name__}: {error}",
+                                    "received_wall_unix": time.time()})
+            except (WS.WebSocketRefused, OSError) as error:
+                # OSError covers TimeoutError and every ssl/socket failure beneath it. The fault is
+                # recorded as a fault; it is never smoothed over into a quiet stretch.
+                end_reason = f"{type(error).__name__}: {error}"
+                counts["faults"] = counts.get("faults", 0) + 1
+            finally:
+                try:
+                    socket.close()
+                except Exception:                                         # noqa: BLE001
+                    pass
+                with lock:
+                    connection.execute(
+                        "UPDATE session SET ended_wall_unix=?, end_reason=?, frames=? "
+                        "WHERE session_id=?", (time.time(), end_reason, frames_here, session_id))
+                    connection.commit()
+            if websocket is not None:
+                break                       # a fixture transport is not reconnected to
+            reconnect_index += 1
+            if deadline is None or time.monotonic() < deadline:
+                time.sleep(reconnect_pause)
     finally:
         stop.set()
         for thread in threads:
