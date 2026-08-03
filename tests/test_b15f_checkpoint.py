@@ -73,6 +73,18 @@ def account_response(context_slot, data=None, owner=None, lamports=1_000_000, va
     return payload
 
 
+def batch_response(context_slot, curves=(CURVE,), data=None, owner=None, lamports=1_000_000,
+                   values=None):
+    """A getMultipleAccounts shape: `value` is an ARRAY positionally matching the request."""
+    if values is None:
+        values = [{"owner": owner if owner is not None else B15F.PUMP_PROGRAM,
+                   "lamports": lamports,
+                   "data": [base64.b64encode(
+                       data if data is not None else curve_account()).decode(), "base64"]}
+                  for _ in curves]
+    return {"result": {"context": {"slot": context_slot}, "value": values}}
+
+
 class Temp(unittest.TestCase):
     def setUp(self):
         self.directory = pathlib.Path(tempfile.mkdtemp(prefix="b15f-test-"))
@@ -152,7 +164,11 @@ class TestSyntheticClockScheduling(Temp):
 
     def _opener(self, context_slot, data=None):
         def opener(request, **_k):
-            payload = account_response(context_slot, data)
+            body = json.loads(request.data.decode())
+            if body["method"] == "getMultipleAccounts":
+                payload = batch_response(context_slot, body["params"][0], data)
+            else:
+                payload = account_response(context_slot, data)
 
             class Handle:
                 status = 200
@@ -324,7 +340,10 @@ class TestTransportFailures(Temp):
         b15a = self.b15a([("FutureSig", 10_000)])
 
         def working(request, **_k):
-            payload = account_response(11_050)
+            body = json.loads(request.data.decode())
+            payload = (batch_response(11_050, body["params"][0])
+                       if body["method"] == "getMultipleAccounts"
+                       else account_response(11_050))
 
             class Handle:
                 status = 200
@@ -359,7 +378,10 @@ class TestSharedStateSeparateCosts(Temp):
         b15a = self.b15a([("FutureSig", 10_000)])
 
         def opener(request, **_k):
-            payload = account_response(11_050)
+            body = json.loads(request.data.decode())
+            payload = (batch_response(11_050, body["params"][0])
+                       if body["method"] == "getMultipleAccounts"
+                       else account_response(11_050))
 
             class Handle:
                 status = 200
@@ -388,6 +410,233 @@ class TestSharedStateSeparateCosts(Temp):
         self.assertTrue(per_checkpoint)
         for *_identity, count in per_checkpoint:
             self.assertEqual(3, count, "three scenarios from one shared state")
+
+
+class TestBatchSafety(Temp):
+    """Six rules, each naming the failure it prevents. All are reachable and all are tested."""
+
+    def test_the_tolerance_survived_the_supersession(self):
+        v2 = B15F.verify_preregistration_v2()
+        self.assertEqual(150, v2["what_is_NOT_changed"]["max_lateness_slots"])
+        self.assertEqual(self.document["context_slot_geometry"]["max_lateness_slots"],
+                         v2["what_is_NOT_changed"]["max_lateness_slots"])
+        self.assertIn("widening max_lateness_slots", v2["strictly_forbidden"])
+
+    def test_a_v2_that_widened_the_tolerance_is_refused(self):
+        """The one change the supersession exists to refuse, checked rather than trusted."""
+        document = json.loads(B15F.PREREG_V2_PATH.read_text())
+        document["what_is_NOT_changed"]["max_lateness_slots"] = 5000
+        path = self.directory / "v2.json"
+        path.write_text(json.dumps(document))
+        digest = __import__("hashlib").sha256(
+            json.dumps(document, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        with self.assertRaisesRegex(Refused, "the one change it exists to refuse"):
+            B15F.verify_preregistration_v2(path, digest)
+
+    def test_a_length_mismatch_discards_the_whole_batch(self):
+        payload = batch_response(11_000, [CURVE, "Other"], values=[None])
+        with self.assertRaisesRegex(Refused, B15F.C_BATCH_LENGTH):
+            B15F.map_batch(payload, [CURVE, "Other"])
+
+    def test_a_missing_value_array_discards_the_whole_batch(self):
+        with self.assertRaisesRegex(Refused, B15F.C_BATCH_LENGTH):
+            B15F.map_batch({"result": {"context": {"slot": 1}}}, [CURVE])
+
+    def test_curves_map_back_by_address_not_by_ordinal(self):
+        """Indexing a deduplicated request by a target's ordinal is how an account gets swapped."""
+        payload = batch_response(11_000, ["AAA", "BBB"])
+        payload["result"]["value"][0]["lamports"] = 111
+        payload["result"]["value"][1]["lamports"] = 222
+        mapped, context = B15F.map_batch(payload, ["AAA", "BBB"])
+        self.assertEqual(111, mapped["AAA"]["lamports"])
+        self.assertEqual(222, mapped["BBB"]["lamports"])
+        self.assertEqual(11_000, context)
+
+    def test_the_shared_context_is_checked_against_each_target_separately(self):
+        payload = batch_response(11_000, [CURVE])
+        mapped, context = B15F.map_batch(payload, [CURVE])
+        # In tolerance for a nearby target...
+        state, _c, lateness = B15F.read_account_from_batch(
+            mapped[CURVE], CURVE, context, 10_950, self.document, DECODER)
+        self.assertEqual(50, lateness)
+        # ...and refused for a distant one settled by the SAME shared context.
+        with self.assertRaisesRegex(Refused, B15F.C_LATE):
+            B15F.read_account_from_batch(mapped[CURVE], CURVE, context, 10_000, self.document,
+                                         DECODER)
+
+    def test_a_null_entry_refuses_only_its_own_target(self):
+        payload = batch_response(11_000, ["AAA", "BBB"])
+        payload["result"]["value"][0] = None
+        mapped, context = B15F.map_batch(payload, ["AAA", "BBB"])
+        with self.assertRaisesRegex(Refused, B15F.C_ACCOUNT_MISSING):
+            B15F.read_account_from_batch(mapped["AAA"], "AAA", context, 11_000, self.document,
+                                         DECODER)
+        state, _c, _l = B15F.read_account_from_batch(mapped["BBB"], "BBB", context, 11_000,
+                                                     self.document, DECODER)
+        self.assertIsNotNone(state, "the sibling target is untainted")
+
+    def test_a_drifted_v2_hash_is_refused(self):
+        with self.assertRaisesRegex(Refused, "V2 preregistration hashes"):
+            B15F.verify_preregistration_v2(expected_sha256="0" * 64)
+
+    def test_the_batch_path_enforces_every_account_check(self):
+        """The same refusals as the single-account path, on the path that now actually runs."""
+        # Each entry is otherwise VALID so only the check under test can fire; an entry that
+        # would fail two checks cannot show which one caught it.
+        good_data = [base64.b64encode(curve_account()).decode(), "base64"]
+        cases = (
+            ({"owner": "SomeoneElse", "lamports": 1, "data": good_data},
+             B15F.C_WRONG_OWNER),
+            ({"owner": B15F.PUMP_PROGRAM, "lamports": 0, "data": good_data},
+             B15F.C_ACCOUNT_CLOSED),
+            ({"owner": B15F.PUMP_PROGRAM, "lamports": 1, "data": []},
+             B15F.C_ACCOUNT_CLOSED),
+        )
+        for entry, code in cases:
+            with self.subTest(code=code):
+                with self.assertRaisesRegex(Refused, code):
+                    B15F.read_account_from_batch(entry, CURVE, 11_000, 11_000, self.document,
+                                                 DECODER)
+
+    def test_a_curve_absent_from_the_response_refuses_its_target(self):
+        b15a = self.b15a([("FutureSig", 10_000)])
+
+        def opener(request, **_k):
+            body = json.loads(request.data.decode())
+            if body["method"] == "getMultipleAccounts":
+                # A well-formed response for a DIFFERENT curve: right length, wrong address.
+                payload = batch_response(11_050, body["params"][0])
+                payload["result"]["value"] = [None] * len(body["params"][0])
+            else:
+                payload = account_response(11_050)
+
+            class Handle:
+                status = 200
+
+                def read(self):
+                    return json.dumps(payload).encode()
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *_a):
+                    return False
+            return Handle()
+
+        B15F.run(b15a_path=b15a, work_dir=self.work, url="https://h.invalid/?k=1",
+                 opener=opener, sleeper=lambda _s: None, slot_source=lambda: 9_000, ticks=1)
+        counts = B15F.run(b15a_path=b15a, work_dir=self.work, url="https://h.invalid/?k=1",
+                          opener=opener, sleeper=lambda _s: None, slot_source=lambda: 11_100,
+                          ticks=1)
+        self.assertGreater(counts["refused"], 0)
+        self.assertIn(B15F.C_ACCOUNT_MISSING, counts["refusals_by_code"])
+
+    def test_a_target_whose_curve_was_never_requested_is_refused(self):
+        """A due target with no bonding curve is filtered out of the request, so nothing maps to
+        it. That must be a named refusal rather than a silent skip."""
+        path = self.directory / "shadow.sqlite"
+        connection = sqlite3.connect(path)
+        connection.executescript(PILOT.SCHEMA)
+        connection.execute(
+            "INSERT INTO launch(launch_seq,session_id,frame_seq,signature,slot,mint,"
+            "bonding_curve,decoded_wall_unix,decoded_monotonic_ns,decode_status,evidence_sha256,"
+            "create_key) VALUES (1,'s',1,'NoCurveSig',10000,?,?,0.0,0,?,'e','k1')",
+            (MINT, CURVE, PILOT.DECODE_DECODED))
+        connection.commit()
+        connection.close()
+
+        def opener(request, **_k):
+            body = json.loads(request.data.decode())
+            payload = (batch_response(11_050, body["params"][0])
+                       if body["method"] == "getMultipleAccounts"
+                       else account_response(11_050))
+
+            class Handle:
+                status = 200
+
+                def read(self):
+                    return json.dumps(payload).encode()
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *_a):
+                    return False
+            return Handle()
+
+        B15F.run(b15a_path=path, work_dir=self.work, url="https://h.invalid/?k=1",
+                 opener=opener, sleeper=lambda _s: None, slot_source=lambda: 9_000, ticks=1)
+        # Blank the curve on the durable schedule so the target is due with nothing to request.
+        db = sqlite3.connect(self.work / "checkpoints.sqlite")
+        db.execute("UPDATE schedule SET bonding_curve=NULL")
+        db.commit()
+        db.close()
+        counts = B15F.run(b15a_path=path, work_dir=self.work, url="https://h.invalid/?k=1",
+                          opener=opener, sleeper=lambda _s: None, slot_source=lambda: 11_100,
+                          ticks=1)
+        self.assertIn(B15F.C_BATCH_MISSING_CURVE, counts["refusals_by_code"])
+
+    def test_a_batch_length_mismatch_refuses_every_target_in_it(self):
+        b15a = self.b15a([("FutureSig", 10_000)])
+
+        def opener(request, **_k):
+            body = json.loads(request.data.decode())
+            if body["method"] == "getMultipleAccounts":
+                payload = {"result": {"context": {"slot": 11_050}, "value": []}}
+            else:
+                payload = account_response(11_050)
+
+            class Handle:
+                status = 200
+
+                def read(self):
+                    return json.dumps(payload).encode()
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *_a):
+                    return False
+            return Handle()
+
+        B15F.run(b15a_path=b15a, work_dir=self.work, url="https://h.invalid/?k=1",
+                 opener=opener, sleeper=lambda _s: None, slot_source=lambda: 9_000, ticks=1)
+        counts = B15F.run(b15a_path=b15a, work_dir=self.work, url="https://h.invalid/?k=1",
+                          opener=opener, sleeper=lambda _s: None, slot_source=lambda: 11_100,
+                          ticks=1)
+        self.assertEqual(0, counts["checkpointed"])
+        self.assertGreater(counts["refused"], 0)
+        self.assertIn(B15F.C_BATCH_LENGTH, counts["refusals_by_code"])
+
+    def test_a_duplicated_curve_is_requested_once(self):
+        class Recorder:
+            def __init__(self):
+                self.requested = None
+
+            def __call__(self, request, **_k):
+                body = json.loads(request.data.decode())
+                self.requested = body["params"][0]
+                payload = batch_response(11_000, self.requested)
+
+                class Handle:
+                    status = 200
+
+                    def read(self):
+                        return json.dumps(payload).encode()
+
+                    def __enter__(self):
+                        return self
+
+                    def __exit__(self, *_a):
+                        return False
+                return Handle()
+
+        recorder = Recorder()
+        log = B15B.ExchangeLog(self.work / "x.jsonl")
+        self.addCleanup(log.close)
+        B15F.fetch_accounts_batch([CURVE, CURVE, CURVE], "https://h.invalid/?k=1", log,
+                                  recorder)
+        self.assertEqual([CURVE], recorder.requested)
 
 
 class TestGates(Temp):
@@ -427,7 +676,10 @@ class TestGates(Temp):
         b15a = self.b15a([("FutureSig", 10_000)])
 
         def opener(request, **_k):
-            payload = account_response(11_050)
+            body = json.loads(request.data.decode())
+            payload = (batch_response(11_050, body["params"][0])
+                       if body["method"] == "getMultipleAccounts"
+                       else account_response(11_050))
 
             class Handle:
                 status = 200

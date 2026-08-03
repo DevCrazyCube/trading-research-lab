@@ -42,6 +42,11 @@ B15A_DB = ROOT / "research" / "b15a" / "shadow.sqlite"
 PREREG_PATH = ROOT / "research" / "B15F_CHECKPOINT_PREREGISTRATION.json"
 PREREG_CANONICAL_SHA256 = "be9029b9e7c118e43dc330745aacb664f698750949c9d5b3fc07e56217c1f9e8"
 
+# V2 supersedes V1's transport and cadence ONLY. The lateness tolerance is read from V1 and is
+# identical in both, which is the point: the supersession did not widen it.
+PREREG_V2_PATH = ROOT / "research" / "B15F_CHECKPOINT_PREREGISTRATION_V2.json"
+PREREG_V2_CANONICAL_SHA256 = "696288ab59e6f8dcc2edfc30bfb14bd1b5b27f66be1d7060703345014aa9c2b8"
+
 EXECUTION_SURFACE_TOKENS = ("sendTransaction", "signTransaction", "Keypair", "from_secret_key",
                             "private_key", "secret_key", "sign_message", "PRIVATE_KEY",
                             "WALLET", "mnemonic", "seed_phrase", "requestAirdrop",
@@ -61,6 +66,8 @@ C_COMPLETE = "C_COMPLETE"
 C_MIGRATED = "C_MIGRATED"
 C_RPC_EXHAUSTED = "C_RPC_EXHAUSTED"
 C_PRE_CHECKPOINT_PROTOCOL = "C_PRE_CHECKPOINT_PROTOCOL"
+C_BATCH_LENGTH = "C_BATCH_LENGTH"
+C_BATCH_MISSING_CURVE = "C_BATCH_MISSING_CURVE"
 
 STATE_SCHEDULED = "scheduled"
 STATE_CHECKPOINTED = "checkpointed"
@@ -106,6 +113,30 @@ def verify_preregistration(path=PREREG_PATH, expected_sha256=None):
             f"the checkpoint preregistration hashes {actual}, pinned {expected}. The lateness "
             "tolerance and the prospective-only rule were frozen before any query, and a changed "
             "document is a different protocol")
+    return document
+
+
+def verify_preregistration_v2(path=PREREG_V2_PATH, expected_sha256=None):
+    """The superseding document. Its tolerance must MATCH V1's, not merely be present."""
+    expected = PREREG_V2_CANONICAL_SHA256 if expected_sha256 is None else expected_sha256
+    try:
+        document = json.loads(pathlib.Path(path).read_bytes())
+    except (OSError, json.JSONDecodeError) as error:
+        raise CheckpointRefused(f"cannot read the V2 preregistration {path}: {error}") from error
+    actual = hashlib.sha256(
+        json.dumps(document, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    if actual != expected:
+        raise CheckpointRefused(
+            f"the V2 preregistration hashes {actual}, pinned {expected}")
+    v1 = verify_preregistration()
+    if document["what_is_NOT_changed"]["max_lateness_slots"] != \
+            v1["context_slot_geometry"]["max_lateness_slots"]:
+        # The whole point of the supersession is that this number did NOT move. Checked, so a
+        # future edit that quietly widens it cannot pass as a transport change.
+        raise CheckpointRefused(
+            "the V2 document states a different max_lateness_slots than V1. The supersession "
+            "changes transport and cadence; widening the tolerance after seeing results is the "
+            "one change it exists to refuse")
     return document
 
 
@@ -341,6 +372,67 @@ def fetch_account(curve, url, exchanges, opener=None):
     return outcome, payload, received_mono - requested_mono
 
 
+def fetch_accounts_batch(curves, url, exchanges, opener=None):
+    """ONE getMultipleAccounts for every due curve, settled against one shared context slot.
+
+    Curves are DEDUPLICATED here and mapped back by address afterwards. Several targets can share
+    one bonding curve across delays and horizons, and indexing a deduplicated request by a target's
+    ordinal is exactly how one account's data ends up recorded under another target's name.
+    """
+    ordered = sorted(set(curves))
+    body = {"jsonrpc": "2.0", "id": 1, "method": "getMultipleAccounts",
+            "params": [ordered, {"encoding": "base64", "commitment": "finalized"}]}
+    requested_wall, requested_mono = time.time(), time.monotonic_ns()
+    outcome, status_code, payload = B15B._one_attempt(url, body, opener)
+    received_wall, received_mono = time.time(), time.monotonic_ns()
+    raw_sha256 = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
+    exchanges.append({
+        "bonding_curves": ordered, "endpoint_scheme_host": B15B.endpoint_receipt(url),
+        "request_json": body, "requested_wall_unix": requested_wall,
+        "requested_monotonic_ns": requested_mono, "received_wall_unix": received_wall,
+        "received_monotonic_ns": received_mono, "http_status": status_code,
+        "response_json_or_error": payload, "raw_sha256": raw_sha256, "outcome": outcome,
+    })
+    return outcome, payload, ordered, raw_sha256
+
+
+def map_batch(payload, requested):
+    """Curve address -> account value, with the positional mapping VERIFIED.
+
+    getMultipleAccounts answers positionally, so a length mismatch means every mapping after the
+    divergence is a different account's data. The whole batch is discarded rather than partly
+    trusted.
+    """
+    result = payload.get("result") or {}
+    context_slot = (result.get("context") or {}).get("slot")
+    values = result.get("value")
+    if not isinstance(values, list):
+        raise CheckpointRefused(f"{C_BATCH_LENGTH}: the response carries no value array")
+    if len(values) != len(requested):
+        raise CheckpointRefused(
+            f"{C_BATCH_LENGTH}: {len(values)} entries for {len(requested)} requested accounts; "
+            "every mapping after the divergence would be a different account")
+    return dict(zip(requested, values)), context_slot
+
+
+def read_account_from_batch(entry, curve, context_slot, target, document, decoder):
+    """One target's state out of a shared batch. Geometry is checked for THIS target alone."""
+    lateness = assert_geometry(context_slot, target, document)
+    if entry is None:
+        raise CheckpointRefused(f"{C_ACCOUNT_MISSING}: no account for {curve}")
+    if entry.get("owner") != PUMP_PROGRAM:
+        raise CheckpointRefused(f"{C_WRONG_OWNER}: owner {entry.get('owner')}")
+    if not entry.get("lamports"):
+        raise CheckpointRefused(f"{C_ACCOUNT_CLOSED}: the account holds no lamports")
+    data = entry.get("data")
+    raw = base64.b64decode(data[0]) if isinstance(data, list) and data else b""
+    if not raw:
+        raise CheckpointRefused(f"{C_ACCOUNT_CLOSED}: the account carries no data")
+    fields = decode_bonding_curve(raw, decoder)
+    return state_from_account(fields, target), context_slot, lateness
+
+
 def read_account(payload, target, document, decoder):
     """The account state at the target, or a visible refusal. Never a substituted value."""
     result = (payload.get("result") or {})
@@ -383,6 +475,7 @@ def run(limit=None, b15a_path=B15A_DB, work_dir=WORK_DIR, opener=None, sleeper=t
         connection.execute("INSERT OR REPLACE INTO metadata VALUES (?,?)", (key, str(value)))
     connection.commit()
 
+    v2 = verify_preregistration_v2()
     decoder = B15B.build_decoder()
     route = json.loads((ROOT / "research" / "B15E_SHADOW_PATH_PREREGISTRATION.json").read_text())
     exit_scenarios = {s["scenario_id"]: s for s in route["exit_cost_scenarios"]}
@@ -399,18 +492,40 @@ def run(limit=None, b15a_path=B15A_DB, work_dir=WORK_DIR, opener=None, sleeper=t
             counts["not_scheduled_already_passed"] += skipped
             due = due_targets(connection, slot)
             counts["due"] += len(due)
+            # ONE batched request for the whole tick, per V2. The serial drain it replaces cost up
+            # to 40 slots of lateness and lost roughly half the checkpoints to C_LATE.
+            batch = {}
+            batch_context = None
+            batch_error = None
+            batch_hash = None
+            if due:
+                curves = [row[4] for row in due if row[4]]
+                for start in range(0, len(curves), v2["transport_v2"]["max_accounts_per_request"]):
+                    window = curves[start:start + v2["transport_v2"]["max_accounts_per_request"]]
+                    outcome, payload, requested, batch_hash = fetch_accounts_batch(
+                        window, url, exchanges, opener)
+                    if outcome != "retrieved":
+                        batch_error = f"{C_RPC_EXHAUSTED}: {outcome}"
+                        continue
+                    try:
+                        mapped, batch_context = map_batch(payload, requested)
+                    except CheckpointRefused as error:
+                        # The WHOLE batch is discarded; no target is recorded from it.
+                        batch_error = str(error)
+                        continue
+                    batch.update(mapped)
             for signature, delay, horizon, mint, curve, target in due:
-                if rate["min_interval_ms"]:
-                    sleeper(rate["min_interval_ms"] / 1000.0)
                 connection.execute(
                     "UPDATE schedule SET attempts = attempts + 1 WHERE entry_signature=? AND "
                     "delay_slots=? AND horizon=?", (signature, delay, horizon))
-                outcome, payload, _latency = fetch_account(curve, url, exchanges, opener)
                 try:
-                    if outcome != "retrieved":
-                        raise CheckpointRefused(f"{C_RPC_EXHAUSTED}: {outcome}")
-                    state, context_slot, lateness = read_account(payload, target, document,
-                                                                 decoder)
+                    if batch_error is not None and curve not in batch:
+                        raise CheckpointRefused(batch_error)
+                    if curve not in batch:
+                        raise CheckpointRefused(
+                            f"{C_BATCH_MISSING_CURVE}: no entry for {curve} in the response")
+                    state, context_slot, lateness = read_account_from_batch(
+                        batch[curve], curve, batch_context, target, document, decoder)
                 except CheckpointRefused as error:
                     code = str(error).split(":", 1)[0]
                     if code == C_EARLY_EXHAUSTED:
