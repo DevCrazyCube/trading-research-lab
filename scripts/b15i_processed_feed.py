@@ -71,6 +71,7 @@ STATE_REFUSED = "refused"
 TRIGGER_COMMITMENT = "processed"
 STATE_READ_COMMITMENT = "finalized"
 MAX_QUEUE_DEPTH = 4096
+SLOT_SECONDS = 0.4      # the nominal Solana slot; used ONLY to space retries, never as evidence
 
 LABEL = "SIMULATED_PROCESSED_FEED_PILOT"
 
@@ -226,6 +227,7 @@ CREATE TABLE IF NOT EXISTS target (
   receipt_to_schedule_ns INTEGER NOT NULL,
   state TEXT NOT NULL, reason TEXT,
   queue_delay_ns INTEGER, context_slot INTEGER, lateness_slots INTEGER, rpc_round_trip_ns INTEGER,
+  attempts INTEGER,
   virtual_quote INTEGER, virtual_token INTEGER, real_quote INTEGER, real_token INTEGER,
   quote_mint TEXT, mayhem_mode INTEGER, complete INTEGER,
   evidence_sha256 TEXT NOT NULL,
@@ -239,6 +241,11 @@ def open_database(path=DB_PATH):
     pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(path, timeout=30, check_same_thread=False)
     connection.executescript(SCHEMA)
+    # A database written before `attempts` existed keeps its rows; the column is added rather than
+    # the file recreated, because recreating it would discard the evidence that motivated it.
+    existing = {row[1] for row in connection.execute("PRAGMA table_info(target)")}
+    if "attempts" not in existing:
+        connection.execute("ALTER TABLE target ADD COLUMN attempts INTEGER")
     connection.commit()
     return connection
 
@@ -361,30 +368,56 @@ def _durable(connection, lock, record, state, reason):
 # The worker thread — minContextSlot, finalized read
 # --------------------------------------------------------------------------------------------
 
+def _context_not_reached(payload):
+    """The node's way of saying the target is still ahead of its tip. Retryable, and only this."""
+    return "min context slot" in str(payload).lower()
+
+
 def capture(record, url, connection, lock, decoder, document, counts, opener=None,
-            exchanges=None):
-    """One checkpoint. `minContextSlot` makes the NODE wait for the target rather than us poll.
+            exchanges=None, sleeper=time.sleep):
+    """One checkpoint, retried a bounded number of times while the target is still ahead of the tip.
+
+    **`minContextSlot` does not make the node wait.** The frozen document said it would; the first
+    live run proved otherwise. Every one of 147 requests came back `-32603 Min context slot not
+    reached` in about 220ms rather than blocking until the slot arrived. The parameter is a
+    precondition the node checks and rejects, not a barrier it waits on.
+
+    The remedy needs no new rule, because B15F already froze one: `context_before_target` is
+    "retry, bounded", six attempts, twenty-five slots apart. That is what runs here. Finalization
+    lags about 31 slots, so the first attempt is expected to fail and the third to succeed, with a
+    resulting lateness near 15 slots — inside the frozen 150 and not moved to fit.
 
     `document` is B15F's frozen checkpoint preregistration, verified once at startup, because the
     lateness geometry is B15F's and is not re-derived here.
     """
     started = time.monotonic_ns()
     target = record["target_slot"]
+    policy = document["context_slot_geometry"]
     body = {"jsonrpc": "2.0", "id": 1, "method": "getAccountInfo",
             "params": [record["bonding_curve"],
                        {"encoding": "base64", "commitment": STATE_READ_COMMITMENT,
                         "minContextSlot": target}]}
-    outcome, status, payload = B15B._one_attempt(url, body, opener)
+    attempts = 0
+    for attempt in range(policy["max_attempts"]):
+        attempts = attempt + 1
+        outcome, status, payload = B15B._one_attempt(url, body, opener)
+        if exchanges is not None:
+            exchanges.append({"method": "getAccountInfo", "outcome": outcome,
+                              "http_status": status, "target_slot": target,
+                              "signature": record["signature"], "attempt": attempts,
+                              "delay_slots": record["delay_slots"],
+                              "round_trip_ns": time.monotonic_ns() - started,
+                              "response": payload})
+        if outcome == "retrieved" or not _context_not_reached(payload):
+            break
+        if attempts < policy["max_attempts"]:
+            sleeper(policy["retry_interval_slots"] * SLOT_SECONDS)
     round_trip = time.monotonic_ns() - started
     queue_delay = started - record["enqueued_monotonic_ns"]
-    if exchanges is not None:
-        exchanges.append({"method": "getAccountInfo", "outcome": outcome, "http_status": status,
-                          "target_slot": target, "signature": record["signature"],
-                          "delay_slots": record["delay_slots"],
-                          "round_trip_ns": round_trip, "response": payload})
     try:
         if outcome != "retrieved":
-            raise ProcessedFeedRefused(f"{Q_RPC_FAILED}: {outcome} {str(payload)[:120]}")
+            raise ProcessedFeedRefused(
+                f"{Q_RPC_FAILED}: {outcome} after {attempts} attempts {str(payload)[:120]}")
         state, context_slot, lateness = B15F.read_account(payload, target, document, decoder)
     except (B15F.CheckpointRefused, ProcessedFeedRefused) as error:
         code = str(error).split(":", 1)[0]
@@ -392,9 +425,9 @@ def capture(record, url, connection, lock, decoder, document, counts, opener=Non
             Q_ACCOUNT_MISMATCH if code in (B15F.C_WRONG_OWNER, B15F.C_SCHEMA) else code)
         with lock:
             connection.execute(
-                "UPDATE target SET state=?, reason=?, queue_delay_ns=?, rpc_round_trip_ns=? "
-                "WHERE signature=? AND delay_slots=?",
-                (STATE_REFUSED, f"{code}:{str(error)[:160]}", queue_delay, round_trip,
+                "UPDATE target SET state=?, reason=?, queue_delay_ns=?, rpc_round_trip_ns=?, "
+                "attempts=? WHERE signature=? AND delay_slots=?",
+                (STATE_REFUSED, f"{code}:{str(error)[:160]}", queue_delay, round_trip, attempts,
                  record["signature"], record["delay_slots"]))
             connection.commit()
         counts["refused"] += 1
@@ -402,9 +435,10 @@ def capture(record, url, connection, lock, decoder, document, counts, opener=Non
     with lock:
         connection.execute(
             "UPDATE target SET state=?, queue_delay_ns=?, context_slot=?, lateness_slots=?, "
-            "rpc_round_trip_ns=?, virtual_quote=?, virtual_token=?, real_quote=?, real_token=?, "
-            "quote_mint=?, mayhem_mode=?, complete=? WHERE signature=? AND delay_slots=?",
-            (STATE_CAPTURED, queue_delay, context_slot, lateness, round_trip,
+            "rpc_round_trip_ns=?, attempts=?, virtual_quote=?, virtual_token=?, real_quote=?, "
+            "real_token=?, quote_mint=?, mayhem_mode=?, complete=? "
+            "WHERE signature=? AND delay_slots=?",
+            (STATE_CAPTURED, queue_delay, context_slot, lateness, round_trip, attempts,
              state["virtual_quote"], state["virtual_token"], state["real_quote"],
              state["real_token"], state["quote_mint"], int(state["mayhem_mode"]),
              int(state["complete"]), record["signature"], record["delay_slots"]))
@@ -554,14 +588,15 @@ def reconciler_loop(connection, lock, stop, counts, interval=60.0,
 
 
 def worker_loop(work_queue, url, connection, lock, decoder, document, counts, stop,
-                opener=None, exchanges=None):
+                opener=None, exchanges=None, sleeper=time.sleep):
     while not stop.is_set():
         try:
             record = work_queue.get(timeout=0.5)
         except queue.Empty:
             continue
         try:
-            capture(record, url, connection, lock, decoder, document, counts, opener, exchanges)
+            capture(record, url, connection, lock, decoder, document, counts, opener, exchanges,
+                    sleeper)
         except Exception as error:                                        # noqa: BLE001
             # A worker that dies takes the drain with it and every later target silently pends.
             # The failure is recorded against the target and the loop continues.

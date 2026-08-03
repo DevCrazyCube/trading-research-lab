@@ -338,9 +338,11 @@ class TestCapture(unittest.TestCase):
                                      "data": [base64.b64encode(raw).decode(), "base64"]}}}
 
     def _run(self, response):
+        # No real sleeping: the retry interval is 25 slots, and a test that actually waits it out
+        # takes fifty seconds to assert something that has nothing to do with timing.
         B15I.capture(self.record, "https://example.invalid", self.harness.connection,
                      self.harness.lock, self.curve_decoder, self.checkpoint_document,
-                     self.harness.counts, self._opener(response))
+                     self.harness.counts, self._opener(response), None, lambda _seconds: None)
         return self.harness.connection.execute(
             "SELECT state, reason, context_slot, lateness_slots, virtual_quote FROM target "
             "WHERE signature=? AND delay_slots=?",
@@ -409,6 +411,141 @@ class TestCapture(unittest.TestCase):
         self.assertEqual(options["minContextSlot"], self.record["target_slot"])
         self.assertEqual(options["commitment"], B15I.STATE_READ_COMMITMENT)
         self.assertEqual(options["commitment"], "finalized")
+
+    def test_a_context_not_reached_error_is_retried_a_bounded_number_of_times(self):
+        """minContextSlot does NOT make the node wait. It rejects, and B15F's bounded retry runs.
+
+        147 of 147 live requests came back `-32603 Min context slot not reached` in about 220ms.
+        The parameter is a precondition the node checks, not a barrier it blocks on.
+        """
+        calls, slept = [], []
+        not_reached = {"jsonrpc": "2.0", "id": 1,
+                       "code": -32603, "message": "Min context slot not reached"}
+
+        def opener(request, timeout=None):
+            calls.append(1)
+
+            class Handle:
+                status = 200
+
+                def read(self_inner):
+                    return json.dumps(not_reached).encode()
+
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, *_):
+                    return False
+            return Handle()
+
+        B15I.capture(self.record, "https://example.invalid", self.harness.connection,
+                     self.harness.lock, self.curve_decoder, self.checkpoint_document,
+                     self.harness.counts, opener, None, slept.append)
+        attempts = self.checkpoint_document["context_slot_geometry"]["max_attempts"]
+        self.assertEqual(len(calls), attempts)          # bounded, not unbounded
+        self.assertEqual(len(slept), attempts - 1)      # no sleep after the last attempt
+        interval = self.checkpoint_document["context_slot_geometry"]["retry_interval_slots"]
+        self.assertEqual(set(slept), {interval * B15I.SLOT_SECONDS})
+        state, reason, recorded = self.harness.connection.execute(
+            "SELECT state, reason, attempts FROM target WHERE signature=? AND delay_slots=?",
+            (self.record["signature"], self.record["delay_slots"])).fetchone()
+        self.assertEqual((state, recorded), (B15I.STATE_REFUSED, attempts))
+        self.assertIn(f"after {attempts} attempts", reason)
+
+    def test_a_target_reached_on_a_later_attempt_is_captured(self):
+        responses = [{"jsonrpc": "2.0", "id": 1, "code": -32603,
+                      "message": "Min context slot not reached"},
+                     {"jsonrpc": "2.0", "id": 1, "code": -32603,
+                      "message": "Min context slot not reached"},
+                     self._account(210)]
+
+        def opener(request, timeout=None):
+            payload = responses.pop(0)
+
+            class Handle:
+                status = 200
+
+                def read(self_inner):
+                    return json.dumps(payload).encode()
+
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, *_):
+                    return False
+            return Handle()
+
+        B15I.capture(self.record, "https://example.invalid", self.harness.connection,
+                     self.harness.lock, self.curve_decoder, self.checkpoint_document,
+                     self.harness.counts, opener, None, lambda _seconds: None)
+        state, attempts, lateness = self.harness.connection.execute(
+            "SELECT state, attempts, lateness_slots FROM target WHERE signature=? AND "
+            "delay_slots=?", (self.record["signature"], self.record["delay_slots"])).fetchone()
+        self.assertEqual((state, attempts), (B15I.STATE_CAPTURED, 3))
+        self.assertEqual(lateness, 210 - self.record["target_slot"])
+
+    def test_retrying_never_admits_a_response_past_the_tolerance(self):
+        """The retry budget must not become a way in for a stale answer."""
+        responses = [{"jsonrpc": "2.0", "id": 1, "code": -32603,
+                      "message": "Min context slot not reached"},
+                     self._account(self.record["target_slot"] + 151)]
+
+        def opener(request, timeout=None):
+            payload = responses.pop(0)
+
+            class Handle:
+                status = 200
+
+                def read(self_inner):
+                    return json.dumps(payload).encode()
+
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, *_):
+                    return False
+            return Handle()
+
+        B15I.capture(self.record, "https://example.invalid", self.harness.connection,
+                     self.harness.lock, self.curve_decoder, self.checkpoint_document,
+                     self.harness.counts, opener, None, lambda _seconds: None)
+        state, reason = self.harness.connection.execute(
+            "SELECT state, reason FROM target WHERE signature=? AND delay_slots=?",
+            (self.record["signature"], self.record["delay_slots"])).fetchone()
+        self.assertEqual(state, B15I.STATE_REFUSED)
+        self.assertTrue(reason.startswith(B15I.Q_LATE))
+
+    def test_an_error_that_is_not_context_not_reached_is_never_retried(self):
+        calls = []
+
+        def opener(request, timeout=None):
+            calls.append(1)
+
+            class Handle:
+                status = 200
+
+                def read(self_inner):
+                    return json.dumps({"jsonrpc": "2.0", "id": 1,
+                                       "error": {"code": -32602,
+                                                 "message": "Invalid param"}}).encode()
+
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, *_):
+                    return False
+            return Handle()
+
+        B15I.capture(self.record, "https://example.invalid", self.harness.connection,
+                     self.harness.lock, self.curve_decoder, self.checkpoint_document,
+                     self.harness.counts, opener, None, lambda _seconds: None)
+        self.assertEqual(len(calls), 1)
+
+    def test_the_context_not_reached_detector_does_not_match_unrelated_errors(self):
+        self.assertTrue(B15I._context_not_reached(
+            {"code": -32603, "message": "Min context slot not reached"}))
+        self.assertFalse(B15I._context_not_reached({"code": -32602, "message": "Invalid param"}))
+        self.assertFalse(B15I._context_not_reached("transport_error"))
 
     def test_queue_delay_is_recorded(self):
         self._run(self._account(201))
