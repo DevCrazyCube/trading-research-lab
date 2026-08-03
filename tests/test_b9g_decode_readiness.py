@@ -237,8 +237,16 @@ class DecodeReadinessTests(ReadinessFixture):
         holder = self.lock_path.open("a+b")
         self.addCleanup(holder.close)
         fcntl.flock(holder.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # The bound belongs on the lock probe alone, which is the only thing that could queue behind
+        # the holder. `diagnose_readiness` deliberately runs every check including the structural
+        # one, and that hashes the real b9c inventory — 880 MB as of this writing, 6.3s to digest —
+        # so a wall-clock bound over the whole call fires on artifact size rather than on the
+        # blocking flock it exists to catch. A blocking probe would never return at all, so bounding
+        # the probe itself loses none of the guard's force.
         with self.bounded():
-            report = B9G.diagnose_readiness(self.open(), str(self.path))
+            with self.assertRaises(B9G.FreezeViolation):
+                B9G.assert_collector_lock_unheld(str(self.path))
+        report = B9G.diagnose_readiness(self.open(), str(self.path))
         self.assertFalse(report["ready"])
         self.assertEqual(sorted(report["checks"]), sorted(B9G.READINESS_CHECKS))
         self.assertFalse(report["checks"]["collector_lock_unheld"]["passed"])
