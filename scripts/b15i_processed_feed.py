@@ -596,29 +596,32 @@ def counterparty_evidence(b15a_path=B15A_DB, b15b_path=B15B_DB):
 
 
 def reconcile(connection, lock, b15a_path=B15A_DB, b15b_path=B15B_DB):
-    """Promote a processed observation ONLY on an independent confirmed record.
+    """Promote a processed observation on an independent confirmed record. NEVER orphan it here.
 
-    Never by age, never by absence of contradiction, never by its own repetition. An observation
-    with no confirmed counterpart stands as evidence of what processed showed, is marked orphaned,
-    and is excluded from pricing.
+    Promotion is cheap and safe: a signature present in B15a's decoded launches or B15b's retrieved
+    transactions did confirm, and that is that.
+
+    Orphaning is neither, and this function no longer does it. The earlier rule orphaned anything
+    a confirmed recorder had passed without recording — which assumed the recorder sees everything
+    that confirms. B15k tested that assumption: of 200 launches absent from B15a inside an interval
+    B15a had demonstrably passed, 200 of 200 were CONFIRMED ON CHAIN by an independent
+    getTransaction query. B15a records about 29% of the launches this feed observes, so absence
+    from it was measuring our own instrument and reporting the measurement as a fork rate.
+
+    An observation is orphaned only by `confirmation_worker` below, on an explicit not-found from
+    the chain. Everything else stays unresolved, which is what it is.
     """
-    confirmed, counterparty_tip = counterparty_evidence(b15a_path, b15b_path)
+    confirmed, _tip = counterparty_evidence(b15a_path, b15b_path)
     counts = {FORK_CONFIRMED: 0, FORK_ORPHANED: 0, FORK_UNRESOLVED: 0}
     now = time.time()
     with lock:
         rows = connection.execute(
             "SELECT signature, t0_slot, fork_state FROM observation").fetchall()
-        for signature, t0_slot, _state in rows:
+        for signature, _t0_slot, previous in rows:
             if signature in confirmed:
                 state = FORK_CONFIRMED
-            elif counterparty_tip is not None and counterparty_tip - t0_slot > ORPHAN_MARGIN_SLOTS:
-                # Orphaned is a finding, not a default: it says the confirmed recorder got PAST
-                # this slot and never saw the launch. Measured against the COUNTERPARTY's own
-                # progress, never against our clock — B15a was found running 500 slots behind, and
-                # a rule keyed on our newest observation called 112 launches orphaned that the
-                # counterparty simply had not reached yet. Absence from a lagging feed is not
-                # evidence of absence.
-                state = FORK_ORPHANED
+            elif previous == FORK_ORPHANED:
+                state = FORK_ORPHANED       # set by an independent query; never re-litigated here
             else:
                 state = FORK_UNRESOLVED
             counts[state] += 1
@@ -627,6 +630,70 @@ def reconcile(connection, lock, b15a_path=B15A_DB, b15b_path=B15B_DB):
                 (state, now, signature))
         connection.commit()
     return counts
+
+
+def confirmation_worker(connection, lock, stop, counts, url, opener=None, sleeper=time.sleep,
+                        interval=30.0, batch=60, rate_per_second=2.0, min_age_slots=None):
+    """Ask the CHAIN whether an unresolved launch confirmed. Bounded and rate limited.
+
+    B15a cannot be the sole confirmation oracle — B15k measured it holding 798 of 2,755 launches
+    inside an interval it had passed — so corroboration comes from a getTransaction at confirmed
+    commitment, one signature at a time, at a rate chosen because B15h was killed by HTTP 429.
+
+    A not-found here is the ONLY thing that orphans an observation, and even then it is recorded as
+    what it is: this node has no confirmed transaction for that signature.
+    """
+    margin = ORPHAN_MARGIN_SLOTS if min_age_slots is None else min_age_slots
+    while not stop.wait(interval):
+        try:
+            with lock:
+                tip = connection.execute(
+                    "SELECT MAX(t0_slot) FROM observation").fetchone()[0] or 0
+                # BOTH not-yet-decided states. A freshly written row is `processed_unconfirmed`
+                # and only becomes `unresolved` after a reconcile pass, so a worker watching only
+                # the second one would sit idle behind whatever ran first.
+                pending = connection.execute(
+                    "SELECT signature FROM observation WHERE fork_state IN (?,?) "
+                    "AND t0_slot < ? ORDER BY t0_slot LIMIT ?",
+                    (FORK_UNRESOLVED, FORK_UNCONFIRMED, tip - margin, batch)).fetchall()
+        except sqlite3.Error:
+            counts["worker_errors"] += 1
+            continue
+        for (signature,) in pending:
+            if stop.is_set():
+                return
+            outcome = confirm_on_chain(signature, url, opener)
+            if outcome is None:
+                counts["confirmation_failed"] = counts.get("confirmation_failed", 0) + 1
+                continue
+            state = FORK_CONFIRMED if outcome else FORK_ORPHANED
+            try:
+                with lock:
+                    connection.execute(
+                        "UPDATE observation SET fork_state=?, reconciled_at_wall_unix=? "
+                        "WHERE signature=?", (state, time.time(), signature))
+                    connection.commit()
+            except sqlite3.Error:
+                counts["worker_errors"] += 1
+                continue
+            counts[f"chain_{state}"] = counts.get(f"chain_{state}", 0) + 1
+            sleeper(1.0 / rate_per_second)
+
+
+def confirm_on_chain(signature, url, opener=None):
+    """True if confirmed, False if the node has no confirmed transaction, None if undecided.
+
+    None is not False. A failed query decides nothing and must never orphan anything.
+    """
+    body = {"jsonrpc": "2.0", "id": 1, "method": "getTransaction",
+            "params": [signature, {"commitment": "confirmed",
+                                   "maxSupportedTransactionVersion": 0, "encoding": "json"}]}
+    outcome, _status, _payload = B15B._one_attempt(url, body, opener)
+    if outcome == "retrieved":
+        return True
+    if outcome == "not_found":
+        return False
+    return None
 
 
 # --------------------------------------------------------------------------------------------
@@ -851,6 +918,9 @@ def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opene
     threads.append(threading.Thread(
         target=releaser_loop,
         args=(pending_queue, work_queue, stop, connection, lock, counts), daemon=True))
+    threads.append(threading.Thread(
+        target=confirmation_worker,
+        args=(connection, lock, stop, counts, url, opener), daemon=True))
     for thread in threads:
         thread.start()
 

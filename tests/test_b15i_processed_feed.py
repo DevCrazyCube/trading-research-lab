@@ -11,6 +11,7 @@ import json
 import pathlib
 import queue
 import sys
+import time
 import threading
 import unittest
 
@@ -717,44 +718,126 @@ class TestReconciliation(unittest.TestCase):
         self.assertEqual(self.harness.connection.execute(
             "SELECT fork_state FROM observation").fetchone()[0], B15I.FORK_CONFIRMED)
 
-    def test_an_uncorroborated_observation_the_recorder_passed_is_orphaned(self):
+    def test_a_peer_recorder_never_orphans_anything_however_far_ahead_it_is(self):
+        """B15a is not an oracle. B15k measured it holding 798 of 2,755 launches it had passed.
+
+        Of 200 launches absent from B15a inside an interval B15a had demonstrably passed, 200 of
+        200 were CONFIRMED ON CHAIN. Orphaning on its silence was measuring our own instrument and
+        publishing the measurement as a fork rate.
+        """
         self.harness.feed(_create_frame(200))
         self.harness.feed(_create_frame(1000, signature="Other" + SIGNATURE[5:]))
         counts = B15I.reconcile(self.harness.connection, self.harness.lock,
-                                self._b15a([], tip=1000 + B15I.ORPHAN_MARGIN_SLOTS + 1),
-                                self.directory / "missing.sqlite")
-        self.assertEqual(counts[B15I.FORK_ORPHANED], 2)
-        self.assertEqual(counts[B15I.FORK_CONFIRMED], 0)
-
-    def test_a_lagging_recorder_never_orphans_what_it_has_not_reached(self):
-        """B15a was found running 500 slots behind. Its silence there means nothing yet.
-
-        The rule keyed on our own newest observation called 112 launches orphaned that the
-        counterparty simply had not got to — laundering counterparty lag into a finding.
-        """
-        self.harness.feed(_create_frame(200))
-        self.harness.feed(_create_frame(5000, signature="Other" + SIGNATURE[5:]))
-        counts = B15I.reconcile(self.harness.connection, self.harness.lock,
-                                self._b15a([], tip=400),   # behind both, past neither by the margin
+                                self._b15a([], tip=100_000_000),
                                 self.directory / "missing.sqlite")
         self.assertEqual(counts[B15I.FORK_ORPHANED], 0)
         self.assertEqual(counts[B15I.FORK_UNRESOLVED], 2)
 
-    def test_the_furthest_behind_counterparty_sets_the_bar(self):
-        """A current recorder must not excuse orphaning what the other one has not reached."""
-        import sqlite3
+    def test_reconcile_does_not_undo_an_orphan_set_by_the_chain(self):
         self.harness.feed(_create_frame(200))
-        behind = self.directory / "backfill.sqlite"
-        connection = sqlite3.connect(behind)
-        connection.execute("CREATE TABLE backfill(signature TEXT, status TEXT, slot INTEGER)")
-        connection.execute("INSERT INTO backfill VALUES ('x','retrieved',150)")
-        connection.commit()
-        connection.close()
-        _confirmed, tip = B15I.counterparty_evidence(self._b15a([], tip=100_000), behind)
-        self.assertEqual(tip, 150)
+        self.harness.connection.execute(
+            "UPDATE observation SET fork_state=?", (B15I.FORK_ORPHANED,))
+        self.harness.connection.commit()
         counts = B15I.reconcile(self.harness.connection, self.harness.lock,
-                                self._b15a([], tip=100_000), behind)
-        self.assertEqual(counts[B15I.FORK_ORPHANED], 0)
+                                self._b15a([]), self.directory / "missing.sqlite")
+        self.assertEqual(counts[B15I.FORK_ORPHANED], 1)
+
+    def test_a_confirmed_peer_record_still_promotes(self):
+        self.harness.feed(_create_frame(200))
+        counts = B15I.reconcile(self.harness.connection, self.harness.lock,
+                                self._b15a([SIGNATURE]), self.directory / "missing.sqlite")
+        self.assertEqual(counts[B15I.FORK_CONFIRMED], 1)
+
+    def test_confirm_on_chain_distinguishes_undecided_from_absent(self):
+        """None is not False. A failed query decides nothing and must never orphan anything."""
+        def answer(outcome):
+            def opener(request, timeout=None):
+                class Handle:
+                    status = 200
+
+                    def read(self_inner):
+                        if outcome == "retrieved":
+                            return json.dumps({"result": {"slot": 1}}).encode()
+                        if outcome == "not_found":
+                            return json.dumps({"result": None}).encode()
+                        raise OSError("transport died")
+
+                    def __enter__(self_inner):
+                        return self_inner
+
+                    def __exit__(self_inner, *_):
+                        return False
+                if outcome == "boom":
+                    raise OSError("transport died")
+                return Handle()
+            return opener
+
+        self.assertIs(B15I.confirm_on_chain("S", "https://x.invalid", answer("retrieved")), True)
+        self.assertIs(B15I.confirm_on_chain("S", "https://x.invalid", answer("not_found")), False)
+        self.assertIsNone(B15I.confirm_on_chain("S", "https://x.invalid", answer("boom")))
+
+    def test_only_a_chain_not_found_orphans_an_observation(self):
+        import threading as _threading
+        self.harness.feed(_create_frame(200))
+        self.harness.feed(_create_frame(100_000, signature="Recent" + SIGNATURE[6:]))
+
+        def opener(request, timeout=None):
+            class Handle:
+                status = 200
+
+                def read(self_inner):
+                    return json.dumps({"result": None}).encode()      # no confirmed transaction
+
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, *_):
+                    return False
+            return Handle()
+
+        stop = _threading.Event()
+        thread = _threading.Thread(
+            target=B15I.confirmation_worker,
+            args=(self.harness.connection, self.harness.lock, stop, self.harness.counts,
+                  "https://x.invalid", opener, lambda _s: None, 0.01, 60, 1000.0),
+            daemon=True)
+        thread.start()
+        for _ in range(200):
+            states = dict(self.harness.connection.execute(
+                "SELECT fork_state, COUNT(*) FROM observation GROUP BY fork_state").fetchall())
+            if states.get(B15I.FORK_ORPHANED):
+                break
+            time.sleep(0.01)
+        stop.set()
+        thread.join(timeout=5)
+        states = dict(self.harness.connection.execute(
+            "SELECT fork_state, COUNT(*) FROM observation GROUP BY fork_state").fetchall())
+        self.assertEqual(states.get(B15I.FORK_ORPHANED), 1)     # the old one, past the margin
+        # The recent one is still inside the margin and is left alone.
+        self.assertEqual(states.get(B15I.FORK_UNCONFIRMED), 1)
+
+    def test_a_failed_confirmation_query_orphans_nothing(self):
+        import threading as _threading
+        self.harness.feed(_create_frame(200))
+        self.harness.feed(_create_frame(100_000, signature="Recent" + SIGNATURE[6:]))
+
+        def opener(request, timeout=None):
+            raise OSError("endpoint down")
+
+        stop = _threading.Event()
+        thread = _threading.Thread(
+            target=B15I.confirmation_worker,
+            args=(self.harness.connection, self.harness.lock, stop, self.harness.counts,
+                  "https://x.invalid", opener, lambda _s: None, 0.01, 60, 1000.0),
+            daemon=True)
+        thread.start()
+        time.sleep(0.2)
+        stop.set()
+        thread.join(timeout=5)
+        states = dict(self.harness.connection.execute(
+            "SELECT fork_state, COUNT(*) FROM observation GROUP BY fork_state").fetchall())
+        self.assertEqual(states.get(B15I.FORK_ORPHANED), None)
+        self.assertGreater(self.harness.counts.get("confirmation_failed", 0), 0)
 
     def test_a_recent_observation_is_unresolved_not_orphaned(self):
         self.harness.feed(_create_frame(200))
