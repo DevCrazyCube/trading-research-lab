@@ -1,0 +1,144 @@
+{
+  "preregistration_id": "B15I_PROCESSED_FEED_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 132)",
+  "status": "FROZEN. Committed alone, before connecting to any processed-commitment feed.",
+  "purpose": "Freeze an event-driven, processed-commitment observation path whose checkpoints are enqueued the instant a CreateEvent decodes, so 1/2/4-slot entry targets can be tested for reachability without weakening any rule.",
+  "committed_before_connecting": true,
+
+  "why_this_exists": {
+    "the_measured_blocker": "B15h scheduled 81 targets and missed 78 with H_TARGET_MISSED. Entry delays of 1, 2 and 4 slots are 0.4, 0.8 and 1.6 seconds; a polling scheduler reads the launch table on average 2.5 seconds after a launch is written, by which time every target has passed.",
+    "why_in_process_triggering_in_b15a_is_not_enough": "B15a subscribes at CONFIRMED. The receipt itself can arrive after t0+1, so even triggering inside B15a's own frame handler cannot guarantee the one-slot target was still future. The commitment is the constraint, not the plumbing.",
+    "what_was_NOT_done": "the entry delays were not widened and scheduling-after-target was not permitted. This document changes the OBSERVATION path, not any rule about what counts as a valid target."
+  },
+
+  "pre_connection_measurements": {
+    "taken": "2026-08-03, before this document was committed",
+    "processed_slot": 436877222,
+    "confirmed_slot": 436877223,
+    "finalized_slot": 436877191,
+    "finalized_lag_slots": 31,
+    "note": "at this endpoint the processed and confirmed TIPS are within one slot of each other. That does not settle the question: the decisive quantity is NOTIFICATION latency relative to t0, not the node's tip per commitment, and it is measured empirically by this pilot rather than assumed."
+  },
+
+  "activation": {
+    "activation_slot": 436879222,
+    "chosen_at_processed_slot": 436877222,
+    "margin_slots": 2000,
+    "rule": "a launch is eligible ONLY if its t0_slot is STRICTLY GREATER than activation_slot",
+    "no_retroactive_recovery": "no pre-activation launch, no V1 cell and no B15h cell may enter this population, under any evidence, ever"
+  },
+
+  "trigger_and_read_are_different_commitments": {
+    "trigger_commitment": "processed",
+    "trigger_rationale": "fastest available notification; the whole point is to learn of a launch before t0+1 has passed",
+    "state_read_commitment": "finalized",
+    "state_read_rationale": "a finalized account read CANNOT fork, so the state a cell is priced from is canonical even though the trigger that scheduled it was provisional. The measured finalization lag of 31 slots sits comfortably inside the frozen 150-slot tolerance, so waiting for finality costs admissibility nothing.",
+    "consequence": "only the TRIGGER forks. Fork handling below governs the trigger; the state itself is settled."
+  },
+
+  "raw_first_discipline": {
+    "order_is_mandatory": ["write the raw frame to the append-only log", "record the launch identity", "then enqueue the checkpoints"],
+    "why": "if the process dies between decode and enqueue, the observation still exists on disk. Enqueuing first would create a schedule referring to a frame nobody can produce.",
+    "raw_writing_never_blocks_on_rpc": {
+      "rule": "the feed handler MUST NOT make or await an RPC call",
+      "mechanism": "checkpoints go onto a bounded in-process queue drained by a separate worker",
+      "why": "a feed handler that waits on a network round trip stops reading the socket, and the frames that arrive meanwhile are lost — trading the evidence for the derivative"
+    }
+  },
+
+  "queue": {
+    "kind": "bounded in-process queue with a durable record per enqueue",
+    "max_depth": 4096,
+    "on_overflow": "a durable overflow record is written with reason Q_OVERFLOW and the target is marked missed. A dropped target is never silently absent.",
+    "durability": "every enqueued target is written to the database BEFORE the worker sees it, so a crash leaves a pending row rather than nothing",
+    "crash_replay": {
+      "rule": "on restart, a pending target whose deadline has passed is recorded Q_MISSED_WHILE_DOWN and is NEVER fetched",
+      "why": "fetching it now would produce an account read from after the target and present it as the state at the target — the fabrication this whole line of work exists to prevent"
+    }
+  },
+
+  "checkpoint_geometry": {
+    "delays": [1, 2, 4],
+    "delay_source": "B15D_SHADOW_ROUTE_V1, unchanged",
+    "target_slot_formula": "t0_slot + delay_slots",
+    "max_lateness_slots": 150,
+    "max_lateness_source": "B15F_CHECKPOINT_V1, unchanged and not widened by this document",
+    "min_context_slot": "the getAccountInfo request carries minContextSlot equal to the target, so the node itself waits until it has reached the target rather than the client polling for it",
+    "scheduled_before_passed": "a target must have been enqueued while still strictly future. A target already passed at enqueue time is recorded Q_TARGET_ALREADY_PASSED and never fetched.",
+    "no_retrospective_recovery": true
+  },
+
+  "fork_handling": {
+    "processed_is_provisional": "a processed observation may be orphaned. It is never treated as canonical.",
+    "states": [
+      {"state": "processed_unconfirmed", "meaning": "seen at processed; not yet reconciled"},
+      {"state": "confirmed", "meaning": "an independent confirmed-commitment record corroborates the launch"},
+      {"state": "orphaned", "meaning": "reconciliation found no confirmed record; the observation stands as evidence of what processed showed and is excluded from pricing"},
+      {"state": "unresolved", "meaning": "reconciliation has not yet been possible"}
+    ],
+    "promotion_rule": "a processed observation is promoted ONLY by an independent confirmed record: B15a's confirmed recorder or B15b's retrieved launch transaction. It is never promoted by age, by absence of contradiction, or by its own repetition.",
+    "pricing_rule": "ONLY cells whose launch is `confirmed` may be priced. `processed_unconfirmed`, `unresolved` and `orphaned` are excluded and counted.",
+    "b15a_remains_independent": "the confirmed recorder is not overwritten, not superseded and not treated as complete. It is the reconciliation counterparty and a separate coverage path."
+  },
+
+  "backfill_is_not_required_at_capture": {
+    "rule": "a checkpoint is captured on schedule whether or not B15b has backfilled the launch transaction yet",
+    "why": "the target is 1.6 seconds after t0 and a backfill takes minutes. Requiring it at capture time makes the capture impossible, which is what B15h's H_NO_MATCHING_TRANSACTION did.",
+    "where_the_check_moves": "H_NO_MATCHING_TRANSACTION applies at JOIN and PRICING time, not at observation capture"
+  },
+
+  "latency_measurements": {
+    "required_on_every_launch": ["receipt_to_schedule_monotonic_ns", "target_lead_slots_at_scheduling", "queue_delay_ns"],
+    "required_on_every_checkpoint": ["checkpoint_lateness_slots", "rpc_round_trip_ns"],
+    "required_on_every_run": ["overflow_count", "missed_while_down_count", "already_passed_count"],
+    "target_lead_slots_at_scheduling": "target_slot minus the processed slot observed at enqueue. A NEGATIVE or zero lead means the target had already passed and the delay is unreachable on this transport — which is the pilot's primary question."
+  },
+
+  "the_question_this_pilot_answers": {
+    "question": "are 1, 2 and 4 slot entry targets empirically reachable on a standard processed WebSocket?",
+    "answered_by": "the distribution of target_lead_slots_at_scheduling, per delay",
+    "if_the_answer_is_no": "report the MEASURED blocker. Do not widen a delay, do not relax scheduling-after-target, and do not promote a processed observation to canonical to make coverage look better.",
+    "provider_upgrade_noted_not_purchased": "a streaming provider offering transactionSubscribe or accountSubscribe at lower latency would be the natural next step if the standard endpoint cannot reach these targets. Nothing is purchased, subscribed to or configured by this document."
+  },
+
+  "refusal_codes": [
+    {"code": "Q_OVERFLOW", "meaning": "the bounded queue was full; the target is durably recorded as dropped"},
+    {"code": "Q_TARGET_ALREADY_PASSED", "meaning": "the target had passed by the time the frame was decoded"},
+    {"code": "Q_MISSED_WHILE_DOWN", "meaning": "the process restarted after the target passed; never fetched"},
+    {"code": "Q_PRE_ACTIVATION", "meaning": "t0 at or before the activation slot"},
+    {"code": "Q_LATE", "meaning": "the context slot exceeded the target beyond the 150-slot tolerance"},
+    {"code": "Q_ACCOUNT_MISMATCH", "meaning": "owner, discriminator or layout disagrees with the pinned evidence"},
+    {"code": "Q_ORPHANED", "meaning": "the processed observation was never corroborated by a confirmed record"},
+    {"code": "Q_UNRESOLVED", "meaning": "reconciliation has not yet been possible"},
+    {"code": "Q_RPC_FAILED", "meaning": "the checkpoint request failed after its bounded attempts"}
+  ],
+
+  "publication": {
+    "always_publishable": ["coverage counts", "refusal census", "latency and lead distributions", "fork reconciliation counts"],
+    "never_publishable_here": ["any return", "any profitability or executability claim", "any landing probability", "any mixture with V1, B15h or B15e"]
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "blocking the feed handler on an RPC call",
+    "silently dropping an enqueued target",
+    "fetching a target whose deadline passed while the process was down",
+    "promoting a processed observation to canonical without an independent confirmed record",
+    "pricing an unconfirmed, unresolved or orphaned cell",
+    "overwriting or superseding the B15a confirmed recorder",
+    "widening the entry delays or the lateness tolerance",
+    "admitting a pre-activation, V1 or B15h cell",
+    "purchasing or configuring a paid streaming service"
+  ],
+
+  "status_locks": {
+    "label": "SIMULATED_PROCESSED_FEED_PILOT",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
