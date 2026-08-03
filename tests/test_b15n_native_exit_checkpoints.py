@@ -509,6 +509,40 @@ class TestReading(Base):
         self.assertEqual(json.loads(lines[0])["outcome"], "retrieved")
 
 
+class TestNoRedundantFinalityWait(Base):
+    """The due-check already waits for finality, so the reader must not wait again.
+
+    A 12.4-second wait per target, applied serially at two requests a second, gave about five reads
+    a minute against roughly six hundred targets a minute arriving. The backlog pushed checkpoint
+    lateness to a mean of 103 slots against a 150 tolerance and refused 12 outright, which looked
+    like a slow endpoint and was a redundant sleep.
+    """
+
+    def test_the_due_check_uses_the_finalized_slot(self):
+        """Which is why no further wait is needed: finality has already passed the target."""
+        import inspect
+        source = inspect.getsource(B15F.current_slot)
+        self.assertIn('"commitment": "finalized"', source)
+
+    def test_the_reader_does_not_sleep_when_no_delay_is_given(self):
+        slept = []
+        raw = B15N.RawLog(self.directory / "raw.jsonl")
+        row = {"signature": "Sig1", "delay_slots": 1, "horizon": "h_1000_slots",
+               "bonding_curve": CURVE, "t0_slot": T0, "target_slot": T0 + 1001, "attempts": 0}
+        B15N.read_checkpoint(row, "https://example.invalid", self.document,
+                             B15B.build_decoder(), raw,
+                             opener_for([account_response(row["target_slot"])]), slept.append)
+        raw.close()
+        self.assertEqual(slept, [])
+
+    def test_the_entrypoint_passes_no_finalization_wait(self):
+        source = (ROOT / "scripts" / "b15n_native_exit_checkpoints.py").read_text()
+        self.assertIn("finalization_lag_slots=0", source)
+        # A contiguous phrase: comment wrapping split the previous one across two lines and the
+        # assertion failed on the formatting rather than on the property.
+        self.assertIn("at or below the current FINALIZED slot", source)
+
+
 class TestAdmission(Base):
     def test_only_an_explicit_chain_confirmation_admits(self):
         self.assertTrue(B15N.admissible_downstream("confirmed", None))

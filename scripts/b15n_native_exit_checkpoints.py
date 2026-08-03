@@ -650,21 +650,18 @@ def main(argv=None):
     if arguments.status:
         print(json.dumps(status(), indent=2, sort_keys=True))
         return 0
-    lag = 0
-    try:
-        # Measured once, not assumed: the client waits out the finalization lag before its first
-        # attempt because minContextSlot rejects rather than waits.
-        url = B15B.rpc_url()
-        processed = B15F.current_slot(url)
-        body = {"jsonrpc": "2.0", "id": 1, "method": "getSlot",
-                "params": [{"commitment": "processed"}]}
-        outcome, _status, payload = B15B._one_attempt(url, body, None)
-        if outcome == "retrieved" and payload.get("result") and processed:
-            lag = max(0, payload["result"] - processed)
-    except Exception:                                                     # noqa: BLE001
-        lag = 0
+    # NO finalization wait here, and the reason is structural rather than a tuning choice.
+    # `due_targets` selects only targets at or below the current FINALIZED slot, so finality has
+    # already passed a target before it is ever read and `minContextSlot` is satisfied on the first
+    # attempt. B15i needs that wait because it schedules entry targets one to four slots ahead of
+    # a launch, before finality could possibly have reached them; here the due-check does the
+    # waiting, for free, and in parallel across every pending target.
+    #
+    # Measured: with a 12.4-second wait per target applied serially, throughput was about five
+    # reads a minute against roughly six hundred targets a minute arriving, so the backlog pushed
+    # checkpoint lateness to a mean of 103 slots against a 150 tolerance and refused 12 outright.
     ticks = arguments.ticks if arguments.ticks is not None else 10 ** 9
-    counts, report = run(ticks=ticks, limit=arguments.limit, finalization_lag_slots=lag)
+    counts, report = run(ticks=ticks, limit=arguments.limit, finalization_lag_slots=0)
     print(json.dumps({"counts": counts, "census": report}, indent=2, sort_keys=True))
     return 0
 
