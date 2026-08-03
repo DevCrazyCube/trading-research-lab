@@ -52,7 +52,10 @@ EXECUTION_SURFACE_TOKENS = ("sendTransaction", "signTransaction", "Keypair", "fr
                             "WALLET", "mnemonic", "seed_phrase", "requestAirdrop",
                             "simulateTransaction")
 
-SECRET_TOKENS = ("api-key", "api_key", "apikey", "authorization", "bearer ", "helius")
+# Credential material only. A provider's HOST NAME is not a secret, and the preregistration
+# explicitly requires recording the endpoint's scheme and host — so a token list containing the host
+# forbade the very thing the freeze mandates and refused the first live record.
+SECRET_TOKENS = ("api-key", "api_key", "apikey", "authorization", "bearer ", "secret")
 
 # Directory TOKENS, not assembled path strings. This is the whole lesson of B15O.
 FORBIDDEN_DIRECTORY_TOKENS = ("b15a", "b15b", "b15f")
@@ -297,10 +300,21 @@ def assert_no_execution_surface(path=None):
 
 
 def scan_for_secrets(text, where):
+    """Credential material, and a query string on any recorded endpoint.
+
+    The positive check matters more than the token list: a receipt is scheme and host, so a "?" or an
+    "=" in one means a query string survived, whatever its parameter happened to be called.
+    """
     lowered = str(text).lower()
     found = sorted({token for token in SECRET_TOKENS if token in lowered})
     if found:
         raise BackfillRefused(f"{P_SECRET_IN_OUTPUT}: {where} contains {found}")
+    import re as _re
+    for receipt in _re.findall(r'"endpoint_scheme_host"\s*:\s*"([^"]*)"', str(text)):
+        if "?" in receipt or "=" in receipt:
+            raise BackfillRefused(
+                f"{P_SECRET_IN_OUTPUT}: {where} records the endpoint as {receipt!r}, which carries "
+                f"a query string; a receipt is scheme and host only")
     return True
 
 

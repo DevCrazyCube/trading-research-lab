@@ -574,6 +574,25 @@ class TestRetrieval(Base):
         raw.close()
         self.assertIn(B15P.P_SECRET_IN_OUTPUT, str(caught.exception))
 
+    def test_a_provider_host_name_is_not_a_secret(self):
+        """The freeze REQUIRES recording scheme and host, so the host cannot also be forbidden.
+
+        A token list containing the provider's name refused the first live record it saw.
+        """
+        raw = self._raw()
+        self.assertTrue(raw.append(
+            {"endpoint_scheme_host": "https://mainnet.helius-rpc.com", "outcome": "retrieved"}))
+        raw.close()
+
+    def test_a_receipt_carrying_a_query_string_refuses_whatever_it_is_called(self):
+        raw = self._raw()
+        for receipt in ("https://host?token=abc", "https://host?x=1"):
+            with self.subTest(receipt=receipt):
+                with self.assertRaises(B15P.BackfillRefused) as caught:
+                    raw.append({"endpoint_scheme_host": receipt})
+                self.assertIn("scheme and host only", str(caught.exception))
+        raw.close()
+
     def test_the_endpoint_receipt_drops_the_query(self):
         self.assertEqual(B15P.endpoint_receipt("https://host.example/?api-key=abc"),
                          "https://host.example")
