@@ -1,0 +1,123 @@
+{
+  "preregistration_id": "B15J_RAW_RETENTION_V2",
+  "supersedes": "B15J_RAW_RETENTION_V1",
+  "supersedes_canonical_sha256": "42172140823f35adf7aef4753aea3492f932809e51c23d7747672f5d655e670e",
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 136)",
+  "status": "FROZEN. Committed alone, before any change to the compaction gate.",
+  "purpose": "Replace the per-segment replace gate with exactly one pinned-frontier verification pass per compaction run, without weakening any evidence V1 required.",
+  "committed_before_behaviour_change": true,
+
+  "what_changes_and_what_does_not": {
+    "changes": "gate ORCHESTRATION only — how many times the sealed set is read, and when originals are deleted",
+    "does_not_change": [
+      "the per-segment seal record: uncompressed_bytes, record_count, first/last identity and time, sha256 of the uncompressed bytes",
+      "the free-space reserve of 48318382080 bytes and its derivation",
+      "the exclusion of the active tail from every gate census",
+      "the rule that no original is deleted before its replacement is proven",
+      "the segment format, sequence assignment, canonical order, gzip codec and mtime pinning",
+      "the prohibition on filtering frames or narrowing any subscription"
+    ],
+    "why_a_superseding_document_rather_than_an_edit": "V1 froze a per-segment gate and ran under it. Editing V1 would make the record of what was actually done unreadable, so V1 stands and this replaces it from here forward."
+  },
+
+  "the_measured_problem": {
+    "v1_gate": "for EACH segment, compute a full sealed-set census, park the original, recompute the full sealed-set census, compare, delete",
+    "cost": "two full reads of the entire retained set per segment replaced, so N segments cost O(N * total_bytes)",
+    "measured": "B15i reached 19 segments and 13.0 GB sealed. A compaction run occupied one core for more than twenty minutes and the cost grows with every segment retained.",
+    "why_it_matters_beyond_speed": "a gate too slow to finish is a gate that stops running, and then nothing is compressed and the disk argument returns"
+  },
+
+  "the_v2_gate": {
+    "one_pass": "exactly ONE traversal of the pinned sealed set per compaction run, after all eligible archives are written and before any original is deleted",
+    "ordered_steps": [
+      "acquire the single-compactor lock, or refuse",
+      "pin the frontier: the highest sealed sequence for this stem at the moment the run starts",
+      "select candidates: sealed segments at or below the frontier that still have an original and are not already recorded replaced",
+      "compress every candidate to its archive, each written as .gz.partial and renamed only when complete",
+      "park every candidate original under a .parked name, so the single pass is forced to read archives",
+      "ONE traversal of every sealed segment at or below the frontier, in ascending sequence, in whatever form now exists, verifying each segment's streamed bytes against its own sealed sha256 and record_count as it goes, and accumulating the run census",
+      "compare the run census against the value computed from the seal records alone",
+      "on success delete every parked original; on ANY failure restore every parked original and quarantine the run"
+    ],
+    "the_expected_census_comes_from_the_seals": {
+      "rule": "the expected census is computed from the sealed per-segment evidence, not from a second read of the files",
+      "definition": "total_record_count is the sum of record_count over the pinned segments; segment_chain_sha256 is the SHA-256 over the concatenation of sha256_uncompressed for the pinned segments in ascending sequence",
+      "why_this_is_not_weaker": "V1 compared one read against another read of the same bytes, so a reader defect that affected both reads identically would have passed. Comparing against evidence recorded at rotation time cannot be fooled that way.",
+      "why_a_line_level_traversal_is_still_required": "the hashes alone would prove the bytes and say nothing about the READER. The single pass streams every segment through the same reader a replay uses, in canonical order, so a reader that stopped producing the right stream fails the gate."
+    },
+    "per_segment_verification_inside_the_pass": "each segment's streamed bytes are hashed and its records counted during the traversal and compared to its own seal record, so a failure names the segment rather than the run",
+    "atomicity": {
+      "rule": "originals are deleted only after the whole pass has passed. A run either replaces every candidate or none of them.",
+      "why": "a partial replacement leaves a set that was never verified as a set, and the next run inherits it without knowing which half was proven"
+    }
+  },
+
+  "failure_and_recovery": {
+    "on_failure": "every parked original is restored to its sealed name, a quarantine record naming the failing segment and reason is written, and the run exits non-zero. No original is deleted.",
+    "quarantine_record": "appended to <work_dir>/segments/quarantine.jsonl with the frontier, the candidate sequences, the failing sequence and the reason",
+    "crash_mid_run": {
+      "rule": "on restart, every .parked original is restored before anything else happens, and every .gz.partial is discarded",
+      "why": "a parked original is an original the previous run had not finished proving. Adopting the archive instead would accept an unverified replacement, and leaving the file parked would hide it from the reader.",
+      "idempotence": "restoring a parked original and discarding a partial archive are both safe to repeat"
+    },
+    "an_archive_without_its_original": "already replaced by a run whose flag write was lost. Its archive is verified against the seal hash before the flag is recorded, and it is never taken on trust.",
+    "concurrent_compactors": "refused by an exclusive lock on <work_dir>/compaction.lock. A second process deleting files a first is verifying is not left to chance."
+  },
+
+  "frontier_discipline": {
+    "pinned_once": "the frontier is read once at run start and never re-read during the run",
+    "why": "the live writer keeps sealing segments. A set read twice is two different sets, and comparing them reports a divergence that is only the feed doing its job.",
+    "segments_above_the_frontier": "ignored entirely by this run, neither compressed nor verified, and picked up by the next run",
+    "a_changed_frontier_mid_run_changes_nothing": "the pass reads only sequences at or below the pinned frontier, so a segment sealed during the run cannot affect the outcome"
+  },
+
+  "equivalence_to_v1": {
+    "claim": "for any set of sealed segments and archives, the V2 gate admits a replacement if and only if the V1 gate would have admitted it",
+    "argument": "V1 required (a) each archive decompresses to its sealed sha256, and (b) the full-set line census is unchanged when the archive is read in place of the original. V2 verifies (a) for every candidate during the single pass, and verifies that the same traversal over the same pinned set reproduces the record counts and per-segment hashes recorded at rotation. Since the line stream of a segment is a function of its bytes, and the bytes are proven identical, the traversal V1 compared cannot differ.",
+    "verified_how": "on synthetic multi-segment fixtures, both gates are run over the same directories and their admit/refuse decisions are compared segment for segment. A disagreement is a failure of this document, not a tolerance."
+  },
+
+  "refusal_codes": [
+    {"code": "R_DISK_RESERVE", "meaning": "free space fell below the reserve; capture stopped and quarantined"},
+    {"code": "R_SEAL_MISMATCH", "meaning": "a segment's streamed bytes do not hash to its recorded sha256, or its record count differs"},
+    {"code": "R_DECOMPRESS_MISMATCH", "meaning": "an archive does not decompress to the sealed bytes"},
+    {"code": "R_REPLAY_DIVERGED", "meaning": "the run census does not match the value computed from the seal records"},
+    {"code": "R_SEGMENT_GAP", "meaning": "the index has a missing or duplicated sequence number"},
+    {"code": "R_PARTIAL_ARCHIVE", "meaning": "a .gz.partial was found; it is discarded, never adopted"},
+    {"code": "R_PARKED_ORIGINAL", "meaning": "a .parked original from an unfinished run was found and restored"},
+    {"code": "R_INDEX_UNREADABLE", "meaning": "the segment index could not be read; unknown is not clean and nothing is replaced"},
+    {"code": "R_SECRET_IN_ARCHIVE", "meaning": "credential material appeared in an archive or index"},
+    {"code": "R_ACTIVE_TAIL_COMPRESSED", "meaning": "something attempted to compress the file still being appended to"},
+    {"code": "R_CONCURRENT_COMPACTOR", "meaning": "another compactor holds the lock"}
+  ],
+
+  "publication": {
+    "always_publishable": ["segment counts", "byte counts before and after", "compression ratios", "verification outcomes", "pass timings", "free-space measurements", "refusal and quarantine census"],
+    "never_publishable_here": ["any return", "any profitability or executability claim", "any landing probability"]
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "filtering frames or narrowing any subscription",
+    "changing any RPC rate or subscription scope",
+    "deleting an original before the whole pass has passed",
+    "deleting some candidates and restoring others from the same run",
+    "compressing the active tail",
+    "including the active tail in a gate census",
+    "adopting a partial archive or a parked original's archive without verification",
+    "re-reading the frontier during a run",
+    "modifying B11c, its manifest, or any B11a artifact",
+    "widening the free-space reserve or restating it differently",
+    "tuning any threshold to a result"
+  ],
+
+  "status_locks": {
+    "label": "OPERATIONAL_RAW_RETENTION",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
