@@ -1,0 +1,128 @@
+{
+  "preregistration_id": "B15N_NATIVE_EXIT_CHECKPOINT_V2",
+  "supersedes": "B15N_NATIVE_EXIT_CHECKPOINT_V1",
+  "supersedes_canonical_sha256": "28a4dc50db2aced38669b8a4fa1e4f346a755262d212fd97927708c40ea1edbd",
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 144)",
+  "status": "FROZEN. Committed alone, before the transport is changed.",
+  "purpose": "Replace one account read per target with one batched read per group of due curves, changing the transport and nothing else.",
+  "committed_before_transport_change": true,
+
+  "what_changes": {
+    "the_only_change": "the request method, from getAccountInfo per target to getMultipleAccounts per batch of distinct due curves",
+    "everything_else_is_inherited_verbatim": true,
+    "why_a_superseding_document": "V1 froze a per-target transport and ran under it, producing the measurement that motivates this. Editing V1 would make the record of what actually ran unreadable, so V1 stands and this replaces it from here forward."
+  },
+
+  "the_measured_problem": {
+    "arrival_rate": "25.6 launches per minute observed by B15i, six targets each, so about 153 targets per minute",
+    "v1_capacity": "120 targets per minute at the frozen ceiling of two requests per second, one request per target",
+    "deficit": "about 1.3x, and about 2.5x once the h_10000_slots targets begin arriving roughly 67 minutes after each launch",
+    "consequence_measured_live": "of 537 checkpoints, mean lateness 127 slots against a 150 tolerance, maximum exactly 150, and 366 targets already refused C_LATE. A backlog that grows cannot be waited out; it ends with every target late.",
+    "what_was_NOT_done": "the rate ceiling was not raised and the lateness tolerance was not widened. B15h was killed by HTTP 429 when a pool was left unbounded, and the tolerance is B15F's."
+  },
+
+  "inherited_verbatim_from_v1": {
+    "activation_slot": 436984352,
+    "activation_rule": "a launch is eligible ONLY if its t0_slot is STRICTLY GREATER than activation_slot; no pre-activation launch is ever scheduled, backfilled or recovered",
+    "scheduling_source": "the observation table of B15i's processed-commitment feed, read-only. B15a's launch table and B15f's schedule are not read.",
+    "entry_delays_slots": [1, 2, 4],
+    "exit_horizons": [{"name": "h_1000_slots", "slots": 1000}, {"name": "h_10000_slots", "slots": 10000}],
+    "nominal_target_slot": "t0_slot + delay_slots + horizon_slots",
+    "commitment": "finalized",
+    "min_context_slot_semantics": "the request carries minContextSlot, and it is satisfied on the first attempt because a target is only due once the finalized slot has reached it",
+    "max_lateness_slots": 150,
+    "admissible_when": "context_slot >= target_slot AND context_slot - target_slot <= max_lateness_slots",
+    "max_attempts": 6,
+    "retry_interval_slots": 25,
+    "max_requests_per_second": 2,
+    "admission_rules": "scheduling does not wait for chain confirmation; admission does. Provenance is re-read at checkpoint time and only an explicitly chain-confirmed launch is admissible downstream. An unconfirmed, unresolved or orphaned launch's checkpoint is recorded, counted and withheld.",
+    "never_backfills": "a target whose deadline passed beyond the tolerance is recorded N_TARGET_ALREADY_PASSED and never fetched",
+    "isolation": "writes only under research/b15n; no other worker's cadence, rate or subscription is altered"
+  },
+
+  "the_batched_transport": {
+    "method": "getMultipleAccounts",
+    "pattern_source": "B15F_CHECKPOINT_V2, already frozen, including its deduplication and its positional-mapping verification",
+    "max_accounts_per_request": 100,
+    "max_accounts_rationale": "the documented getMultipleAccounts ceiling. Chosen as the protocol limit rather than tuned, so no batch size was picked to produce an outcome.",
+    "min_context_slot_for_a_batch": "the MAXIMUM target slot among the batch's targets. Every target in the batch is already at or below the finalized slot, so the maximum is already reached and the request is satisfied on the first attempt; using the maximum guarantees the shared context slot is at or after every target in the batch.",
+    "deterministic_batching": {
+      "ordering": "due targets in canonical order: target_slot, then signature, then delay_slots, then horizon",
+      "curve_selection": "the DISTINCT bonding curves of those targets, in first-appearance order under that ordering, truncated to max_accounts_per_request",
+      "request_order": "the request array is that curve list, in that order, and the order is recorded",
+      "why_deterministic": "a batch composed by set iteration would differ between runs, and a replay could not reproduce which accounts shared a context slot"
+    },
+    "one_request_serves_many_targets": "several targets share one bonding curve across delays and horizons. The request carries each curve ONCE and every target sharing it is settled from that one element."
+  },
+
+  "element_to_target_evidence": {
+    "requirement": "each element of the response array must map back to exactly ONE requested account and, through it, to every target that requested it",
+    "recorded_per_target": ["the requested pubkey", "its index in the request array", "the batch's shared context slot", "the sha256 of the whole preserved request/response exchange", "the batch identifier"],
+    "one_exchange_preserved_per_request": "the request JSON and the response JSON are appended verbatim to the raw log before any element is judged",
+    "mapping_is_verified_not_assumed": "getMultipleAccounts answers positionally, so the mapping is checked by length and by index rather than trusted"
+  },
+
+  "refusals_specific_to_batching": {
+    "length_mismatch": "an array whose length differs from the request discards the WHOLE batch; every mapping after a divergence would be a different account's data",
+    "null_element": "a null element refuses that curve's targets as N_ACCOUNT_ABSENT and does not affect the others",
+    "duplicate_in_request": "a request array containing the same pubkey twice is refused before it is sent, because two elements would both claim to be that account's answer",
+    "mixed_or_absent_context": "a response without exactly one integer context slot is refused; a per-target geometry check needs one unambiguous shared context",
+    "no_success_may_hide_a_failure": {
+      "rule": "the batch produces exactly one recorded outcome per target it was drawn for, and the count is asserted before the batch is considered handled",
+      "why": "a partly successful batch marked done leaves targets silently unread, and their absence later reads as targets that never came due"
+    }
+  },
+
+  "proof_obligations_before_the_transport_is_used": [
+    "REQUEST COUNT: on a synthetic population, the number of requests under V2 must be strictly fewer than under V1 for the same due set, and the reduction must be reported",
+    "DECODING EQUIVALENCE: for identical synthetic account bytes, the state decoded from a batch element must equal the state V1 decodes from a single-account response, field for field",
+    "GEOMETRY EQUIVALENCE: for the same context slot and target, the lateness and the admit/refuse decision must match V1's"
+  ],
+
+  "refusal_codes": [
+    {"code": "C_PRE_PROTOCOL", "meaning": "t0 is at or before the activation slot"},
+    {"code": "C_LATE", "meaning": "the shared context slot exceeded this target beyond the 150-slot tolerance"},
+    {"code": "N_RPC_FAILED", "meaning": "the batched request did not complete within its bounded attempts"},
+    {"code": "N_TARGET_ALREADY_PASSED", "meaning": "the deadline passed before the target could be read; never fetched"},
+    {"code": "N_ACCOUNT_MISMATCH", "meaning": "owner, discriminator or layout disagrees with the pinned evidence"},
+    {"code": "N_ACCOUNT_ABSENT", "meaning": "the batch element for this curve is null"},
+    {"code": "N_BATCH_LENGTH", "meaning": "the response array length differs from the request; the whole batch is discarded"},
+    {"code": "N_BATCH_DUPLICATE", "meaning": "the request array would contain a pubkey twice"},
+    {"code": "N_BATCH_CONTEXT", "meaning": "the response carries no single unambiguous integer context slot"},
+    {"code": "N_BATCH_UNACCOUNTED", "meaning": "a target the batch was drawn for received no recorded outcome"},
+    {"code": "N_NOT_CONFIRMED", "meaning": "no explicit chain confirmation; recorded and withheld"},
+    {"code": "N_ORPHANED", "meaning": "B15i's chain query found no confirmed transaction for the launch"},
+    {"code": "N_SCHEDULE_CONFLICT", "meaning": "a (signature, delay, horizon) already exists with different geometry"}
+  ],
+
+  "publication": {
+    "always_publishable": ["request counts and the reduction", "schedule and checkpoint counts", "refusal census", "lateness and latency distributions", "fork-state and gap-provenance counts"],
+    "post_change_figures_only_from_prospective_evidence": "lateness and coverage after this change are reported only once evidence recorded UNDER this transport exists. A number carried over from V1's records would describe V1.",
+    "never_publishable_here": ["any return", "any profitability or executability claim", "any landing probability", "any capacity or sizing figure"]
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "raising the two-requests-per-second ceiling",
+    "widening the 150-slot lateness tolerance",
+    "changing the activation slot, the population, the geometry, the commitment or the admission rules",
+    "reading B15a's launch table or B15f's schedule as a scheduling source",
+    "indexing a deduplicated request by a target's ordinal",
+    "trusting a positional mapping without verifying its length",
+    "treating a partly successful batch as handled",
+    "backfilling a pre-activation or missed target",
+    "altering B15i, B11c, or any other worker's cadence, rate or subscription",
+    "publishing a post-change figure computed from evidence recorded under V1",
+    "publishing any strategy, capacity or return figure from this worker"
+  ],
+
+  "status_locks": {
+    "label": "NATIVE_EXIT_CHECKPOINTS",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
