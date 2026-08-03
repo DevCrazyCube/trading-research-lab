@@ -1,0 +1,130 @@
+{
+  "preregistration_id": "B15G_CHECKPOINT_JOIN_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (handoff 126)",
+  "status": "FROZEN. Committed alone, before any checkpoint-derived return was read or published.",
+  "purpose": "Freeze the join between B15f prospective checkpoints and B15d priced entries: the population, the identity, the geometry that must hold, the exit pricing inputs, the denominator, and the maturity condition that gates any figure.",
+  "committed_before_reading_any_checkpoint_return": true,
+
+  "population": {
+    "rule": "ONLY targets scheduled prospectively under B15F_CHECKPOINT_V1",
+    "excluded_by_construction": "every target recorded C_PRE_CHECKPOINT_PROTOCOL, because it had already passed when that protocol began",
+    "never_mixed_with_b15e": {
+      "statement": "B15e cells and B15g cells are SEPARATE POPULATIONS with different target definitions. They are never combined, averaged, compared numerically or presented in one column.",
+      "why": "B15e's target is the first observation at or after the actual entry plus the horizon; B15g's is the nominal t0 + delay + horizon settled against an account read. A difference between them would measure the two definitions, not anything about a strategy.",
+      "enforcement": "no B15e row identifier may appear in a B15g artifact, and a test asserts it"
+    }
+  },
+
+  "identity_and_join": {
+    "key": ["entry_signature", "delay_slots", "horizon", "scenario_id"],
+    "entry_source": "research/b15d/shadow_entries.sqlite, the priced candidate cells",
+    "checkpoint_source": "research/b15f/checkpoints.sqlite, the checkpoint and schedule tables",
+    "exactness": "join on exact launch/create signature; no fuzzy or nearest match",
+    "one_row_per_key": true,
+    "conflict_is_a_refusal": "an identity, IDL version or evidence-hash conflict between the two sources is refused with J_IDENTITY_CONFLICT rather than resolved in favour of either"
+  },
+
+  "geometry": {
+    "recorded_on_every_row": ["nominal_target_slot", "actual_entry_observation_slot", "checkpoint_context_slot", "checkpoint_lateness_slots", "effective_hold_slots"],
+    "nominal_target_slot": "t0_slot + delay_slots + horizon_slots, as B15f scheduled it",
+    "effective_hold_slots": "nominal_target_slot - actual_entry_observation_slot",
+    "hard_requirement": "the ACTUAL entry observation must be STRICTLY BEFORE the nominal target",
+    "on_violation": "J_ENTRY_NOT_BEFORE_TARGET; the row is refused and never priced",
+    "why_this_check_matters": "B15d's actual entry is the first observation at or after t0 + delay, which can land arbitrarily late — after the nominal target. Pricing an exit at a target that precedes the entry would sell a position that had not been opened.",
+    "nominal_label_must_stay_visible": {
+      "rule": "every row carries target_semantics = 'nominal_t0_plus_delay_plus_horizon'",
+      "forbidden_names": ["b10c_state_in_force", "b15e_exit_semantics", "state_in_force", "first_observation_at_or_after_entry"],
+      "why": "three different target rules now exist in this project. A row that does not say which one it used is a number waiting to be misfiled."
+    }
+  },
+
+  "exit_pricing": {
+    "state_source": "the B15f checkpoint — the bonding-curve ACCOUNT at the target slot",
+    "scenario_pairing": "the exit uses the SAME scenario id as the entry, always; a mismatch is refused with J_SCENARIO_MISMATCH",
+    "route": "direct_standard_rpc_v1, unchanged",
+    "tip_lamports": 0,
+    "tip_justification": "an explicit operator route choice — this route sends no tips — not an inference from absent evidence",
+    "ata_rent_lamports": 0,
+    "ata_rent_justification": "charged at ENTRY, where B10a books it as never-refunded. Zero here because it was already paid, NOT because it is free.",
+    "no_double_count": "base and priority stay separate; B10a sums them and charges the pair again per failed attempt",
+    "cost_absence_is_refused": "a missing cost component is J_COST_ABSENT, never zero"
+  },
+
+  "sell_fee_schedule": {
+    "problem_stated_plainly": "the BondingCurve ACCOUNT publishes NO fee basis points. It carries reserves, completion, creator, mayhem and quote mint, and nothing about fees. A checkpoint therefore cannot supply a fee schedule by itself.",
+    "rule": "the schedule is taken from the MOST RECENT observed TradeEvent on that curve at or BEFORE the nominal target slot, recorded by B15a",
+    "why_that_is_point_in_time": "a TradeEvent at or before the target publishes the basis points that were in force at or before the instant being priced; nothing later is read",
+    "if_no_such_event_exists": "J_NO_FEE_EVIDENCE. The exit is not priced. A fee schedule is not assumed, defaulted, or carried from another curve.",
+    "known_defect_upstream": {
+      "where": "b15f_checkpoint.py _price_exits",
+      "what": "it prices its own convenience exits with a HARDCODED schedule of fee_bps 95, creator 5, cashback 0, buyback 0",
+      "assessment": "that is an invented constant standing where evidence belongs, and B15c observed fee_basis_points taking more than one value in a single sample, so it is not even a safe constant",
+      "action_taken_here": "B15g does NOT use B15f's checkpoint_exit table. It reprices from the checkpoint state with an evidence-derived schedule. B15f's own exit rows are to be treated as superseded.",
+      "why_b15f_is_not_edited": "it is a running worker and the brief for this handoff forbids modifying running upstream workers. The defect is reported rather than patched under a prohibition."
+    }
+  },
+
+  "denominator": {
+    "rule": "EVERY prospectively scheduled B15f target appears, in exactly one terminal or pending state",
+    "states": [
+      {"state": "pending", "meaning": "the target has not yet been reached; not terminal"},
+      {"state": "priced", "meaning": "checkpoint present, entry priced, exit priced"},
+      {"state": "checkpointed_entry_unpriced", "meaning": "the checkpoint exists but B15d has not priced that entry cell"},
+      {"state": "refused", "meaning": "a J_ code fired; the reason is recorded"},
+      {"state": "checkpoint_refused", "meaning": "B15f refused the checkpoint itself; its code is carried through"}
+    ],
+    "never_dropped": "a target that could not be priced is never removed from the census; the targets that fail are disproportionately the curves that died, and a cohort narrowed to what priced is a cohort selected on having priced"
+  },
+
+  "refusal_codes": [
+    {"code": "J_ENTRY_NOT_BEFORE_TARGET", "meaning": "the actual entry observation is at or after the nominal target"},
+    {"code": "J_SCENARIO_MISMATCH", "meaning": "entry and exit scenarios differ"},
+    {"code": "J_IDENTITY_CONFLICT", "meaning": "identity, version or evidence hash disagrees between sources"},
+    {"code": "J_NO_FEE_EVIDENCE", "meaning": "no TradeEvent at or before the target publishes a fee schedule"},
+    {"code": "J_COST_ABSENT", "meaning": "a required cost component is not stated"},
+    {"code": "J_CURVE_COMPLETE", "meaning": "the checkpoint shows the curve complete; no bonding-curve exit is priced"},
+    {"code": "J_LIQUIDITY_UNAVAILABLE", "meaning": "B10a refused the exit at the checkpoint reserves"},
+    {"code": "J_CHECKPOINT_REFUSED", "meaning": "B15f refused the checkpoint; its code is carried through unchanged"},
+    {"code": "J_DUPLICATE_JOIN", "meaning": "the join key matched more than one row on either side"}
+  ],
+
+  "maturity": {
+    "slice_definition": "a (scenario_id, horizon) cell group",
+    "slice_is_closed_when": "every scheduled target in that slice is TERMINAL — priced, refused, or explicitly censored — and none is pending",
+    "figures_only_for_closed_slices": true,
+    "no_interim_sum": "a partial slice's sum is never published, labelled provisional, or shown in a status line. A sum over the targets that have resolved so far is a sum over the fastest-resolving targets, which are not a random sample.",
+    "bases_when_published": ["observed_evaluable", "whole_cohort_worst_case"],
+    "bases_rule": "per B14b, both bases or neither; the worst-case basis assigns the worst admissible outcome to every unevaluable at-risk target"
+  },
+
+  "always_publishable": ["coverage counts", "reason census", "geometry distributions", "slice closure status"],
+  "never_publishable_here": ["any profitability claim", "any executable claim", "any landing probability", "any comparison with B15e", "any interim slice sum"],
+
+  "still_unmeasured": {
+    "market_impact": "unmeasured. The account state at the target is a curve our hypothetical trade never touched.",
+    "landing_probability": "unmeasured, for both the entry and the exit"
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "including a target that was not scheduled prospectively",
+    "mixing, comparing or aggregating with B15e",
+    "pricing an exit whose target precedes its entry",
+    "assuming a fee schedule that no evidence publishes",
+    "publishing a sum over an unclosed slice",
+    "dropping a scheduled target from the denominator",
+    "claiming profitability, executability or a landing probability"
+  ],
+
+  "status_locks": {
+    "label": "SIMULATED_PROSPECTIVE_CHECKPOINT",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "refused_status_names": ["executable", "live", "profitable", "production_ready", "validated", "backtested", "guaranteed"]
+  }
+}
