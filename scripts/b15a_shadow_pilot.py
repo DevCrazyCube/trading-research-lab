@@ -499,6 +499,12 @@ def b11b_vetoes(fields, state=None):
 # Replay — derived tables rebuilt from the immutable raw log
 # --------------------------------------------------------------------------------------------
 
+def _plain_lines(path):
+    """The tail alone, for a work directory that has never been rotated."""
+    with pathlib.Path(path).open() as handle:
+        yield from handle
+
+
 def replay(raw_path=RAW_PATH, db_path=DB_PATH, freshness_bound_ns=None, backfill=None):
     """Rebuild `launch`, `decision` and `pump_event` from the raw frames. Raw is never touched.
 
@@ -510,6 +516,12 @@ def replay(raw_path=RAW_PATH, db_path=DB_PATH, freshness_bound_ns=None, backfill
     raw = pathlib.Path(raw_path)
     if not raw.exists():
         raise PilotRefused(f"no raw frame log at {raw}; there is nothing to replay from")
+    # Sealed segments FIRST, in ascending sequence, then the active tail. Reading only the tail
+    # would rebuild the derived tables from whatever has arrived since the last rotation and
+    # silently delete every launch older than it — the exact evidence loss compression was
+    # introduced to avoid.
+    stem = raw.name.removesuffix(".jsonl")
+    segments = [r for r in B15J.read_index(raw.parent) if r["stem"] == stem]
     document = verify_preregistration()
     freshness = document["freshness_bound_ns"] if freshness_bound_ns is None else freshness_bound_ns
     connection = open_database(db_path)
@@ -523,76 +535,89 @@ def replay(raw_path=RAW_PATH, db_path=DB_PATH, freshness_bound_ns=None, backfill
     connection.execute("DELETE FROM pump_event")
     connection.commit()
 
+    # The session table describes the live connection and cannot be rebuilt from payloads, which
+    # is exactly why it is preserved rather than deleted above — and exactly why it must be READ.
+    degraded_by_session = {row[0]: bool(row[1]) for row in
+                           connection.execute(
+                               "SELECT session_id, reconnect_index > 0 FROM session")}
     counts = {"frames": 0, "failed_tx": 0, "launch_candidates": 0, "non_launch_events": 0,
-              "decoded": 0, "duplicates_ignored": 0}
-    with raw.open() as handle:
-        for line in handle:
-            record = json.loads(line)
-            counts["frames"] += 1
-            document_in = record["raw_notification_json"]
-            params = (document_in.get("params") or {}).get("result") or {}
-            value = params.get("value") or {}
-            slot = (params.get("context") or {}).get("slot")
-            signature = value.get("signature")
-            if value.get("err") is not None:
-                counts["failed_tx"] += 1
-                continue
-            payloads, _skipped = program_data_payloads(value.get("logs"))
-            for index, payload in enumerate(payloads):
-                status_code, fields, error = decode_create(
-                    payload, b7d, discriminator, create_type, types)
-                if status_code in NON_LAUNCH_STATUSES:
-                    counts["non_launch_events"] += 1
-                    connection.execute(
-                        "INSERT INTO pump_event(session_id,frame_seq,signature,slot,"
-                        "discriminator,decode_status,observed_wall_unix,observed_monotonic_ns) "
-                        "VALUES (?,?,?,?,?,?,?,?)",
-                        (record["session_id"], record["frame_seq"], signature, slot,
-                         payload[:8].hex(), status_code, record["received_wall_unix"],
-                         record["received_monotonic_ns"]))
-                    continue
-                counts["launch_candidates"] += 1
-                if status_code == DECODE_DECODED:
-                    counts["decoded"] += 1
-                key = create_key(signature, slot, index, fields)
-                evidence = {"session_id": record["session_id"],
-                            "frame_seq": record["frame_seq"], "signature": signature,
-                            "slot": slot, "decode_status": status_code, "fields": fields}
-                cursor = connection.execute(
-                    "INSERT OR IGNORE INTO launch(session_id,frame_seq,signature,slot,mint,"
-                    "bonding_curve,creator,user,is_mayhem_mode,quote_mint,decoded_wall_unix,"
-                    "decoded_monotonic_ns,decode_status,decode_error,backfill_status,"
-                    "evidence_sha256,create_key) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                    (record["session_id"], record["frame_seq"], signature, slot,
-                     (fields or {}).get("mint"), (fields or {}).get("bonding_curve"),
-                     (fields or {}).get("creator"), (fields or {}).get("user"),
-                     (fields or {}).get("is_mayhem_mode"), (fields or {}).get("quote_mint"),
-                     record["received_wall_unix"], record["received_monotonic_ns"], status_code,
-                     error, "not_attempted", evidence_hash(evidence), key))
-                if cursor.rowcount == 0:
-                    counts["duplicates_ignored"] += 1
-                    counts["launch_candidates"] -= 1
-                    if status_code == DECODE_DECODED:
-                        counts["decoded"] -= 1
-                    continue
-                launch_seq = cursor.lastrowid
-                state, missing = state_from_create_event(fields, slot)
-                availability = feature_availability(fields, "not_attempted", state, missing)
-                result, reason, detail = decide(fields, status_code, "not_attempted", 0,
-                                                freshness, False, state)
-                decision = {"launch_seq": launch_seq, "policy_id": B11B.PRIMARY_POLICY,
-                            "result": result, "reason": reason, "detail": detail}
+              "decoded": 0, "duplicates_ignored": 0,
+              "sessions_known": len(degraded_by_session),
+              "degraded_sessions": sum(1 for v in degraded_by_session.values() if v)}
+    for line in (B15J.iter_lines(raw.parent, stem, raw) if segments else _plain_lines(raw)):
+        record = json.loads(line)
+        counts["frames"] += 1
+        document_in = record["raw_notification_json"]
+        params = (document_in.get("params") or {}).get("result") or {}
+        value = params.get("value") or {}
+        slot = (params.get("context") or {}).get("slot")
+        signature = value.get("signature")
+        if value.get("err") is not None:
+            counts["failed_tx"] += 1
+            continue
+        payloads, _skipped = program_data_payloads(value.get("logs"))
+        for index, payload in enumerate(payloads):
+            status_code, fields, error = decode_create(
+                payload, b7d, discriminator, create_type, types)
+            if status_code in NON_LAUNCH_STATUSES:
+                counts["non_launch_events"] += 1
                 connection.execute(
-                    "INSERT INTO decision(launch_seq,policy_id,decided_wall_unix,"
-                    "decided_monotonic_ns,observation_to_decision_ns,feature_availability,"
-                    "policy_result,reason_code,hypothetical_quote_lamports,simulated_entry,"
-                    "outcome_placeholder,evidence_sha256) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                    (launch_seq, B11B.PRIMARY_POLICY, record["received_wall_unix"],
-                     record["received_monotonic_ns"], 0,
-                     json.dumps(availability, sort_keys=True), result,
-                     reason if detail is None else f"{reason}:{detail}",
-                     B11B.ORDER_SIZE_LAMPORTS if result == RESULT_PROPOSED else None,
-                     None, None, evidence_hash(decision)))
+                    "INSERT INTO pump_event(session_id,frame_seq,signature,slot,"
+                    "discriminator,decode_status,observed_wall_unix,observed_monotonic_ns) "
+                    "VALUES (?,?,?,?,?,?,?,?)",
+                    (record["session_id"], record["frame_seq"], signature, slot,
+                     payload[:8].hex(), status_code, record["received_wall_unix"],
+                     record["received_monotonic_ns"]))
+                continue
+            counts["launch_candidates"] += 1
+            if status_code == DECODE_DECODED:
+                counts["decoded"] += 1
+            key = create_key(signature, slot, index, fields)
+            evidence = {"session_id": record["session_id"],
+                        "frame_seq": record["frame_seq"], "signature": signature,
+                        "slot": slot, "decode_status": status_code, "fields": fields}
+            cursor = connection.execute(
+                "INSERT OR IGNORE INTO launch(session_id,frame_seq,signature,slot,mint,"
+                "bonding_curve,creator,user,is_mayhem_mode,quote_mint,decoded_wall_unix,"
+                "decoded_monotonic_ns,decode_status,decode_error,backfill_status,"
+                "evidence_sha256,create_key) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (record["session_id"], record["frame_seq"], signature, slot,
+                 (fields or {}).get("mint"), (fields or {}).get("bonding_curve"),
+                 (fields or {}).get("creator"), (fields or {}).get("user"),
+                 (fields or {}).get("is_mayhem_mode"), (fields or {}).get("quote_mint"),
+                 record["received_wall_unix"], record["received_monotonic_ns"], status_code,
+                 error, "not_attempted", evidence_hash(evidence), key))
+            if cursor.rowcount == 0:
+                counts["duplicates_ignored"] += 1
+                counts["launch_candidates"] -= 1
+                if status_code == DECODE_DECODED:
+                    counts["decoded"] -= 1
+                continue
+            launch_seq = cursor.lastrowid
+            state, missing = state_from_create_event(fields, slot)
+            availability = feature_availability(fields, "not_attempted", state, missing)
+            # session_degraded is READ BACK from the preserved session table, never assumed
+            # False. Passing a literal False here silently rewrote 3,602 S07_session_degraded
+            # decisions as clean ones on the first replay after compression — turning degraded
+            # provenance into clean provenance, which is the single failure mode this project has
+            # spent the most effort preventing. A session whose id is not in the table is treated
+            # as degraded, because unknown is not clean.
+            degraded = degraded_by_session.get(record["session_id"], True)
+            result, reason, detail = decide(fields, status_code, "not_attempted", 0,
+                                            freshness, degraded, state)
+            decision = {"launch_seq": launch_seq, "policy_id": B11B.PRIMARY_POLICY,
+                        "result": result, "reason": reason, "detail": detail}
+            connection.execute(
+                "INSERT INTO decision(launch_seq,policy_id,decided_wall_unix,"
+                "decided_monotonic_ns,observation_to_decision_ns,feature_availability,"
+                "policy_result,reason_code,hypothetical_quote_lamports,simulated_entry,"
+                "outcome_placeholder,evidence_sha256) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                (launch_seq, B11B.PRIMARY_POLICY, record["received_wall_unix"],
+                 record["received_monotonic_ns"], 0,
+                 json.dumps(availability, sort_keys=True), result,
+                 reason if detail is None else f"{reason}:{detail}",
+                 B11B.ORDER_SIZE_LAMPORTS if result == RESULT_PROPOSED else None,
+                 None, None, evidence_hash(decision)))
     connection.commit()
     counts["launch_rows"] = connection.execute("SELECT COUNT(*) FROM launch").fetchone()[0]
     counts["decision_rows"] = connection.execute("SELECT COUNT(*) FROM decision").fetchone()[0]

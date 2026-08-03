@@ -714,6 +714,51 @@ class TestReplay(Temp):
         return PILOT.replay(raw_path=self.session_dir / "raw_frames.jsonl",
                             db_path=self.session_dir / "shadow.sqlite")
 
+    def test_replay_preserves_degraded_session_provenance(self):
+        """S07 survives a rebuild. It did not, and 3,602 live rows were rewritten as clean.
+
+        `session_degraded` cannot come from a payload — it comes from whether the session that
+        carried the frame was a reconnect. Replay passed a literal False, so every degraded
+        decision came back clean. A launch observed after a gap silently became a launch observed
+        on a continuous feed, which is the provenance failure this project has spent the most
+        effort preventing.
+        """
+        import sqlite3
+        database = self.session_dir / "shadow.sqlite"
+        connection = sqlite3.connect(database)
+        # Mark the session that actually carried the frames as a reconnect, so every launch in
+        # this fixture is degraded and a replay that ignores provenance cannot hide behind zero.
+        carrier = connection.execute(
+            "SELECT session_id FROM launch LIMIT 1").fetchone()[0]
+        connection.execute("UPDATE session SET reconnect_index=1 WHERE session_id=?", (carrier,))
+        connection.commit()
+        connection.close()
+
+        counts = self._replay()
+        self.assertGreater(counts["degraded_sessions"], 0)
+        connection = sqlite3.connect(f"file:{database}?mode=ro", uri=True)
+        reasons = dict(connection.execute(
+            "SELECT reason_code, COUNT(*) FROM decision GROUP BY reason_code").fetchall())
+        connection.close()
+        self.assertIn(PILOT.S07_SESSION_DEGRADED, reasons)
+
+    def test_replay_treats_an_unknown_session_as_degraded(self):
+        """Unknown is not clean: a frame whose session is not in the table is degraded."""
+        import sqlite3
+        database = self.session_dir / "shadow.sqlite"
+        connection = sqlite3.connect(database)
+        connection.execute("DELETE FROM session")
+        connection.commit()
+        connection.close()
+
+        counts = self._replay()
+        self.assertEqual(counts["sessions_known"], 0)
+        connection = sqlite3.connect(f"file:{database}?mode=ro", uri=True)
+        reasons = dict(connection.execute(
+            "SELECT reason_code, COUNT(*) FROM decision GROUP BY reason_code").fetchall())
+        connection.close()
+        self.assertIn(PILOT.S07_SESSION_DEGRADED, reasons)
+
     def test_replay_reproduces_the_same_launches(self):
         database = sqlite3.connect(self.session_dir / "shadow.sqlite")
         before = database.execute("SELECT COUNT(*) FROM launch WHERE decode_status='decoded'"

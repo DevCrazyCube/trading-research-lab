@@ -336,7 +336,28 @@ def discard_partial_archives(work_dir):
     return discarded
 
 
-def open_file_holders(path):
+def _descriptor_is_writable(pid, descriptor_name):
+    """Whether this file descriptor can write. Read from /proc/PID/fdinfo, not guessed.
+
+    Readers and writers matter differently here and the difference is not cosmetic. A READER
+    holding the file keeps its own handle on the same inode across a rename, so it finishes reading
+    exactly the bytes it started with — harmless. A WRITER keeps APPENDING to that inode, so the
+    sealed segment grows after it was hashed. Treating both as blockers made a downstream reader
+    look like a hazard and stopped a rotation that was safe.
+    """
+    info = pathlib.Path(f"/proc/{pid}/fdinfo/{descriptor_name}")
+    try:
+        for line in info.read_text().splitlines():
+            if line.startswith("flags:"):
+                flags = int(line.split()[1], 8)
+                return (flags & os.O_ACCMODE) in (os.O_WRONLY, os.O_RDWR)
+    except (OSError, ValueError, IndexError):
+        # Unknown is not clean: a descriptor whose mode cannot be read counts as a writer.
+        return True
+    return True
+
+
+def open_file_holders(path, writers_only=False):
     """PIDs holding this exact file open, read from /proc. Empty when nothing does.
 
     Rotating a file a live writer still holds is the quiet disaster in this design: `os.replace`
@@ -352,31 +373,33 @@ def open_file_holders(path):
     for entry in proc.iterdir():
         if not entry.name.isdigit():
             continue
-        descriptors = entry / "fd"
         try:
-            for descriptor in descriptors.iterdir():
+            for descriptor in (entry / "fd").iterdir():
                 try:
-                    if descriptor.resolve() == target:
-                        holders.add(int(entry.name))
+                    if descriptor.resolve() != target:
+                        continue
                 except (OSError, RuntimeError):
                     continue
+                if writers_only and not _descriptor_is_writable(entry.name, descriptor.name):
+                    continue
+                holders.add(int(entry.name))
         except (PermissionError, FileNotFoundError, NotADirectoryError):
             continue
     return holders
 
 
 def assert_no_writer(path, allow=()):
-    """Refuse if anything holds the file open. Self is NOT excused automatically.
+    """Refuse if anything holds the file open FOR WRITING. Self is NOT excused automatically.
 
     An earlier version subtracted os.getpid() unconditionally, which meant the one caller most
     likely to hold the file — a writer rotating its own log — was the one caller the gate could
     never catch. A holder that is legitimately expected is named in `allow`, explicitly.
     """
-    holders = open_file_holders(path) - set(allow)
+    holders = open_file_holders(path, writers_only=True) - set(allow)
     if holders:
         raise RetentionRefused(
-            f"{sorted(holders)} still hold {pathlib.Path(path).name} open. Rotating it now would "
-            f"move the name while the writer keeps appending to the same inode, so the sealed "
+            f"{sorted(holders)} hold {pathlib.Path(path).name} open FOR WRITING. Rotating it now "
+            f"would move the name while they keep appending to the same inode, so the sealed "
             f"segment would grow after it was hashed. Stop the writer first.")
     return True
 

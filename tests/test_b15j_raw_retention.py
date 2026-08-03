@@ -163,7 +163,7 @@ class TestSealAndRotate(Base):
         try:
             with self.assertRaises(B15J.RetentionRefused) as caught:
                 B15J.assert_no_writer(self.active)
-            self.assertIn("still hold", str(caught.exception))
+            self.assertIn("FOR WRITING", str(caught.exception))
             self.assertIn("same inode", str(caught.exception))
             # Naming the holder explicitly is how the rotation driver runs against its own writer.
             self.assertTrue(B15J.assert_no_writer(self.active, allow=[os.getpid()]))
@@ -173,6 +173,36 @@ class TestSealAndRotate(Base):
     def test_no_writer_passes_when_nothing_holds_the_file(self):
         self.write_active([_line(0)])
         self.assertTrue(B15J.assert_no_writer(self.active))
+
+    def test_a_reader_does_not_block_rotation(self):
+        """A reader keeps its own handle on the same inode across the rename, so it is harmless.
+
+        B15d holds B15a's raw log open to read it. Treating that as a hazard stopped a rotation
+        that was entirely safe, so readers and writers are now distinguished by their fd flags
+        rather than lumped together.
+        """
+        self.write_active([_line(0)])
+        handle = self.active.open("r")
+        try:
+            self.assertIn(os.getpid(), B15J.open_file_holders(self.active))
+            self.assertNotIn(os.getpid(),
+                             B15J.open_file_holders(self.active, writers_only=True))
+            self.assertTrue(B15J.assert_no_writer(self.active))
+        finally:
+            handle.close()
+
+    def test_a_read_write_handle_counts_as_a_writer(self):
+        self.write_active([_line(0)])
+        handle = self.active.open("r+")
+        try:
+            with self.assertRaises(B15J.RetentionRefused):
+                B15J.assert_no_writer(self.active)
+        finally:
+            handle.close()
+
+    def test_an_unreadable_descriptor_mode_counts_as_a_writer(self):
+        """Unknown is not clean: a mode that cannot be read is treated as write-capable."""
+        self.assertTrue(B15J._descriptor_is_writable(999999999, "0"))
 
 
 class TestIndex(Base):
