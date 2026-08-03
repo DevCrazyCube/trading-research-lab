@@ -737,8 +737,6 @@ def main(argv=None):
     return 1 if report["refusals"] else 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
 
 
 # --------------------------------------------------------------------------------------------
@@ -907,3 +905,7 @@ def compact_once(work_dir, stem, document=None, verifier=None):
     report["expected_census"] = expected
     report["observed_census"] = observed
     return report
+
+
+if __name__ == "__main__":
+    sys.exit(main())

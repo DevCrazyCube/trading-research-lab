@@ -860,6 +860,34 @@ class TestV2Gate(Base):
         self.assertTrue(B15J.sealed_path(self.directory, STEM, 1).exists())
 
 
+class TestEntryPoint(Base):
+    """The CLI is exercised as a process, because importing the module hides one whole class of bug.
+
+    The `if __name__` block sat above the V2 definitions, so every import-based test passed while
+    the command line died with NameError on the first call. Only running it as a program finds that.
+    """
+
+    def test_the_command_line_status_runs_as_a_process(self):
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "b15j_raw_retention.py"),
+             "--target", "b15i", "--status"],
+            capture_output=True, text=True, timeout=300)
+        self.assertEqual(result.returncode, 0, result.stderr[-800:])
+        report = json.loads(result.stdout)
+        self.assertEqual(report["reserve_bytes"], 45 * 1024 ** 3)
+
+    def test_every_module_level_definition_precedes_the_entry_point(self):
+        """A definition after `if __name__` exists on import and not when run as a program."""
+        source = (ROOT / "scripts" / "b15j_raw_retention.py").read_text()
+        guard = source.index('if __name__ == "__main__":')
+        after = source[guard:]
+        for line in after.splitlines():
+            self.assertFalse(line.startswith(("def ", "class ")),
+                             f"{line!r} is defined after the entry point and will not exist when "
+                             f"the script is run as a program")
+
+
 class TestV1V2Equivalence(Base):
     """The two gates must agree, segment for segment, on synthetic multi-segment fixtures.
 
