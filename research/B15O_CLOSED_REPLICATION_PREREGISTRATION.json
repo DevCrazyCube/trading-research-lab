@@ -1,0 +1,123 @@
+{
+  "preregistration_id": "B15O_CLOSED_REPLICATION_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 146)",
+  "status": "FROZEN. Committed alone, before any B15N strategy quantity was read.",
+  "purpose": "Replicate B15L and B15M verbatim on a mechanically closed population drawn from B15i and B15N evidence, so their published findings can be described against a population not censored by a closed recorder.",
+  "committed_before_reading_any_strategy_quantity": true,
+
+  "why_this_exists": {
+    "the_censoring_being_removed": "B15L and B15M ran on cells whose exit checkpoints came from B15f, which schedules from B15a, which B15k measured holding 29% of the launches B15i observes. B15a reached its 5,000-launch stopping rule with extension forbidden, so that fraction is final.",
+    "what_changes": "the exit checkpoints come from B15N, which schedules from B15i's own observations. Nothing about either estimand changes.",
+    "what_this_can_and_cannot_settle": "it can say whether the published findings look the same on a larger, differently-censored population. It cannot say either version is correct, because both rest on the same arithmetic and the same unreacting-book assumption."
+  },
+
+  "the_closed_population": {
+    "definition": "the FIRST 5,000 distinct launches B15N scheduled, ordered canonically by (t0_slot, signature, mint)",
+    "canonical_order": "ascending t0_slot, then ascending signature, then ascending mint; ties broken in that order and no other",
+    "membership_is_mechanical": "membership is a function of B15N's schedule table and the ordering above. No launch is selected, excluded or reordered by any property of its curve, its reserves or any outcome.",
+    "activation_boundary": {
+      "activation_slot": 436984352,
+      "source": "B15N_NATIVE_EXIT_CHECKPOINT_V1, unchanged",
+      "note": "B15N's own frozen rule admits only launches whose t0_slot is STRICTLY GREATER than the activation slot, so every member is strictly after it by construction rather than by a rule restated here"
+    },
+    "size": 5000,
+    "size_rationale": "the same count B15a's own stopping rule used, chosen so the two populations are the same size and no reader can attribute a difference to one being larger. It is fixed here, before the 5,000th launch exists.",
+    "never_moved_or_shortened": "the boundary is 5,000 and the ordering is canonical. Neither is changed, relaxed, or replaced by 'as many as are ready', under any circumstance, ever. A population trimmed to what happened to mature is a population chosen after its outcomes were visible."
+  },
+
+  "closure_gate": {
+    "fail_closed": "the population is LOCKED and nothing is materialized until every condition below holds. Absence of evidence is never treated as closure.",
+    "conditions_all_required": [
+      "B15N's schedule holds at least 5,000 distinct launches at or after the activation boundary",
+      "the current finalized slot is at or beyond the LAST deadline of the 5,000th member: its t0_slot plus the maximum entry delay plus the maximum exit horizon plus the frozen 150-slot lateness tolerance",
+      "every schedule row belonging to every one of the 5,000 members is terminal: checkpointed, refused or not_scheduled, and none still scheduled"
+    ],
+    "last_deadline_formula": "t0_slot_of_the_5000th + max(entry_delays) + max(horizon_slots) + max_lateness_slots = t0 + 4 + 10000 + 150",
+    "why_all_three": "the count alone would materialize before the last horizons were read; the slot alone would materialize while attempts were still in flight; the terminality alone would materialize on a population that is not yet 5,000. Each condition covers a way the other two can be satisfied by an unfinished population.",
+    "materialize_exactly_once": "once the gate opens the study is materialized once and its output is written once. A second run reports the existing artifact rather than recomputing it, so no output can differ between readings.",
+    "reporting_while_locked": "the watcher reports the locked state, the members counted so far, and the slots remaining to closure. It reports NO estimand quantity while locked."
+  },
+
+  "inputs": {
+    "entry_checkpoints": "research/b15i/processed_feed.sqlite, the target table, read-only",
+    "exit_checkpoints": "research/b15n/exit_checkpoints.sqlite, the checkpoint table, read-only",
+    "forbidden_paths": ["research/b15a/shadow.sqlite", "research/b15f/checkpoints.sqlite"],
+    "forbidden_enforced_by_source_scan": "the module is scanned for those artifact paths and refuses at startup if either appears, because the whole point of the population is that it does not descend from them",
+    "no_network": "every quantity is computed from evidence already on disk. If the evidence is insufficient the study refuses rather than fetching more."
+  },
+
+  "replicated_verbatim": {
+    "b15l": {
+      "preregistration_id": "B15L_COUNTERFACTUAL_ROUNDTRIP_V1",
+      "canonical_sha256": "a1d3c51b76c8a10d048f7c22a2d0c72b69d3024e85d3e7eaa8c2837ded570cfe",
+      "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+      "unchanged": ["the estimand and its construction", "the UNREACTING_ORDER_FLOW assumption and its statement as false", "the 100,000,000-lamport position", "the entry delays 1/2/4", "the horizons h_1000_slots and h_10000_slots", "the three cost scenarios", "the eligibility conditions and every refusal code", "the exact B9I and B10a arithmetic by direct call", "fee schedules decoded from launch transactions and never hardcoded", "the prohibition on means, on aggregation across horizons or scenarios, and on calling any output a return"]
+    },
+    "b15m": {
+      "preregistration_id": "B15M_LIQUIDITY_CAPACITY_V1",
+      "canonical_sha256": "3feca3846ce544d1e97ce7bb7691e06bbf988b3d00c2d26122e27c3f4fd53d4a",
+      "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+      "unchanged": ["the external-liquidity capacity estimand", "the monotonicity requirement and the maximality proof per cell", "the curve-resolution floor and the worth-something bound", "the fixed size grid", "the differential check against B10b's max_executable_tokens", "exact integer order statistics with no mean", "the prohibition on selecting, ranking or recommending a size"]
+    },
+    "the_only_change": "which artifact supplies the exit checkpoints. Both estimands, both labels, every threshold and every refusal are the published ones."
+  },
+
+  "predeclared_comparison": {
+    "nature": "DESCRIPTIVE ONLY. The replicated figures are placed beside the published V1 figures and the differences are described.",
+    "no_pass_threshold_exists": "no tolerance, no agreement criterion, no 'replicated successfully' claim and no hypothesis test appears anywhere in this study. A threshold invented now would be a threshold chosen with the V1 numbers already known.",
+    "no_pooling": "the two populations are never combined, averaged, or presented as one. They are different populations observed through different recorders.",
+    "quantities_compared_and_fixed_here": {
+      "b15l": ["priced cells per (scenario, horizon, delay)", "the count and share of cells for which the naive observed-book exit could be priced at all", "the median self-impact in lamports per horizon", "the median counterfactual net in lamports per (scenario, horizon, delay)", "the count and share of cells at or below zero", "the refusal census by code"],
+      "b15m": ["the exact integer order statistics of external liquidity capacity per (horizon, delay)", "the zero-capacity count and share", "the cap-hit count and share", "the curve-resolution floor", "the liquidity-executable and non-negative counts per grid size per (scenario, horizon, delay)", "the refusal census by code"]
+    },
+    "published_v1_figures_are_read_from_their_committed_findings": "research/B15L_COUNTERFACTUAL_FINDING.md and research/B15M_LIQUIDITY_CAPACITY_FINDING.md, so the comparison operand cannot drift",
+    "direction_is_not_predicted": "this document does not say which way any difference will go. Predicting it would invite reading a confirmed prediction as a validated method."
+  },
+
+  "determinism": {
+    "row_permutation": "the output must be identical under any permutation of the input rows",
+    "membership_permutation": "the 5,000 members must be identical under any permutation of B15N's schedule rows",
+    "checked": "by computing over shuffled copies and comparing field for field"
+  },
+
+  "refusal_codes": [
+    {"code": "O_POPULATION_OPEN", "meaning": "fewer than 5,000 distinct launches exist; the population is not yet drawable"},
+    {"code": "O_NOT_MATURE", "meaning": "the 5,000th member's last deadline plus tolerance has not passed"},
+    {"code": "O_ATTEMPTS_IN_FLIGHT", "meaning": "a member's schedule row is still scheduled; its outcome is not yet terminal"},
+    {"code": "O_ALREADY_MATERIALIZED", "meaning": "the study has been materialized; the existing artifact is reported rather than recomputed"},
+    {"code": "O_FORBIDDEN_SOURCE", "meaning": "a B15a or B15f artifact path appears in the module"},
+    {"code": "O_EVIDENCE_INSUFFICIENT", "meaning": "an input artifact is missing or unreadable; no network fetch is made to complete it"},
+    {"code": "O_MEMBERSHIP_UNSTABLE", "meaning": "the drawn membership differed between two computations over the same evidence"},
+    {"code": "O_PUBLISHED_FIGURE_MISSING", "meaning": "a V1 finding document could not be read, so the comparison operand is unavailable"}
+  ],
+
+  "publication": {
+    "always_publishable": ["the locked state and slots remaining", "population membership counts", "coverage and censoring counts", "the refusal census", "both replicated estimands with their own labels", "the descriptive side-by-side against V1"],
+    "never_publishable": ["any return, profit or expected value", "any landing probability", "any recommended or optimal size", "any pass, fail or agreement verdict", "any pooled figure across the two populations", "any figure from a locked population"],
+    "labels_preserved": "each replicated estimand keeps its own V1 label, executable=false, landing_probability=unmeasured and competitor_response=unmeasured"
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "any network call",
+    "reading a B15a or B15f artifact",
+    "moving, shortening or relaxing the 5,000-launch boundary",
+    "materializing any figure while the population is locked",
+    "materializing more than once",
+    "inventing a pass threshold, an agreement criterion or a verdict",
+    "pooling or averaging the two populations",
+    "changing any B15L or B15M estimand, threshold, grid, delay, horizon, cost scenario or refusal",
+    "touching B11c, B11a, the B15i or B15N workers, their cadence, or any live data"
+  ],
+
+  "status_locks": {
+    "label": "CLOSED_POPULATION_REPLICATION",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
