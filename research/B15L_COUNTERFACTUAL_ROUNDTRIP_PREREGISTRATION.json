@@ -1,0 +1,164 @@
+{
+  "preregistration_id": "B15L_COUNTERFACTUAL_ROUNDTRIP_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 138)",
+  "status": "FROZEN. Committed alone, before any counterfactual quantity is computed and before any result is inspected.",
+  "purpose": "Price an exact-integer hypothetical round trip in which OUR OWN ORDER perturbs the bonding curve, under an explicitly named and explicitly false assumption that no other participant reacts to it, so the size of the self-impact term can be seen rather than guessed at.",
+  "committed_before_any_result": true,
+
+  "what_this_is_not": {
+    "not_a_return": "no output of this study is a return, a profit, an expected value, a P&L or a performance figure, and none may be described as one.",
+    "not_a_reversal_of_b10b": {
+      "b10b_refused": "B10b declined counterfactual replay because validity cannot be proven by trade variant: under shifted reserves an exact-input buy yields different tokens, an exact-token buy yields a different cost that may exceed the max_sol_cost the trader signed, and in that case the transaction WOULD NOT HAVE LANDED and the observation would not exist.",
+      "b15l_position": "that refusal stands and is not contradicted. B15L does not assert the counterfactual is valid. It computes what the pinned arithmetic yields under an assumption it names as false, and labels every output with that assumption, so a reader can see the magnitude of a term B10b could only decline to model.",
+      "the_difference": "B10b would have published a path as though it were a marked position. B15L publishes a counterfactual on an unreacting book, named as such in the label of every row."
+    },
+    "unreacting_order_flow_is_false_by_construction": "the observed external reserve changes carried to the exit were produced by traders facing the reserves OUR order would have changed. Some of their orders would have executed differently and some would not have landed at all. This assumption is stated as false rather than as small: its error is not bounded here and its sign is not stated, for the same reason B10b gave — subsequent order sizes are not invariant to the reserves they faced."
+  },
+
+  "population": {
+    "rule": "a cell is (launch_signature, delay_slots, horizon). It is admissible only if ALL of the following hold, and every failure is counted by its own refusal code.",
+    "required": [
+      "the launch is a B15i observation whose fork_state is `confirmed`",
+      "a B15i entry checkpoint exists for (signature, delay_slots) in state `captured`",
+      "a B15f exit checkpoint exists for (signature, delay_slots, horizon) in state `checkpointed`",
+      "both checkpoints carry the native quote mint",
+      "neither checkpoint is in mayhem mode",
+      "the entry checkpoint is NOT complete",
+      "an exactly decoded fee schedule is available from the launch transaction"
+    ],
+    "measured_at_freeze_time": {
+      "b15i_confirmed_launches": 11766,
+      "b15i_launches_with_a_captured_entry_checkpoint": 11468,
+      "b15f_signatures_with_an_exit_checkpoint": 3785,
+      "intersection_available_to_this_study": 1764,
+      "why_recorded_here": "so the population cannot later be said to have been chosen after outcomes were seen. The intersection is small because B15f schedules from B15a, and B15k measured B15a holding 29% of the launches B15i observes; that censoring is a property of the recorders and is published beside every result."
+    },
+    "no_substitution": "a missing checkpoint is never replaced by a nearby one, a current one, or an interpolation. The cell is refused."
+  },
+
+  "frozen_inputs_taken_from_earlier_freezes_unchanged": {
+    "entry_delays_slots": [1, 2, 4],
+    "entry_delay_source": "B15D_SHADOW_ROUTE_V1, unchanged and not re-derived",
+    "exit_horizons": ["h_1000_slots", "h_10000_slots"],
+    "exit_horizon_source": "B10b identifiers and slot-horizon semantics, unchanged: the exit is priced at the checkpoint whose target is t0 + delay_slots + horizon_slots",
+    "h_10_observations_excluded": "B10b's third horizon is an OBSERVATION horizon and requires a per-curve stream of canonical trade observations. This transport has account checkpoints and no such stream, so the horizon is not applicable rather than approximated. Stated here rather than silently dropped.",
+    "position_lamports": 100000000,
+    "position_source": "0.1 SOL, unchanged from B10a/B10b/B10c/B11b/B15a/B15d. No size was chosen with this study in view.",
+    "cost_scenarios": [
+      {"scenario_id": "optimistic", "base_fee_lamports": 5000, "priority_fee_lamports": 1000, "tip_lamports": 0, "ata_rent_lamports": 2039280, "failed_attempts": 0},
+      {"scenario_id": "base", "base_fee_lamports": 5000, "priority_fee_lamports": 100000, "tip_lamports": 0, "ata_rent_lamports": 2039280, "failed_attempts": 0},
+      {"scenario_id": "stressed", "base_fee_lamports": 5000, "priority_fee_lamports": 1000000, "tip_lamports": 0, "ata_rent_lamports": 2039280, "failed_attempts": 1}
+    ],
+    "cost_scenario_source": "B15D_SHADOW_ROUTE_V1, verbatim. No scenario is added, removed or retuned here.",
+    "fee_schedule": {
+      "source": "the fee basis points decoded EXACTLY from the launch transaction, as B15h does",
+      "never_hardcoded": "the BondingCurve account publishes no fee basis points. A hardcoded schedule was a real defect in B15f and is forbidden here: a cell whose fee schedule cannot be decoded is refused, not priced at an assumed rate."
+    },
+    "arithmetic": {
+      "reused": "B9I's three pinned curve formulas and B10a's price_entry, price_exit and curve_fees, called directly",
+      "reimplementation_forbidden": "a second copy of these formulas would drift from the gate that validated them against 92,510 trades",
+      "float_forbidden": "every quantity is an exact Python integer; a float anywhere is a refusal"
+    }
+  },
+
+  "the_counterfactual_construction": {
+    "ordered_steps": [
+      "1. ENTRY. Price the hypothetical buy of position_lamports against the B15i entry checkpoint state using B10a's price_entry, obtaining tokens_out, curve fees and execution costs.",
+      "2. OUR DELTA. Our order's effect on the curve is d_quote = +position_lamports and d_token = -tokens_out, applied to BOTH the virtual and the real reserves.",
+      "3. EXTERNAL DELTA. The observed external change is the exit checkpoint's reserves minus the entry checkpoint's reserves, component by component, computed from the two account reads and nothing else.",
+      "4. COUNTERFACTUAL EXIT STATE. entry_state + our_delta + external_delta, component by component. This is the additive transport, and it is defensible only under the conditions below.",
+      "5. EXIT. Price the sale of exactly tokens_out against the counterfactual exit state using B10a's price_exit."
+    ],
+    "the_reserve_update_rule": {
+      "rule": "a trade moves the virtual and the real reserve by the SAME delta on both sides: d_virtual_quote == d_real_quote and d_virtual_token == d_real_token",
+      "quote_amount_reaching_the_curve": "position_lamports. B10a's price_entry takes the curve-side quote amount and computes fees SEPARATELY, adding them to lamports_out_of_wallet, so the curve receives the position and the fees do not enter the reserves.",
+      "must_be_validated_before_use": "the rule is verified by exact reproduction over consecutive canonical observations in the frozen B10b artifact. It must hold for 100% of the pairs it is checked on. Anything less refuses the whole study rather than proceeding on a rule that mostly works."
+    },
+    "additive_transport_is_refused_when": [
+      "any component of the counterfactual exit state is negative or zero where the curve requires positive",
+      "the external token delta would remove more tokens than the counterfactual curve holds, which is the case where somebody else's trade could not have executed as observed",
+      "the curve is complete at the exit checkpoint, or completes between entry and exit: completion depends on the real token reserve reaching its floor, and our order moves when that happens, so the observed completion instant is not the counterfactual one",
+      "mayhem mode differs between the two checkpoints",
+      "the quote mint differs between the two checkpoints, or is not native",
+      "the two checkpoints do not name the same bonding curve and mint",
+      "the exit checkpoint's context slot is not at or after the entry checkpoint's context slot",
+      "either checkpoint's lateness exceeds the frozen B15F tolerance"
+    ]
+  },
+
+  "diagnostics_not_selection": {
+    "self_impact_term": "for every priced cell, the same exit is ALSO priced against the naive observed exit state with no self-impact, and the difference is reported as the self-impact term",
+    "purpose": "to show how large the term B10b declined to model actually is",
+    "explicitly_not_a_selection_criterion": "no cell is included, excluded, weighted or ordered by its self-impact term, and no threshold on it exists anywhere in this study",
+    "naive_figure_is_not_the_headline": "the naive figure exists only as the comparison operand and carries the same labels and the same prohibition on being called a return"
+  },
+
+  "determinism": {
+    "row_permutation": "the study's output must be identical under any permutation of its input rows; nothing may depend on arrival or iteration order",
+    "checked": "by running the whole computation over a shuffled copy of the input and comparing the outputs field for field"
+  },
+
+  "refusal_codes": [
+    {"code": "L_NOT_CONFIRMED", "meaning": "the launch is not chain-corroborated in B15i"},
+    {"code": "L_NO_ENTRY_CHECKPOINT", "meaning": "no captured B15i entry checkpoint for this (signature, delay)"},
+    {"code": "L_NO_EXIT_CHECKPOINT", "meaning": "no checkpointed B15f exit checkpoint for this (signature, delay, horizon)"},
+    {"code": "L_NO_FEE_SCHEDULE", "meaning": "the fee basis points could not be decoded exactly from the launch transaction"},
+    {"code": "L_NON_NATIVE_QUOTE", "meaning": "a checkpoint's quote mint is not the native mint"},
+    {"code": "L_MAYHEM", "meaning": "a checkpoint is in mayhem mode, or the two disagree"},
+    {"code": "L_COMPLETE_AT_ENTRY", "meaning": "the curve is already complete at the entry checkpoint"},
+    {"code": "L_COMPLETE_BY_EXIT", "meaning": "the curve is complete at the exit checkpoint; the observed completion instant is not the counterfactual one"},
+    {"code": "L_IDENTITY_MISMATCH", "meaning": "the two checkpoints do not name the same curve and mint"},
+    {"code": "L_TIME_ORDER", "meaning": "the exit context slot is not at or after the entry context slot"},
+    {"code": "L_STALE_CHECKPOINT", "meaning": "a checkpoint's lateness exceeds the frozen B15F tolerance"},
+    {"code": "L_IMPOSSIBLE_RESERVES", "meaning": "a counterfactual reserve component is non-positive or otherwise impossible"},
+    {"code": "L_TRANSPORT_INDEFENSIBLE", "meaning": "the external delta cannot be carried additively into the counterfactual world"},
+    {"code": "L_ENTRY_UNPRICEABLE", "meaning": "B10a refused the entry, for example an order exceeding available reserves"},
+    {"code": "L_EXIT_UNPRICEABLE", "meaning": "B10a refused or made unavailable the exit"},
+    {"code": "L_FLOAT_PRESENT", "meaning": "a non-integer appeared in a quantity"},
+    {"code": "L_UPDATE_RULE_UNVALIDATED", "meaning": "the reserve update rule did not reproduce 100% of the pairs it was checked on"}
+  ],
+
+  "publication": {
+    "beside_every_figure": ["the scenario_id", "the horizon", "the delay", "the count of priced cells", "the count of refused cells by code", "the censoring statement"],
+    "censoring_statement_required_verbatim": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market",
+    "never_aggregated_across_horizons": "a figure spanning h_1000_slots and h_10000_slots is forbidden; the two are different holding periods and a combined number describes neither",
+    "never_aggregated_across_scenarios": "the three cost scenarios are alternative assumptions, not samples of one distribution, so no average over them exists",
+    "always_publishable": ["coverage counts", "refusal census", "the self-impact diagnostic", "the distribution of counterfactual net proceeds per scenario and horizon"],
+    "never_publishable": ["a return", "a profit", "an expected value", "a landing probability", "a competitor-response estimate", "any figure without its labels"]
+  },
+
+  "labels_on_every_row": {
+    "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+    "executable": false,
+    "landing_probability": "unmeasured",
+    "competitor_response": "unmeasured",
+    "assumption": "UNREACTING_ORDER_FLOW",
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "calling any output a return, a profit, an expected value or a performance figure",
+    "reimplementing the pinned curve formulas instead of calling B9I and B10a",
+    "any float in any quantity",
+    "a hardcoded fee schedule",
+    "substituting a nearby, later or current state for a missing checkpoint",
+    "selecting, weighting or ordering cells by the self-impact term or by any outcome",
+    "aggregating across horizons or across cost scenarios",
+    "widening the frozen delays, horizons, position size, cost scenarios or lateness tolerance",
+    "modifying B11c, B11a, any live subscription, any RPC cadence, or any frozen B14 or B15 population",
+    "presenting the naive no-self-impact figure as the headline"
+  ],
+
+  "status_locks": {
+    "label": "COUNTERFACTUAL_UNREACTING_BOOK",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
