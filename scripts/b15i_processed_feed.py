@@ -152,8 +152,10 @@ def assert_feed_thread_does_not_call_rpc(path=None):
         raise ProcessedFeedRefused("handle_frame is missing; the feed handler cannot be checked")
     end = source.find("\ndef ", start + 1)
     body = source[start:end if end > 0 else len(source)]
-    for token in ("urlopen", "fetch_account", "getAccountInfo", "getMultipleAccounts",
-                  "_one_attempt", "requests."):
+    # Call forms, not bare words: an earlier version matched the substring "requests." and fired
+    # on a comment that ended a sentence with it. A gate that trips on prose gets edited away.
+    for token in ("urlopen(", "fetch_account(", "getAccountInfo", "getMultipleAccounts",
+                  "_one_attempt(", "requests.get(", "requests.post("):
         if token in body:
             raise ProcessedFeedRefused(
                 f"the feed handler contains {token!r}. It must not await an RPC call: a handler "
@@ -289,7 +291,7 @@ class RawLog:
 # --------------------------------------------------------------------------------------------
 
 def handle_frame(message, decoder, raw, connection, work_queue, document, counts, lock,
-                 session_id=None, after_gap=False):
+                 session_id=None, after_gap=False, ready_delay_ns=0):
     """One processed notification. Writes evidence, then enqueues. Never touches the network.
 
     The order is mandatory: raw frame, then launch identity, then enqueue. Dying between decode and
@@ -349,14 +351,21 @@ def handle_frame(message, decoder, raw, connection, work_queue, document, counts
                       "target_slot": target, "lead_slots": lead,
                       "enqueued_wall_unix": enqueued_wall,
                       "enqueued_monotonic_ns": enqueued_mono,
-                      "receipt_to_schedule_ns": enqueued_mono - received_mono}
+                      "receipt_to_schedule_ns": enqueued_mono - received_mono,
+                      "ready_monotonic_ns": enqueued_mono + ready_delay_ns}
             if lead <= 0:
                 _durable(connection, lock, record, STATE_REFUSED, Q_TARGET_ALREADY_PASSED)
                 counts["already_passed"] += 1
                 continue
             _durable(connection, lock, record, STATE_PENDING, None)
             try:
-                work_queue.put_nowait(record)
+                # Priority is the moment the target can plausibly be answered. A worker must never
+                # spend that wait itself: at 32 slots of finalization lag and ~210 targets a
+                # minute, sleeping workers need about fifty threads just to idle, and with
+                # twenty-four the queue backed up until lateness reached 150 — the frozen cliff.
+                # The releaser thread holds the wait; a worker only issues its call.
+                work_queue.put_nowait((record["ready_monotonic_ns"], record["target_slot"],
+                                       record["delay_slots"], record))
             except queue.Full:
                 # Never a silent drop. The durable row is rewritten as refused so the census sees
                 # it, because a dropped target absent from the count reads as one that never came.
@@ -644,6 +653,32 @@ def reconciler_loop(connection, lock, stop, counts, interval=60.0,
             counts["last_reconcile_error"] = f"{type(error).__name__}: {error}"
 
 
+def releaser_loop(pending_queue, work_queue, stop, connection, lock, counts):
+    """Hold the wait for finality here, so a worker is never blocked doing nothing.
+
+    `pending_queue` is a priority queue keyed on the moment a target can plausibly be answered, so
+    the earliest item is always at the head and sleeping on it cannot make a later one overdue.
+    Every enqueue is at `t + lag` for the same lag, so arrivals are already in that order.
+    """
+    while not stop.is_set():
+        try:
+            item = pending_queue.get(timeout=0.5)
+        except queue.Empty:
+            continue
+        ready, record = item[0], item[-1]
+        remaining = (ready - time.monotonic_ns()) / 1e9
+        if remaining > 0 and stop.wait(remaining):
+            pending_queue.task_done()
+            break
+        try:
+            work_queue.put_nowait(record)
+        except queue.Full:
+            _durable(connection, lock, record, STATE_REFUSED, Q_OVERFLOW)
+            counts["overflow"] += 1
+        finally:
+            pending_queue.task_done()
+
+
 def measure_finalization_lag(url, opener=None):
     """How far finalized trails processed, right now. One pair of getSlot calls, at startup.
 
@@ -721,6 +756,7 @@ def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opene
     # One pair of getSlot calls, before any worker starts. Workers then wait out the lag instead
     # of discovering it three requests at a time, each.
     finalization_lag = measure_finalization_lag(url, opener)
+    ready_delay_ns = int(finalization_lag * SLOT_SECONDS * 1e9)
     connection.execute("INSERT OR REPLACE INTO metadata(key,value) VALUES (?,?)",
                        ("finalization_lag_slots_at_startup", str(finalization_lag)))
     connection.commit()
@@ -728,16 +764,20 @@ def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opene
     counts = {"finalization_lag_slots": finalization_lag, "frames": 0, "launches": 0,
               "already_passed": 0, "overflow": 0, "captured": 0, "refused": 0,
               "pre_activation": 0, "worker_errors": 0, "missed_while_down": 0}
+    pending_queue = queue.PriorityQueue(maxsize=MAX_QUEUE_DEPTH)
     work_queue = queue.Queue(maxsize=MAX_QUEUE_DEPTH)
     stop = threading.Event()
     threads = [threading.Thread(target=worker_loop,
                                 args=(work_queue, url, connection, lock, curve_decoder,
                                       checkpoint_document, counts, stop, opener, exchanges,
-                                      time.sleep, finalization_lag),
+                                      time.sleep, 0),
                                 daemon=True) for _ in range(workers)]
     threads.append(threading.Thread(
         target=reconciler_loop, args=(connection, lock, stop, counts, reconcile_interval),
         daemon=True))
+    threads.append(threading.Thread(
+        target=releaser_loop,
+        args=(pending_queue, work_queue, stop, connection, lock, counts), daemon=True))
     for thread in threads:
         thread.start()
 
@@ -785,8 +825,9 @@ def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opene
                         break
                     frames_here += 1
                     try:
-                        handle_frame(message, create_decoder, raw, connection, work_queue,
-                                     document, counts, lock, session_id, reconnect_index > 0)
+                        handle_frame(message, create_decoder, raw, connection, pending_queue,
+                                     document, counts, lock, session_id, reconnect_index > 0,
+                                     ready_delay_ns)
                     except (json.JSONDecodeError, KeyError, TypeError, AttributeError) as error:
                         counts["worker_errors"] += 1
                         raw.append({"handler_error": f"{type(error).__name__}: {error}",

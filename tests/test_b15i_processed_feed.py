@@ -75,7 +75,7 @@ class Harness:
         self.tmp = pathlib.Path(tmp)
         self.connection = B15I.open_database(self.tmp / "db.sqlite")
         self.raw = B15I.RawLog(self.tmp / "raw.jsonl")
-        self.queue = queue.Queue(maxsize=max_depth)
+        self.queue = queue.PriorityQueue(maxsize=max_depth)   # what handle_frame fills
         self.lock = threading.Lock()
         self.counts = {"frames": 0, "launches": 0, "already_passed": 0, "overflow": 0,
                        "captured": 0, "refused": 0, "pre_activation": 0, "worker_errors": 0}
@@ -85,9 +85,13 @@ class Harness:
         self.document = {"activation": {"activation_slot": activation},
                          "checkpoint_geometry": {"delays": [1, 2, 4], "max_lateness_slots": 150}}
 
-    def feed(self, message):
+    def feed(self, message, ready_delay_ns=0):
         B15I.handle_frame(message, self.decoder, self.raw, self.connection, self.queue,
-                          self.document, self.counts, self.lock)
+                          self.document, self.counts, self.lock, ready_delay_ns=ready_delay_ns)
+
+    def due(self):
+        """The records handle_frame queued, in release order, stripped of their priority key."""
+        return [self.queue.get()[-1] for _ in range(self.queue.qsize())]
 
     def rows(self, table):
         return self.connection.execute(f"SELECT * FROM {table}").fetchall()
@@ -305,7 +309,7 @@ class TestCapture(unittest.TestCase):
         self.directory.mkdir(exist_ok=True)
         self.harness = Harness(self.directory)
         self.harness.feed(_create_frame(200))
-        self.record = self.harness.queue.get()
+        self.record = self.harness.queue.get()[-1]
         self.checkpoint_document = B15F.verify_preregistration()
         self.curve_decoder = B15I.B15B.build_decoder()
 
@@ -787,6 +791,79 @@ class TestReconciliation(unittest.TestCase):
         self.assertEqual(report["priceable_cells"], 1)
 
 
+class TestReleaser(unittest.TestCase):
+    """The wait for finality lives here, not on a worker.
+
+    With workers doing the sleeping, 24 of them could not keep up with ~210 targets a minute at
+    32 slots of lag: the backlog pushed checkpoint lateness to a mean of 83 and a maximum of 150,
+    which is the frozen cliff exactly. Efficiency was traded for admissibility without anyone
+    deciding to.
+    """
+
+    def setUp(self):
+        self.directory = pathlib.Path(f"b15i_rel_{self.id().split('.')[-1]}")
+        self.directory.mkdir(exist_ok=True)
+        self.harness = Harness(self.directory)
+
+    def tearDown(self):
+        self.harness.raw.close()
+        self.harness.connection.close()
+        for path in sorted(self.directory.iterdir()):
+            path.unlink()
+        self.directory.rmdir()
+
+    def test_the_earliest_target_is_always_at_the_head(self):
+        self.harness.feed(_create_frame(500, "SigLate" + "1" * 30), ready_delay_ns=10**9)
+        self.harness.feed(_create_frame(200, "SigSoon" + "2" * 30), ready_delay_ns=0)
+        first = self.harness.queue.get()[-1]
+        self.assertEqual(first["signature"], "SigSoon" + "2" * 30)
+
+    def test_a_due_target_is_released_to_the_workers(self):
+        self.harness.feed(_create_frame(200))
+        work = queue.Queue(maxsize=16)
+        stop = threading.Event()
+        thread = threading.Thread(
+            target=B15I.releaser_loop,
+            args=(self.harness.queue, work, stop, self.harness.connection, self.harness.lock,
+                  self.harness.counts), daemon=True)
+        thread.start()
+        self.harness.queue.join()
+        stop.set()
+        thread.join(timeout=5)
+        self.assertEqual(work.qsize(), 3)
+        self.assertIsInstance(work.get(), dict)      # plain records, not priority tuples
+
+    def test_a_target_not_yet_due_is_held_rather_than_released_early(self):
+        self.harness.feed(_create_frame(200), ready_delay_ns=30 * 10**9)
+        work = queue.Queue(maxsize=16)
+        stop = threading.Event()
+        thread = threading.Thread(
+            target=B15I.releaser_loop,
+            args=(self.harness.queue, work, stop, self.harness.connection, self.harness.lock,
+                  self.harness.counts), daemon=True)
+        thread.start()
+        stop.wait(0.4)
+        stop.set()
+        thread.join(timeout=5)
+        self.assertEqual(work.qsize(), 0)            # nothing released before its time
+
+    def test_a_full_worker_queue_at_release_records_the_drop(self):
+        self.harness.feed(_create_frame(200))
+        work = queue.Queue(maxsize=1)
+        stop = threading.Event()
+        thread = threading.Thread(
+            target=B15I.releaser_loop,
+            args=(self.harness.queue, work, stop, self.harness.connection, self.harness.lock,
+                  self.harness.counts), daemon=True)
+        thread.start()
+        self.harness.queue.join()
+        stop.set()
+        thread.join(timeout=5)
+        self.assertEqual(self.harness.counts["overflow"], 2)
+        self.assertEqual(self.harness.connection.execute(
+            "SELECT COUNT(*) FROM target WHERE reason=?", (B15I.Q_OVERFLOW,)).fetchone()[0], 2)
+
+
 class TestSessionsAndReconnect(unittest.TestCase):
     """A single read timeout used to end the pilot for good. These prove it no longer does."""
 
@@ -942,17 +1019,21 @@ class TestWorkerLoop(unittest.TestCase):
 
     def test_a_throwing_worker_records_the_failure_and_keeps_draining(self):
         stop = threading.Event()
+        # Workers consume what the RELEASER hands them: plain records, not priority tuples.
+        work = queue.Queue(maxsize=16)
+        for record in self.harness.due():
+            work.put(record)
 
         def exploding(request, timeout=None):
             raise MemoryError("the drain must not die with it")
 
         thread = threading.Thread(
             target=B15I.worker_loop,
-            args=(self.harness.queue, "https://example.invalid", self.harness.connection,
+            args=(work, "https://example.invalid", self.harness.connection,
                   self.harness.lock, B15I.B15B.build_decoder(), B15F.verify_preregistration(),
                   self.harness.counts, stop, exploding, None), daemon=True)
         thread.start()
-        self.harness.queue.join()
+        work.join()
         stop.set()
         thread.join(timeout=5)
         self.assertFalse(thread.is_alive())
