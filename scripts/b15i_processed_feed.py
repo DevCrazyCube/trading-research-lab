@@ -387,8 +387,8 @@ def _context_not_reached(payload):
 
 
 def capture(record, url, connection, lock, decoder, document, counts, opener=None,
-            exchanges=None, sleeper=time.sleep):
-    """One checkpoint, retried a bounded number of times while the target is still ahead of the tip.
+            exchanges=None, sleeper=time.sleep, first_attempt_delay_slots=0):
+    """One checkpoint: wait for finality, ask once, then retry a bounded number of times.
 
     **`minContextSlot` does not make the node wait.** The frozen document said it would; the first
     live run proved otherwise. Every one of 147 requests came back `-32603 Min context slot not
@@ -396,9 +396,17 @@ def capture(record, url, connection, lock, decoder, document, counts, opener=Non
     precondition the node checks and rejects, not a barrier it waits on.
 
     The remedy needs no new rule, because B15F already froze one: `context_before_target` is
-    "retry, bounded", six attempts, twenty-five slots apart. That is what runs here. Finalization
-    lags about 31 slots, so the first attempt is expected to fail and the third to succeed, with a
-    resulting lateness near 15 slots — inside the frozen 150 and not moved to fit.
+    "retry, bounded", six attempts, twenty-five slots apart. That is the safety net.
+
+    **The client waits instead, before asking at all.** Firing immediately and retrying spent about
+    three requests per target where one would do, and that load is shared: B15h died on HTTP 429
+    within six minutes of this pilot starting with thirty-two workers. Sleeping for the measured
+    finalization lag first cuts the request count roughly threefold and costs nothing, because the
+    answer does not exist until then either way.
+
+    The wait changes when we ask, never what is admitted. Lateness is still measured from the
+    response's own context slot against B15F's tolerance, so a target that finalizes late is
+    refused exactly as before.
 
     `document` is B15F's frozen checkpoint preregistration, verified once at startup, because the
     lateness geometry is B15F's and is not re-derived here.
@@ -410,6 +418,8 @@ def capture(record, url, connection, lock, decoder, document, counts, opener=Non
             "params": [record["bonding_curve"],
                        {"encoding": "base64", "commitment": STATE_READ_COMMITMENT,
                         "minContextSlot": target}]}
+    if first_attempt_delay_slots > 0:
+        sleeper(first_attempt_delay_slots * SLOT_SECONDS)
     attempts = 0
     for attempt in range(policy["max_attempts"]):
         attempts = attempt + 1
@@ -634,8 +644,26 @@ def reconciler_loop(connection, lock, stop, counts, interval=60.0,
             counts["last_reconcile_error"] = f"{type(error).__name__}: {error}"
 
 
+def measure_finalization_lag(url, opener=None):
+    """How far finalized trails processed, right now. One pair of getSlot calls, at startup.
+
+    Measured rather than assumed: the freeze recorded 31 slots at one moment, and a number written
+    down once is a number that will be wrong later. Returns 0 if either call fails, which simply
+    means the first attempt fires immediately and the bounded retry does the waiting.
+    """
+    tips = {}
+    for commitment in (TRIGGER_COMMITMENT, STATE_READ_COMMITMENT):
+        outcome, _status, payload = B15B._one_attempt(
+            url, {"jsonrpc": "2.0", "id": 1, "method": "getSlot",
+                  "params": [{"commitment": commitment}]}, opener)
+        if outcome != "retrieved" or payload.get("result") is None:
+            return 0
+        tips[commitment] = payload["result"]
+    return max(0, tips[TRIGGER_COMMITMENT] - tips[STATE_READ_COMMITMENT])
+
+
 def worker_loop(work_queue, url, connection, lock, decoder, document, counts, stop,
-                opener=None, exchanges=None, sleeper=time.sleep):
+                opener=None, exchanges=None, sleeper=time.sleep, first_attempt_delay_slots=0):
     while not stop.is_set():
         try:
             record = work_queue.get(timeout=0.5)
@@ -643,7 +671,7 @@ def worker_loop(work_queue, url, connection, lock, decoder, document, counts, st
             continue
         try:
             capture(record, url, connection, lock, decoder, document, counts, opener, exchanges,
-                    sleeper)
+                    sleeper, first_attempt_delay_slots)
         except Exception as error:                                        # noqa: BLE001
             # A worker that dies takes the drain with it and every later target silently pends.
             # The failure is recorded against the target and the loop continues.
@@ -690,14 +718,22 @@ def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opene
         connection.execute("INSERT OR REPLACE INTO metadata(key,value) VALUES (?,?)", (key, value))
     connection.commit()
 
+    # One pair of getSlot calls, before any worker starts. Workers then wait out the lag instead
+    # of discovering it three requests at a time, each.
+    finalization_lag = measure_finalization_lag(url, opener)
+    connection.execute("INSERT OR REPLACE INTO metadata(key,value) VALUES (?,?)",
+                       ("finalization_lag_slots_at_startup", str(finalization_lag)))
+    connection.commit()
     lock = threading.Lock()
-    counts = {"frames": 0, "launches": 0, "already_passed": 0, "overflow": 0, "captured": 0,
-              "refused": 0, "pre_activation": 0, "worker_errors": 0, "missed_while_down": 0}
+    counts = {"finalization_lag_slots": finalization_lag, "frames": 0, "launches": 0,
+              "already_passed": 0, "overflow": 0, "captured": 0, "refused": 0,
+              "pre_activation": 0, "worker_errors": 0, "missed_while_down": 0}
     work_queue = queue.Queue(maxsize=MAX_QUEUE_DEPTH)
     stop = threading.Event()
     threads = [threading.Thread(target=worker_loop,
                                 args=(work_queue, url, connection, lock, curve_decoder,
-                                      checkpoint_document, counts, stop, opener, exchanges),
+                                      checkpoint_document, counts, stop, opener, exchanges,
+                                      time.sleep, finalization_lag),
                                 daemon=True) for _ in range(workers)]
     threads.append(threading.Thread(
         target=reconciler_loop, args=(connection, lock, stop, counts, reconcile_interval),

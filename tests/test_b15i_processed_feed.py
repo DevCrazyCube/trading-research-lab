@@ -541,6 +541,88 @@ class TestCapture(unittest.TestCase):
                      self.harness.counts, opener, None, lambda _seconds: None)
         self.assertEqual(len(calls), 1)
 
+    def test_the_client_waits_for_finality_before_asking_at_all(self):
+        """One request instead of three. B15h died on HTTP 429 six minutes into the 32-worker run.
+
+        The wait changes WHEN we ask, never what is admitted: lateness is still measured from the
+        response's own context slot against B15F's tolerance.
+        """
+        calls, slept = [], []
+
+        def opener(request, timeout=None):
+            calls.append(1)
+
+            class Handle:
+                status = 200
+
+                def read(self_inner):
+                    return json.dumps(self._account(205)).encode()
+
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, *_):
+                    return False
+            return Handle()
+
+        B15I.capture(self.record, "https://example.invalid", self.harness.connection,
+                     self.harness.lock, self.curve_decoder, self.checkpoint_document,
+                     self.harness.counts, opener, None, slept.append, 31)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(slept, [31 * B15I.SLOT_SECONDS])
+        state, lateness = self.harness.connection.execute(
+            "SELECT state, lateness_slots FROM target WHERE signature=? AND delay_slots=?",
+            (self.record["signature"], self.record["delay_slots"])).fetchone()
+        self.assertEqual((state, lateness), (B15I.STATE_CAPTURED, 205 - self.record["target_slot"]))
+
+    def test_waiting_first_still_refuses_a_response_past_the_tolerance(self):
+        B15I.capture(self.record, "https://example.invalid", self.harness.connection,
+                     self.harness.lock, self.curve_decoder, self.checkpoint_document,
+                     self.harness.counts,
+                     self._opener(self._account(self.record["target_slot"] + 151)), None,
+                     lambda _seconds: None, 31)
+        state, reason = self.harness.connection.execute(
+            "SELECT state, reason FROM target WHERE signature=? AND delay_slots=?",
+            (self.record["signature"], self.record["delay_slots"])).fetchone()
+        self.assertEqual(state, B15I.STATE_REFUSED)
+        self.assertTrue(reason.startswith(B15I.Q_LATE))
+
+    def test_a_zero_lag_waits_not_at_all(self):
+        slept = []
+        B15I.capture(self.record, "https://example.invalid", self.harness.connection,
+                     self.harness.lock, self.curve_decoder, self.checkpoint_document,
+                     self.harness.counts, self._opener(self._account(201)), None, slept.append, 0)
+        self.assertEqual(slept, [])
+
+    def test_the_finalization_lag_is_measured_not_assumed(self):
+        tips = {"processed": 1000, "finalized": 969}
+
+        def opener(request, timeout=None):
+            commitment = json.loads(request.data)["params"][0]["commitment"]
+
+            class Handle:
+                status = 200
+
+                def read(self_inner):
+                    return json.dumps({"jsonrpc": "2.0", "id": 1,
+                                       "result": tips[commitment]}).encode()
+
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, *_):
+                    return False
+            return Handle()
+
+        self.assertEqual(B15I.measure_finalization_lag("https://example.invalid", opener), 31)
+
+    def test_an_unmeasurable_lag_falls_back_to_no_wait_rather_than_a_guess(self):
+        """Zero means the first attempt fires and the bounded retry does the waiting instead."""
+        def opener(request, timeout=None):
+            raise OSError("no answer")
+
+        self.assertEqual(B15I.measure_finalization_lag("https://example.invalid", opener), 0)
+
     def test_the_context_not_reached_detector_does_not_match_unrelated_errors(self):
         self.assertTrue(B15I._context_not_reached(
             {"code": -32603, "message": "Min context slot not reached"}))
