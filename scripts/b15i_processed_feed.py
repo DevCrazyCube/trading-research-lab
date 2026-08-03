@@ -537,6 +537,22 @@ def census(connection, lock=None):
 # Run
 # --------------------------------------------------------------------------------------------
 
+def reconciler_loop(connection, lock, stop, counts, interval=60.0,
+                    b15a_path=B15A_DB, b15b_path=B15B_DB):
+    """Reconcile on a timer, not only at shutdown.
+
+    A session meant to run for days that reconciles once at exit would leave every observation
+    reading `processed_unconfirmed` for its whole life, and an operator glancing at the census
+    would see a fork state that means "not yet checked" and read it as "not corroborated".
+    """
+    while not stop.wait(interval):
+        try:
+            counts.update(reconcile(connection, lock, b15a_path, b15b_path))
+        except sqlite3.Error as error:
+            counts["worker_errors"] += 1
+            counts["last_reconcile_error"] = f"{type(error).__name__}: {error}"
+
+
 def worker_loop(work_queue, url, connection, lock, decoder, document, counts, stop,
                 opener=None, exchanges=None):
     while not stop.is_set():
@@ -561,7 +577,7 @@ def worker_loop(work_queue, url, connection, lock, decoder, document, counts, st
 
 
 def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opener=None,
-        websocket=None, max_frames=None):
+        websocket=None, max_frames=None, reconcile_interval=60.0):
     """Subscribe at processed, write raw, enqueue, drain. Read-only against the chain throughout."""
     assert_no_execution_surface()
     assert_feed_thread_does_not_call_rpc()
@@ -600,6 +616,9 @@ def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opene
                                 args=(work_queue, url, connection, lock, curve_decoder,
                                       checkpoint_document, counts, stop, opener, exchanges),
                                 daemon=True) for _ in range(workers)]
+    threads.append(threading.Thread(
+        target=reconciler_loop, args=(connection, lock, stop, counts, reconcile_interval),
+        daemon=True))
     for thread in threads:
         thread.start()
 
