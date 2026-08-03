@@ -28,6 +28,24 @@ import urllib.request
 import urllib.error
 import zlib
 
+
+def _load(name, filename):
+    """By absolute path, in this module's own established idiom (see `_cohort_adapter`).
+
+    A plain import would resolve only when `scripts/` is on `sys.path`, which is true for
+    `python scripts/b9d_transaction_bodies.py` and false for the many callers that load this file
+    with `spec_from_file_location`.
+    """
+    import importlib.util
+    here = os.path.dirname(os.path.abspath(__file__))
+    spec = importlib.util.spec_from_file_location(name, os.path.join(here, filename))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+HTTP = _load("rpc_http_identity", "rpc_http_identity.py")
+
 # Primary sources. Pinned by hash: a scaffold that silently accepts a different artifact would
 # reproduce the frozen counts against the wrong evidence.
 B9C_PATH = "research/b9c_signature_inventory.sqlite"
@@ -2574,8 +2592,7 @@ def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None,
     """Return byte-exact response plus parsed result; transient overload backs off and retries."""
     request_body = json.dumps({"jsonrpc": "2.0", "id": request_id, "method": method,
                                "params": params}, separators=(",", ":")).encode()
-    request = urllib.request.Request(endpoint, data=request_body,
-                                     headers={"Content-Type": "application/json"})
+    request = HTTP.json_rpc_request(endpoint, request_body)
     transport = opener or urllib.request.urlopen
     for attempt in range(retries + 1):
         try:

@@ -7,13 +7,29 @@ its normalized rows. Read-only finalized RPC only. SOLANA_RPC_URL is required an
 import argparse
 import concurrent.futures as futures
 import hashlib
+import importlib.util
 import json
 import os
+import pathlib
 import sqlite3
 import time
 import urllib.error
 import urllib.request
 import zlib
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+
+def _load(name, filename):
+    """By absolute path: this module is loaded with `spec_from_file_location` from many places,
+    where `scripts/` is not on `sys.path` and a plain import would fail."""
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / filename)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+HTTP = _load("rpc_http_identity", "rpc_http_identity.py")
 
 CUTOFF_TIME = 1785154782
 EXPECTED_MEMBERS = 1601
@@ -87,8 +103,7 @@ def request_bytes(url, method, params, retries):
         separators=(",", ":")).encode()
     for attempt in range(retries):
         try:
-            request = urllib.request.Request(
-                url, data=request_body, headers={"Content-Type": "application/json"})
+            request = HTTP.json_rpc_request(url, request_body)
             with urllib.request.urlopen(request, timeout=90) as response:
                 raw = response.read()
             payload = json.loads(raw)

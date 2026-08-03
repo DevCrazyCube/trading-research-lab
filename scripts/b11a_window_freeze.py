@@ -32,6 +32,7 @@ because the frozen one was inconvenient is a chosen window, and a chosen window 
 """
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import pathlib
@@ -42,6 +43,22 @@ import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PREREGISTRATION_PATH = ROOT / "research" / "B11A_FRESH_COHORT_PREREGISTRATION.json"
+
+
+def _load(name, filename):
+    """By absolute path, because this module is itself loaded by path from ~20 places.
+
+    A plain `import` would resolve only when `scripts/` happened to be on `sys.path`, which is true
+    when this file runs as a script and false when something loads it with
+    `spec_from_file_location`. That difference would be invisible until a caller broke.
+    """
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / filename)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+HTTP = _load("rpc_http_identity", "rpc_http_identity.py")
 
 # The committed bytes of the freeze. Pinned here so a silently edited preregistration fails the
 # check rather than redefining the window it is supposed to fix.
@@ -226,8 +243,7 @@ def _endpoint_reference(url):
 def _default_transport(url, method, params, timeout=30):
     body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
                       separators=(",", ":")).encode()
-    request = urllib.request.Request(
-        url, data=body, headers={"Content-Type": "application/json"})
+    request = HTTP.json_rpc_request(url, body)
     with urllib.request.urlopen(request, timeout=timeout) as response:
         payload = json.loads(response.read())
     if "error" in payload:

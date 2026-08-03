@@ -140,6 +140,13 @@ FORBIDDEN_STAGES = ("position_paths", "outcome_labels")
 # script that changed is a stage that does something else now.
 MANIFEST_FILES = (
     "scripts/b11a_window_freeze.py",
+    # The shared client identity every stage transport loads. Pinned here because a manifest that
+    # attests the four transports but not the one module they all send through would have a hole
+    # exactly the size of the thing that talks to the network.
+    #
+    # Named as data, not imported: this supervisor still makes no call of its own, and the text scan
+    # in `test_the_module_makes_no_call_outside_the_preflight` is what holds that.
+    "scripts/rpc_http_identity.py",
     "scripts/b7d_create_enumerator.py",
     "scripts/b9c_signature_inventory.py",
     "scripts/b9d_transaction_bodies.py",

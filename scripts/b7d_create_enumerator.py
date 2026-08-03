@@ -14,14 +14,30 @@ import argparse
 import base64
 import concurrent.futures as cf
 import hashlib
+import importlib.util
 import json
 import os
+import pathlib
 import sqlite3
 import struct
 import tempfile
 import time
 import urllib.error
 import urllib.request
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+
+def _load(name, filename):
+    """By absolute path: this module is loaded with `spec_from_file_location` from many places,
+    where `scripts/` is not on `sys.path` and a plain import would fail."""
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / filename)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+HTTP = _load("rpc_http_identity", "rpc_http_identity.py")
 
 PUMP = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
 EVENT_TAG = bytes.fromhex("e445a52e51cb9a1d")
@@ -133,8 +149,7 @@ def rpc_block(url, slot, retries):
     last_error = None
     for attempt in range(retries):
         try:
-            request = urllib.request.Request(
-                url, data=body, headers={"Content-Type": "application/json"})
+            request = HTTP.json_rpc_request(url, body)
             with urllib.request.urlopen(request, timeout=90) as response:
                 result = json.loads(response.read())
             if "error" not in result:
@@ -165,13 +180,20 @@ def rpc_produced_slots(url, start_slot, end_slot, retries):
     last_error = None
     for attempt in range(retries):
         try:
-            request = urllib.request.Request(
-                url, data=body, headers={"Content-Type": "application/json"})
+            request = HTTP.json_rpc_request(url, body)
             with urllib.request.urlopen(request, timeout=90) as response:
                 result = json.loads(response.read())
             if "error" not in result:
                 return set(result["result"]), None
             last_error = f"{result['error'].get('code')}: {result['error'].get('message')}"
+        except urllib.error.HTTPError as error:
+            # A WAF refusing this client answers 403 and will answer 403 to every retry. Backing off
+            # against it spends the whole budget and then reports a transport failure, which reads
+            # as an unlucky network rather than as a request the provider will never accept. Every
+            # other transport here already treats 403 as terminal; this one did not.
+            last_error = f"HTTP {error.code}"
+            if HTTP.is_client_refusal(error.code):
+                break
         except Exception as error:  # noqa: BLE001
             last_error = f"{type(error).__name__}: {error}"
         if attempt + 1 < retries:

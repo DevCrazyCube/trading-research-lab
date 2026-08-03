@@ -181,11 +181,19 @@ class TestFreeze(Base):
 class TestDependencyAudit(Base):
     """A manifest that only ever passes proves nothing, so it is aimed at the real offender."""
 
-    def test_this_study_has_a_clean_two_module_closure(self):
+    def test_this_study_has_a_clean_closure_of_exactly_these_modules(self):
+        """Named, not counted: a count would pass for any three modules, including a dirty one.
+
+        `rpc_http_identity` joined the closure when the B11 transports were given one shared client
+        identity; b7d loads it. It reaches no artifact and names no forbidden directory, so the
+        closure is still clean — which is what the audit asserts, module by module.
+        """
         audit = B15P.static_dependency_audit()
         self.assertEqual(audit["forbidden_references"], {})
         self.assertEqual(sorted(audit["closure"]),
-                         ["b15p_native_fee_backfill.py", "b7d_create_enumerator.py"])
+                         ["b15p_native_fee_backfill.py", "b7d_create_enumerator.py",
+                          "rpc_http_identity.py"])
+        self.assertTrue(audit["all_declared"])
 
     def test_the_audit_catches_the_module_that_caused_b15o(self):
         """B15L is what B15O used for fee schedules; it must refuse."""
