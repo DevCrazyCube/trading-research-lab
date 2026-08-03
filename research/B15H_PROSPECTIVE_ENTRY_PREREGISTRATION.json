@@ -1,0 +1,125 @@
+{
+  "preregistration_id": "B15H_PROSPECTIVE_ENTRY_V2",
+  "supersedes": null,
+  "supersedes_nothing_reason": "this does not replace B15d V1; it opens a SEPARATE prospective population. V1 cells stay exactly as they are, permanently quarantined.",
+  "date": "2026-08-03",
+  "author": "Claude (handoff 130)",
+  "status": "FROZEN. Committed alone, before any V2 entry checkpoint is scheduled and before any V2 result exists.",
+  "purpose": "Freeze a prospective entry protocol whose delayed entry state does NOT depend on possibly-gapped TradeEvent history, effective only for launches observed after an activation slot fixed in this document.",
+
+  "activation": {
+    "activation_slot": 436875955,
+    "chosen_at_finalized_slot": 436873955,
+    "margin_slots": 2000,
+    "rule": "a launch is eligible for V2 ONLY if its t0_slot is STRICTLY GREATER than activation_slot",
+    "boundary_is_strict": true,
+    "why_a_future_slot": "the boundary was set roughly thirteen minutes ahead of the slot observed while writing this, so no launch that already existed can fall inside it. An activation chosen at or behind the present would admit launches whose outcomes were already partly visible.",
+    "no_retroactive_recovery": {
+      "statement": "NO pre-activation launch may enter the V2 population, under any evidence, ever.",
+      "includes": "every cell currently quarantined under D_feed_degraded_at_t0 stays quarantined. This document does not narrow S07, does not re-evaluate a V1 cell, and does not create a path by which one could be recovered.",
+      "why": "a protocol that improves the evidence and then reaches backwards to re-score what it already saw is choosing which past cells to rescue after their outcomes were observable"
+    }
+  },
+
+  "the_epistemic_question": {
+    "question": "Is the CreateEvent receipt itself sufficient to know the launch was observed, despite prior session gaps?",
+    "answer_launch_level": "YES. If the frame arrived, that launch was observed. A gap BEFORE it does not make the frame that did arrive less real, and B15b's exact transaction backfill independently confirms the launch's own contents. The receipt is self-authenticating for the one launch it carries.",
+    "answer_population_level": "NO. A gap means we cannot know how many OTHER launches we did not see. The launch-level fact is sound; population completeness is not.",
+    "what_this_corrects": "V1 attached S07 to the DECISION, which was right for V1 because V1's delayed entry state was reconstructed from TradeEvent history that a gap can silently truncate. It was the entry STATE that was poisoned, not the launch observation. V2 removes that dependency entirely by reading the bonding-curve account at the target instead, so a launch observed after a gap can yield a valid V2 entry.",
+    "what_it_does_NOT_license": "it licenses nothing about coverage. Every V2 result is CONDITIONED ON OBSERVED LAUNCHES, and the incidence of launches we never saw cannot be estimated from this feed at all — establishing it would require an independent feed to compare against, which this project does not have.",
+    "provenance_is_retained_not_erased": "a launch first seen after a reconnect is recorded observed_after_gap for its whole life. That flag is never rewritten as continuous, and it appears on every row and in every census."
+  },
+
+  "why_the_entry_state_is_now_sound": {
+    "b15a": "detects the CreateEvent; the receipt is self-authenticating for that launch",
+    "b15b": "exact launch-transaction backfill proves self-contained t0 facts from the transaction itself",
+    "policy": "the frozen P1 uses no pre-launch feed history, so no gap can affect the eligibility decision",
+    "the_gap_that_remains": "V1's delayed entry state came from TradeEvent observations between t0 and t0+delay, and a gap there silently removes trades, leaving a state that looks complete and is wrong",
+    "v2_fix": "the entry state is read from the bonding-curve ACCOUNT at the target slot, which is the state itself rather than a reconstruction from a stream of deltas"
+  },
+
+  "entry_checkpoints": {
+    "scheduled": "immediately on decoded launch, from t0 alone",
+    "delays": [1, 2, 4],
+    "delay_source": "B15D_SHADOW_ROUTE_V1, unchanged",
+    "target_slot_formula": "t0_slot + delay_slots",
+    "machinery": "B15F_CHECKPOINT_V2 bounded batching, shared context slot, and lateness geometry, unchanged",
+    "max_lateness_slots": 150,
+    "max_lateness_unchanged_from": "B15F_CHECKPOINT_V1",
+    "account_layout": "the pinned BondingCurve, discriminator 17b7f83760d8ac60, from research/pump_idl_9c82f61.json",
+    "one_shared_state_per_launch_delay": "ONE checkpoint per (launch, delay). The three cost scenarios price from it separately, because the chain does not know about our scenarios.",
+    "missed_targets_are_never_repaired": "a target reached before its checkpoint could be taken is refused. Current account state may not stand in for it."
+  },
+
+  "eligibility": {
+    "all_required": [
+      "t0_slot strictly greater than activation_slot",
+      "an exactly decoded CreateEvent under the pinned IDL",
+      "an exactly matching successful launch transaction from B15b",
+      "complete t0 state, fee config and veto evidence",
+      "an admissible point-in-time entry account checkpoint at t0 + delay"
+    ],
+    "any_missing_condition_refuses": true
+  },
+
+  "refusal_codes": [
+    {"code": "H_PRE_ACTIVATION", "meaning": "t0 is at or before the activation slot; this launch belongs to V1 and stays there"},
+    {"code": "H_NO_CREATE_EVENT", "meaning": "no exactly decoded CreateEvent"},
+    {"code": "H_NO_MATCHING_TRANSACTION", "meaning": "B15b has no exactly matching successful launch transaction"},
+    {"code": "H_INCOMPLETE_T0", "meaning": "t0 state, fee config or veto evidence is incomplete"},
+    {"code": "H_NO_CHECKPOINT", "meaning": "no entry checkpoint exists for this target"},
+    {"code": "H_CHECKPOINT_LATE", "meaning": "the checkpoint context exceeded the target beyond the tolerance"},
+    {"code": "H_TARGET_MISSED", "meaning": "the target passed before a checkpoint could be scheduled"},
+    {"code": "H_ACCOUNT_MISMATCH", "meaning": "account owner, discriminator or version disagrees with the pinned evidence"},
+    {"code": "H_UNDECIDABLE_COORDINATE", "meaning": "a gap overlaps the coordinate and its position cannot be decided"},
+    {"code": "H_FEED_UNREADABLE", "meaning": "the feed-session record could not be read; unknown is not clean"},
+    {"code": "H_CURVE_COMPLETE", "meaning": "the curve is complete at the entry target"},
+    {"code": "H_V1_MIXING", "meaning": "a V1 cell or population was offered to a V2 computation"}
+  ],
+
+  "coverage_census": {
+    "published_beside_every_result": true,
+    "never_below_it": "a coverage figure printed under a return is a footnote; printed beside it, it is a condition on reading the return at all",
+    "fields": ["sessions", "reconnects", "faults", "launches_observed", "launches_observed_after_gap", "session_hours", "activation_slot", "v2_launches_eligible"],
+    "statement_required_on_every_result": "conditioned on OBSERVED launches; missed-launch incidence is not estimable from this feed"
+  },
+
+  "population_separation": {
+    "rule": "the V2 population is separate from B15d V1 and B15g V1 and is never mixed, compared numerically, or aggregated with them",
+    "enforcement": "a V1 identifier offered to a V2 computation is refused with H_V1_MIXING",
+    "why": "V1 cells were priced from a reconstruction that a gap can truncate, V2 cells from an account read. A difference between them would measure the two evidence bases rather than anything about a strategy."
+  },
+
+  "publication": {
+    "always_publishable": ["schedule and coverage counts", "refusal census", "session and reconnect census"],
+    "not_publishable_until_v2_slices_close": ["any return", "any drawdown", "any comparison of any kind"],
+    "never_publishable": ["a profitability claim", "an executability claim", "a landing probability", "a missed-launch incidence estimate", "any mixture with V1"]
+  },
+
+  "still_unmeasured": {
+    "market_impact": "unmeasured",
+    "landing_probability": "unmeasured",
+    "missed_launch_incidence": "not estimable from this feed; it would require an independent feed to compare against"
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "admitting a pre-activation launch to the V2 population",
+    "recovering, re-scoring or narrowing any quarantined V1 cell",
+    "rewriting observed_after_gap provenance as continuous",
+    "using current account state to repair a missed entry target",
+    "widening the lateness tolerance",
+    "mixing V1 and V2 populations",
+    "estimating missed-launch incidence from this feed",
+    "publishing any return before its V2 slice closes"
+  ],
+
+  "status_locks": {
+    "label": "SIMULATED_PROSPECTIVE_ENTRY_V2",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
