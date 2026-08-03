@@ -1,0 +1,147 @@
+{
+  "preregistration_id": "B15Q_CLEAN_REPLICATION_V1",
+  "supersedes": null,
+  "supersedes_nothing_reason": "B15Q is a NEW artifact. It does not replace, edit or re-run B15O, whose empty result stands as the record of what a population without fee schedules yields.",
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 152)",
+  "status": "FROZEN. Committed alone, while B15P is incomplete and before any B15Q strategy quantity was read.",
+  "purpose": "Replicate B15L and B15M on the frozen B15O 5,000 using B15P's launch-transaction fee schedules, from a population whose every input is free of a closed recorder.",
+  "committed_before_reading_any_strategy_quantity": true,
+
+  "relationship_to_b15o": {
+    "b15o_is_not_touched": "the B15O artifact is neither edited, replaced nor re-run. Its zero-priced-cell result is evidence about a population that had no fee schedules, and deleting it would delete the finding.",
+    "what_changed": "B15P supplies fee schedules decoded from each member's own launch transaction. Nothing else about either estimand changes.",
+    "both_are_reported": "B15Q's output carries B15O's figures as a descriptive operand alongside B15L's and B15M's published V1 figures"
+  },
+
+  "bound_hashes": {
+    "b15o_artifact_sha256": "394eeb5a62b05471569c8d6406e18fd4a8f7fd7e454925186628ce294e958e5b",
+    "member_set_sha256": "661f953a3aa995abe9a013e69da080f71bad212666a40610d859764b2855a296",
+    "b15p_preregistration_canonical_sha256": "72af534e22cdd5389074d2d9c41dc647464df7414166dd32956f1aaef99b65ec",
+    "b15l_preregistration_canonical_sha256": "a1d3c51b76c8a10d048f7c22a2d0c72b69d3024e85d3e7eaa8c2837ded570cfe",
+    "b15m_preregistration_canonical_sha256": "3feca3846ce544d1e97ce7bb7691e06bbf988b3d00c2d26122e27c3f4fd53d4a",
+    "any_drift_refuses": "a document that no longer hashes to its bound value stops the study, because what would be replicated is not what was published"
+  },
+
+  "closure_gate": {
+    "fail_closed": "nothing is materialized until every condition holds. Absence of evidence is never closure.",
+    "conditions_all_required": [
+      "the B15O artifact hashes to its bound value",
+      "the roster re-derived under the artifact's rule hashes to the bound member_set_sha256",
+      "B15P's preregistration hashes to its bound value",
+      "B15P is COMPLETE: all 5,000 members carry a terminal record",
+      "B15P's completeness and replay manifest verifies: every stored schedule rebuilds from its preserved raw response"
+    ],
+    "why_the_manifest_and_not_just_the_count": "a count says every member was attempted; the replay says every schedule that was kept can still be derived from the evidence it came from. A backfill can be complete and wrong.",
+    "materialize_exactly_once": "the artifact is written once. A second run reports the existing one rather than recomputing, so no two readings can differ.",
+    "while_locked": "the study reports the lock reasons and coverage counts only. It computes and publishes NO strategy quantity while B15P is incomplete."
+  },
+
+  "inputs": {
+    "permitted": ["research/b15i/processed_feed.sqlite (entry checkpoints)",
+                  "research/b15n/exit_checkpoints.sqlite (exit checkpoints)",
+                  "research/b15p/fee_schedules.sqlite (launch-transaction fee schedules)",
+                  "research/b15o/replication.json (the frozen roster's authority)"],
+    "forbidden": ["research/b15a", "research/b15b", "research/b15f"],
+    "audit": {
+      "static": "B15P's transitive closure audit, run at startup: forbidden DIRECTORY tokens in code string constants read from the AST, so a name in a comment is documentation and a name in a literal is a dependency",
+      "runtime": "B15P's path guard, wrapping the whole materialization: every path opened is recorded and one under a forbidden directory refuses immediately, whatever it was spelled like",
+      "why_both": "the static audit cannot see a path assembled at runtime and the runtime guard cannot see a dependency that never executes. B15O failed the first; only the second would have caught it."
+    },
+    "b15l_and_b15m_are_imported_and_their_closures_are_dirty": {
+      "fact": "B15L and B15M transitively load b15a_shadow_pilot, b15b_backfill and b15f_checkpoint, so their closures carry forbidden references",
+      "why_that_is_admissible_here": "every input is passed to them by INJECTION as in-memory mappings, so neither opens any artifact. B15L.fee_schedules — the function that reads B15b's exchange log and the direct cause of B15O's empty result — is never called.",
+      "how_it_is_enforced_rather_than_promised": "the runtime path guard wraps the entire materialization, so if either module opened a forbidden artifact the study would refuse on the spot; and a test asserts B15L.fee_schedules is never called",
+      "declared_manifest_required": "every forbidden closure reference must be declared before the study runs; an undeclared one refuses"
+    },
+    "no_network": "every quantity comes from evidence already on disk. Insufficient evidence refuses rather than fetching more."
+  },
+
+  "no_trade_event_is_coverage_not_failure": {
+    "fact_measured_before_freezing": "B15P refuses about 17% of members with P_NO_TRADE_EVENT: their launch transaction carries an exactly decoded CreateEvent and no TradeEvent, so it publishes no fee basis points at all",
+    "interpretation": "that is a property of those launches, almost certainly a launch with no creator buy in the same transaction. It is COVERAGE, and naming it a technical failure would invite a reader to think a retry could fix it. No amount of retrying can.",
+    "never_filled_from_a_later_trade": {
+      "rule": "a member with no TradeEvent in its launch transaction is refused. Its fee schedule is NOT taken from a later trade on the same curve, from another member, from a modal value, or from any configuration observed after t0.",
+      "why": "the fee basis points in force at a later trade are evidence from after the decision instant. Using them would be future leakage: the entry is priced at t0 with a number that could only be known afterwards.",
+      "enforced": "the study reads only B15P's stored per-member schedules, and a test attempts a later-trade fill and requires refusal"
+    },
+    "published_beside_every_figure": "the count and share of members refused for want of a t0 fee schedule appears beside every result, so no reader has to infer it"
+  },
+
+  "replicated_verbatim": {
+    "b15l": {"label": "COUNTERFACTUAL_UNREACTING_BOOK", "assumption": "UNREACTING_ORDER_FLOW"},
+    "b15m": {"label": "LIQUIDITY_CAPACITY_DIAGNOSTIC"},
+    "unchanged": ["both estimands and their construction", "the 100,000,000-lamport position", "the entry delays 1/2/4", "the horizons h_1000_slots and h_10000_slots", "the three cost scenarios", "the fixed size grid", "every eligibility condition and refusal code", "the exact B9I, B10a and B10b arithmetic by direct call", "the monotonicity requirement and per-cell maximality proof", "exact integer order statistics with no mean", "the prohibitions on aggregation across horizons or scenarios, on selecting a size, and on calling any output a return"],
+    "curve_formulas_not_duplicated": "B15L.run and B15M.run are called; no pricing or curve function is reimplemented here, and a test asserts the module contains none"
+  },
+
+  "the_censoring_statement_is_corrected": {
+    "the_inherited_prose_is_false_here": "B15L and B15M carry a censoring statement saying the population is censored because B15f schedules from B15a. For the B15Q population that is false: it descends from neither.",
+    "how_it_is_handled": "the inherited statement is PRESERVED in the artifact under `inherited_censoring_statement_superseded`, marked false, and a truthful B15Q statement replaces it in the published position. Nothing is silently rewritten.",
+    "the_truthful_statement": "conditioned on B15O's frozen 5,000 launches, which descend from B15i's own observations and from no closed recorder; a cell is absent when its B15i entry checkpoint is missing, when its B15N exit checkpoint is missing or withheld pending chain confirmation, or when its launch transaction published no fee basis points at t0 and therefore has no admissible fee schedule",
+    "why_not_edit_b15l_and_b15m": "they are published and their prose is correct for the population they ran on. Correcting them retroactively would rewrite a finished study."
+  },
+
+  "predeclared_comparison": {
+    "nature": "DESCRIPTIVE ONLY",
+    "operands": ["B15L V1 and B15M V1 as published in their committed finding documents, by sha256",
+                 "B15O's artifact figures, including its zero priced cells, by sha256"],
+    "no_pass_threshold_exists": "no tolerance, agreement criterion, verdict or hypothesis test appears anywhere in this study",
+    "no_pooling": "the populations are never combined, averaged or presented as one",
+    "quantities_compared_and_fixed_here": {
+      "b15l": ["priced cells per (scenario, horizon, delay)", "the count and share of cells whose naive observed-book exit could be priced", "the median self-impact per horizon", "the median counterfactual net per group", "the count and share at or below zero", "the refusal census by code"],
+      "b15m": ["exact integer capacity order statistics per (horizon, delay)", "zero-capacity count and share", "cap-hit count and share", "the curve-resolution floor", "liquidity-executable and non-negative counts per grid size", "the refusal census by code"]
+    },
+    "direction_is_not_predicted": "this document does not say which way any difference will go"
+  },
+
+  "determinism": {
+    "row_permutation": "the output must be identical under any permutation of the input rows",
+    "checked": "by computing over shuffled copies and comparing field for field"
+  },
+
+  "refusal_codes": [
+    {"code": "Q_B15P_INCOMPLETE", "meaning": "B15P has not reached a terminal record for all 5,000 members"},
+    {"code": "Q_B15P_MANIFEST_FAILED", "meaning": "B15P's completeness or replay verification does not pass"},
+    {"code": "Q_HASH_DRIFT", "meaning": "a bound document or artifact no longer hashes to its bound value"},
+    {"code": "Q_MEMBER_SET_DRIFT", "meaning": "the roster no longer hashes to the bound member_set_sha256"},
+    {"code": "Q_FORBIDDEN_DEPENDENCY", "meaning": "an undeclared forbidden closure reference, or a forbidden path opened at runtime"},
+    {"code": "Q_NO_T0_FEE_SCHEDULE", "meaning": "the member's launch transaction published no fee basis points; a coverage refusal, never filled from a later trade"},
+    {"code": "Q_FUTURE_LEAKAGE", "meaning": "a fee schedule was offered from any source other than the member's own launch transaction"},
+    {"code": "Q_SCHEDULE_NOT_UNIQUE", "meaning": "a member carries more than one schedule"},
+    {"code": "Q_JOIN_IDENTITY", "meaning": "an entry and an exit checkpoint disagree on curve or mint"},
+    {"code": "Q_EVIDENCE_INSUFFICIENT", "meaning": "an input artifact is missing or unreadable; no network fetch completes it"},
+    {"code": "Q_ALREADY_MATERIALIZED", "meaning": "the artifact exists; it is reported rather than recomputed"}
+  ],
+
+  "publication": {
+    "always_publishable": ["the lock state and its reasons", "population and coverage counts including the t0-fee-unavailable share", "the refusal census", "both replicated estimands with their own labels", "the descriptive side-by-side against V1 and against B15O"],
+    "never_publishable": ["any return, profit or expected value", "any landing probability", "any recommended or optimal size", "any pass, fail or agreement verdict", "any pooled figure", "any figure while B15P is incomplete"],
+    "labels_preserved": "each replicated estimand keeps its own label, executable=false, landing_probability=unmeasured and competitor_response=unmeasured"
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "any network call",
+    "reading any path under research/b15a, research/b15b or research/b15f",
+    "calling B15L.fee_schedules or any function that reads a closed recorder",
+    "filling a missing t0 fee schedule from a later trade, another member, a modal value, or any post-t0 observation",
+    "editing, replacing or re-running the B15O artifact",
+    "materializing any figure while B15P is incomplete",
+    "materializing more than once",
+    "inventing a pass threshold, agreement criterion or verdict",
+    "pooling the populations",
+    "changing any B15L or B15M estimand, threshold, grid, delay, horizon, cost scenario or refusal",
+    "editing B15L's or B15M's published censoring prose",
+    "touching B11c, B11a, any worker, or any RPC cadence"
+  ],
+
+  "status_locks": {
+    "label": "CLEAN_CLOSED_REPLICATION",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
