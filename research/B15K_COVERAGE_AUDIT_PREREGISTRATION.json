@@ -1,0 +1,103 @@
+{
+  "preregistration_id": "B15K_COVERAGE_AUDIT_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 134)",
+  "status": "FROZEN. Committed alone, before any comparison is computed and before any confirmation query is sent.",
+  "purpose": "Decide, on evidence, why the B15i processed feed observes launches that the B15a confirmed recorder does not — separating recorder lag, confirmed-feed miss, processed fork, and decode failure — without relabelling an absent row as an orphan.",
+  "committed_before_any_comparison": true,
+
+  "why_this_exists": {
+    "the_observation": "over one window B15i recorded 2,062 launches at processed commitment while B15a's confirmed recorder held 512 of them; B15a was separately measured running about 500 slots behind the processed tip.",
+    "the_two_explanations": "either processed showed launches that confirmed never accepted (fork orphans), or B15a is under-recording launches that did confirm (a feed miss). These have opposite consequences: the first is a property of the chain, the second is a defect in our own instrument.",
+    "why_it_cannot_be_left_open": "B15i prices only cells whose launch is corroborated. If B15a under-records, using it as the sole confirmation oracle silently discards real launches and reports the discard as a fork rate.",
+    "what_is_NOT_assumed": "that absence from B15a means anything at all until the common interval is established and an independent query has been made"
+  },
+
+  "the_common_closed_interval": {
+    "rule": "a launch is comparable ONLY if its slot lies inside [lo, hi] where both recorders have demonstrably passed hi",
+    "hi": "min(max slot recorded by B15i, max slot recorded by B15a) minus closure_margin_slots",
+    "lo": "max(min slot recorded by B15i, min slot recorded by B15a) plus closure_margin_slots",
+    "closure_margin_slots": 300,
+    "closure_margin_rationale": "300 slots is about two minutes, comfortably longer than any observed write lag in either recorder. It is the same margin already used for the B15i orphan rule and is not re-tuned here.",
+    "why_a_closed_interval": "outside it, absence from a recorder means only that the recorder has not got there yet. Comparing across an open edge measures lag and reports it as a miss — the exact error that marked 112 launches orphaned when the counterparty simply had not arrived.",
+    "empty_interval_is_a_result": "if the interval is empty or holds no launches, the audit reports that and concludes nothing"
+  },
+
+  "classification": {
+    "computed_for": "every B15i launch whose slot lies inside the common closed interval",
+    "classes": [
+      {"class": "CORROBORATED", "meaning": "B15a holds a decoded launch with the same signature"},
+      {"class": "B15A_DECODE_FAILED", "meaning": "B15a saw the signature but its decode failed; the frame arrived and the recorder did not read it"},
+      {"class": "B15A_SAW_NON_LAUNCH", "meaning": "B15a recorded the signature only as a non-launch pump_event; it arrived and was classified differently"},
+      {"class": "ABSENT_FROM_B15A", "meaning": "no row of any kind in B15a for this signature inside a window B15a has passed. UNEXPLAINED until an independent query says otherwise."}
+    ],
+    "absent_is_not_orphan": {
+      "rule": "ABSENT_FROM_B15A is never renamed to orphan, fork, or missed. It is an open question with a name.",
+      "why": "an orphan is a claim about the chain; an absence is a fact about our recorder. Letting the second become the first turns an instrument defect into a finding."
+    }
+  },
+
+  "independent_confirmation_sample": {
+    "purpose": "to decide, per sampled launch, whether the transaction actually reached confirmed commitment on chain",
+    "population": "the ABSENT_FROM_B15A launches inside the common closed interval",
+    "sample_size": 200,
+    "sample_size_rationale": "bounded so the shared endpoint is not loaded — B15h was killed by HTTP 429 within six minutes of an unbounded worker pool. 200 is large enough that a feed miss and a fork orphan produce visibly different counts and small enough to run at two requests a second in under two minutes.",
+    "selection_rule": "sort the eligible signatures by SHA-256 of the signature string, ascending, and take the first sample_size",
+    "selection_rationale": "deterministic and reproducible from the population alone, fixed before any result is seen, and independent of slot, time and base58 prefix clustering. Re-running the audit on the same population selects the same launches.",
+    "if_population_is_smaller": "the whole population is sampled and the audit says so",
+    "query": {
+      "method": "getTransaction",
+      "commitment": "confirmed",
+      "max_supported_transaction_version": 0,
+      "rate_limit_requests_per_second": 2,
+      "max_attempts_per_signature": 3,
+      "raw_preserved": "every request and response is appended to an exchange log before the answer is judged"
+    },
+    "outcomes": [
+      {"outcome": "CONFIRMED_ON_CHAIN", "meaning": "getTransaction at confirmed returns the transaction. B15a missed a launch that confirmed."},
+      {"outcome": "NOT_FOUND_AT_CONFIRMED", "meaning": "the node has no confirmed transaction for this signature. Consistent with a processed-only fork, and reported as such rather than as proof of one."},
+      {"outcome": "QUERY_FAILED", "meaning": "the query did not complete within its attempts. Decides nothing and is counted separately."}
+    ]
+  },
+
+  "what_the_answer_changes": {
+    "if_mostly_CONFIRMED_ON_CHAIN": "B15a under-records and MUST NOT be the sole confirmation oracle. A confirmed getTransaction reconciliation per processed launch becomes the corroboration path, bounded and rate-limited, and B15a becomes one input among two.",
+    "if_mostly_NOT_FOUND_AT_CONFIRMED": "the processed feed carries transactions that do not confirm, B15a is behaving correctly, and the orphan classification stands on evidence rather than on absence.",
+    "if_mixed": "both effects are present and both counts are published; no single explanation is asserted.",
+    "in_every_case": "the provider and feed limitation is recorded, and every population figure is published as conditional on the observing feed"
+  },
+
+  "refusal_codes": [
+    {"code": "K_INTERVAL_EMPTY", "meaning": "no common closed interval exists yet; nothing is comparable"},
+    {"code": "K_RECORDER_UNREADABLE", "meaning": "a recorder database could not be read; unknown is not clean and no comparison is made"},
+    {"code": "K_OUTSIDE_INTERVAL", "meaning": "a launch offered for classification lies outside the common closed interval"},
+    {"code": "K_QUERY_FAILED", "meaning": "an independent confirmation query did not complete within its attempts"},
+    {"code": "K_SAMPLE_NOT_DETERMINISTIC", "meaning": "the selection did not reproduce on the same population"}
+  ],
+
+  "publication": {
+    "always_publishable": ["interval bounds", "class counts", "sample outcomes", "conditional coverage statements", "refusal census"],
+    "never_publishable_here": ["any return", "any profitability or executability claim", "any landing probability", "a missed-launch incidence for the chain as a whole"],
+    "required_statement": "every coverage figure is conditional on the observing feed; neither recorder establishes what neither saw"
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "relabelling an absence as an orphan without an independent query",
+    "comparing across an open interval edge",
+    "widening the sample after seeing results",
+    "changing the selection rule after seeing results",
+    "using B15a as the sole confirmation oracle if it is shown to under-record",
+    "estimating chain-wide missed-launch incidence from either feed"
+  ],
+
+  "status_locks": {
+    "label": "COVERAGE_AUDIT",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
