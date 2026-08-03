@@ -284,6 +284,61 @@ class TestCanonicalOrder(Base):
         finally:
             shutil.rmtree(other, ignore_errors=True)
 
+    def test_the_gate_census_excludes_the_live_tail(self):
+        """A tail that grows during verification must not fail the gate for the segments.
+
+        The first live compaction refused both segments with R_REPLAY_DIVERGED because 400,000
+        frames arrived between the two censuses. The tail is not a segment and is never replaced.
+        """
+        self.rotate([_line(i) for i in range(5)])
+        sealed_only = B15J.census_of(self.directory, STEM, self.active, include_tail=False)
+        self.write_active([_line(99)])          # the feed keeps writing
+        self.assertEqual(B15J.census_of(self.directory, STEM, self.active, include_tail=False),
+                         sealed_only)
+        self.assertNotEqual(B15J.census_of(self.directory, STEM, self.active), sealed_only)
+
+    def test_the_gate_passes_while_the_tail_is_growing(self):
+        record = self.rotate([_line(i) for i in range(20)])
+        B15J.compress_segment(self.directory, record)
+        original_census = B15J.census_of
+
+        def growing(work_dir, stem, active, include_tail=True, max_sequence=None):
+            self.write_active([_line(500)])     # a frame lands mid-verification, every time
+            return original_census(work_dir, stem, active, include_tail, max_sequence)
+
+        outcome = B15J.verify_and_replace(self.directory, record, STEM, self.active,
+                                          census=growing)
+        self.assertTrue(outcome["replaced"])
+
+    def test_the_gate_survives_a_new_segment_sealed_mid_verification(self):
+        """The writer keeps rotating. A set read twice is two different sets, not a divergence.
+
+        Excluding the live tail was not enough: the first live compaction still refused two
+        segments because the feed had sealed another one between the two censuses.
+        """
+        record = self.rotate([_line(i) for i in range(20)])
+        B15J.compress_segment(self.directory, record)
+        original_census = B15J.census_of
+        sealed = {"done": False}
+
+        def rotating(work_dir, stem, active, include_tail=True, max_sequence=None):
+            if not sealed["done"]:
+                sealed["done"] = True
+                self.write_active([_line(900)])
+                B15J.rotate(active, work_dir, stem, self.document)   # a whole new segment appears
+            return original_census(work_dir, stem, active, include_tail, max_sequence)
+
+        outcome = B15J.verify_and_replace(self.directory, record, STEM, self.active,
+                                          census=rotating)
+        self.assertTrue(outcome["replaced"])
+
+    def test_a_census_pinned_to_a_frontier_ignores_later_segments(self):
+        self.rotate([_line(0)])
+        pinned = B15J.census_of(self.directory, STEM, self.active, False, 1)
+        self.rotate([_line(1)])
+        self.assertEqual(B15J.census_of(self.directory, STEM, self.active, False, 1), pinned)
+        self.assertNotEqual(B15J.census_of(self.directory, STEM, self.active, False, 2), pinned)
+
     def test_reading_twice_gives_the_same_census(self):
         self.rotate([_line(0), _line(1)])
         self.write_active([_line(2)])
@@ -403,7 +458,7 @@ class TestCompressAndReplace(Base):
         B15J.compress_segment(self.directory, record)
         answers = [{"lines": 10, "chain_sha256": "aaa"}, {"lines": 11, "chain_sha256": "bbb"}]
 
-        def shifting(_work_dir, _stem, _active):
+        def shifting(_work_dir, _stem, _active, _include_tail=True, _max_sequence=None):
             return answers.pop(0)
 
         with self.assertRaises(B15J.RetentionRefused) as caught:
@@ -468,6 +523,41 @@ class TestDriver(Base):
         self.assertIn(B15J.R_DECOMPRESS_MISMATCH, report["refusals"][0]["reason"])
         self.assertEqual(report["verified"], [])
         self.assertTrue(original.exists())          # never removed on a failed gate
+
+    def test_a_second_compactor_is_refused_rather_than_racing(self):
+        """Two runs raced and one deleted a file the other was verifying. Nothing was lost."""
+        with B15J.CompactionLock(self.directory):
+            with self.assertRaises(B15J.RetentionRefused) as caught:
+                with B15J.CompactionLock(self.directory):
+                    pass
+            self.assertIn("another compactor", str(caught.exception))
+        with B15J.CompactionLock(self.directory):
+            pass                      # released, so the next one gets it
+
+    def test_an_archive_left_without_its_flag_is_re_verified_not_re_reported(self):
+        self.write_active([_line(i) for i in range(500)])
+        B15J.rotate(self.active, self.directory, STEM, self.document)
+        record = B15J.read_index(self.directory)[0]
+        B15J.compress_segment(self.directory, record)
+        B15J.sealed_path(self.directory, STEM, 1).unlink()      # replaced, flag write lost
+        report = B15J.run("b15i", work_dir=self.directory, max_segment_bytes=10 ** 9,
+                          document=self.document, reserve_bytes=0, active_name=ACTIVE, stem=STEM)
+        self.assertEqual(report["refusals"], [])
+        self.assertIn(1, B15J.verified_sequences(self.directory))
+
+    def test_an_archive_left_without_its_flag_must_still_prove_itself(self):
+        self.write_active([_line(i) for i in range(500)])
+        B15J.rotate(self.active, self.directory, STEM, self.document)
+        record = B15J.read_index(self.directory)[0]
+        B15J.compress_segment(self.directory, record)
+        B15J.sealed_path(self.directory, STEM, 1).unlink()
+        archive = B15J.sealed_path(self.directory, STEM, 1, compressed=True)
+        with gzip.GzipFile(filename=str(archive), mode="wb", mtime=0) as handle:
+            handle.write(b"not the sealed bytes\n")
+        report = B15J.run("b15i", work_dir=self.directory, max_segment_bytes=10 ** 9,
+                          document=self.document, reserve_bytes=0, active_name=ACTIVE, stem=STEM)
+        self.assertEqual(len(report["refusals"]), 1)
+        self.assertNotIn(1, B15J.verified_sequences(self.directory))
 
     def test_status_reports_the_margin_against_the_reserve(self):
         self.write_active([_line(i) for i in range(100)])

@@ -24,6 +24,7 @@ and quarantines rather than degrading, because a feed that keeps writing a thinn
 guard produces a census whose coverage silently changed at an unmarked moment.
 """
 import argparse
+import fcntl
 import gzip
 import hashlib
 import importlib.util
@@ -421,7 +422,7 @@ def open_segment(work_dir, record):
         f"archive; the set is incomplete and is not read as though it were complete")
 
 
-def iter_lines(work_dir, stem, active_path):
+def iter_lines(work_dir, stem, active_path, include_tail=True, max_sequence=None):
     """Every raw line, sealed segments in ascending sequence and then the ACTIVE TAIL LAST.
 
     The tail comes last because it is still being appended to. Its final line may be partial; it is
@@ -429,6 +430,11 @@ def iter_lines(work_dir, stem, active_path):
     """
     records = [r for r in read_index(work_dir) if r["stem"] == stem]
     assert_index_contiguous(records)
+    if max_sequence is not None:
+        # A FIXED set. The live writer keeps sealing new segments, so "whatever the index holds
+        # now" is a different set each time it is read, and the gate compared one set against
+        # another and called the difference a divergence.
+        records = [r for r in records if r["sequence"] <= max_sequence]
     for record in sorted(records, key=lambda r: r["sequence"]):
         handle = open_segment(work_dir, record)
         try:
@@ -437,7 +443,7 @@ def iter_lines(work_dir, stem, active_path):
         finally:
             handle.close()
     active = pathlib.Path(active_path)
-    if active.exists():
+    if include_tail and active is not None and active.exists():
         with active.open("rb") as handle:
             for line in handle:
                 text = line.decode("utf-8", errors="replace")
@@ -450,16 +456,23 @@ def iter_lines(work_dir, stem, active_path):
                 yield text
 
 
-def census_of(work_dir, stem, active_path):
-    """A cheap, total, order-sensitive fingerprint of the whole record stream.
+def census_of(work_dir, stem, active_path, include_tail=True, max_sequence=None):
+    """A cheap, total, order-sensitive fingerprint of the record stream.
 
     Not a summary of interesting fields — a hash chain over every line in canonical order, plus
     counts. A summary can agree while the underlying bytes differ; a chain cannot.
+
+    `include_tail=False` covers the SEALED SEGMENTS only, and that is what the replace gate uses.
+    The tail is being appended to by a live feed, so a census taken twice around a multi-minute
+    verification never matches itself: the first live compaction refused both segments with
+    R_REPLAY_DIVERGED because 400,000 frames had arrived in between. The tail is not a segment,
+    is never replaced, and its bytes are never at risk — including it made the gate unpassable
+    rather than stricter.
     """
     digest = hashlib.sha256()
     lines = identities = 0
     first_time = last_time = None
-    for line in iter_lines(work_dir, stem, active_path):
+    for line in iter_lines(work_dir, stem, active_path, include_tail, max_sequence):
         lines += 1
         digest.update(line.encode())
         identity, moment = _identity_and_time(line)
@@ -504,7 +517,10 @@ def verify_and_replace(work_dir, record, stem, active_path, census=None):
     READER still produces the same stream from it.
     """
     census = census_of if census is None else census
-    before = census(work_dir, stem, active_path)
+    # Pinned to the segments that exist NOW, so a segment sealed mid-verification cannot make the
+    # two censuses differ. Excluding the tail was not enough: the writer rotates too.
+    frontier = max((r["sequence"] for r in read_index(work_dir) if r["stem"] == stem), default=0)
+    before = census(work_dir, stem, active_path, False, frontier)
     proof = verify_segment(work_dir, record)
     original = sealed_path(work_dir, record["stem"], record["sequence"])
     if not original.exists():
@@ -514,7 +530,7 @@ def verify_and_replace(work_dir, record, stem, active_path, census=None):
     parked = original.with_suffix(original.suffix + ".parked")
     os.replace(original, parked)
     try:
-        after = census(work_dir, stem, active_path)
+        after = census(work_dir, stem, active_path, False, frontier)
         if after != before:
             raise RetentionRefused(
                 f"{R_REPLAY_DIVERGED}: segment {record['sequence']:06d} read from its archive "
@@ -568,6 +584,38 @@ def verified_sequences(work_dir):
     return done
 
 
+class CompactionLock:
+    """One compactor per work directory, or none.
+
+    Two concurrent runs raced: one replaced a segment while the other was mid-gate on it, and the
+    second reported R_SEAL_MISMATCH for an original that had legitimately gone. Nothing was lost,
+    but a second process deleting files another is verifying is not something to leave to luck.
+    """
+
+    def __init__(self, work_dir):
+        self.path = pathlib.Path(work_dir) / "compaction.lock"
+        self.handle = None
+
+    def __enter__(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.handle = self.path.open("a+")
+        try:
+            fcntl.flock(self.handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as error:
+            self.handle.close()
+            self.handle = None
+            raise RetentionRefused(
+                f"another compactor holds {self.path}; refusing to verify files it may replace"
+            ) from error
+        return self
+
+    def __exit__(self, *_):
+        if self.handle is not None:
+            fcntl.flock(self.handle, fcntl.LOCK_UN)
+            self.handle.close()
+        return False
+
+
 def run(target="b15i", work_dir=None, rotate_first=True, max_segment_bytes=None, document=None,
         reserve_bytes=None, allow_writers=(), compress=True, active_name=None, stem=None):
     """Rotate if the tail is large, then compress, verify and replace every unverified segment."""
@@ -581,6 +629,8 @@ def run(target="b15i", work_dir=None, rotate_first=True, max_segment_bytes=None,
         else max_segment_bytes
     reserve = document["free_space_guard"]["reserve_bytes"] if reserve_bytes is None \
         else reserve_bytes
+    lock = CompactionLock(work_dir)
+    lock.__enter__()
     report = {"target": target, "discarded_partials": discard_partial_archives(work_dir),
               "free_bytes_before": free_bytes(work_dir), "reserve_bytes": reserve,
               "rotated": None, "verified": [], "refusals": []}
@@ -591,6 +641,21 @@ def run(target="b15i", work_dir=None, rotate_first=True, max_segment_bytes=None,
         already = verified_sequences(work_dir)
         for record in read_index(work_dir):
             if record["stem"] != stem or record["sequence"] in already:
+                continue
+            plain = sealed_path(work_dir, record["stem"], record["sequence"])
+            archive = sealed_path(work_dir, record["stem"], record["sequence"], compressed=True)
+            if not plain.exists() and archive.exists():
+                # Replaced by an earlier run whose flag write was lost. The archive still has to
+                # prove itself before the flag is recorded; it is not taken on trust.
+                try:
+                    proof = verify_segment(work_dir, record)
+                    update_index_flags(work_dir, record["sequence"], replaced=True,
+                                       archive_sha256=proof["archive_sha256"],
+                                       archive_bytes=proof["archive_bytes"],
+                                       recovered_flag=True)
+                except RetentionRefused as error:
+                    report["refusals"].append(
+                        {"sequence": record["sequence"], "reason": str(error)[:200]})
                 continue
             try:
                 compress_segment(work_dir, record)
@@ -609,6 +674,7 @@ def run(target="b15i", work_dir=None, rotate_first=True, max_segment_bytes=None,
     report["free_bytes_after"] = free_bytes(work_dir)
     report["reclaimed_bytes"] = report["free_bytes_after"] - report["free_bytes_before"]
     report["above_reserve"] = report["free_bytes_after"] >= reserve
+    lock.__exit__()
     return report
 
 
