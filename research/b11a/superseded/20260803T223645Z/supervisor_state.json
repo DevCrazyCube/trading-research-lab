@@ -1,0 +1,28 @@
+{
+  "composition_published": false,
+  "cutoff_slot_inclusive": 437211659,
+  "endpoint": "https://api.mainnet-beta.solana.com",
+  "last_poll_at": 1785796451,
+  "last_tip_slot": 437056459,
+  "manifest_sha256": "769959ce62ce6082bb4a49f69ade8922f2f6d5167504f866369a6469ac5aacee",
+  "poll_seconds": 300,
+  "polls": 344,
+  "preregistration_canonical_sha256": "ae4d2f0351aaba193fe7d87cde8cd68ce83aa8d21515d4d20af0a158f8dafe9f",
+  "quarantine": null,
+  "results_unlocked": false,
+  "run_order": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "signature_inventory",
+    "transaction_bodies",
+    "decode_and_reserves",
+    "reserve_coverage_gate",
+    "failure_coverage_gate",
+    "simulator_replay_gate"
+  ],
+  "schema_version": "1.0.0",
+  "stage_in_flight": null,
+  "stages_completed": [],
+  "state": "waiting_for_maturity"
+}
