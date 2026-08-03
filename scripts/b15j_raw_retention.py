@@ -42,6 +42,9 @@ SCHEMA_VERSION = "1.0.0"
 PREREG_PATH = ROOT / "research" / "B15J_RAW_RETENTION_PREREGISTRATION.json"
 PREREG_CANONICAL_SHA256 = "42172140823f35adf7aef4753aea3492f932809e51c23d7747672f5d655e670e"
 
+PREREG_V2_PATH = ROOT / "research" / "B15J_RAW_RETENTION_V2_PREREGISTRATION.json"
+PREREG_V2_CANONICAL_SHA256 = "913dd60479d7f725c040550a8a4ac2635d20efd16668af23458bcdf8b6ecdd01"
+
 EXECUTION_SURFACE_TOKENS = ("sendTransaction", "signTransaction", "Keypair", "from_secret_key",
                             "private_key", "sign_message", "PRIVATE_KEY", "WALLET",
                             "mnemonic", "seed_phrase", "requestAirdrop", "simulateTransaction")
@@ -58,6 +61,8 @@ R_PARTIAL_ARCHIVE = "R_PARTIAL_ARCHIVE"
 R_INDEX_UNREADABLE = "R_INDEX_UNREADABLE"
 R_SECRET_IN_ARCHIVE = "R_SECRET_IN_ARCHIVE"
 R_ACTIVE_TAIL_COMPRESSED = "R_ACTIVE_TAIL_COMPRESSED"
+R_PARKED_ORIGINAL = "R_PARKED_ORIGINAL"
+R_CONCURRENT_COMPACTOR = "R_CONCURRENT_COMPACTOR"
 
 READ_BLOCK = 1 << 20
 COMPRESS_LEVEL = 6
@@ -78,6 +83,35 @@ def verify_preregistration(path=PREREG_PATH, expected_sha256=None):
         json.dumps(document, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     if actual != expected:
         raise RetentionRefused(f"the retention preregistration hashes {actual}, pinned {expected}")
+    return document
+
+
+def verify_preregistration_v2(path=PREREG_V2_PATH, expected_sha256=None):
+    """The V2 freeze, and it must agree with V1 on everything V2 says it does not change.
+
+    A superseding document is the usual way a frozen number gets quietly restated, so the reserve
+    and the tail exclusion are compared against V1 rather than trusted because V2 says so.
+    """
+    expected = PREREG_V2_CANONICAL_SHA256 if expected_sha256 is None else expected_sha256
+    try:
+        document = json.loads(pathlib.Path(path).read_bytes())
+    except (OSError, json.JSONDecodeError) as error:
+        raise RetentionRefused(f"cannot read the V2 preregistration {path}: {error}") from error
+    actual = hashlib.sha256(
+        json.dumps(document, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    if actual != expected:
+        raise RetentionRefused(f"the V2 retention preregistration hashes {actual}, pinned {expected}")
+    v1 = verify_preregistration()
+    if document["supersedes_canonical_sha256"] != PREREG_CANONICAL_SHA256:
+        raise RetentionRefused(
+            f"V2 says it supersedes {document['supersedes_canonical_sha256']}, but V1 hashes "
+            f"{PREREG_CANONICAL_SHA256}. A superseding document must name the document it replaces.")
+    unchanged = " ".join(document["what_changes_and_what_does_not"]["does_not_change"])
+    reserve = v1["free_space_guard"]["reserve_bytes"]
+    if str(reserve) not in unchanged:
+        raise RetentionRefused(
+            f"V2 does not carry V1's reserve of {reserve} bytes verbatim; a reserve restated in "
+            f"different words is a reserve that can drift")
     return document
 
 
@@ -629,48 +663,33 @@ def run(target="b15i", work_dir=None, rotate_first=True, max_segment_bytes=None,
         else max_segment_bytes
     reserve = document["free_space_guard"]["reserve_bytes"] if reserve_bytes is None \
         else reserve_bytes
+    v2_document = verify_preregistration_v2()
     lock = CompactionLock(work_dir)
     lock.__enter__()
-    report = {"target": target, "discarded_partials": discard_partial_archives(work_dir),
+    report = {"target": target, "gate_version": v2_document["preregistration_id"],
+              "restored_parked": restore_parked_originals(work_dir),
+              "discarded_partials": discard_partial_archives(work_dir),
               "free_bytes_before": free_bytes(work_dir), "reserve_bytes": reserve,
               "rotated": None, "verified": [], "refusals": []}
     if rotate_first and active.exists() and active.stat().st_size >= limit:
         assert_no_writer(active, allow=allow_writers)
         report["rotated"] = rotate(active, work_dir, stem, document)["sequence"]
     if compress:
-        already = verified_sequences(work_dir)
-        for record in read_index(work_dir):
-            if record["stem"] != stem or record["sequence"] in already:
-                continue
-            plain = sealed_path(work_dir, record["stem"], record["sequence"])
-            archive = sealed_path(work_dir, record["stem"], record["sequence"], compressed=True)
-            if not plain.exists() and archive.exists():
-                # Replaced by an earlier run whose flag write was lost. The archive still has to
-                # prove itself before the flag is recorded; it is not taken on trust.
-                try:
-                    proof = verify_segment(work_dir, record)
-                    update_index_flags(work_dir, record["sequence"], replaced=True,
-                                       archive_sha256=proof["archive_sha256"],
-                                       archive_bytes=proof["archive_bytes"],
-                                       recovered_flag=True)
-                except RetentionRefused as error:
-                    report["refusals"].append(
-                        {"sequence": record["sequence"], "reason": str(error)[:200]})
-                continue
-            try:
-                compress_segment(work_dir, record)
-                outcome = verify_and_replace(work_dir, record, stem, active)
-                update_index_flags(work_dir, record["sequence"], replaced=True,
-                                   archive_sha256=outcome.get("archive_sha256"),
-                                   archive_bytes=outcome.get("archive_bytes"),
-                                   uncompressed_bytes=record["uncompressed_bytes"])
-                report["verified"].append(
-                    {"sequence": record["sequence"],
-                     "uncompressed_bytes": record["uncompressed_bytes"],
-                     "archive_bytes": outcome.get("archive_bytes")})
-            except RetentionRefused as error:
-                report["refusals"].append(
-                    {"sequence": record["sequence"], "reason": str(error)[:200]})
+        # V2: ONE pinned-frontier pass per run, not one per segment. V1 cost two full reads of the
+        # whole retained set per segment replaced, which at 19 segments and 13 GB sealed took over
+        # twenty minutes of a core and grew with everything retained. A gate too slow to finish is
+        # a gate that stops running.
+        gate = compact_once(work_dir, stem, v2_document)
+        report["gate"] = gate
+        report["frontier"] = gate.get("frontier")
+        report["refusals"].extend(gate["refusals"])
+        for sequence in gate["replaced"]:
+            record = next(r for r in read_index(work_dir)
+                          if r["stem"] == stem and r["sequence"] == sequence)
+            archive = sealed_path(work_dir, stem, sequence, compressed=True)
+            report["verified"].append(
+                {"sequence": sequence, "uncompressed_bytes": record["uncompressed_bytes"],
+                 "archive_bytes": archive.stat().st_size if archive.exists() else None})
     report["free_bytes_after"] = free_bytes(work_dir)
     report["reclaimed_bytes"] = report["free_bytes_after"] - report["free_bytes_before"]
     report["above_reserve"] = report["free_bytes_after"] >= reserve
@@ -720,3 +739,171 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# --------------------------------------------------------------------------------------------
+# V2 — exactly one pinned-frontier pass per compaction run
+# --------------------------------------------------------------------------------------------
+
+def parked_path(work_dir, stem, sequence):
+    return pathlib.Path(str(sealed_path(work_dir, stem, sequence)) + ".parked")
+
+
+def restore_parked_originals(work_dir):
+    """A parked original belongs to a run that never finished proving it. Restore it, always.
+
+    Adopting the archive instead would accept an unverified replacement. Leaving the file parked
+    would hide it from the reader, which is worse: the set would read as complete while missing a
+    segment the index still lists.
+    """
+    directory = segment_dir(work_dir)
+    if not directory.exists():
+        return 0
+    restored = 0
+    for path in sorted(directory.glob("*.parked")):
+        os.replace(path, path.with_suffix(""))
+        restored += 1
+    return restored
+
+
+def expected_census(records):
+    """The census the pinned set MUST produce, computed from the seal records alone.
+
+    No file is read to obtain this. V1 compared one read against another read of the same bytes, so
+    a reader defect that affected both identically would have passed both. Rotation-time evidence
+    cannot be fooled that way.
+    """
+    ordered = sorted(records, key=lambda r: r["sequence"])
+    chain = hashlib.sha256()
+    for record in ordered:
+        chain.update(record["sha256_uncompressed"].encode())
+    return {"segments": len(ordered),
+            "total_record_count": sum(r["record_count"] for r in ordered),
+            "segment_chain_sha256": chain.hexdigest()}
+
+
+def single_pass_verify(work_dir, stem, records):
+    """ONE traversal of the pinned sealed set, verifying each segment as it streams.
+
+    Every segment is read through the same code path a replay uses, in ascending sequence, in
+    whatever form now exists. Each segment's bytes are hashed and its records counted during the
+    traversal and checked against its own seal, so a failure names the segment rather than the run.
+    """
+    ordered = sorted(records, key=lambda r: r["sequence"])
+    chain = hashlib.sha256()
+    total = 0
+    for record in ordered:
+        digest = hashlib.sha256()
+        count = 0
+        handle = open_segment(work_dir, record)
+        try:
+            for line in handle:
+                digest.update(line)
+                if line.strip():
+                    count += 1
+        finally:
+            handle.close()
+        actual = digest.hexdigest()
+        if actual != record["sha256_uncompressed"]:
+            raise RetentionRefused(
+                f"{R_SEAL_MISMATCH}: segment {record['sequence']:06d} streams to {actual}, sealed "
+                f"as {record['sha256_uncompressed']}")
+        if count != record["record_count"]:
+            raise RetentionRefused(
+                f"{R_SEAL_MISMATCH}: segment {record['sequence']:06d} streams {count} records, "
+                f"sealed as {record['record_count']}")
+        chain.update(actual.encode())
+        total += count
+    return {"segments": len(ordered), "total_record_count": total,
+            "segment_chain_sha256": chain.hexdigest()}
+
+
+def quarantine(work_dir, payload):
+    path = segment_dir(work_dir) / "quarantine.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    line = json.dumps({**payload, "at_wall_unix": time.time()},
+                      sort_keys=True, separators=(",", ":"))
+    scan_for_secrets(line, "quarantine record")
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(line + "\n")
+    return payload
+
+
+def compact_once(work_dir, stem, document=None, verifier=None):
+    """The V2 gate. Every candidate is replaced, or none is.
+
+    A partial replacement would leave a set that was never verified as a set, and the next run
+    would inherit it without knowing which half had been proven.
+    """
+    document = verify_preregistration_v2() if document is None else document
+    work_dir = pathlib.Path(work_dir)
+    verifier = single_pass_verify if verifier is None else verifier
+    report = {"stem": stem, "restored_parked": restore_parked_originals(work_dir),
+              "discarded_partials": discard_partial_archives(work_dir),
+              "candidates": [], "replaced": [], "refusals": []}
+    records = [r for r in read_index(work_dir) if r["stem"] == stem]
+    assert_index_contiguous(records)
+    if not records:
+        report["frontier"] = 0
+        return report
+    # Pinned ONCE. The live writer keeps sealing segments, and a set read twice is two different
+    # sets — comparing them reports a divergence that is only the feed doing its job.
+    frontier = max(r["sequence"] for r in records)
+    report["frontier"] = frontier
+    pinned = [r for r in records if r["sequence"] <= frontier]
+    already = verified_sequences(work_dir)
+    candidates = [r for r in pinned if r["sequence"] not in already
+                  and sealed_path(work_dir, stem, r["sequence"]).exists()]
+    report["candidates"] = [r["sequence"] for r in candidates]
+
+    # An archive whose original is already gone was replaced by a run whose flag write was lost.
+    # It still has to prove itself before the flag is recorded.
+    for record in pinned:
+        sequence = record["sequence"]
+        if sequence in already or sealed_path(work_dir, stem, sequence).exists():
+            continue
+        try:
+            proof = verify_segment(work_dir, record)
+            update_index_flags(work_dir, sequence, replaced=True, recovered_flag=True,
+                               archive_sha256=proof["archive_sha256"],
+                               archive_bytes=proof["archive_bytes"])
+        except RetentionRefused as error:
+            report["refusals"].append({"sequence": sequence, "reason": str(error)[:200]})
+
+    if not candidates:
+        report["expected_census"] = expected_census(pinned)
+        return report
+
+    for record in candidates:
+        compress_segment(work_dir, record)
+    for record in candidates:
+        os.replace(sealed_path(work_dir, stem, record["sequence"]),
+                   parked_path(work_dir, stem, record["sequence"]))
+    try:
+        expected = expected_census(pinned)
+        observed = verifier(work_dir, stem, pinned)
+        if observed != expected:
+            raise RetentionRefused(
+                f"{R_REPLAY_DIVERGED}: the pinned set streams {observed}, and the seal records say "
+                f"{expected}")
+    except Exception as error:                                            # noqa: BLE001
+        # Every original back, none deleted. The failure is recorded rather than retried blindly,
+        # and it carries its TYPE: a bare message like "unexpected end of stream" leaves an
+        # operator unable to tell a refusal from a MemoryError.
+        restored = restore_parked_originals(work_dir)
+        reason = f"{type(error).__name__}: {error}"[:300]
+        report["refusals"].append({"frontier": frontier, "restored": restored, "reason": reason})
+        quarantine(work_dir, {"stem": stem, "frontier": frontier,
+                              "candidates": report["candidates"],
+                              "reason": reason, "restored": restored})
+        return report
+    for record in candidates:
+        parked_path(work_dir, stem, record["sequence"]).unlink()
+        archive = sealed_path(work_dir, stem, record["sequence"], compressed=True)
+        update_index_flags(work_dir, record["sequence"], replaced=True,
+                           archive_bytes=archive.stat().st_size,
+                           uncompressed_bytes=record["uncompressed_bytes"])
+        report["replaced"].append(record["sequence"])
+    report["expected_census"] = expected
+    report["observed_census"] = observed
+    return report
