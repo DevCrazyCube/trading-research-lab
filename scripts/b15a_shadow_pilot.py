@@ -106,6 +106,7 @@ def _load(name, filename):
 
 WS = _load("b15a_websocket", "b15a_websocket.py")
 B11B = _load("b11b_t0_features", "b11b_t0_features.py")
+B15J = _load("b15j_raw_retention", "b15j_raw_retention.py")
 
 
 class PilotRefused(RuntimeError):
@@ -249,21 +250,68 @@ def record_metadata(connection, document, receipt, commitment):
 
 
 class RawLog:
-    """Append-only. A line once written is never edited or deleted."""
+    """Append-only. A line once written is never edited or deleted — only sealed and compressed.
 
-    def __init__(self, path=RAW_PATH):
+    Rotation lives here because this object owns the file handle. An outside rotator that renamed
+    the path while this handle stayed open would leave the writer appending to the same inode under
+    its sealed name, so a segment would keep growing after it was hashed.
+    """
+
+    def __init__(self, path=RAW_PATH, retention=None, max_segment_bytes=None, reserve_bytes=None,
+                 check_interval_seconds=60.0, stem=None):
         pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
         self.path = pathlib.Path(path)
         self.handle = open(self.path, "a", encoding="utf-8")
-        self.count = sum(1 for _ in self.path.open()) if self.path.exists() else 0
+        self.retention = retention
+        self.stem = stem or self.path.name.removesuffix(".jsonl")
+        self.max_segment_bytes = max_segment_bytes
+        self.reserve_bytes = reserve_bytes
+        self.check_interval_seconds = check_interval_seconds
+        self.bytes_written = self.path.stat().st_size if self.path.exists() else 0
+        self.rotations = 0
+        self._last_space_check = 0.0
+        if self.path.exists():
+            with self.path.open() as existing:
+                self.count = sum(1 for _ in existing)
+        else:
+            self.count = 0
 
     def append(self, record):
         self.count += 1
-        self.handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
+        line = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
+        self.handle.write(line)
         # Flushed per frame. A buffered raw log loses the last frames on any hard stop, and those
         # are exactly the frames a fault investigation wants.
         self.handle.flush()
+        self.bytes_written += len(line.encode())
+        self._maybe_check_space()
+        self._maybe_rotate()
         return self.count
+
+    def _maybe_check_space(self):
+        if self.retention is None or self.reserve_bytes is None:
+            return
+        now = time.monotonic()
+        if now - self._last_space_check < self.check_interval_seconds:
+            return
+        self._last_space_check = now
+        # Raises, which stops capture. It never degrades to a thinner record: a feed that keeps
+        # writing past the guard changes its own coverage at a moment no later census can name.
+        self.retention.assert_free_space(self.path.parent, self.reserve_bytes)
+
+    def _maybe_rotate(self):
+        if self.retention is None or not self.max_segment_bytes:
+            return
+        if self.bytes_written < self.max_segment_bytes:
+            return
+        self.handle.close()          # the seal is taken over a file nobody is appending to
+        try:
+            self.retention.rotate(self.path, self.path.parent, self.stem,
+                                  self.retention.verify_preregistration())
+            self.rotations += 1
+            self.bytes_written = 0
+        finally:
+            self.handle = open(self.path, "a", encoding="utf-8")
 
     def close(self):
         self.handle.close()
@@ -844,7 +892,8 @@ MAX_CONSECUTIVE_BARREN_SESSIONS = 20
 
 def run(commitment=DEFAULT_COMMITMENT, max_frames=None, transport=None, backfill=None,
         work_dir=WORK_DIR, clock=None, max_sessions=None,
-        max_barren_sessions=MAX_CONSECUTIVE_BARREN_SESSIONS):
+        max_barren_sessions=MAX_CONSECUTIVE_BARREN_SESSIONS, reserve_bytes=None,
+        max_segment_bytes=None):
     """Connect, record, decide, reconnect, stop. Fails visibly and preserves everything."""
     assert_no_execution_surface()
     assert_isolated(work_dir)
@@ -855,7 +904,19 @@ def run(commitment=DEFAULT_COMMITMENT, max_frames=None, transport=None, backfill
     url = WS.websocket_url_from_env()
     receipt = WS.endpoint_receipt(url)
     connection = open_database(pathlib.Path(work_dir) / "shadow.sqlite")
-    raw = RawLog(pathlib.Path(work_dir) / "raw_frames.jsonl")
+    retention_document = B15J.verify_preregistration()
+    reserve = retention_document["free_space_guard"]["reserve_bytes"] if reserve_bytes is None \
+        else reserve_bytes
+    segment_limit = retention_document["segment_format"]["max_segment_bytes"] \
+        if max_segment_bytes is None else max_segment_bytes
+    # Refused here rather than after hours of writing: below the reserve there is nothing this
+    # pilot should be adding to the disk, because B11a's collection cannot be repeated.
+    B15J.assert_free_space(work_dir, reserve)
+    B15J.discard_partial_archives(work_dir)
+    raw = RawLog(pathlib.Path(work_dir) / "raw_frames.jsonl", retention=B15J,
+                 max_segment_bytes=segment_limit, reserve_bytes=reserve,
+                 check_interval_seconds=retention_document["free_space_guard"][
+                     "check_interval_seconds"])
     record_metadata(connection, document, receipt, commitment)
     b7d, discriminator, create_type, types = load_pinned_create_type()
     decoder = {"b7d": b7d, "discriminator": discriminator, "create_type": create_type,

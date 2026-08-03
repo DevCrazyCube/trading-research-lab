@@ -204,9 +204,11 @@ def run_offline_session(directory, commitment="confirmed"):
         made["count"] += 1
         return FakeSocket(stream if made["count"] == 1 else [])
 
+    # reserve_bytes=0 because a fixture runs in a temp directory whose filesystem is not the one
+    # the guard exists to protect. The guard itself is driven by its own tests, not disabled there.
     PILOT.run(commitment=commitment, max_frames=len(stream), transport=transport,
               backfill=lambda _signature: "unavailable", work_dir=work, clock=lambda _s: None,
-              max_sessions=2)
+              max_sessions=2, reserve_bytes=0)
     return work
 
 

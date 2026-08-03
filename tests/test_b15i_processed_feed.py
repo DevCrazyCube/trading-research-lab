@@ -918,7 +918,7 @@ class TestSessionsAndReconnect(unittest.TestCase):
             return B15I.run(url="https://example.invalid", ws_url="wss://example.invalid",
                             work_dir=self.directory / "b15i", workers=1,
                             opener=lambda *a, **k: (_ for _ in ()).throw(OSError("no rpc")),
-                            reconcile_interval=3600.0, **kwargs)
+                            reconcile_interval=3600.0, reserve_bytes=0, **kwargs)
         finally:
             B15I.WS.WebSocket = original
 
@@ -941,6 +941,33 @@ class TestSessionsAndReconnect(unittest.TestCase):
         connection.close()
         self.assertEqual(rows["SigOne" + "1" * 30], 0)
         self.assertEqual(rows["SigTwo" + "2" * 30], 1)
+
+    def test_the_pilot_refuses_to_start_below_the_disk_reserve(self):
+        """Refused at startup, not after an hour of writing. B11a is the party protected."""
+        transport = self.Transport([[_create_frame(436_900_000, "SigOne" + "1" * 30)]])
+        original = B15I.WS.WebSocket
+        B15I.WS.WebSocket = transport
+        try:
+            with self.assertRaises(B15I.B15J.RetentionRefused) as caught:
+                B15I.run(url="https://example.invalid", ws_url="wss://example.invalid",
+                         work_dir=self.directory / "b15i", workers=1, max_sessions=1,
+                         reconcile_interval=3600.0, reserve_bytes=1 << 62)
+            self.assertIn("R_DISK_RESERVE", str(caught.exception))
+            self.assertIn("B11a", str(caught.exception))
+        finally:
+            B15I.WS.WebSocket = original
+
+    def test_the_raw_log_rotates_itself_and_the_segments_replay_whole(self):
+        transport = self.Transport([[_create_frame(436_900_000 + i, f"Sig{i:040d}")
+                                     for i in range(6)]])
+        self._run(transport, max_sessions=1, reconnect_pause=0.0, max_segment_bytes=1)
+        work = self.directory / "b15i"
+        index = B15I.B15J.read_index(work)
+        self.assertGreater(len(index), 1)
+        B15I.B15J.assert_index_contiguous(index)
+        lines = list(B15I.B15J.iter_lines(work, "raw_processed_frames",
+                                          work / "raw_processed_frames.jsonl"))
+        self.assertEqual(len(lines), 6)      # every frame still readable across the segments
 
     def test_the_fault_is_recorded_as_a_fault_not_smoothed_over(self):
         transport = self.Transport([[_create_frame(436_900_000, "SigOne" + "1" * 30)]])

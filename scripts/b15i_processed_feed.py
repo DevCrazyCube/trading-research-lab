@@ -85,6 +85,7 @@ def _load(name, filename):
 
 
 B15H = _load("b15h_prospective_entry", "b15h_prospective_entry.py")
+B15J = _load("b15j_raw_retention", "b15j_raw_retention.py")
 B15F, B15B, PILOT, B10A = B15H.B15F, B15H.B15B, B15H.PILOT, B15H.B10A
 WS = PILOT.WS
 
@@ -235,7 +236,7 @@ CREATE TABLE IF NOT EXISTS target (
   receipt_to_schedule_ns INTEGER NOT NULL,
   state TEXT NOT NULL, reason TEXT,
   queue_delay_ns INTEGER, context_slot INTEGER, lateness_slots INTEGER, rpc_round_trip_ns INTEGER,
-  attempts INTEGER,
+  attempts INTEGER, waited_ns INTEGER,
   virtual_quote INTEGER, virtual_token INTEGER, real_quote INTEGER, real_token INTEGER,
   quote_mint TEXT, mayhem_mode INTEGER, complete INTEGER,
   evidence_sha256 TEXT NOT NULL,
@@ -252,8 +253,9 @@ def open_database(path=DB_PATH):
     # A database written before `attempts` existed keeps its rows; the column is added rather than
     # the file recreated, because recreating it would discard the evidence that motivated it.
     existing = {row[1] for row in connection.execute("PRAGMA table_info(target)")}
-    if "attempts" not in existing:
-        connection.execute("ALTER TABLE target ADD COLUMN attempts INTEGER")
+    for column in ("attempts", "waited_ns"):
+        if column not in existing:
+            connection.execute(f"ALTER TABLE target ADD COLUMN {column} INTEGER")
     observed = {row[1] for row in connection.execute("PRAGMA table_info(observation)")}
     for column, definition in (("session_id", "TEXT"),
                                ("observed_after_gap", "INTEGER NOT NULL DEFAULT 0")):
@@ -264,12 +266,27 @@ def open_database(path=DB_PATH):
 
 
 class RawLog:
-    """Append-only. Written BEFORE anything is enqueued."""
+    """Append-only, self-rotating, and refusing before the disk becomes someone else's problem.
 
-    def __init__(self, path=RAW_PATH):
+    Rotation happens HERE rather than in an outside process because this object owns the file
+    handle. An external rotator that renamed the path while this handle stayed open would leave the
+    writer appending to the same inode under its sealed name, so the "sealed" segment would keep
+    growing after it was hashed.
+    """
+
+    def __init__(self, path=RAW_PATH, retention=None, max_segment_bytes=None, reserve_bytes=None,
+                 check_interval_seconds=60.0, stem=None):
         pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
         self.path = pathlib.Path(path)
         self.handle = open(self.path, "a", encoding="utf-8")
+        self.retention = retention
+        self.stem = stem or self.path.name.removesuffix(".jsonl")
+        self.max_segment_bytes = max_segment_bytes
+        self.reserve_bytes = reserve_bytes
+        self.check_interval_seconds = check_interval_seconds
+        self.bytes_written = self.path.stat().st_size if self.path.exists() else 0
+        self.rotations = 0
+        self._last_space_check = 0.0
         if self.path.exists():
             with self.path.open() as existing:
                 self.count = sum(1 for _ in existing)
@@ -278,9 +295,40 @@ class RawLog:
 
     def append(self, record):
         self.count += 1
-        self.handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
+        line = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
+        self.handle.write(line)
         self.handle.flush()
+        self.bytes_written += len(line.encode())
+        self._maybe_check_space()
+        self._maybe_rotate()
         return self.count
+
+    def _maybe_check_space(self):
+        if self.retention is None or self.reserve_bytes is None:
+            return
+        now = time.monotonic()
+        if now - self._last_space_check < self.check_interval_seconds:
+            return
+        self._last_space_check = now
+        # Raises RetentionRefused, which stops capture. It does not degrade, sample or filter:
+        # a feed that keeps writing a thinner record past the guard changes its own coverage at
+        # an unmarked moment, and no later census can say when.
+        self.retention.assert_free_space(self.path.parent, self.reserve_bytes)
+
+    def _maybe_rotate(self):
+        if self.retention is None or not self.max_segment_bytes:
+            return
+        if self.bytes_written < self.max_segment_bytes:
+            return
+        # Close first: the seal must be taken over a file nobody is appending to.
+        self.handle.close()
+        try:
+            self.retention.rotate(self.path, self.path.parent, self.stem,
+                                  self.retention.verify_preregistration())
+            self.rotations += 1
+            self.bytes_written = 0
+        finally:
+            self.handle = open(self.path, "a", encoding="utf-8")
 
     def close(self):
         self.handle.close()
@@ -429,22 +477,31 @@ def capture(record, url, connection, lock, decoder, document, counts, opener=Non
                         "minContextSlot": target}]}
     if first_attempt_delay_slots > 0:
         sleeper(first_attempt_delay_slots * SLOT_SECONDS)
+    # Two clocks, kept apart. `waited_ns` is time deliberately spent not asking; `network_ns` is
+    # only the calls themselves. Reporting their sum as "round trip" made a 220ms endpoint look
+    # like a 14.7s one, which is a claim about the provider that the measurement never supported.
+    waited_ns = time.monotonic_ns() - started
+    network_ns = 0
     attempts = 0
     for attempt in range(policy["max_attempts"]):
         attempts = attempt + 1
+        attempt_started = time.monotonic_ns()
         outcome, status, payload = B15B._one_attempt(url, body, opener)
+        network_ns += time.monotonic_ns() - attempt_started
         if exchanges is not None:
             exchanges.append({"method": "getAccountInfo", "outcome": outcome,
                               "http_status": status, "target_slot": target,
                               "signature": record["signature"], "attempt": attempts,
                               "delay_slots": record["delay_slots"],
-                              "round_trip_ns": time.monotonic_ns() - started,
+                              "network_ns": network_ns, "waited_ns": waited_ns,
                               "response": payload})
         if outcome == "retrieved" or not _context_not_reached(payload):
             break
         if attempts < policy["max_attempts"]:
+            retry_started = time.monotonic_ns()
             sleeper(policy["retry_interval_slots"] * SLOT_SECONDS)
-    round_trip = time.monotonic_ns() - started
+            waited_ns += time.monotonic_ns() - retry_started
+    round_trip = network_ns
     queue_delay = started - record["enqueued_monotonic_ns"]
     try:
         if outcome != "retrieved":
@@ -458,19 +515,19 @@ def capture(record, url, connection, lock, decoder, document, counts, opener=Non
         with lock:
             connection.execute(
                 "UPDATE target SET state=?, reason=?, queue_delay_ns=?, rpc_round_trip_ns=?, "
-                "attempts=? WHERE signature=? AND delay_slots=?",
+                "attempts=?, waited_ns=? WHERE signature=? AND delay_slots=?",
                 (STATE_REFUSED, f"{code}:{str(error)[:160]}", queue_delay, round_trip, attempts,
-                 record["signature"], record["delay_slots"]))
+                 waited_ns, record["signature"], record["delay_slots"]))
             connection.commit()
         counts["refused"] += 1
         return
     with lock:
         connection.execute(
             "UPDATE target SET state=?, queue_delay_ns=?, context_slot=?, lateness_slots=?, "
-            "rpc_round_trip_ns=?, attempts=?, virtual_quote=?, virtual_token=?, real_quote=?, "
-            "real_token=?, quote_mint=?, mayhem_mode=?, complete=? "
+            "rpc_round_trip_ns=?, attempts=?, waited_ns=?, virtual_quote=?, virtual_token=?, "
+            "real_quote=?, real_token=?, quote_mint=?, mayhem_mode=?, complete=? "
             "WHERE signature=? AND delay_slots=?",
-            (STATE_CAPTURED, queue_delay, context_slot, lateness, round_trip, attempts,
+            (STATE_CAPTURED, queue_delay, context_slot, lateness, round_trip, attempts, waited_ns,
              state["virtual_quote"], state["virtual_token"], state["real_quote"],
              state["real_token"], state["quote_mint"], int(state["mayhem_mode"]),
              int(state["complete"]), record["signature"], record["delay_slots"]))
@@ -603,13 +660,17 @@ def census(connection, lock=None):
             "still_future_at_scheduling": reachable,
             # The pilot's whole question, per delay. A zero here is the measured blocker.
             "reachable": reachable > 0}
-    for delay, count, med_sched, med_queue, med_rtt in _query(
+    # Waiting and network are reported separately and never summed into one figure. Their sum
+    # once made a 220ms endpoint read as a 14.7s one, which is a claim about the provider that the
+    # measurement never supported.
+    for delay, count, med_sched, med_queue, med_net, med_wait in _query(
             "SELECT delay_slots, COUNT(*), CAST(AVG(receipt_to_schedule_ns) AS INTEGER), "
-            "CAST(AVG(queue_delay_ns) AS INTEGER), CAST(AVG(rpc_round_trip_ns) AS INTEGER) "
-            "FROM target GROUP BY delay_slots"):
+            "CAST(AVG(queue_delay_ns) AS INTEGER), CAST(AVG(rpc_round_trip_ns) AS INTEGER), "
+            "CAST(AVG(waited_ns) AS INTEGER) FROM target GROUP BY delay_slots"):
         report["latency_ns_by_delay"][str(delay)] = {
             "targets": count, "receipt_to_schedule_mean_ns": med_sched,
-            "queue_delay_mean_ns": med_queue, "rpc_round_trip_mean_ns": med_rtt}
+            "queue_delay_mean_ns": med_queue, "rpc_network_mean_ns": med_net,
+            "deliberate_wait_mean_ns": med_wait}
     lateness = _query("SELECT delay_slots, MIN(lateness_slots), CAST(AVG(lateness_slots) AS "
                       "INTEGER), MAX(lateness_slots) FROM target WHERE state='captured' "
                       "GROUP BY delay_slots")
@@ -723,7 +784,7 @@ def worker_loop(work_queue, url, connection, lock, decoder, document, counts, st
 
 def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opener=None,
         websocket=None, max_frames=None, reconcile_interval=60.0, max_sessions=10**9,
-        reconnect_pause=1.0):
+        reconnect_pause=1.0, reserve_bytes=None, max_segment_bytes=None):
     """Subscribe at processed, write raw, enqueue, drain. Read-only against the chain throughout."""
     assert_no_execution_surface()
     assert_feed_thread_does_not_call_rpc()
@@ -736,7 +797,19 @@ def run(url=None, ws_url=None, work_dir=WORK_DIR, seconds=None, workers=4, opene
     work_dir = pathlib.Path(work_dir)
     work_dir.mkdir(parents=True, exist_ok=True)
     connection = open_database(work_dir / "processed_feed.sqlite")
-    raw = RawLog(work_dir / "raw_processed_frames.jsonl")
+    retention_document = B15J.verify_preregistration()
+    reserve = retention_document["free_space_guard"]["reserve_bytes"] if reserve_bytes is None \
+        else reserve_bytes
+    segment_limit = retention_document["segment_format"]["max_segment_bytes"] \
+        if max_segment_bytes is None else max_segment_bytes
+    # Refuse at startup rather than after an hour of writing: if the reserve is already breached
+    # there is nothing this pilot should be adding to the disk.
+    B15J.assert_free_space(work_dir, reserve)
+    B15J.discard_partial_archives(work_dir)
+    raw = RawLog(work_dir / "raw_processed_frames.jsonl", retention=B15J,
+                 max_segment_bytes=segment_limit, reserve_bytes=reserve,
+                 check_interval_seconds=retention_document["free_space_guard"][
+                     "check_interval_seconds"])
     exchanges = B15B.ExchangeLog(work_dir / "rpc_exchanges.jsonl")
     b7d, discriminator, create_type, types = PILOT.load_pinned_create_type()
     create_decoder = {"b7d": b7d, "discriminator": discriminator, "create_type": create_type,
