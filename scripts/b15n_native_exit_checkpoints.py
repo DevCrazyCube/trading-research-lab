@@ -461,6 +461,25 @@ def admissible_downstream(fork_state, chain_verdict):
 # The poller
 # --------------------------------------------------------------------------------------------
 
+def read_current_slot(url, opener, slot_source, counts):
+    """The finalized slot for this tick, or None and a recorded fault. Never an exception upward.
+
+    One transient HTTP 429 on this single getSlot unwound the entire worker and it stayed dead, while
+    B15f absorbed ten of them and kept running. A durable poller must record a transient endpoint
+    fault and skip the tick: the targets are still scheduled, their deadlines are minutes away, and
+    the next poll will reach them.
+    """
+    try:
+        current = B15F.current_slot(url, opener) if slot_source is None else slot_source()
+    except Exception as error:                                            # noqa: BLE001
+        counts["slot_unavailable"] = counts.get("slot_unavailable", 0) + 1
+        counts["last_slot_error"] = f"{type(error).__name__}: {error}"[:200]
+        return None
+    if current is None:
+        counts["slot_unavailable"] = counts.get("slot_unavailable", 0) + 1
+    return current
+
+
 def due_targets(connection, current_slot, tolerance, limit=None):
     """Targets whose slot has arrived and whose deadline has not passed, oldest first.
 
@@ -696,9 +715,8 @@ def run(url=None, work_dir=WORK_DIR, b15i_path=B15I_DB, document=None, ticks=1, 
         for tick in range(ticks):
             if tick:
                 sleeper(poll)
-            current = B15F.current_slot(url, opener) if slot_source is None else slot_source()
+            current = read_current_slot(url, opener, slot_source, counts)
             if current is None:
-                counts["slot_unavailable"] = counts.get("slot_unavailable", 0) + 1
                 continue
             activation = inherited["activation_slot"]
             highest = connection.execute(

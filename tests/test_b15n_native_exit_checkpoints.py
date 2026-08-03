@@ -691,6 +691,43 @@ class TestEndToEnd(Base):
         self.assertEqual(counts["slot_unavailable"], 1)
         self.assertEqual(report["checkpoints"], 0)
 
+    def test_a_transient_slot_error_skips_the_tick_instead_of_killing_the_worker(self):
+        """One HTTP 429 on this single getSlot unwound the whole worker and it stayed dead.
+
+        B15f absorbed ten of the same error and kept running. The targets are still scheduled and
+        their deadlines are minutes away, so a skipped tick costs nothing and a dead worker costs
+        everything.
+        """
+        self.write_feed([self.launch()])
+
+        def exploding():
+            raise B15F.CheckpointRefused("C_RPC_EXHAUSTED: HTTPError 429: Too Many Requests")
+
+        counts, report = B15N.run(url="https://example.invalid", work_dir=self.directory,
+                                  b15i_path=self.b15i, document=self.v2, ticks=1,
+                                  opener=opener_for([batch_response(T0 + 1001, [CURVE])]),
+                                  sleeper=lambda _s: None, slot_source=exploding)
+        self.assertEqual(counts["slot_unavailable"], 1)
+        self.assertIn("429", counts["last_slot_error"])
+        self.assertEqual(report["checkpoints"], 0)
+
+    def test_several_transient_slot_errors_are_all_absorbed(self):
+        self.write_feed([self.launch()])
+        calls = {"n": 0}
+
+        def flaky():
+            calls["n"] += 1
+            if calls["n"] < 3:
+                raise OSError("endpoint down")
+            return T0 + 1001
+
+        counts, report = B15N.run(url="https://example.invalid", work_dir=self.directory,
+                                  b15i_path=self.b15i, document=self.v2, ticks=3,
+                                  opener=opener_for([batch_response(T0 + 1001, [CURVE])]),
+                                  sleeper=lambda _s: None, slot_source=flaky)
+        self.assertEqual(counts["slot_unavailable"], 2)
+        self.assertEqual(counts.get("checkpointed"), 1)     # the third tick worked
+
     def test_status_on_an_unstarted_worker_says_so(self):
         report = B15N.status(self.directory / "unstarted")
         self.assertEqual(report["state"], "not_started")
