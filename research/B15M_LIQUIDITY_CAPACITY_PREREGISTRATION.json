@@ -1,0 +1,156 @@
+{
+  "preregistration_id": "B15M_LIQUIDITY_CAPACITY_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 140)",
+  "status": "FROZEN. Committed alone, before any capacity is computed and before any result is inspected.",
+  "purpose": "Measure, exactly, how much quote input each cell's EXTERNAL liquidity could have supported on exit — without our own buy's reserve contribution paying for our own sale.",
+  "committed_before_any_capacity_computed": true,
+
+  "why_this_exists": {
+    "the_b15l_finding": "of 14,688 priced cells, the naive observed-book exit could be priced on only 2,748. On the other 81% the observed curve held on the order of one lamport of real quote, so the tokens a 0.1 SOL buy would have acquired could not be sold against the book as it actually stood.",
+    "the_question_that_follows": "0.1 SOL was fixed long before any of this and was never chosen with these curves in view. The binding question is not what that size would have yielded but how much external liquidity existed to exit into at all.",
+    "why_it_is_worth_more_than_another_counterfactual": "it needs no assumption about competitor response. The answer is a property of the observed reserves and the pinned arithmetic, and it is exact."
+  },
+
+  "what_this_is_not": {
+    "not_recommended_sizing": "a capacity is what the book could have absorbed, not what anyone should have sent. No size is recommended, selected or optimised anywhere in this study.",
+    "not_a_governor_resize": "no position limit, risk governor or order size in any frozen document is changed, proposed to be changed, or read as evidence for changing.",
+    "not_a_return": "no output is a return, a profit, an expected value or a performance figure, and none may be described as one.",
+    "not_a_landing_claim": "capacity says nothing about whether an order would have landed at the delay it assumes."
+  },
+
+  "population": {
+    "rule": "the IDENTICAL admissible row universe as B15L_COUNTERFACTUAL_ROUNDTRIP_V1, by the same conditions in the same order, so the two studies describe the same cells",
+    "reused_verbatim_from_b15l": [
+      "a B15i observation whose fork_state is `confirmed`",
+      "a captured B15i entry checkpoint for (signature, delay_slots)",
+      "a checkpointed B15f exit checkpoint for (signature, delay_slots, horizon)",
+      "native quote mint on both checkpoints",
+      "mayhem mode on neither",
+      "not complete at entry, and not complete at exit",
+      "an exactly decoded fee schedule from the launch transaction",
+      "both checkpoints within the frozen B15F lateness tolerance",
+      "matching bonding curve and mint, and exit context slot at or after entry context slot"
+    ],
+    "no_new_admission": "this study admits no cell B15L refused, and refuses no cell B15L admitted, except where a refusal code below names a condition specific to capacity."
+  },
+
+  "frozen_inputs_unchanged": {
+    "entry_delays_slots": [1, 2, 4],
+    "entry_delay_source": "B15D_SHADOW_ROUTE_V1",
+    "exit_horizons": ["h_1000_slots", "h_10000_slots"],
+    "exit_horizon_source": "B10b identifiers and slot-horizon semantics",
+    "capacity_search_upper_bound_lamports": 100000000,
+    "upper_bound_rationale": "0.1 SOL, the position size fixed from B10a onward. It is the SEARCH CEILING, not a target: a cell whose capacity reaches it is reported as cap-hit, meaning the true capacity is at least this and was not measured further.",
+    "cost_scenarios": [
+      {"scenario_id": "optimistic", "base_fee_lamports": 5000, "priority_fee_lamports": 1000, "tip_lamports": 0, "ata_rent_lamports": 2039280, "failed_attempts": 0},
+      {"scenario_id": "base", "base_fee_lamports": 5000, "priority_fee_lamports": 100000, "tip_lamports": 0, "ata_rent_lamports": 2039280, "failed_attempts": 0},
+      {"scenario_id": "stressed", "base_fee_lamports": 5000, "priority_fee_lamports": 1000000, "tip_lamports": 0, "ata_rent_lamports": 2039280, "failed_attempts": 1}
+    ],
+    "cost_scenario_source": "B15D_SHADOW_ROUTE_V1, verbatim",
+    "arithmetic": "B9I's pinned formulas and B10a's price_entry, price_exit and curve_fees by direct call; B10b's max_executable_tokens for the differential check. No formula is reimplemented and no float appears anywhere."
+  },
+
+  "primary_estimand": {
+    "name": "external_liquidity_capacity_lamports",
+    "definition": "for one cell, the greatest integer q in [0, 100000000] such that the token amount a buy of q would acquire at the ENTRY checkpoint can be sold in full against the OBSERVED EXIT checkpoint state, with our own buy's reserve contribution NOT carried forward",
+    "the_two_constraints": [
+      "the entry must be possible: tokens_out(q) must not exceed the entry checkpoint's real token reserve",
+      "the exit must be payable: quote_out(tokens_out(q)) against the OBSERVED exit reserves must not exceed the observed exit real quote reserve"
+    ],
+    "explicitly_external_only": "the exit is priced against the exit checkpoint exactly as observed. Our buy adds nothing to the reserves it will later be paid out of. That self-contribution is what B15L measured and what this study removes.",
+    "monotonicity": {
+      "claim": "the admissible q form a prefix of [0, 100000000], so a binary search finds its end",
+      "argument": "tokens_out_for_exact_quote_in is non-decreasing in q, and quote_out_for_tokens_in is non-decreasing in tokens_in, so the composite draw is non-decreasing in q and each constraint defines a down-set. The intersection of two down-sets is a down-set.",
+      "not_taken_on_trust": "bisection is used ONLY if monotonicity is verified. The verification is stated below and a failure refuses the cell rather than returning a search result over a set that is not a prefix.",
+      "verification_per_cell": "the returned q must satisfy both constraints, and q+1 must violate at least one unless q is the search ceiling. Both are checked on every cell, not sampled.",
+      "verification_of_the_predicate_shape": "over a preregistered exhaustive scan of small synthetic curves, the admissible set is confirmed to be a contiguous prefix for every curve scanned; a single non-prefix set fails the study rather than being tolerated."
+    },
+    "zero_capacity": "a cell whose capacity is 0 is a cell whose external liquidity could not have paid for any positive buy's exit. It is reported, counted, and never treated as missing data.",
+    "cap_hit": "a cell whose capacity equals the search ceiling is reported as cap-hit and its true capacity is stated as unmeasured above the ceiling, never as equal to it."
+  },
+
+  "secondary_estimand_separately_named": {
+    "name": "fixed_grid_liquidity_executability",
+    "grid_lamports": [1000000, 2500000, 5000000, 10000000, 25000000, 50000000, 100000000],
+    "grid_rationale": "a fixed preregistered grid spanning two orders of magnitude below the frozen position, chosen before any capacity was computed so no size can have been picked from a result.",
+    "reported_per_grid_size": [
+      "whether the size is liquidity-executable at all: its tokens can be sold in full against the observed exit state",
+      "the exact proceeds minus the frozen entry and exit costs, per cost scenario",
+      "whether that quantity is non-negative, per cost scenario"
+    ],
+    "no_optimisation": "no size is selected, ranked as best, or described as optimal. The grid is reported in full, including sizes that fail, and a reader choosing among them is doing something this study does not do."
+  },
+
+  "circular_liquidity_dependence": {
+    "name": "circular_liquidity_dependence",
+    "definition": "a cell where the exit could be priced in B15L's self-contributed counterfactual but its external-only capacity is zero: the sale was payable only out of the reserves our own purchase had added",
+    "why_it_is_named": "an exit funded by one's own entry is not liquidity. Left unnamed it would appear as a priced cell indistinguishable from one the market could have absorbed.",
+    "reported_as": "a count and a share per horizon and delay, beside the capacity distribution",
+    "not_a_selection_criterion": "no cell is included, excluded, weighted or ordered by it"
+  },
+
+  "reporting": {
+    "per_group": "every figure is reported per (cost scenario, horizon, delay) where costs matter, and per (horizon, delay) where they do not — capacity itself is a liquidity fact and does not depend on our fee assumptions",
+    "order_statistics": "exact integer minimum, p10, p25, median, p75, p90 and maximum, taken by integer index into the sorted values. No mean, no interpolation, no float.",
+    "required_counts": ["cells", "zero_capacity_cells", "cap_hit_cells", "circular_liquidity_dependence_cells", "refusals by code"],
+    "never_aggregated": "no figure spans two horizons, and no figure spans two cost scenarios. Alternative assumptions are not samples of a distribution.",
+    "censoring_statement_required_verbatim": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market"
+  },
+
+  "determinism": {
+    "row_permutation": "the output must be identical under any permutation of the input rows",
+    "checked": "by running the whole computation over shuffled inputs and comparing field for field"
+  },
+
+  "differential_tests_required": {
+    "against_b10b": "for every cell, the capacity found by searching over q must equal the capacity implied by B10b's max_executable_tokens: with T_max the largest sellable token amount, the capacity is the largest q whose tokens_out does not exceed T_max. The two routes must agree exactly on every cell; a disagreement fails the study.",
+    "why_that_equality_holds": "quote_out_for_tokens_in is non-decreasing, so `quote_out(T) <= real_quote` and `T <= T_max` are the same condition. The test therefore checks a theorem rather than a coincidence.",
+    "against_b10a": "tokens acquired must equal B9I.tokens_out_for_exact_quote_in and every cost must equal B10a's own fields",
+    "off_by_one": "maximality is tested by construction: a search returning q-1 or q+1 must fail the test on synthetic curves with a known answer"
+  },
+
+  "refusal_codes": [
+    {"code": "M_NOT_IN_B15L_UNIVERSE", "meaning": "the cell is not admissible under B15L's conditions"},
+    {"code": "M_NON_MONOTONE", "meaning": "the admissible set is not a prefix, so bisection is not valid for this cell"},
+    {"code": "M_MAXIMALITY_UNPROVEN", "meaning": "the returned capacity is not maximal: q+1 is also admissible"},
+    {"code": "M_CONSTRAINT_VIOLATED", "meaning": "the returned capacity does not itself satisfy both constraints"},
+    {"code": "M_IMPOSSIBLE_RESERVES", "meaning": "a checkpoint's reserves are non-positive or otherwise impossible"},
+    {"code": "M_FLOAT_PRESENT", "meaning": "a non-integer appeared in a quantity"},
+    {"code": "M_DIFFERENTIAL_DISAGREEMENT", "meaning": "the q-side and B10b token-side routes disagree"}
+  ],
+
+  "labels_on_every_row": {
+    "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+    "executable": false,
+    "landing_probability": "unmeasured",
+    "competitor_response": "unmeasured",
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "any network call: this study reads frozen artifacts only",
+    "calling any output a return, a profit, an expected value or a performance figure",
+    "recommending, selecting or ranking a position size",
+    "changing any frozen position size, risk governor or order limit, or citing this study as grounds to",
+    "carrying our own buy's reserve contribution into the exit state for the primary estimand",
+    "using bisection on a cell whose monotonicity was not verified",
+    "reporting a cap-hit capacity as the true capacity",
+    "aggregating across horizons or across cost scenarios",
+    "any float in any quantity",
+    "reimplementing the pinned curve formulas instead of calling B9I, B10a and B10b",
+    "modifying B11c, B11a, any live worker, any RPC cadence, or any frozen population"
+  ],
+
+  "status_locks": {
+    "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
