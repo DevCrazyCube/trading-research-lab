@@ -1,0 +1,150 @@
+{
+  "preregistration_id": "B15J_RAW_RETENTION_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 134)",
+  "status": "FROZEN. Committed alone, before any raw file is rotated, compressed, moved or replaced.",
+  "purpose": "Freeze an operational, outcome-independent raw retention format and a derived free-space reserve, so shadow capture can continue for days without threatening the B11a collection, and so no byte of raw evidence is ever lost or made unreplayable.",
+  "committed_before_altering_any_file": true,
+
+  "why_this_exists": {
+    "measured_growth": "research/b15a/raw_frames.jsonl grows about 19 GB/day and research/b15i/raw_processed_frames.jsonl about 32 GB/day, together about 51 GB/day.",
+    "measured_free_space": "128 GB free on / at the time this document was written.",
+    "the_collision": "B11c reports 317,425 slots to maturity, about 35.3 hours. At 51 GB/day the shadow feeds consume roughly 75 GB before B11a's collection starts, leaving about 53 GB for a pipeline whose measured precedent needs 29.4 GiB and which keeps growing while the feeds keep writing.",
+    "what_is_NOT_done": "no frame is filtered, no subscription is narrowed, and no raw record is discarded. The bytes are the same bytes; only their storage representation changes."
+  },
+
+  "outcome_independence": {
+    "statement": "Every threshold in this document is derived from a measured artifact size or a stated margin, and none of them depends on any result, return, coverage figure or refusal rate.",
+    "why_it_matters": "a retention rule tuned to keep the data that happens to look good is a selection rule wearing an operations costume"
+  },
+
+  "segment_format": {
+    "layout": "<work_dir>/segments/<stem>-NNNNNN.jsonl for a sealed but uncompressed segment, <stem>-NNNNNN.jsonl.gz once compressed, and <stem>.jsonl for the single ACTIVE tail",
+    "sequence": "NNNNNN is zero-padded, strictly increasing from 000001, assigned at seal time and never reused",
+    "canonical_segment_order": "ascending sequence number, then the active tail LAST. This is the only order in which a replay may read them.",
+    "active_tail": {
+      "rule": "the active tail is never compressed, never sealed in place and never guessed at",
+      "why": "it is being appended to; a partial final line is normal and must be read as far as it is complete, not repaired"
+    },
+    "rotation_trigger": "the active tail exceeds max_segment_bytes at an append boundary",
+    "max_segment_bytes": 536870912,
+    "max_segment_bytes_rationale": "512 MiB uncompressed. Small enough that a corrupt segment costs a bounded amount of evidence and that verification fits in memory streaming; large enough that a day of capture produces tens of segments rather than thousands."
+  },
+
+  "seal_record": {
+    "written_to": "<work_dir>/segments/index.jsonl, append-only, one JSON object per sealed segment",
+    "fields_required": [
+      "sequence",
+      "stem",
+      "uncompressed_bytes",
+      "record_count",
+      "first_record_sha256",
+      "last_record_sha256",
+      "first_received_wall_unix",
+      "last_received_wall_unix",
+      "first_identity",
+      "last_identity",
+      "sha256_uncompressed",
+      "sealed_at_wall_unix"
+    ],
+    "identity": "the signature carried by the record, or null when the record carries none (a subscription acknowledgement or a handler-error record). Null is recorded as null and never as an empty string.",
+    "sha256_uncompressed": "SHA-256 over the sealed file's bytes exactly as they were written, before any compression. This is the anchor every later check compares against.",
+    "index_is_append_only": "a seal record is never rewritten. A correction is a new record with a higher sequence, never an edit."
+  },
+
+  "compression": {
+    "codec": "gzip from the Python standard library, mtime pinned to 0",
+    "why_gzip": "stdlib only, no dependency added, and deterministic when mtime is pinned so the same bytes always produce the same archive",
+    "compresslevel": 6,
+    "determinism_requirement": "compressing the same sealed bytes twice must produce byte-identical output; the seal is verified against the UNCOMPRESSED hash regardless, so determinism is a convenience and never the proof"
+  },
+
+  "the_replace_gate": {
+    "statement": "A sealed original is deleted ONLY after all three of the following pass. Any failure leaves the original in place and the segment marked unverified.",
+    "conditions": [
+      "the compressed file exists and its own sha256 is recorded",
+      "decompressing the compressed file streams back bytes whose sha256 equals sha256_uncompressed from the seal record",
+      "a replay over the full segment set, with this segment read from its compressed form, reproduces the census row-for-row against the same census computed before the replacement"
+    ],
+    "order_is_mandatory": ["seal", "compress", "verify hash", "verify replay equivalence", "then and only then replace"],
+    "never": "no raw file is deleted, truncated or moved before its replacement is proven to reproduce it",
+    "crash_during_rotation": {
+      "rule": "a partially written compressed file is named <name>.gz.partial and is discarded on restart, never adopted",
+      "why": "an adopted partial archive is a silent truncation that hashes to something, and something is not the right thing",
+      "idempotence": "rotation and compression are restartable at any point; the sealed original is the authority until the gate passes"
+    }
+  },
+
+  "replay_equivalence": {
+    "requirement": "a replay reader must stream compressed and uncompressed segments in canonical segment order and produce a census identical, row for row, to the one produced from the pre-rotation files",
+    "checked_how": "the census is computed before rotation and after, and the two are compared field by field. A single differing field fails the gate.",
+    "duplicate_replay": "reading the same segment twice must not double-count: derived tables are rebuilt from scratch on replay, never appended to",
+    "gaps_and_duplicates": "a missing or repeated sequence number in the index fails the replay closed. An incomplete segment set is never read as a complete one."
+  },
+
+  "free_space_guard": {
+    "reserve_bytes": 48318382080,
+    "reserve_derivation": {
+      "measured_precedent": "the complete B9 pipeline occupies 31,580,337,648 bytes on disk (29.4 GiB), including the intermediate .bak copies it made at each sealing stage",
+      "why_that_is_the_right_precedent": "B11c's remaining stages are program_boundary, enumerate_creates, build_cohort, signature_inventory, transaction_bodies, decode_and_reserves and three gates — the same pipeline that produced those B9 artifacts, on a cohort whose size is not yet known",
+      "margin": "1.5x",
+      "margin_rationale": "the B11 cohort could be larger than B9's and its size cannot be known before the cohort is built. 1.5 is chosen now, before any B11 artifact exists, and is not tuned to any outcome. It is stated rather than hidden so it can be argued with.",
+      "arithmetic": "29.4 GiB x 1.5 = 44.1 GiB, rounded up to 45 GiB = 48,318,382,080 bytes",
+      "what_it_is_NOT": "it is not a profit-dependent value, not a round number chosen for comfort, and not derived from how much space the shadow feeds happen to want"
+    },
+    "trip_rule": "when free space on the filesystem holding the work directory falls below reserve_bytes, shadow capture STOPS and quarantines. It does not degrade, sample, filter or overwrite.",
+    "on_trip": {
+      "actions": ["stop appending to the raw log", "write a durable quarantine record with the measured free bytes and the reserve", "close the session with end_reason disk_reserve", "exit non-zero so the operator sees it"],
+      "never": "capture is never continued in a reduced form. A feed that keeps writing a thinner record past the guard produces a census whose coverage silently changed at an unmarked moment."
+    },
+    "checked": "before every rotation and at least once per check_interval_seconds",
+    "check_interval_seconds": 60,
+    "b11a_is_the_protected_party": "the guard exists so that B11a's collection, which cannot be repeated and whose maturity slot has been waiting since it was frozen, is never starved by a shadow feed that can simply be restarted"
+  },
+
+  "secret_scan": {
+    "rule": "every archive and every index file is scanned for credential material before it is written and again before any of it is committed",
+    "tokens": ["api-key", "api_key", "apikey", "authorization", "bearer ", "helius", "secret", "private_key", "mnemonic"],
+    "endpoint_receipts": "scheme and host only, as everywhere else in this project. A full endpoint URL in an index or a seal record is a refusal, not a warning.",
+    "why_here": "raw frames are provider payloads and an index names files by path; both are places a credential can end up by accident, and an archive is exactly the artifact nobody re-reads before sharing"
+  },
+
+  "refusal_codes": [
+    {"code": "R_DISK_RESERVE", "meaning": "free space fell below the reserve; capture stopped and quarantined"},
+    {"code": "R_SEAL_MISMATCH", "meaning": "a sealed segment's bytes do not hash to its recorded sha256"},
+    {"code": "R_DECOMPRESS_MISMATCH", "meaning": "the decompressed archive does not hash to the sealed original"},
+    {"code": "R_REPLAY_DIVERGED", "meaning": "a census computed over the segment set differs from the pre-rotation census"},
+    {"code": "R_SEGMENT_GAP", "meaning": "the index has a missing or duplicated sequence number"},
+    {"code": "R_PARTIAL_ARCHIVE", "meaning": "a .gz.partial was found; it is discarded, never adopted"},
+    {"code": "R_INDEX_UNREADABLE", "meaning": "the segment index could not be read; unknown is not clean and nothing is replaced"},
+    {"code": "R_SECRET_IN_ARCHIVE", "meaning": "credential material appeared in an archive or index"},
+    {"code": "R_ACTIVE_TAIL_COMPRESSED", "meaning": "something attempted to compress the file still being appended to"}
+  ],
+
+  "publication": {
+    "always_publishable": ["segment counts", "byte counts before and after", "compression ratios", "verification outcomes", "free-space measurements", "refusal census"],
+    "never_publishable_here": ["any return", "any profitability or executability claim", "any landing probability"]
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "filtering frames or narrowing any subscription",
+    "deleting, truncating or moving a raw file before its replacement is proven equivalent",
+    "compressing the active tail",
+    "adopting a partial archive",
+    "repairing a truncated final line",
+    "continuing capture in a reduced form after the free-space guard trips",
+    "modifying B11c, its manifest, or any B11a artifact",
+    "tuning any threshold in this document to a result"
+  ],
+
+  "status_locks": {
+    "label": "OPERATIONAL_RAW_RETENTION",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
