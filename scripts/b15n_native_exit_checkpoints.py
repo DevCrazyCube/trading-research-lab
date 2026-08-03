@@ -42,6 +42,9 @@ B15I_DB = ROOT / "research" / "b15i" / "processed_feed.sqlite"
 PREREG_PATH = ROOT / "research" / "B15N_NATIVE_EXIT_CHECKPOINT_PREREGISTRATION.json"
 PREREG_CANONICAL_SHA256 = "28a4dc50db2aced38669b8a4fa1e4f346a755262d212fd97927708c40ea1edbd"
 
+PREREG_V2_PATH = ROOT / "research" / "B15N_NATIVE_EXIT_CHECKPOINT_V2_PREREGISTRATION.json"
+PREREG_V2_CANONICAL_SHA256 = "43ce41c6bf924bb872205f7561ec854409210ac4782fd8be263cd8dbe0182fb3"
+
 EXECUTION_SURFACE_TOKENS = ("sendTransaction", "signTransaction", "Keypair", "from_secret_key",
                             "private_key", "secret_key", "sign_message", "PRIVATE_KEY",
                             "WALLET", "mnemonic", "seed_phrase", "requestAirdrop",
@@ -61,6 +64,10 @@ N_ACCOUNT_ABSENT = "N_ACCOUNT_ABSENT"
 N_NOT_CONFIRMED = "N_NOT_CONFIRMED"
 N_ORPHANED = "N_ORPHANED"
 N_SCHEDULE_CONFLICT = "N_SCHEDULE_CONFLICT"
+N_BATCH_LENGTH = "N_BATCH_LENGTH"
+N_BATCH_DUPLICATE = "N_BATCH_DUPLICATE"
+N_BATCH_CONTEXT = "N_BATCH_CONTEXT"
+N_BATCH_UNACCOUNTED = "N_BATCH_UNACCOUNTED"
 
 STATE_SCHEDULED = "scheduled"
 STATE_CHECKPOINTED = "checkpointed"
@@ -106,6 +113,45 @@ def verify_preregistration(path=PREREG_PATH, expected_sha256=None):
             raise ExitCheckpointRefused(
                 f"this document says {key} is {inherited[key]} and B15F says {theirs[key]}; a "
                 f"restated tolerance is a tolerance that can drift")
+    return document
+
+
+def verify_preregistration_v2(path=PREREG_V2_PATH, expected_sha256=None):
+    """The V2 freeze, and it must agree with V1 on everything it says it does not change.
+
+    A superseding document is the usual way a frozen number gets quietly restated, so every
+    inherited field is compared against V1's own document rather than trusted because V2 repeats it.
+    """
+    expected = PREREG_V2_CANONICAL_SHA256 if expected_sha256 is None else expected_sha256
+    try:
+        document = json.loads(pathlib.Path(path).read_bytes())
+    except (OSError, json.JSONDecodeError) as error:
+        raise ExitCheckpointRefused(
+            f"cannot read the V2 preregistration {path}: {error}") from error
+    actual = hashlib.sha256(
+        json.dumps(document, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    if actual != expected:
+        raise ExitCheckpointRefused(
+            f"the V2 exit-checkpoint preregistration hashes {actual}, pinned {expected}")
+    if document["supersedes_canonical_sha256"] != PREREG_CANONICAL_SHA256:
+        raise ExitCheckpointRefused(
+            f"V2 says it supersedes {document['supersedes_canonical_sha256']} but V1 hashes "
+            f"{PREREG_CANONICAL_SHA256}; a superseding document must name what it replaces")
+    v1 = verify_preregistration()
+    inherited = document["inherited_verbatim_from_v1"]
+    read = v1["account_read"]["inherited_verbatim_from_b15f"]
+    for key, theirs in (("activation_slot", v1["activation"]["activation_slot"]),
+                        ("entry_delays_slots", v1["target_geometry"]["entry_delays_slots"]),
+                        ("exit_horizons", v1["target_geometry"]["exit_horizons"]),
+                        ("commitment", read["commitment"]),
+                        ("max_lateness_slots", read["max_lateness_slots"]),
+                        ("max_attempts", read["max_attempts"]),
+                        ("retry_interval_slots", read["retry_interval_slots"]),
+                        ("max_requests_per_second", read["max_requests_per_second"])):
+        if inherited[key] != theirs:
+            raise ExitCheckpointRefused(
+                f"V2 says {key} is {inherited[key]!r} and V1 says {theirs!r}; the only permitted "
+                f"change is the request method")
     return document
 
 
@@ -499,6 +545,7 @@ def census(connection):
     report = {"schema_version": SCHEMA_VERSION, "label": LABEL, "executable": False,
               "performance_status": "not_evaluated", "execution_status": "never_executed",
               "scheduling_source": "B15i observations; B15a and B15f are not read",
+              "transport": "getMultipleAccounts, batched per group of due curves",
               "schedule_states": dict(query(
                   "SELECT state, COUNT(*) FROM schedule GROUP BY state")),
               "schedule_reasons": dict(query(
@@ -531,6 +578,54 @@ def census(connection):
     report["latency_ns"] = ({"min": latency[0][0], "mean_floor": latency[0][1],
                              "max": latency[0][2]} if latency[0][0] is not None else None)
     return report
+
+
+def replay_batched_checkpoints(raw_path, decoder):
+    """Rebuild every checkpoint from the preserved BATCHED exchanges alone.
+
+    The claim that the raw log is sufficient is worth exactly as much as an exercise of it, so this
+    reproduces the derived rows from the request/response pairs — including the per-target index that
+    maps each array element back to exactly one target — and the caller compares.
+    """
+    path = pathlib.Path(raw_path)
+    if not path.exists():
+        raise ExitCheckpointRefused(f"no raw exchange log at {path} to replay from")
+    b15f_document = B15F.verify_preregistration()
+    rebuilt = {}
+    with path.open() as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if record.get("method") != "getMultipleAccounts" or record.get("outcome") != "retrieved":
+                continue
+            curves = record["bonding_curves"]
+            try:
+                elements, context_slot = map_elements(record["response"], curves)
+            except ExitCheckpointRefused:
+                continue
+            for target in record["targets"]:
+                curve = target["bonding_curve"]
+                # The recorded index must still name this curve, or the mapping evidence is wrong.
+                if curves[target["request_index"]] != curve:
+                    continue
+                try:
+                    state, element_context, lateness = B15F.read_account_from_batch(
+                        elements.get(curve), curve, context_slot, target["target_slot"],
+                        b15f_document, decoder)
+                except B15F.CheckpointRefused:
+                    continue
+                rebuilt[(target["signature"], target["delay_slots"], target["horizon"])] = {
+                    "context_slot": element_context, "lateness_slots": lateness,
+                    "virtual_quote": state["virtual_quote"],
+                    "virtual_token": state["virtual_token"],
+                    "real_quote": state["real_quote"], "real_token": state["real_token"],
+                    "request_index": target["request_index"]}
+    return rebuilt
 
 
 def replay_checkpoints(raw_path, document, decoder):
@@ -569,29 +664,27 @@ def replay_checkpoints(raw_path, document, decoder):
 
 
 def run(url=None, work_dir=WORK_DIR, b15i_path=B15I_DB, document=None, ticks=1, opener=None,
-        sleeper=time.sleep, slot_source=None, poll_seconds=None, limit=None,
-        finalization_lag_slots=None):
+        sleeper=time.sleep, slot_source=None, poll_seconds=None, limit=None):
     """One or more polls: schedule what is new, retire what was missed, read what is due."""
     assert_no_execution_surface()
     assert_no_b15a_or_b15f_dependency()
     assert_isolated(work_dir)
-    document = verify_preregistration() if document is None else document
-    inherited = document["account_read"]["inherited_verbatim_from_b15f"]
+    v1 = verify_preregistration()
+    document = verify_preregistration_v2() if document is None else document
+    inherited = document["inherited_verbatim_from_v1"]
     tolerance = inherited["max_lateness_slots"]
-    poll = document["scheduler"]["poll_seconds"] if poll_seconds is None else poll_seconds
+    poll = v1["scheduler"]["poll_seconds"] if poll_seconds is None else poll_seconds
     url = url or B15B.rpc_url()
     work_dir = pathlib.Path(work_dir)
     work_dir.mkdir(parents=True, exist_ok=True)
     connection = open_database(work_dir / "exit_checkpoints.sqlite")
     raw = RawLog(work_dir / "rpc_exchanges.jsonl")
     decoder = B15B.build_decoder()
-    lag = (B15F.current_slot(url, opener) if slot_source is None else slot_source())
-    if finalization_lag_slots is None:
-        finalization_lag_slots = 0
     for key, value in (("schema_version", SCHEMA_VERSION),
                        ("preregistration_id", document["preregistration_id"]),
-                       ("preregistration_canonical_sha256", PREREG_CANONICAL_SHA256),
-                       ("activation_slot", str(document["activation"]["activation_slot"])),
+                       ("preregistration_canonical_sha256", PREREG_V2_CANONICAL_SHA256),
+                       ("transport", "getMultipleAccounts"),
+                       ("activation_slot", str(inherited["activation_slot"])),
                        ("scheduling_source", "b15i_observation"),
                        ("rpc_endpoint_receipt", json.dumps(B15B.endpoint_receipt(url))),
                        ("label", LABEL)):
@@ -607,20 +700,19 @@ def run(url=None, work_dir=WORK_DIR, b15i_path=B15I_DB, document=None, ticks=1, 
             if current is None:
                 counts["slot_unavailable"] = counts.get("slot_unavailable", 0) + 1
                 continue
-            activation = document["activation"]["activation_slot"]
+            activation = inherited["activation_slot"]
             highest = connection.execute(
                 "SELECT MAX(t0_slot) FROM schedule").fetchone()[0] or activation
             launches = observed_launches(b15i_path, after_slot=max(activation, highest),
                                          limit=limit)
-            for key, value in schedule_new(connection, launches, current, document,
+            for key, value in schedule_new(connection, launches, current, v1,
                                            tolerance).items():
                 counts[key] = counts.get(key, 0) + value
             counts["retired_missed"] = counts.get("retired_missed", 0) + retire_missed(
                 connection, current, tolerance)
             rows = due_targets(connection, current, tolerance, limit)
-            counts = drain(connection, rows, url, document, decoder, raw, counts, opener, sleeper,
-                           finalization_lag_slots, b15i_path,
-                           inherited["max_requests_per_second"])
+            counts = drain_batched(connection, rows, url, document, decoder, raw, counts, opener,
+                                   sleeper, b15i_path)
     finally:
         raw.close()
     report = census(connection)
@@ -650,7 +742,7 @@ def main(argv=None):
     if arguments.status:
         print(json.dumps(status(), indent=2, sort_keys=True))
         return 0
-    # NO finalization wait here, and the reason is structural rather than a tuning choice.
+    # NO finalization wait, and the reason is structural rather than a tuning choice.
     # `due_targets` selects only targets at or below the current FINALIZED slot, so finality has
     # already passed a target before it is ever read and `minContextSlot` is satisfied on the first
     # attempt. B15i needs that wait because it schedules entry targets one to four slots ahead of
@@ -661,9 +753,235 @@ def main(argv=None):
     # reads a minute against roughly six hundred targets a minute arriving, so the backlog pushed
     # checkpoint lateness to a mean of 103 slots against a 150 tolerance and refused 12 outright.
     ticks = arguments.ticks if arguments.ticks is not None else 10 ** 9
-    counts, report = run(ticks=ticks, limit=arguments.limit, finalization_lag_slots=0)
+    counts, report = run(ticks=ticks, limit=arguments.limit)
     print(json.dumps({"counts": counts, "census": report}, indent=2, sort_keys=True))
     return 0
+
+
+
+
+# --------------------------------------------------------------------------------------------
+# V2 — one batched read per group of due curves. The transport changes; nothing else does.
+# --------------------------------------------------------------------------------------------
+
+def canonical_order(rows):
+    """Due targets in one fixed order: target slot, signature, delay, horizon.
+
+    A batch composed by set iteration would differ between runs, and no replay could reproduce
+    which accounts shared a context slot.
+    """
+    return sorted(rows, key=lambda row: (row["target_slot"], row["signature"],
+                                         row["delay_slots"], row["horizon"]))
+
+
+def batch_targets(rows, max_accounts):
+    """The next batch: distinct curves in first-appearance order, and every target they serve.
+
+    Several targets share one bonding curve across delays and horizons, so the request carries each
+    curve ONCE and every target sharing it is settled from that one element. Indexing a deduplicated
+    request by a target's ordinal is exactly how one account's data ends up under another target's
+    name, which is why the mapping below goes by address.
+    """
+    ordered = canonical_order(rows)
+    curves, served = [], []
+    for row in ordered:
+        curve = row["bonding_curve"]
+        if curve in curves:
+            served.append(row)
+            continue
+        if len(curves) >= max_accounts:
+            break
+        curves.append(curve)
+        served.append(row)
+    return curves, [row for row in served if row["bonding_curve"] in curves]
+
+
+def assert_no_duplicate_request(curves):
+    """Two elements would both claim to be one account's answer. Refused before it is sent."""
+    seen = set()
+    for curve in curves:
+        if curve in seen:
+            raise ExitCheckpointRefused(
+                f"{N_BATCH_DUPLICATE}: {curve} appears twice in the request array; two elements "
+                f"would both claim to be its answer")
+        seen.add(curve)
+    return True
+
+
+def fetch_batch(curves, targets, url, document, raw, opener=None, sleeper=time.sleep):
+    """ONE getMultipleAccounts for the batch, with minContextSlot at the batch's latest target.
+
+    Every target in a batch is already at or below the finalized slot, so the maximum is already
+    reached and the request is satisfied first try; using the maximum guarantees the shared context
+    slot is at or after every target the batch serves.
+    """
+    assert_no_duplicate_request(curves)
+    inherited = document["inherited_verbatim_from_v1"]
+    min_context = max(row["target_slot"] for row in targets)
+    body = {"jsonrpc": "2.0", "id": 1, "method": "getMultipleAccounts",
+            "params": [list(curves), {"encoding": "base64",
+                                      "commitment": inherited["commitment"],
+                                      "minContextSlot": min_context}]}
+    started = time.monotonic_ns()
+    outcome = payload = None
+    attempts = 0
+    for attempt in range(inherited["max_attempts"]):
+        attempts = attempt + 1
+        outcome, status, payload = B15B._one_attempt(url, body, opener)
+        raw_sha256 = raw.append({
+            "method": "getMultipleAccounts", "batch_size": len(curves),
+            "bonding_curves": list(curves), "min_context_slot": min_context,
+            "targets": [{"signature": row["signature"], "delay_slots": row["delay_slots"],
+                         "horizon": row["horizon"], "target_slot": row["target_slot"],
+                         "bonding_curve": row["bonding_curve"],
+                         "request_index": curves.index(row["bonding_curve"])}
+                        for row in targets],
+            "attempt": attempts, "outcome": outcome, "http_status": status,
+            "request_json": body, "response": payload, "at_wall_unix": time.time()})
+        if outcome == "retrieved" or "min context slot" not in str(payload).lower():
+            break
+        if attempts < inherited["max_attempts"]:
+            sleeper(inherited["retry_interval_slots"] * SLOT_SECONDS)
+    latency = time.monotonic_ns() - started
+    if outcome != "retrieved":
+        raise ExitCheckpointRefused(
+            f"{N_RPC_FAILED}: {outcome} after {attempts} attempts {str(payload)[:120]}")
+    return {"payload": payload, "raw_sha256": raw_sha256, "latency_ns": latency,
+            "attempts": attempts, "min_context_slot": min_context}
+
+
+def map_elements(payload, curves):
+    """Curve address -> element, with the positional mapping VERIFIED and one shared context.
+
+    getMultipleAccounts answers positionally, so a length mismatch means every mapping after the
+    divergence is a different account's data and the whole batch is discarded rather than partly
+    trusted.
+    """
+    result = payload.get("result") or {}
+    context_slot = (result.get("context") or {}).get("slot")
+    if isinstance(context_slot, bool) or not isinstance(context_slot, int):
+        raise ExitCheckpointRefused(
+            f"{N_BATCH_CONTEXT}: the response carries no single integer context slot "
+            f"({context_slot!r}); a per-target geometry check needs one unambiguous shared context")
+    values = result.get("value")
+    if not isinstance(values, list):
+        raise ExitCheckpointRefused(f"{N_BATCH_LENGTH}: the response carries no value array")
+    if len(values) != len(curves):
+        raise ExitCheckpointRefused(
+            f"{N_BATCH_LENGTH}: {len(values)} entries for {len(curves)} requested accounts; every "
+            f"mapping after the divergence would be a different account")
+    return {curve: values[index] for index, curve in enumerate(curves)}, context_slot
+
+
+def assert_every_target_accounted(targets, outcomes):
+    """A partly successful batch is not a handled batch.
+
+    Without this, a batch that recorded most of its targets would be considered done and the rest
+    would sit unread; their absence later reads as targets that never came due.
+    """
+    expected = {(row["signature"], row["delay_slots"], row["horizon"]) for row in targets}
+    if set(outcomes) != expected:
+        missing = sorted(expected - set(outcomes))
+        raise ExitCheckpointRefused(
+            f"{N_BATCH_UNACCOUNTED}: {len(missing)} of {len(expected)} targets the batch was drawn "
+            f"for received no outcome, for example {missing[:3]}; one element's success must not "
+            f"hide another's failure")
+    return True
+
+
+def read_batch(rows, url, document, decoder, raw, opener=None, sleeper=time.sleep):
+    """One batched request, then per-target geometry and decoding. Returns one outcome per target."""
+    limit = document["the_batched_transport"]["max_accounts_per_request"]
+    curves, targets = batch_targets(rows, limit)
+    fetched = fetch_batch(curves, targets, url, document, raw, opener, sleeper)
+    elements, context_slot = map_elements(fetched["payload"], curves)
+    b15f_document = B15F.verify_preregistration()
+    outcomes = {}
+    for row in targets:
+        key = (row["signature"], row["delay_slots"], row["horizon"])
+        curve = row["bonding_curve"]
+        try:
+            state, element_context, lateness = B15F.read_account_from_batch(
+                elements.get(curve), curve, context_slot, row["target_slot"], b15f_document,
+                decoder)
+        except B15F.CheckpointRefused as error:
+            code = str(error).split(":", 1)[0]
+            if code == B15F.C_LATE:
+                mapped = C_LATE
+            elif code == B15F.C_ACCOUNT_MISSING:
+                mapped = N_ACCOUNT_ABSENT
+            else:
+                mapped = N_ACCOUNT_MISMATCH
+            outcomes[key] = {"row": row, "error": f"{mapped}:{str(error)[:200]}"}
+            continue
+        outcomes[key] = {"row": row, "state": state, "context_slot": element_context,
+                         "lateness_slots": lateness, "raw_sha256": fetched["raw_sha256"],
+                         "latency_ns": fetched["latency_ns"], "attempts": fetched["attempts"],
+                         "request_index": curves.index(curve)}
+    assert_every_target_accounted(targets, outcomes)
+    return outcomes, targets
+
+
+def drain_batched(connection, rows, url, document, decoder, raw, counts, opener=None,
+                  sleeper=time.sleep, b15i_path=B15I_DB):
+    """Drain the due set in batches at the inherited rate. Every outcome lands in the database."""
+    rate = document["inherited_verbatim_from_v1"]["max_requests_per_second"]
+    limit = document["the_batched_transport"]["max_accounts_per_request"]
+    pending = canonical_order(rows)
+    requests = 0
+    while pending:
+        if requests:
+            sleeper(1.0 / rate)
+        try:
+            outcomes, served = read_batch(pending, url, document, decoder, raw, opener, sleeper)
+        except ExitCheckpointRefused as error:
+            code = str(error).split(":", 1)[0]
+            # The whole batch is discarded, and every target it was drawn for keeps its scheduled
+            # state so a later poll retries it while the deadline still allows.
+            _curves, served = batch_targets(pending, limit)
+            counts[code] = counts.get(code, 0) + len(served)
+            pending = [row for row in pending if row not in served]
+            requests += 1
+            continue
+        requests += 1
+        for outcome in outcomes.values():
+            row = outcome["row"]
+            if "error" in outcome:
+                code = outcome["error"].split(":", 1)[0]
+                connection.execute(
+                    "UPDATE schedule SET state=?, reason=?, attempts=attempts+1 WHERE signature=? "
+                    "AND delay_slots=? AND horizon=?",
+                    (STATE_REFUSED, outcome["error"], row["signature"], row["delay_slots"],
+                     row["horizon"]))
+                counts[code] = counts.get(code, 0) + 1
+                continue
+            provenance = current_provenance(row["signature"], b15i_path)
+            state = outcome["state"]
+            connection.execute(
+                "INSERT OR REPLACE INTO checkpoint(signature,delay_slots,horizon,target_slot,"
+                "context_slot,lateness_slots,virtual_quote,virtual_token,real_quote,real_token,"
+                "quote_mint,mayhem_mode,complete,fork_state_at_read,chain_verdict,"
+                "observed_after_gap,raw_sha256,latency_ns,attempts,read_at_wall_unix) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (row["signature"], row["delay_slots"], row["horizon"], row["target_slot"],
+                 outcome["context_slot"], outcome["lateness_slots"], state["virtual_quote"],
+                 state["virtual_token"], state["real_quote"], state["real_token"],
+                 state["quote_mint"], int(state["mayhem_mode"]), int(state["complete"]),
+                 provenance["fork_state"], provenance["chain_verdict"],
+                 int(bool(provenance["observed_after_gap"])), outcome["raw_sha256"],
+                 outcome["latency_ns"], outcome["attempts"], time.time()))
+            connection.execute(
+                "UPDATE schedule SET state=?, reason=NULL, attempts=attempts+1 WHERE signature=? "
+                "AND delay_slots=? AND horizon=?",
+                (STATE_CHECKPOINTED, row["signature"], row["delay_slots"], row["horizon"]))
+            counts["checkpointed"] = counts.get("checkpointed", 0) + 1
+            if not admissible_downstream(provenance["fork_state"], provenance["chain_verdict"]):
+                key = N_ORPHANED if provenance["fork_state"] == "orphaned" else N_NOT_CONFIRMED
+                counts[key] = counts.get(key, 0) + 1
+        connection.commit()
+        pending = [row for row in pending if row not in served]
+    counts["batched_requests"] = counts.get("batched_requests", 0) + requests
+    return counts
 
 
 if __name__ == "__main__":
