@@ -1,0 +1,129 @@
+{
+  "preregistration_id": "B15N_NATIVE_EXIT_CHECKPOINT_V1",
+  "supersedes": null,
+  "date": "2026-08-03",
+  "author": "Claude (claude, handoff 142)",
+  "status": "FROZEN. Committed alone, before any exit checkpoint is scheduled and before any account is read.",
+  "purpose": "Schedule exit-horizon bonding-curve account reads from B15i's OWN observed launches, so the admissible population for downstream study is bounded by what B15i sees rather than by what B15a recorded.",
+  "committed_before_any_checkpoint": true,
+
+  "why_this_exists": {
+    "the_measured_censoring": "B15M admitted 4,896 cells out of 18,846 exit checkpoints. Those exit checkpoints came from B15f, which schedules from B15a, and B15k measured B15a holding 29% of the launches B15i observes.",
+    "why_it_cannot_improve_on_its_own": "B15a reached its frozen stopping rule at exactly 5,000 observed launches with extension_forbidden, so it is closed. The 29% fraction is final and every study inheriting B15f's schedule inherits it.",
+    "what_this_changes": "the scheduling SOURCE, and nothing else. B15i already observes launches at processed commitment and corroborates them against the chain; scheduling exits from that observation removes B15a from the dependency chain entirely.",
+    "pure_instrumentation": "no estimand is introduced, no assumption is added, and no figure about a strategy is produced. This document creates evidence, not a conclusion."
+  },
+
+  "activation": {
+    "activation_slot": 436984352,
+    "chosen_at_processed_slot": 436982352,
+    "margin_slots": 2000,
+    "rule": "a launch is eligible ONLY if its t0_slot is STRICTLY GREATER than activation_slot",
+    "why_a_future_slot": "the boundary sits roughly thirteen minutes ahead of the slot observed while writing this, so no launch that already existed can fall inside it, and no exit horizon can be scheduled against a curve whose later state is already visible.",
+    "enforced_strictly": "a launch at or before the activation slot is refused C_PRE_PROTOCOL and is never scheduled, backfilled or recovered, under any evidence, ever."
+  },
+
+  "scheduling_source": {
+    "source": "the `observation` table of B15i's processed-commitment feed, read-only",
+    "explicitly_not": "B15a's launch table and B15f's schedule. Neither is read by this worker, and a test asserts the code contains no reference to either artifact.",
+    "when": "immediately when B15i has recorded the launch; the schedule does NOT wait for chain confirmation",
+    "why_not_wait": "an exit target is t0 + delay + horizon, and confirmation of a launch can take longer than the 1,000-slot horizon is far away. Waiting would systematically lose the shorter horizon on exactly the launches whose confirmation was slowest.",
+    "what_confirmation_gates_instead": "ADMISSION, not scheduling. Every row carries the launch's fork_state as observed at read time, and a checkpoint is admissible downstream ONLY once an explicit chain confirmation exists. An unconfirmed, unresolved or orphaned launch's checkpoint is recorded, counted and withheld."
+  },
+
+  "target_geometry": {
+    "entry_delays_slots": [1, 2, 4],
+    "entry_delay_source": "B15D_SHADOW_ROUTE_V1, unchanged",
+    "exit_horizons": [{"name": "h_1000_slots", "slots": 1000}, {"name": "h_10000_slots", "slots": 10000}],
+    "exit_horizon_source": "B10b identifiers and slot-horizon semantics, unchanged",
+    "nominal_target_slot": "t0_slot + delay_slots + horizon_slots",
+    "cells_per_launch": 6,
+    "no_other_horizon": "B10b's observation horizon needs a per-curve trade stream this transport does not have, and is not approximated."
+  },
+
+  "account_read": {
+    "inherited_verbatim_from_b15f": {
+      "commitment": "finalized",
+      "min_context_slot": "the getAccountInfo request carries minContextSlot equal to the target",
+      "max_lateness_slots": 150,
+      "admissible_when": "context_slot >= target_slot AND context_slot - target_slot <= max_lateness_slots",
+      "max_attempts": 6,
+      "retry_interval_slots": 25,
+      "max_requests_per_second": 2,
+      "min_interval_ms": 500
+    },
+    "correction_carried_forward": "minContextSlot does NOT make the node wait; B15i measured 147 of 147 requests returning -32603 in about 220ms. The client waits out the measured finalization lag before its first attempt and B15F's bounded retry is the safety net. That is a B15i finding applied here, not a new rule.",
+    "account_layout": "the pinned BondingCurve, discriminator 17b7f83760d8ac60, from research/pump_idl_9c82f61.json",
+    "no_inferred_fields": "every recorded field is decoded from the account bytes. Nothing is computed, defaulted, carried from another row, or filled in from a fee schedule; the account publishes no fee basis points and none is stored here.",
+    "raw_evidence_preserved": ["the raw JSON-RPC response", "its sha256", "the context slot", "the request-to-response latency in nanoseconds", "the attempt count"],
+    "replayable": "every derived row must be reproducible from the preserved raw responses alone, and a test rebuilds them and compares."
+  },
+
+  "scheduler": {
+    "kind": "a durable poller, not an event-driven releaser",
+    "poll_seconds": 20,
+    "why_polling_is_adequate_here": "the nearest target is 1,001 slots after t0, about 400 seconds. A 20-second poll is 50 slots, comfortably inside the 150-slot tolerance. B15i needed event-driven scheduling because its entry targets are 1, 2 and 4 slots away and a poll cannot reach them; that reasoning does not transfer to horizons three orders of magnitude further out, and pretending it does would add machinery with no purpose.",
+    "restart_safe": "every target is written durably before it is due. On restart the schedule is read from disk and nothing is re-derived from a feed.",
+    "idempotent": "a (signature, delay, horizon) is scheduled at most once and read at most once successfully; a repeat is ignored rather than duplicated",
+    "never_backfills_a_passed_target": {
+      "rule": "a target whose deadline has already passed beyond the lateness tolerance when the worker first sees it is recorded N_TARGET_ALREADY_PASSED and never fetched",
+      "why": "fetching it would produce an account read from after the target and record it as the state at the target — the fabrication this whole line of work exists to prevent"
+    }
+  },
+
+  "isolation": {
+    "namespace": "research/b15n, its own database and its own raw-evidence log",
+    "reads_only": ["research/b15i/processed_feed.sqlite, read-only"],
+    "writes_nothing_outside_its_own_namespace": true,
+    "frozen_artifacts_untouched": "B15f's checkpoints, B15i's tables and B15i's running subscription logic are not modified, and a test asserts this worker opens no artifact for writing outside research/b15n",
+    "existing_worker_cadence_unchanged": "no other worker's polling interval, subscription or rate limit is altered. This worker's own rate is bounded at 2 requests per second, the B15F figure, because B15h was killed by HTTP 429 when a pool was left unbounded."
+  },
+
+  "provenance_carried": {
+    "fork_state": "the launch's B15i fork_state at read time: confirmed, processed_unconfirmed, unresolved or orphaned",
+    "observed_after_gap": "whether B15i first saw the launch after a websocket reconnect. Carried onto every checkpoint row for its whole life and never rewritten as continuous.",
+    "chain_verdict": "B15i's independent getTransaction verdict where one exists, carried rather than re-queried, because re-asking would add load for an answer another worker already preserved"
+  },
+
+  "refusal_codes": [
+    {"code": "C_PRE_PROTOCOL", "meaning": "t0 is at or before the activation slot; never scheduled and never recovered"},
+    {"code": "C_LATE", "meaning": "the context slot exceeded the target beyond the 150-slot tolerance; the reserves it reports are not the reserves at the target"},
+    {"code": "N_RPC_FAILED", "meaning": "the read did not complete within its bounded attempts; kept distinct from C_LATE because a failed request and a stale answer are different facts"},
+    {"code": "N_TARGET_ALREADY_PASSED", "meaning": "the deadline had passed before the worker could schedule or fetch; never fetched"},
+    {"code": "N_ACCOUNT_MISMATCH", "meaning": "owner, discriminator or layout disagrees with the pinned evidence"},
+    {"code": "N_ACCOUNT_ABSENT", "meaning": "the node returned no account for the curve at the target"},
+    {"code": "N_NOT_CONFIRMED", "meaning": "the launch has no explicit chain confirmation, so the checkpoint is recorded and withheld from downstream admission"},
+    {"code": "N_ORPHANED", "meaning": "B15i's chain query found no confirmed transaction for the launch"},
+    {"code": "N_SCHEDULE_CONFLICT", "meaning": "a (signature, delay, horizon) already exists with different geometry"}
+  ],
+
+  "publication": {
+    "always_publishable": ["schedule and checkpoint counts", "refusal census", "fork-state and gap-provenance counts", "lateness and latency distributions", "the admissible-population comparison against the B15f-derived path"],
+    "never_publishable_here": ["any return", "any profitability or executability claim", "any landing probability", "any capacity or sizing figure", "any comparison of strategies"],
+    "this_document_produces_no_strategy_figure": "its output is coverage. A reader looking for a result here is looking in the wrong document."
+  },
+
+  "strictly_forbidden": [
+    "wallet or key material of any kind",
+    "signing, constructing, simulating or submitting a transaction",
+    "any spending",
+    "reading B15a's launch table or B15f's schedule as a scheduling source",
+    "writing anywhere outside research/b15n",
+    "modifying B11c, B11a, B15f's artifacts, B15i's tables or B15i's subscription logic",
+    "changing any existing worker's RPC cadence, rate limit or poll interval",
+    "scheduling or recovering a launch at or before the activation slot",
+    "fetching a target whose deadline has passed",
+    "substituting a later or current account state for a missed target",
+    "storing any field not decoded from the account bytes",
+    "admitting an unconfirmed, unresolved or orphaned launch's checkpoint downstream",
+    "rewriting observed_after_gap provenance as continuous",
+    "publishing any strategy, capacity or return figure from this worker"
+  ],
+
+  "status_locks": {
+    "label": "NATIVE_EXIT_CHECKPOINTS",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
