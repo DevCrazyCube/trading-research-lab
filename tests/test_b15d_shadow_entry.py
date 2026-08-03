@@ -482,6 +482,92 @@ class TestPricingEndToEnd(Temp):
         self.assertTrue(report["no_landing_probability_claimed"])
 
 
+class TestDegradedFeedPropagation(Temp):
+    """Degraded provenance survives the supersession, or nothing downstream is trustworthy.
+
+    Backfill repairs a transaction's CONTENTS. It cannot retroactively prove the feed was
+    continuous at t0, and it cannot erase the fact that it was not. Before this gate existed, B15b
+    wrote a v2 decision that never mentioned session degradation and B15d priced 8,553 cells with
+    no knowledge of it — 87% of launches carried S07 at feed time.
+    """
+
+    def _b15a(self, rows):
+        path = self.directory / "shadow.sqlite"
+        connection = sqlite3.connect(path)
+        connection.executescript(PILOT.SCHEMA)
+        for index, (signature, reason) in enumerate(rows, start=1):
+            connection.execute(
+                "INSERT INTO launch(launch_seq,session_id,frame_seq,signature,slot,mint,"
+                "decoded_wall_unix,decoded_monotonic_ns,decode_status,evidence_sha256,create_key) "
+                "VALUES (?,?,?,?,?,?,0.0,0,?,'e',?)",
+                (index, "s", index, signature, 1000, MINT, PILOT.DECODE_DECODED, f"k{index}"))
+            connection.execute(
+                "INSERT INTO decision(launch_seq,policy_id,decided_wall_unix,"
+                "decided_monotonic_ns,observation_to_decision_ns,feature_availability,"
+                "policy_result,reason_code,evidence_sha256) VALUES (?,?,0.0,0,0,'{}',?,?,'e')",
+                (index, "p", PILOT.RESULT_NO_ENTRY, reason))
+        connection.commit()
+        connection.close()
+        return path
+
+    def test_degraded_launches_are_identified_from_the_feed_time_decision(self):
+        path = self._b15a([("Clean", PILOT.S04_VETO), ("Dirty", PILOT.S07_SESSION_DEGRADED)])
+        self.assertEqual({"Dirty"}, B15D.feed_degraded_signatures(path))
+
+    def test_a_prefixed_reason_still_counts_as_degraded(self):
+        path = self._b15a([("Dirty", f"{PILOT.S07_SESSION_DEGRADED}:extra detail")])
+        self.assertEqual({"Dirty"}, B15D.feed_degraded_signatures(path))
+
+    def test_an_unreadable_record_is_refused_rather_than_treated_as_clean(self):
+        """Unknown degradation is not clean degradation."""
+        self.assertIsNone(B15D.feed_degraded_signatures(self.directory / "absent.sqlite"))
+        with self.assertRaisesRegex(Refused, "Unknown is not clean"):
+            B15D.assert_degraded_source_available(None)
+
+    def test_a_known_empty_record_passes(self):
+        path = self._b15a([("Clean", PILOT.S04_VETO)])
+        self.assertEqual(set(), B15D.assert_degraded_source_available(
+            B15D.feed_degraded_signatures(path)))
+
+    def test_a_degraded_launch_is_never_priced(self):
+        b15a = self._b15a([("LaunchSig", PILOT.S07_SESSION_DEGRADED)])
+        counts = B15D.run(raw_path=self.raw([frame(f"S{s}", s) for s in (1001, 1002, 1004)]),
+                          b15b_path=self.b15b(), work_dir=self.work, b15a_path=b15a)
+        self.assertEqual(0, counts["by_status"].get(B15D.STATUS_PRICED, 0))
+        self.assertEqual(9, counts["by_status"].get(B15D.STATUS_REFUSED))
+        self.assertEqual(1, counts["feed_degraded_launches"])
+
+    def test_the_refusal_names_the_degradation(self):
+        b15a = self._b15a([("LaunchSig", PILOT.S07_SESSION_DEGRADED)])
+        B15D.run(raw_path=self.raw([frame(f"S{s}", s) for s in (1001, 1002, 1004)]),
+                 b15b_path=self.b15b(), work_dir=self.work, b15a_path=b15a)
+        connection = sqlite3.connect(self.work / "shadow_entries.sqlite")
+        reasons = {row[0] for row in connection.execute(
+            "SELECT DISTINCT reason FROM candidate WHERE status='refused'")}
+        connection.close()
+        self.assertEqual({B15D.D_FEED_DEGRADED_AT_T0}, reasons)
+
+    def test_a_clean_launch_still_prices(self):
+        """The gate must not refuse everything; that would be safe and useless."""
+        b15a = self._b15a([("LaunchSig", PILOT.S04_VETO)])
+        counts = B15D.run(raw_path=self.raw([frame(f"S{s}", s) for s in (1001, 1002, 1004)]),
+                          b15b_path=self.b15b(), work_dir=self.work, b15a_path=b15a)
+        self.assertGreater(counts["by_status"].get(B15D.STATUS_PRICED, 0), 0)
+        self.assertEqual(0, counts["feed_degraded_launches"])
+
+    def test_a_degraded_cell_carries_no_figures(self):
+        b15a = self._b15a([("LaunchSig", PILOT.S07_SESSION_DEGRADED)])
+        B15D.run(raw_path=self.raw([frame(f"S{s}", s) for s in (1001, 1002, 1004)]),
+                 b15b_path=self.b15b(), work_dir=self.work, b15a_path=b15a)
+        connection = sqlite3.connect(self.work / "shadow_entries.sqlite")
+        rows = connection.execute(
+            "SELECT tokens_out, execution_cost_lamports, total_outlay_lamports FROM candidate"
+        ).fetchall()
+        connection.close()
+        for row in rows:
+            self.assertEqual((None, None, None), row)
+
+
 class TestGates(Temp):
     def test_a_drifted_freeze_is_refused(self):
         with self.assertRaisesRegex(Refused, "a different route"):

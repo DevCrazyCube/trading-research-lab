@@ -353,6 +353,50 @@ def open_database(path=DB_PATH):
     return connection
 
 
+D_FEED_DEGRADED_AT_T0 = "D_feed_degraded_at_t0"
+
+
+def feed_degraded_signatures(b15a_path=None):
+    """Launches whose FEED-TIME decision was S07_session_degraded.
+
+    Backfill repairs a transaction's CONTENTS. It cannot retroactively prove that the feed was
+    continuous at t0, and it cannot erase the fact that it was not. Both facts are kept: the
+    backfilled state is real, and the observation it belongs to was taken through a degraded
+    session. The safety rule is that degraded defaults to no trade, and no frozen contract permits
+    recovery from S07 — B15b's and B15d's preregistrations do not mention it at all.
+
+    An empty set is returned when B15a is unreadable, and the CALLER treats that as unknown rather
+    than as clean; see `assert_degraded_source_available`.
+    """
+    path = (ROOT / "research" / "b15a" / "shadow.sqlite") if b15a_path is None \
+        else pathlib.Path(b15a_path)
+    if not path.exists():
+        return None
+    connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=30)
+    try:
+        return {row[0] for row in connection.execute(
+            "SELECT l.signature FROM launch l JOIN decision d ON d.launch_seq = l.launch_seq "
+            "WHERE d.reason_code LIKE ?", (f"{PILOT.S07_SESSION_DEGRADED}%",))}
+    except sqlite3.Error:
+        return None
+    finally:
+        connection.close()
+
+
+def assert_degraded_source_available(degraded):
+    """Unknown degradation is not clean degradation.
+
+    If B15a cannot be read, we do not know which launches were observed through a degraded
+    session. Pricing them all as clean would be exactly the substitution this gate exists to
+    prevent, so the run refuses instead.
+    """
+    if degraded is None:
+        raise ShadowEntryRefused(
+            "the feed-degradation record could not be read from B15a. Unknown is not clean: "
+            "without it every entry would be priced as though its feed had been continuous")
+    return degraded
+
+
 def eligible_launches(b15b_path=B15B_DB, limit=None):
     """B15b launches whose t0 state is complete. Read-only; B15b keeps running."""
     connection = sqlite3.connect(f"file:{b15b_path}?mode=ro", uri=True, timeout=30)
@@ -375,7 +419,7 @@ def eligible_launches(b15b_path=B15B_DB, limit=None):
 # --------------------------------------------------------------------------------------------
 
 def run(limit=None, raw_path=B15A_RAW, b15b_path=B15B_DB, work_dir=WORK_DIR,
-        cost_context_path=ROOT / "research" / "B15C_COST_CONTEXT.json"):
+        cost_context_path=ROOT / "research" / "B15C_COST_CONTEXT.json", b15a_path=None):
     """Price every eligible launch under every frozen cell. Preserves every candidate."""
     assert_no_execution_surface()
     assert_isolated(work_dir)
@@ -405,6 +449,9 @@ def run(limit=None, raw_path=B15A_RAW, b15b_path=B15B_DB, work_dir=WORK_DIR,
     trade = next(bytes(e["discriminator"]).hex() for e in idl["events"]
                  if e["name"] == "TradeEvent")
     launches = eligible_launches(b15b_path, limit)
+    # Read BEFORE anything is priced. A launch observed through a degraded session may not become
+    # a priced entry, and an unreadable record is refused rather than treated as clean.
+    degraded = assert_degraded_source_available(feed_degraded_signatures(b15a_path))
     # ONE pass over the raw log covering every launch at once. Scanning per launch was
     # O(launches x log size) and did not finish against a 1.1 GB log with five hundred launches.
     smallest_delay = min(delays)
@@ -424,7 +471,18 @@ def run(limit=None, raw_path=B15A_RAW, b15b_path=B15B_DB, work_dir=WORK_DIR,
                 counts["cells"] += 1
                 cell = f"{scenario['scenario_id']}@{delay}"
                 state, observation = state_at_or_after(observations, t0_slot, delay)
-                status, reason, priced = _price(state, observation, policy, order_spec)
+                if signature in degraded:
+                    # Fail closed. Both facts are preserved: the backfilled state exists and is
+                    # recorded upstream, and this observation was taken through a degraded feed.
+                    status, reason, priced = (STATUS_REFUSED, D_FEED_DEGRADED_AT_T0,
+                                              {"tokens_out": None,
+                                               "execution_cost_lamports": None,
+                                               "total_outlay_lamports": None, "fee_bps": None,
+                                               "creator_fee_bps": None,
+                                               "cashback_fee_bps": None,
+                                               "buyback_fee_bps": None})
+                else:
+                    status, reason, priced = _price(state, observation, policy, order_spec)
                 by_status[status] = by_status.get(status, 0) + 1
                 by_cell.setdefault(cell, {})
                 by_cell[cell][status] = by_cell[cell].get(status, 0) + 1
@@ -442,6 +500,7 @@ def run(limit=None, raw_path=B15A_RAW, b15b_path=B15B_DB, work_dir=WORK_DIR,
                 _insert(connection, record)
         connection.commit()
     connection.close()
+    counts["feed_degraded_launches"] = len(degraded)
     counts["by_status"] = dict(sorted(by_status.items()))
     counts["by_cell"] = {k: dict(sorted(v.items())) for k, v in sorted(by_cell.items())}
     counts["label"] = LABEL
