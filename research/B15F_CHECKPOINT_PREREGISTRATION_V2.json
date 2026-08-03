@@ -1,0 +1,80 @@
+{
+  "preregistration_id": "B15F_CHECKPOINT_V2",
+  "supersedes": "B15F_CHECKPOINT_V1",
+  "supersedes_canonical_sha256": "be9029b9e7c118e43dc330745aacb664f698750949c9d5b3fc07e56217c1f9e8",
+  "date": "2026-08-03",
+  "author": "Claude (handoff 127)",
+  "status": "FROZEN. Committed alone, before any batched request is made.",
+  "purpose": "Supersede V1's transport and cadence to recover the coverage lost to lateness. The lateness TOLERANCE is unchanged.",
+
+  "what_is_NOT_changed": {
+    "max_lateness_slots": 150,
+    "statement": "The tolerance is IDENTICAL to V1's and is not touched by this document. It was fixed before any checkpoint existed, half the checkpoints then began failing against it, and widening it now would make the number look better without making it truer. That is the one change this supersession refuses to make.",
+    "also_unchanged": ["prospective-only scheduling", "the strict future-target boundary", "the nominal target formula", "the pinned BondingCurve layout and discriminator", "every refusal code", "the C_PRE_CHECKPOINT_PROTOCOL treatment of already-passed targets"]
+  },
+
+  "why_v1_failed": {
+    "measured_from_preserved_evidence": true,
+    "observed": "797 checkpoints landed and 799 were refused C_LATE — roughly half. Lateness moved from min 36 / p50 54 / max 103 over the first fifty to p50 93 / p90 134 / p99 147 / max 149 against the 150 budget.",
+    "audit": {
+      "requests_per_tick": "86 ticks observed; p50 28, p90 31, max 32",
+      "rpc_round_trip_ms": "p50 137, p90 163, max 1210",
+      "tick_granularity_cost_slots": 50,
+      "serial_drain_cost_slots": 40,
+      "baseline_structural_lateness_slots": 90
+    },
+    "conclusion": "A 20-second tick contributes up to 50 slots before anything is fetched, and draining 32 requests serially at two per second contributes up to 40 more. That is roughly 90 slots of structural lateness against a 150-slot budget, leaving 60 slots for provider variance — which matches the observed p50 of 93 almost exactly. The cause is throughput and cadence, NOT an over-tight tolerance."
+  },
+
+  "transport_v2": {
+    "method": "getMultipleAccounts",
+    "replaces": "one getAccountInfo per due target",
+    "max_accounts_per_request": 100,
+    "why_batched": "one request settles every due target against ONE shared context slot, collapsing the serial drain from up to 40 slots to a single round trip",
+    "commitment": "finalized",
+    "encoding": "base64"
+  },
+
+  "batch_safety_rules": [
+    {"rule": "positional mapping is verified, never assumed", "detail": "the response array length MUST equal the request array length; a mismatch refuses the WHOLE batch with C_BATCH_LENGTH and no target is recorded from it", "why": "getMultipleAccounts answers positionally, so a length mismatch means every mapping after the divergence is a different account's data under this target's name"},
+    {"rule": "curves are deduplicated before the request and mapped back afterwards", "detail": "several targets can share one bonding curve across delays and horizons; the request carries each curve once and every target reads the entry for ITS curve by address, not by its own index", "why": "indexing a deduplicated request by the target's ordinal is exactly how an account gets swapped"},
+    {"rule": "the shared context slot is checked against EACH target independently", "detail": "a batch supplies one context slot; every target must satisfy context >= its own target and context - target <= 150 on its own. A target failing that is refused individually while the rest of the batch proceeds.", "why": "one shared state may not be spread across distinct target slots outside the geometry each of them was scheduled under"},
+    {"rule": "a null or malformed entry refuses only its own target", "detail": "a missing account is C_ACCOUNT_MISSING for that target; the batch is not discarded and the other targets are not tainted", "why": "hiding a partial error behind a batch-level success is how one bad account becomes a whole tick of silent gaps"},
+    {"rule": "per-target raw evidence is preserved", "detail": "the whole batch response is written to the append-only exchange log once, and every target records that batch's raw hash together with the curve address it read", "why": "a target must be able to name the exact bytes its state came from"},
+    {"rule": "a target is checkpointed at most once", "detail": "the unique identity index from V1 is unchanged, so a duplicate within or across batches is impossible"}
+  ],
+
+  "cadence_v2": {
+    "scheduler_poll_seconds": 5,
+    "was": 20,
+    "justification": "5 seconds is about 12 slots at the nominal rate, replacing up to 50. Combined with batching, structural lateness falls from roughly 90 slots to roughly 13 plus one round trip, restoring most of the 150-slot budget as headroom for provider variance.",
+    "rpc_cost": "one getSlot per tick plus at most one getMultipleAccounts per tick. At 5 seconds that is 24 requests per minute against V1's 3 polls plus up to 96 individual account reads, so the request count FALLS while the cadence quadruples."
+  },
+
+  "new_refusal_codes": [
+    {"code": "C_BATCH_LENGTH", "meaning": "the response array length does not equal the request array length; the whole batch is discarded"},
+    {"code": "C_BATCH_MISSING_CURVE", "meaning": "the response carries no entry for a curve that was requested"}
+  ],
+
+  "publication": {
+    "unchanged_from_v1": true,
+    "publishable": ["schedule counts", "checkpoint coverage", "refusal counts by code", "lateness distribution"],
+    "not_publishable": ["any profitability figure", "any mixture with B15e"]
+  },
+
+  "strictly_forbidden": [
+    "widening max_lateness_slots",
+    "indexing a deduplicated batch by a target's ordinal",
+    "recording a target from a batch whose length did not verify",
+    "spreading one shared context slot across targets it does not satisfy",
+    "hiding a partial batch error behind a batch-level success",
+    "wallet or key material, signing, constructing, simulating, submitting or spending"
+  ],
+
+  "status_locks": {
+    "label": "SIMULATED_SHADOW_CHECKPOINT",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}
