@@ -975,6 +975,295 @@ class DurableQuarantineTests(unittest.TestCase):
         self.assertFalse(self.state_path.exists())
 
 
+class StateIsDurableAtEverySafetyBoundaryTests(unittest.TestCase):
+    """The state file must be on disk BEFORE the thing it describes can go wrong.
+
+    Three writes carried the whole resume story and none of them was pinned: deleting any one of
+    them left the suite green. Each test below crashes the process at the boundary that write
+    protects and reads the file back the way an operator would, so a deletion is caught by the
+    consequence rather than by the line's presence.
+    """
+
+    class Boom(RuntimeError):
+        """An injected crash, distinguishable from any refusal the watcher raises itself."""
+
+    def stored(self, harness):
+        return json.loads(harness.paths["state_path"].read_text())
+
+    # -- boundary A: VERIFYING, before any resume or probe work ---------------------------------
+
+    def test_verifying_is_on_disk_before_resume_work_begins(self):
+        """If the run dies deciding whether a resume is safe, the file must say VERIFYING.
+
+        Without this write the file still claims whatever the previous run left -- for a fresh run
+        `initialising`, for a resumed one `waiting_for_maturity` -- and an operator reading it would
+        believe the supervisor never got as far as checking.
+        """
+        harness = Harness(self, [CUTOFF - 1])
+        original = W.assert_resume_is_safe
+        self.addCleanup(lambda: setattr(W, "assert_resume_is_safe", original))
+        seen = {}
+
+        def crash(state, receipt_dir):
+            seen["on_disk"] = json.loads(harness.paths["state_path"].read_text())
+            raise self.Boom("killed while deciding whether the resume was safe")
+
+        W.assert_resume_is_safe = crash
+        with self.assertRaises(self.Boom):
+            harness.watch(poll_seconds=1, max_iterations=1)
+        self.assertEqual(seen["on_disk"]["state"], W.STATE_VERIFYING)
+        self.assertEqual(self.stored(harness)["state"], W.STATE_VERIFYING)
+
+    def test_the_endpoint_receipt_is_durable_at_the_same_boundary(self):
+        """It is written in the same breath as VERIFYING, and it is what an operator checks."""
+        harness = Harness(self, [CUTOFF - 1])
+        original = W.assert_resume_is_safe
+        self.addCleanup(lambda: setattr(W, "assert_resume_is_safe", original))
+        W.assert_resume_is_safe = lambda *_a: (_ for _ in ()).throw(self.Boom("x"))
+        with self.assertRaises(self.Boom):
+            harness.watch(poll_seconds=1, max_iterations=1)
+        stored = self.stored(harness)
+        self.assertEqual(stored["endpoint"], W.endpoint_receipt(URL))
+        self.assertNotIn("SECRETVALUE1234567890", json.dumps(stored))
+
+    # -- boundary B: RUNNING_STAGE and stage_in_flight, before the subprocess ------------------
+
+    def test_running_stage_and_stage_in_flight_are_on_disk_before_the_subprocess_starts(self):
+        harness = Harness(self, [CUTOFF])
+        seen = {}
+
+        def runner(argv, stdout_path, stderr_path):
+            # The FIRST call only: `seen` overwritten each stage would assert about the last one.
+            seen.setdefault("on_disk", json.loads(harness.paths["state_path"].read_text()))
+            seen.setdefault("stage_count", len(seen))
+            pathlib.Path(stdout_path).write_text("")
+            pathlib.Path(stderr_path).write_text("")
+            return 0
+
+        harness.runner = runner
+        harness.watch(poll_seconds=1, max_iterations=1)
+        self.assertEqual(seen["on_disk"]["state"], W.STATE_RUNNING_STAGE)
+        self.assertEqual(seen["on_disk"]["stage_in_flight"], W.RUN_ORDER[0])
+
+    def test_run_stage_records_running_stage_whatever_its_caller_left_behind(self):
+        """`run_stage`'s own contract, not the loop's.
+
+        `watch` happens to set RUNNING_STAGE before entering the stage loop, which made the
+        assignment inside `run_stage` look redundant -- a mutation sweep survived deleting it. It is
+        only redundant while the one existing caller keeps doing that. Driven directly here, so the
+        function's own guarantee is pinned rather than inherited from its caller.
+        """
+        harness = Harness(self, [CUTOFF])
+        state = {"schema_version": W.SCHEMA_VERSION, "state": W.STATE_WAITING,
+                 "quarantine": None, "polls": 1, "stages_completed": [], "stage_in_flight": None,
+                 "cutoff_slot_inclusive": CUTOFF, "last_tip_slot": CUTOFF, "last_poll_at": 0,
+                 "endpoint": W.endpoint_receipt(URL), "manifest_sha256": "0" * 64}
+        stage = W.RUN_ORDER[0]
+        seen = {}
+
+        def runner(argv, stdout_path, stderr_path):
+            seen["on_disk"] = json.loads(harness.paths["state_path"].read_text())
+            pathlib.Path(stdout_path).write_text("")
+            pathlib.Path(stderr_path).write_text("")
+            return 0
+
+        W.run_stage(stage, harness.resolved_commands()[stage], state, runner=runner,
+                    log_dir=harness.paths["log_dir"], receipt_dir=harness.paths["receipt_dir"],
+                    state_path=harness.paths["state_path"])
+        self.assertEqual(seen["on_disk"]["state"], W.STATE_RUNNING_STAGE,
+                         "run_stage must record RUNNING_STAGE itself, not rely on its caller")
+        self.assertEqual(seen["on_disk"]["stage_in_flight"], stage)
+
+    def test_a_process_killed_mid_stage_cannot_leave_state_claiming_it_was_waiting(self):
+        """The lie this write exists to prevent: a stage ran, the file says nothing happened."""
+        harness = Harness(self, [CUTOFF])
+
+        def crashing_runner(argv, stdout_path, stderr_path):
+            pathlib.Path(stdout_path).write_text("partial\n")
+            pathlib.Path(stderr_path).write_text("")
+            raise self.Boom("SIGKILL during the stage")
+
+        harness.runner = crashing_runner
+        with self.assertRaises(self.Boom):
+            harness.watch(poll_seconds=1, max_iterations=1)
+        stored = self.stored(harness)
+        self.assertNotEqual(stored["state"], W.STATE_WAITING)
+        self.assertEqual(stored["state"], W.STATE_RUNNING_STAGE)
+        self.assertEqual(stored["stage_in_flight"], W.RUN_ORDER[0])
+
+    def test_resuming_from_that_crash_quarantines_rather_than_resuming(self):
+        """A partial artifact is not a checkpoint, and the durable write is what makes it visible."""
+        harness = Harness(self, [CUTOFF])
+
+        def crashing_runner(argv, stdout_path, stderr_path):
+            pathlib.Path(stdout_path).write_text("partial\n")
+            pathlib.Path(stderr_path).write_text("")
+            raise self.Boom("SIGKILL during the stage")
+
+        harness.runner = crashing_runner
+        with self.assertRaises(self.Boom):
+            harness.watch(poll_seconds=1, max_iterations=1)
+        with self.assertRaisesRegex(W.Quarantined, W.Q08_STAGE_INTERRUPTED):
+            Harness(self, [CUTOFF]).watch(poll_seconds=1, max_iterations=1,
+                                          **{k: v for k, v in harness.paths.items()})
+
+    def test_no_receipt_is_written_for_a_stage_that_never_finished(self):
+        harness = Harness(self, [CUTOFF])
+
+        def crashing_runner(argv, stdout_path, stderr_path):
+            pathlib.Path(stdout_path).write_text("")
+            pathlib.Path(stderr_path).write_text("")
+            raise self.Boom("killed")
+
+        harness.runner = crashing_runner
+        with self.assertRaises(self.Boom):
+            harness.watch(poll_seconds=1, max_iterations=1)
+        self.assertEqual(W.completed_stages(harness.paths["receipt_dir"]), [])
+
+    # -- boundary C: the receipt, then stages_completed ----------------------------------------
+
+    def test_stages_completed_is_durable_after_a_stage_succeeds(self):
+        harness = Harness(self, [CUTOFF])
+        harness.watch(poll_seconds=1, max_iterations=1)
+        stored = self.stored(harness)
+        self.assertEqual(stored["stages_completed"], list(W.RUN_ORDER))
+        self.assertIsNone(stored["stage_in_flight"])
+
+    def test_the_receipt_is_written_before_state_claims_the_stage_is_done(self):
+        """Ordering, not just presence. The receipt is the authority; state derives from it.
+
+        Crash immediately after the FIRST stage's receipt lands. The receipt must exist, and the
+        durable state must not be claiming a later stage or completion.
+        """
+        harness = Harness(self, [CUTOFF])
+        first = W.RUN_ORDER[0]
+        observed = {}
+
+        def runner(argv, stdout_path, stderr_path):
+            pathlib.Path(stdout_path).write_text("")
+            pathlib.Path(stderr_path).write_text("")
+            if harness.ran and len(harness.ran) >= 1:
+                observed["receipt_existed"] = W.receipt_path(
+                    first, harness.paths["receipt_dir"]).exists()
+                observed["state_when_second_started"] = json.loads(
+                    harness.paths["state_path"].read_text())
+                raise self.Boom("killed just after the first receipt")
+            harness.ran.append(argv)
+            return 0
+
+        harness.runner = runner
+        with self.assertRaises(self.Boom):
+            harness.watch(poll_seconds=1, max_iterations=1)
+        self.assertTrue(observed["receipt_existed"],
+                        "the receipt must be durable before the next stage begins")
+        self.assertEqual(observed["state_when_second_started"]["stages_completed"], [first],
+                         "state must already record the finished stage, from its receipt")
+
+    def test_a_receipted_stage_is_never_rerun(self):
+        harness = Harness(self, [CUTOFF])
+        harness.watch(poll_seconds=1, max_iterations=1)
+        first_run = list(harness.ran)
+        second = Harness(self, [CUTOFF])
+        second.watch(poll_seconds=1, max_iterations=1,
+                     **{k: v for k, v in harness.paths.items()})
+        self.assertEqual(second.ran, [], "every stage already had a receipt; none may run again")
+        self.assertEqual(len(first_run), len(W.RUN_ORDER))
+
+    def test_completion_cannot_be_claimed_without_receipts(self):
+        """`stages_completed` is derived from receipts, so deleting one un-completes the stage."""
+        harness = Harness(self, [CUTOFF])
+        harness.watch(poll_seconds=1, max_iterations=1)
+        self.assertEqual(len(W.completed_stages(harness.paths["receipt_dir"])), len(W.RUN_ORDER))
+        W.receipt_path(W.RUN_ORDER[-1], harness.paths["receipt_dir"]).unlink()
+        remaining = W.completed_stages(harness.paths["receipt_dir"])
+        self.assertNotIn(W.RUN_ORDER[-1], remaining)
+        view = W.status(state_path=harness.paths["state_path"],
+                        receipt_dir=harness.paths["receipt_dir"],
+                        lock_path=harness.directory / "supervisor.lock")
+        self.assertNotIn(W.RUN_ORDER[-1], view["stages_completed"])
+        self.assertIn(W.RUN_ORDER[-1], view["stages_remaining"])
+
+    def test_a_receipt_marked_incomplete_does_not_count_as_completed(self):
+        harness = Harness(self, [CUTOFF])
+        harness.watch(poll_seconds=1, max_iterations=1)
+        path = W.receipt_path(W.RUN_ORDER[0], harness.paths["receipt_dir"])
+        receipt = json.loads(path.read_text())
+        receipt["completed"] = False
+        path.write_text(json.dumps(receipt))
+        self.assertNotIn(W.RUN_ORDER[0], W.completed_stages(harness.paths["receipt_dir"]))
+
+    def test_receipts_that_are_not_a_prefix_of_the_run_order_quarantine(self):
+        """A contradiction between receipts and the frozen order stops the run.
+
+        This is the reachable half of the resume contradiction check: a receipt for the LAST stage
+        with none before it is in run order and is not a PREFIX of it, which means every earlier
+        stage was skipped.
+        """
+        harness = Harness(self, [CUTOFF - 1])
+        harness.watch(poll_seconds=1, max_iterations=1)
+        harness.paths["receipt_dir"].mkdir(parents=True, exist_ok=True)
+        W.atomic_write_json(W.receipt_path(W.RUN_ORDER[-1], harness.paths["receipt_dir"]),
+                            {"stage": W.RUN_ORDER[-1], "completed": True}, "out-of-order receipt")
+        state = json.loads(harness.paths["state_path"].read_text())
+        with self.assertRaisesRegex(W.Quarantined, W.Q12_DUPLICATE_STAGE):
+            W.assert_resume_is_safe(state, harness.paths["receipt_dir"])
+
+    def test_a_receipt_outside_the_run_order_is_invisible_by_construction(self):
+        """Recorded rather than asserted-around: the unknown-stage branch cannot fire.
+
+        `completed_stages` builds its list by iterating RUN_ORDER, so every element is a member of
+        RUN_ORDER by construction and `assert_resume_is_safe`'s `stage not in RUN_ORDER` check is
+        unreachable. A rogue receipt file is therefore ignored, not caught. That is pre-existing and
+        is reported rather than changed here: editing manifest-pinned code within hours of maturity
+        buys nothing, and the PREFIX check above is what actually protects the resume.
+        """
+        harness = Harness(self, [CUTOFF - 1])
+        harness.watch(poll_seconds=1, max_iterations=1)
+        harness.paths["receipt_dir"].mkdir(parents=True, exist_ok=True)
+        W.atomic_write_json(W.receipt_path("not_a_stage", harness.paths["receipt_dir"]),
+                            {"stage": "not_a_stage", "completed": True}, "rogue receipt")
+        done = W.completed_stages(harness.paths["receipt_dir"])
+        self.assertNotIn("not_a_stage", done)
+        for stage in done:
+            self.assertIn(stage, W.RUN_ORDER)
+
+    def test_resume_after_a_clean_stage_boundary_continues_rather_than_repeating(self):
+        """Crash strictly BETWEEN stages, then resume: the finished ones stay finished.
+
+        The crash is injected around `run_stage` rather than inside the runner. Raising inside the
+        runner is mid-stage: the pre-launch write has already set `stage_in_flight`, so a resume
+        correctly quarantines with Q08 instead of continuing, which is a different test.
+        """
+        harness = Harness(self, [CUTOFF])
+        stop_after = 2
+        original = W.run_stage
+        self.addCleanup(lambda: setattr(W, "run_stage", original))
+        calls = {"n": 0}
+
+        def crash_between(*args, **kwargs):
+            calls["n"] += 1
+            if calls["n"] > stop_after:
+                raise self.Boom("killed after a clean stage boundary")
+            return original(*args, **kwargs)
+
+        W.run_stage = crash_between
+        with self.assertRaises(self.Boom):
+            harness.watch(poll_seconds=1, max_iterations=1)
+        # The crash is over: restore before resuming, or the resumed run dies in the same injection.
+        W.run_stage = original
+        done_before = W.completed_stages(harness.paths["receipt_dir"])
+        self.assertEqual(done_before, list(W.RUN_ORDER[:stop_after]))
+        resumed = Harness(self, [CUTOFF])
+        state = resumed.watch(poll_seconds=1, max_iterations=1,
+                              **{k: v for k, v in harness.paths.items()})
+        self.assertEqual(state["state"], W.STATE_ALL_STAGES_COMPLETE)
+        self.assertEqual(W.completed_stages(harness.paths["receipt_dir"]), list(W.RUN_ORDER))
+        for argv in resumed.ran:
+            self.assertNotIn(argv, done_before)
+        self.assertEqual(len(resumed.ran), len(W.RUN_ORDER) - stop_after,
+                         "only the unfinished stages may run on resume")
+
+
 class ResumeTests(unittest.TestCase):
     """A partial artifact is not a checkpoint."""
 
