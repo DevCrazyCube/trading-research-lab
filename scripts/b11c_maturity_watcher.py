@@ -47,6 +47,7 @@ import shlex
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.parse
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -60,6 +61,9 @@ def _load(name, filename):
 
 
 B11A = _load("b11a_window_freeze", "b11a_window_freeze.py")
+# The shared transport classification. Loaded, not reimplemented: two copies of a retry policy
+# drift, and the drift is what killed a run.
+HTTP = _load("rpc_http_identity", "rpc_http_identity.py")
 # B11a is deliberately standalone — it imports nothing from the rest of the project, so the frozen
 # window cannot be moved by an edit elsewhere. Its `WindowRefused` is therefore the base here.
 
@@ -174,6 +178,10 @@ COMPOSITION_WORDS = ("curves", "curve_count", "creates", "signatures", "transact
 RETRYABLE_MARKERS = ("timed out", "timeout", "temporarily unavailable", "connection reset",
                      "connection refused", "bad gateway", "service unavailable",
                      "gateway timeout", "429", "502", "503", "504", "-32005")
+
+# RPC-level refusals that no retry can lift, checked BEFORE the retryable markers. -32002 is the
+# provider answering that this plan may not ask -- an answer about who you are, not about now.
+NON_RETRYABLE_RPC_MARKERS = ("-32002",)
 
 
 class WatcherRefused(B11A.WindowRefused):
@@ -729,6 +737,73 @@ def is_retryable(message):
     return any(marker in lowered for marker in RETRYABLE_MARKERS)
 
 
+def poll_failure_diagnostic(error):
+    """Enough to tell a DNS failure from a TLS one from a status code, and nothing private.
+
+    Built from NAMED exception fields rather than `str(error)`: an `HTTPError` carries the full
+    endpoint in its `url` attribute, and this endpoint's credential lives in its PATH. What is kept
+    is the class, the HTTP status where there is one, and a `URLError`'s `reason` -- which is exactly
+    where "Temporary failure in name resolution" and an SSL error text live, and which carries no
+    endpoint. `assert_no_secret` still guards the result before it is written.
+
+    The reason this exists at all: the run that died logged `type(error).__name__` and nothing else,
+    so the one field that would have identified the cause was the one field not recorded.
+    """
+    name = type(error).__name__
+    if isinstance(error, urllib.error.HTTPError):
+        return f"{name} HTTP {error.code}"
+    reason = getattr(error, "reason", None)
+    if reason is not None:
+        return f"{name}: {type(reason).__name__}: {reason}"
+    return f"{name}: {error}"
+
+
+def is_retryable_failure(error):
+    """Type first for transport faults; message only for failures surfaced from the RPC layer.
+
+    A DNS failure and a TLS failure are `URLError`s whose TEXT contains none of the transient
+    markers, which is how one momentary name-resolution blip terminated a run built to survive days
+    of waiting. Classifying transport faults by TYPE removes that whole class of mistake, rather than
+    adding two more strings to a list that will always be missing the next one.
+
+    `RETRYABLE_MARKERS` is kept for what it is actually good at: an RPC-level condition delivered
+    inside a successful HTTP response, such as -32005 for a node that is behind. A plan or
+    entitlement refusal is terminal there, because no retry changes an answer about who you are.
+    """
+    if isinstance(error, (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError)):
+        # The type-based answer is FINAL for a transport fault: falling through to the message
+        # matcher afterwards would let a 503's digits re-admit a status the policy had refused.
+        return HTTP.is_retryable_error(error)
+    lowered = str(error).lower()
+    if any(marker in lowered for marker in NON_RETRYABLE_RPC_MARKERS):
+        return False
+    return is_retryable(error)
+
+
+def record_quarantine(state, state_path, reason_code, diagnostic):
+    """Persist the reason BEFORE raising, so the durable record cannot outlive the truth.
+
+    A supervisor that exits on a quarantine while its state file still reads
+    `waiting_for_maturity` tells an operator the run is healthy. That is what happened: the only
+    thing that revealed the death was the liveness signal, and the reason existed nowhere but
+    stderr, as a bare class name. `assert_manifest_unchanged` already wrote before raising; the
+    polling path did not.
+
+    The diagnostic is NOT scanned for secrets here. `write_state` reaches `atomic_write_json`, which
+    already runs `assert_no_secret` over the whole payload, so a second call in this function could
+    never fire — and a check nobody can provoke is worse than no check, because it reads as
+    protection that was never tested. Two tests drive the real guard through this path: a diagnostic
+    carrying an injected secret refuses the write and leaves no file, and a clean one writes.
+    """
+    if state is None:
+        return None
+    state["state"] = STATE_QUARANTINED
+    state["quarantine"] = {"reason_code": reason_code, "diagnostic": diagnostic,
+                           "at_wall_unix": int(time.time())}
+    write_state(state, state_path)
+    return state["quarantine"]
+
+
 def poll_finalized_slot(url, transport=None):
     """The only network call before maturity, and it asks for a FINALIZED slot.
 
@@ -744,25 +819,44 @@ def poll_finalized_slot(url, transport=None):
     return value
 
 
-def poll_with_backoff(url, transport=None, retries=MAX_POLL_RETRIES, sleeper=time.sleep):
-    """Bounded retries with exponential backoff. Non-retryable failures quarantine immediately."""
+def poll_with_backoff(url, transport=None, retries=MAX_POLL_RETRIES, sleeper=time.sleep,
+                      state=None, state_path=STATE_PATH):
+    """Bounded retries with exponential backoff. Non-retryable failures quarantine immediately.
+
+    Every terminal exit here persists its reason first. `state` is optional only so the function can
+    be driven in isolation; the watcher always passes it, and a test asserts the write happens
+    BEFORE the raise rather than in some cleanup that a crash could skip.
+
+    Retry count, backoff base, cap and cadence are unchanged: only the classification moved, and the
+    diagnostic that was missing is now recorded.
+    """
     for attempt in range(retries):
         try:
             return poll_finalized_slot(url, transport=transport)
-        except Quarantined:
+        except Quarantined as error:
+            # Q04 already names its own reason. Persist it rather than leave the state file
+            # claiming the run is still waiting.
+            message = str(error)
+            record_quarantine(state, state_path, message.split(":", 1)[0], message[:400])
             raise
         except Exception as error:                                   # noqa: BLE001 - classified
-            if not is_retryable(error):
+            diagnostic = poll_failure_diagnostic(error)
+            if not is_retryable_failure(error):
+                record_quarantine(state, state_path, Q06_NON_RETRYABLE_RPC, diagnostic)
                 raise Quarantined(
-                    f"{Q06_NON_RETRYABLE_RPC}: {type(error).__name__}. This is not a transport "
-                    "hiccup, and retrying past it would be guessing about why it failed")
+                    f"{Q06_NON_RETRYABLE_RPC}: {diagnostic}. This is not a transport hiccup, and "
+                    "retrying past it would be guessing about why it failed")
             if attempt == retries - 1:
                 # Raised BEFORE sleeping again: the last backoff before giving up buys nothing and
                 # the sleep is observable, which is what makes this bound testable.
+                record_quarantine(
+                    state, state_path, Q05_RETRIES_EXHAUSTED,
+                    f"{retries} retryable failures in a row; last was {diagnostic}")
                 raise Quarantined(
                     f"{Q05_RETRIES_EXHAUSTED}: {retries} retryable failures in a row. A retryable "
-                    "failure that keeps failing is not retryable in practice")
+                    f"failure that keeps failing is not retryable in practice. Last: {diagnostic}")
             sleeper(min(BACKOFF_CAP_SECONDS, BACKOFF_BASE_SECONDS * (2 ** attempt)))
+    record_quarantine(state, state_path, Q05_RETRIES_EXHAUSTED, "no attempt was made")
     raise Quarantined(f"{Q05_RETRIES_EXHAUSTED}: no attempt succeeded")
 
 
@@ -996,7 +1090,8 @@ def watch(url, poll_seconds=DEFAULT_POLL_SECONDS, transport=None, sleeper=time.s
             return state
         iterations += 1
 
-        tip = poll_with_backoff(url, transport=transport, sleeper=sleeper)
+        tip = poll_with_backoff(url, transport=transport, sleeper=sleeper,
+                                state=state, state_path=state_path)
         state["polls"] += 1
         state["last_tip_slot"] = tip
         state["last_poll_at"] = int(time.time())

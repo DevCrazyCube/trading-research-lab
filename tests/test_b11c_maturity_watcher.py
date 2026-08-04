@@ -15,6 +15,9 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import urllib.error
+import ssl
+import io
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -692,6 +695,284 @@ class RetryTests(unittest.TestCase):
         # One fewer sleep than attempts: the last backoff before giving up buys nothing, and
         # counting them is what makes the bound observable rather than merely stated.
         self.assertEqual(len(slept), 5)
+
+
+class TransportClassificationTests(unittest.TestCase):
+    """The failure that killed a run: a transient URLError whose TEXT matched no marker.
+
+    Classification is by TYPE for transport faults now, so a name-resolution blip and a TLS error
+    are retried like every other transport fault instead of quarantining a supervisor built to wait
+    for days.
+    """
+
+    def url_error(self, reason):
+        return urllib.error.URLError(reason)
+
+    def http_error(self, status):
+        return urllib.error.HTTPError(URL, status, "x", {}, io.BytesIO(b""))
+
+    def test_a_dns_failure_is_retryable(self):
+        """The regression. Its text contains no marker, and it used to be fatal."""
+        error = self.url_error(OSError(-3, "Temporary failure in name resolution"))
+        self.assertFalse(W.is_retryable(error), "still matches no marker, as before")
+        self.assertTrue(W.is_retryable_failure(error), "but is now classified by type")
+
+    def test_a_tls_failure_is_retryable(self):
+        error = self.url_error(ssl.SSLError(1, "[SSL] record layer failure"))
+        self.assertFalse(W.is_retryable(error))
+        self.assertTrue(W.is_retryable_failure(error))
+
+    def test_connection_faults_and_timeouts_are_retryable(self):
+        for error in (self.url_error(ConnectionRefusedError(111, "Connection refused")),
+                      self.url_error(ConnectionResetError(104, "Connection reset by peer")),
+                      self.url_error("timed out"),
+                      TimeoutError("timed out"),
+                      OSError(101, "Network is unreachable")):
+            with self.subTest(error=type(error).__name__):
+                self.assertTrue(W.is_retryable_failure(error))
+
+    def test_every_transient_http_status_is_retryable(self):
+        for status in (408, 429, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                self.assertTrue(W.is_retryable_failure(self.http_error(status)))
+
+    def test_403_is_terminal_and_the_message_matcher_cannot_re_admit_it(self):
+        """A 403 body could contain '503' or '429'; the type answer must be final."""
+        self.assertFalse(W.is_retryable_failure(self.http_error(403)))
+        poisoned = urllib.error.HTTPError(URL, 403, "429 503 gateway timeout", {}, io.BytesIO(b""))
+        self.assertTrue(W.is_retryable(poisoned), "its text does match markers")
+        self.assertFalse(W.is_retryable_failure(poisoned), "but 403 is still terminal")
+
+    def test_other_http_statuses_are_terminal(self):
+        for status in (400, 401, 404, 410, 422, 501):
+            with self.subTest(status=status):
+                self.assertFalse(W.is_retryable_failure(self.http_error(status)))
+
+    def test_httperror_is_classified_before_its_urlerror_base(self):
+        """HTTPError subclasses URLError. The wrong isinstance order retries every 403."""
+        self.assertTrue(issubclass(urllib.error.HTTPError, urllib.error.URLError))
+        self.assertFalse(W.is_retryable_failure(self.http_error(403)))
+
+    def test_a_minus_32002_plan_refusal_is_terminal(self):
+        """It arrives as an RPC error inside a successful response, not as a status."""
+        error = B11A.WindowRefused(
+            "RPC error: {'code': -32002, 'message': 'Archive, Debug and Trace requests are not "
+            "available on your current plan'}")
+        self.assertFalse(W.is_retryable_failure(error))
+
+    def test_a_terminal_marker_beats_a_retryable_one_in_the_same_message(self):
+        """What the terminal list is actually FOR, and the only case where it changes the answer.
+
+        A -32002 message on its own matches no retryable marker either, so the guard would look
+        redundant. It earns its place on precedence: a plan refusal whose text also happens to carry
+        '503' or 'timeout' -- a provider quoting a status in prose, or an upstream detail appended --
+        must still be terminal. Without the guard this message is retried six times against an
+        answer that will never change.
+        """
+        both = B11A.WindowRefused(
+            "RPC error: {'code': -32002, 'message': 'archive not available on your plan; "
+            "upstream returned 503 gateway timeout'}")
+        self.assertTrue(W.is_retryable(both), "its text does match retryable markers")
+        self.assertFalse(W.is_retryable_failure(both), "but the terminal marker wins")
+
+    def test_a_minus_32005_node_behind_is_still_retryable(self):
+        """Preserved: the marker list is kept for exactly this, an RPC-level transient."""
+        error = B11A.WindowRefused("RPC error: {'code': -32005, 'message': 'node is behind'}")
+        self.assertTrue(W.is_retryable_failure(error))
+
+    def test_a_genuine_rpc_mistake_is_still_terminal(self):
+        for message in ("invalid params", "method not found", "401 unauthorized"):
+            with self.subTest(message=message):
+                self.assertFalse(W.is_retryable_failure(RuntimeError(message)))
+
+    def test_the_success_path_is_unchanged(self):
+        def healthy(url, method, params):
+            return CUTOFF - 1
+
+        self.assertEqual(W.poll_with_backoff(URL, transport=healthy, sleeper=lambda _s: None),
+                         CUTOFF - 1)
+
+    def test_a_dns_blip_now_recovers_instead_of_quarantining(self):
+        """End to end: the exact shape that killed the run, survived."""
+        attempts = {"n": 0}
+
+        def blip(url, method, params):
+            attempts["n"] += 1
+            if attempts["n"] < 3:
+                raise urllib.error.URLError(
+                    OSError(-3, "Temporary failure in name resolution"))
+            return CUTOFF - 1
+
+        self.assertEqual(W.poll_with_backoff(URL, transport=blip, sleeper=lambda _s: None),
+                         CUTOFF - 1)
+        self.assertEqual(attempts["n"], 3)
+
+    def test_the_bounds_are_unchanged(self):
+        self.assertEqual(W.MAX_POLL_RETRIES, 6)
+        self.assertEqual(W.BACKOFF_BASE_SECONDS, 5)
+        self.assertEqual(W.BACKOFF_CAP_SECONDS, 120)
+        slept = []
+
+        def always(url, method, params):
+            raise urllib.error.URLError(OSError(-3, "Temporary failure in name resolution"))
+
+        with self.assertRaises(W.Quarantined):
+            W.poll_with_backoff(URL, transport=always, retries=6, sleeper=slept.append)
+        self.assertEqual(slept, [5, 10, 20, 40, 80])
+        self.assertLessEqual(max(slept), W.BACKOFF_CAP_SECONDS)
+
+
+class DurableQuarantineTests(unittest.TestCase):
+    """A supervisor that dies must not leave a state file claiming it is healthy."""
+
+    def setUp(self):
+        self.directory = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(self.directory, ignore_errors=True))
+        self.state_path = self.directory / "supervisor_state.json"
+        self.state = {"schema_version": W.SCHEMA_VERSION, "state": W.STATE_WAITING,
+                      "quarantine": None, "polls": 4, "stages_completed": [],
+                      "stage_in_flight": None, "cutoff_slot_inclusive": CUTOFF,
+                      "last_tip_slot": CUTOFF - 10, "last_poll_at": 0, "endpoint": None}
+
+    def stored(self):
+        return json.loads(self.state_path.read_text())
+
+    def test_a_non_retryable_failure_is_persisted_before_the_raise(self):
+        def fatal(url, method, params):
+            raise urllib.error.HTTPError(URL, 403, "Forbidden", {}, io.BytesIO(b""))
+
+        with self.assertRaisesRegex(W.Quarantined, W.Q06_NON_RETRYABLE_RPC):
+            W.poll_with_backoff(URL, transport=fatal, sleeper=lambda _s: None,
+                                state=self.state, state_path=self.state_path)
+        stored = self.stored()
+        self.assertEqual(stored["state"], W.STATE_QUARANTINED)
+        self.assertEqual(stored["quarantine"]["reason_code"], W.Q06_NON_RETRYABLE_RPC)
+        self.assertIn("403", stored["quarantine"]["diagnostic"])
+
+    def test_exhaustion_is_persisted_too(self):
+        def always(url, method, params):
+            raise urllib.error.URLError(OSError(-3, "Temporary failure in name resolution"))
+
+        with self.assertRaisesRegex(W.Quarantined, W.Q05_RETRIES_EXHAUSTED):
+            W.poll_with_backoff(URL, transport=always, retries=2, sleeper=lambda _s: None,
+                                state=self.state, state_path=self.state_path)
+        stored = self.stored()
+        self.assertEqual(stored["state"], W.STATE_QUARANTINED)
+        self.assertEqual(stored["quarantine"]["reason_code"], W.Q05_RETRIES_EXHAUSTED)
+        self.assertIn("name resolution", stored["quarantine"]["diagnostic"])
+
+    def test_a_non_finalized_tip_is_persisted_too(self):
+        """Q04 already named its reason; it just never reached the state file."""
+        def wrong(url, method, params):
+            return "not-a-slot"
+
+        with self.assertRaisesRegex(W.Quarantined, W.Q04_NON_FINALIZED_SLOT):
+            W.poll_with_backoff(URL, transport=wrong, sleeper=lambda _s: None,
+                                state=self.state, state_path=self.state_path)
+        self.assertEqual(self.stored()["quarantine"]["reason_code"], W.Q04_NON_FINALIZED_SLOT)
+
+    def test_the_write_happens_before_the_raise_not_after(self):
+        """Driven, not assumed: the file must already be on disk when the exception surfaces."""
+        observed = {}
+
+        def fatal(url, method, params):
+            raise urllib.error.HTTPError(URL, 401, "x", {}, io.BytesIO(b""))
+
+        try:
+            W.poll_with_backoff(URL, transport=fatal, sleeper=lambda _s: None,
+                                state=self.state, state_path=self.state_path)
+        except W.Quarantined:
+            observed["existed_at_raise_time"] = self.state_path.exists()
+            observed["state_at_raise_time"] = self.stored()["state"]
+        self.assertTrue(observed["existed_at_raise_time"])
+        self.assertEqual(observed["state_at_raise_time"], W.STATE_QUARANTINED)
+
+    def test_the_diagnostic_distinguishes_dns_from_tls_from_a_status(self):
+        cases = {
+            urllib.error.URLError(OSError(-3, "Temporary failure in name resolution")):
+                "name resolution",
+            urllib.error.URLError(ssl.SSLError(1, "[SSL] record layer failure")): "SSL",
+            urllib.error.HTTPError(URL, 503, "x", {}, io.BytesIO(b"")): "HTTP 503",
+        }
+        for error, expected in cases.items():
+            with self.subTest(expected=expected):
+                self.assertIn(expected, W.poll_failure_diagnostic(error))
+
+    def test_the_diagnostic_carries_no_endpoint_or_credential(self):
+        """An HTTPError holds the full URL in `.url`, and this endpoint's key is in its PATH."""
+        secret = "sEcReTkEy0123456789abcdef"
+        error = urllib.error.HTTPError(f"https://host.invalid/{secret}", 403, "Forbidden", {},
+                                       io.BytesIO(b""))
+        diagnostic = W.poll_failure_diagnostic(error)
+        self.assertNotIn(secret, diagnostic)
+        self.assertNotIn("host.invalid", diagnostic)
+        self.assertEqual(diagnostic, "HTTPError HTTP 403")
+
+    def test_a_diagnostic_carrying_the_live_secret_refuses_to_be_written(self):
+        """The project's stance: refuse the write, never redact it silently.
+
+        The secret is INJECTED rather than taken from the ambient environment. Reading
+        `_secret_values()` made this test skip whenever the suite ran without the credential
+        exported, which is most of the time -- and a guard that skips is a guard a mutant walks
+        straight through. It did: removing the `assert_no_secret` call survived a mutation run.
+        """
+        original = W._secret_values
+        W._secret_values = lambda: {"sEcReTkEy0123456789abcdef"}
+        self.addCleanup(lambda: setattr(W, "_secret_values", original))
+        leaked = "URLError: OSError: connect to https://host/sEcReTkEy0123456789abcdef failed"
+        with self.assertRaisesRegex(W.Quarantined, W.Q09_SECRET_WOULD_BE_WRITTEN):
+            W.record_quarantine(self.state, self.state_path, W.Q06_NON_RETRYABLE_RPC, leaked)
+        self.assertFalse(self.state_path.exists(),
+                         "nothing may be written when the diagnostic is refused")
+
+    def test_a_clean_diagnostic_still_writes_with_the_guard_armed(self):
+        """The other half: the guard must not refuse an honest diagnostic."""
+        original = W._secret_values
+        W._secret_values = lambda: {"sEcReTkEy0123456789abcdef"}
+        self.addCleanup(lambda: setattr(W, "_secret_values", original))
+        W.record_quarantine(self.state, self.state_path, W.Q06_NON_RETRYABLE_RPC,
+                            "URLError: OSError: Temporary failure in name resolution")
+        self.assertEqual(self.stored()["quarantine"]["reason_code"], W.Q06_NON_RETRYABLE_RPC)
+
+    def test_status_reports_the_persisted_quarantine_rather_than_healthy_waiting(self):
+        def fatal(url, method, params):
+            raise urllib.error.HTTPError(URL, 403, "Forbidden", {}, io.BytesIO(b""))
+
+        with self.assertRaises(W.Quarantined):
+            W.poll_with_backoff(URL, transport=fatal, sleeper=lambda _s: None,
+                                state=self.state, state_path=self.state_path)
+        view = W.status(state_path=self.state_path, receipt_dir=self.directory / "receipts",
+                        lock_path=self.directory / "supervisor.lock")
+        self.assertEqual(view["reported_state"], W.STATE_QUARANTINED)
+        self.assertEqual(view["quarantine"]["reason_code"], W.Q06_NON_RETRYABLE_RPC)
+        self.assertNotEqual(view["reported_state"], W.STATE_WAITING)
+
+    def test_a_dead_process_after_a_crash_no_longer_reads_as_waiting(self):
+        """The exact operator-facing lie this fixes, reproduced end to end."""
+        before = W.status(state_path=self.state_path, receipt_dir=self.directory / "receipts",
+                          lock_path=self.directory / "supervisor.lock")
+        self.assertEqual(before["state"], W.LIVENESS_NOT_STARTED)
+        W.write_state(self.state, self.state_path)
+        healthy_looking = W.status(state_path=self.state_path,
+                                   receipt_dir=self.directory / "receipts",
+                                   lock_path=self.directory / "supervisor.lock")
+        self.assertEqual(healthy_looking["reported_state"], W.STATE_WAITING)
+        self.assertIsNone(healthy_looking["quarantine"])
+        W.record_quarantine(self.state, self.state_path, W.Q06_NON_RETRYABLE_RPC,
+                            "URLError: OSError: Temporary failure in name resolution")
+        after = W.status(state_path=self.state_path, receipt_dir=self.directory / "receipts",
+                         lock_path=self.directory / "supervisor.lock")
+        self.assertEqual(after["reported_state"], W.STATE_QUARANTINED)
+        self.assertIn("name resolution", after["quarantine"]["diagnostic"])
+
+    def test_no_state_means_no_write_and_no_crash(self):
+        """Driven in isolation without a state file must still classify and raise."""
+        def fatal(url, method, params):
+            raise urllib.error.HTTPError(URL, 403, "x", {}, io.BytesIO(b""))
+
+        with self.assertRaisesRegex(W.Quarantined, W.Q06_NON_RETRYABLE_RPC):
+            W.poll_with_backoff(URL, transport=fatal, sleeper=lambda _s: None)
+        self.assertFalse(self.state_path.exists())
 
 
 class ResumeTests(unittest.TestCase):
