@@ -2323,3 +2323,44 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **NOT done:** nothing was signed, simulated, submitted or spent; no threshold, model gate or live
   worker was touched; the B15O artifact recording the empty-population result stands unedited beside
   this one.
+
+## 2026-08-04 — B11 collection is GO after the Chainstack Growth archive unlock (B11c, handoff 162)
+
+- **Status:** accepted
+- **Ratified by:** user (the Growth upgrade was the owner's decision, and the owner asked for the
+  archive capacity to be used); verified by Claude at handoff 162
+- **Decision:** The operational verdict on the armed B11c nine-stage pipeline changes from **NO-GO**
+  (handoff 161) to **GO**. No code changed and the watcher was not restarted: the endpoint URL is
+  unchanged and the entitlement is account-side, so the running process inherited it.
+- **What was blocking, and what cleared it:** the previous plan answered HTTP 403 / JSON-RPC `-32002`
+  "Archive, Debug and Trace requests are not available on your current plan" for `getBlocks`,
+  `getBlock`, `getBlockTime` and `getSignaturesForAddress`. Under Growth, all ten method-and-parameter
+  shapes the nine stages actually issue now return HTTP 200 with the expected semantic shape, probed
+  against preserved slot 433894233 and public program constants only. Archive depth is unrestricted —
+  a header-only `getBlock` is served at slot 1.
+- **Re-verified alongside it:** liveness on all three signals, manifest `a5b7c9fb` equal to disk (13
+  files), both preregistration hashes and the state's pin, the window re-derived from the burned
+  register and disjoint from all seven burned ranges, nine stages resolved, B11e dry run `passed` with
+  no findings and all four gates exiting non-zero on an empty artifact, zero stages, zero receipts, no
+  quarantine, and the endpoint recorded as scheme+host with no credential anywhere.
+- **Cost, measured rather than assumed, and correcting handoff 161:** `getBlock` with
+  `jsonParsed`/`full` — one call per launch-window slot — measures a mean 1,527 ms and 6.53 MB, not
+  the 250 ms handoff 161 assumed. On the burned corpus analogue (the same 203,601-slot span) the run
+  is therefore roughly **342,000 requests, ~1.34 TB of transfer and ~36.5 hours**, dominated by
+  `enumerate_creates` (~21.6 h at its default 4 workers) and by `transaction_bodies` (~14.9 h at
+  b9d's fixed 2.5 calls/second). The earlier 18–20 hour figure was too optimistic.
+- **Headroom:** disk 129 GB free against ~5.6 GB of expected artifacts (b7d persists decoded events
+  and slot summaries, never raw blocks, so the 1.34 TB is transient transfer). Memory measures ~31 MB
+  per worker and ~122 MB peak at four, against ~1.2 GB available. File descriptors ample.
+- **The one thing not verified:** Growth request-unit headroom. The endpoint exposes no rate, quota
+  or credit headers, so the RU budget for ~342,000 calls of this weight cannot be read from the RPC
+  side and must be confirmed in the Chainstack console. This is a stated residual risk, not a
+  measured pass.
+- **Residual operational risk carried forward from handoff 161, and now larger:** b9c and
+  `b7d.rpc_block` treat 5xx as terminal where b9d retries it, so a single transient gateway error in
+  `enumerate_creates` or `signature_inventory` quarantines the run. Over a ~36-hour pass rather than
+  the ~18 hours previously estimated, that is roughly twice the exposure. Fail-closed and resumable,
+  but it will stop the pipeline. `b11c` is also still absent from its own MANIFEST_FILES.
+- **NOT done:** no stage run early, no fresh-window query, no composition inspected, no cadence or
+  concurrency changed, no provider switched, no signing/simulation/submission/spend, and no change to
+  B15Q, the B15 workers or any model gate.
