@@ -16,6 +16,7 @@ import pathlib
 import sys
 import unittest
 import urllib.error
+import urllib.parse
 import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -310,6 +311,90 @@ class TestCloudflare403IsTerminal(unittest.TestCase):
         for status in (200, 400, 401, 404, 408, 429, 500, 502, 503, 504):
             with self.subTest(status=status):
                 self.assertFalse(HTTP.is_client_refusal(status))
+
+
+class TestTheEndpointIdentityContract(unittest.TestCase):
+    """The one representation of an endpoint that may be persisted.
+
+    This exists because two sanitizers disagreed: b9d's kept `parsed.path` and b11c's did not. That
+    was invisible while the provider carried its key in the query string and wrote a live credential
+    into a collected artifact the moment the provider carried it in the path.
+    """
+
+    def test_a_query_string_credential_never_survives(self):
+        self.assertEqual(
+            HTTP.endpoint_identity("https://mainnet.helius-rpc.com/?api-key=SECRET1234567890"),
+            "https://mainnet.helius-rpc.com")
+
+    def test_a_path_credential_never_survives(self):
+        """The exact shape that leaked."""
+        self.assertEqual(
+            HTTP.endpoint_identity(
+                "https://solana-mainnet.core.chainstack.com/abcdef0123456789abcdef0123456789"),
+            "https://solana-mainnet.core.chainstack.com")
+
+    def test_userinfo_never_survives(self):
+        for url in ("https://user:pass@host.example/x", "https://user@host.example",
+                    "https://:onlypassword@host.example"):
+            with self.subTest(url=url):
+                identity = HTTP.endpoint_identity(url)
+                self.assertEqual(identity, "https://host.example")
+                for token in ("user", "pass", "onlypassword"):
+                    self.assertNotIn(token, identity.replace("host.example", ""))
+
+    def test_a_fragment_never_survives(self):
+        self.assertEqual(HTTP.endpoint_identity("https://host.example/x#secretfragment"),
+                         "https://host.example")
+
+    def test_an_explicit_port_is_kept_and_a_default_is_not_invented(self):
+        self.assertEqual(HTTP.endpoint_identity("http://127.0.0.1:8899/x"),
+                         "http://127.0.0.1:8899")
+        self.assertEqual(HTTP.endpoint_identity("https://host.example:443/x"),
+                         "https://host.example:443")
+        self.assertEqual(HTTP.endpoint_identity("https://host.example/x"), "https://host.example")
+
+    def test_an_ipv6_host_is_rebracketed_so_the_identity_stays_a_url(self):
+        self.assertEqual(HTTP.endpoint_identity("https://[2001:db8::1]/secretpath123456"),
+                         "https://[2001:db8::1]")
+        self.assertEqual(HTTP.endpoint_identity("https://[2001:db8::1]:8899/x"),
+                         "https://[2001:db8::1]:8899")
+
+    def test_malformed_and_non_http_endpoints_are_refused_not_guessed_at(self):
+        for bad in ("", "not-a-url", "https:///nopath", "ftp://host/x", "ws://host/x",
+                    "https://host:notaport/x", "//host/x", None):
+            with self.subTest(bad=bad):
+                with self.assertRaises(HTTP.TransportIdentityError):
+                    HTTP.endpoint_identity(bad)
+
+    def test_an_injected_secret_in_any_component_is_absent_from_the_identity(self):
+        secret = "sEcReT0123456789abcdefXYZ"
+        for url in (f"https://host.example/{secret}",
+                    f"https://host.example/?api-key={secret}",
+                    f"https://host.example/x#{secret}",
+                    f"https://{secret}:x@host.example/",
+                    f"https://host.example:8899/a/b/{secret}?t={secret}#{secret}"):
+            with self.subTest(url=url):
+                self.assertNotIn(secret, HTTP.endpoint_identity(url))
+                self.assertNotIn(secret, HTTP.assert_endpoint_identity_is_safe(url))
+
+    def test_the_safety_assertion_catches_a_sanitizer_that_leaked_a_component(self):
+        """Drives the guard rather than trusting it: a deliberately leaky identity must refuse."""
+        original = HTTP.endpoint_identity
+        HTTP.endpoint_identity = lambda endpoint: (
+            f"https://host.example{urllib.parse.urlsplit(endpoint).path}")
+        try:
+            with self.assertRaises(HTTP.TransportIdentityError):
+                HTTP.assert_endpoint_identity_is_safe("https://host.example/secretpath1234567")
+        finally:
+            HTTP.endpoint_identity = original
+
+    def test_the_identity_is_idempotent(self):
+        once = HTTP.endpoint_identity("https://host.example:8899/a?b#c")
+        self.assertEqual(HTTP.endpoint_identity(once), once)
+
+    def test_a_host_only_identity_passes_the_safety_assertion(self):
+        self.assertEqual(HTTP.assert_endpoint_identity_is_safe("https://host.example/x"),
+                         "https://host.example")
 
 
 class TestTheSharedRetryPolicy(unittest.TestCase):

@@ -3481,9 +3481,39 @@ class ExecutionGateTests(unittest.TestCase):
             if saved is not None:
                 os.environ["B9D_TEST_RPC"] = saved
 
-    def test_endpoint_reference_strips_query_credentials(self):
-        self.assertEqual(B9D.endpoint_reference(
-            "https://mainnet.example/rpc?api-key=secret"), "https://mainnet.example/rpc")
+    def test_endpoint_reference_keeps_only_scheme_host_and_explicit_port(self):
+        """This test previously asserted the defect: that `/rpc` was RETAINED.
+
+        Keeping the path was harmless while the provider carried its key in the query string, and it
+        wrote a live credential into a collected artifact the moment the provider carried the key in
+        the PATH instead -- which is what happened. The contract is now positive: build the identity
+        from scheme, host and explicit port, so a path, query, fragment or userinfo is absent because
+        it was never copied.
+        """
+        for url, expected in (
+                ("https://mainnet.example/rpc?api-key=secret", "https://mainnet.example"),
+                ("https://mainnet.example/abcdef0123456789abcdef0123456789",
+                 "https://mainnet.example"),
+                ("https://user:pass@mainnet.example/keymaterial1234", "https://mainnet.example"),
+                ("https://[2001:db8::1]:8899/secretpath1234567", "https://[2001:db8::1]:8899"),
+                ("http://127.0.0.1:8899", "http://127.0.0.1:8899")):
+            with self.subTest(url=url):
+                self.assertEqual(B9D.endpoint_reference(url), expected)
+
+    def test_endpoint_reference_refuses_what_it_cannot_sanitize(self):
+        for bad in ("not-a-url", "https:///nohost", "ftp://host/x", "https://host:notaport/x"):
+            with self.subTest(bad=bad):
+                with self.assertRaises(B9D.FreezeViolation):
+                    B9D.endpoint_reference(bad)
+
+    def test_no_persisted_boundary_metadata_field_can_carry_a_path_credential(self):
+        """Every field b9d persists about the endpoint, scanned against an injected secret."""
+        secret = "abcdef0123456789abcdef0123456789"
+        endpoint = f"https://host.example/{secret}"
+        reference = B9D.endpoint_reference(endpoint)
+        self.assertNotIn(secret, reference)
+        self.assertNotIn(secret, json.dumps({"boundary_endpoint_reference": reference,
+                                             "endpoint_reference": reference}))
 
     def test_transaction_preflight_requires_every_frozen_meta_field(self):
         meta = {field: [] for field in B9D.REQUIRED_META_FIELDS}

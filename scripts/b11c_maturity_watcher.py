@@ -97,6 +97,15 @@ MAX_POLL_RETRIES = 6
 BACKOFF_BASE_SECONDS = 5
 BACKOFF_CAP_SECONDS = 120
 
+# While a stage runs the poll clock stops, so the supervisor proves it is alive on this cadence
+# instead. Short relative to a stage measured in hours, and cheap: one small atomic state write.
+STAGE_HEARTBEAT_SECONDS = 30
+
+# How long a stage may produce nothing before its PROGRESS is reported as stalled. This is not a
+# timeout and kills nothing -- a legitimately quiet stage exists -- it is what makes a hung child
+# visible to an operator instead of hidden behind a faithful supervisor heartbeat.
+STAGE_PROGRESS_TOLERANCE_SECONDS = 900
+
 STATE_INITIALISING = "initialising"
 STATE_VERIFYING = "verifying"
 STATE_WAITING = "waiting_for_maturity"
@@ -207,10 +216,10 @@ def endpoint_receipt(url):
     The configured endpoint carries its key in the query string, so anything that records a URL
     records a secret. This is the only representation allowed to leave the process.
     """
-    parts = urllib.parse.urlsplit(url)
-    if not parts.scheme or not parts.hostname:
-        raise WatcherRefused("the endpoint has no scheme or host to record")
-    return f"{parts.scheme}://{parts.hostname}"
+    try:
+        return HTTP.assert_endpoint_identity_is_safe(url)
+    except HTTP.TransportIdentityError as error:
+        raise WatcherRefused(f"the endpoint cannot be recorded safely: {error}") from error
 
 
 def _secret_values():
@@ -539,6 +548,10 @@ def initial_state(window, manifest, poll_seconds):
         "run_order": list(RUN_ORDER),
         "stages_completed": [],
         "stage_in_flight": None,
+        "stage_pid": None,
+        "stage_heartbeat_at": None,
+        "stage_progress_at": None,
+        "stage_output_bytes": None,
         "quarantine": None,
         "polls": 0,
         "last_tip_slot": None,
@@ -632,10 +645,22 @@ def liveness(state, lock_path=LOCK_PATH, now=None):
     pid = read_pid(lock_path)
     alive = process_is_this_watcher(pid)
     held = lock_is_held(lock_path)
-    last = state.get("last_poll_at")
-    interval = state.get("poll_seconds") or DEFAULT_POLL_SECONDS
+    # WHICH heartbeat depends on what the supervisor is doing, because the poll clock stops the
+    # moment a stage starts. Judging a running stage by `last_poll_at` reported `stale` for an
+    # entire healthy 40-hour stage and masked `running_stage` in the operator's view -- so the
+    # signal was useless exactly while collection was happening, which is when it matters most.
+    running = state.get("state") == STATE_RUNNING_STAGE
+    if running:
+        source = "stage"
+        last = state.get("stage_heartbeat_at")
+        interval = STAGE_HEARTBEAT_SECONDS
+    else:
+        source = "poll"
+        last = state.get("last_poll_at")
+        interval = state.get("poll_seconds") or DEFAULT_POLL_SECONDS
+    tolerance = interval * HEARTBEAT_TOLERANCE_INTERVALS
     age = None if last is None else now - last
-    fresh = age is not None and age <= interval * HEARTBEAT_TOLERANCE_INTERVALS
+    fresh = age is not None and age <= tolerance
     if alive and held and fresh:
         verdict = LIVENESS_ALIVE
     elif not alive and not held:
@@ -645,9 +670,111 @@ def liveness(state, lock_path=LOCK_PATH, now=None):
         # that has stopped writing. Neither is "running normally", and calling it alive would be
         # the guess this whole module exists to avoid.
         verdict = LIVENESS_STALE
-    return {"liveness": verdict, "pid": pid, "pid_alive": alive, "lock_held": held,
-            "heartbeat_age_seconds": age, "heartbeat_fresh": fresh,
-            "heartbeat_tolerance_seconds": interval * HEARTBEAT_TOLERANCE_INTERVALS}
+    signals = {"liveness": verdict, "pid": pid, "pid_alive": alive, "lock_held": held,
+               "heartbeat_age_seconds": age, "heartbeat_fresh": fresh,
+               "heartbeat_source": source, "heartbeat_tolerance_seconds": tolerance}
+    if running:
+        # A live supervisor faithfully writing heartbeats while its CHILD hangs would read as
+        # healthy, so the stage's own progress is reported separately. Supervisor liveness and stage
+        # progress are different questions and conflating them is what hid the last defect.
+        progress = state.get("stage_progress_at")
+        signals["stage_pid"] = state.get("stage_pid")
+        signals["stage_progress_age_seconds"] = None if progress is None else now - progress
+        signals["stage_progressing"] = (
+            progress is not None and now - progress <= STAGE_PROGRESS_TOLERANCE_SECONDS)
+    return signals
+
+
+INCIDENT_DIR = WORK_DIR / "incidents"
+
+# A directory name nobody can mistake for a resumable run, and a marker file that says so inside it.
+INCIDENT_MARKER = "INVALIDATED_DO_NOT_RESUME.json"
+
+
+def incident_quarantine(reason_code, reason, secret_bearing, work_dir=WORK_DIR,
+                        state_path=STATE_PATH, lock_path=LOCK_PATH, receipt_dir=RECEIPT_DIR,
+                        log_dir=LOG_DIR, incident_dir=INCIDENT_DIR, stamp=None,
+                        secret_values=None):
+    """Retire a run that produced UNUSABLE evidence, deliberately unlike `archive_run`.
+
+    `archive_run` exists for a run that never collected anything and REFUSES once a receipt exists,
+    which is right: a run holding receipts describes a collection somebody may still need. An
+    incident is the other case -- receipts exist AND the evidence must not be reused -- so it needs
+    its own procedure rather than a flag on the normal one. Two paths that differ only in a boolean
+    are two paths one careless call can confuse.
+
+    What it does, in this order:
+
+    1. Captures forensics for EVERY file first, including the ones about to be removed: relative
+       path, byte size and sha256. A hash recorded after deletion is a hash of nothing.
+    2. Moves the clean, credential-free evidence aside -- state, lock, receipts, logs -- so the
+       record of what happened survives.
+    3. REMOVES the files named in `secret_bearing`, and only those, after their hashes are captured.
+       They are the one class of artifact that must not be retained, because retaining a credential
+       is the harm.
+    4. Writes `INVALIDATED_DO_NOT_RESUME.json` into the incident directory. The directory is not
+       under `superseded/`, so nothing that walks archived runs will offer it as a resume.
+
+    `secret_values` is injectable so the scan can be driven in a test without a live credential; it
+    defaults to the live ones. The report itself is scanned before it is written, and a match refuses
+    rather than redacts -- the same stance as everywhere else here.
+    """
+    stamp = stamp or time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    work_dir = pathlib.Path(work_dir)
+    destination = pathlib.Path(incident_dir) / stamp
+    destination.mkdir(parents=True, exist_ok=True)
+    values = _secret_values() if secret_values is None else set(secret_values)
+    forbidden = {str(pathlib.Path(p)) for p in secret_bearing}
+
+    def forensics(path):
+        blob = path.read_bytes()
+        return {"path": str(path.relative_to(work_dir)), "size_bytes": len(blob),
+                "sha256": hashlib.sha256(blob).hexdigest(),
+                "credential_present": any(v and v.encode() in blob for v in values)}
+
+    captured, removed, preserved = [], [], []
+    for path in sorted(work_dir.rglob("*")):
+        if path.is_dir() or INCIDENT_DIR.name in path.parts or ARCHIVE_DIR.name in path.parts:
+            continue
+        record = forensics(path)
+        captured.append(record)
+        if str(path) in forbidden or record["credential_present"]:
+            path.unlink()
+            removed.append(record)
+        else:
+            target = destination / path.relative_to(work_dir)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            os.replace(path, target)
+            preserved.append(record)
+
+    report = {
+        "schema_version": SCHEMA_VERSION,
+        "incident_at": stamp,
+        "reason_code": reason_code,
+        "reason": reason,
+        "not_for_resume": ("This run's evidence is INVALIDATED. A clean rerun must start from zero "
+                           "receipts and regenerate every stage. Nothing here may be reused, "
+                           "resumed from, or smoothed into a later run."),
+        "removed_because_credential_bearing": removed,
+        "preserved_credential_free": preserved,
+        "files_examined": len(captured),
+        "endpoint_value_never_recorded": ("only the offending metadata KEY name is recorded; the "
+                                          "endpoint value and its path are not written here"),
+    }
+    # Scanned against the SAME values used to classify the files, not only the live environment.
+    # Scanning solely via `assert_no_secret` made this guard undrivable whenever the suite ran
+    # without the credential exported, which is most of the time -- and a guard that cannot be
+    # driven is one nobody has shown works.
+    serialized = json.dumps(report, sort_keys=True, default=str)
+    leaked = sorted(v for v in values if v and v in serialized)
+    if leaked:
+        raise Quarantined(
+            f"{Q09_SECRET_WOULD_BE_WRITTEN}: the incident report would carry credential material. "
+            f"Nothing is redacted here, so the write is refused and the incident directory is left "
+            f"without a marker rather than with a leaking one")
+    assert_no_secret(report, "the incident report")
+    atomic_write_json(destination / INCIDENT_MARKER, report, "incident report")
+    return report
 
 
 def archive_run(reason, work_dir=WORK_DIR, state_path=STATE_PATH, lock_path=LOCK_PATH,
@@ -917,8 +1044,31 @@ def next_stage(done):
     return None
 
 
+def touch_stage_heartbeat(state, state_path, stdout_path=None, progressed=False, now=None):
+    """Prove the SUPERVISOR is alive while it waits on a stage that may run for many hours.
+
+    Two clocks, because they answer different questions. `stage_heartbeat_at` says the supervisor is
+    still there. `stage_progress_at` says the STAGE is still producing, and only advances when the
+    stage's output actually grew -- so a child that hangs while the supervisor keeps ticking shows a
+    fresh heartbeat and a stalling progress age, which is the truth rather than a comfortable
+    average of the two.
+    """
+    moment = int(time.time()) if now is None else now
+    state["stage_heartbeat_at"] = moment
+    if stdout_path is not None:
+        path = pathlib.Path(stdout_path)
+        size = path.stat().st_size if path.exists() else 0
+        if size != state.get("stage_output_bytes"):
+            state["stage_output_bytes"] = size
+            progressed = True
+    if progressed or state.get("stage_progress_at") is None:
+        state["stage_progress_at"] = moment
+    write_state(state, state_path)
+    return state["stage_heartbeat_at"]
+
+
 def run_stage(stage, command, state, runner=None, log_dir=LOG_DIR, receipt_dir=RECEIPT_DIR,
-              state_path=STATE_PATH):
+              state_path=STATE_PATH, heartbeat_seconds=STAGE_HEARTBEAT_SECONDS):
     """Run one stage once, with a durable receipt written after it finishes."""
     if command["wiring"] != "resolved":
         raise Quarantined(
@@ -939,16 +1089,30 @@ def run_stage(stage, command, state, runner=None, log_dir=LOG_DIR, receipt_dir=R
 
     state["stage_in_flight"] = stage
     state["state"] = STATE_RUNNING_STAGE
-    write_state(state, state_path)
+    state["stage_pid"] = None
+    state["stage_output_bytes"] = 0
+    touch_stage_heartbeat(state, state_path, progressed=True)
 
     started = int(time.time())
     if runner is None:
         with open(stdout_path, "w") as out, open(stderr_path, "w") as err:
-            result = subprocess.run(argv, cwd=ROOT, stdout=out, stderr=err, text=True)
-        returncode = result.returncode
+            process = subprocess.Popen(argv, cwd=ROOT, stdout=out, stderr=err, text=True)
+            state["stage_pid"] = process.pid
+            touch_stage_heartbeat(state, state_path, stdout_path=stdout_path)
+            while True:
+                try:
+                    returncode = process.wait(timeout=heartbeat_seconds)
+                    break
+                except subprocess.TimeoutExpired:
+                    # Waiting, not sleeping: the supervisor proves it is alive on every tick, and
+                    # records the stage's output size so a HUNG child stays visible behind a
+                    # perfectly healthy supervisor heartbeat.
+                    touch_stage_heartbeat(state, state_path, stdout_path=stdout_path)
     else:
         returncode = runner(argv, stdout_path, stderr_path)
+        touch_stage_heartbeat(state, state_path, stdout_path=stdout_path)
     finished = int(time.time())
+    state["stage_pid"] = None
 
     receipt = {
         "schema_version": SCHEMA_VERSION,

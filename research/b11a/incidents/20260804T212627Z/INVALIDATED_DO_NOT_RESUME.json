@@ -1,0 +1,109 @@
+{
+  "endpoint_value_never_recorded": "only the offending metadata KEY name is recorded; the endpoint value and its path are not written here",
+  "files_examined": 16,
+  "incident_at": "20260804T212627Z",
+  "not_for_resume": "This run's evidence is INVALIDATED. A clean rerun must start from zero receipts and regenerate every stage. Nothing here may be reused, resumed from, or smoothed into a later run.",
+  "preserved_credential_free": [
+    {
+      "credential_present": false,
+      "path": "b11a_creates.sqlite",
+      "sha256": "9e33ffa0ab13a022537f3de841335745c12b2806577b1312bb202c5e07c16142",
+      "size_bytes": 401408
+    },
+    {
+      "credential_present": false,
+      "path": "b11a_creates.sqlite-shm",
+      "sha256": "1b6edc0de0e3d01d7d8cfabfeca3e8db33ab681d13701cfde7268d950e112e15",
+      "size_bytes": 32768
+    },
+    {
+      "credential_present": false,
+      "path": "b11a_creates.sqlite-wal",
+      "sha256": "c4472d90dea4dad31873432cb8ac9d9b76c7f15b67a6588f534429ccd501ef5f",
+      "size_bytes": 4128272
+    },
+    {
+      "credential_present": false,
+      "path": "b11a_program_boundary.json-shm",
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "size_bytes": 32768
+    },
+    {
+      "credential_present": false,
+      "path": "b11a_program_boundary.json-wal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "credential_present": false,
+      "path": "b11a_program_boundary.json.collector.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "credential_present": false,
+      "path": "logs/enumerate_creates.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "credential_present": false,
+      "path": "logs/enumerate_creates.stdout.log",
+      "sha256": "0f02ce346f3e7a74f2fbe89593d418ed386c400b465f50c0d2cd15e4c15b746e",
+      "size_bytes": 2216
+    },
+    {
+      "credential_present": false,
+      "path": "logs/program_boundary.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "credential_present": false,
+      "path": "logs/program_boundary.stdout.log",
+      "sha256": "5a0c313ccf5f5bcc8b6bc4ce80c55fd022799445aaf67a10b1cccee609571618",
+      "size_bytes": 809
+    },
+    {
+      "credential_present": false,
+      "path": "logs/watcher.stderr.log",
+      "sha256": "333a82a2d5ac49d2c407878e830a3a74de1738428edee8e4e870f8c22c84704b",
+      "size_bytes": 945
+    },
+    {
+      "credential_present": false,
+      "path": "logs/watcher.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "credential_present": false,
+      "path": "receipts/program_boundary.json",
+      "sha256": "9a80389b69583dcb578dc14b4c01e4a5f2d1843575d3f966c68aa95a9eb6d892",
+      "size_bytes": 682
+    },
+    {
+      "credential_present": false,
+      "path": "supervisor.lock",
+      "sha256": "ee225472931dc1903a0e00c10da02582362592129d4f4bf5fa99bba3e9adcbcc",
+      "size_bytes": 8
+    },
+    {
+      "credential_present": false,
+      "path": "supervisor_state.json",
+      "sha256": "67c0a6395089a4a470282e6fa870cde47b5f97f04744d554cfd1cba8a44649b7",
+      "size_bytes": 887
+    }
+  ],
+  "reason": "b9d endpoint_reference persisted scheme+host+PATH, so the Chainstack path credential was written into the program_boundary artifact metadata under the key boundary_endpoint_reference. Repaired: one shared sanitizer now yields scheme+host+explicit port only. This run is INVALIDATED; a clean rerun regenerates stage 1 and stage 2 from zero receipts.",
+  "reason_code": "Q_CREDENTIAL_IN_ARTIFACT",
+  "removed_because_credential_bearing": [
+    {
+      "credential_present": true,
+      "path": "b11a_program_boundary.json",
+      "sha256": "e7e1aef5859ef02c772df9a59be6d78a7bca14212a00cd654333a9f056670624",
+      "size_bytes": 94208
+    }
+  ],
+  "schema_version": "1.0.0"
+}

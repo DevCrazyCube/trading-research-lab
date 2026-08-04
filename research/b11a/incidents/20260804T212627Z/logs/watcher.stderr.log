@@ -1,0 +1,6 @@
+WatcherRefused: SOLANA_RPC_URL is not set. Credentials are environment-only and this process never reads one from a file it wrote
+WatcherRefused: SOLANA_RPC_URL is not set. Credentials are environment-only and this process never reads one from a file it wrote
+WatcherRefused: Q05_retries_exhausted: 6 retryable failures in a row. A retryable failure that keeps failing is not retryable in practice
+WatcherRefused: Q09_secret_would_be_written: a credential was about to be written to supervisor state. Nothing is redacted here — a redaction that fails silently looks exactly like one that worked — so the write is refused and the value never leaves the process
+WatcherRefused: Q06_non_retryable_rpc: HTTPError. This is not a transport hiccup, and retrying past it would be guessing about why it failed
+WatcherRefused: Q06_non_retryable_rpc: URLError. This is not a transport hiccup, and retrying past it would be guessing about why it failed

@@ -83,6 +83,69 @@ def json_rpc_request(url, body, method="POST"):
     return urllib.request.Request(url, data=bytes(body), headers=headers(), method=method)
 
 
+def endpoint_identity(endpoint):
+    """The ONLY representation of an endpoint that may be persisted: scheme, host, explicit port.
+
+    One contract, in the one module every transport already loads, because the leak this replaces was
+    two sanitizers disagreeing. b9d's kept `parsed.path`; b11c's did not. That was harmless while the
+    provider carried its key in the QUERY STRING and became a credential written into a collected
+    artifact the moment the provider carried it in the PATH instead.
+
+    So the rule is positive rather than a list of things to strip: build the identity from the two
+    components that are safe by construction, and let everything else -- path, query, fragment and
+    userinfo -- be absent because it was never copied, not because a filter caught it.
+
+    * userinfo (`https://user:pass@host`) never appears: `hostname` excludes it by definition.
+    * an IPv6 host is re-bracketed, because `hostname` strips the brackets and `https://::1` is not
+      a parseable URL.
+    * an explicit port is kept, because two endpoints on one host are two endpoints; a default port
+      is not restated.
+    * anything that is not an http(s) URL with a host is refused rather than guessed at.
+    """
+    parsed = urllib.parse.urlsplit(str(endpoint))
+    if parsed.scheme not in ("http", "https"):
+        raise TransportIdentityError(
+            f"an endpoint identity needs an http or https scheme, got {parsed.scheme!r}")
+    host = parsed.hostname
+    if not host:
+        raise TransportIdentityError("an endpoint identity needs a host")
+    try:
+        port = parsed.port
+    except ValueError as error:
+        raise TransportIdentityError(f"the endpoint port is not a number: {error}") from error
+    if ":" in host:                      # IPv6 literal; hostname() has already dropped the brackets
+        host = f"[{host}]"
+    return f"{parsed.scheme}://{host}{f':{port}' if port else ''}"
+
+
+def assert_endpoint_identity_is_safe(endpoint):
+    """Belt for the braces: the identity must not contain any component that could carry a secret.
+
+    Derived from the SOURCE url rather than from a token list, so it needs no knowledge of which
+    provider hides its key where. If a path, query, fragment or userinfo string survived into the
+    identity, that is the bug this exists to catch.
+    """
+    identity = endpoint_identity(endpoint)
+    parsed = urllib.parse.urlsplit(identity)
+    # STRUCTURAL, not a substring hunt. Searching the identity for each source component's text
+    # false-positives the moment a component is short: a one-character password matches the letter
+    # inside the hostname. Parsing the identity back and requiring the risky components to be ABSENT
+    # is exact, and it cannot be fooled by a coincidence either way.
+    present = [name for name, value in (("path", parsed.path), ("query", parsed.query),
+                                        ("fragment", parsed.fragment),
+                                        ("username", parsed.username),
+                                        ("password", parsed.password)) if value]
+    if present:
+        raise TransportIdentityError(
+            f"the endpoint identity {identity!r} still carries {present}; a persisted endpoint must "
+            f"be scheme, host and explicit port only")
+    source = urllib.parse.urlsplit(str(endpoint))
+    if parsed.hostname != source.hostname or parsed.port != source.port:
+        raise TransportIdentityError(
+            f"the endpoint identity names a different host or port than the endpoint it came from")
+    return identity
+
+
 def is_client_refusal(status):
     """A 403 is the WAF refusing this client. Terminal everywhere, never retried."""
     return status == 403

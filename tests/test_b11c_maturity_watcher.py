@@ -7,6 +7,7 @@ quarantine and resume — is exercised without a single real request.
 One module graph is loaded for the whole file: loading the same module twice by path creates two
 distinct exception classes, and an `assertRaises` on the wrong one never matches.
 """
+import hashlib
 import importlib.util
 import json
 import os
@@ -14,6 +15,8 @@ import pathlib
 import shutil
 import subprocess
 import tempfile
+import sys
+import time
 import unittest
 import urllib.error
 import ssl
@@ -576,8 +579,35 @@ class SecretTests(unittest.TestCase):
         self.assertIn("https://rpc.invalid", text)
 
     def test_an_endpoint_without_a_host_is_refused(self):
-        with self.assertRaisesRegex(W.WatcherRefused, "no scheme or host"):
-            W.endpoint_receipt("not-a-url")
+        """Still refused; the wording now comes from the one shared sanitizer both modules use."""
+        for bad in ("not-a-url", "https:///nohost", "ftp://host/x", "https://host:notaport/x"):
+            with self.subTest(bad=bad):
+                with self.assertRaises(W.WatcherRefused):
+                    W.endpoint_receipt(bad)
+
+    def test_the_endpoint_receipt_keeps_only_scheme_host_and_explicit_port(self):
+        """The leak this replaces: a path credential survived a sanitizer that stripped queries."""
+        for url, expected in (
+                ("https://mainnet.helius-rpc.com/?api-key=SECRETVALUE1234567890",
+                 "https://mainnet.helius-rpc.com"),
+                ("https://solana-mainnet.core.chainstack.com/abcdef0123456789abcdef0123456789",
+                 "https://solana-mainnet.core.chainstack.com"),
+                ("https://user:pass@host.example/keymaterial123456",
+                 "https://host.example"),
+                ("https://[2001:db8::1]:8899/secretpath1234567", "https://[2001:db8::1]:8899"),
+                ("http://127.0.0.1:8899", "http://127.0.0.1:8899"),
+                ("https://host.example:443/x#fragment", "https://host.example:443")):
+            with self.subTest(url=url):
+                self.assertEqual(W.endpoint_receipt(url), expected)
+
+    def test_the_watcher_and_b9d_agree_on_the_endpoint_identity(self):
+        """Two sanitizers that disagreed is what let the credential through. There is now one."""
+        B9D = _load("b9d_transaction_bodies", "b9d_transaction_bodies.py")
+        for url in ("https://solana-mainnet.core.chainstack.com/abcdef0123456789abcdef0123456789",
+                    "https://mainnet.helius-rpc.com/?api-key=SECRETVALUE1234567890",
+                    "https://[2001:db8::1]:8899/secretpath1234567"):
+            with self.subTest(url=url):
+                self.assertEqual(W.endpoint_receipt(url), B9D.endpoint_reference(url))
 
 
 class CompositionTests(unittest.TestCase):
@@ -973,6 +1003,317 @@ class DurableQuarantineTests(unittest.TestCase):
         with self.assertRaisesRegex(W.Quarantined, W.Q06_NON_RETRYABLE_RPC):
             W.poll_with_backoff(URL, transport=fatal, sleeper=lambda _s: None)
         self.assertFalse(self.state_path.exists())
+
+
+class IncidentQuarantineTests(unittest.TestCase):
+    """Retiring a run whose evidence must NOT be reused, without deleting the record of it."""
+
+    SECRET = "abcdef0123456789abcdef0123456789"
+
+    def setUp(self):
+        self.work = pathlib.Path(tempfile.mkdtemp(prefix="b11c-inc-"))
+        self.addCleanup(shutil.rmtree, self.work, ignore_errors=True)
+        (self.work / "receipts").mkdir()
+        (self.work / "logs").mkdir()
+        self.tainted = self.work / "b11a_program_boundary.json"
+        self.tainted.write_bytes(
+            b"SQLite format 3\x00boundary_endpoint_referencehttps://host.example/"
+            + self.SECRET.encode())
+        self.clean_partial = self.work / "b11a_creates.sqlite"
+        self.clean_partial.write_bytes(b"SQLite format 3\x00partial scan, no credential")
+        (self.work / "receipts" / "program_boundary.json").write_text(
+            json.dumps({"stage": "program_boundary", "completed": True}))
+        (self.work / "logs" / "program_boundary.stdout.log").write_text("boundary ok\n")
+        self.state_path = self.work / "supervisor_state.json"
+        self.state_path.write_text(json.dumps({"state": W.STATE_RUNNING_STAGE,
+                                               "stages_completed": ["program_boundary"]}))
+        (self.work / "supervisor.lock").write_text("4242")
+
+    def quarantine(self, **kwargs):
+        return W.incident_quarantine(
+            "Q_CREDENTIAL_IN_ARTIFACT", "a persisted endpoint carried a path credential",
+            secret_bearing=[self.tainted], work_dir=self.work, state_path=self.state_path,
+            lock_path=self.work / "supervisor.lock", receipt_dir=self.work / "receipts",
+            log_dir=self.work / "logs", incident_dir=self.work / "incidents",
+            stamp="20260804T200000Z", secret_values={self.SECRET}, **kwargs)
+
+    def report(self):
+        return json.loads((self.work / "incidents" / "20260804T200000Z" /
+                           W.INCIDENT_MARKER).read_text())
+
+    def test_the_credential_bearing_artifact_is_removed(self):
+        self.quarantine()
+        self.assertFalse(self.tainted.exists(), "a credential-bearing artifact may not be retained")
+
+    def test_its_forensics_are_captured_before_removal(self):
+        expected = hashlib.sha256(self.tainted.read_bytes()).hexdigest()
+        size = self.tainted.stat().st_size
+        report = self.quarantine()
+        removed = {r["path"]: r for r in report["removed_because_credential_bearing"]}
+        self.assertIn("b11a_program_boundary.json", removed)
+        self.assertEqual(removed["b11a_program_boundary.json"]["sha256"], expected)
+        self.assertEqual(removed["b11a_program_boundary.json"]["size_bytes"], size)
+        self.assertTrue(removed["b11a_program_boundary.json"]["credential_present"])
+
+    def test_the_report_never_records_the_endpoint_value_or_the_credential(self):
+        self.quarantine()
+        text = json.dumps(self.report())
+        self.assertNotIn(self.SECRET, text)
+        self.assertNotIn("host.example", text)
+
+    def test_the_report_refuses_to_be_written_if_it_would_carry_a_secret(self):
+        """The stance everywhere here: refuse the write, never redact."""
+        with self.assertRaisesRegex(W.Quarantined, W.Q09_SECRET_WOULD_BE_WRITTEN):
+            W.incident_quarantine(
+                "Q_TEST", f"leaky reason containing {self.SECRET}",
+                secret_bearing=[self.tainted], work_dir=self.work, state_path=self.state_path,
+                lock_path=self.work / "supervisor.lock", receipt_dir=self.work / "receipts",
+                log_dir=self.work / "logs", incident_dir=self.work / "incidents",
+                stamp="20260804T210000Z", secret_values={self.SECRET})
+
+    def test_credential_free_evidence_is_preserved_not_erased(self):
+        report = self.quarantine()
+        preserved = {r["path"] for r in report["preserved_credential_free"]}
+        self.assertIn("receipts/program_boundary.json", preserved)
+        self.assertIn("logs/program_boundary.stdout.log", preserved)
+        self.assertIn("supervisor_state.json", preserved)
+        self.assertIn("b11a_creates.sqlite", preserved)
+        moved = self.work / "incidents" / "20260804T200000Z"
+        self.assertTrue((moved / "receipts" / "program_boundary.json").exists())
+        self.assertTrue((moved / "b11a_creates.sqlite").exists())
+
+    def test_a_credential_bearing_file_is_removed_even_if_not_named(self):
+        """Named OR detected. A caller who forgets one must not thereby retain it."""
+        sneaky = self.work / "logs" / "extra.log"
+        sneaky.write_text(f"endpoint https://host.example/{self.SECRET}\\n")
+        report = self.quarantine()
+        self.assertFalse(sneaky.exists())
+        self.assertIn("logs/extra.log",
+                      {r["path"] for r in report["removed_because_credential_bearing"]})
+
+    def test_the_clean_run_starts_from_zero_receipts(self):
+        self.quarantine()
+        self.assertEqual(W.completed_stages(self.work / "receipts"), [],
+                         "a rerun must regenerate every stage, not resume")
+        self.assertFalse(self.state_path.exists())
+        self.assertFalse((self.work / "supervisor.lock").exists())
+
+    def test_the_incident_is_marked_not_for_resume_and_kept_out_of_superseded(self):
+        self.quarantine()
+        report = self.report()
+        self.assertEqual(report["reason_code"], "Q_CREDENTIAL_IN_ARTIFACT")
+        self.assertIn("INVALIDATED", report["not_for_resume"])
+        self.assertIn("zero receipts", report["not_for_resume"])
+        self.assertTrue((self.work / "incidents" / "20260804T200000Z" /
+                         "INVALIDATED_DO_NOT_RESUME.json").exists())
+        self.assertFalse((self.work / "superseded").exists(),
+                         "an incident must not appear where archived resumable runs live")
+
+    def test_it_does_not_reuse_archive_run_which_rightly_refuses_a_receipted_run(self):
+        """The reason this procedure exists at all."""
+        with self.assertRaisesRegex(W.WatcherRefused, "completed stages"):
+            W.archive_run("would be wrong", work_dir=self.work, state_path=self.state_path,
+                          lock_path=self.work / "supervisor.lock",
+                          archive_dir=self.work / "superseded")
+
+    def test_every_examined_file_is_accounted_for(self):
+        report = self.quarantine()
+        self.assertEqual(report["files_examined"],
+                         len(report["removed_because_credential_bearing"])
+                         + len(report["preserved_credential_free"]))
+
+
+class HeartbeatDuringAStageTests(unittest.TestCase):
+    """A healthy 40-hour stage must not read as `stale`, and a hung one must not read as healthy.
+
+    The poll clock stops when a stage starts, so judging a running stage by `last_poll_at` reported
+    stale for the whole of a healthy stage AND masked `running_stage` in the operator's view -- the
+    signal was useless exactly while collection was happening. Two clocks now: one says the
+    SUPERVISOR is alive, the other says the STAGE is producing.
+    """
+
+    def setUp(self):
+        self.directory = pathlib.Path(tempfile.mkdtemp(prefix="b11c-hb-"))
+        self.addCleanup(shutil.rmtree, self.directory, ignore_errors=True)
+        self.state_path = self.directory / "state.json"
+        self.lock_path = self.directory / "supervisor.lock"
+
+    def running_state(self, heartbeat_age=0, progress_age=0, now=None):
+        now = int(time.time()) if now is None else now
+        return {"schema_version": W.SCHEMA_VERSION, "state": W.STATE_RUNNING_STAGE,
+                "quarantine": None, "polls": 38, "stages_completed": ["program_boundary"],
+                "stage_in_flight": "enumerate_creates", "stage_pid": 4242,
+                "stage_heartbeat_at": now - heartbeat_age,
+                "stage_progress_at": now - progress_age,
+                "stage_output_bytes": 2216,
+                "cutoff_slot_inclusive": CUTOFF, "last_tip_slot": CUTOFF,
+                # Deliberately ancient: this is the clock that used to be consulted.
+                "last_poll_at": now - 100_000, "poll_seconds": 300, "endpoint": None}
+
+    def test_a_long_healthy_stage_is_alive_not_stale(self):
+        state = self.running_state(heartbeat_age=5, progress_age=5)
+        signals = W.liveness(state, lock_path=self.lock_path)
+        self.assertEqual(signals["heartbeat_source"], "stage")
+        self.assertTrue(signals["heartbeat_fresh"])
+        self.assertEqual(signals["heartbeat_age_seconds"], 5)
+
+    def test_the_ancient_poll_clock_is_not_consulted_during_a_stage(self):
+        """The whole defect in one assertion: last_poll_at is 100,000s old and irrelevant."""
+        state = self.running_state(heartbeat_age=1)
+        signals = W.liveness(state, lock_path=self.lock_path)
+        self.assertLess(signals["heartbeat_age_seconds"], 100)
+        self.assertEqual(signals["heartbeat_tolerance_seconds"],
+                         W.STAGE_HEARTBEAT_SECONDS * W.HEARTBEAT_TOLERANCE_INTERVALS)
+
+    def test_the_poll_clock_is_still_used_while_waiting_for_maturity(self):
+        state = self.running_state(heartbeat_age=1)
+        state["state"] = W.STATE_WAITING
+        signals = W.liveness(state, lock_path=self.lock_path)
+        self.assertEqual(signals["heartbeat_source"], "poll")
+        self.assertFalse(signals["heartbeat_fresh"], "the poll clock is 100,000s old")
+
+    def test_a_supervisor_that_stopped_heartbeating_mid_stage_is_not_alive(self):
+        state = self.running_state(heartbeat_age=10_000)
+        signals = W.liveness(state, lock_path=self.lock_path)
+        self.assertFalse(signals["heartbeat_fresh"])
+
+    def test_a_stalled_child_is_visible_behind_a_healthy_supervisor(self):
+        """The failure mode the second clock exists for."""
+        state = self.running_state(heartbeat_age=2, progress_age=10_000)
+        signals = W.liveness(state, lock_path=self.lock_path)
+        self.assertTrue(signals["heartbeat_fresh"], "the supervisor is fine")
+        self.assertFalse(signals["stage_progressing"], "the stage is not")
+        self.assertGreater(signals["stage_progress_age_seconds"], 900)
+        self.assertEqual(signals["stage_pid"], 4242)
+
+    def test_a_progressing_child_reports_progressing(self):
+        state = self.running_state(heartbeat_age=2, progress_age=2)
+        signals = W.liveness(state, lock_path=self.lock_path)
+        self.assertTrue(signals["stage_progressing"])
+
+    def test_progress_fields_are_absent_when_no_stage_is_running(self):
+        state = self.running_state()
+        state["state"] = W.STATE_WAITING
+        signals = W.liveness(state, lock_path=self.lock_path)
+        self.assertNotIn("stage_progressing", signals)
+
+    def test_a_dead_parent_is_dead_however_fresh_the_stored_heartbeat_is(self):
+        state = self.running_state(heartbeat_age=0, progress_age=0)
+        W.write_state(state, self.state_path)
+        view = W.status(state_path=self.state_path, receipt_dir=self.directory / "receipts",
+                        lock_path=self.lock_path)
+        self.assertFalse(view["pid_alive"])
+        self.assertFalse(view["lock_held"])
+        self.assertEqual(view["liveness"], W.LIVENESS_DEAD)
+        self.assertEqual(view["state"], W.LIVENESS_DEAD, "a dead run must not present as running")
+        self.assertEqual(view["reported_state"], W.STATE_RUNNING_STAGE)
+
+    def test_a_missing_state_file_is_not_started_not_healthy(self):
+        view = W.status(state_path=self.directory / "absent.json",
+                        receipt_dir=self.directory / "receipts", lock_path=self.lock_path)
+        self.assertEqual(view["liveness"], W.LIVENESS_NOT_STARTED)
+
+    def test_the_operator_view_shows_running_stage_when_the_stage_heartbeat_is_fresh(self):
+        """Requires a live-looking pid and lock, so the whole signal set agrees."""
+        state = self.running_state(heartbeat_age=1, progress_age=1)
+        W.write_state(state, self.state_path)
+        self.lock_path.write_text(str(os.getpid()))
+        original_process = W.process_is_this_watcher
+        original_lock = W.lock_is_held
+        W.process_is_this_watcher = lambda pid: True
+        W.lock_is_held = lambda path=None: True
+        self.addCleanup(lambda: setattr(W, "process_is_this_watcher", original_process))
+        self.addCleanup(lambda: setattr(W, "lock_is_held", original_lock))
+        view = W.status(state_path=self.state_path, receipt_dir=self.directory / "receipts",
+                        lock_path=self.lock_path)
+        self.assertEqual(view["liveness"], W.LIVENESS_ALIVE)
+        self.assertEqual(view["state"], W.STATE_RUNNING_STAGE,
+                         "running_stage must not be masked by an aged RPC poll")
+        self.assertNotEqual(view["state"], W.LIVENESS_STALE)
+
+    def test_the_heartbeat_helper_advances_the_supervisor_clock_every_call(self):
+        state = self.running_state(heartbeat_age=50, progress_age=50)
+        first = W.touch_stage_heartbeat(state, self.state_path, now=1000)
+        second = W.touch_stage_heartbeat(state, self.state_path, now=1030)
+        self.assertEqual((first, second), (1000, 1030))
+        self.assertEqual(json.loads(self.state_path.read_text())["stage_heartbeat_at"], 1030)
+
+    def test_progress_advances_only_when_the_stage_output_actually_grew(self):
+        log = self.directory / "stage.stdout.log"
+        log.write_text("first\n")
+        state = self.running_state()
+        state["stage_output_bytes"] = None
+        W.touch_stage_heartbeat(state, self.state_path, stdout_path=log, now=1000)
+        self.assertEqual(state["stage_progress_at"], 1000)
+        # No new output: the supervisor clock moves, the progress clock does not.
+        W.touch_stage_heartbeat(state, self.state_path, stdout_path=log, now=1030)
+        self.assertEqual(state["stage_heartbeat_at"], 1030)
+        self.assertEqual(state["stage_progress_at"], 1000)
+        log.write_text("first\nsecond\n")
+        W.touch_stage_heartbeat(state, self.state_path, stdout_path=log, now=1060)
+        self.assertEqual(state["stage_progress_at"], 1060)
+
+    def test_a_real_subprocess_stage_is_heartbeaten_while_it_runs(self):
+        """End to end with a real child: the supervisor must tick more than once while waiting."""
+        harness = Harness(self, [CUTOFF])
+        state = {"schema_version": W.SCHEMA_VERSION, "state": W.STATE_WAITING, "quarantine": None,
+                 "polls": 1, "stages_completed": [], "stage_in_flight": None, "stage_pid": None,
+                 "stage_heartbeat_at": None, "stage_progress_at": None, "stage_output_bytes": None,
+                 "cutoff_slot_inclusive": CUTOFF, "last_tip_slot": CUTOFF, "last_poll_at": 0,
+                 "endpoint": None, "manifest_sha256": "0" * 64}
+        stage = W.RUN_ORDER[0]
+        command = {"argv": [sys.executable, "-c",
+                            "import time,sys\n"
+                            "for i in range(3):\n"
+                            "    print(i, flush=True)\n"
+                            "    time.sleep(0.2)\n"],
+                   "wiring": "resolved", "note": "synthetic"}
+        beats = []
+        original = W.touch_stage_heartbeat
+
+        def counting(state_arg, state_path, **kwargs):
+            beats.append(kwargs.get("now"))
+            return original(state_arg, state_path, **kwargs)
+
+        W.touch_stage_heartbeat = counting
+        self.addCleanup(lambda: setattr(W, "touch_stage_heartbeat", original))
+        receipt = W.run_stage(stage, command, state, log_dir=harness.paths["log_dir"],
+                             receipt_dir=harness.paths["receipt_dir"],
+                             state_path=harness.paths["state_path"], heartbeat_seconds=0.1)
+        self.assertTrue(receipt["completed"])
+        self.assertEqual(receipt["exit_code"], 0)
+        self.assertGreaterEqual(len(beats), 3, "the supervisor must tick while waiting, not once")
+        self.assertIsNone(state["stage_pid"], "the child pid is cleared when the stage ends")
+        self.assertGreater(state["stage_output_bytes"], 0)
+
+    def test_the_child_pid_is_recorded_while_the_stage_runs(self):
+        harness = Harness(self, [CUTOFF])
+        state = {"schema_version": W.SCHEMA_VERSION, "state": W.STATE_WAITING, "quarantine": None,
+                 "polls": 1, "stages_completed": [], "stage_in_flight": None, "stage_pid": None,
+                 "stage_heartbeat_at": None, "stage_progress_at": None, "stage_output_bytes": None,
+                 "cutoff_slot_inclusive": CUTOFF, "last_tip_slot": CUTOFF, "last_poll_at": 0,
+                 "endpoint": None, "manifest_sha256": "0" * 64}
+        command = {"argv": [sys.executable, "-c", "import time; time.sleep(0.4)"],
+                   "wiring": "resolved", "note": "synthetic"}
+        seen = {}
+        original = W.touch_stage_heartbeat
+
+        def capture(state_arg, state_path, **kwargs):
+            result = original(state_arg, state_path, **kwargs)
+            # Read AFTER the write this call performs: reading first would see the previous version
+            # and assert that the very write under test had not happened yet.
+            if state_arg.get("stage_pid") and "pid" not in seen:
+                seen["pid"] = state_arg["stage_pid"]
+                seen["on_disk"] = json.loads(pathlib.Path(state_path).read_text()).get("stage_pid")
+            return result
+
+        W.touch_stage_heartbeat = capture
+        self.addCleanup(lambda: setattr(W, "touch_stage_heartbeat", original))
+        W.run_stage(W.RUN_ORDER[0], command, state, log_dir=harness.paths["log_dir"],
+                    receipt_dir=harness.paths["receipt_dir"],
+                    state_path=harness.paths["state_path"], heartbeat_seconds=0.1)
+        self.assertGreater(seen["pid"], 0)
+        self.assertEqual(seen["on_disk"], seen["pid"], "the child pid must be durable, not in RAM")
 
 
 class StateIsDurableAtEverySafetyBoundaryTests(unittest.TestCase):

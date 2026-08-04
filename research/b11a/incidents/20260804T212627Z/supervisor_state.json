@@ -1,0 +1,30 @@
+{
+  "composition_published": false,
+  "cutoff_slot_inclusive": 437211659,
+  "endpoint": "https://solana-mainnet.core.chainstack.com",
+  "last_poll_at": 1785862309,
+  "last_tip_slot": 437212112,
+  "manifest_sha256": "02ff2220c11d4c312a06d7ed9eb1a0f0699df5a10631c71bf631d229bf785aa0",
+  "poll_seconds": 300,
+  "polls": 38,
+  "preregistration_canonical_sha256": "ae4d2f0351aaba193fe7d87cde8cd68ce83aa8d21515d4d20af0a158f8dafe9f",
+  "quarantine": null,
+  "results_unlocked": false,
+  "run_order": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "signature_inventory",
+    "transaction_bodies",
+    "decode_and_reserves",
+    "reserve_coverage_gate",
+    "failure_coverage_gate",
+    "simulator_replay_gate"
+  ],
+  "schema_version": "1.0.0",
+  "stage_in_flight": "enumerate_creates",
+  "stages_completed": [
+    "program_boundary"
+  ],
+  "state": "running_stage"
+}

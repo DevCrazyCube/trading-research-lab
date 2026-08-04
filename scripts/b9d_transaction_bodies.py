@@ -2580,12 +2580,17 @@ def decode_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
 # ---------------------------------------------------------------------------------------------
 
 def endpoint_reference(endpoint):
-    """Credential-free endpoint identity suitable for artifact metadata."""
-    parsed = urllib.parse.urlsplit(endpoint)
-    if parsed.scheme not in ("http", "https") or not parsed.hostname:
-        raise FreezeViolation("RPC endpoint must be an http(s) URL")
-    port = f":{parsed.port}" if parsed.port else ""
-    return f"{parsed.scheme}://{parsed.hostname}{port}{parsed.path}"
+    """Credential-free endpoint identity for artifact metadata: scheme, host, explicit port.
+
+    Delegates to the ONE shared contract. This function used to append `parsed.path`, which was
+    harmless while the provider carried its key in the query string and wrote a live credential into
+    a collected artifact the moment the provider carried it in the path. Two sanitizers that
+    disagreed is what made that possible, so there is now one.
+    """
+    try:
+        return HTTP.assert_endpoint_identity_is_safe(endpoint)
+    except HTTP.TransportIdentityError as error:
+        raise FreezeViolation(f"RPC endpoint must be an http(s) URL: {error}") from error
 
 
 def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None, retries=8):
