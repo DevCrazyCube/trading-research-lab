@@ -139,6 +139,12 @@ FORBIDDEN_STAGES = ("position_paths", "outcome_labels")
 # Everything whose bytes must be unchanged since this supervisor was written against them. A stage
 # script that changed is a stage that does something else now.
 MANIFEST_FILES = (
+    # This supervisor pins ITSELF. It attests the manifest, then waits days, then reads disk again at
+    # the maturity transition and launches the stages. An edit to this file during that wait would
+    # change which stages run, in what order, and under which gates -- the very substitution the
+    # manifest exists to prevent -- and until it was listed here that one file was the blind spot.
+    # A process whose own code changed under it must quarantine, not proceed.
+    "scripts/b11c_maturity_watcher.py",
     "scripts/b11a_window_freeze.py",
     # The shared client identity every stage transport loads. Pinned here because a manifest that
     # attests the four transports but not the one module they all send through would have a hole

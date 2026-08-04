@@ -21,6 +21,7 @@ this module is a defect rather than a variation, and `assert_no_unrouted_request
 """
 import ast
 import pathlib
+import urllib.error
 import urllib.request
 
 SCRIPTS = pathlib.Path(__file__).resolve().parent
@@ -85,6 +86,36 @@ def json_rpc_request(url, body, method="POST"):
 def is_client_refusal(status):
     """A 403 is the WAF refusing this client. Terminal everywhere, never retried."""
     return status == 403
+
+
+# The one retry classification for every transport in the B11 stage pipeline. Stated once so the
+# five call sites cannot drift: b9d already used exactly this set, and b7d and b9c retried only 429,
+# which made a single transient gateway error during enumeration or signature inventory fatal to a
+# run measured in tens of hours.
+#
+# 408 and 5xx are the server saying "not now". 403 is the server saying "not you" -- Cloudflare's
+# `error code: 1010` for the client identity, and Chainstack's `-32002` for a plan entitlement. No
+# number of retries changes an answer about who you are, and retrying one spends the budget and then
+# reports a transport failure, which reads as an unlucky network.
+RETRYABLE_STATUSES = (408, 429, 500, 502, 503, 504)
+
+
+def is_retryable_status(status):
+    """Whether an HTTP status is worth another attempt. A 403 never is."""
+    if is_client_refusal(status):
+        return False
+    return status in RETRYABLE_STATUSES
+
+
+def is_retryable_error(error):
+    """Classify a transport exception. A non-HTTP transport fault is retryable; a 403 is not.
+
+    `urllib.error.HTTPError` is a subclass of `URLError`, so it must be tested FIRST -- an isinstance
+    chain in the other order would classify every 403 as a retryable connection problem.
+    """
+    if isinstance(error, urllib.error.HTTPError):
+        return is_retryable_status(error.code)
+    return isinstance(error, (urllib.error.URLError, TimeoutError, OSError))
 
 
 # ----------------------------------------------------------------------------------------------

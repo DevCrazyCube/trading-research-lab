@@ -312,6 +312,230 @@ class TestCloudflare403IsTerminal(unittest.TestCase):
                 self.assertFalse(HTTP.is_client_refusal(status))
 
 
+class TestTheSharedRetryPolicy(unittest.TestCase):
+    """One classification, so five transports cannot drift apart again."""
+
+    def test_the_retryable_set_is_exactly_the_documented_one(self):
+        self.assertEqual(HTTP.RETRYABLE_STATUSES, (408, 429, 500, 502, 503, 504))
+
+    def test_each_retryable_status_is_retryable(self):
+        for status in (408, 429, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                self.assertTrue(HTTP.is_retryable_status(status))
+
+    def test_403_is_never_retryable_even_if_someone_adds_it_to_the_set(self):
+        """The 403 rule sits ABOVE the set, so widening the set cannot resurrect it."""
+        original = HTTP.RETRYABLE_STATUSES
+        HTTP.RETRYABLE_STATUSES = original + (403,)
+        try:
+            self.assertFalse(HTTP.is_retryable_status(403))
+        finally:
+            HTTP.RETRYABLE_STATUSES = original
+
+    def test_other_statuses_are_terminal(self):
+        for status in (200, 400, 401, 404, 410, 418, 422, 501):
+            with self.subTest(status=status):
+                self.assertFalse(HTTP.is_retryable_status(status))
+
+    def test_a_403_http_error_is_classified_before_its_urlerror_base(self):
+        """HTTPError subclasses URLError; the wrong isinstance order calls every 403 retryable."""
+        self.assertFalse(HTTP.is_retryable_error(cloudflare_403()))
+
+    def test_transport_faults_that_are_not_http_are_retryable(self):
+        for error in (urllib.error.URLError("connection reset"), TimeoutError("timed out"),
+                      OSError("broken pipe")):
+            with self.subTest(error=type(error).__name__):
+                self.assertTrue(HTTP.is_retryable_error(error))
+
+    def test_a_retryable_http_error_is_retryable(self):
+        for status in (408, 429, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                error = urllib.error.HTTPError(URL, status, "x", {}, io.BytesIO(b""))
+                self.assertTrue(HTTP.is_retryable_error(error))
+
+    def test_all_four_transports_use_the_shared_policy_rather_than_their_own_numbers(self):
+        """A literal status tuple in a transport is how they drifted the first time."""
+        import re
+        for name in ("b7d_create_enumerator.py", "b9c_signature_inventory.py",
+                     "b9d_transaction_bodies.py"):
+            source = (ROOT / "scripts" / name).read_text()
+            with self.subTest(module=name):
+                self.assertIn("HTTP.is_retryable", source)
+                # no inline 5xx status tuple left behind
+                self.assertIsNone(re.search(r"\(\s*408\s*,\s*429\s*,", source))
+                self.assertNotIn("error.code != 429", source)
+
+
+class TestTransientRetriesAndTerminalRefusals(unittest.TestCase):
+    """Driven per transport: retried statuses are retried, 403 stops at one, exhaustion raises."""
+
+    def http_error(self, status):
+        return urllib.error.HTTPError(URL, status, "x", {}, io.BytesIO(b""))
+
+    # -- b7d.rpc_block -------------------------------------------------------------------------
+
+    def test_b7d_getblock_retries_every_transient_status(self):
+        for status in (408, 429, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                sleeps = []
+                original = B7D.time.sleep
+                B7D.time.sleep = sleeps.append
+                try:
+                    with captured(raise_error=self.http_error(status)) as requests:
+                        slot, state, _r, error = B7D.rpc_block(URL, 700, retries=3)
+                finally:
+                    B7D.time.sleep = original
+                self.assertEqual(state, "error")
+                self.assertEqual(len(requests), 3, f"{status} was not retried to exhaustion")
+                self.assertEqual(len(sleeps), 2, "one bounded sleep between attempts")
+
+    def test_b7d_getblock_stops_at_one_attempt_on_a_terminal_status(self):
+        for status in (403, 400, 404):
+            with self.subTest(status=status):
+                with captured(raise_error=self.http_error(status)) as requests:
+                    _s, state, _r, error = B7D.rpc_block(URL, 700, retries=8)
+                self.assertEqual(state, "error")
+                self.assertIn(str(status), error)
+                self.assertEqual(len(requests), 1)
+
+    def test_b7d_getblock_backoff_is_bounded(self):
+        sleeps = []
+        original = B7D.time.sleep
+        B7D.time.sleep = sleeps.append
+        try:
+            with captured(raise_error=self.http_error(503)):
+                B7D.rpc_block(URL, 700, retries=8)
+        finally:
+            B7D.time.sleep = original
+        self.assertEqual(len(sleeps), 7)
+        self.assertLessEqual(max(sleeps), 8, "b7d's cap is 8 seconds and must not have moved")
+        self.assertEqual(sleeps[:4], [0.5, 1.0, 2.0, 4.0], "the frozen backoff schedule")
+
+    # -- b7d.rpc_produced_slots ----------------------------------------------------------------
+
+    def test_b7d_getblocks_retries_every_transient_status(self):
+        for status in (408, 429, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                original = B7D.time.sleep
+                B7D.time.sleep = lambda _s: None
+                try:
+                    with captured(raise_error=self.http_error(status)) as requests:
+                        produced, error = B7D.rpc_produced_slots(URL, 700, 701, retries=3)
+                finally:
+                    B7D.time.sleep = original
+                self.assertIsNone(produced)
+                self.assertEqual(len(requests), 3)
+
+    def test_b7d_getblocks_stops_at_one_attempt_on_a_terminal_status(self):
+        for status in (403, 404):
+            with self.subTest(status=status):
+                with captured(raise_error=self.http_error(status)) as requests:
+                    produced, error = B7D.rpc_produced_slots(URL, 700, 701, retries=8)
+                self.assertIsNone(produced)
+                self.assertEqual(len(requests), 1)
+
+    # -- b9c.request_bytes ---------------------------------------------------------------------
+
+    def test_b9c_retries_every_transient_status_then_raises(self):
+        for status in (408, 429, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                original = B9C.time.sleep
+                B9C.time.sleep = lambda _s: None
+                try:
+                    with captured(raise_error=self.http_error(status)) as requests:
+                        with self.assertRaises(urllib.error.HTTPError):
+                            B9C.request_bytes(URL, "getSignaturesForAddress", ["x"], retries=3)
+                finally:
+                    B9C.time.sleep = original
+                self.assertEqual(len(requests), 3,
+                                 f"{status} must be retried to exhaustion, then raise")
+
+    def test_b9c_raises_at_once_on_a_terminal_status(self):
+        for status in (403, 400, 404):
+            with self.subTest(status=status):
+                with captured(raise_error=self.http_error(status)) as requests:
+                    with self.assertRaises(urllib.error.HTTPError):
+                        B9C.request_bytes(URL, "getSignaturesForAddress", ["x"], retries=8)
+                self.assertEqual(len(requests), 1)
+
+    def test_b9c_never_returns_silently_after_exhausting_retries(self):
+        """Exhaustion must raise. A silent return would look like an empty page."""
+        original = B9C.time.sleep
+        B9C.time.sleep = lambda _s: None
+        try:
+            with captured(raise_error=self.http_error(503)):
+                with self.assertRaises(Exception):
+                    B9C.request_bytes(URL, "getSignaturesForAddress", ["x"], retries=2)
+        finally:
+            B9C.time.sleep = original
+
+    def test_b9c_backoff_is_bounded(self):
+        sleeps = []
+        original = B9C.time.sleep
+        B9C.time.sleep = sleeps.append
+        try:
+            with captured(raise_error=self.http_error(429)):
+                with self.assertRaises(urllib.error.HTTPError):
+                    B9C.request_bytes(URL, "getSignaturesForAddress", ["x"], retries=8)
+        finally:
+            B9C.time.sleep = original
+        self.assertLessEqual(max(sleeps), 12, "b9c's cap is 12 seconds and must not have moved")
+        self.assertEqual(sleeps[:4], [0.5, 1.0, 2.0, 4.0])
+
+    def test_b9c_keeps_the_minus_32002_plan_refusal_terminal_at_the_rpc_layer(self):
+        """A plan refusal can arrive as a 200 with an error body. It is still not retryable."""
+        body = json.dumps({"jsonrpc": "2.0", "id": 1,
+                           "error": {"code": -32002, "message": "Archive ... not available"}}).encode()
+        calls = []
+
+        def opener(request, timeout=None):
+            calls.append(request)
+            return Response(body)
+
+        original = urllib.request.urlopen
+        urllib.request.urlopen = opener
+        try:
+            with self.assertRaises(RuntimeError) as caught:
+                B9C.request_bytes(URL, "getSignaturesForAddress", ["x"], retries=8)
+        finally:
+            urllib.request.urlopen = original
+        self.assertIn("-32002", str(caught.exception))
+        self.assertEqual(len(calls), 1)
+
+    # -- b9d.rpc_request -----------------------------------------------------------------------
+
+    def test_b9d_retries_every_transient_status_then_raises(self):
+        for status in (408, 429, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                attempts = []
+                original = B9D.time.sleep
+                B9D.time.sleep = lambda _s: None
+
+                def opener(request, timeout=None):
+                    attempts.append(request)
+                    raise urllib.error.HTTPError(URL, status, "x", {}, io.BytesIO(b""))
+                try:
+                    with self.assertRaises(B9D.FreezeViolation):
+                        B9D.rpc_request(URL, "getTransaction", ["s"], opener=opener, retries=2)
+                finally:
+                    B9D.time.sleep = original
+                self.assertEqual(len(attempts), 3)
+
+    def test_b9d_backoff_is_bounded_and_honours_retry_after(self):
+        sleeps = []
+        original = B9D.time.sleep
+        B9D.time.sleep = sleeps.append
+
+        def opener(request, timeout=None):
+            raise urllib.error.HTTPError(URL, 503, "x", {}, io.BytesIO(b""))
+        try:
+            with self.assertRaises(B9D.FreezeViolation):
+                B9D.rpc_request(URL, "getTransaction", ["s"], opener=opener, retries=8)
+        finally:
+            B9D.time.sleep = original
+        self.assertLessEqual(max(sleeps), 30, "b9d's cap is 30 seconds and must not have moved")
+
+
 class TestTheAuditCatchesAMissingCallSite(unittest.TestCase):
     def test_no_stage_reachable_module_builds_its_own_request(self):
         paths = [ROOT / "scripts" / name for name in STAGE_REACHABLE]

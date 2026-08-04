@@ -161,8 +161,9 @@ def rpc_block(url, slot, retries):
                 return slot, "skipped", None, f"{error.get('code')}: {error.get('message')}"
             last_error = f"{error.get('code')}: {error.get('message')}"
         except urllib.error.HTTPError as error:
+            # 408/429/5xx are transient; a 403 for the client or the plan, and any 4xx, are not.
             last_error = f"HTTP {error.code}"
-            if error.code != 429:
+            if not HTTP.is_retryable_status(error.code):
                 break
         except Exception as error:  # noqa: BLE001
             last_error = f"{type(error).__name__}: {error}"
@@ -187,12 +188,12 @@ def rpc_produced_slots(url, start_slot, end_slot, retries):
                 return set(result["result"]), None
             last_error = f"{result['error'].get('code')}: {result['error'].get('message')}"
         except urllib.error.HTTPError as error:
-            # A WAF refusing this client answers 403 and will answer 403 to every retry. Backing off
-            # against it spends the whole budget and then reports a transport failure, which reads
-            # as an unlucky network rather than as a request the provider will never accept. Every
-            # other transport here already treats 403 as terminal; this one did not.
+            # A server refusing this client or this plan answers 403 and will answer 403 to every
+            # retry. Backing off against it spends the whole budget and then reports a transport
+            # failure, which reads as an unlucky network rather than as a request the provider will
+            # never accept. Only 408/429/5xx earn another attempt; every other status stops here.
             last_error = f"HTTP {error.code}"
-            if HTTP.is_client_refusal(error.code):
+            if not HTTP.is_retryable_status(error.code):
                 break
         except Exception as error:  # noqa: BLE001
             last_error = f"{type(error).__name__}: {error}"

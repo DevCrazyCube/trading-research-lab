@@ -174,6 +174,44 @@ class VerificationTests(unittest.TestCase):
             with self.subTest(relative=relative):
                 self.assertIn(relative, manifest)
 
+    def test_the_manifest_pins_the_supervisor_itself(self):
+        """The blind spot until it was listed: the file that decides which stages run."""
+        self.assertIn("scripts/b11c_maturity_watcher.py", W.MANIFEST_FILES)
+        self.assertIn("scripts/b11c_maturity_watcher.py", W.build_manifest())
+
+    def test_an_edit_to_the_supervisor_during_the_wait_quarantines_it(self):
+        """Self-drift, driven rather than argued.
+
+        The supervisor attests, waits, then reads disk again at the maturity transition and launches
+        the stages. If its OWN code changed in between, the stages it runs are not the stages it
+        attested, and it must stop. This is the same gap as `test_drift_during_the_wait...` but for
+        the one file that check could not see until the self-pin existed.
+        """
+        harness = Harness(self, [CUTOFF - 1, CUTOFF])
+        real_build = W.build_manifest
+        self.addCleanup(lambda: setattr(W, "build_manifest", real_build))
+
+        def edit_the_supervisor_while_it_sleeps(seconds):
+            harness.slept.append(seconds)
+            W.build_manifest = lambda files=W.MANIFEST_FILES: dict(
+                real_build(files), **{"scripts/b11c_maturity_watcher.py": "0" * 64})
+
+        harness.sleeper = edit_the_supervisor_while_it_sleeps
+        with self.assertRaisesRegex(W.Quarantined, W.Q02_SCRIPT_MANIFEST_DRIFT):
+            harness.watch(poll_seconds=1)
+        self.assertEqual([], harness.ran,
+                         "a stage ran under a supervisor whose own code the run never attested")
+        state = json.loads(harness.paths["state_path"].read_text())
+        self.assertEqual(W.STATE_QUARANTINED, state["state"])
+
+    def test_an_unchanged_supervisor_reaches_its_stages(self):
+        """The other half: self-pinning must not quarantine a run that held still."""
+        harness = Harness(self, [CUTOFF - 1, CUTOFF])
+        state = harness.watch(poll_seconds=1)
+        self.assertEqual(W.STATE_ALL_STAGES_COMPLETE, state["state"])
+        self.assertEqual(len(W.RUN_ORDER), len(harness.ran))
+        self.assertEqual(W.manifest_hash(W.build_manifest()), state["manifest_sha256"])
+
     def test_a_missing_manifest_file_stops_everything(self):
         with self.assertRaisesRegex(W.WatcherRefused, W.Q02_SCRIPT_MANIFEST_DRIFT):
             W.build_manifest(("scripts/does-not-exist.py",))

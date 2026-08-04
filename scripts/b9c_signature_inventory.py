@@ -114,7 +114,10 @@ def request_bytes(url, method, params, retries):
                 raise RuntimeError(
                     f"RPC error {code}: {payload['error'].get('message', 'unknown error')}")
         except urllib.error.HTTPError as error:
-            if error.code != 429:
+            # 408/429/5xx are the server saying "not now" and are worth another bounded attempt.
+            # Anything else -- 403 for the client or the plan, 400, 404 -- is terminal at once, and
+            # the last attempt raises rather than falling out of the loop as a silent success.
+            if not HTTP.is_retryable_status(error.code) or attempt == retries - 1:
                 raise
         except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError):
             if attempt == retries - 1:

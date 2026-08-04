@@ -2599,8 +2599,8 @@ def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None,
             with transport(request, timeout=timeout) as response:
                 raw = response.read()
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as error:
-            retryable = not isinstance(error, urllib.error.HTTPError) or error.code in (
-                408, 429, 500, 502, 503, 504)
+            # One shared classification, so this transport and b7d's and b9c's cannot drift apart.
+            retryable = HTTP.is_retryable_error(error)
             if not retryable or attempt == retries:
                 raise FreezeViolation(f"{method} transport failed after {attempt + 1} attempt(s): "
                                       f"{type(error).__name__}") from error
