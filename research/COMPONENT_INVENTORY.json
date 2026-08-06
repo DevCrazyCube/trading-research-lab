@@ -1,0 +1,113 @@
+{
+  "inventory_id": "SHADOW_READINESS_COMPONENT_INVENTORY",
+  "schema_version": "1.0.0",
+  "date": "2026-08-06",
+  "why_this_file_exists": "The B17c gap map asserted that the recorder and the operator surface did not exist. Both do, with tests and evidence on disk. Prose inventories drift from the filesystem, so the inventory is now data with a guard over it: tests/test_component_inventory.py sweeps scripts/ and ui/ for readiness markers and fails if a matching component is not classified here. An omission now breaks the build instead of becoming a finding.",
+
+  "status_values": {
+    "EXISTS_CONFORMING": "exists and meets the contract named in `conforms_to`",
+    "EXISTS_NOT_SHADOW_CONFORMING": "exists and works, but does not produce or consume records conforming to B17B_EXECUTION_MEASUREMENT_V1. NOT the same as absent, and must never be reported as absent.",
+    "NOT_A_READINESS_COMPONENT": "matched a name marker but is something else; classified so the sweep stays quiet without hiding it",
+    "ABSENT": "verified not to exist. The verification is named in `absence_evidence`."
+  },
+
+  "components": [
+    {
+      "path": "scripts/recorder.py",
+      "status": "EXISTS_NOT_SHADOW_CONFORMING",
+      "role": "B6-lite raw capture recorder implementing docs/schema/RAW_CAPTURE_SPEC.md v0.3",
+      "has": "segment framing with CRC32C, sessions, gap detection, crash recovery, clock samples, compression, duty cycle, 64 MiB segment roll; read-only against the network, no keys and no signing",
+      "why_not_shadow_conforming": "it records RAW PROVIDER FRAMES, not decision or execution records. It carries none of the B17b clocks (decision/build/sign/send/receipt/land/finalize), no fee or tip fields, no slippage and no outcome. Its own docstring also states the polling adapter reconstructs filtered block JSON marked `b6-lite-normalized-v1` and is NOT byte-identical to provider frames, and that provider sequence numbers, heartbeats, commitment transitions, latency and dead-slot notifications remain Geyser-phase gates.",
+      "tests": "tests/test_recorder.py",
+      "evidence_on_disk": ["research/b6g_confirmed_2026-07-27.json", "research/b6g_confirmed_raw_2026-07-27.bin", "research/b6g_processed_2026-07-27.json", "research/b6g_processed_raw_2026-07-27.bin"]
+    },
+    {
+      "path": "docs/schema/RAW_CAPTURE_SPEC.md",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "itself; it is the spec recorder.py implements",
+      "role": "raw capture format specification v0.3"
+    },
+    {
+      "path": "tests/test_recorder.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "unittest.TestCase, discoverable by both runners",
+      "role": "recorder guards"
+    },
+    {
+      "path": "ui/operator_console.html",
+      "status": "EXISTS_NOT_SHADOW_CONFORMING",
+      "role": "read-only operator console, self-contained: no stylesheet, script, font, image, analytics, fetch, XHR, WebSocket, EventSource, form action or beacon. Opens from disk with the network unplugged and behaves identically.",
+      "displays": "kill_switch_engaged, among the rest of the b12b snapshot",
+      "computes": "nothing; exact integers and [numerator, denominator] pairs are rendered as they arrive, so the page cannot become a second implementation of a metric",
+      "why_not_shadow_conforming": "it renders a b12b snapshot, which has no B17b execution-measurement fields to render. It is also read-only BY DESIGN, so it displays kill-switch state without being able to change it.",
+      "tests": "tests/test_b12b_operator_console.py"
+    },
+    {
+      "path": "scripts/b12b_operator_snapshot.py",
+      "status": "EXISTS_NOT_SHADOW_CONFORMING",
+      "role": "builds and hashes the canonical read-only snapshot the console renders",
+      "why_not_shadow_conforming": "its schema predates B17B_EXECUTION_MEASUREMENT_V1 and carries none of its fields",
+      "tests": "tests/test_b12b_operator_console.py"
+    },
+    {
+      "path": "scripts/b12b_preview_server.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "read-only serving: loopback 127.0.0.1 only, GET and HEAD only with every other method answered 405 before reaching a handler, one directory with no traversal, no write path",
+      "role": "serves ui/ on loopback so the console can be viewed in a browser; the console works identically from file://",
+      "tests": "tests/test_b12b_operator_console.py"
+    },
+    {
+      "path": "tests/test_b12b_operator_console.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "unittest.TestCase, discoverable by both runners",
+      "role": "console, snapshot and preview-server guards"
+    },
+    {
+      "path": "scripts/b17a_shadow_rehearsal.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "signing-free rehearsal: runtime socket refusal plus an AST execution-surface scan over its own transitive closure",
+      "role": "end-to-end signing-free shadow rehearsal on synthetic input",
+      "tests": "tests/test_b17a_shadow_rehearsal.py"
+    },
+    {
+      "path": "scripts/b16a_operator_archetypes.py",
+      "status": "NOT_A_READINESS_COMPONENT",
+      "role": "burned-data study of operator archetypes. `operator` here means a market participant, not a human running this system. Listed because the name marker matches and silence would look like an omission."
+    },
+    {
+      "path": "scripts/b16c_wallet_inventory.py",
+      "status": "NOT_A_READINESS_COMPONENT",
+      "role": "burned-data study reconstructing observed wallet token inventory from preserved evidence. Holds no key and controls no wallet."
+    },
+    {
+      "path": "scripts/b9k_wallet_cost.py",
+      "status": "NOT_A_READINESS_COMPONENT",
+      "role": "wallet-level cost arithmetic for the cost model. Holds no key and controls no wallet."
+    }
+  ],
+
+  "verified_absent": [
+    {
+      "what": "an operator-reachable kill-switch CONTROL",
+      "status": "ABSENT",
+      "absence_evidence": "`kill_switch_engaged` is read by b12a (b12a_risk_governor.py:394) and displayed by b12b, but a repository-wide grep finds no component that WRITES it outside a test fixture and the b17a counterexample. It arrives as an input field in `health` that nothing produces from an operator action.",
+      "correction_note": "This is narrower than B17c's original claim of 'no operator surface', which was wrong. The surface exists and shows the switch; what is missing is an owner of the switch's state."
+    },
+    {
+      "what": "wallet or treasury custody of any kind",
+      "status": "ABSENT",
+      "absence_evidence": "no key material, no signer, no transaction construction. b17a's closure scan is one check but is scoped to the closure; the broader claim rests on there being no key-handling dependency in the repository and no component named above holding one.",
+      "and_should_stay_absent": "until a written architecture exists and is separately authorized"
+    },
+    {
+      "what": "any record conforming to B17B_EXECUTION_MEASUREMENT_V1",
+      "status": "ABSENT",
+      "absence_evidence": "the contract was frozen at commit b0ae56a and nothing writes its fields yet. This absence is by design: the contract is frozen first so an implementation is judged against it."
+    }
+  ],
+
+  "name_markers_the_guard_sweeps_for": ["recorder", "operator", "console", "preview", "capture", "wallet", "treasury", "execut"],
+  "note_on_those_markers": "Documented here, but the sweep does NOT read them from this file. They are defined in tests/test_component_inventory.py and this list is asserted to match. The first version read them from here, which meant emptying the list disarmed the guard silently -- a mutation found it. A guard whose sensitivity is configured by the file it polices is not a guard.",
+
+  "runner_note": "68 of 75 test files use unittest.TestCase and are discoverable by `python -m pytest` and `python -m unittest` alike. tests/test_b17a_shadow_rehearsal.py originally used bare pytest functions and reported ZERO tests under `python -m unittest`; it has been converted. Five pre-existing files remain pytest-only and are recorded here as a known fact, not silently: test_b9b_curve_history_counts.py, test_b9c_signature_inventory.py, test_b9g_decode_readiness.py, test_b9g_seal_collection.py, test_handoff_queue.py."
+}

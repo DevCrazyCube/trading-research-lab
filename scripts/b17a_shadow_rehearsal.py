@@ -167,7 +167,15 @@ def assert_no_execution_surface(entry=SELF, scripts_dir=None):
         raise RehearsalRefused(
             f"an execution surface is reachable from the rehearsal: {findings}. A shadow rehearsal "
             f"that can build or send a transaction is not a shadow rehearsal")
-    return {"closure": module_closure(entry, scripts_dir), "execution_surface_found": {}}
+    return {
+        "closure": module_closure(entry, scripts_dir),
+        "execution_surface_found": {},
+        # Stated in the artifact rather than left to a reader, because the B17c gap map read this
+        # result as a repository-wide absence and was wrong: scripts/recorder.py and the b12b
+        # operator console both exist and are outside this closure.
+        "scope": ("the transitive `_load` closure of the rehearsal chain ONLY. This is not a "
+                  "repository-wide scan and says nothing about modules outside the closure."),
+    }
 
 
 class NoNetwork:

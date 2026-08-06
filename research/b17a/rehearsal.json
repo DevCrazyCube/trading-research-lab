@@ -22,7 +22,8 @@
    "b17a_shadow_rehearsal.py",
    "b9i_quote_reproduction.py"
   ],
-  "execution_surface_found": {}
+  "execution_surface_found": {},
+  "scope": "the transitive `_load` closure of the rehearsal chain ONLY. This is not a repository-wide scan and says nothing about modules outside the closure."
  },
  "observation": {
   "bonding_curve": "CurveSynth111111111111111111111111111111111",
