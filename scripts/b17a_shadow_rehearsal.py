@@ -49,12 +49,20 @@ B10A = _load("b10a_simulator_kernel", "b10a_simulator_kernel.py")
 
 # Every surface that would turn a rehearsal into a live action. Scanned across the closure from the
 # AST, so a name in a docstring is documentation and a name in code is a finding.
-EXECUTION_SURFACE = (
+#
+# The two groups are matched differently, and the split is load-bearing. Wire names travel AS
+# STRINGS -- an RPC method is literally the text you send -- so they are matched as substrings of
+# any code string. Class names never do; they are imported and called. Substring-matching those
+# flagged recorder.py for `maxSupportedTransactionVersion`, a getBlock parameter for READING blocks,
+# which is the opposite of a signing capability. Matching them as identifiers and imports instead
+# loses nothing: `Transaction()` is an ast.Name, and `from x import Transaction` is an ast.alias.
+EXECUTION_SURFACE_WIRE = (
     "sendTransaction", "signTransaction", "simulateTransaction", "requestAirdrop",
-    "Keypair", "from_secret_key", "from_seed", "private_key", "secret_key", "sign_message",
-    "PRIVATE_KEY", "MNEMONIC", "mnemonic", "seed_phrase", "Transaction", "VersionedTransaction",
-    "partial_sign", "sign_and_send",
+    "from_secret_key", "from_seed", "private_key", "secret_key", "sign_message",
+    "PRIVATE_KEY", "MNEMONIC", "mnemonic", "seed_phrase", "partial_sign", "sign_and_send",
 )
+EXECUTION_SURFACE_TYPES = ("Keypair", "Transaction", "VersionedTransaction")
+EXECUTION_SURFACE = EXECUTION_SURFACE_WIRE + EXECUTION_SURFACE_TYPES
 
 # Modules the rehearsal deliberately does not scan for the surface list: they are the scanner's own
 # declaration of it. Nothing else is exempt.
@@ -151,15 +159,18 @@ def assert_no_execution_surface(entry=SELF, scripts_dir=None):
             continue
         declared = _declared_surface(path)
         values = [v for v in code_string_constants(path) if v not in declared]
-        hits = sorted({token for token in EXECUTION_SURFACE
+        hits = sorted({token for token in EXECUTION_SURFACE_WIRE
                        for value in values if token in value})
-        # An identifier can also be a capability, not only a string.
+        # An identifier can also be a capability, not only a string -- and for the class names it is
+        # the ONLY way they appear, so imports are walked too or the split above would leave a hole.
         tree = ast.parse(path.read_text())
         for node in ast.walk(tree):
             if isinstance(node, ast.Attribute) and node.attr in EXECUTION_SURFACE:
                 hits.append(node.attr)
             if isinstance(node, ast.Name) and node.id in EXECUTION_SURFACE:
                 hits.append(node.id)
+            if isinstance(node, ast.alias) and node.name.split(".")[-1] in EXECUTION_SURFACE:
+                hits.append(node.name.split(".")[-1])
         hits = sorted(set(hits) - declared)
         if hits:
             findings[name] = hits

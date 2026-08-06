@@ -3,14 +3,12 @@
   "schema_version": "1.0.0",
   "date": "2026-08-06",
   "why_this_file_exists": "The B17c gap map asserted that the recorder and the operator surface did not exist. Both do, with tests and evidence on disk. Prose inventories drift from the filesystem, so the inventory is now data with a guard over it: tests/test_component_inventory.py sweeps scripts/ and ui/ for readiness markers and fails if a matching component is not classified here. An omission now breaks the build instead of becoming a finding.",
-
   "status_values": {
     "EXISTS_CONFORMING": "exists and meets the contract named in `conforms_to`",
     "EXISTS_NOT_SHADOW_CONFORMING": "exists and works, but does not produce or consume records conforming to B17B_EXECUTION_MEASUREMENT_V1. NOT the same as absent, and must never be reported as absent.",
     "NOT_A_READINESS_COMPONENT": "matched a name marker but is something else; classified so the sweep stays quiet without hiding it",
     "ABSENT": "verified not to exist. The verification is named in `absence_evidence`."
   },
-
   "components": [
     {
       "path": "scripts/recorder.py",
@@ -19,7 +17,12 @@
       "has": "segment framing with CRC32C, sessions, gap detection, crash recovery, clock samples, compression, duty cycle, 64 MiB segment roll; read-only against the network, no keys and no signing",
       "why_not_shadow_conforming": "it records RAW PROVIDER FRAMES, not decision or execution records. It carries none of the B17b clocks (decision/build/sign/send/receipt/land/finalize), no fee or tip fields, no slippage and no outcome. Its own docstring also states the polling adapter reconstructs filtered block JSON marked `b6-lite-normalized-v1` and is NOT byte-identical to provider frames, and that provider sequence numbers, heartbeats, commitment transitions, latency and dead-slot notifications remain Geyser-phase gates.",
       "tests": "tests/test_recorder.py",
-      "evidence_on_disk": ["research/b6g_confirmed_2026-07-27.json", "research/b6g_confirmed_raw_2026-07-27.bin", "research/b6g_processed_2026-07-27.json", "research/b6g_processed_raw_2026-07-27.bin"]
+      "evidence_on_disk": [
+        "research/b6g_confirmed_2026-07-27.json",
+        "research/b6g_confirmed_raw_2026-07-27.bin",
+        "research/b6g_processed_2026-07-27.json",
+        "research/b6g_processed_raw_2026-07-27.bin"
+      ]
     },
     {
       "path": "docs/schema/RAW_CAPTURE_SPEC.md",
@@ -70,6 +73,23 @@
       "tests": "tests/test_b17a_shadow_rehearsal.py"
     },
     {
+      "path": "scripts/b18a_shadow_record.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "B17B_EXECUTION_MEASUREMENT_V1, read from the frozen document at import time with its canonical sha256 pinned; the module refuses to load if the contract was edited",
+      "role": "the shadow record layer: READS recorder.py segments and canonical observations, WRITES B17b-conforming records. Never writes, alters or re-frames a segment.",
+      "enforces": "unknown is null with a frozen reason code and never zero; landing probability refused by name and by suffix; total cost null unless every lamport component is known; retries are their own records; endpoint identity is a sanitizer fixed point; no floats; shadow records carry the same key set as live ones with the send-side fields U_NOT_APPLICABLE",
+      "tests": "tests/test_b18a_shadow_record.py",
+      "evidence_on_disk": [
+        "research/b18a/records.json"
+      ]
+    },
+    {
+      "path": "tests/test_b18a_shadow_record.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "unittest.TestCase, discoverable by both runners",
+      "role": "shadow record layer guards; fixtures are built with the recorder's OWN SegmentWriter rather than an imitation of its framing"
+    },
+    {
       "path": "scripts/b16a_operator_archetypes.py",
       "status": "NOT_A_READINESS_COMPONENT",
       "role": "burned-data study of operator archetypes. `operator` here means a market participant, not a human running this system. Listed because the name marker matches and silence would look like an omission."
@@ -83,9 +103,45 @@
       "path": "scripts/b9k_wallet_cost.py",
       "status": "NOT_A_READINESS_COMPONENT",
       "role": "wallet-level cost arithmetic for the cost model. Holds no key and controls no wallet."
+    },
+    {
+      "path": "scripts/b15a_shadow_pilot.py",
+      "status": "EXISTS_NOT_SHADOW_CONFORMING",
+      "role": "the B15a live Pump launch shadow pilot: subscribes to public log notifications, preserves every frame as delivered, decodes CreateEvents with the pinned IDL, and records what the frozen B11b P1 policy would HYPOTHETICALLY have proposed. Proposes nothing real.",
+      "implements": "research/B15A_SHADOW_PILOT_PREREGISTRATION.json, committed alone before the file existed",
+      "why_not_shadow_conforming": "it predates B17B_EXECUTION_MEASUREMENT_V1 and records hypothetical proposals in its own shape, with none of the eight clocks, no fee or tip fields, no slippage and no outcome enum. A B18a-conforming bridge over its output is a candidate follow-on, not part of slice A.",
+      "tests": "tests/test_b15a_shadow_pilot.py"
+    },
+    {
+      "path": "scripts/b15a_shadow_fixtures.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "offline-only fixture generation: every frame is manufactured in-file and the launch-readiness gate drives the whole pilot loop against a fake transport. No network, no chain.",
+      "role": "synthetic frames and the B15a launch-readiness gate",
+      "tests": "tests/test_b15a_shadow_pilot.py"
+    },
+    {
+      "path": "scripts/b15a_shadow_entrypoint.sh",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "credentials env-only, never in argv -- the credential is SOURCED rather than passed, because anything handed to `tmux new-session -e` or to the pilot as an argument appears in a process argv where `ps` shows it to every user on the box",
+      "role": "entrypoint for the detached B15a shadow pilot session"
+    },
+    {
+      "path": "scripts/b15d_shadow_entry.py",
+      "status": "EXISTS_NOT_SHADOW_CONFORMING",
+      "role": "prices delayed HYPOTHETICAL entries on the frozen direct-RPC shadow route, offline",
+      "implements": "research/B15D_SHADOW_ROUTE_PREREGISTRATION.json, committed alone before any entry was priced",
+      "why_not_shadow_conforming": "predates B17b; emits priced cells, not measurement records",
+      "tests": "tests/test_b15d_shadow_entry.py"
+    },
+    {
+      "path": "scripts/b15e_shadow_path.py",
+      "status": "EXISTS_NOT_SHADOW_CONFORMING",
+      "role": "shadow position paths and frozen exits; offline, read-only, impact-blind by nature",
+      "implements": "research/B15E_SHADOW_PATH_PREREGISTRATION.json, committed alone before any later return was inspected",
+      "why_not_shadow_conforming": "predates B17b; emits paths and exits, not measurement records",
+      "tests": "tests/test_b15e_shadow_path.py"
     }
   ],
-
   "verified_absent": [
     {
       "what": "an operator-reachable kill-switch CONTROL",
@@ -100,14 +156,35 @@
       "and_should_stay_absent": "until a written architecture exists and is separately authorized"
     },
     {
-      "what": "any record conforming to B17B_EXECUTION_MEASUREMENT_V1",
+      "what": "a DEVNET or MAINNET record conforming to B17B_EXECUTION_MEASUREMENT_V1",
       "status": "ABSENT",
-      "absence_evidence": "the contract was frozen at commit b0ae56a and nothing writes its fields yet. This absence is by design: the contract is frozen first so an implementation is judged against it."
+      "absence_evidence": "scripts/b18a_shadow_record.py emits stage=shadow records only, and its validator refuses a shadow record carrying a send, sign or land clock. No component builds, signs or submits anything, so no devnet or mainnet record can exist.",
+      "supersedes": "an earlier entry here claimed that NO B17b-conforming record existed. That was true when written and became false at the commit that added b18a. Corrected rather than left standing; test_no_absence_claim_contradicts_a_conforming_component now fails if a component claims to conform to a contract this list calls unimplemented."
+    },
+    {
+      "what": "a shadow record driven by a real B12a decision rather than a supplied decision dict",
+      "status": "ABSENT",
+      "absence_evidence": "b18a takes `decision_unix_nanos` as an argument; nothing yet wires B17a's rehearsal decision into it, so `decision_unix_nanos` is U_NOT_INSTRUMENTED in every record written so far. Visible in research/b18a/records.json."
+    },
+    {
+      "what": "any record carrying a failure outcome (dropped, expired, rejected_by_provider, failed_on_chain)",
+      "status": "ABSENT",
+      "absence_evidence": "those outcomes and the U_PROVIDER_SILENT and U_LOST reason codes can only be produced by a real failure, and no stage produces one. The enum is frozen and unexercised, which is the concrete reason Slice B is the next dependency."
     }
   ],
-
-  "name_markers_the_guard_sweeps_for": ["recorder", "operator", "console", "preview", "capture", "wallet", "treasury", "execut"],
+  "name_markers_the_guard_sweeps_for": [
+    "recorder",
+    "operator",
+    "console",
+    "preview",
+    "capture",
+    "wallet",
+    "treasury",
+    "execut",
+    "record",
+    "shadow"
+  ],
   "note_on_those_markers": "Documented here, but the sweep does NOT read them from this file. They are defined in tests/test_component_inventory.py and this list is asserted to match. The first version read them from here, which meant emptying the list disarmed the guard silently -- a mutation found it. A guard whose sensitivity is configured by the file it polices is not a guard.",
-
-  "runner_note": "68 of 75 test files use unittest.TestCase and are discoverable by `python -m pytest` and `python -m unittest` alike. tests/test_b17a_shadow_rehearsal.py originally used bare pytest functions and reported ZERO tests under `python -m unittest`; it has been converted. Five pre-existing files remain pytest-only and are recorded here as a known fact, not silently: test_b9b_curve_history_counts.py, test_b9c_signature_inventory.py, test_b9g_decode_readiness.py, test_b9g_seal_collection.py, test_handoff_queue.py."
+  "runner_note": "68 of 75 test files use unittest.TestCase and are discoverable by `python -m pytest` and `python -m unittest` alike. tests/test_b17a_shadow_rehearsal.py originally used bare pytest functions and reported ZERO tests under `python -m unittest`; it has been converted. Five pre-existing files remain pytest-only and are recorded here as a known fact, not silently: test_b9b_curve_history_counts.py, test_b9c_signature_inventory.py, test_b9g_decode_readiness.py, test_b9g_seal_collection.py, test_handoff_queue.py.",
+  "sweep_history": "Widening the markers to include `record` and `shadow` when b18a landed surfaced five B15 shadow components that no inventory had ever listed, including a 1,101-line live shadow pilot. Nothing had claimed they were absent -- they were simply never enumerated, which is the quieter version of the same failure and exactly what a disk sweep is for."
 }

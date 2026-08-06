@@ -116,6 +116,30 @@ class ExecutionSurfaceScanTests(PlantingTestCase):
         with self.assertRaises(B17A.RehearsalRefused):
             B17A.assert_no_execution_surface("entry.py", self.tmp)
 
+    def test_a_class_name_reached_by_import_is_caught(self):
+        """Class names are matched as identifiers and IMPORTS, so the split leaves no hole."""
+        self.plant("entry.py", "from solana.transaction import Transaction\n")
+        with self.assertRaises(B17A.RehearsalRefused) as refusal:
+            B17A.assert_no_execution_surface("entry.py", self.tmp)
+        self.assertIn("Transaction", str(refusal.exception))
+
+    def test_a_class_name_inside_a_longer_rpc_parameter_is_not_a_capability(self):
+        """`maxSupportedTransactionVersion` is a getBlock parameter for READING blocks.
+
+        Substring-matching class names against camelCase flagged the recorder for this, which is the
+        opposite of a signing capability. Wire names still match as substrings; class names do not.
+        """
+        self.plant("entry.py",
+                   'params = {"maxSupportedTransactionVersion": 0, "transactionDetails": "full"}\n')
+        result = B17A.assert_no_execution_surface("entry.py", self.tmp)
+        self.assertEqual(result["execution_surface_found"], {})
+
+    def test_a_wire_method_name_is_still_caught_inside_a_longer_string(self):
+        """The other half of the split: an RPC method travels AS a string and must still be found."""
+        self.plant("entry.py", 'body = {"method": "sendTransaction", "params": []}\n')
+        with self.assertRaises(B17A.RehearsalRefused):
+            B17A.assert_no_execution_surface("entry.py", self.tmp)
+
     def test_reaches_through_the_closure(self):
         """A capability one hop away is still reachable, and must be found."""
         self.plant("entry.py", 'DEP = _load("dep", "dep.py")\n')

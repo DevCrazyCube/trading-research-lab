@@ -36,6 +36,23 @@ repository-wide, and the inventory is swept from disk by marker rather than writ
 needs *building*. Confusing them proposes duplicate work, which is exactly what the five-slice plan
 below originally did.
 
+## 0.1 What the widened sweep then found
+
+Adding `record` and `shadow` to the sweep markers when b18a landed surfaced **five B15 shadow
+components no inventory had ever listed**, including `scripts/b15a_shadow_pilot.py` — a 1,101-line
+**live shadow pilot** that subscribes to public log notifications, preserves frames as delivered,
+decodes CreateEvents with the pinned IDL, and records what the frozen B11b P1 policy would
+hypothetically have proposed. It implements a preregistration committed alone before the file
+existed, and it has tests.
+
+Nothing had claimed these were absent. They were simply never enumerated — the quieter version of
+the §0 failure, and the reason the sweep discovers from disk rather than validating a list. All five
+are now classified; none is B17b-conforming, because all predate the contract.
+
+**This changes how slice A should be read.** b18a is not the first shadow component; it is the first
+one that emits records in the frozen shape. Bridging `b15a_shadow_pilot.py`'s output into B18a
+records is a genuine follow-on, and it was not part of slice A.
+
 ## 1. Inventory
 
 Full data with per-component reasoning in `research/COMPONENT_INVENTORY.json`.
@@ -53,9 +70,15 @@ Full data with per-component reasoning in `research/COMPONENT_INVENTORY.json`.
 | exit policy / capacity | `scripts/b15m_*` | exists |
 | cost model | `scripts/b15*`, `scripts/b9k_wallet_cost.py` | exists; exact-integer |
 | simulator kernel | B10a, commit `c0679f9` | replays 92,510/92,510 direct-Pump trades exactly |
+| live shadow pilot | `scripts/b15a_shadow_pilot.py` (1,101 lines) | **exists**, not B17b-conforming — see §0.1 |
+| shadow fixtures / readiness gate | `scripts/b15a_shadow_fixtures.py`, `scripts/b15a_shadow_entrypoint.sh` | exists |
+| shadow entry / path pricing | `scripts/b15d_shadow_entry.py`, `scripts/b15e_shadow_path.py` | exists, not B17b-conforming |
 | shadow rehearsal | `scripts/b17a_shadow_rehearsal.py` | exists |
+| shadow record layer | `scripts/b18a_shadow_record.py` | **exists**, B17b-conforming — slice A, delivered |
+| shadow records | `research/b18a/records.json` | exists (synthetic segment; 6 measured fields, 37 nulls each with a reason) |
 | measurement contract | `research/B17B_EXECUTION_MEASUREMENT_CONTRACT.json` | frozen v1.0.0, canonical sha256 `29f480fcad6dd93cc40ab3ab16ae3368c02280a27a286e7f6458577451ad2ce4` |
-| B17b-conforming record | — | absent by design; the contract is frozen first so an implementation is judged against it |
+| devnet/mainnet record | — | absent; b18a emits `stage=shadow` only and refuses a shadow record carrying a send, sign or land clock |
+| failure-outcome record | — | absent; `dropped`/`expired`/`rejected_by_provider`/`failed_on_chain` and the `U_PROVIDER_SILENT`/`U_LOST` codes are frozen and **unexercised** |
 | kill-switch **control** | — | absent; see G6 |
 | wallet / treasury | — | absent, and must stay so |
 
@@ -100,14 +123,32 @@ also states two limits honestly: the polling adapter reconstructs filtered block
 numbers, heartbeats, commitment transitions, latency and dead-slot notifications remain
 **Geyser-phase gates**.
 
-So the work is an **extension**, not a build: a decision/execution record layer that conforms to
-B17b, sitting alongside the raw capture rather than replacing it. Anyone who writes a second raw
-recorder is duplicating working code.
+So the work was an **extension**, not a build: a decision/execution record layer conforming to B17b,
+sitting alongside the raw capture rather than replacing it. **Delivered as `b18a`** — it reads
+segments through `RECORDER.scan_segment` and never calls a recorder writer, asserted from the AST,
+with a test that a segment's bytes are unchanged after a full read.
 
-### G2 — no B17b-conforming record exists (unchanged, and correct)
-Absent by design. A shadow record must have the **same shape** as a live one, with the
-build/sign/send/land fields null + `U_NOT_APPLICABLE` — otherwise shadow and live are not
-comparable. B17a emits a rehearsal snapshot, not a B17b record.
+**One thing found while reading the framing, reported and not repaired.** CRC32C of an empty body is
+`0`, so a run of zero bytes satisfies the recorder's own scanner as a sequence of valid empty
+records — a preallocated or sparse region would read as observations. `recorder.py` is not this
+layer's to change, so b18a refuses a zero-length frame header instead, and a test pins both halves:
+that the recorder's scanner accepts the zeros, and that b18a does not.
+
+### G2 — CLOSED for shadow by `scripts/b18a_shadow_record.py` (slice A)
+`b18a` reads recorder segments through the recorder's own CRC scanner and emits records conforming
+to the frozen contract. It reads the contract at import and **pins its canonical hash**, so an
+edited contract makes the module refuse to load rather than emit records claiming a conformance
+nobody froze.
+
+Shadow and live are the same shape: a shadow record carries every key a live one would, with the
+send-side fields null + `U_NOT_APPLICABLE`. In `research/b18a/records.json`, 6 fields are measured
+and 37 are null — **each of the 37 with a reason code**, 30 `U_NOT_APPLICABLE` (structurally
+impossible in shadow) and 7 `U_NOT_INSTRUMENTED` (possible, not wired). Those are different facts
+and the layer keeps them different.
+
+What remains open under G2: devnet and mainnet records (blocked, correctly), records driven by a
+real B12a decision rather than a supplied `decision_unix_nanos`, and any record with a failure
+outcome — see the note under §4.
 
 ### G3 — wallet and treasury architecture is undesigned, and that is currently correct
 Nothing exists. The gap is real but **must not be closed by writing code**; the useful work is a
@@ -148,16 +189,23 @@ narrowed, and still non-overlapping:
 
 | slice | files touched | why disjoint |
 |---|---|---|
-| **A. B17b record layer (G1+G2)** | new module; **reads** `recorder.py`, does not replace it | new files only |
+| ~~**A. B17b record layer (G1+G2)**~~ | `scripts/b18a_shadow_record.py` | **DONE** |
 | **B. Failure rehearsal harness (G4)** | new `tests/`, injects into b11c **copies** | must not edit manifest-pinned b11c while a watcher runs |
 | **C. Wallet/treasury architecture (G3)** | `research/` document only | prose; no code |
 | **D. Strategy preregistrations (G5)** | `research/` preregs, committed alone | prose; no code |
 | **E. Kill-switch state owner (G6)** | new module; **must not** add a write path to `b12b_preview_server.py` or the console | leaves the read-only surface intact |
 
-**Narrowest next slice: A.** It is the only one that unblocks anything else — G2 depends on it, and
-the failure harness has more to test once records exist. It extends `recorder.py` rather than
-duplicating it, and it is the slice whose contract is already frozen, so it can be judged against
-B17b instead of defining its own success.
+**Narrowest next slice, now that A is done: B, and the reason is concrete rather than a preference.**
+B17b froze an `outcome` enum containing `dropped`, `expired`, `rejected_by_provider` and
+`failed_on_chain`, and two reason codes — `U_PROVIDER_SILENT` and `U_LOST` — that only a real failure
+can produce. **Nothing in the repository can currently produce any of them.** A third of the
+contract's failure vocabulary is frozen and unexercised, and a record schema whose failure paths have
+never been written is a schema whose failure semantics are untested. Slice B is what populates them.
+
+**E is not a dependency, it is parallel.** The kill-switch state owner needs nothing from the record
+layer and blocks nothing in it, so it can proceed at any time by a second agent. It is also the
+slice with the most room to go wrong — the only one that could grow a write path near the read-only
+surface — which is an argument for doing it deliberately rather than early.
 
 **Hard constraint on all five:** B11 stays untouched — no reads of composition or outcomes, no edits
 to `research/b11a`, the watcher, its artifacts, or manifest-pinned collection code.

@@ -41,7 +41,7 @@ SWEPT_DIRECTORIES = ("scripts", "ui")
 # configured by its subject is not a guard; the inventory now has to MATCH this list instead of
 # defining it.
 NAME_MARKERS = ("recorder", "operator", "console", "preview", "capture", "wallet", "treasury",
-                "execut")
+                "execut", "record", "shadow")
 
 # Phrases that assert an absence. A document may use them, but not about a path that exists.
 ABSENCE_PHRASES = ("does not exist", "do not exist", "no operator surface", "does not yet exist")
@@ -120,6 +120,26 @@ class InventoryIntegrityTests(unittest.TestCase):
                 self.assertEqual(entry["status"], "ABSENT")
                 self.assertTrue(entry.get("absence_evidence", "").strip(),
                                 "an absence must name how it was verified")
+
+    def test_no_absence_claim_contradicts_a_conforming_component(self):
+        """An absence goes stale the moment somebody builds the thing, and nothing shouts.
+
+        This happened: the inventory said no B17b-conforming record existed, and stayed saying it
+        after b18a started emitting them. A component that declares `conforms_to X` and an absence
+        entry that says X is unimplemented cannot both be true.
+        """
+        conformed = " ".join(entry.get("conforms_to", "") for entry in self.components)
+        offences = []
+        for entry in self.inventory["verified_absent"]:
+            claim = entry["what"]
+            for token in ("B17B_EXECUTION_MEASUREMENT_V1",):
+                # A qualified claim ("a DEVNET or MAINNET record conforming to X") is not a claim
+                # that nothing conforms to X, so only unqualified ones are contradictions.
+                if token in claim and token in conformed and not any(
+                        word in claim.lower() for word in ("devnet", "mainnet", "live")):
+                    offences.append(claim)
+        self.assertEqual(offences, [],
+                         f"these absences are contradicted by a conforming component: {offences}")
 
     def test_the_kill_switch_really_has_no_writer(self):
         """Re-verify the one absence I still claim, rather than trusting the document.
