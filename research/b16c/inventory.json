@@ -1,0 +1,280 @@
+{
+ "coverage": {
+  "account_observations": 280206,
+  "transactions": 94985,
+  "transactions_used": 94985,
+  "wallet_mint_pairs": 37982,
+  "wallet_mint_pairs_with_an_uncollected_gap": 998,
+  "what_a_gap_means": "consecutive observations of one token account must chain. Where the earlier `after` differs from the later `before`, a transaction this corpus never collected moved that balance. The corpus holds only transactions that touched a bonding curve, so a pure wallet-to-wallet transfer is exactly the kind of thing that would appear here as a gap."
+ },
+ "executable": false,
+ "execution_status": "never_executed",
+ "flow_recomputed_on_the_stricter_denominator": {
+  "creator_like_participant": {
+   "on_balance_flat_with_no_gap": {
+    "flow_less_documented_fee": {
+     "max": 12961811596,
+     "median": 194346913,
+     "min": -2667415201,
+     "n": 93,
+     "p10": 2264954,
+     "p25": 19090787,
+     "p75": 1124067403,
+     "p90": 3542822836
+    },
+    "positions": 93
+   },
+   "on_trade_derived_resolved": {
+    "flow_less_documented_fee": {
+     "max": 28133364393,
+     "median": 241995369,
+     "min": -2762586,
+     "n": 101,
+     "p10": 5547700,
+     "p25": 26224832,
+     "p75": 1490113181,
+     "p90": 5548228822
+    },
+    "positions": 101
+   }
+  },
+  "delayed_entrant": {
+   "on_balance_flat_with_no_gap": {
+    "flow_less_documented_fee": {
+     "max": 16059385544,
+     "median": -3338135,
+     "min": -24094101229,
+     "n": 18755,
+     "p10": -351060012,
+     "p25": -69547318,
+     "p75": 254399,
+     "p90": 97902084
+    },
+    "positions": 18755
+   },
+   "on_trade_derived_resolved": {
+    "flow_less_documented_fee": {
+     "max": 33618616304,
+     "median": -2027980,
+     "min": -8047462369,
+     "n": 17861,
+     "p10": -239249134,
+     "p25": -53862218,
+     "p75": 1460641,
+     "p90": 110545917
+    },
+    "positions": 17861
+   }
+  },
+  "immediate_launch_sniper": {
+   "on_balance_flat_with_no_gap": {
+    "flow_less_documented_fee": {
+     "max": 44483078831,
+     "median": -9717417,
+     "min": -16946199222,
+     "n": 859,
+     "p10": -389003198,
+     "p25": -156192294,
+     "p75": 156085813,
+     "p90": 1298208184
+    },
+    "positions": 859
+   },
+   "on_trade_derived_resolved": {
+    "flow_less_documented_fee": {
+     "max": 44483078831,
+     "median": -8095591,
+     "min": -5642491318,
+     "n": 840,
+     "p10": -335627314,
+     "p25": -140189145,
+     "p75": 179240072,
+     "p90": 1412370404
+    },
+    "positions": 840
+   }
+  },
+  "incidental_trader": {
+   "on_balance_flat_with_no_gap": {
+    "flow_less_documented_fee": {
+     "max": 7662921585,
+     "median": -11999459,
+     "min": -2703108544,
+     "n": 828,
+     "p10": -458093572,
+     "p25": -204755595,
+     "p75": 64554317,
+     "p90": 457946945
+    },
+    "positions": 828
+   },
+   "on_trade_derived_resolved": {
+    "flow_less_documented_fee": {
+     "max": 9351344509,
+     "median": -10480282,
+     "min": -2468557528,
+     "n": 819,
+     "p10": -444497031,
+     "p25": -189429425,
+     "p75": 66812259,
+     "p90": 492926664
+    },
+    "positions": 819
+   }
+  },
+  "migration_trader": {
+   "on_balance_flat_with_no_gap": {
+    "flow_less_documented_fee": {
+     "max": -41463539,
+     "median": -41463539,
+     "min": -41463539,
+     "n": 1,
+     "p10": -41463539,
+     "p25": -41463539,
+     "p75": -41463539,
+     "p90": -41463539
+    },
+    "positions": 1
+   },
+   "on_trade_derived_resolved": {
+    "flow_less_documented_fee": null,
+    "positions": 0
+   }
+  },
+  "reading": "the same flow figure on two denominators. Where they agree the conclusion did not rest on the weaker holding test; where they differ, the balance-derived denominator is the better one.",
+  "repeat_early_entrant": {
+   "on_balance_flat_with_no_gap": {
+    "flow_less_documented_fee": {
+     "max": 4704704535,
+     "median": -1279378,
+     "min": -5110640128,
+     "n": 2090,
+     "p10": -77012701,
+     "p25": -20204403,
+     "p75": 9538896,
+     "p90": 90935192
+    },
+    "positions": 2090
+   },
+   "on_trade_derived_resolved": {
+    "flow_less_documented_fee": {
+     "max": 4704704535,
+     "median": -1279378,
+     "min": -5110640128,
+     "n": 2095,
+     "p10": -77012701,
+     "p25": -20530497,
+     "p75": 9573298,
+     "p90": 90935192
+    },
+    "positions": 2095
+   }
+  },
+  "still_not_profit": "this changes which positions are counted, not what the number means. Costs beyond the documented curve fee remain unrecorded.",
+  "unclassified_mid_window": {
+   "on_balance_flat_with_no_gap": {
+    "flow_less_documented_fee": {
+     "max": 5720624746,
+     "median": -6628558,
+     "min": -3491939233,
+     "n": 3672,
+     "p10": -287849441,
+     "p25": -78103399,
+     "p75": 10429571,
+     "p90": 152877793
+    },
+    "positions": 3672
+   },
+   "on_trade_derived_resolved": {
+    "flow_less_documented_fee": {
+     "max": 17317285823,
+     "median": -6271403,
+     "min": -3491939233,
+     "n": 3690,
+     "p10": -284927858,
+     "p25": -75626353,
+     "p75": 11902136,
+     "p90": 166084215
+    },
+    "positions": 3690
+   }
+  }
+ },
+ "inventory_by_archetype": {
+  "creator_like_participant": {
+   "flat_at_last_observation": 96,
+   "positions": 110,
+   "positions_with_an_uncollected_gap": 5,
+   "still_holding_at_last_observation": 14
+  },
+  "delayed_entrant": {
+   "flat_at_last_observation": 18835,
+   "no_balance_evidence": 183,
+   "positions": 21065,
+   "positions_with_an_uncollected_gap": 94,
+   "still_holding_at_last_observation": 2047
+  },
+  "immediate_launch_sniper": {
+   "flat_at_last_observation": 883,
+   "positions": 918,
+   "positions_with_an_uncollected_gap": 24,
+   "still_holding_at_last_observation": 35
+  },
+  "incidental_trader": {
+   "flat_at_last_observation": 840,
+   "positions": 925,
+   "positions_with_an_uncollected_gap": 12,
+   "still_holding_at_last_observation": 85
+  },
+  "migration_trader": {
+   "flat_at_last_observation": 1,
+   "positions": 22,
+   "still_holding_at_last_observation": 21
+  },
+  "repeat_early_entrant": {
+   "flat_at_last_observation": 2095,
+   "positions": 2121,
+   "positions_with_an_uncollected_gap": 5,
+   "still_holding_at_last_observation": 26
+  },
+  "unclassified_mid_window": {
+   "flat_at_last_observation": 3715,
+   "no_balance_evidence": 1,
+   "positions": 3773,
+   "positions_with_an_uncollected_gap": 45,
+   "still_holding_at_last_observation": 57
+  }
+ },
+ "method": {
+  "canonical_order": "slot, transaction_index, accountIndex",
+  "no_layout_decoded": "no SPL Token or Token-2022 instruction layout is decoded. The RPC already states owner, mint, programId, exact integer amount and decimals per token account, and has already resolved lookup-table addresses, so decoding would be a weaker second derivation.",
+  "paired_by": "accountIndex, never owner: one owner may hold several accounts of one mint and pairing on owner would net them together silently",
+  "source": "meta.preTokenBalances and meta.postTokenBalances of the stored getTransaction responses in b9d.raw_transaction",
+  "token_programs_observed": [
+   "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+   "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+  ]
+ },
+ "not_claimed": {
+  "completeness": "a zero final balance means flat AT THE LAST COLLECTED OBSERVATION, not for all time. Anything after the corpus's last collected transaction for that account is unobserved.",
+  "profit": "not claimed. This bounds inventory; it prices nothing.",
+  "shared_ownership": "never inferred. Two addresses holding one mint are two addresses, and no clustering was attempted."
+ },
+ "performance_status": "not_evaluated",
+ "status": "EXPLORATORY AND DESCRIPTIVE. Bounds inventory only; prices nothing and claims no profit.",
+ "study": "B16C_WALLET_INVENTORY",
+ "trade_derived_versus_balance_derived": {
+  "disagreements": {
+   "creator_like_participant:trade=False:balance=True": 8,
+   "creator_like_participant:trade=True:balance=False": 3,
+   "delayed_entrant:trade=False:balance=True": 5,
+   "delayed_entrant:trade=True:balance=False": 981,
+   "immediate_launch_sniper:trade=True:balance=False": 43,
+   "incidental_trader:trade=True:balance=False": 21,
+   "migration_trader:trade=True:balance=False": 1,
+   "unclassified_mid_window:trade=False:balance=True": 1,
+   "unclassified_mid_window:trade=True:balance=False": 26
+  },
+  "reading": "B16a inferred holding from its own trades alone. Where the two disagree, the balance evidence is the better one: it sees everything the collected transactions saw, including movements the wallet's own trades do not explain."
+ }
+}
