@@ -78,7 +78,9 @@ Full data with per-component reasoning in `research/COMPONENT_INVENTORY.json`.
 | shadow records | `research/b18a/records.json` | exists (synthetic segment; 6 measured fields, 37 nulls each with a reason) |
 | measurement contract | `research/B17B_EXECUTION_MEASUREMENT_CONTRACT.json` | frozen v1.0.0, canonical sha256 `29f480fcad6dd93cc40ab3ab16ae3368c02280a27a286e7f6458577451ad2ce4` |
 | devnet/mainnet record | — | absent; b18a emits `stage=shadow` only and refuses a shadow record carrying a send, sign or land clock |
-| failure-outcome record | — | absent; `dropped`/`expired`/`rejected_by_provider`/`failed_on_chain` and the `U_PROVIDER_SILENT`/`U_LOST` codes are frozen and **unexercised** |
+| failure-rehearsal harness | `scripts/b18b_failure_rehearsal.py` | **exists**; 6/7 outcomes and both failure-only reason codes exercised by injected fault |
+| wallet/treasury architecture | `research/B19A_WALLET_TREASURY_ARCHITECTURE.md` | exists (prose only); audited |
+| failure record from a REAL send | — | absent, and requires a send |
 | kill-switch **control** | — | absent; see G6 |
 | wallet / treasury | — | absent, and must stay so |
 
@@ -157,7 +159,35 @@ cannot bypass them, separation between a decision process and anything holding v
 radius of a compromised component. **Wallet equality is not owner identity**, and no design may
 quietly assume otherwise.
 
-### G4 — operational failure rehearsals are ad hoc
+### G4 — CLOSED for the record layer by `scripts/b18b_failure_rehearsal.py` (slice B)
+Two live-watcher deaths this project (Cloudflare 403 on the default UA; a transient `URLError`
+misclassified as fatal) were diagnosed *after* they killed a run. b18b rehearses them deliberately,
+by injected fault, with no network and nothing sent.
+
+**6 of the 7 frozen outcomes are now reached** — `never_sent`, `unknown`, `dropped`, `expired`,
+`rejected_by_provider`, `failed_on_chain` — along with both failure-only reason codes,
+`U_PROVIDER_SILENT` and `U_LOST`. `landed` is unreachable without a real send, and a test asserts it
+stays that way: if it ever starts passing, something in this repository sent a transaction.
+
+**The retry decision comes from `rpc_http_identity`, the module the live watcher uses**, not a copy.
+So a 403 produces exactly one record (a client refusal is terminal) while 429, 500 and 503 produce a
+chain — and a transport error is retryable *by type*, which is the exact rule whose absence killed a
+watcher.
+
+The distinction the harness is built around is the one a zero would erase: `never_sent` after a DNS
+failure means **we know it did not happen**, and `unknown` after provider silence means **we do not
+know what happened, and it may have landed**. Their land clocks carry `U_NOT_APPLICABLE` and
+`U_PROVIDER_SILENT` respectively, and a mutant that collapses either into the other dies.
+
+Also rehearsed: clock step and causal inversion, partial durable write (write-then-rename, with the
+destination absent if the rename never completes), duplicate attempts, kill and resume (lost attempts
+are reported as lost, never renumbered or reconstructed from memory), and quarantine.
+
+**Still open under G4:** these are record-layer rehearsals. The *watcher's* operational failures —
+duplicate stage, resumption after kill against a live collection — remain exercised only by b11c's
+retrofitted invariants, and touching those while a watcher runs is still forbidden.
+
+### G4-original — operational failure rehearsals are ad hoc (superseded above)
 Two live-watcher deaths this project (Cloudflare 403 on the default UA; a transient `URLError`
 misclassified as fatal) were diagnosed *after* they killed a run. B11c now has quarantine, two-clock
 liveness and Q02/Q04–Q09/Q12 — retrofitted from incidents. Missing: **rehearsed** failure — provider
@@ -190,8 +220,9 @@ narrowed, and still non-overlapping:
 | slice | files touched | why disjoint |
 |---|---|---|
 | ~~**A. B17b record layer (G1+G2)**~~ | `scripts/b18a_shadow_record.py` | **DONE** |
-| **B. Failure rehearsal harness (G4)** | new `tests/`, injects into b11c **copies** | must not edit manifest-pinned b11c while a watcher runs |
-| **C. Wallet/treasury architecture (G3)** | `research/` document only | prose; no code |
+| ~~**B. Failure rehearsal harness (G4)**~~ | `scripts/b18b_failure_rehearsal.py` | **DONE** (record layer; watcher-side still open) |
+| **B'. Watcher failure rehearsals** | new `tests/`, b11c **copies** only | must not edit manifest-pinned b11c while a watcher runs |
+| ~~**C. Wallet/treasury architecture (G3)**~~ | `research/B19A_WALLET_TREASURY_ARCHITECTURE.md` | **DONE** (Codex); independently audited 2026-08-07 |
 | **D. Strategy preregistrations (G5)** | `research/` preregs, committed alone | prose; no code |
 | **E. Kill-switch state owner (G6)** | new module; **must not** add a write path to `b12b_preview_server.py` or the console | leaves the read-only surface intact |
 

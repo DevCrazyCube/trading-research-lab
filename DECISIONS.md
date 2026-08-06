@@ -2364,3 +2364,24 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **NOT done:** no stage run early, no fresh-window query, no composition inspected, no cadence or
   concurrency changed, no provider switched, no signing/simulation/submission/spend, and no change to
   B15Q, the B15 workers or any model gate.
+## 2026-08-06 — Wallet, treasury and emergency-control boundaries are architecture only (B19a)
+
+- **Status:** design recorded; unimplemented and operator-unratified.
+- **Decision:** any future execution system separates research/decision services, an independent
+  risk service, a keyless transaction builder, an isolated policy-enforcing signer, a dedicated
+  balance-limited operating wallet, and an offline/manual treasury. The browser console remains
+  read-only. Emergency state belongs to a separate minimal control process, defaults engaged on
+  uncertainty, and never auto-clears.
+- **Reason:** a strategy, recorder, UI or builder compromise must not imply custody or unbounded
+  spending. Approval binds the exact proposal, risk decision and full transaction message; the
+  signer independently refuses unknown programs/accounts, extra instructions, stale evidence,
+  changed fees/tips, duplicate hashes or an engaged/ambiguous emergency state.
+- **Not authorized:** no wallet/address/key is created, no signer or control service is implemented,
+  no limit is selected or ratified, and no funding, signing, simulation, submission or transaction
+  occurs. Phase 5b, Phase 6, legal/tax review and explicit owner authorization remain gates.
+- **Specification:** `research/B19A_WALLET_TREASURY_ARCHITECTURE.md`.
+- **Independently audited 2026-08-07** (Claude, handoff 194). Four defects and one omission were
+  corrected in the specification; the audit and its findings are recorded in that document's final
+  section. The material one: the compromise table credited signer policy with bounding the loss from
+  a compromised signer host, and an attacker holding that host holds the policy too — the operating
+  wallet balance is the only real bound there.

@@ -7,7 +7,8 @@
     "EXISTS_CONFORMING": "exists and meets the contract named in `conforms_to`",
     "EXISTS_NOT_SHADOW_CONFORMING": "exists and works, but does not produce or consume records conforming to B17B_EXECUTION_MEASUREMENT_V1. NOT the same as absent, and must never be reported as absent.",
     "NOT_A_READINESS_COMPONENT": "matched a name marker but is something else; classified so the sweep stays quiet without hiding it",
-    "ABSENT": "verified not to exist. The verification is named in `absence_evidence`."
+    "ABSENT": "verified not to exist. The verification is named in `absence_evidence`.",
+    "SUPERSEDED": "was verified absent and has since been built. Kept rather than deleted so the change is visible; the entry says what is still absent."
   },
   "components": [
     {
@@ -140,6 +141,29 @@
       "implements": "research/B15E_SHADOW_PATH_PREREGISTRATION.json, committed alone before any later return was inspected",
       "why_not_shadow_conforming": "predates B17b; emits paths and exits, not measurement records",
       "tests": "tests/test_b15e_shadow_path.py"
+    },
+    {
+      "path": "scripts/b18b_failure_rehearsal.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "B17B_EXECUTION_MEASUREMENT_V1 vocabulary at stage=rehearsal; every record carries a synthetic_fault block and an explicit record_is_not_evidence, and b18a.assert_conforms refuses one that does not",
+      "role": "injected-fault harness that reaches the failure half of the frozen contract -- 6 of 7 outcomes and both failure-only reason codes. `landed` is deliberately unreachable and a test asserts it stays so.",
+      "retry_policy": "decided by scripts/rpc_http_identity.py, the module the live watcher uses, not by a second table; so a 403 is terminal and 429/5xx/transport errors retry",
+      "tests": "tests/test_b18b_failure_rehearsal.py",
+      "evidence_on_disk": [
+        "research/b18b/failure_rehearsal.json"
+      ]
+    },
+    {
+      "path": "tests/test_b18b_failure_rehearsal.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "unittest.TestCase, discoverable by both runners",
+      "role": "failure-rehearsal guards, centred on the distinction between `we know it did not happen` and `we do not know what happened`"
+    },
+    {
+      "path": "research/B19A_WALLET_TREASURY_ARCHITECTURE.md",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "prose architecture only; creates no wallet, key, signer, limit or transaction. Independently audited 2026-08-07; four defects and one omission corrected, recorded in the document.",
+      "role": "wallet, treasury and emergency-control trust boundaries (Codex, slice C)"
     }
   ],
   "verified_absent": [
@@ -168,8 +192,8 @@
     },
     {
       "what": "any record carrying a failure outcome (dropped, expired, rejected_by_provider, failed_on_chain)",
-      "status": "ABSENT",
-      "absence_evidence": "those outcomes and the U_PROVIDER_SILENT and U_LOST reason codes can only be produced by a real failure, and no stage produces one. The enum is frozen and unexercised, which is the concrete reason Slice B is the next dependency."
+      "status": "SUPERSEDED",
+      "absence_evidence": "NO LONGER TRUE at the commit adding b18b. Failure outcomes and U_PROVIDER_SILENT / U_LOST are now produced by injected faults at stage=rehearsal. Those records are marked as evidence of nothing and may never be aggregated; what remains absent is a failure record from a REAL send, which requires a send."
     }
   ],
   "name_markers_the_guard_sweeps_for": [

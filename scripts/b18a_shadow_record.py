@@ -116,7 +116,17 @@ OUTCOMES = tuple(next(entry for entry in CONTRACT["failure_expiry_and_retry"]["f
 NON_NULLABLE = tuple(entry["name"] for section in _SECTIONS
                      for entry in CONTRACT[section]["fields"] if entry.get("nullable") is False)
 
-STAGES = ("shadow", "devnet", "mainnet")
+# The contract's own three stages, plus one this repository adds for fault injection. A rehearsal
+# record uses the frozen vocabulary -- same fields, same reason codes, same outcome enum -- so that
+# the failure half of the contract can be exercised at all; nothing else in the repository can
+# produce `dropped`, `expired`, `rejected_by_provider` or `failed_on_chain`, and an enum nobody can
+# reach is an enum nobody has tested. It is a FOURTH stage rather than a shadow record because a
+# shadow record may not claim an outcome it could not have had, and because a fault record must be
+# impossible to count as evidence: `assert_conforms` requires it to carry `synthetic_fault` and to
+# say in the record itself that it is not evidence.
+STAGES = ("shadow", "devnet", "mainnet", "rehearsal")
+CONTRACT_STAGES = tuple(CONTRACT["applies_to_stages"])
+REHEARSAL_STAGE = "rehearsal"
 
 # In shadow nothing is built, signed or sent, so these cannot exist. Not "were not measured":
 # CANNOT exist, which is why the reason is U_NOT_APPLICABLE and not U_NOT_INSTRUMENTED.
@@ -417,6 +427,20 @@ def assert_conforms(record):
     for path, value in _walk(record):
         if isinstance(value, float):
             problems.append(f"a float reached {path}; every amount and duration is an exact integer")
+
+    if record.get("stage") == REHEARSAL_STAGE:
+        # A fault record must be unmistakable. Without these it would be a well-formed record
+        # carrying a real-looking failure outcome, which is exactly the thing that must never end up
+        # in an aggregate.
+        fault = record.get("synthetic_fault")
+        if not isinstance(fault, dict) or not fault.get("fault"):
+            problems.append(
+                "a rehearsal record must name the synthetic fault that produced it; without that it "
+                "is indistinguishable from a record of something that actually happened")
+        if not record.get("record_is_not_evidence"):
+            problems.append("a rehearsal record must say in itself that it is not evidence")
+        if record.get("executable") is not False:
+            problems.append("a rehearsal record may not be marked executable")
 
     if record.get("stage") == "shadow":
         for field in ("send_unix_nanos", "sign_completed_unix_nanos", "land_unix_nanos"):

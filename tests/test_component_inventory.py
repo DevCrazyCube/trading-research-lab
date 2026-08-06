@@ -114,12 +114,24 @@ class InventoryIntegrityTests(unittest.TestCase):
         self.assertEqual(tuple(self.inventory["name_markers_the_guard_sweeps_for"]), NAME_MARKERS)
 
     def test_absence_claims_carry_their_evidence(self):
-        """An absence asserted without a named verification is an assumption wearing a status."""
+        """An absence asserted without a named verification is an assumption wearing a status.
+
+        SUPERSEDED is permitted alongside ABSENT: an absence that has since been built is kept
+        rather than deleted, so the change stays visible and the entry can say what is still absent.
+        Deleting it would make the inventory look as though the gap had never existed.
+        """
         for entry in self.inventory["verified_absent"]:
             with self.subTest(what=entry["what"]):
-                self.assertEqual(entry["status"], "ABSENT")
+                self.assertIn(entry["status"], ("ABSENT", "SUPERSEDED"))
                 self.assertTrue(entry.get("absence_evidence", "").strip(),
                                 "an absence must name how it was verified")
+
+    def test_a_superseded_absence_says_what_is_still_absent(self):
+        """Otherwise SUPERSEDED becomes a way to retire an inconvenient gap without answering it."""
+        for entry in self.inventory["verified_absent"]:
+            if entry.get("status") == "SUPERSEDED":
+                with self.subTest(what=entry["what"]):
+                    self.assertIn("remains absent", entry["absence_evidence"])
 
     def test_no_absence_claim_contradicts_a_conforming_component(self):
         """An absence goes stale the moment somebody builds the thing, and nothing shouts.
