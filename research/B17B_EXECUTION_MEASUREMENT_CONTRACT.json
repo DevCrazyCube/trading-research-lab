@@ -1,0 +1,121 @@
+{
+  "contract_id": "B17B_EXECUTION_MEASUREMENT_V1",
+  "schema_version": "1.0.0",
+  "date": "2026-08-06",
+  "author": "Claude (claude, handoff 188)",
+  "status": "FROZEN. Defines what a later shadow, devnet or mainnet stage must record. Recording nothing yet: no stage exists that may produce these fields.",
+
+  "purpose": "Fix, before any execution stage exists, exactly what must be measured about it. Written now so the measurement cannot be designed around whatever the first implementation happens to make easy.",
+
+  "the_rule_that_governs_every_field": {
+    "unknown_is_never_zero": "every field below is nullable, and a null means NOT MEASURED. No field may be defaulted to 0, to false, or to an empty list to make a record complete. A record with nulls is honest; a record with invented zeros is not.",
+    "absence_is_reported": "a stage that cannot measure a field records null AND the reason code for why, from `unmeasured_reason_codes`.",
+    "no_invented_landing_probability": "landing probability is NOT a field of this contract and may not be derived from it. A ratio of landed to sent is a description of what happened in a sample, never a probability attached to a future order, and it must not be reported as one.",
+    "float_forbidden": "every duration is an integer count of the stated unit and every amount an integer of lamports. No float appears in a record."
+  },
+
+  "clocks": {
+    "principle": "eight distinct instants, each recorded separately and never inferred from another. A pipeline that stores one timestamp and derives the rest cannot tell where its latency lives.",
+    "fields": [
+      {"name": "observation_unix_nanos", "meaning": "when the evidence the decision rests on was OBSERVED by us", "nullable": true},
+      {"name": "observation_slot", "meaning": "the slot that evidence describes", "nullable": true},
+      {"name": "decision_unix_nanos", "meaning": "when the proposal was decided upon", "nullable": true},
+      {"name": "build_started_unix_nanos", "meaning": "when transaction construction began", "nullable": true},
+      {"name": "build_completed_unix_nanos", "meaning": "when a signable message existed", "nullable": true},
+      {"name": "sign_started_unix_nanos", "meaning": "when signing began", "nullable": true},
+      {"name": "sign_completed_unix_nanos", "meaning": "when a signed transaction existed", "nullable": true},
+      {"name": "send_unix_nanos", "meaning": "when the transaction left this process", "nullable": true},
+      {"name": "receipt_unix_nanos", "meaning": "when the provider acknowledged receipt", "nullable": true},
+      {"name": "land_unix_nanos", "meaning": "when the transaction was first observed in a block", "nullable": true},
+      {"name": "land_slot", "meaning": "the slot it landed in", "nullable": true},
+      {"name": "finalize_unix_nanos", "meaning": "when the landing slot reached finalized commitment", "nullable": true},
+      {"name": "finalize_slot", "meaning": "the finalized slot observed at that moment", "nullable": true}
+    ],
+    "derived_durations_are_computed_not_stored": "any interval is computed from two recorded instants at read time. Storing a duration alongside its endpoints invites the two to disagree.",
+    "clock_source_must_be_declared": {
+      "field": "clock_source",
+      "meaning": "which clock produced the unix_nanos values, and whether it is monotonic",
+      "why": "a wall clock that steps backwards produces negative latencies, and a reader must be able to tell that from a real one"
+    }
+  },
+
+  "economics": {
+    "fields": [
+      {"name": "priority_fee_microlamports_per_cu", "nullable": true, "meaning": "the compute-unit price actually set on the transaction"},
+      {"name": "compute_unit_limit", "nullable": true},
+      {"name": "compute_units_consumed", "nullable": true},
+      {"name": "base_fee_lamports", "nullable": true},
+      {"name": "priority_fee_lamports_paid", "nullable": true, "meaning": "computed from the price and units actually consumed, not from the limit"},
+      {"name": "jito_tip_lamports", "nullable": true, "meaning": "null means NO TIP WAS MEASURED, which is different from a tip of zero. A zero must be recorded as 0 only when it is known to be zero."},
+      {"name": "jito_bundle_id", "nullable": true},
+      {"name": "jito_bundle_landed", "nullable": true, "meaning": "tri-state: true, false, or null for not observed"},
+      {"name": "ata_rent_lamports", "nullable": true, "meaning": "charged on entry and never refunded; recorded separately because it is not a fee"},
+      {"name": "total_execution_cost_lamports", "nullable": true, "meaning": "null unless EVERY component above is known. A partial total is worse than none."}
+    ]
+  },
+
+  "slippage_and_fill": {
+    "fields": [
+      {"name": "quoted_state_slot", "nullable": true, "meaning": "the curve state the decision was priced against"},
+      {"name": "executed_state_slot", "nullable": true, "meaning": "the curve state the transaction actually executed against"},
+      {"name": "expected_tokens_out", "nullable": true},
+      {"name": "actual_tokens_out", "nullable": true},
+      {"name": "slippage_tokens", "nullable": true, "meaning": "actual minus expected, an exact integer, signed. Null unless both sides are known."},
+      {"name": "slippage_limit_tokens", "nullable": true, "meaning": "the limit the transaction itself enforced, if any"},
+      {"name": "partial_fill", "nullable": true, "meaning": "tri-state; this regime's curve does not partially fill, so a true here is a finding"}
+    ]
+  },
+
+  "failure_expiry_and_retry": {
+    "fields": [
+      {"name": "outcome", "nullable": false, "enum": ["landed", "failed_on_chain", "dropped", "expired", "rejected_by_provider", "never_sent", "unknown"], "meaning": "unknown is a permitted and meaningful value; it may not be replaced by a guess"},
+      {"name": "on_chain_error", "nullable": true, "meaning": "the program or runtime error verbatim, never summarised into a category at record time"},
+      {"name": "blockhash", "nullable": true},
+      {"name": "blockhash_slot", "nullable": true},
+      {"name": "expiry_slot", "nullable": true, "meaning": "the last slot at which the transaction could have landed"},
+      {"name": "attempt_index", "nullable": false, "meaning": "0 for the first attempt; every retry is its OWN record, never an increment on the first"},
+      {"name": "retry_of_signature", "nullable": true, "meaning": "links a retry to what it retried, so a chain of attempts can be reconstructed without merging them"},
+      {"name": "retry_policy_id", "nullable": true, "meaning": "which frozen policy governed the retry, so behaviour is attributable to a rule rather than to a moment"}
+    ],
+    "each_attempt_is_a_record": "a retried order produces N records, not one record with a counter. Collapsing them hides the distribution of what it took to land."
+  },
+
+  "provider_and_route": {
+    "fields": [
+      {"name": "endpoint_identity", "nullable": false, "meaning": "scheme, host and explicit port ONLY. Never a path, query, fragment or userinfo -- a path credential written into a record is the defect B16/B11 already hit once."},
+      {"name": "route", "nullable": true, "enum": ["direct_rpc", "jito_bundle", "other", null]},
+      {"name": "provider_region_declared", "nullable": true, "meaning": "as declared by the provider, not inferred from latency"},
+      {"name": "leader_at_send_slot", "nullable": true, "meaning": "null unless actually observed; not derived from a schedule that may have changed"}
+    ]
+  },
+
+  "counterfactual_limitations": {
+    "must_be_carried_with_every_aggregate": [
+      "an executed order CHANGED the book, so no observed later price is the price that would have existed without it",
+      "a landed order tells you nothing about the orders that did not land, and the two populations differ",
+      "competitor reaction is unmeasured and unmeasurable from one's own records alone",
+      "a sample of attempts is not a probability of landing, and must not be presented as one",
+      "cost measured on landed transactions omits the cost of failures unless failures are recorded with their own costs"
+    ],
+    "aggregates_require_denominators": "any ratio must publish its numerator and denominator as integers beside it, so a reader can see what it is a ratio of."
+  },
+
+  "unmeasured_reason_codes": [
+    {"code": "U_NOT_INSTRUMENTED", "meaning": "the stage does not yet measure this"},
+    {"code": "U_PROVIDER_SILENT", "meaning": "the provider returned no such field"},
+    {"code": "U_NOT_APPLICABLE", "meaning": "the field cannot apply to this route or outcome"},
+    {"code": "U_LOST", "meaning": "the value existed and was not captured; a defect, recorded as one"},
+    {"code": "U_REFUSED", "meaning": "recording it would leak a credential or composition"}
+  ],
+
+  "applies_to_stages": {
+    "shadow": "records every clock and economic field it can WITHOUT signing or sending: observation, decision, and the build/sign/send/receipt/land/finalize fields all null with U_NOT_APPLICABLE. This is what makes a shadow record comparable to a live one rather than a different shape.",
+    "devnet": "may record the full set. Devnet economics are not mainnet economics and every aggregate must say so.",
+    "mainnet": "requires separate explicit authorization that this contract does not grant and cannot grant."
+  },
+
+  "this_contract_authorizes_nothing": {
+    "statement": "freezing what would be measured is not permission to execute. No wallet, key, transaction construction, signing, submission or spending is authorized by this document, and none exists in the repository.",
+    "phase_gate": "PLAN.md Phase 6 requires separate, explicit owner authorization for any live action."
+  }
+}

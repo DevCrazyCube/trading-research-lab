@@ -1,0 +1,80 @@
+{
+ "a_rejected_proposal_is_never_priced": "the entry, path, exit and reconciliation run only when B12a approved. A rejected decision leaves them null, which is what makes the rejection mean something.",
+ "evidence": "SYNTHETIC ONLY. No fresh window, no burned artifact, no network.",
+ "executable": false,
+ "execution_status": "never_executed",
+ "kill_switch_counterexample": {
+  "decision": "rejected",
+  "primary_reason": "R02_KILL_SWITCH_ENGAGED",
+  "shows": "the identical chain, with only the kill switch changed, produces no priced entry at all. The rejection is load-bearing, not decorative.",
+  "simulated_round_trip": null
+ },
+ "network": "refused at runtime: socket.socket raised for the duration of the chain",
+ "no_execution_surface": {
+  "closure": [
+   "b10a_simulator_kernel.py",
+   "b10b_position_path.py",
+   "b10c_outcome_labels.py",
+   "b11b_baseline_metrics.py",
+   "b11b_t0_features.py",
+   "b12a_risk_governor.py",
+   "b12b_operator_snapshot.py",
+   "b17a_shadow_rehearsal.py",
+   "b9i_quote_reproduction.py"
+  ],
+  "execution_surface_found": {}
+ },
+ "observation": {
+  "bonding_curve": "CurveSynth111111111111111111111111111111111",
+  "complete": false,
+  "creator": "CreatorSynthA1111111111111111111111111111111",
+  "evidence": "SYNTHETIC. Constructed here, not drawn from any window, fresh or burned.",
+  "inner_index": 1,
+  "mayhem_mode": false,
+  "mint": "MintSynth1111111111111111111111111111111111",
+  "outer_index": 0,
+  "quote_mint": "11111111111111111111111111111111",
+  "real_quote": 4200000000,
+  "real_token": 780000000000000,
+  "slot": 435600003,
+  "transaction_index": 7,
+  "virtual_quote": 30000000000,
+  "virtual_token": 1073000000000000
+ },
+ "operator_snapshot_hash": "28f611074bdb254398b4b57045ae557457ab7a2dffeb44d898c2d647294f3c9a",
+ "operator_snapshot_status": null,
+ "performance_status": "not_evaluated",
+ "proposal": {
+  "bonding_curve": "CurveSynth111111111111111111111111111111111",
+  "creator": "CreatorSynthA1111111111111111111111111111111",
+  "mint": "MintSynth1111111111111111111111111111111111",
+  "proposal_id": "rehearsal-435600003-7",
+  "quote_lamports": 100000000,
+  "schema_version": "1.0.0",
+  "side": "buy"
+ },
+ "reconciliation": {
+  "no_custody": "no wallet holds anything as a result of this rehearsal; the position exists only as arithmetic",
+  "position_is_simulated": true,
+  "projected_total_exposure_lamports": 406788560,
+  "reconciled": true
+ },
+ "rehearsal": "B17A_SHADOW_REHEARSAL",
+ "risk_decision": {
+  "approval_is_simulation_only": true,
+  "decision": "approved",
+  "primary_reason": null,
+  "reasons": []
+ },
+ "schema_version": "1.0.0",
+ "simulated_round_trip": {
+  "NO_SIGNING_OR_SUBMISSION": "This decision authorises nothing. B12a holds no wallet, no key and no transport; it neither signs nor submits, and an approval here is a risk clearance for a simulated order only.",
+  "entry_slot": 435600003,
+  "exit_slot": 435601003,
+  "lamports_into_wallet_at_exit": 111724467,
+  "lamports_out_of_wallet_at_entry": 103394280,
+  "simulated_net_lamports": 8330187,
+  "simulation_only": true,
+  "tokens_acquired": 3564784017626
+ }
+}
