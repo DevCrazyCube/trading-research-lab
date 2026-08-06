@@ -1,0 +1,117 @@
+{
+  "preregistration_id": "B16D_CREATOR_REENTRY_SIGNAL_V1",
+  "date": "2026-08-06",
+  "author": "Claude (claude, handoff 186)",
+  "status": "FROZEN. Committed alone, before any outcome figure was computed.",
+  "supersedes": null,
+
+  "question": "Can a PUBLIC creator-or-create_user buy occurring after launch serve as a point-in-time delayed-confirmation signal for an ORDINARY FOLLOWER who enters only after observing it?",
+
+  "development_data_only": {
+    "corpus": "the burned B8b/B9d window, slots 433894233..434097833 and their observation span",
+    "status": "BURNED DEVELOPMENT DATA. Permanently excluded from evaluation. Nothing measured here may be reported as an evaluation result, and the B11a fresh window is neither read nor referenced.",
+    "artifacts": ["research/b9d_transaction_bodies.sqlite", "research/b10b_observed_paths.sqlite", "research/b10c_t0_identity.sqlite"],
+    "not_read": ["research/b11a", "any live artifact", "any network endpoint"]
+  },
+
+  "the_follower_is_not_the_creator": {
+    "rule": "the outcome measured is the FOLLOWER's, priced from the follower's own entry and exit against the curve. The creator wallet's own flow is never the result and never enters the outcome arithmetic.",
+    "why": "B16b and B16c measured what creator-equal wallets did. This asks a different question: whether somebody watching them could have done anything with it."
+  },
+
+  "signal_definition": {
+    "signal": "the FIRST buy on a curve by a wallet equal to that curve's creator or create_user field, occurring strictly after the create coordinate",
+    "one_per_curve": "at most one signal per curve. Taking every creator buy would let a curve with many contribute many correlated observations and would invite selecting the convenient one.",
+    "wallet_equality_is_not_ownership": "a wallet equal to a recorded field is a wallet equal to a recorded field. No clustering or ownership inference is performed anywhere."
+  },
+
+  "observability_gate": {
+    "rule": "an entry is admissible only if the signal transaction was provably observable before the entry instant",
+    "same_slot_is_refused": "an entry in the SAME slot at a later transaction index is REFUSED. Ordering within a slot is decided by the leader, not by what an observer had seen, so same-slot capture cannot be proven and will not be assumed.",
+    "reported_separately": "the count of same-slot-later-transaction opportunities is reported as an INADMISSIBLE variant, so a reader can see what was given up and cannot mistake it for a result",
+    "admissible_entry": "entry slot >= signal slot + delay, with delay from the frozen list below"
+  },
+
+  "frozen_timing_variants": {
+    "entry_delays_slots": [1, 2, 4],
+    "source": "B15D_SHADOW_ROUTE_V1 and B15L, inherited unchanged and not re-derived here",
+    "entry_coordinate": "the first canonical observation at or after (signal_slot + delay); the state faced is the curve's reserves as of the last observation at or before that coordinate",
+    "no_variant_may_be_added_after_seeing_an_outcome": true
+  },
+
+  "frozen_position_sizes": {
+    "primary_lamports": 100000000,
+    "source": "0.1 SOL, unchanged from B10a/B10b/B10c/B11b/B15a/B15d/B15L. No size was chosen with this study in view.",
+    "sensitivity_grid_lamports": [1000000, 10000000, 100000000],
+    "grid_is_not_selection": "the grid is reported for sensitivity only. No size will be selected, recommended, or described as best."
+  },
+
+  "frozen_exit_horizons": {
+    "horizons": ["h_1000_slots", "h_10000_slots"],
+    "source": "B10b identifiers and slot-horizon semantics, unchanged",
+    "exit_state": "the curve's reserves as of the last observation at or before (entry_slot + horizon_slots)",
+    "right_censoring": "if the curve's observed path contains no observation at or after the horizon, or the curve is complete at the exit, the cell is RIGHT-CENSORED and carries no outcome. A censored cell is never counted as zero."
+  },
+
+  "costs_and_capacity": {
+    "arithmetic": "B9I's pinned curve formulas and B10a's price_entry, price_exit and curve_fees, called directly. No formula is reimplemented.",
+    "fee_schedule": {
+      "source": "decoded EXACTLY from that curve's own TradeEvent payloads in the burned corpus, using the pinned IDL",
+      "never_hardcoded": "a hardcoded schedule was a real defect in B15F and is forbidden. A curve whose schedule cannot be decoded is REFUSED, not priced at an assumed rate.",
+      "one_per_curve": "the schedule of the curve's first decodable TradeEvent; a curve whose decodable schedules disagree is refused"
+    },
+    "cost_scenarios": "B15D_SHADOW_ROUTE_V1's three scenarios verbatim: optimistic, base, stressed. None is added, removed or retuned.",
+    "capacity_gate": "B15M's admissibility against the OBSERVED exit book. A cell whose exit the observed reserves could not pay for is refused, never priced against liquidity our own entry supplied.",
+    "float_forbidden": "every quantity is an exact Python integer"
+  },
+
+  "frozen_baselines_non_model": {
+    "baseline_launch": "the same machinery entered at the same delays after the CREATE coordinate instead of the signal. This is the launch-snipe comparator.",
+    "baseline_any_buy": "the same machinery entered at the same delays after the first NON-creator buy on that curve. This is the 'somebody bought' comparator, and it is what distinguishes a creator-specific effect from a generic activity effect.",
+    "why_both": "a signal that only matches 'any buy' is not a creator signal. A signal that only matches 'launch' is not a delayed-confirmation signal.",
+    "computed_on_the_same_denominator_and_machinery": true
+  },
+
+  "denominator": {
+    "whole_cohort": "all 1,136 curves in the burned corpus are the denominator for coverage. A signal that fires on few curves is reported as firing on few curves.",
+    "coverage_reported_before_outcomes": "selection coverage is reported first and separately, so no outcome can be read without the share of the cohort it came from"
+  },
+
+  "outcome_reporting": {
+    "statistics": "exact integer order statistics: min, p10, p25, median, p75, p90, max, and counts at or below zero. NO MEAN, because a mean over a censored heavy-tailed set invites reading it as an expectation.",
+    "never_aggregated": "figures are never aggregated across horizons, delays or cost scenarios. The scenarios are alternative assumptions, not samples.",
+    "tail_and_concentration": "the share of the total positive outcome attributable to the top cells is reported, so a lottery shape cannot present as an edge",
+    "not_a_return": "no figure will be called a return, a profit, an expected value or a performance result"
+  },
+
+  "refusal_codes": [
+    {"code": "D_NO_SIGNAL", "meaning": "the curve has no creator-like buy after its create"},
+    {"code": "D_SAME_SLOT_UNPROVABLE", "meaning": "the only entry opportunity was in the signal's own slot; observability cannot be proven"},
+    {"code": "D_NO_ENTRY_OBSERVATION", "meaning": "no observation exists at or after the delayed entry coordinate"},
+    {"code": "D_NO_FEE_SCHEDULE", "meaning": "the curve's fee basis points could not be decoded from its own TradeEvents"},
+    {"code": "D_FEE_SCHEDULE_AMBIGUOUS", "meaning": "the curve's decodable schedules disagree"},
+    {"code": "D_RIGHT_CENSORED", "meaning": "no observation at or after the exit horizon; the cell carries no outcome"},
+    {"code": "D_COMPLETE_AT_ENTRY_OR_EXIT", "meaning": "the curve is complete, so the observed state is not one our order could have traded against"},
+    {"code": "D_CAPACITY_REFUSED", "meaning": "the observed exit book could not pay for the sale"},
+    {"code": "D_ENTRY_UNPRICEABLE", "meaning": "B10a refused the entry"},
+    {"code": "D_EXIT_UNPRICEABLE", "meaning": "B10a refused the exit"}
+  ],
+
+  "prohibitions": [
+    "no threshold, delay, horizon or size may be changed after seeing any outcome",
+    "no variant may be added after seeing any outcome",
+    "the creator wallet's own flow may never be reported as the follower's result",
+    "no figure may be presented as an evaluation result: this is burned development data",
+    "no recommendation to trade, to follow any wallet, or to issue tokens",
+    "no identity or ownership inference",
+    "no reading of research/b11a, no network, no signing, submission, token creation or liquidity action"
+  ],
+
+  "status_locks": {
+    "label": "CREATOR_REENTRY_DELAYED_CONFIRMATION",
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "assumption": "UNREACTING_ORDER_FLOW: the observed path is replayed as if our order did not change it, which it would have"
+  }
+}
