@@ -1,0 +1,182 @@
+{
+ "by_role": {
+  "both_fields_name_this_wallet": {
+   "distinct_curves": 101,
+   "distinct_wallets": 96,
+   "flow_less_documented_fee_lamports": {
+    "max": 28133364393,
+    "median": 241995369,
+    "min": -2762586,
+    "n": 101,
+    "p10": 5547700,
+    "p25": 26224832,
+    "p75": 1490113181,
+    "p90": 5548228822
+   },
+   "observed_quote_flow_lamports": {
+    "max": 28417403803,
+    "median": 249999998,
+    "min": 38868,
+    "n": 101,
+    "p10": 7266533,
+    "p25": 27224696,
+    "p75": 1504594482,
+    "p90": 5601821434
+   },
+   "positions": 101,
+   "quote_in_lamports": {
+    "max": 49382716040,
+    "median": 98765431,
+    "min": 97777,
+    "n": 101,
+    "p10": 7365800,
+    "p25": 24444443,
+    "p75": 371407060,
+    "p90": 1271111101
+   }
+  },
+  "limit": "creator and create_user name the SAME wallet on 1,120 of 1,136 curves, so the roles cannot be separated meaningfully in this corpus. The split is reported for completeness and its denominators are the point.",
+  "role_tally_over_all_creator_like_positions": {
+   "both_fields_name_this_wallet": 110
+  }
+ },
+ "channels_outside_the_flow": {
+  "instructions_in_corpus": {
+   "claim_cashback": 930,
+   "claim_cashback_v2": 14,
+   "collect_coin_creator_fee": 1,
+   "collect_creator_fee": 2,
+   "collect_creator_fee_v2": 5,
+   "create_pool": 16,
+   "distribute_creator_fees": 15,
+   "distribute_creator_fees_v2": 59,
+   "migrate": 2,
+   "migrate_bonding_curve_creator": 38,
+   "migrate_pool_coin_creator": 1,
+   "migrate_v2": 16,
+   "transfer_creator_fees_to_pump": 2,
+   "transfer_creator_fees_to_pump_v2": 23
+  },
+  "instructions_touching_a_creator_like_wallet": {
+   "collect_creator_fee": 2,
+   "collect_creator_fee_v2": 1,
+   "distribute_creator_fees": 3,
+   "distribute_creator_fees_v2": 8
+  },
+  "why_separate": "creator fees, cashback and buyback move lamports through vaults, not through the curve reserves, so they are absent from the flow by construction. Presence is reported; amounts are not, because an address appearing in an instruction is not proof it was paid."
+ },
+ "denominators": {
+  "creator_like_positions": 110,
+  "fully_exited": 101,
+  "inventory_unresolved_and_therefore_excluded_from_every_flow": 9,
+  "trades_excluded_upstream": {
+   "direction_contradicts_reserve_delta": 2,
+   "multiple_reserve_observations": 920,
+   "multiple_trade_instructions": 1232,
+   "no_reserve_observation": 476
+  },
+  "unresolved_share_note": "a position still holding has no closing price, so it carries no flow figure at all rather than a zero"
+ },
+ "does_it_survive_excluding_launch_transaction_activity": {
+  "bought_in_the_create_transaction": {
+   "distinct_curves": 0,
+   "distinct_wallets": 0,
+   "flow_less_documented_fee_lamports": null,
+   "observed_quote_flow_lamports": null,
+   "positions": 0,
+   "quote_in_lamports": null
+  },
+  "did_not_buy_in_the_create_transaction": {
+   "distinct_curves": 101,
+   "distinct_wallets": 96,
+   "flow_less_documented_fee_lamports": {
+    "max": 28133364393,
+    "median": 241995369,
+    "min": -2762586,
+    "n": 101,
+    "p10": 5547700,
+    "p25": 26224832,
+    "p75": 1490113181,
+    "p90": 5548228822
+   },
+   "observed_quote_flow_lamports": {
+    "max": 28417403803,
+    "median": 249999998,
+    "min": 38868,
+    "n": 101,
+    "p10": 7266533,
+    "p25": 27224696,
+    "p75": 1504594482,
+    "p90": 5601821434
+   },
+   "positions": 101,
+   "quote_in_lamports": {
+    "max": 49382716040,
+    "median": 98765431,
+    "min": 97777,
+    "n": 101,
+    "p10": 7365800,
+    "p25": 24444443,
+    "p75": 371407060,
+    "p90": 1271111101
+   }
+  },
+  "reading": "the two subsets are reported side by side. A result that lives only in the first is a statement about buying at the curve's opening reserves, not about creators trading well afterwards."
+ },
+ "executable": false,
+ "execution_status": "never_executed",
+ "headline_being_decomposed": {
+  "distinct_curves": 101,
+  "distinct_wallets": 96,
+  "flow_less_documented_fee_lamports": {
+   "max": 28133364393,
+   "median": 241995369,
+   "min": -2762586,
+   "n": 101,
+   "p10": 5547700,
+   "p25": 26224832,
+   "p75": 1490113181,
+   "p90": 5548228822
+  },
+  "observed_quote_flow_lamports": {
+   "max": 28417403803,
+   "median": 249999998,
+   "min": 38868,
+   "n": 101,
+   "p10": 7266533,
+   "p25": 27224696,
+   "p75": 1504594482,
+   "p90": 5601821434
+  },
+  "positions": 101,
+  "quote_in_lamports": {
+   "max": 49382716040,
+   "median": 98765431,
+   "min": 97777,
+   "n": 101,
+   "p10": 7365800,
+   "p25": 24444443,
+   "p75": 371407060,
+   "p90": 1271111101
+  }
+ },
+ "not_claimed": {
+  "issuance_as_a_strategy": "not recommended and not evaluated. This decomposes an observation; it does not endorse the behaviour it describes and says nothing about its legality, ethics or durability.",
+  "profit": "not claimed. Complete wallet-level costs, inventory and transfers are not available, and without all three a flow is not a result."
+ },
+ "performance_status": "not_evaluated",
+ "status": "EXPLORATORY AND DESCRIPTIVE. Not a profit measurement and not a recommendation to issue tokens.",
+ "study": "B16B_CREATOR_FLOW_DECOMPOSITION",
+ "token_transfers": {
+  "consequence": "a position that looks closed may not be, and one that looks open may have been settled elsewhere. No flow figure here is bounded by wallet-level inventory.",
+  "distinct_programs_in_corpus": 201,
+  "token_program_instructions_decoded": 0,
+  "token_program_instructions_present": {
+   "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA": 74305,
+   "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb": 208474
+  },
+  "transfers_are_recorded_but_not_decoded": true,
+  "why": "only the Pump IDL was pinned, so every non-Pump instruction is stored with a null idl_name. The raw material for transfer analysis exists; the decoding does not, and this audit did not add it."
+ },
+ "wallet_equality_is_not_ownership": "every figure below is about wallets EQUAL to a recorded creator or create_user field. No clustering, funding graph or heuristic linkage was attempted, and no claim is made that any two addresses share an owner."
+}
