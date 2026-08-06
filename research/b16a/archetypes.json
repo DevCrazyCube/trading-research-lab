@@ -1,0 +1,474 @@
+{
+ "archetype_rules": {
+  "applied_in_this_order": [
+   "creator_like_participant",
+   "migration_trader",
+   "repeat_early_entrant",
+   "immediate_launch_sniper",
+   "delayed_entrant",
+   "incidental_trader",
+   "unclassified_mid_window"
+  ],
+  "delayed_slots": 30,
+  "early_slots": 4,
+  "immediate_slots": 1,
+  "repeat_curves": 5,
+  "thresholds_were_not_tuned": "round numbers chosen for legibility before any distribution was inspected, and none was moved after seeing a result"
+ },
+ "archetypes": {
+  "creator_like_participant": {
+   "distinct_curves": 110,
+   "distinct_wallets": 105,
+   "entry_delay_slots": {
+    "max": 892827,
+    "median": 180,
+    "min": 0,
+    "n": 110,
+    "p10": 9,
+    "p25": 55,
+    "p75": 1131,
+    "p90": 4184
+   },
+   "exit_delay_slots_where_fully_exited": {
+    "max": 968571,
+    "median": 867,
+    "min": -94281,
+    "n": 101,
+    "p10": 8,
+    "p25": 85,
+    "p75": 6366,
+    "p90": 60056
+   },
+   "flow_is_not_profit": "observed quote flow is one window on one curve, before costs this corpus does not record, and says nothing about the wallet's result",
+   "flow_less_documented_curve_fee_where_fully_exited": {
+    "max": 28133364393,
+    "median": 241995369,
+    "min": -2762586,
+    "n": 101,
+    "p10": 5547700,
+    "p25": 26224832,
+    "p75": 1490113181,
+    "p90": 5548228822
+   },
+   "observed_quote_flow_lamports_where_fully_exited": {
+    "max": 28417403803,
+    "median": 249999998,
+    "min": 38868,
+    "n": 101,
+    "p10": 7266533,
+    "p25": 27224696,
+    "p75": 1504594482,
+    "p90": 5601821434
+   },
+   "positions": 110,
+   "positions_with_any_sell": 102,
+   "positions_with_unresolved_inventory": 9,
+   "quote_in_lamports": {
+    "max": 49382716040,
+    "median": 98765431,
+    "min": 97777,
+    "n": 110,
+    "p10": 4938271,
+    "p25": 24444425,
+    "p75": 371407060,
+    "p90": 1711111109
+   }
+  },
+  "delayed_entrant": {
+   "distinct_curves": 557,
+   "distinct_wallets": 13309,
+   "entry_delay_slots": {
+    "max": 1490058,
+    "median": 400,
+    "min": 30,
+    "n": 21065,
+    "p10": 51,
+    "p25": 109,
+    "p75": 2589,
+    "p90": 12396
+   },
+   "exit_delay_slots_where_fully_exited": {
+    "max": 1585297,
+    "median": 190,
+    "min": -28016,
+    "n": 17861,
+    "p10": 28,
+    "p25": 57,
+    "p75": 898,
+    "p90": 4730
+   },
+   "flow_is_not_profit": "observed quote flow is one window on one curve, before costs this corpus does not record, and says nothing about the wallet's result",
+   "flow_less_documented_curve_fee_where_fully_exited": {
+    "max": 33618616304,
+    "median": -2027980,
+    "min": -8047462369,
+    "n": 17861,
+    "p10": -239249134,
+    "p25": -53862218,
+    "p75": 1460641,
+    "p90": 110545917
+   },
+   "observed_quote_flow_lamports_where_fully_exited": {
+    "max": 33969474459,
+    "median": -535038,
+    "min": -7561967730,
+    "n": 17861,
+    "p10": -220445754,
+    "p25": -46890982,
+    "p75": 5203090,
+    "p90": 131302977
+   },
+   "positions": 21065,
+   "positions_with_any_sell": 18589,
+   "positions_with_unresolved_inventory": 3204,
+   "quote_in_lamports": {
+    "max": 61311292452,
+    "median": 195555555,
+    "min": 1,
+    "n": 21065,
+    "p10": 381306,
+    "p25": 19753085,
+    "p75": 840066250,
+    "p90": 1847631822
+   }
+  },
+  "immediate_launch_sniper": {
+   "distinct_curves": 340,
+   "distinct_wallets": 601,
+   "entry_delay_slots": {
+    "max": 1,
+    "median": 0,
+    "min": 0,
+    "n": 918,
+    "p10": 0,
+    "p25": 0,
+    "p75": 0,
+    "p90": 1
+   },
+   "exit_delay_slots_where_fully_exited": {
+    "max": 1133785,
+    "median": 36,
+    "min": 0,
+    "n": 840,
+    "p10": 3,
+    "p25": 12,
+    "p75": 104,
+    "p90": 375
+   },
+   "flow_is_not_profit": "observed quote flow is one window on one curve, before costs this corpus does not record, and says nothing about the wallet's result",
+   "flow_less_documented_curve_fee_where_fully_exited": {
+    "max": 44483078831,
+    "median": -8095591,
+    "min": -5642491318,
+    "n": 840,
+    "p10": -335627314,
+    "p25": -140189145,
+    "p75": 179240072,
+    "p90": 1412370404
+   },
+   "observed_quote_flow_lamports_where_fully_exited": {
+    "max": 45096402591,
+    "median": -2,
+    "min": -5512356692,
+    "n": 840,
+    "p10": -314077382,
+    "p25": -121278668,
+    "p75": 195023540,
+    "p90": 1452388090
+   },
+   "positions": 918,
+   "positions_with_any_sell": 877,
+   "positions_with_unresolved_inventory": 78,
+   "quote_in_lamports": {
+    "max": 19357104783,
+    "median": 1185185184,
+    "min": 49381,
+    "n": 918,
+    "p10": 118518518,
+    "p25": 500000000,
+    "p75": 1832000000,
+    "p90": 4096936438
+   }
+  },
+  "incidental_trader": {
+   "distinct_curves": 214,
+   "distinct_wallets": 925,
+   "entry_delay_slots": {
+    "max": 29,
+    "median": 14,
+    "min": 2,
+    "n": 925,
+    "p10": 4,
+    "p25": 7,
+    "p75": 21,
+    "p90": 26
+   },
+   "exit_delay_slots_where_fully_exited": {
+    "max": 1610238,
+    "median": 71,
+    "min": 1,
+    "n": 819,
+    "p10": 12,
+    "p25": 26,
+    "p75": 207,
+    "p90": 632
+   },
+   "flow_is_not_profit": "observed quote flow is one window on one curve, before costs this corpus does not record, and says nothing about the wallet's result",
+   "flow_less_documented_curve_fee_where_fully_exited": {
+    "max": 9351344509,
+    "median": -10480282,
+    "min": -2468557528,
+    "n": 819,
+    "p10": -444497031,
+    "p25": -189429425,
+    "p75": 66812259,
+    "p90": 492926664
+   },
+   "observed_quote_flow_lamports_where_fully_exited": {
+    "max": 9473483724,
+    "median": -5779840,
+    "min": -2344840131,
+    "n": 819,
+    "p10": -417986788,
+    "p25": -171173788,
+    "p75": 78846579,
+    "p90": 516410339
+   },
+   "positions": 925,
+   "positions_with_any_sell": 860,
+   "positions_with_unresolved_inventory": 106,
+   "quote_in_lamports": {
+    "max": 17046412443,
+    "median": 801975308,
+    "min": 3349,
+    "n": 925,
+    "p10": 49382715,
+    "p25": 203623090,
+    "p75": 1434863823,
+    "p90": 2053333333
+   }
+  },
+  "migration_trader": {
+   "distinct_curves": 7,
+   "distinct_wallets": 22,
+   "entry_delay_slots": {
+    "max": 173148,
+    "median": 754,
+    "min": 0,
+    "n": 22,
+    "p10": 0,
+    "p25": 0,
+    "p75": 2824,
+    "p90": 2824
+   },
+   "exit_delay_slots_where_fully_exited": null,
+   "flow_is_not_profit": "observed quote flow is one window on one curve, before costs this corpus does not record, and says nothing about the wallet's result",
+   "flow_less_documented_curve_fee_where_fully_exited": null,
+   "observed_quote_flow_lamports_where_fully_exited": null,
+   "positions": 22,
+   "positions_with_any_sell": 0,
+   "positions_with_unresolved_inventory": 22,
+   "quote_in_lamports": {
+    "max": 20018250843,
+    "median": 1466666666,
+    "min": 41073343,
+    "n": 22,
+    "p10": 97777777,
+    "p25": 408598211,
+    "p75": 2561286705,
+    "p90": 19210359504
+   }
+  },
+  "repeat_early_entrant": {
+   "distinct_curves": 500,
+   "distinct_wallets": 126,
+   "entry_delay_slots": {
+    "max": 1459027,
+    "median": 2,
+    "min": 0,
+    "n": 2121,
+    "p10": 0,
+    "p25": 0,
+    "p75": 8,
+    "p90": 37
+   },
+   "exit_delay_slots_where_fully_exited": {
+    "max": 714474,
+    "median": 16,
+    "min": 0,
+    "n": 2095,
+    "p10": 3,
+    "p25": 6,
+    "p75": 52,
+    "p90": 179
+   },
+   "flow_is_not_profit": "observed quote flow is one window on one curve, before costs this corpus does not record, and says nothing about the wallet's result",
+   "flow_less_documented_curve_fee_where_fully_exited": {
+    "max": 4704704535,
+    "median": -1279378,
+    "min": -5110640128,
+    "n": 2095,
+    "p10": -77012701,
+    "p25": -20530497,
+    "p75": 9573298,
+    "p90": 90935192
+   },
+   "observed_quote_flow_lamports_where_fully_exited": {
+    "max": 4786643341,
+    "median": -1,
+    "min": -4995874531,
+    "n": 2095,
+    "p10": -66323882,
+    "p25": -13934939,
+    "p75": 15753423,
+    "p90": 100843528
+   },
+   "positions": 2121,
+   "positions_with_any_sell": 2110,
+   "positions_with_unresolved_inventory": 26,
+   "quote_in_lamports": {
+    "max": 16466253481,
+    "median": 122405904,
+    "min": 987,
+    "n": 2121,
+    "p10": 3962278,
+    "p25": 39506172,
+    "p75": 493827159,
+    "p90": 1200000000
+   }
+  },
+  "unclassified_mid_window": {
+   "distinct_curves": 418,
+   "distinct_wallets": 1450,
+   "entry_delay_slots": {
+    "max": 29,
+    "median": 13,
+    "min": 2,
+    "n": 3773,
+    "p10": 4,
+    "p25": 7,
+    "p75": 20,
+    "p90": 25
+   },
+   "exit_delay_slots_where_fully_exited": {
+    "max": 1610347,
+    "median": 34,
+    "min": 0,
+    "n": 3690,
+    "p10": 4,
+    "p25": 12,
+    "p75": 104,
+    "p90": 386
+   },
+   "flow_is_not_profit": "observed quote flow is one window on one curve, before costs this corpus does not record, and says nothing about the wallet's result",
+   "flow_less_documented_curve_fee_where_fully_exited": {
+    "max": 17317285823,
+    "median": -6271403,
+    "min": -3491939233,
+    "n": 3690,
+    "p10": -284927858,
+    "p25": -75626353,
+    "p75": 11902136,
+    "p90": 166084215
+   },
+   "observed_quote_flow_lamports_where_fully_exited": {
+    "max": 17510077301,
+    "median": -951127,
+    "min": -3439709164,
+    "n": 3690,
+    "p10": -260590917,
+    "p25": -61410212,
+    "p75": 19288002,
+    "p90": 188052685
+   },
+   "positions": 3773,
+   "positions_with_any_sell": 3743,
+   "positions_with_unresolved_inventory": 83,
+   "quote_in_lamports": {
+    "max": 11831111101,
+    "median": 444000000,
+    "min": 502,
+    "n": 3773,
+    "p10": 5460744,
+    "p25": 97777777,
+    "p75": 1048585942,
+    "p90": 1954757047
+   }
+  }
+ },
+ "concentration": {
+  "curves_per_wallet": {
+   "max": 99,
+   "median": 1,
+   "min": 1,
+   "n": 15272,
+   "p10": 1,
+   "p25": 1,
+   "p75": 2,
+   "p90": 3
+  },
+  "distinct_wallets": 15272,
+  "positions": 28934,
+  "share_of_positions_top_10_pct_of_wallets": {
+   "positions": 10808,
+   "share_pct_denominator": 28934,
+   "share_pct_numerator": 10808,
+   "wallets": 1527
+  },
+  "share_of_positions_top_1_pct_of_wallets": {
+   "positions": 3944,
+   "share_pct_denominator": 28934,
+   "share_pct_numerator": 3944,
+   "wallets": 152
+  },
+  "wallets_on_one_curve_only": 10090
+ },
+ "coverage": {
+  "curves_with_a_create_coordinate": 1136,
+  "excluded_from_trades": {
+   "direction_contradicts_reserve_delta": 2,
+   "multiple_reserve_observations": 920,
+   "multiple_trade_instructions": 1232,
+   "no_reserve_observation": 476
+  },
+  "exclusions_are_refusals": "a transaction with more than one trade instruction has no evidence pairing wallet to reserve delta, so it is dropped and counted rather than resolved by assumption",
+  "positions": 28934,
+  "trades_usable": 91466
+ },
+ "executable": false,
+ "execution_status": "never_executed",
+ "not_measurable_here": {
+  "advertised_bot_features": "out of scope by construction. This module measures observed on-chain behaviour only and makes no claim about what any tool advertises.",
+  "executable_cost_and_capacity_per_wallet": "not available in this corpus: the per-launch fee basis points are not recorded here, which is exactly the gap B15P existed to fill for a different population. B15Q's published capacity and cost figures describe ITS OWN 5,000-launch population and are not transferable to these curves.",
+  "identity_ownership": "never inferred. `creator_like` means a wallet equals a recorded field, not that two wallets are one operator.",
+  "profitability": "not computed and not computable here. A position's observed quote flow covers one curve inside one window, before the curve fees and execution costs this corpus does not record, and a wallet may have moved tokens out.",
+  "token_transfers": "invisible. Only Pump program instructions are collected, so a wallet that sent its tokens elsewhere looks identical to one still holding.",
+  "wallet_history_outside_the_window": "absent. A wallet's first appearance here is not its first trade, and its last is not its last."
+ },
+ "performance_status": "not_evaluated",
+ "source": {
+  "artifacts": [
+   "research/b9d_transaction_bodies.sqlite",
+   "research/b10b_observed_paths.sqlite",
+   "research/b10c_t0_identity.sqlite"
+  ],
+  "burned_slot_range": [
+   433894233,
+   434097833
+  ],
+  "corpus": "burned B8b/B9d window",
+  "network": "none",
+  "reads_no_b11a": true
+ },
+ "status": "EXPLORATORY AND DESCRIPTIVE. Hypothesis-generating, not a preregistered estimand.",
+ "study": "B16A_OPERATOR_ARCHETYPES",
+ "wallet_recovery": {
+  "method": "the `user` account of the trade instruction, at the IDL account position",
+  "validation": {
+   "disagreed": 0,
+   "unresolved": 0,
+   "validated_against_t0_user": 400
+  },
+  "why_validated": "the stored account list is longer than the IDL declares, so the position is a claim; B10c derived t0_user by decoding the event payload, which makes it an independent check"
+ }
+}
