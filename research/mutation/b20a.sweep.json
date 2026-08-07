@@ -1,0 +1,137 @@
+{
+  "sweep_id": "b20a",
+  "description": "Mutation sweep over the emergency-state owner. Every mutant makes an uncertainty PERMISSIVE that B19a requires to be engaged; a survivor means a fail-closed default is not actually load-bearing.",
+  "target": "scripts/b20a_emergency_state.py",
+  "tests": [
+    "tests/test_b20a_emergency_state.py"
+  ],
+  "mutants": [
+    {
+      "name": "no-state default made permissive",
+      "old": "    if not path.is_file():\n        return _verdict(True, E01_NO_STATE",
+      "new": "    if False:\n        return _verdict(True, E01_NO_STATE"
+    },
+    {
+      "name": "unreadable state tolerated",
+      "old": "    except (ValueError, OSError) as problem:\n        return _verdict(True, E02_UNREADABLE",
+      "new": "    except (ValueError, OSError) as problem:\n        return _verdict(False, E02_UNREADABLE"
+    },
+    {
+      "name": "MAC check neutered",
+      "old": "    if not hmac.compare_digest(compute_mac(record, secret), str(record[\"mac\"])):",
+      "new": "    if False:"
+    },
+    {
+      "name": "missing secret trusted",
+      "old": "    if secret is None:\n        return _verdict(True, E04_NO_SECRET",
+      "new": "    if False:\n        return _verdict(True, E04_NO_SECRET"
+    },
+    {
+      "name": "stale heartbeat tolerated",
+      "old": "    if now_unix_nanos - record[\"heartbeat_unix_nanos\"] > stale_after_nanos:",
+      "new": "    if False:"
+    },
+    {
+      "name": "future timestamp tolerated",
+      "old": "    if record[\"recorded_unix_nanos\"] > now_unix_nanos:",
+      "new": "    if False:"
+    },
+    {
+      "name": "malformed record tolerated",
+      "old": "    if missing or \"mac\" not in record:",
+      "new": "    if False:"
+    },
+    {
+      "name": "non-integer field tolerated",
+      "old": "        if isinstance(value, bool) or not isinstance(value, int) or value < 0:\n            return _verdict(True, E10_MALFORMED_RECORD,",
+      "new": "        if False:\n            return _verdict(True, E10_MALFORMED_RECORD,"
+    },
+    {
+      "name": "engaged flag ignored on read",
+      "old": "    if record[\"engaged\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "verifier disagreement ignored",
+      "old": "    if not primary[\"kill_switch_engaged\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "missing receipt accepted",
+      "old": "        if tail is None:",
+      "new": "        if False:"
+    },
+    {
+      "name": "unreadable receipt accepted",
+      "old": "        if tail == \"unreadable\":",
+      "new": "        if False:"
+    },
+    {
+      "name": "receipt generation mismatch accepted",
+      "old": "        if tail.get(\"generation\") != primary[\"generation\"] or tail.get(\"engaged\") is not False:",
+      "new": "        if False:"
+    },
+    {
+      "name": "non-integer clock accepted",
+      "old": "    if isinstance(now_unix_nanos, bool) or not isinstance(now_unix_nanos, int):\n        return _verdict(True, E06_CLOCK_CONFLICT,",
+      "new": "    if False:\n        return _verdict(True, E06_CLOCK_CONFLICT,"
+    },
+    {
+      "name": "clear without a reason allowed",
+      "old": "    if not isinstance(reason, str) or not reason.strip():\n        raise EmergencyRefused(\n            \"clearing requires a reason.",
+      "new": "    if False:\n        raise EmergencyRefused(\n            \"clearing requires a reason."
+    },
+    {
+      "name": "clear without the secret allowed",
+      "old": "        raise EmergencyRefused(f\"{OPERATOR_SECRET_ENV} is unset; clearing requires authentication\")",
+      "new": "        pass"
+    },
+    {
+      "name": "clear ignores the expected generation",
+      "old": "    if current != expected_generation:",
+      "new": "    if False:"
+    },
+    {
+      "name": "engage over unreadable state overwrites",
+      "old": "    if current is None:\n        raise EmergencyRefused(\n            \"the current state is unreadable, so the next generation cannot be established.",
+      "new": "    if False:\n        raise EmergencyRefused(\n            \"the current state is unreadable, so the next generation cannot be established."
+    },
+    {
+      "name": "engage without a reason allowed",
+      "old": "    if not isinstance(reason, str) or not reason.strip():\n        raise EmergencyRefused(\"engaging requires a reason;",
+      "new": "    if False:\n        raise EmergencyRefused(\"engaging requires a reason;"
+    },
+    {
+      "name": "generation no longer increments on engage",
+      "old": "        \"generation\": current + 1,\n        \"engaged\": True,",
+      "new": "        \"generation\": current,\n        \"engaged\": True,"
+    },
+    {
+      "name": "heartbeat clears the switch",
+      "old": "    refreshed[\"heartbeat_unix_nanos\"] = now_unix_nanos",
+      "new": "    refreshed[\"heartbeat_unix_nanos\"] = now_unix_nanos\n    refreshed[\"engaged\"] = False"
+    },
+    {
+      "name": "receipt written after the state",
+      "old": "    _append_receipt(receipt_path, record, action)\n    temporary = path.with_suffix",
+      "new": "    temporary = path.with_suffix"
+    },
+    {
+      "name": "receipt log opened for write instead of append",
+      "old": "    with receipt_path.open(\"a\", encoding=\"utf-8\") as handle:",
+      "new": "    with receipt_path.open(\"w\", encoding=\"utf-8\") as handle:"
+    },
+    {
+      "name": "snapshot claims the console may mutate it",
+      "old": "        \"console_may_mutate_this\": False,",
+      "new": "        \"console_may_mutate_this\": True,"
+    },
+    {
+      "name": "emergency_state decoupled from the verdict",
+      "old": "        \"emergency_state\": bool(engaged),",
+      "new": "        \"emergency_state\": False,"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None. Every fail-closed branch in this module is reachable from a test, because a default nobody can provoke is indistinguishable from a permissive one nobody noticed."
+}

@@ -1,0 +1,146 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "killed": 25,
+  "mutants_declared": 25,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_no_state_at_all_is_engaged",
+      "name": "no-state default made permissive",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_unreadable_state_is_engaged",
+      "name": "unreadable state tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_a_tampered_record_is_engaged",
+      "name": "MAC check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_a_missing_secret_is_engaged_rather_than_trusted",
+      "name": "missing secret trusted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_a_stale_heartbeat_is_engaged",
+      "name": "stale heartbeat tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_each_future_timestamp_is_caught_by_its_OWN_guard",
+      "name": "future timestamp tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_a_malformed_record_is_engaged",
+      "name": "malformed record tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_a_non_integer_generation_is_malformed",
+      "name": "non-integer field tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_an_explicitly_engaged_switch_reports_that_reason",
+      "name": "engaged flag ignored on read",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::TwoIndependentVerifiersTests::test_a_cleared_state_with_no_receipt_disagrees_and_engages",
+      "name": "verifier disagreement ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::TwoIndependentVerifiersTests::test_a_cleared_state_with_no_receipt_disagrees_and_engages",
+      "name": "missing receipt accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::TwoIndependentVerifiersTests::test_an_unreadable_receipt_log_disagrees_and_engages",
+      "name": "unreadable receipt accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::TwoIndependentVerifiersTests::test_a_rolled_back_receipt_log_disagrees_and_engages",
+      "name": "receipt generation mismatch accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_a_non_integer_clock_is_a_clock_conflict",
+      "name": "non-integer clock accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::ClearingTests::test_clearing_requires_a_reason",
+      "name": "clear without a reason allowed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::ClearingTests::test_clearing_requires_the_secret",
+      "name": "clear without the secret allowed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::ClearingTests::test_clearing_a_generation_someone_else_moved_is_refused",
+      "name": "clear ignores the expected generation",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::EngageTests::test_engaging_over_an_unreadable_state_refuses_rather_than_overwriting",
+      "name": "engage over unreadable state overwrites",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::EngageTests::test_engaging_requires_a_reason_and_an_operator",
+      "name": "engage without a reason allowed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_a_record_stamped_in_the_future_is_a_clock_conflict",
+      "name": "generation no longer increments on engage",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::HeartbeatTests::test_the_heartbeat_leaves_the_ENGAGED_FLAG_ITSELF_untouched",
+      "name": "heartbeat clears the switch",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FailClosedReadTests::test_a_stale_heartbeat_is_engaged",
+      "name": "receipt written after the state",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::TwoIndependentVerifiersTests::test_a_rolled_back_receipt_log_disagrees_and_engages",
+      "name": "receipt log opened for write instead of append",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::ConsoleBoundaryTests::test_the_snapshot_is_read_only_and_says_so",
+      "name": "snapshot claims the console may mutate it",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20a_emergency_state.py::FeedsTheRiskGovernorTests::test_an_engaged_switch_makes_b12a_reject_with_R02",
+      "name": "emergency_state decoupled from the verdict",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b20a",
+  "target": "scripts/b20a_emergency_state.py",
+  "tests": [
+    "tests/test_b20a_emergency_state.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "c8f77ed99d396fe8d32cce85693059f899ba8b6f6662b537ef77d54574ac72f5",
+  "working_tree_unchanged": true
+}
