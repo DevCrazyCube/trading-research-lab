@@ -210,9 +210,30 @@ Also rehearsed: clock step and causal inversion, partial durable write (write-th
 destination absent if the rename never completes), duplicate attempts, kill and resume (lost attempts
 are reported as lost, never renumbered or reconstructed from memory), and quarantine.
 
-**Still open under G4:** these are record-layer rehearsals. The *watcher's* operational failures —
-duplicate stage, resumption after kill against a live collection — remain exercised only by b11c's
-retrofitted invariants, and touching those while a watcher runs is still forbidden.
+**The watcher side is now closed too, by `scripts/b18c_watcher_failure_rehearsal.py` (slice B').**
+It provokes **10 of b11c's 13 quarantine codes** deliberately — Q02 manifest drift (including the
+supervisor editing *itself* under a wait), Q04 non-finalized slot, Q05 retries exhausted, Q06
+non-retryable RPC, Q07 stage failed, Q08 stage interrupted, Q09 secret would be written, Q10
+composition would leak, Q11 stage wiring unresolved, Q12 duplicate stage — and names why the other
+three cannot be reached offline rather than leaving them silent.
+
+**How it runs beside a live watcher.** It never touches `b11c`. `staged_watcher()` copies it into a
+scratch tree, and because `b11c` derives `ROOT` from its own `__file__`, the copy's `WORK_DIR`,
+`STATE_PATH`, `RECEIPT_DIR` and `LOG_DIR` all resolve into that scratch tree. The copy is
+*structurally unable* to reach the live work directory rather than merely careful not to, the live
+file is re-hashed before and after every sweep, and a test asserts nothing under the real
+`research/b11a` changes.
+
+The two faults that killed real runs are the centre of it: a 403 is terminal (retrying a WAF refusal
+is how a run got banned) and a `URLError` is retryable **by type**, because its text —
+"Temporary failure in name resolution" — matches no transient marker and message-matching called it
+fatal. The retry policy is b11c's own, so this tests the real classification rather than a copy of
+it. Also rehearsed: bounded exponential backoff, a fault that *clears* and must not quarantine,
+kill-and-resume (a stage in flight is never resumed; a clean shutdown is), the b9d path-credential
+leak shape, and two-clock liveness — a healthy stage must not read as a dead supervisor.
+
+**Still open:** nothing on the watcher's failure classification. What remains untested is behaviour
+under a *real* provider, which by definition needs one.
 
 ### G4-original — operational failure rehearsals are ad hoc (superseded above)
 Two live-watcher deaths this project (Cloudflare 403 on the default UA; a transient `URLError`
@@ -293,16 +314,18 @@ narrowed, and still non-overlapping:
 |---|---|---|
 | ~~**A. B17b record layer (G1+G2)**~~ | `scripts/b18a_shadow_record.py` | **DONE** |
 | ~~**B. Failure rehearsal harness (G4)**~~ | `scripts/b18b_failure_rehearsal.py` | **DONE** (record layer; watcher-side still open) |
-| **B'. Watcher failure rehearsals** | new `tests/`, b11c **copies** only | must not edit manifest-pinned b11c while a watcher runs |
+| ~~**B'. Watcher failure rehearsals**~~ | `scripts/b18c_watcher_failure_rehearsal.py` | **DONE**; 10/13 quarantine codes provoked, live watcher byte-unchanged |
 | ~~**C. Wallet/treasury architecture (G3)**~~ | `research/B19A_WALLET_TREASURY_ARCHITECTURE.md` | **DONE** (Codex); independently audited 2026-08-07 |
 | ~~**D. Strategy preregistrations (G5)**~~ | `research/B19B..B19D` preregs + `scripts/b19_preregistration_register.py` | **DONE** (codex seat, 2026-08-07); documents committed alone, register and tests separately |
 | **E. Kill-switch state owner (G6)** | new module; **must not** add a write path to `b12b_preview_server.py` or the console | leaves the read-only surface intact |
 
-**State as of 2026-08-07: A, B (record layer), C and D are done. B' and E remain open.**
+**State as of 2026-08-07: A, B, B', C and D are done. E is the only slice remaining, and it is
+authorization-blocked.**
 
-**B'** is the watcher-side half of G4 and concerns the one component that is actually running and
-has already died twice. It is takeable now — new `tests/` against **copies** of b11c — and remains
-forbidden from editing the manifest-pinned files while a watcher runs.
+**B' is closed.** `scripts/b18c_watcher_failure_rehearsal.py` rehearses the watcher-side half of G4
+against a byte-identical copy, provoking 10 of b11c's 13 quarantine codes while the live watcher —
+running for over two days at the time — stayed byte-unchanged, verified by digest before and after
+every sweep. Details in G4 above.
 
 **E is not a dependency, it is parallel.** The kill-switch state owner needs nothing from the record
 layer and blocks nothing in it. It is also the slice with the most room to go wrong — the only one

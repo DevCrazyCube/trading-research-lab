@@ -1,0 +1,229 @@
+{
+ "composition_refusal": {
+  "a_boolean_not_a_count": "accepted",
+  "clean": "accepted",
+  "count_keyed_by_window_word": "refused",
+  "nested_count": "refused",
+  "the_stage_name_itself": "accepted",
+  "the_word_in_prose": "accepted"
+ },
+ "executable": false,
+ "execution_status": "never_executed",
+ "harness": "B18C_WATCHER_FAILURE_REHEARSAL",
+ "live_watcher_sha256_after": "cabb33d91533995f2b20793dae2a177299242525fb6a39c81dfe5dcd2fdbdebf",
+ "live_watcher_sha256_before": "cabb33d91533995f2b20793dae2a177299242525fb6a39c81dfe5dcd2fdbdebf",
+ "live_watcher_unchanged": true,
+ "manifest_drift": {
+  "file_edited": "scripts/b11c_maturity_watcher.py",
+  "manifest_hash_after_the_edit": "9431aa17933b1dfb0ea4ca1a1a7008784a706bda80f0a37907bc53e545d4b7ca",
+  "manifest_hash_attested_before_the_edit": "771b60aa6edbed693fa51d39db8c76f23babd43b056a0906efcdb624144343a3",
+  "persisted_state": "quarantined",
+  "quarantined": true,
+  "reason_code": "Q02_script_manifest_drift",
+  "refusal_message": "Q02_script_manifest_drift: a stage script, IDL or the preregistration changed since this run began. A stage script that changed is a stage that does something else now"
+ },
+ "network": "refused at runtime: socket.socket raised for the whole sweep",
+ "no_execution_surface": {
+  "closure": [
+   "b10a_simulator_kernel.py",
+   "b10b_position_path.py",
+   "b10c_outcome_labels.py",
+   "b11b_baseline_metrics.py",
+   "b11b_t0_features.py",
+   "b12a_risk_governor.py",
+   "b12b_operator_snapshot.py",
+   "b17a_shadow_rehearsal.py",
+   "b18c_watcher_failure_rehearsal.py",
+   "b9i_quote_reproduction.py"
+  ],
+  "execution_surface_found": {},
+  "scope": "the transitive `_load` closure of the rehearsal chain ONLY. This is not a repository-wide scan and says nothing about modules outside the closure."
+ },
+ "non_finalized_slot": {
+  "boolean_true": true,
+  "negative": true,
+  "null": true,
+  "string": true
+ },
+ "non_retryable": {
+  "attempts": 1,
+  "backoff_sleeps": [],
+  "reason_code": "Q06_non_retryable_rpc"
+ },
+ "performance_status": "not_evaluated",
+ "quarantine_code_coverage": {
+  "declared": [
+   "Q01_preregistration_drift",
+   "Q02_script_manifest_drift",
+   "Q03_git_ancestry_broken",
+   "Q04_non_finalized_slot",
+   "Q05_retries_exhausted",
+   "Q06_non_retryable_rpc",
+   "Q07_stage_failed",
+   "Q08_stage_interrupted",
+   "Q09_secret_would_be_written",
+   "Q10_composition_would_leak",
+   "Q11_stage_wiring_unresolved",
+   "Q12_duplicate_stage",
+   "Q13_ambiguous_failure"
+  ],
+  "not_reached": {
+   "Q01_preregistration_drift": "needs the frozen preregistration to differ from its pin; a document change, not a fault",
+   "Q03_git_ancestry_broken": "needs a rewritten git history in the scratch tree, which would prove nothing about the real one",
+   "Q13_ambiguous_failure": "reached only when a failure resists classification, which an injected fault cannot honestly be"
+  },
+  "reached": [
+   "Q02_script_manifest_drift",
+   "Q04_non_finalized_slot",
+   "Q05_retries_exhausted",
+   "Q06_non_retryable_rpc",
+   "Q07_stage_failed",
+   "Q08_stage_interrupted",
+   "Q09_secret_would_be_written",
+   "Q10_composition_would_leak",
+   "Q11_stage_wiring_unresolved",
+   "Q12_duplicate_stage"
+  ]
+ },
+ "record_is_not_evidence": "every fault here was constructed by this file. None describes anything that happened to the live run, and none may be counted.",
+ "recovers_before_exhausting": {
+  "attempts": 3,
+  "backoff_sleeps": [
+   5,
+   10
+  ],
+  "quarantined": null,
+  "slot": 435800000
+ },
+ "rehearsed_against": "a byte-identical COPY of scripts/b11c_maturity_watcher.py",
+ "retries_exhausted": {
+  "attempts": 3,
+  "backoff_sleeps": [
+   5,
+   10
+  ],
+  "persisted_state": "quarantined",
+  "reason_code": "Q05_retries_exhausted",
+  "refusal_message": "Q05_retries_exhausted: 3 retryable failures in a row. A retryable failure that keeps failing is not retryable in practice. Last: HTTPError HTTP 503"
+ },
+ "schema_version": "1.0.0",
+ "secret_refusal": {
+  "clean": {
+   "file_written": true,
+   "refused": false
+  },
+  "full_url": {
+   "left_no_file": true,
+   "left_no_partial": true,
+   "message_omits_the_secret": true,
+   "refusal_type": "Quarantined",
+   "refused": true
+  },
+  "nested_in_a_diagnostic": {
+   "left_no_file": true,
+   "left_no_partial": true,
+   "message_omits_the_secret": true,
+   "refusal_type": "Quarantined",
+   "refused": true
+  },
+  "path_segment_only": {
+   "left_no_file": true,
+   "left_no_partial": true,
+   "message_omits_the_secret": true,
+   "refusal_type": "Quarantined",
+   "refused": true
+  }
+ },
+ "stage_lifecycle": {
+  "clean_resume_allowed": {
+   "as_intended": true,
+   "refused": false
+  },
+  "clean_stage_completes": {
+   "receipt_completed": true,
+   "refused": false
+  },
+  "duplicate_stage": {
+   "message_names_the_code": true,
+   "reason_code": "Q12_duplicate_stage",
+   "refused": true,
+   "refused_before_running": true
+  },
+  "stage_failed": {
+   "exit_code_recorded": 1,
+   "message_names_the_code": true,
+   "reason_code": "Q07_stage_failed",
+   "receipt_says_not_completed": true,
+   "receipt_written_anyway": true,
+   "refused": true
+  },
+  "stage_interrupted": {
+   "message_names_the_stage": true,
+   "not_resumed": true,
+   "reason_code": "Q08_stage_interrupted",
+   "refused": true
+  },
+  "stage_wiring_unresolved": {
+   "message_names_the_code": true,
+   "reason_code": "Q11_stage_wiring_unresolved",
+   "refused": true,
+   "runner_never_called": true
+  }
+ },
+ "staged_work_dir_was_scratch": true,
+ "transport_classification": {
+  "connection_reset": {
+   "diagnostic": "ConnectionResetError: Connection reset by peer",
+   "note": "an OSError subclass",
+   "retryable": true
+  },
+  "dns_failure": {
+   "diagnostic": "URLError: str: Temporary failure in name resolution",
+   "note": "the exact fault that killed a run: its TEXT matches no transient marker, so message-substring classification called it fatal. Typed classification is what fixed it.",
+   "retryable": true
+  },
+  "provider_403": {
+   "diagnostic": "HTTPError HTTP 403",
+   "note": "the WAF refusing this client. Retrying it is how a run got banned.",
+   "retryable": false
+  },
+  "provider_429": {
+   "diagnostic": "HTTPError HTTP 429",
+   "note": "rate limited; bounded retries are correct",
+   "retryable": true
+  },
+  "provider_503": {
+   "diagnostic": "HTTPError HTTP 503",
+   "note": "provider unavailable",
+   "retryable": true
+  },
+  "rpc_entitlement": {
+   "diagnostic": "RuntimeError: RPC error -32002: transaction simulation failed",
+   "note": "no retry changes an answer about who you are",
+   "retryable": false
+  },
+  "rpc_node_behind": {
+   "diagnostic": "RuntimeError: RPC error -32005: node is behind by 200 slots",
+   "note": "an RPC-level condition inside a successful HTTP response",
+   "retryable": true
+  },
+  "tls_failure": {
+   "diagnostic": "URLError: str: [SSL: CERTIFICATE_VERIFY_FAILED]",
+   "note": "also a URLError whose text matches no marker",
+   "retryable": true
+  }
+ },
+ "two_clock_liveness": {
+  "heartbeat_after": 1786000240,
+  "heartbeat_before": 1786000000,
+  "heartbeat_while_stage_ran": 1786000120,
+  "note": "the poll clock stops while a stage runs, so progress and liveness are separate signals; one clock read a healthy stage as a dead supervisor",
+  "progress_after_real_progress": 1786000240,
+  "progress_before": 1786000000,
+  "progress_while_stage_ran": 1786000000,
+  "state_keys": [
+   "stage_heartbeat_at",
+   "stage_progress_at"
+  ]
+ }
+}

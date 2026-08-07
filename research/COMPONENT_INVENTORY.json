@@ -194,6 +194,23 @@
       "status": "EXISTS_CONFORMING",
       "conforms_to": "unittest.TestCase, discoverable by both runners",
       "role": "B19 register guards, including a machine-check of B19d's central claim against the frozen B11b contract rather than trusting its prose"
+    },
+    {
+      "path": "scripts/b18c_watcher_failure_rehearsal.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "offline fault injection against a byte-identical COPY of the watcher; the live scripts/b11c_maturity_watcher.py is re-hashed before and after every sweep and a test asserts nothing under the live research/b11a changes",
+      "role": "watcher-side failure rehearsals: 10 of b11c's 13 quarantine codes provoked deliberately, with a named reason for each of the three that cannot be reached offline",
+      "safety_design": "the staged copy derives ROOT from its own __file__, so its WORK_DIR, STATE_PATH, RECEIPT_DIR and LOG_DIR all resolve into a scratch tree. It is structurally unable to reach the live work directory rather than merely careful not to.",
+      "tests": "tests/test_b18c_watcher_failure_rehearsal.py",
+      "evidence_on_disk": [
+        "research/b18c/watcher_failure_rehearsal.json"
+      ]
+    },
+    {
+      "path": "tests/test_b18c_watcher_failure_rehearsal.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "unittest.TestCase, discoverable by both runners",
+      "role": "watcher failure-rehearsal guards, including a class that exists solely to stop the harness fabricating: it cross-checks every credited quarantine code against the individual rehearsal that caused it"
     }
   ],
   "verified_absent": [
