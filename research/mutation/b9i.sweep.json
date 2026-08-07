@@ -1,0 +1,92 @@
+{
+  "sweep_id": "b9i",
+  "description": "Mutation sweep over the pinned curve arithmetic -- the three formulas every price in this project is computed from, and the rounding rules that took a full-artifact reproduction to establish. Five modules call these rather than reimplementing them, so a silent change here is a silent change everywhere at once.",
+  "target": "scripts/b9i_quote_reproduction.py",
+  "tests": [
+    "tests/test_b9i_quote_reproduction.py"
+  ],
+  "mutants": [
+    {
+      "name": "ceil_div rounds down",
+      "old": "    return -(-numerator // denominator)",
+      "new": "    return numerator // denominator"
+    },
+    {
+      "name": "ceil_div accepts a non-positive denominator",
+      "old": "    if denominator <= 0:\n        raise FreezeViolation(f\"non-positive denominator {denominator} in exact integer quote\")",
+      "new": "    if False:\n        raise FreezeViolation(f\"non-positive denominator {denominator} in exact integer quote\")"
+    },
+    {
+      "name": "exact-input buy drops the numerator minus one",
+      "old": "    return (quote_in - 1) * virtual_token // (virtual_quote + quote_in - 1)",
+      "new": "    return quote_in * virtual_token // (virtual_quote + quote_in - 1)"
+    },
+    {
+      "name": "exact-input buy drops the denominator minus one",
+      "old": "    return (quote_in - 1) * virtual_token // (virtual_quote + quote_in - 1)",
+      "new": "    return (quote_in - 1) * virtual_token // (virtual_quote + quote_in)"
+    },
+    {
+      "name": "exact-input buy rounds up",
+      "old": "    return (quote_in - 1) * virtual_token // (virtual_quote + quote_in - 1)",
+      "new": "    return ceil_div((quote_in - 1) * virtual_token, virtual_quote + quote_in - 1)"
+    },
+    {
+      "name": "exact-input buy accepts a non-positive input",
+      "old": "    if quote_in <= 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "legacy buy uses ceil instead of floor plus one",
+      "old": "    return tokens_out * virtual_quote // denominator + 1",
+      "new": "    return ceil_div(tokens_out * virtual_quote, denominator)"
+    },
+    {
+      "name": "legacy buy drops the plus one",
+      "old": "    return tokens_out * virtual_quote // denominator + 1",
+      "new": "    return tokens_out * virtual_quote // denominator"
+    },
+    {
+      "name": "legacy buy accepts consuming the whole reserve",
+      "old": "    if denominator <= 0:\n        raise FreezeViolation(\n            f\"legacy buy consumes the whole virtual token reserve",
+      "new": "    if False:\n        raise FreezeViolation(\n            f\"legacy buy consumes the whole virtual token reserve"
+    },
+    {
+      "name": "sell rounds up",
+      "old": "    return tokens_in * virtual_quote // (virtual_token + tokens_in)",
+      "new": "    return ceil_div(tokens_in * virtual_quote, virtual_token + tokens_in)"
+    },
+    {
+      "name": "sell accepts a negative token input",
+      "old": "    if tokens_in < 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a non-integer trade quantity is accepted",
+      "old": "        if isinstance(value, bool) or not isinstance(value, int) or value < 0:\n            raise FreezeViolation(f\"TradeEvent {label} is not a non-negative integer: {value!r}\")",
+      "new": "        if False:\n            raise FreezeViolation(f\"TradeEvent {label} is not a non-negative integer: {value!r}\")"
+    },
+    {
+      "name": "an unrecognised buy silently uses the exact-input formula",
+      "old": "        raise FreezeViolation(\n            f\"buy instruction {name!r} has no pinned quote arithmetic; exact-input and exact-token \"\n            \"buys use different formulas and must not share one\")",
+      "new": "        return (\"tokens_out\",\n                tokens_out_for_exact_quote_in(\n                    before_virtual_quote, before_virtual_token, quote),\n                token)"
+    },
+    {
+      "name": "an unrecognised sell silently uses the sell formula",
+      "old": "    raise FreezeViolation(f\"sell instruction {name!r} has no pinned quote arithmetic\")",
+      "new": "    return (\"quote_out\",\n            quote_out_for_tokens_in(before_virtual_quote, before_virtual_token, token),\n            quote)"
+    },
+    {
+      "name": "a legacy buy is priced with the exact-input formula",
+      "old": "        if name in LEGACY_BUYS:",
+      "new": "        if False:"
+    },
+    {
+      "name": "an exact-input buy is priced with the legacy formula",
+      "old": "        if name in EXACT_INPUT_BUYS:",
+      "new": "        if False:"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None expected. The legacy-buy mutant is the sharpest: ceil and floor+1 AGREE on every trade whose division leaves a remainder, so only an exactly-divisible case distinguishes them, and the frozen corpus holds exactly one. B2b's nine samples chose ceil and were wrong for precisely that reason."
+}

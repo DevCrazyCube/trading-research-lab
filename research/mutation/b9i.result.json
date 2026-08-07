@@ -1,0 +1,102 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 16,
+  "mutants_declared": 16,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::BuybackFeeTests::test_exact_input_fees_reproduce_from_the_decoded_gross_input",
+      "name": "ceil_div rounds down",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::CurveFormulaGuardsFoundUntestedByMutationTests::test_ceil_div_refuses_a_non_positive_denominator",
+      "name": "ceil_div accepts a non-positive denominator",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::CurveFormulaGuardsFoundUntestedByMutationTests::test_the_exact_input_buy_keeps_BOTH_minus_one_terms",
+      "name": "exact-input buy drops the numerator minus one",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::CurveFormulaGuardsFoundUntestedByMutationTests::test_the_exact_input_buy_keeps_BOTH_minus_one_terms",
+      "name": "exact-input buy drops the denominator minus one",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::CurveFormulaGuardsFoundUntestedByMutationTests::test_the_exact_input_buy_keeps_BOTH_minus_one_terms",
+      "name": "exact-input buy rounds up",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::CurveFormulaGuardsFoundUntestedByMutationTests::test_the_exact_input_buy_refuses_a_non_positive_input",
+      "name": "exact-input buy accepts a non-positive input",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::QuoteReproductionTests::test_legacy_buy_adds_one_even_when_ratio_divides_exactly",
+      "name": "legacy buy uses ceil instead of floor plus one",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::QuoteReproductionTests::test_legacy_buy_adds_one_even_when_ratio_divides_exactly",
+      "name": "legacy buy drops the plus one",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::BuybackFeeTests::test_nonpositive_legacy_denominator_fails_closed",
+      "name": "legacy buy accepts consuming the whole reserve",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::CurveFormulaGuardsFoundUntestedByMutationTests::test_the_sell_rounds_DOWN",
+      "name": "sell rounds up",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::CurveFormulaGuardsFoundUntestedByMutationTests::test_the_sell_refuses_a_negative_token_input_but_allows_zero",
+      "name": "sell accepts a negative token input",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::CurveFormulaGuardsFoundUntestedByMutationTests::test_a_trade_quantity_that_is_not_a_non_negative_integer_is_refused",
+      "name": "a non-integer trade quantity is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::BuybackFeeTests::test_an_unrecognised_instruction_stops_the_run",
+      "name": "an unrecognised buy silently uses the exact-input formula",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::BuybackFeeTests::test_an_unrecognised_instruction_stops_the_run",
+      "name": "an unrecognised sell silently uses the sell formula",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::QuoteReproductionTests::test_legacy_buy_adds_one_even_when_ratio_divides_exactly",
+      "name": "a legacy buy is priced with the exact-input formula",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9i_quote_reproduction.py::ReproduceArtifactLoopTests::test_an_exact_input_event_without_a_quote_mint_fails_closed",
+      "name": "an exact-input buy is priced with the legacy formula",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b9i",
+  "target": "scripts/b9i_quote_reproduction.py",
+  "tests": [
+    "tests/test_b9i_quote_reproduction.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "d752c9e010611f704677a52fab6c0ab9efc43653f57c5ca2b5a63b2820567d4d",
+  "working_tree_unchanged": true
+}

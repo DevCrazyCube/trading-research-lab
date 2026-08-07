@@ -327,5 +327,108 @@ class ReproduceArtifactLoopTests(unittest.TestCase):
                             "fixture is pointless unless the quote base gives a DIFFERENT fee")
 
 
+
+class CurveFormulaGuardsFoundUntestedByMutationTests(unittest.TestCase):
+    """The three pinned formulas' own terms and guards, which no test exercised.
+
+    WHAT THE SWEEP FOUND, and it is cleaner than a count. The ONE formula with a unit test — the
+    legacy buy, whose floor+1 finding has `test_legacy_buy_adds_one_even_when_ratio_divides_exactly`
+    — had BOTH its mutants killed. The two formulas WITHOUT one had every mutant survive. Coverage
+    sat exactly where a unit test existed.
+
+    WHY THAT IS NOT A CONTRADICTION OF THE 92,510/92,510 REPLAY. That replay is genuine independent
+    corroboration: `b10a.replay_gate` decodes the venue's own `TradeEvent` from collected raw bytes
+    with the pinned IDLs and compares our prediction against the value the Pump program emitted.
+    The oracle is the venue, not our arithmetic.
+
+    But it is a PIPELINE STAGE, not a test. `simulator_replay_gate` is stage 9 of B11, run against
+    `b11a_bodies.sqlite`; no test executes `replay_gate`, and this file never called
+    `tokens_out_for_exact_quote_in` or `quote_out_for_tokens_in` at all. So the forward arithmetic
+    was corroborated ONCE, in the past, on a burned corpus — and was unguarded against regression
+    between then and the next full pipeline run. These are that guard.
+
+    Five modules call these formulas rather than reimplementing them, so a silent change here is a
+    silent change to every price in the project at once.
+    """
+
+    VQ, VT = 30_000_000_000, 1_073_000_000_000_000
+
+    def test_the_exact_input_buy_keeps_BOTH_minus_one_terms(self):
+        """`(quote_in - 1) * vt // (vq + quote_in - 1)`. Neither `- 1` is decoration.
+
+        The fixture asserts the two wrong variants differ from the right one, so the test cannot
+        pass by coincidence on a quantity where all three agree.
+        """
+        quote_in = 100_000_000
+        expected = (quote_in - 1) * self.VT // (self.VQ + quote_in - 1)
+        self.assertEqual(B9I.tokens_out_for_exact_quote_in(self.VQ, self.VT, quote_in), expected)
+
+        without_numerator_term = quote_in * self.VT // (self.VQ + quote_in - 1)
+        without_denominator_term = (quote_in - 1) * self.VT // (self.VQ + quote_in)
+        self.assertNotEqual(expected, without_numerator_term,
+                            "the fixture must be able to see the numerator term")
+        self.assertNotEqual(expected, without_denominator_term,
+                            "the fixture must be able to see the denominator term")
+
+    def test_the_exact_input_buy_rounds_DOWN(self):
+        """Rounding a buy's token output UP hands out tokens the curve never sold."""
+        quote_in = 3
+        floor_answer = (quote_in - 1) * self.VT // (self.VQ + quote_in - 1)
+        ceil_answer = B9I.ceil_div((quote_in - 1) * self.VT, self.VQ + quote_in - 1)
+        self.assertNotEqual(floor_answer, ceil_answer,
+                            "the fixture must land on a remainder or it distinguishes nothing")
+        self.assertEqual(B9I.tokens_out_for_exact_quote_in(self.VQ, self.VT, quote_in),
+                         floor_answer)
+
+    def test_the_sell_rounds_DOWN(self):
+        """Rounding proceeds UP pays out quote the reserve does not hold."""
+        tokens_in = 7
+        floor_answer = tokens_in * self.VQ // (self.VT + tokens_in)
+        ceil_answer = B9I.ceil_div(tokens_in * self.VQ, self.VT + tokens_in)
+        self.assertNotEqual(floor_answer, ceil_answer)
+        self.assertEqual(B9I.quote_out_for_tokens_in(self.VQ, self.VT, tokens_in), floor_answer)
+
+    def test_ceil_div_refuses_a_non_positive_denominator(self):
+        """Reachable only through a caller passing a degenerate reserve, which is why no corpus
+        of real trades could ever have triggered it."""
+        for denominator in (0, -1):
+            with self.subTest(denominator=denominator):
+                with self.assertRaisesRegex(B9I.FreezeViolation, "non-positive denominator"):
+                    B9I.ceil_div(1, denominator)
+
+    def test_the_exact_input_buy_refuses_a_non_positive_input(self):
+        for quote_in in (0, -1):
+            with self.subTest(quote_in=quote_in):
+                with self.assertRaisesRegex(B9I.FreezeViolation, "positive quote input"):
+                    B9I.tokens_out_for_exact_quote_in(self.VQ, self.VT, quote_in)
+
+    def test_the_sell_refuses_a_negative_token_input_but_allows_zero(self):
+        """Zero is a sell of nothing and is arithmetically fine; negative is not a quantity."""
+        with self.assertRaisesRegex(B9I.FreezeViolation, "non-negative token input"):
+            B9I.quote_out_for_tokens_in(self.VQ, self.VT, -1)
+        self.assertEqual(B9I.quote_out_for_tokens_in(self.VQ, self.VT, 0), 0)
+
+    def test_a_trade_quantity_that_is_not_a_non_negative_integer_is_refused(self):
+        """Booleans included: `True` is an `int` in Python and would price as one lamport."""
+        for field in ("quote_amount", "token_amount"):
+            for value in (1.0, -1, True, "10", None):
+                with self.subTest(field=field, value=value):
+                    fields = {"ix_name": "sell", "is_buy": False,
+                              "quote_amount": 10, "token_amount": 10}
+                    fields[field] = value
+                    with self.assertRaisesRegex(B9I.FreezeViolation, "non-negative integer"):
+                        B9I.reproduce_trade(self.VQ, self.VT, fields)
+
+    def test_the_legacy_buy_refuses_consuming_the_whole_virtual_reserve(self):
+        """Its own guard, asserted through the function rather than through `reproduce_trade`.
+
+        An existing test reaches this via `reproduce_trade`, but the mutant targeting it was
+        AMBIGUOUS — `if denominator <= 0:` occurs in `ceil_div` too, and `.replace(..., 1)` mutated
+        that one instead, so this guard had no mutant at all until the patterns were disambiguated.
+        """
+        with self.assertRaisesRegex(B9I.FreezeViolation, "whole virtual token reserve"):
+            B9I.quote_in_for_exact_tokens_out(self.VQ, self.VT, self.VT)
+
+
 if __name__ == "__main__":
     unittest.main()
