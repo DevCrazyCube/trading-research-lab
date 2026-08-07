@@ -755,6 +755,75 @@ class RealCorpusTests(unittest.TestCase):
             database.close()
 
 
+class InputValidationFoundUntestedByMutationTests(unittest.TestCase):
+    """Five guards a mutation sweep could neuter without any existing test noticing.
+
+    Worth stating what the sweep did NOT find, because it is the more important half: every
+    LEAKAGE guard was killed. The after-t0 refusal, the launch-transaction rule, the requirement
+    that t0 itself be present, the no-strings rule and the disjoint feature/identity contract are
+    all covered. What was uncovered is the input validation around them — and a validator nobody
+    tests is how a malformed input reaches a guard that assumed it was well-formed.
+    """
+
+    def test_an_empty_observation_list_is_refused_BY_ITS_OWN_GUARD(self):
+        """Asserts the MESSAGE, because asserting only the refusal tests a different guard.
+
+        With no observations the loop body never runs, so `seen_t0` stays False and the
+        decision-state check refuses anyway. A test asserting merely "it raises" therefore passes
+        with the empty-list guard deleted — a mutation sweep showed exactly that, and it is section
+        7's "a test killed by a different guard than the one it names" appearing in a test written
+        the same day the lesson was recorded.
+
+        The two refusals are not interchangeable. "no observations at all" and "observations exist
+        but none is at t0" are different faults with different fixes, and the message is the whole
+        difference between them.
+        """
+        with self.assertRaises(B11B.ContractRefused) as caught:
+            B11B.build_t0_features(create_record(), [], (1_000, 7, 0, -1))
+        self.assertIn("no observations at or before t0", str(caught.exception))
+        self.assertNotIn("no observation at t0", str(caught.exception))
+
+    def test_create_must_be_a_mapping(self):
+        for bad in ("a string", ["a", "list"], 7, None):
+            with self.subTest(create=type(bad).__name__):
+                with self.assertRaises(B11B.ContractRefused):
+                    B11B.build_t0_features(bad, [observation(0, "CreateEvent")], (1_000, 7, 0, -1))
+
+    def test_observations_must_be_a_sequence_not_a_string_or_mapping(self):
+        """A string is iterable, so without this it would be walked CHARACTER BY CHARACTER and
+        each character asked for its canonical key — a failure far from its cause."""
+        for bad in ("CreateEvent", {"kind": "CreateEvent"}, b"bytes"):
+            with self.subTest(observations=type(bad).__name__):
+                with self.assertRaises(B11B.ContractRefused):
+                    B11B.build_t0_features(create_record(), bad, (1_000, 7, 0, -1))
+
+    def test_a_missing_required_field_is_refused_by_name(self):
+        for field in ("slot", "transaction_index", "creator", "real_token", "token_total_supply"):
+            with self.subTest(missing=field):
+                create = {k: v for k, v in create_record().items() if k != field}
+                with self.assertRaises(B11B.ContractRefused) as caught:
+                    B11B.build_t0_features(create, [observation(0, "CreateEvent")],
+                                           (1_000, 7, 0, -1))
+                self.assertIn(field, str(caught.exception),
+                              "the refusal must name the absent field, or it cannot be fixed")
+
+    def test_the_grouping_block_must_match_the_contract(self):
+        """The feature side was covered and the identity side was not, which is the asymmetry
+        that matters: a grouping block quietly gaining or losing a field changes what is treated
+        as an identity rather than a predictor."""
+        record = B11B.build_t0_features(create_record(), [observation(0, "CreateEvent")],
+                                        (1_000, 7, 0, -1))
+        B11B.assert_feature_partition(record)
+
+        extra = dict(record, grouping=dict(record["grouping"], invented_identity="x"))
+        with self.assertRaises(B11B.ContractRefused):
+            B11B.assert_feature_partition(extra)
+
+        short = dict(record, grouping={k: v for k, v in record["grouping"].items() if k != "mint"})
+        with self.assertRaises(B11B.ContractRefused):
+            B11B.assert_feature_partition(short)
+
+
 class FloatSafeMagnitudeTests(unittest.TestCase):
     """Guard a conclusion that currently rests on a regime, not on the code.
 

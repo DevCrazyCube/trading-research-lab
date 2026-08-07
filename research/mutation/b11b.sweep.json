@@ -1,0 +1,97 @@
+{
+  "sweep_id": "b11b",
+  "description": "Mutation sweep over the t0 feature contract -- the module whose job is that no feature may be computed from anything after t0. Every mutant either admits a look into the future, lets an identity become a predictor, or accepts a state the contract refuses. PLAN.md has claimed 31/31 for this since before sweeps were reproducible.",
+  "target": "scripts/b11b_t0_features.py",
+  "tests": [
+    "tests/test_b11b_baseline_evaluation.py"
+  ],
+  "mutants": [
+    {
+      "name": "an observation after t0 is accepted",
+      "old": "        if key > tuple(t0_key):",
+      "new": "        if False:"
+    },
+    {
+      "name": "the after-t0 boundary made inclusive",
+      "old": "        if key > tuple(t0_key):",
+      "new": "        if key > tuple(t0_key) and False:"
+    },
+    {
+      "name": "t0 need not be inside the launch transaction",
+      "old": "        if (observation[\"slot\"], observation[\"transaction_index\"]) != launch_transaction:",
+      "new": "        if False:"
+    },
+    {
+      "name": "the decision state itself may be missing",
+      "old": "    if not seen_t0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "t0 presence recorded without checking the key",
+      "old": "        if key == tuple(t0_key):\n            seen_t0 = True",
+      "new": "        if True:\n            seen_t0 = True"
+    },
+    {
+      "name": "an empty observation list is accepted",
+      "old": "    if not observations:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a string may appear in a feature block",
+      "old": "        if isinstance(value, str):",
+      "new": "        if False:"
+    },
+    {
+      "name": "a non-integer feature is accepted",
+      "old": "        if value is not None and not isinstance(value, (int, bool)):",
+      "new": "        if False:"
+    },
+    {
+      "name": "the feature block need not match the contract",
+      "old": "    if set(record.get(\"features\", {})) != features:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the grouping block need not match the contract",
+      "old": "    if set(record.get(\"grouping\", {})) != grouping:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an identity may also be a feature",
+      "old": "    if overlap:",
+      "new": "    if False:"
+    },
+    {
+      "name": "create need not be a mapping",
+      "old": "    if not isinstance(create, dict):",
+      "new": "    if False:"
+    },
+    {
+      "name": "a string is accepted as observations",
+      "old": "    if isinstance(observations, (dict, str, bytes)):",
+      "new": "    if False:"
+    },
+    {
+      "name": "a missing required field is tolerated",
+      "old": "    if field not in mapping:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an unknown program version is treated as supported",
+      "old": "    if version_supported is None:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an unsupported program version is accepted",
+      "old": "    if not version_supported:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a curve outside its regime is accepted",
+      "old": "    if not regime_in_regime:",
+      "new": "    if False:"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None expected. Every feature record in this project rests on these guards; one that no test can distinguish from its absence would mean the leakage claim is unverified rather than verified."
+}

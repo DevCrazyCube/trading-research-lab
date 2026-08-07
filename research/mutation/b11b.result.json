@@ -1,0 +1,107 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 17,
+  "mutants_declared": 17,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureLeakageTests::test_an_observation_after_t0_is_refused",
+      "name": "an observation after t0 is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureLeakageTests::test_an_observation_after_t0_is_refused",
+      "name": "the after-t0 boundary made inclusive",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureLeakageTests::test_an_observation_from_another_transaction_is_refused",
+      "name": "t0 need not be inside the launch transaction",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureLeakageTests::test_the_decision_state_itself_must_be_present",
+      "name": "the decision state itself may be missing",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureLeakageTests::test_the_decision_state_itself_must_be_present",
+      "name": "t0 presence recorded without checking the key",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::InputValidationFoundUntestedByMutationTests::test_an_empty_observation_list_is_refused_BY_ITS_OWN_GUARD",
+      "name": "an empty observation list is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureContractTests::test_no_string_may_appear_in_a_feature_block",
+      "name": "a string may appear in a feature block",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureContractTests::test_a_non_scalar_feature_is_refused",
+      "name": "a non-integer feature is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureContractTests::test_an_added_or_missing_feature_is_refused",
+      "name": "the feature block need not match the contract",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::InputValidationFoundUntestedByMutationTests::test_the_grouping_block_must_match_the_contract",
+      "name": "the grouping block need not match the contract",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureContractTests::test_a_field_declared_as_both_a_feature_and_an_identity_is_refused",
+      "name": "an identity may also be a feature",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::InputValidationFoundUntestedByMutationTests::test_create_must_be_a_mapping",
+      "name": "create need not be a mapping",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::InputValidationFoundUntestedByMutationTests::test_observations_must_be_a_sequence_not_a_string_or_mapping",
+      "name": "a string is accepted as observations",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::InputValidationFoundUntestedByMutationTests::test_a_missing_required_field_is_refused_by_name",
+      "name": "a missing required field is tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::VetoTests::test_an_unstated_version_check_is_refused_rather_than_assumed_passed",
+      "name": "an unknown program version is treated as supported",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::VetoTests::test_each_veto_fires_for_its_own_condition",
+      "name": "an unsupported program version is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::VetoTests::test_each_veto_fires_for_its_own_condition",
+      "name": "a curve outside its regime is accepted",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b11b",
+  "target": "scripts/b11b_t0_features.py",
+  "tests": [
+    "tests/test_b11b_baseline_evaluation.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "3b411badf3cf738dc6e6aae8c2805c47e4782fb8b3732084f32050aaa543c493",
+  "working_tree_unchanged": true
+}
