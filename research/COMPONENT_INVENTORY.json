@@ -275,6 +275,12 @@
       "status": "EXISTS_CONFORMING",
       "conforms_to": "sweep declaration; 11 mutants, 0 expected survivors",
       "role": "proves the reporting guards are load-bearing. Its first run found four untested ones, including a loop that would sleep a full interval after its final beat."
+    },
+    {
+      "path": "research/B21A_EXTERNAL_PRACTITIONER_CLAIMS.md",
+      "status": "NOT_A_READINESS_COMPONENT",
+      "role": "reading note on r/CryptoTradingBot and r/ai_trading, retrieved 2026-08-07. EVERY figure in it is an unverified third-party claim and none may be used as a threshold, parameter, cost assumption or prior. Recorded because the tool leads and validation techniques are cheap to lose, and because one post is a direct warning about the class of project this is.",
+      "establishes": "nothing about any strategy; no result, edge, cost figure or threshold"
     }
   ],
   "verified_absent": [
