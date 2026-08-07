@@ -392,11 +392,31 @@ run by surfacing two tests that were passing for a neighbouring guard's reason: 
 test was kept alive by verifier disagreement rather than by the heartbeat. Both now isolate the
 guard they name.
 
-**Still open under G6:** nothing consumes it yet. b12b does not read the snapshot, no process runs
-the heartbeat, and no operator surface invokes `engage`/`clear` — those are integration, and this
-slice deliberately stopped at the owner. `test_the_kill_switch_really_has_no_writer` in
-`tests/test_component_inventory.py` was the guard that re-derived this absence on every run; it now
-needs revisiting, because the absence it checks for has been deliberately filled.
+**The operator surface exists: `scripts/b20b_emergency_control.py`.** B19a calls for "a separate
+authenticated local operator mechanism"; b20a owns the state and this is the route a human reaches
+it through. It is a **separate file on purpose**: b20a contains no `argparse` and a test asserts
+that, because argv is visible in `ps` to every user on the machine, lands in shell history and is
+captured by process accounting. A CLI inside b20a would make its own guarantee unenforceable.
+
+It **holds no policy**. Every operation is a pass-through to b20a, and a test neuters b20a to show
+the surface then cannot decide anything — the only way to demonstrate the rules are not quietly
+duplicated in two places that would eventually disagree. Exit codes are part of the interface (0
+clear, 2 engaged, 3 refused) so a supervisor can branch without parsing prose. `clear` **re-reads
+after writing** and reports engaged if the verifiers still disagree, because an operator walking
+away believing a halt ended is the worst available failure. `status` distinguishes a fail-closed
+default from a deliberate halt, since an operator who cannot tell them apart will treat both as
+noise. 20 tests, mutation sweep 11/11.
+
+**Still open under G6:** `b12b_operator_snapshot.py` does not read the snapshot, so the console still
+renders a `kill_switch_engaged` that no owner produced. That is the last wiring step and it is a
+**read** path — G6's caution stands, and neither the console nor its preview server may gain a write
+path. Nothing runs the heartbeat as a service either; `b20b heartbeat --loop` exists but no
+supervisor invokes it.
+
+`test_the_kill_switch_really_has_no_writer` was the guard that re-derived this absence on every run.
+It is now `test_the_kill_switch_has_exactly_one_owner`: the absence it checked for was deliberately
+filled, and what is still worth preventing is a *second* writer, since two components answering "is
+the switch engaged" can disagree and both look authoritative.
 
 ### G7 — mutation evidence was unreproducible; CLOSED FORWARD ONLY by `scripts/mutation_sweep.py`
 **Found by the claude seat on 2026-08-07.** Mutation numbers are what this project cites when it
@@ -590,6 +610,23 @@ The same failure wearing other clothes:
 - **B17a's closure scan read as a repository-wide result** — a scoped negative describing itself as global
 - **B18c publishing a quarantine code no rehearsal had caused** — read from a leftover state file
 - **a harness reporting `persisted_before_raise` as a boolean** — its own opinion of a fact
+
+**A count is not a comparison, and two verified numbers can support a false identity.** Found on
+2026-08-07 when the claude seat claimed recorder.py's five Geyser-phase gates were the same list as
+b18a's seven `U_NOT_INSTRUMENTED` fields, and the codex seat recorded it in G1 after verifying —
+correctly — that there were five of one and seven of the other. Both counts were right. Neither seat
+compared the *items*, and the overlap turned out to be empty. **Five is not seven**, so the
+arithmetic alone should have stopped it before any list was opened.
+
+The trap is that checking a count *feels* like verification and produces a true statement, so the
+habit of demanding evidence is satisfied by something that was never evidence for the claim being
+made. The claim was an identity between two sets; the evidence was their cardinalities. When the
+assertion is "these are the same", the check is set equality — name the items, both directions.
+
+Consequence, which is why it is worth a lesson rather than a correction: it would have had someone
+wait on a provider feature to fix a wiring gap that needs no provider and was already recorded as
+its own absence in the inventory. A wrong link between two real gaps is worse than either gap,
+because both look explained.
 
 **A check that cannot fire is worse than no check**, because it reads as protection. Prefer removing
 it; where the protection is genuinely wanted against a *future* change, extract it into a function a

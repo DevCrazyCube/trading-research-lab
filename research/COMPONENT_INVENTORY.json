@@ -256,6 +256,25 @@
       "status": "EXISTS_CONFORMING",
       "conforms_to": "sweep declaration; 25 mutants, 0 expected survivors",
       "role": "proves each fail-closed default is load-bearing. Its first run surfaced two tests passing for a neighbouring guard's reason."
+    },
+    {
+      "path": "scripts/b20b_emergency_control.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "B19a's 'separate authenticated local operator mechanism'; holds no policy of its own, every operation a pass-through to b20a. Exit codes are the interface: 0 clear, 2 engaged, 3 refused.",
+      "role": "the operator control surface for emergency state (slice E, second half). A separate file from b20a on purpose: b20a has no argparse and a test enforces that, because argv is world-readable in ps.",
+      "holds_no_custody": "no wallet, key, transaction or network. Reads a clock, and reads/writes one local JSON file through b20a."
+    },
+    {
+      "path": "tests/test_b20b_emergency_control.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "unittest.TestCase, discoverable by both runners",
+      "role": "control-surface guards, centred on what the surface must NOT do: accept the secret in argv, or carry a second copy of the policy"
+    },
+    {
+      "path": "research/mutation/b20b.sweep.json",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "sweep declaration; 11 mutants, 0 expected survivors",
+      "role": "proves the reporting guards are load-bearing. Its first run found four untested ones, including a loop that would sleep a full interval after its final beat."
     }
   ],
   "verified_absent": [
