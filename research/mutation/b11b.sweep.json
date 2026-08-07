@@ -90,6 +90,21 @@
       "name": "a curve outside its regime is accepted",
       "old": "    if not regime_in_regime:",
       "new": "    if False:"
+    },
+    {
+      "name": "the buy-formula floor is not applied at the veto site",
+      "old": "        tokens_out = assert_tokens_out_in_range(",
+      "new": "        tokens_out = (lambda v, _vt: v)("
+    },
+    {
+      "name": "the upper bound of the floor is dropped",
+      "old": "    if tokens_out < 0 or tokens_out >= virtual_token:",
+      "new": "    if tokens_out < 0:"
+    },
+    {
+      "name": "the floor accepts a non-integer",
+      "old": "    if not isinstance(tokens_out, int) or isinstance(tokens_out, bool):",
+      "new": "    if False:"
     }
   ],
   "expected_survivors": [],

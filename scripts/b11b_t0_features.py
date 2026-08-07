@@ -156,6 +156,42 @@ class ContractRefused(B10B.FreezeViolation):
 # Feature materialization
 # --------------------------------------------------------------------------------------------
 
+def assert_tokens_out_in_range(tokens_out, virtual_token):
+    """A floor under the buy formula, at the one consumer that uses its value without checking it.
+
+    WHY HERE AND NOWHERE ELSE. `tokens_out_for_exact_quote_in` feeds three consumers. b10b and b15m
+    both *prove* the property they depend on at runtime — b10b re-checks maximality in both
+    directions and b15m refuses a cell whose admissible set is not a prefix. This module is the
+    third, and it uses the value to decide VETO CODES: `<= 0` sets V7 and `> real_token` sets V6.
+    So a wrong buy formula here would not misprice anything, it would change WHICH CURVES ARE
+    ELIGIBLE — a population effect, in the module whose whole job is that the cohort is honestly
+    constructed.
+
+    THE INVARIANT. `(quote_in - 1) * virtual_token // (virtual_quote + quote_in - 1)` multiplies
+    `virtual_token` by a ratio in `[0, 1)` for any positive `quote_in`, so `0 <= tokens_out <
+    virtual_token` holds for every input the formula accepts. One comparison.
+
+    WHAT IT IS NOT. A floor, not a proof. An error that stays inside the bound is invisible to it,
+    and only the unit tests on `tokens_out_for_exact_quote_in` itself catch that class. It is worth
+    saying plainly rather than letting a cheap check read as a guarantee.
+
+    EXTRACTED RATHER THAN INLINE, deliberately. With a correct formula this can never fire, and a
+    check that cannot fire reads as protection while testing nothing — it would survive any mutation
+    and nobody could show it works. As a function a test hands it a crafted value. Proposed by the
+    claude seat, who also stated the limitation above.
+    """
+    if not isinstance(tokens_out, int) or isinstance(tokens_out, bool):
+        raise ContractRefused(
+            f"the buy formula returned {tokens_out!r}, which is not an integer; a veto decided "
+            "from it would not be arithmetic")
+    if tokens_out < 0 or tokens_out >= virtual_token:
+        raise ContractRefused(
+            f"the buy formula returned {tokens_out} against a virtual token reserve of "
+            f"{virtual_token}; the pinned formula cannot leave this range, so the arithmetic is "
+            "wrong and the eligibility vetoes decided from it would be wrong with it")
+    return tokens_out
+
+
 def assert_disjoint_contract(feature_fields=FEATURE_FIELDS, grouping_fields=GROUPING_FIELDS):
     """No field may be declared as both a feature and a grouping identity.
 
@@ -336,8 +372,10 @@ def evaluate_vetoes(state, order_quote_lamports, *, regime_in_regime, version_su
         codes.add(V3_CURVE_COMPLETE_AT_T0)
     if not codes or codes <= {V5_MIXED_REGIME_WITHIN_CURVE, V8_UNSUPPORTED_PROGRAM_VERSION}:
         # Size checks need well-formed reserves, so they run only once the state predicates pass.
-        tokens_out = B9I.tokens_out_for_exact_quote_in(
-            state["virtual_quote"], state["virtual_token"], order_quote_lamports)
+        tokens_out = assert_tokens_out_in_range(
+            B9I.tokens_out_for_exact_quote_in(
+                state["virtual_quote"], state["virtual_token"], order_quote_lamports),
+            state["virtual_token"])
         if tokens_out <= 0:
             codes.add(V7_ORDER_BUYS_ZERO_TOKENS)
         elif tokens_out > state["real_token"]:

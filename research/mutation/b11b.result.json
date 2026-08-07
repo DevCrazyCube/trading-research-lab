@@ -2,8 +2,8 @@
   "baseline_passed": true,
   "expected_survivors": {},
   "git_ancestry_staged": false,
-  "killed": 17,
-  "mutants_declared": 17,
+  "killed": 20,
+  "mutants_declared": 20,
   "per_mutant": [
     {
       "first_failing_test": "tests/test_b11b_baseline_evaluation.py::FeatureLeakageTests::test_an_observation_after_t0_is_refused",
@@ -89,6 +89,21 @@
       "first_failing_test": "tests/test_b11b_baseline_evaluation.py::VetoTests::test_each_veto_fires_for_its_own_condition",
       "name": "a curve outside its regime is accepted",
       "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::BuyFormulaFloorTests::test_the_veto_site_ACTUALLY_CALLS_the_floor",
+      "name": "the buy-formula floor is not applied at the veto site",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::BuyFormulaFloorTests::test_a_value_at_or_above_the_virtual_reserve_is_refused",
+      "name": "the upper bound of the floor is dropped",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11b_baseline_evaluation.py::BuyFormulaFloorTests::test_a_non_integer_is_refused_including_a_boolean",
+      "name": "the floor accepts a non-integer",
+      "outcome": "killed"
     }
   ],
   "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
@@ -102,6 +117,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "3b411badf3cf738dc6e6aae8c2805c47e4782fb8b3732084f32050aaa543c493",
+  "working_tree_sha256": "9768ff72546ed23df042c220dbc82431f83d0949e069554f38fe7ac78af4180f",
   "working_tree_unchanged": true
 }

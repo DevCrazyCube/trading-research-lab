@@ -824,6 +824,88 @@ class InputValidationFoundUntestedByMutationTests(unittest.TestCase):
             B11B.assert_feature_partition(short)
 
 
+class BuyFormulaFloorTests(unittest.TestCase):
+    """The floor under the buy formula at the veto consumer, fired with crafted values.
+
+    It exists as a function precisely so these can exist: with a correct formula the branch never
+    fires, and a check that cannot fire reads as protection while testing nothing. These hand it
+    values the real formula cannot produce.
+    """
+
+    VT = 1_073_000_000_000_000
+
+    def test_a_value_inside_the_range_passes_through_unchanged(self):
+        self.assertEqual(B11B.assert_tokens_out_in_range(0, self.VT), 0)
+        self.assertEqual(B11B.assert_tokens_out_in_range(self.VT - 1, self.VT), self.VT - 1)
+
+    def test_a_value_at_or_above_the_virtual_reserve_is_refused(self):
+        """The formula's multiplier is strictly below 1, so reaching the reserve is impossible."""
+        for tokens_out in (self.VT, self.VT + 1, self.VT * 2):
+            with self.subTest(tokens_out=tokens_out):
+                with self.assertRaisesRegex(B11B.ContractRefused, "cannot leave this range"):
+                    B11B.assert_tokens_out_in_range(tokens_out, self.VT)
+
+    def test_a_negative_value_is_refused(self):
+        with self.assertRaisesRegex(B11B.ContractRefused, "cannot leave this range"):
+            B11B.assert_tokens_out_in_range(-1, self.VT)
+
+    def test_a_non_integer_is_refused_including_a_boolean(self):
+        for bad in (1.0, "5", None, True):
+            with self.subTest(value=bad):
+                with self.assertRaisesRegex(B11B.ContractRefused, "not an integer"):
+                    B11B.assert_tokens_out_in_range(bad, self.VT)
+
+    def test_the_real_formula_satisfies_the_invariant_across_a_wide_range(self):
+        """Confirms the floor is a floor and not a trap: no legitimate input trips it."""
+        vq = 30_000_000_000
+        for quote_in in (1, 2, 1_000, 10**6, 10**9, 10**12, 10**15, 10**18):
+            with self.subTest(quote_in=quote_in):
+                tokens = B11B.B9I.tokens_out_for_exact_quote_in(vq, self.VT, quote_in)
+                self.assertEqual(B11B.assert_tokens_out_in_range(tokens, self.VT), tokens)
+
+    def test_the_veto_path_still_produces_its_codes_for_ordinary_states(self):
+        """The wrapper must not have changed what the vetoes decide."""
+        record = B11B.build_t0_features(create_record(), [observation(0, "CreateEvent")],
+                                        (1_000, 7, 0, -1))
+        self.assertIn("features", record)
+
+    def test_the_veto_site_ACTUALLY_CALLS_the_floor(self):
+        """Every test above exercises the floor DIRECTLY, so deleting its call site changed
+        nothing any of them could see — a mutation sweep showed exactly that.
+
+        Same defect found earlier the same day in `mutation_sweep.verify`, where every conformance
+        test called `assert_conforms` directly and nothing asserted `verify` applied it. A guard
+        that is well tested and not wired in is not a guard, and the tests proving it works are
+        what make its absence hardest to notice.
+
+        The site is `evaluate_vetoes`, not `build_t0_features` — writing this against the wrong
+        entry point is how that was established, since the spy simply never fired.
+        """
+        calls = []
+        real = B11B.assert_tokens_out_in_range
+
+        def spy(tokens_out, virtual_token):
+            calls.append((tokens_out, virtual_token))
+            return real(tokens_out, virtual_token)
+
+        B11B.assert_tokens_out_in_range = spy
+        self.addCleanup(setattr, B11B, "assert_tokens_out_in_range", real)
+
+        curve = {"virtual_quote": 30_000_000_000, "virtual_token": LAUNCH_VT,
+                 "real_quote": 0, "real_token": LAUNCH_RT, "quote_mint": NATIVE,
+                 "mayhem_mode": False, "complete": False, "slot": 1_000}
+        codes = B11B.evaluate_vetoes(curve, B11B.ORDER_SIZE_LAMPORTS,
+                                     regime_in_regime=True, version_supported=True)
+
+        self.assertEqual(codes, (), "the fixture must be eligible, or the size path is skipped")
+        self.assertTrue(calls, "the veto path computed tokens_out without passing it through "
+                               "the floor")
+        tokens_out, virtual_token = calls[0]
+        self.assertEqual(virtual_token, LAUNCH_VT,
+                         "the floor must be given the state's own virtual reserve, not a constant")
+        self.assertLess(tokens_out, virtual_token)
+
+
 class FloatSafeMagnitudeTests(unittest.TestCase):
     """Guard a conclusion that currently rests on a regime, not on the code.
 

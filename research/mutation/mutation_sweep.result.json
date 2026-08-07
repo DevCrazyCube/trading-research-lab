@@ -2,8 +2,8 @@
   "baseline_passed": true,
   "expected_survivors": {},
   "git_ancestry_staged": false,
-  "killed": 26,
-  "mutants_declared": 26,
+  "killed": 27,
+  "mutants_declared": 27,
   "per_mutant": [
     {
       "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_a_missing_declaration_file_refuses",
@@ -134,6 +134,11 @@
       "first_failing_test": "tests/test_mutation_sweep.py::RunTests::test_a_killed_mutant_with_an_unparsable_killer_reports_a_reason_not_null",
       "name": "unparsed killer reported as null instead of a reason code",
       "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::ShippedSweepTests::test_every_shipped_mutant_still_matches_its_target",
+      "name": "ambiguous pattern silently mutates the first site",
+      "outcome": "killed"
     }
   ],
   "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
@@ -147,6 +152,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "a52815eff5a59987fef74662f6b9b7750c851ee2c5bdfe5c5c572c960b8120e0",
+  "working_tree_sha256": "fce7ac4d5bb95ee4e9cc4d0873c0ae05dc7f546a761ace864a45bed93177395f",
   "working_tree_unchanged": true
 }
