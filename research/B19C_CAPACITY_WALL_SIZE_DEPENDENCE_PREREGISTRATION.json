@@ -1,0 +1,132 @@
+{
+  "preregistration_id": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1",
+  "date": "2026-08-07",
+  "author": "Claude (codex seat, handoff 197)",
+  "status": "FROZEN. Committed alone, before any capacity above the B15M ceiling is computed and before any wall shape is inspected.",
+  "supersedes": null,
+  "group": "B19 — pre-execution design artifacts. See B19B for the group note.",
+
+  "question": "Above the frozen 0.1 SOL search ceiling, is external-liquidity capacity a CLIFF or a SLOPE — and how many cells that B15M reported as cap-hit have a capacity that is barely above the ceiling versus far above it?",
+
+  "why_this_is_open_at_all": {
+    "what_b15m_settled": "B15M measured, per cell, the greatest integer q in [0, 100000000] whose acquired tokens could be sold in full against the OBSERVED exit state with our own buy's reserve contribution not carried forward. That is exact and stands unchanged.",
+    "what_it_deliberately_did_not_settle": "a cell whose capacity reached the ceiling was reported as CAP-HIT, with its true capacity stated as unmeasured above the ceiling and never as equal to it. That honest refusal is precisely the open question: `at least 0.1 SOL` covers both `0.100000001 SOL` and `40 SOL`, and those are different worlds.",
+    "why_it_is_not_outcome_fitting": "capacity is a property of the OBSERVED reserves and the pinned arithmetic. It is not an outcome, contains no label, and no threshold is chosen from it. Raising a measurement ceiling measures the book; it does not propose sending more."
+  },
+
+  "known_at_authorship_time": {
+    "purpose": "so a later reader can audit the fit rather than trust an assurance",
+    "b15l": "81% of priced cells held on the order of one lamport of real quote in the observed book. Known.",
+    "b15m": "the study ran with a ceiling of 100000000 lamports and reported zero-capacity, cap-hit and circular-liquidity-dependence counts. The DISTRIBUTION of its capacities is not used to place the new ceiling or the grid below.",
+    "b11": "has NOT produced its result and is neither read nor referenced.",
+    "ceiling_was_chosen_before_looking": "the new ceiling and the grid below were written down before any capacity above 100000000 was computed."
+  },
+
+  "population": {
+    "rule": "the IDENTICAL admissible cell universe as B15M_LIQUIDITY_CAPACITY_V1, by the same conditions in the same order, so the two studies describe the same cells",
+    "no_new_admission": "no cell B15M refused is admitted and no cell it admitted is refused, except where a refusal code below names a condition specific to the raised ceiling",
+    "development_vs_evaluation": "runs against the burned corpus are DEVELOPMENT ONLY and may never be reported as an evaluation result"
+  },
+
+  "frozen_inputs_unchanged": {
+    "entry_delays_slots": [1, 2, 4],
+    "entry_delay_source": "B15D_SHADOW_ROUTE_V1",
+    "exit_horizons": ["h_1000_slots", "h_10000_slots"],
+    "exit_horizon_source": "B10b identifiers and slot-horizon semantics",
+    "cost_scenarios": "B15D_SHADOW_ROUTE_V1's optimistic, base and stressed, verbatim. Capacity itself does not depend on our fee assumptions and is reported per (horizon, delay) only; figures that net costs are reported per (cost scenario, horizon, delay).",
+    "arithmetic": "B9I's pinned formulas and B10a's price_entry, price_exit and curve_fees by direct call, with B10b's max_executable_tokens for the differential check. No formula is reimplemented and no float appears anywhere."
+  },
+
+  "the_raised_ceiling": {
+    "new_search_ceiling_lamports": 10000000000,
+    "old_ceiling_lamports": 100000000,
+    "ratio": "exactly 100x",
+    "rationale": "10 SOL is a round decimal landmark two orders of magnitude above the frozen position size, written down before any capacity above the old ceiling was computed. It is not derived from any observed reserve figure.",
+    "it_is_a_ceiling_not_a_target": "a cell whose capacity reaches 10000000000 is reported as CAP-HIT AT THE NEW CEILING and its true capacity is stated as unmeasured above it, never as equal to it. The same discipline B15M applied, one level up.",
+    "explicitly_not_a_sizing_proposal": "no order of any size is proposed, recommended or implied. The frozen position size remains 100000000 lamports and this study does not vary it."
+  },
+
+  "primary_estimand": {
+    "name": "external_liquidity_capacity_lamports_raised_ceiling",
+    "definition": "for one cell, the greatest integer q in [0, 10000000000] such that the token amount a buy of q would acquire at the ENTRY checkpoint can be sold in full against the OBSERVED EXIT checkpoint state, with our own buy's reserve contribution NOT carried forward",
+    "identical_to_b15m_except_the_bound": "the two constraints, the external-only rule and the exactness are B15M's, unchanged. Only the interval's upper end differs.",
+    "monotonicity": {
+      "claim": "the admissible q form a prefix of [0, 10000000000], so a binary search finds its end",
+      "argument": "inherited from B15M: tokens_out_for_exact_quote_in is non-decreasing in q and quote_out_for_tokens_in is non-decreasing in tokens_in, so the composite draw is non-decreasing and each constraint defines a down-set; the intersection of two down-sets is a down-set. Raising the upper bound does not affect the argument.",
+      "not_taken_on_trust": "bisection is used ONLY if monotonicity is verified per cell. The returned q must satisfy both constraints, and q+1 must violate at least one unless q is the ceiling. Both are checked on EVERY cell, not sampled. A failure refuses the cell rather than returning a search result over a set that is not a prefix."
+    },
+    "agreement_with_b15m_is_required": "for every cell whose B15M capacity was strictly below 100000000, the raised-ceiling capacity MUST equal it exactly. A disagreement fails the study rather than being reported as a refinement — the two searches differ only in an upper bound that such a cell never reached."
+  },
+
+  "the_wall_shape": {
+    "name": "fixed_grid_external_executability_extended",
+    "grid_lamports": [1000000, 10000000, 100000000, 500000000, 1000000000, 5000000000, 10000000000],
+    "grid_rationale": "B15M's grid extended upward by the same round decimal-and-half-decimal pattern it already used, written down before any capacity above the old ceiling was computed. The first three members are B15M's own, retained so the two studies can be read against each other.",
+    "reported_per_grid_size": [
+      "whether the size is externally executable at all: its tokens can be sold in full against the observed exit state",
+      "the exact proceeds minus the frozen entry and exit costs, per cost scenario",
+      "whether that quantity is non-negative, per cost scenario"
+    ],
+    "cliff_versus_slope_is_reported_not_concluded": "the study reports the exact count of cells executable at each grid size. Whether that constitutes a cliff is a reading of the table, and the study states the counts rather than the adjective.",
+    "no_optimisation": "no size is selected, ranked as best, or described as optimal. The grid is reported in full including sizes that fail."
+  },
+
+  "previously_cap_hit_cells": {
+    "reported_separately": "the cells B15M reported as cap-hit are reported as their own named subgroup, with their now-measured capacities as exact order statistics and a count of those that are STILL cap-hit at the raised ceiling",
+    "why_separate": "this subgroup is the entire reason the study exists, and mixing it into the whole-population distribution would hide the answer inside the question"
+  },
+
+  "reporting": {
+    "per_group": "capacity per (horizon, delay); cost-netted figures per (cost scenario, horizon, delay)",
+    "order_statistics": "exact integer min, p10, p25, median, p75, p90, max by integer index into the sorted values. No mean, no interpolation, no float.",
+    "required_counts": ["cells", "zero_capacity_cells", "cap_hit_at_old_ceiling", "cap_hit_at_new_ceiling", "newly_measured_cells", "circular_liquidity_dependence_cells", "refusals by code"],
+    "never_aggregated": "no figure spans two horizons and no figure spans two cost scenarios",
+    "censoring_statement_required_verbatim": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market"
+  },
+
+  "determinism": {
+    "row_permutation": "the output must be identical under any permutation of the input rows",
+    "checked": "by running the whole computation over shuffled inputs and comparing field for field"
+  },
+
+  "differential_tests_required": {
+    "against_b10b": "for every cell the capacity found by searching over q must equal the capacity implied by B10b's max_executable_tokens, as in B15M. The two routes must agree exactly on every cell; a disagreement fails the study.",
+    "against_b15m": "every cell whose B15M capacity was strictly below the old ceiling must reproduce that capacity exactly under the raised ceiling",
+    "off_by_one": "maximality is tested by construction on synthetic curves with a known answer: a search returning q-1 or q+1 must fail the test"
+  },
+
+  "refusal_codes": [
+    {"code": "W_NOT_IN_B15M_UNIVERSE", "meaning": "the cell is not admissible under B15L/B15M conditions"},
+    {"code": "W_NON_MONOTONE", "meaning": "the admissible set is not a prefix, so bisection is not valid for this cell"},
+    {"code": "W_MAXIMALITY_UNPROVEN", "meaning": "the returned capacity is not maximal: q+1 is also admissible"},
+    {"code": "W_CONSTRAINT_VIOLATED", "meaning": "the returned capacity does not itself satisfy both constraints"},
+    {"code": "W_DISAGREES_WITH_B15M", "meaning": "a sub-ceiling cell did not reproduce its B15M capacity exactly"},
+    {"code": "W_IMPOSSIBLE_RESERVES", "meaning": "a checkpoint's reserves are non-positive or otherwise impossible"},
+    {"code": "W_FLOAT_PRESENT", "meaning": "a non-integer appeared in a quantity"},
+    {"code": "W_DIFFERENTIAL_DISAGREEMENT", "meaning": "the q-side and B10b token-side routes disagree"}
+  ],
+
+  "prohibitions": [
+    "raising a MEASUREMENT ceiling is not evidence for raising any POSITION limit, and this study may not be cited as grounds to change any order size, risk-governor cap or frozen position size — B15M's not_a_governor_resize applies here unchanged",
+    "no size is recommended, selected or ranked",
+    "no output is a return, a profit, an expected value or a performance figure",
+    "no claim about landing probability or competitor response, neither of which this study measures",
+    "carrying our own buy's reserve contribution into the exit state for the primary estimand",
+    "using bisection on a cell whose monotonicity was not verified",
+    "reporting a cap-hit capacity as the true capacity",
+    "aggregating across horizons or across cost scenarios",
+    "any float in any quantity",
+    "reimplementing the pinned curve formulas instead of calling B9I, B10a and B10b",
+    "no reading of research/b11a composition or outcomes; no network; no signing, submission, spend or transaction construction",
+    "modifying B11c, B11a, any live worker, any RPC cadence, or any frozen population"
+  ],
+
+  "status_locks": {
+    "label": "LIQUIDITY_CAPACITY_DIAGNOSTIC",
+    "executable": false,
+    "landing_probability": "unmeasured",
+    "competitor_response": "unmeasured",
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "preregistration_id": "B19B_EXIT_TIMING_POLICY_V1",
+  "date": "2026-08-07",
+  "author": "Claude (codex seat, handoff 197)",
+  "status": "FROZEN. Committed alone, before any exit-timing figure is computed and before any outcome under any rule below is inspected.",
+  "supersedes": null,
+  "group": "B19 — pre-execution design artifacts written before the thing they describe exists. B19a is the wallet/treasury architecture; B19b/c/d are the strategy preregistrations of slice D.",
+
+  "question": "Does the CHOICE of exit coordinate change the executable outcome at all, beyond the two fixed horizons already frozen — and can that be measured without any threshold being tuned on an outcome?",
+
+  "why_this_is_written_now_rather_than_later": {
+    "principle": "a preregistration's entire epistemic value comes from being fixed BEFORE the evidence it will be judged against exists. Written after, the same document cannot honestly be written at all.",
+    "the_hazard_this_does_not_escape": "the burned corpus (B8b/B9/B10/B16) already exists today and will still exist later. Delay does not shrink that surface. It is handled by the disclosure block below and by the structural choices in `no_threshold_is_tunable_here`, not by waiting.",
+    "recorded_by": "handoff 197; the owner chose slice D over slice E with both agent seats recommending otherwise, and that disagreement is recorded rather than smoothed."
+  },
+
+  "known_at_authorship_time": {
+    "purpose": "so a later reader can AUDIT the fit rather than trust an assurance that none occurred",
+    "b15l": "of 14,688 priced cells the naive observed-book exit could be priced on only 2,748; on the rest the observed curve held on the order of one lamport of real quote. Known.",
+    "b15m": "external-liquidity capacity was measured per cell with a search ceiling of 100000000 lamports. Known that the study ran; its capacity distribution is NOT used to place, order or motivate any rule below.",
+    "b16d": "one non-issuance signal was priced on burned data and every priced variant was negative. Known.",
+    "b11": "has NOT produced its result. No fresh-window composition or outcome has been read by this author, and none is referenced.",
+    "what_that_forbids": "no rule below may be justified, ordered, added or dropped by appeal to any figure named above."
+  },
+
+  "no_threshold_is_tunable_here": {
+    "rule": "every candidate rule is either PARAMETER-FREE, or inherited verbatim from an already-frozen document, or a member of a fixed grid reported in full with no member selected.",
+    "why_structural": "a rule with a free numeric cut invites choosing the cut from the answer. Removing the free parameter removes the temptation mechanically rather than forbidding it in prose.",
+    "consequence_accepted": "genuinely adaptive exit rules are therefore OUT OF SCOPE of this study, and that is a deliberate cost, not an oversight."
+  },
+
+  "population": {
+    "rule": "the IDENTICAL admissible cell universe as B15M_LIQUIDITY_CAPACITY_V1, which is itself B15L's universe, by the same conditions in the same order",
+    "no_new_admission": "this study admits no cell those refused and refuses none they admitted, except where a refusal code below names a condition specific to exit timing",
+    "development_vs_evaluation": "runs against the burned corpus are DEVELOPMENT ONLY and may never be reported as an evaluation result. Evaluation, if it ever occurs, is on a window this author has not read."
+  },
+
+  "frozen_inputs_unchanged": {
+    "entry_delays_slots": [1, 2, 4],
+    "entry_delay_source": "B15D_SHADOW_ROUTE_V1, inherited unchanged and not re-derived",
+    "position_lamports": 100000000,
+    "position_source": "0.1 SOL, fixed from B10a onward; no size is chosen, recommended or varied here",
+    "cost_scenarios": [
+      {"scenario_id": "optimistic", "base_fee_lamports": 5000, "priority_fee_lamports": 1000, "tip_lamports": 0, "ata_rent_lamports": 2039280, "failed_attempts": 0},
+      {"scenario_id": "base", "base_fee_lamports": 5000, "priority_fee_lamports": 100000, "tip_lamports": 0, "ata_rent_lamports": 2039280, "failed_attempts": 0},
+      {"scenario_id": "stressed", "base_fee_lamports": 5000, "priority_fee_lamports": 1000000, "tip_lamports": 0, "ata_rent_lamports": 2039280, "failed_attempts": 1}
+    ],
+    "cost_scenario_source": "B15D_SHADOW_ROUTE_V1, verbatim",
+    "arithmetic": "B9I's pinned formulas and B10a's price_entry, price_exit and curve_fees by direct call. No formula is reimplemented. Every quantity is an exact Python integer and every fraction an exact rational pair. NO FLOAT ANYWHERE.",
+    "canonical_order": "(slot, transaction_index, outer_index, inner_index), never insertion order"
+  },
+
+  "frozen_exit_rules": {
+    "note": "the complete list. No rule may be added, removed or reparameterised after any outcome is seen.",
+    "set": [
+      {"rule_id": "E_FIXED_H1000", "parameters": "none", "definition": "the incumbent fixed horizon h_1000_slots, B10c state-in-force semantics unchanged", "role": "incumbent comparator"},
+      {"rule_id": "E_FIXED_H10000", "parameters": "none", "definition": "the incumbent fixed horizon h_10000_slots, unchanged", "role": "incumbent comparator"},
+      {"rule_id": "E_FIRST_OBSERVATION", "parameters": "none", "definition": "the first canonical observation strictly after the entry coordinate", "role": "the earliest exit the evidence permits; a floor, not a proposal"},
+      {"rule_id": "E_FIRST_EXTERNALLY_PAYABLE", "parameters": "none", "definition": "the earliest canonical observation at or after entry whose OBSERVED external reserves could pay for the full position in one sale, by B15M's external-only constraint with our own buy's reserve contribution NOT carried forward", "role": "this is the 'beyond B15m's gate' rule: B15m used external payability as an ADMISSIBILITY GATE at a fixed horizon; here the same predicate is a TIMING TRIGGER. Same arithmetic, different use, and the difference is the question."},
+      {"rule_id": "E_COMPLETE_OR_HORIZON", "parameters": "none", "definition": "the curve's completion coordinate if completion occurs at or before h_10000_slots, else h_10000_slots", "role": "tests whether completion is a materially different exit instant from the horizon that contains it"},
+      {"rule_id": "E_PEAK_DRAWDOWN_1_10", "parameters": "exact rational 1/10, member of a fixed grid", "definition": "the first observation at which realizable external quote for the held position falls at or below (1 - 1/10) of its running peak since entry", "role": "grid member; NOT selected"},
+      {"rule_id": "E_PEAK_DRAWDOWN_1_4", "parameters": "exact rational 1/4, member of a fixed grid", "definition": "as above with fraction 1/4", "role": "grid member; NOT selected"},
+      {"rule_id": "E_PEAK_DRAWDOWN_1_2", "parameters": "exact rational 1/2, member of a fixed grid", "definition": "as above with fraction 1/2", "role": "grid member; NOT selected"}
+    ],
+    "grid_is_not_selection": "the three drawdown fractions are reported in full, including any that fail. No fraction will be selected, ranked best, or described as optimal, and a reader choosing among them is doing something this study does not do.",
+    "grid_rationale": "1/10, 1/4 and 1/2 are exact halving-and-quartering landmarks spanning an order of magnitude, written down before any drawdown figure was computed. They are not derived from any observed distribution."
+  },
+
+  "right_censoring": {
+    "rule": "if a rule's trigger condition is never satisfied within the cell's observed path, the cell is RIGHT-CENSORED under that rule and carries NO outcome",
+    "never_zero": "a censored cell is never counted as zero, never imputed, and never dropped silently. Zero-by-absence is forbidden.",
+    "reported": "the censored count is reported per rule, per delay, beside every figure, so no distribution can be read without the share of cells that produced no number"
+  },
+
+  "capacity_gate": {
+    "rule": "B15M's external-only payability is applied at the exit coordinate each rule selects; a cell whose exit the observed reserves could not pay for is REFUSED, never priced against liquidity our own entry supplied",
+    "circular_liquidity_dependence": "reported per rule, by B15M's definition, because an exit funded by one's own entry is not liquidity and left unnamed would read as a priced cell"
+  },
+
+  "denominator_and_coverage": {
+    "reported_first": "coverage — cells admitted, refused by code, and censored per rule — is reported BEFORE any outcome figure, so no outcome can be read without the share of the cohort it came from",
+    "whole_cohort": "the admissible universe is the denominator; a rule that triggers on few cells is reported as triggering on few cells"
+  },
+
+  "outcome_reporting": {
+    "statistics": "exact integer order statistics by integer index into the sorted values: min, p10, p25, median, p75, p90, max, and counts at or below zero. NO MEAN, because a mean over a censored heavy-tailed set invites reading it as an expectation.",
+    "never_aggregated": "no figure spans two rules, two delays or two cost scenarios. Alternative assumptions are not samples of a distribution.",
+    "tail_and_concentration": "the share of total positive outcome attributable to the top cells is reported per rule, so a lottery shape cannot present as an edge",
+    "not_a_return": "no figure is a return, a profit, an expected value or a performance result, and none may be described as one"
+  },
+
+  "multiplicity": {
+    "family_definition": "exit rules x entry delays",
+    "family_size": 24,
+    "members": "8 rules crossed with 3 delays, within a single cost scenario",
+    "primary_result": "ONE pre-committed figure: the exact integer median net outcome per rule at delay 1 under the `base` cost scenario, reported beside its coverage and censored count. Every other cell is secondary, reported only in a table, and MAY NOT be promoted to primary after the fact.",
+    "correction_if_ever_tested": "any future inferential claim over this family uses a Bonferroni-corrected alpha of 0.05/24 = 0.00208333...",
+    "no_test_in_this_pass": "no significance test, confidence interval or p-value is computed. Grouped uncertainty, if reported, is an assumption-free jackknife range."
+  },
+
+  "determinism": {
+    "row_permutation": "the output must be identical under any permutation of the input rows",
+    "checked": "by running the whole computation over shuffled inputs and comparing field for field"
+  },
+
+  "refusal_codes": [
+    {"code": "X_NOT_IN_B15M_UNIVERSE", "meaning": "the cell is not admissible under B15L/B15M conditions"},
+    {"code": "X_NO_ENTRY_OBSERVATION", "meaning": "no observation exists at or after the delayed entry coordinate"},
+    {"code": "X_RULE_NEVER_TRIGGERED", "meaning": "the rule's condition is not satisfied within the observed path; the cell is right-censored under that rule"},
+    {"code": "X_EXIT_UNPRICEABLE", "meaning": "B10a refused the exit at the selected coordinate"},
+    {"code": "X_CAPACITY_REFUSED", "meaning": "the observed external reserves could not pay for the sale at the selected coordinate"},
+    {"code": "X_COMPLETE_AT_ENTRY", "meaning": "the curve is complete at entry, so the observed state is not one our order could have traded against"},
+    {"code": "X_NO_FEE_SCHEDULE", "meaning": "the curve's fee basis points could not be decoded from its own TradeEvents"},
+    {"code": "X_FLOAT_PRESENT", "meaning": "a non-integer appeared in a quantity"},
+    {"code": "X_NON_CANONICAL_ORDER", "meaning": "observations were not in canonical coordinate order"}
+  ],
+
+  "prohibitions": [
+    "no rule may be added, removed or reparameterised after seeing any outcome",
+    "no exit rule may be SELECTED, ranked best, recommended or adopted on the strength of this study; adopting one requires a NEW preregistration committed before the choice",
+    "no threshold may be tuned from any outcome",
+    "no figure from the burned corpus may be reported as an evaluation result",
+    "no reading of research/b11a composition or outcomes; no network; no signing, submission, spend or transaction construction",
+    "no position size is chosen, varied or recommended",
+    "no claim about landing probability, which this study does not measure",
+    "no aggregation across rules, delays or cost scenarios",
+    "any float in any quantity"
+  ],
+
+  "status_locks": {
+    "label": "EXIT_TIMING_DIAGNOSTIC",
+    "executable": false,
+    "landing_probability": "unmeasured",
+    "competitor_response": "unmeasured",
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "assumption": "UNREACTING_ORDER_FLOW: the observed path is replayed as if our order did not change it, which it would have"
+  }
+}

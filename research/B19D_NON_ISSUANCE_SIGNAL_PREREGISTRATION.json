@@ -1,0 +1,165 @@
+{
+  "preregistration_id": "B19D_NON_ISSUANCE_SIGNAL_V1",
+  "date": "2026-08-07",
+  "author": "Claude (codex seat, handoff 197)",
+  "status": "FROZEN. Committed alone, before any signal below is priced on any window, and before any fresh-window label exists.",
+  "supersedes": null,
+  "group": "B19 — pre-execution design artifacts. See B19B for the group note.",
+
+  "question": "Does ANY point-in-time signal available to an ordinary participant who does NOT issue a token survive complete costs and the external-liquidity capacity gate?",
+
+  "non_issuance_is_the_point": {
+    "definition": "a signal is NON-ISSUANCE if acting on it requires no token creation, no liquidity provision and no privileged position on the curve — only observing public state and entering after it",
+    "why_scoped_this_way": "issuance is NOT recommended as a strategy and is out of scope of this and every study in this group. A strategy that requires us to create the asset is a different activity with a different risk, legal and ethical profile, and it is not what this project is evaluating.",
+    "no_manipulation": "no signal below involves coordinated promotion, wash trading, spoofing or any attempt to influence another participant's behaviour. Every signal is a passive observation of public state."
+  },
+
+  "the_leakage_hazard_this_document_exists_to_survive": {
+    "the_hazard": "the burned corpus already exists. A candidate signal list written by someone who has seen burned results can be selected to exploit them, and the resulting document would look exactly like a preregistration while being a postregistration.",
+    "why_delay_does_not_fix_it": "waiting for B11 does not shrink the burned surface by one byte; it strictly ADDS the fresh result to what is known at authorship. The fix is structural, below, and disclosure, below — not patience.",
+    "the_structural_fix": "every candidate signal is a BOOLEAN drawn from an already-frozen contract. A boolean has no cut to move. Threshold tuning is not forbidden here so much as made impossible to express.",
+    "the_disclosure_fix": "everything the author knew at authorship is written down, so a later reader can audit the fit instead of trusting an assurance."
+  },
+
+  "known_at_authorship_time": {
+    "b16d": "measured ONE non-issuance signal — creator re-entry delayed confirmation — on the burned corpus, and found the observable edge dominated by selection with EVERY priced variant negative. This is known to the author and is disclosed precisely because it creates the temptation to drop that signal from the list. It is RETAINED below, unchanged, as S5.",
+    "b15l_and_b15m": "the observed book could not pay for a 0.1 SOL exit on the large majority of priced cells. Known.",
+    "b11": "has NOT produced its result. No fresh-window composition, label or outcome has been read by this author, and B11a is neither read nor referenced.",
+    "what_that_forbids": "no signal may be added, dropped, reordered or reworded by appeal to any burned figure, and the retention of S5 despite its known negative result is the test of that rule."
+  },
+
+  "candidate_signals_frozen": {
+    "source_restriction": "every signal is a predicate over the BOOLEAN fields of the B11b v1.0.0 t0 feature contract, or a signal definition inherited verbatim from an already-frozen preregistration. Nothing else is admissible.",
+    "why_only_booleans": "the contract's other fields are integers, and any signal over an integer needs a cut. No threshold may be chosen before labels exist — the same reason B11b excluded the momentum and curve-progress baselines. Rather than repeat that argument per signal, integer-derived signals are excluded by construction and recorded as deferred below.",
+    "set": [
+      {"signal_id": "S1_CREATOR_INITIAL_BUY_PRESENT", "predicate": "creator_initial_buy_present is true", "source": "B11b t0 feature contract v1.0.0, boolean field, unchanged; one arm of B11b's frozen P4 partition"},
+      {"signal_id": "S2_NO_CREATOR_INITIAL_BUY", "predicate": "creator_initial_buy_present is false", "source": "B11b t0 feature contract v1.0.0, the same boolean field negated; the complement arm of B11b's frozen P4 partition, retained so the partition is reported in full and neither arm can be quietly dropped"},
+      {"signal_id": "S3_T0_IS_LAUNCH_INSTRUCTION", "predicate": "t0_is_launch_instruction is true", "source": "B11b t0 feature contract v1.0.0, boolean field, unchanged"},
+      {"signal_id": "S4_CASHBACK_ENABLED", "predicate": "is_cashback_enabled is true", "source": "B11b t0 feature contract v1.0.0, boolean field, unchanged"},
+      {"signal_id": "S5_CREATOR_REENTRY_DELAYED_CONFIRMATION", "predicate": "B16D_CREATOR_REENTRY_SIGNAL_V1's signal definition VERBATIM: the first buy on a curve by a wallet equal to that curve's creator or create_user field, strictly after the create coordinate, at most one per curve", "source": "B16D_CREATOR_REENTRY_SIGNAL_V1, inherited unchanged", "retained_deliberately": "its burned-corpus result was negative and it is kept anyway; dropping it would be selection on a known outcome"}
+    ],
+    "completeness": "this is the complete list. No signal may be added, removed or reworded after any outcome on any window is seen.",
+    "wallet_equality_is_not_ownership": "S5 compares a wallet to a recorded field. A wallet equal to a recorded field is a wallet equal to a recorded field. No clustering, ownership or identity inference is performed anywhere, in either direction, and our own knowledge of our own addresses may never enter a feature."
+  },
+
+  "observability_gate": {
+    "rule": "an entry is admissible only if the signal was provably observable before the entry instant",
+    "same_slot_is_refused": "an entry in the SAME slot at a later transaction index is REFUSED. Ordering within a slot is decided by the leader, not by what an observer had seen, so same-slot capture cannot be proven and will not be assumed.",
+    "reported_separately": "the count of same-slot-later-transaction opportunities is reported as an INADMISSIBLE variant, so a reader can see what was given up and cannot mistake it for a result",
+    "inherited_from": "B16D_CREATOR_REENTRY_SIGNAL_V1, unchanged"
+  },
+
+  "evaluation_versus_development": {
+    "the_rule_that_makes_this_a_preregistration": "this document is frozen NOW; the study runs LATER, on a window this author has not read and whose result does not yet exist.",
+    "evaluation_window": "the B11a fresh cohort, when B11 has produced it. Its composition is NOT inspected before or during freezing, and this document does not reference it.",
+    "burned_corpus_is_development_only": "any run against B8b/B9/B10/B16 artifacts is DEVELOPMENT ONLY: it may be used to prove the machinery computes what it claims, and its figures may NEVER be reported as an evaluation result or as evidence of edge.",
+    "one_pass": "the evaluation runs ONCE on the fresh window. A second pass after seeing the first is a new study needing a new preregistration.",
+    "no_peeking_clause": "if the machinery must be debugged after the fresh window exists, it is debugged against synthetic fixtures or the burned corpus, never by inspecting fresh-window outcomes."
+  },
+
+  "frozen_inputs_unchanged": {
+    "entry_delays_slots": [1, 2, 4],
+    "entry_delay_source": "B15D_SHADOW_ROUTE_V1 and B15L, inherited unchanged",
+    "position_lamports": 100000000,
+    "position_source": "0.1 SOL, fixed from B10a onward. No size was chosen with this study in view and none is varied here.",
+    "horizons": ["h_1000_slots", "h_10000_slots", "h_10_observations", "administrative_window_end"],
+    "horizon_source": "the four B10c horizons, inherited unchanged, with B10c STATE-IN-FORCE semantics",
+    "cost_scenarios": "B15D_SHADOW_ROUTE_V1's optimistic, base and stressed, verbatim. None is added, removed or retuned.",
+    "fee_schedule": {
+      "source": "decoded EXACTLY from that curve's own TradeEvent payloads using the pinned IDL",
+      "never_hardcoded": "a hardcoded schedule was a real defect in B15F and is forbidden. A curve whose schedule cannot be decoded is REFUSED, not priced at an assumed rate.",
+      "one_per_curve": "the schedule of the curve's first decodable TradeEvent; a curve whose decodable schedules disagree is refused"
+    },
+    "capacity_gate": "B15M's external-only payability against the OBSERVED exit book. A cell whose exit the observed reserves could not pay for is refused, never priced against liquidity our own entry supplied.",
+    "arithmetic": "B9I's pinned formulas and B10a's price_entry, price_exit and curve_fees by direct call. No formula is reimplemented. Exact integers only; NO FLOAT ANYWHERE.",
+    "canonical_order": "(slot, transaction_index, outer_index, inner_index), never insertion order"
+  },
+
+  "frozen_baselines_non_model": {
+    "baseline_launch": "the same machinery entered at the same delays after the CREATE coordinate instead of the signal. The launch-snipe comparator.",
+    "baseline_any_buy": "the same machinery entered at the same delays after the first NON-creator buy on that curve. The 'somebody bought' comparator, which distinguishes a specific effect from a generic activity effect.",
+    "why_both": "a signal that only matches 'any buy' is not a signal about anything in particular. A signal that only matches 'launch' is not a delayed-confirmation signal.",
+    "computed_on_the_same_denominator_and_machinery": true,
+    "inherited_from": "B16D_CREATOR_REENTRY_SIGNAL_V1, unchanged"
+  },
+
+  "what_survives_costs_means_exactly": {
+    "pre_committed_criterion": "a signal SURVIVES COSTS at a cell group if the exact integer MEDIAN net outcome of its admissible cells, after complete entry and exit costs and after the B15M capacity gate, is STRICTLY GREATER THAN ZERO.",
+    "zero_is_not_a_tuned_threshold": "zero is break-even, an accounting identity, not a fitted number. No other cut is used and none may be introduced.",
+    "median_not_mean": "exact integer median by integer index into the sorted values. NO MEAN, because a mean over a censored heavy-tailed set invites reading it as an expectation.",
+    "surviving_is_not_an_edge": "a median above zero on one window is a description of that window, not a demonstration of edge, not a return, and not grounds to trade. It would license a NEXT study, nothing more.",
+    "censoring": "a right-censored cell carries no outcome, is never counted as zero, and is reported in the censored count beside every figure"
+  },
+
+  "multiplicity": {
+    "family_definition": "signals x horizons",
+    "family_size": 20,
+    "members": "S1..S5 crossed with the four frozen horizons",
+    "primary_result": "ONE pre-committed figure: the exact integer median net outcome for S1 at delay 1, horizon h_10000_slots, under the `base` cost scenario, reported beside its coverage, its censored count and both frozen baselines. Every other cell is secondary, reported only in a table, and MAY NOT be promoted to primary after the fact.",
+    "why_s1_is_primary": "it is the arm of B11b's already-frozen P4 partition, chosen for its prior status in a frozen document rather than for anything known about its outcome",
+    "correction_if_ever_tested": "any future inferential claim over this family uses a Bonferroni-corrected alpha of 0.05/20 = 0.0025",
+    "no_test_in_this_pass": "no significance test, confidence interval or p-value is computed. Grouped uncertainty, if reported, is an assumption-free jackknife range."
+  },
+
+  "denominator_and_coverage": {
+    "reported_first": "coverage — cells admitted, refused by code, and censored per signal — is reported BEFORE any outcome figure, so no outcome can be read without the share of the cohort it came from",
+    "whole_cohort": "the whole admissible cohort is the denominator. A signal that fires on few curves is reported as firing on few curves.",
+    "selection_is_the_usual_explanation": "where an apparent effect coincides with a small or unusual selected subgroup, that is reported as the leading explanation rather than as a finding"
+  },
+
+  "outcome_reporting": {
+    "statistics": "exact integer order statistics: min, p10, p25, median, p75, p90, max, and counts at or below zero",
+    "never_aggregated": "no figure spans two signals, two horizons, two delays or two cost scenarios. Alternative assumptions are not samples of a distribution.",
+    "tail_and_concentration": "the share of total positive outcome attributable to the top cells is reported per signal, so a lottery shape cannot present as an edge",
+    "not_a_return": "no figure is a return, a profit, an expected value or a performance result, and none may be described as one"
+  },
+
+  "deliberately_deferred_with_reasons": {
+    "note": "recorded rather than written thinly and amended later. An amendment after seeing a result is the failure this document exists to prevent, wearing a disguise.",
+    "items": [
+      {"item": "signals over the contract's INTEGER fields", "reason": "each needs a numeric cut, and no threshold may be chosen before labels exist — the same reason B11b excluded the momentum and curve-progress baselines. Specifiable only after a labelled window exists, in a preregistration committed before the cut is chosen."},
+      {"item": "regime-conditional variants", "reason": "the partition would have to be defined against the fresh window's regime composition, and inspecting that composition before evaluation is exactly the leakage this project forbids. Cannot be honestly specified now."},
+      {"item": "multi-signal combinations", "reason": "a combination carries implicit weights and is a model, not a signal. It needs its own preregistration, committed before any single-signal result on the evaluation window is seen."},
+      {"item": "signals using cross-curve aggregates or off-chain data", "reason": "excluded by the B11b feature contract's source_restriction, which admits only fields published by the pinned IDL for the curve's own events."},
+      {"item": "anything requiring issuance", "reason": "out of scope by decision, not by difficulty. Issuance is not recommended as a strategy."}
+    ]
+  },
+
+  "refusal_codes": [
+    {"code": "N_NO_SIGNAL", "meaning": "the curve does not satisfy the signal predicate"},
+    {"code": "N_SAME_SLOT_UNPROVABLE", "meaning": "the only entry opportunity was in the signal's own slot; observability cannot be proven"},
+    {"code": "N_NO_ENTRY_OBSERVATION", "meaning": "no observation exists at or after the delayed entry coordinate"},
+    {"code": "N_NO_FEE_SCHEDULE", "meaning": "the curve's fee basis points could not be decoded from its own TradeEvents"},
+    {"code": "N_FEE_SCHEDULE_AMBIGUOUS", "meaning": "the curve's decodable schedules disagree"},
+    {"code": "N_RIGHT_CENSORED", "meaning": "no observation at or after the exit horizon; the cell carries no outcome"},
+    {"code": "N_COMPLETE_AT_ENTRY_OR_EXIT", "meaning": "the curve is complete, so the observed state is not one our order could have traded against"},
+    {"code": "N_CAPACITY_REFUSED", "meaning": "the observed exit book could not pay for the sale"},
+    {"code": "N_ENTRY_UNPRICEABLE", "meaning": "B10a refused the entry"},
+    {"code": "N_EXIT_UNPRICEABLE", "meaning": "B10a refused the exit"},
+    {"code": "N_STRING_IN_FEATURE_BLOCK", "meaning": "a string reached a feature value, violating the frozen no-strings rule"},
+    {"code": "N_FLOAT_PRESENT", "meaning": "a non-integer appeared in a quantity"}
+  ],
+
+  "prohibitions": [
+    "no signal may be added, removed, reworded or reordered after seeing any outcome on any window",
+    "no threshold, delay, horizon or size may be changed after seeing any outcome",
+    "no burned-corpus figure may be reported as an evaluation result or as evidence of edge",
+    "no result licenses a trade, a recommendation to follow any wallet, or an issuance",
+    "no identity, ownership or funding-cluster inference; wallet equality is not owner identity",
+    "no string may appear in any feature value",
+    "no reading of research/b11a composition or outcomes before evaluation; no network; no signing, submission, spend or transaction construction",
+    "no promotion of a secondary cell to primary after the fact",
+    "no aggregation across signals, horizons, delays or cost scenarios",
+    "any float in any quantity"
+  ],
+
+  "status_locks": {
+    "label": "NON_ISSUANCE_SIGNAL_DIAGNOSTIC",
+    "executable": false,
+    "landing_probability": "unmeasured",
+    "competitor_response": "unmeasured",
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "assumption": "UNREACTING_ORDER_FLOW: the observed path is replayed as if our order did not change it, which it would have"
+  }
+}
