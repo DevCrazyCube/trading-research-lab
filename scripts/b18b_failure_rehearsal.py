@@ -433,12 +433,54 @@ def recorder_zero_frame_finding():
                            "class of error as a zero standing in for an unknown"),
         "recorder_not_changed": ("scripts/recorder.py is untouched. B18a refuses a zero-length "
                                  "frame header instead. Changing the recorder's framing while a "
-                                 "collection run reads it needs its own authorization and its own "
-                                 "evidence."),
-        "what_a_fix_would_need": ("a framing change is not obviously safe: existing sealed segments "
-                                  "and their .sha256 sidecars were written under the current rule, "
-                                  "so a reader that starts rejecting zero-length headers must be "
-                                  "shown not to reject any real historical frame first"),
+                                 "collection run reads it needs its own authorization."),
+        "safety_evidence": zero_length_header_is_unreachable(),
+    }
+
+
+def zero_length_header_is_unreachable():
+    """The evidence a recorder fix would need, gathered 2026-08-07. Read-only.
+
+    The open question was whether rejecting a zero-length frame header could reject a REAL frame.
+    The answer does not depend on what history happens to exist, which is what makes it worth
+    having: `SegmentWriter.write` computes the header length as `len(json.dumps(header).encode())`,
+    and the shortest JSON serialization of any Python value is two bytes. A written frame therefore
+    ALWAYS carries `header_len >= 2`, and `header_len == 0` is unreachable from the writer rather
+    than merely unobserved.
+
+    So the guard rejects exactly the states the writer cannot produce. Sampling history would have
+    been the weaker argument even if there were history to sample -- and there is not: a sweep of
+    the repository found no recorder-framed file at all, because `SegmentWriter` is called only
+    inside recorder.py and by tests, and no collection run has left a persisted segment here. An
+    empty population means the change is UNBLOCKED by historical evidence, not that it is proven
+    safe; the reachability argument is what makes it safe.
+    """
+    RECORDER = _load("recorder_for_reachability", "recorder.py")
+    probes = [{}, {"recorder_id": "x"}, {"a": 1}, None, []]
+    lengths = [len(json.dumps(probe, separators=(",", ":")).encode()) for probe in probes]
+    return {
+        "question": "could refusing a zero-length frame header refuse a real frame?",
+        "answer": "no, and not because history happens to lack one",
+        "shortest_header_the_writer_can_emit_bytes": min(lengths),
+        "probe_header_lengths": lengths,
+        "why": ("SegmentWriter.write derives header_len from json.dumps(header).encode(), whose "
+                "shortest possible output is 2 bytes ('{}' or '[]'). header_len == 0 is therefore "
+                "unreachable from the writer."),
+        "historical_population": {
+            "recorder_framed_files_found_in_repository": 0,
+            "note": ("SegmentWriter is called only inside recorder.py and by tests; no collection "
+                     "run has left a persisted segment here. research/b6g_*_raw.bin use a different "
+                     "8-byte length prefix written by scripts/b6g_analyze_raw.py, and "
+                     "research/b15*/segments hold gzipped JSONL, not CRC-framed records."),
+            "an_empty_population_proves_nothing_on_its_own": (
+                "nothing to break is not the same as safe to change; the reachability argument "
+                "above is what carries the claim"),
+        },
+        "what_this_does_and_does_not_authorize": (
+            "it removes the objection I raised against a recorder-side fix. It is not authorization "
+            "to make one: recorder.py is manifest-adjacent collection code and a change to it "
+            "belongs to whoever owns that decision, not to this harness."),
+        "crc32c_of_empty_body": RECORDER.crc32c(b""),
     }
 
 

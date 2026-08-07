@@ -2618,10 +2618,29 @@
   "crc32c_of_empty_body": 0,
   "finding": "CRC32C of an empty body is 0, so a zero-filled region satisfies the recorder's own scanner as a run of valid empty records",
   "last_seq_reported": 0,
-  "recorder_not_changed": "scripts/recorder.py is untouched. B18a refuses a zero-length frame header instead. Changing the recorder's framing while a collection run reads it needs its own authorization and its own evidence.",
+  "recorder_not_changed": "scripts/recorder.py is untouched. B18a refuses a zero-length frame header instead. Changing the recorder's framing while a collection run reads it needs its own authorization.",
   "records_the_recorder_counts_as_valid": 3,
+  "safety_evidence": {
+   "answer": "no, and not because history happens to lack one",
+   "crc32c_of_empty_body": 0,
+   "historical_population": {
+    "an_empty_population_proves_nothing_on_its_own": "nothing to break is not the same as safe to change; the reachability argument above is what carries the claim",
+    "note": "SegmentWriter is called only inside recorder.py and by tests; no collection run has left a persisted segment here. research/b6g_*_raw.bin use a different 8-byte length prefix written by scripts/b6g_analyze_raw.py, and research/b15*/segments hold gzipped JSONL, not CRC-framed records.",
+    "recorder_framed_files_found_in_repository": 0
+   },
+   "probe_header_lengths": [
+    2,
+    19,
+    7,
+    4,
+    2
+   ],
+   "question": "could refusing a zero-length frame header refuse a real frame?",
+   "shortest_header_the_writer_can_emit_bytes": 2,
+   "what_this_does_and_does_not_authorize": "it removes the objection I raised against a recorder-side fix. It is not authorization to make one: recorder.py is manifest-adjacent collection code and a change to it belongs to whoever owns that decision, not to this harness.",
+   "why": "SegmentWriter.write derives header_len from json.dumps(header).encode(), whose shortest possible output is 2 bytes ('{}' or '[]'). header_len == 0 is therefore unreachable from the writer."
+  },
   "valid_bytes_the_recorder_reports": 60,
-  "what_a_fix_would_need": "a framing change is not obviously safe: existing sealed segments and their .sha256 sidecars were written under the current rule, so a reader that starts rejecting zero-length headers must be shown not to reject any real historical frame first",
   "why_it_matters": "a preallocated, sparse or zero-filled region would read as observations rather than as absence, and absence read as observation is the same class of error as a zero standing in for an unknown",
   "zero_bytes_probed": 64
  },

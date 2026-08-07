@@ -400,6 +400,11 @@ class KillResumeAndQuarantineTests(unittest.TestCase):
 
 class RecorderZeroFrameFindingTests(unittest.TestCase):
 
+    def setUp(self):
+        self._directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self._directory.cleanup)
+        self.root = self._directory.name
+
     def test_the_finding_is_demonstrated_not_asserted(self):
         finding = B18B.recorder_zero_frame_finding()
         self.assertEqual(finding["crc32c_of_empty_body"], 0)
@@ -415,11 +420,51 @@ class RecorderZeroFrameFindingTests(unittest.TestCase):
         B18B.recorder_zero_frame_finding()
         self.assertFalse((ROOT / ".b18b_zero_probe.seg").exists())
 
-    def test_the_finding_says_why_a_fix_is_not_obviously_safe(self):
+    def test_the_finding_carries_the_safety_evidence_and_its_limits(self):
         """A finding that only says 'this is wrong' invites an unsafe fix."""
         finding = B18B.recorder_zero_frame_finding()
-        self.assertIn("sidecars", finding["what_a_fix_would_need"])
         self.assertIn("untouched", finding["recorder_not_changed"])
+        evidence = finding["safety_evidence"]
+        self.assertIn("not authorization", evidence["what_this_does_and_does_not_authorize"])
+
+    def test_the_real_writer_cannot_emit_a_zero_length_header(self):
+        """The claim, tested against the ACTUAL SegmentWriter rather than argued from its source.
+
+        This is why refusing `header_len == 0` cannot refuse a real frame: the writer derives the
+        length from json.dumps(header).encode(), whose shortest output is two bytes. Not rare --
+        unreachable. An argument from reading the code would be the weaker version of this.
+        """
+        writer = RECORDER.SegmentWriter(self.root, "REC01", "SESS01")
+        headers = [{}, {"recorder_id": "x"}, {"a": 1, "b": [1, 2]}, None, []]
+        for seq, header in enumerate(headers):
+            writer.write(seq, header, b"payload")
+        path = pathlib.Path(writer.seal(len(headers) - 1))
+
+        data = path.read_bytes()
+        struct_ = RECORDER.SegmentWriter.HDR
+        offset, seen = 0, 0
+        while offset + struct_.size <= len(data):
+            record_len, header_len, _seq, _crc = struct_.unpack_from(data, offset)
+            with self.subTest(frame=seen):
+                self.assertGreaterEqual(header_len, 2,
+                                        "the writer emitted a header shorter than '{}'")
+            offset += struct_.size + header_len + record_len
+            seen += 1
+        self.assertEqual(seen, len(headers))
+
+    def test_no_recorder_framed_file_exists_in_the_repository(self):
+        """The population the historical check would have sampled. It is empty, and that is a fact
+        about this repository rather than an argument -- so the finding does not lean on it."""
+        evidence = B18B.zero_length_header_is_unreachable()
+        self.assertEqual(
+            evidence["historical_population"]["recorder_framed_files_found_in_repository"], 0)
+        self.assertIn("not the same as safe to change",
+                      evidence["historical_population"]["an_empty_population_proves_nothing_on_its_own"])
+
+    def test_the_shortest_possible_header_is_two_bytes(self):
+        evidence = B18B.zero_length_header_is_unreachable()
+        self.assertEqual(evidence["shortest_header_the_writer_can_emit_bytes"], 2)
+        self.assertEqual(evidence["crc32c_of_empty_body"], 0)
 
 
 # ----------------------------------------------------------------------------------------------

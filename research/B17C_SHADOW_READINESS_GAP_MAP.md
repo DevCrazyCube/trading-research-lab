@@ -136,6 +136,22 @@ records — a preallocated or sparse region would read as observations. `recorde
 layer's to change, so b18a refuses a zero-length frame header instead, and a test pins both halves:
 that the recorder's scanner accepts the zeros, and that b18a does not.
 
+**The safety objection I raised against a recorder-side fix is now resolved (2026-08-07).** I said a
+reader that starts rejecting zero-length headers must first be shown to reject no real historical
+frame. It cannot: `SegmentWriter.write` derives the header length from `json.dumps(header).encode()`,
+whose shortest possible output is two bytes, so `header_len == 0` is **unreachable from the writer**
+rather than merely unobserved. A test writes five headers through the real `SegmentWriter` —
+including `{}`, `None` and `[]` — and asserts every emitted frame carries `header_len >= 2`.
+
+Separately, a sweep found **no recorder-framed file anywhere in the repository**: `SegmentWriter` is
+called only inside `recorder.py` and by tests, `research/b6g_*_raw.bin` use an 8-byte length prefix
+from a different tool, and `research/b15*/segments` hold gzipped JSONL. So there was no history to
+sample — but an empty population is not evidence of safety, and the claim rests on the
+reachability argument, not on the emptiness.
+
+This **removes the objection** to a recorder-side fix. It is **not** authorization to make one:
+`recorder.py` is collection code and that change belongs to whoever owns it.
+
 ### G2 — CLOSED for shadow by `scripts/b18a_shadow_record.py` (slice A)
 `b18a` reads recorder segments through the recorder's own CRC scanner and emits records conforming
 to the frozen contract. It reads the contract at import and **pins its canonical hash**, so an
