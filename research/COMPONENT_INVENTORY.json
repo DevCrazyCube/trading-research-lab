@@ -48,10 +48,10 @@
     },
     {
       "path": "scripts/b12b_operator_snapshot.py",
-      "status": "EXISTS_NOT_SHADOW_CONFORMING",
+      "status": "EXISTS_CONFORMING",
       "role": "builds and hashes the canonical read-only snapshot the console renders",
-      "why_not_shadow_conforming": "its schema predates B17B_EXECUTION_MEASUREMENT_V1 and carries none of its fields",
-      "tests": "tests/test_b12b_operator_console.py"
+      "tests": "tests/test_b12b_operator_console.py",
+      "conforms_to": "reads the emergency-state owner rather than rendering an unowned kill switch; build_snapshot stays pure and takes the verdict as data; a disagreement between health and the owner renders ENGAGED per B19a"
     },
     {
       "path": "scripts/b12b_preview_server.py",
@@ -288,7 +288,7 @@
     {
       "what": "an operator-reachable kill-switch CONTROL",
       "status": "SUPERSEDED",
-      "absence_evidence": "NO LONGER TRUE at the commit adding b20a. `scripts/b20a_emergency_state.py` is the owner of emergency state (slice E, built under explicit owner authorization) and produces `kill_switch_engaged` and `emergency_state` for b12a, which had demanded both and received them from nothing. What remains absent is the integration: b12b does not read its snapshot, no process runs its heartbeat, and no operator surface invokes engage/clear. The owner exists; nothing consumes it yet.",
+      "absence_evidence": "NO LONGER TRUE. scripts/b20a_emergency_state.py owns the state (owner-ratified, DECISIONS 2026-08-07), scripts/b20b_emergency_control.py is the operator surface, and b12b now READS the verdict via read_emergency rather than rendering a value nobody produced. What remains absent is a caller that composes them in production: build_snapshot takes the verdict as DATA and stays pure, so something must call read_emergency and pass it in. No such caller exists outside tests.",
       "correction_note": "This is narrower than B17c's original claim of 'no operator surface', which was wrong. The surface exists and shows the switch; what is missing is an owner of the switch's state."
     },
     {

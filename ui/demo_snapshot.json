@@ -10,6 +10,7 @@
     "sol": "exact. lamports // 1000000000 and the remainder as 9 fixed decimals, so every lamport is shown and nothing is rounded. Digits are never trimmed: a fixed width cannot be mistaken for a rounded one.",
     "version": "1.0.0"
   },
+  "emergency": null,
   "evidence": {
     "age_seconds": 2,
     "age_slots": 3,
@@ -303,7 +304,7 @@
     }
   ],
   "snapshot_schema_version": "1.0.0",
-  "snapshot_sha256": "b43b2dcb9bea65e3540dc911318e947fdc4b090a9d07114016892c2e610ce06c",
+  "snapshot_sha256": "8f6429533d22f0ff9b0df2f747f4ea07fc52c61777c2667441e09e0e4ba6cda3",
   "status_banner": {
     "detail": "SYNTHETIC DEMONSTRATION DATA. Every mint, creator, position and figure below is invented for interface development. No B11a composition was read and no outcome was computed.",
     "executable": false,

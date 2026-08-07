@@ -14,6 +14,8 @@ file itself.
 """
 import http.client
 import importlib.util
+import copy
+import ast
 import json
 import pathlib
 import re
@@ -986,3 +988,136 @@ class ScopeTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EmergencyOwnerWiringTests(unittest.TestCase):
+    """G6's last step: the console's kill switch now comes from something that owns it.
+
+    Before this, `build_snapshot` rendered whatever the caller put in `health`, and nothing produced
+    it -- b12a REFUSES a health snapshot omitting the field, so every caller had to invent an answer.
+    The switch was mandatory and unwritten.
+    """
+
+    def setUp(self):
+        self.components = copy.deepcopy(B12B.demo_components())
+
+    def verdict(self, engaged, reason="E09_EXPLICITLY_ENGAGED"):
+        return {"kill_switch_engaged": engaged, "emergency_state": engaged,
+                "reason_code": reason, "generation": 3, "detail": None}
+
+    def build(self, emergency=None, decisions=None, **health_overrides):
+        components = copy.deepcopy(self.components)
+        components["health"].update(health_overrides)
+        if decisions is not None:
+            components["risk_decisions"] = decisions
+        return B12B.build_snapshot(**components, emergency=emergency)
+
+    def build_halted(self, emergency, **health_overrides):
+        """Engaging means no approvals may be shown, so the fixture carries none.
+
+        b12b already refuses "1 opportunities are approved while the system is halted"; that guard
+        is correct and it is a real consequence of this wiring. The verdict and the decisions in a
+        snapshot must come from the SAME MOMENT -- an owner that says engaged cannot be rendered
+        beside approvals made while it said clear, because the snapshot is a coherent whole rather
+        than a collection of independently true panels.
+        """
+        return self.build(emergency=emergency, decisions=[], **health_overrides)
+
+    def test_without_a_verdict_the_snapshot_is_unchanged(self):
+        """The wiring is additive: existing callers keep working and the block is null."""
+        snapshot = self.build()
+        self.assertIsNone(snapshot["emergency"])
+        self.assertFalse(snapshot["overview"]["kill_switch_engaged"])
+
+    def test_the_owners_verdict_is_what_the_snapshot_renders(self):
+        snapshot = self.build_halted(self.verdict(True), kill_switch_engaged=False,
+                                     emergency_state=False)
+        self.assertTrue(snapshot["overview"]["kill_switch_engaged"])
+        self.assertTrue(snapshot["evidence"]["kill_switch_engaged"])
+        self.assertTrue(snapshot["overview"]["emergency_state"])
+        self.assertEqual(snapshot["emergency"]["owner"], "scripts/b20a_emergency_state.py")
+
+    def test_a_disagreement_renders_engaged_rather_than_refusing(self):
+        """B19a's rule, and the asymmetry is the reason: refusing would blind the operator
+        entirely, and showing clear when it is engaged costs whatever the halt was preventing."""
+        snapshot = self.build_halted(self.verdict(True), kill_switch_engaged=False,
+                                     emergency_state=False)
+        self.assertTrue(snapshot["emergency"]["sources_disagree"])
+        self.assertTrue(snapshot["overview"]["kill_switch_engaged"])
+        self.assertIn("ENGAGED", snapshot["emergency"]["disagreement_note"])
+
+    def test_a_supplied_engagement_is_never_downgraded_by_an_owner_saying_clear(self):
+        """The other direction of the same rule. Either source engaging is enough."""
+        snapshot = self.build_halted(self.verdict(False, "E00_CLEARED"),
+                                     kill_switch_engaged=True, emergency_state=True)
+        self.assertTrue(snapshot["emergency"]["sources_disagree"])
+        # BOTH fields. Asserting only the kill switch left a mutant alive that downgraded
+        # emergency_state alone -- the two are separate flags and each needs its own claim.
+        self.assertTrue(snapshot["overview"]["kill_switch_engaged"])
+        self.assertTrue(snapshot["overview"]["emergency_state"])
+        self.assertTrue(snapshot["evidence"]["emergency_state"])
+
+    def test_agreement_reports_no_disagreement_and_no_note(self):
+        """A guard that always fires is a stop, not a check."""
+        snapshot = self.build(emergency=self.verdict(False, "E00_CLEARED"),
+                              kill_switch_engaged=False, emergency_state=False)
+        self.assertFalse(snapshot["emergency"]["sources_disagree"])
+        self.assertIsNone(snapshot["emergency"]["disagreement_note"])
+        self.assertFalse(snapshot["overview"]["kill_switch_engaged"])
+
+    def test_both_sources_are_shown_not_just_the_resolved_value(self):
+        """An operator who sees `engaged` without being told the sources disagree will go looking
+        for a halt nobody ordered."""
+        snapshot = self.build_halted(self.verdict(True), kill_switch_engaged=False,
+                                     emergency_state=False)
+        self.assertEqual(snapshot["emergency"]["health_said"],
+                         {"kill_switch_engaged": False, "emergency_state": False})
+        self.assertTrue(snapshot["emergency"]["kill_switch_engaged"])
+
+    def test_an_engaged_verdict_beside_approvals_is_refused(self):
+        """The coherence guard, which this wiring makes reachable in a new way. Not a bug: a
+        snapshot is a whole, and approvals made while the switch said clear cannot be shown
+        beside an owner that now says engaged."""
+        with self.assertRaises(B12B.SnapshotRefused) as refusal:
+            self.build(emergency=self.verdict(True), kill_switch_engaged=False,
+                       emergency_state=False)
+        self.assertIn("approved while the system is halted", str(refusal.exception))
+
+    def test_the_block_says_the_console_may_not_mutate_it(self):
+        snapshot = self.build_halted(self.verdict(True))
+        self.assertFalse(snapshot["emergency"]["console_may_mutate_this"])
+
+    def test_build_snapshot_does_no_file_reading(self):
+        """It assembles components each validated by their owner. Reading state it does not own
+        would make it a second reader, and two readers of one file disagree eventually."""
+        tree = ast.parse((ROOT / "scripts" / "b12b_operator_snapshot.py").read_text())
+        builder = next(n for n in ast.walk(tree)
+                       if isinstance(n, ast.FunctionDef) and n.name == "build_snapshot")
+        calls = {ast.unparse(n.func) for n in ast.walk(builder) if isinstance(n, ast.Call)}
+        self.assertNotIn("B20A.read_verdict", calls)
+        self.assertNotIn("read_emergency", calls)
+        self.assertIn("emergency_block", calls)
+
+    def test_the_reader_exists_and_delegates_to_the_owner(self):
+        """The literal gap G6 named: b12b could not ask anything what the switch said."""
+        tree = ast.parse((ROOT / "scripts" / "b12b_operator_snapshot.py").read_text())
+        reader = next(n for n in ast.walk(tree)
+                      if isinstance(n, ast.FunctionDef) and n.name == "read_emergency")
+        calls = {ast.unparse(n.func) for n in ast.walk(reader) if isinstance(n, ast.Call)}
+        self.assertIn("B20A.read_verdict", calls)
+
+    def test_this_module_imports_no_write_operation_from_the_owner(self):
+        """A snapshot builder that could engage or clear would be a control surface."""
+        source = (ROOT / "scripts" / "b12b_operator_snapshot.py").read_text()
+        for operation in ("B20A.engage", "B20A.clear", "B20A.heartbeat", "B20A._write"):
+            with self.subTest(operation=operation):
+                self.assertNotIn(operation, source)
+
+    def test_the_console_and_preview_server_still_never_mention_the_owner(self):
+        """The codex seat's guard, re-asserted from my side because my change is what could break
+        it. The demo carries `emergency: null`, so no owner name reaches the page."""
+        for path in (ROOT / "ui" / "operator_console.html",
+                     ROOT / "scripts" / "b12b_preview_server.py",
+                     ROOT / "ui" / "demo_snapshot.json"):
+            with self.subTest(path=path.name):
+                self.assertNotIn("b20a", path.read_text())

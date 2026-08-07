@@ -1,0 +1,47 @@
+{
+  "sweep_id": "b12b_emergency",
+  "description": "The G6 wiring: b12b reads the emergency-state owner instead of rendering a kill switch nobody produced. The guards that matter are the fail-closed direction of a disagreement and the absence of any write path to the owner.",
+  "target": "scripts/b12b_operator_snapshot.py",
+  "tests": [
+    "tests/test_b12b_operator_console.py"
+  ],
+  "mutants": [
+    {
+      "name": "a disagreement renders the owner's value instead of engaging",
+      "old": "            \"kill_switch_engaged\": owned[0] or supplied[0],",
+      "new": "            \"kill_switch_engaged\": owned[0],"
+    },
+    {
+      "name": "a supplied engagement is downgraded by an owner saying clear",
+      "old": "            \"emergency_state\": owned[1] or supplied[1],",
+      "new": "            \"emergency_state\": owned[1],"
+    },
+    {
+      "name": "a disagreement is resolved silently, without telling the operator",
+      "old": "    disagree = supplied != owned",
+      "new": "    disagree = False"
+    },
+    {
+      "name": "the snapshot keeps rendering the caller's health instead of the owner",
+      "old": "    shown = owner_block[\"rendered\"] if owner_block else {",
+      "new": "    shown = None if owner_block else {"
+    },
+    {
+      "name": "the block stops saying the console may not mutate it",
+      "old": "        \"console_may_mutate_this\": False,\n    }\n\n\ndef build_snapshot",
+      "new": "        \"console_may_mutate_this\": True,\n    }\n\n\ndef build_snapshot"
+    },
+    {
+      "name": "the reader stops asking the owner",
+      "old": "    return B20A.read_verdict(now_unix_nanos, **kwargs)",
+      "new": "    return {\"kill_switch_engaged\": False, \"emergency_state\": False,\n            \"reason_code\": \"E00_CLEARED\", \"generation\": 0, \"detail\": None}"
+    },
+    {
+      "name": "emergency becomes an undeclared snapshot field again",
+      "old": "\"config\", \"emergency\", \"provenance\", \"snapshot_sha256\",",
+      "new": "\"config\", \"provenance\", \"snapshot_sha256\","
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None."
+}

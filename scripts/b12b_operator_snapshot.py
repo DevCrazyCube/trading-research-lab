@@ -58,6 +58,7 @@ def _load(name, filename):
 B12A = _load("b12a_risk_governor", "b12a_risk_governor.py")
 B11B = B12A.B11B
 B10B = B12A.B10B
+B20A = _load("b20a_emergency_state", "b20a_emergency_state.py")
 
 SCHEMA_VERSION = "1.0.0"
 
@@ -72,7 +73,7 @@ FORBIDDEN_STATUS_LEVEL = "EXECUTABLE"
 SNAPSHOT_FIELDS = (
     "snapshot_schema_version", "display_format", "status_banner", "overview", "pipeline",
     "windows", "strategy", "opportunities", "simulated_positions", "portfolio", "evidence",
-    "config", "provenance", "snapshot_sha256",
+    "config", "emergency", "provenance", "snapshot_sha256",
 )
 
 # --------------------------------------------------------------------------------------------
@@ -440,12 +441,67 @@ def _utilisation(used, limit):
     return list(B12A.METRICS.reduce_rational(used, limit))
 
 
+def read_emergency(now_unix_nanos, **kwargs):
+    """Ask the emergency-state owner what the switch says. The gap G6 named.
+
+    Until now the console rendered a `kill_switch_engaged` that came from whatever the caller put in
+    `health`, and nothing produced it -- b12a REFUSES a health snapshot omitting the field, so every
+    caller had to invent an answer. b20a owns it now and this is the read path to it.
+
+    A read only. This module builds a snapshot; it cannot engage or clear anything, and b20a's write
+    operations are not imported here.
+    """
+    return B20A.read_verdict(now_unix_nanos, **kwargs)
+
+
+def emergency_block(verdict, health):
+    """Render the owner's verdict, and refuse to show `clear` when the two sources disagree.
+
+    B19a's rule is that a disagreement means engaged, and it applies here for a reason specific to a
+    display: refusing to build the snapshot would blind the operator entirely, which is worse than
+    showing a switch as engaged when it might not be. The asymmetry is the whole point -- showing
+    engaged when it is clear costs a halt, showing clear when it is engaged costs whatever the halt
+    was there to prevent.
+
+    The disagreement is REPORTED rather than silently resolved, because an operator who sees
+    `engaged` without being told the sources disagree will look for a halt that nobody ordered.
+    """
+    owner = B20A.snapshot(verdict)
+    supplied = (health["kill_switch_engaged"], health["emergency_state"])
+    owned = (owner["kill_switch_engaged"], owner["emergency_state"])
+    disagree = supplied != owned
+    return {
+        **owner,
+        "sources_disagree": disagree,
+        "health_said": {"kill_switch_engaged": supplied[0], "emergency_state": supplied[1]},
+        "rendered": {
+            # Disagreement engages, per B19a. `or` rather than the owner's value alone, so a
+            # supplied engagement is never downgraded by an owner that says clear.
+            "kill_switch_engaged": owned[0] or supplied[0],
+            "emergency_state": owned[1] or supplied[1],
+        },
+        "disagreement_note": (
+            "the health snapshot and the emergency-state owner disagree; the snapshot renders "
+            "ENGAGED because a disagreement means engaged, and shows both sources rather than "
+            "hiding which one said what" if disagree else None),
+        "console_may_mutate_this": False,
+    }
+
+
 def build_snapshot(*, risk_decisions, portfolio, config, health, pipeline, windows, strategy,
-                   simulated_positions, provenance, status_detail):
+                   simulated_positions, provenance, status_detail, emergency=None):
     """Assemble one canonical snapshot from components that were each validated by their owner."""
     B12A.assert_config(config)
     B12A.assert_health(health)
     B12A.assert_portfolio(portfolio)
+
+    # `emergency` is DATA, not a file read. build_snapshot stays pure -- it assembles components
+    # each validated by their owner, and doing I/O here would make it a reader of state it does not
+    # own. `read_emergency` is the reader; the caller composes them.
+    owner_block = emergency_block(emergency, health) if emergency is not None else None
+    shown = owner_block["rendered"] if owner_block else {
+        "kill_switch_engaged": health["kill_switch_engaged"],
+        "emergency_state": health["emergency_state"]}
 
     age_slots = health["current_slot"] - health["evidence_slot"]
     age_seconds = health["current_unix"] - health["evidence_unix"]
@@ -537,9 +593,10 @@ def build_snapshot(*, risk_decisions, portfolio, config, health, pipeline, windo
             "open_positions": exposure["open_position_count"],
             "pending_orders": exposure["pending_order_count"],
             "results_locked": strategy["results_locked"],
-            "kill_switch_engaged": health["kill_switch_engaged"],
-            "emergency_state": health["emergency_state"],
+            "kill_switch_engaged": shown["kill_switch_engaged"],
+            "emergency_state": shown["emergency_state"],
         },
+        "emergency": owner_block,
         "pipeline": list(pipeline),
         "windows": dict(windows),
         "strategy": dict(strategy),
@@ -571,8 +628,8 @@ def build_snapshot(*, risk_decisions, portfolio, config, health, pipeline, windo
             "evidence_complete": health["evidence_complete"],
             "evidence_conflicting": health["evidence_conflicting"],
             "program_version_supported": health["program_version_supported"],
-            "kill_switch_engaged": health["kill_switch_engaged"],
-            "emergency_state": health["emergency_state"],
+            "kill_switch_engaged": shown["kill_switch_engaged"],
+            "emergency_state": shown["emergency_state"],
         },
         "config": {
             "config_version": config["config_version"],

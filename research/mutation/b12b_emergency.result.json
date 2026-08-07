@@ -1,0 +1,57 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 7,
+  "mutants_declared": 7,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b12b_operator_console.py::EmergencyOwnerWiringTests::test_a_supplied_engagement_is_never_downgraded_by_an_owner_saying_clear",
+      "name": "a disagreement renders the owner's value instead of engaging",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12b_operator_console.py::EmergencyOwnerWiringTests::test_a_supplied_engagement_is_never_downgraded_by_an_owner_saying_clear",
+      "name": "a supplied engagement is downgraded by an owner saying clear",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12b_operator_console.py::EmergencyOwnerWiringTests::test_a_disagreement_renders_engaged_rather_than_refusing",
+      "name": "a disagreement is resolved silently, without telling the operator",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12b_operator_console.py::EmergencyOwnerWiringTests::test_a_disagreement_renders_engaged_rather_than_refusing",
+      "name": "the snapshot keeps rendering the caller's health instead of the owner",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12b_operator_console.py::EmergencyOwnerWiringTests::test_the_block_says_the_console_may_not_mutate_it",
+      "name": "the block stops saying the console may not mutate it",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12b_operator_console.py::EmergencyOwnerWiringTests::test_the_reader_exists_and_delegates_to_the_owner",
+      "name": "the reader stops asking the owner",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12b_operator_console.py::SnapshotContractTests::test_a_changed_field_moves_the_hash",
+      "name": "emergency becomes an undeclared snapshot field again",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b12b_emergency",
+  "target": "scripts/b12b_operator_snapshot.py",
+  "tests": [
+    "tests/test_b12b_operator_console.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "6758135168c61755f07fbc1b10c0817feb42f9516cb0d494e7c9fb605dc4c6b8",
+  "working_tree_unchanged": true
+}
