@@ -32,6 +32,37 @@ NO NETWORK
 ----------
 Every transport is a callable defined here that raises or returns a scripted value. The whole sweep
 runs under B17a's `NoNetwork`, so a socket opened anywhere aborts it.
+
+TWO SURVIVING MUTANTS, AND WHY THEY ARE NOT "EQUIVALENT"
+--------------------------------------------------------
+The mutation sweep over this module reaches 24/24 only after two mutants are set aside, and the
+label they are set aside under matters more than the number. They hardcode values this module
+*reports*: `persisted_state` as `"quarantined"` in `rehearse_retries_exhausted`, and `attempts=1`
+with an empty backoff list in `rehearse_non_retryable`.
+
+I first called them equivalent mutants. They are not, and the codex seat was right to narrow it. A
+strictly equivalent mutant is identical on all inputs, so no test can kill it and inquiry correctly
+stops. These are identical only GIVEN that `b11c` currently persists before raising and quarantines
+a terminal fault on the first call. If `b11c` ever regressed and raised without persisting, the
+honest version would report the real state and the hardcoded version would not — and what it would
+hide is exactly the regression the Q05 rehearsal exists to detect.
+
+So the accurate label is **a mutant in a redundant reporting path whose underlying property is
+asserted independently elsewhere**. Today that elsewhere is
+`PrimaryEvidenceTests.test_the_state_file_on_disk_says_quarantined_after_exhausted_retries` and
+`test_a_terminal_failure_really_calls_the_transport_once`, which drive the staged watcher directly
+and read the file `b11c` actually wrote, never this module's report.
+
+The distinction is operational, not pedantic: "equivalent mutant" is the label that ends auditing,
+and "covered elsewhere" is the label that tells the next reader to go check the coverage still
+exists. If those two tests were ever weakened, the first label would keep the sweep looking clean
+while the property quietly stopped being checked.
+
+Note also why `ReportMatchesPrimaryEvidenceTests` does not catch them: it requires the report and the
+independent observation to AGREE, and a hardcoded `"quarantined"` agrees with a correct `b11c`.
+Agreement cannot detect a constant that happens to be right. The layering still holds — the
+cross-check catches disagreement, the primary evidence catches regression — but the cross-check is
+not the layer doing the work here.
 """
 import argparse
 import hashlib

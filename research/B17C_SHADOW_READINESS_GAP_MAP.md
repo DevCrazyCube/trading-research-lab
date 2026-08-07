@@ -313,7 +313,7 @@ narrowed, and still non-overlapping:
 | slice | files touched | why disjoint |
 |---|---|---|
 | ~~**A. B17b record layer (G1+G2)**~~ | `scripts/b18a_shadow_record.py` | **DONE** |
-| ~~**B. Failure rehearsal harness (G4)**~~ | `scripts/b18b_failure_rehearsal.py` | **DONE** (record layer; watcher-side still open) |
+| ~~**B. Failure rehearsal harness (G4)**~~ | `scripts/b18b_failure_rehearsal.py` | **DONE** (record layer; watcher side closed by B' below) |
 | ~~**B'. Watcher failure rehearsals**~~ | `scripts/b18c_watcher_failure_rehearsal.py` | **DONE**; 10/13 quarantine codes provoked, live watcher byte-unchanged |
 | ~~**C. Wallet/treasury architecture (G3)**~~ | `research/B19A_WALLET_TREASURY_ARCHITECTURE.md` | **DONE** (Codex); independently audited 2026-08-07 |
 | ~~**D. Strategy preregistrations (G5)**~~ | `research/B19B..B19D` preregs + `scripts/b19_preregistration_register.py` | **DONE** (codex seat, 2026-08-07); documents committed alone, register and tests separately |
@@ -373,3 +373,34 @@ pytest; under the standard-library runner the file looked unguarded. It has been
 are recorded in the inventory rather than left to be rediscovered:
 `test_b9b_curve_history_counts.py`, `test_b9c_signature_inventory.py`,
 `test_b9g_decode_readiness.py`, `test_b9g_seal_collection.py`, `test_handoff_queue.py`.
+
+## 7. Standing lessons
+
+Each of these was learned by getting it wrong here, and each has already recurred in a different
+disguise. They are recorded because the next occurrence will not look like the last one.
+
+**An artefact may not be trusted to describe itself.** The general form, found while mutation-testing
+B18c: *deriving a judgement in the test does not help if the input to the derivation still comes from
+the thing under test.* A test that reads a value out of a component cannot detect that component
+faking the value, however carefully it reasons about what it read. The only fix is evidence obtained
+independently — drive the subject yourself and read the primary artefact.
+
+The same failure wearing other clothes:
+- a **zero standing in for an unknown** — the record describes its own gap as a measurement
+- **B17a's closure scan read as a repository-wide result** — a scoped negative describing itself as global
+- **B18c publishing a quarantine code no rehearsal had caused** — read from a leftover state file
+- **a harness reporting `persisted_before_raise` as a boolean** — its own opinion of a fact
+
+**A check that cannot fire is worse than no check**, because it reads as protection. Prefer removing
+it; where the protection is genuinely wanted against a *future* change, extract it into a function a
+test can call with crafted input, rather than leaving it inline where its condition is always false.
+
+**A test killed by a different guard than the one it names is not testing that guard.** Mutation
+testing is what surfaces this; a passing suite never will.
+
+**Distinguish an equivalent mutant from a redundantly-covered one.** A strictly equivalent mutant is
+identical on all inputs and inquiry correctly stops. A mutant that is identical *only given that some
+other component is currently correct* is a different animal: it is covered elsewhere today, and the
+label matters because "equivalent" ends auditing while "covered elsewhere" invites someone to check
+the coverage still exists. Two of B18c's survivors were mislabelled this way and the codex seat
+caught it.
