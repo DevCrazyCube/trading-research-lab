@@ -1,0 +1,112 @@
+{
+  "sweep_id": "b15m",
+  "description": "Mutation sweep over the liquidity-capacity gate. B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1 -- frozen and committed alone -- states it INHERITS B15M's monotonicity verification and its differential test against B10b. That inheritance is only worth something if the inherited guards are load-bearing, and B10b's own maximality proof turned out not to be.",
+  "target": "scripts/b15m_liquidity_capacity.py",
+  "tests": [
+    "tests/test_b15m_liquidity_capacity.py"
+  ],
+  "mutants": [
+    {
+      "name": "the constraint post-condition is dropped",
+      "old": "    if not is_admissible(entry, exit_state, capacity):",
+      "new": "    if False:"
+    },
+    {
+      "name": "the maximality post-condition is dropped",
+      "old": "    if capacity < ceiling and is_admissible(entry, exit_state, capacity + 1):",
+      "new": "    if False:"
+    },
+    {
+      "name": "maximality only checked at the ceiling",
+      "old": "    if capacity < ceiling and is_admissible(entry, exit_state, capacity + 1):",
+      "new": "    if capacity < 0 and is_admissible(entry, exit_state, capacity + 1):"
+    },
+    {
+      "name": "the capacity search loses its upper half",
+      "old": "        if is_payable(entry, exit_state, middle):\n            low = middle",
+      "new": "        if is_payable(entry, exit_state, middle):\n            low = middle - 1"
+    },
+    {
+      "name": "a zero-draw capacity is reported rather than refused (primary route)",
+      "old": "    if gross_draw(entry, exit_state, low) < 1:\n        # Payable, and worth nothing.",
+      "new": "    if False:\n        # Payable, and worth nothing."
+    },
+    {
+      "name": "a zero-draw capacity is reported rather than refused (b10b route)",
+      "old": "    # The same zero-gross rule, so the two routes are comparing the same quantity.\n    if gross_draw(entry, exit_state, low) < 1:",
+      "new": "    # The same zero-gross rule, so the two routes are comparing the same quantity.\n    if False:"
+    },
+    {
+      "name": "an unpayable floor is accepted",
+      "old": "    if floor is None or not is_payable(entry, exit_state, floor):",
+      "new": "    if False:"
+    },
+    {
+      "name": "an entry taking more tokens than the curve holds is payable",
+      "old": "    if tokens > entry[\"real_token\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a zero-token draw is payable",
+      "old": "    if tokens <= 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a non-positive quote input is priced",
+      "old": "    if quote_in <= 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "non-positive virtual reserves accepted",
+      "old": "    if state[\"virtual_quote\"] <= 0 or state[\"virtual_token\"] <= 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "negative real reserves accepted",
+      "old": "    if state[\"real_quote\"] < 0 or state[\"real_token\"] < 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a ceiling that buys no token is accepted",
+      "old": "    if tokens_for(entry, ceiling) < 1:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the minimum-quote search loses its lower half",
+      "old": "        if tokens_for(entry, middle) >= 1:",
+      "new": "        if tokens_for(entry, middle) > 1:"
+    },
+    {
+      "name": "a float may appear in a quantity",
+      "old": "    if isinstance(value, bool) or not isinstance(value, int):",
+      "new": "    if False:"
+    },
+    {
+      "name": "forbidden result words are tolerated",
+      "old": "    if found:\n        raise CapacityRefused(\n",
+      "new": "    if False:\n        raise CapacityRefused(\n"
+    },
+    {
+      "name": "the forbidden-word scan skips the status locks",
+      "old": "        if key in STATUS_LOCK_KEYS:",
+      "new": "        if False:"
+    },
+    {
+      "name": "a tampered preregistration is accepted",
+      "old": "    if actual != expected:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an execution surface in this module is tolerated",
+      "old": "    if found:\n        raise CapacityRefused(f\"an execution surface appeared in {path.name}: {found}\")",
+      "new": "    if False:\n        raise CapacityRefused(f\"an execution surface appeared in {path.name}: {found}\")"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None expected. assert_maximal is already EXTRACTED as a named function precisely so its post-conditions can be provoked -- its docstring cites B10b learning that lesson the expensive way -- so if those two survive, extraction was necessary and not sufficient.",
+  "pytest_args": [
+    "-k",
+    "not test_the_real_artifacts_load_and_the_universe_is_not_empty"
+  ],
+  "pytest_args_reason": "ONE test of the 57 is excluded: it opens research/b15o/replication.json, research/b10b_observed_paths.sqlite and research/b15i/processed_feed.sqlite, which are untracked and therefore absent from a staged tree by design -- that absence is what keeps a staged tree from reaching the live research/b11a while a watcher writes to it. Without the exclusion the baseline fails and the sweep refuses, which is correct but leaves the other 56 tests unswept. WHAT THIS COSTS: any guard reachable ONLY through that test is invisible here, so a mutant killed solely by it will report as a survivor and must be given its own test rather than declared. That is the safe direction, but it is a real narrowing and this sweep's number is about 56 tests, not 57."
+}

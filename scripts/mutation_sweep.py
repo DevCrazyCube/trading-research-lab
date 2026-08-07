@@ -62,7 +62,8 @@ SWEEP_DIR = ROOT / "research" / "mutation"
 # here and worse — a mutant carrying `find` instead of `old` would be silently inert, and an inert
 # mutant is one this sweep counts as applied while it changes nothing.
 DECLARATION_FIELDS = ("sweep_id", "description", "target", "tests", "mutants",
-                      "expected_survivors", "expected_survivors_note", "needs_git_ancestry")
+                      "expected_survivors", "expected_survivors_note", "needs_git_ancestry",
+                      "pytest_args", "pytest_args_reason")
 
 # The ONLY tracked paths the tree check ignores, named rather than skipped silently.
 #
@@ -113,6 +114,10 @@ def assert_declaration(declaration, name):
             f"{name}: the declaration carries unknown field(s) {sorted(unknown)}. A misspelled "
             "field is an absent field wearing a plausible name, and an author who believes it is "
             "doing something is worse off than one who left it out")
+
+    if declaration.get("pytest_args") and not declaration.get("pytest_args_reason"):
+        raise SweepRefused(
+            f"{name} passes extra pytest arguments without stating why. Narrowing which tests run is narrowing what the score covers, and an unexplained narrowing is how a sweep comes to report a number about fewer guards than a reader assumes")
 
     mutants = declaration["mutants"]
     if not isinstance(mutants, list) or not mutants:
@@ -266,10 +271,10 @@ def first_failing_test(output):
     return None
 
 
-def _run_tests(staged_root, tests, timeout):
+def _run_tests(staged_root, tests, timeout, extra_args=()):
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pytest", *tests, "-x", "-q"],
+            [sys.executable, "-m", "pytest", *tests, *extra_args, "-x", "-q"],
             cwd=staged_root, capture_output=True, text=True, timeout=timeout)
         return result.returncode, result.stdout[-2000:]
     except subprocess.TimeoutExpired:
@@ -380,7 +385,8 @@ def run_sweep(name, root=ROOT, sweep_dir=SWEEP_DIR, timeout=600, staging_root=No
         target = assert_within(staged_root / target_name, staged_root, name)
         original = target.read_text()
 
-        baseline_code, baseline_output = _run_tests(staged_root, tests, timeout)
+        extra_args = declaration.get("pytest_args") or ()
+        baseline_code, baseline_output = _run_tests(staged_root, tests, timeout, extra_args)
         if baseline_code != 0:
             raise SweepRefused(
                 f"{name}: the unmutated suite does not pass in the staged tree (exit "
@@ -409,7 +415,7 @@ def run_sweep(name, root=ROOT, sweep_dir=SWEEP_DIR, timeout=600, staging_root=No
                     "with surrounding lines until it is unique.")
             target.write_text(original.replace(mutant["old"], mutant["new"], 1))
             try:
-                code, output = _run_tests(staged_root, tests, timeout)
+                code, output = _run_tests(staged_root, tests, timeout, extra_args)
             finally:
                 target.write_text(original)
             if code == 0:
@@ -464,6 +470,8 @@ def run_sweep(name, root=ROOT, sweep_dir=SWEEP_DIR, timeout=600, staging_root=No
             "working_tree_unchanged": True,
             "working_tree_sha256": _manifest_digest(after),
             "tree_manifest_exclusions": list(TREE_MANIFEST_EXCLUSIONS),
+            "pytest_args": list(extra_args),
+            "pytest_args_reason": declaration.get("pytest_args_reason"),
             "staged_copy_only": True,
             "git_ancestry_staged": bool(declaration.get("needs_git_ancestry")),
             "record_is_not_evidence_of_correctness":

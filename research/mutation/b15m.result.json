@@ -1,0 +1,122 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 19,
+  "mutants_declared": 19,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestCapacitySearch::test_an_answer_one_past_the_maximum_is_refused",
+      "name": "the constraint post-condition is dropped",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestCapacitySearch::test_an_answer_one_short_of_the_maximum_is_refused",
+      "name": "the maximality post-condition is dropped",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestCapacitySearch::test_an_answer_one_short_of_the_maximum_is_refused",
+      "name": "maximality only checked at the ceiling",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "timeout",
+      "name": "the capacity search loses its upper half",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestWorthSomethingBound::test_an_empty_book_reports_zero_not_a_token_sized_capacity",
+      "name": "a zero-draw capacity is reported rather than refused (primary route)",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::GuardsFoundUntestedByMutationTests::test_the_B10B_ROUTE_also_refuses_a_zero_draw_capacity",
+      "name": "a zero-draw capacity is reported rather than refused (b10b route)",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestResolutionFloor::test_capacity_is_zero_when_nothing_can_be_acquired",
+      "name": "an unpayable floor is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestCapacitySearch::test_the_entry_token_reserve_binds_as_well_as_the_exit_quote",
+      "name": "an entry taking more tokens than the curve holds is payable",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::GuardsFoundUntestedByMutationTests::test_a_draw_acquiring_ZERO_TOKENS_draws_NOTHING",
+      "name": "a zero-token draw is payable",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestWorthSomethingBound::test_the_gross_draw_is_non_decreasing",
+      "name": "a non-positive quote input is priced",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestCapacitySearch::test_impossible_reserves_refuse",
+      "name": "non-positive virtual reserves accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestCapacitySearch::test_negative_real_reserves_refuse",
+      "name": "negative real reserves accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestResolutionFloor::test_the_floor_is_none_when_even_the_ceiling_buys_nothing",
+      "name": "a ceiling that buys no token is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::GuardsFoundUntestedByMutationTests::test_the_minimum_quote_search_finds_the_FIRST_quote_buying_a_WHOLE_token",
+      "name": "the minimum-quote search loses its lower half",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestCapacitySearch::test_a_float_reserve_refuses",
+      "name": "a float may appear in a quantity",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestPreregistration::test_a_field_named_after_a_return_or_a_recommendation_is_refused",
+      "name": "forbidden result words are tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestPreregistration::test_the_status_locks_are_exempt",
+      "name": "the forbidden-word scan skips the status locks",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestPreregistration::test_a_tampered_freeze_refuses",
+      "name": "a tampered preregistration is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b15m_liquidity_capacity.py::TestPreregistration::test_an_execution_surface_is_caught",
+      "name": "an execution surface in this module is tolerated",
+      "outcome": "killed"
+    }
+  ],
+  "pytest_args": [
+    "-k",
+    "not test_the_real_artifacts_load_and_the_universe_is_not_empty"
+  ],
+  "pytest_args_reason": "ONE test of the 57 is excluded: it opens research/b15o/replication.json, research/b10b_observed_paths.sqlite and research/b15i/processed_feed.sqlite, which are untracked and therefore absent from a staged tree by design -- that absence is what keeps a staged tree from reaching the live research/b11a while a watcher writes to it. Without the exclusion the baseline fails and the sweep refuses, which is correct but leaves the other 56 tests unswept. WHAT THIS COSTS: any guard reachable ONLY through that test is invisible here, so a mutant killed solely by it will report as a survivor and must be given its own test rather than declared. That is the safe direction, but it is a real narrowing and this sweep's number is about 56 tests, not 57.",
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b15m",
+  "target": "scripts/b15m_liquidity_capacity.py",
+  "tests": [
+    "tests/test_b15m_liquidity_capacity.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "ee4c53df66be1465df19ec2c8aa5b8c34e47fc4edfda116a164dbe6d30848f5f",
+  "working_tree_unchanged": true
+}

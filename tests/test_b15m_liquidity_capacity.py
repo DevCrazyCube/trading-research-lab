@@ -528,5 +528,90 @@ class TestStudyRun(unittest.TestCase):
         self.assertGreater(len(exits), 0)
 
 
+class GuardsFoundUntestedByMutationTests(unittest.TestCase):
+    """Three guards a mutation sweep could neuter without any test noticing.
+
+    The two `assert_maximal` post-conditions DIED, which answers the question this sweep was run
+    to ask: extracting a guard so it can be provoked works, provided somebody then writes the test.
+    b10b extracted nothing and its equivalent checks all survived; b15m extracted AND tested, and
+    its did not.
+
+    The first survivor below is the interesting one and it was only visible because the mutation
+    patterns were disambiguated first.
+    """
+
+    def test_the_B10B_ROUTE_also_refuses_a_zero_draw_capacity(self):
+        """The same rule exists twice, deliberately, and only one copy was tested.
+
+        `external_capacity` and `capacity_via_b10b` both end with "if the gross draw is under one
+        lamport, the capacity is zero" — the second carries the comment *"the same zero-gross rule,
+        so the two routes are comparing the same quantity"*, because the differential check between
+        them is only meaningful if they apply identical rules.
+
+        A single mutation pattern matches both, mutates the first, and dies against the primary
+        route's test — reporting the pair as covered. Disambiguating them showed the b10b route's
+        copy has no test at all. That is the worst case for an ambiguous pattern: two sites kept
+        identical ON PURPOSE so a cross-check can compare them, where mutating one silently breaks
+        the cross-check's premise instead of the code it checks.
+        """
+        # A cell whose exit reserve can pay easily, but where any token amount draws LESS THAN
+        # ONE LAMPORT — a vanishing quote-to-token ratio. The first fixture attempted here reached
+        # zero through an earlier return instead, so the check was never exercised and the mutant
+        # lived; the assertion below pins that this one goes through the zero-gross rule itself.
+        entry = entry_state()
+        exit_tiny = exit_state(virtual_quote=1, virtual_token=10 ** 18, real_quote=10 ** 12)
+        self.assertGreater(B15M.tokens_for(entry, CEILING), 0,
+                           "the entry must acquire tokens, or the routes return early")
+        self.assertEqual(B15M.gross_draw(entry, exit_tiny, CEILING), 0,
+                         "and selling them must draw under one lamport, which is the rule at issue")
+        for route in (B15M.external_capacity, B15M.capacity_via_b10b):
+            with self.subTest(route=route.__name__):
+                self.assertEqual(route(entry, exit_tiny, CEILING), 0,
+                                 "a capacity that draws less than one lamport is not a capacity")
+
+    def test_a_draw_acquiring_ZERO_TOKENS_draws_NOTHING(self):
+        """The guard is in `gross_draw`, not in `is_payable` — writing it against the latter is
+        how that was established, since a zero-token quote is still *payable* (it draws nothing,
+        which the reserves can certainly cover).
+
+        Without it, `quote_out_for_tokens_in` is asked to price zero tokens. It answers zero here,
+        so the mutant is invisible to any test that only checks the number — the reason to assert
+        it is that pricing an empty position is a question that should not be asked at all, and
+        the short-circuit is what stops a future formula change from answering it differently.
+        """
+        entry = entry_state()
+        exits = exit_state()
+        self.assertEqual(B15M.tokens_for(entry, 1), 0,
+                         "the fixture must acquire zero tokens, or this proves nothing")
+        self.assertEqual(B15M.gross_draw(entry, exits, 1), 0)
+
+        # Force the difference: if the short-circuit is gone, the pricing formula runs and its
+        # answer is used. A stub makes that visible.
+        real = B15M.B9I.quote_out_for_tokens_in
+        B15M.B9I.quote_out_for_tokens_in = lambda vq, vt, tokens: 10 ** 9
+        self.addCleanup(setattr, B15M.B9I, "quote_out_for_tokens_in", real)
+        self.assertEqual(B15M.gross_draw(entry, exits, 1), 0,
+                         "a zero-token draw must not reach the pricing formula at all")
+
+    def test_the_minimum_quote_search_finds_the_FIRST_quote_buying_a_WHOLE_token(self):
+        """`>= 1` versus `> 1`, on a curve where the distinction is visible.
+
+        The launch fixture cannot see this: it is so steep that the first effective quote already
+        buys 35,766 tokens, so `>= 1` and `> 1` return the same answer and the mutant survives.
+        A SHALLOW curve — virtual token equal to virtual quote — buys exactly one token at q=3 and
+        two at q=4, which is the only shape that distinguishes the two conditions.
+
+        It matters because the floor is the study's lower search bound: overshooting it by one
+        token silently raises the bottom of every capacity in the run rather than failing.
+        """
+        shallow = entry_state(virtual_quote=1_000_000, virtual_token=1_000_000)
+        self.assertEqual(B15M.tokens_for(shallow, 2), 0)
+        self.assertEqual(B15M.tokens_for(shallow, 3), 1, "q=3 must buy EXACTLY one token")
+        self.assertEqual(B15M.tokens_for(shallow, 4), 2)
+
+        self.assertEqual(B15M.minimum_effective_quote(shallow, 1_000), 3,
+                         "the floor is the first quote buying a whole token, not two")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
