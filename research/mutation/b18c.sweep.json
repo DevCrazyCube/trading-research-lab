@@ -1,0 +1,151 @@
+{
+  "sweep_id": "b18c",
+  "description": "Watcher failure rehearsals against a copy. The safety guards matter more than the fidelity ones: a harness that can edit a manifest-pinned file while a watcher runs is worse than no harness at all.",
+  "target": "scripts/b18c_watcher_failure_rehearsal.py",
+  "tests": [
+    "tests/test_b18c_watcher_failure_rehearsal.py"
+  ],
+  "mutants": [
+    {
+      "name": "the live watcher is never re-checked",
+      "old": "    after = live_watcher_digest()\n    if after != before:",
+      "new": "    after = before\n    if False:"
+    },
+    {
+      "name": "the isolation guard stops checking ROOT",
+      "old": "    if module_root != scratch_root:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the isolation guard stops checking for the live work directory",
+      "old": "    if ROOT in module_work_dir.parents or module_work_dir == ROOT / \"research\" / \"b11a\":",
+      "new": "    if False:"
+    },
+    {
+      "name": "the isolation guard stops checking scratch containment",
+      "old": "    if not str(module_work_dir).startswith(str(scratch_root)):",
+      "new": "    if False:"
+    },
+    {
+      "name": "the isolation guard is never called when staging",
+      "old": "        assert_staged_isolation(self.module.ROOT, self.module.WORK_DIR, self.root)",
+      "new": "        pass"
+    },
+    {
+      "name": "rehearsals may share one state file",
+      "old": "        if path.exists():\n            raise RehearsalRefused(f\"{path} already exists",
+      "new": "        if False:\n            raise RehearsalRefused(f\"{path} already exists"
+    },
+    {
+      "name": "the scratch tree is left behind",
+      "old": "    def __exit__(self, *exception):\n        self._directory.cleanup()",
+      "new": "    def __exit__(self, *exception):\n        pass"
+    },
+    {
+      "name": "a probe/policy disagreement is reported instead of refused",
+      "old": "        if actual != fault[\"expected_retryable\"]:",
+      "new": "        if False:"
+    },
+    {
+      "name": "a diagnostic carrying the endpoint is accepted",
+      "old": "        if \"redacted\" in diagnostic or \"rpc.example.com\" in diagnostic:",
+      "new": "        if False:"
+    },
+    {
+      "name": "a composition probe mismatch is accepted",
+      "old": "        if actual != expected:\n            raise RehearsalRefused(",
+      "new": "        if False:\n            raise RehearsalRefused("
+    },
+    {
+      "name": "a written secret is not treated as a failure",
+      "old": "        for label in (\"full_url\", \"path_segment_only\", \"nested_in_a_diagnostic\"):\n            if not results[label][\"refused\"]:",
+      "new": "        for label in ():\n            if not results[label][\"refused\"]:"
+    },
+    {
+      "name": "a clean payload being refused goes unnoticed",
+      "old": "        if results[\"clean\"][\"refused\"]:",
+      "new": "        if False:"
+    },
+    {
+      "name": "the secret catch widens back to Exception",
+      "old": "            except staged.module.WatcherRefused as refusal:",
+      "new": "            except Exception as refusal:"
+    },
+    {
+      "name": "Q04 is credited without every probe refusing",
+      "old": "    if probes and all(probes.values()):",
+      "new": "    if probes and any(probes.values()):"
+    },
+    {
+      "name": "Q09 is credited unconditionally",
+      "old": "    if secret and all(secret.get(case, {}).get(\"refused\") for case in cases):",
+      "new": "    if secret:"
+    },
+    {
+      "name": "Q10 is credited unconditionally",
+      "old": "    if report.get(\"composition_refusal\", {}).get(\"count_keyed_by_window_word\") == \"refused\":",
+      "new": "    if True:"
+    },
+    {
+      "name": "a stage code is credited even when the stage did not refuse",
+      "old": "        if isinstance(entry, dict) and entry.get(\"reason_code\"):\n            reached.add(entry[\"reason_code\"])",
+      "new": "        if isinstance(entry, dict):\n            reached.add(entry.get(\"reason_code\") or \"Q07_stage_failed\")"
+    },
+    {
+      "name": "an unexplained unreached code gets no reason and no refusal",
+      "old": "    if unexplained:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the manifest is never attested before the edit",
+      "old": "    staged.module.assert_manifest_unchanged(state, state_path)\n    attested = state[\"manifest_sha256\"]",
+      "new": "    attested = \"0\" * 64"
+    },
+    {
+      "name": "the failing runner raises instead of returning a code",
+      "old": "        return 1\n",
+      "new": "        raise RuntimeError('stage exited 1')\n"
+    },
+    {
+      "name": "the clean stage is never run, so the happy path is unproven",
+      "old": "    staged.module.run_stage(\"program_boundary\", resolved, state, runner=clean_runner,",
+      "new": "    _unused = lambda *a, **k: None; _unused("
+    },
+    {
+      "name": "the two clocks are reported as one",
+      "old": "        \"progress_while_stage_ran\": still.get(\"stage_progress_at\"),",
+      "new": "        \"progress_while_stage_ran\": still.get(\"stage_heartbeat_at\"),"
+    },
+    {
+      "name": "the heartbeat is reported as advancing regardless",
+      "old": "        \"heartbeat_after\": state.get(\"stage_heartbeat_at\"),",
+      "new": "        \"heartbeat_after\": 99_999_999_999,"
+    },
+    {
+      "name": "progress is reported as advancing during a stage that made none",
+      "old": "        \"progress_after_real_progress\": state.get(\"stage_progress_at\"),",
+      "new": "        \"progress_after_real_progress\": 99_999_999_999,"
+    },
+    {
+      "name": "the persisted state is reported as quarantined regardless",
+      "old": "            \"persisted_state\": persisted[\"state\"],",
+      "new": "            \"persisted_state\": \"quarantined\","
+    },
+    {
+      "name": "a terminal fault's retry count is faked",
+      "old": "            \"attempts\": transport.calls[\"n\"],\n            \"backoff_sleeps\": slept,\n        }",
+      "new": "            \"attempts\": 1,\n            \"backoff_sleeps\": [],\n        }"
+    }
+  ],
+  "expected_survivors": [
+    {
+      "name": "the persisted state is reported as quarantined regardless",
+      "why": "A mutant in a REDUNDANT REPORTING PATH, not an equivalent mutant. It is identical only GIVEN that b11c persists before raising; were b11c to regress and raise without persisting, the hardcoded constant would hide exactly the regression the Q05 rehearsal exists to detect. The property is asserted independently by PrimaryEvidenceTests.test_the_state_file_on_disk_says_quarantined_after_exhausted_retries, which reads the file b11c actually wrote rather than this module's report. If that test is ever weakened this mutant stops being covered, which is why it is declared here instead of deleted."
+    },
+    {
+      "name": "a terminal fault's retry count is faked",
+      "why": "Same shape. Identical only given that a non-retryable failure quarantines on the first call. Covered independently by PrimaryEvidenceTests.test_a_terminal_failure_really_calls_the_transport_once, which asserts the transport call count directly."
+    }
+  ],
+  "expected_survivors_note": "Two. Both are mutants in a redundant reporting path whose underlying property is asserted independently elsewhere. 'Equivalent mutant' is the label that ends auditing; 'covered elsewhere' is the label that tells the next reader to check the coverage still exists. The codex seat corrected this wording in handoff 201 and the distinction is the reason these are declared rather than removed: if either starts being KILLED, the coverage that justifies it moved and the sweep will say so."
+}

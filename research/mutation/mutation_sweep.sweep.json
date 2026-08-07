@@ -1,0 +1,142 @@
+{
+  "sweep_id": "mutation_sweep",
+  "description": "The sweep framework applied to itself. If the thing that establishes other guards are load-bearing has untested guards of its own, every number it produces inherits that doubt.",
+  "target": "scripts/mutation_sweep.py",
+  "tests": [
+    "tests/test_mutation_sweep.py"
+  ],
+  "mutants": [
+    {
+      "name": "missing declaration file passes",
+      "old": "    if not path.is_file():",
+      "new": "    if False:"
+    },
+    {
+      "name": "required declaration fields not enforced",
+      "old": "        if field not in declaration:",
+      "new": "        if False:"
+    },
+    {
+      "name": "declaration identity not checked",
+      "old": "    if declaration[\"sweep_id\"] != name:",
+      "new": "    if False:"
+    },
+    {
+      "name": "empty mutant list tolerated",
+      "old": "    if not isinstance(mutants, list) or not mutants:",
+      "new": "    if False:"
+    },
+    {
+      "name": "required mutant fields not enforced",
+      "old": "            if field not in mutant:",
+      "new": "            if False:"
+    },
+    {
+      "name": "inert mutant tolerated",
+      "old": "        if mutant[\"old\"] == mutant[\"new\"]:",
+      "new": "        if False:"
+    },
+    {
+      "name": "duplicate mutant names tolerated",
+      "old": "        if mutant[\"name\"] in seen:",
+      "new": "        if False:"
+    },
+    {
+      "name": "declared survivor fields not enforced",
+      "old": "            if field not in expected:",
+      "new": "            if False:"
+    },
+    {
+      "name": "stale declared survivor tolerated",
+      "old": "        if expected[\"name\"] not in seen:",
+      "new": "        if False:"
+    },
+    {
+      "name": "untracked target tolerated",
+      "old": "    if target_name not in tracked:",
+      "new": "    if False:"
+    },
+    {
+      "name": "failing baseline tolerated",
+      "old": "        if baseline_code != 0:",
+      "new": "        if False:"
+    },
+    {
+      "name": "unmatched pattern skipped instead of refused",
+      "old": "            if mutant[\"old\"] not in original:",
+      "new": "            if False:"
+    },
+    {
+      "name": "undeclared survivors tolerated",
+      "old": "        if undeclared:",
+      "new": "        if False:"
+    },
+    {
+      "name": "resurrected declared survivor tolerated",
+      "old": "        if resurrected:",
+      "new": "        if False:"
+    },
+    {
+      "name": "staging escape guard neutered",
+      "old": "    if not pathlib.Path(path).resolve().is_relative_to(pathlib.Path(root).resolve()):",
+      "new": "    if False:"
+    },
+    {
+      "name": "staged copy left mutated between runs",
+      "old": "            finally:\n                target.write_text(original)",
+      "new": "            finally:\n                pass"
+    },
+    {
+      "name": "staging copies untracked files too",
+      "old": "    for name in tracked_files(root):",
+      "new": "    for name in [str(p.relative_to(root)) for p in pathlib.Path(root).rglob('*') if p.is_file() and '.git' not in p.parts]:"
+    },
+    {
+      "name": "working-tree-changed guard neutered",
+      "old": "    if added or removed or modified:",
+      "new": "    if False:"
+    },
+    {
+      "name": "sweep lock not taken",
+      "old": "    if lock.exists():",
+      "new": "    if False:"
+    },
+    {
+      "name": "sweep lock never released",
+      "old": "        lock.unlink(missing_ok=True)",
+      "new": "        pass"
+    },
+    {
+      "name": "tree-manifest exclusion widened to everything",
+      "old": "        if name in TREE_MANIFEST_EXCLUSIONS:",
+      "new": "        if True:"
+    },
+    {
+      "name": "unknown declaration field tolerated",
+      "old": "    if unknown:",
+      "new": "    if False:"
+    },
+    {
+      "name": "unknown mutant field tolerated",
+      "old": "        if unknown_mutant:",
+      "new": "        if False:"
+    },
+    {
+      "name": "unknown declared-survivor field tolerated",
+      "old": "        if unknown_survivor:",
+      "new": "        if False:"
+    },
+    {
+      "name": "subtest killers no longer parsed",
+      "old": "        for prefix in (\"FAILED \", \"SUBFAILED\"):",
+      "new": "        for prefix in (\"FAILED \",):"
+    },
+    {
+      "name": "unparsed killer reported as null instead of a reason code",
+      "old": "                    else first_failing_test(output) or \"U_KILLER_NOT_PARSED\"),",
+      "new": "                    else first_failing_test(output)),"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None. The two guards that no correct run can trigger \u2014 the staging-escape check and the working-tree-changed check \u2014 were EXTRACTED into assert_within and assert_tree_unchanged so tests could call them with crafted input. Left inline they would have been checks that cannot fire, and they would have survived this sweep while looking like protection."
+}

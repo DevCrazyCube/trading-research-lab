@@ -1,0 +1,137 @@
+{
+  "sweep_id": "b18b",
+  "description": "The failure rehearsals. What is defended here is the distinction a zero would erase: `never_sent` means we know it did not happen, `unknown` means it may have landed, and their land clocks carry different reason codes.",
+  "target": "scripts/b18b_failure_rehearsal.py",
+  "tests": [
+    "tests/test_b18b_failure_rehearsal.py"
+  ],
+  "mutants": [
+    {
+      "name": "the retry decision stops using the shared policy",
+      "old": "    return IDENTITY.is_retryable_error(fault[\"error\"])",
+      "new": "    return True"
+    },
+    {
+      "name": "a 403 becomes retryable",
+      "old": "    if fault[\"error\"] is None:\n        return False",
+      "new": "    if fault[\"error\"] is None:\n        return True"
+    },
+    {
+      "name": "provider silence claims the landing did not happen",
+      "old": "            unknown(field, \"U_PROVIDER_SILENT\" if fault[\"response_seen\"] is False else \"U_LOST\")",
+      "new": "            unknown(field, \"U_NOT_APPLICABLE\")"
+    },
+    {
+      "name": "a lost response is blamed on the provider",
+      "old": "        unknown(\"receipt_unix_nanos\", \"U_LOST\")",
+      "new": "        unknown(\"receipt_unix_nanos\", \"U_PROVIDER_SILENT\")"
+    },
+    {
+      "name": "a send that never happened is merely uninstrumented",
+      "old": "        for field in (\"send_unix_nanos\", \"receipt_unix_nanos\"):\n            unknown(field, \"U_NOT_APPLICABLE\")",
+      "new": "        for field in (\"send_unix_nanos\", \"receipt_unix_nanos\"):\n            unknown(field, \"U_NOT_INSTRUMENTED\")"
+    },
+    {
+      "name": "an on-chain failure loses its real cost",
+      "old": "        known(\"total_execution_cost_lamports\", 5_000 + 100_000 + 0 + 2_039_280)",
+      "new": "        unknown(\"total_execution_cost_lamports\", \"U_NOT_APPLICABLE\")"
+    },
+    {
+      "name": "retries stop being separate records",
+      "old": "        records.append(fault_record(",
+      "new": "        records.append(records[-1]) or (lambda *a, **k: None)("
+    },
+    {
+      "name": "a retry stops naming what it retried",
+      "old": "    if retry_of_signature is not None:\n        known(\"retry_of_signature\", retry_of_signature)",
+      "new": "    if False:\n        known(\"retry_of_signature\", retry_of_signature)"
+    },
+    {
+      "name": "duplicate attempts are accepted",
+      "old": "        if key in seen:",
+      "new": "        if False:"
+    },
+    {
+      "name": "a decision may precede its observation",
+      "old": "        if observation is not None and decision is not None and decision < observation:",
+      "new": "        if False:"
+    },
+    {
+      "name": "an effect may precede its cause within one attempt",
+      "old": "            if measured.get(later) is not None and measured.get(earlier) is not None \\\n                    and measured[later] < measured[earlier]:",
+      "new": "            if False:"
+    },
+    {
+      "name": "a stepped wall clock is accepted",
+      "old": "            if slot_forward and clock_back:",
+      "new": "            if False:"
+    },
+    {
+      "name": "clock incoherence never raises",
+      "old": "    if problems:\n        raise RecordRefused(f\"clock incoherence",
+      "new": "    if False:\n        raise RecordRefused(f\"clock incoherence"
+    },
+    {
+      "name": "a truncated record file parses as a shorter run",
+      "old": "    except json.JSONDecodeError as error:\n        raise RecordRefused(",
+      "new": "    except json.JSONDecodeError as error:\n        return [] or RecordRefused("
+    },
+    {
+      "name": "a count that disagrees with the contents is accepted",
+      "old": "    if len(records) != document.get(\"count\"):",
+      "new": "    if False:"
+    },
+    {
+      "name": "a digest mismatch is accepted",
+      "old": "    if digest != document.get(\"records_sha256\"):",
+      "new": "    if False:"
+    },
+    {
+      "name": "the write is no longer atomic",
+      "old": "    temporary.write_text(payload + \"\\n\")\n    temporary.replace(path)",
+      "new": "    path.write_text(payload + \"\\n\")"
+    },
+    {
+      "name": "a resumed run renumbers its survivors to look contiguous",
+      "old": "        \"attempts_durably_written\": sorted(written_indexes),",
+      "new": "        \"attempts_durably_written\": list(range(len(written_indexes))),"
+    },
+    {
+      "name": "a resumed run hides what the kill lost",
+      "old": "    missing = sorted(set(range(all_intended)) - written_indexes)",
+      "new": "    missing = []"
+    },
+    {
+      "name": "a quarantined run reads as merely partial",
+      "old": "        \"not_for_use\": (\"this run is INVALIDATED.",
+      "new": "        \"not_for_use\": (\"this run is partial. (\""
+    },
+    {
+      "name": "the zero-frame finding stops demonstrating anything",
+      "old": "        counted, valid_bytes, last_seq = RECORDER.scan_segment(str(scratch))",
+      "new": "        counted, valid_bytes, last_seq = (0, 0, None)  # scan_segment("
+    },
+    {
+      "name": "the probe leaves its scratch file behind",
+      "old": "    finally:\n        scratch.unlink(missing_ok=True)",
+      "new": "    finally:\n        pass"
+    },
+    {
+      "name": "the fault table stops being frozen",
+      "old": "    if fault_name not in FAULTS:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a fault record stops declaring it is not evidence",
+      "old": "    record[\"record_is_not_evidence\"] = (",
+      "new": "    record[\"_not_evidence_removed\"] = ("
+    },
+    {
+      "name": "a fault record stops naming its fault",
+      "old": "    record[\"synthetic_fault\"] = {",
+      "new": "    record[\"_fault_removed\"] = {"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None."
+}

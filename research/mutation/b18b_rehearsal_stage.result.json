@@ -1,0 +1,36 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "killed": 3,
+  "mutants_declared": 3,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b18b_failure_rehearsal.py::FaultRecordsAreNotEvidenceTests::test_a_rehearsal_record_without_its_fault_block_is_refused",
+      "name": "a rehearsal record needs no fault block",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18b_failure_rehearsal.py::FaultRecordsAreNotEvidenceTests::test_a_rehearsal_record_that_drops_the_not_evidence_marker_is_refused",
+      "name": "a rehearsal record needs no not-evidence marker",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18b_failure_rehearsal.py::FaultRecordsAreNotEvidenceTests::test_a_rehearsal_record_may_not_be_marked_executable",
+      "name": "a rehearsal record may be executable",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b18b_rehearsal_stage",
+  "target": "scripts/b18a_shadow_record.py",
+  "tests": [
+    "tests/test_b18b_failure_rehearsal.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "78e55934dba260c54dda1bff3be4f77d792559751160a8bd8df292f5de7c15b9",
+  "working_tree_unchanged": true
+}

@@ -1,0 +1,161 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "killed": 28,
+  "mutants_declared": 28,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ContractPinningTests::test_a_tampered_contract_refuses_to_load",
+      "name": "a tampered contract loads anyway",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ContractPinningTests::test_a_missing_contract_refuses_rather_than_defaulting",
+      "name": "a missing contract is tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_a_null_without_a_reason_is_refused",
+      "name": "a null needs no reason code",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_a_reason_attached_to_a_known_value_is_refused",
+      "name": "a reason may sit on a known value",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_a_reason_code_outside_the_frozen_set_is_refused",
+      "name": "any reason string is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_a_non_nullable_field_may_not_be_null",
+      "name": "non-nullable fields may be null",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_an_outcome_outside_the_frozen_enum_is_refused",
+      "name": "any outcome string is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::LandingProbabilityIsForbiddenTests::test_a_landing_probability_field_is_refused_by_name",
+      "name": "landing probability is no longer refused",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::LandingProbabilityIsForbiddenTests::test_it_is_refused_under_a_new_spelling",
+      "name": "only the exact name is refused, not the suffix",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ConformanceTests::test_a_total_cost_with_an_unknown_component_is_refused",
+      "name": "a partial total is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ConformanceTests::test_a_total_that_does_not_equal_its_components_is_refused",
+      "name": "a total need not equal its components",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ConformanceTests::test_an_unsanitized_endpoint_in_a_record_is_refused",
+      "name": "an unsanitized stored endpoint is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ConformanceTests::test_a_float_anywhere_is_refused",
+      "name": "floats are accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ShadowShapeTests::test_a_shadow_record_claiming_it_sent_something_is_refused",
+      "name": "a shadow record may claim it sent something",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ShadowShapeTests::test_a_shadow_record_may_not_claim_it_landed",
+      "name": "a shadow record may claim it landed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ConformanceTests::test_a_later_attempt_without_a_retry_link_is_refused",
+      "name": "a later attempt needs no retry link",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ConformanceTests::test_a_retry_that_names_nothing_is_refused",
+      "name": "a retry need not name what it retried",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ConformanceTests::test_a_negative_attempt_index_is_refused",
+      "name": "a negative attempt index is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ConformanceTests::test_a_field_the_contract_does_not_name_is_refused",
+      "name": "fields the contract does not name are accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_a_record_missing_a_contract_named_field_is_refused",
+      "name": "contract-named fields may be missing",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::ConformanceTests::test_a_record_against_another_contract_revision_is_refused",
+      "name": "a record from another contract revision is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::RecorderIsReadOnlyTests::test_a_segment_with_no_valid_frame_is_refused_not_reported_as_empty",
+      "name": "an unreadable segment reads as empty",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::RecorderIsReadOnlyTests::test_a_zero_filled_region_is_refused_rather_than_read_as_empty_records",
+      "name": "a zero-length frame header is read as a record",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::RecorderIsReadOnlyTests::test_a_frame_without_a_slot_is_refused_rather_than_anchored_to_nothing",
+      "name": "a frame without a slot is anchored to nothing",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_impossible_shadow_fields_say_not_applicable_not_uninstrumented",
+      "name": "impossible shadow fields claim they were merely not instrumented",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_a_non_nullable_field_may_not_be_null",
+      "name": "the tip defaults to zero instead of null",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::DeterminismAndSafetyTests::test_a_changed_field_produces_a_different_hash",
+      "name": "the hash stops being deterministic over content",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_a_non_nullable_field_may_not_be_null",
+      "name": "the endpoint is stored raw",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b18a",
+  "target": "scripts/b18a_shadow_record.py",
+  "tests": [
+    "tests/test_b18a_shadow_record.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "78e55934dba260c54dda1bff3be4f77d792559751160a8bd8df292f5de7c15b9",
+  "working_tree_unchanged": true
+}

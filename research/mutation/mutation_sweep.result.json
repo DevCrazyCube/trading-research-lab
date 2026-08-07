@@ -1,0 +1,151 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "killed": 26,
+  "mutants_declared": 26,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_a_missing_declaration_file_refuses",
+      "name": "missing declaration file passes",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_each_required_field_is_individually_required",
+      "name": "required declaration fields not enforced",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_a_declaration_that_does_not_know_its_own_name_refuses",
+      "name": "declaration identity not checked",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_a_sweep_with_no_mutants_refuses",
+      "name": "empty mutant list tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_each_mutant_field_is_individually_required",
+      "name": "required mutant fields not enforced",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_a_mutant_that_replaces_its_pattern_with_itself_refuses",
+      "name": "inert mutant tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_duplicate_mutant_names_refuse",
+      "name": "duplicate mutant names tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_a_declared_survivor_without_a_justification_refuses",
+      "name": "declared survivor fields not enforced",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_a_declared_survivor_naming_no_mutant_refuses",
+      "name": "stale declared survivor tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::RunTests::test_an_untracked_target_refuses",
+      "name": "untracked target tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::RunTests::test_a_failing_baseline_refuses_instead_of_reporting_a_perfect_score",
+      "name": "failing baseline tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::RunTests::test_an_unmatched_pattern_refuses_rather_than_skipping",
+      "name": "unmatched pattern skipped instead of refused",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::RunTests::test_an_undeclared_survivor_refuses",
+      "name": "undeclared survivors tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::RunTests::test_a_declared_survivor_that_gets_killed_refuses",
+      "name": "resurrected declared survivor tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::ExtractedGuardTests::test_a_target_escaping_the_staging_root_refuses",
+      "name": "staging escape guard neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::RunTests::test_the_staged_copy_is_what_gets_mutated",
+      "name": "staged copy left mutated between runs",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::StagingTests::test_staging_copies_tracked_files_and_not_ignored_ones",
+      "name": "staging copies untracked files too",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::ExtractedGuardTests::test_a_changed_working_tree_refuses_and_names_the_paths",
+      "name": "working-tree-changed guard neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::SweepLockTests::test_a_second_sweep_refuses_immediately_while_one_holds_the_lock",
+      "name": "sweep lock not taken",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::SweepLockTests::test_a_completed_sweep_releases_its_lock",
+      "name": "sweep lock never released",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::TreeManifestExclusionTests::test_a_change_to_anything_else_still_refuses",
+      "name": "tree-manifest exclusion widened to everything",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_an_unknown_declaration_field_refuses",
+      "name": "unknown declaration field tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_an_unknown_mutant_field_refuses",
+      "name": "unknown mutant field tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::DeclarationTests::test_an_unknown_declared_survivor_field_refuses",
+      "name": "unknown declared-survivor field tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::RunTests::test_a_subtest_failure_is_parsed_too",
+      "name": "subtest killers no longer parsed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_mutation_sweep.py::RunTests::test_a_killed_mutant_with_an_unparsable_killer_reports_a_reason_not_null",
+      "name": "unparsed killer reported as null instead of a reason code",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "mutation_sweep",
+  "target": "scripts/mutation_sweep.py",
+  "tests": [
+    "tests/test_mutation_sweep.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "78e55934dba260c54dda1bff3be4f77d792559751160a8bd8df292f5de7c15b9",
+  "working_tree_unchanged": true
+}

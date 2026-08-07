@@ -1,0 +1,96 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "killed": 15,
+  "mutants_declared": 15,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestStructuralConformance::test_a_document_that_does_not_know_its_own_id_refuses",
+      "name": "identity check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestStructuralConformance::test_each_required_block_is_individually_required",
+      "name": "required-blocks check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestStructuralConformance::test_a_draft_may_not_be_cited_as_a_commitment",
+      "name": "frozen-status check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestStructuralConformance::test_an_unstated_status_lock_is_not_an_engaged_one",
+      "name": "status-lock presence check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestVerifyAppliesBothChecks::test_a_correctly_pinned_but_non_conforming_document_still_refuses",
+      "name": "status-lock value check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestStructuralConformance::test_a_document_without_a_b11_disclosure_refuses",
+      "name": "b11 disclosure check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestStructuralConformance::test_an_empty_prohibition_or_refusal_list_is_not_a_permissive_default",
+      "name": "empty prohibitions/refusals check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestStructuralConformance::test_a_refusal_code_without_a_meaning_refuses",
+      "name": "refusal-code shape check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestStructuralConformance::test_a_float_anywhere_refuses_and_names_where",
+      "name": "float check neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestStructuralConformance::test_a_float_anywhere_refuses_and_names_where",
+      "name": "float detection made blind",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestTheRegisterVerifies::test_an_unregistered_id_refuses_rather_than_passing_by_absence",
+      "name": "unknown id passes by absence",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestTheRegisterVerifies::test_a_registered_but_missing_document_refuses",
+      "name": "missing file passes",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestTamperingRefuses::test_adding_an_exit_rule_after_the_fact_refuses",
+      "name": "hash mismatch tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestTheRegisterVerifies::test_both_digests_are_recorded_and_correct",
+      "name": "canonicalisation made order-dependent",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b19_strategy_preregistrations.py::TestVerifyAppliesBothChecks::test_a_correctly_pinned_but_non_conforming_document_still_refuses",
+      "name": "conformance skipped entirely after hashing",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b19",
+  "target": "scripts/b19_preregistration_register.py",
+  "tests": [
+    "tests/test_b19_strategy_preregistrations.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "c56f87a4468558547cd5bee008da929e38572978de940cfd9b6b1aa07c92fcc0",
+  "working_tree_unchanged": true
+}

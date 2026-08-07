@@ -1,0 +1,157 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {
+    "a terminal fault's retry count is faked": "Same shape. Identical only given that a non-retryable failure quarantines on the first call. Covered independently by PrimaryEvidenceTests.test_a_terminal_failure_really_calls_the_transport_once, which asserts the transport call count directly.",
+    "the persisted state is reported as quarantined regardless": "A mutant in a REDUNDANT REPORTING PATH, not an equivalent mutant. It is identical only GIVEN that b11c persists before raising; were b11c to regress and raise without persisting, the hardcoded constant would hide exactly the regression the Q05 rehearsal exists to detect. The property is asserted independently by PrimaryEvidenceTests.test_the_state_file_on_disk_says_quarantined_after_exhausted_retries, which reads the file b11c actually wrote rather than this module's report. If that test is ever weakened this mutant stops being covered, which is why it is declared here instead of deleted."
+  },
+  "killed": 24,
+  "mutants_declared": 26,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::LiveWatcherIsUntouchedTests::test_a_changed_original_is_refused_rather_than_reported",
+      "name": "the live watcher is never re-checked",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::InternalGuardsAreForcedTests::test_the_isolation_guard_refuses_a_root_outside_the_scratch_tree",
+      "name": "the isolation guard stops checking ROOT",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::InternalGuardsAreForcedTests::test_the_isolation_guard_refuses_a_work_dir_in_the_live_tree",
+      "name": "the isolation guard stops checking for the live work directory",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::InternalGuardsAreForcedTests::test_the_isolation_guard_refuses_a_work_dir_outside_the_scratch_tree",
+      "name": "the isolation guard stops checking scratch containment",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::LiveWatcherIsUntouchedTests::test_staging_actually_calls_the_isolation_guard",
+      "name": "the isolation guard is never called when staging",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::HarnessCannotFabricateTests::test_reusing_a_state_label_is_refused",
+      "name": "rehearsals may share one state file",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::LiveWatcherIsUntouchedTests::test_the_scratch_tree_is_removed_afterwards",
+      "name": "the scratch tree is left behind",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::TransportClassificationTests::test_a_mismatch_between_probe_and_policy_refuses",
+      "name": "a probe/policy disagreement is reported instead of refused",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::InternalGuardsAreForcedTests::test_a_diagnostic_carrying_the_endpoint_is_refused",
+      "name": "a diagnostic carrying the endpoint is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::InternalGuardsAreForcedTests::test_a_composition_probe_that_disagrees_with_the_guard_is_refused",
+      "name": "a composition probe mismatch is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::InternalGuardsAreForcedTests::test_a_secret_that_gets_written_refuses_the_rehearsal",
+      "name": "a written secret is not treated as a failure",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::InternalGuardsAreForcedTests::test_a_clean_payload_being_refused_also_refuses_the_rehearsal",
+      "name": "a clean payload being refused goes unnoticed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::InternalGuardsAreForcedTests::test_the_secret_catch_is_narrow_enough_to_expose_a_harness_bug",
+      "name": "the secret catch widens back to Exception",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::CreditsAreWithheldTests::test_q04_is_withheld_when_one_probe_was_accepted",
+      "name": "Q04 is credited without every probe refusing",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::CreditsAreWithheldTests::test_q09_is_withheld_when_one_credential_payload_was_written",
+      "name": "Q09 is credited unconditionally",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::CreditsAreWithheldTests::test_an_empty_report_credits_nothing",
+      "name": "Q10 is credited unconditionally",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::CreditsAreWithheldTests::test_a_stage_code_is_withheld_when_the_stage_did_not_refuse",
+      "name": "a stage code is credited even when the stage did not refuse",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::HarnessCannotFabricateTests::test_an_unexplained_unreached_code_refuses_rather_than_getting_a_default",
+      "name": "an unexplained unreached code gets no reason and no refusal",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::ReportMatchesPrimaryEvidenceTests::test_the_reported_manifest_hashes_match_a_fresh_computation",
+      "name": "the manifest is never attested before the edit",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::LiveWatcherIsUntouchedTests::test_the_live_watcher_is_byte_identical_after_a_full_sweep",
+      "name": "the failing runner raises instead of returning a code",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::LiveWatcherIsUntouchedTests::test_the_live_watcher_is_byte_identical_after_a_full_sweep",
+      "name": "the clean stage is never run, so the happy path is unproven",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::TwoClockLivenessTests::test_a_healthy_stage_does_not_read_as_a_dead_supervisor",
+      "name": "the two clocks are reported as one",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::ReportMatchesPrimaryEvidenceTests::test_the_reported_clocks_match_an_independent_touch",
+      "name": "the heartbeat is reported as advancing regardless",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::ReportMatchesPrimaryEvidenceTests::test_the_reported_clocks_match_an_independent_touch",
+      "name": "progress is reported as advancing during a stage that made none",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": null,
+      "name": "the persisted state is reported as quarantined regardless",
+      "outcome": "survived"
+    },
+    {
+      "first_failing_test": null,
+      "name": "a terminal fault's retry count is faked",
+      "outcome": "survived"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [
+    "the persisted state is reported as quarantined regardless",
+    "a terminal fault's retry count is faked"
+  ],
+  "sweep_id": "b18c",
+  "target": "scripts/b18c_watcher_failure_rehearsal.py",
+  "tests": [
+    "tests/test_b18c_watcher_failure_rehearsal.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "78e55934dba260c54dda1bff3be4f77d792559751160a8bd8df292f5de7c15b9",
+  "working_tree_unchanged": true
+}

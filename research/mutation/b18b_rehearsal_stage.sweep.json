@@ -1,0 +1,27 @@
+{
+  "sweep_id": "b18b_rehearsal_stage",
+  "description": "The three guards in b18a that make a rehearsal record impossible to mistake for evidence. They live in b18a but are exercised only by b18b's tests, and a declaration names one target, so they are their own sweep rather than being folded into either neighbour where they would be invisible.",
+  "target": "scripts/b18a_shadow_record.py",
+  "tests": [
+    "tests/test_b18b_failure_rehearsal.py"
+  ],
+  "mutants": [
+    {
+      "name": "a rehearsal record needs no fault block",
+      "old": "        if not isinstance(fault, dict) or not fault.get(\"fault\"):",
+      "new": "        if False:"
+    },
+    {
+      "name": "a rehearsal record needs no not-evidence marker",
+      "old": "        if not record.get(\"record_is_not_evidence\"):",
+      "new": "        if False:"
+    },
+    {
+      "name": "a rehearsal record may be executable",
+      "old": "        if record.get(\"executable\") is not False:",
+      "new": "        if False:"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None."
+}

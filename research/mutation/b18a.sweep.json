@@ -1,0 +1,152 @@
+{
+  "sweep_id": "b18a",
+  "description": "The shadow record layer. Its guards are the two rules the frozen contract exists to enforce -- unknown is null and never zero, and landing probability is forbidden -- so a guard here that is not load-bearing means a record could quietly stop meaning what the contract says.",
+  "target": "scripts/b18a_shadow_record.py",
+  "tests": [
+    "tests/test_b18a_shadow_record.py"
+  ],
+  "mutants": [
+    {
+      "name": "a tampered contract loads anyway",
+      "old": "    if actual != expected_sha256:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a missing contract is tolerated",
+      "old": "    if not path.exists():",
+      "new": "    if False:"
+    },
+    {
+      "name": "a null needs no reason code",
+      "old": "        if measured[field] is None and field not in unmeasured:\n            problems.append(f\"{field} is null with no reason code",
+      "new": "        if False:\n            problems.append(f\"{field} is null with no reason code"
+    },
+    {
+      "name": "a reason may sit on a known value",
+      "old": "        if measured[field] is not None and field in unmeasured:",
+      "new": "        if False:"
+    },
+    {
+      "name": "any reason string is accepted",
+      "old": "        if reason not in REASON_CODES:",
+      "new": "        if False:"
+    },
+    {
+      "name": "non-nullable fields may be null",
+      "old": "        if measured.get(field) is None:\n            problems.append(f\"{field} is declared non-nullable",
+      "new": "        if False:\n            problems.append(f\"{field} is declared non-nullable"
+    },
+    {
+      "name": "any outcome string is accepted",
+      "old": "    if measured.get(\"outcome\") is not None and measured[\"outcome\"] not in OUTCOMES:",
+      "new": "    if False:"
+    },
+    {
+      "name": "landing probability is no longer refused",
+      "old": "        if any(marker in leaf for marker in FORBIDDEN_FIELD_MARKERS) \\\n                or leaf.endswith(FORBIDDEN_FIELD_SUFFIXES):",
+      "new": "        if False:"
+    },
+    {
+      "name": "only the exact name is refused, not the suffix",
+      "old": "        if any(marker in leaf for marker in FORBIDDEN_FIELD_MARKERS) \\\n                or leaf.endswith(FORBIDDEN_FIELD_SUFFIXES):",
+      "new": "        if any(marker in leaf for marker in FORBIDDEN_FIELD_MARKERS):"
+    },
+    {
+      "name": "a partial total is accepted",
+      "old": "        if unknown_components:\n            problems.append(",
+      "new": "        if False:\n            problems.append("
+    },
+    {
+      "name": "a total need not equal its components",
+      "old": "            if total != known:",
+      "new": "            if False:"
+    },
+    {
+      "name": "an unsanitized stored endpoint is accepted",
+      "old": "    if rebuilt != value:",
+      "new": "    if False:"
+    },
+    {
+      "name": "floats are accepted",
+      "old": "        if isinstance(value, float):",
+      "new": "        if False:"
+    },
+    {
+      "name": "a shadow record may claim it sent something",
+      "old": "            if measured.get(field) is not None:\n                problems.append(\n                    f\"{field} has a value in a SHADOW record",
+      "new": "            if False:\n                problems.append(\n                    f\"{field} has a value in a SHADOW record"
+    },
+    {
+      "name": "a shadow record may claim it landed",
+      "old": "        if measured.get(\"outcome\") not in (\"never_sent\", \"unknown\"):",
+      "new": "        if False:"
+    },
+    {
+      "name": "a later attempt needs no retry link",
+      "old": "    if measured.get(\"attempt_index\") is not None and measured[\"attempt_index\"] > 0 \\\n            and measured.get(\"retry_of_signature\") is None:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a retry need not name what it retried",
+      "old": "    if not retry_of_signature:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a negative attempt index is accepted",
+      "old": "    if attempt_index < 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "fields the contract does not name are accepted",
+      "old": "    unknown = [field for field in measured if field not in MEASURED_FIELDS]",
+      "new": "    unknown = []"
+    },
+    {
+      "name": "contract-named fields may be missing",
+      "old": "    missing = [field for field in MEASURED_FIELDS if field not in measured]",
+      "new": "    missing = []"
+    },
+    {
+      "name": "a record from another contract revision is accepted",
+      "old": "    if record.get(\"contract_sha256\") != CONTRACT_SHA256:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an unreadable segment reads as empty",
+      "old": "    if valid == 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a zero-length frame header is read as a record",
+      "old": "        if header_len == 0:",
+      "new": "        if False:"
+    },
+    {
+      "name": "a frame without a slot is anchored to nothing",
+      "old": "    if \"slot\" not in payload:",
+      "new": "    if False:"
+    },
+    {
+      "name": "impossible shadow fields claim they were merely not instrumented",
+      "old": "        record[\"unmeasured\"][field] = \"U_NOT_APPLICABLE\"",
+      "new": "        record[\"unmeasured\"][field] = \"U_NOT_INSTRUMENTED\""
+    },
+    {
+      "name": "the tip defaults to zero instead of null",
+      "old": "        \"measured\": {field: None for field in MEASURED_FIELDS},",
+      "new": "        \"measured\": {field: (0 if \"lamports\" in field else None) for field in MEASURED_FIELDS},"
+    },
+    {
+      "name": "the hash stops being deterministic over content",
+      "old": "    public = {key: value for key, value in record.items() if not key.startswith(\"_\")}",
+      "new": "    public = {\"constant\": 1}"
+    },
+    {
+      "name": "the endpoint is stored raw",
+      "old": "    measured[\"endpoint_identity\"] = _sanitized_endpoint(endpoint)",
+      "new": "    measured[\"endpoint_identity\"] = endpoint"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None."
+}

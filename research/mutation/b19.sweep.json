@@ -1,0 +1,85 @@
+{
+  "sweep_id": "b19",
+  "description": "Mutation sweep over the substantive guards of the B19 preregistration register. Each mutant neuters exactly one guard; a survivor means that guard is untested or a test was passing for the wrong reason.",
+  "target": "scripts/b19_preregistration_register.py",
+  "tests": ["tests/test_b19_strategy_preregistrations.py"],
+  "mutants": [
+    {
+      "name": "identity check neutered",
+      "old": "    if stated != prereg_id:",
+      "new": "    if False:"
+    },
+    {
+      "name": "required-blocks check neutered",
+      "old": "    if missing:",
+      "new": "    if False:"
+    },
+    {
+      "name": "frozen-status check neutered",
+      "old": "    if not isinstance(status, str) or not status.startswith(\"FROZEN\"):",
+      "new": "    if False:"
+    },
+    {
+      "name": "status-lock presence check neutered",
+      "old": "        if field not in locks:",
+      "new": "        if False:"
+    },
+    {
+      "name": "status-lock value check neutered",
+      "old": "        if locks[field] != required:",
+      "new": "        if False:"
+    },
+    {
+      "name": "b11 disclosure check neutered",
+      "old": "    if not isinstance(disclosure, dict) or \"b11\" not in disclosure:",
+      "new": "    if False:"
+    },
+    {
+      "name": "empty prohibitions/refusals check neutered",
+      "old": "        if not isinstance(entries, list) or not entries:",
+      "new": "        if False:"
+    },
+    {
+      "name": "refusal-code shape check neutered",
+      "old": "        if not isinstance(entry, dict) or \"code\" not in entry or \"meaning\" not in entry:",
+      "new": "        if False:"
+    },
+    {
+      "name": "float check neutered",
+      "old": "    if floats:",
+      "new": "    if False:"
+    },
+    {
+      "name": "float detection made blind",
+      "old": "    if isinstance(value, float):",
+      "new": "    if False:"
+    },
+    {
+      "name": "unknown id passes by absence",
+      "old": "    if entry is None:",
+      "new": "    if False:"
+    },
+    {
+      "name": "missing file passes",
+      "old": "    if not document_path.is_file():",
+      "new": "    if False:"
+    },
+    {
+      "name": "hash mismatch tolerated",
+      "old": "    if actual != entry[\"canonical_sha256\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "canonicalisation made order-dependent",
+      "old": "json.dumps(document, sort_keys=True, separators=(\",\", \":\")).encode()).hexdigest()",
+      "new": "json.dumps(document, sort_keys=False, separators=(\",\", \":\")).encode()).hexdigest()"
+    },
+    {
+      "name": "conformance skipped entirely after hashing",
+      "old": "    return assert_conforms(document, prereg_id)",
+      "new": "    return document"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None. Every guard in this module is reachable and independently tested. The last mutant listed survived the first sweep, because every conformance test called assert_conforms directly and nothing asserted that verify() applies it; it is killed now by a test that registers a deliberately non-conforming document carrying an honest hash."
+}
