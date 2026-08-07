@@ -497,8 +497,12 @@ class PrimaryEvidenceTests(unittest.TestCase):
         state["manifest_sha256"] = before
         with self.assertRaises(self.staged.module.Quarantined):
             self.staged.module.assert_manifest_unchanged(state, path)
-        self.assertEqual(json.loads(path.read_text())["quarantine"]["reason_code"],
-                         "Q02_script_manifest_drift")
+        persisted = json.loads(path.read_text())
+        self.assertEqual(persisted["quarantine"]["reason_code"], "Q02_script_manifest_drift")
+        # The persisted STATE, not only the reason code. Its absence is what an ambiguous mutation
+        # pattern concealed: the declared survivor's justification pointed at the retries site's
+        # test and was silently extended to this one, which had no such coverage.
+        self.assertEqual(persisted["state"], "quarantined")
 
     def test_the_two_clocks_really_move_independently(self):
         state, path = self.staged.isolated("primary_clocks")

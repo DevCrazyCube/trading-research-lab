@@ -2,11 +2,12 @@
   "baseline_passed": true,
   "expected_survivors": {
     "a terminal fault's retry count is faked": "Same shape. Identical only given that a non-retryable failure quarantines on the first call. Covered independently by PrimaryEvidenceTests.test_a_terminal_failure_really_calls_the_transport_once, which asserts the transport call count directly.",
-    "the persisted state is reported as quarantined regardless": "A mutant in a REDUNDANT REPORTING PATH, not an equivalent mutant. It is identical only GIVEN that b11c persists before raising; were b11c to regress and raise without persisting, the hardcoded constant would hide exactly the regression the Q05 rehearsal exists to detect. The property is asserted independently by PrimaryEvidenceTests.test_the_state_file_on_disk_says_quarantined_after_exhausted_retries, which reads the file b11c actually wrote rather than this module's report. If that test is ever weakened this mutant stops being covered, which is why it is declared here instead of deleted."
+    "manifest-drift reports its persisted state as quarantined regardless": "Redundant reporting path. Covered independently by PrimaryEvidenceTests.test_the_manifest_hash_really_changes_when_the_supervisor_is_edited, which drives assert_manifest_unchanged directly and asserts persisted['state'] == 'quarantined' from the file b11c wrote. THAT ASSERTION WAS ADDED FOR THIS DECLARATION: before it, the test checked only the reason code, so the property this mutant would hide was not covered here at all. The site existed behind an AMBIGUOUS pattern that also matched rehearse_retries_exhausted; the framework applied the mutant only to the first match, so this site was never mutated AND the other site's justification was silently extended to it. The declaration now names its own test rather than inheriting one.",
+    "retries-exhausted reports its persisted state as quarantined regardless": "Redundant reporting path, not an equivalent mutant. Identical only GIVEN that b11c persists before raising; a regression there would be hidden by the constant. Covered independently by PrimaryEvidenceTests.test_the_state_file_on_disk_says_quarantined_after_exhausted_retries, which reads the file b11c wrote rather than this module's report. Split out from an AMBIGUOUS pattern that also matched rehearse_manifest_drift: the framework applied it only to the FIRST site, so the manifest site was never mutated and this justification never covered it."
   },
   "git_ancestry_staged": false,
   "killed": 27,
-  "mutants_declared": 29,
+  "mutants_declared": 30,
   "per_mutant": [
     {
       "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::LiveWatcherIsUntouchedTests::test_a_changed_original_is_refused_rather_than_reported",
@@ -130,11 +131,6 @@
     },
     {
       "first_failing_test": null,
-      "name": "the persisted state is reported as quarantined regardless",
-      "outcome": "survived"
-    },
-    {
-      "first_failing_test": null,
       "name": "a terminal fault's retry count is faked",
       "outcome": "survived"
     },
@@ -152,13 +148,24 @@
       "first_failing_test": "tests/test_b18c_watcher_failure_rehearsal.py::GitAncestryTests::test_the_accepted_ancestor_matches_an_independent_call",
       "name": "a real ancestor is never checked, so the guard could be a stop",
       "outcome": "killed"
+    },
+    {
+      "first_failing_test": null,
+      "name": "retries-exhausted reports its persisted state as quarantined regardless",
+      "outcome": "survived"
+    },
+    {
+      "first_failing_test": null,
+      "name": "manifest-drift reports its persisted state as quarantined regardless",
+      "outcome": "survived"
     }
   ],
   "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
   "staged_copy_only": true,
   "survivors": [
-    "the persisted state is reported as quarantined regardless",
-    "a terminal fault's retry count is faked"
+    "a terminal fault's retry count is faked",
+    "retries-exhausted reports its persisted state as quarantined regardless",
+    "manifest-drift reports its persisted state as quarantined regardless"
   ],
   "sweep_id": "b18c",
   "target": "scripts/b18c_watcher_failure_rehearsal.py",
@@ -168,6 +175,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "0e5e25ead2f2be898de5d09d46660f911dd00b9a6a153a274252300094a03109",
+  "working_tree_sha256": "e579e073f9761ec62936485154fb1c96dcd84300fb3757cef1160a21740cf2ec",
   "working_tree_unchanged": true
 }

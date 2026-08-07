@@ -127,11 +127,6 @@
       "new": "        \"progress_after_real_progress\": 99_999_999_999,"
     },
     {
-      "name": "the persisted state is reported as quarantined regardless",
-      "old": "            \"persisted_state\": persisted[\"state\"],",
-      "new": "            \"persisted_state\": \"quarantined\","
-    },
-    {
       "name": "a terminal fault's retry count is faked",
       "old": "            \"attempts\": transport.calls[\"n\"],\n            \"backoff_sleeps\": slept,\n        }",
       "new": "            \"attempts\": 1,\n            \"backoff_sleeps\": [],\n        }"
@@ -150,16 +145,30 @@
       "name": "a real ancestor is never checked, so the guard could be a stop",
       "old": "    results[\"a_real_ancestor_is_accepted\"] = staged.module.verify_git_ancestry(git=clean)",
       "new": "    results[\"a_real_ancestor_is_accepted\"] = {\"preregistration_commit\": \"faked\"}"
+    },
+    {
+      "name": "retries-exhausted reports its persisted state as quarantined regardless",
+      "old": "            \"backoff_sleeps\": slept,\n            \"persisted_state\": persisted[\"state\"],",
+      "new": "            \"backoff_sleeps\": slept,\n            \"persisted_state\": \"quarantined\","
+    },
+    {
+      "name": "manifest-drift reports its persisted state as quarantined regardless",
+      "old": "            \"file_edited\": \"scripts/b11c_maturity_watcher.py\",\n            \"persisted_state\": persisted[\"state\"],",
+      "new": "            \"file_edited\": \"scripts/b11c_maturity_watcher.py\",\n            \"persisted_state\": \"quarantined\","
     }
   ],
   "expected_survivors": [
     {
-      "name": "the persisted state is reported as quarantined regardless",
-      "why": "A mutant in a REDUNDANT REPORTING PATH, not an equivalent mutant. It is identical only GIVEN that b11c persists before raising; were b11c to regress and raise without persisting, the hardcoded constant would hide exactly the regression the Q05 rehearsal exists to detect. The property is asserted independently by PrimaryEvidenceTests.test_the_state_file_on_disk_says_quarantined_after_exhausted_retries, which reads the file b11c actually wrote rather than this module's report. If that test is ever weakened this mutant stops being covered, which is why it is declared here instead of deleted."
-    },
-    {
       "name": "a terminal fault's retry count is faked",
       "why": "Same shape. Identical only given that a non-retryable failure quarantines on the first call. Covered independently by PrimaryEvidenceTests.test_a_terminal_failure_really_calls_the_transport_once, which asserts the transport call count directly."
+    },
+    {
+      "name": "retries-exhausted reports its persisted state as quarantined regardless",
+      "why": "Redundant reporting path, not an equivalent mutant. Identical only GIVEN that b11c persists before raising; a regression there would be hidden by the constant. Covered independently by PrimaryEvidenceTests.test_the_state_file_on_disk_says_quarantined_after_exhausted_retries, which reads the file b11c wrote rather than this module's report. Split out from an AMBIGUOUS pattern that also matched rehearse_manifest_drift: the framework applied it only to the FIRST site, so the manifest site was never mutated and this justification never covered it."
+    },
+    {
+      "name": "manifest-drift reports its persisted state as quarantined regardless",
+      "why": "Redundant reporting path. Covered independently by PrimaryEvidenceTests.test_the_manifest_hash_really_changes_when_the_supervisor_is_edited, which drives assert_manifest_unchanged directly and asserts persisted['state'] == 'quarantined' from the file b11c wrote. THAT ASSERTION WAS ADDED FOR THIS DECLARATION: before it, the test checked only the reason code, so the property this mutant would hide was not covered here at all. The site existed behind an AMBIGUOUS pattern that also matched rehearse_retries_exhausted; the framework applied the mutant only to the first match, so this site was never mutated AND the other site's justification was silently extended to it. The declaration now names its own test rather than inheriting one."
     }
   ],
   "expected_survivors_note": "Two. Both are mutants in a redundant reporting path whose underlying property is asserted independently elsewhere. 'Equivalent mutant' is the label that ends auditing; 'covered elsewhere' is the label that tells the next reader to check the coverage still exists. The codex seat corrected this wording in handoff 201 and the distinction is the reason these are declared rather than removed: if either starts being KILLED, the coverage that justifies it moved and the sweep will say so."
