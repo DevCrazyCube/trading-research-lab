@@ -101,6 +101,27 @@ class ContractPinningTests(unittest.TestCase):
         document = json.loads(B18A.CONTRACT_PATH.read_text())
         self.assertEqual(B18A.canonical_sha256(document), B18A.CONTRACT_SHA256)
 
+    def test_the_pin_is_canonical_and_deliberately_not_the_file_hash(self):
+        """An auditor re-checked the pin with `sha256sum` and read the mismatch as tampering.
+
+        The pin is over canonical serialization so it survives reindentation and key reordering --
+        the contract's MEANING is frozen, not its whitespace. Both values are asserted here so the
+        difference is a documented fact rather than a surprise, and so that a reformatting of the
+        file fails this test loudly instead of silently invalidating the reference value.
+        """
+        file_digest = hashlib.sha256(B18A.CONTRACT_PATH.read_bytes()).hexdigest()
+        self.assertEqual(file_digest, B18A.CONTRACT_FILE_SHA256_FOR_REFERENCE)
+        self.assertNotEqual(file_digest, B18A.CONTRACT_SHA256)
+
+    def test_canonical_hashing_ignores_formatting_but_not_content(self):
+        """Why the pin is canonical, demonstrated rather than asserted."""
+        document = json.loads(B18A.CONTRACT_PATH.read_text())
+        reindented = json.loads(json.dumps(document, indent=7, sort_keys=False))
+        self.assertEqual(B18A.canonical_sha256(reindented), B18A.CONTRACT_SHA256)
+        changed = json.loads(json.dumps(document))
+        changed["contract_id"] = "SOMETHING_ELSE"
+        self.assertNotEqual(B18A.canonical_sha256(changed), B18A.CONTRACT_SHA256)
+
 
 # ----------------------------------------------------------------------------------------------
 # Rule 1: unknown is null, never zero, and never silent

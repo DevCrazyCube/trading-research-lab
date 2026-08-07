@@ -76,7 +76,18 @@ Full data with per-component reasoning in `research/COMPONENT_INVENTORY.json`.
 | shadow rehearsal | `scripts/b17a_shadow_rehearsal.py` | exists |
 | shadow record layer | `scripts/b18a_shadow_record.py` | **exists**, B17b-conforming — slice A, delivered |
 | shadow records | `research/b18a/records.json` | exists (synthetic segment; 6 measured fields, 37 nulls each with a reason) |
-| measurement contract | `research/B17B_EXECUTION_MEASUREMENT_CONTRACT.json` | frozen v1.0.0, canonical sha256 `29f480fcad6dd93cc40ab3ab16ae3368c02280a27a286e7f6458577451ad2ce4` |
+| measurement contract | `research/B17B_EXECUTION_MEASUREMENT_CONTRACT.json` | frozen v1.0.0, **canonical** sha256 `29f480fcad6dd93cc40ab3ab16ae3368c02280a27a286e7f6458577451ad2ce4` — see the note below |
+
+> **The contract's pin is not its file hash, and `sha256sum` will look like tampering.** The raw file
+> digests to `c96f8b56ceb277884751e4adf3af9108586bfd86ed600ae85e9a01b6052a11a2`. The pin is over
+> canonical serialization (`sort_keys=True, separators=(",",":")`), so it survives reindentation and
+> key reordering — the contract's *meaning* is frozen, not its whitespace. An auditor raised this as
+> a false tampering alarm on 2026-08-07, which is why it is written down.
+>
+> The obvious remedy — a note inside the contract's own header — **would add a key and change the
+> canonical hash, breaking the pin it was meant to explain.** So it lives here and in
+> `scripts/b18a_shadow_record.py`, which holds the pin. Two tests assert both digests, so
+> reformatting the file fails loudly instead of silently invalidating the reference value.
 | devnet/mainnet record | — | absent; b18a emits `stage=shadow` only and refuses a shadow record carrying a send, sign or land clock |
 | failure-rehearsal harness | `scripts/b18b_failure_rehearsal.py` | **exists**; 6/7 outcomes and both failure-only reason codes exercised by injected fault |
 | wallet/treasury architecture | `research/B19A_WALLET_TREASURY_ARCHITECTURE.md` | exists (prose only); audited |
@@ -224,7 +235,20 @@ that makes "this page cannot leak a snapshot and cannot touch a wallet" checkabl
 The precise gap is narrower and more interesting: **`kill_switch_engaged` has no writer.** A
 repository-wide grep finds it read by b12a and rendered by b12b, but assigned nowhere outside a test
 fixture and b17a's counterexample. It arrives as an input field in `health` that no component
-produces from an operator action. So the missing piece is not a button — it is an **owner of the
+produces from an operator action.
+
+**Sharper still, found by the codex seat on 2026-08-07 and verified here.** The field is not merely
+unwritten — it is **mandatory and unwritten**. `b12a.assert_health` (`b12a_risk_governor.py:239-243`)
+*refuses* a health snapshot that omits any required flag: "an unstated health flag is not a healthy
+one". So `kill_switch_engaged` cannot be defaulted, cannot be skipped, and is produced by nothing.
+Every caller must invent it. The one occurrence that looks like a default —
+`b12b_operator_snapshot.py:621` setting it `False` — is inside `demo_components()`, a labelled
+synthetic fixture, so it is not a zero-by-absence violation; it was checked specifically because it
+would have been one anywhere else.
+
+That is a stronger argument for slice E than the original phrasing: the system already refuses to
+run without an answer to "is the kill switch engaged", and there is no component whose job it is to
+answer. So the missing piece is not a button — it is an **owner of the
 switch's state**, with a control surface separate from the read-only console. `test_the_kill_switch_
 really_has_no_writer` re-verifies this absence on every run rather than trusting this paragraph.
 

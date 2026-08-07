@@ -47,7 +47,19 @@ SCHEMA_VERSION = "1.0.0"
 CONTRACT_PATH = ROOT / "research" / "B17B_EXECUTION_MEASUREMENT_CONTRACT.json"
 # Pinned. A contract that changed is a contract nobody froze, and records written against it would
 # claim a conformance that was never agreed.
+#
+# THIS IS NOT THE FILE'S sha256, AND A RE-CHECK THAT ASSUMES IT IS WILL READ AS TAMPERING.
+# `sha256sum` over the raw bytes returns c96f8b56ceb277884751e4adf3af9108586bfd86ed600ae85e9a01b6052
+# a11a2. The pin is over CANONICAL serialization -- `json.dumps(sort_keys=True, separators=(",",":"))`
+# -- so it survives reindentation and key reordering, which is the point: the contract's MEANING is
+# frozen, not its whitespace. An auditor raised exactly this false alarm on 2026-08-07.
+#
+# The obvious fix -- documenting this inside the contract's own header -- would ADD A KEY and
+# therefore change the canonical hash, breaking the pin it was meant to explain. So it is documented
+# here, in the module that holds the pin, and in the gap map. The frozen document stays byte-frozen.
 CONTRACT_SHA256 = "29f480fcad6dd93cc40ab3ab16ae3368c02280a27a286e7f6458577451ad2ce4"
+CONTRACT_FILE_SHA256_FOR_REFERENCE = (
+    "c96f8b56ceb277884751e4adf3af9108586bfd86ed600ae85e9a01b6052a11a2")
 
 
 def _load(name, filename):
