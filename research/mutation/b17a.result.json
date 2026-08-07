@@ -1,0 +1,112 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 18,
+  "mutants_declared": 18,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_a_class_name_reached_by_import_is_caught",
+      "name": "the scanner reports no findings",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_a_class_name_reached_by_import_is_caught",
+      "name": "findings are collected but never raised",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_a_wire_method_name_is_still_caught_inside_a_longer_string",
+      "name": "string constants no longer scanned",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_fires_on_an_attribute_not_only_a_string",
+      "name": "attribute access no longer scanned",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_fires_on_a_bare_name",
+      "name": "bare identifiers no longer scanned",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_a_class_name_reached_by_import_is_caught",
+      "name": "imports no longer scanned",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_a_denylist_entry_that_only_CONTAINS_a_token_is_still_exempt",
+      "name": "a module's own denylist no longer excluded",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_a_class_name_reached_by_import_is_caught",
+      "name": "denylist exclusion widened to everything",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_a_module_named_in_the_closure_but_absent_from_disk_is_skipped",
+      "name": "the closure stops at the entry module",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_a_module_named_in_the_closure_but_absent_from_disk_is_skipped",
+      "name": "a missing module is scanned as empty rather than skipped",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ExecutionSurfaceScanTests::test_code_string_constants_excludes_docstrings_and_keeps_code",
+      "name": "docstrings counted as capabilities",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::NoNetworkTests::test_refuses_a_socket_and_restores_afterwards",
+      "name": "the socket refusal is not installed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::RejectionBlocksPricingTests::test_rehearse_raises_if_the_kill_switch_ever_approves",
+      "name": "an approval while halted is tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::RejectionBlocksPricingTests::test_simulate_round_trip_refuses_an_exit_it_cannot_price",
+      "name": "an exit that could not be priced is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ReconciliationTests::test_refuses_an_entry_that_cost_less_than_the_order",
+      "name": "spending less than the order is not caught",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ReconciliationTests::test_refuses_a_position_with_no_tokens",
+      "name": "acquiring zero tokens is not caught",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ReconciliationTests::test_refuses_when_exposure_does_not_rise",
+      "name": "exposure need not increase after a buy",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b17a_shadow_rehearsal.py::ReconciliationTests::test_refuses_a_position_with_no_tokens",
+      "name": "reconciliation problems are collected but never raised",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b17a",
+  "target": "scripts/b17a_shadow_rehearsal.py",
+  "tests": [
+    "tests/test_b17a_shadow_rehearsal.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "89cf7d3db4efb21bcdbbe96839c80e657b3a8df464344cc53361655debf99545",
+  "working_tree_unchanged": true
+}

@@ -1,0 +1,102 @@
+{
+  "sweep_id": "b17a",
+  "description": "Mutation sweep over the shadow rehearsal and its execution-surface scanner. These guards underwrite the repository's most load-bearing safety claim -- that nothing in the rehearsal chain can construct, sign, simulate or submit a transaction. A scanner that cannot fail is a scanner that proves nothing.",
+  "target": "scripts/b17a_shadow_rehearsal.py",
+  "tests": [
+    "tests/test_b17a_shadow_rehearsal.py"
+  ],
+  "mutants": [
+    {
+      "name": "the scanner reports no findings",
+      "old": "        if hits:\n            findings[name] = hits",
+      "new": "        if False:\n            findings[name] = hits"
+    },
+    {
+      "name": "findings are collected but never raised",
+      "old": "    if findings:",
+      "new": "    if False:"
+    },
+    {
+      "name": "string constants no longer scanned",
+      "old": "        hits = sorted({token for token in EXECUTION_SURFACE_WIRE\n                       for value in values if token in value})",
+      "new": "        hits = []"
+    },
+    {
+      "name": "attribute access no longer scanned",
+      "old": "            if isinstance(node, ast.Attribute) and node.attr in EXECUTION_SURFACE:",
+      "new": "            if False:"
+    },
+    {
+      "name": "bare identifiers no longer scanned",
+      "old": "            if isinstance(node, ast.Name) and node.id in EXECUTION_SURFACE:",
+      "new": "            if False:"
+    },
+    {
+      "name": "imports no longer scanned",
+      "old": "            if isinstance(node, ast.alias) and node.name.split(\".\")[-1] in EXECUTION_SURFACE:",
+      "new": "            if False:"
+    },
+    {
+      "name": "a module's own denylist no longer excluded",
+      "old": "        values = [v for v in code_string_constants(path) if v not in declared]",
+      "new": "        values = list(code_string_constants(path))"
+    },
+    {
+      "name": "denylist exclusion widened to everything",
+      "old": "        hits = sorted(set(hits) - declared)",
+      "new": "        hits = []"
+    },
+    {
+      "name": "the closure stops at the entry module",
+      "old": "            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) \\",
+      "new": "            if False and isinstance(node, ast.Call) and isinstance(node.func, ast.Name) \\"
+    },
+    {
+      "name": "a missing module is scanned as empty rather than skipped",
+      "old": "        if not path.exists():\n            continue\n        declared = _declared_surface(path)",
+      "new": "        if False:\n            continue\n        declared = _declared_surface(path)"
+    },
+    {
+      "name": "docstrings counted as capabilities",
+      "old": "            if doc is not None:",
+      "new": "            if False:"
+    },
+    {
+      "name": "the socket refusal is not installed",
+      "old": "        self._saved = socket.socket",
+      "new": "        self._saved = socket.socket\n        return self"
+    },
+    {
+      "name": "an approval while halted is tolerated",
+      "old": "        if halted_decision[\"decision\"] == B12A.DECISION_APPROVED:",
+      "new": "        if False:"
+    },
+    {
+      "name": "an exit that could not be priced is accepted",
+      "old": "    if sold.get(\"status\") != B10A.STATUS_PRICED:",
+      "new": "    if False:"
+    },
+    {
+      "name": "spending less than the order is not caught",
+      "old": "    if simulated[\"lamports_out_of_wallet_at_entry\"] < proposal[\"quote_lamports\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "acquiring zero tokens is not caught",
+      "old": "    if simulated[\"tokens_acquired\"] <= 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "exposure need not increase after a buy",
+      "old": "    if projected_exposure <= before[\"total_exposure_lamports\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "reconciliation problems are collected but never raised",
+      "old": "    if problems:",
+      "new": "    if False:"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None expected. Every claim that this repository cannot sign or send rests on this scanner reporting honestly, and a guard here that no test can distinguish from its absence would make that claim unverified rather than verified."
+}

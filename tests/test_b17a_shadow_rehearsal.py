@@ -140,6 +140,44 @@ class ExecutionSurfaceScanTests(PlantingTestCase):
         with self.assertRaises(B17A.RehearsalRefused):
             B17A.assert_no_execution_surface("entry.py", self.tmp)
 
+    def test_a_denylist_entry_that_only_CONTAINS_a_token_is_still_exempt(self):
+        """Found by mutation: the two denylist exclusions are not redundant.
+
+        The scan excludes a module's own denylist twice — once by filtering the string constants
+        before the substring search, and once by subtracting `declared` from the hits. Deleting the
+        FIRST looked harmless because the second appears to cover it, and every existing test
+        passed with it gone.
+
+        It does not cover it. The second subtraction removes hits that are exactly a declared
+        value; the first removes declared values from the search entirely. A denylist entry written
+        as a longer descriptive string — which is how a human documents one — CONTAINS the token
+        without BEING it, so the substring search yields the bare token, and subtracting the long
+        string does not remove it. The module is then flagged for declaring what it refuses to do.
+        """
+        self.plant("entry.py",
+                   'EXECUTION_SURFACE_MARKERS = ("the wire method sendTransaction is forbidden",)\n')
+        result = B17A.assert_no_execution_surface("entry.py", self.tmp)
+        self.assertEqual(result["execution_surface_found"], {})
+
+    def test_a_module_named_in_the_closure_but_absent_from_disk_is_skipped(self):
+        """A `_load` of a module that is not there must not crash the scan.
+
+        The guard is `if not path.exists(): continue`, and nothing exercised it — with it removed
+        the scan reads a nonexistent file and dies, which is a scanner that cannot report on the
+        very repository state most likely to need reporting: a half-applied change.
+        """
+        self.plant("entry.py",
+                   'GONE = _load("missing_module", "missing_module.py")\n'
+                   'STILL_HERE = _load("present_module", "present_module.py")\n')
+        self.plant("present_module.py", 'x = 1\n')
+        self.assertFalse((self.tmp / "missing_module.py").exists())
+
+        result = B17A.assert_no_execution_surface("entry.py", self.tmp)
+
+        self.assertIn("missing_module.py", result["closure"],
+                      "the closure still NAMES it, so the absence stays visible")
+        self.assertEqual(result["execution_surface_found"], {})
+
     def test_reaches_through_the_closure(self):
         """A capability one hop away is still reachable, and must be found."""
         self.plant("entry.py", 'DEP = _load("dep", "dep.py")\n')
