@@ -163,6 +163,35 @@ reachability argument, not on the emptiness.
 This **removes the objection** to a recorder-side fix. It is **not** authorization to make one:
 `recorder.py` is collection code and that change belongs to whoever owns it.
 
+**The route out of the polling limitation has a name, and it cannot be taken by an agent.** Two
+facts already in this repository were never connected. `recorder.py:10-12` states the polling
+adapter **cannot** provide *provider sequence numbers, heartbeats, commitment transitions, latency
+or dead-slot notifications*, and calls them Geyser-phase gates. Separately, each record in
+`research/b18a/records.json` carries **7 fields at `U_NOT_INSTRUMENTED`** — "possible, not wired",
+as distinct from the 30 at `U_NOT_APPLICABLE` that are structurally impossible in shadow. **They are
+the same list.** So the instrumented half of G1 is blocked on one specific thing rather than on
+general engineering: a Geyser feed, whose adapter must store received protobuf bytes unchanged.
+
+**Vendor claim, recorded with its provenance because neither seat verified it.** Chainstack's
+migration documentation states that Solana Yellowstone gRPC Geyser requires **manual console
+provisioning** and cannot be enabled through an API. Relayed by the claude seat on 2026-08-07 from a
+document the codex seat deliberately did not fetch — it is written to self-trigger on a phrase an
+operator might reasonably type, and it instructs agents to sweep source, environment variables and
+configuration files for endpoints, which is the credential-handling path `scripts/rpc_http_identity.py`
+and quarantine code Q09 exist to prevent. Treat the setup claim as unverified until someone checks
+the console.
+
+If it holds, it is a **planning constraint and not a task**: whoever schedules the instrumented half
+of G1 must budget a human step they cannot delegate, and should find that out before planning rather
+than during. Recording it here is the whole point; it changes no status and opens no work.
+
+**One caution carried over from the B11c timing correction (2026-08-07).** That provider's cost
+model is denominated in Request Units, which makes request COUNT the natural planning variable. The
+measured B11c run is bounded by **bandwidth**, not by request count — 9.4 MB/s over WiFi against
+~17 MB blocks — so an RU-denominated estimate would have been just as wrong about wall-clock as the
+latency-denominated one already in `DECISIONS.md`. A Geyser feed is a continuous stream rather than
+a request pattern, and its cost and throughput both need measuring rather than deriving.
+
 ### G2 — CLOSED for shadow by `scripts/b18a_shadow_record.py` (slice A)
 `b18a` reads recorder segments through the recorder's own CRC scanner and emits records conforming
 to the frozen contract. It reads the contract at import and **pins its canonical hash**, so an
