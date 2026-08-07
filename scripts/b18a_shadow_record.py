@@ -36,6 +36,7 @@ closure is scanned for wallet, key, signing and submission surfaces by B17a's sc
 reads files and writes JSON; that is all it can do.
 """
 import argparse
+import copy
 import hashlib
 import importlib.util
 import json
@@ -618,16 +619,51 @@ def main(argv=None):
     parser.add_argument("--clock-source", default="CLOCK_REALTIME, not monotonic")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--output", default=None)
+    parser.add_argument("--curve-state", default=None,
+                        help=("JSON file of decoded curve reserves. WITHOUT it, records are "
+                              "frame-only and carry no decision, because a recorder frame has no "
+                              "reserves to decide on. WITH it, a real B12a decision is run and "
+                              "timed. The difference between the two outputs IS the finding."))
+    parser.add_argument("--quote-lamports", type=int, default=100_000_000)
     arguments = parser.parse_args(argv)
 
     surface = assert_no_execution_surface()
-    decision = {"decision_unix_nanos": None, "retry_policy_id": None}
-    records = records_from_segment(arguments.segment, decision, arguments.endpoint,
-                                   clock_source=arguments.clock_source, limit=arguments.limit)
+    if arguments.curve_state:
+        curve_state = json.loads(pathlib.Path(arguments.curve_state).read_text())
+        components = copy.deepcopy(B17A.B12B.demo_components())
+        records = []
+        with B17A.NoNetwork():
+            for frame in read_frames(arguments.segment):
+                if arguments.limit is not None and len(records) >= arguments.limit:
+                    break
+                records.append(decide_and_record(
+                    observation_from_frame(frame), curve_state, components, arguments.endpoint,
+                    clock_source=arguments.clock_source,
+                    quote_lamports=arguments.quote_lamports))
+        decision_backed = True
+    else:
+        records = records_from_segment(arguments.segment,
+                                       {"decision_unix_nanos": None, "retry_policy_id": None},
+                                       arguments.endpoint, clock_source=arguments.clock_source,
+                                       limit=arguments.limit)
+        decision_backed = False
+
+    uninstrumented = sorted({field for record in records
+                             for field, reason in record["unmeasured"].items()
+                             if reason == "U_NOT_INSTRUMENTED"})
     report = {
         "schema_version": SCHEMA_VERSION,
         "layer": "B18A_SHADOW_RECORD",
         "contract_sha256": CONTRACT_SHA256,
+        "decision_backed": decision_backed,
+        "uninstrumented_fields": uninstrumented,
+        "uninstrumented_count": len(uninstrumented),
+        "what_the_count_means": (
+            "Frame-only records leave seven fields uninstrumented because a recorder frame carries "
+            "no curve reserves to decide on. Supplying a decoded curve state runs a real B12a "
+            "decision and measures three of them. The remaining four name a retry policy and a "
+            "slippage limit that do not exist, and a route and provider region that are plans "
+            "rather than observations while nothing is sent."),
         "no_execution_surface": surface,
         "network": "refused at runtime: socket.socket raised while every record was built",
         "records": [{key: value for key, value in record.items() if not key.startswith("_")}

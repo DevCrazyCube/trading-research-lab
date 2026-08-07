@@ -175,6 +175,16 @@
       "name": "the verdict is dropped from provenance",
       "old": "    record[\"provenance\"][\"risk_decision\"] = {",
       "new": "    record[\"provenance\"][\"_dropped\"] = {"
+    },
+    {
+      "name": "the CLI silently ignores the curve state and never decides",
+      "old": "    if arguments.curve_state:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the artifact's uninstrumented count is asserted rather than derived",
+      "old": "    uninstrumented = sorted({field for record in records\n                             for field, reason in record[\"unmeasured\"].items()\n                             if reason == \"U_NOT_INSTRUMENTED\"})",
+      "new": "    uninstrumented = [\"provider_region_declared\", \"retry_policy_id\", \"route\",\n                      \"slippage_limit_tokens\"]"
     }
   ],
   "expected_survivors": [],

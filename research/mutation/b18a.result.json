@@ -2,8 +2,8 @@
   "baseline_passed": true,
   "expected_survivors": {},
   "git_ancestry_staged": false,
-  "killed": 34,
-  "mutants_declared": 34,
+  "killed": 36,
+  "mutants_declared": 36,
   "per_mutant": [
     {
       "first_failing_test": "tests/test_b18a_shadow_record.py::ContractPinningTests::test_a_tampered_contract_refuses_to_load",
@@ -174,6 +174,16 @@
       "first_failing_test": "tests/test_b18a_shadow_record.py::RealDecisionWiringTests::test_a_rejected_decision_is_never_priced",
       "name": "the verdict is dropped from provenance",
       "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::CliProducesTheArtifactTests::test_the_cli_with_a_curve_state_measures_three_of_them",
+      "name": "the CLI silently ignores the curve state and never decides",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::CliProducesTheArtifactTests::test_the_cli_without_a_curve_state_leaves_seven_uninstrumented",
+      "name": "the artifact's uninstrumented count is asserted rather than derived",
+      "outcome": "killed"
     }
   ],
   "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
@@ -187,6 +197,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "c14449fb3b5886f815eae138ea6d56557ed3421544475331cfaf905331952dee",
+  "working_tree_sha256": "7086f5caabbfe3fec8cd50208b9691fca7ba5ab80545f2794ab79d0fce7c843c",
   "working_tree_unchanged": true
 }

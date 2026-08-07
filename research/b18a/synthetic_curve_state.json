@@ -1,0 +1,14 @@
+{
+ "_synthetic": "SYNTHETIC decoded reserves. Stands in for the decode step b18a does not have: a recorder frame carries no curve reserves, so this is supplied rather than derived. Not evidence about any curve.",
+ "bonding_curve": "CurveSynth111111111111111111111111111111111",
+ "complete": false,
+ "creator": "CreatorSynthA1111111111111111111111111111111",
+ "mayhem_mode": false,
+ "mint": "MintSynth1111111111111111111111111111111111",
+ "quote_mint": "11111111111111111111111111111111",
+ "real_quote": 4200000000,
+ "real_token": 780000000000000,
+ "slot": 435600003,
+ "virtual_quote": 30000000000,
+ "virtual_token": 1073000000000000
+}

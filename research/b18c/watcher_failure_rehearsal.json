@@ -9,6 +9,23 @@
  },
  "executable": false,
  "execution_status": "never_executed",
+ "git_ancestry": {
+  "a_real_ancestor_is_accepted": {
+   "preregistration_commit": "cafebabe"
+  },
+  "commit_not_an_ancestor": {
+   "branch": "the preregistration commit is not an ancestor of HEAD",
+   "reason_code": "Q03_git_ancestry_broken",
+   "refusal_message": "Q03_git_ancestry_broken: the preregistration commit is not an ancestor of HEAD",
+   "refused": true
+  },
+  "no_git_in_staged_tree": {
+   "branch": "the preregistration has no commit",
+   "reason_code": "Q03_git_ancestry_broken",
+   "refusal_message": "Q03_git_ancestry_broken: the preregistration has no commit. A parameter with no history is a parameter nobody can show was frozen first",
+   "refused": true
+  }
+ },
  "harness": "B18C_WATCHER_FAILURE_REHEARSAL",
  "live_watcher_sha256_after": "cabb33d91533995f2b20793dae2a177299242525fb6a39c81dfe5dcd2fdbdebf",
  "live_watcher_sha256_before": "cabb33d91533995f2b20793dae2a177299242525fb6a39c81dfe5dcd2fdbdebf",
@@ -69,11 +86,11 @@
   ],
   "not_reached": {
    "Q01_preregistration_drift": "needs the frozen preregistration to differ from its pin; a document change, not a fault",
-   "Q03_git_ancestry_broken": "needs a rewritten git history in the scratch tree, which would prove nothing about the real one",
    "Q13_ambiguous_failure": "reached only when a failure resists classification, which an injected fault cannot honestly be"
   },
   "reached": [
    "Q02_script_manifest_drift",
+   "Q03_git_ancestry_broken",
    "Q04_non_finalized_slot",
    "Q05_retries_exhausted",
    "Q06_non_retryable_rpc",

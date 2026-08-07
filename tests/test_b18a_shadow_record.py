@@ -658,3 +658,111 @@ class RealDecisionWiringTests(SegmentFixture):
         self.assertTrue(B18A.assert_conforms(record))
         self.assertEqual(record["stage"], "shadow")
         self.assertEqual(record["measured"]["outcome"], "never_sent")
+
+
+class ArtifactsMatchTheCodeTests(unittest.TestCase):
+    """The committed evidence files must say what the code produces.
+
+    6d01eba changed the code and both sweep declarations and left these two artifacts stale, so
+    research/b18a/records.json showed seven uninstrumented fields while the commit message said
+    four. In this repository the artifacts ARE the evidence -- the gap map and the inventory cite
+    them by path -- so a reader checking the message against the file concludes the message is
+    wrong. Worse than stale: `main()` still hardcoded the decision to None, so the CLI could not
+    produce the new records at all and regenerating would have changed nothing.
+
+    These tests fail if an artifact drifts from the code again, which is cheaper than remembering.
+    """
+
+    def test_the_frame_only_artifact_reports_seven_uninstrumented(self):
+        report = json.loads((ROOT / "research/b18a/records.json").read_text())
+        self.assertFalse(report["decision_backed"])
+        self.assertEqual(report["uninstrumented_count"], 7)
+
+    def test_the_decision_backed_artifact_reports_four(self):
+        report = json.loads((ROOT / "research/b18a/decision_records.json").read_text())
+        self.assertTrue(report["decision_backed"])
+        self.assertEqual(report["uninstrumented_count"], 4)
+        self.assertEqual(report["uninstrumented_fields"],
+                         ["provider_region_declared", "retry_policy_id", "route",
+                          "slippage_limit_tokens"])
+
+    def test_the_artifacts_agree_with_what_the_records_actually_carry(self):
+        """The header count must be derived from the records, not asserted beside them."""
+        for name in ("records", "decision_records"):
+            report = json.loads((ROOT / f"research/b18a/{name}.json").read_text())
+            observed = sorted({field for record in report["records"]
+                               for field, reason in record["unmeasured"].items()
+                               if reason == "U_NOT_INSTRUMENTED"})
+            with self.subTest(artifact=name):
+                self.assertEqual(report["uninstrumented_fields"], observed)
+                self.assertEqual(report["uninstrumented_count"], len(observed))
+
+    def test_the_cli_can_reach_the_decision_path(self):
+        """`decide_and_record` was reachable only from the API, so the documented entry point
+        could not produce a decision-backed record. An unreachable feature is an absent one."""
+        tree = ast.parse((ROOT / "scripts" / "b18a_shadow_record.py").read_text())
+        main = next(n for n in ast.walk(tree)
+                    if isinstance(n, ast.FunctionDef) and n.name == "main")
+        calls = {ast.unparse(n.func) for n in ast.walk(main) if isinstance(n, ast.Call)}
+        self.assertIn("decide_and_record", calls)
+
+    def test_the_synthetic_curve_state_says_it_is_synthetic(self):
+        state = json.loads((ROOT / "research/b18a/synthetic_curve_state.json").read_text())
+        self.assertIn("SYNTHETIC", state["_synthetic"])
+        self.assertIn("not derived", state["_synthetic"].replace("rather than derived",
+                                                                 "not derived"))
+
+
+class CliProducesTheArtifactTests(SegmentFixture):
+    """Run `main` and check ITS OUTPUT, rather than reading the file it wrote last time.
+
+    The stored-artifact tests above pin what a reader sees. They cannot test the code that produces
+    it: a mutant that breaks `main` leaves the committed file untouched, so they pass. Two mutants
+    survived on exactly that -- disabling the curve-state branch, and hardcoding the count instead
+    of deriving it.
+
+    The general form, which is the third instance of one rule today: A TEST THAT READS A STORED
+    ARTIFACT CANNOT TEST THE CODE THAT PRODUCES IT. It is the same shape as reading a harness's
+    report instead of driving the subject, one layer out.
+    """
+
+    def setUp(self):
+        super().setUp()
+        synthetic = B18A.B17A.synthetic_observation()
+        state = B18A.B17A.curve_state(synthetic) | {
+            k: synthetic[k] for k in ("mint", "bonding_curve", "creator")}
+        self.state_path = pathlib.Path(self.root) / "curve.json"
+        self.state_path.write_text(json.dumps(state))
+        self.out = pathlib.Path(self.root) / "out.json"
+
+    def run_main(self, *extra):
+        import contextlib, io
+        with contextlib.redirect_stdout(io.StringIO()):
+            B18A.main(["--segment", self.write_segment(), "--output", str(self.out), *extra])
+        return json.loads(self.out.read_text())
+
+    def test_the_cli_without_a_curve_state_leaves_seven_uninstrumented(self):
+        report = self.run_main()
+        self.assertFalse(report["decision_backed"])
+        self.assertEqual(report["uninstrumented_count"], 7)
+
+    def test_the_cli_with_a_curve_state_measures_three_of_them(self):
+        """Kills the mutant that ignores --curve-state: the count stays 7 without the decision."""
+        report = self.run_main("--curve-state", str(self.state_path))
+        self.assertTrue(report["decision_backed"])
+        self.assertEqual(report["uninstrumented_count"], 4)
+        for field in ("decision_unix_nanos", "quoted_state_slot", "expected_tokens_out"):
+            with self.subTest(field=field):
+                self.assertNotIn(field, report["uninstrumented_fields"])
+                self.assertIsNotNone(report["records"][0]["measured"][field])
+
+    def test_the_count_is_derived_from_the_records_it_shipped(self):
+        """Kills the hardcoded-count mutant: the header must follow the records, in both modes."""
+        for extra in ((), ("--curve-state", str(self.state_path))):
+            report = self.run_main(*extra)
+            observed = sorted({field for record in report["records"]
+                               for field, reason in record["unmeasured"].items()
+                               if reason == "U_NOT_INSTRUMENTED"})
+            with self.subTest(decision_backed=report["decision_backed"]):
+                self.assertEqual(report["uninstrumented_fields"], observed)
+                self.assertEqual(report["uninstrumented_count"], len(observed))

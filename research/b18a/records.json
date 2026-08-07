@@ -1,6 +1,7 @@
 {
  "contract_sha256": "29f480fcad6dd93cc40ab3ab16ae3368c02280a27a286e7f6458577451ad2ce4",
  "count": 3,
+ "decision_backed": false,
  "layer": "B18A_SHADOW_RECORD",
  "network": "refused at runtime: socket.socket raised while every record was built",
  "no_execution_surface": {
@@ -43,7 +44,7 @@
     "blockhash_slot": null,
     "build_completed_unix_nanos": null,
     "build_started_unix_nanos": null,
-    "clock_source": "CLOCK_REALTIME via time.time_ns(); NOT monotonic",
+    "clock_source": "CLOCK_REALTIME, not monotonic",
     "compute_unit_limit": null,
     "compute_units_consumed": null,
     "decision_unix_nanos": null,
@@ -88,7 +89,7 @@
     "seq_in_session": 0,
     "session_id": "SESS-SYNTH-01"
    },
-   "record_sha256": "17ed30dbbe87abc2d3e4643facc8f83864d1849a572acd78afe7211f1dc1934a",
+   "record_sha256": "6c78bf735ca9d8bdd0b8108cc41d5b4a34e5bf47e5165598c4a6a0af89378663",
    "schema_version": "1.0.0",
    "stage": "shadow",
    "unmeasured": {
@@ -152,7 +153,7 @@
     "blockhash_slot": null,
     "build_completed_unix_nanos": null,
     "build_started_unix_nanos": null,
-    "clock_source": "CLOCK_REALTIME via time.time_ns(); NOT monotonic",
+    "clock_source": "CLOCK_REALTIME, not monotonic",
     "compute_unit_limit": null,
     "compute_units_consumed": null,
     "decision_unix_nanos": null,
@@ -197,7 +198,7 @@
     "seq_in_session": 1,
     "session_id": "SESS-SYNTH-01"
    },
-   "record_sha256": "b8b6556f9a5c2d5b8aeb87abd2c4941995bf2c84b7893d4c9d1b2c2da960ea26",
+   "record_sha256": "d383df26af0ad977728b766e7a75a073f85bdc066316caa7bedbe1a42086249b",
    "schema_version": "1.0.0",
    "stage": "shadow",
    "unmeasured": {
@@ -261,7 +262,7 @@
     "blockhash_slot": null,
     "build_completed_unix_nanos": null,
     "build_started_unix_nanos": null,
-    "clock_source": "CLOCK_REALTIME via time.time_ns(); NOT monotonic",
+    "clock_source": "CLOCK_REALTIME, not monotonic",
     "compute_unit_limit": null,
     "compute_units_consumed": null,
     "decision_unix_nanos": null,
@@ -306,7 +307,7 @@
     "seq_in_session": 2,
     "session_id": "SESS-SYNTH-01"
    },
-   "record_sha256": "7cba5c523e59d549dcfdc7071c0673e71d62b204f062a08d8b1667686a41267d",
+   "record_sha256": "1b956c3716957fe5b242c60036bfaf9455e9376965a47345929fa5f62337d977",
    "schema_version": "1.0.0",
    "stage": "shadow",
    "unmeasured": {
@@ -350,5 +351,16 @@
    }
   }
  ],
- "schema_version": "1.0.0"
+ "schema_version": "1.0.0",
+ "uninstrumented_count": 7,
+ "uninstrumented_fields": [
+  "decision_unix_nanos",
+  "expected_tokens_out",
+  "provider_region_declared",
+  "quoted_state_slot",
+  "retry_policy_id",
+  "route",
+  "slippage_limit_tokens"
+ ],
+ "what_the_count_means": "Frame-only records leave seven fields uninstrumented because a recorder frame carries no curve reserves to decide on. Supplying a decoded curve state runs a real B12a decision and measures three of them. The remaining four name a retry policy and a slippage limit that do not exist, and a route and provider region that are plans rather than observations while nothing is sent."
 }
