@@ -236,13 +236,33 @@
       "status": "EXISTS_CONFORMING",
       "conforms_to": "unittest.TestCase, discoverable by both runners",
       "role": "watcher failure-rehearsal guards, including a class that exists solely to stop the harness fabricating: it cross-checks every credited quarantine code against the individual rehearsal that caused it"
+    },
+    {
+      "path": "scripts/b20a_emergency_state.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "B19a's required emergency-state semantics: engaged by default at start, on no/unreadable/malformed state, bad MAC, missing secret, stale heartbeat, clock conflict and verifier disagreement; clearing requires an authenticated operator, a reason, the expected generation and an append-only receipt, and never happens by restart or timeout",
+      "role": "the emergency-state owner, closing G6. Produces the kill_switch_engaged and emergency_state fields b12a demands and nothing produced.",
+      "holds_no_custody": "no wallet, key, address or transaction; verified by running B17a's execution-surface scanner over the module. Its one secret authenticates an operator to a local control process and cannot authorize a transaction.",
+      "console_boundary": "returns a read-only snapshot; adds no write path to ui/operator_console.html or scripts/b12b_preview_server.py, asserted by a test"
+    },
+    {
+      "path": "tests/test_b20a_emergency_state.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "unittest.TestCase, discoverable by both runners",
+      "role": "emergency-state owner guards; every fail-closed branch is provoked rather than reasoned about"
+    },
+    {
+      "path": "research/mutation/b20a.sweep.json",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "sweep declaration; 25 mutants, 0 expected survivors",
+      "role": "proves each fail-closed default is load-bearing. Its first run surfaced two tests passing for a neighbouring guard's reason."
     }
   ],
   "verified_absent": [
     {
       "what": "an operator-reachable kill-switch CONTROL",
-      "status": "ABSENT",
-      "absence_evidence": "`kill_switch_engaged` is read by b12a (b12a_risk_governor.py:394) and displayed by b12b, but a repository-wide grep finds no component that WRITES it outside a test fixture and the b17a counterexample. It arrives as an input field in `health` that nothing produces from an operator action.",
+      "status": "SUPERSEDED",
+      "absence_evidence": "NO LONGER TRUE at the commit adding b20a. `scripts/b20a_emergency_state.py` is the owner of emergency state (slice E, built under explicit owner authorization) and produces `kill_switch_engaged` and `emergency_state` for b12a, which had demanded both and received them from nothing. What remains absent is the integration: b12b does not read its snapshot, no process runs its heartbeat, and no operator surface invokes engage/clear. The owner exists; nothing consumes it yet.",
       "correction_note": "This is narrower than B17c's original claim of 'no operator surface', which was wrong. The surface exists and shows the switch; what is missing is an owner of the switch's state."
     },
     {

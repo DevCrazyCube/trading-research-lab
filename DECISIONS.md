@@ -2449,3 +2449,45 @@ The two do not imply each other. A user-ratified decision can remain provisional
   (18/18).
 - **NOT done:** no existing sweep result was re-derived or corrected, no test was changed to make a
   mutant die, and the b18a/b18b/b18c sweeps remain unported — they are the claude seat's lane.
+
+## 2026-08-07 — The emergency-state owner is implemented (slice E, closing G6)
+
+- **Status:** implemented; unwired and operator-unratified.
+- **Ratified by:** the owner, explicitly. This is the control-service class a standing instruction
+  forbids implementing, and no accumulation of evidence substituted for being told to build it.
+  Both agent seats had held it blocked all session on exactly that ground.
+- **Decision:** `scripts/b20a_emergency_state.py` owns emergency state and implements B19a's
+  required semantics without inventing any. Engaged is the default at process start and on no
+  state, an unreadable or malformed record, a bad MAC, a missing secret, a stale heartbeat, a clock
+  conflict, or verifier disagreement — ten reason codes of which exactly one is not engaged. The
+  read path NEVER raises and never returns unknown, because a read that raised would hand the
+  decision back to the caller, which is the gap G6 described.
+- **It closes the reader/writer gap:** `b12a.assert_health` refuses a snapshot omitting
+  `kill_switch_engaged` or `emergency_state`, and nothing produced either. `health_fields` now does,
+  and a test carries them through `assert_health` into `_health_reasons` and asserts R01 and R02.
+- **Clearing is the only privileged operation** and the only route to a not-engaged state: an
+  authenticated operator, a reason, the generation they believe is current, and a durable
+  append-only receipt. It never happens by restart or timeout. Engaging requires no strategy, RPC or
+  signer, because a control that is hard to pull is not a control.
+- **Two independent verifiers**, per B19a: the state file and the tail of the append-only receipt
+  log, read through different paths. Disagreement engages. A test shows the state file alone
+  verifies perfectly in every disagreement case, which is why one reader is not enough.
+- **Custody boundary held:** no wallet, key, address or transaction, verified by running B17a's
+  execution-surface scanner over the module rather than asserting it. The single secret is an
+  operator authentication secret, environment-only and never in argv, used to MAC a local state
+  file; it authenticates a human to a local control process and cannot authorize a transaction
+  because nothing here can construct one.
+- **Console untouched:** `snapshot` is read-only and a test asserts neither
+  `ui/operator_console.html` nor `scripts/b12b_preview_server.py` references this module.
+- **Guards:** 48 tests, both runners; mutation sweep 25/25, 0 survivors. The sweep's first run
+  surfaced two tests passing for a neighbouring guard's reason — the `recorded_unix_nanos`
+  future-check was masked by the heartbeat check, and the heartbeat-cannot-clear test was kept alive
+  by verifier disagreement rather than by the heartbeat. Both now isolate the guard they name.
+- **A guard whose claim changed:** `test_the_kill_switch_really_has_no_writer` asserted an absence
+  this slice deliberately filled. It is now `test_the_kill_switch_has_exactly_one_owner`, because
+  two components answering "is the switch engaged" is worse than none — they can disagree and both
+  look authoritative. The inventory's ABSENT entry became SUPERSEDED and states what remains absent.
+- **NOT done:** nothing consumes it. b12b does not read the snapshot, no process runs the heartbeat,
+  no operator surface invokes engage or clear, no limit is ratified, and no wallet, signer,
+  transaction, signing, submission or spend exists anywhere. Phase 5b, Phase 6 and explicit owner
+  authorization remain gates.

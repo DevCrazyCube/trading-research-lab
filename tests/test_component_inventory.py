@@ -153,18 +153,30 @@ class InventoryIntegrityTests(unittest.TestCase):
         self.assertEqual(offences, [],
                          f"these absences are contradicted by a conforming component: {offences}")
 
-    def test_the_kill_switch_really_has_no_writer(self):
-        """Re-verify the one absence I still claim, rather than trusting the document.
+    def test_the_kill_switch_has_exactly_one_owner(self):
+        """The claim this guard defends CHANGED when slice E landed, so the guard changed with it.
 
-        `kill_switch_engaged` may be READ and DISPLAYED anywhere; what must not exist is a component
-        that assigns it outside a test fixture or the b17a counterexample.
+        It used to assert that `kill_switch_engaged` had NO writer, and re-derived that absence on
+        every run. `scripts/b20a_emergency_state.py` is now the sanctioned owner, built under
+        explicit owner authorization, so continuing to assert the absence would be defending a
+        claim that is no longer true — and its own failure message said as much: "if that is an
+        operator control, the inventory's ABSENT entry is stale and must be corrected". It was, and
+        it has been.
+
+        What is still worth guarding, and what this now checks: no SECOND writer. Two components
+        answering "is the switch engaged" is worse than none, because they can disagree and each
+        looks authoritative. `kill_switch_engaged` may still be READ and DISPLAYED anywhere.
         """
+        sanctioned = {
+            "scripts/b20a_emergency_state.py",      # the owner, slice E
+            "scripts/b17a_shadow_rehearsal.py",     # the kill-switch counterexample
+        }
         assignment = re.compile(r"""\[["']kill_switch_engaged["']\]\s*=|kill_switch_engaged\s*=\s*""")
         writers = []
         for path in sorted((ROOT / "scripts").rglob("*.py")):
             relative = path.relative_to(ROOT).as_posix()
-            if relative == "scripts/b17a_shadow_rehearsal.py":
-                continue  # the kill-switch counterexample sets it deliberately
+            if relative in sanctioned:
+                continue
             for number, line in enumerate(path.read_text().splitlines(), start=1):
                 stripped = line.strip()
                 if stripped.startswith("#") or '"kill_switch_engaged":' in stripped:
@@ -172,8 +184,13 @@ class InventoryIntegrityTests(unittest.TestCase):
                 if assignment.search(stripped):
                     writers.append(f"{relative}:{number}")
         self.assertEqual(writers, [],
-                         f"something now writes the kill switch: {writers}. If that is an operator "
-                         f"control, the inventory's ABSENT entry is stale and must be corrected.")
+                         f"a second component now writes the kill switch: {writers}. Emergency "
+                         f"state has one owner; a competing writer can disagree with it and both "
+                         f"will look authoritative.")
+
+    def test_the_sanctioned_owner_actually_exists(self):
+        """Otherwise the allowance above silently becomes an exemption for a file nobody wrote."""
+        self.assertTrue((ROOT / "scripts" / "b20a_emergency_state.py").is_file())
 
 
 class GapMapConsistencyTests(unittest.TestCase):

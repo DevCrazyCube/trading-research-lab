@@ -81,7 +81,7 @@ Full data with per-component reasoning in `research/COMPONENT_INVENTORY.json`.
 | failure-rehearsal harness | `scripts/b18b_failure_rehearsal.py` | **exists**; 6/7 outcomes and both failure-only reason codes exercised by injected fault |
 | wallet/treasury architecture | `research/B19A_WALLET_TREASURY_ARCHITECTURE.md` | exists (prose only); audited |
 | failure record from a REAL send | — | absent, and requires a send |
-| kill-switch **control** | — | absent; see G6 |
+| emergency-state owner | `scripts/b20a_emergency_state.py` | **exists** — slice E; produces `kill_switch_engaged` and `emergency_state`; nothing consumes it yet, see G6 |
 | wallet / treasury | — | absent, and must stay so |
 
 > **The contract's pin is not its file hash, and `sha256sum` will look like tampering.** The raw file
@@ -302,8 +302,50 @@ would have been one anywhere else.
 That is a stronger argument for slice E than the original phrasing: the system already refuses to
 run without an answer to "is the kill switch engaged", and there is no component whose job it is to
 answer. So the missing piece is not a button — it is an **owner of the
-switch's state**, with a control surface separate from the read-only console. `test_the_kill_switch_
-really_has_no_writer` re-verifies this absence on every run rather than trusting this paragraph.
+switch's state**, with a control surface separate from the read-only console.
+
+### G6 — CLOSED by `scripts/b20a_emergency_state.py` (slice E)
+
+**Built 2026-08-07 under explicit owner authorization**, which it required: an emergency-state owner
+is the control-service class a standing instruction forbids implementing, and no amount of evidence
+substituted for the owner saying so.
+
+It implements B19a's required semantics rather than inventing any. Engaged is the default at process
+start, on no state, on an unreadable or malformed record, on a bad MAC, on a missing secret, on a
+stale heartbeat, on a clock conflict and on verifier disagreement — ten reason codes of which
+**exactly one is not engaged**. `read_verdict` NEVER raises and never returns unknown: a read that
+raised would hand the decision back to the caller, which is the gap G6 described.
+
+- **It produces the fields nothing produced.** `health_fields` returns `kill_switch_engaged` and
+  `emergency_state`, and a test feeds them through `b12a.assert_health` into `_health_reasons` and
+  asserts R01 and R02 fire. The reader and the writer are now connected.
+- **Clearing is the only privileged operation**, and the only path to a not-engaged state. It needs
+  an operator, a reason, the generation the operator believes is current, and the secret; it writes
+  an append-only receipt; and it never happens by restart or timeout. Engaging needs none of that,
+  because a control that is hard to pull is not a control.
+- **Two independent verifiers**, per B19a. One reads the state file, the other the tail of the
+  append-only receipt log. A partial write, a restored older file or a hand-edited record makes them
+  disagree, and disagreement engages. A test shows the state file alone verifies perfectly in every
+  such case, which is the justification for the second verifier made concrete.
+- **The console is untouched.** `snapshot` returns a read-only dict; a test asserts neither
+  `ui/operator_console.html` nor `scripts/b12b_preview_server.py` mentions this module. Wiring the
+  snapshot into b12b is deliberately NOT done here.
+- **No wallet, key, address or transaction**, checked by running B17a's execution-surface scanner
+  over the module rather than asserting it in prose. The one secret is an operator authentication
+  secret, env-only and never in argv, used to MAC a local state file; it authenticates a human to a
+  local control process and cannot authorize a transaction because nothing here can build one.
+
+48 tests, both runners. **Mutation sweep 25/25, 0 survivors** — and it earned its keep on the first
+run by surfacing two tests that were passing for a neighbouring guard's reason: the
+`recorded_unix_nanos` future-check was masked by the heartbeat check, and the heartbeat-cannot-clear
+test was kept alive by verifier disagreement rather than by the heartbeat. Both now isolate the
+guard they name.
+
+**Still open under G6:** nothing consumes it yet. b12b does not read the snapshot, no process runs
+the heartbeat, and no operator surface invokes `engage`/`clear` — those are integration, and this
+slice deliberately stopped at the owner. `test_the_kill_switch_really_has_no_writer` in
+`tests/test_component_inventory.py` was the guard that re-derived this absence on every run; it now
+needs revisiting, because the absence it checks for has been deliberately filled.
 
 ### G7 — mutation evidence was unreproducible; CLOSED FORWARD ONLY by `scripts/mutation_sweep.py`
 **Found by the claude seat on 2026-08-07.** Mutation numbers are what this project cites when it
@@ -424,7 +466,7 @@ narrowed, and still non-overlapping:
 | ~~**B'. Watcher failure rehearsals**~~ | `scripts/b18c_watcher_failure_rehearsal.py` | **DONE**; 10/13 quarantine codes provoked, live watcher byte-unchanged |
 | ~~**C. Wallet/treasury architecture (G3)**~~ | `research/B19A_WALLET_TREASURY_ARCHITECTURE.md` | **DONE** (Codex); independently audited 2026-08-07 |
 | ~~**D. Strategy preregistrations (G5)**~~ | `research/B19B..B19D` preregs + `scripts/b19_preregistration_register.py` | **DONE** (codex seat, 2026-08-07); documents committed alone, register and tests separately |
-| **E. Kill-switch state owner (G6)** | new module; **must not** add a write path to `b12b_preview_server.py` or the console | leaves the read-only surface intact |
+| ~~**E. Kill-switch state owner (G6)**~~ | `scripts/b20a_emergency_state.py` | **DONE** (codex seat, 2026-08-07) under explicit owner authorization; console and preview server untouched, asserted by a test |
 
 **State as of 2026-08-07: A, B, B', C and D are done. E is the only slice remaining, and it is
 authorization-blocked.**
