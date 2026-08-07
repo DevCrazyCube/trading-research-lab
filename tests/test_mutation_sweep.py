@@ -517,6 +517,113 @@ class SweepLockTests(unittest.TestCase):
         self.assertNotIn(".sweep.lock", " ".join(SWEEP.tracked_files(root)))
 
 
+class GitAncestryStagingTests(unittest.TestCase):
+    """Some components refuse a parameter that cannot be shown to have been committed first.
+
+    `b11c` raises `Q03_git_ancestry_broken` — "a parameter with no history is a parameter nobody
+    can show was frozen first" — so its tests fail in a tracked-file copy for a reason that has
+    nothing to do with any mutant. That is the guard working, not a gap, and it made 45 of the 124
+    staged-tree failures.
+    """
+
+    def test_a_tracked_only_tree_has_no_history(self):
+        root = toy_repo(self)
+        destination = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, destination, True)
+        SWEEP.stage_tree(destination, root)
+        self.assertFalse((destination / ".git").exists())
+
+    def test_include_git_stages_the_history(self):
+        root = toy_repo(self)
+        destination = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, destination, True)
+        SWEEP.stage_tree(destination, root, include_git=True)
+        self.assertTrue((destination / ".git").is_dir())
+
+    def test_history_is_COPIED_not_symlinked(self):
+        """A symlink would put the real object store within reach of a mutated program."""
+        root = toy_repo(self)
+        destination = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, destination, True)
+        SWEEP.stage_tree(destination, root, include_git=True)
+        staged_git = destination / ".git"
+        self.assertFalse(staged_git.is_symlink())
+        for path in staged_git.rglob("*"):
+            with self.subTest(path=path.name):
+                self.assertFalse(path.is_symlink())
+
+    def test_asking_for_history_that_does_not_exist_refuses(self):
+        """The reachable case is a SUBDIRECTORY of a repository, not a directory outside one.
+
+        Outside a repo, `git ls-files` fails first and staging never gets as far as this guard.
+        Inside a subdirectory it succeeds — the subdirectory is tracked — while `.git` sits a level
+        up and is absent. Writing this test the naive way produced a CalledProcessError instead of
+        the refusal, which is how the reachable shape was found.
+        """
+        root = toy_repo(self)
+        subdirectory = root / "scripts"
+        self.assertTrue(SWEEP.tracked_files(subdirectory), "expected git to work in a subdirectory")
+        self.assertFalse((subdirectory / ".git").exists())
+        destination = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, destination, True)
+        with self.assertRaisesRegex(SWEEP.SweepRefused, "no .git"):
+            SWEEP.stage_tree(destination, subdirectory, include_git=True)
+
+    def test_the_declaration_field_is_off_by_default(self):
+        """Turning it on silently would change what every existing sweep's baseline sees."""
+        root = toy_repo(self)
+        sweep_dir = declaration(self, root, [KILLED_MUTANT])
+        staging = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, staging, True)
+        result = SWEEP.run_sweep("toy", root=root, sweep_dir=sweep_dir, timeout=120,
+                                 staging_root=staging)
+        self.assertIs(result["git_ancestry_staged"], False)
+        self.assertFalse((staging / "tree" / ".git").exists())
+
+    def test_a_declaration_may_ask_for_it(self):
+        root = toy_repo(self)
+        sweep_dir = declaration(self, root, [KILLED_MUTANT])
+        body = json.loads((sweep_dir / "toy.sweep.json").read_text())
+        body["needs_git_ancestry"] = True
+        (sweep_dir / "toy.sweep.json").write_text(json.dumps(body))
+        staging = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, staging, True)
+
+        result = SWEEP.run_sweep("toy", root=root, sweep_dir=sweep_dir, timeout=120,
+                                 staging_root=staging)
+
+        self.assertIs(result["git_ancestry_staged"], True)
+        self.assertTrue((staging / "tree" / ".git").is_dir())
+
+
+class LiveCollectionIsUnreachableTests(unittest.TestCase):
+    """The safety property that lets any of this run beside a live watcher.
+
+    Staging copies git-TRACKED files. The live collection artifacts are untracked by design, so
+    they are absent from a staged tree structurally rather than by anyone remembering to exclude
+    them. This asserts that against the real repository, because it is the assumption every sweep
+    in this project has been running on.
+    """
+
+    def test_the_live_watcher_artifacts_are_untracked_and_so_never_stage(self):
+        tracked = set(SWEEP.tracked_files(ROOT))
+        live = ["research/b11a/b11a_creates.sqlite",
+                "research/b11a/b11a_creates.sqlite-wal",
+                "research/b11a/supervisor_state.json",
+                "research/b11a/supervisor.lock"]
+        for path in live:
+            with self.subTest(path=path):
+                self.assertNotIn(path, tracked,
+                                 f"{path} is tracked, so a sweep would stage a live artifact")
+
+    def test_what_does_stage_from_that_path_is_historical_only(self):
+        staged = [p for p in SWEEP.tracked_files(ROOT) if p.startswith("research/b11a/")]
+        self.assertTrue(staged, "expected the historical incident records to be tracked")
+        for path in staged:
+            with self.subTest(path=path):
+                self.assertRegex(path, r"^research/b11a/(incidents|superseded)/")
+
+
 class ShippedSweepTests(unittest.TestCase):
     """The declarations that ship with the repository must be well-formed without running them.
 

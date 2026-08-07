@@ -62,7 +62,7 @@ SWEEP_DIR = ROOT / "research" / "mutation"
 # here and worse — a mutant carrying `find` instead of `old` would be silently inert, and an inert
 # mutant is one this sweep counts as applied while it changes nothing.
 DECLARATION_FIELDS = ("sweep_id", "description", "target", "tests", "mutants",
-                      "expected_survivors", "expected_survivors_note")
+                      "expected_survivors", "expected_survivors_note", "needs_git_ancestry")
 
 # The ONLY tracked paths the tree check ignores, named rather than skipped silently.
 #
@@ -162,12 +162,29 @@ def tracked_files(root=ROOT):
     return [name for name in result.stdout.decode().split("\0") if name]
 
 
-def stage_tree(destination, root=ROOT):
+def stage_tree(destination, root=ROOT, include_git=False):
     """Copy the git-tracked tree into a scratch directory.
 
     Tracked files only: the ignored artifacts in `research/` run to gigabytes and none of them is
     input to a guard. What is copied is exactly what a reader could check out, which is the point —
     the number this produces must be reproducible from the repository and not from local state.
+
+    THIS IS ALSO THE SAFETY PROPERTY, and it is worth naming because a live watcher writes into
+    `research/b11a` continuously. Tracked-only staging means the live artifacts — the creates
+    sqlite, its WAL, the supervisor state and lock — are all UNTRACKED and therefore absent from
+    the staged tree, while the 28 tracked files under that path are historical incident records.
+    A staged tree structurally cannot reach a running collection, rather than being careful not to.
+
+    `include_git` additionally copies `.git`. Some components verify that a frozen parameter was
+    committed BEFORE it was used — `b11c` raises `Q03_git_ancestry_broken`, "a parameter with no
+    history is a parameter nobody can show was frozen first" — and a tracked-file copy has no
+    history at all, so those tests fail in staging for a reason that has nothing to do with the
+    mutant. It is COPIED rather than symlinked, at ~12 MB, so that anything the tests write lands
+    on the copy; a symlink would put the real object store within reach of a mutated program.
+
+    It is opt-in per declaration rather than automatic, because turning it on changes what every
+    existing sweep's baseline sees, and a change that silently alters seven established results is
+    not one to make as a side effect.
     """
     destination = pathlib.Path(destination)
     for name in tracked_files(root):
@@ -177,6 +194,13 @@ def stage_tree(destination, root=ROOT):
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+    if include_git:
+        git_dir = pathlib.Path(root) / ".git"
+        if not git_dir.is_dir():
+            raise SweepRefused(
+                f"{root} has no .git, so git ancestry cannot be staged and a sweep that needs it "
+                "would fail for a reason unrelated to any mutant")
+        shutil.copytree(git_dir, destination / ".git", symlinks=False)
     return destination
 
 
@@ -329,7 +353,7 @@ def run_sweep(name, root=ROOT, sweep_dir=SWEEP_DIR, timeout=600, staging_root=No
     staged_root = scratch / "tree"
     staged_root.mkdir(parents=True, exist_ok=True)
     try:
-        stage_tree(staged_root, root)
+        stage_tree(staged_root, root, include_git=bool(declaration.get("needs_git_ancestry")))
         # Structural, not a promise: everything below writes only under `staged_root`.
         target = assert_within(staged_root / target_name, staged_root, name)
         original = target.read_text()
@@ -406,6 +430,7 @@ def run_sweep(name, root=ROOT, sweep_dir=SWEEP_DIR, timeout=600, staging_root=No
             "working_tree_sha256": _manifest_digest(after),
             "tree_manifest_exclusions": list(TREE_MANIFEST_EXCLUSIONS),
             "staged_copy_only": True,
+            "git_ancestry_staged": bool(declaration.get("needs_git_ancestry")),
             "record_is_not_evidence_of_correctness":
                 "a killed mutant shows a guard is load-bearing, not that the guard is right",
         }

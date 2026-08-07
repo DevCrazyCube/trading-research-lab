@@ -198,9 +198,10 @@
     {
       "path": "scripts/mutation_sweep.py",
       "status": "EXISTS_CONFORMING",
-      "conforms_to": "reproducible mutation sweeps: declaration in research/mutation/<id>.sweep.json, result out; an unmatched pattern refuses rather than skipping, a green baseline is required first, every mutant is applied to a staged copy of the git-tracked tree and never to the working tree, and survivors must be declared in data with a justification",
+      "conforms_to": "reproducible mutation sweeps: declaration in research/mutation/<id>.sweep.json, result out; an unmatched pattern refuses rather than skipping, a green baseline is required first, every mutant is applied to a staged copy of the git-tracked tree and never to the working tree, and survivors must be declared in data with a justification; git ancestry may be staged per declaration via needs_git_ancestry, COPIED not symlinked so a mutated program cannot reach the real object store",
       "role": "closes G7 forward. Mutation numbers were cited in 131 of 270 commits and reproducible from none of them; this makes a sweep a committed artefact. Swept by itself: 18/18 killed, 0 survivors.",
-      "not_in_the_default_suite": "a full sweep costs minutes per target; the suite checks only that shipped declarations are well-formed and that every declared mutant still matches its target"
+      "not_in_the_default_suite": "a full sweep costs minutes per target; the suite checks only that shipped declarations are well-formed and that every declared mutant still matches its target",
+      "safety_property": "staging is git-TRACKED ONLY, so the live watcher artifacts -- the creates sqlite, its WAL, the supervisor state and lock -- are untracked and structurally absent from any staged tree. The only research/b11a files that stage are 28 historical incident and superseded records. Asserted against the real repository by LiveCollectionIsUnreachableTests."
     },
     {
       "path": "tests/test_mutation_sweep.py",

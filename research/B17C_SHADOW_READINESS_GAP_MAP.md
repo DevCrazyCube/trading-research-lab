@@ -501,6 +501,49 @@ message is one somebody eventually disables. Fixed three ways:
 while a sweep runs.** A sweep's central claim is that the working tree did not move, and it cannot
 distinguish a colleague's edit from its own escape.
 
+**And the constraint is enforced by nothing.** The sweep lock made sweep-versus-sweep automatic;
+sweep-versus-human is still pure convention, because **nothing in either seat's toolchain reads the
+dashboard ownership flag**. Observed on 2026-08-07: the codex seat took ownership, then edited two
+files during the claude seat's b18a sweep and refused it. The holder and the editor were the same
+seat and it still did not help, because the mechanism was never consulted. That is a check that
+cannot fire, in the collaboration layer rather than in code — the same failure this document already
+records against guards, one level up, where it is harder to see because there is no test to run.
+
+The refusal did name the changed paths, so the diagnosis took one line instead of hashing every
+tracked file, which is the earlier fix earning its keep. **No mechanism is proposed here.** The
+obvious ones — having a sweep take the dashboard lock, or having an edit path consult it — couple
+two systems that are deliberately independent, and that is a scope decision rather than an
+implementation detail.
+
+**Git ancestry can now be staged, and 45 of the 124 failures were never a data problem.**
+`test_b11c_maturity_watcher.py` (42) and `test_b11e_pipeline_dryrun.py` (3) fail in a staged tree
+with `Q03_git_ancestry_broken` — *"the preregistration has no commit. A parameter with no history is
+a parameter nobody can show was frozen first"* — because staging copies tracked files and not
+`.git`. The guard is working; it simply cannot see a history that is not there.
+
+`stage_tree(..., include_git=True)`, requested per declaration via `needs_git_ancestry`, copies the
+12 MB `.git`. Those two files then go from 45 failures to **177 passed in 22 s**. It is **copied and
+never symlinked**, so anything the tests write lands on the copy rather than putting the real object
+store within reach of a mutated program, and a test asserts no path under the staged `.git` is a
+symlink. It is opt-in because enabling it silently would change what every existing sweep's baseline
+sees, and a change that alters seven established results as a side effect is not one to make quietly.
+
+**A related correction, recorded because the reasoning generalises.** `b18c` listed Q03 as
+unreachable, on the grounds that reaching it "needs a rewritten git history in the scratch tree,
+which would prove nothing about the real one". That is true of the *not-an-ancestor* branch and
+false of the other: no `.git` at all means no commit, which quarantines immediately — and this
+framework's staging reaches that branch by accident on every run. **Unreachability was inferred from
+one branch and stated about the whole code.** Both branches and the accepted case are now rehearsed
+and coverage is 11/13, leaving Q01 and Q13.
+
+**The nine remaining unsweepable files need untracked artifacts** — `research/b15o/replication.json`,
+`research/b9c_signature_inventory.sqlite`, `research/b10b_observed_paths.sqlite`,
+`research/b15i/processed_feed.sqlite` and the B15a shadow database, ~864 MB in total. Still deferred,
+and the symlink that would expose them is now a **worse** trade than it looked: staging is
+tracked-only, which is exactly why a staged tree cannot reach the live `research/b11a` while a
+watcher writes to it every second. A symlink of `research/` would hand that property back. If those
+nine are ever wanted, the exposure must be per-artifact and must never include `b11a`.
+
 **A field that could not answer the question it was built for, renamed rather than trusted.** Each
 result records the test that failed under each mutant. It was called `killed_by` and was proposed to
 answer the standing lesson *a test killed by a different guard than the one it names is not testing
@@ -610,6 +653,22 @@ The same failure wearing other clothes:
 - **B17a's closure scan read as a repository-wide result** — a scoped negative describing itself as global
 - **B18c publishing a quarantine code no rehearsal had caused** — read from a leftover state file
 - **a harness reporting `persisted_before_raise` as a boolean** — its own opinion of a fact
+
+**Unreachability proved of one branch is not unreachability of the code.** Found on 2026-08-07:
+`b18c` recorded quarantine code Q03 as unreachable because reaching it "needs a rewritten git
+history, which would prove nothing about the real one". True of the *not-an-ancestor* branch. The
+other branch — no `.git` at all, therefore no commit, therefore immediate quarantine — is reached by
+the mutation framework's own staging on every single run, which is how it was found.
+
+The general form, in the claude seat's words: **unreachable was inferred from one branch and stated
+about the whole code.** It belongs beside the check-that-cannot-fire rule because it is that rule's
+mirror. There, a branch that can never fire is recorded as protection; here, a branch that fires
+routinely is recorded as impossible. Both are claims about reachability made without enumerating the
+ways in.
+
+The cost is specific: an unreachable-by-design note is a *stopping* claim. Nobody re-tests it, so it
+survives every later change to the thing it describes. When writing one, name the branch rather than
+the code, and say which input would reach it if any could.
 
 **A count is not a comparison, and two verified numbers can support a false identity.** Found on
 2026-08-07 when the claude seat claimed recorder.py's five Geyser-phase gates were the same list as
