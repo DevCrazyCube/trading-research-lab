@@ -164,6 +164,36 @@
       "status": "EXISTS_CONFORMING",
       "conforms_to": "prose architecture only; creates no wallet, key, signer, limit or transaction. Independently audited 2026-08-07; four defects and one omission corrected, recorded in the document.",
       "role": "wallet, treasury and emergency-control trust boundaries (Codex, slice C)"
+    },
+    {
+      "path": "research/B19B_EXIT_TIMING_POLICY_PREREGISTRATION.json",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "B19 preregistration group; canonical hash pinned in scripts/b19_preregistration_register.py, tampering refuses",
+      "role": "preregisters whether the choice of exit coordinate changes the executable outcome, beyond B15m's gate (slice D). Frozen, never run."
+    },
+    {
+      "path": "research/B19C_CAPACITY_WALL_SIZE_DEPENDENCE_PREREGISTRATION.json",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "B19 preregistration group; canonical hash pinned, tampering refuses",
+      "role": "preregisters the shape of the external-liquidity capacity wall above B15m's frozen 0.1 SOL search ceiling (slice D). Raising a MEASUREMENT ceiling is explicitly not grounds to raise any POSITION limit. Frozen, never run."
+    },
+    {
+      "path": "research/B19D_NON_ISSUANCE_SIGNAL_PREREGISTRATION.json",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "B19 preregistration group; canonical hash pinned, tampering refuses",
+      "role": "preregisters whether any non-issuance signal survives complete costs and the capacity gate (slice D). Candidate signals are booleans from the frozen B11b t0 contract, so no threshold exists to tune; integer-field signals are deferred with a written reason. Evaluated only on a window nobody has read. Frozen, never run."
+    },
+    {
+      "path": "scripts/b19_preregistration_register.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "pins the canonical hash of every B19 preregistration and refuses a changed or non-conforming document; records the raw file digest alongside it so a reformat fails loudly rather than silently invalidating a reference value",
+      "role": "the mechanical half of the B16d discipline (slice D). Runs no study, reads no artifact, opens no socket."
+    },
+    {
+      "path": "tests/test_b19_strategy_preregistrations.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "unittest.TestCase, discoverable by both runners",
+      "role": "B19 register guards, including a machine-check of B19d's central claim against the frozen B11b contract rather than trusting its prose"
     }
   ],
   "verified_absent": [

@@ -2385,3 +2385,33 @@ The two do not imply each other. A user-ratified decision can remain provisional
   section. The material one: the compromise table credited signer policy with bounding the loss from
   a compromised signer host, and an attacker holding that host holds the policy too — the operating
   wallet balance is the only real bound there.
+
+## 2026-08-07 — The strategy backlog is preregistered before B11 lands, not after (B19b/c/d)
+
+- **Status:** accepted; documents frozen, no study run.
+- **Ratified by:** the owner, who chose slice D over slice E when both agent seats had recommended
+  waiting for B11. Recorded as an owner decision rather than an agent preference because it
+  reverses the advice in handoffs 195 and 197.
+- **Decision:** the three open G5 questions are preregistered now —
+  `research/B19B_EXIT_TIMING_POLICY_PREREGISTRATION.json`,
+  `research/B19C_CAPACITY_WALL_SIZE_DEPENDENCE_PREREGISTRATION.json` and
+  `research/B19D_NON_ISSUANCE_SIGNAL_PREREGISTRATION.json` — with canonical hashes pinned in
+  `scripts/b19_preregistration_register.py`, which refuses a changed or non-conforming document.
+- **Reason, which reverses the earlier argument:** a preregistration's value comes entirely from
+  being fixed before the evidence it will be judged against exists. The burned sets (B8b/B9/B10/B16)
+  exist today and will still exist later, so waiting does not shrink the fitting surface by one
+  byte — it only adds B11's result to what is known at authorship. After B11 lands, a B11-adjacent
+  preregistration cannot honestly be written at all. Both agent seats subsequently accepted this.
+- **Three disciplines added beyond the B16d template**, because a hash pin does not produce them:
+  a mandatory `known_at_authorship_time` disclosure block, so a later reader can audit the fit
+  rather than trust an assurance; **no tunable threshold by construction** — B19d's candidate
+  signals are all booleans drawn from the frozen B11b t0 contract, and a boolean has no cut to
+  move; and questions whose *specification* would depend on B11's output shape are deferred in
+  writing with a reason rather than written thinly and amended later.
+- **Sequencing:** the preregistration documents are committed **alone**, before the register and
+  its tests, so the git history itself shows they preceded the analysis. A preregistration committed
+  alongside the code that consumes it cannot later be shown to have come first.
+- **NOT done:** no study was run, no outcome computed, no threshold chosen, no size recommended, no
+  B11a composition or outcome read, no network call, and no wallet, signer or control service
+  implemented. B19d may be evaluated only on a window nobody has read; burned-corpus runs are
+  development-only and may never be reported as evaluation.
