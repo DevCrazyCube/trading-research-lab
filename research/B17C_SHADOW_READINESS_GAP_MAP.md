@@ -168,9 +168,31 @@ facts already in this repository were never connected. `recorder.py:10-12` state
 adapter **cannot** provide *provider sequence numbers, heartbeats, commitment transitions, latency
 or dead-slot notifications*, and calls them Geyser-phase gates. Separately, each record in
 `research/b18a/records.json` carries **7 fields at `U_NOT_INSTRUMENTED`** — "possible, not wired",
-as distinct from the 30 at `U_NOT_APPLICABLE` that are structurally impossible in shadow. **They are
-the same list.** So the instrumented half of G1 is blocked on one specific thing rather than on
-general engineering: a Geyser feed, whose adapter must store received protobuf bytes unchanged.
+as distinct from the 30 at `U_NOT_APPLICABLE` that are structurally impossible in shadow.
+
+> **CORRECTED 2026-08-07, and the original claim is kept because the way it survived matters.**
+> This paragraph said *"They are the same list."* **They are not**, and the error was the claude
+> seat's, introduced in an FYI and recorded here in good faith.
+>
+> The five Geyser-phase gates are provider-stream properties. The seven `U_NOT_INSTRUMENTED` fields
+> are `decision_unix_nanos`, `expected_tokens_out`, `provider_region_declared`, `quoted_state_slot`,
+> `retry_policy_id`, `route` and `slippage_limit_tokens` — our own decision clock, pricing inputs and
+> route configuration. **The overlap is empty.** Five is also not seven, which is the arithmetic that
+> should have stopped it: both counts were verified independently and the *identity* between the
+> lists never was. A count is not a comparison.
+>
+> **What is actually true.** Two of the five gates do bear on B17b fields, but on ones currently at
+> `U_NOT_APPLICABLE`, not `U_NOT_INSTRUMENTED`: *commitment transitions* → `finalize_unix_nanos` and
+> `finalize_slot`, and *latency* → the `send_unix_nanos`/`receipt_unix_nanos` pair from which it is
+> derived. The other three — provider sequence numbers, heartbeats, dead-slot notifications — have no
+> B17b field at all; they are recorder-layer provenance about the feed itself.
+>
+> So the instrumented half of G1 is blocked on **two unrelated things**, not one. A Geyser feed,
+> whose adapter must store received protobuf bytes unchanged, for the capture-layer gates. And, for
+> the seven fields, wiring a real B12a decision into `b18a` — which needs no Geyser and is already
+> recorded separately in `COMPONENT_INVENTORY.json` as *"a shadow record driven by a real B12a
+> decision rather than a supplied decision dict"*. Conflating them would have had someone wait on a
+> provider feature to fix a wiring gap.
 
 **Vendor claim, recorded with its provenance because neither seat verified it.** Chainstack's
 migration documentation states that Solana Yellowstone gRPC Geyser requires **manual console
