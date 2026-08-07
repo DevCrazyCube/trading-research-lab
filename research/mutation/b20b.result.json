@@ -1,6 +1,7 @@
 {
   "baseline_passed": true,
   "expected_survivors": {},
+  "git_ancestry_staged": false,
   "killed": 11,
   "mutants_declared": 11,
   "per_mutant": [
@@ -71,6 +72,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "b03e7ed979fc29e48d6eda5cb9758a3ce26ab4879c941ef9b1710010e5f28543",
+  "working_tree_sha256": "99c0f42eb9fe2bfa1fe941f793c6c077a6c9484aaf1add1c90acc95a9f469658",
   "working_tree_unchanged": true
 }
