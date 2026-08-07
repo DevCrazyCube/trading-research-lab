@@ -2570,3 +2570,34 @@ The two do not imply each other. A user-ratified decision can remain provisional
 - **Bears on Slice D:** `B19B`/`B19C`/`B19D` are frozen and waiting on B11. The wait is
   substantially longer than either seat had assumed, which changes no decision but should stop the
   backlog being treated as nearly unblocked.
+
+## 2026-08-07 — `b9d`'s 2.5 calls/second is calibrated to a different endpoint; recorded, not changed
+
+- **Status:** observation recorded. **No code changed, nothing restarted, the watcher untouched.**
+  Owner's decision on 2026-08-07 was to record and change nothing.
+- **The mismatch.** `scripts/b9d_transaction_bodies.py` paces `transaction_bodies` at a hardcoded
+  `calls_per_second=2.5`, and `b11c` passes no override. That figure is a **measured property of the
+  FREE PUBLIC endpoint**: B6J's F40 records *"the free endpoint sustains ~2.5 `getTransaction`/s"*
+  and states the ceiling was **server-side, not client-side**. B7A's comparison table measures
+  Helius at **7.8/s** against the same demand. **The watcher runs on paid Chainstack Growth.**
+- So a server-side ceiling of one provider is pacing collection against a different one. It is not a
+  politeness setting — the original measurement says the limit belonged to the free endpoint.
+- **Why it is worth recording before stage 5 rather than after.** `transaction_bodies` is
+  rate-bound, not link-bound, with a floor of `signatures / rate` seconds. At one million signatures
+  that is **4.6 days at 2.5/s** and roughly **1.5 days at 7.8/s**. It is the single largest lever on
+  how long B11 takes, and the pipeline is on stage 2 of 9, so the window is open rather than past.
+- **What was NOT done, deliberately:**
+  - **Chainstack's actual `getTransaction` rate was not measured.** Doing so means firing RPC at the
+    provider while a collection runs against it, and the run is at 2 d 21 h with no quarantine. The
+    claim here is about the constant's **provenance**, not a measured superiority.
+  - **No code was changed.** `b9d` is manifest-pinned collection code, and editing it while a
+    watcher runs is forbidden.
+- **The argument for changing nothing, which is not merely caution.** Altering a collection
+  parameter has provenance consequences beyond speed: the manifest, the frozen population and the
+  receipts all describe a pipeline configured a particular way. *"We could go faster"* is not the
+  same claim as *"re-opening a frozen pipeline is safe"*, and only the first has any evidence.
+- **This is the fifth instance today of a constant or instrument calibrated in one regime and
+  applied to another** — after a latency probe that could not see bandwidth, Request Units that
+  could not see bandwidth, random sampling that could not see a float boundary, and a within-stage
+  slot meter read as whole-run progress. That pattern, rather than any individual figure, is the
+  finding worth carrying forward.
