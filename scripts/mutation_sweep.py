@@ -389,11 +389,24 @@ def run_sweep(name, root=ROOT, sweep_dir=SWEEP_DIR, timeout=600, staging_root=No
 
         killed, survivors, records = [], [], []
         for mutant in declaration["mutants"]:
-            if mutant["old"] not in original:
+            occurrences = original.count(mutant["old"])
+            if occurrences == 0:
                 raise SweepRefused(
                     f"{name}: mutant {mutant['name']!r} does not match the target. It was never "
                     "applied, and an unapplied mutant silently inflates the score — a sweep that "
                     "skips is a sweep that lies")
+            if occurrences > 1:
+                # Application is `.replace(old, new, 1)`, so an ambiguous pattern silently mutates
+                # the FIRST site rather than the one the author named. Two mutants sharing a
+                # pattern then both hit the same line, one site is never tested, and the score
+                # counts both as applied. Found by using this tool: two b9i mutants both matched
+                # `if denominator <= 0:` and both mutated ceil_div, leaving the legacy-buy guard
+                # untouched while its mutant was reported as a survivor.
+                raise SweepRefused(
+                    f"{name}: mutant {mutant['name']!r} matches {occurrences} places in "
+                    f"{target_name}. Only the first would be mutated, so the site the author meant "
+                    "may never be tested while the mutant is counted as applied. Widen the pattern "
+                    "with surrounding lines until it is unique.")
             target.write_text(original.replace(mutant["old"], mutant["new"], 1))
             try:
                 code, output = _run_tests(staged_root, tests, timeout)

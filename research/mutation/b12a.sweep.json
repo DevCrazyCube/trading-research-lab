@@ -98,8 +98,8 @@
     },
     {
       "name": "drawdown unverifiable branch neutered",
-      "old": "    if peak <= 0 or current > peak:",
-      "new": "    if False:"
+      "old": "    if peak <= 0 or current > peak:\n        return R22_PORTFOLIO_DRAWDOWN_UNVERIFIABLE",
+      "new": "    if False:\n        return R22_PORTFOLIO_DRAWDOWN_UNVERIFIABLE"
     },
     {
       "name": "a sell is accepted as a buy",

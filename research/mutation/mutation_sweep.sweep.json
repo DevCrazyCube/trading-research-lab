@@ -63,7 +63,7 @@
     },
     {
       "name": "unmatched pattern skipped instead of refused",
-      "old": "            if mutant[\"old\"] not in original:",
+      "old": "            if occurrences == 0:",
       "new": "            if False:"
     },
     {
@@ -135,6 +135,11 @@
       "name": "unparsed killer reported as null instead of a reason code",
       "old": "                    else first_failing_test(output) or \"U_KILLER_NOT_PARSED\"),",
       "new": "                    else first_failing_test(output)),"
+    },
+    {
+      "name": "ambiguous pattern silently mutates the first site",
+      "old": "            if occurrences > 1:",
+      "new": "            if False:"
     }
   ],
   "expected_survivors": [],

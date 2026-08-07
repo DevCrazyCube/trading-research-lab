@@ -98,8 +98,8 @@
     },
     {
       "name": "a missing cost policy field is defaulted",
-      "old": "    if missing:\n        raise SimulationRefused(\n",
-      "new": "    if False:\n        raise SimulationRefused(\n"
+      "old": "    if missing:\n        raise SimulationRefused(\n            f\"cost policy does not state",
+      "new": "    if False:\n        raise SimulationRefused(\n            f\"cost policy does not state"
     },
     {
       "name": "a fee rate above 100 percent is accepted",
@@ -112,9 +112,15 @@
       "new": "    if False:"
     },
     {
-      "name": "failed attempts cost nothing",
-      "old": "                 + policy[\"failed_attempts\"]\n                 * (policy[\"base_fee_lamports\"] + policy[\"priority_fee_lamports\"]))",
-      "new": "                 + 0 * (policy[\"base_fee_lamports\"] + policy[\"priority_fee_lamports\"]))"
+      "name": "failed attempts cost nothing on ENTRY",
+      "old": "    fees = curve_fees(quote_in, schedule)\n    execution = (policy[\"base_fee_lamports\"] + policy[\"priority_fee_lamports\"]\n                 + policy[\"tip_lamports\"] + policy[\"ata_rent_lamports\"]\n                 + policy[\"failed_attempts\"]",
+      "new": "    fees = curve_fees(quote_in, schedule)\n    execution = (policy[\"base_fee_lamports\"] + policy[\"priority_fee_lamports\"]\n                 + policy[\"tip_lamports\"] + policy[\"ata_rent_lamports\"]\n                 + 0"
+    },
+    {
+      "name": "failed attempts cost nothing on EXIT",
+      "old": "    fees = curve_fees(quote_out, schedule)\n    execution = (policy[\"base_fee_lamports\"] + policy[\"priority_fee_lamports\"]\n                 + policy[\"tip_lamports\"]\n                 + policy[\"failed_attempts\"]",
+      "new": "    fees = curve_fees(quote_out, schedule)\n    execution = (policy[\"base_fee_lamports\"] + policy[\"priority_fee_lamports\"]\n                 + policy[\"tip_lamports\"]\n                 + 0",
+      "note": "the same code appears in both legs; the original pattern matched both and only the first was ever mutated, so this leg had no mutant at all"
     }
   ],
   "expected_survivors": [],

@@ -2,8 +2,8 @@
   "baseline_passed": true,
   "expected_survivors": {},
   "git_ancestry_staged": false,
-  "killed": 22,
-  "mutants_declared": 22,
+  "killed": 23,
+  "mutants_declared": 23,
   "per_mutant": [
     {
       "first_failing_test": "tests/test_b10a_simulator_kernel.py::ArithmeticTests::test_fees_use_ceiling_but_buyback_uses_floor",
@@ -112,7 +112,12 @@
     },
     {
       "first_failing_test": "tests/test_b10a_simulator_kernel.py::GuardsFoundUntestedByMutationTests::test_failed_attempts_are_charged_and_are_not_free",
-      "name": "failed attempts cost nothing",
+      "name": "failed attempts cost nothing on ENTRY",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::GuardsFoundUntestedByMutationTests::test_failed_attempts_are_charged_ON_THE_EXIT_LEG_TOO",
+      "name": "failed attempts cost nothing on EXIT",
       "outcome": "killed"
     }
   ],
@@ -127,6 +132,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "1c6f4a3f0e7a80ce01623ba6df332181a039898a4a94ae0b2bafcfe4517daff5",
+  "working_tree_sha256": "aedca1b31053dd8a040d95e66601d2e1a8b99ecf810708e5d4670d743098e313",
   "working_tree_unchanged": true
 }

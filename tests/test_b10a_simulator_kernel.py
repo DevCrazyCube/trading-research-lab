@@ -378,6 +378,25 @@ class GuardsFoundUntestedByMutationTests(unittest.TestCase):
                          - clean["lamports_out_of_wallet"], expected_extra)
         self.assertGreater(expected_extra, 0, "the fixture must actually charge something")
 
+    def test_failed_attempts_are_charged_ON_THE_EXIT_LEG_TOO(self):
+        """The exit leg had no mutant at all until the ambiguity was found.
+
+        Both legs compute the retry term with identical code, so one declared pattern matched two
+        sites and `.replace(..., 1)` only ever mutated the entry. The exit's version was never
+        tested and never mutated — invisible in a sweep reporting 22/22. The framework now refuses
+        an ambiguous pattern outright, and this covers the leg that was missed.
+        """
+        entry = state()
+        tokens = B10A.price_entry(entry, ORDER, SCHEDULE, POLICY)["tokens_out"]
+
+        clean = B10A.price_exit(state(slot=900), tokens, SCHEDULE, dict(POLICY, failed_attempts=0))
+        costly = B10A.price_exit(state(slot=900), tokens, SCHEDULE, dict(POLICY, failed_attempts=3))
+
+        expected_extra = 3 * (POLICY["base_fee_lamports"] + POLICY["priority_fee_lamports"])
+        self.assertEqual(clean["lamports_into_wallet"] - costly["lamports_into_wallet"],
+                         expected_extra,
+                         "retries on the way out reduce proceeds by exactly their cost")
+
 
 if __name__ == "__main__":
     unittest.main()

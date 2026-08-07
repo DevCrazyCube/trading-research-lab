@@ -710,6 +710,79 @@ The cost is specific: an unreachable-by-design note is a *stopping* claim. Nobod
 survives every later change to the thing it describes. When writing one, name the branch rather than
 the code, and say which input would reach it if any could.
 
+**A claim proved of a PART is not a claim about the WHOLE, and this is the dominant failure mode in
+this repository.** Not a recurring coincidence — **five instances in one day**, by both seats, in
+prose, in code, in a JSON declaration and in a ratified decision entry:
+
+| # | claim | proved of | asserted of |
+|---|---|---|---|
+| 1 | "no execution surface" | B17a's 9-module `_load` closure | the repository — produced §0's false absences, this session's *first* correction |
+| 2 | Q03 "unreachable" | the not-an-ancestor branch | the whole code; the other branch fires on every staged run |
+| 3 | "covered elsewhere" | b18c's retries site | the manifest site too, which had neither coverage nor a mutant |
+| 4 | "97.56% done" | `enumerate_creates` | the nine-stage run |
+| 5 | "bounded by the link" | stage 2 | the run; stage 5 is rate-bound |
+
+They span the session end to end, which is what makes it a mode rather than a streak. **And the
+count was first got wrong the same way**: written up as three, by counting the instances in front of
+the author and stating a number about the set — the error appearing inside the entry describing it.
+
+*Remedy:* name what the claim was proved OF, in the claim, and check that thing's boundary. B17a now
+returns an explicit `scope` field saying it is not repository-wide; that is the shape of the fix, and
+it belongs on any negative result that travels.
+
+**Evidence of the wrong KIND is not evidence that is merely too narrow.** Distinguished from the
+above because the remedies differ, and filing them together would serve neither.
+
+recorder.py's five Geyser-phase gates were claimed to be b18a's seven `U_NOT_INSTRUMENTED` fields.
+Both *counts* were verified; the claim was set *identity*; the overlap was empty. Widening the scope
+would not have helped — **five is not seven refutes it outright**. Cardinality cannot distinguish
+identity from disjointness at all, so the evidence gathered could not have come out differently had
+the claim been false.
+
+*Remedy:* ask whether the evidence offered could have looked different if the claim were false. A
+count that reads the same whether two sets are identical or disjoint is not evidence about identity,
+however carefully it was checked — and checking it carefully is what makes it feel like verification.
+
+**A corpus corroborates the paths it took and is silent on the refusals it never triggered, and
+that silence is indistinguishable from success.** Raised by the claude seat.
+
+B10a's replay reproduces 92,510 of 92,510 direct-Pump trades exactly, and the comparison target is
+**not** ours: `replay_gate` decodes the venue's own `TradeEvent` from collected raw bytes with the
+pinned IDLs and checks our prediction against the value the Pump program emitted. The oracle is the
+venue — genuine independent corroboration of the forward arithmetic, and not circular.
+
+It is **no evidence at all** about a refusal branch. `reproduce_trade` raises on an instruction form
+it has no pinned arithmetic for; if the corpus contained no such form, 92,510 successes say nothing
+about whether that raise works. The same holds for every input validator: a corpus of well-formed
+inputs cannot show that malformed ones are refused.
+
+*A checkable form, per surviving mutant* — the claude seat's, extended by one branch found while
+applying it to b9i. Ask: **what input would trigger this guard, and did the corpus contain one?**
+- **No** → the corpus was never going to catch it and a test must.
+- **Yes, and the corpus check runs** → the guard is wrong or unreachable. More urgent.
+- **Yes, but the corpus check is not wired to the suite** → the corroboration is real and
+  *historical*. This was the actual case for b9i's three formula mutants: `simulator_replay_gate` is
+  **stage 9 of the B11 pipeline, not a test**, no test executes `replay_gate`, and the b9i test file
+  never called the two formulas at all. Corroborated once, in the past, then unguarded against
+  regression until the next full pipeline run.
+
+**Why the sweeps kept finding the same shape, which is the useful part.** A corpus asks *were the
+paths taken computed correctly*; a sweep asks *which guards can be deleted without any test
+noticing*. They are complements, and the second answers exactly what the first is structurally
+silent on. b11b, b12a and b9i were all validated by corpora and none by sweeps until this week — so
+"core logic well covered, validation ring not" is the **predicted** shape of that combination rather
+than three separate lapses of care:
+
+| module | covered | not covered |
+|---|---|---|
+| b11b | every leakage guard | five input validators |
+| b12a | all 24 veto families | three validators |
+| b9i | forward arithmetic, corroborated 92,510× | eight guards |
+
+This also gives G7 a second justification beyond reproducibility: **mutation testing is the only
+instrument here that can see an untriggered refusal**, and 131 of 270 commits cited that one class of
+evidence unreproducibly.
+
 **A count is not a comparison, and two verified numbers can support a false identity.** Found on
 2026-08-07 when the claude seat claimed recorder.py's five Geyser-phase gates were the same list as
 b18a's seven `U_NOT_INSTRUMENTED` fields, and the codex seat recorded it in G1 after verifying —
