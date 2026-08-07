@@ -1,0 +1,107 @@
+{
+  "sweep_id": "b10b",
+  "description": "Mutation sweep over the position path -- the maximality proof that licenses bisection in b15m, and the canonical-ordering and leakage guards around it. This module was cited as the GOOD example of a consumer that verifies at runtime the property it depends on; that citation is only worth something if the verification is itself load-bearing.",
+  "target": "scripts/b10b_position_path.py",
+  "tests": [
+    "tests/test_b10b_position_path.py"
+  ],
+  "mutants": [
+    {
+      "name": "the overdraw check on the result is dropped",
+      "old": "    if gross > real_quote:\n        raise PathRefused(",
+      "new": "    if False:\n        raise PathRefused("
+    },
+    {
+      "name": "the under-selection check is dropped",
+      "old": "    if low < tokens_held:\n        next_gross = B9I.quote_out_for_tokens_in(virtual_quote, virtual_token, low + 1)\n        if next_gross <= real_quote:",
+      "new": "    if False:\n        next_gross = B9I.quote_out_for_tokens_in(virtual_quote, virtual_token, low + 1)\n        if next_gross <= real_quote:"
+    },
+    {
+      "name": "under-selection tolerated when it fires",
+      "old": "        if next_gross <= real_quote:\n            raise PathRefused(",
+      "new": "        if False:\n            raise PathRefused("
+    },
+    {
+      "name": "the bisection loses its upper half",
+      "old": "        middle = (low + high + 1) // 2",
+      "new": "        middle = (low + high) // 2"
+    },
+    {
+      "name": "the bisection comparison made exclusive",
+      "old": "        if B9I.quote_out_for_tokens_in(virtual_quote, virtual_token, middle) <= real_quote:",
+      "new": "        if B9I.quote_out_for_tokens_in(virtual_quote, virtual_token, middle) < real_quote:"
+    },
+    {
+      "name": "non-positive virtual reserves accepted in the search",
+      "old": "    if virtual_quote <= 0 or virtual_token <= 0:\n        raise PathRefused(\n            f\"virtual reserves ({virtual_quote}, {virtual_token}) are non-positive; the curve is \"",
+      "new": "    if False:\n        raise PathRefused(\n            f\"virtual reserves ({virtual_quote}, {virtual_token}) are non-positive; the curve is \""
+    },
+    {
+      "name": "a duplicate coordinate is accepted",
+      "old": "        if key == previous:",
+      "new": "        if False:"
+    },
+    {
+      "name": "an out-of-order coordinate is accepted",
+      "old": "        if key < previous:",
+      "new": "        if False:"
+    },
+    {
+      "name": "an observation for another mint is accepted",
+      "old": "        if observation.get(\"mint\") != mint:",
+      "new": "        if False:"
+    },
+    {
+      "name": "a string is accepted as an observation sequence",
+      "old": "    if isinstance(observations, (dict, str, bytes)):",
+      "new": "    if False:"
+    },
+    {
+      "name": "a non-integer canonical coordinate is accepted",
+      "old": "        if isinstance(value, bool) or not isinstance(value, int):",
+      "new": "        if False:"
+    },
+    {
+      "name": "a missing canonical coordinate is accepted",
+      "old": "        if field not in record:",
+      "new": "        if False:"
+    },
+    {
+      "name": "a future-reachable object is tolerated",
+      "old": "    if forbidden & set(reachable):",
+      "new": "    if False:"
+    },
+    {
+      "name": "a non-scalar leaks into the entry view",
+      "old": "        if not isinstance(obj, ALLOWED_VIEW_TYPES):",
+      "new": "        if False:"
+    },
+    {
+      "name": "the reachability walk has no bound",
+      "old": "        if len(seen) > limit:",
+      "new": "        if False:"
+    },
+    {
+      "name": "a non-scalar t0 state field is accepted",
+      "old": "        if not isinstance(value, (int, str, bool)):",
+      "new": "        if False:"
+    },
+    {
+      "name": "both an order and a policy may be supplied",
+      "old": "    if (order is None) == (entry_policy is None):",
+      "new": "    if False:"
+    },
+    {
+      "name": "a non-callable entry policy is accepted",
+      "old": "        if not callable(entry_policy):",
+      "new": "        if False:"
+    },
+    {
+      "name": "a negative tokens_held is accepted",
+      "old": "    if isinstance(tokens_held, bool) or not isinstance(tokens_held, int) or tokens_held < 0:",
+      "new": "    if False:"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None expected. B15M's preregistration states bisection is used ONLY if monotonicity is verified and that a failure refuses the cell; if these checks are not load-bearing, that statement is describing a guarantee nobody holds."
+}

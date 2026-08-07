@@ -717,5 +717,159 @@ class RealDatasetTests(unittest.TestCase):
         self.assertEqual(trades, 743)
 
 
+class MaximalityProofFoundUntestedByMutationTests(unittest.TestCase):
+    """The proof that verifies the search, which nothing verified.
+
+    A mutation sweep killed both bisection mutants — `(low + high) // 2` instead of
+    `(low + high + 1) // 2`, and `<` instead of `<=` — so the SEARCH is well tested and returns
+    the right answer. All three checks that PROVE the answer survived.
+
+    That distinction is the finding. `max_executable_tokens` does not trust its bisection: it
+    re-checks that the selected size does not overdraw, and that `low + 1` is not also executable.
+    Those checks can only fire when the search is wrong, and since the search is correct they never
+    fire in ordinary operation — the check-that-cannot-fire shape, arriving through correctness
+    rather than through an always-false condition.
+
+    B15M's frozen preregistration leans on this: *"bisection is used ONLY if monotonicity is
+    verified… a failure refuses the cell rather than returning a search result over a set that is
+    not a prefix."* Until now no test could distinguish that guarantee from its absence.
+
+    These fire it by making the arithmetic lie — patching `quote_out_for_tokens_in` so the search
+    reaches a wrong answer — which is exactly the situation the proof exists for.
+    """
+
+    VQ, VT = LAUNCH_VQ, LAUNCH_VT
+
+    def patch_quote_out(self, replacement):
+        real = B9I.quote_out_for_tokens_in
+        B9I.quote_out_for_tokens_in = replacement
+        self.addCleanup(setattr, B9I, "quote_out_for_tokens_in", real)
+        return real
+
+    def test_the_honest_case_returns_a_maximal_size(self):
+        """Baseline. `tokens_held` must exceed what the reserve can pay, or the answer is capped
+        by holdings and there is no `low + 1` for the proof to check — which is how the first
+        version of this test passed vacuously."""
+        reserve, held = 1_000_000_000, 10**14
+        self.assertGreater(B9I.quote_out_for_tokens_in(self.VQ, self.VT, held), reserve,
+                           "the reserve must bind, not the holdings")
+        tokens, gross = B10B.max_executable_tokens(self.VQ, self.VT, reserve, held)
+        self.assertLessEqual(gross, reserve)
+        self.assertGreater(B9I.quote_out_for_tokens_in(self.VQ, self.VT, tokens + 1), reserve,
+                           "one more token must overdraw, or the answer was not maximal")
+
+    def test_a_result_that_OVERDRAWS_the_reserve_is_refused(self):
+        """Everything is unaffordable, so the search never improves `low` past 0 — and pricing 0
+        still overdraws. A pure stub: no call counting, no ordering assumptions."""
+        self.patch_quote_out(lambda vq, vt, tokens: 10**18)
+        with self.assertRaisesRegex(B10B.PathRefused, "size search is wrong"):
+            B10B.max_executable_tokens(self.VQ, self.VT, 1_000_000_000, 10**13)
+
+    def test_a_result_that_UNDER_SELECTS_is_refused(self):
+        """The other direction, and it can only be reached by INCONSISTENT arithmetic.
+
+        A pure stub cannot trigger this, and working that out is the finding. With any
+        deterministic `quote_out_for_tokens_in`, bisection always evaluates `low + 1` before it
+        stops: the loop only ends when `low == high`, and the step before that tests
+        `(low + low + 2) // 2 == low + 1`. So if the search settled below `tokens_held`, `low + 1`
+        was just measured as unaffordable — and a pure function will say so again at the check.
+
+        The guard therefore defends against arithmetic that answers differently on two calls: a
+        formula that is not a function of its inputs, a mutated dependency, a racing reserve. That
+        is unreachable in normal operation, which is exactly why nothing had tested it, and it is
+        reachable here only by simulating the inconsistency it exists for.
+
+        This stub answers "unaffordable" the first time it is asked about 6 and "affordable"
+        afterwards, so the search rejects 6 and settles on 5, then the maximality re-check finds 6
+        executable after all.
+        """
+        asked = {"six": 0}
+
+        def inconsistent(vq, vt, tokens):
+            if tokens == 6:
+                asked["six"] += 1
+                return 10**18 if asked["six"] == 1 else 0
+            return 0 if tokens <= 5 else 10**18
+
+        self.patch_quote_out(inconsistent)
+        with self.assertRaisesRegex(B10B.PathRefused, "also executable"):
+            B10B.max_executable_tokens(self.VQ, self.VT, 1_000, 10**13)
+        self.assertGreaterEqual(asked["six"], 2,
+                                "the re-check must ask again rather than reuse the search's answer")
+
+    def test_non_positive_virtual_reserves_are_refused_BY_THEIR_OWN_GUARD(self):
+        """Zero and negative are refused by DIFFERENT guards, so the message is asserted.
+
+        Negative is caught earlier by the non-negative-integer check; only zero reaches the
+        curve-is-undefined branch. Asserting merely "it raises" credits the wrong one.
+        """
+        for field in ("vq", "vt"):
+            with self.subTest(field=field, value=0):
+                vq = 0 if field == "vq" else self.VQ
+                vt = 0 if field == "vt" else self.VT
+                with self.assertRaisesRegex(B10B.PathRefused, "curve is undefined"):
+                    B10B.max_executable_tokens(vq, vt, 1_000, 1_000)
+            with self.subTest(field=field, value=-1):
+                vq = -1 if field == "vq" else self.VQ
+                vt = -1 if field == "vt" else self.VT
+                with self.assertRaisesRegex(B10B.PathRefused, "non-negative integer"):
+                    B10B.max_executable_tokens(vq, vt, 1_000, 1_000)
+
+
+class InputGuardsFoundUntestedByMutationTests(unittest.TestCase):
+    """The validation ring around the path logic — the same split found in b11b, b12a and b9i."""
+
+    def test_a_string_is_not_an_observation_sequence(self):
+        """A string is iterable, so without this it is walked character by character and each
+        character asked for its canonical key — a failure far from its cause."""
+        for bad in ("an observation", {"slot": 1}, b"bytes"):
+            with self.subTest(kind=type(bad).__name__):
+                with self.assertRaisesRegex(B10B.PathRefused, "sequence of observation mappings"):
+                    B10B.assert_canonical_sequence(bad, mint=MINT, after=None)
+
+    def test_a_non_integer_canonical_coordinate_is_refused(self):
+        for field in ("slot", "transaction_index", "outer_index", "inner_index"):
+            for value in (1.0, "1", True, None):
+                with self.subTest(field=field, value=value):
+                    record = observation(700)
+                    record[field] = value
+                    with self.assertRaisesRegex(B10B.PathRefused, "must be an integer"):
+                        B10B.canonical_key(record)
+
+    def test_a_non_scalar_may_not_be_REACHABLE_from_the_entry_view(self):
+        """Two different guards, two different messages, and the mutant targets the second.
+
+        `entry_feature_view` refuses a container among the t0 FIELDS ("only scalars may cross");
+        `assert_no_future_reachable` refuses one anywhere in the reference GRAPH ("only mappings
+        and scalars may be reachable"). A test calling the first credits it for the second's work,
+        which is how this mutant survived a test that looked like it covered it.
+        """
+        import types as _types
+        with self.assertRaisesRegex(B10B.PathRefused, "only mappings and scalars may be reachable"):
+            B10B.assert_no_future_reachable(_types.MappingProxyType({"a": [1, 2]}))
+        with self.assertRaisesRegex(B10B.PathRefused, "only mappings and scalars may be reachable"):
+            B10B.assert_no_future_reachable(_types.MappingProxyType({"a": {"b": {1, 2}}}))
+
+    def test_an_entry_policy_that_is_not_callable_is_refused(self):
+        with self.assertRaisesRegex(B10B.PathRefused, "must be callable"):
+            B10B.decide_entry(t0_state(), SCHEDULE, POLICY, entry_policy="not a function")
+
+    def test_a_negative_tokens_held_is_refused_BY_MARK_TO_EXIT_ITSELF(self):
+        """The same message is raised by `max_executable_tokens`, so asserting the text credits
+        whichever guard happens to run — and with mark_to_exit's removed, the search's fires and
+        the test still passes.
+
+        A COMPLETE curve distinguishes them: mark_to_exit returns early for a complete curve
+        without ever reaching the search, so only its own guard can refuse here.
+        """
+        complete = t0_state(complete=True)
+        self.assertEqual(
+            B10B.mark_to_exit(complete, 0, SCHEDULE, POLICY)["reason"],
+            B10B.REASON_CURVE_COMPLETE,
+            "a complete curve must return early, or this does not isolate the guard")
+        with self.assertRaisesRegex(B10B.PathRefused, "tokens_held must be"):
+            B10B.mark_to_exit(complete, -1, SCHEDULE, POLICY)
+
+
 if __name__ == "__main__":
     unittest.main()

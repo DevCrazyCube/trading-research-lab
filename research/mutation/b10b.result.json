@@ -1,0 +1,117 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 19,
+  "mutants_declared": 19,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::MaximalityProofFoundUntestedByMutationTests::test_a_result_that_OVERDRAWS_the_reserve_is_refused",
+      "name": "the overdraw check on the result is dropped",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::MaximalityProofFoundUntestedByMutationTests::test_a_result_that_UNDER_SELECTS_is_refused",
+      "name": "the under-selection check is dropped",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::MaximalityProofFoundUntestedByMutationTests::test_a_result_that_UNDER_SELECTS_is_refused",
+      "name": "under-selection tolerated when it fires",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "timeout",
+      "name": "the bisection loses its upper half",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::LeakageTests::test_the_entry_is_byte_identical_whether_the_token_moons_or_collapses",
+      "name": "the bisection comparison made exclusive",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::MaximalityProofFoundUntestedByMutationTests::test_non_positive_virtual_reserves_are_refused_BY_THEIR_OWN_GUARD",
+      "name": "non-positive virtual reserves accepted in the search",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::CanonicalOrderTests::test_a_duplicate_coordinate_is_refused",
+      "name": "a duplicate coordinate is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::CanonicalOrderTests::test_a_reversed_sequence_is_refused_rather_than_sorted",
+      "name": "an out-of-order coordinate is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::CrossMintTests::test_a_foreign_mint_anywhere_in_the_path_is_refused",
+      "name": "an observation for another mint is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::InputGuardsFoundUntestedByMutationTests::test_a_string_is_not_an_observation_sequence",
+      "name": "a string is accepted as an observation sequence",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::InputGuardsFoundUntestedByMutationTests::test_a_non_integer_canonical_coordinate_is_refused",
+      "name": "a non-integer canonical coordinate is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::CanonicalOrderTests::test_a_missing_coordinate_component_is_refused",
+      "name": "a missing canonical coordinate is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::LeakageTests::test_a_deeply_buried_observation_is_still_found",
+      "name": "a future-reachable object is tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::InputGuardsFoundUntestedByMutationTests::test_a_non_scalar_may_not_be_REACHABLE_from_the_entry_view",
+      "name": "a non-scalar leaks into the entry view",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::LeakageTests::test_the_reachability_walk_refuses_to_truncate",
+      "name": "the reachability walk has no bound",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::LeakageTests::test_a_container_in_the_view_is_refused_even_when_it_holds_nothing_future",
+      "name": "a non-scalar t0 state field is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::LeakageTests::test_stating_both_an_order_and_a_policy_is_refused",
+      "name": "both an order and a policy may be supplied",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::InputGuardsFoundUntestedByMutationTests::test_an_entry_policy_that_is_not_callable_is_refused",
+      "name": "a non-callable entry policy is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10b_position_path.py::InputGuardsFoundUntestedByMutationTests::test_a_negative_tokens_held_is_refused_BY_MARK_TO_EXIT_ITSELF",
+      "name": "a negative tokens_held is accepted",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b10b",
+  "target": "scripts/b10b_position_path.py",
+  "tests": [
+    "tests/test_b10b_position_path.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "020007747c9c0effadce08ec0ad125e7b4d35300234326aba5251060fb50fe88",
+  "working_tree_unchanged": true
+}
