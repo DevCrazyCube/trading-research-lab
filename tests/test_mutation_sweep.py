@@ -526,6 +526,21 @@ class GitAncestryStagingTests(unittest.TestCase):
     staged-tree failures.
     """
 
+    def test_listing_tracked_files_where_there_is_no_repo_says_so(self):
+        """The error used to be a CalledProcessError naming the command, not the situation."""
+        outside = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, outside, True)
+        with self.assertRaisesRegex(SWEEP.SweepRefused, "staged tree"):
+            SWEEP.tracked_files(outside)
+
+    def test_a_staged_tree_is_correctly_not_a_repository(self):
+        root = toy_repo(self)
+        destination = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, destination, True)
+        SWEEP.stage_tree(destination, root)
+        self.assertTrue(SWEEP.is_git_repository(root))
+        self.assertFalse(SWEEP.is_git_repository(destination))
+
     def test_a_tracked_only_tree_has_no_history(self):
         root = toy_repo(self)
         destination = pathlib.Path(tempfile.mkdtemp())
@@ -604,6 +619,19 @@ class LiveCollectionIsUnreachableTests(unittest.TestCase):
     them. This asserts that against the real repository, because it is the assumption every sweep
     in this project has been running on.
     """
+
+    def setUp(self):
+        # These two assert a property OF THE REAL REPOSITORY, so they cannot run inside a staged
+        # tree — which has no .git precisely because staging is tracked-only. Written without this
+        # they failed the framework's own self-sweep baseline, so `mutation_sweep` could no longer
+        # sweep itself: tests asserting "a staged tree cannot reach the live collection" broke
+        # BECAUSE the staged tree correctly could not reach the real repository.
+        if not SWEEP.is_git_repository(ROOT):
+            self.skipTest("not a git repository — this asserts a property of the real repo")
+
+    def test_the_skip_above_does_not_fire_in_the_real_repository(self):
+        """Keeps the skip honest. A skip nobody checks is a test nobody runs."""
+        self.assertTrue(SWEEP.is_git_repository(ROOT))
 
     def test_the_live_watcher_artifacts_are_untracked_and_so_never_stage(self):
         tracked = set(SWEEP.tracked_files(ROOT))

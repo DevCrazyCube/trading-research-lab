@@ -157,8 +157,30 @@ def assert_declaration(declaration, name):
     return declaration
 
 
+def is_git_repository(root=ROOT):
+    """Whether `git ls-files` can answer here at all.
+
+    A STAGED TREE IS NOT ONE. Staging copies tracked files and, unless asked, not `.git` — which is
+    the property that keeps a staged tree from reaching the live collection. Anything that queries
+    git must therefore be prepared for the answer "there is no repository here", and a caller that
+    is not gets an opaque CalledProcessError from three frames down.
+    """
+    result = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"],
+                            cwd=root, capture_output=True)
+    return result.returncode == 0
+
+
 def tracked_files(root=ROOT):
-    result = subprocess.run(["git", "ls-files", "-z"], cwd=root, capture_output=True, check=True)
+    result = subprocess.run(["git", "ls-files", "-z"], cwd=root, capture_output=True)
+    if result.returncode != 0:
+        # Was a bare CalledProcessError, which named the command and not the situation. The
+        # situation is almost always "this is a staged tree", and saying so is the difference
+        # between a one-line diagnosis and reading a traceback.
+        raise SweepRefused(
+            f"git could not list tracked files in {root} (exit {result.returncode}): "
+            f"{result.stderr.decode().strip()}. If this is a staged tree, it has no .git by "
+            "design — staging is tracked-only, which is what keeps it from reaching a live "
+            "collection.")
     return [name for name in result.stdout.decode().split("\0") if name]
 
 
