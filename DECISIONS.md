@@ -2535,3 +2535,38 @@ The two do not imply each other. A user-ratified decision can remain provisional
   has survived 65 hours without a quarantine, and this project has already lost two runs to
   transient network faults. Chasing an hour by moving a live run onto a different link is a bad
   trade, and the correct time to act on this is before the next heavy stage begins, not during one.
+
+## 2026-08-07 — `transaction_bodies` is rate-bound, not link-bound; my own generalisation corrected
+
+- **Status:** correction of an entry made earlier the same day. No code changed, nothing restarted,
+  the watcher untouched.
+- **Corrects:** the closing line of *"B11c cost and schedule measured in flight"* (023cd09), which
+  said the run "is bounded by the link and not by the endpoint". **That is true of stage 2 and false
+  of stage 5**, and stating it about "the run" was the same error this session has now recorded four
+  times: a property proved of one part, asserted about the whole.
+- **What binds `transaction_bodies`:** `b9d_transaction_bodies.py` paces itself at a fixed
+  `calls_per_second=2.5`, and the watcher passes no override. Bandwidth would only bind above
+  **3.76 MB per transaction** (9.4 MB/s ÷ 2.5 s⁻¹); a `getTransaction` response is tens of kilobytes,
+  three orders of magnitude below that. **The measured 9.4 MB/s does not transfer to this stage.**
+- **The floor, which is a fact and not an estimate:** elapsed ≥ `signatures / 2.5` seconds, whatever
+  the network does. Sensitivity, offered as a table precisely because it is not a forecast:
+
+  | signatures | floor |
+  |---|---|
+  | 100,000 | 11 h |
+  | 500,000 | 2.3 days |
+  | 1,000,000 | 4.6 days |
+  | 3,000,000 | 13.9 days |
+
+- **NO FORECAST IS OFFERED, because its input does not exist yet.** The signature count is produced
+  by `signature_inventory`, **stage 4**; the pipeline is on stage 2. Until that stage completes there
+  is no number to multiply, and any figure produced now would be a third derived estimate from a
+  seat whose previous two were both corrected.
+- **Why this is worth an entry rather than a note:** the run is currently reported by a
+  within-stage slot meter that cannot see the seven stages behind it, which led both agent seats to
+  describe B11 as nearly finished. It is on **stage 2 of 9**, and stage 5 has a hard floor that may
+  be measured in days. Anyone planning against "nearly done" is planning against a meter reading
+  something narrower than the question.
+- **Bears on Slice D:** `B19B`/`B19C`/`B19D` are frozen and waiting on B11. The wait is
+  substantially longer than either seat had assumed, which changes no decision but should stop the
+  backlog being treated as nearly unblocked.
