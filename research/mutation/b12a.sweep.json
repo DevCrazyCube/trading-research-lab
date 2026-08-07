@@ -1,0 +1,177 @@
+{
+  "sweep_id": "b12a",
+  "description": "Mutation sweep over the deterministic risk governor -- the veto that sits above any model. Every mutant either disables a control family, loosens a limit by one, defaults something the governor refuses to default, or lets the decision record contradict itself. PLAN.md has claimed 36/36 for this component since before sweeps were reproducible; this makes the claim checkable.",
+  "target": "scripts/b12a_risk_governor.py",
+  "tests": [
+    "tests/test_b12a_risk_governor.py"
+  ],
+  "mutants": [
+    {
+      "name": "R01 emergency state ignored",
+      "old": "    if health[\"emergency_state\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R02 kill switch ignored",
+      "old": "    if health[\"kill_switch_engaged\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R03 incomplete evidence accepted",
+      "old": "    if not health[\"evidence_complete\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R04 conflicting evidence accepted",
+      "old": "    if health[\"evidence_conflicting\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R06 slot staleness ignored",
+      "old": "    if health[\"current_slot\"] - health[\"evidence_slot\"] > config[\"max_evidence_age_slots\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R07 wall-clock staleness ignored",
+      "old": "    if health[\"current_unix\"] - health[\"evidence_unix\"] > config[\"max_evidence_age_seconds\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R06 staleness boundary loosened",
+      "old": "    if health[\"current_slot\"] - health[\"evidence_slot\"] > config[\"max_evidence_age_slots\"]:",
+      "new": "    if health[\"current_slot\"] - health[\"evidence_slot\"] > config[\"max_evidence_age_slots\"] + 1:"
+    },
+    {
+      "name": "R15 order size limit ignored",
+      "old": "    if proposal[\"quote_lamports\"] > config[\"max_order_lamports\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R16 total exposure limit ignored",
+      "old": "    if projected[\"total_exposure_lamports\"] > config[\"max_total_exposure_lamports\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R17 open position limit ignored",
+      "old": "    if projected[\"position_count\"] > config[\"max_open_positions\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R18 creator exposure limit ignored",
+      "old": "    if projected[\"creator_exposure_lamports\"] > config[\"max_creator_exposure_lamports\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R19 creator position limit ignored",
+      "old": "    if projected[\"creator_position_count\"] > config[\"max_creator_positions\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R20 daily loss limit ignored",
+      "old": "    if -portfolio[\"realised_pnl_today_lamports\"] > config[\"max_daily_realised_loss_lamports\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R23 pending exposure limit ignored",
+      "old": "    if projected[\"pending_exposure_lamports\"] > config[\"max_pending_exposure_lamports\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R21 drawdown veto ignored",
+      "old": "    if drawdown:",
+      "new": "    if False:"
+    },
+    {
+      "name": "R15 order limit made inclusive",
+      "old": "    if proposal[\"quote_lamports\"] > config[\"max_order_lamports\"]:",
+      "new": "    if proposal[\"quote_lamports\"] >= config[\"max_order_lamports\"]:"
+    },
+    {
+      "name": "R16 exposure limit off by one",
+      "old": "    if projected[\"total_exposure_lamports\"] > config[\"max_total_exposure_lamports\"]:",
+      "new": "    if projected[\"total_exposure_lamports\"] > config[\"max_total_exposure_lamports\"] + 1:"
+    },
+    {
+      "name": "drawdown comparison uses float division",
+      "old": "    if (peak - current) * denominator > numerator * peak:",
+      "new": "    if (peak - current) / peak > numerator / denominator:"
+    },
+    {
+      "name": "drawdown unverifiable branch neutered",
+      "old": "    if peak <= 0 or current > peak:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a sell is accepted as a buy",
+      "old": "    if proposal[\"side\"] != B10A.BUY:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a zero-lamport order is accepted",
+      "old": "    if _non_negative_int(\"proposal quote_lamports\", proposal[\"quote_lamports\"]) <= 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a missing limit is defaulted rather than refused",
+      "old": "    missing = [field for field in CONFIG_FIELDS if field not in config]",
+      "new": "    missing = []"
+    },
+    {
+      "name": "an unknown config field is tolerated",
+      "old": "    unknown = [field for field in config if field not in CONFIG_FIELDS]",
+      "new": "    unknown = []"
+    },
+    {
+      "name": "unratified config accepted",
+      "old": "    if config[\"ratification\"] not in ALLOWED_RATIFICATION:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a negative limit is accepted",
+      "old": "    if isinstance(value, bool) or not isinstance(value, int) or value < 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a float limit is accepted",
+      "old": "    if isinstance(value, bool) or not isinstance(value, int) or value < 0:",
+      "new": "    if value is None:"
+    },
+    {
+      "name": "a missing health flag is defaulted",
+      "old": "    missing = [field for field in HEALTH_FIELDS if field not in health]",
+      "new": "    missing = []"
+    },
+    {
+      "name": "a non-boolean health flag accepted",
+      "old": "        if not isinstance(health[field], bool):",
+      "new": "        if False:"
+    },
+    {
+      "name": "an approval may carry reasons",
+      "old": "    if record[\"decision\"] == DECISION_APPROVED and record[\"reasons\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a rejection may carry no reason",
+      "old": "    if record[\"decision\"] == DECISION_REJECTED and not record[\"reasons\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a rejection may carry exposure",
+      "old": "    if record[\"decision\"] == DECISION_REJECTED and record[\"exposure_after\"] is not None:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a resized order is permitted",
+      "old": "    if record[\"order_was_resized\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "apply_approved accepts a rejection",
+      "old": "    if record[\"decision\"] != DECISION_APPROVED:",
+      "new": "    if False:"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None expected. This module is the last thing standing between a model and an order, and a guard in it that no test can distinguish from its absence is not a guard."
+}

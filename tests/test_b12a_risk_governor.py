@@ -691,5 +691,68 @@ class ScopeTests(unittest.TestCase):
         self.assertIn("U3", report["unmet"])
 
 
+class GuardsFoundUntestedByMutationTests(unittest.TestCase):
+    """Three guards a mutation sweep could neuter without any existing test noticing.
+
+    PLAN.md has claimed 36/36 for this module since before sweeps were reproducible. Making that
+    claim re-runnable (`research/mutation/b12a.sweep.json`) surfaced these three. This module is
+    the last thing standing between a model and an order, so a guard here that no test can
+    distinguish from its absence is not a guard.
+    """
+
+    def test_the_drawdown_comparison_is_exact_and_a_float_would_approve_what_it_rejects(self):
+        """The no-float rule, at the one place a float changes a decision rather than a report.
+
+        `drawdown_reason` cross-multiplies instead of dividing. Replacing that with float division
+        survived every existing test, because no test used values where float64 loses integer
+        precision — above ~9e15, its 53-bit mantissa cannot represent consecutive integers.
+
+        The divergence is not symmetric. At these values exact arithmetic says the drawdown limit
+        is EXCEEDED and float says it is not, so the float version approves an order the exact one
+        refuses. That is the direction that costs money, and it is why the rule is "no float
+        anywhere" rather than "no float where it matters" — nobody should have to work out where
+        the boundary bites.
+        """
+        peak, current = 10**17, 66666666666666666
+        numerator, denominator = 1, 3
+
+        exact_exceeded = (peak - current) * denominator > numerator * peak
+        float_exceeded = (peak - current) / peak > numerator / denominator
+        self.assertTrue(exact_exceeded, "the fixture must be over the limit exactly")
+        self.assertFalse(float_exceeded, "and under it in float, or this proves nothing")
+
+        book = portfolio()
+        book["peak_realizable_portfolio_lamports"] = peak
+        book["current_realizable_portfolio_lamports"] = current
+        limits = dict(config(), max_portfolio_drawdown_ratio=[numerator, denominator])
+
+        self.assertEqual(B12A.drawdown_reason(book, limits),
+                         B12A.R21_PORTFOLIO_DRAWDOWN_LIMIT_EXCEEDED)
+
+    def test_a_health_flag_that_is_not_a_boolean_is_refused(self):
+        """`1` and `"yes"` are truthy, and a truthy kill switch that is not `True` is a flag whose
+        producer and consumer disagree about the type. The governor refuses rather than coercing."""
+        for field in ("kill_switch_engaged", "emergency_state", "evidence_complete",
+                      "evidence_conflicting", "program_version_supported",
+                      "curve_regime_consistent"):
+            for value in (1, 0, "true", None):
+                with self.subTest(field=field, value=value):
+                    with self.assertRaises(B12A.RiskRefused):
+                        B12A.assert_health(dict(health(), **{field: value}))
+
+    def test_a_record_claiming_a_resized_order_is_refused(self):
+        """The governor approves the exact order or rejects it; it never shrinks one.
+
+        That property is load-bearing — a governor that silently resizes changes the thing being
+        evaluated — and `_assert_record_consistent` enforces it, but nothing exercised the branch,
+        so neutering it changed nothing observable.
+        """
+        record = decide()
+        self.assertIs(record["order_was_resized"], False)
+
+        with self.assertRaisesRegex(B12A.RiskRefused, "does not resize"):
+            B12A._assert_record_consistent(dict(record, order_was_resized=True))
+
+
 if __name__ == "__main__":
     unittest.main()

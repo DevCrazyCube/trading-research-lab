@@ -1,0 +1,187 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 33,
+  "mutants_declared": 33,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::KillSwitchAndEmergencyTests::test_emergency_state_outranks_every_other_reason",
+      "name": "R01 emergency state ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::HappyPathTests::test_a_rejection_publishes_no_projected_book",
+      "name": "R02 kill switch ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::StalenessTests::test_incomplete_and_conflicting_evidence_each_reject",
+      "name": "R03 incomplete evidence accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::StalenessTests::test_incomplete_and_conflicting_evidence_each_reject",
+      "name": "R04 conflicting evidence accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::StalenessTests::test_both_clocks_are_checked_because_either_can_stop_alone",
+      "name": "R06 slot staleness ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::StalenessTests::test_both_clocks_are_checked_because_either_can_stop_alone",
+      "name": "R07 wall-clock staleness ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::StalenessTests::test_slot_staleness_at_and_one_over",
+      "name": "R06 staleness boundary loosened",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::CapBoundaryTests::test_max_order_lamports_at_and_one_over",
+      "name": "R15 order size limit ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::CapBoundaryTests::test_total_exposure_at_and_one_over",
+      "name": "R16 total exposure limit ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::CapBoundaryTests::test_open_position_count_at_and_one_over",
+      "name": "R17 open position limit ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::CapBoundaryTests::test_creator_exposure_at_and_one_over",
+      "name": "R18 creator exposure limit ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::CapBoundaryTests::test_creator_position_count_at_and_one_over",
+      "name": "R19 creator position limit ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::CapBoundaryTests::test_daily_realised_loss_at_and_one_over",
+      "name": "R20 daily loss limit ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::CapBoundaryTests::test_pending_exposure_at_and_one_over",
+      "name": "R23 pending exposure limit ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::DrawdownTests::test_a_zero_drawdown_allowance_still_permits_an_undrawn_book",
+      "name": "R21 drawdown veto ignored",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::HappyPathTests::test_a_clean_proposal_is_approved_exactly_as_proposed",
+      "name": "R15 order limit made inclusive",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::CapBoundaryTests::test_total_exposure_at_and_one_over",
+      "name": "R16 exposure limit off by one",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::GuardsFoundUntestedByMutationTests::test_the_drawdown_comparison_is_exact_and_a_float_would_approve_what_it_rejects",
+      "name": "drawdown comparison uses float division",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::DrawdownTests::test_an_unverifiable_drawdown_rejects_rather_than_passing",
+      "name": "drawdown unverifiable branch neutered",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::MissingInputTests::test_a_sell_proposal_is_refused_in_this_regime",
+      "name": "a sell is accepted as a buy",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::MissingInputTests::test_a_zero_order_is_not_an_order",
+      "name": "a zero-lamport order is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::MissingInputTests::test_every_config_field_is_required",
+      "name": "a missing limit is defaulted rather than refused",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::MissingInputTests::test_an_extra_key_alongside_a_complete_config_is_still_refused",
+      "name": "an unknown config field is tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::MissingInputTests::test_an_unratified_config_is_the_only_thing_that_can_be_declared_today",
+      "name": "unratified config accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::MissingInputTests::test_a_limit_of_none_is_refused_and_never_read_as_unlimited",
+      "name": "a negative limit is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::MissingInputTests::test_a_negative_limit_is_refused",
+      "name": "a float limit is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::MissingInputTests::test_every_health_field_is_required",
+      "name": "a missing health flag is defaulted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::GuardsFoundUntestedByMutationTests::test_a_health_flag_that_is_not_a_boolean_is_refused",
+      "name": "a non-boolean health flag accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::FailClosedTests::test_an_approved_record_can_never_carry_reasons",
+      "name": "an approval may carry reasons",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::FailClosedTests::test_a_rejected_record_can_never_be_unexplained",
+      "name": "a rejection may carry no reason",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::FailClosedTests::test_a_rejected_record_can_never_publish_a_projected_book",
+      "name": "a rejection may carry exposure",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::GuardsFoundUntestedByMutationTests::test_a_record_claiming_a_resized_order_is_refused",
+      "name": "a resized order is permitted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b12a_risk_governor.py::PendingExposureTests::test_only_an_approved_decision_may_be_applied",
+      "name": "apply_approved accepts a rejection",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b12a",
+  "target": "scripts/b12a_risk_governor.py",
+  "tests": [
+    "tests/test_b12a_risk_governor.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "fa28f3a9ded143f7b2f049f09e98d08ceaf39e603694fed97783ea484ab297a8",
+  "working_tree_unchanged": true
+}
