@@ -135,6 +135,21 @@
       "name": "a terminal fault's retry count is faked",
       "old": "            \"attempts\": transport.calls[\"n\"],\n            \"backoff_sleeps\": slept,\n        }",
       "new": "            \"attempts\": 1,\n            \"backoff_sleeps\": [],\n        }"
+    },
+    {
+      "name": "Q03 is credited from one branch alone",
+      "old": "    if ancestry and all(ancestry.get(b, {}).get(\"refused\") for b in branches):",
+      "new": "    if ancestry and any(ancestry.get(b, {}).get(\"refused\") for b in branches):"
+    },
+    {
+      "name": "the no-git branch is never driven",
+      "old": "        staged.module.verify_git_ancestry()\n",
+      "new": "        raise staged.module.Quarantined('Q03_git_ancestry_broken: faked')\n"
+    },
+    {
+      "name": "a real ancestor is never checked, so the guard could be a stop",
+      "old": "    results[\"a_real_ancestor_is_accepted\"] = staged.module.verify_git_ancestry(git=clean)",
+      "new": "    results[\"a_real_ancestor_is_accepted\"] = {\"preregistration_commit\": \"faked\"}"
     }
   ],
   "expected_survivors": [

@@ -531,3 +531,130 @@ class DeterminismAndSafetyTests(SegmentFixture):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RealDecisionWiringTests(SegmentFixture):
+    """`decide_and_record` — the first B17b records carrying a measured clock.
+
+    Every record written before this had `decision_unix_nanos` at U_NOT_INSTRUMENTED because the
+    caller passed None. What matters here is not that three fields moved out of that state, but that
+    they moved because something measured them: reducing the unmeasured count by filling fields with
+    plausible values is the exact failure the contract exists to prevent, and it would look
+    identical from the outside.
+    """
+
+    def setUp(self):
+        super().setUp()
+        synthetic = B18A.B17A.synthetic_observation()
+        self.curve_state = B18A.B17A.curve_state(synthetic) | {
+            k: synthetic[k] for k in ("mint", "bonding_curve", "creator")}
+        self.components = copy.deepcopy(B18A.B17A.B12B.demo_components())
+
+    def record(self, components=None, curve_state=None, clock=None):
+        observation = B18A.observation_from_frame(B18A.read_frames(self.write_segment())[0])
+        return B18A.decide_and_record(
+            observation, curve_state or self.curve_state, components or self.components,
+            ENDPOINT, clock_source=CLOCK_SOURCE, quote_lamports=100_000_000,
+            **({"clock": clock} if clock else {}))
+
+    def test_the_decision_clock_is_measured_not_supplied(self):
+        record = self.record(clock=lambda: 1_786_000_000_123_456_789)
+        self.assertEqual(record["measured"]["decision_unix_nanos"], 1_786_000_000_123_456_789)
+        self.assertNotIn("decision_unix_nanos", record["unmeasured"])
+
+    def test_the_clock_is_taken_around_the_decision_not_at_the_observation(self):
+        """A decision clock equal to the observation clock would be a copied timestamp."""
+        record = self.record()
+        self.assertNotEqual(record["measured"]["decision_unix_nanos"],
+                            record["measured"]["observation_unix_nanos"])
+        self.assertGreater(record["measured"]["decision_unix_nanos"],
+                           record["measured"]["observation_unix_nanos"])
+
+    def test_the_quoted_state_slot_is_the_curve_the_decision_saw(self):
+        record = self.record()
+        self.assertEqual(record["measured"]["quoted_state_slot"], self.curve_state["slot"])
+
+    def test_an_approved_decision_carries_a_price(self):
+        record = self.record()
+        self.assertEqual(record["provenance"]["risk_decision"]["decision"], "approved")
+        self.assertGreater(record["measured"]["expected_tokens_out"], 0)
+
+    def test_a_rejected_decision_is_never_priced(self):
+        """B17a's seam, enforced here too: a price for a refused order describes a decision nobody
+        made. This is the property that must survive, not the field count."""
+        components = copy.deepcopy(self.components)
+        components["health"]["kill_switch_engaged"] = True
+        record = self.record(components=components)
+        self.assertEqual(record["provenance"]["risk_decision"]["decision"], "rejected")
+        self.assertEqual(record["provenance"]["risk_decision"]["primary_reason"],
+                         "R02_KILL_SWITCH_ENGAGED")
+        self.assertIsNone(record["measured"]["expected_tokens_out"])
+        self.assertEqual(record["unmeasured"]["expected_tokens_out"], "U_NOT_INSTRUMENTED")
+
+    def test_a_rejected_decision_still_records_its_clock(self):
+        """A refusal is a decision and it happened at a time. Losing that would make refusals
+        invisible to any later latency question."""
+        components = copy.deepcopy(self.components)
+        components["health"]["kill_switch_engaged"] = True
+        record = self.record(components=components)
+        self.assertIsNotNone(record["measured"]["decision_unix_nanos"])
+
+    def test_exactly_four_fields_remain_uninstrumented_and_each_has_a_reason(self):
+        """The count is not the point; these four are the ones nothing measured."""
+        record = self.record()
+        remaining = sorted(k for k, v in record["unmeasured"].items()
+                           if v == "U_NOT_INSTRUMENTED")
+        self.assertEqual(remaining, ["provider_region_declared", "retry_policy_id", "route",
+                                     "slippage_limit_tokens"])
+
+    def test_no_unratified_policy_identifier_was_invented(self):
+        """retry_policy_id and slippage_limit_tokens name things that do not exist. Writing an
+        identifier for a policy nobody ratified would be inventing the policy."""
+        record = self.record()
+        self.assertIsNone(record["measured"]["retry_policy_id"])
+        self.assertIsNone(record["measured"]["slippage_limit_tokens"])
+
+    def test_a_recorder_observation_alone_cannot_support_a_decision(self):
+        """The finding that forced curve_state to be a separate argument: a recorder frame carries
+        no decoded reserves, so the decode step is missing rather than implicit."""
+        observation = B18A.observation_from_frame(B18A.read_frames(self.write_segment())[0])
+        for field in ("virtual_quote", "virtual_token", "real_quote", "real_token"):
+            self.assertNotIn(field, observation)
+        with self.assertRaises((KeyError, TypeError)):
+            B18A.decide_and_record(observation, observation, self.components, ENDPOINT,
+                                   clock_source=CLOCK_SOURCE, quote_lamports=100_000_000)
+
+    def test_the_proposal_id_names_recorder_coordinates_not_a_transaction_index(self):
+        """seq_in_session is a frame counter. Calling it a transaction index would have put a wrong
+        name in the identifier of every record."""
+        tree = ast.parse((ROOT / "scripts" / "b18a_shadow_record.py").read_text())
+        builder = next(n for n in ast.walk(tree)
+                       if isinstance(n, ast.FunctionDef) and n.name == "_proposal_from")
+        # Docstring excluded. The docstring EXPLAINS why transaction_index would be wrong, so a scan
+        # that reads it trips on its own reasoning -- the same self-reference trap b17a's surface
+        # scanner hit, and the same fix: a name in prose is documentation, in code it is a choice.
+        body = [n for n in builder.body
+                if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant)
+                        and isinstance(n.value.value, str))]
+        source = "\n".join(ast.unparse(n) for n in body)
+        self.assertIn("observation_slot", source)
+        self.assertIn("seq_in_session", source)
+        self.assertNotIn("transaction_index", source)
+
+    def test_the_proposal_builder_carries_no_strategy(self):
+        """Held to the same standard as b17a's propose: no branch, no numeric constant."""
+        tree = ast.parse((ROOT / "scripts" / "b18a_shadow_record.py").read_text())
+        builder = next(n for n in ast.walk(tree)
+                       if isinstance(n, ast.FunctionDef) and n.name == "_proposal_from")
+        self.assertEqual([n for n in ast.walk(builder)
+                          if isinstance(n, (ast.If, ast.Compare))], [])
+        self.assertEqual([n.value for n in ast.walk(builder)
+                          if isinstance(n, ast.Constant)
+                          and isinstance(n.value, (int, float))
+                          and not isinstance(n.value, bool)], [])
+
+    def test_the_record_still_conforms_and_is_still_a_shadow_record(self):
+        record = self.record()
+        self.assertTrue(B18A.assert_conforms(record))
+        self.assertEqual(record["stage"], "shadow")
+        self.assertEqual(record["measured"]["outcome"], "never_sent")

@@ -1,8 +1,9 @@
 {
   "baseline_passed": true,
   "expected_survivors": {},
-  "killed": 28,
-  "mutants_declared": 28,
+  "git_ancestry_staged": false,
+  "killed": 34,
+  "mutants_declared": 34,
   "per_mutant": [
     {
       "first_failing_test": "tests/test_b18a_shadow_record.py::ContractPinningTests::test_a_tampered_contract_refuses_to_load",
@@ -143,6 +144,36 @@
       "first_failing_test": "tests/test_b18a_shadow_record.py::UnknownIsNeverZeroTests::test_a_non_nullable_field_may_not_be_null",
       "name": "the endpoint is stored raw",
       "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::RealDecisionWiringTests::test_the_clock_is_taken_around_the_decision_not_at_the_observation",
+      "name": "the decision clock is copied from the observation",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::RealDecisionWiringTests::test_a_rejected_decision_is_never_priced",
+      "name": "a rejected decision is priced anyway",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::RealDecisionWiringTests::test_the_quoted_state_slot_is_the_curve_the_decision_saw",
+      "name": "the quoted state slot is taken from the frame, not the curve",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::RealDecisionWiringTests::test_exactly_four_fields_remain_uninstrumented_and_each_has_a_reason",
+      "name": "an unratified retry policy identifier is invented",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::RealDecisionWiringTests::test_the_proposal_builder_carries_no_strategy",
+      "name": "the proposal names a frame counter as a transaction index",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b18a_shadow_record.py::RealDecisionWiringTests::test_a_rejected_decision_is_never_priced",
+      "name": "the verdict is dropped from provenance",
+      "outcome": "killed"
     }
   ],
   "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
@@ -156,6 +187,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "78e55934dba260c54dda1bff3be4f77d792559751160a8bd8df292f5de7c15b9",
+  "working_tree_sha256": "c14449fb3b5886f815eae138ea6d56557ed3421544475331cfaf905331952dee",
   "working_tree_unchanged": true
 }

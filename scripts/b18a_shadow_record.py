@@ -40,6 +40,7 @@ import hashlib
 import importlib.util
 import json
 import pathlib
+import time
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCHEMA_VERSION = "1.0.0"
@@ -327,6 +328,106 @@ def shadow_record(observation, decision, endpoint, *, attempt_index=0, clock_sou
     for field in MEASURED_FIELDS:
         if measured[field] is None and field not in record["unmeasured"]:
             record["unmeasured"][field] = "U_NOT_INSTRUMENTED"
+    return record
+
+
+def _proposal_from(observation, curve_state, quote_lamports):
+    """A proposal from RECORDER coordinates, not b17a's.
+
+    `B17A.propose` reads `slot` and `transaction_index` from a rehearsal observation; a recorder
+    observation has `observation_slot` and `seq_in_session`. Reusing it meant dressing one shape up
+    as the other, and `seq_in_session` is a frame counter, not a transaction index -- a name that
+    would have been wrong in the identifier of every record.
+
+    Carries no strategy, on the same standard b17a's own `propose` is held to: the size is an
+    argument, there is no branch and no numeric constant.
+    """
+    return {
+        "schema_version": B17A.B12A.SCHEMA_VERSION,
+        "proposal_id": f"recorded-{observation['observation_slot']}-{observation['seq_in_session']}",
+        "mint": curve_state["mint"],
+        "bonding_curve": curve_state["bonding_curve"],
+        "creator": curve_state["creator"],
+        "side": B17A.B10A.BUY,
+        "quote_lamports": quote_lamports,
+    }
+
+
+def decide_and_record(observation, curve_state, components, endpoint, *, clock_source,
+                      quote_lamports, schedule=None, policy=None, clock=time.time_ns):
+    """Run the REAL B12a decision, time it, and record only what that actually measured.
+
+    Until now `decision_unix_nanos` was an argument callers passed, and `main` passed `None`, so
+    every record written carried it at `U_NOT_INSTRUMENTED`. B12a's decision object has no clock of
+    its own -- correctly, because only the caller can observe when the decision was made -- so the
+    clock is taken around the `decide` call and nowhere else.
+
+    THREE FIELDS BECOME MEASURED, AND FOUR DELIBERATELY DO NOT.
+
+    Measured: `decision_unix_nanos`, observed here; `quoted_state_slot`, the curve state the
+    decision was actually priced against; and `expected_tokens_out`, but ONLY when the decision
+    approved and the entry was therefore priced.
+
+    Still `U_NOT_INSTRUMENTED`: `retry_policy_id` and `slippage_limit_tokens`, because no retry
+    policy and no slippage limit exist to name -- writing an identifier for a policy nobody ratified
+    would be inventing one; `route` and `provider_region_declared`, because nothing is sent, so the
+    route is a plan rather than an observation. Reducing the unmeasured count by filling fields with
+    plausible values is the failure this contract exists to prevent, and it would be invisible
+    afterwards.
+
+    THE CURVE STATE IS A SEPARATE ARGUMENT, AND THAT IS A FINDING RATHER THAN AN INCONVENIENCE.
+    A recorder frame carries a slot, clocks and provenance; it does NOT carry decoded curve
+    reserves, because `observation_from_frame` reads the frame envelope and not the Pump account
+    layout inside it. So a B17b record anchored to a recorder frame cannot on its own support a
+    B12a decision -- b11b's eligibility vetoes need `virtual_quote`, `virtual_token`, `real_quote`,
+    `real_token`, `quote_mint`, `mayhem_mode` and `complete`. My first version passed the recorder
+    observation straight to `B17A.curve_state` and raised KeyError on `virtual_quote`.
+
+    Passing the curve state in makes the missing decode step visible at every call site instead of
+    hiding it behind a default. The decode itself is not built here: it is a real gap, recorded in
+    the inventory, and inventing a plausible reserve set to close it would be exactly the failure
+    this contract exists to prevent.
+
+    THE REJECTION SEAM IS PRESERVED. B17a's rehearsal proves a rejected proposal is never priced;
+    the same must hold here, so a rejected decision leaves `expected_tokens_out` null. A record that
+    quoted a price for an order the risk governor refused would describe a decision nobody made.
+    """
+    schedule = schedule or {"fee_bps": 95, "creator_fee_bps": 30, "cashback_fee_bps": 0,
+                            "buyback_fee_bps": 5000}
+    policy = policy or {"base_fee_lamports": 5000, "priority_fee_lamports": 100_000,
+                        "tip_lamports": 0, "ata_rent_lamports": 2_039_280, "failed_attempts": 0}
+
+    state = dict(curve_state)
+    proposal = _proposal_from(observation, curve_state, quote_lamports)
+    verdict = B17A.B12A.decide(proposal, state, components["portfolio"], components["health"],
+                               components["config"])
+    decided_at = clock()
+
+    expected_tokens_out = None
+    if verdict["decision"] == B17A.B12A.DECISION_APPROVED:
+        priced = B17A.B10A.price_entry(state, {"side": B17A.B10A.BUY,
+                                               "quote_lamports": quote_lamports},
+                                       schedule, policy)
+        expected_tokens_out = priced["tokens_out"]
+
+    record = shadow_record(observation,
+                           {"decision_unix_nanos": decided_at, "retry_policy_id": None},
+                           endpoint, clock_source=clock_source,
+                           quoted_state_slot=state["slot"],
+                           expected_tokens_out=expected_tokens_out)
+    # The verdict itself has no B17b field -- `outcome` describes a transaction, and a risk refusal
+    # is not one -- so it goes in provenance rather than being forced into a measured field or lost.
+    record["provenance"]["risk_decision"] = {
+        "decision": verdict["decision"],
+        "primary_reason": verdict["primary_reason"],
+        "decision_sha256": verdict["decision_sha256"],
+        "approval_is_simulation_only": verdict["approval_is_simulation_only"],
+        "priced_only_when_approved": ("expected_tokens_out is null unless this decision approved; "
+                                      "a price for a refused order describes a decision nobody made"),
+    }
+    record["_observation"] = observation
+    assert_conforms(record)
+    record["record_sha256"] = record_hash(record)
     return record
 
 

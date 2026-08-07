@@ -580,6 +580,60 @@ def rehearse_stage_lifecycle(staged):
     return results
 
 
+def rehearse_git_ancestry(staged):
+    """Q03, both branches. My original reason for calling this unreachable was simply wrong.
+
+    The b18c artifact said Q03 "needs a rewritten git history in the scratch tree, which would prove
+    nothing about the real one". That is true of the NOT-AN-ANCESTOR branch and false of the other
+    one: the staged tree contains no `.git` at all, so `verify_git_ancestry` finds no commit for the
+    preregistration and quarantines immediately. It was reachable the whole time and I never called
+    the function -- the codex seat found it by accident while staging for G7, because its staging
+    hits the same condition every time.
+
+    Worth keeping as a lesson rather than a fix: "unreachable" was my inference from one branch,
+    stated about the whole code, and it went into a committed artifact as a reason.
+    """
+    results = {}
+    try:
+        staged.module.verify_git_ancestry()
+        results["no_git_in_staged_tree"] = {"refused": False, "note": "NOT REFUSED"}
+    except staged.module.Quarantined as refusal:
+        results["no_git_in_staged_tree"] = {
+            "refused": True,
+            "reason_code": staged.module.Q03_GIT_ANCESTRY_BROKEN,
+            "branch": "the preregistration has no commit",
+            "refusal_message": str(refusal),
+        }
+
+    # The other branch, driven through the injectable `git` the watcher provides for exactly this.
+    class _Result:
+        def __init__(self, stdout="", returncode=0):
+            self.stdout, self.returncode = stdout, returncode
+
+    def not_an_ancestor(*args):
+        if args[0] == "log":
+            return _Result(stdout="deadbeef\n")
+        return _Result(returncode=1)
+
+    try:
+        staged.module.verify_git_ancestry(git=not_an_ancestor)
+        results["commit_not_an_ancestor"] = {"refused": False, "note": "NOT REFUSED"}
+    except staged.module.Quarantined as refusal:
+        results["commit_not_an_ancestor"] = {
+            "refused": True,
+            "reason_code": staged.module.Q03_GIT_ANCESTRY_BROKEN,
+            "branch": "the preregistration commit is not an ancestor of HEAD",
+            "refusal_message": str(refusal),
+        }
+
+    # And it must be satisfiable, or the guard is a stop rather than a check.
+    def clean(*args):
+        return _Result(stdout="cafebabe\n") if args[0] == "log" else _Result(returncode=0)
+
+    results["a_real_ancestor_is_accepted"] = staged.module.verify_git_ancestry(git=clean)
+    return results
+
+
 def rehearse_two_clock_liveness(staged):
     """A poll clock that stops during a long stage must not read as death.
 
@@ -638,6 +692,12 @@ def credited_codes(report, codes):
         reached.add(codes.Q09_SECRET_WOULD_BE_WRITTEN)
     if report.get("composition_refusal", {}).get("count_keyed_by_window_word") == "refused":
         reached.add(codes.Q10_COMPOSITION_WOULD_LEAK)
+    # Q03 needs BOTH branches refused -- no commit, and a commit that is not an ancestor. One alone
+    # would credit a code for half a guard.
+    ancestry = report.get("git_ancestry", {})
+    branches = ("no_git_in_staged_tree", "commit_not_an_ancestor")
+    if ancestry and all(ancestry.get(b, {}).get("refused") for b in branches):
+        reached.add(codes.Q03_GIT_ANCESTRY_BROKEN)
     return sorted(reached)
 
 
@@ -646,8 +706,6 @@ def unreachable_codes(staged, reached):
     reasons = {
         staged.module.Q01_PREREGISTRATION_DRIFT:
             "needs the frozen preregistration to differ from its pin; a document change, not a fault",
-        staged.module.Q03_GIT_ANCESTRY_BROKEN:
-            "needs a rewritten git history in the scratch tree, which would prove nothing about the real one",
         staged.module.Q13_AMBIGUOUS_FAILURE:
             "reached only when a failure resists classification, which an injected fault cannot honestly be",
     }
@@ -675,6 +733,7 @@ def rehearse_all():
             "secret_refusal": rehearse_secret_refusal(staged),
             "composition_refusal": rehearse_composition_refusal(staged),
             "stage_lifecycle": rehearse_stage_lifecycle(staged),
+            "git_ancestry": rehearse_git_ancestry(staged),
             "two_clock_liveness": rehearse_two_clock_liveness(staged),
         }
         codes = staged.module.QUARANTINE_CODES

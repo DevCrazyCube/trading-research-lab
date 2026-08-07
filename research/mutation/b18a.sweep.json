@@ -145,6 +145,36 @@
       "name": "the endpoint is stored raw",
       "old": "    measured[\"endpoint_identity\"] = _sanitized_endpoint(endpoint)",
       "new": "    measured[\"endpoint_identity\"] = endpoint"
+    },
+    {
+      "name": "the decision clock is copied from the observation",
+      "old": "    decided_at = clock()",
+      "new": "    decided_at = observation[\"observation_unix_nanos\"]"
+    },
+    {
+      "name": "a rejected decision is priced anyway",
+      "old": "    if verdict[\"decision\"] == B17A.B12A.DECISION_APPROVED:",
+      "new": "    if True:"
+    },
+    {
+      "name": "the quoted state slot is taken from the frame, not the curve",
+      "old": "                           quoted_state_slot=state[\"slot\"],",
+      "new": "                           quoted_state_slot=observation[\"observation_slot\"],"
+    },
+    {
+      "name": "an unratified retry policy identifier is invented",
+      "old": "                           {\"decision_unix_nanos\": decided_at, \"retry_policy_id\": None},",
+      "new": "                           {\"decision_unix_nanos\": decided_at, \"retry_policy_id\": \"RP1\"},"
+    },
+    {
+      "name": "the proposal names a frame counter as a transaction index",
+      "old": "\"proposal_id\": f\"recorded-{observation['observation_slot']}-{observation['seq_in_session']}\",",
+      "new": "\"proposal_id\": f\"recorded-{observation['observation_slot']}-{observation['seq_in_session']}\", \"transaction_index\": 0,"
+    },
+    {
+      "name": "the verdict is dropped from provenance",
+      "old": "    record[\"provenance\"][\"risk_decision\"] = {",
+      "new": "    record[\"provenance\"][\"_dropped\"] = {"
     }
   ],
   "expected_survivors": [],

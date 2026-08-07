@@ -304,13 +304,18 @@
     },
     {
       "what": "a shadow record driven by a real B12a decision rather than a supplied decision dict",
-      "status": "ABSENT",
-      "absence_evidence": "b18a takes `decision_unix_nanos` as an argument; nothing yet wires B17a's rehearsal decision into it, so `decision_unix_nanos` is U_NOT_INSTRUMENTED in every record written so far. Visible in research/b18a/records.json."
+      "status": "SUPERSEDED",
+      "absence_evidence": "NO LONGER TRUE at the commit adding b18a.decide_and_record. A real B12a decision is now run and timed, so decision_unix_nanos, quoted_state_slot and expected_tokens_out are MEASURED and U_NOT_INSTRUMENTED falls from 7 to 4. What remains absent is a DECODE step: a recorder frame carries no curve reserves, so curve_state must be supplied by the caller and nothing in b18a produces it from a frame. The four still-uninstrumented fields are retry_policy_id and slippage_limit_tokens, which name a policy and a limit that do not exist, and route and provider_region_declared, which are plans rather than observations while nothing is sent."
     },
     {
       "what": "any record carrying a failure outcome (dropped, expired, rejected_by_provider, failed_on_chain)",
       "status": "SUPERSEDED",
       "absence_evidence": "NO LONGER TRUE at the commit adding b18b. Failure outcomes and U_PROVIDER_SILENT / U_LOST are now produced by injected faults at stage=rehearsal. Those records are marked as evidence of nothing and may never be aggregated; what remains absent is a failure record from a REAL send, which requires a send."
+    },
+    {
+      "what": "a decode step turning a recorder frame into curve reserves",
+      "status": "ABSENT",
+      "absence_evidence": "b18a.observation_from_frame reads the frame envelope -- slot, clocks, provenance -- and not the Pump account layout inside it. b11b's eligibility vetoes need virtual_quote, virtual_token, real_quote, real_token, quote_mint, mayhem_mode and complete, so decide_and_record takes curve_state as an explicit argument. Passing the recorder observation straight through raises KeyError on virtual_quote, asserted by test_a_recorder_observation_alone_cannot_support_a_decision."
     }
   ],
   "name_markers_the_guard_sweeps_for": [

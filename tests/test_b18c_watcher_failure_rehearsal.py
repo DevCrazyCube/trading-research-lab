@@ -120,6 +120,9 @@ class HarnessCannotFabricateTests(unittest.TestCase):
             justified.add("Q09_secret_would_be_written")
         if report["composition_refusal"]["count_keyed_by_window_word"] == "refused":
             justified.add("Q10_composition_would_leak")
+        if all(report["git_ancestry"][b]["refused"]
+               for b in ("no_git_in_staged_tree", "commit_not_an_ancestor")):
+            justified.add("Q03_git_ancestry_broken")
         self.assertEqual(set(coverage["reached"]), justified - {None})
 
     def test_unreached_codes_each_carry_a_reason(self):
@@ -534,6 +537,43 @@ class PrimaryEvidenceTests(unittest.TestCase):
                 path, {"endpoint_reference": "/a1b2c3d4e5f6a7b8c9d0e1f2"}, "primary")
         self.assertFalse(path.exists())
 
+    def test_verify_git_ancestry_really_refuses_a_tree_with_no_git(self):
+        """Driven directly, not read out of the harness's report.
+
+        Two mutants survived here -- faking the call and faking its result -- because every Q03 test
+        I wrote read the reported dict. That is the same defect this class exists for, and I hit it
+        again writing new code two rounds after diagnosing it. The report is a convenience; the
+        check is calling b11c.
+        """
+        self.assertFalse((pathlib.Path(self.staged.root) / ".git").exists())
+        with self.assertRaises(self.staged.module.Quarantined) as refusal:
+            self.staged.module.verify_git_ancestry()
+        self.assertIn("Q03_git_ancestry_broken", str(refusal.exception))
+        self.assertIn("no commit", str(refusal.exception))
+
+    def test_verify_git_ancestry_really_refuses_a_non_ancestor_commit(self):
+        class Result:
+            def __init__(self, stdout="", returncode=0):
+                self.stdout, self.returncode = stdout, returncode
+
+        def not_an_ancestor(*args):
+            return Result(stdout="deadbeef\n") if args[0] == "log" else Result(returncode=1)
+
+        with self.assertRaises(self.staged.module.Quarantined) as refusal:
+            self.staged.module.verify_git_ancestry(git=not_an_ancestor)
+        self.assertIn("not an ancestor", str(refusal.exception))
+
+    def test_verify_git_ancestry_really_accepts_a_real_ancestor(self):
+        class Result:
+            def __init__(self, stdout="", returncode=0):
+                self.stdout, self.returncode = stdout, returncode
+
+        def clean(*args):
+            return Result(stdout="cafebabe\n") if args[0] == "log" else Result(returncode=0)
+
+        self.assertEqual(self.staged.module.verify_git_ancestry(git=clean),
+                         {"preregistration_commit": "cafebabe"})
+
     def test_a_count_keyed_by_a_window_word_is_really_refused(self):
         with self.assertRaises(self.staged.module.Quarantined):
             self.staged.module.assert_no_composition({"curve_count": 1136}, "primary")
@@ -651,6 +691,84 @@ class ReportMatchesPrimaryEvidenceTests(unittest.TestCase):
         self.assertEqual(reported["progress_while_stage_ran"], still["stage_progress_at"])
         self.assertEqual(reported["heartbeat_after"], state["stage_heartbeat_at"])
         self.assertEqual(reported["progress_after_real_progress"], state["stage_progress_at"])
+
+
+class GitAncestryTests(unittest.TestCase):
+    """Q03, which this harness wrongly called unreachable in a committed artifact.
+
+    The original reason read: "needs a rewritten git history in the scratch tree, which would prove
+    nothing about the real one". That is true of the not-an-ancestor branch and false of the other:
+    the staged tree has no `.git` at all, so verify_git_ancestry finds no commit and quarantines
+    immediately. I inferred "unreachable" from one branch and stated it about the whole code. The
+    codex seat found it by accident while staging for G7.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.report = B18C.rehearse_all()
+
+    def test_a_staged_tree_with_no_git_quarantines(self):
+        result = self.report["git_ancestry"]["no_git_in_staged_tree"]
+        self.assertTrue(result["refused"])
+        self.assertEqual(result["reason_code"], "Q03_git_ancestry_broken")
+        # The REAL message, not a label the harness chose. b11c says "has no commit"; a faked
+        # refusal does not, and two mutants survived until this compared the actual text.
+        self.assertIn("has no commit", result["refusal_message"])
+        self.assertIn("nobody can show was frozen first", result["refusal_message"])
+
+    def test_the_reported_refusal_matches_an_independent_call(self):
+        """Cross-check: the harness's text must equal what calling b11c directly produces."""
+        with B18C.staged_watcher() as staged:
+            try:
+                staged.module.verify_git_ancestry()
+                self.fail("verify_git_ancestry did not refuse in a tree with no git")
+            except staged.module.Quarantined as refusal:
+                observed = str(refusal)
+        self.assertEqual(self.report["git_ancestry"]["no_git_in_staged_tree"]["refusal_message"],
+                         observed)
+
+    def test_the_accepted_ancestor_matches_an_independent_call(self):
+        """Kills the mutant that fakes the accepted result instead of calling b11c."""
+        class Result:
+            def __init__(self, stdout="", returncode=0):
+                self.stdout, self.returncode = stdout, returncode
+
+        def clean(*args):
+            return Result(stdout="cafebabe\n") if args[0] == "log" else Result(returncode=0)
+
+        with B18C.staged_watcher() as staged:
+            observed = staged.module.verify_git_ancestry(git=clean)
+        self.assertEqual(self.report["git_ancestry"]["a_real_ancestor_is_accepted"], observed)
+
+    def test_a_commit_that_is_not_an_ancestor_quarantines(self):
+        result = self.report["git_ancestry"]["commit_not_an_ancestor"]
+        self.assertTrue(result["refused"])
+        self.assertEqual(result["reason_code"], "Q03_git_ancestry_broken")
+        self.assertIn("not an ancestor of HEAD", result["refusal_message"])
+
+    def test_a_real_ancestor_is_accepted(self):
+        """Or the guard is a stop rather than a check."""
+        self.assertIn("preregistration_commit",
+                      self.report["git_ancestry"]["a_real_ancestor_is_accepted"])
+
+    def test_q03_is_now_credited_and_no_longer_listed_unreachable(self):
+        coverage = self.report["quarantine_code_coverage"]
+        self.assertIn("Q03_git_ancestry_broken", coverage["reached"])
+        self.assertNotIn("Q03_git_ancestry_broken", coverage["not_reached"])
+
+    def test_q03_is_withheld_when_only_one_branch_refuses(self):
+        """Crediting a code for half a guard is the same error as crediting it for none."""
+        with B18C.staged_watcher() as staged:
+            doctored = dict(self.report, git_ancestry={
+                "no_git_in_staged_tree": {"refused": True},
+                "commit_not_an_ancestor": {"refused": False}})
+            self.assertNotIn("Q03_git_ancestry_broken",
+                             B18C.credited_codes(doctored, staged.module))
+
+    def test_only_two_codes_remain_unreachable(self):
+        coverage = self.report["quarantine_code_coverage"]
+        self.assertEqual(sorted(coverage["not_reached"]),
+                         ["Q01_preregistration_drift", "Q13_ambiguous_failure"])
 
 
 class SweepSafetyTests(unittest.TestCase):
