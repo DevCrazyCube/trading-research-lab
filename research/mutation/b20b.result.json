@@ -1,0 +1,76 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "killed": 11,
+  "mutants_declared": 11,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::ExitCodeTests::test_no_state_reports_engaged",
+      "name": "engaged exit code becomes success",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::ClearRechecksTests::test_a_clear_that_still_reads_engaged_says_so_and_exits_engaged",
+      "name": "clear no longer re-reads the state",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::ClearRechecksTests::test_a_clear_that_still_reads_engaged_says_so_and_exits_engaged",
+      "name": "clear that still reads engaged reports success",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::FailClosedDefaultIsExplainedTests::test_a_default_engagement_is_distinguished_from_an_operator_one",
+      "name": "fail-closed default no longer distinguished",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::ExitCodeTests::test_a_refusal_is_its_own_exit_code",
+      "name": "refusal swallowed instead of surfaced",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::ExitCodeTests::test_status_is_the_default_subcommand",
+      "name": "default subcommand is no longer status",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::HeartbeatTests::test_the_loop_does_not_sleep_after_its_final_beat",
+      "name": "heartbeat loop ignores its bound",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::ExitCodeTests::test_engaging_exits_engaged",
+      "name": "engage exit code claims clear",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::JsonOutputTests::test_json_status_is_the_owner_s_snapshot_verbatim",
+      "name": "json status stops using the owner snapshot",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::ExitCodeTests::test_clearing_requires_the_expected_generation_to_be_supplied",
+      "name": "expect-generation no longer required",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b20b_emergency_control.py::ClockTests::test_the_clock_helper_returns_nanoseconds",
+      "name": "clock helper loses nanosecond scale",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b20b",
+  "target": "scripts/b20b_emergency_control.py",
+  "tests": [
+    "tests/test_b20b_emergency_control.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "b03e7ed979fc29e48d6eda5cb9758a3ce26ab4879c941ef9b1710010e5f28543",
+  "working_tree_unchanged": true
+}

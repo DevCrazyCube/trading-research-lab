@@ -1,0 +1,67 @@
+{
+  "sweep_id": "b20b",
+  "description": "Mutation sweep over the operator control surface. Every mutant either misreports the state to a caller branching on exit code, or erases the distinction between a fail-closed default and a deliberate halt.",
+  "target": "scripts/b20b_emergency_control.py",
+  "tests": [
+    "tests/test_b20b_emergency_control.py"
+  ],
+  "mutants": [
+    {
+      "name": "engaged exit code becomes success",
+      "old": "    return EXIT_ENGAGED if verdict[\"kill_switch_engaged\"] else EXIT_CLEAR",
+      "new": "    return EXIT_CLEAR"
+    },
+    {
+      "name": "clear no longer re-reads the state",
+      "old": "    verdict = B20A.read_verdict(now, state_path=args.state, receipt_path=args.receipts)\n    if verdict[\"kill_switch_engaged\"]:",
+      "new": "    verdict = B20A.read_verdict(now, state_path=args.state, receipt_path=args.receipts)\n    if False:"
+    },
+    {
+      "name": "clear that still reads engaged reports success",
+      "old": "        print(f\"BUT IT READS AS ENGAGED: {verdict['reason_code']} \u2014 {verdict['detail']}\", file=out)\n        return EXIT_ENGAGED",
+      "new": "        print(f\"BUT IT READS AS ENGAGED: {verdict['reason_code']} \u2014 {verdict['detail']}\", file=out)\n        return EXIT_CLEAR"
+    },
+    {
+      "name": "fail-closed default no longer distinguished",
+      "old": "        if verdict[\"kill_switch_engaged\"] and verdict[\"reason_code\"] != B20A.E09_EXPLICITLY_ENGAGED:",
+      "new": "        if False:"
+    },
+    {
+      "name": "refusal swallowed instead of surfaced",
+      "old": "        print(f\"REFUSED: {refusal}\", file=out)\n        return EXIT_REFUSED",
+      "new": "        print(f\"REFUSED: {refusal}\", file=out)\n        return EXIT_CLEAR"
+    },
+    {
+      "name": "default subcommand is no longer status",
+      "old": "    args.command = args.command or \"status\"",
+      "new": "    args.command = args.command or \"engage\""
+    },
+    {
+      "name": "heartbeat loop ignores its bound",
+      "old": "        if args.max_beats is not None and count >= args.max_beats:\n            break",
+      "new": "        if False:\n            break"
+    },
+    {
+      "name": "engage exit code claims clear",
+      "old": "    print(f\"ENGAGED at generation {record['generation']}: {record['reason']}\", file=out)\n    return EXIT_ENGAGED",
+      "new": "    print(f\"ENGAGED at generation {record['generation']}: {record['reason']}\", file=out)\n    return EXIT_CLEAR"
+    },
+    {
+      "name": "json status stops using the owner snapshot",
+      "old": "        print(json.dumps(snapshot, indent=2, sort_keys=True), file=out)",
+      "new": "        print(json.dumps({\"kill_switch_engaged\": verdict[\"kill_switch_engaged\"]}, indent=2), file=out)"
+    },
+    {
+      "name": "expect-generation no longer required",
+      "old": "    clear.add_argument(\"--expect-generation\", required=True, type=int,",
+      "new": "    clear.add_argument(\"--expect-generation\", required=False, default=0, type=int,"
+    },
+    {
+      "name": "clock helper loses nanosecond scale",
+      "old": "    return int(clock() * 1_000_000_000)",
+      "new": "    return int(clock())"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None. This surface holds no policy, so every guard in it is about reporting the owner's answer faithfully -- and a surface that misreports is worse than none, because it is trusted."
+}
