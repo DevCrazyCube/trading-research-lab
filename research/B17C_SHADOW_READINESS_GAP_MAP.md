@@ -654,6 +654,22 @@ The same failure wearing other clothes:
 - **B18c publishing a quarantine code no rehearsal had caused** — read from a leftover state file
 - **a harness reporting `persisted_before_raise` as a boolean** — its own opinion of a fact
 
+**A skip is a check that cannot fire wearing different clothes, so assert where it must NOT fire.**
+A skipped test reports as a pass. A skip condition that quietly starts matching everywhere is
+therefore indistinguishable from a suite that runs — the same invisibility as a branch whose
+condition is always false, arriving through the test runner instead of through the code.
+
+The remedy is cheap and is the half most likely to be left out: beside the skip, assert that it does
+**not** fire in the environment the test exists for. `test_the_skip_above_does_not_fire_in_the_real_
+repository` is three lines and it is what keeps the other two honest.
+
+Found on 2026-08-07 in a case worth keeping for its shape. `LiveCollectionIsUnreachableTests`
+asserts that a staged tree cannot reach the live collection. It broke **because that property
+held**: staging is tracked-only, so the staged tree had no `.git`, so `tracked_files` found no
+repository, so the tests asserting unreachability could not run at all. In the claude seat's words,
+*the guard and its test were the same fact pointing opposite ways*. The right fix was a skip; the
+skip is only safe because something checks it stays narrow.
+
 **Unreachability proved of one branch is not unreachability of the code.** Found on 2026-08-07:
 `b18c` recorded quarantine code Q03 as unreachable because reaching it "needs a rewritten git
 history, which would prove nothing about the real one". True of the *not-an-ancestor* branch. The
