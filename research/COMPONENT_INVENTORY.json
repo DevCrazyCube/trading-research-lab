@@ -196,6 +196,31 @@
       "role": "B19 register guards, including a machine-check of B19d's central claim against the frozen B11b contract rather than trusting its prose"
     },
     {
+      "path": "scripts/mutation_sweep.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "reproducible mutation sweeps: declaration in research/mutation/<id>.sweep.json, result out; an unmatched pattern refuses rather than skipping, a green baseline is required first, every mutant is applied to a staged copy of the git-tracked tree and never to the working tree, and survivors must be declared in data with a justification",
+      "role": "closes G7 forward. Mutation numbers were cited in 131 of 270 commits and reproducible from none of them; this makes a sweep a committed artefact. Swept by itself: 18/18 killed, 0 survivors.",
+      "not_in_the_default_suite": "a full sweep costs minutes per target; the suite checks only that shipped declarations are well-formed and that every declared mutant still matches its target"
+    },
+    {
+      "path": "tests/test_mutation_sweep.py",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "unittest.TestCase, discoverable by both runners",
+      "role": "mutation-sweep framework guards, driven against a tiny synthetic git repository so every refusal is provoked rather than reasoned about"
+    },
+    {
+      "path": "research/mutation/b19.sweep.json",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "sweep declaration; 15 mutants, 0 expected survivors",
+      "role": "the B19 register's sweep, reproducible by `python scripts/mutation_sweep.py b19`"
+    },
+    {
+      "path": "research/mutation/mutation_sweep.sweep.json",
+      "status": "EXISTS_CONFORMING",
+      "conforms_to": "sweep declaration; 18 mutants, 0 expected survivors",
+      "role": "the sweep framework applied to itself, because a tool that establishes other guards are load-bearing must not have untested guards of its own"
+    },
+    {
       "path": "scripts/b18c_watcher_failure_rehearsal.py",
       "status": "EXISTS_CONFORMING",
       "conforms_to": "offline fault injection against a byte-identical COPY of the watcher; the live scripts/b11c_maturity_watcher.py is re-hashed before and after every sweep and a test asserts nothing under the live research/b11a changes",

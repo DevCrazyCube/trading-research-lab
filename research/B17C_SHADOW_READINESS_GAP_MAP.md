@@ -305,6 +305,113 @@ answer. So the missing piece is not a button — it is an **owner of the
 switch's state**, with a control surface separate from the read-only console. `test_the_kill_switch_
 really_has_no_writer` re-verifies this absence on every run rather than trusting this paragraph.
 
+### G7 — mutation evidence was unreproducible; CLOSED FORWARD ONLY by `scripts/mutation_sweep.py`
+**Found by the claude seat on 2026-08-07.** Mutation numbers are what this project cites when it
+wants to claim a test is worth something — and **131 of 270 commits cite them in their message**,
+while every sweep that produced them lived in a scratch directory and was deleted at session end. A
+reader could re-run the suite and could not re-run the thing establishing the suite means anything.
+That is the same species as the failure this whole document exists for: a claim that cannot be
+checked from the artefact.
+
+`scripts/mutation_sweep.py` makes a sweep a declared, committed, re-runnable artefact
+(`research/mutation/<id>.sweep.json` in, `<id>.result.json` out). Four properties, each because the
+obvious implementation fails in a way that looks like success:
+
+- **an unmatched pattern is a refusal, never a skip.** A sweep declaring 20 mutants and applying 16
+  reports 16/16; one whose patterns rot after a refactor applies nothing and reports 0/0, a clean
+  sweep with no content. Both are the artefact-cannot-describe-itself rule one level up.
+- **a green baseline is required first.** Against an already-failing suite every mutant "dies" and
+  the score is perfect and empty — check-that-cannot-fire at sweep level.
+- **nothing is mutated in the working tree.** Every mutant is applied to a staged copy of the
+  git-tracked tree, so the live watcher and the manifest-pinned files cannot be reached rather than
+  being carefully avoided; restore-in-finally does not survive SIGKILL. The working tree is
+  re-hashed and asserted byte-identical on exit.
+- **survivors are declared in data with a justification**, and the sweep refuses both an undeclared
+  survivor *and* a declared one that starts being killed — the second because the coverage that
+  justified it moved and that should arrive as a failure, not a surprise.
+
+Sweeps are **not** in the default suite: b18c's costs roughly nine minutes against its own
+22-second suite, and a suite people stop running is worse than the gap. What the default suite does
+check, cheaply, is that every shipped declaration is well-formed and **every declared mutant still
+matches its target** — the realistic decay that would otherwise turn a real sweep into a silent
+no-op.
+
+The framework is swept by itself: **18/18 killed, 0 survivors**. The two guards no correct run can
+trigger — the staging-escape check and the working-tree-changed check — were extracted into
+`assert_within` and `assert_tree_unchanged` so tests could call them with crafted input. Left
+inline they would have been checks that cannot fire, and would have survived this sweep while
+reading as protection.
+
+**STILL OPEN, AND STATED HERE RATHER THAN LEFT TO INFERENCE: the 131 historical mutation figures in
+this repository's commit history are REPORTED AND NOT REPRODUCED.** They were not retrofitted —
+that is not feasible, and a `research/mutation/` directory appearing now would make every past
+number look reproducible by association when none of them is. Only sweeps declared under
+`research/mutation/` are re-runnable; at this commit those are `b18a` (28/28),
+`b18b_rehearsal_stage` (3/3), `b18c` (24/26, both survivors declared), `b19` (15/15) and
+`mutation_sweep` (26/26). Every other mutation number in this repository, in any commit message or
+document, is a report from a deleted scratchpad.
+
+**What cannot yet be swept, measured rather than assumed.** Staging copies the git-tracked tree
+only — 425 files, 32 MB, 0.2 s — because the ignored artifacts under `research/` run to 38 GB and
+none is input to a guard. Running the full suite inside such a tree gives **124 failures across 14
+test files**, all of which read untracked artifacts: `test_b11c_maturity_watcher` (42), `b15q` (20),
+`b9d` (13), `b15d` (13), `b15o` (12), `b15p` (8), `b9g` (5), `b15l` (3), `b11e` (3), and five more
+with one each. Those 14 cannot currently be swept.
+
+The limitation is **loud, not silent**: the baseline check refuses such a sweep with "the unmutated
+suite does not pass in the staged tree" rather than producing a number. All 267 tests across the
+five sweep-relevant files pass in a staged tree, so every declared sweep genuinely runs. Closing it
+would mean making untracked artifacts reachable — a read-only symlink of `research/`. Deferred, not
+rejected: it is needed only for those 14, and it trades a structurally unreachable working tree for
+one that is reachable and merely not written to. The list above makes it a bounded job later.
+
+**A defect this framework shipped with, found by colliding with a colleague rather than by
+reasoning.** `main()` writes `research/mutation/<id>.result.json` into the working tree while the
+tree check hashed every tracked file, so two concurrent sweeps always destroyed each other — and so
+did any dashboard handoff during any sweep, because `handoff` appends to `agent_discussion.md`.
+Both surfaced as "something escaped the staging root" after nine minutes of work: the most alarming
+possible message for the most benign cause, and a guard that cries escape when a colleague sends a
+message is one somebody eventually disables. Fixed three ways:
+
+- the refusal **names the changed paths** instead of saying "something did". The claude seat hit the
+  old message for real and had to hash every tracked file by hand to find the cause was two files
+  edited underneath them. `assert_tree_unchanged` took digests and structurally could not name
+  anything, so it now takes per-path manifests.
+- a **sweep lock** refuses a second concurrent sweep immediately and accurately rather than nine
+  minutes later and wrongly. A stale lock refuses rather than being stolen, and says how to clear it.
+- **exactly one path is excluded** from the tree check — `agent_discussion.md` — because the
+  collaboration protocol's job is to run concurrently with work. It is a named constant carrying its
+  reason, and a test asserts a change to **anything else still refuses**, which is the half that
+  keeps an exception from becoming a hole.
+
+**A constraint that follows, and is inherent rather than incidental: no working-tree edits by anyone
+while a sweep runs.** A sweep's central claim is that the working tree did not move, and it cannot
+distinguish a colleague's edit from its own escape.
+
+**A field that could not answer the question it was built for, renamed rather than trusted.** Each
+result records the test that failed under each mutant. It was called `killed_by` and was proposed to
+answer the standing lesson *a test killed by a different guard than the one it names is not testing
+that guard*. **It cannot**, and both seats verified why rather than arguing it: the sweep runs
+pytest with `-x`, so the run stops at the FIRST failure, and run order is class position then method
+order. When several guards each kill a mutant, the record names whichever happens to run first.
+
+The case that settled it: b18a's mutant *"the tip defaults to zero instead of null"* is recorded
+against `test_a_non_nullable_field_may_not_be_null`, and applying the mutant shows that
+`test_no_unmeasured_field_was_defaulted_to_zero_or_false` kills it just as independently. An audit
+built on the old reading produced **21 suspects that were nearly all artifacts of the ordering** —
+the field generating false alarms in precisely the use it was argued for.
+
+It is now `first_failing_test`, named for what it measures, with the limitation asserted by a test
+rather than only described: three tests kill one mutant and only the first is recorded. Answering
+the section-7 question needs the full failure set, which `-x` discards by design; collecting it
+means running every mutant against its whole test file (26 × 73 on b18c), which is worth an opt-in
+flag and not a default.
+
+**What the field is still good for**, and it earned its keep once already: a recorded test obviously
+unrelated to its mutant is worth a look. That is how b18b's mutant *"a 403 becomes retryable"* was
+found to be **misnamed rather than miskilled** — its recorded test was correct and the mutant's name
+was wrong.
+
 ## 4. Revised slice plan
 
 The original plan proposed building a recorder and an operator surface that already exist. Corrected,

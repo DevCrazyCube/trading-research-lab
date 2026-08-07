@@ -2415,3 +2415,37 @@ The two do not imply each other. A user-ratified decision can remain provisional
   B11a composition or outcome read, no network call, and no wallet, signer or control service
   implemented. B19d may be evaluated only on a window nobody has read; burned-corpus runs are
   development-only and may never be reported as evaluation.
+
+## 2026-08-07 — Mutation evidence becomes reproducible, forward only (G7)
+
+- **Status:** accepted; framework in place, two sweeps declared.
+- **Ratified by:** the owner, after the claude seat found the gap and the codex seat sized it and
+  proposed the constraints. Neither agent started it; it touches both lanes.
+- **The gap:** mutation numbers are what this project cites to claim a test is load-bearing, and
+  **131 of 270 commits cite them**, while every sweep producing them lived in a scratch directory
+  deleted at session end. A reader could re-run the suite and could not re-run the thing that
+  establishes the suite means anything. Same species as the failure the B17c gap map exists for.
+- **Decision:** `scripts/mutation_sweep.py` makes a sweep a declared, committed, re-runnable
+  artefact — `research/mutation/<id>.sweep.json` in, `<id>.result.json` out — with four properties
+  chosen because the obvious implementation fails in ways that look like success: an unmatched
+  pattern refuses rather than skipping; a green baseline is required before any mutant counts;
+  every mutant is applied to a **staged copy of the git-tracked tree** and never to the working
+  tree, which is re-hashed and asserted byte-identical on exit; and survivors must be declared in
+  data with a justification, with the sweep refusing both an undeclared survivor and a declared one
+  that starts being killed.
+- **Why the staged copy is non-negotiable here:** a live watcher has run for days holding its code
+  in memory and four files are manifest-pinned. Restore-in-finally does not survive SIGKILL. This
+  is the same upgrade B18c made — structure instead of care.
+- **Not in the default suite:** a sweep costs minutes per target and a suite people stop running is
+  worse than the gap. The suite checks only that declarations are well-formed and that every
+  declared mutant still matches its target, which is the decay that would silently empty a sweep.
+- **Self-applied:** 18/18 killed, 0 survivors. Two guards no correct run can trigger were extracted
+  into `assert_within` and `assert_tree_unchanged` so tests could reach them; inline they would
+  have been checks that cannot fire and would have survived while reading as protection.
+- **FORWARD ONLY, and recorded rather than implied:** the 131 historical mutation figures are
+  **reported and not reproduced**. They are not retrofitted — infeasible, and a `research/mutation/`
+  directory appearing now would make every past number look reproducible by association. Only
+  declared sweeps are re-runnable; at this commit those are `b19` (15/15) and `mutation_sweep`
+  (18/18).
+- **NOT done:** no existing sweep result was re-derived or corrected, no test was changed to make a
+  mutant die, and the b18a/b18b/b18c sweeps remain unported — they are the claude seat's lane.
