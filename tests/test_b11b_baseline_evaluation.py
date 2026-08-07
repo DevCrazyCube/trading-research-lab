@@ -755,5 +755,76 @@ class RealCorpusTests(unittest.TestCase):
             database.close()
 
 
+class FloatSafeMagnitudeTests(unittest.TestCase):
+    """Guard a conclusion that currently rests on a regime, not on the code.
+
+    `b14c_model_engine` computes decision-tree split thresholds as `(low + high) / 2` in FLOAT.
+    That was checked on 2026-08-07 and is not a defect **today**: the dangerous failure — a midpoint
+    rounding up to `high`, emptying one side of a split that the sample counts said was non-empty —
+    never occurs, and the only divergence is the midpoint landing exactly on `low`, which still
+    separates the two training points and differs only for unseen values strictly between them.
+
+    That divergence needs a feature value above **2**52 = 4,503,599,627,370,496**, where float64's
+    53-bit mantissa stops representing consecutive integers.
+
+    THE MARGIN IS 4.5x AND IT IS NOT GUARANTEED BY ANYTHING IN THIS REPOSITORY. Six of the
+    seventeen frozen FEATURE_FIELDS are token-unit denominated, and they sit at ~1e15 = 2**49.8
+    ONLY because Pump's standard supply is 1e9 at 6 decimals. A token with ten times the standard
+    supply crosses the line. Nothing in the contract, the builder or the model bounds it.
+
+    So this exists rather than a note. An answered-no is a stopping claim and nobody re-tests a
+    stopping claim; a test fails. Raised by the claude seat, who was right that the close needed a
+    guard rather than a memory.
+    """
+
+    FLOAT_EXACT_INTEGER_LIMIT = 2 ** 52
+
+    def features_for(self, supply):
+        """The FEATURE BLOCK, not the whole record. The first version of this returned the record,
+        whose top-level values are dicts and strings, so the magnitude check below skipped every
+        one and passed while asserting nothing — a check that cannot fire, inside the guard written
+        against that very failure. The non-vacuity assertion is there so it cannot recur."""
+        create = dict(create_record(), token_total_supply=supply)
+        observations = [observation(0, "CreateEvent")]
+        record = B11B.build_t0_features(create, observations, (1_000, 7, 0, -1))
+        return record["features"]
+
+    def test_every_standard_regime_feature_stays_below_the_float_exact_limit(self):
+        features = self.features_for(SUPPLY)
+        checked = []
+        for name, value in sorted(features.items()):
+            if isinstance(value, bool) or not isinstance(value, int):
+                continue
+            checked.append(name)
+            with self.subTest(field=name):
+                self.assertLess(abs(value), self.FLOAT_EXACT_INTEGER_LIMIT,
+                                f"{name} = {value:,} has crossed 2**52; b14c's float split "
+                                "thresholds are no longer safe by magnitude and that close "
+                                "must be re-opened")
+        self.assertGreaterEqual(len(checked), 6,
+                                "this must actually inspect the integer features, not skip them")
+
+    def test_the_margin_is_a_regime_property_and_a_larger_supply_crosses_the_line(self):
+        """Pins WHERE the line is, so the guard above is not merely 'stay small'.
+
+        If this ever stops crossing, either the arithmetic changed or the boundary moved, and
+        either way the conclusion above needs re-deriving rather than inheriting.
+        """
+        standard = self.features_for(SUPPLY)["token_total_supply_units"]
+        self.assertLess(standard, self.FLOAT_EXACT_INTEGER_LIMIT)
+        self.assertGreater(standard * 10, self.FLOAT_EXACT_INTEGER_LIMIT,
+                           "a ten-times-standard supply must cross 2**52, or the margin is "
+                           "wider than the finding assumed and the docstring is stale")
+
+    def test_the_token_denominated_fields_are_the_ones_at_risk(self):
+        """Named explicitly, because the count was reported as four and is six."""
+        token_fields = [f for f in B11B.FEATURE_FIELDS if "token" in f and "units" in f]
+        self.assertEqual(len(token_fields), 6)
+        features = self.features_for(SUPPLY)
+        for name in token_fields:
+            with self.subTest(field=name):
+                self.assertIn(name, features)
+
+
 if __name__ == "__main__":
     unittest.main()
