@@ -515,11 +515,19 @@ obvious ones — having a sweep take the dashboard lock, or having an edit path 
 two systems that are deliberately independent, and that is a scope decision rather than an
 implementation detail.
 
-**Git ancestry can now be staged, and 45 of the 124 failures were never a data problem.**
-`test_b11c_maturity_watcher.py` (42) and `test_b11e_pipeline_dryrun.py` (3) fail in a staged tree
-with `Q03_git_ancestry_broken` — *"the preregistration has no commit. A parameter with no history is
-a parameter nobody can show was frozen first"* — because staging copies tracked files and not
-`.git`. The guard is working; it simply cannot see a history that is not there.
+**Git ancestry can now be staged, and 47 of the 124 failures were never a data problem.**
+`test_b11c_maturity_watcher.py` (42), `test_b11e_pipeline_dryrun.py` (3),
+`test_b13f_feature_vector.py` (1) and `test_b13e_collection_contract.py` (1) all fail in a staged
+tree for one reason: the tree has no history, so nothing can be shown to have been committed first.
+b11c says it as `Q03_git_ancestry_broken` — *"the preregistration has no commit. A parameter with no
+history is a parameter nobody can show was frozen first"* — while b13e and b13f say *"the
+preregistration must already be committed"*. The guard is working; it simply cannot see a history
+that is not there.
+
+**The count was first recorded as 45 with "three unexplained singletons" beside it, and the two extra
+were the same cause.** Chasing them took one command and turned an unexplained remainder into a
+closed account. An unexplained residue in a gap map is a small debt that compounds: it invites the
+next reader to assume somebody already looked.
 
 `stage_tree(..., include_git=True)`, requested per declaration via `needs_git_ancestry`, copies the
 12 MB `.git`. Those two files then go from 45 failures to **177 passed in 22 s**. It is **copied and
@@ -535,6 +543,22 @@ false of the other: no `.git` at all means no commit, which quarantines immediat
 framework's staging reaches that branch by accident on every run. **Unreachability was inferred from
 one branch and stated about the whole code.** Both branches and the accepted case are now rehearsed
 and coverage is 11/13, leaving Q01 and Q13.
+
+**The full 124 now account for themselves, with nothing left over:**
+
+| cause | failures | status |
+|---|---|---|
+| no git history in a staged tree | **47** | fixed by `needs_git_ancestry` |
+| untracked research artifacts | **76** | deferred, and the exposure is argued against below |
+| checkout-specific by design | **1** | correct as it stands; see below |
+| | **124** | |
+
+The single checkout-specific failure is
+`test_interactive_dashboard.py::test_codex_launch_command_is_the_owner_selected_command`, which pins
+the launch command **including its absolute working directory**. It cannot pass in any staged tree
+and **should not be made to**: the command is an owner-selected, security-relevant constant, and a
+test that stopped checking the literal path would stop checking the thing it exists for. It is
+recorded as permanently unsweepable-by-design rather than as a gap.
 
 **The nine remaining unsweepable files need untracked artifacts** — `research/b15o/replication.json`,
 `research/b9c_signature_inventory.sqlite`, `research/b10b_observed_paths.sqlite`,
