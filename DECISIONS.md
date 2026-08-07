@@ -2491,3 +2491,47 @@ The two do not imply each other. A user-ratified decision can remain provisional
   no operator surface invokes engage or clear, no limit is ratified, and no wallet, signer,
   transaction, signing, submission or spend exists anywhere. Phase 5b, Phase 6 and explicit owner
   authorization remain gates.
+
+## 2026-08-07 — B11c cost and schedule measured in flight; the handoff-162 estimate is superseded
+
+- **Status:** correction of record. No code changed, nothing was restarted, and the watcher was not
+  touched — every figure below is passive observation of a run in progress.
+- **Supersedes:** the cost paragraph of the 2026-08-05 GO decision (handoff 162). That decision
+  itself corrected an earlier 18–20 hour figure as "too optimistic"; it was still optimistic, and
+  for a reason neither estimate modelled.
+- **Measured 2026-08-07 at 95.1% through `enumerate_creates` (193,600 / 203,601 slots), 65.7 hours
+  into a run with no quarantine and zero retries:**
+
+  | quantity | handoff 162 | measured |
+  |---|---|---|
+  | transfer per block | 6.53 MB | **11.5 MB average**; 17.0 MB in a directly sampled window |
+  | `getBlock` latency | 1,527 ms | **4,800 ms** sustained |
+  | rate | 9,430 slots/h implied | **~3,000 slots/h** |
+  | `enumerate_creates` | ~21.6 h | **~69 h** (3.2x) |
+  | whole nine-stage run | ~36.5 h | **not yet estimable; see below** |
+  | transfer, this stage | — | **~2.3 TB** |
+
+- **The reason, and it is not throttling.** Sustained throughput is 9.4 MB/s (76 Mbit/s) over
+  `wlan0`; the machine has no wired interface. At 9.4 MB/s with ~17 MB blocks the ceiling is
+  0.55 blocks/s, and the observed rate is 0.56 blocks/s. **The run is link-bound.** Zero retries,
+  zero backoffs and zero 429s appear in 65.7 hours of stage log, so the provider is not limiting
+  anything — the connection is simply full.
+- **Why both estimates missed it:** each multiplied a probed per-call latency by the slot count and
+  divided by worker count, which silently assumes bandwidth is free. Once a run is link-bound the
+  worker count stops being a lever, which is why four workers buy nothing here. The probe also
+  sampled unusually small blocks: Solana block size varies with network activity and the window's
+  real average is ~1.8x what was probed.
+- **Consequence for the remaining seven stages.** `transaction_bodies` (estimated 14.9 h at b9d's
+  fixed 2.5 calls/second) is the other heavyweight and will meet the same ceiling. **No replacement
+  whole-run figure is offered here**, because extrapolating one stage's overrun across seven
+  differently-shaped stages would repeat the error being corrected. What is now known: the run is
+  days rather than hours, and it is bounded by the link and not by the endpoint.
+- **Disk is NOT the risk, and the earlier reasoning on that holds.** 98 MB is on disk after ~2.2 TB
+  transferred — about 0.5 KB kept per slot, roughly 23,000x discarded. The stage projects to ~102 MB
+  against 128 GB free. The transfer figure matters only for a metered or capped connection, which is
+  a household constraint rather than a research one and is recorded here so it is not rediscovered.
+- **Deliberately NOT done:** the network was not changed, no worker count was altered, no stage was
+  restarted and nothing manifest-pinned was edited. The stage is ~3 hours from completion, the run
+  has survived 65 hours without a quarantine, and this project has already lost two runs to
+  transient network faults. Chasing an hour by moving a live run onto a different link is a bad
+  trade, and the correct time to act on this is before the next heavy stage begins, not during one.
