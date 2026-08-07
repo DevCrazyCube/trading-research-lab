@@ -1,0 +1,132 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 22,
+  "mutants_declared": 22,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::ArithmeticTests::test_fees_use_ceiling_but_buyback_uses_floor",
+      "name": "protocol fee rounds down instead of up",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::GuardsFoundUntestedByMutationTests::test_every_fee_component_rounds_UP_not_just_the_protocol_fee",
+      "name": "creator fee rounds down instead of up",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::GuardsFoundUntestedByMutationTests::test_every_fee_component_rounds_UP_not_just_the_protocol_fee",
+      "name": "cashback rounds down instead of up",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::ArithmeticTests::test_the_buyback_fee_is_reported_but_never_charged",
+      "name": "buyback is CHARGED as well as reported",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::ArithmeticTests::test_the_buyback_fee_is_reported_but_never_charged",
+      "name": "creator fee dropped from the charged total",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::ArithmeticTests::test_fees_use_ceiling_but_buyback_uses_floor",
+      "name": "buyback rounds up instead of down",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::EligibilityTests::test_an_exit_drawing_more_than_the_curve_holds_is_refused",
+      "name": "an exit may draw more than the curve holds",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::EligibilityTests::test_an_order_larger_than_the_curve_can_supply_is_refused",
+      "name": "an entry may take more tokens than the curve holds",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::GuardsFoundUntestedByMutationTests::test_an_exit_drawing_EXACTLY_the_reserve_is_allowed_and_one_more_is_not",
+      "name": "the reserve check made inclusive",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::EligibilityTests::test_entry_into_a_completed_curve_is_refused",
+      "name": "a completed curve may be priced on entry",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::EligibilityTests::test_a_non_sol_quote_is_refused",
+      "name": "a non-native quote mint is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::EligibilityTests::test_mayhem_mode_is_refused",
+      "name": "mayhem mode is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::GuardsFoundUntestedByMutationTests::test_non_positive_virtual_reserves_are_refused_BY_THE_ELIGIBILITY_GUARD",
+      "name": "non-positive virtual reserves accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::EligibilityTests::test_a_sell_order_is_not_an_entry",
+      "name": "a sell is accepted as an entry",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::GuardsFoundUntestedByMutationTests::test_an_entry_spending_nothing_is_refused",
+      "name": "a zero-quote entry is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::EligibilityTests::test_an_order_too_small_to_buy_a_token_is_refused_not_rounded_to_zero",
+      "name": "an entry acquiring zero tokens is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::LeakageBoundaryTests::test_an_exit_at_or_before_the_decision_instant_is_refused",
+      "name": "an exit may precede its entry",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::LeakageBoundaryTests::test_an_exit_at_or_before_the_decision_instant_is_refused",
+      "name": "the causality check made exclusive of equality",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::NoInventedDefaultsTests::test_every_required_cost_must_be_stated",
+      "name": "a missing cost policy field is defaulted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::NoInventedDefaultsTests::test_a_fee_rate_outside_the_basis_point_range_is_refused",
+      "name": "a fee rate above 100 percent is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::GuardsFoundUntestedByMutationTests::test_non_positive_virtual_reserves_are_refused_BY_THE_ELIGIBILITY_GUARD",
+      "name": "a negative or float quantity is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b10a_simulator_kernel.py::GuardsFoundUntestedByMutationTests::test_failed_attempts_are_charged_and_are_not_free",
+      "name": "failed attempts cost nothing",
+      "outcome": "killed"
+    }
+  ],
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b10a",
+  "target": "scripts/b10a_simulator_kernel.py",
+  "tests": [
+    "tests/test_b10a_simulator_kernel.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "1c6f4a3f0e7a80ce01623ba6df332181a039898a4a94ae0b2bafcfe4517daff5",
+  "working_tree_unchanged": true
+}

@@ -258,5 +258,126 @@ class SchemaTests(unittest.TestCase):
         self.assertIn(self.result()["status"], B10A.STATUSES)
 
 
+class GuardsFoundUntestedByMutationTests(unittest.TestCase):
+    """Seven guards a mutation sweep could neuter without any existing test noticing.
+
+    This kernel is the arithmetic every cost figure in the project rests on: B15L, B15M, B16D and
+    the B19 preregistrations all call `price_entry`, `price_exit` and `curve_fees` directly rather
+    than reimplementing them. A silent change to rounding or solvency here moves every priced cell
+    in the same direction at once, which is the kind of error a spot-check never finds.
+
+    The pattern in what survived is worth naming: the PROTOCOL fee's rounding was tested and the
+    creator fee's and cashback's were not. Coverage followed the field somebody happened to care
+    about rather than the rule they all share.
+    """
+
+    def test_every_fee_component_rounds_UP_not_just_the_protocol_fee(self):
+        """`ceil_div` on each component, checked where ceil and floor actually differ.
+
+        1 lamport at 30 bps is 0.003 lamports of fee: ceil gives 1, floor gives 0. Rounding a fee
+        down is the direction that flatters every result, because it understates cost on every
+        trade at once.
+        """
+        schedule = {"fee_bps": 95, "creator_fee_bps": 30, "cashback_fee_bps": 17,
+                    "buyback_fee_bps": 5000}
+        fees = B10A.curve_fees(1, schedule)
+        self.assertEqual(fees["fee"], 1, "protocol fee must round up")
+        self.assertEqual(fees["creator_fee"], 1, "creator fee must round up")
+        self.assertEqual(fees["cashback"], 1, "cashback must round up")
+        self.assertEqual(fees["charged_total"], 3)
+
+    def test_the_buyback_rounds_DOWN_because_it_is_a_split_not_a_charge(self):
+        """The opposite direction from the others, deliberately: it is reported, not charged."""
+        schedule = {"fee_bps": 10000, "creator_fee_bps": 0, "cashback_fee_bps": 0,
+                    "buyback_fee_bps": 1}
+        fees = B10A.curve_fees(1, schedule)
+        self.assertEqual(fees["buyback_fee_reported_not_charged"], 0,
+                         "a 1-bps split of a 1-lamport fee rounds DOWN to nothing")
+        # And the identity that matters: the charged total is the three CHARGED components and
+        # never includes the buyback, whatever the buyback happens to be.
+        big = {"fee_bps": 9000, "creator_fee_bps": 30, "cashback_fee_bps": 10,
+               "buyback_fee_bps": 5000}
+        charged = B10A.curve_fees(1_000_000, big)
+        self.assertGreater(charged["buyback_fee_reported_not_charged"], 0,
+                           "the fixture must produce a non-zero buyback or this proves nothing")
+        self.assertEqual(charged["charged_total"],
+                         charged["fee"] + charged["creator_fee"] + charged["cashback"])
+
+    def test_an_exit_drawing_EXACTLY_the_reserve_is_allowed_and_one_more_is_not(self):
+        """Pins the boundary, not just the direction. `>` and `>=` differ by one lamport, and an
+        off-by-one here silently refuses or permits a whole class of exits."""
+        entry = state()
+        tokens = B10A.price_entry(entry, ORDER, SCHEDULE, POLICY)["tokens_out"]
+        exact = B10A.B9I.quote_out_for_tokens_in(
+            entry["virtual_quote"], entry["virtual_token"], tokens)
+
+        allowed = B10A.price_exit(state(slot=800, real_quote=exact), tokens, SCHEDULE, POLICY)
+        self.assertEqual(allowed["status"], B10A.STATUS_PRICED,
+                         "an exit the reserves can exactly pay must be priced")
+
+        with self.assertRaises(B10A.SimulationRefused):
+            B10A.price_exit(state(slot=800, real_quote=exact - 1), tokens, SCHEDULE, POLICY)
+
+    def test_non_positive_virtual_reserves_are_refused_BY_THE_ELIGIBILITY_GUARD(self):
+        """Asserts the MESSAGE, because zero and minus one are refused by different guards.
+
+        A mutation sweep showed that asserting merely "it raises" leaves the eligibility check
+        mutable: minus one is caught earlier by the non-negative-integer check, and with the
+        eligibility guard removed zero falls through to the curve arithmetic and fails there
+        anyway. Two guards, one assertion, and the wrong one was being credited.
+
+        A zero virtual reserve is not a small curve, it is an undefined one, and it must be named
+        as such rather than surfacing as whatever the arithmetic happens to do with it.
+        """
+        for field in ("virtual_quote", "virtual_token"):
+            with self.subTest(field=field, value=0):
+                with self.assertRaises(B10A.SimulationRefused) as caught:
+                    B10A.price_entry(state(**{field: 0}), ORDER, SCHEDULE, POLICY)
+                self.assertIn("virtual reserves are non-positive", str(caught.exception))
+                self.assertIn("curve is undefined", str(caught.exception))
+
+            with self.subTest(field=field, value=-1):
+                with self.assertRaises(B10A.SimulationRefused) as caught:
+                    B10A.price_entry(state(**{field: -1}), ORDER, SCHEDULE, POLICY)
+                self.assertIn("non-negative integer", str(caught.exception),
+                              "a negative reserve is a type failure, caught before eligibility")
+
+    def test_an_entry_spending_nothing_is_refused(self):
+        for amount in (0, -1):
+            with self.subTest(quote_lamports=amount):
+                with self.assertRaises(B10A.SimulationRefused):
+                    B10A.price_entry(state(), {"side": B10A.BUY, "quote_lamports": amount},
+                                     SCHEDULE, POLICY)
+
+    def test_quantities_must_be_non_negative_integers_not_floats_or_booleans(self):
+        """`_positive_int` is the module's no-float rule and nothing exercised it.
+
+        A float lamport amount is the failure this project bans everywhere else; accepting one
+        here would put it at the bottom of every cost figure.
+        """
+        for value in (1.0, -1, True, "100", None):
+            with self.subTest(value=value):
+                with self.assertRaises(B10A.SimulationRefused):
+                    B10A._positive_int("probe", value)
+
+    def test_failed_attempts_are_charged_and_are_not_free(self):
+        """The term B21a's external reading found named as what killed a real memecoin bot:
+        "the transaction fees from retrying transactions killed it". It was untested here.
+
+        A failed attempt pays base + priority and lands nothing, so its cost must appear in the
+        execution total. Zeroing that term understates cost on exactly the trades that went worst.
+        """
+        base = dict(POLICY, failed_attempts=0)
+        retried = dict(POLICY, failed_attempts=2)
+
+        clean = B10A.price_entry(state(), ORDER, SCHEDULE, base)
+        costly = B10A.price_entry(state(), ORDER, SCHEDULE, retried)
+
+        expected_extra = 2 * (POLICY["base_fee_lamports"] + POLICY["priority_fee_lamports"])
+        self.assertEqual(costly["lamports_out_of_wallet"]
+                         - clean["lamports_out_of_wallet"], expected_extra)
+        self.assertGreater(expected_extra, 0, "the fixture must actually charge something")
+
+
 if __name__ == "__main__":
     unittest.main()

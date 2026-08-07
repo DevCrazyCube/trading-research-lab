@@ -1,0 +1,122 @@
+{
+  "sweep_id": "b10a",
+  "description": "Mutation sweep over the simulator kernel -- the pricing arithmetic every cost figure in this project rests on. B15L, B15M, B16D and the B19 preregistrations all call price_entry, price_exit and curve_fees directly rather than reimplementing them, so a guard here that no test can distinguish from its absence would make every downstream cost figure unverified.",
+  "target": "scripts/b10a_simulator_kernel.py",
+  "tests": [
+    "tests/test_b10a_simulator_kernel.py"
+  ],
+  "mutants": [
+    {
+      "name": "protocol fee rounds down instead of up",
+      "old": "    fee = B9I.ceil_div(quote_lamports * schedule[\"fee_bps\"], 10000)",
+      "new": "    fee = (quote_lamports * schedule[\"fee_bps\"]) // 10000"
+    },
+    {
+      "name": "creator fee rounds down instead of up",
+      "old": "    creator_fee = B9I.ceil_div(quote_lamports * schedule[\"creator_fee_bps\"], 10000)",
+      "new": "    creator_fee = (quote_lamports * schedule[\"creator_fee_bps\"]) // 10000"
+    },
+    {
+      "name": "cashback rounds down instead of up",
+      "old": "    cashback = B9I.ceil_div(quote_lamports * schedule[\"cashback_fee_bps\"], 10000)",
+      "new": "    cashback = (quote_lamports * schedule[\"cashback_fee_bps\"]) // 10000"
+    },
+    {
+      "name": "buyback is CHARGED as well as reported",
+      "old": "            \"charged_total\": fee + creator_fee + cashback}",
+      "new": "            \"charged_total\": fee + creator_fee + cashback + buyback}"
+    },
+    {
+      "name": "creator fee dropped from the charged total",
+      "old": "            \"charged_total\": fee + creator_fee + cashback}",
+      "new": "            \"charged_total\": fee + cashback}"
+    },
+    {
+      "name": "buyback rounds up instead of down",
+      "old": "    buyback = (fee * schedule[\"buyback_fee_bps\"]) // 10000",
+      "new": "    buyback = B9I.ceil_div(fee * schedule[\"buyback_fee_bps\"], 10000)"
+    },
+    {
+      "name": "an exit may draw more than the curve holds",
+      "old": "    if quote_out > state[\"real_quote\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an entry may take more tokens than the curve holds",
+      "old": "    if tokens_out > state[\"real_token\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the reserve check made inclusive",
+      "old": "    if quote_out > state[\"real_quote\"]:",
+      "new": "    if quote_out > state[\"real_quote\"] + 1:"
+    },
+    {
+      "name": "a completed curve may be priced on entry",
+      "old": "    if state[\"complete\"]:\n        raise SimulationRefused(",
+      "new": "    if False:\n        raise SimulationRefused("
+    },
+    {
+      "name": "a non-native quote mint is accepted",
+      "old": "    if state[\"quote_mint\"] != B9D.NATIVE_QUOTE_MINT:",
+      "new": "    if False:"
+    },
+    {
+      "name": "mayhem mode is accepted",
+      "old": "    if state[\"mayhem_mode\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "non-positive virtual reserves accepted",
+      "old": "    if state[\"virtual_quote\"] <= 0 or state[\"virtual_token\"] <= 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a sell is accepted as an entry",
+      "old": "    if order.get(\"side\") != BUY:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a zero-quote entry is accepted",
+      "old": "    if quote_in <= 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an entry acquiring zero tokens is accepted",
+      "old": "    if tokens_out <= 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an exit may precede its entry",
+      "old": "    if exit_state[\"slot\"] <= entry_state[\"slot\"]:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the causality check made exclusive of equality",
+      "old": "    if exit_state[\"slot\"] <= entry_state[\"slot\"]:",
+      "new": "    if exit_state[\"slot\"] < entry_state[\"slot\"]:"
+    },
+    {
+      "name": "a missing cost policy field is defaulted",
+      "old": "    if missing:\n        raise SimulationRefused(\n",
+      "new": "    if False:\n        raise SimulationRefused(\n"
+    },
+    {
+      "name": "a fee rate above 100 percent is accepted",
+      "old": "        if value > 10000:",
+      "new": "        if False:"
+    },
+    {
+      "name": "a negative or float quantity is accepted",
+      "old": "    if isinstance(value, bool) or not isinstance(value, int) or value < 0:",
+      "new": "    if False:"
+    },
+    {
+      "name": "failed attempts cost nothing",
+      "old": "                 + policy[\"failed_attempts\"]\n                 * (policy[\"base_fee_lamports\"] + policy[\"priority_fee_lamports\"]))",
+      "new": "                 + 0 * (policy[\"base_fee_lamports\"] + policy[\"priority_fee_lamports\"]))"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None expected. Rounding direction, the buyback-is-reported-not-charged rule and the reserve solvency checks are the three places where a silent change would move every priced cell in the same direction."
+}
