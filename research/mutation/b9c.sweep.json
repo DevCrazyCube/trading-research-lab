@@ -1,0 +1,106 @@
+{
+  "sweep_id": "b9c",
+  "description": "Mutation sweep over the burned/fresh split in the signature inventory. Written because this module's untested guard is the one that actually stopped something: three days of B11a collection completed, produced a clean 33,866-member cohort, and stage 4 refused it in one second against EXPECTED_MEMBERS = 1601, a constant describing the B9 study. No test in the suite mentioned that constant. Every mutant here is a way the replacement could be wrong in the same silent style -- a mode that never selects fresh, a pin that still applies, a survivor of the old one-message-two-conditions ambiguity, or a fresh path that quietly falls back to the burned horizon.",
+  "target": "scripts/b9c_signature_inventory.py",
+  "tests": [
+    "tests/test_b9c_signature_inventory.py"
+  ],
+  "expected_survivors": [],
+  "mutants": [
+    {
+      "name": "every source is treated as burned, so fresh mode is unreachable",
+      "old": "    return SOURCE_MODE_BURNED if str(source_path) == BURNED_SOURCE else SOURCE_MODE_FRESH",
+      "new": "    return SOURCE_MODE_BURNED"
+    },
+    {
+      "name": "every source is treated as fresh, so the burned pin is unreachable",
+      "old": "    return SOURCE_MODE_BURNED if str(source_path) == BURNED_SOURCE else SOURCE_MODE_FRESH",
+      "new": "    return SOURCE_MODE_FRESH"
+    },
+    {
+      "name": "the pinned count is applied to a fresh cohort too -- the original B11a failure",
+      "old": "    if mode == SOURCE_MODE_BURNED:\n        if len(members) != EXPECTED_MEMBERS:",
+      "new": "    if True:\n        if len(members) != EXPECTED_MEMBERS:"
+    },
+    {
+      "name": "the burned pin stops refusing, so the freeze no longer holds",
+      "old": "        if len(members) != EXPECTED_MEMBERS:",
+      "new": "        if False:"
+    },
+    {
+      "name": "distinctness is dropped in every mode",
+      "old": "    if len(curves) != len(members):",
+      "new": "    if False:"
+    },
+    {
+      "name": "distinctness becomes burned-only, so a fresh window may carry a duplicated curve",
+      "old": "    curves = {row[1] for row in members}\n    if len(curves) != len(members):",
+      "new": "    curves = {row[1] for row in members}\n    if mode == SOURCE_MODE_BURNED and len(curves) != len(members):"
+    },
+    {
+      "name": "the empty-cohort refusal is dropped, so absence passes every later check vacuously",
+      "old": "    if not members:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the empty check moves after distinctness, where an empty cohort already passed",
+      "old": "    if not members:\n        raise SystemExit(\n            \"REFUSING: the cohort carries no members. An empty population satisfies every \"\n            \"distinctness and agreement check vacuously, so it is refused before them\")\n    curves = {row[1] for row in members}",
+      "new": "    curves = {row[1] for row in members}"
+    },
+    {
+      "name": "the two refusals share one message again, as they did when B11a tripped them",
+      "old": "            f\"REFUSING: {len(members):,} cohort rows carry only {len(curves):,} distinct bonding \"\n            \"curves. A curve on two rows is two populations sharing an address, and every \"\n            \"signature fetched against it would be attributed to whichever row was read last\")",
+      "new": "            f\"REFUSING: the burned cohort {source_path} carries {len(members):,} curves, \"\n            f\"pinned at {EXPECTED_MEMBERS:,}\")"
+    },
+    {
+      "name": "fresh mode accepts an unnamed create enumeration",
+      "old": "    if creates_path is None:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the enumeration is no longer bound to the one the cohort came from",
+      "old": "    if actual != recorded:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the fresh cohort's own verification is skipped, and the values it would have checked are manufactured to agree",
+      "old": "        info = adapter.assert_fresh_cohort(source_path)",
+      "new": "        info = {\"members\": len(members),\n                \"source_sha256\": hashlib.sha256(open(creates_path, \"rb\").read()).hexdigest()}"
+    },
+    {
+      "name": "the view is allowed to disagree with the table it projects",
+      "old": "    if info[\"members\"] != len(members):",
+      "new": "    if False:"
+    },
+    {
+      "name": "a filtering adapter is tolerated",
+      "old": "    if enumerated != len(members):",
+      "new": "    if False:"
+    },
+    {
+      "name": "fresh mode falls back to the burned horizon instead of refusing",
+      "old": "    if cutoff_slot is None:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the burned source accepts an argv override of its pinned horizon",
+      "old": "            if value is not None:\n                raise SystemExit(",
+      "new": "            if False:\n                raise SystemExit("
+    },
+    {
+      "name": "the fresh horizon is recorded as the burned timestamp",
+      "old": "    return {\"cutoff_slot\": str(cutoff_slot), \"cutoff_source\": \"explicit-fresh-window\"}",
+      "new": "    return {\"cutoff_time\": str(CUTOFF_TIME)}"
+    },
+    {
+      "name": "the cutoff no longer travels through the metadata mismatch guard",
+      "old": "        \"max_pages\": str(max_pages), \"endpoint_ref\": \"configured-mainnet\",\n        **cutoff_metadata,\n    }",
+      "new": "        \"max_pages\": str(max_pages), \"endpoint_ref\": \"configured-mainnet\",\n    }"
+    },
+    {
+      "name": "the mode gate is bypassed entirely, so neither corpus's argv rules apply",
+      "old": "    assert_mode_arguments(mode, arguments.source, arguments.cutoff_slot, arguments.creates)",
+      "new": "    pass"
+    }
+  ]
+}

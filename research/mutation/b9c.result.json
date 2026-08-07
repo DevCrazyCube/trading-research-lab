@@ -1,0 +1,119 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 19,
+  "mutants_declared": 19,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_source_mode_splits_the_burned_artifact_from_everything_else",
+      "name": "every source is treated as burned, so fresh mode is unreachable",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_source_mode_splits_the_burned_artifact_from_everything_else",
+      "name": "every source is treated as fresh, so the burned pin is unreachable",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_fresh_cohort_is_not_measured_against_the_burned_pin",
+      "name": "the pinned count is applied to a fresh cohort too -- the original B11a failure",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_the_pin_still_refuses_a_burned_source_of_the_wrong_size",
+      "name": "the burned pin stops refusing, so the freeze no longer holds",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_duplicate_bonding_curves_refuse_in_every_mode[burned]",
+      "name": "distinctness is dropped in every mode",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_duplicate_bonding_curves_refuse_in_every_mode[fresh]",
+      "name": "distinctness becomes burned-only, so a fresh window may carry a duplicated curve",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_an_empty_cohort_refuses_before_anything_can_pass_it_vacuously[burned]",
+      "name": "the empty-cohort refusal is dropped, so absence passes every later check vacuously",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_an_empty_cohort_refuses_before_anything_can_pass_it_vacuously[burned]",
+      "name": "the empty check moves after distinctness, where an empty cohort already passed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_duplicate_bonding_curves_refuse_in_every_mode[burned]",
+      "name": "the two refusals share one message again, as they did when B11a tripped them",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_fresh_mode_refuses_when_the_create_enumeration_is_not_named",
+      "name": "fresh mode accepts an unnamed create enumeration",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_fresh_mode_refuses_a_creates_artifact_the_cohort_did_not_come_from",
+      "name": "the enumeration is no longer bound to the one the cohort came from",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_fresh_mode_refuses_a_creates_artifact_the_cohort_did_not_come_from",
+      "name": "the fresh cohort's own verification is skipped, and the values it would have checked are manufactured to agree",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_the_view_may_not_disagree_with_the_table_it_projects",
+      "name": "the view is allowed to disagree with the table it projects",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_fresh_mode_refuses_when_the_adapter_filtered",
+      "name": "a filtering adapter is tolerated",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_fresh_mode_refuses_rather_than_falling_back_to_the_burned_horizon",
+      "name": "fresh mode falls back to the burned horizon instead of refusing",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_the_burned_source_refuses_an_argv_override[437211659-None]",
+      "name": "the burned source accepts an argv override of its pinned horizon",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_the_recorded_horizon_follows_the_mode",
+      "name": "the fresh horizon is recorded as the burned timestamp",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_initialize_matching_metadata_is_idempotent",
+      "name": "the cutoff no longer travels through the metadata mismatch guard",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_main_actually_reaches_the_mode_gate",
+      "name": "the mode gate is bypassed entirely, so neither corpus's argv rules apply",
+      "outcome": "killed"
+    }
+  ],
+  "pytest_args": [],
+  "pytest_args_reason": null,
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b9c",
+  "target": "scripts/b9c_signature_inventory.py",
+  "tests": [
+    "tests/test_b9c_signature_inventory.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "8b676dfcc7fd33d61f4b8b5e038c1150ab3058cd59ea17a9611c9909fb19296b",
+  "working_tree_unchanged": true
+}

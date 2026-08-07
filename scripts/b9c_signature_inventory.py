@@ -31,9 +31,162 @@ def _load(name, filename):
 
 HTTP = _load("rpc_http_identity", "rpc_http_identity.py")
 
+# The burned B9a cohort, and the two pins below describe IT and nothing else. A `--source` that is
+# not this exact path is a fresh window whose population and whose observation horizon this module
+# has never seen, so the pins do not apply and must not be silently reused. That is the same
+# burned-versus-fresh split `b9d_transaction_bodies.source_mode` already draws; it is drawn here
+# because B11a pointed this module at a fresh cohort and both pins were still the B9 ones.
+BURNED_SOURCE = "research/b9a_outcomes.sqlite"
+SOURCE_MODE_BURNED = "burned"
+SOURCE_MODE_FRESH = "fresh"
+
+# The B9 observation horizon. Burned: it belongs to the B9 window and is meaningless outside it.
+#
+# This pin is the DANGEROUS one, and more dangerous than the count directly below it. The count
+# refuses loudly against any population that is not 1,601. This one is consulted by
+# `resolve_cutoff_slot`, which brackets with low = the cohort's earliest launch and high = the live
+# tip and requires `low_time <= CUTOFF_TIME < high_time`. The tip is always later than a timestamp
+# from July, so the upper half of that bracket is satisfied by everything; the ONLY thing standing
+# between a fresh window and this burned horizon is `low_time <= CUTOFF_TIME`, and that condition is
+# SATISFIED by any fresh window that begins EARLIER than this timestamp. Such a window brackets,
+# bisects, and truncates its signature collection at another study's clock with no refusal and no
+# mark on the artifact. B11a happened to begin 3h48m AFTER it and so refused; that was the calendar,
+# not this module. Fresh mode therefore does not resolve a cutoff from a time at all -- it requires
+# the caller to state the slot, and refuses when the caller does not.
 CUTOFF_TIME = 1785154782
 EXPECTED_MEMBERS = 1601
 SCHEMA_VERSION = "b9c-v1"
+
+
+def source_mode(source_path):
+    """Burned when `--source` names the burned B9a artifact, fresh otherwise.
+
+    By path rather than by content: the question is not whether some cohort is well formed but
+    whether it is THE cohort the pins were taken against, and only the burned path can be.
+    """
+    return SOURCE_MODE_BURNED if str(source_path) == BURNED_SOURCE else SOURCE_MODE_FRESH
+
+
+def _cohort_adapter():
+    """Loaded lazily so burned mode keeps working with no dependency on the fresh-cohort adapter."""
+    return _load("b11d_cohort_adapter", "b11d_cohort_adapter.py")
+
+
+def assert_mode_arguments(mode, source_path, cutoff_slot, creates_path):
+    """The argv must agree with which corpus `--source` names.
+
+    Extracted rather than left inline in `main`, and the reason is on the record: a mutation sweep
+    of this module killed every guard that had a function to call and left every guard sitting in
+    `main` alive, including the one immediately below -- the single most important line in this
+    change. `main` cannot be entered from a test without a network, so a check that lives only
+    there is a check nobody can provoke. B15M learned this and B10B paid for not having.
+    """
+    if mode == SOURCE_MODE_BURNED:
+        for name, value in (("--cutoff-slot", cutoff_slot), ("--creates", creates_path)):
+            if value is not None:
+                raise SystemExit(
+                    f"REFUSING: {name} is fresh-mode only. --source is the burned B9a artifact, "
+                    "whose horizon and population are pinned in this file; accepting an override "
+                    "against it would let a caller re-point the freeze from argv")
+        return
+    if cutoff_slot is None:
+        # Refuses rather than falling back to CUTOFF_TIME. The fallback is precisely the fail-open
+        # documented at that constant: a fresh window earlier than the burned timestamp brackets
+        # successfully and truncates itself at another study's clock without a word.
+        raise SystemExit(
+            f"REFUSING: {source_path} is a fresh cohort and --cutoff-slot was not given. This "
+            "module's only horizon is the burned B9 one, which describes a window this cohort is "
+            "not part of. State the observation horizon as a slot")
+
+
+def cutoff_metadata_for(mode, cutoff_slot):
+    """What the artifact records about the bound it was collected under.
+
+    Burned mode records the timestamp it resolves from; fresh mode records the slot it was handed.
+    Stamping `cutoff_time` on a fresh run would put the B9 horizon on an artifact bounded by
+    something else, which is the provenance lie this metadata exists to prevent.
+    """
+    if mode == SOURCE_MODE_BURNED:
+        return {"cutoff_time": str(CUTOFF_TIME)}
+    return {"cutoff_slot": str(cutoff_slot), "cutoff_source": "explicit-fresh-window"}
+
+
+def assert_cohort(members, mode, source_path, creates_path=None):
+    """Every refusal here carries its OWN message.
+
+    The single line these replace covered two different conditions, and when B11a tripped it the
+    text could not say which -- diagnosing it meant opening the artifact and re-running both
+    comparisons by hand. A refusal that does not name what failed is a refusal somebody has to
+    reproduce before they can act on it.
+
+    What survives in EVERY mode is everything that is a statement about the cohort itself:
+    non-emptiness, because absence is refusal and a zero-member cohort would otherwise sail
+    straight through a pin-free guard, and one-to-one bonding curves, because a curve appearing
+    twice is structural corruption whatever produced it.
+
+    What is burned-only is the pinned COUNT. Fresh mode replaces it with agreement between two
+    separately produced, separately hashed artifacts -- this cohort and the create enumeration it
+    was derived from. That is not the tautology the pin was protecting against: the tautology would
+    be reading the expected number out of the very file being checked. Two producers agreeing is
+    evidence, and it catches something the pin never could, namely truncation between the stage that
+    enumerated and the stage that built.
+    """
+    if not members:
+        raise SystemExit(
+            "REFUSING: the cohort carries no members. An empty population satisfies every "
+            "distinctness and agreement check vacuously, so it is refused before them")
+    curves = {row[1] for row in members}
+    if len(curves) != len(members):
+        raise SystemExit(
+            f"REFUSING: {len(members):,} cohort rows carry only {len(curves):,} distinct bonding "
+            "curves. A curve on two rows is two populations sharing an address, and every "
+            "signature fetched against it would be attributed to whichever row was read last")
+    if mode == SOURCE_MODE_BURNED:
+        if len(members) != EXPECTED_MEMBERS:
+            raise SystemExit(
+                f"REFUSING: the burned cohort {source_path} carries {len(members):,} curves, "
+                f"pinned at {EXPECTED_MEMBERS:,}. The pin describes the B9 population; an artifact "
+                "at the burned path that is not that population is not the artifact this freeze "
+                "was written for")
+        return
+
+    if creates_path is None:
+        raise SystemExit(
+            f"REFUSING: {source_path} is a fresh cohort and --creates was not given. The pinned "
+            "count does not apply to a fresh window, and dropping it without putting anything in "
+            "its place would leave the population unchecked. Name the create enumeration this "
+            "cohort was built from")
+    adapter = _cohort_adapter()
+    try:
+        info = adapter.assert_fresh_cohort(source_path)
+    except adapter.CohortRefused as error:
+        raise SystemExit(f"REFUSING: {source_path} is not a verified fresh cohort: {error}")
+    if info["members"] != len(members):
+        raise SystemExit(
+            f"REFUSING: {source_path} holds {info['members']:,} identity rows but its `outcome` "
+            f"view returns {len(members):,}. The view is the consumers' contract and it no longer "
+            "projects the table it is defined over")
+
+    recorded = info["source_sha256"]
+    actual = hashlib.sha256(open(creates_path, "rb").read()).hexdigest()
+    if actual != recorded:
+        raise SystemExit(
+            f"REFUSING: {creates_path} hashes {actual}, but {source_path} records that it was "
+            f"built from {recorded}. Counting against a different enumeration than the one this "
+            "cohort came from would compare two windows and call the disagreement a defect")
+    creates = sqlite3.connect(f"file:{creates_path}?mode=ro", uri=True)
+    try:
+        enumerated = creates.execute("SELECT COUNT(*) FROM create_event").fetchone()[0]
+    finally:
+        creates.close()
+    # Exact equality, not a bound: `b11d_cohort_adapter.read_cohort` is exhaustive and REFUSES on a
+    # duplicate curve or mint rather than dropping one, so it never filters. Any inequality here is
+    # a row that appeared or vanished between the two stages.
+    if enumerated != len(members):
+        raise SystemExit(
+            f"REFUSING: {creates_path} enumerated {enumerated:,} create events but {source_path} "
+            f"carries {len(members):,} members. The adapter never filters, so these must agree; "
+            "they disagree when one artifact was truncated after the other was written")
 
 
 def connect(path, readonly=False):
@@ -320,12 +473,18 @@ def scan_curve(path, url, member, cutoff_slot, max_pages, retries):
         raise
 
 
-def initialize(database, source_path, source_hash, members, max_pages):
+def initialize(database, source_path, source_hash, members, max_pages, cutoff_metadata):
     schema(database)
+    # `cutoff_metadata` rather than a fixed `cutoff_time`: burned mode records the timestamp it
+    # resolves from, fresh mode records the slot it was handed. Writing `cutoff_time` in fresh mode
+    # would stamp the B9 horizon onto an artifact collected under a different one, which is the
+    # provenance lie this metadata exists to prevent. Both land in `expected`, so the mismatch guard
+    # below covers them: resuming a partial inventory under a changed horizon refuses.
     expected = {
         "schema_version": SCHEMA_VERSION, "source_artifact": source_path,
-        "source_sha256": source_hash, "cutoff_time": str(CUTOFF_TIME),
+        "source_sha256": source_hash,
         "max_pages": str(max_pages), "endpoint_ref": "configured-mainnet",
+        **cutoff_metadata,
     }
     present = dict(database.execute("SELECT key,value FROM metadata"))
     for key, value in expected.items():
@@ -345,11 +504,17 @@ def initialize(database, source_path, source_hash, members, max_pages):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", default="research/b9a_outcomes.sqlite")
+    parser.add_argument("--source", default=BURNED_SOURCE)
     parser.add_argument("--database", default="research/b9c_signature_inventory.sqlite")
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--max-pages", type=int, default=40)
     parser.add_argument("--retries", type=int, default=8)
+    parser.add_argument("--creates", help="fresh mode only: the create enumeration --source was "
+                                          "built from, for cross-artifact population agreement")
+    parser.add_argument("--cutoff-slot", type=int,
+                        help="fresh mode only, and REQUIRED there: the observation horizon as a "
+                             "slot. Fresh mode does not resolve one from a time, because the only "
+                             "time it has is the burned B9 one")
     arguments = parser.parse_args()
     if not 1 <= arguments.workers <= 8:
         parser.error("--workers must be between 1 and 8")
@@ -359,20 +524,32 @@ def main():
     if not url:
         raise SystemExit("REFUSING: SOLANA_RPC_URL is not set. Source .env silently first.")
 
+    mode = source_mode(arguments.source)
+    assert_mode_arguments(mode, arguments.source, arguments.cutoff_slot, arguments.creates)
+
     source_hash = hashlib.sha256(open(arguments.source, "rb").read()).hexdigest()
     source = connect(arguments.source, readonly=True)
     members = source.execute(
         "SELECT mint,bonding_curve,launch_slot FROM outcome ORDER BY launch_slot,mint").fetchall()
     source.close()
-    if len(members) != EXPECTED_MEMBERS or len({row[1] for row in members}) != len(members):
-        raise SystemExit(f"REFUSING: expected {EXPECTED_MEMBERS} distinct cohort curves")
+    assert_cohort(members, mode, arguments.source, arguments.creates)
+
+    # Stored, not merely passed: `collect` reads `cutoff_slot` back out of metadata, and
+    # `resolve_cutoff_slot` already returns an existing one without bisecting. So the explicit
+    # horizon travels by the route the module already had, and the artifact records the bound it was
+    # actually collected under instead of a timestamp from a window it never touched.
+    cutoff_metadata = cutoff_metadata_for(mode, arguments.cutoff_slot)
 
     database = connect(arguments.database)
-    initialize(database, arguments.source, source_hash, members, arguments.max_pages)
+    initialize(database, arguments.source, source_hash, members, arguments.max_pages,
+               cutoff_metadata)
     cutoff_slot = resolve_cutoff_slot(
         database, url, min(row[2] for row in members), arguments.retries)
     database.close()
-    print(f"cohort={len(members):,} cutoff_time={CUTOFF_TIME} cutoff_slot={cutoff_slot:,}")
+    if mode == SOURCE_MODE_BURNED:
+        print(f"cohort={len(members):,} cutoff_time={CUTOFF_TIME} cutoff_slot={cutoff_slot:,}")
+    else:
+        print(f"cohort={len(members):,} mode={mode} cutoff_slot={cutoff_slot:,}")
 
     pending_db = connect(arguments.database, readonly=True)
     terminal = dict(pending_db.execute("SELECT mint,status FROM curve_scan"))
