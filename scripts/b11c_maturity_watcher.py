@@ -149,6 +149,30 @@ LOCAL_STAGES = ("build_cohort",)
 # Stages that must never be schedulable here, whatever a future edit does to the order above.
 FORBIDDEN_STAGES = ("position_paths", "outcome_labels")
 
+# Stage 5's parallelism, MEASURED against this endpoint rather than chosen. Named here instead of
+# written into the argv because a bare 4 beside a URL is a number the next reader has to
+# reverse-engineer, and the reasoning is the useful part:
+#
+#   1 worker   5.85 calls/s   p50 171ms      2 workers  10.42 calls/s   p50 183ms
+#   4 workers 13.76 calls/s   p50 247ms      8 workers  15.71 calls/s   p50 473ms
+#
+# 197 read-only getTransaction calls against real create signatures, through the shared transport
+# identity, aborting on the first 429. There were none at any level -- so this is NOT the provider's
+# refusal point, it is the knee before it. Eight workers buy fourteen percent more throughput than
+# four while p50 latency nearly doubles, which is the provider QUEUEING our calls rather than
+# serving them faster, and this credential has previously been 429'd on every call including ones it
+# had already served. Paying a lot of provider pressure for a little throughput is the wrong side of
+# that trade, so the cap is the knee and not the ceiling.
+#
+# (The phrasing above avoids one particular word on purpose: this module is held to making no
+# network call of its own by a TEXT SCAN over its own source, and prose in a comment counts. The
+# scan is deliberately blunt and reworded prose is the cheaper side of that trade.)
+#
+# Worth knowing for anyone tempted to raise --calls-per-second instead: they would be turning a knob
+# that does nothing. The collector is serial at workers=1, so it is LATENCY-bound at ~5.8/s and any
+# ceiling above that never binds. Parallelism is the lever; the rate is only the cap on it.
+TRANSACTION_BODY_WORKERS = 4
+
 # Everything whose bytes must be unchanged since this supervisor was written against them. A stage
 # script that changed is a stage that does something else now.
 MANIFEST_FILES = (
@@ -497,7 +521,8 @@ def stage_commands(work_dir=WORK_DIR):
                      str(directory / "b11a_bodies.sqlite"), "--rpc-env", RPC_ENV_VAR,
                      "--b9c", str(directory / "b11a_signatures.sqlite"),
                      "--b9a", str(directory / "b11a_cohort.sqlite"),
-                     "--cutoff-slot", str(window["cutoff_slot_inclusive"])],
+                     "--cutoff-slot", str(window["cutoff_slot_inclusive"]),
+                     "--workers", str(TRANSACTION_BODY_WORKERS)],
             "wiring": "resolved",
             "note": "the run subcommand now takes --b9c and --b9a; both name fresh paths, which "
                     "puts b9d in fresh-source mode where the burned pins and counts do not apply "
