@@ -195,3 +195,60 @@ class TestTheDryRunItself(Temp):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OrphanCheckDecidesByGraphNotExtensionTests(unittest.TestCase):
+    """The bug that halted a three-day collection: a produced-unread SQLite database named `.json`
+    was exempt from the orphan check because its extension looked like a terminal export.
+
+    These run on a SYNTHETIC graph rather than the live one, so they keep testing the mechanism
+    after the live wiring is repaired -- a test pinned to the live orphan would pass today and then
+    break the moment the pipeline is fixed, which is the opposite of what a guard should do.
+    """
+
+    def _drive(self, writes, reads=()):
+        import unittest.mock as mock
+        stage_io = {"a": {"reads": (), "writes": tuple(writes)},
+                    "b": {"reads": tuple(reads), "writes": ()}}
+        order = ("a", "b")
+        commands = {"a": {"argv": ["prog"] + list(writes)},
+                    "b": {"argv": ["prog"] + list(reads)}}
+        with mock.patch.object(DRY, "STAGE_IO", stage_io), \
+                mock.patch.object(DRY.B11C, "RUN_ORDER", order):
+            return DRY.check_chain(commands)
+
+    def test_a_produced_unread_json_is_flagged(self):
+        """The exact shape of b11a_program_boundary.json: written, never read, named .json."""
+        findings = self._drive(writes=("thing.json",))
+        self.assertTrue(any("thing.json" in f and "nothing reads" in f for f in findings))
+
+    def test_a_produced_unread_jsonl_is_still_exempt(self):
+        """The create export is a genuine terminal artifact and must stay quiet."""
+        findings = self._drive(writes=("export.jsonl",))
+        self.assertFalse(any("export.jsonl" in f for f in findings))
+
+    def test_a_json_that_IS_read_raises_no_orphan(self):
+        """The check is about the graph, not the extension. A consumed .json is fine."""
+        findings = self._drive(writes=("thing.json",), reads=("thing.json",))
+        self.assertFalse(any("thing.json" in f and "nothing reads" in f for f in findings))
+
+    def test_the_extension_alone_never_grants_immunity(self):
+        """The defect in one line: swap .jsonl for .json on the SAME unread artifact and the
+        verdict must flip. If it does not, the extension is deciding, which is the bug."""
+        as_jsonl = self._drive(writes=("boundary.jsonl",))
+        as_json = self._drive(writes=("boundary.json",))
+        self.assertFalse(any("boundary.jsonl" in f for f in as_jsonl))
+        self.assertTrue(any("boundary.json" in f and "nothing reads" in f for f in as_json))
+
+
+class ProgramBoundaryIsWiredIntoTheBodiesDbTests(unittest.TestCase):
+    """The live graph after the fix: program_boundary's evidence lands where decode reads it."""
+
+    def test_program_boundary_writes_the_bodies_database(self):
+        self.assertEqual(DRY.STAGE_IO["program_boundary"]["writes"], ("b11a_bodies.sqlite",))
+
+    def test_nothing_declares_the_orphaned_json_artifact_any_more(self):
+        for stage, io in DRY.STAGE_IO.items():
+            with self.subTest(stage=stage):
+                self.assertNotIn("b11a_program_boundary.json", io["writes"])
+                self.assertNotIn("b11a_program_boundary.json", io["reads"])

@@ -1,0 +1,71 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {
+    "collect-boundary decodes headers against the burned floor not the fresh cutoff": "Redundantly covered, not equivalent. decode_*_header asserts context_slot >= min_context_slot; with min_context_slot = cutoff_slot = the interval's high, that is the SAME inequality as the condition-1 check in intervals_from_boundary_evidence (high <= context_slot). On the covered branch -- the only one the fixtures reach -- reverting this floor to CUTOFF_SLOT still refuses via condition-1, which CoveredIntervalMayNotOutrunTheEvidenceTests kills directly. The floor is defence-in-depth that also guards the uncovered branch and fails earlier; its independent scenario (uncovered branch with a stale read) is not exercised by any current fixture, so it is declared here rather than killed. If a future uncovered-branch test is added this mutant should start dying, and the sweep will say so."
+  },
+  "git_ancestry_staged": false,
+  "killed": 7,
+  "mutants_declared": 8,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::FreshCutoffIsRequiredTests::test_a_fresh_run_without_a_cutoff_refuses",
+      "name": "fresh mode stops requiring a cutoff",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::FreshCutoffIsRequiredTests::test_burned_mode_refuses_an_explicit_cutoff",
+      "name": "burned mode accepts an argv override of the freeze",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::CoveredIntervalMayNotOutrunTheEvidenceTests::test_a_covered_interval_past_the_read_is_refused",
+      "name": "a covered interval may outrun the account read",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::BoundaryEvidenceDerivationTests::test_a_last_deploy_before_the_range_covers_it_from_current_state_alone",
+      "name": "the context-slot bound is skipped even when a caller supplies one",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::VerifySpanFollowsTheCollectedHorizonTests::test_intervals_that_fall_short_of_the_stamped_horizon_are_refused",
+      "name": "the verify span ignores the stamped horizon and falls to the burned constant",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::BoundaryHonoursTheFreshCutoffTests::test_initialize_run_stamps_the_passed_cutoff_not_the_constant",
+      "name": "the run stamps the burned cutoff regardless of the fresh horizon",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": null,
+      "name": "collect-boundary decodes headers against the burned floor not the fresh cutoff",
+      "outcome": "survived"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::BoundaryHonoursTheFreshCutoffTests::test_the_minted_interval_reaches_the_fresh_cutoff_not_the_burned_one",
+      "name": "collect-boundary mints against the burned span not the fresh one",
+      "outcome": "killed"
+    }
+  ],
+  "pytest_args": [
+    "-k",
+    "not ReserveScopeTests and not DecoderOrchestrationTests and not PublicationGateTests"
+  ],
+  "pytest_args_reason": "Those three classes open research/b9a_outcomes.sqlite read-only -- the burned cohort, an UNTRACKED evidence artifact absent from the sweep's tracked-only staged tree, so they cannot run there and the unmutated baseline fails on them. They exercise decode orchestration, reserve scoping and publication gates, none of which this cutoff change touches. COST, per the framework's rule: any mutant killable ONLY through one of these excluded tests reports as a survivor here and must earn its own in-memory test rather than a declaration. Every declared mutant is in the cutoff/boundary path, covered by in-memory boundary tests and the new FreshCutoff/CoveredInterval/VerifySpan classes, so none should so survive; if one does, it is a real coverage gap, not an artifact of the exclusion.",
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [
+    "collect-boundary decodes headers against the burned floor not the fresh cutoff"
+  ],
+  "sweep_id": "b9d_fresh_cutoff",
+  "target": "scripts/b9d_transaction_bodies.py",
+  "tests": [
+    "tests/test_b9d_transaction_bodies.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "3e679c53793a283518d63d9d90231ea94d89bf6bb8da6674c0d88e5d38fdbf83",
+  "working_tree_unchanged": true
+}

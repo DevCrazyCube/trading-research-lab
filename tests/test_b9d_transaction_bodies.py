@@ -169,13 +169,17 @@ class SourceHashTests(unittest.TestCase):
         try:
             B9D.collect_raw_population = capture
             B9D.main(["run", "/tmp/b11a-out.sqlite", "--rpc-env", "B9D_TEST_RPC",
-                      "--b9c", "/tmp/fresh-b9c.sqlite", "--b9a", "/tmp/fresh-b9a.sqlite"])
+                      "--b9c", "/tmp/fresh-b9c.sqlite", "--b9a", "/tmp/fresh-b9a.sqlite",
+                      "--cutoff-slot", "437211659"])
         finally:
             B9D.collect_raw_population = original
             if previous is None:
                 os.environ.pop("B9D_TEST_RPC", None)
             else:
                 os.environ["B9D_TEST_RPC"] = previous
+        # The fresh horizon must reach the collector, not the burned constant: this is the stage-5
+        # half of the fail-open b9c closed at stage 4.
+        self.assertEqual(seen["cutoff_slot"], 437211659)
         self.assertEqual(seen["b9c_path"], "/tmp/fresh-b9c.sqlite")
         self.assertEqual(seen["b9a_path"], "/tmp/fresh-b9a.sqlite")
         self.assertEqual(seen["output"], "/tmp/b11a-out.sqlite")
@@ -3554,3 +3558,119 @@ class ExecutionGateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FreshCutoffIsRequiredTests(unittest.TestCase):
+    """The stage-5 fail-open b9c closed at stage 4: a fresh window must STATE its horizon, never
+    inherit the burned one by omission."""
+
+    def test_a_fresh_run_without_a_cutoff_refuses(self):
+        prev = os.environ.get("B9D_TEST_RPC")
+        os.environ["B9D_TEST_RPC"] = "https://rpc.invalid/"
+        self.addCleanup(lambda: os.environ.__setitem__("B9D_TEST_RPC", prev) if prev
+                        else os.environ.pop("B9D_TEST_RPC", None))
+        with self.assertRaises(SystemExit) as exit:
+            B9D.main(["run", "/tmp/x.sqlite", "--rpc-env", "B9D_TEST_RPC",
+                      "--b9c", "/tmp/fresh-b9c.sqlite", "--b9a", "/tmp/fresh-b9a.sqlite"])
+        self.assertIn("--cutoff-slot was not given", str(exit.exception))
+
+    def test_burned_mode_refuses_an_explicit_cutoff(self):
+        """argv may not move the freeze on the burned corpus."""
+        with self.assertRaises(SystemExit) as exit:
+            B9D.resolved_cutoff(435536742, mode=B9D.SOURCE_MODE_BURNED)
+        self.assertIn("fresh-mode only", str(exit.exception))
+
+    def test_collect_boundary_requires_a_cutoff(self):
+        parser_exit = SystemExit
+        with self.assertRaises(parser_exit):
+            B9D.main(["collect-boundary", "/tmp/x.sqlite"])
+
+
+class CoveredIntervalMayNotOutrunTheEvidenceTests(unittest.TestCase):
+    """The seat's review condition: a covered interval whose high exceeds the account's context
+    slot claims coverage a single read cannot support. Harmless while high was the burned constant
+    far below any read; reachable once high is the collected window."""
+
+    def _mint(self, high, context_slot):
+        return B9D.intervals_from_boundary_evidence(
+            "prog", last_deploy_slot=0, in_range_deploys=[], idl_path="i", idl_sha256="h",
+            evidence_key="k", span=(0, high), context_slot=context_slot)
+
+    def test_a_covered_interval_within_the_read_is_accepted(self):
+        rows = self._mint(high=100, context_slot=200)
+        self.assertEqual(rows[0]["coverage"], "covered")
+        self.assertEqual(rows[0]["to_slot"], 100)
+
+    def test_a_covered_interval_past_the_read_is_refused(self):
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            self._mint(high=300, context_slot=200)
+        self.assertIn("read at context slot", str(v.exception))
+
+    def test_the_burned_callers_default_skips_the_check(self):
+        """context_slot=None preserves the existing behaviour for burned callers unchanged."""
+        rows = B9D.intervals_from_boundary_evidence(
+            "prog", 0, [], "i", "h", "k", span=(0, 999_999_999))
+        self.assertEqual(rows[0]["coverage"], "covered")
+
+
+class VerifySpanFollowsTheCollectedHorizonTests(unittest.TestCase):
+    """The mint/verify asymmetry the 243 never spanned: collect-boundary mints intervals over the
+    fresh window while program_version_rows re-checked them against the burned OBSERVATION_RANGE, a
+    guaranteed stage-6 refusal after stage 5's days. The verify span now follows the horizon the
+    artifact records, read from metadata `run` stamped -- a different stage than the one that minted
+    the intervals, so it is cross-stage agreement, not the tautology of reading the bound out of the
+    rows being checked."""
+
+    def _artifact(self, meta_cutoff, to_slot):
+        db = sqlite3.connect(":memory:")
+        B9D.schema(db)
+        if meta_cutoff is not None:
+            db.execute("INSERT OR REPLACE INTO metadata VALUES('cutoff_slot',?)",
+                       (str(meta_cutoff),))
+        pins = {B9D.PUMP_PROGRAM: (B9D.PUMP_IDL_PATH, B9D.PUMP_IDL_SHA256),
+                B9D.PUMPSWAP_PROGRAM: (B9D.PUMPSWAP_IDL_PATH, B9D.PUMPSWAP_IDL_SHA256)}
+        for pid, (idl, sha) in pins.items():
+            db.execute("INSERT INTO program_version VALUES(?,?,?,?,?,?,?,?)",
+                       (pid, B9D.SLOT_MIN, to_slot, idl, sha, 0, "k", "covered"))
+        return db
+
+    def test_a_fresh_window_verifies_when_the_metadata_records_its_horizon(self):
+        fresh = 437_211_659
+        rows = B9D.program_version_rows(self._artifact(fresh, fresh), B9D.PUMP_PROGRAM)
+        self.assertEqual(rows[0]["coverage"], "covered")
+
+    def test_intervals_that_fall_short_of_the_stamped_horizon_are_refused(self):
+        """The meaningful failure: metadata records a fresh horizon but the intervals stop at the
+        burned cutoff, leaving the fresh tail uncovered. That gap is exactly the transactions decode
+        would then be unable to attribute, and it must refuse at verify, not at attribution."""
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.program_version_rows(self._artifact(437_211_659, B9D.CUTOFF_SLOT),
+                                     B9D.PUMP_PROGRAM)
+        self.assertIn("no boundary evidence covers", str(v.exception).lower().replace("refusing", ""))
+
+    def test_a_bare_artifact_falls_to_the_burned_constant_unchanged(self):
+        rows = B9D.program_version_rows(self._artifact(None, B9D.CUTOFF_SLOT), B9D.PUMP_PROGRAM)
+        self.assertEqual(rows[0]["coverage"], "covered")
+
+
+class BoundaryHonoursTheFreshCutoffTests(BoundaryCollectorTests):
+    """collect_boundary_evidence must thread the fresh horizon into the mint and initialize_run
+    must stamp it: two survivors the cutoff-path tests above did not reach, because they exercise
+    the leaf functions and these exercise the threading."""
+
+    def test_the_minted_interval_reaches_the_fresh_cutoff_not_the_burned_one(self):
+        fresh = B9D.CUTOFF_SLOT + 50  # <= the fixture context (CUTOFF_SLOT+100), so condition-1 holds
+        B9D.collect_boundary_evidence(
+            self.database, "https://rpc.invalid",
+            opener=self.opener(self.boundary_raws(), []), cutoff_slot=fresh)
+        tos = {row[0] for row in self.database.execute(
+            "SELECT to_slot FROM program_version WHERE coverage='covered'")}
+        self.assertEqual(tos, {fresh})
+
+    def test_initialize_run_stamps_the_passed_cutoff_not_the_constant(self):
+        db = sqlite3.connect(":memory:")
+        B9D.initialize_run(db, "https://rpc.invalid",
+                           {B9D.B9C_SHA256: B9D.B9C_SHA256, B9D.B9A_SHA256: B9D.B9A_SHA256},
+                           cutoff_slot=437_211_659)
+        stamped = dict(db.execute("SELECT key,value FROM metadata"))["cutoff_slot"]
+        self.assertEqual(stamped, "437211659")

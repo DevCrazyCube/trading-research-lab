@@ -1,0 +1,62 @@
+{
+  "sweep_id": "b9d_fresh_cutoff",
+  "description": "b9d's fresh-window cutoff handling: the fail-open that would have decoded a fresh window against the burned horizon, and the mint/verify asymmetry that would have refused it at stage 6 after stage 5's days. Guards the fresh requirement, the context-slot bound on covered intervals, and the metadata-driven verify span.",
+  "target": "scripts/b9d_transaction_bodies.py",
+  "tests": [
+    "tests/test_b9d_transaction_bodies.py"
+  ],
+  "mutants": [
+    {
+      "name": "fresh mode stops requiring a cutoff",
+      "old": "    if cutoff_slot_arg is None:\n        raise SystemExit(\n            \"REFUSING: --cutoff-slot was not given.",
+      "new": "    if False:\n        raise SystemExit(\n            \"REFUSING: --cutoff-slot was not given."
+    },
+    {
+      "name": "burned mode accepts an argv override of the freeze",
+      "old": "    if mode == SOURCE_MODE_BURNED:\n        if cutoff_slot_arg is not None:",
+      "new": "    if mode == SOURCE_MODE_BURNED:\n        if False:"
+    },
+    {
+      "name": "a covered interval may outrun the account read",
+      "old": "        if context_slot is not None and high > context_slot:",
+      "new": "        if False and high > context_slot:"
+    },
+    {
+      "name": "the context-slot bound is skipped even when a caller supplies one",
+      "old": "        if context_slot is not None and high > context_slot:",
+      "new": "        if context_slot is None and high > context_slot:"
+    },
+    {
+      "name": "the verify span ignores the stamped horizon and falls to the burned constant",
+      "old": "    span = (SLOT_MIN, int(stamped)) if stamped is not None else OBSERVATION_RANGE",
+      "new": "    span = OBSERVATION_RANGE"
+    },
+    {
+      "name": "the run stamps the burned cutoff regardless of the fresh horizon",
+      "old": "              \"cutoff_slot\": str(cutoff_slot)}",
+      "new": "              \"cutoff_slot\": str(CUTOFF_SLOT)}"
+    },
+    {
+      "name": "collect-boundary decodes headers against the burned floor not the fresh cutoff",
+      "old": "        header = decode_programdata_header(result, address, min_context_slot=cutoff_slot)",
+      "new": "        header = decode_programdata_header(result, address, min_context_slot=CUTOFF_SLOT)"
+    },
+    {
+      "name": "collect-boundary mints against the burned span not the fresh one",
+      "old": "            span=span, context_slot=header[\"context_slot\"])",
+      "new": "            context_slot=header[\"context_slot\"])"
+    }
+  ],
+  "expected_survivors": [
+    {
+      "name": "collect-boundary decodes headers against the burned floor not the fresh cutoff",
+      "why": "Redundantly covered, not equivalent. decode_*_header asserts context_slot >= min_context_slot; with min_context_slot = cutoff_slot = the interval's high, that is the SAME inequality as the condition-1 check in intervals_from_boundary_evidence (high <= context_slot). On the covered branch -- the only one the fixtures reach -- reverting this floor to CUTOFF_SLOT still refuses via condition-1, which CoveredIntervalMayNotOutrunTheEvidenceTests kills directly. The floor is defence-in-depth that also guards the uncovered branch and fails earlier; its independent scenario (uncovered branch with a stale read) is not exercised by any current fixture, so it is declared here rather than killed. If a future uncovered-branch test is added this mutant should start dying, and the sweep will say so."
+    }
+  ],
+  "expected_survivors_note": "One. A redundantly-covered mutant whose independent coverage is condition-1, checked at a second point; the label distinction is the codex seat's from handoff 201.",
+  "pytest_args": [
+    "-k",
+    "not ReserveScopeTests and not DecoderOrchestrationTests and not PublicationGateTests"
+  ],
+  "pytest_args_reason": "Those three classes open research/b9a_outcomes.sqlite read-only -- the burned cohort, an UNTRACKED evidence artifact absent from the sweep's tracked-only staged tree, so they cannot run there and the unmutated baseline fails on them. They exercise decode orchestration, reserve scoping and publication gates, none of which this cutoff change touches. COST, per the framework's rule: any mutant killable ONLY through one of these excluded tests reports as a survivor here and must earn its own in-memory test rather than a declaration. Every declared mutant is in the cutoff/boundary path, covered by in-memory boundary tests and the new FreshCutoff/CoveredInterval/VerifySpan classes, so none should so survive; if one does, it is a real coverage gap, not an artifact of the exclusion."
+}

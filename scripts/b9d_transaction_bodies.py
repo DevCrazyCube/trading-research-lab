@@ -879,6 +879,31 @@ CUTOFF_SLOT = 435_536_742
 OBSERVATION_RANGE = (SLOT_MIN, CUTOFF_SLOT)
 
 
+def resolved_cutoff(cutoff_slot_arg, *, mode=None):
+    """The observation-range upper bound, burned constant or explicit fresh slot.
+
+    `CUTOFF_SLOT` is the B9 horizon and describes only the burned window. A fresh run collects a
+    different window whose horizon this module has never seen, so it must be STATED, not inherited:
+    the fail-open this replaces is a fresh window silently decoded against the burned cutoff, which
+    is one stage's worth of the exact failure `b9c` hit at stage 4. `mode` is `None` for commands
+    that carry no burned/fresh signal (`collect-boundary` reads program accounts, not the cohort);
+    there the slot is REQUIRED, because a boundary map is minted freshly for whatever window is being
+    collected and there is no burned re-run of it to protect.
+    """
+    if mode == SOURCE_MODE_BURNED:
+        if cutoff_slot_arg is not None:
+            raise SystemExit(
+                "REFUSING: --cutoff-slot is fresh-mode only. The burned run's horizon is pinned in "
+                "this module; accepting an override against it would let argv move the freeze.")
+        return CUTOFF_SLOT
+    if cutoff_slot_arg is None:
+        raise SystemExit(
+            "REFUSING: --cutoff-slot was not given. This module's only pinned horizon is the burned "
+            "B9 one, which describes a window a fresh collection is not part of. State the "
+            "observation horizon as a slot.")
+    return int(cutoff_slot_arg)
+
+
 def validate_intervals(program_id, intervals):
     """Sort and check one program's version intervals; refuse anything ambiguous.
 
@@ -974,7 +999,8 @@ def resolve_version(program_id, slot, intervals):
 
 def intervals_from_boundary_evidence(program_id, last_deploy_slot, in_range_deploys,
                                      idl_path, idl_sha256, evidence_key,
-                                     history_complete=False, span=OBSERVATION_RANGE):
+                                     history_complete=False, span=OBSERVATION_RANGE,
+                                     context_slot=None):
     """Turn preserved boundary evidence into version intervals, conservatively.
 
     The one case that yields a covered range is the freeze's own argument: if the **current**
@@ -1001,6 +1027,18 @@ def intervals_from_boundary_evidence(program_id, last_deploy_slot, in_range_depl
                 f"{program_id}: current last-deploy slot {last_deploy_slot:,} is at or before the "
                 f"range start, which contradicts the in-range deploy(s) {sorted(in_range_deploys)}; "
                 "refusing to reconcile contradictory boundary evidence")
+        # The covered interval claims the range up to `high`, but the only evidence is one account
+        # read at `context_slot`. If `high` is above that read, the interval asserts coverage the
+        # evidence cannot support -- a live deploy between `context_slot` and `high` would be
+        # invisible. Harmless while `high` was the burned CUTOFF_SLOT, always far below any read;
+        # deriving `high` from the collected window makes it reachable, which is why it is now
+        # asserted rather than trusted. `context_slot=None` is the burned callers' default and skips
+        # the check, so existing behaviour is unchanged.
+        if context_slot is not None and high > context_slot:
+            raise FreezeViolation(
+                f"{program_id}: a covered interval would reach slot {high:,} but the ProgramData "
+                f"account was read at context slot {context_slot:,}. A single read cannot prove no "
+                f"deploy occurred between them; refusing to mint coverage past the evidence.")
         return [{"program_id": program_id, "from_slot": low, "to_slot": high,
                  "idl_path": idl_path, "idl_sha256": idl_sha256,
                  "deploy_slot": last_deploy_slot, "evidence_key": evidence_key,
@@ -2114,7 +2152,17 @@ def program_version_rows(database, program_id):
     rows = [dict(zip(columns, row)) for row in database.execute(
         "SELECT program_id,from_slot,to_slot,idl_path,idl_sha256,deploy_slot,evidence_key,coverage "
         "FROM program_version WHERE program_id=? ORDER BY from_slot", (program_id,))]
-    rows = assert_boundary_coverage(program_id, rows)
+    # The coverage span's upper bound is the horizon this artifact was COLLECTED under, read from
+    # the metadata `run` stamped -- NOT the burned OBSERVATION_RANGE this used to fall back to. That
+    # fallback is the mint/verify asymmetry that would refuse a fresh window at stage 6 after stage
+    # 5's days: collect-boundary mints intervals over the fresh span while this re-check measured
+    # them against the burned one. The cutoff comes from `run` and the intervals from
+    # `collect-boundary` -- two different stages, so this is cross-stage agreement, not the tautology
+    # of reading the bound out of the intervals being checked. Absent metadata (a bare artifact)
+    # falls to the burned constant, preserving existing behaviour.
+    stamped = dict(database.execute("SELECT key,value FROM metadata")).get("cutoff_slot")
+    span = (SLOT_MIN, int(stamped)) if stamped is not None else OBSERVATION_RANGE
+    rows = assert_boundary_coverage(program_id, rows, span=span)
     expected = {
         PUMP_PROGRAM: (PUMP_IDL_PATH, PUMP_IDL_SHA256),
         PUMPSWAP_PROGRAM: (PUMPSWAP_IDL_PATH, PUMPSWAP_IDL_SHA256),
@@ -2694,14 +2742,19 @@ def preserved_boundary_account(
     return result, key, bool(existing)
 
 
-def collect_boundary_evidence(database, endpoint, opener=None):
+def collect_boundary_evidence(database, endpoint, opener=None, cutoff_slot=CUTOFF_SLOT):
     """Derive ProgramData identities, preserve both headers, and materialize the §4 map.
 
     This implements only the frozen current-state branch. If a last-deploy slot is newer than the
     observation-range start, the response remains preserved but the function fails and explicitly
     requires the separately specified loader-history path.
+
+    `cutoff_slot` is the range upper bound: the burned constant by default, the fresh window's
+    horizon when the caller states one. It also floors the finalized read: an account context slot
+    before the cutoff cannot describe the window, so `decode_*_header` refuses it.
     """
     schema(database)
+    span = (SLOT_MIN, cutoff_slot)
     pins = {
         PUMP_PROGRAM: (PUMP_IDL_PATH, PUMP_IDL_SHA256),
         PUMPSWAP_PROGRAM: (PUMPSWAP_IDL_PATH, PUMPSWAP_IDL_SHA256),
@@ -2710,7 +2763,8 @@ def collect_boundary_evidence(database, endpoint, opener=None):
     for program_index, program_id in enumerate(TARGET_PROGRAMS):
         program_result, program_key, program_replayed = preserved_boundary_account(
             database, endpoint, program_id, program_id, 36, program_index * 2 + 1, opener)
-        program_header = decode_program_header(program_result, program_id)
+        program_header = decode_program_header(program_result, program_id,
+                                                min_context_slot=cutoff_slot)
         address = program_header["programdata_address"]
         recorded_address = PROGRAMDATA_ACCOUNTS[program_id]
         if address != recorded_address:
@@ -2719,11 +2773,12 @@ def collect_boundary_evidence(database, endpoint, opener=None):
                 f"inventory records {recorded_address}; refusing an unbound boundary query")
         result, key, programdata_replayed = preserved_boundary_account(
             database, endpoint, program_id, address, 12, program_index * 2 + 2, opener)
-        header = decode_programdata_header(result, address)
+        header = decode_programdata_header(result, address, min_context_slot=cutoff_slot)
         idl_path, idl_sha256 = pins[program_id]
         intervals = intervals_from_boundary_evidence(
-            program_id, header["last_deploy_slot"], [], idl_path, idl_sha256, key)
-        intervals = assert_boundary_coverage(program_id, intervals)
+            program_id, header["last_deploy_slot"], [], idl_path, idl_sha256, key,
+            span=span, context_slot=header["context_slot"])
+        intervals = assert_boundary_coverage(program_id, intervals, span=span)
         expected = [(
             row["program_id"], row["from_slot"], row["to_slot"], row["idl_path"],
             row["idl_sha256"], row["deploy_slot"], row["evidence_key"], row["coverage"])
@@ -2781,7 +2836,7 @@ def assert_transaction_shape(signature, result):
     return True
 
 
-def initialize_run(database, endpoint, digests):
+def initialize_run(database, endpoint, digests, cutoff_slot=CUTOFF_SLOT):
     schema(database)
     refuse_if_complete(database)
     assert_resumable(database, digests)
@@ -2790,7 +2845,10 @@ def initialize_run(database, endpoint, digests):
               "b9a_sha256": next((v for k, v in digests.items() if v == B9A_SHA256), B9A_SHA256),
               "endpoint_reference": endpoint_reference(endpoint),
               "authorization_seq": "218", "schema_version": SCHEMA_VERSION,
-              "cutoff_slot": str(CUTOFF_SLOT)}
+              # Burned constant by default; the fresh window's stated horizon otherwise. Stamping
+              # CUTOFF_SLOT on a fresh run would record the B9 horizon on a different window's
+              # artifact, and the drift check below would then refuse a correct resume.
+              "cutoff_slot": str(cutoff_slot)}
     present = dict(database.execute("SELECT key,value FROM metadata"))
     for key, value in values.items():
         if key in present and present[key] != value:
@@ -2855,16 +2913,16 @@ def collector_lock(output):
 
 def collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                            max_slots=None, max_transactions=None, progress_every=100,
-                           calls_per_second=2.5):
+                           calls_per_second=2.5, cutoff_slot=CUTOFF_SLOT):
     with collector_lock(output):
         return _collect_raw_population(
             endpoint, output, b9c_path, b9a_path, max_slots, max_transactions,
-            progress_every, calls_per_second)
+            progress_every, calls_per_second, cutoff_slot)
 
 
 def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                             max_slots=None, max_transactions=None, progress_every=100,
-                            calls_per_second=2.5):
+                            calls_per_second=2.5, cutoff_slot=CUTOFF_SLOT):
     """Resumably preserve block coordinates and transaction response bodies; no decoding yet."""
     # §11: this must be the first observable action on an existing output. In particular it comes
     # before source hashing/population scans and before the writable `connect()` that sets WAL and
@@ -2874,7 +2932,7 @@ def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PA
     grouped = frozen_population_by_slot(b9c_path, b9a_path)
     database = connect(output)
     try:
-        initialize_run(database, endpoint, digests)
+        initialize_run(database, endpoint, digests, cutoff_slot)
         if calls_per_second <= 0:
             raise FreezeViolation("calls_per_second must be positive")
         minimum_interval = 1.0 / calls_per_second
@@ -2977,10 +3035,17 @@ def main(argv=None):
     run.add_argument("--max-transactions", type=int)
     run.add_argument("--progress-every", type=int, default=100)
     run.add_argument("--calls-per-second", type=float, default=2.5)
+    run.add_argument("--cutoff-slot", type=int,
+                     help="fresh mode only, REQUIRED there: the observation horizon as a slot. "
+                          "The burned run's horizon is pinned; a fresh window's must be stated.")
     boundary = sub.add_parser(
         "collect-boundary", help="authorized read-only: preserve §4 ProgramData headers")
     boundary.add_argument("output")
     boundary.add_argument("--rpc-env", default="SOLANA_RPC_URL")
+    boundary.add_argument("--cutoff-slot", type=int, required=True,
+                          help="the observation horizon as a slot. Required: a boundary map is "
+                               "minted for whatever window is being collected, and the burned "
+                               "window's map already exists, so there is no default to inherit.")
     audit = sub.add_parser(
         "verify-artifact",
         help="offline: run every §11 publication gate against a collected artifact")
@@ -3010,7 +3075,8 @@ def main(argv=None):
         with collector_lock(args.output):
             database = connect(args.output)
             try:
-                summary = collect_boundary_evidence(database, endpoint)
+                summary = collect_boundary_evidence(
+                    database, endpoint, cutoff_slot=resolved_cutoff(args.cutoff_slot))
             finally:
                 database.close()
         print(json.dumps(summary, indent=2, sort_keys=True))
@@ -3070,10 +3136,15 @@ def main(argv=None):
     endpoint = os.environ.get(args.rpc_env)
     if not endpoint:
         raise SystemExit(f"missing RPC endpoint environment variable {args.rpc_env}")
+    # The run's mode is known from its cohort sources: burned when both are the pinned artifacts,
+    # fresh otherwise. Fresh REQUIRES --cutoff-slot, so a fresh run cannot stamp the burned horizon
+    # into its metadata by omission -- the stage-5 shape of the stage-4 fail-open.
+    run_cutoff = resolved_cutoff(args.cutoff_slot,
+                                 mode=source_mode(args.b9c, args.b9a))
     result = collect_raw_population(
         endpoint, args.output, b9c_path=args.b9c, b9a_path=args.b9a, max_slots=args.max_slots,
         max_transactions=args.max_transactions, progress_every=args.progress_every,
-        calls_per_second=args.calls_per_second)
+        calls_per_second=args.calls_per_second, cutoff_slot=run_cutoff)
     print(json.dumps(result, sort_keys=True))
     return 0
 

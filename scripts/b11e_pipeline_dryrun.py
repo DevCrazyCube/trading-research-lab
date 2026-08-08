@@ -64,7 +64,13 @@ BURNED_MARKERS = ("b9a_outcomes", "b9c_signature_inventory.sqlite", "b9d_transac
 # What each stage consumes and produces, declared here so the chain can be checked as a graph
 # rather than by reading nine argv lists and hoping.
 STAGE_IO = {
-    "program_boundary": {"reads": (), "writes": ("b11a_program_boundary.json",)},
+    # program_boundary writes its version-coverage rows INTO the bodies database, because that is
+    # where decode reads them: verify_artifact -> assert_boundary_evidence_complete queries
+    # program_version against the artifact it decodes. It shares b11a_bodies.sqlite with
+    # transaction_bodies -- two writers, one consumer -- rather than the standalone
+    # b11a_program_boundary.json it used to emit, which nothing read. That orphan is what refused
+    # stage 6 after a three-day collection; the graph now declares the wiring the fix installs.
+    "program_boundary": {"reads": (), "writes": ("b11a_bodies.sqlite",)},
     "enumerate_creates": {"reads": (), "writes": ("b11a_creates.sqlite", "b11a_creates.jsonl")},
     "build_cohort": {"reads": ("b11a_creates.sqlite",), "writes": ("b11a_cohort.sqlite",)},
     "signature_inventory": {"reads": ("b11a_cohort.sqlite",), "writes": ("b11a_signatures.sqlite",)},
@@ -194,7 +200,14 @@ def check_chain(commands):
             produced[name] = stage
     consumed = {name for stage in order for name in STAGE_IO[stage]["reads"]}
     for name, stage in sorted(produced.items()):
-        if name not in consumed and not name.endswith((".jsonl", ".json")):
+        # `.jsonl` is exempt because a create export is a genuine terminal artifact nothing in the
+        # pipeline consumes. `.json` was exempt beside it and should never have been: the only
+        # `.json` output is `b11a_program_boundary.json`, which stage 6 IS meant to consume, and it
+        # is not even JSON -- it opens `SQLite format 3`. The extension was a proxy for "terminal
+        # export" and it silently swallowed a consumed database, which is exactly the orphan this
+        # check exists to catch. The extension names the format the writer chose, not whether the
+        # artifact is read; only the graph knows that, so the graph decides.
+        if name not in consumed and not name.endswith(".jsonl"):
             findings.append(f"{stage}: writes {name} which nothing reads")
     # And the declared graph must match the actual argument lists.
     for stage in order:
