@@ -1,0 +1,114 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": true,
+  "killed": 18,
+  "mutants_declared": 18,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_refuses_the_plan_that_looks_obviously_right",
+      "name": "the prefix check is dropped, so superseding stage 1 alone is allowed and the resume quarantines",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_superseding_only_the_tail_is_permitted",
+      "name": "the prefix check compares against the wrong length and accepts a hole",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_refuses_while_a_supervisor_holds_the_lock",
+      "name": "a live supervisor no longer blocks the move",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_refuses_an_unknown_stage",
+      "name": "an unknown stage name is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_refuses_superseding_nothing",
+      "name": "superseding nothing becomes a no-op success",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_refuses_a_stage_named_twice",
+      "name": "a stage named twice is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_refuses_without_a_reason",
+      "name": "an unexplained supersede is allowed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_refuses_a_stage_with_no_receipt",
+      "name": "a stage with no receipt is superseded anyway",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_a_relative_escape_is_refused_after_resolution",
+      "name": "an artifact outside the work directory is moved",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_a_relative_escape_is_refused_after_resolution",
+      "name": "containment is checked textually, so a relative escape passes",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_a_missing_artifact_is_refused_before_anything_moves",
+      "name": "a missing artifact is recorded as moved",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_refuses_to_write_a_second_record_into_one_archive",
+      "name": "a second supersede overwrites an existing archive",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_a_quarantined_run_refuses_unless_clearing_is_asked_for",
+      "name": "a quarantine is cleared without anybody asking",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_clearing_the_quarantine_records_it_verbatim",
+      "name": "the cleared quarantine is not recorded, so the reason for the stop is lost",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_nothing_is_deleted",
+      "name": "the receipt is deleted rather than archived",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_moves_named_artifacts_and_refuses_an_escape",
+      "name": "the artifact is copied rather than moved, leaving the superseded one in place",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_clearing_the_quarantine_records_it_verbatim",
+      "name": "state keeps the stale completed list instead of the new one",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_the_note_carries_the_reason_and_every_move",
+      "name": "the note is not written durably, so only the return value carries the record",
+      "outcome": "killed"
+    }
+  ],
+  "pytest_args": [],
+  "pytest_args_reason": null,
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b11c_supersede",
+  "target": "scripts/b11c_maturity_watcher.py",
+  "tests": [
+    "tests/test_b11c_maturity_watcher.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "aa68464174e92b05c38668d16f1a93e4fb3e8d5a361c79f58c23fee69481983a",
+  "working_tree_unchanged": true
+}

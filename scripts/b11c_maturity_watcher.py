@@ -440,9 +440,18 @@ def stage_commands(work_dir=WORK_DIR):
     return {
         "program_boundary": {
             "argv": [sys.executable, "scripts/b9d_transaction_bodies.py", "collect-boundary",
-                     str(directory / "b11a_program_boundary.json"), "--rpc-env", RPC_ENV_VAR],
+                     str(directory / "b11a_bodies.sqlite"), "--rpc-env", RPC_ENV_VAR,
+                     "--cutoff-slot", str(window["cutoff_slot_inclusive"])],
             "wiring": "resolved",
-            "note": "A2 probe; output path and RPC env are both explicit arguments",
+            "note": "A2 probe, writing INTO the bodies artifact rather than beside it. It used to "
+                    "write b11a_program_boundary.json, and nothing ever read that file: `decode` "
+                    "takes its boundary evidence from the artifact it is decoding, via "
+                    "`verify_artifact(database)` -> `assert_boundary_evidence_complete`, and stage "
+                    "5 never puts boundary rows there. So stage 6 would have failed on "
+                    "'boundary_completed_at_unix is absent' after stage 5's days of collection. "
+                    "The name was also a lie about the file -- `collect-boundary` writes a full "
+                    "b9d SQLite artifact, ten tables, and the .json suffix meant b11e's "
+                    "'writes X which nothing reads' check skipped it by extension",
         },
         "build_cohort": {
             "argv": [sys.executable, "scripts/b11d_cohort_adapter.py", "build",
@@ -465,20 +474,37 @@ def stage_commands(work_dir=WORK_DIR):
         "signature_inventory": {
             "argv": [sys.executable, "scripts/b9c_signature_inventory.py",
                      "--source", str(directory / "b11a_cohort.sqlite"),
-                     "--database", str(directory / "b11a_signatures.sqlite")],
+                     "--database", str(directory / "b11a_signatures.sqlite"),
+                     "--creates", str(directory / "b11a_creates.sqlite"),
+                     "--cutoff-slot", str(window["cutoff_slot_inclusive"])],
             "wiring": "resolved",
             "note": "reads the cohort artifact, whose `outcome` view answers b9c's query exactly. "
-                    "Compatibility demonstrated by test rather than assumed",
+                    "Compatibility was demonstrated by test rather than assumed -- but the test "
+                    "demonstrated the QUERY SHAPE, and b9c also carried EXPECTED_MEMBERS = 1601 "
+                    "and CUTOFF_TIME, both describing the B9 study. The count refused this "
+                    "window's 33,866-member cohort in one second after three days of collection. "
+                    "The horizon would NOT have refused: it is consulted through a bracket that "
+                    "any window starting before 27 Jul 14:19 satisfies, so such a window would "
+                    "have truncated itself at another study's clock silently. b9c now splits "
+                    "burned from fresh and REQUIRES the horizon; the slot comes from "
+                    "`verify_preregistration` above, which runs the Q01 hash gate before "
+                    "returning it, so a document that drifted mid-run refuses here rather than "
+                    "handing a stale bound to a collection. --creates lets the fresh population "
+                    "be checked against the enumeration it was built from, since the pin cannot",
         },
         "transaction_bodies": {
             "argv": [sys.executable, "scripts/b9d_transaction_bodies.py", "run",
                      str(directory / "b11a_bodies.sqlite"), "--rpc-env", RPC_ENV_VAR,
                      "--b9c", str(directory / "b11a_signatures.sqlite"),
-                     "--b9a", str(directory / "b11a_cohort.sqlite")],
+                     "--b9a", str(directory / "b11a_cohort.sqlite"),
+                     "--cutoff-slot", str(window["cutoff_slot_inclusive"])],
             "wiring": "resolved",
             "note": "the run subcommand now takes --b9c and --b9a; both name fresh paths, which "
                     "puts b9d in fresh-source mode where the burned pins and counts do not apply "
-                    "and the cohort must verify itself instead",
+                    "and the cohort must verify itself instead. --cutoff-slot because fresh mode "
+                    "was NOT in fact free of the burned horizon: `initialize_run` stamps b9d's own "
+                    "CUTOFF_SLOT = 435,536,742 into this artifact's metadata under a drift check, "
+                    "and B11a's window sits entirely above that slot",
         },
         "decode_and_reserves": {
             "argv": [sys.executable, "scripts/b9d_transaction_bodies.py", "decode",
@@ -486,7 +512,15 @@ def stage_commands(work_dir=WORK_DIR):
                      "--b9c", str(directory / "b11a_signatures.sqlite"),
                      "--b9a", str(directory / "b11a_cohort.sqlite")],
             "wiring": "resolved",
-            "note": "decode accepts --b9c and --b9a overrides",
+            "note": "decode accepts --b9c and --b9a overrides, and DELIBERATELY takes no horizon. "
+                    "It needs one -- this is the stage the burned range would have stopped, since "
+                    "`program_version_rows` measured intervals against OBSERVATION_RANGE on both "
+                    "ends -- but it reads that horizon from the artifact's own metadata rather "
+                    "than from argv. That is not the artifact vouching for itself: the cutoff is "
+                    "stamped by `transaction_bodies` and the intervals are minted by "
+                    "`program_boundary`, two different stages, so agreement between them is "
+                    "evidence. Passing it a fourth time here would add a bound nobody checks "
+                    "against the two that are already cross-checked",
         },
         "reserve_coverage_gate": {
             "argv": [sys.executable, "scripts/b9e_reserve_coverage.py",
@@ -858,6 +892,138 @@ class InstanceLock:
 # --------------------------------------------------------------------------------------------
 # Polling
 # --------------------------------------------------------------------------------------------
+
+def supersede_stages(names, reason, work_dir=WORK_DIR, state_path=STATE_PATH,
+                     archive_dir=ARCHIVE_DIR, lock_path=LOCK_PATH, receipt_dir=RECEIPT_DIR,
+                     artifacts=(), stamp=None, clear_quarantine=False):
+    """Retire named stages so they will run again. Explicit, recorded, and never destructive.
+
+    `archive_run` cannot do this: it refuses the moment any stage has a receipt, because an
+    archived run with receipts is a collection somebody may still need. That is the right rule for
+    a failed launch and the wrong tool for a partial run whose EARLY stages must be redone. B11a is
+    the case — stage 1 collected an upgrade-boundary proof for slots 433,894,233..435,536,742, and
+    the window it will be used against begins 32,408 slots above that. The evidence is not stale,
+    it is about somewhere else.
+
+    THE PREFIX RULE IS ENFORCED HERE RATHER THAN DISCOVERED AT RESUME, and that is the whole
+    reason this is a function instead of four `mv` commands. `assert_resume_is_safe` requires the
+    completed stages to be a true PREFIX of the run order, so superseding stage 1 while stages 2
+    and 3 keep their receipts leaves a HOLE, and the supervisor cannot tell a hole made on purpose
+    from a stage that was skipped — nor should it learn to guess, since guessing wrong green-lights
+    a gap in a collection that cannot be repeated. Refusing here means the operator finds out
+    BEFORE the evidence has been moved, rather than at the next start with the receipts already
+    somewhere else.
+
+    Never deletes. Everything moves under `superseded/<stamp>/` beside a note recording what was
+    moved, why, and the state at the time — including the quarantine verbatim when one is cleared.
+    A supersede whose reason is unrecoverable later is a supersede nobody can audit.
+    """
+    if not names:
+        raise WatcherRefused("superseding nothing is not an operation; name the stages")
+    unknown = [name for name in names if name not in RUN_ORDER]
+    if unknown:
+        raise WatcherRefused(
+            f"unknown stage(s) {unknown}; the run order is {list(RUN_ORDER)}")
+    duplicates = sorted({name for name in names if list(names).count(name) > 1})
+    if duplicates:
+        raise WatcherRefused(f"stage(s) {duplicates} named twice; say once what you mean once")
+    if not (reason or "").strip():
+        raise WatcherRefused(
+            "a supersede without a reason cannot be audited afterwards; state why")
+    if lock_is_held(lock_path):
+        raise WatcherRefused(
+            "the instance lock is held, so a supervisor is alive. Moving receipts out from under a "
+            "running collection is how two processes come to disagree about what has been done")
+
+    work_dir = pathlib.Path(work_dir)
+    receipt_dir = pathlib.Path(receipt_dir)
+    before = completed_stages(receipt_dir)
+
+    missing = [name for name in names if not receipt_path(name, receipt_dir).exists()]
+    if missing:
+        raise WatcherRefused(
+            f"no receipt for stage(s) {missing}; superseding something that is not there means the "
+            "plan and the artifact tree disagree, and the tree is the record")
+
+    remaining = [stage for stage in before if stage not in names]
+    if list(remaining) != list(RUN_ORDER[:len(remaining)]):
+        raise WatcherRefused(
+            f"superseding {sorted(names)} would leave completed stages {remaining}, which is not a "
+            f"PREFIX of {list(RUN_ORDER)}. A resume would quarantine on {Q12_DUPLICATE_STAGE} "
+            "because a hole is indistinguishable from a skipped stage. Supersede the stages after "
+            "it as well, so what remains is a prefix")
+
+    resolved = []
+    for artifact in artifacts:
+        path = pathlib.Path(artifact)
+        path = path if path.is_absolute() else work_dir / path
+        # `resolve` before comparing: a relative escape like ../../scripts would otherwise pass a
+        # textual check and move a file out of a directory this function has no business leaving.
+        if work_dir.resolve() not in path.resolve().parents:
+            raise WatcherRefused(
+                f"{artifact} is outside {work_dir}; this moves a collection's own artifacts and "
+                "nothing else")
+        if not path.exists():
+            raise WatcherRefused(f"no artifact at {path}; refusing to record a move that cannot "
+                                 "have happened")
+        resolved.append(path)
+
+    stamp = stamp or time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    destination = pathlib.Path(archive_dir) / stamp
+    if destination.exists():
+        raise WatcherRefused(
+            f"{destination} already exists; writing a second supersede into one archive would "
+            "leave two records claiming to be the same moment")
+
+    state = read_state(state_path) or {}
+    quarantine = state.get("quarantine")
+    if quarantine and not clear_quarantine:
+        raise WatcherRefused(
+            f"the watcher is quarantined ({quarantine.get('reason_code')}) and clear_quarantine "
+            "was not requested. Superseding the receipts without clearing it leaves a run that "
+            "cannot start for a reason that no longer applies; clearing it silently would erase "
+            "why the collection stopped. Ask for it explicitly and it is recorded")
+
+    (destination / "receipts").mkdir(parents=True)
+    moved = []
+    for name in names:
+        source = receipt_path(name, receipt_dir)
+        target = destination / "receipts" / source.name
+        os.replace(source, target)
+        moved.append({"stage": name, "from": str(source), "to": str(target)})
+    if resolved:
+        (destination / "artifacts").mkdir()
+        for path in resolved:
+            target = destination / "artifacts" / path.name
+            os.replace(path, target)
+            moved.append({"stage": None, "from": str(path), "to": str(target)})
+
+    after = completed_stages(receipt_dir)
+    note = {
+        "reason": reason,
+        "archived_at": stamp,
+        "superseded_stages": list(names),
+        "moved": moved,
+        "stages_completed_before": before,
+        "stages_completed_after": after,
+        # Verbatim, because this is the only surviving record of why the collection stopped once
+        # the live state has been cleared.
+        "quarantine_cleared": quarantine if clear_quarantine else None,
+    }
+    assert_no_secret(json.dumps(note), "the supersede note")
+    atomic_write_json(destination / "superseded.json", note, "supersede note")
+
+    if state:
+        # `stages_completed` is derived from the receipts at every start — `watch` recomputes it
+        # from `assert_resume_is_safe` before dispatching — so this write keeps the file honest
+        # between now and then rather than being the thing the supervisor trusts.
+        state["stages_completed"] = after
+        if clear_quarantine:
+            state["quarantine"] = None
+            state["state"] = STATE_WAITING
+        write_state(state, state_path)
+    return note
+
 
 def is_retryable(message):
     lowered = str(message).lower()

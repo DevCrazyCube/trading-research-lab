@@ -1,0 +1,102 @@
+{
+  "sweep_id": "b11c_supersede",
+  "description": "Mutation sweep over supersede_stages, the machinery that retires stages so they can be re-run. Swept rather than trusted because it moves the only copy of evidence from a collection that cannot be repeated, inside a directory both agent seats were otherwise forbidden to write to, and because the first plan every party agreed to -- supersede stage 1 and stage 4, keep 2 and 3 -- is one this function must REFUSE. Its most important guard is a refusal against its own operators.",
+  "target": "scripts/b11c_maturity_watcher.py",
+  "tests": [
+    "tests/test_b11c_maturity_watcher.py"
+  ],
+  "needs_git_ancestry": true,
+  "expected_survivors": [],
+  "mutants": [
+    {
+      "name": "the prefix check is dropped, so superseding stage 1 alone is allowed and the resume quarantines",
+      "old": "    if list(remaining) != list(RUN_ORDER[:len(remaining)]):",
+      "new": "    if False:"
+    },
+    {
+      "name": "the prefix check compares against the wrong length and accepts a hole",
+      "old": "    if list(remaining) != list(RUN_ORDER[:len(remaining)]):",
+      "new": "    if list(remaining) != list(RUN_ORDER[:len(RUN_ORDER)]) and remaining:"
+    },
+    {
+      "name": "a live supervisor no longer blocks the move",
+      "old": "    if lock_is_held(lock_path):",
+      "new": "    if False:"
+    },
+    {
+      "name": "an unknown stage name is accepted",
+      "old": "    if unknown:",
+      "new": "    if False:"
+    },
+    {
+      "name": "superseding nothing becomes a no-op success",
+      "old": "    if not names:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a stage named twice is accepted",
+      "old": "    if duplicates:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an unexplained supersede is allowed",
+      "old": "    if not (reason or \"\").strip():",
+      "new": "    if False:"
+    },
+    {
+      "name": "a stage with no receipt is superseded anyway",
+      "old": "    if missing:",
+      "new": "    if False:"
+    },
+    {
+      "name": "an artifact outside the work directory is moved",
+      "old": "        if work_dir.resolve() not in path.resolve().parents:",
+      "new": "        if False:"
+    },
+    {
+      "name": "containment is checked textually, so a relative escape passes",
+      "old": "        if work_dir.resolve() not in path.resolve().parents:",
+      "new": "        if str(work_dir) not in str(path):"
+    },
+    {
+      "name": "a missing artifact is recorded as moved",
+      "old": "        if not path.exists():\n            raise WatcherRefused(f\"no artifact at {path}; refusing to record a move that cannot \"\n                                 \"have happened\")",
+      "new": "        if False:\n            raise WatcherRefused(f\"no artifact at {path}; refusing to record a move that cannot \"\n                                 \"have happened\")"
+    },
+    {
+      "name": "a second supersede overwrites an existing archive",
+      "old": "    if destination.exists():",
+      "new": "    if False:"
+    },
+    {
+      "name": "a quarantine is cleared without anybody asking",
+      "old": "    if quarantine and not clear_quarantine:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the cleared quarantine is not recorded, so the reason for the stop is lost",
+      "old": "        \"quarantine_cleared\": quarantine if clear_quarantine else None,",
+      "new": "        \"quarantine_cleared\": None,"
+    },
+    {
+      "name": "the receipt is deleted rather than archived",
+      "old": "        os.replace(source, target)\n        moved.append({\"stage\": name, \"from\": str(source), \"to\": str(target)})",
+      "new": "        source.unlink()\n        moved.append({\"stage\": name, \"from\": str(source), \"to\": str(target)})"
+    },
+    {
+      "name": "the artifact is copied rather than moved, leaving the superseded one in place",
+      "old": "            os.replace(path, target)\n            moved.append({\"stage\": None, \"from\": str(path), \"to\": str(target)})",
+      "new": "            target.write_bytes(path.read_bytes())\n            moved.append({\"stage\": None, \"from\": str(path), \"to\": str(target)})"
+    },
+    {
+      "name": "state keeps the stale completed list instead of the new one",
+      "old": "        state[\"stages_completed\"] = after",
+      "new": "        state[\"stages_completed\"] = before"
+    },
+    {
+      "name": "the note is not written durably, so only the return value carries the record",
+      "old": "    atomic_write_json(destination / \"superseded.json\", note, \"supersede note\")",
+      "new": "    pass"
+    }
+  ]
+}
