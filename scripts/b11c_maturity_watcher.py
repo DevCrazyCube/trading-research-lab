@@ -204,6 +204,13 @@ MANIFEST_FILES = (
     "scripts/b9f_failure_coverage.py",
     "scripts/b10a_simulator_kernel.py",
     "scripts/b11d_cohort_adapter.py",
+    # The subsample selector. Pinned because it decides WHICH curves are studied, which makes it
+    # the most selection-critical file the pipeline runs -- an edit here during the wait would
+    # change the population under a preregistration frozen precisely to stop that. It was missing
+    # from this list when `subsample_cohort` was first wired, and nothing noticed: every other
+    # stage script was pinned, so the gap was one name rather than a category. The test below now
+    # derives the requirement from the stage table instead of from anyone remembering.
+    "scripts/b11f_cohort_subsample.py",
     "research/pump_idl_9c82f61.json",
     "research/pump_amm_idl_9c82f61.json",
     "research/B11A_FRESH_COHORT_PREREGISTRATION.json",

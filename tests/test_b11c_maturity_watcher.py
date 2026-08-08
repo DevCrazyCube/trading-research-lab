@@ -2129,3 +2129,33 @@ class SupersedeStagesTests(unittest.TestCase):
         written = json.loads(
             (self.archive / "20260808T010000Z" / "superseded.json").read_text())
         self.assertEqual(written, note, "the returned note and the durable one must be the same")
+
+
+class EveryStageScriptIsPinnedTests(unittest.TestCase):
+    """The manifest must cover every script the pipeline runs, derived rather than remembered.
+
+    b11f_cohort_subsample.py was wired in as a stage and left out of MANIFEST_FILES. Nothing
+    caught it: the list was hand-maintained and every OTHER stage script happened to be on it, so
+    the omission looked like a complete list. The manifest exists to stop a stage script changing
+    during a wait measured in days -- and the one file it was missing is the one that chooses which
+    curves the study observes.
+    """
+
+    def test_every_script_named_in_a_stage_argv_is_manifest_pinned(self):
+        commands = W.stage_commands(pathlib.Path("/tmp/b11a-iso"))
+        for stage, command in commands.items():
+            for part in command["argv"]:
+                if part.endswith(".py") and part.startswith("scripts/"):
+                    with self.subTest(stage=stage, script=part):
+                        self.assertIn(
+                            part, W.MANIFEST_FILES,
+                            f"{part} runs as part of {stage} but is not pinned; it could change "
+                            "during the wait and the run would proceed against different code")
+
+    def test_the_check_would_notice_an_unpinned_script(self):
+        """Non-vacuous: with a stage naming an unpinned script, the assertion must fail."""
+        scripts = {part for command in W.stage_commands(pathlib.Path("/tmp/b11a-iso")).values()
+                   for part in command["argv"]
+                   if part.endswith(".py") and part.startswith("scripts/")}
+        self.assertTrue(scripts, "the scan must actually find scripts, or it proves nothing")
+        self.assertNotIn("scripts/not_pinned_anywhere.py", W.MANIFEST_FILES)
