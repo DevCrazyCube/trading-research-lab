@@ -3674,3 +3674,92 @@ class BoundaryHonoursTheFreshCutoffTests(BoundaryCollectorTests):
                            cutoff_slot=437_211_659)
         stamped = dict(db.execute("SELECT key,value FROM metadata"))["cutoff_slot"]
         self.assertEqual(stamped, "437211659")
+
+
+class VerifyIsNoWeakerThanMintTests(BoundaryCollectorTests):
+    """The publication gate must apply the SAME floor and the SAME high-vs-context_slot check as
+    the mint. A verify weaker than its mint can only ratify what the mint already got right, and
+    this one decoded headers against the burned floor and never re-applied condition-1 -- caught in
+    review, the mint/verify asymmetry one level below the span check."""
+
+    def _built(self, cutoff):
+        db = self.database
+        B9D.collect_boundary_evidence(db, "https://rpc.invalid",
+                                      opener=self.opener(self.boundary_raws(), []),
+                                      cutoff_slot=cutoff)
+        # initialize_run stamps cutoff_slot; the built artifact needs it for verify's floor.
+        db.execute("INSERT OR REPLACE INTO metadata VALUES('cutoff_slot',?)", (str(cutoff),))
+        return db
+
+    def _asymmetric_raws(self, programdata_context):
+        """Program account read HIGH (passes any floor), ProgramData read at programdata_context.
+        Without this the program-header decode fires first on the same context and masks the
+        programdata-header mutant -- which is why it first looked redundantly covered."""
+        high = {"slot": B9D.CUTOFF_SLOT + 500}
+        return [self.raw_program(1, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMP_PROGRAM], context=high),
+                self.raw(2, 433_095_571, context={"slot": programdata_context}),
+                self.raw_program(3, B9D.PROGRAMDATA_ACCOUNTS[B9D.PUMPSWAP_PROGRAM], context=high),
+                self.raw(4, 433_112_355, context={"slot": programdata_context})]
+
+    def test_the_mint_programdata_floor_refuses_before_condition_one(self):
+        """Kills the mint programdata-header mutant: with the ProgramData read below the fresh floor
+        but the Program read above it, the original refuses at the programdata floor with 'before
+        required cutoff'; revert that floor to the burned constant and the read passes, so the
+        refusal comes instead from condition-1 with 'a covered interval would reach'."""
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.collect_boundary_evidence(
+                self.database, "https://rpc.invalid",
+                opener=self.opener(self._asymmetric_raws(B9D.CUTOFF_SLOT + 50), []),
+                cutoff_slot=B9D.CUTOFF_SLOT + 200)
+        self.assertIn("before required cutoff", str(v.exception))
+
+    def test_the_mint_header_floor_message_distinguishes_it_from_condition_one(self):
+        """Kills the previously-declared survivor: with cutoff above the read, the mint's header
+        floor refuses FIRST with 'before required cutoff'; revert it to the burned constant and the
+        refusal instead comes from condition-1 with 'a covered interval would reach'. Asserting
+        WHICH refusal occurs tells them apart -- the same one-message-two-conditions lesson as b9c."""
+        high = B9D.CUTOFF_SLOT + 200  # above the fixture context (CUTOFF_SLOT+100)
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.collect_boundary_evidence(self.database, "https://rpc.invalid",
+                                          opener=self.opener(self.boundary_raws(), []),
+                                          cutoff_slot=high)
+        self.assertIn("before required cutoff", str(v.exception))
+
+    def test_verify_re_applies_condition_one_against_the_preserved_context_slot(self):
+        db = self._built(B9D.CUTOFF_SLOT + 50)  # mints cleanly (<= context CUTOFF_SLOT+100)
+        # Only the intervals outrun the read; the floor stays below context so the header check
+        # PASSES and condition-1 is the guard that must fire, isolating it from the floor.
+        db.execute("UPDATE program_version SET to_slot=? WHERE coverage='covered'",
+                   (B9D.CUTOFF_SLOT + 300,))
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.assert_boundary_evidence_complete(db)
+        self.assertIn("cannot prove no deploy", str(v.exception))
+
+    def test_verify_decodes_headers_against_the_stamped_floor_not_the_burned_one(self):
+        """A preserved read below the fresh horizon must be refused at verify, as it is at mint."""
+        db = self._built(B9D.CUTOFF_SLOT + 50)
+        db.execute("INSERT OR REPLACE INTO metadata VALUES('cutoff_slot',?)",
+                   (str(B9D.CUTOFF_SLOT + 300),))  # floor now above the preserved context (+100)
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.assert_boundary_evidence_complete(db)
+        self.assertIn("before required cutoff", str(v.exception))
+
+    def test_verify_programdata_floor_refuses_a_low_read_the_program_floor_would_miss(self):
+        """The verify twin: mint over a clean artifact, then re-stamp a floor above the preserved
+        ProgramData context while the Program context stays high, and verify must refuse at the
+        programdata floor -- the mutant reverting it to the burned constant would pass the low read."""
+        db = self.database
+        B9D.collect_boundary_evidence(
+            db, "https://rpc.invalid",
+            opener=self.opener(self._asymmetric_raws(B9D.CUTOFF_SLOT + 50), []),
+            cutoff_slot=B9D.CUTOFF_SLOT + 40)
+        db.execute("INSERT OR REPLACE INTO metadata VALUES('cutoff_slot',?)",
+                   (str(B9D.CUTOFF_SLOT + 100),))  # floor above the +50 ProgramData read
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.assert_boundary_evidence_complete(db)
+        self.assertIn("before required cutoff", str(v.exception))
+
+    def test_a_coherent_fresh_artifact_verifies(self):
+        """The accept path: mint and verify agree, nothing tampered."""
+        db = self._built(B9D.CUTOFF_SLOT + 50)
+        self.assertTrue(B9D.assert_boundary_evidence_complete(db))

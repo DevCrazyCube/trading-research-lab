@@ -45,15 +45,20 @@
       "name": "collect-boundary mints against the burned span not the fresh one",
       "old": "            span=span, context_slot=header[\"context_slot\"])",
       "new": "            context_slot=header[\"context_slot\"])"
-    }
-  ],
-  "expected_survivors": [
+    },
     {
-      "name": "collect-boundary decodes headers against the burned floor not the fresh cutoff",
-      "why": "Redundantly covered, not equivalent. decode_*_header asserts context_slot >= min_context_slot; with min_context_slot = cutoff_slot = the interval's high, that is the SAME inequality as the condition-1 check in intervals_from_boundary_evidence (high <= context_slot). On the covered branch -- the only one the fixtures reach -- reverting this floor to CUTOFF_SLOT still refuses via condition-1, which CoveredIntervalMayNotOutrunTheEvidenceTests kills directly. The floor is defence-in-depth that also guards the uncovered branch and fails earlier; its independent scenario (uncovered branch with a stale read) is not exercised by any current fixture, so it is declared here rather than killed. If a future uncovered-branch test is added this mutant should start dying, and the sweep will say so."
+      "name": "verify decodes headers against the burned floor not the stamped one",
+      "old": "        programdata_header = decode_programdata_header(decoded[1][1], programdata_address,\n                                                      min_context_slot=floor)",
+      "new": "        programdata_header = decode_programdata_header(decoded[1][1], programdata_address,\n                                                      min_context_slot=CUTOFF_SLOT)"
+    },
+    {
+      "name": "verify skips condition-1 against the preserved read",
+      "old": "            if row[\"coverage\"] == \"covered\" and row[\"to_slot\"] > programdata_header[\"context_slot\"]:",
+      "new": "            if False and row[\"to_slot\"] > programdata_header[\"context_slot\"]:"
     }
   ],
-  "expected_survivors_note": "One. A redundantly-covered mutant whose independent coverage is condition-1, checked at a second point; the label distinction is the codex seat's from handoff 201.",
+  "expected_survivors": [],
+  "expected_survivors_note": "None. The mint header-floor mutant, declared in the first pass as redundantly covered by condition-1, is now killed: the two guards refuse with DIFFERENT messages, and a test asserting which refusal occurs tells them apart -- the codex seat's point in review, the same one-message-two-conditions lesson as b9c. Covered-elsewhere was the honest first label; a distinguishing test was the better answer.",
   "pytest_args": [
     "-k",
     "not ReserveScopeTests and not DecoderOrchestrationTests and not PublicationGateTests"

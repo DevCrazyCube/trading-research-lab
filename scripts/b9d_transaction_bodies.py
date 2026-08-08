@@ -815,16 +815,39 @@ def assert_boundary_evidence_complete(database):
                         f"{program_id}: program-binding evidence key {binding and binding[0]!r} "
                         f"does not name its preserved Program request {expected_key}")
             decoded.append((expected_key, payload["result"]))
-        program_header = decode_program_header(decoded[0][1], program_id)
+        # The floor is the horizon this artifact was collected under, from the metadata `run`
+        # stamped -- the SAME one the mint used. This function is the publication gate, and a verify
+        # weaker than its mint can only ratify what the mint already got right: before this it
+        # decoded headers against the burned CUTOFF_SLOT default while collect-boundary decoded
+        # against the fresh cutoff, so a preserved response read anywhere above the burned horizon
+        # passed here while the intervals claimed coverage to the top of a fresh window. Same
+        # mint/verify asymmetry the span check already closed, one level down, caught in review.
+        stamped = dict(database.execute("SELECT key,value FROM metadata")).get("cutoff_slot")
+        floor = int(stamped) if stamped is not None else CUTOFF_SLOT
+        program_header = decode_program_header(decoded[0][1], program_id, min_context_slot=floor)
         if program_header["programdata_address"] != programdata_address:
             raise FreezeViolation(
                 f"{program_id}: preserved Program derives {program_header['programdata_address']}, "
                 f"not inventory ProgramData {programdata_address}")
-        programdata_header = decode_programdata_header(decoded[1][1], programdata_address)
+        programdata_header = decode_programdata_header(decoded[1][1], programdata_address,
+                                                      min_context_slot=floor)
         versions = program_version_rows(database, program_id)
         if any(row["evidence_key"] != decoded[1][0] for row in versions):
             raise FreezeViolation(
                 f"{program_id}: version coverage does not name its preserved ProgramData response")
+        # Condition-1 at VERIFY, not only at mint: a covered interval may not reach past the slot
+        # the account was actually read at. Mint checks this against the freshly decoded context
+        # slot; verify must re-check it against the PRESERVED one, because a publication gate proves
+        # the stored evidence stands on its own rather than trusting the miner. Without it a covered
+        # interval reaching the top of the window would ratify coverage over the ~7.7 days between
+        # the burned floor and the fresh horizon that a single read cannot witness.
+        for row in versions:
+            if row["coverage"] == "covered" and row["to_slot"] > programdata_header["context_slot"]:
+                raise FreezeViolation(
+                    f"{program_id}: preserved evidence claims coverage to slot {row['to_slot']:,} "
+                    f"but the ProgramData account was read at context slot "
+                    f"{programdata_header['context_slot']:,}; a single read cannot prove no deploy "
+                    f"occurred between them.")
         expected_metadata = {
             f"boundary_program_context_slot:{program_id}": program_header["context_slot"],
             f"boundary_context_slot:{program_id}": programdata_header["context_slot"],
