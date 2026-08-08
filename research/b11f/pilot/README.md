@@ -25,10 +25,19 @@ and the *hash order* the selection rule uses. If both were known at once, N coul
 or exclude particular high-activity curves — N would silently become a selection knob rather than a
 size knob, defeating the leakage prohibition through the one parameter left open.
 
-That claim is not asserted here, it is checkable: **no file in this directory contains `sha256`, the
-selection SEED, or any other selection machinery.** They compute quartiles, mean, standard deviation
-and a projected total, and nothing else. Grep is a sufficient audit, and the preregistration's
-pilot-isolation test makes it a permanent one.
+That claim is not asserted here, it is checkable: **no executable module in this directory — no
+`.py` file — imports a hash library, references the selection function, or carries the frozen seed
+literal.** They compute quartiles, mean, standard deviation and a projected total, and nothing else.
+The preregistration's pilot-isolation test makes that permanent, parsing each module's AST rather
+than scanning text.
+
+The scope is *executable code*, not text, and that distinction is not a loophole — it is forced by
+this very file. An earlier draft of this paragraph claimed no file here contained the hash function
+at all, which was **false the moment it was written**, because the sentence naming the property
+contains the name of the property. A prose description of a guard is not the guard. This project has
+now hit the same edge three times: a supervisor held to making no network call by a text scan that a
+comment tripped, an orphan artifact exempted by a filename that lied about its format, and now a
+README whose claim about text was falsified by its own text. Check code as code.
 
 ## What these numbers are NOT
 
