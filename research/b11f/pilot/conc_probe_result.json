@@ -1,0 +1,23 @@
+{
+  "steps": [
+    {
+      "workers": 2,
+      "achieved_rate": 10.42,
+      "p50_ms": 183,
+      "failures": []
+    },
+    {
+      "workers": 4,
+      "achieved_rate": 13.76,
+      "p50_ms": 247,
+      "failures": []
+    },
+    {
+      "workers": 8,
+      "achieved_rate": 15.71,
+      "p50_ms": 473,
+      "failures": []
+    }
+  ],
+  "aborted": null
+}

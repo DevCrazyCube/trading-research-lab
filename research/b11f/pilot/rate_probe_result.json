@@ -1,0 +1,47 @@
+{
+  "endpoint": "https://solana-mainnet.core.chainstack.com",
+  "steps": [
+    {
+      "requested_rate": 2.5,
+      "achieved_rate": 2.56,
+      "calls": 25,
+      "failures": [],
+      "p50_ms": 171,
+      "p95_ms": 184
+    },
+    {
+      "requested_rate": 5,
+      "achieved_rate": 4.95,
+      "calls": 25,
+      "failures": [],
+      "p50_ms": 170,
+      "p95_ms": 180
+    },
+    {
+      "requested_rate": 10,
+      "achieved_rate": 5.8,
+      "calls": 25,
+      "failures": [],
+      "p50_ms": 171,
+      "p95_ms": 181
+    },
+    {
+      "requested_rate": 20,
+      "achieved_rate": 5.76,
+      "calls": 25,
+      "failures": [],
+      "p50_ms": 171,
+      "p95_ms": 178
+    },
+    {
+      "requested_rate": 40,
+      "achieved_rate": 5.66,
+      "calls": 25,
+      "failures": [],
+      "p50_ms": 174,
+      "p95_ms": 192
+    }
+  ],
+  "aborted": null,
+  "calls_spent": 125
+}

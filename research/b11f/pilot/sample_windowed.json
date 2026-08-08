@@ -1,0 +1,9 @@
+{
+  "sampled": 80,
+  "windowed_mean": 1282.9,
+  "windowed_median": 31.0,
+  "alltime_mean": 1282.9375,
+  "projected": 43446691.400000006,
+  "stderr_projected": 9095168.087843122,
+  "mean_pages": 2.0875
+}
