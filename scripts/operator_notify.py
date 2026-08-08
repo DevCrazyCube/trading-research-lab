@@ -213,6 +213,14 @@ def main(argv=None):
     sub.add_parser("chat-id", help="print the chat id of whoever last messaged the bot")
     test = sub.add_parser("test", help="send one message")
     test.add_argument("--text", default="B11a notifier online.")
+    say = sub.add_parser("say", help="send an arbitrary message; refuses if it carries a credential")
+    say.add_argument("--text", required=True)
+    say.add_argument("--from", dest="seat", default=None,
+                     help="which seat is speaking, prefixed to the message")
+    commit = sub.add_parser("commit", help="announce a git commit by subject line only")
+    commit.add_argument("--sha", required=True)
+    commit.add_argument("--subject", required=True)
+    commit.add_argument("--seat", default=None)
     watcher = sub.add_parser("watch", help="poll the supervisor state and push on change")
     watcher.add_argument("--interval", type=int, default=60)
     sub.add_parser("status", help="print the safe projection without sending anything")
@@ -229,6 +237,18 @@ def main(argv=None):
         return 0
     if args.command == "test":
         print("sent" if send(args.text) else "telegram rejected the message")
+        return 0
+    if args.command == "say":
+        text = f"[{args.seat}] {args.text}" if args.seat else args.text
+        print("sent" if send(text) else "telegram rejected the message")
+        return 0
+    if args.command == "commit":
+        # Subject line ONLY, never the body. Commit bodies here quote log lines, argv and error
+        # text -- exactly the places a credential travels -- and a hook that forwarded them would
+        # publish one the first time somebody pasted a failing command into a message.
+        who = f"[{args.seat}] " if args.seat else ""
+        print("sent" if send(f"{who}commit {args.sha[:8]}\n{args.subject}")
+              else "telegram rejected the message")
         return 0
     watch(interval=args.interval)
     return 0
