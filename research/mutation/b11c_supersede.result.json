@@ -2,8 +2,8 @@
   "baseline_passed": true,
   "expected_survivors": {},
   "git_ancestry_staged": true,
-  "killed": 18,
-  "mutants_declared": 18,
+  "killed": 26,
+  "mutants_declared": 26,
   "per_mutant": [
     {
       "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_it_refuses_the_plan_that_looks_obviously_right",
@@ -94,6 +94,46 @@
       "first_failing_test": "tests/test_b11c_maturity_watcher.py::SupersedeStagesTests::test_the_note_carries_the_reason_and_every_move",
       "name": "the note is not written durably, so only the return value carries the record",
       "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::ReattestInPlaceTests::test_an_unchanged_manifest_is_refused",
+      "name": "reattest attests the OLD hash instead of the tree it is looking at",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::ReattestInPlaceTests::test_a_stage_in_flight_is_refused",
+      "name": "reattest blesses a tree mid-stage, attesting a run nobody can classify",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::ReattestInPlaceTests::test_a_disagreement_between_state_and_receipts_is_refused",
+      "name": "reattest freezes a state/receipt disagreement into the record",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::ReattestInPlaceTests::test_a_non_prefix_completed_set_is_refused",
+      "name": "reattest attests a hole in the completed stages",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::ReattestInPlaceTests::test_a_held_lock_is_refused",
+      "name": "reattest runs under a live supervisor",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::ReattestInPlaceTests::test_clearing_records_the_quarantine_verbatim",
+      "name": "reattest DISCARDS the completed stages -- the exact failure it exists to prevent",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::ReattestInPlaceTests::test_the_prior_state_is_archived_not_overwritten",
+      "name": "reattest does not archive the prior state, so the old manifest is unrecoverable",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11c_maturity_watcher.py::ReattestInPlaceTests::test_a_quarantine_is_not_cleared_unless_asked",
+      "name": "reattest clears a quarantine nobody asked to clear",
+      "outcome": "killed"
     }
   ],
   "pytest_args": [],
@@ -109,6 +149,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "aa68464174e92b05c38668d16f1a93e4fb3e8d5a361c79f58c23fee69481983a",
+  "working_tree_sha256": "89fe6b0a5c373f29634cdb2c7ac69da77c1c67428cdcff6091d15505710ce495",
   "working_tree_unchanged": true
 }

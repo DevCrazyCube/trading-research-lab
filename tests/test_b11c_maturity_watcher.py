@@ -2214,3 +2214,126 @@ class StageArgvActuallyParsesTests(unittest.TestCase):
         self.assertNotIn("build", usage,
                          "b11f declares no `build` subcommand, which is why the original argv died")
         self.assertIn("--source", usage, "the scan must actually be reading a usage line")
+
+
+class ReattestInPlaceTests(unittest.TestCase):
+    """Adopting a new manifest without discarding the work already done.
+
+    The gap that cost a launch: supersede retires stages and archive_run discards the state, so a
+    restart re-freezes from zero. Both are right when the work must be redone and NEITHER is right
+    when a pinned file changed for a reviewed reason and five stages are still valid -- re-freezing
+    there re-runs the local stages, which refuse, because a cohort artifact is written once.
+    """
+
+    def setUp(self):
+        self.work = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.work, ignore_errors=True)
+        self.receipts = self.work / "receipts"
+        self.receipts.mkdir()
+        self.archive = self.work / "superseded"
+        self.state_path = self.work / "supervisor_state.json"
+        self.lock = self.work / "supervisor.lock"
+        self.done = list(W.RUN_ORDER[:3])
+        for stage in self.done:
+            (self.receipts / f"{stage}.json").write_text(
+                json.dumps({"stage": stage, "completed": True}))
+        self.state = {"stages_completed": list(self.done), "stage_in_flight": None,
+                      "quarantine": None, "state": "running_stage",
+                      "manifest_sha256": "stale" + "0" * 59}
+        self.write_state()
+
+    def write_state(self):
+        self.state_path.write_text(json.dumps(self.state))
+
+    def reattest(self, reason="a pinned file changed for a reviewed reason", **kwargs):
+        return W.reattest_in_place(
+            reason, work_dir=self.work, state_path=self.state_path, lock_path=self.lock,
+            receipt_dir=self.receipts, archive_dir=self.archive, stamp="20260808T150000Z", **kwargs)
+
+    # -- the thing it exists for -----------------------------------------------------------------
+
+    def test_it_adopts_the_current_manifest_and_keeps_every_completed_stage(self):
+        note = self.reattest()
+        state = json.loads(self.state_path.read_text())
+        self.assertEqual(state["manifest_sha256"], W.manifest_hash(W.build_manifest()))
+        self.assertEqual(state["stages_completed"], self.done,
+                         "the completed work must survive; re-running it is what this avoids")
+        self.assertEqual(note["stages_preserved"], self.done)
+        self.assertNotEqual(note["manifest_before"], note["manifest_after"])
+
+    def test_the_prior_state_is_archived_not_overwritten(self):
+        self.reattest()
+        archived = self.archive / "20260808T150000Z" / "supervisor_state.before.json"
+        self.assertTrue(archived.exists())
+        self.assertEqual(json.loads(archived.read_text())["manifest_sha256"],
+                         "stale" + "0" * 59)
+
+    # -- refusals, each a way this could launder a mistake ---------------------------------------
+
+    def test_it_computes_the_manifest_itself_and_takes_none_on_trust(self):
+        """A re-attestation that accepts a hash attests what the caller believed, not the disk."""
+        import inspect
+        signature = inspect.signature(W.reattest_in_place)
+        self.assertNotIn("manifest", signature.parameters)
+        self.assertNotIn("manifest_sha256", signature.parameters)
+
+    def test_an_unchanged_manifest_is_refused(self):
+        self.state["manifest_sha256"] = W.manifest_hash(W.build_manifest())
+        self.write_state()
+        with self.assertRaisesRegex(W.WatcherRefused, "nothing changed"):
+            self.reattest()
+
+    def test_a_stage_in_flight_is_refused(self):
+        self.state["stage_in_flight"] = "transaction_bodies"
+        self.write_state()
+        with self.assertRaisesRegex(W.WatcherRefused, "in flight"):
+            self.reattest()
+
+    def test_a_disagreement_between_state_and_receipts_is_refused(self):
+        self.state["stages_completed"] = self.done[:2]
+        self.write_state()
+        with self.assertRaisesRegex(W.WatcherRefused, "receipts say"):
+            self.reattest()
+
+    def test_a_non_prefix_completed_set_is_refused(self):
+        (self.receipts / f"{W.RUN_ORDER[0]}.json").unlink()
+        self.state["stages_completed"] = list(W.RUN_ORDER[1:3])
+        self.write_state()
+        with self.assertRaisesRegex(W.WatcherRefused, "PREFIX"):
+            self.reattest()
+
+    def test_a_held_lock_is_refused(self):
+        import fcntl
+        self.lock.write_text("1")
+        handle = open(self.lock, "r+")
+        self.addCleanup(handle.close)
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        self.addCleanup(lambda: fcntl.flock(handle.fileno(), fcntl.LOCK_UN))
+        with self.assertRaisesRegex(W.WatcherRefused, "instance lock is held"):
+            self.reattest()
+
+    def test_an_unexplained_reattestation_is_refused(self):
+        with self.assertRaisesRegex(W.WatcherRefused, "without a reason"):
+            self.reattest(reason="   ")
+
+    def test_a_quarantine_is_not_cleared_unless_asked(self):
+        self.state["quarantine"] = {"reason_code": "Q07_stage_failed"}
+        self.write_state()
+        with self.assertRaisesRegex(W.WatcherRefused, "clear_quarantine was not requested"):
+            self.reattest()
+
+    def test_clearing_records_the_quarantine_verbatim(self):
+        quarantine = {"reason_code": "Q07_stage_failed", "stage": "transaction_bodies",
+                      "exit_code": 1}
+        self.state["quarantine"] = quarantine
+        self.write_state()
+        note = self.reattest(clear_quarantine=True)
+        self.assertEqual(note["quarantine_cleared"], quarantine)
+        state = json.loads(self.state_path.read_text())
+        self.assertIsNone(state["quarantine"])
+        self.assertEqual(state["stages_completed"], self.done, "clearing must not lose the work")
+
+    def test_it_refuses_when_there_is_no_state_at_all(self):
+        self.state_path.unlink()
+        with self.assertRaisesRegex(W.WatcherRefused, "nothing to re-attest"):
+            self.reattest()

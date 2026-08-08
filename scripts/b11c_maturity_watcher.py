@@ -1093,6 +1093,108 @@ def supersede_stages(names, reason, work_dir=WORK_DIR, state_path=STATE_PATH,
     return note
 
 
+def reattest_in_place(reason, work_dir=WORK_DIR, state_path=STATE_PATH, lock_path=LOCK_PATH,
+                      receipt_dir=RECEIPT_DIR, archive_dir=ARCHIVE_DIR, clear_quarantine=False,
+                      stamp=None):
+    """Adopt the CURRENT tree's manifest while keeping the work already done.
+
+    The gap this fills, which cost a launch before it was noticed: `supersede_stages` retires
+    stages and `archive_run` discards the state so a restart re-freezes from zero. Both are right
+    when the work must be redone. NEITHER is right when a pinned file changed for a reviewed reason
+    and the completed stages are still valid -- re-freezing there resets `stages_completed` to
+    empty, re-runs the local stages, and they refuse, because a cohort artifact is written once.
+    The correct move is to change the ATTESTATION and nothing else.
+
+    What it will not do, and why each one is a way this could launder a mistake:
+
+      - It computes the new manifest ITSELF and never accepts one as an argument. A re-attestation
+        that takes the hash on trust attests whatever the caller believed rather than what is on
+        disk, which is the exact substitution the manifest exists to detect.
+      - It refuses when the manifest has NOT changed. A no-op reported as a re-attestation is a
+        record of an event that did not happen.
+      - It refuses while a stage is in flight. That is Q08 territory: a partial artifact is not a
+        checkpoint, and blessing the tree mid-stage would attest a run whose current output nobody
+        can classify.
+      - It refuses when the state and the receipts disagree about what completed. Re-attesting over
+        an inconsistency freezes it into the record instead of surfacing it.
+      - It refuses a completed set that is not a PREFIX of the run order, for the same reason
+        `supersede_stages` does: a hole is indistinguishable from a skipped stage.
+
+    Never destructive. The prior state is copied into `superseded/<stamp>/` beside a note carrying
+    both manifests, the preserved stages and any quarantine cleared -- verbatim, because once the
+    live state is rewritten that note is the only account of why the run stopped.
+    """
+    if not (reason or "").strip():
+        raise WatcherRefused("a re-attestation without a reason cannot be audited; state why")
+    if lock_is_held(lock_path):
+        raise WatcherRefused(
+            "the instance lock is held, so a supervisor is alive. Re-attesting under a running "
+            "collection would change the manifest it is checking itself against, mid-run")
+
+    state = read_state(state_path)
+    if not state:
+        raise WatcherRefused(
+            f"no state at {state_path}; there is nothing to re-attest. A fresh start attests the "
+            "current tree by itself")
+    if state.get("stage_in_flight"):
+        raise WatcherRefused(
+            f"{state['stage_in_flight']!r} is in flight. A partial artifact is not a checkpoint and "
+            "this process cannot tell an interrupted stage from a corrupted one -- the same reason "
+            f"a resume raises {Q08_STAGE_INTERRUPTED}. Stop the stage first")
+
+    recorded = list(state.get("stages_completed") or [])
+    from_receipts = completed_stages(receipt_dir)
+    if recorded != list(from_receipts):
+        raise WatcherRefused(
+            f"the state says {recorded} completed and the receipts say {list(from_receipts)}. "
+            "Re-attesting over a disagreement would freeze it into the record; the receipts are "
+            "the evidence, so reconcile before attesting")
+    if list(recorded) != list(RUN_ORDER[:len(recorded)]):
+        raise WatcherRefused(
+            f"completed stages {recorded} are not a PREFIX of {list(RUN_ORDER)}. A hole cannot be "
+            "distinguished from a skipped stage, so it may not be attested either")
+
+    previous_manifest = state.get("manifest_sha256")
+    manifest = build_manifest()
+    current = manifest_hash(manifest)
+    if current == previous_manifest:
+        raise WatcherRefused(
+            f"the manifest is already {current}; nothing changed. A re-attestation that attests "
+            "the same tree records an event that did not happen")
+
+    quarantine = state.get("quarantine")
+    if quarantine and not clear_quarantine:
+        raise WatcherRefused(
+            f"the watcher is quarantined ({quarantine.get('reason_code')}) and clear_quarantine was "
+            "not requested. Re-attesting without clearing it leaves a run that cannot start for a "
+            "reason that no longer applies; clearing it silently would erase why it stopped")
+
+    stamp = stamp or time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    destination = pathlib.Path(archive_dir) / stamp
+    if destination.exists():
+        raise WatcherRefused(f"{destination} already exists; two records claiming one moment")
+    destination.mkdir(parents=True)
+    atomic_write_json(destination / "supervisor_state.before.json", state, "prior state")
+    note = {
+        "reason": reason,
+        "archived_at": stamp,
+        "manifest_before": previous_manifest,
+        "manifest_after": current,
+        "manifest_files": len(manifest),
+        "stages_preserved": recorded,
+        "quarantine_cleared": quarantine if clear_quarantine else None,
+    }
+    assert_no_secret(json.dumps(note), "the re-attestation note")
+    atomic_write_json(destination / "reattested.json", note, "re-attestation note")
+
+    state["manifest_sha256"] = current
+    if clear_quarantine:
+        state["quarantine"] = None
+        state["state"] = STATE_WAITING
+    write_state(state, state_path)
+    return note
+
+
 def is_retryable(message):
     lowered = str(message).lower()
     return any(marker in lowered for marker in RETRYABLE_MARKERS)

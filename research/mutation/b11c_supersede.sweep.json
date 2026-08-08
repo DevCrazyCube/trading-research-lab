@@ -20,8 +20,8 @@
     },
     {
       "name": "a live supervisor no longer blocks the move",
-      "old": "    if lock_is_held(lock_path):",
-      "new": "    if False:"
+      "old": "    if lock_is_held(lock_path):\n        raise WatcherRefused(\n            \"the instance lock is held, so a supervisor is alive. Moving receipts out from under a \"\n",
+      "new": "    if False:\n        raise WatcherRefused(\n            \"the instance lock is held, so a supervisor is alive. Moving receipts out from under a \"\n"
     },
     {
       "name": "an unknown stage name is accepted",
@@ -40,8 +40,8 @@
     },
     {
       "name": "an unexplained supersede is allowed",
-      "old": "    if not (reason or \"\").strip():",
-      "new": "    if False:"
+      "old": "    if not (reason or \"\").strip():\n        raise WatcherRefused(\n",
+      "new": "    if False:\n        raise WatcherRefused(\n"
     },
     {
       "name": "a stage with no receipt is superseded anyway",
@@ -65,18 +65,18 @@
     },
     {
       "name": "a second supersede overwrites an existing archive",
-      "old": "    if destination.exists():",
-      "new": "    if False:"
+      "old": "    if destination.exists():\n        raise WatcherRefused(\n",
+      "new": "    if False:\n        raise WatcherRefused(\n"
     },
     {
       "name": "a quarantine is cleared without anybody asking",
-      "old": "    if quarantine and not clear_quarantine:",
-      "new": "    if False:"
+      "old": "    if quarantine and not clear_quarantine:\n        raise WatcherRefused(\n            f\"the watcher is quarantined ({quarantine.get('reason_code')}) and clear_quarantine \"\n",
+      "new": "    if False:\n        raise WatcherRefused(\n            f\"the watcher is quarantined ({quarantine.get('reason_code')}) and clear_quarantine \"\n"
     },
     {
       "name": "the cleared quarantine is not recorded, so the reason for the stop is lost",
-      "old": "        \"quarantine_cleared\": quarantine if clear_quarantine else None,",
-      "new": "        \"quarantine_cleared\": None,"
+      "old": "        \"quarantine_cleared\": quarantine if clear_quarantine else None,\n    }\n    assert_no_secret(json.dumps(note), \"the supersede note\")\n",
+      "new": "        \"quarantine_cleared\": None,\n    }\n    assert_no_secret(json.dumps(note), \"the supersede note\")\n"
     },
     {
       "name": "the receipt is deleted rather than archived",
@@ -97,6 +97,46 @@
       "name": "the note is not written durably, so only the return value carries the record",
       "old": "    atomic_write_json(destination / \"superseded.json\", note, \"supersede note\")",
       "new": "    pass"
+    },
+    {
+      "name": "reattest attests the OLD hash instead of the tree it is looking at",
+      "old": "    manifest = build_manifest()\n    current = manifest_hash(manifest)\n    if current == previous_manifest:",
+      "new": "    manifest = build_manifest()\n    current = previous_manifest\n    if False:"
+    },
+    {
+      "name": "reattest blesses a tree mid-stage, attesting a run nobody can classify",
+      "old": "    if state.get(\"stage_in_flight\"):\n        raise WatcherRefused(\n",
+      "new": "    if False:\n        raise WatcherRefused(\n"
+    },
+    {
+      "name": "reattest freezes a state/receipt disagreement into the record",
+      "old": "    if recorded != list(from_receipts):",
+      "new": "    if False:"
+    },
+    {
+      "name": "reattest attests a hole in the completed stages",
+      "old": "    if list(recorded) != list(RUN_ORDER[:len(recorded)]):",
+      "new": "    if False:"
+    },
+    {
+      "name": "reattest runs under a live supervisor",
+      "old": "    if lock_is_held(lock_path):\n        raise WatcherRefused(\n            \"the instance lock is held, so a supervisor is alive. Re-attesting under a running \"",
+      "new": "    if False:\n        raise WatcherRefused(\n            \"the instance lock is held, so a supervisor is alive. Re-attesting under a running \""
+    },
+    {
+      "name": "reattest DISCARDS the completed stages -- the exact failure it exists to prevent",
+      "old": "    state[\"manifest_sha256\"] = current\n    if clear_quarantine:",
+      "new": "    state[\"manifest_sha256\"] = current\n    state[\"stages_completed\"] = []\n    if clear_quarantine:"
+    },
+    {
+      "name": "reattest does not archive the prior state, so the old manifest is unrecoverable",
+      "old": "    atomic_write_json(destination / \"supervisor_state.before.json\", state, \"prior state\")",
+      "new": "    pass"
+    },
+    {
+      "name": "reattest clears a quarantine nobody asked to clear",
+      "old": "    if quarantine and not clear_quarantine:\n        raise WatcherRefused(\n            f\"the watcher is quarantined ({quarantine.get('reason_code')}) and clear_quarantine was \"\n            \"not requested. Re-attesting without clearing it leaves a run that cannot start for a \"",
+      "new": "    if False:\n        raise WatcherRefused(\n            f\"the watcher is quarantined ({quarantine.get('reason_code')}) and clear_quarantine was \"\n            \"not requested. Re-attesting without clearing it leaves a run that cannot start for a \""
     }
   ]
 }
