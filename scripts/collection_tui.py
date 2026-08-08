@@ -72,12 +72,22 @@ RESET = "\033[0m"
 BOLD = "\033[1m"
 
 
+# Eighths, so one cell carries eight visible states instead of one. Over 153,473 blocks a
+# whole-cell bar advances once every 29 minutes, which reads as broken -- and a progress bar that
+# never moves is worse than no progress bar, because it says the run is stuck.
+PARTIALS = " ▏▎▍▌▋▊▉"
+
+
 def bar(done, total, width=34, filled_colour=CORAL, empty_colour=DIM):
-    """A proportional bar. `total` of zero renders empty rather than dividing."""
+    """A proportional bar with sub-cell resolution. `total` of zero renders empty."""
     fraction = (done / total) if total else 0.0
     fraction = max(0.0, min(1.0, fraction))
-    cells = int(fraction * width)
-    return (fg(filled_colour) + "█" * cells + fg(empty_colour) + "░" * (width - cells) + RESET,
+    exact = fraction * width
+    cells = int(exact)
+    remainder = exact - cells
+    tip = PARTIALS[int(remainder * 8)] if cells < width else ""
+    empty = width - cells - (1 if tip else 0)
+    return (fg(filled_colour) + "█" * cells + tip + fg(empty_colour) + "░" * max(0, empty) + RESET,
             fraction)
 
 
@@ -298,6 +308,14 @@ def render(previous):
         blocks_left = max(0, targets["blocks"] - (counts["blocks"] or 0))
         txns_left = max(0, targets["txns"] - (counts["txns"] or 0))
         add("")
+        history = previous.setdefault("history", [])
+        history.append((now, total_done))
+        while history and now - history[0][0] > 300:
+            history.pop(0)
+        per_minute = None
+        if len(history) > 1 and history[-1][0] - history[0][0] > 20:
+            span = history[-1][0] - history[0][0]
+            per_minute = (history[-1][1] - history[0][1]) / span * 60
         if rate:
             in_blocks = blocks_left > 0
             phase_eta = (blocks_left / rate) if in_blocks else (txns_left / rate)
@@ -306,6 +324,11 @@ def render(previous):
                 f"{fg(DIM)}{phase} left{RESET} {fg(CREAM)}"
                 f"{thousands(blocks_left if in_blocks else txns_left)}{RESET}   "
                 f"{fg(DIM)}this phase{RESET} {fg(CORAL)}{human_time(phase_eta)}{RESET}")
+            if per_minute is not None:
+                finish = time.localtime(now + phase_eta)
+                add(f"  {fg(DIM)}last 5 min{RESET} {fg(CREAM)}{per_minute:,.0f}/min{RESET}   "
+                    f"{fg(DIM)}done around{RESET} {fg(CORAL)}"
+                    f"{time.strftime('%a %H:%M', finish)}{RESET}")
             if in_blocks and txns_left:
                 add(f"  {fg(DIM)}then {thousands(txns_left)} transactions, which fetch faster "
                     f"per call{RESET}")
