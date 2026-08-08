@@ -1,0 +1,66 @@
+{
+  "preregistration_id": "B11F_COHORT_SUBSAMPLE_V1",
+  "schema_version": "1.0.0",
+  "date": "2026-08-08",
+  "author": "Claude (claude seat, handoff 237), owner-authorized re-scoping",
+  "status": "FROZEN before any outcome for this window exists. Stage 4 (signature_inventory) has never run against B11a; no signature count, trade, graduation, price, or reserve has been observed for any curve in this cohort. This document is written into that clean state deliberately.",
+
+  "why_this_exists": {
+    "the_scale_finding": "The B11a cohort is 33,866 curves -- every Pump create in a 24h window, not a selected set. Stage 5 (transaction_bodies) fetches one getTransaction per signature. The pipeline was sized against the burned B9 study's ~59 signatures per curve; a direct measurement disproves that for this window.",
+    "the_measurement_not_an_extrapolation": "80 curves drawn at random (fixed seed) from the cohort, signatures counted at or below the observation cutoff: min 1, p25 2, MEDIAN 31, p75 2,178, max 11,102, MEAN 1,283. The mean is ~22x the burned study's figure, and the distribution is extremely heavy-tailed -- the median curve is quiet and a few carry thousands.",
+    "the_projected_cost": "1,283 mean x 33,866 = ~43.4 million in-window signatures (the sample's own error puts it near +/- 9.1M). At the measured concurrent ceiling of 13.76 getTransaction/s (4 workers; 8 only reached 15.7 with the provider already queueing) that is ~36 days for stage 5, ~86 serial. No worker count closes it: a one-week stage needs ~72 calls/s, five times what the provider will serve this credential.",
+    "the_conclusion": "This is a SCALE problem, not a tuning one. The full cohort cannot be collected in a tractable time, and the earlier ~2.4-day estimate was an extrapolation of the burned per-curve rate onto a window ~22x more active per curve. The cohort must be subsampled, and the subsample must be chosen before any outcome is seen -- which, because stage 4 never ran, it can still be."
+  },
+
+  "the_rule": {
+    "frame": "Every curve in research/b11a/b11a_cohort.sqlite, identified by its `mint` -- the stable creation identity, one row per curve, 33,866 rows. The frame is the whole cohort; nothing is pre-excluded.",
+    "selection": "A deterministic hash-threshold uniform sample. For each curve compute key = sha256(SEED || mint) as a big-endian integer; select the N curves with the SMALLEST key. This is a uniform random draw without replacement that is also reproducible from (SEED, N) and the cohort's mints alone.",
+    "SEED": "b11f-cohort-subsample-v1",
+    "N": 2000,
+    "N_is_the_one_operational_knob": "N is the only parameter the owner may set without changing the rule's structure. It trades sample size against the cost DRAW below. 2,000 is the recommended value: a ~2-day median stage-5, wide enough for the frozen B19b/c/d studies to run with known sampling error.",
+    "why_hash_threshold_not_random_sample": "A hash on the mint is reproducible, auditable and tamper-evident: anyone can recompute the exact selection from SEED, N and the cohort, and a changed SEED or N produces a visibly different set. `random.sample` leaves no such trail.",
+    "nested_property_stated_for_honesty_not_used": "Because selection is the N smallest hashes, a larger N is a SUPERSET of a smaller one: the sample for N=1,000 is contained in the sample for N=2,000. This makes a staged approach POSSIBLE -- collect 1,000, and if the realised cost is low extend to 2,000 by collecting only the added 1,000. It is documented because it is a real property of the rule, but V1 fixes N at a single value; any staged extension is a SEPARATE preregistered decision, because letting realised cost choose the final N is a dependency on the aggregate outcome, mild but real, and it should be entered deliberately rather than drifted into."
+  },
+
+  "the_prohibition_this_document_exists_to_enforce": {
+    "no_selection_on_anything_downstream_of_launch": "The selection key is a function of `mint` and the frozen SEED ONLY. It reads NO signature count, trade count, graduation status, price, reserve, or any quantity produced after the curve was created. Those ARE the outcome; selecting on them is selecting on the dependent variable, and it is tempting precisely because dropping the quiet tokens is what would make collection cheap -- which is exactly why it is refused.",
+    "creation_time_keys_are_the_only_legitimate_ones": "What is known at t0 and MAY key a sample: a random draw (used here), launch_slot, is_mayhem_mode. What may NOT: everything the collection is being run to observe. The cohort table carries mint, bonding_curve, launch_slot, is_mayhem_mode, create_signature -- all creation-time -- and NO outcome column, so the rule cannot accidentally reach one.",
+    "a_test_will_enforce_this": "The selector implementation must take ONLY (mint, SEED, N) and a test must assert its inputs are creation-time identity, never an activity quantity -- read from the AST, the same way b16d's pricing function is proven not to read the creator's own flow.",
+    "no_redraw_on_seeing_cost": "The SEED and N are frozen here. The sample may not be redrawn, reseeded, or resized after any cost or outcome is observed. A sample chosen twice and kept once is chosen on what was seen between the draws."
+  },
+
+  "representativeness": {
+    "a_uniform_draw_preserves_the_population": "Because the draw is uniform on creation identity and independent of activity, the sample's signature distribution is the cohort's in expectation -- the heavy tail included. The 11,102-signature tokens appear in the sample in proportion, not dropped; that is the point. Research on the sample generalises to the full 33,866-curve cohort with sampling error on the order of 1/sqrt(N).",
+    "what_it_does_not_fix": "A uniform sample of a heavy-tailed population inherits the heavy tail, so the realised cost is itself heavy-tailed -- see the draw below. Representativeness and cost-predictability are in tension here, and this rule chooses representativeness, because a cost-predictable sample would require selecting on activity, which is forbidden."
+  },
+
+  "cost_is_a_draw_not_a_promise": {
+    "the_projection": "At mean 1,283 signatures/curve, N=2,000 projects ~2.57M signatures, ~52 hours (~2.2 days) at 13.76/s. That is a MEDIAN-of-draws expectation, not a guarantee.",
+    "the_tail_risk": "The draw is uniform, so a random 2,000 can pull several 11,102-signature tokens the median curve is nothing like. A single unlucky draw could push the realised cost materially above the projection; the honest statement is that stage-5 runtime for this rule is a random variable whose expectation is ~2.2 days and whose upper tail is not bounded by the rule, only by N.",
+    "per_thousand": "~26 hours of stage-5 per 1,000 curves sampled at the mean rate. The owner sets N against that: ~1,000 ~= a day, ~2,800 ~= three days, each a median with tail risk above it.",
+    "why_the_tail_is_not_capped": "Capping realised cost would mean stopping collection when a curve proves expensive, which is selecting against high-activity curves -- the forbidden dependency, arriving through the back door. The cost is accepted as a draw so the sample stays honest."
+  },
+
+  "relationship_to_the_frozen_studies": {
+    "B19b_B19c_B19d_run_on_this_subsample": "The exit-timing, capacity-wall and non-issuance-signal preregistrations were frozen against the full cohort. They now evaluate on this preregistered subsample. Their hypotheses and methods are unchanged; their statistical power is reduced in proportion to N/33,866, with wider confidence intervals that each study must report honestly.",
+    "the_preregistration_chain_is_intact": "A preregistered random subsample of a preregistered cohort, frozen before any outcome, is still preregistration -- the subsample was fixed before a single signature was collected, exactly as the studies were. No study was re-specified after seeing data; the population it runs on was narrowed by a rule written into the same clean state."
+  },
+
+  "clean_to_freeze": {
+    "stage_4_never_ran": "signature_inventory has produced no artifact for this window. No inventory, no counts, no outcomes exist. This is verified by the absence of b11a_signatures.sqlite and the quarantine record showing stage 4 exited before writing.",
+    "why_that_matters": "The whole value of this rule is that it is chosen in ignorance of what it selects. That ignorance is real here and is not to be spent by reaching for activity as a key because dropping the quiet tokens is cheap."
+  },
+
+  "what_remains_to_build": {
+    "the_selector": "scripts/b11f_cohort_subsample.py: a pure function selected(cohort_mints, seed=SEED, n=N) -> the N mints, plus a CLI stage that writes the subsampled cohort artifact stage 4 will read. Committed AFTER this document, separately, so the document provably precedes the code that reads it.",
+    "the_pipeline_wiring": "stage 4's --source (and stage 3's cohort output, or a new subsample stage between 3 and 4) points at the subsampled cohort rather than the full one. That edits b11c and its manifest -- a change on the far side of the re-attestation, owner-authorized, reviewed both directions, exactly as the cutoff fix was.",
+    "tests_and_sweep": "the selector's leakage prohibition and nested property earn tests and a mutation sweep before anything runs, per the standing discipline."
+  },
+
+  "status_locks": {
+    "executable": false,
+    "performance_status": "not_evaluated",
+    "execution_status": "never_executed",
+    "this_document_selects_no_curve_yet": "It fixes the RULE. The selection is realised only when the selector runs against the cohort, which is a separate, later, owner-gated step. Freezing the rule is not running it."
+  }
+}
