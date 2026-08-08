@@ -282,6 +282,13 @@
       "status": "NOT_A_READINESS_COMPONENT",
       "role": "reading note on r/CryptoTradingBot and r/ai_trading, retrieved 2026-08-07. EVERY figure in it is an unverified third-party claim and none may be used as a threshold, parameter, cost assumption or prior. Recorded because the tool leads and validation techniques are cheap to lose, and because one post is a direct warning about the class of project this is.",
       "establishes": "nothing about any strategy; no result, edge, cost figure or threshold"
+    },
+    {
+      "path": "scripts/operator_notify.py",
+      "status": "NOT_A_READINESS_COMPONENT",
+      "role": "Telegram notifier for B11a collection events and agent commits",
+      "has": "read-only projection of the supervisor state into named fields, outbound HTTPS to Telegram, a credential guard that refuses rather than redacts, and a post-commit hook so both agent seats are audible to the operator",
+      "why_not_a_readiness_component": "It OBSERVES and never participates. It opens the supervisor state read-only, writes no artifact, no receipt and no lock, and a test asserts the module names no write of its own. If it dies the collection does not notice. It is deliberately NOT manifest-pinned either -- pinning an observer would let an edit to the notifier quarantine the collection, inverting the relationship. Nothing about live-trading readiness depends on it: it carries no decision, execution, clock, fee or outcome field, and reaching a phone is not a property any gate may rest on."
     }
   ],
   "verified_absent": [
