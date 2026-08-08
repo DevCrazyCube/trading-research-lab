@@ -3763,3 +3763,120 @@ class VerifyIsNoWeakerThanMintTests(BoundaryCollectorTests):
         """The accept path: mint and verify agree, nothing tampered."""
         db = self._built(B9D.CUTOFF_SLOT + 50)
         self.assertTrue(B9D.assert_boundary_evidence_complete(db))
+
+
+class SerialAndConcurrentProduceIdenticalRowsTests(unittest.TestCase):
+    """The load-bearing proof: --workers changes only HOW fast the same bytes are collected, never
+    WHICH bytes. A pool of one would look equivalent; this runs a real 2-worker pool against the
+    same synthetic population and asserts the artifacts match row-for-row on every deterministic
+    column. received_at_unix is wall-clock and excluded; everything that is evidence is compared."""
+
+    def setUp(self):
+        self.saved = (B9D.assert_sources, B9D.frozen_population_by_slot, B9D.rpc_request,
+                      B9D.assert_raw_transaction_population)
+        slots = {700 + i: {f"sig_{700+i}_{j}" for j in range(2)} for i in range(4)}
+        self.slots = slots
+        B9D.assert_sources = lambda *a, **k: {B9D.B9C_PATH: B9D.B9C_SHA256,
+                                              B9D.B9A_PATH: B9D.B9A_SHA256}
+        B9D.frozen_population_by_slot = lambda *a, **k: slots
+        B9D.assert_raw_transaction_population = lambda *a, **k: True
+        meta = {f: 0 for f in B9D.REQUIRED_META_FIELDS}
+
+        def rpc(endpoint, method, params, request_id):
+            if method == "getBlock":
+                slot = params[0]
+                result = {"signatures": sorted(slots[slot])}
+            else:
+                signature = params[0]
+                result = {"slot": int(signature.split("_")[1]), "meta": dict(meta),
+                          "transaction": ["QQ==", "base64"]}
+            raw = json.dumps({"jsonrpc": "2.0", "id": request_id, "result": result},
+                             separators=(",", ":")).encode()
+            return raw, result
+        B9D.rpc_request = rpc
+        for name, value in zip(("assert_sources", "frozen_population_by_slot", "rpc_request",
+                                "assert_raw_transaction_population"), self.saved):
+            self.addCleanup(setattr, B9D, name, value)
+
+    def _collect(self, workers):
+        path = pathlib.Path(tempfile.mkdtemp()) / "b9d.sqlite"
+        B9D.collect_raw_population("https://rpc.invalid", str(path),
+                                   max_slots=10, max_transactions=100, workers=workers)
+        db = sqlite3.connect(str(path))
+        rows = {}
+        for table, key in (("raw_block_signatures", "slot"),
+                           ("raw_transaction", "signature"),
+                           ("transaction_coordinate", "signature")):
+            cols = [c[1] for c in db.execute(f"PRAGMA table_info({table})")
+                    if c[1] != "received_at_unix"]
+            rows[table] = sorted(tuple(r) for r in db.execute(
+                f"SELECT {','.join(cols)} FROM {table}"))
+        db.close()
+        return rows
+
+    def test_two_workers_produce_the_same_rows_as_one(self):
+        one = self._collect(1)
+        two = self._collect(2)
+        self.assertEqual(one, two)
+        # And it actually collected: not an empty-equals-empty pass.
+        self.assertEqual(len(one["raw_block_signatures"]), 4)
+        self.assertEqual(len(one["raw_transaction"]), 8)
+
+    def test_four_workers_also_match(self):
+        self.assertEqual(self._collect(1), self._collect(4))
+
+    def test_exactly_one_preflight_marker_regardless_of_workers(self):
+        """The preflight shape-checks and marks ONE signature; concurrency must not race it."""
+        for workers in (1, 2, 4):
+            path = pathlib.Path(tempfile.mkdtemp()) / "b9d.sqlite"
+            B9D.collect_raw_population("https://rpc.invalid", str(path),
+                                       max_slots=10, max_transactions=100, workers=workers)
+            db = sqlite3.connect(str(path))
+            n = db.execute("SELECT count(*) FROM metadata WHERE key='transaction_shape_preflight'"
+                           ).fetchone()[0]
+            db.close()
+            self.assertEqual(n, 1, f"workers={workers} left {n} preflight markers")
+
+    def test_workers_out_of_range_is_refused(self):
+        # Assert the WORKER-bound message specifically: without it a generic FreezeViolation is also
+        # raised by the population-completeness gate downstream, so both the real check and a removed
+        # one would "refuse" and the guard would look tested when it was not. max_slots keeps the
+        # population gate quiet so only the worker bound can fire.
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.collect_raw_population("https://rpc.invalid",
+                                       str(pathlib.Path(tempfile.mkdtemp()) / "x.sqlite"),
+                                       max_slots=10, max_transactions=100, workers=9)
+        self.assertIn("workers must be an integer in 1..8", str(v.exception))
+
+
+class WorkersDefaultsToOneTests(unittest.TestCase):
+    """The default IS the serial path. If nothing enforces default=1, an additive change quietly
+    becomes a behaviour change every existing caller inherits -- the seat's load-bearing point."""
+
+    def test_the_collector_default_is_one_worker(self):
+        import inspect
+        self.assertEqual(inspect.signature(B9D.collect_raw_population)
+                         .parameters["workers"].default, 1)
+        self.assertEqual(inspect.signature(B9D._collect_raw_population)
+                         .parameters["workers"].default, 1)
+
+    def test_the_run_argument_defaults_to_one(self):
+        parser = None
+        import argparse, io, contextlib
+        # Parse a minimal run invocation and read the default off the namespace.
+        with contextlib.redirect_stderr(io.StringIO()):
+            try:
+                ns = B9D.build_arg_parser().parse_args(
+                    ["run", "/tmp/x", "--b9c", "/tmp/c", "--b9a", "/tmp/a"]) \
+                    if hasattr(B9D, "build_arg_parser") else None
+            except Exception:
+                ns = None
+        if ns is not None:
+            self.assertEqual(ns.workers, 1)
+        else:
+            # No factory to call; assert the literal default in the source is 1.
+            import re, pathlib
+            src = pathlib.Path(B9D.__file__).read_text()
+            m = re.search(r'run\.add_argument\("--workers"[^)]*default=(\d+)', src, re.S)
+            self.assertIsNotNone(m)
+            self.assertEqual(m.group(1), "1")

@@ -55,6 +55,31 @@
       "name": "verify skips condition-1 against the preserved read",
       "old": "            if row[\"coverage\"] == \"covered\" and row[\"to_slot\"] > programdata_header[\"context_slot\"]:",
       "new": "            if False and row[\"to_slot\"] > programdata_header[\"context_slot\"]:"
+    },
+    {
+      "name": "the collector default is no longer 1 worker",
+      "old": "                           calls_per_second=2.5, cutoff_slot=CUTOFF_SLOT, workers=1):\n    with collector_lock(output):",
+      "new": "                           calls_per_second=2.5, cutoff_slot=CUTOFF_SLOT, workers=2):\n    with collector_lock(output):"
+    },
+    {
+      "name": "the run argument default is no longer 1",
+      "old": "    run.add_argument(\"--workers\", type=int, default=1,",
+      "new": "    run.add_argument(\"--workers\", type=int, default=2,"
+    },
+    {
+      "name": "the worker-count bound is removed",
+      "old": "        if not isinstance(workers, int) or isinstance(workers, bool) or not 1 <= workers <= 8:",
+      "new": "        if False:"
+    },
+    {
+      "name": "the preflight is not run serially before the pool",
+      "old": "            if not preflight_done and pending:",
+      "new": "            if False and pending:"
+    },
+    {
+      "name": "the concurrent request id stops being position-based",
+      "old": "            rest = list(enumerate(pending[start:], start + 1))",
+      "new": "            rest = [(0, item) for item in pending[start:]]"
     }
   ],
   "expected_survivors": [],

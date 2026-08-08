@@ -14,10 +14,12 @@ transaction.
 import argparse
 import base64
 import binascii
+import concurrent.futures
 import contextlib
 import fcntl
 import hashlib
 import json
+import threading
 import os
 import sqlite3
 import struct
@@ -2936,16 +2938,16 @@ def collector_lock(output):
 
 def collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                            max_slots=None, max_transactions=None, progress_every=100,
-                           calls_per_second=2.5, cutoff_slot=CUTOFF_SLOT):
+                           calls_per_second=2.5, cutoff_slot=CUTOFF_SLOT, workers=1):
     with collector_lock(output):
         return _collect_raw_population(
             endpoint, output, b9c_path, b9a_path, max_slots, max_transactions,
-            progress_every, calls_per_second, cutoff_slot)
+            progress_every, calls_per_second, cutoff_slot, workers)
 
 
 def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PATH,
                             max_slots=None, max_transactions=None, progress_every=100,
-                            calls_per_second=2.5, cutoff_slot=CUTOFF_SLOT):
+                            calls_per_second=2.5, cutoff_slot=CUTOFF_SLOT, workers=1):
     """Resumably preserve block coordinates and transaction response bodies; no decoding yet."""
     # §11: this must be the first observable action on an existing output. In particular it comes
     # before source hashing/population scans and before the writable `connect()` that sets WAL and
@@ -2958,6 +2960,8 @@ def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PA
         initialize_run(database, endpoint, digests, cutoff_slot)
         if calls_per_second <= 0:
             raise FreezeViolation("calls_per_second must be positive")
+        if not isinstance(workers, int) or isinstance(workers, bool) or not 1 <= workers <= 8:
+            raise FreezeViolation(f"workers must be an integer in 1..8, got {workers!r}")
         minimum_interval = 1.0 / calls_per_second
         last_call = [None]
 
@@ -2970,16 +2974,28 @@ def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PA
             last_call[0] = time.monotonic()
             return raw_result
 
-        done_blocks = {row[0] for row in database.execute("SELECT slot FROM raw_block_signatures")}
-        block_count = 0
-        for slot in sorted(grouped):
-            if slot in done_blocks:
-                continue
-            if max_slots is not None and block_count >= max_slots:
-                break
-            params = [slot, {"commitment": "finalized", "transactionDetails": "signatures",
-                             "rewards": False, "maxSupportedTransactionVersion": 0}]
-            raw, result = paced_request("getBlock", params, request_id=slot)
+        # The concurrent path's rate gate is SEPARATE from `paced_request` above, deliberately: the
+        # serial gate measures end-to-start (its sleep waits a full interval AFTER each request
+        # returns) and is left byte-identical for workers=1. The concurrent gate measures
+        # start-to-start under a lock, so calls_per_second is a global ceiling on the START rate
+        # across all threads while slow requests overlap -- the only model that makes the flag mean
+        # one thing whatever the worker count. Both share `last_call`; only one path runs per call.
+        rate_lock = threading.Lock()
+
+        def rate_limited_request(method, params, request_id):
+            with rate_lock:
+                if last_call[0] is not None:
+                    remaining = minimum_interval - (time.monotonic() - last_call[0])
+                    if remaining > 0:
+                        time.sleep(remaining)
+                last_call[0] = time.monotonic()
+            return rpc_request(endpoint, method, params, request_id=request_id)
+
+        def block_params(slot):
+            return [slot, {"commitment": "finalized", "transactionDetails": "signatures",
+                           "rewards": False, "maxSupportedTransactionVersion": 0}]
+
+        def write_block(slot, params, raw, result):
             if not isinstance(result, dict) or not isinstance(result.get("signatures"), list):
                 raise FreezeViolation(f"slot {slot}: getBlock lacks a signatures list")
             coordinates = transaction_coordinates(slot, result["signatures"], grouped[slot])
@@ -2988,42 +3004,130 @@ def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PA
                 database.executemany(
                     "INSERT OR IGNORE INTO transaction_coordinate VALUES (?,?,?)",
                     [(signature, slot, index) for signature, index in coordinates.items()])
-            block_count += 1
-            if progress_every and block_count % progress_every == 0:
-                print(f"blocks +{block_count}; latest slot {slot}", flush=True)
+
+        done_blocks = {row[0] for row in database.execute("SELECT slot FROM raw_block_signatures")}
+        block_count = 0
+        if workers == 1:
+            # The serial path, unchanged: end-to-start pacing, one connection, one thread.
+            for slot in sorted(grouped):
+                if slot in done_blocks:
+                    continue
+                if max_slots is not None and block_count >= max_slots:
+                    break
+                params = block_params(slot)
+                raw, result = paced_request("getBlock", params, request_id=slot)
+                write_block(slot, params, raw, result)
+                block_count += 1
+                if progress_every and block_count % progress_every == 0:
+                    print(f"blocks +{block_count}; latest slot {slot}", flush=True)
+        else:
+            # Concurrent FETCH, main-thread WRITE. `ex.map` streams results in submission order, so
+            # the write order matches the serial path exactly and the single writer is preserved
+            # without a lock; a worker only fetches. Pending is a fixed disjoint list, so no slot is
+            # claimed twice, and a write is one atomic transaction, so an interrupted run leaves a
+            # slot either fully stored or absent -- never half, never falsely done.
+            pending = [slot for slot in sorted(grouped) if slot not in done_blocks]
+            if max_slots is not None:
+                pending = pending[:max_slots]
+
+            def fetch_block(slot):
+                params = block_params(slot)
+                raw, result = rate_limited_request("getBlock", params, request_id=slot)
+                return slot, params, raw, result
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+                for slot, params, raw, result in pool.map(fetch_block, pending):
+                    write_block(slot, params, raw, result)
+                    block_count += 1
+                    if progress_every and block_count % progress_every == 0:
+                        print(f"blocks +{block_count}; latest slot {slot}", flush=True)
 
         # A bounded `--max-slots` invocation is an explicit partial collection probe and must
         # remain resumable. An unbounded production pass, however, may not cross into transaction
         # bodies until the frozen block and signature populations are both exact.
+        def tx_params(signature):
+            return [signature, {"encoding": "base64", "commitment": "finalized",
+                                "maxSupportedTransactionVersion": 0}]
+
         coordinates = transaction_body_coordinates(database, require_complete=max_slots is None)
         done_transactions = {row[0] for row in database.execute("SELECT signature FROM raw_transaction")}
         transaction_count = 0
         preflight_done = database.execute(
             "SELECT value FROM metadata WHERE key='transaction_shape_preflight' ").fetchone()
-        for signature, slot in coordinates:
-            if signature in done_transactions:
-                continue
-            if max_transactions is not None and transaction_count >= max_transactions:
-                break
-            params = [signature, {"encoding": "base64", "commitment": "finalized",
-                                  "maxSupportedTransactionVersion": 0}]
-            raw, result = paced_request("getTransaction", params, transaction_count + 1)
-            if result is None:
-                raise FreezeViolation(f"{signature}: finalized getTransaction returned null")
-            if not preflight_done:
-                assert_transaction_shape(signature, result)
-            reconcile_slot(signature, slot, result.get("slot"))
-            with database:
-                store_raw(database, "raw_transaction", "signature", signature,
-                          "getTransaction", params, raw)
+        if workers == 1:
+            # The serial path, unchanged.
+            for signature, slot in coordinates:
+                if signature in done_transactions:
+                    continue
+                if max_transactions is not None and transaction_count >= max_transactions:
+                    break
+                params = tx_params(signature)
+                raw, result = paced_request("getTransaction", params, transaction_count + 1)
+                if result is None:
+                    raise FreezeViolation(f"{signature}: finalized getTransaction returned null")
                 if not preflight_done:
+                    assert_transaction_shape(signature, result)
+                reconcile_slot(signature, slot, result.get("slot"))
+                with database:
+                    store_raw(database, "raw_transaction", "signature", signature,
+                              "getTransaction", params, raw)
+                    if not preflight_done:
+                        database.execute(
+                            "INSERT INTO metadata VALUES ('transaction_shape_preflight',?)",
+                            (signature,))
+                        preflight_done = (signature,)
+                transaction_count += 1
+                if progress_every and transaction_count % progress_every == 0:
+                    print(f"transactions +{transaction_count}; latest slot {slot}", flush=True)
+        else:
+            # The request id is the item's POSITION in the pending list, not a running counter, so
+            # a signature fetched by any worker carries the same id the serial path would give it --
+            # the provider echoes that id into the stored response, so a position-based id is what
+            # makes workers=1 and workers=2 produce byte-identical rows. The preflight, which shape-
+            # checks and marks exactly ONE signature, is run SERIALLY before the pool: with N workers
+            # racing to be "first" it is a data race, so it is made a sequential prefix of one.
+            pending = [(signature, slot) for signature, slot in coordinates
+                       if signature not in done_transactions]
+            if max_transactions is not None:
+                pending = pending[:max_transactions]
+            start = 0
+            if not preflight_done and pending:
+                signature, slot = pending[0]
+                params = tx_params(signature)
+                raw, result = rate_limited_request("getTransaction", params, 1)
+                if result is None:
+                    raise FreezeViolation(f"{signature}: finalized getTransaction returned null")
+                assert_transaction_shape(signature, result)
+                reconcile_slot(signature, slot, result.get("slot"))
+                with database:
+                    store_raw(database, "raw_transaction", "signature", signature,
+                              "getTransaction", params, raw)
                     database.execute(
                         "INSERT INTO metadata VALUES ('transaction_shape_preflight',?)",
                         (signature,))
-                    preflight_done = (signature,)
-            transaction_count += 1
-            if progress_every and transaction_count % progress_every == 0:
-                print(f"transactions +{transaction_count}; latest slot {slot}", flush=True)
+                transaction_count += 1
+                start = 1
+                if progress_every and transaction_count % progress_every == 0:
+                    print(f"transactions +{transaction_count}; latest slot {slot}", flush=True)
+
+            def fetch_tx(indexed):
+                request_id, (signature, slot) = indexed
+                params = tx_params(signature)
+                raw, result = rate_limited_request("getTransaction", params, request_id)
+                return signature, slot, params, raw, result
+
+            rest = list(enumerate(pending[start:], start + 1))
+            with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+                for signature, slot, params, raw, result in pool.map(fetch_tx, rest):
+                    if result is None:
+                        raise FreezeViolation(f"{signature}: finalized getTransaction returned null")
+                    reconcile_slot(signature, slot, result.get("slot"))
+                    with database:
+                        store_raw(database, "raw_transaction", "signature", signature,
+                                  "getTransaction", params, raw)
+                    transaction_count += 1
+                    if progress_every and transaction_count % progress_every == 0:
+                        print(f"transactions +{transaction_count}; latest slot {slot}", flush=True)
 
         # `--max-transactions` is an explicitly partial, resumable probe. Only an unbounded
         # production pass may claim raw collection returned successfully, and it must carry every
@@ -3061,6 +3165,10 @@ def main(argv=None):
     run.add_argument("--cutoff-slot", type=int,
                      help="fresh mode only, REQUIRED there: the observation horizon as a slot. "
                           "The burned run's horizon is pinned; a fresh window's must be stated.")
+    run.add_argument("--workers", type=int, default=1,
+                     help="concurrent getBlock/getTransaction fetchers, 1..8, default 1. Default 1 "
+                          "keeps the serial path byte-identical; only a caller that opts in fetches "
+                          "in parallel. calls_per_second stays a GLOBAL ceiling whatever the count.")
     boundary = sub.add_parser(
         "collect-boundary", help="authorized read-only: preserve §4 ProgramData headers")
     boundary.add_argument("output")
@@ -3167,7 +3275,7 @@ def main(argv=None):
     result = collect_raw_population(
         endpoint, args.output, b9c_path=args.b9c, b9a_path=args.b9a, max_slots=args.max_slots,
         max_transactions=args.max_transactions, progress_every=args.progress_every,
-        calls_per_second=args.calls_per_second, cutoff_slot=run_cutoff)
+        calls_per_second=args.calls_per_second, cutoff_slot=run_cutoff, workers=args.workers)
     print(json.dumps(result, sort_keys=True))
     return 0
 

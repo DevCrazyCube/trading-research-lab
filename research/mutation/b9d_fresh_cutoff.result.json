@@ -2,8 +2,8 @@
   "baseline_passed": true,
   "expected_survivors": {},
   "git_ancestry_staged": false,
-  "killed": 10,
-  "mutants_declared": 10,
+  "killed": 15,
+  "mutants_declared": 15,
   "per_mutant": [
     {
       "first_failing_test": "tests/test_b9d_transaction_bodies.py::FreshCutoffIsRequiredTests::test_a_fresh_run_without_a_cutoff_refuses",
@@ -54,6 +54,31 @@
       "first_failing_test": "tests/test_b9d_transaction_bodies.py::VerifyIsNoWeakerThanMintTests::test_verify_re_applies_condition_one_against_the_preserved_context_slot",
       "name": "verify skips condition-1 against the preserved read",
       "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::WorkersDefaultsToOneTests::test_the_collector_default_is_one_worker",
+      "name": "the collector default is no longer 1 worker",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::WorkersDefaultsToOneTests::test_the_run_argument_defaults_to_one",
+      "name": "the run argument default is no longer 1",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::SerialAndConcurrentProduceIdenticalRowsTests::test_workers_out_of_range_is_refused",
+      "name": "the worker-count bound is removed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::SerialAndConcurrentProduceIdenticalRowsTests::test_exactly_one_preflight_marker_regardless_of_workers",
+      "name": "the preflight is not run serially before the pool",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::SerialAndConcurrentProduceIdenticalRowsTests::test_four_workers_also_match",
+      "name": "the concurrent request id stops being position-based",
+      "outcome": "killed"
     }
   ],
   "pytest_args": [
@@ -72,6 +97,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "28fcb50d0fe02bb5262e418b0eff44e6d27162811fdc1d2d81396bd270a94543",
+  "working_tree_sha256": "3a38afc3e83009c0d07aa3f3400cbd717023a2f967e8e8361173bc7d09653fa9",
   "working_tree_unchanged": true
 }
