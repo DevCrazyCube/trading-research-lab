@@ -174,6 +174,18 @@ FORBIDDEN_STAGES = ("position_paths", "outcome_labels")
 # ceiling above that never binds. Parallelism is the lever; the rate is only the cap on it.
 TRANSACTION_BODY_WORKERS = 4
 
+# The pacing CEILING, which must be raised alongside the worker count or the workers cannot use
+# themselves. b9d's `--calls-per-second` defaults to 2.5 -- chosen for a study 21x smaller -- and
+# the limiter is GLOBAL by design, holding one shared clock under a lock so N workers stay bounded
+# rather than becoming 2.5N. That design is right and was asked for explicitly. The consequence is
+# that `--workers 4` ALONE BUYS NOTHING: the first live run measured 1.84 calls/s, which is the 2.5
+# ceiling minus latency, and projected 90 hours where the probe had said 12.
+#
+# Set just above the measured 4-worker throughput of 13.76/s, so CONCURRENCY is what binds and the
+# ceiling stays what a ceiling should be -- a cap catching a future worker count nobody measured,
+# rather than the thing quietly setting the rate.
+TRANSACTION_BODY_CALLS_PER_SECOND = 14
+
 # The preregistered draw size, frozen in B11F_COHORT_SUBSAMPLE_PREREGISTRATION and repeated here
 # only so the argv can carry it. The SEED is NOT repeated: it lives in the selector as a frozen
 # constant, because a value on a command line is one an operator can change without amending the
@@ -552,7 +564,8 @@ def stage_commands(work_dir=WORK_DIR):
                      "--b9c", str(directory / "b11a_signatures.sqlite"),
                      "--b9a", str(directory / "b11a_subsample.sqlite"),
                      "--cutoff-slot", str(window["cutoff_slot_inclusive"]),
-                     "--workers", str(TRANSACTION_BODY_WORKERS)],
+                     "--workers", str(TRANSACTION_BODY_WORKERS),
+                     "--calls-per-second", str(TRANSACTION_BODY_CALLS_PER_SECOND)],
             "wiring": "resolved",
             "note": "the run subcommand now takes --b9c and --b9a; both name fresh paths, which "
                     "puts b9d in fresh-source mode where the burned pins and counts do not apply "
