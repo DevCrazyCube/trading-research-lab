@@ -89,6 +89,9 @@ def _load(name, filename):
 
 
 B17A = _load("b17a_shadow_rehearsal", "b17a_shadow_rehearsal.py")
+# The real supervisor, loaded only for its MANIFEST_FILES so the staged copy stages
+# exactly what the manifest requires and cannot drift from it.
+B11C = _load("b11c_for_manifest_list", "b11c_maturity_watcher.py")
 
 
 class RehearsalRefused(RuntimeError):
@@ -152,22 +155,23 @@ class staged_watcher:
         (self.root / "research" / "b11a").mkdir(parents=True)
         for name in COPIED_MODULES:
             shutil.copy2(ROOT / "scripts" / name, self.root / "scripts" / name)
-        # Manifest entries the copy will hash. Present so a drift rehearsal can change one of them
-        # in the SCRATCH tree and nowhere else.
-        for name in ("b7d_create_enumerator.py", "b9c_signature_inventory.py",
-                     "b9d_transaction_bodies.py", "b9e_reserve_coverage.py",
-                     "b9f_failure_coverage.py", "b10a_simulator_kernel.py",
-                     "b11d_cohort_adapter.py"):
-            source = ROOT / "scripts" / name
-            if source.exists():
-                shutil.copy2(source, self.root / "scripts" / name)
+        # Manifest entries the copy will hash, DERIVED from the real supervisor's own list rather
+        # than restated here. Present so a drift rehearsal can change one of them in the SCRATCH
+        # tree and nowhere else.
+        #
+        # This used to be a hand-written tuple, and it drifted the moment a stage script was added:
+        # b11f_cohort_subsample.py entered MANIFEST_FILES and not this list, so every staged copy
+        # was missing a file its own manifest required and `build_manifest` refused with Q02 --
+        # correctly. Thirty-seven errors from one omitted name. The same shape as the omission it
+        # was reacting to, one layer down, which is what a second hand-maintained copy of a list
+        # always eventually is.
         (self.root / "research").mkdir(exist_ok=True)
-        for name in ("pump_idl_9c82f61.json", "pump_amm_idl_9c82f61.json",
-                     "B11A_FRESH_COHORT_PREREGISTRATION.json",
-                     "B11A_FRESH_COHORT_PREREGISTRATION.md"):
-            source = ROOT / "research" / name
+        for relative in B11C.MANIFEST_FILES:
+            source = ROOT / relative
             if source.exists():
-                shutil.copy2(source, self.root / "research" / name)
+                destination = self.root / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, destination)
 
         spec = importlib.util.spec_from_file_location(
             "b11c_staged_copy", self.root / "scripts" / "b11c_maturity_watcher.py")
