@@ -1118,6 +1118,88 @@ class RpcRetryTests(unittest.TestCase):
         self.assertIn("after 3 attempt", str(ctx.exception))
         self.assertEqual(len(calls), 3)
 
+    class HeaderedResponse:
+        """A response that also carries headers, so the decode path can see Content-Length."""
+        def __init__(self, raw, content_length=None):
+            self.raw = raw
+            self.headers = {} if content_length is None else {"Content-Length": str(content_length)}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return self.raw
+
+    def test_a_truncated_getblock_body_is_retried_then_returns_the_whole_response(self):
+        # The real failure: a large getBlock body cut mid-stream. One out of tens of thousands.
+        whole = json.dumps({"jsonrpc": "2.0", "id": 1,
+                            "result": {"blockhash": "h", "signatures": ["a", "b", "c"]}}).encode()
+        cut = whole[: len(whole) - 12]  # a valid JSON prefix, unterminated
+        responses = [cut, whole]
+        calls = []
+
+        def opener(request, timeout):
+            calls.append(request)
+            body = responses.pop(0)
+            # Declare the FULL length so the short first body is unambiguously a truncation.
+            return self.HeaderedResponse(body, content_length=len(whole))
+
+        raw, result = B9D.rpc_request(
+            "https://unused.invalid", "getBlock", [7], opener=opener, retries=3)
+        self.assertEqual(raw, whole)  # the recovered body is byte-exact, not the truncated one
+        self.assertEqual(result["signatures"], ["a", "b", "c"])
+        self.assertEqual(len(calls), 2)
+
+    def test_persistent_truncation_fails_after_retries_naming_what_was_undecodable(self):
+        whole = json.dumps({"jsonrpc": "2.0", "id": 1, "result": {"slot": 7}}).encode()
+        cut = whole[: len(whole) - 8]
+        calls = []
+
+        def opener(request, timeout):
+            calls.append(request)
+            return self.HeaderedResponse(cut, content_length=len(whole))
+
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.rpc_request("https://unused.invalid", "getBlock", [7], opener=opener, retries=2)
+        message = str(ctx.exception)
+        self.assertIn("undecodable JSON", message)   # names what was undecodable, not "transport failed"
+        self.assertIn("truncated transfer", message)  # inspected, not a bare retryable class
+        self.assertIn(f"of {len(whole)} declared", message)
+        self.assertEqual(len(calls), 3)               # bounded: retries + 1, then it stops
+
+    def test_a_malformed_full_body_is_labelled_malformed_not_truncated(self):
+        # Content-Length matches the received bytes, but the JSON is broken mid-body: a broken
+        # provider, not a cut wire. The message must say so, so an outage is not read as a truncation.
+        malformed = b'{"jsonrpc":"2.0","id":1,"result":{"slot":7,,}}'
+        calls = []
+
+        def opener(request, timeout):
+            calls.append(request)
+            return self.HeaderedResponse(malformed, content_length=len(malformed))
+
+        with self.assertRaises(B9D.FreezeViolation) as ctx:
+            B9D.rpc_request("https://unused.invalid", "getBlock", [7], opener=opener, retries=1)
+        self.assertIn("malformed body", str(ctx.exception))
+        self.assertNotIn("truncated transfer", str(ctx.exception))
+
+    def test_the_last_attempt_raises_it_is_never_swallowed_into_a_partial_result(self):
+        # The reviewer's declared mutant: a loop that exhausts and returns a half-parsed body is
+        # worse than the fatal it replaced. The final attempt must raise, returning nothing.
+        whole = json.dumps({"jsonrpc": "2.0", "id": 1, "result": {"slot": 7}}).encode()
+        cut = whole[: len(whole) - 8]
+        returned = []
+
+        def opener(request, timeout):
+            return self.HeaderedResponse(cut, content_length=len(whole))
+
+        with self.assertRaises(B9D.FreezeViolation):
+            returned.append(B9D.rpc_request(
+                "https://unused.invalid", "getBlock", [7], opener=opener, retries=1))
+        self.assertEqual(returned, [])  # it raised; no partial value escaped the loop
+
 
 class CollectorLockTests(unittest.TestCase):
     def test_a_second_writer_is_refused_while_the_first_holds_the_artifact_lock(self):

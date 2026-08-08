@@ -2673,9 +2673,15 @@ def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None,
     request = HTTP.json_rpc_request(endpoint, request_body)
     transport = opener or urllib.request.urlopen
     for attempt in range(retries + 1):
+        content_length = None
         try:
             with transport(request, timeout=timeout) as response:
                 raw = response.read()
+                # Captured for the decode check below: a body short of its declared length is a
+                # truncated transfer, which is transient, versus a full body that will not parse.
+                response_headers = getattr(response, "headers", None)
+                if response_headers is not None:
+                    content_length = response_headers.get("Content-Length")
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as error:
             # One shared classification, so this transport and b7d's and b9c's cannot drift apart.
             retryable = HTTP.is_retryable_error(error)
@@ -2690,7 +2696,27 @@ def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None,
         try:
             payload = json.loads(raw)
         except json.JSONDecodeError as error:
-            raise FreezeViolation(f"{method} returned non-JSON bytes: {error}") from error
+            # A truncated transfer is transient -- a large getBlock body cut mid-stream re-requests
+            # whole -- but a genuinely malformed body from a broken provider is not, and blanket
+            # retrying would spend the whole budget to fail identically while reporting a plain
+            # transport failure. So retry like the overload path does, but INSPECT and name what
+            # was undecodable: a body short of its declared Content-Length, or one whose decode
+            # failed at its very end, is a truncation; a decode that failed mid-body is malformed.
+            # A run that burns its retries then says which it hit, not "transport failed".
+            declared = int(content_length) if content_length and content_length.isdigit() else None
+            received = len(raw)
+            short_of_declared = declared is not None and received < declared
+            failed_at_end = error.pos >= received - 1
+            kind = "truncated transfer" if short_of_declared or failed_at_end else "malformed body"
+            detail = (f"{method} returned undecodable JSON on attempt {attempt + 1} ({kind}): "
+                      f"{error}; received {received} bytes"
+                      + (f" of {declared} declared" if declared is not None else ""))
+            if attempt < retries:
+                time.sleep(min(30, 2 ** attempt))
+                continue
+            # The last attempt must RAISE, never fall through to return a half-parsed body: a
+            # loop that exhausts silently is worse than the fatal it replaced.
+            raise FreezeViolation(detail) from error
         rpc_error = payload.get("error")
         if rpc_error is not None:
             message = str(rpc_error.get("message", "")) if isinstance(rpc_error, dict) else ""
