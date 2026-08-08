@@ -111,6 +111,95 @@ def cutoff_metadata_for(mode, cutoff_slot):
     return {"cutoff_slot": str(cutoff_slot), "cutoff_source": "explicit-fresh-window"}
 
 
+def source_metadata(source_path):
+    """The source's own metadata table, or {} if it has none. Read-only, never trusted alone."""
+    database = sqlite3.connect(f"file:{source_path}?mode=ro", uri=True)
+    try:
+        return dict(database.execute("SELECT key, value FROM metadata"))
+    except sqlite3.DatabaseError:
+        return {}
+    finally:
+        database.close()
+
+
+def _subsample_selector():
+    """Loaded lazily, like the cohort adapter: only a subsample source needs it."""
+    return _load("b11f_cohort_subsample", "b11f_cohort_subsample.py")
+
+
+def assert_subsample(members, source_path, creates_path, declared):
+    """A subsample is not a smaller cohort; it is a DRAW, and the draw itself is what to check.
+
+    The full-cohort rule this replaces asserted that the cohort's member count EQUALS the
+    enumeration's -- true because `b11d_cohort_adapter.read_cohort` never filters, and FALSE BY
+    CONSTRUCTION for a draw of 5,000 from 33,866. It is my own check, from the commit that
+    introduced it, and it would have refused the subsample on the first run.
+
+    The temptation was to relax it into a bound -- members <= enumerated -- which every subsample
+    passes and which therefore checks nothing. What replaces it is stronger than what it replaces,
+    because a subsample admits a question a full cohort does not: is this the draw the frozen rule
+    actually makes? That is answerable, from the enumeration, without trusting the artifact:
+
+      1. The parent population it claims to have drawn from must match the enumeration's create
+         count. This is the ORIGINAL never-filters check, moved onto the number the subsample
+         records rather than its own row count, so the guarantee survives the draw.
+      2. Re-running the frozen selection over the enumeration's mints must reproduce EXACTLY the
+         members present. Not a subset, not the right size -- the same mints. A cherry-picked
+         "subsample", or one drawn under a different seed or N, fails here and cannot be made to
+         pass except by being the real draw.
+      3. The count must equal the N the artifact declares, so the artifact cannot claim one draw
+         size and carry another.
+
+    Check 2 is the one that matters and it is not a self-read: the mints come from the create
+    enumeration, a different artifact written by a different stage, and the seed and N come from
+    the preregistration frozen before any of this ran.
+    """
+    creates = sqlite3.connect(f"file:{creates_path}?mode=ro", uri=True)
+    try:
+        enumerated = creates.execute("SELECT COUNT(*) FROM create_event").fetchone()[0]
+        enumerated_mints = [row[0] for row in creates.execute("SELECT mint FROM create_event")]
+    finally:
+        creates.close()
+
+    population = declared.get("subsample_population")
+    if population is None or not str(population).isdigit():
+        raise SystemExit(
+            f"REFUSING: {source_path} declares itself a subsample but records no parent population; "
+            "a draw that cannot say what it drew from is not auditable back to one")
+    if int(population) != enumerated:
+        raise SystemExit(
+            f"REFUSING: {source_path} was drawn from a population of {int(population):,} but "
+            f"{creates_path} enumerated {enumerated:,} create events. The adapter that built the "
+            "parent never filters, so these must agree; they disagree when the draw and the "
+            "enumeration are about different windows, or one was truncated after the other")
+
+    seed, count = declared.get("subsample_seed"), declared.get("subsample_n")
+    if not seed or count is None or not str(count).isdigit():
+        raise SystemExit(
+            f"REFUSING: {source_path} declares itself a subsample but not the seed and N it was "
+            "drawn with. A draw nobody can reproduce is a selection nobody can check")
+    if int(count) != len(members):
+        raise SystemExit(
+            f"REFUSING: {source_path} declares N={int(count):,} but carries {len(members):,} "
+            "members. An artifact that claims one draw size and holds another has been edited "
+            "since it was sealed")
+
+    selector = _subsample_selector()
+    try:
+        expected = set(selector.selected(enumerated_mints, seed=seed, n=int(count)))
+    except Exception as error:
+        raise SystemExit(f"REFUSING: the frozen selection could not be re-run over "
+                         f"{creates_path}: {error}")
+    present = {row[0] for row in members}
+    if present != expected:
+        missing, extra = len(expected - present), len(present - expected)
+        raise SystemExit(
+            f"REFUSING: {source_path} is not the draw the frozen rule makes over {creates_path}. "
+            f"{missing:,} selected curves are absent and {extra:,} present curves were not "
+            "selected. The seed and N are preregistered; a subsample that differs from them was "
+            "chosen by something other than the rule")
+
+
 def assert_cohort(members, mode, source_path, creates_path=None):
     """Every refusal here carries its OWN message.
 
@@ -166,6 +255,10 @@ def assert_cohort(members, mode, source_path, creates_path=None):
             f"REFUSING: {source_path} holds {info['members']:,} identity rows but its `outcome` "
             f"view returns {len(members):,}. The view is the consumers' contract and it no longer "
             "projects the table it is defined over")
+
+    declared = source_metadata(source_path)
+    if declared.get("subsample_kind"):
+        return assert_subsample(members, source_path, creates_path, declared)
 
     recorded = info["source_sha256"]
     actual = hashlib.sha256(open(creates_path, "rb").read()).hexdigest()

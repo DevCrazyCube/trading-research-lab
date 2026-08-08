@@ -137,14 +137,15 @@ QUARANTINE_CODES = (Q01_PREREGISTRATION_DRIFT, Q02_SCRIPT_MANIFEST_DRIFT, Q03_GI
 # The A2 probe runs FIRST. An upgrade boundary is a property of the program, not of the window, so
 # it costs no composition — and if version coverage cannot be proven there is no point collecting
 # anything at all.
-RUN_ORDER = ("program_boundary", "enumerate_creates", "build_cohort", "signature_inventory",
+RUN_ORDER = ("program_boundary", "enumerate_creates", "build_cohort", "subsample_cohort",
+             "signature_inventory",
              "transaction_bodies", "decode_and_reserves", "reserve_coverage_gate",
              "failure_coverage_gate", "simulator_replay_gate")
 
 # Stages that are not part of B11a's frozen pipeline because they touch no network and produce no
 # evidence: they only reshape what an earlier stage already collected. Declared here so
 # `verify_stage_order` can accept them by name rather than by exception, and asserted offline.
-LOCAL_STAGES = ("build_cohort",)
+LOCAL_STAGES = ("build_cohort", "subsample_cohort")
 
 # Stages that must never be schedulable here, whatever a future edit does to the order above.
 FORBIDDEN_STAGES = ("position_paths", "outcome_labels")
@@ -172,6 +173,12 @@ FORBIDDEN_STAGES = ("position_paths", "outcome_labels")
 # that does nothing. The collector is serial at workers=1, so it is LATENCY-bound at ~5.8/s and any
 # ceiling above that never binds. Parallelism is the lever; the rate is only the cap on it.
 TRANSACTION_BODY_WORKERS = 4
+
+# The preregistered draw size, frozen in B11F_COHORT_SUBSAMPLE_PREREGISTRATION and repeated here
+# only so the argv can carry it. The SEED is NOT repeated: it lives in the selector as a frozen
+# constant, because a value on a command line is one an operator can change without amending the
+# document that froze it, and the whole point of the draw is that it was chosen in ignorance.
+SUBSAMPLE_N = 5000
 
 # Everything whose bytes must be unchanged since this supervisor was written against them. A stage
 # script that changed is a stage that does something else now.
@@ -495,9 +502,25 @@ def stage_commands(work_dir=WORK_DIR):
             "wiring": "resolved",
             "note": "start, end, database and export are all explicit; end slot is exclusive",
         },
+        "subsample_cohort": {
+            "argv": [sys.executable, "scripts/b11f_cohort_subsample.py", "build",
+                     "--source", str(directory / "b11a_cohort.sqlite"),
+                     "--output", str(directory / "b11a_subsample.sqlite"),
+                     "--n", str(SUBSAMPLE_N)],
+            "wiring": "resolved",
+            "local": True,
+            "note": "offline: draws the preregistered subsample from the full cohort. Local for "
+                    "the same reason build_cohort is -- no network, no evidence, it only reshapes "
+                    "what an earlier stage already collected. It exists because the full 33,866 "
+                    "curves are ~43M in-window signatures, about 36 days of stage 5 at the "
+                    "measured concurrent rate; the draw is hash-on-mint, uniform, and frozen in "
+                    "B11F before any outcome existed. The SEED is the selector's own frozen "
+                    "constant and is deliberately NOT passed here: a seed on the command line is "
+                    "a seed somebody can change without amending the preregistration",
+        },
         "signature_inventory": {
             "argv": [sys.executable, "scripts/b9c_signature_inventory.py",
-                     "--source", str(directory / "b11a_cohort.sqlite"),
+                     "--source", str(directory / "b11a_subsample.sqlite"),
                      "--database", str(directory / "b11a_signatures.sqlite"),
                      "--creates", str(directory / "b11a_creates.sqlite"),
                      "--cutoff-slot", str(window["cutoff_slot_inclusive"])],
@@ -520,7 +543,7 @@ def stage_commands(work_dir=WORK_DIR):
             "argv": [sys.executable, "scripts/b9d_transaction_bodies.py", "run",
                      str(directory / "b11a_bodies.sqlite"), "--rpc-env", RPC_ENV_VAR,
                      "--b9c", str(directory / "b11a_signatures.sqlite"),
-                     "--b9a", str(directory / "b11a_cohort.sqlite"),
+                     "--b9a", str(directory / "b11a_subsample.sqlite"),
                      "--cutoff-slot", str(window["cutoff_slot_inclusive"]),
                      "--workers", str(TRANSACTION_BODY_WORKERS)],
             "wiring": "resolved",
@@ -535,7 +558,7 @@ def stage_commands(work_dir=WORK_DIR):
             "argv": [sys.executable, "scripts/b9d_transaction_bodies.py", "decode",
                      str(directory / "b11a_bodies.sqlite"),
                      "--b9c", str(directory / "b11a_signatures.sqlite"),
-                     "--b9a", str(directory / "b11a_cohort.sqlite")],
+                     "--b9a", str(directory / "b11a_subsample.sqlite")],
             "wiring": "resolved",
             "note": "decode accepts --b9c and --b9a overrides, and DELIBERATELY takes no horizon. "
                     "It needs one -- this is the stage the burned range would have stopped, since "
@@ -550,7 +573,7 @@ def stage_commands(work_dir=WORK_DIR):
         "reserve_coverage_gate": {
             "argv": [sys.executable, "scripts/b9e_reserve_coverage.py",
                      str(directory / "b11a_bodies.sqlite"),
-                     "--b9a", str(directory / "b11a_cohort.sqlite")],
+                     "--b9a", str(directory / "b11a_subsample.sqlite")],
             "wiring": "resolved",
             "note": "artifact positional and --b9a override are explicit",
         },

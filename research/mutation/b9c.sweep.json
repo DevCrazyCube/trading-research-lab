@@ -5,7 +5,12 @@
   "tests": [
     "tests/test_b9c_signature_inventory.py"
   ],
-  "expected_survivors": [],
+  "expected_survivors": [
+    {
+      "name": "the selection is relaxed to a subset test, which every cherry-pick passes",
+      "why": "EQUIVALENT UNDER THE CHECK ABOVE IT, and I only learned that by trying to kill it. `assert_subsample` refuses first when the declared N differs from the member count, so by the time the selection is compared, |present| == n. `expected` is exactly the n smallest keys, so |present| == |expected|, and a subset of equal size IS equality -- present <= expected and present == expected cannot differ for any artifact that reaches this line. I wrote a strict-subset fixture expecting to kill it and it survived, because making the subset strict requires an inconsistent N, which the size guard rejects first. COUPLED, NOT INDEPENDENT: if the size check were ever removed or moved below this one, the equivalence dissolves and this mutant becomes killable immediately -- a subsample that drops curves would then pass a subset test. The sweep will say so, because this declaration will start failing."
+    }
+  ],
   "mutants": [
     {
       "name": "every source is treated as burned, so fresh mode is unreachable",
@@ -101,6 +106,56 @@
       "name": "the mode gate is bypassed entirely, so neither corpus's argv rules apply",
       "old": "    assert_mode_arguments(mode, arguments.source, arguments.cutoff_slot, arguments.creates)",
       "new": "    pass"
+    },
+    {
+      "name": "a subsample is never detected, so the full-cohort rule refuses it",
+      "old": "    if declared.get(\"subsample_kind\"):",
+      "new": "    if False:"
+    },
+    {
+      "name": "source metadata is always empty, so no artifact can declare itself a subsample",
+      "old": "        return dict(database.execute(\"SELECT key, value FROM metadata\"))",
+      "new": "        return {}"
+    },
+    {
+      "name": "the parent population may disagree with the enumeration -- the never-filters guarantee is lost across the draw",
+      "old": "    if int(population) != enumerated:",
+      "new": "    if False:"
+    },
+    {
+      "name": "a subsample without a declared population is accepted",
+      "old": "    if population is None or not str(population).isdigit():",
+      "new": "    if False:"
+    },
+    {
+      "name": "a subsample that will not say its seed and N is accepted, so the draw is unreproducible",
+      "old": "    if not seed or count is None or not str(count).isdigit():",
+      "new": "    if False:"
+    },
+    {
+      "name": "an artifact may declare one draw size and carry another",
+      "old": "    if int(count) != len(members):",
+      "new": "    if False:"
+    },
+    {
+      "name": "THE CHECK: a subsample that is not the frozen draw is accepted",
+      "old": "    if present != expected:",
+      "new": "    if False:"
+    },
+    {
+      "name": "the selection is relaxed to a subset test, which every cherry-pick passes",
+      "old": "    if present != expected:",
+      "new": "    if not present <= expected:"
+    },
+    {
+      "name": "the draw is recomputed from the members themselves, which is tautological",
+      "old": "        expected = set(selector.selected(enumerated_mints, seed=seed, n=int(count)))",
+      "new": "        expected = {row[0] for row in members}"
+    },
+    {
+      "name": "the draw is recomputed under the selector default rather than the artifact's declared seed",
+      "old": "        expected = set(selector.selected(enumerated_mints, seed=seed, n=int(count)))",
+      "new": "        expected = set(selector.selected(enumerated_mints, n=int(count)))"
     }
   ]
 }

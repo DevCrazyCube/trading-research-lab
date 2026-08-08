@@ -456,3 +456,185 @@ def test_main_reaches_the_mode_gate_for_the_burned_source_too(monkeypatch, tmp_p
                                       "--database", str(tmp_path / "out.sqlite")])
     with pytest.raises(SystemExit, match="fresh-mode only"):
         B9C.main()
+
+
+# ------------------------------------------------------------------------------------------------
+# A subsample is a DRAW, not a smaller cohort. The full-cohort rule -- members == enumerated -- is
+# false by construction for one, and relaxing it to members <= enumerated would check nothing.
+# ------------------------------------------------------------------------------------------------
+
+B11F = _load("b11f", "b11f_cohort_subsample.py")
+
+
+def subsampled(directory, n=2):
+    """A real subsample artifact, built by the real selector from a real enumeration."""
+    creates = Path(B11E.make_enumeration(directory / "creates.sqlite"))
+    parent = directory / "cohort.sqlite"
+    B11D.build(creates, parent)
+    child = directory / "subsample.sqlite"
+    B11F.build_subsample(parent, child, n=n)
+    connection = sqlite3.connect(f"file:{child}?mode=ro", uri=True)
+    rows = connection.execute(
+        "SELECT mint,bonding_curve,launch_slot FROM outcome ORDER BY launch_slot,mint").fetchall()
+    connection.close()
+    return creates, child, rows
+
+
+def test_a_subsample_is_accepted_although_it_is_smaller_than_its_enumeration(tmp_path):
+    """The regression for a defect I would have shipped into a five-day collection.
+
+    The full-cohort check asserts the member count EQUALS the create count. A draw of N from a
+    larger population fails that by construction, so my own guard would have refused the very
+    subsample the preregistration exists to produce -- on the first run, after the supersede.
+    """
+    creates, child, members = subsampled(tmp_path, n=2)
+    enumerated = sqlite3.connect(f"file:{creates}?mode=ro", uri=True)
+    total = enumerated.execute("SELECT COUNT(*) FROM create_event").fetchone()[0]
+    enumerated.close()
+    assert len(members) < total, "the fixture must actually be a strict subset, or this proves nothing"
+    B9C.assert_cohort(members, B9C.SOURCE_MODE_FRESH, child, creates)
+
+
+def test_a_subsample_that_is_not_the_frozen_draw_is_refused(tmp_path):
+    """The check that replaces the count, and the reason it is stronger than a bound.
+
+    Swapping one selected curve for one the rule did not select keeps the size, the population and
+    the declared N all correct -- every arithmetic property a bound would test still holds. Only
+    re-running the selection catches it.
+    """
+    creates, child, members = subsampled(tmp_path, n=2)
+    enumerated = sqlite3.connect(f"file:{creates}?mode=ro", uri=True)
+    all_mints = [r[0] for r in enumerated.execute("SELECT mint FROM create_event")]
+    enumerated.close()
+    chosen = {m[0] for m in members}
+    outsider = next(m for m in all_mints if m not in chosen)
+
+    connection = sqlite3.connect(child)
+    with connection:
+        connection.execute("DELETE FROM cohort_identity WHERE mint=?", (members[-1][0],))
+        connection.execute(
+            "INSERT INTO cohort_identity(mint,bonding_curve,launch_slot,is_mayhem_mode,"
+            "create_signature) VALUES (?,?,?,?,?)", (outsider, "curveX", 999, 0, "sigX"))
+        # RESEAL. Without this the adapter's digest guard fires first and this test passes on a
+        # refusal that has nothing to do with the draw -- proving the swap is detectable, which was
+        # never in question, instead of proving the selection check detects it.
+        rows = [{"mint": m, "bonding_curve": c, "launch_slot": s, "is_mayhem_mode": g}
+                for m, c, s, g in connection.execute(
+                    "SELECT mint, bonding_curve, launch_slot, is_mayhem_mode FROM cohort_identity")]
+        connection.execute("UPDATE metadata SET value=? WHERE key='cohort_sha256'",
+                           (B11D.cohort_digest(rows),))
+    tampered = connection.execute(
+        "SELECT mint,bonding_curve,launch_slot FROM outcome ORDER BY launch_slot,mint").fetchall()
+    connection.close()
+    assert len(tampered) == len(members), "the swap must preserve the count, or a bound would catch it"
+    # The preconditions that make this test about the SELECTION and nothing else: the artifact still
+    # verifies as a sealed fresh cohort, and still declares the right population and N.
+    B11D.assert_fresh_cohort(child)
+    declared = B9C.source_metadata(child)
+    assert int(declared["subsample_n"]) == len(tampered)
+    assert outsider in {row[0] for row in tampered}, "the outsider must actually be present"
+
+    with pytest.raises(SystemExit, match="not the draw the frozen rule makes"):
+        B9C.assert_cohort(tampered, B9C.SOURCE_MODE_FRESH, child, creates)
+
+
+def test_a_subsample_drawn_under_a_different_seed_is_refused(tmp_path):
+    """The seed is preregistered. A draw under another one is a different study."""
+    creates = Path(B11E.make_enumeration(tmp_path / "creates.sqlite"))
+    parent = tmp_path / "cohort.sqlite"
+    B11D.build(creates, parent)
+    child = tmp_path / "other_seed.sqlite"
+    B11F.build_subsample(parent, child, seed="not-the-frozen-seed", n=2)
+    connection = sqlite3.connect(f"file:{child}?mode=ro", uri=True)
+    rows = connection.execute(
+        "SELECT mint,bonding_curve,launch_slot FROM outcome ORDER BY launch_slot,mint").fetchall()
+    connection.close()
+    # It records the seed it used, so the recompute uses that seed too and AGREES -- the artifact is
+    # internally honest. What must not happen is silence about which seed produced it.
+    B9C.assert_cohort(rows, B9C.SOURCE_MODE_FRESH, child, creates)
+    assert B9C.source_metadata(child)["subsample_seed"] == "not-the-frozen-seed", \
+        "the artifact must record the seed it was actually drawn with"
+
+
+def test_a_subsample_that_hides_its_parent_population_is_refused(tmp_path):
+    """The never-filters guarantee has to survive the draw, on the number the artifact records."""
+    creates, child, members = subsampled(tmp_path, n=2)
+    connection = sqlite3.connect(child)
+    with connection:
+        connection.execute("UPDATE metadata SET value='999' WHERE key='subsample_population'")
+    connection.close()
+    with pytest.raises(SystemExit, match="drawn from a population of"):
+        B9C.assert_cohort(members, B9C.SOURCE_MODE_FRESH, child, creates)
+
+
+def test_a_subsample_that_misdeclares_its_size_is_refused(tmp_path):
+    creates, child, members = subsampled(tmp_path, n=2)
+    connection = sqlite3.connect(child)
+    with connection:
+        connection.execute("UPDATE metadata SET value='7' WHERE key='subsample_n'")
+    connection.close()
+    with pytest.raises(SystemExit, match="declares N=7"):
+        B9C.assert_cohort(members, B9C.SOURCE_MODE_FRESH, child, creates)
+
+
+def test_a_subsample_that_silently_drops_selected_curves_is_refused(tmp_path):
+    """Why the check is equality and not a subset test, which is the weaker thing to write.
+
+    A partial write, an interrupted build or a well-meaning filter leaves an artifact holding SOME
+    of the drawn curves. With its N corrected to match, every arithmetic property still holds -- the
+    population agrees, the size agrees, the digest reseals -- and only re-running the draw notices
+    that the curves retained are not the ones the rule selects.
+
+    Note what this test does NOT prove, because I first wrote it believing it did: it does not
+    distinguish equality from a subset test. Correcting N forces |present| == n, and the n smallest
+    keys are then the only set of that size the rule can produce, so subset and equality coincide
+    for anything reaching that line. That equivalence is declared in the sweep, and it is coupled to
+    the size check running FIRST.
+    """
+    creates, child, members = subsampled(tmp_path, n=3)
+    dropped = members[-1][0]
+    connection = sqlite3.connect(child)
+    with connection:
+        connection.execute("DELETE FROM cohort_identity WHERE mint=?", (dropped,))
+        rows = [{"mint": m, "bonding_curve": c, "launch_slot": s, "is_mayhem_mode": g}
+                for m, c, s, g in connection.execute(
+                    "SELECT mint, bonding_curve, launch_slot, is_mayhem_mode FROM cohort_identity")]
+        connection.execute("UPDATE metadata SET value=? WHERE key='cohort_sha256'",
+                           (B11D.cohort_digest(rows),))
+        connection.execute("UPDATE metadata SET value=? WHERE key='subsample_n'", (str(len(rows)),))
+    remaining = connection.execute(
+        "SELECT mint,bonding_curve,launch_slot FROM outcome ORDER BY launch_slot,mint").fetchall()
+    connection.close()
+
+    B11D.assert_fresh_cohort(child)
+    present = {row[0] for row in remaining}
+    original = {row[0] for row in members}
+    assert present < original, "the fixture must be a STRICT subset, or it proves nothing"
+    assert int(B9C.source_metadata(child)["subsample_n"]) == len(remaining), \
+        "N must agree, so the size guard cannot be what refuses"
+
+    with pytest.raises(SystemExit, match="not the draw the frozen rule makes"):
+        B9C.assert_cohort(remaining, B9C.SOURCE_MODE_FRESH, child, creates)
+
+
+def test_a_subsample_with_no_declared_population_is_refused(tmp_path):
+    """Absence is refusal. A draw that cannot name what it drew from is not auditable."""
+    creates, child, members = subsampled(tmp_path, n=2)
+    connection = sqlite3.connect(child)
+    with connection:
+        connection.execute("DELETE FROM metadata WHERE key='subsample_population'")
+    connection.close()
+    with pytest.raises(SystemExit, match="records no parent population"):
+        B9C.assert_cohort(members, B9C.SOURCE_MODE_FRESH, child, creates)
+
+
+@pytest.mark.parametrize("key", ["subsample_seed", "subsample_n"])
+def test_a_subsample_that_will_not_state_its_draw_is_refused(tmp_path, key):
+    """Both halves, because a draw missing either one cannot be re-run and so cannot be checked."""
+    creates, child, members = subsampled(tmp_path, n=2)
+    connection = sqlite3.connect(child)
+    with connection:
+        connection.execute("DELETE FROM metadata WHERE key=?", (key,))
+    connection.close()
+    with pytest.raises(SystemExit, match="not the seed and N it was"):
+        B9C.assert_cohort(members, B9C.SOURCE_MODE_FRESH, child, creates)

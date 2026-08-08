@@ -434,13 +434,30 @@ class WiringTests(unittest.TestCase):
         self.assertLess(order.index("build_cohort"), order.index("signature_inventory"))
         self.assertLess(order.index("build_cohort"), order.index("transaction_bodies"))
 
-    def test_every_consumer_is_pointed_at_the_cohort_artifact(self):
+    def test_every_consumer_is_pointed_at_the_study_population(self):
+        """The subsample, not the full cohort, and not the burned corpus.
+
+        The full cohort is the sampling FRAME; the subsample is the population actually studied.
+        A consumer left on the frame would carry 33,866 curves against an inventory covering
+        5,000 -- and `b9d.frozen_population` would NOT catch it, because it raises only when a
+        curve is in the inventory and missing from the cohort. Its docstring says membership must
+        agree "bidirectionally"; the code checks one direction. Pointing every consumer at the
+        subsample makes the claim true rather than relying on the gap.
+        """
         commands = W.stage_commands(pathlib.Path("/tmp/b11a-iso"))
         for stage in ("signature_inventory", "transaction_bodies", "decode_and_reserves",
                       "reserve_coverage_gate"):
             with self.subTest(stage=stage):
                 joined = " ".join(commands[stage]["argv"])
-                self.assertIn("b11a_cohort.sqlite", joined)
+                self.assertIn("b11a_subsample.sqlite", joined)
+                self.assertNotIn("b11a_cohort.sqlite", joined)
+
+    def test_only_the_subsample_stage_reads_the_full_cohort(self):
+        """The frame is read exactly once, by the draw. Everything after sees the population."""
+        commands = W.stage_commands(pathlib.Path("/tmp/b11a-iso"))
+        readers = [name for name, command in commands.items()
+                   if "b11a_cohort.sqlite" in " ".join(command["argv"])]
+        self.assertEqual(sorted(readers), ["build_cohort", "subsample_cohort"])
 
     def test_b9d_run_now_names_both_fresh_sources(self):
         """The defect this handoff repaired: without them the run subcommand falls back to the
@@ -1914,11 +1931,16 @@ class SupersedeStagesTests(unittest.TestCase):
         self.archive = self.work / "superseded"
         self.state_path = self.work / "supervisor_state.json"
         self.lock = self.work / "supervisor.lock"
-        for stage in ("program_boundary", "enumerate_creates", "build_cohort"):
+        # Named from RUN_ORDER rather than hardcoded: these tests once said RUN_ORDER[:4] and
+        # meant "up to signature_inventory", so inserting a stage silently re-aimed every one of
+        # them at a different set. A slice is a claim about the order, not about the stages.
+        self.done = list(W.RUN_ORDER[:3])
+        self.failed = W.RUN_ORDER[3]
+        self.first_four = self.done + [self.failed]
+        for stage in self.done:
             self.write_receipt(stage, completed=True)
-        self.write_receipt("signature_inventory", completed=False)
-        self.state = {"stages_completed": ["program_boundary", "enumerate_creates",
-                                           "build_cohort"],
+        self.write_receipt(self.failed, completed=False)
+        self.state = {"stages_completed": list(self.done),
                       "stage_in_flight": None, "quarantine": None, "state": "running_stage"}
         self.write_state()
 
@@ -1945,22 +1967,21 @@ class SupersedeStagesTests(unittest.TestCase):
         has to come BEFORE the move, which is what the second half of this test checks.
         """
         with self.assertRaisesRegex(W.WatcherRefused, "PREFIX"):
-            self.supersede(["program_boundary", "signature_inventory"])
+            self.supersede([W.RUN_ORDER[0], self.failed])
         self.assertEqual(
             sorted(p.name for p in self.receipts.iterdir()),
-            ["build_cohort.json", "enumerate_creates.json", "program_boundary.json",
-             "signature_inventory.json"],
+            sorted(f"{s}.json" for s in self.first_four),
             "the refusal must precede the move, or the operator learns of it too late")
         self.assertFalse(self.archive.exists())
 
     def test_the_message_names_the_quarantine_a_resume_would_hit(self):
         with self.assertRaises(W.WatcherRefused) as caught:
-            self.supersede(["program_boundary", "signature_inventory"])
+            self.supersede([W.RUN_ORDER[0], self.failed])
         self.assertIn(W.Q12_DUPLICATE_STAGE, str(caught.exception))
 
     def test_superseding_all_four_reaches_a_valid_prefix(self):
         """The route that satisfies the invariant instead of weakening it."""
-        note = self.supersede(list(W.RUN_ORDER[:4]))
+        note = self.supersede(self.first_four)
         self.assertEqual(W.completed_stages(self.receipts), [])
         self.assertEqual(
             W.assert_resume_is_safe({"stage_in_flight": None}, self.receipts), [],
@@ -1981,22 +2002,20 @@ class SupersedeStagesTests(unittest.TestCase):
         This is also the case we would have used had stage 1's boundary proof been sound: only
         stage 4 needed redoing, and the function must permit that without argument.
         """
-        note = self.supersede(["signature_inventory"], reason="the pin was from another study")
+        note = self.supersede([self.failed], reason="the pin was from another study")
         remaining = W.completed_stages(self.receipts)
-        self.assertEqual(remaining, ["program_boundary", "enumerate_creates", "build_cohort"])
+        self.assertEqual(remaining, self.done)
         self.assertEqual(W.assert_resume_is_safe({"stage_in_flight": None}, self.receipts),
                          remaining, "a proper prefix must be left alone, not rejected")
         self.assertEqual(note["stages_completed_after"], remaining)
-        self.assertFalse((self.receipts / "signature_inventory.json").exists())
+        self.assertFalse((self.receipts / f"{self.failed}.json").exists())
 
     def test_nothing_is_deleted(self):
-        self.supersede(list(W.RUN_ORDER[:4]))
+        self.supersede(self.first_four)
         archived = self.archive / "20260808T010000Z" / "receipts"
-        self.assertEqual(
-            sorted(p.name for p in archived.iterdir()),
-            ["build_cohort.json", "enumerate_creates.json", "program_boundary.json",
-             "signature_inventory.json"])
-        self.assertEqual(json.loads((archived / "signature_inventory.json").read_text())["exit_code"],
+        self.assertEqual(sorted(p.name for p in archived.iterdir()),
+                         sorted(f"{s}.json" for s in self.first_four))
+        self.assertEqual(json.loads((archived / f"{self.failed}.json").read_text())["exit_code"],
                          1, "the FAILED receipt is evidence too; it is archived, not dropped")
 
     # -- artifacts ---------------------------------------------------------------------------
@@ -2004,7 +2023,7 @@ class SupersedeStagesTests(unittest.TestCase):
     def test_it_moves_named_artifacts_and_refuses_an_escape(self):
         artifact = self.work / "b11a_cohort.sqlite"
         artifact.write_bytes(b"cohort")
-        self.supersede(list(W.RUN_ORDER[:4]), artifacts=["b11a_cohort.sqlite"])
+        self.supersede(self.first_four, artifacts=["b11a_cohort.sqlite"])
         self.assertFalse(artifact.exists())
         moved = self.archive / "20260808T010000Z" / "artifacts" / "b11a_cohort.sqlite"
         self.assertEqual(moved.read_bytes(), b"cohort")
@@ -2014,7 +2033,7 @@ class SupersedeStagesTests(unittest.TestCase):
         outside.write_bytes(b"x")
         self.addCleanup(outside.unlink, missing_ok=True)
         with self.assertRaisesRegex(W.WatcherRefused, "outside"):
-            self.supersede(list(W.RUN_ORDER[:4]), artifacts=[str(outside)])
+            self.supersede(self.first_four, artifacts=[str(outside)])
         self.assertTrue(outside.exists())
 
     def test_a_relative_escape_is_refused_after_resolution(self):
@@ -2023,12 +2042,12 @@ class SupersedeStagesTests(unittest.TestCase):
         outside.write_bytes(b"x")
         self.addCleanup(outside.unlink, missing_ok=True)
         with self.assertRaisesRegex(W.WatcherRefused, "outside"):
-            self.supersede(list(W.RUN_ORDER[:4]), artifacts=["../escaped.sqlite"])
+            self.supersede(self.first_four, artifacts=["../escaped.sqlite"])
         self.assertTrue(outside.exists())
 
     def test_a_missing_artifact_is_refused_before_anything_moves(self):
         with self.assertRaisesRegex(W.WatcherRefused, "no artifact"):
-            self.supersede(list(W.RUN_ORDER[:4]), artifacts=["never_existed.sqlite"])
+            self.supersede(self.first_four, artifacts=["never_existed.sqlite"])
         self.assertEqual(len(list(self.receipts.iterdir())), 4)
 
     # -- refusals ----------------------------------------------------------------------------
@@ -2041,12 +2060,12 @@ class SupersedeStagesTests(unittest.TestCase):
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         self.addCleanup(lambda: fcntl.flock(handle.fileno(), fcntl.LOCK_UN))
         with self.assertRaisesRegex(W.WatcherRefused, "instance lock is held"):
-            self.supersede(list(W.RUN_ORDER[:4]))
+            self.supersede(self.first_four)
         self.assertEqual(len(list(self.receipts.iterdir())), 4)
 
     def test_it_refuses_an_unknown_stage(self):
         with self.assertRaisesRegex(W.WatcherRefused, "unknown stage"):
-            self.supersede(["program_boundary", "not_a_stage"])
+            self.supersede([W.RUN_ORDER[0], "not_a_stage"])
 
     def test_it_refuses_superseding_nothing(self):
         with self.assertRaisesRegex(W.WatcherRefused, "superseding nothing"):
@@ -2054,24 +2073,24 @@ class SupersedeStagesTests(unittest.TestCase):
 
     def test_it_refuses_a_stage_named_twice(self):
         with self.assertRaisesRegex(W.WatcherRefused, "named twice"):
-            self.supersede(["program_boundary", "program_boundary"])
+            self.supersede([W.RUN_ORDER[0], W.RUN_ORDER[0]])
 
     def test_it_refuses_without_a_reason(self):
         for blank in ("", "   "):
             with self.assertRaisesRegex(W.WatcherRefused, "without a reason"):
-                self.supersede(list(W.RUN_ORDER[:4]), reason=blank)
+                self.supersede(self.first_four, reason=blank)
 
     def test_it_refuses_a_stage_with_no_receipt(self):
         with self.assertRaisesRegex(W.WatcherRefused, "no receipt"):
-            self.supersede(list(W.RUN_ORDER[:5]))
+            self.supersede(self.first_four + [W.RUN_ORDER[4]])
 
     def test_it_refuses_to_write_a_second_record_into_one_archive(self):
-        self.supersede(list(W.RUN_ORDER[:4]))
-        for stage in W.RUN_ORDER[:3]:
+        self.supersede(self.first_four)
+        for stage in self.done:
             self.write_receipt(stage, completed=True)
-        self.write_receipt("signature_inventory", completed=False)
+        self.write_receipt(self.failed, completed=False)
         with self.assertRaisesRegex(W.WatcherRefused, "already exists"):
-            self.supersede(list(W.RUN_ORDER[:4]))
+            self.supersede(self.first_four)
 
     # -- the quarantine ----------------------------------------------------------------------
 
@@ -2080,7 +2099,7 @@ class SupersedeStagesTests(unittest.TestCase):
                                     "stage": "signature_inventory"}
         self.write_state()
         with self.assertRaisesRegex(W.WatcherRefused, "clear_quarantine was not requested"):
-            self.supersede(list(W.RUN_ORDER[:4]))
+            self.supersede(self.first_four)
         self.assertEqual(len(list(self.receipts.iterdir())), 4)
 
     def test_clearing_the_quarantine_records_it_verbatim(self):
@@ -2089,19 +2108,19 @@ class SupersedeStagesTests(unittest.TestCase):
                       "exit_code": 1}
         self.state["quarantine"] = quarantine
         self.write_state()
-        note = self.supersede(list(W.RUN_ORDER[:4]), clear_quarantine=True)
+        note = self.supersede(self.first_four, clear_quarantine=True)
         self.assertEqual(note["quarantine_cleared"], quarantine)
         state = json.loads(self.state_path.read_text())
         self.assertIsNone(state["quarantine"])
         self.assertEqual(state["stages_completed"], [])
 
     def test_a_clean_run_records_no_quarantine_and_needs_no_permission(self):
-        note = self.supersede(list(W.RUN_ORDER[:4]))
+        note = self.supersede(self.first_four)
         self.assertIsNone(note["quarantine_cleared"],
                           "nothing was cleared, so nothing may be recorded as cleared")
 
     def test_the_note_carries_the_reason_and_every_move(self):
-        note = self.supersede(list(W.RUN_ORDER[:4]), reason="stage 1 proved another window")
+        note = self.supersede(self.first_four, reason="stage 1 proved another window")
         self.assertEqual(note["reason"], "stage 1 proved another window")
         self.assertEqual(len(note["moved"]), 4)
         for entry in note["moved"]:

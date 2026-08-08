@@ -1,9 +1,11 @@
 {
   "baseline_passed": true,
-  "expected_survivors": {},
+  "expected_survivors": {
+    "the selection is relaxed to a subset test, which every cherry-pick passes": "EQUIVALENT UNDER THE CHECK ABOVE IT, and I only learned that by trying to kill it. `assert_subsample` refuses first when the declared N differs from the member count, so by the time the selection is compared, |present| == n. `expected` is exactly the n smallest keys, so |present| == |expected|, and a subset of equal size IS equality -- present <= expected and present == expected cannot differ for any artifact that reaches this line. I wrote a strict-subset fixture expecting to kill it and it survived, because making the subset strict requires an inconsistent N, which the size guard rejects first. COUPLED, NOT INDEPENDENT: if the size check were ever removed or moved below this one, the equivalence dissolves and this mutant becomes killable immediately -- a subsample that drops curves would then pass a subset test. The sweep will say so, because this declaration will start failing."
+  },
   "git_ancestry_staged": false,
-  "killed": 19,
-  "mutants_declared": 19,
+  "killed": 28,
+  "mutants_declared": 29,
   "per_mutant": [
     {
       "first_failing_test": "tests/test_b9c_signature_inventory.py::test_source_mode_splits_the_burned_artifact_from_everything_else",
@@ -99,13 +101,65 @@
       "first_failing_test": "tests/test_b9c_signature_inventory.py::test_main_actually_reaches_the_mode_gate",
       "name": "the mode gate is bypassed entirely, so neither corpus's argv rules apply",
       "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_subsample_is_accepted_although_it_is_smaller_than_its_enumeration",
+      "name": "a subsample is never detected, so the full-cohort rule refuses it",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_subsample_is_accepted_although_it_is_smaller_than_its_enumeration",
+      "name": "source metadata is always empty, so no artifact can declare itself a subsample",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_subsample_that_hides_its_parent_population_is_refused",
+      "name": "the parent population may disagree with the enumeration -- the never-filters guarantee is lost across the draw",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_subsample_with_no_declared_population_is_refused",
+      "name": "a subsample without a declared population is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_subsample_that_will_not_state_its_draw_is_refused[subsample_seed]",
+      "name": "a subsample that will not say its seed and N is accepted, so the draw is unreproducible",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_subsample_that_misdeclares_its_size_is_refused",
+      "name": "an artifact may declare one draw size and carry another",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_subsample_that_is_not_the_frozen_draw_is_refused",
+      "name": "THE CHECK: a subsample that is not the frozen draw is accepted",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": null,
+      "name": "the selection is relaxed to a subset test, which every cherry-pick passes",
+      "outcome": "survived"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_subsample_that_is_not_the_frozen_draw_is_refused",
+      "name": "the draw is recomputed from the members themselves, which is tautological",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9c_signature_inventory.py::test_a_subsample_drawn_under_a_different_seed_is_refused",
+      "name": "the draw is recomputed under the selector default rather than the artifact's declared seed",
+      "outcome": "killed"
     }
   ],
   "pytest_args": [],
   "pytest_args_reason": null,
   "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
   "staged_copy_only": true,
-  "survivors": [],
+  "survivors": [
+    "the selection is relaxed to a subset test, which every cherry-pick passes"
+  ],
   "sweep_id": "b9c",
   "target": "scripts/b9c_signature_inventory.py",
   "tests": [
@@ -114,6 +168,6 @@
   "tree_manifest_exclusions": [
     "agent_discussion.md"
   ],
-  "working_tree_sha256": "8b676dfcc7fd33d61f4b8b5e038c1150ab3058cd59ea17a9611c9909fb19296b",
+  "working_tree_sha256": "8cb48304c81b02082bfd1954a89451080643c8ad0ec5bc2c890e59ac14ba62e4",
   "working_tree_unchanged": true
 }
