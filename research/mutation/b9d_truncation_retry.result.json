@@ -1,0 +1,42 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 3,
+  "mutants_declared": 3,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::RpcRetryTests::test_a_truncated_getblock_body_is_retried_then_returns_the_whole_response",
+      "name": "a decode failure is fatal on the first attempt again",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::RpcRetryTests::test_a_malformed_full_body_is_labelled_malformed_not_truncated",
+      "name": "the last attempt is swallowed into a half-parsed result",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b9d_transaction_bodies.py::RpcRetryTests::test_a_malformed_full_body_is_labelled_malformed_not_truncated",
+      "name": "the truncated/malformed inspection is dropped",
+      "outcome": "killed"
+    }
+  ],
+  "pytest_args": [
+    "-k",
+    "RpcRetry"
+  ],
+  "pytest_args_reason": "The sweep scopes to RpcRetryTests, which exercises the transport retry loop with in-memory openers and needs no external artifact. The rest of the file is left in place; narrowing here is about which guards the score covers -- the truncation-retry path -- not about hiding a class that would fail. Every declared mutant lives in that path and is killed by those tests, so nothing killable only outside RpcRetryTests is claimed.",
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b9d_truncation_retry",
+  "target": "scripts/b9d_transaction_bodies.py",
+  "tests": [
+    "tests/test_b9d_transaction_bodies.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "86096a6f8460f7a9113becd13348ea2c5d0f6865d007658156de49ec113c9956",
+  "working_tree_unchanged": true
+}

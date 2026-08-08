@@ -1,0 +1,32 @@
+{
+  "sweep_id": "b9d_truncation_retry",
+  "description": "b9d's getBlock truncation handling: the fix that keeps one cut-mid-stream response out of tens of thousands from killing a multi-day stage. Guards that a decode failure is RETRIED (not fatal on first), that the failure is INSPECTED and labelled truncated-vs-malformed rather than reported as a plain transport failure, and -- the reviewer's declared concern -- that the last attempt RAISES with that detail and never falls through to a half-parsed result.",
+  "target": "scripts/b9d_transaction_bodies.py",
+  "tests": [
+    "tests/test_b9d_transaction_bodies.py"
+  ],
+  "mutants": [
+    {
+      "name": "a decode failure is fatal on the first attempt again",
+      "old": "            if attempt < retries:",
+      "new": "            if False:",
+      "note": "Never retries the decode, so the truncated-then-whole body raises on attempt 1 instead of recovering; test_a_truncated_getblock_body_is_retried_then_returns_the_whole_response fails."
+    },
+    {
+      "name": "the last attempt is swallowed into a half-parsed result",
+      "old": "            raise FreezeViolation(detail) from error",
+      "new": "            return raw, {}",
+      "note": "The reviewer's declared mutant: on exhaustion it returns the truncated body with an empty result instead of raising -- worse than the fatal it replaced. test_the_last_attempt_raises_it_is_never_swallowed_into_a_partial_result fails because nothing is raised."
+    },
+    {
+      "name": "the truncated/malformed inspection is dropped",
+      "old": "            kind = \"truncated transfer\" if short_of_declared or failed_at_end else \"malformed body\"",
+      "new": "            kind = \"truncated transfer\"",
+      "note": "Every undecodable body is called a truncation, so a genuinely malformed body from a broken provider is mislabelled; test_a_malformed_full_body_is_labelled_malformed_not_truncated fails."
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None. Each mutant breaks one of the three properties the fix exists for -- retry, honest labelling, and raise-not-swallow -- and each is killed by a RpcRetryTests case that drives rpc_request with an in-memory opener and no external artifact.",
+  "pytest_args": ["-k", "RpcRetry"],
+  "pytest_args_reason": "The sweep scopes to RpcRetryTests, which exercises the transport retry loop with in-memory openers and needs no external artifact. The rest of the file is left in place; narrowing here is about which guards the score covers -- the truncation-retry path -- not about hiding a class that would fail. Every declared mutant lives in that path and is killed by those tests, so nothing killable only outside RpcRetryTests is claimed."
+}
