@@ -510,7 +510,7 @@ def stage_commands(work_dir=WORK_DIR):
             "note": "start, end, database and export are all explicit; end slot is exclusive",
         },
         "subsample_cohort": {
-            "argv": [sys.executable, "scripts/b11f_cohort_subsample.py", "build",
+            "argv": [sys.executable, "scripts/b11f_cohort_subsample.py",
                      "--source", str(directory / "b11a_cohort.sqlite"),
                      "--output", str(directory / "b11a_subsample.sqlite"),
                      "--n", str(SUBSAMPLE_N)],

@@ -2159,3 +2159,58 @@ class EveryStageScriptIsPinnedTests(unittest.TestCase):
                    if part.endswith(".py") and part.startswith("scripts/")}
         self.assertTrue(scripts, "the scan must actually find scripts, or it proves nothing")
         self.assertNotIn("scripts/not_pinned_anywhere.py", W.MANIFEST_FILES)
+
+
+class StageArgvActuallyParsesTests(unittest.TestCase):
+    """Every stage's argv must be one its script can parse, positionals included.
+
+    b11e checks that every FLAG the plan passes is declared. It does not check bare tokens, so
+    `b11f_cohort_subsample.py build --source ...` sailed through every offline check and died at
+    run time with "unrecognized arguments: build" -- exit 2, after three stages had completed. I
+    had copied b11d's `build` subcommand pattern onto a script that has no subcommands.
+
+    A subcommand is a POSITIONAL, and the flag check was blind to positionals by construction.
+    """
+
+    def parsed_usage(self, script):
+        """The script's own usage line, which names its subcommands in braces if it has any."""
+        result = subprocess.run([sys.executable, script, "--help"], capture_output=True,
+                                text=True, cwd=ROOT, timeout=60)
+        return result.stdout + result.stderr
+
+    def test_every_bare_token_in_a_stage_argv_is_a_subcommand_the_script_declares(self):
+        commands = W.stage_commands(pathlib.Path("/tmp/b11a-iso"))
+        for stage, command in commands.items():
+            argv = command["argv"]
+            script = next((a for a in argv if a.endswith(".py")), None)
+            if not script:
+                continue
+            index = argv.index(script)
+            bare = []
+            skip_next = False
+            for token in argv[index + 1:]:
+                if skip_next:
+                    skip_next = False
+                    continue
+                if token.startswith("-"):
+                    skip_next = True          # assume the flag takes a value; harmless if it does not
+                    continue
+                bare.append(token)
+            if not bare:
+                continue
+            usage = self.parsed_usage(script)
+            for token in bare:
+                if "/" in token or token.endswith((".sqlite", ".json", ".jsonl")):
+                    continue                   # a path argument, not a subcommand
+                with self.subTest(stage=stage, token=token):
+                    self.assertIn(
+                        token, usage,
+                        f"{stage} passes bare token {token!r} to {script}, which does not declare "
+                        "it. A stray positional passes every flag check and fails at run time")
+
+    def test_the_check_would_have_caught_the_defect_it_was_written_for(self):
+        """Non-vacuous: the exact broken argv must be rejected by the same logic."""
+        usage = self.parsed_usage("scripts/b11f_cohort_subsample.py")
+        self.assertNotIn("build", usage,
+                         "b11f declares no `build` subcommand, which is why the original argv died")
+        self.assertIn("--source", usage, "the scan must actually be reading a usage line")
