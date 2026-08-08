@@ -1,0 +1,84 @@
+{
+  "baseline_passed": true,
+  "expected_survivors": {},
+  "git_ancestry_staged": false,
+  "killed": 12,
+  "mutants_declared": 12,
+  "per_mutant": [
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheDrawIsDeterministicAndUniform::test_a_changed_seed_changes_the_draw",
+      "name": "the key ignores the seed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheDrawIsDeterministicAndUniform::test_a_changed_seed_changes_the_draw",
+      "name": "the key ignores the mint",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheDrawIsNested::test_a_larger_n_is_a_superset_and_a_prefix",
+      "name": "select the largest keys, not the smallest",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheDrawRefusesRatherThanLie::test_n_larger_than_population_refuses_it_does_not_truncate",
+      "name": "the over-population guard is removed, so N silently truncates",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheDrawRefusesRatherThanLie::test_duplicate_mint_refuses",
+      "name": "the duplicate-mint guard is removed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheDrawRefusesRatherThanLie::test_boolean_n_is_not_an_integer_count",
+      "name": "the boolean-N guard is removed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheDrawRefusesRatherThanLie::test_n_below_one_refuses",
+      "name": "the N-below-one guard is weakened to N<0",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheSelectorReadsCreationTimeIdentityOnly::test_selected_signature_is_mints_seed_and_n",
+      "name": "the selector grows an outcome input",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheSubsampleArtifactIsAFreshCohort::test_a_parent_claiming_outcomes_is_refused",
+      "name": "build no longer verifies the parent is a sealed fresh cohort",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheSubsampleArtifactIsAFreshCohort::test_a_parent_with_no_provenance_window_is_refused",
+      "name": "the missing-window guard is removed",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheSubsampleArtifactIsAFreshCohort::test_write_once_it_refuses_to_overwrite",
+      "name": "the subsample artifact is no longer write-once",
+      "outcome": "killed"
+    },
+    {
+      "first_failing_test": "tests/test_b11f_cohort_subsample.py::TheSubsampleArtifactIsAFreshCohort::test_metadata_records_the_draw_for_audit",
+      "name": "the recorded N is the population, not the draw",
+      "outcome": "killed"
+    }
+  ],
+  "pytest_args": [],
+  "pytest_args_reason": null,
+  "record_is_not_evidence_of_correctness": "a killed mutant shows a guard is load-bearing, not that the guard is right",
+  "staged_copy_only": true,
+  "survivors": [],
+  "sweep_id": "b11f_subsample",
+  "target": "scripts/b11f_cohort_subsample.py",
+  "tests": [
+    "tests/test_b11f_cohort_subsample.py"
+  ],
+  "tree_manifest_exclusions": [
+    "agent_discussion.md"
+  ],
+  "working_tree_sha256": "7151f48b5ff51d75861ffb2a3466fb28572fc21368113923c51a092564041252",
+  "working_tree_unchanged": true
+}

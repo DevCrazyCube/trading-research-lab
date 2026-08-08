@@ -1,0 +1,86 @@
+{
+  "sweep_id": "b11f_subsample",
+  "description": "B11F's hash-on-mint uniform draw: the properties the preregistration stands on. That the key reads BOTH the seed and the mint (drop either and the draw stops being seeded, or stops depending on identity); that it takes the SMALLEST keys, so a larger N is a prefix-superset of a smaller one; that the size guards refuse rather than truncate or admit a boolean; that the selector's signature cannot silently grow an outcome input; and that build_subsample refuses a parent that is not a sealed fresh cohort, has no window, or was tampered, and never overwrites. Test (b), the pilot-isolation check, is not exercised by these mutants -- it guards a different tree (research/b11f/pilot) and is proven non-vacuous by its own planted-machinery tests in the baseline suite.",
+  "target": "scripts/b11f_cohort_subsample.py",
+  "tests": [
+    "tests/test_b11f_cohort_subsample.py"
+  ],
+  "mutants": [
+    {
+      "name": "the key ignores the seed",
+      "old": "hashlib.sha256(seed.encode(\"utf-8\") + mint.encode(\"utf-8\"))",
+      "new": "hashlib.sha256(mint.encode(\"utf-8\"))",
+      "note": "Killed by the changed-seed test: a key that does not read the seed draws the same set for every seed."
+    },
+    {
+      "name": "the key ignores the mint",
+      "old": "hashlib.sha256(seed.encode(\"utf-8\") + mint.encode(\"utf-8\"))",
+      "new": "hashlib.sha256(seed.encode(\"utf-8\"))",
+      "note": "Every key becomes equal, the draw collapses onto the mint tie-break and stops depending on the seed -- the changed-seed test fails."
+    },
+    {
+      "name": "select the largest keys, not the smallest",
+      "old": "    return ordered[:n]",
+      "new": "    return ordered[len(ordered) - n:]",
+      "note": "Still nested as a set, but the tail is not a prefix of a larger tail; the prefix-nested assertion fails."
+    },
+    {
+      "name": "the over-population guard is removed, so N silently truncates",
+      "old": "    if n > len(mints):",
+      "new": "    if False:",
+      "note": "n beyond the population returns the whole population instead of refusing; making N a promise the data cannot keep."
+    },
+    {
+      "name": "the duplicate-mint guard is removed",
+      "old": "    if len(mints) != len(set(mints)):",
+      "new": "    if False:",
+      "note": "A cohort weighting some curve twice would be drawn from without complaint."
+    },
+    {
+      "name": "the boolean-N guard is removed",
+      "old": "    if not isinstance(n, int) or isinstance(n, bool) or n < 1:",
+      "new": "    if not isinstance(n, int) or n < 1:",
+      "note": "n=True is an int subclass; without the bool check a size of True quietly means one curve."
+    },
+    {
+      "name": "the N-below-one guard is weakened to N<0",
+      "old": "    if not isinstance(n, int) or isinstance(n, bool) or n < 1:",
+      "new": "    if not isinstance(n, int) or isinstance(n, bool) or n < 0:",
+      "note": "n=0 slips through and returns an empty draw instead of refusing."
+    },
+    {
+      "name": "the selector grows an outcome input",
+      "old": "def selected(cohort_mints, seed=SEED, n=DEFAULT_N):",
+      "new": "def selected(cohort_mints, seed=SEED, n=DEFAULT_N, signature_count=0):",
+      "note": "The signature-shape test and the banned-activity-substring test both fire: 'signature_count' is a downstream quantity the selector may not name."
+    },
+    {
+      "name": "build no longer verifies the parent is a sealed fresh cohort",
+      "old": "    adapter.assert_fresh_cohort(source_path)  # refuses a non-cohort or an outcome-bearing one",
+      "new": "    source_path  # refuses a non-cohort or an outcome-bearing one",
+      "note": "An outcome-claiming or hash-tampered parent would be read and re-sealed into a superficially valid subsample; the outcome-parent and tampered-parent tests fail."
+    },
+    {
+      "name": "the missing-window guard is removed",
+      "old": "    if provenance is None:",
+      "new": "    if False:",
+      "note": "A parent with no provenance row unpacks None and raises the wrong error; the no-provenance test asserts the specific refusal."
+    },
+    {
+      "name": "the subsample artifact is no longer write-once",
+      "old": "    if output_path.exists():",
+      "new": "    if False:",
+      "note": "Rebuilding over an existing subsample would silently replace a population a downstream hash was taken against."
+    },
+    {
+      "name": "the recorded N is the population, not the draw",
+      "old": "            (\"subsample_n\", str(int(n))),",
+      "new": "            (\"subsample_n\", str(int(len(members)))),",
+      "note": "The audit metadata would misreport how many curves were drawn; the metadata test pins it to the requested N."
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None. Every mutant is in the draw's correctness or the artifact's refusals, each covered by an in-memory test over synthetic cohorts. The pilot-isolation property (test b) is deliberately not represented here: the sweep mutates the selector, whereas test (b) guards the pilot directory, and its non-vacuity is established in the baseline by test_the_check_flags_a_pilot_that_would_carry_machinery and test_the_check_flags_the_frozen_seed_literal rather than by a survivor here.",
+  "pytest_args": null,
+  "pytest_args_reason": null
+}
