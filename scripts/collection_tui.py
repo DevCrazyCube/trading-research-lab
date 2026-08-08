@@ -19,6 +19,7 @@ import sqlite3
 import subprocess
 import sys
 import termios
+import threading
 import time
 import tty
 
@@ -154,6 +155,34 @@ def git_feed(limit=6):
         return []
 
 
+# The phase targets come from COUNT(DISTINCT signature) over a multi-gigabyte inventory, which
+# takes the better part of a minute. Computing it inline made the FIRST FRAME take 54 seconds and
+# the dashboard look dead -- a progress display whose own progress you cannot see. It is loaded
+# once, on a daemon thread, and the frame renders without it until it arrives.
+_TARGETS = {"value": None, "state": "idle"}
+
+
+def _load_targets():
+    counts = sqlite_counts(SIGNATURES, {
+        "ok": "SELECT COUNT(DISTINCT signature) FROM signature_observation "
+              "WHERE time_class='in_window' AND err_json='null'",
+        "slots": "SELECT COUNT(DISTINCT slot) FROM signature_observation "
+                 "WHERE time_class='in_window' AND err_json='null'"})
+    if counts.get("ok"):
+        _TARGETS["value"] = {"txns": counts["ok"], "blocks": counts["slots"]}
+        _TARGETS["state"] = "ready"
+    else:
+        _TARGETS["state"] = "unavailable"
+
+
+def start_target_load():
+    """Kick the one slow query onto a daemon thread. Idempotent; never blocks a frame."""
+    if _TARGETS["state"] == "idle" and SIGNATURES.exists():
+        _TARGETS["state"] = "loading"
+        threading.Thread(target=_load_targets, daemon=True).start()
+    return _TARGETS
+
+
 def agent_usage(cache={}, every=45.0):
     """Token usage per seat, from the session transcripts. Cached: these files are tens of MiB."""
     now = time.time()
@@ -241,16 +270,8 @@ def render(previous):
     counts = sqlite_counts(BODIES, {
         "blocks": "SELECT COUNT(*) FROM raw_block_signatures",
         "txns": "SELECT COUNT(*) FROM raw_transaction"})
-    targets = previous.get("targets")
-    if targets is None:
-        sig = sqlite_counts(SIGNATURES, {
-            "ok": "SELECT COUNT(DISTINCT signature) FROM signature_observation "
-                  "WHERE time_class='in_window' AND err_json='null'",
-            "slots": "SELECT COUNT(DISTINCT slot) FROM signature_observation "
-                     "WHERE time_class='in_window' AND err_json='null'"})
-        if sig.get("ok"):
-            targets = {"txns": sig["ok"], "blocks": sig["slots"]}
-            previous["targets"] = targets
+    loader = start_target_load()
+    targets = loader["value"]
 
     if counts["blocks"] is not None and targets:
         for key, label in (("blocks", "BLOCKS"), ("txns", "TRANSACTIONS")):
@@ -292,6 +313,13 @@ def render(previous):
             add(f"  {fg(DIM)}measuring rate...{RESET}")
     elif counts["blocks"] is None:
         add(f"  {fg(DIM)}collection artifact not open yet{RESET}")
+    if counts["blocks"] is not None and not targets:
+        drawn, _ = bar(0, 1, 34)
+        add(f"  {fg(CREAM)}BLOCKS       {RESET}{drawn}  "
+            f"{fg(CREAM)}{thousands(counts['blocks'] or 0)}{fg(DIM)}/…{RESET}")
+        note = "counting the inventory (one slow pass, ~1 min)" \
+            if loader["state"] == "loading" else "targets unavailable"
+        add(f"  {fg(DIM)}{note}{RESET}")
     add("")
 
     # ---- agents -------------------------------------------------------------------------------
@@ -310,8 +338,8 @@ def render(previous):
     # ---- feed ---------------------------------------------------------------------------------
     add(f"  {fg(CREAM)}RECENT{RESET}")
     for sha, when, who, subject in git_feed(6):
-        subject = subject[:62] + ("…" if len(subject) > 62 else "")
-        add(f"    {fg(CORAL)}{sha}{RESET} {fg(DIM)}{when:<14}{RESET}{fg(MUTED)}{subject}{RESET}")
+        subject = subject[:60] + ("…" if len(subject) > 62 else "")
+        add(f"    {fg(CORAL)}{sha}{RESET} {fg(DIM)}{when:<15}{RESET}{fg(MUTED)}{subject}{RESET}")
 
     add("")
     add(f"  {fg(DIM)}q quit   ·   read-only, nothing here writes{RESET}")
