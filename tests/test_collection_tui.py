@@ -18,11 +18,24 @@ class ItObservesAndNeverParticipates(unittest.TestCase):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source)
 
-    def test_every_sqlite_open_is_read_only(self):
-        source = (ROOT / "scripts" / "collection_tui.py").read_text()
-        self.assertIn("mode=ro", source)
-        self.assertEqual(source.count("sqlite3.connect"), source.count("mode=ro"),
-                         "every connect must carry mode=ro, or one of them can write")
+    def test_every_sqlite_open_is_read_only_AND_immutable(self):
+        """mode=ro is not enough, and that cost a stage.
+
+        A read-only connection to a WAL database still reads the side file and can checkpoint it,
+        which rewrites the MAIN file's bytes -- same content, different sha256. b9d pins its
+        sources by byte hash, so this dashboard polling the signature inventory changed the bytes
+        under a gate that then correctly refused to decode. Observing was not free.
+        """
+        # Line-based, not a substring count: a COMMENT mentioning immutable=1 inflated one side
+        # and the counts disagreed while the code was correct -- prose contaminating a count, the
+        # same trap as a text scan that cannot tell a comment from a call.
+        lines = (ROOT / "scripts" / "collection_tui.py").read_text().splitlines()
+        connects = [l for l in lines if "sqlite3.connect" in l]
+        self.assertTrue(connects, "the scan must find a connect, or it proves nothing")
+        for line in connects:
+            with self.subTest(line=line.strip()[:60]):
+                self.assertIn("immutable=1", line,
+                              "every connect must be immutable=1, or reading rewrites the file")
 
     def test_it_is_not_manifest_pinned(self):
         spec = importlib.util.spec_from_file_location("b11c", ROOT / "scripts" / "b11c_maturity_watcher.py")

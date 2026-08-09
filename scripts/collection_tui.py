@@ -137,7 +137,12 @@ def sqlite_counts(path, queries):
     if not path.exists():
         return {name: None for name in queries}
     try:
-        db = sqlite3.connect(f"file:{path}?mode=ro&immutable=0", uri=True, timeout=0.4)
+        # immutable=1, not merely mode=ro. A read-only connection to a WAL database still reads
+        # (and can checkpoint) the side file, which REWRITES the main file's bytes -- identical
+        # content, different sha256. That is what tripped the decode gate: b9d pins its sources by
+        # byte hash, and this dashboard polling the inventory changed those bytes underneath it.
+        # immutable=1 promises SQLite the file cannot change, so it never touches the sidecars.
+        db = sqlite3.connect(f"file:{path}?mode=ro&immutable=1", uri=True, timeout=0.4)
         db.execute("PRAGMA busy_timeout=400")
         out = {}
         for name, sql in queries.items():
