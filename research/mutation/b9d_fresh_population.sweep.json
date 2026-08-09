@@ -1,0 +1,44 @@
+{
+  "sweep_id": "b9d_fresh_population",
+  "description": "b9d's four burned-count pins made fresh-mode aware in one cycle. In a fresh run the population size is not a pinned number -- it is however many in-window successful signatures b9c derived -- so the coordinate seam, the raw-body seam and verify's reconcile all assert EXHAUSTIVENESS against b9c's inventory instead of against 94,985/38,853. Each mutant reverts one fresh path to its burned constant, or loosens the exhaustiveness, and dies against a fresh fixture whose population (3 signatures over 2 slots) is nothing like the burned counts. Burned mode is unchanged and its tests still pass.",
+  "target": "scripts/b9d_transaction_bodies.py",
+  "tests": [
+    "tests/test_b9d_transaction_bodies.py"
+  ],
+  "mutants": [
+    {
+      "name": "the coordinate seam reverts to the burned count",
+      "old": "    if source_mode(b9c_path, b9a_path) == SOURCE_MODE_FRESH:\n        population_signatures, population_slots = frozen_population(b9c_path, b9a_path)",
+      "new": "    if False:\n        population_signatures, population_slots = frozen_population(b9c_path, b9a_path)",
+      "note": "A fresh run falls through to the burned 38,853/94,985 count check, which refuses the valid 3-signature fixture; test_a_complete_fresh_coordinate_phase_passes fails."
+    },
+    {
+      "name": "the raw-body seam reverts to the burned count",
+      "old": "    if source_mode(b9c_path, b9a_path) == SOURCE_MODE_FRESH:\n        population_signatures, _ = frozen_population(b9c_path, b9a_path)",
+      "new": "    if False:\n        population_signatures, _ = frozen_population(b9c_path, b9a_path)",
+      "note": "The fresh raw-body phase falls to the burned 94,985 check and refuses the valid 3-body fixture; test_a_complete_fresh_raw_body_phase_passes fails."
+    },
+    {
+      "name": "verify reconciles against the burned count, not the derived one",
+      "old": "    expected = (len(frozen_population(b9c_path, b9a_path)[0])\n                if source_mode(b9c_path, b9a_path) == SOURCE_MODE_FRESH else EXPECTED_SIGNATURES)",
+      "new": "    expected = EXPECTED_SIGNATURES",
+      "note": "In fresh mode the reconcile target becomes 94,985 instead of the derived 3; test_verify_reconciles_against_the_derived_count_not_the_burned_one fails on the coherent fresh artifact."
+    },
+    {
+      "name": "the exhaustiveness check stops rejecting extras",
+      "old": "    if missing or extra:",
+      "new": "    if missing:",
+      "note": "A coordinate or body outside the population is admitted; test_a_coordinate_outside_the_population_is_refused fails."
+    },
+    {
+      "name": "the exhaustiveness check stops rejecting a short population",
+      "old": "    if missing or extra:",
+      "new": "    if extra:",
+      "note": "A missing coordinate, body or block is admitted; test_a_missing_coordinate_is_refused / test_a_missing_fetched_block_is_refused / test_a_missing_raw_body_is_refused fail."
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None. Each fresh path has a mutant reverting it to its burned constant, and the exhaustiveness helper has a mutant for each direction it must reject. All are killed by FreshPopulationSeamsAreExhaustiveTests, whose fixture population of 3 signatures over 2 slots is nothing like the burned 94,985/38,853, so any path still reading a burned constant refuses a valid fresh artifact.",
+  "pytest_args": ["-k", "FreshPopulationSeams or PopulationTests or CoordinateSeam"],
+  "pytest_args_reason": "Scoped to the population-seam classes, which build small synthetic b9c/b9a/b9d fixtures and need no external artifact. Burned-mode behaviour is covered by PopulationTests and CoordinateSeam; the fresh paths by FreshPopulationSeams. Narrowing is about which guards the score covers -- the four pins' fresh handling -- not about hiding a class that would fail; every declared mutant lives in these paths."
+}
