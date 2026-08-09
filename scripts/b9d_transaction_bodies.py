@@ -507,19 +507,74 @@ def refuse_completed_artifact_before_work(path):
     return None
 
 
-def assert_resumable(database, digests):
-    """§5: a partial artifact resumes only when its source metadata matches exactly."""
-    stored = dict(database.execute(
-        "SELECT key, value FROM metadata WHERE key IN ('b9c_sha256','b9a_sha256')"))
+# The row-content digest a source declares in its OWN metadata. WAL-invariant because it is over
+# ordered rows, not the file image: a checkpoint, vacuum, page-size or SQLite-version difference
+# rewrites the bytes but not the rows. b9c's seal writes `content_sha256` over signature_observation;
+# the cohort adapter writes `cohort_sha256` over cohort_identity. b9d never recomputes either -- it
+# records the declared value at collection and compares it at verify, so the algorithm stays with
+# the artifact that owns the rows.
+CONTENT_DIGEST_KEYS = ("content_sha256", "cohort_sha256")
+
+
+def source_content_digest(path):
+    """The row-content digest `path` declares in its metadata, or None if it declares none."""
+    connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        metadata = dict(connection.execute("SELECT key, value FROM metadata"))
+    finally:
+        connection.close()
+    for key in CONTENT_DIGEST_KEYS:
+        if metadata.get(key):
+            return metadata[key]
+    return None
+
+
+def source_identity(mode, digests, b9c_path=B9C_PATH, b9a_path=B9A_PATH):
+    """The source-provenance metadata a run stamps into its artifact.
+
+    BURNED: the pinned byte hashes, exactly as before -- byte-identical stamping.
+
+    FRESH: the source's ACTUAL byte hash (recorded but NOT enforcing -- a checkpoint diagnostic)
+    and its declared row-content digest (the enforcing pin). The old stamping searched `digests`
+    for a value equal to the BURNED constant and, finding none in a fresh run, fell back to that
+    constant -- so a fresh artifact recorded the burned b9c/b9a hashes and verify then compared the
+    fresh file against them and refused every fresh decode. Fresh mode does not use that fallback:
+    it records what the fresh sources actually are, and REFUSES if a source declares no content
+    digest rather than pinning bytes a checkpoint would break.
+    """
+    if mode == SOURCE_MODE_BURNED:
+        return {"b9c_sha256": next((v for k, v in digests.items() if v == B9C_SHA256), B9C_SHA256),
+                "b9a_sha256": next((v for k, v in digests.items() if v == B9A_SHA256), B9A_SHA256)}
+    identity = {"b9c_sha256": digests.get(b9c_path, sha256_file(b9c_path)),
+                "b9a_sha256": digests.get(b9a_path, sha256_file(b9a_path))}
+    for role, path in (("b9c", b9c_path), ("b9a", b9a_path)):
+        digest = source_content_digest(path)
+        if not digest:
+            raise FreezeViolation(
+                f"fresh source {path} declares no row-content digest in its metadata "
+                f"({' or '.join(CONTENT_DIGEST_KEYS)}); a WAL-invariant source pin cannot be "
+                "recorded, and this refuses rather than pinning file bytes a checkpoint would change")
+        identity[f"{role}_content_sha256"] = digest
+    return identity
+
+
+def assert_resumable(database, identity, mode):
+    """§5: a partial artifact resumes only when its source identity still matches.
+
+    The enforcing key is mode-dependent: BURNED compares the byte hash; FRESH compares the
+    row-content digest, because a WAL checkpoint between two resume attempts changes a source's
+    bytes but not its rows, and refusing on that would strand a correct resume.
+    """
+    stored = dict(database.execute("SELECT key, value FROM metadata"))
     if not stored:
         return True
-    expected = {"b9c_sha256": digests.get(B9C_PATH, B9C_SHA256),
-                "b9a_sha256": digests.get(B9A_PATH, B9A_SHA256)}
-    for key, value in expected.items():
-        if stored.get(key) and stored[key] != value:
+    keys = (("b9c_content_sha256", "b9a_content_sha256") if mode == SOURCE_MODE_FRESH
+            else ("b9c_sha256", "b9a_sha256"))
+    for key in keys:
+        if stored.get(key) and identity.get(key) and stored[key] != identity[key]:
             raise FreezeViolation(
                 f"partial artifact was built against {key}={stored[key]}, current source is "
-                f"{value}; refusing to resume across a source change")
+                f"{identity[key]}; refusing to resume across a source change")
     return True
 
 
@@ -779,18 +834,53 @@ def assert_body_population_matches(database):
 
 
 def verify_source_artifacts(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH):
-    """§11: no completed source artifact changed hash since the run recorded it."""
+    """§11: no completed source artifact changed since the run recorded it.
+
+    BURNED enforces the byte hash: the burned corpus is static, so its bytes are its identity.
+    FRESH enforces the ROW-CONTENT digest each source declares -- WAL-invariant, so a checkpoint
+    that rewrites the file cannot forge a change -- and keeps the byte hash as a NON-enforcing
+    diagnostic: when the two disagree it tells us a checkpoint happened, the signal we lacked and
+    spent an hour failing to reconstruct.
+    """
     recorded = dict(database.execute(
-        "SELECT key, value FROM metadata WHERE key IN ('b9c_sha256','b9a_sha256')"))
-    if not recorded:
-        raise FreezeViolation(
-            "artifact records no source hashes; it cannot prove which evidence it was built from")
-    for key, path in (("b9c_sha256", b9c_path), ("b9a_sha256", b9a_path)):
-        actual = sha256_file(path)
-        if recorded.get(key) != actual:
+        "SELECT key, value FROM metadata WHERE key IN "
+        "('b9c_sha256','b9a_sha256','b9c_content_sha256','b9a_content_sha256')"))
+    if source_mode(b9c_path, b9a_path) == SOURCE_MODE_BURNED:
+        byte_recorded = {k: recorded[k] for k in ("b9c_sha256", "b9a_sha256") if k in recorded}
+        if not byte_recorded:
             raise FreezeViolation(
-                f"{path} now hashes {actual}, but this artifact was built against "
-                f"{recorded.get(key)}; a source artifact changed after the run")
+                "artifact records no source hashes; it cannot prove which evidence it was built "
+                "from")
+        for key, path in (("b9c_sha256", b9c_path), ("b9a_sha256", b9a_path)):
+            actual = sha256_file(path)
+            if recorded.get(key) != actual:
+                raise FreezeViolation(
+                    f"{path} now hashes {actual}, but this artifact was built against "
+                    f"{recorded.get(key)}; a source artifact changed after the run")
+        return byte_recorded
+    for role, path in (("b9c", b9c_path), ("b9a", b9a_path)):
+        content_key = f"{role}_content_sha256"
+        recorded_content = recorded.get(content_key)
+        if not recorded_content:
+            raise FreezeViolation(
+                f"artifact records no content digest for {role} ({content_key}); it cannot prove "
+                f"its {role} source is unchanged without pinning file bytes a checkpoint would "
+                "break")
+        current_content = source_content_digest(path)
+        if current_content is None:
+            raise FreezeViolation(
+                f"{path} declares no row-content digest to verify against; the source is not sealed")
+        if recorded_content != current_content:
+            raise FreezeViolation(
+                f"{path} content digest is now {current_content}, but this artifact was built "
+                f"against {recorded_content}; the source's rows changed after the run")
+        recorded_byte = recorded.get(f"{role}_sha256")
+        actual_byte = sha256_file(path)
+        if recorded_byte and recorded_byte != actual_byte:
+            # Diagnostic, not a refusal: the rows are unchanged, only the file image moved.
+            print(f"note: {path} file bytes changed ({recorded_byte} -> {actual_byte}) while its "
+                  "row-content digest is unchanged; a checkpoint or layout rewrite, not a content "
+                  "change", flush=True)
     return recorded
 
 
@@ -2940,13 +3030,15 @@ def assert_transaction_shape(signature, result):
     return True
 
 
-def initialize_run(database, endpoint, digests, cutoff_slot=CUTOFF_SLOT):
+def initialize_run(database, endpoint, digests, cutoff_slot=CUTOFF_SLOT,
+                   b9c_path=B9C_PATH, b9a_path=B9A_PATH):
     schema(database)
     refuse_if_complete(database)
-    assert_resumable(database, digests)
+    mode = source_mode(b9c_path, b9a_path)
+    identity = source_identity(mode, digests, b9c_path, b9a_path)
+    assert_resumable(database, identity, mode)
     record_decoder_manifest(database, decoder_manifest())
-    values = {"b9c_sha256": next((v for k, v in digests.items() if v == B9C_SHA256), B9C_SHA256),
-              "b9a_sha256": next((v for k, v in digests.items() if v == B9A_SHA256), B9A_SHA256),
+    values = {**identity,
               "endpoint_reference": endpoint_reference(endpoint),
               "authorization_seq": "218", "schema_version": SCHEMA_VERSION,
               # Burned constant by default; the fresh window's stated horizon otherwise. Stamping
@@ -3036,7 +3128,8 @@ def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PA
     grouped = frozen_population_by_slot(b9c_path, b9a_path)
     database = connect(output)
     try:
-        initialize_run(database, endpoint, digests, cutoff_slot)
+        initialize_run(database, endpoint, digests, cutoff_slot,
+                       b9c_path=b9c_path, b9a_path=b9a_path)
         if calls_per_second <= 0:
             raise FreezeViolation("calls_per_second must be positive")
         if not isinstance(workers, int) or isinstance(workers, bool) or not 1 <= workers <= 8:

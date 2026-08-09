@@ -1312,6 +1312,94 @@ class FreshPopulationSeamsAreExhaustiveTests(unittest.TestCase):
                 setattr(B9D, name, fn)
 
 
+class FreshSourcePinIsWalInvariantTests(unittest.TestCase):
+    """The fifth burned pin. A fresh run must NOT stamp B9C_SHA256/B9A_SHA256 (which made verify
+    compare a fresh file against a different study's hash), and verify must enforce the ROW-CONTENT
+    digest each source declares -- WAL-invariant -- keeping the file byte hash as a non-enforcing
+    checkpoint diagnostic. The load-bearing case: a byte-only change passes; a content change refuses."""
+
+    def setUp(self):
+        self.dir = pathlib.Path(tempfile.mkdtemp())
+        self.b9c = self._source("b9c.sqlite", "content_sha256", "b9c_content_digest_value")
+        self.b9a = self._source("b9a.sqlite", "cohort_sha256", "b9a_content_digest_value")
+        self.assertEqual(B9D.source_mode(str(self.b9c), str(self.b9a)), B9D.SOURCE_MODE_FRESH)
+
+    def _source(self, name, content_key, content_value):
+        path = self.dir / name
+        con = sqlite3.connect(str(path))
+        con.execute("CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+        if content_key:
+            con.execute("INSERT INTO metadata VALUES (?,?)", (content_key, content_value))
+        con.commit()
+        con.close()
+        return path
+
+    def _artifact(self, recorded):
+        db = sqlite3.connect(":memory:")
+        db.execute("CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+        db.executemany("INSERT INTO metadata VALUES (?,?)", list(recorded.items()))
+        db.commit()
+        return db
+
+    def _recorded(self, **over):
+        base = {"b9c_sha256": B9D.sha256_file(str(self.b9c)),
+                "b9a_sha256": B9D.sha256_file(str(self.b9a)),
+                "b9c_content_sha256": "b9c_content_digest_value",
+                "b9a_content_sha256": "b9a_content_digest_value"}
+        base.update(over)
+        return base
+
+    def test_a_fresh_run_records_the_declared_content_digest_not_the_burned_constant(self):
+        identity = B9D.source_identity(B9D.SOURCE_MODE_FRESH, {}, str(self.b9c), str(self.b9a))
+        self.assertEqual(identity["b9c_content_sha256"], "b9c_content_digest_value")
+        self.assertEqual(identity["b9a_content_sha256"], "b9a_content_digest_value")
+        # the byte hash is the fresh file's own, never the burned constant (the stamping bug)
+        self.assertEqual(identity["b9c_sha256"], B9D.sha256_file(str(self.b9c)))
+        self.assertNotEqual(identity["b9c_sha256"], B9D.B9C_SHA256)
+        self.assertNotEqual(identity["b9a_sha256"], B9D.B9A_SHA256)
+
+    def test_a_fresh_source_without_a_content_digest_is_refused(self):
+        bare = self._source("bare.sqlite", None, None)
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.source_identity(B9D.SOURCE_MODE_FRESH, {}, str(bare), str(self.b9a))
+        self.assertIn("no row-content digest", str(v.exception))
+
+    def test_verify_passes_when_the_content_digest_matches(self):
+        db = self._artifact(self._recorded())
+        self.assertTrue(B9D.verify_source_artifacts(db, str(self.b9c), str(self.b9a)))
+
+    def test_verify_refuses_a_content_change(self):
+        db = self._artifact(self._recorded(b9c_content_sha256="a_different_content_digest"))
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.verify_source_artifacts(db, str(self.b9c), str(self.b9a))
+        self.assertIn("rows changed after the run", str(v.exception))
+
+    def test_verify_passes_when_only_the_bytes_moved(self):
+        # The whole point: a checkpoint changes the file's bytes, not its rows. Recording a stale
+        # byte hash but the correct content digest must PASS, where the old byte-enforcing verify
+        # refused. This is the fifth-pin failure's actual fix.
+        db = self._artifact(self._recorded(b9c_sha256="deadbeef_stale_byte_hash"))
+        self.assertTrue(B9D.verify_source_artifacts(db, str(self.b9c), str(self.b9a)))
+
+    def test_verify_refuses_when_no_content_digest_was_recorded(self):
+        recorded = self._recorded()
+        del recorded["b9c_content_sha256"]
+        db = self._artifact(recorded)
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.verify_source_artifacts(db, str(self.b9c), str(self.b9a))
+        self.assertIn("no content digest for b9c", str(v.exception))
+
+    def test_resume_survives_a_byte_only_change_but_refuses_a_content_change(self):
+        db = self._artifact(self._recorded())
+        same_content = {"b9c_content_sha256": "b9c_content_digest_value",
+                        "b9a_content_sha256": "b9a_content_digest_value",
+                        "b9c_sha256": "moved_bytes", "b9a_sha256": "moved_bytes"}
+        self.assertTrue(B9D.assert_resumable(db, same_content, B9D.SOURCE_MODE_FRESH))
+        changed = dict(same_content, b9c_content_sha256="changed_content")
+        with self.assertRaises(B9D.FreezeViolation):
+            B9D.assert_resumable(db, changed, B9D.SOURCE_MODE_FRESH)
+
+
 class CollectorLockTests(unittest.TestCase):
     def test_a_second_writer_is_refused_while_the_first_holds_the_artifact_lock(self):
         output = str(pathlib.Path(tempfile.mkdtemp()) / "artifact.sqlite")
@@ -1403,14 +1491,18 @@ class ArtifactTests(unittest.TestCase):
         database = self.artifact()
         database.execute("INSERT INTO metadata VALUES ('b9c_sha256','deadbeef')")
         with self.assertRaises(B9D.FreezeViolation) as ctx:
-            B9D.assert_resumable(database, {B9D.B9C_PATH: B9D.B9C_SHA256})
+            B9D.assert_resumable(
+                database, {"b9c_sha256": B9D.B9C_SHA256, "b9a_sha256": B9D.B9A_SHA256},
+                B9D.SOURCE_MODE_BURNED)
         self.assertIn("refusing to resume", str(ctx.exception))
         database.close()
 
     def test_resume_with_matching_sources_is_allowed(self):
         database = self.artifact()
         database.execute("INSERT INTO metadata VALUES ('b9c_sha256',?)", (B9D.B9C_SHA256,))
-        self.assertTrue(B9D.assert_resumable(database, {B9D.B9C_PATH: B9D.B9C_SHA256}))
+        self.assertTrue(B9D.assert_resumable(
+            database, {"b9c_sha256": B9D.B9C_SHA256, "b9a_sha256": B9D.B9A_SHA256},
+            B9D.SOURCE_MODE_BURNED))
         database.close()
 
     def test_a_coordinate_cannot_be_claimed_by_two_signatures(self):
