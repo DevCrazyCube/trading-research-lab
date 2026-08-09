@@ -29,6 +29,7 @@ STATE = WORK / "supervisor_state.json"
 RECEIPTS = WORK / "receipts"
 BODIES = WORK / "b11a_bodies.sqlite"
 SIGNATURES = WORK / "b11a_signatures.sqlite"
+SUBSAMPLE = WORK / "b11a_subsample.sqlite"
 TRANSCRIPTS = pathlib.Path.home() / ".claude" / "projects" / "-home-anont-meme"
 
 def _b11c():
@@ -173,15 +174,28 @@ _TARGETS = {"value": None, "state": "idle"}
 
 
 def _load_targets():
-    counts = sqlite_counts(SIGNATURES, {
-        "ok": "SELECT COUNT(DISTINCT signature) FROM signature_observation "
-              "WHERE time_class='in_window' AND err_json='null'",
-        "slots": "SELECT COUNT(DISTINCT slot) FROM signature_observation "
-                 "WHERE time_class='in_window' AND err_json='null'"})
-    if counts.get("ok"):
-        _TARGETS["value"] = {"txns": counts["ok"], "blocks": counts["slots"]}
+    """ASK b9d what its population is; do not restate the rule in SQL here.
+
+    This first shipped with a hand-written query -- COUNT(DISTINCT slot) WHERE in_window AND no
+    error -- which looked like the right denominator and was not. b9d's `frozen_population` applies
+    filters that query does not (non-Mayhem curves, its own exact population rule), so the bar
+    measured against a target the pipeline never had: it reported 113,804/153,473 and "74%" for a
+    block phase that was COMPLETE. A progress display with an invented denominator is worse than
+    none, because it reports work remaining that does not exist.
+    """
+    if not (SIGNATURES.exists() and SUBSAMPLE.exists()):
+        _TARGETS["state"] = "unavailable"
+        return
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "b9d_for_population", ROOT / "scripts" / "b9d_transaction_bodies.py")
+        b9d = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(b9d)
+        signatures, slots = b9d.frozen_population(str(SIGNATURES), str(SUBSAMPLE))
+        _TARGETS["value"] = {"txns": len(signatures), "blocks": len(slots)}
         _TARGETS["state"] = "ready"
-    else:
+    except Exception:
         _TARGETS["state"] = "unavailable"
 
 
