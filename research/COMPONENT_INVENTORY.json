@@ -296,6 +296,13 @@
       "role": "Live terminal dashboard for the B11a collection",
       "has": "read-only render of supervisor state, receipts, artifact row counts, per-seat token usage from session transcripts, and recent commit subjects; truecolor ANSI, stdlib only, alternate screen buffer",
       "why_not_a_readiness_component": "It OBSERVES and never participates, the same rule as operator_notify. Every read is read-only, it writes nothing anywhere, and a test asserts the module names no write. It is not manifest-pinned, because pinning a display would let an edit to a progress bar quarantine a collection. It derives RUN_ORDER from b11c rather than restating it, so a dashboard cannot show a stage list the pipeline does not have. Nothing about live-trading readiness depends on it and no gate may rest on a screen being drawn."
+    },
+    {
+      "path": "scripts/b19d_non_issuance_signal.py",
+      "status": "EXISTS_CONFORMING",
+      "role": "B19D evaluation machinery -- does any non-issuance signal survive complete costs",
+      "has": "the five frozen boolean signals, three entry delays, four B10c horizons, three B15D cost scenarios and the 0.1 SOL position, all quoted from the hash-pinned preregistration and verified against it before any run; exact integer order statistics with no mean and no float; coverage reported before outcome; the document's own refusal codes",
+      "why_conforming": "It implements a frozen document and adds nothing to it. The preregistration pin is checked before evaluation and a changed document is refused. Tests enforce the document's prohibitions against the implementer rather than trusting them: no float literal and no true division in any quantity function, no path to the evaluation window so development cannot silently become evaluation, and S5 retained despite being known negative on the burned corpus -- the document says that retention is the test of the no-cherry-picking rule, so dropping it would be the failure it exists to prevent."
     }
   ],
   "verified_absent": [
