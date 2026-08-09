@@ -119,7 +119,8 @@ class WhenItSpeaks(unittest.TestCase):
 
     BASE = {"state": "running_stage", "stage_in_flight": "enumerate_creates",
             "stages_completed": ["program_boundary"], "receipts": [], "quarantine_reason": None,
-            "quarantine_stage": None, "polls": 1, "last_tip_slot": 1}
+            "quarantine_stage": None, "polls": 1, "last_tip_slot": 1,
+            "watcher_running": True, "stalled_seconds": 12}
 
     def test_an_unchanged_state_says_nothing(self):
         self.assertIsNone(N.render(self.BASE, dict(self.BASE)))
@@ -141,6 +142,33 @@ class WhenItSpeaks(unittest.TestCase):
         message = N.render(self.BASE, done)
         self.assertIn("enumerate_creates", message)
         self.assertIn("2/9", message)
+
+    def test_a_dead_watcher_with_a_cold_heartbeat_is_announced(self):
+        """The blind spot that cost 95 minutes: a dead watcher changes no state, so every
+        change-driven check stayed silent while the collection sat stopped."""
+        dead = dict(self.BASE, watcher_running=False, stalled_seconds=5400)
+        message = N.render(self.BASE, dead)
+        self.assertIn("STALLED", message)
+        self.assertIn("90 minutes", message)
+
+    def test_a_stall_is_announced_once_not_every_interval(self):
+        """An alert that repeats every minute is one that gets muted, and this is the alert that
+        matters overnight."""
+        dead = dict(self.BASE, watcher_running=False, stalled_seconds=5400)
+        self.assertIn("STALLED", N.render(self.BASE, dead))
+        later = dict(dead, stalled_seconds=5460)
+        self.assertIsNone(N.render(dead, later), "the same stall must not re-announce")
+
+    def test_a_watcher_that_exits_cleanly_is_reported_without_the_stall_wording(self):
+        gone = dict(self.BASE, watcher_running=False, stalled_seconds=30)
+        message = N.render(self.BASE, gone)
+        self.assertIn("watcher process is gone", message)
+        self.assertNotIn("STALLED", message)
+
+    def test_a_cold_heartbeat_with_a_LIVE_watcher_is_not_a_stall(self):
+        """A long stage legitimately goes quiet between heartbeats; only a MISSING process counts."""
+        quiet = dict(self.BASE, watcher_running=True, stalled_seconds=5400)
+        self.assertIsNone(N.render(self.BASE, quiet))
 
     def test_the_first_observation_reports_where_things_stand(self):
         message = N.render(None, self.BASE)

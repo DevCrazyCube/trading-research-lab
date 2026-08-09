@@ -136,6 +136,21 @@ def discover_chat_id(token=None, opener=None):
 # What is worth waking somebody for
 # ------------------------------------------------------------------------------------------------
 
+def watcher_is_running():
+    """Whether a supervisor process actually exists. /proc, so no dependency and no shell."""
+    import pathlib as _p
+    for entry in _p.Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            command = (entry / "cmdline").read_bytes().decode(errors="replace")
+        except (OSError, FileNotFoundError):
+            continue                       # a process may exit between listing and reading
+        if "b11c_maturity_watcher" in command and "zsh" not in command:
+            return True
+    return False
+
+
 def describe(state, receipts):
     """The safe projection of the supervisor's state. Named fields ONLY.
 
@@ -144,8 +159,15 @@ def describe(state, receipts):
     inheriting one is not.
     """
     quarantine = state.get("quarantine") or {}
+    heartbeat = state.get("stage_heartbeat_at")
     return {
         "state": state.get("state"),
+        # THE BLIND SPOT THIS CLOSES. Everything else here is a state CHANGE, and a watcher that
+        # died stops changing state -- so silence read exactly like a healthy run. A collection sat
+        # quarantined for ninety-five minutes with nothing to report because nothing had changed.
+        # Liveness is not a change; it has to be sampled.
+        "watcher_running": watcher_is_running(),
+        "stalled_seconds": int(time.time() - heartbeat) if heartbeat else None,
         "stage_in_flight": state.get("stage_in_flight"),
         "stages_completed": list(state.get("stages_completed") or []),
         "receipts": sorted(receipts),
@@ -163,6 +185,16 @@ def render(previous, current):
         return (f"B11a watcher observed\nstate: {current['state']}\n"
                 f"stages done: {len(current['stages_completed'])}/9")
     lines = []
+    # A stall is reported ONCE, on the edge, not every interval -- an alert that repeats every
+    # minute is one that gets muted, and this is the alert that matters overnight.
+    stalled = (current.get("stalled_seconds") or 0) > 900 and not current["watcher_running"]
+    was_stalled = (previous.get("stalled_seconds") or 0) > 900 and not previous["watcher_running"]
+    if stalled and not was_stalled:
+        lines.append(f"STALLED: no watcher process and no heartbeat for "
+                     f"{current['stalled_seconds'] // 60} minutes. The collection is not running "
+                     f"and nothing will report it, because a dead watcher changes no state.")
+    if previous["watcher_running"] and not current["watcher_running"] and not stalled:
+        lines.append("the watcher process is gone")
     if current["quarantine_reason"] and current["quarantine_reason"] != previous["quarantine_reason"]:
         lines.append(f"QUARANTINED: {current['quarantine_reason']}"
                      + (f" at {current['quarantine_stage']}" if current["quarantine_stage"] else ""))
