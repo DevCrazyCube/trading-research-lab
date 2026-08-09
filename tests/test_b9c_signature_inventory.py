@@ -823,3 +823,128 @@ def test_the_digest_reports_the_row_count_it_covered(tmp_path):
         assert B9C.content_digest(connection)[1] == 7
     finally:
         connection.close()
+
+
+def test_a_sealed_artifact_is_no_longer_in_wal_mode(tmp_path):
+    """Asserted directly on the POST-CONDITION, not inferred from a side effect.
+
+    A sweep killed nothing here at first: the earlier tests checked that sidecars were absent
+    afterwards, and SQLite removes them on close anyway, so deleting the journal_mode line changed
+    no observable outcome. The guard was doing nothing the runtime was not already doing -- except
+    in the case that matters, where a reader reopens the file and the WAL comes back.
+    """
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    B9C.seal_artifact(path)
+    connection = sqlite3.connect(path)
+    try:
+        mode = connection.execute("PRAGMA journal_mode").fetchone()[0]
+    finally:
+        connection.close()
+    assert mode.lower() == "delete", f"a sealed artifact must not be in WAL mode, got {mode!r}"
+
+
+def test_reopening_a_sealed_artifact_does_not_recreate_a_wal(tmp_path):
+    """The property the mode change exists for, and the one the earlier tests missed.
+
+    Sidecars being absent immediately after sealing proves little -- SQLite tidies them on close.
+    What matters is that a LATER reader cannot bring the WAL back, because that is the reader that
+    moves the bytes under a consumer holding a hash.
+    """
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    sealed = B9C.seal_artifact(path)
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute("SELECT COUNT(*) FROM observation").fetchone()
+        assert not Path(str(path) + "-wal").exists(), \
+            "a reader recreated the WAL, so the bytes can still move"
+    finally:
+        connection.close()
+    assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == sealed
+
+
+def test_the_seal_refuses_a_checkpoint_that_reports_it_did_not_drain(tmp_path, monkeypatch):
+    """The partial-drain refusal, driven directly.
+
+    A real partial drain needs a concurrent writer at an exact moment and cannot be provoked
+    reliably, so the CHECKPOINT RESULT is substituted instead. That is the whole condition the
+    guard reads, and a guard nothing can provoke is one nobody can show works -- this project has
+    now been bitten by that often enough to stop accepting it.
+    """
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    real_connect = sqlite3.connect
+
+    class Pretend:
+        def __init__(self, inner): self._inner = inner
+        def execute(self, sql, *a):
+            if "wal_checkpoint" in sql:
+                class R:
+                    def fetchone(self_inner): return (0, 3, 1)   # 3 log pages left undrained
+                return R()
+            return self._inner.execute(sql, *a)
+        def close(self): self._inner.close()
+
+    monkeypatch.setattr(sqlite3, "connect", lambda *a, **k: Pretend(real_connect(*a, **k)))
+    with pytest.raises(Exception) as caught:
+        B9C.seal_artifact(path)
+    assert "REFUSING to seal" in str(caught.value)
+    assert "log pages" in str(caught.value)
+
+
+def test_the_seal_refuses_a_busy_checkpoint(tmp_path, monkeypatch):
+    """Same technique for the busy result: a writer still holds it, so the hash would be over a
+    file that is still moving."""
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    real_connect = sqlite3.connect
+
+    class Pretend:
+        def __init__(self, inner): self._inner = inner
+        def execute(self, sql, *a):
+            if "wal_checkpoint" in sql:
+                class R:
+                    def fetchone(self_inner): return (1, 0, 0)   # busy
+                return R()
+            return self._inner.execute(sql, *a)
+        def close(self): self._inner.close()
+
+    monkeypatch.setattr(sqlite3, "connect", lambda *a, **k: Pretend(real_connect(*a, **k)))
+    with pytest.raises(Exception) as caught:
+        B9C.seal_artifact(path)
+    assert "checkpoint reported busy" in str(caught.value)
+
+
+def test_the_sidecar_check_refuses_a_leftover(tmp_path):
+    """Called DIRECTLY, because inline it could not be reached.
+
+    Planting a -wal and re-sealing does not work: SQLite removes the sidecars when the connection
+    closes, so the planted file is gone before the check runs. Inline the guard was unreachable
+    from any test -- a check that cannot fire, written by me, one day after I documented that
+    exact failure in three other modules. Extracted, it is provable.
+    """
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    B9C.seal_artifact(path)
+    Path(str(path) + "-wal").write_bytes(b"leftover bytes")
+    with pytest.raises(Exception) as caught:
+        B9C.assert_no_sidecars(path)
+    assert "still carries" in str(caught.value)
+
+
+def test_the_sidecar_check_passes_on_a_clean_seal(tmp_path):
+    """The other half: it must accept what sealing actually produces, or it is just an alarm."""
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    B9C.seal_artifact(path)
+    assert B9C.assert_no_sidecars(path) is None
+
+
+def test_an_empty_sidecar_is_not_a_leftover(tmp_path):
+    """A zero-byte -wal carries nothing and is not evidence of a failed drain."""
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    B9C.seal_artifact(path)
+    Path(str(path) + "-wal").write_bytes(b"")
+    assert B9C.assert_no_sidecars(path) is None

@@ -669,13 +669,25 @@ def seal_artifact(path):
             raise RuntimeError(f"REFUSING to seal {path}: quick_check returned {integrity!r}")
     finally:
         database.close()
+    assert_no_sidecars(path)
+    return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+
+
+def assert_no_sidecars(path):
+    """No -wal or -shm may survive with content. EXTRACTED so a test can provoke it.
+
+    Inline, this could not be driven: SQLite removes the sidecars when the connection closes, so
+    a planted file is gone before the check runs and the guard was unreachable from any test --
+    a check that cannot fire, which is the failure this project keeps finding in other people's
+    code and which I had just written into my own. Extracted, it is callable directly and its
+    refusal is provable. B15M learned the same lesson and B10B paid for not having.
+    """
     for sidecar in ("-wal", "-shm"):
         leftover = pathlib.Path(str(path) + sidecar)
         if leftover.exists() and leftover.stat().st_size:
             raise RuntimeError(
                 f"REFUSING to seal {path}: {leftover.name} still carries "
                 f"{leftover.stat().st_size} bytes after the checkpoint")
-    return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
 
 
 def main():
