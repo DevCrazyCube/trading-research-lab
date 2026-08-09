@@ -638,3 +638,188 @@ def test_a_subsample_that_will_not_state_its_draw_is_refused(tmp_path, key):
     connection.close()
     with pytest.raises(SystemExit, match="not the seed and N it was"):
         B9C.assert_cohort(members, B9C.SOURCE_MODE_FRESH, child, creates)
+
+
+# ------------------------------------------------------------------------------------------------
+# Sealing. A WAL checkpoint after a consumer records a byte hash is what refused a completed
+# 12 GB collection at the decode gate, with every row cryptographically intact.
+# ------------------------------------------------------------------------------------------------
+
+def wal_database(path, rows=64):
+    """A database with a GENUINELY un-checkpointed WAL, like an artifact mid-write.
+
+    The returned connection is left OPEN on purpose. Closing the last connection checkpoints and
+    removes the WAL, so a fixture that closes has nothing left to seal -- the seal test would then
+    pass while exercising nothing. The precondition assertion below caught exactly that.
+    """
+    connection = sqlite3.connect(path)
+    connection.execute("PRAGMA journal_mode=WAL")
+    connection.execute("PRAGMA wal_autocheckpoint=0")
+    connection.execute("CREATE TABLE observation (id INTEGER PRIMARY KEY, payload TEXT)")
+    with connection:
+        connection.executemany("INSERT INTO observation(payload) VALUES (?)",
+                               [(f"row-{i}" * 40,) for i in range(rows)])
+    return path, connection
+
+
+def test_sealing_leaves_no_sidecars_behind(tmp_path):
+    """The -wal and -shm are what carried this failure; after sealing they must not exist."""
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    assert Path(str(path) + "-wal").stat().st_size > 0, \
+        "the fixture must carry an un-checkpointed WAL, or sealing it proves nothing"
+    holder.close()
+    B9C.seal_artifact(path)
+    for sidecar in ("-wal", "-shm"):
+        leftover = Path(str(path) + sidecar)
+        assert not (leftover.exists() and leftover.stat().st_size), \
+            f"{sidecar} still carries content after sealing"
+
+
+def test_a_sealed_artifact_does_not_change_when_it_is_read(tmp_path):
+    """The property the whole seal exists for.
+
+    Before this, opening the database could fold the WAL into the main file and move its sha256 --
+    identical content, different hash -- and a downstream consumer that pinned the byte hash then
+    refused. This asserts the bytes survive repeated reading, including a read that does NOT
+    promise immutability, which is the exact mistake the dashboard made.
+    """
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    sealed = B9C.seal_artifact(path)
+    for _ in range(3):
+        connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        connection.execute("SELECT COUNT(*) FROM observation").fetchone()
+        connection.close()
+    assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == sealed, \
+        "reading a sealed artifact must not move its bytes"
+
+
+def test_the_returned_hash_is_the_hash_of_the_sealed_file(tmp_path):
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    sealed = B9C.seal_artifact(path)
+    assert sealed == hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def test_sealing_is_idempotent(tmp_path):
+    """A second seal must not move the bytes either, or re-sealing would defeat the point."""
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.close()
+    first = B9C.seal_artifact(path)
+    assert B9C.seal_artifact(path) == first
+
+
+def test_the_content_survives_sealing(tmp_path):
+    path, holder = wal_database(tmp_path / "artifact.sqlite", rows=128)
+    holder.close()
+    B9C.seal_artifact(path)
+    connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        assert connection.execute("SELECT COUNT(*) FROM observation").fetchone()[0] == 128
+    finally:
+        connection.close()
+
+
+def test_a_writer_still_holding_the_wal_is_refused_not_sealed(tmp_path):
+    """A partial drain is the state nobody could reconcile afterwards; sealing it would preserve
+    the ambiguity inside an artifact everything downstream trusts."""
+    path, holder = wal_database(tmp_path / "artifact.sqlite")
+    holder.execute("BEGIN IMMEDIATE")
+    holder.execute("INSERT INTO observation(payload) VALUES ('uncommitted')")
+    try:
+        with pytest.raises(Exception) as caught:
+            B9C.seal_artifact(path)
+        assert "REFUSING to seal" in str(caught.value)
+    finally:
+        holder.rollback()
+        holder.close()
+
+
+# ------------------------------------------------------------------------------------------------
+# The content digest: the contract b9d verifies against. It answers "is this the same EVIDENCE",
+# which is the question a byte hash of a live SQLite file cannot answer.
+# ------------------------------------------------------------------------------------------------
+
+def observation_db(path, rows):
+    """rows: (curve, signature, slot, page_index, row_index). Minimal but real column set."""
+    connection = sqlite3.connect(path)
+    connection.executescript("""
+        CREATE TABLE signature_observation (
+            bonding_curve TEXT, signature TEXT, slot INTEGER, block_time INTEGER,
+            err_json TEXT, memo TEXT, confirmation_status TEXT,
+            page_index INTEGER, row_index INTEGER, time_class TEXT);
+    """)
+    with connection:
+        connection.executemany(
+            "INSERT INTO signature_observation VALUES (?,?,?,?,?,?,?,?,?,?)",
+            [(c, s, sl, 1, "null", None, "finalized", p, r, "in_window")
+             for c, s, sl, p, r in rows])
+    return connection
+
+
+def test_the_content_digest_is_stable_across_insertion_order(tmp_path):
+    """Two builds of the same evidence must agree, whatever order the rows were written in."""
+    rows = [("curveA", "sig1", 10, 0, 0), ("curveA", "sig2", 11, 0, 1),
+            ("curveB", "sig3", 12, 0, 0)]
+    first = observation_db(tmp_path / "a.sqlite", rows)
+    second = observation_db(tmp_path / "b.sqlite", list(reversed(rows)))
+    try:
+        assert B9C.content_digest(first)[0] == B9C.content_digest(second)[0]
+    finally:
+        first.close(); second.close()
+
+
+def test_the_content_digest_changes_when_a_value_changes(tmp_path):
+    """Non-vacuous: a digest that never moves would verify nothing."""
+    base = [("curveA", "sig1", 10, 0, 0)]
+    first = observation_db(tmp_path / "a.sqlite", base)
+    second = observation_db(tmp_path / "b.sqlite", [("curveA", "sig1", 11, 0, 0)])
+    try:
+        assert B9C.content_digest(first)[0] != B9C.content_digest(second)[0]
+    finally:
+        first.close(); second.close()
+
+
+def test_a_null_and_an_empty_string_do_not_collide(tmp_path):
+    """NULL is a distinct byte, not an absent field. Otherwise a missing memo and an empty memo
+    hash identically and the digest cannot tell them apart."""
+    connection = observation_db(tmp_path / "a.sqlite", [("c", "s", 1, 0, 0)])
+    other = observation_db(tmp_path / "b.sqlite", [("c", "s", 1, 0, 0)])
+    try:
+        with other:
+            other.execute("UPDATE signature_observation SET memo=''")
+        assert B9C.content_digest(connection)[0] != B9C.content_digest(other)[0]
+    finally:
+        connection.close(); other.close()
+
+
+def test_adjacent_fields_cannot_be_shifted_into_each_other(tmp_path):
+    """Without a field separator, ('ab','c') and ('a','bc') hash the same."""
+    first = observation_db(tmp_path / "a.sqlite", [("ab", "c", 1, 0, 0)])
+    second = observation_db(tmp_path / "b.sqlite", [("a", "bc", 1, 0, 0)])
+    try:
+        assert B9C.content_digest(first)[0] != B9C.content_digest(second)[0]
+    finally:
+        first.close(); second.close()
+
+
+def test_a_float_in_a_row_is_refused_not_hashed(tmp_path):
+    """A float's rendering is a formatting decision; a digest must not depend on one."""
+    connection = observation_db(tmp_path / "a.sqlite", [("c", "s", 1, 0, 0)])
+    try:
+        with connection:
+            connection.execute("UPDATE signature_observation SET slot=1.5")
+        with pytest.raises(Exception) as caught:
+            B9C.content_digest(connection)
+        assert "float" in str(caught.value)
+    finally:
+        connection.close()
+
+
+def test_the_digest_reports_the_row_count_it_covered(tmp_path):
+    connection = observation_db(tmp_path / "a.sqlite",
+                                [("c", f"s{i}", i, 0, i) for i in range(7)])
+    try:
+        assert B9C.content_digest(connection)[1] == 7
+    finally:
+        connection.close()

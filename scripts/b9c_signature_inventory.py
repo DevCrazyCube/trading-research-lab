@@ -595,6 +595,89 @@ def initialize(database, source_path, source_hash, members, max_pages, cutoff_me
         raise RuntimeError(f"curve_scan membership mismatch: {actual} != {len(members)}")
 
 
+CONTENT_DIGEST_KEY = "content_sha256"
+
+
+def content_digest(database):
+    """A digest over the OBSERVATION ROWS, invariant to how SQLite lays the file out.
+
+    The contract b9d verifies against. A byte hash of a live SQLite file is not a statement about
+    content: a checkpoint, a vacuum, a different page size or another SQLite version can all move
+    the bytes while every row is identical. This hashes the rows themselves, in a canonical order,
+    so the digest answers "is this the same evidence" rather than "is this the same file".
+
+    Canonical order is (bonding_curve, signature, page_index, row_index) -- the artifact's own
+    coordinates, never insertion order, so two builds of the same evidence agree. Values are
+    rendered as exact integers and unquoted text; NO FLOAT enters the digest, because a float's
+    repr is a formatting decision and would make the digest depend on one.
+    """
+    digest = hashlib.sha256()
+    rows = database.execute(
+        "SELECT bonding_curve, signature, slot, block_time, err_json, memo, confirmation_status, "
+        "page_index, row_index, time_class FROM signature_observation "
+        "ORDER BY bonding_curve, signature, page_index, row_index")
+    count = 0
+    for row in rows:
+        for value in row:
+            if isinstance(value, float):
+                raise RuntimeError(
+                    f"REFUSING: a float reached the content digest in row {count}; a float's "
+                    "rendering is a formatting decision and the digest must not depend on one")
+            digest.update(b"\x00" if value is None else str(value).encode())
+            digest.update(b"\x1f")
+        digest.update(b"\x1e")
+        count += 1
+    return digest.hexdigest(), count
+
+
+def seal_artifact(path):
+    """Make the artifact byte-stable before anything records its hash.
+
+    THE FAILURE THIS PREVENTS, which cost a stage. A SQLite database in WAL mode keeps recent
+    writes in a side file, and folding them into the main file later rewrites its bytes -- same
+    content, different sha256. b9d pins its sources by BYTE hash, so a downstream consumer recorded
+    one hash at run start, a checkpoint happened afterwards, and `verify_source_artifacts` refused
+    to decode 12 GB of correctly collected evidence because a source "changed" when nothing about
+    its content had. Merely opening the database read-only can be enough, if the opener does not
+    promise immutability.
+
+    So the artifact is drained and closed out here, BEFORE its hash is meaningful to anyone:
+    checkpoint the whole WAL, drop back to a rollback journal so no -wal or -shm survives, and
+    verify integrity afterwards. From then on the bytes cannot move under a reader.
+
+    REFUSES rather than seals if the checkpoint does not fully drain. A partially checkpointed file
+    is precisely the state nobody could reconcile afterwards -- the mtimes said one thing, the
+    hashes said another, and there was no way to tell which write had landed. Sealing that halfway
+    would preserve the ambiguity in an artifact everything downstream trusts.
+    """
+    database = sqlite3.connect(path, timeout=120)
+    try:
+        busy, log_pages, checkpointed = database.execute(
+            "PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+        if busy:
+            raise RuntimeError(
+                f"REFUSING to seal {path}: the WAL checkpoint reported busy, so a writer still "
+                "holds it. Sealing now would record a hash over a file that is still moving")
+        if log_pages not in (0, -1) or checkpointed not in (0, -1):
+            raise RuntimeError(
+                f"REFUSING to seal {path}: the checkpoint left {log_pages} log pages and "
+                f"{checkpointed} checkpointed pages; TRUNCATE must drain the WAL completely, and a "
+                "partial drain is the exact state that could not be reconciled afterwards")
+        database.execute("PRAGMA journal_mode=DELETE")
+        integrity = database.execute("PRAGMA quick_check").fetchone()[0]
+        if integrity != "ok":
+            raise RuntimeError(f"REFUSING to seal {path}: quick_check returned {integrity!r}")
+    finally:
+        database.close()
+    for sidecar in ("-wal", "-shm"):
+        leftover = pathlib.Path(str(path) + sidecar)
+        if leftover.exists() and leftover.stat().st_size:
+            raise RuntimeError(
+                f"REFUSING to seal {path}: {leftover.name} still carries "
+                f"{leftover.stat().st_size} bytes after the checkpoint")
+    return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", default=BURNED_SOURCE)
@@ -683,6 +766,21 @@ def main():
     print(f"raw_replay_pages={replay_pages:,} raw_replay_rows={replay_rows:,}")
     print("observations=%d distinct=%d in_window_rows=%d in_window_distinct=%d "
           "successful_distinct=%d failed_distinct=%d" % counts)
+    # Sealed LAST, after every gate has passed, so the hash printed here is the hash a consumer
+    # will still see however many times the artifact is read afterwards.
+    # The CONTENT digest is recorded before the file is sealed, so a consumer can verify the
+    # evidence rather than the file layout. b9d reads this key; it never recomputes it.
+    recorder = connect(arguments.database)
+    try:
+        digest, digest_rows = content_digest(recorder)
+        with recorder:
+            recorder.execute("INSERT OR REPLACE INTO metadata VALUES (?,?)",
+                             (CONTENT_DIGEST_KEY, digest))
+    finally:
+        recorder.close()
+    sealed = seal_artifact(arguments.database)
+    print(f"content_sha256={digest} rows={digest_rows:,}")
+    print(f"sealed sha256={sealed}")
     return 0
 
 

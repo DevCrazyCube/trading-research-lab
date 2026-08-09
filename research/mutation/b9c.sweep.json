@@ -156,6 +156,51 @@
       "name": "the draw is recomputed under the selector default rather than the artifact's declared seed",
       "old": "        expected = set(selector.selected(enumerated_mints, seed=seed, n=int(count)))",
       "new": "        expected = set(selector.selected(enumerated_mints, n=int(count)))"
+    },
+    {
+      "name": "the seal tolerates a busy checkpoint, recording a hash over a file still moving",
+      "old": "        if busy:",
+      "new": "        if False:"
+    },
+    {
+      "name": "the seal tolerates a PARTIAL drain -- the exact state nobody could reconcile",
+      "old": "        if log_pages not in (0, -1) or checkpointed not in (0, -1):",
+      "new": "        if False:"
+    },
+    {
+      "name": "the seal leaves the database in WAL mode, so the bytes can move again",
+      "old": "        database.execute(\"PRAGMA journal_mode=DELETE\")",
+      "new": "        pass"
+    },
+    {
+      "name": "the seal does not checkpoint at all",
+      "old": "        busy, log_pages, checkpointed = database.execute(\n            \"PRAGMA wal_checkpoint(TRUNCATE)\").fetchone()",
+      "new": "        busy, log_pages, checkpointed = (0, 0, 0)"
+    },
+    {
+      "name": "the seal accepts leftover sidecar bytes",
+      "old": "        if leftover.exists() and leftover.stat().st_size:",
+      "new": "        if False:"
+    },
+    {
+      "name": "the content digest ignores row order, so two orderings collide",
+      "old": "        \"ORDER BY bonding_curve, signature, page_index, row_index\")",
+      "new": "        \"\")"
+    },
+    {
+      "name": "the content digest drops its field separator, so adjacent fields can collide",
+      "old": "            digest.update(b\"\\x1f\")",
+      "new": "            pass"
+    },
+    {
+      "name": "the content digest renders NULL as an empty field, colliding with a real empty value",
+      "old": "            digest.update(b\"\\x00\" if value is None else str(value).encode())",
+      "new": "            digest.update(b\"\" if value is None else str(value).encode())"
+    },
+    {
+      "name": "a float is allowed into the digest, making it depend on a formatting decision",
+      "old": "            if isinstance(value, float):",
+      "new": "            if False:"
     }
   ]
 }
