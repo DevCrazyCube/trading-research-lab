@@ -303,6 +303,13 @@
       "role": "B19D evaluation machinery -- does any non-issuance signal survive complete costs",
       "has": "the five frozen boolean signals, three entry delays, four B10c horizons, three B15D cost scenarios and the 0.1 SOL position, all quoted from the hash-pinned preregistration and verified against it before any run; exact integer order statistics with no mean and no float; coverage reported before outcome; the document's own refusal codes",
       "why_conforming": "It implements a frozen document and adds nothing to it. The preregistration pin is checked before evaluation and a changed document is refused. Tests enforce the document's prohibitions against the implementer rather than trusting them: no float literal and no true division in any quantity function, no path to the evaluation window so development cannot silently become evaluation, and S5 retained despite being known negative on the burned corpus -- the document says that retention is the test of the no-cherry-picking rule, so dropping it would be the failure it exists to prevent."
+    },
+    {
+      "path": "scripts/b19b_exit_timing_policy.py",
+      "status": "EXISTS_CONFORMING",
+      "role": "B19B evaluation machinery -- does the choice of exit coordinate change the outcome",
+      "has": "the eight frozen exit rules, three entry delays, three cost scenarios and the 0.1 SOL position, all quoted from the hash-pinned preregistration and verified against it including rule ORDER; exact integer order statistics with no mean; drawdown fractions compared by cross-multiplication so no float reaches a trigger",
+      "why_conforming": "It implements a frozen document and adds nothing. Every rule is parameter-free, inherited verbatim, or a member of a fixed grid reported in full with no member selected -- the document's structural defence against choosing a cut from the answer. A reordered or shortened rule set is refused, not silently accepted. Tests assert no float literal anywhere and no true division inside select_exit, since a fraction compared as a float differs from an exact one only at the boundary, which is where the rule fires."
     }
   ],
   "verified_absent": [
