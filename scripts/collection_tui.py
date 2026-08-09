@@ -350,6 +350,30 @@ def render(previous):
             add(f"  {fg(DIM)}measuring rate...{RESET}")
     elif counts["blocks"] is None:
         add(f"  {fg(DIM)}collection artifact not open yet{RESET}")
+
+    # The offline stages write different tables, so the collection bars go blank and the screen
+    # looks idle at exactly the moment the pipeline is busiest. Show what they are actually doing.
+    derived = sqlite_counts(BODIES, {
+        "instructions": "SELECT COUNT(*) FROM instruction",
+        "reserves": "SELECT COUNT(*) FROM reserve_observation",
+        "failures": "SELECT COUNT(*) FROM classification_failure"})
+    # DERIVED: every stage after the collection ones, by position in the run order. Naming them
+    # here would be the restated-list failure this file's own test forbids -- and it caught me
+    # writing exactly that, one function below the comment explaining why not to.
+    collection_end = RUN_ORDER.index("transaction_bodies") if "transaction_bodies" in RUN_ORDER \
+        else len(RUN_ORDER)
+    offline_stages = set(RUN_ORDER[collection_end + 1:])
+    if in_flight in offline_stages and derived["instructions"] is not None:
+        add("")
+        if derived["instructions"] == 0:
+            add(f"  {fg(CREAM)}DECODE{RESET}  {fg(DIM)}verifying the whole artifact before writing "
+                f"anything -- every preserved response re-hashed and every coordinate replayed. "
+                f"No rows yet is expected.{RESET}")
+        else:
+            add(f"  {fg(CREAM)}DECODED{RESET}   "
+                f"{fg(CORAL)}{thousands(derived['instructions'])}{RESET} {fg(DIM)}instructions{RESET}   "
+                f"{fg(CORAL)}{thousands(derived['reserves'])}{RESET} {fg(DIM)}reserve observations{RESET}   "
+                f"{fg(CORAL)}{thousands(derived['failures'])}{RESET} {fg(DIM)}classified failures{RESET}")
     if counts["blocks"] is not None and not targets:
         drawn, _ = bar(0, 1, 34)
         add(f"  {fg(CREAM)}BLOCKS       {RESET}{drawn}  "
