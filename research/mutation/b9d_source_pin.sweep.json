@@ -1,0 +1,44 @@
+{
+  "sweep_id": "b9d_source_pin",
+  "description": "The fifth burned pin: a fresh run must not stamp B9C_SHA256/B9A_SHA256, and verify must enforce the WAL-invariant ROW-CONTENT digest rather than the file byte hash. Each mutant reverts one fresh path to burned-byte behaviour -- fresh stamping falls back to the constant, verify enforces bytes again, the content-change guard or the no-content-digest guard is dropped, or resume compares bytes -- and dies against fixtures where the byte hash moved but the rows did not, or the rows changed.",
+  "target": "scripts/b9d_transaction_bodies.py",
+  "tests": [
+    "tests/test_b9d_transaction_bodies.py"
+  ],
+  "mutants": [
+    {
+      "name": "fresh stamping falls back to the burned constant",
+      "old": "    if mode == SOURCE_MODE_BURNED:\n        return {\"b9c_sha256\": next(",
+      "new": "    if True:\n        return {\"b9c_sha256\": next(",
+      "note": "A fresh run returns the burned-constant identity with no content digest; test_a_fresh_run_records_the_declared_content_digest_not_the_burned_constant fails (no b9c_content_sha256)."
+    },
+    {
+      "name": "the no-content-digest refusal is removed",
+      "old": "        if not digest:",
+      "new": "        if False:",
+      "note": "A fresh source declaring no row-content digest is pinned anyway instead of refused; test_a_fresh_source_without_a_content_digest_is_refused fails."
+    },
+    {
+      "name": "verify reverts to enforcing the byte hash",
+      "old": "    if source_mode(b9c_path, b9a_path) == SOURCE_MODE_BURNED:",
+      "new": "    if True:",
+      "note": "Fresh verify enforces file bytes again, so a checkpoint that moved the bytes refuses; test_verify_passes_when_only_the_bytes_moved fails."
+    },
+    {
+      "name": "the content-change check no longer refuses",
+      "old": "        if recorded_content != current_content:",
+      "new": "        if False:",
+      "note": "A genuine change to the source's rows is admitted; test_verify_refuses_a_content_change fails."
+    },
+    {
+      "name": "resume compares bytes, not content, in fresh mode",
+      "old": "(\"b9c_content_sha256\", \"b9a_content_sha256\") if mode == SOURCE_MODE_FRESH",
+      "new": "(\"b9c_content_sha256\", \"b9a_content_sha256\") if False",
+      "note": "Fresh resume compares the byte hash, so a checkpoint between attempts strands a correct resume; test_resume_survives_a_byte_only_change_but_refuses_a_content_change fails."
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None. Each mutant reverts one fresh path to burned-byte behaviour and is killed by FreshSourcePinIsWalInvariantTests, whose fixtures separate a moved byte hash (must pass) from a changed row-content digest (must refuse). Burned-mode behaviour is unchanged and covered by the existing source/resume tests.",
+  "pytest_args": ["-k", "FreshSourcePin"],
+  "pytest_args_reason": "Scoped to FreshSourcePinIsWalInvariantTests, which drives source_identity/verify_source_artifacts/assert_resumable with in-memory and small on-disk fixtures and needs no external artifact. The burned-path source tests (PublicationGateTests, the ResumeTests) open research/b9c_signature_inventory.sqlite -- the burned inventory, an UNTRACKED evidence artifact absent from the sweep's tracked-only staged tree -- so they cannot run there and the unmutated baseline would fail on them, exactly as b9d_fresh_cutoff.sweep.json documents. Every declared mutant reverts a FRESH path and is killed by a FreshSourcePin case; the burned path is unchanged and covered by those tests in the full working-tree suite. COST, per the framework's rule: a mutant killable only through an excluded burned test would report as a survivor here and must earn an in-memory test rather than a declaration -- none of these are, they are all fresh-path."
+}
