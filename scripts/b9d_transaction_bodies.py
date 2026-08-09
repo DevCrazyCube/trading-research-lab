@@ -552,10 +552,37 @@ def transaction_coordinates(slot, block_signatures, wanted):
     return {signature: seen[signature] for signature in wanted}
 
 
-def assert_coordinate_population(database, expected_slots=None, expected_signatures=None):
+def _assert_exhaustive_against_inventory(phase, present, required, unit):
+    """A fresh seam passes iff the phase carries EXACTLY the population b9c derived.
+
+    Stronger than any count and independent of population size: it names the members the
+    population needs that the phase is missing, and the members the phase carries that the
+    population never included. A fresh pin would be the burned pin wearing a different number;
+    this survives the population changing size, which every fresh window does, because it checks
+    against the inventory itself rather than against a frozen total.
+    """
+    missing = required - present
+    extra = present - required
+    if missing or extra:
+        raise FreezeViolation(
+            f"the {phase} phase is not exhaustive against the fresh inventory: "
+            f"{len(missing):,} {unit}(s) the population needs are absent and "
+            f"{len(extra):,} {unit}(s) present are not in the population "
+            f"({len(present):,} present vs {len(required):,} required); a fresh run must carry "
+            "exactly the in-window population b9c derived, no more and no less")
+    return True
+
+
+def assert_coordinate_population(database, expected_slots=None, expected_signatures=None,
+                                b9c_path=B9C_PATH, b9a_path=B9A_PATH):
     """Fail closed unless the block-to-transaction coordinate phase is exactly complete.
 
-    The expected values resolve from the module constants **at call time**, not as default
+    BURNED mode compares against the pinned counts. FRESH mode does not pin a number at all: it
+    asserts the coordinate phase is EXHAUSTIVE against b9c's inventory -- every in-window
+    successful signature has a coordinate, every fetched block is one the population needed -- a
+    check that survives the population size changing, which the burned counts cannot.
+
+    The burned expected values resolve from the module constants **at call time**, not as default
     arguments. Bound as defaults they were frozen at import, so patching `EXPECTED_SLOTS` appeared
     to work and silently did nothing — a trap for anyone testing this gate.
 
@@ -563,6 +590,17 @@ def assert_coordinate_population(database, expected_slots=None, expected_signatu
     This seam assertion supplies the other half of §11: a silently short block or signature
     population must never become the iterable that drives transaction-body collection.
     """
+    if source_mode(b9c_path, b9a_path) == SOURCE_MODE_FRESH:
+        population_signatures, population_slots = frozen_population(b9c_path, b9a_path)
+        coordinate_signatures = {row[0] for row in database.execute(
+            "SELECT signature FROM transaction_coordinate")}
+        fetched_slots = {row[0] for row in database.execute(
+            "SELECT slot FROM raw_block_signatures")}
+        _assert_exhaustive_against_inventory(
+            "transaction coordinate", coordinate_signatures, population_signatures, "signature")
+        _assert_exhaustive_against_inventory(
+            "fetched block", fetched_slots, population_slots, "slot")
+        return True
     expected_slots = EXPECTED_SLOTS if expected_slots is None else expected_slots
     expected_signatures = (EXPECTED_SIGNATURES if expected_signatures is None
                            else expected_signatures)
@@ -579,16 +617,22 @@ def assert_coordinate_population(database, expected_slots=None, expected_signatu
     return True
 
 
-def transaction_body_coordinates(database, require_complete=True):
+def transaction_body_coordinates(database, require_complete=True,
+                                 b9c_path=B9C_PATH, b9a_path=B9A_PATH):
     """Return canonical body-fetch coordinates, gated by exact population completeness."""
     if require_complete:
-        assert_coordinate_population(database)
+        assert_coordinate_population(database, b9c_path=b9c_path, b9a_path=b9a_path)
     return list(database.execute(
         "SELECT signature,slot FROM transaction_coordinate ORDER BY slot,transaction_index"))
 
 
-def assert_raw_transaction_population(database, expected_signatures=None):
+def assert_raw_transaction_population(database, expected_signatures=None,
+                                     b9c_path=B9C_PATH, b9a_path=B9A_PATH):
     """Fail closed unless every frozen signature has one preserved raw transaction body.
+
+    BURNED mode compares against the pinned count. FRESH mode asserts the raw-body set is
+    exactly the in-window population b9c derived -- every population signature has one body and
+    no body is outside the population -- independent of how large that population is.
 
     Resolved at call time, not as a default argument — see `assert_coordinate_population`.
 
@@ -596,6 +640,12 @@ def assert_raw_transaction_population(database, expected_signatures=None):
     coordinate seam separately proves that the frozen population itself has exactly 94,985 unique
     signatures. Together these keep an interrupted collector from looking decoder-ready.
     """
+    if source_mode(b9c_path, b9a_path) == SOURCE_MODE_FRESH:
+        population_signatures, _ = frozen_population(b9c_path, b9a_path)
+        body_signatures = {row[0] for row in database.execute(
+            "SELECT signature FROM raw_transaction")}
+        return _assert_exhaustive_against_inventory(
+            "raw transaction body", body_signatures, population_signatures, "signature")
     expected_signatures = (EXPECTED_SIGNATURES if expected_signatures is None
                            else expected_signatures)
     body_count = database.execute("SELECT count(*) FROM raw_transaction").fetchone()[0]
@@ -873,15 +923,18 @@ def verify_artifact(database, b9c_path=B9C_PATH, b9a_path=B9A_PATH, check_source
     names which property failed.
     """
     summary = {"integrity": verify_integrity(database)}
-    assert_coordinate_population(database)
-    assert_raw_transaction_population(database)
+    assert_coordinate_population(database, b9c_path=b9c_path, b9a_path=b9a_path)
+    assert_raw_transaction_population(database, b9c_path=b9c_path, b9a_path=b9a_path)
     assert_body_population_matches(database)
     summary["raw_hashes"] = verify_raw_hashes(database)
     summary["coordinates_replayed"] = replay_coordinates_from_raw(database)
     reconciled = verify_body_slots(database)
     # Assert the count, not just record it. A returned number nobody compares is how the set
-    # mismatch above stayed invisible: it reported 1 against a population of 2 and passed.
-    expected = EXPECTED_SIGNATURES
+    # mismatch above stayed invisible: it reported 1 against a population of 2 and passed. In a
+    # fresh run the population size is not a pinned number -- it is however many signatures b9c
+    # derived -- so the target is that count, not the burned one.
+    expected = (len(frozen_population(b9c_path, b9a_path)[0])
+                if source_mode(b9c_path, b9a_path) == SOURCE_MODE_FRESH else EXPECTED_SIGNATURES)
     if reconciled != expected:
         raise FreezeViolation(
             f"only {reconciled:,} of {expected:,} bodies reconciled against their coordinates; "
@@ -3075,7 +3128,8 @@ def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PA
             return [signature, {"encoding": "base64", "commitment": "finalized",
                                 "maxSupportedTransactionVersion": 0}]
 
-        coordinates = transaction_body_coordinates(database, require_complete=max_slots is None)
+        coordinates = transaction_body_coordinates(database, require_complete=max_slots is None,
+                                                    b9c_path=b9c_path, b9a_path=b9a_path)
         done_transactions = {row[0] for row in database.execute("SELECT signature FROM raw_transaction")}
         transaction_count = 0
         preflight_done = database.execute(
@@ -3159,7 +3213,7 @@ def _collect_raw_population(endpoint, output, b9c_path=B9C_PATH, b9a_path=B9A_PA
         # production pass may claim raw collection returned successfully, and it must carry every
         # frozen body before any later decoder orchestration can treat the artifact as ready.
         if max_transactions is None:
-            assert_raw_transaction_population(database)
+            assert_raw_transaction_population(database, b9c_path=b9c_path, b9a_path=b9a_path)
         return {"blocks_added": block_count, "transactions_added": transaction_count,
                 "blocks_total": database.execute(
                     "SELECT count(*) FROM raw_block_signatures").fetchone()[0],

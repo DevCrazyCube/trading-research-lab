@@ -1201,6 +1201,117 @@ class RpcRetryTests(unittest.TestCase):
         self.assertEqual(returned, [])  # it raised; no partial value escaped the loop
 
 
+class FreshPopulationSeamsAreExhaustiveTests(unittest.TestCase):
+    """The burned-count pins, in fresh mode: not a new number but EXHAUSTIVENESS against b9c's
+    inventory -- every in-window signature has a coordinate and a body, every fetched block is one
+    the population needed. The fixtures use a population of 3 signatures over 2 slots, nothing like
+    the burned 94,985/38,853, so a path still reading the burned constant fails outright -- which is
+    exactly how each mutant that reverts a fresh path to its constant is caught."""
+
+    def setUp(self):
+        self.dir = pathlib.Path(tempfile.mkdtemp())
+        rows = [
+            ("curveA", "sig1", "null", 100, "in_window"),
+            ("curveA", "sig2", "null", 100, "in_window"),
+            ("curveA", "sig3", "null", 101, "in_window"),
+            ("curveA", "sigFailed", '{"InstructionError":[]}', 101, "in_window"),  # excluded
+            ("curveA", "sigLate", "null", 102, "after_cutoff"),                     # excluded
+        ]
+        b9c, b9a = build_sources(self.dir, rows, [("curveA", 0)])
+        self.b9c, self.b9a = str(b9c), str(b9a)
+        # The fixture is a fresh pair, and the derived population is 3 signatures over 2 slots.
+        self.assertEqual(B9D.source_mode(self.b9c, self.b9a), B9D.SOURCE_MODE_FRESH)
+
+    def _artifact(self, coords, bodies, blocks):
+        db = B9D.connect(str(self.dir / "bodies.sqlite"))
+        B9D.schema(db)
+        for slot in blocks:
+            db.execute("INSERT INTO raw_block_signatures VALUES (?,?,?,?,?,?)",
+                       (slot, "getBlock", "[]", 0.0, "h" * 64, b"z"))
+        for sig, slot, idx in coords:
+            db.execute("INSERT INTO transaction_coordinate VALUES (?,?,?)", (sig, slot, idx))
+        for sig in bodies:
+            db.execute("INSERT INTO raw_transaction VALUES (?,?,?,?,?,?)",
+                       (sig, "getTransaction", "[]", 0.0, "h" * 64, b"z"))
+        db.commit()
+        return db
+
+    FULL_COORDS = [("sig1", 100, 0), ("sig2", 100, 1), ("sig3", 101, 0)]
+
+    def _coord(self, **kw):
+        return B9D.assert_coordinate_population(kw.pop("db"), b9c_path=self.b9c, b9a_path=self.b9a)
+
+    def test_a_complete_fresh_coordinate_phase_passes(self):
+        db = self._artifact(self.FULL_COORDS, [], [100, 101])
+        self.assertTrue(self._coord(db=db))
+
+    def test_a_missing_coordinate_is_refused(self):
+        db = self._artifact(self.FULL_COORDS[:2], [], [100, 101])
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            self._coord(db=db)
+        self.assertIn("not exhaustive", str(v.exception))
+
+    def test_a_coordinate_outside_the_population_is_refused(self):
+        db = self._artifact(self.FULL_COORDS + [("sigX", 100, 2)], [], [100, 101])
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            self._coord(db=db)
+        self.assertIn("not in the population", str(v.exception))
+
+    def test_a_missing_fetched_block_is_refused(self):
+        # Coordinates are complete, but block slot 101 was never fetched.
+        db = self._artifact(self.FULL_COORDS, [], [100])
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            self._coord(db=db)
+        self.assertIn("fetched block", str(v.exception))
+
+    def test_a_complete_fresh_raw_body_phase_passes(self):
+        db = self._artifact(self.FULL_COORDS, ["sig1", "sig2", "sig3"], [100, 101])
+        self.assertTrue(
+            B9D.assert_raw_transaction_population(db, b9c_path=self.b9c, b9a_path=self.b9a))
+
+    def test_a_missing_raw_body_is_refused(self):
+        db = self._artifact(self.FULL_COORDS, ["sig1", "sig2"], [100, 101])
+        with self.assertRaises(B9D.FreezeViolation) as v:
+            B9D.assert_raw_transaction_population(db, b9c_path=self.b9c, b9a_path=self.b9a)
+        self.assertIn("not exhaustive", str(v.exception))
+
+    def test_the_fresh_path_does_not_use_the_burned_count(self):
+        # The whole point: a population of 3 passes. If the seam still compared against the burned
+        # 94,985 it would refuse this artifact, so passing proves the derived population is used.
+        db = self._artifact(self.FULL_COORDS, ["sig1", "sig2", "sig3"], [100, 101])
+        self.assertNotEqual(3, B9D.EXPECTED_SIGNATURES)
+        self.assertTrue(self._coord(db=db))
+        self.assertTrue(
+            B9D.assert_raw_transaction_population(db, b9c_path=self.b9c, b9a_path=self.b9a))
+
+    def test_verify_reconciles_against_the_derived_count_not_the_burned_one(self):
+        # Drive verify_artifact to its reconcile check with everything before it stubbed, so the
+        # only property under test is that fresh mode targets the derived population (3), not 94,985.
+        db = self._artifact(self.FULL_COORDS, ["sig1", "sig2", "sig3"], [100, 101])
+        saved = {name: getattr(B9D, name) for name in (
+            "verify_integrity", "assert_coordinate_population", "assert_raw_transaction_population",
+            "assert_body_population_matches", "verify_raw_hashes", "replay_coordinates_from_raw",
+            "verify_body_slots")}
+        try:
+            B9D.verify_integrity = lambda db: {}
+            B9D.assert_coordinate_population = lambda db, **k: True
+            B9D.assert_raw_transaction_population = lambda db, **k: True
+            B9D.assert_body_population_matches = lambda db: None
+            B9D.verify_raw_hashes = lambda db: {}
+            B9D.replay_coordinates_from_raw = lambda db: {}
+            B9D.verify_body_slots = lambda db: 3          # matches the derived population of 3
+            self.assertIn("body_slots_reconciled", B9D.verify_artifact(
+                db, b9c_path=self.b9c, b9a_path=self.b9a, check_boundary=False, check_sources=False))
+            B9D.verify_body_slots = lambda db: 2          # one short of the derived population
+            with self.assertRaises(B9D.FreezeViolation) as v:
+                B9D.verify_artifact(db, b9c_path=self.b9c, b9a_path=self.b9a,
+                                    check_boundary=False, check_sources=False)
+            self.assertIn("of 3 bodies reconciled", str(v.exception))
+        finally:
+            for name, fn in saved.items():
+                setattr(B9D, name, fn)
+
+
 class CollectorLockTests(unittest.TestCase):
     def test_a_second_writer_is_refused_while_the_first_holds_the_artifact_lock(self):
         output = str(pathlib.Path(tempfile.mkdtemp()) / "artifact.sqlite")
@@ -3540,7 +3651,7 @@ class CoordinateSeamWiringTests(unittest.TestCase):
         must still reject the short raw table without making a network request.
         """
         saved = B9D.transaction_body_coordinates
-        B9D.transaction_body_coordinates = lambda database, require_complete=True: []
+        B9D.transaction_body_coordinates = lambda database, require_complete=True, **kwargs: []
         self.addCleanup(lambda: setattr(B9D, "transaction_body_coordinates", saved))
         with self.assertRaises(B9D.FreezeViolation) as ctx:
             self.collect(max_slots=None, max_transactions=None)
