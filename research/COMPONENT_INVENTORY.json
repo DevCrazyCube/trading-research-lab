@@ -310,6 +310,13 @@
       "role": "B19B evaluation machinery -- does the choice of exit coordinate change the outcome",
       "has": "the eight frozen exit rules, three entry delays, three cost scenarios and the 0.1 SOL position, all quoted from the hash-pinned preregistration and verified against it including rule ORDER; exact integer order statistics with no mean; drawdown fractions compared by cross-multiplication so no float reaches a trigger",
       "why_conforming": "It implements a frozen document and adds nothing. Every rule is parameter-free, inherited verbatim, or a member of a fixed grid reported in full with no member selected -- the document's structural defence against choosing a cut from the answer. A reordered or shortened rule set is refused, not silently accepted. Tests assert no float literal anywhere and no true division inside select_exit, since a fraction compared as a float differs from an exact one only at the boundary, which is where the rule fires."
+    },
+    {
+      "path": "scripts/b19c_capacity_wall.py",
+      "status": "EXISTS_CONFORMING",
+      "role": "B19C evaluation machinery -- is capacity above the 0.1 SOL ceiling a cliff or a slope",
+      "has": "the raised 10 SOL ceiling, the frozen seven-member grid, the two horizons and three delays, all quoted from the hash-pinned preregistration and verified against it including the verbatim censoring statement; cap-hit cells excluded from the order statistics; the previously-cap-hit subgroup reported separately",
+      "why_conforming": "It reimplements no formula. B15M's search, maximality proof, prefix verification and B10b differential are called with one number changed -- the interval's upper end -- so the differential compares two independent routes rather than two copies of one mistake, and a test asserts no search loop is written here at all. A bound is never reported as a value: cap-hit cells are excluded from the statistics, because including a ceiling as though it were a measurement understates the upper tail by construction while looking complete. The censoring statement is checked verbatim and drift is refused."
     }
   ],
   "verified_absent": [
