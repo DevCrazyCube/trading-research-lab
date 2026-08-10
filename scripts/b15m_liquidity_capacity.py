@@ -363,6 +363,84 @@ def assert_prefix_shape(entry, exit_state, ceiling, samples=None):
 # The fixed grid, and the costs
 # --------------------------------------------------------------------------------------------
 
+# The bodies `research/B15M_PAYABILITY_DOWNSET_PROOF.md` was written against. A proof certifies
+# SOURCE, so the source it certifies is pinned; drift re-arms the scan rather than silently
+# detaching the argument from the code it is about.
+PROVEN_BODIES = {
+    "b9i.tokens_out_for_exact_quote_in":
+        "86b5fac0c9bafa50bdf237bcc6bccfd73129932f4375f4fe9870da4da000e6a7",
+    "b9i.quote_out_for_tokens_in":
+        "f40a46b73025732cec97bbb590a864bd0de0de2fb919ecda3ec9c51a3430a832",
+    "b15m.tokens_for":
+        "abcbbeee367c7e347928a00283c16b64edc81db54c9106989a91d7580dc15810",
+    "b15m.gross_draw":
+        "9c74e8651dfa3de4625c8717e508dc8f7138dacd17c2aefdf64bef67125631ad",
+    "b15m.is_payable":
+        "f109e45fd88314e31be770a7e3553788c17a40d3f61e305872f5942c356cfaf8",
+    "b15m.assert_reserves_possible":
+        "4d6d1d1fa871d634b613aae88197108e4e9a2a788ab1bf9f1427dc6e5cdb2ba3",
+}
+
+
+def _body_digests():
+    """sha256 of each function body the down-set proof depends on, by inspection of live source."""
+    import inspect
+    return {
+        "b9i.tokens_out_for_exact_quote_in": hashlib.sha256(
+            inspect.getsource(B9I.tokens_out_for_exact_quote_in).encode()).hexdigest(),
+        "b9i.quote_out_for_tokens_in": hashlib.sha256(
+            inspect.getsource(B9I.quote_out_for_tokens_in).encode()).hexdigest(),
+        "b15m.tokens_for": hashlib.sha256(inspect.getsource(tokens_for).encode()).hexdigest(),
+        "b15m.gross_draw": hashlib.sha256(inspect.getsource(gross_draw).encode()).hexdigest(),
+        "b15m.is_payable": hashlib.sha256(inspect.getsource(is_payable).encode()).hexdigest(),
+        "b15m.assert_reserves_possible": hashlib.sha256(
+            inspect.getsource(assert_reserves_possible).encode()).hexdigest(),
+    }
+
+
+def proof_binding_intact(pinned=None):
+    """Do the functions the proof is ABOUT still have the bodies it was written against?
+
+    The proof certifies four short function bodies as they are written today. The scan executes the
+    actual predicate every time. That difference is the whole risk: a fee folded into `tokens_for`,
+    or a rounding change after the next program revision, would silently detach the proof while
+    every test still passed.
+
+    So the binding is machine-checked rather than remembered. Returns (True, {}) when every body
+    matches, else (False, {name: (pinned, actual)}) naming exactly what moved.
+    """
+    pinned = PROVEN_BODIES if pinned is None else pinned
+    actual = _body_digests()
+    drifted = {name: (pinned.get(name), digest) for name, digest in actual.items()
+               if pinned.get(name) != digest}
+    return (not drifted), drifted
+
+
+def assert_prefix_shape_by_theorem(entry, exit_state, ceiling, samples=None, pinned=None):
+    """The prefix property, established by proof rather than by a ten-billion-step scan.
+
+    See `research/B15M_PAYABILITY_DOWNSET_PROOF.md`. Under `virtual_quote >= 1` and
+    `virtual_token >= 1` on BOTH states, `tokens_for` and `gross_draw` are non-decreasing in the
+    quote input, so payability is a down-set and the resolution floor is a prefix. Both halves of
+    what the scan asserts follow from one monotonicity lemma.
+
+    THE HYPOTHESES ARE DISCHARGED HERE, not by the caller. `b19c.capacity` happens to call
+    `assert_reserves_possible` before the scan today, but that is a POSITIONAL guarantee: reorder
+    the calls and the proof loses its hypothesis silently. Calling it here makes the guarantee
+    local to the thing that depends on it.
+
+    IF ANY PROVEN BODY HAS DRIFTED, THIS FALLS BACK TO THE SCAN rather than continuing to cite a
+    proof about source that no longer exists. Drift re-arms the brute force automatically; it never
+    downgrades to trust.
+    """
+    intact, drifted = proof_binding_intact(pinned)
+    if not intact:
+        return assert_prefix_shape(entry, exit_state, ceiling, samples=samples)
+    assert_reserves_possible(entry, "entry")
+    assert_reserves_possible(exit_state, "exit")
+    return True
+
+
 def grid_row(entry, exit_state, quote_in, schedule, policy):
     """One preregistered size: is it payable, and what is left after the frozen costs.
 

@@ -447,6 +447,86 @@ class TestStudyRun(unittest.TestCase):
             self.assertIsNotNone(group["external_liquidity_capacity_lamports"])
             self.assertIsNotNone(group["curve_resolution_floor_lamports"])
 
+    def test_the_proof_binding_is_intact_for_the_bodies_it_was_written_against(self):
+        intact, drifted = B15M.proof_binding_intact()
+        self.assertTrue(intact, f"the proof no longer describes the live source: {drifted}")
+
+    def test_drift_in_any_proven_body_RE_ARMS_the_scan(self):
+        """The whole point of pinning: a proof certifies source, so detached source must re-arm.
+
+        `assert_prefix_shape_by_theorem` returns instantly while the binding holds. If any body it
+        was proved against changes, it must fall back to executing the scan rather than continuing
+        to cite a proof about code that no longer exists.
+
+        Asserted behaviourally rather than by inspecting the pin. The observation point is
+        `minimum_effective_quote`, which `assert_prefix_shape` calls on entry and the theorem path
+        never calls: 0 means the theorem answered, 1 means the scan actually ran. It is deliberately
+        NOT one of the pinned bodies -- counting a pinned function by wrapping it CHANGES ITS
+        SOURCE, so the pin sees the wrapper as drift and re-arms, which is correct behaviour that
+        would make the measurement measure itself. (That is not a flaw: the digests are taken from
+        live objects, so runtime substitution is caught as well as file edits.)
+        """
+        entry = entry_state()
+        exit_ = exit_state(real_quote=10 ** 12)
+        counter = {"n": 0}
+        original = B15M.minimum_effective_quote
+
+        def counting(*args, **kwargs):
+            counter["n"] += 1
+            return original(*args, **kwargs)
+
+        B15M.minimum_effective_quote = counting
+        self.addCleanup(setattr, B15M, "minimum_effective_quote", original)
+
+        # Binding intact: the theorem answers, the scan does not run.
+        counter["n"] = 0
+        B15M.assert_prefix_shape_by_theorem(entry, exit_, 50_000)
+        intact_calls = counter["n"]
+
+        # One body drifted: the scan must actually execute.
+        drifted_pins = dict(B15M.PROVEN_BODIES)
+        drifted_pins["b15m.gross_draw"] = "f" * 64
+        counter["n"] = 0
+        B15M.assert_prefix_shape_by_theorem(entry, exit_, 50_000, pinned=drifted_pins)
+        drifted_calls = counter["n"]
+
+        self.assertEqual(intact_calls, 0,
+                         "with the binding intact the theorem must answer without scanning")
+        self.assertEqual(drifted_calls, 1,
+                         "drift must RE-ARM the scan; a fallback that does not execute the scan "
+                         "is a downgrade to trust, not a fallback")
+
+    def test_the_theorem_path_discharges_its_own_hypotheses(self):
+        """H1/H2 are checked HERE, not by whoever happens to call first.
+
+        b19c.capacity calls assert_reserves_possible before the scan today, but that is positional:
+        reorder the calls and the proof loses its hypothesis silently. A zero virtual reserve must
+        be refused by this function itself.
+        """
+        bad = entry_state(virtual_quote=0)
+        with self.assertRaisesRegex(B15M.CapacityRefused, B15M.M_IMPOSSIBLE_RESERVES):
+            B15M.assert_prefix_shape_by_theorem(bad, exit_state(), 1_000)
+
+    def test_the_theorem_and_the_scan_agree_wherever_the_scan_can_run(self):
+        """Differential: on ceilings small enough to brute-force, both must give the same verdict."""
+        for ceiling in (500, 5_000, 50_000):
+            for real_quote in (0, 10 ** 6, 10 ** 12):
+                entry = entry_state()
+                exit_ = exit_state(real_quote=real_quote)
+                with self.subTest(ceiling=ceiling, real_quote=real_quote):
+                    scan_ok = theorem_ok = None
+                    try:
+                        B15M.assert_prefix_shape(entry, exit_, ceiling)
+                        scan_ok = True
+                    except B15M.CapacityRefused:
+                        scan_ok = False
+                    try:
+                        B15M.assert_prefix_shape_by_theorem(entry, exit_, ceiling)
+                        theorem_ok = True
+                    except B15M.CapacityRefused:
+                        theorem_ok = False
+                    self.assertEqual(scan_ok, theorem_ok)
+
     def test_a_cell_the_capacity_loop_refuses_is_not_priced_by_the_grid(self):
         """The two loops must describe the SAME cells, or the report presents two studies as one.
 
