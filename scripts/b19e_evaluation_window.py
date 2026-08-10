@@ -24,6 +24,7 @@ Superseding requires an explicit reason and KEEPS BOTH ENTRIES; nothing is ever 
 NO FLOAT ANYWHERE. Every quantity that reaches a study is an exact integer or a count.
 """
 import argparse
+import collections
 import hashlib
 import importlib.util
 import json
@@ -274,26 +275,154 @@ def record_pass(study_id, window_sha256, result_sha256, path=LEDGER, supersede_r
     return entry
 
 
+# ------------------------------------------------------------------------------------------------
+# The evaluation pass. The study decides everything; this only feeds it and counts.
+# ------------------------------------------------------------------------------------------------
+
+def _cells(study, window, coordinate_of, label):
+    """Every (delay, horizon, scenario) cell for one signal, as outcomes and refusal counts.
+
+    Coverage is accumulated per cell, never inferred at the end from what survived: a curve that
+    produced no signal and a curve whose cell was refused are different facts, and a denominator
+    reconstructed from the outcomes alone cannot tell them apart.
+    """
+    grid = {}
+    for horizon in study.HORIZONS:
+        for delay in study.ENTRY_DELAYS:
+            for scenario in study.SCENARIOS:
+                outcomes, refusals, admitted = [], collections.Counter(), set()
+                for curve, path in window["paths"].items():
+                    signal_slot = coordinate_of(curve)
+                    if signal_slot is None:
+                        refusals[study.N_NO_SIGNAL] += 1
+                        continue
+                    try:
+                        value = study.evaluate_cell(
+                            path, signal_slot, horizon, delay,
+                            window["schedules"].get(curve), dict(scenario))
+                    except study.SignalRefused as error:
+                        refusals[str(error)] += 1
+                        continue
+                    outcomes.append(value)
+                    admitted.add(curve)
+                grid[f"{label}|{horizon['name']}|delay_{delay}|{scenario['scenario_id']}"] = (
+                    study.summarise(outcomes, refusals, len(admitted), window["cohort_size"]))
+    return grid
+
+
+def evaluate_b19d(window, progress=False):
+    """B19D over the window. Every figure is computed inside b19d, from b19d's frozen document."""
+    study = _load("b19d_non_issuance_signal", "b19d_non_issuance_signal.py")
+    document = study.verify_preregistration()
+
+    grid = {}
+    for signal in study.SIGNALS:
+        if progress:
+            print(f"  {signal['signal_id']}", file=sys.stderr, flush=True)
+        grid.update(_cells(
+            study, window,
+            lambda curve, s=signal: study.signal_coordinate(
+                s, curve, window["features"], window["reentry"]),
+            signal["signal_id"]))
+    for baseline in study.BASELINES:
+        if progress:
+            print(f"  {baseline}", file=sys.stderr, flush=True)
+        grid.update(_cells(
+            study, window,
+            lambda curve, b=baseline: study.baseline_coordinate(
+                b, curve, window["features"], window["first_non_creator_buy"]),
+            baseline))
+
+    primary_key = (f"{study.PRIMARY['signal_id']}|{study.PRIMARY['horizon']}"
+                   f"|delay_{study.PRIMARY['delay']}|{study.PRIMARY['scenario_id']}")
+    if primary_key not in grid:
+        raise WindowRefused(f"the pre-committed primary cell {primary_key} was not evaluated")
+
+    census = window["provenance"]["cohort_census"]
+    return {
+        "study": "B19D_NON_ISSUANCE_SIGNAL",
+        "preregistration_canonical_sha256": study.PREREG_CANONICAL_SHA256,
+        "label": document.get("status_locks", {}).get("label"),
+        "executable": False,
+        "execution_status": "never_executed",
+        # Coverage FIRST, and the denominator spelled out in three numbers rather than one. A bare
+        # "3932" reads as the whole cohort and silently rebases every share below it.
+        "denominator": {
+            "subsampled": census["subsampled"],
+            "excluded_out_of_regime_mayhem": census["excluded_out_of_regime_mayhem"],
+            "evaluable": census["evaluable"],
+            "statement": (f"{census['subsampled']} curves were subsampled; "
+                          f"{census['excluded_out_of_regime_mayhem']} are mayhem-mode and out of "
+                          f"the frozen regime, so their transaction bodies were never fetched; "
+                          f"{census['evaluable']} are evaluable. Every coverage figure below is "
+                          f"out of {census['evaluable']}, not out of {census['subsampled']}."),
+        },
+        "window_provenance": window["provenance"],
+        "multiplicity": {
+            "family_size": study.FAMILY_SIZE,
+            "cells_reported": len(grid),
+            "primary_result_key": primary_key,
+            "warning": ("the family is reported in full. A figure selected from it after the fact "
+                        "is not the primary result and may not be presented as one."),
+        },
+        "primary_result": grid[primary_key],
+        "family": grid,
+        "not_claimed": {
+            "return": "no figure here is a return, a profit or an expected value.",
+            "edge": ("a median above zero on one window describes that window. It is not a "
+                     "demonstration of edge and not grounds to trade."),
+            "recommendation": "none is made.",
+        },
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     subparsers = parser.add_subparsers(dest="command", required=True)
     prov = subparsers.add_parser(
         "provenance", help="assemble the window and print its provenance; reads no study")
     prov.add_argument("--progress", type=int, default=None)
-    ledger = subparsers.add_parser("ledger", help="show which studies have spent their pass")
+    subparsers.add_parser("ledger", help="show which studies have spent their pass")
+    runner = subparsers.add_parser(
+        "run-b19d", help="THE SINGLE PERMITTED EVALUATION PASS for B19D. Spends its ledger entry.")
+    runner.add_argument("--out", default=str(ROOT / "research" / "B19D_EVALUATION_RESULT.json"))
+    runner.add_argument("--progress", action="store_true")
+    runner.add_argument("--supersede-reason", default=None,
+                        help="required to re-run a study that already spent its pass; both "
+                             "entries are kept and neither is deleted")
     args = parser.parse_args(argv)
 
     if args.command == "ledger":
         print(json.dumps(read_ledger(), indent=2, sort_keys=True))
         return 0
 
-    window = build(progress=args.progress)
-    print(json.dumps({
-        "window_sha256": window_digest(window),
-        **window["provenance"],
-        "note": ("this is provenance only. No study has read the window and no outcome has been "
-                 "computed."),
-    }, indent=2, sort_keys=True))
+    if args.command == "provenance":
+        window = build(progress=args.progress)
+        print(json.dumps({
+            "window_sha256": window_digest(window),
+            **window["provenance"],
+            "note": ("this is provenance only. No study has read the window and no outcome has "
+                     "been computed."),
+        }, indent=2, sort_keys=True))
+        return 0
+
+    # run-b19d. The ledger is checked BEFORE the window is assembled, so an already-spent study
+    # refuses in a second rather than after the work -- and, more to the point, so that no outcome
+    # is ever computed for a study that was not entitled to compute one.
+    study_id = "B19D_NON_ISSUANCE_SIGNAL_V1"
+    assert_unused(study_id, supersede_reason=args.supersede_reason)
+    window = build(progress=1000 if args.progress else None)
+    digest = window_digest(window)
+    assert_unused(study_id, supersede_reason=args.supersede_reason)
+    result = evaluate_b19d(window, progress=args.progress)
+    result["window_sha256"] = digest
+    payload = json.dumps(result, indent=2, sort_keys=True) + "\n"
+    result_sha256 = hashlib.sha256(payload.encode()).hexdigest()
+    pathlib.Path(args.out).write_text(payload)
+    entry = record_pass(study_id, digest, result_sha256,
+                        supersede_reason=args.supersede_reason)
+    print(json.dumps({"wrote": args.out, "ledger_entry": entry,
+                      "result_sha256": result_sha256}, indent=2, sort_keys=True))
     return 0
 
 
