@@ -1,0 +1,71 @@
+{
+  "preregistration_id": "B19G_CAPACITY_WALL_HISTORICAL_V1",
+  "date": "2026-08-10",
+  "author": "codex seat",
+  "status": "FROZEN. Committed alone, before any outcome on the evaluation window was computed for it.",
+  "supersedes": null,
+  "group": "B19",
+
+  "question": "On a HISTORICAL window, above the frozen 0.1 SOL search ceiling, is external-liquidity capacity a CLIFF or a SLOPE -- and how is capacity distributed relative to that ceiling?",
+
+  "why_this_document_exists_at_all": {
+    "the_problem": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1 pins its population to 'the IDENTICAL admissible cell universe as B15M_LIQUIDITY_CAPACITY_V1, by the same conditions in the same order' -- the same clause, verbatim, that makes B19B unevaluable here. B15L's universe comes from b15l.load_entries, selecting WHERE t.state='captured' AND o.fork_state='confirmed': live capture mechanics that no historical corpus carries.",
+    "why_applying_b15m_admissibility_is_not_enough": "b15m.is_admissible is a reserve and payability test only and constrains nothing about entry selection, so applying it reproduces B15M's admission rule while leaving its candidate set unreproduced.",
+    "the_consequence": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1 is NOT EVALUABLE on a historical window and its single permitted pass remains unspent. This document does not spend it.",
+    "one_clause_that_differs_from_b19f": "B19C's previously_cap_hit_cells section reports on cells B15M itself recorded as cap-hit. Those records are properties of B15M's run over B15M's universe and cannot be joined to a historical cell that B15M never saw. That subgroup is therefore NOT REPORTED here, and its absence is declared rather than left as a silently missing section."
+  },
+
+  "population": {
+    "rule": "every curve in the B11a evaluation window that carries a t0 coordinate and a decodable fee schedule. The entry coordinate is t0_slot + delay_slots, the launch-plus-delay rule stated in b15h_prospective_entry.entry_target_slot, applied to every launch rather than to captured ones. The exit is B10c STATE-IN-FORCE at entry + horizon.",
+    "cell_boundary_is_taken_by_agreement_not_by_a_new_implementation": "B19C takes an entry and an exit state as arguments and does not select them. The selection is performed by calling B19B's and B19D's INDEPENDENT implementations of first_at_or_after and state_in_force and refusing on any disagreement. Two independent implementations agreeing is evidence; one being cited by name is not. No third implementation of B10c STATE-IN-FORCE is written for this study.",
+    "this_is_broader_than_b15m_and_that_is_stated_not_hidden": "this universe includes launches a live process would have missed. It is strictly MORE inclusive than B15M's, its figures are NOT comparable to B15M's, and they may never be presented as a continuation of them.",
+    "what_a_broader_population_does_to_a_capacity_distribution": "capacity here is a property of the OBSERVED BOOK at a cell's coordinates, not of a strategy, so widening the candidate set changes which books are measured rather than biasing each measurement. It still changes the DISTRIBUTION: uncaptured launches are not a random subset of launches, and no claim below may treat this distribution as B15M's with more cells.",
+    "development_vs_evaluation": "runs against the burned corpus are DEVELOPMENT ONLY and may never be reported as an evaluation result."
+  },
+
+  "everything_else_is_inherited_by_pin_not_restated": {
+    "source": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1",
+    "canonical_sha256": "519102ba451da9c8556ce321c992312ddbeb5f9b7ab99d3dd9bfa10f976b76fe",
+    "inherited_whole": [
+      "the_raised_ceiling -- new search ceiling 10000000000 lamports, exactly one hundred times the old 100000000",
+      "the_wall_shape -- the seven-member grid, reported in full, with no size selected, ranked or called optimal",
+      "frozen_inputs_unchanged -- entry delays (1, 2, 4) and the two exit horizons",
+      "primary_estimand",
+      "reporting -- counts first, then order statistics, with the censoring statement attached verbatim",
+      "determinism -- output identical under any permutation of input rows",
+      "differential_tests_required -- capacity is cross-checked against B10b's independent route and against B15M, and a disagreement refuses rather than resolves",
+      "refusal_codes",
+      "prohibitions"
+    ],
+    "why_by_pin": "a hand-copied rule set drifts from the thing it copies, and the drift is undetectable by reading either document alone. The implementation verifies both pins.",
+    "what_is_NOT_inherited": "population, and the previously_cap_hit_cells subgroup, which has no historical counterpart. Nothing else differs.",
+    "cap_hit_is_still_not_a_measurement": "a cell at the ceiling has an unknown capacity above it and is EXCLUDED from every order statistic, exactly as in B19C. A bound folded into a distribution understates the upper tail by construction while looking like a complete answer."
+  },
+
+  "no_threshold_is_tunable_here": {
+    "rule": "no number in this study may be chosen, moved, or justified by any outcome computed on any window",
+    "the_only_new_number": "there is none. This document introduces no constant, no threshold and no cut."
+  },
+
+  "known_at_authorship_time": {
+    "purpose": "so a later reader can AUDIT the fit rather than trust an assurance that none occurred",
+    "b19d": "B19D_NON_ISSUANCE_SIGNAL_V1 has been evaluated on this exact window: 0 of 252 cells had a median strictly above zero. KNOWN, and disclosed because it is knowledge this author holds that B19C's author did not. Nothing in this document is placed, ordered or motivated by it; every rule is inherited by pin from a document frozen before B19D ran.",
+    "b19b_and_b19c_outcomes_on_this_window": "NOT KNOWN. Neither pass is spent. The only B19B execution is a machinery rehearsal on the BURNED corpus, from which this author read cell counts, coverage sums and refusal codes and NO median, order statistic or outcome value. B19C's burned rehearsal was stopped in flight when the population defect was confirmed, and its artifact was deleted unread.",
+    "capacity_on_this_window": "NOT KNOWN. No capacity figure has been computed on the evaluation window by anyone."
+  },
+
+  "outcome_reporting": {
+    "coverage_first": "cell counts, refusals by code, and cap-hit counts are reported BEFORE any capacity order statistic",
+    "structural_ceilings_first": "the number of curves that could yield a cell at all is reported before the family",
+    "not_a_return": "capacity is what the observed book could have absorbed. It is not a return, a profit, an expected value or a performance result.",
+    "not_a_recommendation": "no size is selected, ranked or called optimal. The grid is reported and never chosen from."
+  },
+
+  "status_locks": {
+    "label": "CAPACITY_WALL_HISTORICAL_DIAGNOSTIC",
+    "executable": false,
+    "execution_status": "never_executed",
+    "performance_status": "not_evaluated",
+    "single_pass": "this study reads the evaluation window ONCE, recorded in B19_EVALUATION_LEDGER.json before any result is written."
+  }
+}
