@@ -1,0 +1,54 @@
+{
+  "finding_id": "B19_COST_FLOOR_V1",
+  "date": "2026-08-10",
+  "author": "codex seat",
+  "status": "FINAL. Arithmetic on frozen constants and one already-reported median. No study pass was spent to produce it.",
+
+  "why_this_is_recorded_separately": "B19D and B19F each answer their own question and neither answers this one. Both report that the outcome is negative; neither decomposes WHERE the loss comes from. That decomposition turns out to decide what is worth doing next, so it is written down rather than left in a conversation.",
+
+  "provenance": {
+    "no_pass_spent": "this uses the cost constants frozen in B15D_SHADOW_ROUTE_V1, the fee schedules already reported in the B19D/B19F window provenance, and the single median already published in B19F's sealed artifact. Nothing new was read from the evaluation window.",
+    "b19f_median_cited": -5155732,
+    "b19f_cell_cited": "E_FIRST_OBSERVATION|delay_1|base -- the least-selected rule in the family, admitting 1,815 of 3,932 curves"
+  },
+
+  "the_charged_fee_is_125_bps_per_leg_and_it_is_universal_here": {
+    "what_is_charged": "b10a.curve_fees charges fee + creator_fee + cashback. buyback_fee is REPORTED, NOT CHARGED -- it is a split of the protocol fee, and adding it would double-charge the user by half of it. This was got wrong once while producing this finding and corrected against b10a's source before anything was concluded.",
+    "the_two_schedules_observed": {
+      "fee_95_creator_30_cashback_0": 1435,
+      "fee_95_creator_0_cashback_30": 1761
+    },
+    "both_total": 125,
+    "coverage": "1,435 + 1,761 = 3,196, which is EVERY priceable curve in the window. 125 bps per leg is universal here, not modal, so the floor below is not an average over a spread."
+  },
+
+  "decomposition_on_the_frozen_0_1_sol_position": {
+    "position_lamports": 100000000,
+    "scenario": "base",
+    "components": {
+      "protocol_fee_entry_125bps": {"lamports": 1250000, "share_of_position_pct": "1.25", "scaling": "PROPORTIONAL"},
+      "protocol_fee_exit_125bps": {"lamports": 1234375, "share_of_position_pct": "1.23", "scaling": "PROPORTIONAL"},
+      "ata_rent_entry_only": {"lamports": 2039280, "share_of_position_pct": "2.04", "scaling": "FIXED", "note": "b10a charges it and deliberately never credits it back, because the reclaim is real but conditional on closing the account. Crediting it would understate cost; not crediting it overstates cost for an operator who does close accounts."},
+      "base_and_priority_two_legs": {"lamports": 210000, "share_of_position_pct": "0.21", "scaling": "FIXED"}
+    },
+    "modelled_toll_lamports": 4733655,
+    "modelled_toll_pct": "4.73",
+    "observed_median_pct": "5.16",
+    "residual_pct": "0.42",
+    "reading": "the median immediate-exit outcome is approximately 92 percent TOLL and 8 percent market. The launches are not moving against the position; the position is paying a fee to enter and a fee to leave."
+  },
+
+  "the_consequence_that_decides_what_is_worth_doing_next": {
+    "the_obvious_next_move_and_why_it_fails": "the fixed components are 2.25 percent of a 0.1 SOL position, so a larger position amortises them and the arithmetic looks rescuable. It is not. At 1 SOL the fixed part falls from 2.25 percent to 0.22 percent, but the proportional part stays at 2.48 percent. Total toll about 2.70 percent, plus the 0.42 percent observed drift, is still about -3.1 percent. SIZE DOES NOT CHANGE THE SIGN.",
+    "what_that_means_for_b19c_and_b19g": "the capacity studies, already declared not runnable at the raised ceiling, would not have changed the conclusion had they run. That is stated here so their loss is not overestimated -- and it was NOT known when they were declared unrunnable, so it is a consolation rather than a justification.",
+    "the_hurdle_expressed_as_a_number": "any strategy on this venue must produce more than approximately 2.5 percent of favourable price movement round trip, at any size, before it breaks even. That is the protocol's own fee schedule and no infrastructure improvement touches it.",
+    "how_far_the_tested_signals_are_from_it": "B19D tested five signals across 252 cells and none had a median above zero. B19F tested eight exit rules across 72 cells and none had a median above zero. The observed drift at immediate exit is 0.42 percent ADVERSE against a 2.5 percent hurdle.",
+    "what_would_have_to_be_true": "a signal would have to identify, at t0, the curves that move more than 2.5 percent in its favour within the holding window. B19F's p90 at immediate exit is about +2.0 percent, so roughly a tenth of launches do move materially -- the question is entirely whether anything observable at t0 predicts WHICH, and the five features tested do not."
+  },
+
+  "not_claimed": {
+    "that_no_strategy_can_work": "this says the five signals tested, priced through this cost model, do not clear the fee floor on this window. It is not a proof that no observable does.",
+    "that_the_fee_floor_is_permanent": "125 bps per leg is what this window's curves charged. A different venue, a different program version or a different fee regime would have a different floor, and the arithmetic would have to be redone rather than assumed.",
+    "a_recommendation_to_trade": "none is made, at any size."
+  }
+}
