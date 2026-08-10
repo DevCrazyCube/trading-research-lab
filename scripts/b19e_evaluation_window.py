@@ -53,6 +53,8 @@ B10BP = _load("b10b_position_path", "b10b_position_path.py")
 B11BC = _load("b11b_feature_corpus", "b11b_feature_corpus.py")
 B16A = _load("b16a_operator_archetypes", "b16a_operator_archetypes.py")
 B16D = _load("b16d_creator_reentry_signal", "b16d_creator_reentry_signal.py")
+B19B_M = _load("b19b_exit_timing_policy", "b19b_exit_timing_policy.py")
+B19D_M = _load("b19d_non_issuance_signal", "b19d_non_issuance_signal.py")
 
 
 class WindowRefused(RuntimeError):
@@ -571,6 +573,223 @@ def evaluate_b19d(window, progress=False):
     }
 
 
+def evaluate_b19b(window, progress=False):
+    """B19B over the window. Every figure is computed inside b19b, from b19b's frozen document.
+
+    THE ENTRY COORDINATE IS DERIVED, NOT CHOSEN. B19B's population is "the IDENTICAL admissible
+    cell universe as B15M, which is itself B15L's universe, by the same conditions in the same
+    order". B15L's universe is built from B15i capture checkpoints, which exist only for the live
+    shadow period and not for a historical window -- so the literal rows cannot be reused, and the
+    document says conditions rather than rows.
+
+    The condition is stated in code, not inferred by me: b15h_prospective_entry.entry_target_slot
+    is `t0_slot + delay_slots`. The universe's entry is therefore launch-plus-delay, and the
+    faithful historical analogue is signal_slot = the curve's t0 slot, with b19b's own evaluate_cell
+    adding the delay exactly as it always did. B15M's admissibility is applied per cell by b19b
+    itself, so the universe's conditions are enforced where they always were rather than
+    re-implemented here.
+    """
+    study = _load("b19b_exit_timing_policy", "b19b_exit_timing_policy.py")
+    study.verify_preregistration()
+    b15h = _load("b15h_prospective_entry", "b15h_prospective_entry.py")
+
+    priceable = {curve for curve in window["paths"] if window["schedules"].get(curve) is not None}
+    with_t0 = {curve for curve in window["paths"]
+               if window["features"].get(curve, {}).get("t0_slot") is not None}
+    ceilings = {
+        "evaluable_cohort": window["cohort_size"],
+        "curves_with_a_t0_coordinate": len(with_t0),
+        "curves_with_a_decodable_fee_schedule": len(priceable),
+        "curves_that_could_yield_a_cell": len(with_t0 & priceable),
+        "entry_coordinate_rule": (
+            "signal_slot = t0_slot; b19b adds the delay. Derived from "
+            "b15h_prospective_entry.entry_target_slot(t0_slot, delay_slots) = t0_slot + "
+            "delay_slots, which is the universe's own definition, not a choice made here."),
+        "statement": ("these are ceilings, not results. No cell count below can exceed "
+                      f"{len(with_t0 & priceable)} however the rules behave."),
+    }
+    # Asserted rather than trusted: if the inherited definition ever stopped being launch+delay,
+    # every cell in this study would silently enter somewhere else.
+    if b15h.entry_target_slot(1_000, 7) != 1_007:
+        raise WindowRefused(
+            "b15h.entry_target_slot is no longer t0_slot + delay_slots; B19B's entry coordinate "
+            "is inherited from it and must not be assumed")
+
+    grid = {}
+    for rule in study.EXIT_RULES:
+        if progress:
+            print(f"  {rule['rule_id']}", file=sys.stderr, flush=True)
+        for delay in study.ENTRY_DELAYS:
+            for scenario in study.SCENARIOS:
+                outcomes, refusals = [], collections.Counter()
+                for curve, path in window["paths"].items():
+                    block = window["features"].get(curve)
+                    if block is None or block.get("t0_slot") is None:
+                        refusals[study.X_NOT_IN_B15M_UNIVERSE] += 1
+                        continue
+                    try:
+                        value = study.evaluate_cell(
+                            rule, path, block["t0_slot"], delay,
+                            window["schedules"].get(curve), dict(scenario))
+                    except study.ExitRefused as error:
+                        refusals[str(error)] += 1
+                        continue
+                    outcomes.append(value)
+                grid[f"{rule['rule_id']}|delay_{delay}|{scenario['scenario_id']}"] = (
+                    study.summarise(outcomes, refusals, window["cohort_size"]))
+
+    for key, cell in grid.items():
+        admitted = cell["coverage"]["cells_admitted"]
+        if admitted > ceilings["curves_that_could_yield_a_cell"]:
+            raise WindowRefused(
+                f"{key}: {admitted} cells admitted but at most "
+                f"{ceilings['curves_that_could_yield_a_cell']} curves carry both a t0 coordinate "
+                "and a fee schedule")
+
+    census = window["provenance"]["cohort_census"]
+    return {
+        "study": "B19B_EXIT_TIMING_POLICY",
+        "preregistration_canonical_sha256": study.PREREG_CANONICAL_SHA256,
+        "executable": False,
+        "execution_status": "never_executed",
+        "denominator": {
+            "subsampled": census["subsampled"],
+            "excluded_out_of_regime_mayhem": census["excluded_out_of_regime_mayhem"],
+            "evaluable": census["evaluable"],
+            "statement": (f"{census['subsampled']} curves were subsampled; "
+                          f"{census['excluded_out_of_regime_mayhem']} are mayhem-mode and out of "
+                          f"the frozen regime; {census['evaluable']} are evaluable. Every coverage "
+                          f"figure is out of {census['evaluable']}."),
+        },
+        "structural_ceilings_known_before_any_outcome": ceilings,
+        "window_provenance": window["provenance"],
+        "multiplicity": {
+            "family_size": study.FAMILY_SIZE,
+            "cells_reported": len(grid),
+            "primary": study.PRIMARY,
+            "warning": ("the family is reported in full. No rule is selected, and a rule picked "
+                        "from it after the fact is not a result."),
+        },
+        "family": grid,
+        "not_claimed": {
+            "return": "no figure here is a return, a profit or an expected value.",
+            "recommendation": "no exit rule is recommended; the grid is reported, never chosen from.",
+        },
+    }
+
+
+HORIZON_SLOTS = {"h_1000_slots": 1_000, "h_10000_slots": 10_000}
+
+
+def select_cell(path, t0_slot, delay, horizon_slots):
+    """The (entry, exit) pair a cell is formed from, by AGREEMENT between two implementations.
+
+    B19C takes an entry and an exit state as arguments; it does not select them, so somebody must.
+    That somebody must not be this adapter inventing a third definition of B10c STATE-IN-FORCE --
+    an adapter that decides where a cell begins and ends has stopped transporting and started
+    doing the study's work.
+
+    B19B and B19D each implement the semantics independently, from the same B10c rule, without
+    sharing code. This calls BOTH and refuses on any disagreement. Two independent implementations
+    agreeing is evidence; one of them being called by name is only a citation. The refusal also
+    means a future edit to either study that changes the semantics stops this study rather than
+    silently re-forming its cells.
+    """
+    entry_b, entry_d = (B19B_M.first_at_or_after(path, t0_slot + delay),
+                        B19D_M.first_at_or_after(path, t0_slot + delay))
+    if entry_b is not entry_d:
+        raise WindowRefused(
+            f"b19b and b19d disagree on the entry observation at t0={t0_slot} delay={delay}; "
+            "the cell boundary is not determined and no capacity may be measured across it")
+    if entry_b is None:
+        return None, None
+    target = entry_b["slot"] + horizon_slots
+    exit_b, exit_d = B19B_M.state_in_force(path, target), B19D_M.state_in_force(path, target)
+    if exit_b is not exit_d:
+        raise WindowRefused(
+            f"b19b and b19d disagree on the state in force at slot {target}")
+    return entry_b, exit_b
+
+
+def evaluate_b19c(window, progress=False):
+    """B19C over the window. Capacity is computed inside b19c, which computes it via B15M."""
+    study = _load("b19c_capacity_wall", "b19c_capacity_wall.py")
+    study.verify_preregistration()
+
+    priceable = {curve for curve in window["paths"] if window["schedules"].get(curve) is not None}
+    with_t0 = {curve for curve in window["paths"]
+               if window["features"].get(curve, {}).get("t0_slot") is not None}
+    ceilings = {
+        "evaluable_cohort": window["cohort_size"],
+        "curves_with_a_t0_coordinate": len(with_t0),
+        "curves_with_a_decodable_fee_schedule": len(priceable),
+        "curves_that_could_yield_a_cell": len(with_t0 & priceable),
+        "entry_coordinate_rule": (
+            "signal_slot = t0_slot, delay added by the same launch-plus-delay rule B15M's "
+            "universe uses (b15h_prospective_entry.entry_target_slot); exit is B10c STATE-IN-FORCE "
+            "at entry + horizon, taken by agreement between b19b's and b19d's independent "
+            "implementations."),
+    }
+
+    grid = {}
+    for horizon in study.EXIT_HORIZONS:
+        if progress:
+            print(f"  {horizon}", file=sys.stderr, flush=True)
+        for delay in study.ENTRY_DELAYS:
+            capacities, refusals = [], collections.Counter()
+            executability = collections.Counter()
+            cells = 0
+            for curve, path in window["paths"].items():
+                block = window["features"].get(curve)
+                if block is None or block.get("t0_slot") is None:
+                    refusals["W_NOT_IN_B15M_UNIVERSE"] += 1
+                    continue
+                entry, exit_state = select_cell(
+                    path, block["t0_slot"], delay, HORIZON_SLOTS[horizon])
+                if entry is None or exit_state is None:
+                    refusals["W_NO_ENTRY_OBSERVATION"] += 1
+                    continue
+                entry_state, exit_full = B19D_M._state(entry), B19D_M._state(exit_state)
+                try:
+                    value = study.capacity(entry_state, exit_full)
+                except Exception as error:                                    # noqa: BLE001
+                    refusals[f"W_CAPACITY_ERROR:{type(error).__name__}"] += 1
+                    continue
+                capacities.append(value)
+                cells += 1
+                for size, ok in study.grid_executability(entry_state, exit_full).items():
+                    if ok:
+                        executability[str(size)] += 1
+            grid[f"{horizon}|delay_{delay}"] = {
+                "summary": study.summarise(capacities, refusals, dict(executability)),
+                "cells_measured": cells,
+            }
+
+    census = window["provenance"]["cohort_census"]
+    return {
+        "study": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE",
+        "preregistration_canonical_sha256": study.PREREG_CANONICAL_SHA256,
+        "executable": False,
+        "execution_status": "never_executed",
+        "denominator": {
+            "subsampled": census["subsampled"],
+            "excluded_out_of_regime_mayhem": census["excluded_out_of_regime_mayhem"],
+            "evaluable": census["evaluable"],
+            "statement": (f"{census['subsampled']} subsampled; "
+                          f"{census['excluded_out_of_regime_mayhem']} mayhem-mode and out of "
+                          f"regime; {census['evaluable']} evaluable."),
+        },
+        "structural_ceilings_known_before_any_outcome": ceilings,
+        "window_provenance": window["provenance"],
+        "grid_lamports": list(study.GRID),
+        "family": grid,
+        "not_claimed": {
+            "return": "capacity is what the observed book could absorb, not a return.",
+            "recommendation": "no size is selected, ranked or called optimal; the grid is reported.",
+        },
+    }
+
+
 def render_result(result_path):
     """Print a spent result in reading order. READS ONLY -- the artifact is never rewritten.
 
@@ -631,6 +850,26 @@ def main(argv=None):
     rehearsal.add_argument("--out", default=str(
         ROOT / "research" / "B19D_REHEARSAL_BURNED_NOT_A_RESULT.json"))
     rehearsal.add_argument("--progress", action="store_true")
+    runner_b = subparsers.add_parser(
+        "run-b19b", help="THE SINGLE PERMITTED EVALUATION PASS for B19B. Spends its ledger entry.")
+    runner_b.add_argument("--out", default=str(ROOT / "research" / "B19B_EVALUATION_RESULT.json"))
+    runner_b.add_argument("--progress", action="store_true")
+    runner_b.add_argument("--supersede-reason", default=None)
+    rehearsal_b = subparsers.add_parser(
+        "rehearse-b19b", help="run B19B end to end on the BURNED corpus. Spends no ledger entry.")
+    rehearsal_b.add_argument("--out", default=str(
+        ROOT / "research" / "B19B_REHEARSAL_BURNED_NOT_A_RESULT.json"))
+    rehearsal_b.add_argument("--progress", action="store_true")
+    runner_c = subparsers.add_parser(
+        "run-b19c", help="THE SINGLE PERMITTED EVALUATION PASS for B19C. Spends its ledger entry.")
+    runner_c.add_argument("--out", default=str(ROOT / "research" / "B19C_EVALUATION_RESULT.json"))
+    runner_c.add_argument("--progress", action="store_true")
+    runner_c.add_argument("--supersede-reason", default=None)
+    rehearsal_c = subparsers.add_parser(
+        "rehearse-b19c", help="run B19C end to end on the BURNED corpus. Spends no ledger entry.")
+    rehearsal_c.add_argument("--out", default=str(
+        ROOT / "research" / "B19C_REHEARSAL_BURNED_NOT_A_RESULT.json"))
+    rehearsal_c.add_argument("--progress", action="store_true")
     args = parser.parse_args(argv)
 
     if args.command == "ledger":
@@ -648,6 +887,67 @@ def main(argv=None):
             "note": ("this is provenance only. No study has read the window and no outcome has "
                      "been computed."),
         }, indent=2, sort_keys=True))
+        return 0
+
+    if args.command in ("rehearse-b19c", "run-b19c"):
+        rehearsing = args.command == "rehearse-b19c"
+        study_id = "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1"
+        if not rehearsing:
+            assert_unused(study_id, supersede_reason=args.supersede_reason)
+        window = build(
+            bodies_path=BURNED_BODIES if rehearsing else BODIES,
+            paths_path=BURNED_PATHS if rehearsing else PATHS,
+            identity_path=BURNED_IDENTITY if rehearsing else IDENTITY,
+            subsample_path=BURNED_COHORT if rehearsing else SUBSAMPLE,
+            cohort_table="outcome" if rehearsing else "cohort_identity",
+            rehearsal=rehearsing, progress=1000 if args.progress else None)
+        result = evaluate_b19c(window, progress=args.progress)
+        result["window_sha256"] = window_digest(window)
+        if rehearsing:
+            result["status"] = ("BURNED DEVELOPMENT DATA. Not an evaluation result. Proves the "
+                                "machinery executes; spends no ledger entry.")
+            pathlib.Path(args.out).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+            print(json.dumps({"wrote": args.out, "status": result["status"],
+                              "cells": len(result["family"])}, indent=2, sort_keys=True))
+            return 0
+        payload = json.dumps(result, indent=2, sort_keys=True) + "\n"
+        result_sha256 = hashlib.sha256(payload.encode()).hexdigest()
+        pathlib.Path(args.out).write_text(payload)
+        entry = record_pass(study_id, result["window_sha256"], result_sha256,
+                            supersede_reason=args.supersede_reason)
+        print(json.dumps({"wrote": args.out, "ledger_entry": entry,
+                          "result_sha256": result_sha256}, indent=2, sort_keys=True))
+        return 0
+
+    if args.command in ("rehearse-b19b", "run-b19b"):
+        rehearsing = args.command == "rehearse-b19b"
+        study_id = "B19B_EXIT_TIMING_POLICY_V1"
+        if not rehearsing:
+            assert_unused(study_id, supersede_reason=args.supersede_reason)
+        window = build(
+            bodies_path=BURNED_BODIES if rehearsing else BODIES,
+            paths_path=BURNED_PATHS if rehearsing else PATHS,
+            identity_path=BURNED_IDENTITY if rehearsing else IDENTITY,
+            subsample_path=BURNED_COHORT if rehearsing else SUBSAMPLE,
+            cohort_table="outcome" if rehearsing else "cohort_identity",
+            rehearsal=rehearsing, progress=1000 if args.progress else None)
+        result = evaluate_b19b(window, progress=args.progress)
+        result["window_sha256"] = window_digest(window)
+        if rehearsing:
+            result["status"] = ("BURNED DEVELOPMENT DATA. Not an evaluation result. Proves the "
+                                "machinery executes; spends no ledger entry.")
+            pathlib.Path(args.out).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+            print(json.dumps({"wrote": args.out, "status": result["status"],
+                              "cells": result["multiplicity"]["cells_reported"]},
+                             indent=2, sort_keys=True))
+            return 0
+        payload = json.dumps(result, indent=2, sort_keys=True) + "\n"
+        result_sha256 = hashlib.sha256(payload.encode()).hexdigest()
+        pathlib.Path(args.out).write_text(payload)
+        entry = record_pass(study_id, result["window_sha256"], result_sha256,
+                            supersede_reason=args.supersede_reason)
+        print(json.dumps({"wrote": args.out, "ledger_entry": entry,
+                          "result_sha256": result_sha256}, indent=2, sort_keys=True))
         return 0
 
     if args.command == "rehearse-b19d":
