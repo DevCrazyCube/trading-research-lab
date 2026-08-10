@@ -441,6 +441,65 @@ def structural_ceilings(study, window):
     }
 
 
+def assert_ceilings_bind(ceilings, grid):
+    """No cell may admit more curves than its own signal could possibly reach.
+
+    A ceiling that bounds nothing is decoration that reads as a constraint. Asserted on the live
+    run rather than checked by hand on the rehearsal, because the rehearsal is the run that does
+    not matter and this is the one that does.
+    """
+    for key, cell in grid.items():
+        signal_id = key.split("|")[0]
+        ceiling = ceilings["per_signal"][signal_id]["of_those_priceable"]
+        admitted = cell["coverage"]["curves_admitted"]
+        if admitted > ceiling:
+            raise WindowRefused(
+                f"{key}: {admitted} curves admitted but at most {ceiling} could produce both a "
+                "coordinate and a fee schedule. Either the ceiling or the cell is wrong, and "
+                "neither may be reported until it is known which")
+
+
+def assert_complements_partition(study, ceilings, window):
+    """Two signals that are complements over one field must together reach every curve.
+
+    S1 and S2 are `creator_initial_buy_present` True and False. Every curve with a feature block
+    answers that question one way or the other, so their coordinate counts must sum to exactly the
+    number of curves carrying a block.
+
+    This is the invariant the feature-block defect would have broken, and the reason it is asserted
+    rather than eyeballed: with b11b's nested record BOTH counts were zero, and zero plus zero is
+    also internally consistent. A partition check that only compared the two counts to each other
+    would have passed on a study that could not fire at all.
+
+    The pair is derived from SIGNALS rather than named, so a document that reorders or renames its
+    signals does not silently stop being checked.
+    """
+    by_field = collections.defaultdict(dict)
+    for signal in study.SIGNALS:
+        if signal["kind"] == "t0_boolean":
+            by_field[signal["field"]][bool(signal["expect"])] = signal["signal_id"]
+    total = len(window["features"])
+    checked = 0
+    for field, pair in by_field.items():
+        if set(pair) != {True, False}:
+            continue
+        counts = {expect: ceilings["per_signal"][name]["curves_that_can_produce_a_coordinate"]
+                  for expect, name in pair.items()}
+        if sum(counts.values()) != total:
+            raise WindowRefused(
+                f"{pair[True]} ({counts[True]}) and {pair[False]} ({counts[False]}) are "
+                f"complements over {field!r} and must partition the {total} curves carrying a "
+                f"feature block, but they sum to {sum(counts.values())}. A curve answering neither "
+                "means the block did not carry the field, and the study would be reporting silence "
+                "as a negative")
+        checked += 1
+    if not checked:
+        raise WindowRefused(
+            "no complementary signal pair was found to check the partition against; this guard "
+            "must not pass by finding nothing to test")
+    return {"complement_pairs_checked": checked, "curves_partitioned": total}
+
+
 def evaluate_b19d(window, progress=False):
     """B19D over the window. Every figure is computed inside b19d, from b19d's frozen document."""
     study = _load("b19d_non_issuance_signal", "b19d_non_issuance_signal.py")
@@ -469,6 +528,8 @@ def evaluate_b19d(window, progress=False):
                    f"|delay_{study.PRIMARY['delay']}|{study.PRIMARY['scenario_id']}")
     if primary_key not in grid:
         raise WindowRefused(f"the pre-committed primary cell {primary_key} was not evaluated")
+    assert_ceilings_bind(ceilings, grid)
+    assert_complements_partition(study, ceilings, window)
 
     census = window["provenance"]["cohort_census"]
     return {

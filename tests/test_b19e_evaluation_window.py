@@ -223,6 +223,66 @@ class TheFlattenedBlockIsWhatTheStudyDeclares(unittest.TestCase):
             B19D.signal_coordinate(B19D.SIGNALS[0], "CURVE", {"CURVE": self.RECORD}, {})
 
 
+class TheInvariantsAreEnforcedNotEyeballed(unittest.TestCase):
+    """Both guards run on the live pass, so neither depends on someone checking the rehearsal."""
+
+    CEILINGS = {"per_signal": {
+        "S1_CREATOR_INITIAL_BUY_PRESENT": {"curves_that_can_produce_a_coordinate": 900,
+                                           "of_those_priceable": 800},
+        "S2_NO_CREATOR_INITIAL_BUY": {"curves_that_can_produce_a_coordinate": 100,
+                                      "of_those_priceable": 90},
+        "S3_T0_IS_LAUNCH_INSTRUCTION": {"curves_that_can_produce_a_coordinate": 500,
+                                        "of_those_priceable": 400},
+        "S4_CASHBACK_ENABLED": {"curves_that_can_produce_a_coordinate": 300,
+                                "of_those_priceable": 200},
+        "S5_CREATOR_REENTRY_DELAYED_CONFIRMATION": {
+            "curves_that_can_produce_a_coordinate": 50, "of_those_priceable": 40},
+    }}
+
+    def _grid(self, admitted):
+        return {"S1_CREATOR_INITIAL_BUY_PRESENT|h_1000_slots|delay_1|base":
+                {"coverage": {"curves_admitted": admitted}}}
+
+    def test_a_cell_within_its_ceiling_is_accepted(self):
+        B.assert_ceilings_bind(self.CEILINGS, self._grid(800))
+
+    def test_a_cell_exceeding_its_ceiling_refuses(self):
+        """A ceiling that bounds nothing is decoration that reads as a constraint."""
+        with self.assertRaisesRegex(B.WindowRefused, "could produce both"):
+            B.assert_ceilings_bind(self.CEILINGS, self._grid(801))
+
+    def test_the_complement_partition_holds_when_the_counts_cover_the_cohort(self):
+        window = {"features": {f"c{i}": {} for i in range(1000)}}
+        got = B.assert_complements_partition(B19D, self.CEILINGS, window)
+        self.assertEqual(got["complement_pairs_checked"], 1)
+
+    def test_a_broken_partition_refuses(self):
+        window = {"features": {f"c{i}": {} for i in range(1001)}}
+        with self.assertRaisesRegex(B.WindowRefused, "complements over"):
+            B.assert_complements_partition(B19D, self.CEILINGS, window)
+
+    def test_the_all_zero_case_refuses_rather_than_looking_consistent(self):
+        """The exact shape of the feature-block defect: nothing fired, and 0 + 0 agreed.
+
+        A partition check comparing only the two counts to each other passes here. Comparing them
+        to the number of curves carrying a block is what catches a study that cannot fire at all.
+        """
+        ceilings = {"per_signal": dict(self.CEILINGS["per_signal"])}
+        for name in ("S1_CREATOR_INITIAL_BUY_PRESENT", "S2_NO_CREATOR_INITIAL_BUY"):
+            ceilings["per_signal"][name] = {"curves_that_can_produce_a_coordinate": 0,
+                                            "of_those_priceable": 0}
+        window = {"features": {f"c{i}": {} for i in range(1000)}}
+        with self.assertRaisesRegex(B.WindowRefused, "sum to 0"):
+            B.assert_complements_partition(B19D, ceilings, window)
+
+    def test_the_partition_guard_refuses_when_it_finds_nothing_to_check(self):
+        """A guard that passes by testing nothing is the failure mode this whole session hunted."""
+        class NoComplements:
+            SIGNALS = ({"signal_id": "X", "kind": "t0_boolean", "field": "f", "expect": True},)
+        with self.assertRaisesRegex(B.WindowRefused, "must not pass by finding nothing"):
+            B.assert_complements_partition(NoComplements, {"per_signal": {}}, {"features": {}})
+
+
 class OnePassPerStudy(unittest.TestCase):
     def setUp(self):
         self.directory = pathlib.Path(tempfile.mkdtemp(prefix="b19e-ledger-"))
