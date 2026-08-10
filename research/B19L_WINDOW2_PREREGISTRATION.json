@@ -1,0 +1,94 @@
+{
+  "author": "codex seat, designed jointly with the claude seat",
+  "censoring_statement_written_fresh_for_this_population": "B19L's population is censored by four conditions on a historical window and by no live recorder at all: the curve must carry a decodable fee schedule; it must have an observation in a slot strictly after t0, so a trade can be opened at a provable coordinate; the exit must be priceable against observed reserves at the coordinate the rule selects; and mayhem-mode curves are outside the frozen regime and are never fetched. This statement is written for this population rather than inherited, per B19G erratum 1's forward rule, which applies from B19H onward and which this is the first preregistration written since.",
+  "date": "2026-08-11",
+  "group": "B19",
+  "if_c_fires": {
+    "what_happens_next": "nothing automatic. The owner has already been asked, BEFORE this collection was authorised, whether they want the question posed knowing LIVE is a possible answer, and chose to proceed and discuss execution if it fires.",
+    "what_is_still_required": "an execution conversation before any step beyond research, and a further preregistration before anything touches a third window. A LIVE result is a research finding, not a licence."
+  },
+  "not_bundled": "post-graduation markets. Different machinery, different decision, and it belongs on the owner's list rather than smuggled into this document.",
+  "population_and_frame": {
+    "control": "the same cell on the UNSELECTED population, reported alongside.",
+    "entry_frame_named": "first observation in a slot STRICTLY AFTER t0. Same-slot entry is unprovable -- ordering within a slot is the leader's, not an observer's -- and is excluded, as everywhere in this programme.",
+    "selection": "launch-transaction deposit >= 3 SOL, the rule from the selection test, unchanged and not re-derived",
+    "subsample": "5,000, the same as window 1. The 3 SOL incidence in window 1's evaluable cohort is 958 of 3,932 = 24.4%, measured before this freeze, so 5,000 yields roughly 950 selected curves. No larger collection is needed.",
+    "t0_definition": "the LAST transaction-terminal state inside the launch transaction, which is where the creator's own buy lands. path[0] is the CreateEvent and carries zero real quote; reading the deposit there was an error made and corrected during the selection test."
+  },
+  "preregistration_id": "B19L_WINDOW2_OUT_OF_SAMPLE_V1",
+  "primary_estimand": {
+    "no_search": "no threshold is swept, no cell is selected, no rule is ranked. The runner computes this cell and no other.",
+    "the_cell": "ONE pre-named cell, fixed in B19K before this window was collected: take-profit at 6,000,000 lamports (+6% of the 100,000,000 position) with a 100-slot abandon deadline, on curves whose launch-transaction deposit is at least 3,000,000,000 lamports.",
+    "the_triple": "hit rate, exact integer median win, exact integer median abandon loss"
+  },
+  "prohibitions": [
+    "no cell other than the pre-named one may be reported as a result",
+    "no threshold may be retuned after collection",
+    "no figure here is a return, a profit or an expected value",
+    "a LIVE verdict is a research finding and not a recommendation to trade",
+    "nothing signs, submits or spends; no wallet or key exists anywhere in this work"
+  ],
+  "question": "Does the win/loss ASYMMETRY that closed the trading search reproduce on a window that did not exist when the rule was frozen -- and if it moves, does it move ENOUGH to matter?",
+  "regime_markers_defined_before_collection": {
+    "if_same_regime": "outcome (a) is scoped 'holds within regime', and this document PRE-AUTHORISES a marker-triggered window 3 as the standing stronger test. The trigger is objective because it is defined here, before anyone knows when it fires.",
+    "markers": [
+      "venue fee or program-parameter change since window 1, from the B0 upgrade inventories and the observed fee schedules",
+      "launch rate outside 33,866 +/- 40% per 22.6 hours",
+      "SOL price move beyond +/- 30% against window 1"
+    ],
+    "purpose": "window 2 is collected NOW because the out-of-sample test needs new DATA, not a new REGIME. Regime is then established by CLASSIFICATION rather than by waiting, so the classification cannot be chosen to suit the result."
+  },
+  "secondary_estimands_declared_NON_DECISIONAL": [
+    "selection lift out-of-sample (the publishable finding, and out-of-sample status is what a publication needs)",
+    "creator-persistence rho out-of-sample",
+    "capacity-wall replication via B19G machinery",
+    "profitable-window width distribution",
+    "floored-ceiling shape"
+  ],
+  "status": "FROZEN. Committed alone, BEFORE the data it evaluates has been collected.",
+  "status_locks": {
+    "executable": false,
+    "execution_status": "never_executed",
+    "label": "WINDOW2_OUT_OF_SAMPLE_TEST",
+    "performance_status": "not_evaluated",
+    "single_pass": "one pass over window 2, recorded in B19_EVALUATION_LEDGER.json before any result is written"
+  },
+  "stuck_positions": {
+    "a_pessimistic": "total loss of outlay",
+    "b_sellback": "sold into its own deposit at the final observed state, deposit-adjusted, which is always payable by arithmetic because the quote_in sits in the curve's real reserves",
+    "neither_alone": "truth lies between and neither figure may be quoted without the other",
+    "rule": "a position whose exit is never priceable is valued BOTH ways and both are reported"
+  },
+  "supersedes": null,
+  "the_anchors_are_burned_derived_and_stated_as_such": {
+    "hit_rate_pct": 53.3,
+    "median_abandon_loss": -31705105,
+    "median_win": 6000000,
+    "n": 107,
+    "provenance": "measured on the BURNED corpus test split in B19K. Window 1 cannot serve as the comparison, per the contamination above; window 2 is compared against these burned anchors."
+  },
+  "the_break_even_locus_computed_today": {
+    "arithmetic_verified_before_freezing": "EV = hit*win + (1-hit)*loss reproduces B19K's measured -11,619,208 to within 400 lamports at the anchors.",
+    "at_the_anchored_hit_rate_the_abandon_loss_must_shrink_to": -6839718,
+    "at_the_anchored_win_and_loss_EV_crosses_zero_at_hit_rate_pct": 84.1,
+    "in_plain_terms": "window 2 must show the hit rate rising by 31 points, or the abandon loss shrinking by 78%, to reach break-even. Stating this in advance converts 'did it move' into 'did it move ENOUGH'."
+  },
+  "the_decision_map_is_exhaustive_and_the_runner_makes_the_call": {
+    "a_STRUCTURAL_CLOSE": "the triple reproduces within the declared bands. The close generalises to data frozen before it existed, and the trading programme ends properly.",
+    "b_MOVED_BUT_DEAD": "the triple differs materially -- hit rate by more than 10 points, or abandon loss by more than a third -- and the cell's outcome is still negative. Regime-dependence exists and does not matter. The close stands, scoped to the regimes observed.",
+    "c_LIVE": "the pre-named cell clears B19K's own bar -- mean AND median positive under BOTH stuck-position conventions. THE ONLY OUTCOME THAT REOPENS THE TRADING QUESTION.",
+    "who_decides": "scripts/b19l_window2_runner.py classify() makes the call in code, so the map cannot be reinterpreted after the numbers land."
+  },
+  "the_runner_is_pinned": {
+    "editing_it_breaks_the_pin": true,
+    "path": "scripts/b19l_window2_runner.py",
+    "sha256": "2e39f8a36a27dca48e42b946b0d754dc1cd1faf61297338a4d5108e84454b0c6",
+    "written_before_collection": true
+  },
+  "what_is_unprecedented_here": {
+    "claim": "every prior study in this programme was written blind to its OUTCOME. This one is written blind to its DATA. The window it evaluates does not exist at the moment of freezing.",
+    "the_implementation_is_blind_too": "the runner is written and pinned by hash below, before collection. Editing it afterwards breaks the pin.",
+    "why_that_matters": "B19K's take-profit levels descend from ceiling quantiles, and its author had seen the fresh-window headroom table before freezing the family. Window 1 is therefore CONTAMINATED for an out-of-sample test of B19K at any price. Only data that did not exist at freeze time can provide a clean one. That is the specific thing this collection buys and nothing else can."
+  },
+  "why_the_asymmetry_and_not_signal_replication": "signal replication is the weak question: both answers leave the programme where it is, since a replicated signal we cannot trade changes nothing. The entire close rests on winning +6% on 53% of selected curves and losing 32% on the rest. That ratio is the only quantity whose value would change a decision."
+}
