@@ -425,6 +425,37 @@ class InheritingByPinIsVerifiedBothWays(unittest.TestCase):
                 self.assertIn("exactly_one_condition_of_b15ls_is_dropped_and_it_is_named",
                               document["population"])
 
+    def test_the_ledger_key_is_derived_from_the_document_not_written_beside_it(self):
+        """The single-use guarantee is keyed on this string, so it must not be able to drift.
+
+        It did. The runner held a `study_id = "..._V1"` literal written before the V1 -> V2
+        supersession and never updated, so B19F's spent pass was recorded under V1 while the run
+        had verified V2's pin -- leaving V2 reading as UNSPENT and runnable a second time. A guard
+        keyed on a name that can disagree with the thing it names is not a guard.
+        """
+        for path, pin, source in ((B.B19F_PREREG, B.B19F_SHA256, "b19b_exit_timing_policy"),
+                                  (B.B19G_PREREG, B.B19G_SHA256, "b19c_capacity_wall")):
+            with self.subTest(document=path.name):
+                declared = json.loads(path.read_bytes())["preregistration_id"]
+                derived = B.declared_study_id(path, pin, _load(source, f"{source}.py"))
+                self.assertEqual(derived, declared)
+                self.assertIn("_V2", derived, "the superseding document is the live one")
+        runner = (ROOT / "scripts" / "b19e_evaluation_window.py").read_text()
+        self.assertNotIn('study_id = "B19', runner,
+                         "a literal study id can drift from the document it names")
+
+    def test_the_ledger_records_a_pass_for_every_study_that_spent_one(self):
+        """Read from the ledger on disk: no spent pass may sit under a name nothing declares."""
+        declared = set()
+        for path, pin, source in ((B.B19F_PREREG, B.B19F_SHA256, "b19b_exit_timing_policy"),
+                                  (B.B19G_PREREG, B.B19G_SHA256, "b19c_capacity_wall")):
+            declared.add(B.declared_study_id(path, pin, _load(source, f"{source}.py")))
+        for entry in B.read_ledger()["entries"]:
+            if entry["study_id"].startswith("B19F") or entry["study_id"].startswith("B19G"):
+                with self.subTest(entry=entry["sequence"]):
+                    self.assertIn(entry["study_id"], declared,
+                                  "a recorded pass names a study no frozen document declares")
+
     def test_neither_document_spends_the_original_studys_pass(self):
         """B19B and B19C were established not evaluable here; their passes must stay unspent."""
         source = (ROOT / "scripts" / "b19e_evaluation_window.py").read_text()

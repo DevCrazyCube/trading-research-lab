@@ -600,6 +600,18 @@ def evaluate_b19d(window, progress=False):
     }
 
 
+def declared_study_id(path, expected, inherited_module):
+    """The study id the DOCUMENT declares, never a literal written beside it.
+
+    The ledger's single-use guarantee is keyed on this string. A literal drifts: B19F's documents
+    were superseded V1 -> V2 and the constant here was not updated, so the ledger recorded the
+    spent pass under V1 while the run had verified V2 -- which left V2 reading as UNSPENT and
+    runnable again. A guard keyed on a name that can disagree with the thing it names is not a
+    guard. Derived here so the two cannot diverge.
+    """
+    return verify_historical(path, expected, inherited_module)["preregistration_id"]
+
+
 def verify_historical(path, expected, inherited_module):
     """Verify BOTH pins: this document, and the document it inherits its rules from.
 
@@ -977,7 +989,9 @@ def main(argv=None):
 
     if args.command in ("rehearse-b19g", "run-b19g"):
         rehearsing = args.command == "rehearse-b19g"
-        study_id = "B19G_CAPACITY_WALL_HISTORICAL_V1"
+        study_id = declared_study_id(
+            B19G_PREREG, B19G_SHA256,
+            _load("b19c_capacity_wall", "b19c_capacity_wall.py"))
         if not rehearsing:
             assert_unused(study_id, supersede_reason=args.supersede_reason)
         window = build(
@@ -1007,7 +1021,9 @@ def main(argv=None):
 
     if args.command in ("rehearse-b19f", "run-b19f"):
         rehearsing = args.command == "rehearse-b19f"
-        study_id = "B19F_EXIT_TIMING_HISTORICAL_V1"
+        study_id = declared_study_id(
+            B19F_PREREG, B19F_SHA256,
+            _load("b19b_exit_timing_policy", "b19b_exit_timing_policy.py"))
         if not rehearsing:
             assert_unused(study_id, supersede_reason=args.supersede_reason)
         window = build(
@@ -1055,7 +1071,12 @@ def main(argv=None):
     # run-b19d. The ledger is checked BEFORE the window is assembled, so an already-spent study
     # refuses in a second rather than after the work -- and, more to the point, so that no outcome
     # is ever computed for a study that was not entitled to compute one.
-    study_id = "B19D_NON_ISSUANCE_SIGNAL_V1"
+    # Derived from b19d's own document for the same reason as B19F and B19G: a literal here can
+    # drift from the study it names, and the ledger's single-use guarantee is keyed on it. B19D's
+    # document has not been superseded and the literal still happened to match -- which is luck,
+    # not a property.
+    study_id = _load("b19d_non_issuance_signal",
+                     "b19d_non_issuance_signal.py").verify_preregistration()["preregistration_id"]
     assert_unused(study_id, supersede_reason=args.supersede_reason)
     window = build(progress=1000 if args.progress else None)
     digest = window_digest(window)
