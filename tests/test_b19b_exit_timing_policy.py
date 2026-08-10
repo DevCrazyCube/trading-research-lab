@@ -6,6 +6,7 @@ compared as a float is indistinguishable from one compared exactly until it land
 """
 import ast
 import importlib.util
+import itertools
 import json
 import pathlib
 import unittest
@@ -24,17 +25,23 @@ _B9D = importlib.util.module_from_spec(
     importlib.util.spec_from_file_location("b9d_for_mint", ROOT / "scripts" / "b9d_transaction_bodies.py"))
 _B9D.__spec__.loader.exec_module(_B9D)
 NATIVE = _B9D.NATIVE_QUOTE_MINT
+B10BP = B.B10BP
 
 
 def path(rows):
-    """rows: (slot, real_quote, complete). Everything else held constant."""
-    return [{"slot": s, "transaction_index": 0, "outer_index": 0, "inner_index": 0, "kind": "trade",
+    """rows: (slot, real_quote, complete). Everything else held constant.
+
+    `transaction_index` enumerates rather than sitting at 0, so two observations may share a slot
+    without becoming the same canonical coordinate. Two transactions in one slot always differ in
+    execution position -- that is what a transaction index is.
+    """
+    return [{"slot": s, "transaction_index": i, "outer_index": 0, "inner_index": 0, "kind": "trade",
              # Reserves borrowed from b10a's own known-good fixture. My first attempt invented
              # them and every entry was X_ENTRY_UNPRICEABLE, so the rule under test was never
              # reached -- a fixture that refuses before the code you meant to exercise.
              "virtual_quote": 30_000_000_000, "virtual_token": 1_073_000_000_000_000,
              "real_quote": q, "real_token": 793_100_000_000_000, "quote_mint": NATIVE,
-             "mayhem_mode": False, "complete": c} for s, q, c in rows]
+             "mayhem_mode": False, "complete": c} for i, (s, q, c) in enumerate(rows)]
 
 
 class ItImplementsTheFrozenDocument(unittest.TestCase):
@@ -176,3 +183,71 @@ class ReportingDiscipline(unittest.TestCase):
 
     def test_no_figure_may_be_called_a_return(self):
         self.assertIn("is a return", B.summarise([1], {}, 1)["not_a_return"])
+
+
+class RowPermutationInvariance(unittest.TestCase):
+    """The document's `determinism.row_permutation`, enforced rather than assumed.
+
+    "the output must be identical under any permutation of the input rows, checked by running the
+    whole computation over shuffled inputs and comparing field for field."
+
+    This is satisfied ARCHITECTURALLY by sorting once at the adapter boundary and asserting the
+    postcondition here: the study either gets a canonical path and returns one answer, or it gets a
+    permuted one and REFUSES. What it must never do is silently return a different number, which is
+    what every path helper here did before -- `first_at_or_after`, `state_in_force`,
+    `path.index(entry)` and the running peak all read list order.
+
+    Refusal is the honest reading of "identical output" for a module that is handed a path rather
+    than building one. A module that sorted its input would satisfy the letter of the requirement
+    while hiding the fact that its caller had lost the ordering.
+    """
+    SCHEDULE = {"fee_bps": 100, "creator_fee_bps": 0, "cashback_fee_bps": 0, "buyback_fee_bps": 0}
+    POLICY = dict(B.SCENARIOS[1])
+    ROWS = [(10, 30_000_000_000, False), (500, 31_000_000_000, False),
+            (2_000, 29_000_000_000, False), (12_000, 33_000_000_000, False)]
+
+    def _cell(self, p):
+        return B.evaluate_cell(B.EXIT_RULES[0], p, signal_slot=10, delay=1,
+                               schedule=self.SCHEDULE, policy=self.POLICY)
+
+    def test_the_canonical_order_is_evaluated_identically_every_time(self):
+        canonical = path(self.ROWS)
+        first = self._cell(canonical)
+        for _ in range(5):
+            self.assertEqual(self._cell(path(self.ROWS)), first,
+                             "the same rows in canonical order must give the same integer")
+
+    def test_every_non_canonical_permutation_refuses_rather_than_answering(self):
+        """Not one permutation may return a number. A wrong number is worse than no number."""
+        canonical = path(self.ROWS)
+        checked = 0
+        for permutation in itertools.permutations(range(len(canonical))):
+            if list(permutation) == sorted(permutation):
+                continue
+            shuffled = [canonical[i] for i in permutation]
+            with self.assertRaises(B10BP.PathRefused):
+                self._cell(shuffled)
+            checked += 1
+        self.assertEqual(checked, 23, "all 4!-1 non-identity permutations must be covered")
+
+    def test_a_permuted_path_never_silently_yields_a_different_result(self):
+        """The measured regression, stated as what was actually observed rather than as a guess.
+
+        With the guard disabled and reserves that vary across the path
+        ((10, 30 SOL), (500, 60), (2000, 20), (12000, 33)), E_FIXED_H1000 on the canonical order
+        returns an outcome of -4,904,911 lamports; under permutation (0, 2, 3, 1) the SAME rows
+        return X_RULE_NEVER_TRIGGERED. The cell moves between the outcome set and the coverage
+        table, which changes the denominator AND the set the median is taken over.
+
+        Honest scope: across the rule set and the fixtures tried, permutation flipped
+        outcome-versus-refusal but was NOT observed turning one integer into a different integer.
+        That is a weaker fault than a silently wrong number and it is still a fault -- a
+        coverage table is a result here, and the document requires it reported before any outcome.
+        """
+        varied = path([(10, 30_000_000_000, False), (500, 60_000_000_000, False),
+                       (2_000, 20_000_000_000, False), (12_000, 33_000_000_000, False)])
+        permuted = [varied[0], varied[2], varied[3], varied[1]]
+        self.assertIsInstance(self._cell(varied), int, "the canonical order yields an outcome")
+        with self.assertRaises(B10BP.PathRefused) as caught:
+            self._cell(permuted)
+        self.assertIn("precedes", str(caught.exception))

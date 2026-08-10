@@ -168,10 +168,17 @@ class CoverageIsReportedBeforeOutcome(unittest.TestCase):
 
 class TheObservabilityGateAndHorizons(unittest.TestCase):
     def path(self, slots):
-        return [{"slot": s, "transaction_index": 0, "outer_index": 0, "inner_index": 0,
+        """A canonical path. `transaction_index` enumerates, so two observations may share a slot.
+
+        It previously fixed transaction_index at 0, which made the same-slot fixture [10, 10, 30]
+        two observations at the IDENTICAL coordinate (10,0,0,0) -- a duplicate, not a same-slot
+        pair. Two transactions in one slot always differ in execution position; that is what
+        transaction_index is, and it is the whole reason the block phase of the collection exists.
+        """
+        return [{"slot": s, "transaction_index": i, "outer_index": 0, "inner_index": 0,
                  "kind": "trade", "virtual_quote": 30_000_000_000, "virtual_token": 1_073_000_000,
                  "real_quote": 1_000_000_000, "real_token": 100_000_000, "quote_mint": "So111",
-                 "mayhem_mode": False, "complete": False} for s in slots]
+                 "mayhem_mode": False, "complete": False} for i, s in enumerate(slots)]
 
     def test_first_at_or_after_respects_canonical_order(self):
         path = self.path([10, 20, 30])
@@ -240,10 +247,44 @@ class SignalCoordinates(unittest.TestCase):
         self.assertIsNone(B.signal_coordinate(self.signal("S1_CREATOR_INITIAL_BUY_PRESENT"),
                                               "unknown", self.FEATURES, {}))
 
-    def test_a_none_valued_field_does_not_fire(self):
+    def test_a_none_valued_field_is_refused_rather_than_read_as_a_negative(self):
+        """A null feature is an unanswered question, not a negative answer.
+
+        This test previously asserted the opposite -- that None means "did not fire". The
+        preregistration does not decide the case either way, so this is a judgment, and it is
+        recorded here rather than left in the code as a silent default. It rests on a fact about
+        the corpus: b11b_t0_features sets all three signal fields to a bool unconditionally
+        (`bool(creator_buys)`, a `==` comparison, and `bool(_require(...))`, where `_require`
+        raises when the field is absent). None is therefore UNREACHABLE from a working adapter,
+        and a None that does arrive is a broken adapter rather than an undetermined curve.
+
+        It matters for S1/S2 in particular: they are complements over one field, so a value read
+        as a negative lands in S2's numerator. A corpus fault would not merely shrink the cohort,
+        it would manufacture support for the non-issuance signal this study exists to test.
+        """
         features = {"c": {"creator_initial_buy_present": None, "t0_slot": 1}}
-        self.assertIsNone(B.signal_coordinate(self.signal("S1_CREATOR_INITIAL_BUY_PRESENT"),
-                                              "c", features, {}))
+        with self.assertRaisesRegex(B.CorpusContractViolation, "not absent"):
+            B.signal_coordinate(self.signal("S1_CREATOR_INITIAL_BUY_PRESENT"),
+                                "c", features, {})
+
+    def test_a_present_block_missing_the_declared_field_is_refused(self):
+        """The defect this guards: b11b's real record shape makes every t0 signal return None.
+
+        b11b_t0_features returns {"coordinate": {...}, "features": {...}, "grouping": {...}} with
+        no `t0_slot` at any level. Handed to the old `.get()` implementation, S1-S4 returned None
+        for every curve and the study reported "no admissible cells" -- indistinguishable from a
+        real negative result, on the single pass this study is permitted.
+        """
+        nested = {"c": {"coordinate": {"slot": 1}, "features": {"creator_initial_buy_present": True},
+                        "grouping": {}}}
+        with self.assertRaisesRegex(B.CorpusContractViolation, "never declares the field"):
+            B.signal_coordinate(self.signal("S1_CREATOR_INITIAL_BUY_PRESENT"), "c", nested, {})
+        with self.assertRaisesRegex(B.CorpusContractViolation, "never declares the field"):
+            B.baseline_coordinate("baseline_launch", "c", nested, {})
+
+    def test_a_corpus_violation_is_not_a_cell_refusal(self):
+        """It must not be catchable as one, or a broken corpus reads as a big refusal count."""
+        self.assertFalse(issubclass(B.CorpusContractViolation, B.SignalRefused))
 
     def test_S5_fires_at_the_reentry_trade_not_at_t0(self):
         got = B.signal_coordinate(self.signal("S5_CREATOR_REENTRY_DELAYED_CONFIRMATION"),

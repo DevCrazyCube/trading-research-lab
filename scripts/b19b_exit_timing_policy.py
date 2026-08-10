@@ -43,6 +43,7 @@ def _load(name, filename):
 
 B10A = _load("b10a_simulator_kernel", "b10a_simulator_kernel.py")
 B15M = _load("b15m_liquidity_capacity", "b15m_liquidity_capacity.py")
+B10BP = _load("b10b_position_path", "b10b_position_path.py")
 
 
 class ExitRefused(RuntimeError):
@@ -219,7 +220,19 @@ def select_exit(rule, path, entry, tokens, schedule, policy):
 
 
 def evaluate_cell(rule, path, signal_slot, delay, schedule, policy, size=POSITION):
-    """One (rule, delay, scenario) cell. Exact integer lamports, or a documented refusal."""
+    """One (rule, delay, scenario) cell. Exact integer lamports, or a documented refusal.
+
+    The path's canonical order is asserted here, at the only entry to the evaluation, rather than
+    trusted from the adapter. `first_at_or_after`, `state_in_force`, `path.index(entry)` and the
+    running peak inside `select_exit` all read LIST order, so an out-of-order path yields a
+    different exit and a different drawdown with no error raised -- silently wrong, and
+    indistinguishable from correct.
+
+    This is the enforcement the document's `determinism.row_permutation` requires. PathRefused is
+    deliberately not an ExitRefused: a permuted corpus must stop the run, not be tallied as a
+    refused cell where it would read as ordinary coverage loss.
+    """
+    B10BP.assert_canonical_order(path)
     entry = first_at_or_after(path, signal_slot + delay)
     if entry is None:
         raise ExitRefused(X_NO_ENTRY_OBSERVATION)

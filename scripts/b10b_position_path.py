@@ -220,6 +220,49 @@ def assert_canonical_sequence(observations, *, mint, after):
     return ordered
 
 
+def assert_canonical_order(observations, *, label="path"):
+    """A path is in strictly increasing canonical order, or it is refused. It is NEVER sorted here.
+
+    Every path helper in the B19 studies -- `first_at_or_after`, `state_in_force`, the running peak
+    in a drawdown walk, and any `path.index(entry)` followed by a slice -- reads the list in the
+    order it arrives. Hand one an out-of-order path and it returns a DIFFERENT exit, a different
+    peak and a different outcome, with no error raised: silently wrong, and indistinguishable from
+    correct.
+
+    Refused rather than sorted, deliberately. Sorting would repair the symptom and hide the fault:
+    a caller that hands over unordered rows has lost the canonical order somewhere upstream, and
+    that is worth stopping for. It also keeps this cheap enough to sit on every entry -- one pass,
+    no allocation of a second list.
+
+    This is the enforcement half of the row-permutation invariance B19B's and B19C's
+    preregistrations require ("the output must be identical under any permutation of the input
+    rows"). Identical output under permutation is satisfied by producing the same answer for every
+    ordering; it is satisfied equally by refusing every ordering but one, and refusing is the
+    reading that cannot quietly compute a wrong number.
+    """
+    if isinstance(observations, (dict, str, bytes)):
+        raise PathRefused(f"{label} must be a sequence of observation mappings")
+    previous = None
+    for position, observation in enumerate(observations):
+        if not isinstance(observation, dict):
+            raise PathRefused(
+                f"{label}[{position}] is {type(observation).__name__}, not a mapping")
+        key = canonical_key(observation)
+        if previous is not None:
+            if key == previous:
+                raise PathRefused(
+                    f"{label}[{position}] repeats canonical coordinate {key}; a duplicate state "
+                    "would be counted twice")
+            if key < previous:
+                raise PathRefused(
+                    f"{label}[{position}] at {key} precedes {previous}; the path is not in "
+                    f"canonical order {list(CANONICAL_ORDER)}. Every helper here reads list order, "
+                    "so an unordered path is silently wrong rather than an error. Database "
+                    "insertion order is not an ordering")
+        previous = key
+    return observations
+
+
 # --------------------------------------------------------------------------------------------
 # The leakage barrier
 # --------------------------------------------------------------------------------------------

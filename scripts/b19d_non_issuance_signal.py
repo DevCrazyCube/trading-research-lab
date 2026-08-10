@@ -45,6 +45,18 @@ def _load(name, filename):
 
 B10A = _load("b10a_simulator_kernel", "b10a_simulator_kernel.py")
 B15M = _load("b15m_liquidity_capacity", "b15m_liquidity_capacity.py")
+B10BP = _load("b10b_position_path", "b10b_position_path.py")
+
+
+class CorpusContractViolation(RuntimeError):
+    """The corpus handed over a block this study cannot read.
+
+    Deliberately NOT a subclass of SignalRefused. A refusal is a statement about ONE cell and is
+    counted in the coverage table, so a runner catching SignalRefused per cell would turn a
+    systematically mis-shaped corpus into a large and entirely plausible-looking refusal count.
+    This is not a cell that could not be priced -- it is a corpus that never answered the question,
+    and it must reach the operator instead of the report.
+    """
 
 
 class SignalRefused(RuntimeError):
@@ -149,6 +161,39 @@ def verify_preregistration(path=PREREG, expected=PREREG_CANONICAL_SHA256):
 # Signal coordinates
 # ------------------------------------------------------------------------------------------------
 
+def _feature_block(features, curve, field=None):
+    """This study's declared feature block, or None when the curve is genuinely absent.
+
+    A block that is PRESENT but does not carry the declared field is refused rather than read as a
+    signal that did not fire. The two are indistinguishable through `.get()`, and that is the whole
+    danger: a mis-shaped corpus makes every t0 signal return None for every curve, which the report
+    states as "no admissible cells" -- a null result no reader could tell from a real one, produced
+    on the one pass this study is permitted.
+
+    b11b_t0_features returns a NESTED record ({"coordinate": {...}, "features": {...},
+    "grouping": {...}}) with no `t0_slot` anywhere. A FLAT block carrying the feature fields and
+    `t0_slot` is this study's declared input; flattening it is the adapter's job, and failing to do
+    it must stop the run rather than quietly empty it.
+    """
+    block = features.get(curve)
+    if block is None:
+        return None
+    if not isinstance(block, dict):
+        raise CorpusContractViolation(
+            f"{curve}: feature block is {type(block).__name__}, not a mapping")
+    missing = [name for name in (field, "t0_slot") if name is not None and name not in block]
+    if missing:
+        raise CorpusContractViolation(
+            f"{curve}: the feature block carries no {', '.join(missing)}. A block that never "
+            "declares the field cannot report that the signal did not fire; it reports that the "
+            "corpus was never asked. Expected a FLAT block with the feature fields and t0_slot.")
+    if field is not None and block[field] is None:
+        raise CorpusContractViolation(
+            f"{curve}: feature {field!r} is None. 'Did not fire' is False, not absent -- a null "
+            "here means the corpus could not determine the property, which is not a negative.")
+    return block
+
+
 def signal_coordinate(signal, curve, features, reentry):
     """The slot at which this signal became observable, or None if it never fired.
 
@@ -157,13 +202,12 @@ def signal_coordinate(signal, curve, features, reentry):
     creator's first re-entry buy, which is B16D's definition and is inherited whole.
     """
     if signal["kind"] == "t0_boolean":
-        block = features.get(curve)
+        block = _feature_block(features, curve, signal["field"])
         if block is None:
             return None
-        value = block.get(signal["field"])
-        if value is None or bool(value) is not signal["expect"]:
+        if bool(block[signal["field"]]) is not signal["expect"]:
             return None
-        return block.get("t0_slot")
+        return block["t0_slot"]
     if signal["kind"] == "creator_reentry":
         trade = reentry.get(curve)
         return None if trade is None else trade["slot"]
@@ -173,8 +217,8 @@ def signal_coordinate(signal, curve, features, reentry):
 def baseline_coordinate(baseline, curve, features, first_non_creator_buy):
     """The two frozen comparators, on the same machinery and the same denominator."""
     if baseline == "baseline_launch":
-        block = features.get(curve)
-        return None if block is None else block.get("t0_slot")
+        block = _feature_block(features, curve)
+        return None if block is None else block["t0_slot"]
     if baseline == "baseline_any_buy":
         trade = first_non_creator_buy.get(curve)
         return None if trade is None else trade["slot"]
@@ -233,7 +277,13 @@ def evaluate_cell(path, signal_slot, horizon, delay, schedule, policy, size=POSI
 
     Returns an exact integer in lamports. Every failure path raises with one of the document's
     codes, so a cell is never silently dropped and the coverage table adds up.
+
+    The path's canonical order is asserted, not assumed. `first_at_or_after`, `state_in_force` and
+    `exit_observation` all read list order, so an out-of-order path selects a different entry and a
+    different exit and returns a number with no error attached. PathRefused is deliberately not a
+    SignalRefused: it must stop the run rather than be counted as a refused cell.
     """
+    B10BP.assert_canonical_order(path)
     if schedule is None:
         raise SignalRefused(N_NO_FEE_SCHEDULE)
     entry = first_at_or_after(path, signal_slot + delay)

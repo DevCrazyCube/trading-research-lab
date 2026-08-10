@@ -73,6 +73,45 @@ class NoFormulaIsReimplemented(unittest.TestCase):
             if isinstance(node, ast.While):
                 self.fail("a search loop here would be a second implementation of B15M's")
 
+    def test_the_whole_grid_is_reported_and_no_size_is_selected(self):
+        """The no-fishing property, guarded positively rather than left true-by-construction.
+
+        `test_no_bisection_is_written_here` forbids `while`, which proves a NARROWER thing: that
+        B15M's search is not reimplemented here, so the differential compares two independent
+        routes. It does NOT constrain selection over the grid, which needs no loop at all --
+        `max(GRID, key=...)`, `sorted(...)[-1]` or a `for` tracking a best all pass a while-only
+        check. Reporting every size and ranking none is the property that keeps this a description
+        of a shape rather than a search for the size that reads best; it is asserted here.
+        """
+        entry = {"virtual_quote": 30_000_000_000, "virtual_token": 1_073_000_000_000_000,
+                 "real_quote": 0, "real_token": 793_100_000_000_000,
+                 "quote_mint": B.B15M.NATIVE_QUOTE_MINT, "mayhem_mode": False, "complete": False,
+                 "slot": 437_300_000}
+        executability = B.grid_executability(entry, dict(entry, slot=entry["slot"] + 1))
+        self.assertEqual(sorted(executability), sorted(B.GRID),
+                         "every frozen size must be reported, never a subset")
+
+    def test_nothing_ranks_or_selects_over_the_grid(self):
+        """No `max`/`min`/`sorted` may be keyed over GRID, and no field may name a chosen size."""
+        source = (ROOT / "scripts" / "b19c_capacity_wall.py").read_text()
+        tree = ast.parse(source)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            function = node.func
+            name = getattr(function, "id", None) or getattr(function, "attr", None)
+            if name not in ("max", "min", "sorted"):
+                continue
+            referenced = {child.id for child in ast.walk(node)
+                          if isinstance(child, ast.Name)}
+            self.assertNotIn(
+                "GRID", referenced,
+                f"line {node.lineno}: {name}() keyed over GRID would select a size, and the "
+                "study reports the whole grid rather than choosing from it")
+        for forbidden in ("best_size", "selected_size", "optimal_size", "recommended_size"):
+            self.assertNotIn(forbidden, source,
+                             "a field naming a chosen size turns a reported shape into a pick")
+
     def test_no_float_literal_anywhere(self):
         tree = ast.parse((ROOT / "scripts" / "b19c_capacity_wall.py").read_text())
         floats = [n for n in ast.walk(tree)

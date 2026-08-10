@@ -172,6 +172,38 @@ class TestWalletRecovery(Base):
         self.assertEqual(result["validated_against_t0_user"], 1)
         self.assertEqual(result["disagreed"], 0)
 
+    def test_a_bundled_transaction_validates_against_t0s_own_instruction(self):
+        """A launch transaction with several buys must be matched on the OUTER INDEX too.
+
+        The fresh window carries launch transactions bundling a create with three `buy`
+        instructions at outer 4, 6 and 8, each with its own TradeEvent and its own wallet.
+        Selecting on (slot, transaction_index) alone returns all of them in no defined order, and
+        taking the first compares t0's wallet against a DIFFERENT trade's account list. That
+        refused the whole audit on the real window, reported as "the account position is not
+        sound" -- when the position was right and the instruction was wrong.
+
+        Here t0 is the SECOND buy. Before the outer-index match, the first buy's wallet was
+        compared against t0_user and the audit refused.
+        """
+        self.fixture.curve()
+        con = sqlite3.connect(self.fixture.b9d)
+        index = B16A.USER_INDEX["buy"]
+        for outer, wallet in ((0, OTHER), (1, WALLET)):
+            con.execute("INSERT INTO instruction VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                        (1001, 0, outer, -1, "sig-bundle", "pump", "d", "buy", 1,
+                         json.dumps(["x"] * index + [wallet] + ["y"] * 4), 100))
+        con.commit()
+        con.close()
+        con = sqlite3.connect(self.fixture.identity)
+        con.execute("UPDATE identity SET t0_slot=1001, t0_transaction_index=0, "
+                    "t0_outer_index=1, t0_user=?", (WALLET,))
+        con.commit()
+        con.close()
+        result = B16A.assert_user_index_is_sound(self.fixture.b9d, self.fixture.identity)
+        self.assertEqual(result["disagreed"], 0,
+                         "t0's own instruction must be the one validated against")
+        self.assertEqual(result["validated_against_t0_user"], 1)
+
     def test_the_validation_refuses_when_there_is_nothing_to_validate_against(self):
         with self.assertRaisesRegex(B16A.AuditRefused, "no t0_user"):
             B16A.assert_user_index_is_sound(self.fixture.b9d, self.fixture.identity)

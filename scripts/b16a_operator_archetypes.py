@@ -84,18 +84,28 @@ def assert_user_index_is_sound(b9d_path=B9D, identity_path=B10C_IDENTITY, limit=
     identity = _read_only(identity_path, "B10c identity")
     try:
         rows = identity.execute(
-            "SELECT bonding_curve, t0_slot, t0_transaction_index, t0_user FROM identity "
-            "WHERE t0_user IS NOT NULL LIMIT ?", (limit,)).fetchall()
+            "SELECT bonding_curve, t0_slot, t0_transaction_index, t0_outer_index, t0_user "
+            "FROM identity WHERE t0_user IS NOT NULL LIMIT ?", (limit,)).fetchall()
         if not rows:
             raise AuditRefused("no t0_user rows to validate the account position against")
         names = tuple(USER_INDEX)
         checked = disagreed = unresolved = 0
-        for _curve, slot, transaction_index, expected in rows:
+        for _curve, slot, transaction_index, outer_index, expected in rows:
             found = None
+            # Matched on the OUTER INDEX as well, and ordered. A launch transaction routinely
+            # bundles a create with several buys -- one observed case carries three `buy`
+            # instructions at outer 4, 6 and 8, each with its own TradeEvent. Selecting on
+            # (slot, transaction_index) alone returns all three in no defined order, and taking
+            # the first compares t0's wallet against a DIFFERENT trade's account list. That reads
+            # as "the account position is wrong" when the position is right and the instruction is
+            # wrong, and on the fresh window it refused the whole audit over one such bundle.
+            # This is the same mispairing b10b's `_decode_at` documents costing a spurious
+            # 389,217,712-lamport mismatch on b10a's first gate run.
             for name, accounts_json in b9d.execute(
                     "SELECT idl_name, accounts_json FROM instruction WHERE slot=? AND "
-                    "transaction_index=? AND idl_name IN "
-                    f"({','.join('?' * len(names))})", (slot, transaction_index, *names)):
+                    "transaction_index=? AND outer_index=? AND idl_name IN "
+                    f"({','.join('?' * len(names))}) ORDER BY outer_index, inner_index",
+                    (slot, transaction_index, outer_index, *names)):
                 accounts = json.loads(accounts_json)
                 index = USER_INDEX[name]
                 if index < len(accounts):
