@@ -128,7 +128,7 @@ def assert_integer(label, value):
 # The primary estimand
 # ------------------------------------------------------------------------------------------------
 
-def capacity(entry, exit_state, ceiling=NEW_CEILING):
+def capacity(entry, exit_state, ceiling=NEW_CEILING, prefix_check=None):
     """The greatest q whose tokens can be sold in full against the OBSERVED exit state.
 
     B15M's own search, maximality proof, prefix verification and B10b differential, called with the
@@ -145,8 +145,13 @@ def capacity(entry, exit_state, ceiling=NEW_CEILING):
         B15M.assert_reserves_possible(exit_state, "exit")
     except Exception as error:                                            # noqa: BLE001
         raise CapacityRefused(f"{W_IMPOSSIBLE_RESERVES}: {error}") from error
+    # DEFAULT IS THE SCAN, and it stays the scan. B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1 is frozen
+    # and unspent; nothing here changes what it does. B19G_CAPACITY_WALL_HISTORICAL_V3 passes
+    # B15M.assert_prefix_shape_by_theorem explicitly, because the scan cannot run at this ceiling
+    # at all -- ten billion evaluations per cell. A caller that passes nothing gets the brute force.
+    check = B15M.assert_prefix_shape if prefix_check is None else prefix_check
     try:
-        B15M.assert_prefix_shape(entry, exit_state, ceiling)
+        check(entry, exit_state, ceiling)
     except Exception as error:                                            # noqa: BLE001
         raise CapacityRefused(f"{W_NON_MONOTONE}: {error}") from error
     found = B15M.external_capacity(entry, exit_state, ceiling)

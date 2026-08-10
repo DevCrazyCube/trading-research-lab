@@ -43,8 +43,8 @@ LEDGER = ROOT / "research" / "B19_EVALUATION_LEDGER.json"
 # The historical-universe studies. Each pins its OWN document and the document it inherits from.
 B19F_PREREG = ROOT / "research" / "B19F_EXIT_TIMING_HISTORICAL_V2_PREREGISTRATION.json"
 B19F_SHA256 = "f860cd75fcef159f036c303a20abf095af5411d3b1eb8c809214cde330573644"
-B19G_PREREG = ROOT / "research" / "B19G_CAPACITY_WALL_HISTORICAL_V2_PREREGISTRATION.json"
-B19G_SHA256 = "232fa304b7a6ed98b5194f586d4952743db94878dc5b066c9b7b359e638d8a92"
+B19G_PREREG = ROOT / "research" / "B19G_CAPACITY_WALL_HISTORICAL_V3_PREREGISTRATION.json"
+B19G_SHA256 = "6397ebfe71510a7f9ce3150bc4175cb9d3340b808cd121b53f423f7315f682e6"
 B15H_PREREG = ROOT / "research" / "B15H_PROSPECTIVE_ENTRY_PREREGISTRATION.json"
 
 
@@ -82,6 +82,7 @@ B16A = _load("b16a_operator_archetypes", "b16a_operator_archetypes.py")
 B16D = _load("b16d_creator_reentry_signal", "b16d_creator_reentry_signal.py")
 B19B_M = _load("b19b_exit_timing_policy", "b19b_exit_timing_policy.py")
 B19D_M = _load("b19d_non_issuance_signal", "b19d_non_issuance_signal.py")
+B15M_M = _load("b15m_liquidity_capacity", "b15m_liquidity_capacity.py")
 
 
 class WindowRefused(RuntimeError):
@@ -840,7 +841,13 @@ def evaluate_b19g(window, progress=False):
                     continue
                 entry_state, exit_full = B19D_M._state(entry), B19D_M._state(exit_state)
                 try:
-                    value = study.capacity(entry_state, exit_full)
+                    # V3 selects the proof-backed check EXPLICITLY. b19c's default is still the
+                    # scan, so B19C is untouched. If any proven body has drifted, this call falls
+                    # back to the scan by itself and the cell simply becomes slow rather than
+                    # unverified.
+                    value = study.capacity(
+                        entry_state, exit_full,
+                        prefix_check=B15M_M.assert_prefix_shape_by_theorem)
                 except Exception as error:                                    # noqa: BLE001
                     refusals[f"W_CAPACITY_ERROR:{type(error).__name__}"] += 1
                     continue

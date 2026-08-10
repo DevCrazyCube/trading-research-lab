@@ -345,9 +345,18 @@ class InheritingByPinIsVerifiedBothWays(unittest.TestCase):
         changing.
         """
         self.assertEqual(B.max_lateness_slots(), 150)
-        source = (ROOT / "scripts" / "b19e_evaluation_window.py").read_text()
-        self.assertNotIn("150", source.split("def max_lateness_slots")[0],
-                         "the tolerance must not appear as a literal before it is read")
+        # Checked as an INTEGER LITERAL in the parse tree, not as a substring. A substring scan for
+        # "150" matches any hash containing those digits -- the V3 preregistration pin
+        # 6397ebfe71510a7f9ce3150bc... does, and it broke this test the moment it was added. That is
+        # the same text-scan failure this repo keeps meeting; an AST walk cannot be fooled by it.
+        import ast as _ast
+        tree = _ast.parse((ROOT / "scripts" / "b19e_evaluation_window.py").read_text())
+        literals = [node for node in _ast.walk(tree)
+                    if isinstance(node, _ast.Constant) and node.value == 150
+                    and not isinstance(node.value, bool)]
+        self.assertEqual(literals, [],
+                         "the lateness tolerance must be read from B15H, never written here as a "
+                         "literal that could be widened independently")
 
     def _late_window(self, lateness_slots):
         """One curve whose first observation after t0+delay is `lateness_slots` late."""
@@ -412,12 +421,16 @@ class InheritingByPinIsVerifiedBothWays(unittest.TestCase):
         with self.assertRaisesRegex(B.WindowRefused, "declares no max_lateness_slots"):
             B.max_lateness_slots(empty)
 
-    def test_the_v2_documents_carry_no_bias_direction_claim(self):
-        """V1 claimed breadth was conservative for a negative result. It is not knowable."""
+    def test_the_live_documents_carry_no_bias_direction_claim(self):
+        """V1 claimed breadth was conservative for a negative result. It is not knowable.
+
+        Asserts the document SUPERSEDES something rather than naming a version, so a later
+        supersession (B19G is on V3) does not silently stop this from being checked.
+        """
         for path in (B.B19F_PREREG, B.B19G_PREREG):
             document = json.loads(path.read_bytes())
             with self.subTest(document=path.name):
-                self.assertIn("_V2", document["preregistration_id"])
+                self.assertNotIn("_V1", document["preregistration_id"])
                 self.assertIsNotNone(document["supersedes"])
                 for withdrawn in ("the_direction_of_the_bias_is_declared_in_advance",
                                   "this_is_broader_than_b15m_and_that_is_stated_not_hidden"):
@@ -439,7 +452,7 @@ class InheritingByPinIsVerifiedBothWays(unittest.TestCase):
                 declared = json.loads(path.read_bytes())["preregistration_id"]
                 derived = B.declared_study_id(path, pin, _load(source, f"{source}.py"))
                 self.assertEqual(derived, declared)
-                self.assertIn("_V2", derived, "the superseding document is the live one")
+                self.assertNotIn("_V1", derived, "the superseding document is the live one")
         runner = (ROOT / "scripts" / "b19e_evaluation_window.py").read_text()
         self.assertNotIn('study_id = "B19', runner,
                          "a literal study id can drift from the document it names")
