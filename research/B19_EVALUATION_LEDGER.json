@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "result_sha256": "dfd5a357e70804aa944f18885853eb0288c77578983d58b4b916c5d7e2ca3d98",
+      "sequence": 1,
+      "study_id": "B19D_NON_ISSUANCE_SIGNAL_V1",
+      "supersede_reason": null,
+      "supersedes": [],
+      "window_sha256": "dccb911d1fcde8b277d5f07d9f1629f98ae8539a619b2a1348a9ee712e847676"
+    }
+  ],
+  "ledger_id": "B19_EVALUATION_LEDGER_V1"
+}
