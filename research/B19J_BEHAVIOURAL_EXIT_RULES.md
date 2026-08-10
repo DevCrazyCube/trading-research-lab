@@ -134,3 +134,51 @@ immediately, and exiting immediately loses the toll.**
 
 The best exit rule found anywhere in this project is *do not hold the position*. That is not a
 strategy; it is the absence of one.
+
+---
+
+# THE STOPPING SENTENCE
+
+The peer seat's headroom table was released only after this grid was committed, and is applied
+here to judge the round rather than to tune it.
+
+**The ceiling on selected curves, with perfect foresight:** mean **+0.36x**, median **+0.078x**.
+Headroom exists — the question did not close for want of opportunity.
+
+**What the round captured of it:**
+
+| | mean |
+|---|---|
+| ceiling, perfect foresight | +36,000,000 |
+| incumbent — exit immediately, react to nothing | −7,289,855 |
+| best behavioural rule (depth sell ≥10%) | −10,036,620 |
+
+The best rule captures **−27.9%** of the ceiling. Not a small positive fraction — a negative one.
+It is worse than the incumbent by 2,746,765 lamports, and the incumbent is itself the absence of a
+strategy.
+
+**So the stopping sentence is not "the channel works and the headroom is mostly unreachable."** It
+is stronger: *the channel does not work at all, and acting on it is worse than not acting.*
+
+## Why the headroom is unreachable, stated from the three facts the table adds
+
+1. **The ceiling is early** — ~85% of the attainable mean and all of the attainable median lies
+   within 500 slots, and L=100 holds two-thirds. So the opportunity is not hiding in long holds
+   that our rules were too impatient to reach. Our behavioural triggers *are* early-firing. Firing
+   early is not sufficient.
+2. **The median headroom is thin** — +0.078x against a 0.0475x toll is a 1.64x margin. A rule
+   capturing half the median ceiling is still negative. There is almost no room for an imperfect
+   rule to be imperfect in.
+3. **40% of the positive mass sits in ten curves.** The ceiling is itself a lottery. Capturing it
+   requires identifying those ten specific curves *and* timing each one near its own peak. Perfect
+   foresight does both by definition; no rule tested does either.
+
+## What is now closed
+
+Twenty-six exit rules across two independent information channels — twenty-one reading the price
+path, five reading trader identity and direction — against a measured ceiling that says the money
+is genuinely there. **Nothing captures any of it.** The best rule found anywhere in this project
+remains "do not hold the position", which loses the toll.
+
+The gap between a real +0.36x ceiling and a −0.10x best rule is not a gap that better exit design
+closes. It is the distance between knowing the future and not.
