@@ -67,6 +67,55 @@ class NoFormulaIsReimplemented(unittest.TestCase):
         self.assertIn("B15M.capacity_via_b10b", source)
         self.assertIn("B15M.assert_prefix_shape", source)
 
+    def test_the_prefix_check_costs_time_LINEAR_in_the_ceiling(self):
+        """The defect the substring check above could never have found, measured rather than read.
+
+        `assertIn("B15M.assert_prefix_shape", source)` confirms the call is WRITTEN. It cannot
+        confirm the call can RETURN. b15m.assert_prefix_shape scans every integer lamport from the
+        resolution floor to the ceiling, so its cost is linear in the ceiling -- fine at B15M's
+        100,000,000, and ten billion iterations per cell at B19C's raised 10,000,000,000. The B11a
+        window yields 23,592 cells; the study is infeasible by five orders of magnitude, and no
+        test noticed because none of them ever ran it above a ceiling of one million.
+
+        This measures the scaling at two SMALL ceilings and asserts it is linear, so the
+        extrapolation to the production ceiling is a property of the code rather than an argument
+        about it. Deliberately not asserting a wall-clock bound: that would be a flaky test on a
+        shared machine. Ten-times the ceiling must cost at least four times the work -- a loose
+        bound that constant-time or logarithmic behaviour would fail and linear behaviour passes
+        with room to spare.
+        """
+        entry = {"virtual_quote": 30_000_000_000, "virtual_token": 1_073_000_000_000_000,
+                 "real_quote": 0, "real_token": 793_100_000_000_000,
+                 "quote_mint": B.B15M.NATIVE_QUOTE_MINT, "mayhem_mode": False, "complete": False,
+                 "slot": 437_300_000}
+        exit_state = dict(entry)
+        exit_state["real_quote"] = 5_000_000_000
+        counted = {}
+        original = B.B15M.is_payable
+        for ceiling in (10_000, 100_000):
+            calls = {"n": 0}
+
+            def counting(*args, _calls=calls, **kwargs):
+                _calls["n"] += 1
+                return original(*args, **kwargs)
+
+            B.B15M.is_payable = counting
+            try:
+                B.B15M.assert_prefix_shape(entry, exit_state, ceiling)
+            except Exception:                                             # noqa: BLE001
+                pass
+            finally:
+                B.B15M.is_payable = original
+            counted[ceiling] = calls["n"]
+
+        self.assertGreaterEqual(
+            counted[100_000], counted[10_000] * 4,
+            f"a ten-fold ceiling cost {counted[100_000]} against {counted[10_000]}; the prefix "
+            "check must be understood as LINEAR in the ceiling, because that is what makes B19C's "
+            "hundred-fold raise infeasible rather than merely slow")
+        self.assertGreater(counted[10_000], 1_000,
+                           "the scan must actually run, or this test measures nothing")
+
     def test_no_bisection_is_written_here(self):
         tree = ast.parse((ROOT / "scripts" / "b19c_capacity_wall.py").read_text())
         for node in ast.walk(tree):

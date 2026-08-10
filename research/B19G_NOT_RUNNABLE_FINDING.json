@@ -1,0 +1,68 @@
+{
+  "finding_id": "B19G_NOT_RUNNABLE_AT_THE_RAISED_CEILING_V1",
+  "date": "2026-08-10",
+  "author": "codex seat",
+  "status": "FINAL. This is a result about the instrument, not about the market.",
+  "subject": [
+    "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1",
+    "B19G_CAPACITY_WALL_HISTORICAL_V2"
+  ],
+
+  "claim": "B19C, and therefore B19G which inherits its machinery, CANNOT BE EXECUTED at the ceiling that is its own reason to exist. Neither study's pass has been spent and neither should be until this is resolved.",
+
+  "what_was_measured": {
+    "method": "a single real cell from the burned corpus, timed per stage rather than extrapolated from an aggregate",
+    "per_cell_timings": {
+      "assert_prefix_shape": "> 30,000 ms (aborted at a 30-second alarm; it did not finish)",
+      "external_capacity": "0.3 ms",
+      "capacity_via_b10b": "0.2 ms"
+    },
+    "reading": "the two INDEPENDENT capacity searches -- the differential that is the entire point of the study -- together cost under a millisecond. The monotonicity precondition check is the whole cost, by five orders of magnitude."
+  },
+
+  "the_mechanism": {
+    "what_it_does": "b15m.assert_prefix_shape verifies, by brute force, that the admissible set is a contiguous run above the resolution floor. It is a LINEAR SCAN over every integer lamport from the floor to the ceiling.",
+    "iterations_per_cell_measured_on_a_real_entry_state": {
+      "old_ceiling_100000000": 99999999,
+      "new_ceiling_10000000000": 9999999999,
+      "resolution_floor": 2
+    },
+    "cost_at_the_raised_ceiling": "ten billion iterations per cell. The B11a window yields 23,592 cells (3,932 curves x 3 delays x 2 horizons). At a generous five million iterations per second that is approximately 33 minutes per cell and on the order of five hundred thousand hours for the study.",
+    "this_is_not_slowness": "it is infeasibility. No amount of waiting, parallelism or hardware available here changes the order of magnitude."
+  },
+
+  "why_it_was_not_caught": {
+    "the_docstring_says_it": "b15m.assert_prefix_shape's own docstring reads 'This is the assumption bisection rests on, so ON A SMALL CEILING it is checked by brute force rather than argued.' B19C raised the ceiling one hundred fold -- which is its entire purpose -- and inherited a verification scoped to the small one.",
+    "every_call_site": {
+      "scripts/b19c_capacity_wall.py:149": "the ONLY production call, made at 10,000,000,000",
+      "tests/test_b15m_liquidity_capacity.py:141,151,165": "ceilings of 1,000,000, 1,000 and 100",
+      "tests/test_b19c_capacity_wall.py:68": "assertIn('B15M.assert_prefix_shape', source) -- a SUBSTRING CHECK ON THE SOURCE TEXT"
+    },
+    "b15m_never_calls_it": "B15M's own run() does not invoke assert_prefix_shape at all. The function is exercised nowhere above a ceiling of one million, and never by the study that depends on it.",
+    "the_defect_class": "a test that confirms a call is WRITTEN, never that it can RETURN. Both reviewing seats read line 149, correctly saw a delegation to B15M rather than a reimplementation, and neither asked what that delegation costs at a ceiling a hundred times larger than any it had been run at. Reading for the right thing is not the same as reading for every thing.",
+    "how_it_surfaced": "not by review. The burned-corpus rehearsal ran CPU-bound for an hour without leaving its first horizon, and profiling a single cell was the only step that distinguished 'slow' from 'impossible'."
+  },
+
+  "what_was_deliberately_not_done": {
+    "the_available_shortcut": "assert_prefix_shape accepts a `samples` parameter that caps the scan at min(ceiling, samples). Passing it would make the study finish immediately.",
+    "why_it_was_refused": "it converts a per-cell PROOF into a spot check, on precisely the cells where the raised ceiling matters, while B19C's document states that monotonicity is 'VERIFIED per cell rather than assumed' and b19c's own docstring says the verification exists because 'a bisection whose precondition is inherited by argument rather than checked is a search that can silently return a non-maximal answer on the one cell where the argument does not apply'. Sampling would leave bisection resting on an unverified precondition and the study would still report capacities as measured.",
+    "who_it_belongs_to": "that is a document-level change to what the study guarantees, not an implementation decision, and it was put to the owner rather than taken."
+  },
+
+  "disposition": {
+    "decision": "B19G is declared NOT RUNNABLE as specified. Its pass is unspent and remains so. B19C's pass is likewise unspent and was already established as not evaluable on a historical window for an unrelated reason (its population is B15M's capture-based universe).",
+    "decided_by": "the owner, presented with three options: bound the check and amend the document; find a cheaper monotonicity proof under a new preregistration; or declare it not runnable and report the measurement.",
+    "what_would_make_it_runnable": [
+      "a proof that payability is monotone in quote_in, established once analytically rather than per cell, which would remove the precondition check entirely",
+      "a boundary-local verification that checks the prefix property around the found capacity rather than across the whole range, which is new machinery and would need its own preregistration and independent review",
+      "a bounded sample with the document amended to state honestly what the weaker guarantee covers"
+    ],
+    "none_of_these_were_attempted_here": "each is new work with its own failure modes, and the question B19C asks -- how much size the observed book could absorb ABOVE 0.1 SOL -- is of limited practical weight while B19D and B19F both report that the position loses money AT 0.1 SOL."
+  },
+
+  "not_claimed": {
+    "about_capacity": "nothing. No capacity figure was computed on the evaluation window by anyone, and none is reported here.",
+    "about_b15m": "B15M's own results are not called into question. It never invoked this check and its ceiling was the small one the check was written for.",
+    "about_the_market": "this finding is about our instrument. It says nothing whatsoever about liquidity, size or the tradability of anything."
+  }
+}
