@@ -337,6 +337,94 @@ class InheritingByPinIsVerifiedBothWays(unittest.TestCase):
                     self.assertNotIn(restated, document,
                                      f"{restated} must be inherited by pin, never copied")
 
+    def test_the_lateness_bound_is_read_from_b15h_never_hardcoded(self):
+        """A copy of a frozen number is a number this study could quietly widen; a read is not.
+
+        Widening the lateness tolerance is on B15H's own prohibitions list, and it is the one
+        remaining lever by which this study's population could be broadened without the document
+        changing.
+        """
+        self.assertEqual(B.max_lateness_slots(), 150)
+        source = (ROOT / "scripts" / "b19e_evaluation_window.py").read_text()
+        self.assertNotIn("150", source.split("def max_lateness_slots")[0],
+                         "the tolerance must not appear as a literal before it is read")
+
+    def _late_window(self, lateness_slots):
+        """One curve whose first observation after t0+delay is `lateness_slots` late."""
+        t0, native = 1_000, _load("b9d_lw", "b9d_transaction_bodies.py").NATIVE_QUOTE_MINT
+        def observation(slot, index):
+            return {"slot": slot, "transaction_index": index, "outer_index": 0, "inner_index": 0,
+                    "kind": "trade", "virtual_quote": 30_000_000_000,
+                    "virtual_token": 1_073_000_000_000_000, "real_quote": 5_000_000_000,
+                    "real_token": 793_100_000_000_000, "quote_mint": native,
+                    "mayhem_mode": False, "complete": False}
+        path = [observation(t0, 0), observation(t0 + 1 + lateness_slots, 1),
+                observation(t0 + 1 + lateness_slots + 20_000, 2)]
+        return {
+            "paths": {"LATE": path},
+            "features": {"LATE": {"t0_slot": t0, "creator_initial_buy_present": True,
+                                  "t0_is_launch_instruction": True, "is_cashback_enabled": False}},
+            "schedules": {"LATE": {"fee_bps": 100, "creator_fee_bps": 0,
+                                   "cashback_fee_bps": 0, "buyback_fee_bps": 0}},
+            "cohort_size": 1,
+            "provenance": {"cohort_census": {"subsampled": 1, "excluded_out_of_regime_mayhem": 0,
+                                             "evaluable": 1}},
+        }
+
+    def _refused_as_out_of_universe(self, window):
+        report = B.evaluate_b19f(window)
+        return sum(cell["coverage"]["refused_by_code"].get("X_NOT_IN_B15M_UNIVERSE", 0)
+                   if "refused_by_code" in cell["coverage"]
+                   else cell["coverage"]["refusals_by_code"].get("X_NOT_IN_B15M_UNIVERSE", 0)
+                   for cell in report["family"].values())
+
+    def test_the_gate_USES_the_inherited_value_not_a_literal(self):
+        """Reading the tolerance is not the same as obeying it.
+
+        The reader is tested above, but a hardcoded `> 150` inside the evaluation loop would pass
+        that test and every other one: the value would be read, reported in the ceilings, and then
+        ignored. This drives the SAME curve through the SAME loop under two different tolerances
+        and requires the verdict to change. A literal cannot pass it.
+
+        The curve's first observation after t0+delay is 100 slots late: inside a 150-slot tolerance,
+        outside a 50-slot one.
+        """
+        window = self._late_window(100)
+        original = B.max_lateness_slots
+        try:
+            B.max_lateness_slots = lambda *a, **k: 150
+            admitted = self._refused_as_out_of_universe(window)
+            B.max_lateness_slots = lambda *a, **k: 50
+            refused = self._refused_as_out_of_universe(window)
+        finally:
+            B.max_lateness_slots = original
+        self.assertEqual(admitted, 0,
+                         "100 slots late is inside a 150-slot tolerance and must not be refused")
+        self.assertGreater(refused, 0,
+                           "100 slots late is outside a 50-slot tolerance and must be refused; if "
+                           "this is zero the gate is comparing against a literal, not the "
+                           "inherited value")
+
+    def test_a_document_without_the_bound_refuses_rather_than_defaulting(self):
+        directory = pathlib.Path(tempfile.mkdtemp(prefix="b19e-late-"))
+        empty = directory / "no-bound.json"
+        empty.write_text(json.dumps({"frozen": {"something_else": 1}}))
+        with self.assertRaisesRegex(B.WindowRefused, "declares no max_lateness_slots"):
+            B.max_lateness_slots(empty)
+
+    def test_the_v2_documents_carry_no_bias_direction_claim(self):
+        """V1 claimed breadth was conservative for a negative result. It is not knowable."""
+        for path in (B.B19F_PREREG, B.B19G_PREREG):
+            document = json.loads(path.read_bytes())
+            with self.subTest(document=path.name):
+                self.assertIn("_V2", document["preregistration_id"])
+                self.assertIsNotNone(document["supersedes"])
+                for withdrawn in ("the_direction_of_the_bias_is_declared_in_advance",
+                                  "this_is_broader_than_b15m_and_that_is_stated_not_hidden"):
+                    self.assertNotIn(withdrawn, document["population"])
+                self.assertIn("exactly_one_condition_of_b15ls_is_dropped_and_it_is_named",
+                              document["population"])
+
     def test_neither_document_spends_the_original_studys_pass(self):
         """B19B and B19C were established not evaluable here; their passes must stay unspent."""
         source = (ROOT / "scripts" / "b19e_evaluation_window.py").read_text()

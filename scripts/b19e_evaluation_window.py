@@ -41,10 +41,31 @@ SUBSAMPLE = WINDOW_DIR / "b11a_subsample.sqlite"
 LEDGER = ROOT / "research" / "B19_EVALUATION_LEDGER.json"
 
 # The historical-universe studies. Each pins its OWN document and the document it inherits from.
-B19F_PREREG = ROOT / "research" / "B19F_EXIT_TIMING_HISTORICAL_PREREGISTRATION.json"
-B19F_SHA256 = "7531abbf64578388559c255ba7587daf243e8b1c7d0f33ec0f44a6bf4c8b929c"
-B19G_PREREG = ROOT / "research" / "B19G_CAPACITY_WALL_HISTORICAL_PREREGISTRATION.json"
-B19G_SHA256 = "7cfd9f23e2717d247f43b53a0356b3afd8b72f8a0a920a26586f701f0bf443f0"
+B19F_PREREG = ROOT / "research" / "B19F_EXIT_TIMING_HISTORICAL_V2_PREREGISTRATION.json"
+B19F_SHA256 = "f860cd75fcef159f036c303a20abf095af5411d3b1eb8c809214cde330573644"
+B19G_PREREG = ROOT / "research" / "B19G_CAPACITY_WALL_HISTORICAL_V2_PREREGISTRATION.json"
+B19G_SHA256 = "232fa304b7a6ed98b5194f586d4952743db94878dc5b066c9b7b359e638d8a92"
+B15H_PREREG = ROOT / "research" / "B15H_PROSPECTIVE_ENTRY_PREREGISTRATION.json"
+
+
+def max_lateness_slots(path=B15H_PREREG):
+    """B15L's own tolerance, READ from B15H's frozen document rather than restated as 150.
+
+    A hardcoded 150 here would be a fourth copy of a number that already exists in a frozen
+    document, and every hand-maintained copy drifts from the thing it describes. More to the point,
+    a copy is a number this study could quietly widen; a read is not. Widening the lateness
+    tolerance is on B15H's own prohibitions list.
+    """
+    document = json.loads(pathlib.Path(path).read_bytes())
+    for block in document.values():
+        if isinstance(block, dict) and "max_lateness_slots" in block:
+            value = block["max_lateness_slots"]
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise WindowRefused(f"max_lateness_slots is {value!r}, not a non-negative integer")
+            return value
+    raise WindowRefused(
+        f"{path.name} declares no max_lateness_slots; the population's lateness bound is inherited "
+        "from it and must not be assumed")
 
 
 def _load(name, filename):
@@ -642,6 +663,8 @@ def evaluate_b19f(window, progress=False):
     }
     # Asserted rather than trusted: if the inherited definition ever stopped being launch+delay,
     # every cell in this study would silently enter somewhere else.
+    lateness = max_lateness_slots()
+    ceilings["max_lateness_slots_inherited"] = lateness
     if b15h.entry_target_slot(1_000, 7) != 1_007:
         raise WindowRefused(
             "b15h.entry_target_slot is no longer t0_slot + delay_slots; B19B's entry coordinate "
@@ -657,6 +680,16 @@ def evaluate_b19f(window, progress=False):
                 for curve, path in window["paths"].items():
                     block = window["features"].get(curve)
                     if block is None or block.get("t0_slot") is None:
+                        refusals[study.X_NOT_IN_B15M_UNIVERSE] += 1
+                        continue
+                    entry = B19B_M.first_at_or_after(path, block["t0_slot"] + delay)
+                    if entry is None:
+                        refusals[study.X_NO_ENTRY_OBSERVATION] += 1
+                        continue
+                    if entry["slot"] - (block["t0_slot"] + delay) > lateness:
+                        # B15L's assert_fresh, applied to the historical analogue: an entry this
+                        # late is one B15L refuses as a stale checkpoint, and admitting it would
+                        # widen the population beyond the one condition this study drops.
                         refusals[study.X_NOT_IN_B15M_UNIVERSE] += 1
                         continue
                     try:
@@ -685,10 +718,10 @@ def evaluate_b19f(window, progress=False):
         "rules_inherited_from": {"source": "B19B_EXIT_TIMING_POLICY_V1",
                                  "canonical_sha256": study.PREREG_CANONICAL_SHA256},
         "label": document["status_locks"]["label"],
-        "population_is_broader_than_b15m": document["population"][
-            "this_is_broader_than_b15m_and_that_is_stated_not_hidden"],
-        "direction_of_the_bias": document["population"][
-            "the_direction_of_the_bias_is_declared_in_advance"],
+        "population_rule": document["population"]["rule"],
+        "the_one_condition_dropped": document["population"][
+            "exactly_one_condition_of_b15ls_is_dropped_and_it_is_named"],
+        "what_this_population_is_not": document["population"]["what_this_population_is_not"],
         "executable": False,
         "execution_status": "never_executed",
         "denominator": {
@@ -758,11 +791,13 @@ def evaluate_b19g(window, progress=False):
     priceable = {curve for curve in window["paths"] if window["schedules"].get(curve) is not None}
     with_t0 = {curve for curve in window["paths"]
                if window["features"].get(curve, {}).get("t0_slot") is not None}
+    lateness = max_lateness_slots()
     ceilings = {
         "evaluable_cohort": window["cohort_size"],
         "curves_with_a_t0_coordinate": len(with_t0),
         "curves_with_a_decodable_fee_schedule": len(priceable),
         "curves_that_could_yield_a_cell": len(with_t0 & priceable),
+        "max_lateness_slots_inherited": lateness,
         "entry_coordinate_rule": (
             "signal_slot = t0_slot, delay added by the same launch-plus-delay rule B15M's "
             "universe uses (b15h_prospective_entry.entry_target_slot); exit is B10c STATE-IN-FORCE "
@@ -788,6 +823,9 @@ def evaluate_b19g(window, progress=False):
                 if entry is None or exit_state is None:
                     refusals["W_NO_ENTRY_OBSERVATION"] += 1
                     continue
+                if entry["slot"] - (block["t0_slot"] + delay) > lateness:
+                    refusals["W_NOT_IN_B15M_UNIVERSE"] += 1
+                    continue
                 entry_state, exit_full = B19D_M._state(entry), B19D_M._state(exit_state)
                 try:
                     value = study.capacity(entry_state, exit_full)
@@ -811,8 +849,10 @@ def evaluate_b19g(window, progress=False):
         "rules_inherited_from": {"source": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1",
                                  "canonical_sha256": study.PREREG_CANONICAL_SHA256},
         "label": document["status_locks"]["label"],
-        "population_is_broader_than_b15m": document["population"][
-            "this_is_broader_than_b15m_and_that_is_stated_not_hidden"],
+        "population_rule": document["population"]["rule"],
+        "the_one_condition_dropped": document["population"][
+            "exactly_one_condition_of_b15ls_is_dropped_and_it_is_named"],
+        "what_this_population_is_not": document["population"]["what_this_population_is_not"],
         "previously_cap_hit_subgroup": document[
             "everything_else_is_inherited_by_pin_not_restated"]["what_is_NOT_inherited"],
         "executable": False,
