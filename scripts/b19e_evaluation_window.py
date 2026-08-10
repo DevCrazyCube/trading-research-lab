@@ -138,7 +138,39 @@ def assert_fresh(paths_path=PATHS, burned=None):
 # The denominator, stated before anything is computed from it.
 # ------------------------------------------------------------------------------------------------
 
-def cohort_census(subsample_path=SUBSAMPLE, paths_path=PATHS):
+def assert_burned(paths_path, burned=None):
+    """The INVERSE of assert_fresh: a REHEARSAL must run on development data and nothing else.
+
+    Written as its own assertion rather than as `not assert_fresh(...)`. A rehearsal exists to
+    prove the machinery runs end to end before the single permitted pass is spent, and it writes no
+    ledger entry -- so a rehearsal that silently pointed at the fresh window would read the
+    evaluation data without recording that it had. The ledger would still say the pass was unspent,
+    and it would be wrong.
+
+    Every observation must lie inside the burned extent. One that does not means this is not the
+    development corpus, whatever the filename says.
+    """
+    extent = burned_extent() if burned is None else {"low": burned[0], "high": burned[1],
+                                                     "source": "supplied"}
+    connection = sqlite3.connect(f"file:{pathlib.Path(paths_path)}?mode=ro", uri=True)
+    try:
+        outside, span = connection.execute(
+            "SELECT COUNT(*), MIN(slot) FROM observation WHERE slot < ? OR slot > ?",
+            (extent["low"], extent["high"])).fetchone()
+        total = connection.execute("SELECT COUNT(*) FROM observation").fetchone()[0]
+    finally:
+        connection.close()
+    if not total:
+        raise WindowRefused("the rehearsal corpus carries no observations")
+    if outside:
+        raise WindowRefused(
+            f"{outside} observations lie outside the burned extent "
+            f"{extent['low']}-{extent['high']} (first at {span}); a rehearsal must not read the "
+            "evaluation window, because it records no ledger entry for having done so")
+    return {"rehearsal_observations": total, "burned_extent": extent}
+
+
+def cohort_census(subsample_path=SUBSAMPLE, paths_path=PATHS, table="cohort_identity"):
     """Where the cohort went, as counts that add up. Reported before any outcome.
 
     3,932 evaluable curves out of 5,000 subsampled is a 21.4% exclusion, and a coverage line
@@ -152,7 +184,7 @@ def cohort_census(subsample_path=SUBSAMPLE, paths_path=PATHS):
     try:
         mayhem, regular = set(), set()
         for curve, is_mayhem in subsample.execute(
-                "SELECT bonding_curve, is_mayhem_mode FROM cohort_identity"):
+                f"SELECT bonding_curve, is_mayhem_mode FROM {table}"):
             (mayhem if is_mayhem else regular).add(curve)
         with_path = {row[0] for row in paths.execute("SELECT bonding_curve FROM curve")}
     finally:
@@ -205,11 +237,21 @@ def flatten_features(records):
     return features
 
 
+BURNED_BODIES = ROOT / "research" / "b9d_transaction_bodies.sqlite"
+BURNED_IDENTITY = ROOT / "research" / "b10c_t0_identity.sqlite"
+BURNED_COHORT = ROOT / "research" / "b9a_outcomes.sqlite"
+
+
 def build(bodies_path=BODIES, paths_path=PATHS, identity_path=IDENTITY,
-          subsample_path=SUBSAMPLE, progress=None):
-    """Assemble the window. Transport only: nothing here decides anything a document has frozen."""
-    freshness = assert_fresh(paths_path)
-    census = cohort_census(subsample_path, paths_path)
+          subsample_path=SUBSAMPLE, progress=None, rehearsal=False,
+          cohort_table="cohort_identity"):
+    """Assemble the window. Transport only: nothing here decides anything a document has frozen.
+
+    `rehearsal=True` asserts the corpus IS burned rather than that it is fresh, so the two modes
+    cannot be confused by pointing the wrong paths at the wrong flag: each refuses the other's data.
+    """
+    freshness = (assert_burned(paths_path) if rehearsal else assert_fresh(paths_path))
+    census = cohort_census(subsample_path, paths_path, table=cohort_table)
 
     paths = B16D.observed_paths(paths_path)
     for curve, path in paths.items():
@@ -351,10 +393,59 @@ def _cells(study, window, coordinate_of, label):
     return grid
 
 
+def structural_ceilings(study, window):
+    """What each signal COULD reach before any outcome exists. Computed first, on purpose.
+
+    Every number here is fixed by the window's shape, not by any cell's result: how many curves can
+    produce a coordinate at all, and how many carry a fee schedule to be priced against. Stating
+    them after the outcomes would let a thin result be read as a weak signal when it is a small
+    denominator, and would let the author choose which ceiling to mention once the outcomes were
+    known.
+
+    The signal-versus-baseline divergence is the one a reader is most likely to miss. S1-S4 can
+    reach every curve with a feature block; baseline_any_buy can only reach curves that had a
+    non-creator buy; S5 only those with a creator re-entry. The document runs them on the same
+    denominator and the same machinery, and they do -- but a reader comparing a signal to a
+    baseline is comparing across different admissibility, and that has to be visible.
+    """
+    priceable = {curve for curve in window["paths"] if window["schedules"].get(curve) is not None}
+    ceilings = {}
+    for signal in study.SIGNALS:
+        reachable = {curve for curve in window["paths"]
+                     if study.signal_coordinate(
+                         signal, curve, window["features"], window["reentry"]) is not None}
+        ceilings[signal["signal_id"]] = {
+            "curves_that_can_produce_a_coordinate": len(reachable),
+            "of_those_priceable": len(reachable & priceable),
+        }
+    for baseline in study.BASELINES:
+        reachable = {curve for curve in window["paths"]
+                     if study.baseline_coordinate(
+                         baseline, curve, window["features"],
+                         window["first_non_creator_buy"]) is not None}
+        ceilings[baseline] = {
+            "curves_that_can_produce_a_coordinate": len(reachable),
+            "of_those_priceable": len(reachable & priceable),
+        }
+    return {
+        "evaluable_cohort": window["cohort_size"],
+        "curves_with_a_decodable_fee_schedule": len(priceable),
+        "curves_without_one": window["cohort_size"] - len(priceable),
+        "per_signal": ceilings,
+        "statement": (
+            "these are ceilings, not results. A cell can only be admitted for a curve that both "
+            "produces a coordinate and carries a fee schedule, so no signal below can exceed its "
+            "`of_those_priceable` count no matter what the outcomes are. They differ between "
+            "signals and baselines, so a signal-versus-baseline comparison is across different "
+            "admissibility and not a like-for-like contrast."),
+    }
+
+
 def evaluate_b19d(window, progress=False):
     """B19D over the window. Every figure is computed inside b19d, from b19d's frozen document."""
     study = _load("b19d_non_issuance_signal", "b19d_non_issuance_signal.py")
     document = study.verify_preregistration()
+    ceilings = structural_ceilings(study, window)
 
     grid = {}
     for signal in study.SIGNALS:
@@ -398,6 +489,8 @@ def evaluate_b19d(window, progress=False):
                           f"{census['evaluable']} are evaluable. Every coverage figure below is "
                           f"out of {census['evaluable']}, not out of {census['subsampled']}."),
         },
+        # Before the family, and before the primary. Fixed by the window's shape, not by any result.
+        "structural_ceilings_known_before_any_outcome": ceilings,
         "window_provenance": window["provenance"],
         "multiplicity": {
             "family_size": study.FAMILY_SIZE,
@@ -431,6 +524,13 @@ def main(argv=None):
     runner.add_argument("--supersede-reason", default=None,
                         help="required to re-run a study that already spent its pass; both "
                              "entries are kept and neither is deleted")
+    rehearsal = subparsers.add_parser(
+        "rehearse-b19d",
+        help="run B19D end to end on the BURNED development corpus. Spends no ledger entry, and "
+             "its output may never be reported as an evaluation.")
+    rehearsal.add_argument("--out", default=str(
+        ROOT / "research" / "B19D_REHEARSAL_BURNED_NOT_A_RESULT.json"))
+    rehearsal.add_argument("--progress", action="store_true")
     args = parser.parse_args(argv)
 
     if args.command == "ledger":
@@ -445,6 +545,22 @@ def main(argv=None):
             "note": ("this is provenance only. No study has read the window and no outcome has "
                      "been computed."),
         }, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "rehearse-b19d":
+        window = build(bodies_path=BURNED_BODIES, paths_path=BURNED_PATHS,
+                       identity_path=BURNED_IDENTITY, subsample_path=BURNED_COHORT,
+                       cohort_table="outcome", rehearsal=True,
+                       progress=1000 if args.progress else None)
+        result = evaluate_b19d(window, progress=args.progress)
+        result["status"] = ("BURNED DEVELOPMENT DATA. Not an evaluation result, not a return, not "
+                            "a recommendation. This run exists only to prove the machinery "
+                            "executes end to end, and it spends no ledger entry.")
+        result["window_sha256"] = window_digest(window)
+        pathlib.Path(args.out).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+        print(json.dumps({"wrote": args.out, "status": result["status"],
+                          "primary_coverage": result["primary_result"]["coverage"]},
+                         indent=2, sort_keys=True))
         return 0
 
     # run-b19d. The ledger is checked BEFORE the window is assembled, so an already-spent study
