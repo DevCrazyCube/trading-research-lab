@@ -241,6 +241,15 @@
     10000000000
   ],
   "label": "CAPACITY_WALL_HISTORICAL_DIAGNOSTIC",
+  "monotonicity_established_by": {
+    "binding_intact_at_run_time": {
+      "drifted": [],
+      "intact": true
+    },
+    "method": "proof, bound by hash to the source it certifies, per B19G_V3",
+    "proof": "research/B15M_PAYABILITY_DOWNSET_PROOF.md",
+    "proof_status": "PROPOSED, then REFUTED ONCE, then CORRECTED, then CORROBORATED, then REVIEWED AS AN ARGUMENT by a second reviewer who found no further gap, then ACCEPTED by the owner as the establishment method for `B19G_CAPACITY_WALL_HISTORICAL_V3` only. Every one of those words is load bearing and none may be dropped when this status is quoted. In particular \"refuted once\" stays: version 1 of this argument was wrong, an adversary that EXECUTED the predicate found it, and a reader deciding what this proof is worth should be told that before being told it was accepted."
+  },
   "not_claimed": {
     "recommendation": "no size is selected, ranked or called optimal; the grid is reported.",
     "return": "capacity is what the observed book could absorb, not a return."

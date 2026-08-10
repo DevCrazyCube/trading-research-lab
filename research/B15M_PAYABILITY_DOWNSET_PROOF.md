@@ -1,7 +1,13 @@
 # The payability down-set theorem
 
-**Status.** Proposed. Corroborated but NOT accepted. Nothing depends on it yet, and B19G remains
-not-runnable-of-record until this argument is reviewed and a document amendment is authorised.
+**Status.** PROPOSED, then REFUTED ONCE, then CORRECTED, then CORROBORATED, then REVIEWED AS AN
+ARGUMENT by a second reviewer who found no further gap, then ACCEPTED by the owner as the
+establishment method for `B19G_CAPACITY_WALL_HISTORICAL_V3` only. Every one of those words is load
+bearing and none may be dropped when this status is quoted. In particular "refuted once" stays:
+version 1 of this argument was wrong, an adversary that EXECUTED the predicate found it, and a
+reader deciding what this proof is worth should be told that before being told it was accepted.
+
+`B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1` is NOT amended and keeps the scan as its default.
 
 **What it is for.** `b15m.assert_prefix_shape` verifies, by scanning every integer lamport from the
 resolution floor to the ceiling, that the admissible set is a contiguous prefix. At B19C's raised

@@ -39,6 +39,7 @@ PATHS = WINDOW_DIR / "b11a_paths.sqlite"
 IDENTITY = WINDOW_DIR / "b11a_identity.sqlite"
 SUBSAMPLE = WINDOW_DIR / "b11a_subsample.sqlite"
 LEDGER = ROOT / "research" / "B19_EVALUATION_LEDGER.json"
+DOWNSET_PROOF = ROOT / "research" / "B15M_PAYABILITY_DOWNSET_PROOF.md"
 
 # The historical-universe studies. Each pins its OWN document and the document it inherits from.
 B19F_PREREG = ROOT / "research" / "B19F_EXIT_TIMING_HISTORICAL_V2_PREREGISTRATION.json"
@@ -796,6 +797,37 @@ def select_cell(path, t0_slot, delay, horizon_slots):
     return entry_b, exit_b
 
 
+def proof_binding_state():
+    """Whether the pinned bodies still match, recorded IN the result.
+
+    If this says False the run fell back to the scan, and a reader must be able to see that from
+    the artifact rather than infer it from how long the run took.
+    """
+    intact, drifted = B15M_M.proof_binding_intact()
+    return {"intact": intact, "drifted": sorted(drifted)}
+
+
+def proof_status(path=DOWNSET_PROOF):
+    """The proof document's OWN status line, read rather than restated.
+
+    B19G's result rests on this argument, so the report carries the argument's standing verbatim
+    from the document -- including that it was refuted once. A summary written here would drift
+    from the document, and the direction it would drift is obvious: toward dropping the
+    embarrassing clause.
+    """
+    text = pathlib.Path(path).read_text()
+    if "**Status.**" not in text:
+        raise WindowRefused(f"{pathlib.Path(path).name} carries no status line to quote")
+    body = text.split("**Status.**", 1)[1].split("\n\n", 1)[0]
+    status = " ".join(body.split())
+    for required in ("REFUTED ONCE", "REVIEWED", "ACCEPTED"):
+        if required not in status:
+            raise WindowRefused(
+                f"the proof's status no longer states {required!r}; this study reports that "
+                "standing and will not report a softened one")
+    return status
+
+
 def evaluate_b19g(window, progress=False):
     """B19G over the window. Capacity is computed inside b19c, which computes it via B15M."""
     study = _load("b19c_capacity_wall", "b19c_capacity_wall.py")
@@ -885,6 +917,12 @@ def evaluate_b19g(window, progress=False):
                           f"regime; {census['evaluable']} evaluable."),
         },
         "structural_ceilings_known_before_any_outcome": ceilings,
+        "monotonicity_established_by": {
+            "method": "proof, bound by hash to the source it certifies, per B19G_V3",
+            "proof": "research/B15M_PAYABILITY_DOWNSET_PROOF.md",
+            "proof_status": proof_status(),
+            "binding_intact_at_run_time": proof_binding_state(),
+        },
         "window_provenance": window["provenance"],
         "grid_lamports": list(study.GRID),
         "family": grid,
