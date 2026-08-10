@@ -465,6 +465,16 @@ def run(document=None, entries=None, exits=None, schedules=None, tolerance=150,
             continue
         admissible[key] = (entry, exit_state)
 
+    # Cells the CAPACITY loop refuses. Tracked because `continue` below leaves the key in
+    # `admissible`, and the grid loop iterates that same dict -- so without this a cell refused for
+    # impossible reserves was still PRICED by the grid, and the two loops described different sets
+    # of cells while the report presented them as one study. It never fired on the burned run
+    # (report.json carries zero capacity-loop refusals; the only refusals are
+    # M_NOT_IN_B15L_UNIVERSE, which are recorded BEFORE a key enters `admissible`), and it could
+    # not crash there either, because the crash needs quote_in == 1 exactly and every grid size is
+    # at least 1,000,000. A guarantee by accident is not a guarantee.
+    capacity_refused = set()
+
     for horizon in horizons:
         for delay in delays:
             capacities, zero, cap_hit, circular, floors = [], 0, 0, 0, []
@@ -482,6 +492,7 @@ def run(document=None, entries=None, exits=None, schedules=None, tolerance=150,
                                 f"{alternative}")
                 except CapacityRefused as error:
                     refuse(str(error).split(":", 1)[0])
+                    capacity_refused.add(key)
                     continue
                 capacities.append(capacity)
                 floor = minimum_effective_quote(entry, ceiling)
@@ -544,7 +555,9 @@ def run(document=None, entries=None, exits=None, schedules=None, tolerance=150,
             for delay in delays:
                 per_size = {str(size): {"liquidity_executable_cells": 0, "cells": 0,
                                         "non_negative_cells": 0, "nets": []} for size in grid}
-                for key in sorted(k for k in admissible if k[1] == delay and k[2] == horizon):
+                for key in sorted(k for k in admissible
+                                  if k[1] == delay and k[2] == horizon
+                                  and k not in capacity_refused):
                     entry, exit_state = admissible[key]
                     for size in grid:
                         bucket = per_size[str(size)]

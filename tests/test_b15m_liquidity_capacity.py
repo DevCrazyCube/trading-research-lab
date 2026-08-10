@@ -447,6 +447,38 @@ class TestStudyRun(unittest.TestCase):
             self.assertIsNotNone(group["external_liquidity_capacity_lamports"])
             self.assertIsNotNone(group["curve_resolution_floor_lamports"])
 
+    def test_a_cell_the_capacity_loop_refuses_is_not_priced_by_the_grid(self):
+        """The two loops must describe the SAME cells, or the report presents two studies as one.
+
+        `refuse(...); continue` in the capacity loop exits only that loop. The key stayed in
+        `admissible`, and the grid loop iterates the same dict -- so a cell refused for impossible
+        reserves was still priced by the grid, and its numbers still reached the report.
+
+        It never fired on the burned run (report.json carries zero capacity-loop refusals) and it
+        could not have crashed there either, because the crash needs quote_in == 1 exactly and every
+        grid size is at least 1,000,000. That is a guarantee by accident, which is the kind this
+        repo has been bitten by before.
+
+        Here one of the three cells has a zero virtual quote reserve, which `assert_reserves_possible`
+        refuses inside `external_capacity`. The capacity group must then carry 2 cells, and so must
+        every grid group -- not 3.
+        """
+        entries, exits, schedules = self._inputs()
+        for delay in (1, 2, 4):
+            entries[("Sig1", delay)] = entry_state(
+                signature="Sig1", delay_slots=delay, bonding_curve="C1", mint="M1",
+                virtual_quote=0)
+        report = B15M.run(entries=entries, exits=exits, schedules=schedules)
+        self.assertEqual(report["refusals"].get(B15M.M_IMPOSSIBLE_RESERVES), 6,
+                         "the impossible cell must be refused once per horizon and delay")
+        for key, group in report["capacity_by_horizon_delay"].items():
+            self.assertEqual(group["cells"], 2, f"capacity group {key}")
+        for key, group in report["grid_by_scenario_horizon_delay"].items():
+            for size, bucket in group["by_size"].items():
+                self.assertEqual(
+                    bucket["cells"], 2,
+                    f"grid group {key} size {size} priced a cell the capacity loop refused")
+
     def test_the_grid_is_reported_per_scenario_horizon_and_delay(self):
         entries, exits, schedules = self._inputs()
         report = B15M.run(entries=entries, exits=exits, schedules=schedules)
