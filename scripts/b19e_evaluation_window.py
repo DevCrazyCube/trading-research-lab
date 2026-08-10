@@ -571,6 +571,42 @@ def evaluate_b19d(window, progress=False):
     }
 
 
+def render_result(result_path):
+    """Print a spent result in reading order. READS ONLY -- the artifact is never rewritten.
+
+    `json.dumps(sort_keys=True)` serialises the top level alphabetically, so a person reading the
+    file top to bottom meets `family` before `structural_ceilings` and `primary_result`. The
+    coverage-before-outcome discipline is intact in substance -- every cell carries its own
+    coverage and the denominator and ceilings are top-level -- but the intended reading order is
+    defeated by the alphabet.
+
+    Fixed HERE and not in the artifact, deliberately. The ledger pins the result's sha256, so
+    adding a `read_order` key to make it read better would silently break the one record proving
+    what the spent pass produced. Editing the producer would be worse: the code would no longer
+    reproduce the committed bytes, and a later supersede on identical data would yield a different
+    hash, leaving nobody able to tell a presentation change from a substantive one. Presentation
+    belongs outside the sealed object.
+    """
+    result = json.loads(pathlib.Path(result_path).read_bytes())
+    order = ("study", "label", "denominator", "structural_ceilings_known_before_any_outcome",
+             "window_provenance", "multiplicity", "primary_result", "family", "not_claimed")
+    missing = [key for key in result if key not in order]
+    for key in order:
+        if key not in result:
+            continue
+        print(f"\n{'=' * 96}\n{key}\n{'=' * 96}")
+        print(json.dumps(result[key], indent=2, sort_keys=True))
+    if missing:
+        # Announced rather than dropped: a renderer that silently omits a key it did not expect
+        # would hide exactly the field someone added because it mattered.
+        print(f"\n{'=' * 96}\nnot in the declared reading order (shown last, nothing omitted)\n"
+              f"{'=' * 96}")
+        for key in missing:
+            print(f"\n-- {key}")
+            print(json.dumps(result[key], indent=2, sort_keys=True))
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -578,6 +614,9 @@ def main(argv=None):
         "provenance", help="assemble the window and print its provenance; reads no study")
     prov.add_argument("--progress", type=int, default=None)
     subparsers.add_parser("ledger", help="show which studies have spent their pass")
+    render = subparsers.add_parser(
+        "render", help="print a spent result in reading order. Reads the artifact, never edits it.")
+    render.add_argument("result")
     runner = subparsers.add_parser(
         "run-b19d", help="THE SINGLE PERMITTED EVALUATION PASS for B19D. Spends its ledger entry.")
     runner.add_argument("--out", default=str(ROOT / "research" / "B19D_EVALUATION_RESULT.json"))
@@ -597,6 +636,9 @@ def main(argv=None):
     if args.command == "ledger":
         print(json.dumps(read_ledger(), indent=2, sort_keys=True))
         return 0
+
+    if args.command == "render":
+        return render_result(args.result)
 
     if args.command == "provenance":
         window = build(progress=args.progress)
