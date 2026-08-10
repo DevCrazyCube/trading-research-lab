@@ -1,0 +1,309 @@
+{
+  "denominator": {
+    "evaluable": 1136,
+    "excluded_out_of_regime_mayhem": 465,
+    "statement": "1601 subsampled; 465 mayhem-mode and out of regime; 1136 evaluable.",
+    "subsampled": 1601
+  },
+  "executable": false,
+  "execution_status": "never_executed",
+  "family": {
+    "h_10000_slots|delay_1": {
+      "cells_measured": 738,
+      "summary": {
+        "capacity_order_statistics_measured_only": {
+          "max": 9945858806,
+          "median": 22,
+          "min": 3,
+          "note": "cap-hit cells are EXCLUDED from these statistics, because including a bound as though it were a value would understate the upper tail by construction",
+          "p10": 3,
+          "p25": 5,
+          "p75": 1179462,
+          "p90": 195885396
+        },
+        "ceiling_is_not_a_value": "a cell at the ceiling is CAP-HIT; its true capacity is unmeasured above 10000000000 and is never reported as equal to it",
+        "censoring": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market",
+        "counts": {
+          "cap_hit_at_new_ceiling": 17,
+          "cap_hit_at_old_ceiling": 107,
+          "cells": 1136,
+          "newly_measured_cells": 90,
+          "refusals_by_code": {
+            "W_NOT_IN_B15M_UNIVERSE": 148
+          },
+          "zero_capacity_cells": 0
+        },
+        "grid_executable_counts": {
+          "1000000": 201,
+          "10000000": 177,
+          "100000000": 107,
+          "1000000000": 52,
+          "10000000000": 17,
+          "500000000": 65,
+          "5000000000": 25
+        },
+        "not_a_sizing_proposal": "no order of any size is proposed, recommended or implied; the frozen position remains 100000000 lamports and is not varied here"
+      }
+    },
+    "h_10000_slots|delay_2": {
+      "cells_measured": 733,
+      "summary": {
+        "capacity_order_statistics_measured_only": {
+          "max": 9945858806,
+          "median": 22,
+          "min": 3,
+          "note": "cap-hit cells are EXCLUDED from these statistics, because including a bound as though it were a value would understate the upper tail by construction",
+          "p10": 3,
+          "p25": 5,
+          "p75": 1179462,
+          "p90": 192422008
+        },
+        "ceiling_is_not_a_value": "a cell at the ceiling is CAP-HIT; its true capacity is unmeasured above 10000000000 and is never reported as equal to it",
+        "censoring": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market",
+        "counts": {
+          "cap_hit_at_new_ceiling": 17,
+          "cap_hit_at_old_ceiling": 107,
+          "cells": 1136,
+          "newly_measured_cells": 90,
+          "refusals_by_code": {
+            "W_NOT_IN_B15M_UNIVERSE": 151
+          },
+          "zero_capacity_cells": 0
+        },
+        "grid_executable_counts": {
+          "1000000": 199,
+          "10000000": 176,
+          "100000000": 107,
+          "1000000000": 53,
+          "10000000000": 17,
+          "500000000": 64,
+          "5000000000": 25
+        },
+        "not_a_sizing_proposal": "no order of any size is proposed, recommended or implied; the frozen position remains 100000000 lamports and is not varied here"
+      }
+    },
+    "h_10000_slots|delay_4": {
+      "cells_measured": 711,
+      "summary": {
+        "capacity_order_statistics_measured_only": {
+          "max": 9887681466,
+          "median": 23,
+          "min": 3,
+          "note": "cap-hit cells are EXCLUDED from these statistics, because including a bound as though it were a value would understate the upper tail by construction",
+          "p10": 3,
+          "p25": 6,
+          "p75": 1719065,
+          "p90": 192573979
+        },
+        "ceiling_is_not_a_value": "a cell at the ceiling is CAP-HIT; its true capacity is unmeasured above 10000000000 and is never reported as equal to it",
+        "censoring": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market",
+        "counts": {
+          "cap_hit_at_new_ceiling": 17,
+          "cap_hit_at_old_ceiling": 106,
+          "cells": 1136,
+          "newly_measured_cells": 89,
+          "refusals_by_code": {
+            "W_NOT_IN_B15M_UNIVERSE": 154
+          },
+          "zero_capacity_cells": 0
+        },
+        "grid_executable_counts": {
+          "1000000": 198,
+          "10000000": 173,
+          "100000000": 106,
+          "1000000000": 51,
+          "10000000000": 17,
+          "500000000": 63,
+          "5000000000": 26
+        },
+        "not_a_sizing_proposal": "no order of any size is proposed, recommended or implied; the frozen position remains 100000000 lamports and is not varied here"
+      }
+    },
+    "h_1000_slots|delay_1": {
+      "cells_measured": 738,
+      "summary": {
+        "capacity_order_statistics_measured_only": {
+          "max": 9498940513,
+          "median": 34,
+          "min": 3,
+          "note": "cap-hit cells are EXCLUDED from these statistics, because including a bound as though it were a value would understate the upper tail by construction",
+          "p10": 3,
+          "p25": 6,
+          "p75": 89834099,
+          "p90": 663000792
+        },
+        "ceiling_is_not_a_value": "a cell at the ceiling is CAP-HIT; its true capacity is unmeasured above 10000000000 and is never reported as equal to it",
+        "censoring": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market",
+        "counts": {
+          "cap_hit_at_new_ceiling": 39,
+          "cap_hit_at_old_ceiling": 202,
+          "cells": 1136,
+          "newly_measured_cells": 163,
+          "refusals_by_code": {
+            "W_NOT_IN_B15M_UNIVERSE": 148
+          },
+          "zero_capacity_cells": 0
+        },
+        "grid_executable_counts": {
+          "1000000": 316,
+          "10000000": 288,
+          "100000000": 202,
+          "1000000000": 94,
+          "10000000000": 39,
+          "500000000": 122,
+          "5000000000": 48
+        },
+        "not_a_sizing_proposal": "no order of any size is proposed, recommended or implied; the frozen position remains 100000000 lamports and is not varied here"
+      }
+    },
+    "h_1000_slots|delay_2": {
+      "cells_measured": 733,
+      "summary": {
+        "capacity_order_statistics_measured_only": {
+          "max": 9447921565,
+          "median": 34,
+          "min": 3,
+          "note": "cap-hit cells are EXCLUDED from these statistics, because including a bound as though it were a value would understate the upper tail by construction",
+          "p10": 3,
+          "p25": 6,
+          "p75": 89834099,
+          "p90": 667357106
+        },
+        "ceiling_is_not_a_value": "a cell at the ceiling is CAP-HIT; its true capacity is unmeasured above 10000000000 and is never reported as equal to it",
+        "censoring": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market",
+        "counts": {
+          "cap_hit_at_new_ceiling": 39,
+          "cap_hit_at_old_ceiling": 201,
+          "cells": 1136,
+          "newly_measured_cells": 162,
+          "refusals_by_code": {
+            "W_NOT_IN_B15M_UNIVERSE": 151
+          },
+          "zero_capacity_cells": 0
+        },
+        "grid_executable_counts": {
+          "1000000": 313,
+          "10000000": 287,
+          "100000000": 201,
+          "1000000000": 95,
+          "10000000000": 39,
+          "500000000": 122,
+          "5000000000": 48
+        },
+        "not_a_sizing_proposal": "no order of any size is proposed, recommended or implied; the frozen position remains 100000000 lamports and is not varied here"
+      }
+    },
+    "h_1000_slots|delay_4": {
+      "cells_measured": 711,
+      "summary": {
+        "capacity_order_statistics_measured_only": {
+          "max": 8394293125,
+          "median": 38,
+          "min": 3,
+          "note": "cap-hit cells are EXCLUDED from these statistics, because including a bound as though it were a value would understate the upper tail by construction",
+          "p10": 3,
+          "p25": 6,
+          "p75": 91118746,
+          "p90": 715730234
+        },
+        "ceiling_is_not_a_value": "a cell at the ceiling is CAP-HIT; its true capacity is unmeasured above 10000000000 and is never reported as equal to it",
+        "censoring": "conditioned on cells where BOTH an entry and an exit account checkpoint exist; B15f schedules from B15a, which B15k measured holding 29% of the launches B15i observes, so this population is censored by the recorders and not by the market",
+        "counts": {
+          "cap_hit_at_new_ceiling": 41,
+          "cap_hit_at_old_ceiling": 201,
+          "cells": 1136,
+          "newly_measured_cells": 160,
+          "refusals_by_code": {
+            "W_NOT_IN_B15M_UNIVERSE": 154
+          },
+          "zero_capacity_cells": 0
+        },
+        "grid_executable_counts": {
+          "1000000": 312,
+          "10000000": 282,
+          "100000000": 201,
+          "1000000000": 95,
+          "10000000000": 41,
+          "500000000": 121,
+          "5000000000": 48
+        },
+        "not_a_sizing_proposal": "no order of any size is proposed, recommended or implied; the frozen position remains 100000000 lamports and is not varied here"
+      }
+    }
+  },
+  "grid_lamports": [
+    1000000,
+    10000000,
+    100000000,
+    500000000,
+    1000000000,
+    5000000000,
+    10000000000
+  ],
+  "label": "CAPACITY_WALL_HISTORICAL_DIAGNOSTIC",
+  "not_claimed": {
+    "recommendation": "no size is selected, ranked or called optimal; the grid is reported.",
+    "return": "capacity is what the observed book could absorb, not a return."
+  },
+  "population_rule": "B15M's universe MINUS the capture-sampling artifact, and nothing else. A cell is admitted when: (1) the curve carries a t0 coordinate and a decodable fee schedule; (2) the entry coordinate is t0_slot + delay_slots, the launch-plus-delay rule of b15h_prospective_entry.entry_target_slot; (3) the first observation at or after that coordinate is no more than max_lateness_slots late against it, using B15L's own assert_fresh tolerance; (4) b15m.is_admissible holds, applied by call.",
+  "preregistration_canonical_sha256": "6397ebfe71510a7f9ce3150bc4175cb9d3340b808cd121b53f423f7315f682e6",
+  "previously_cap_hit_subgroup": "population, and the previously_cap_hit_cells subgroup, which has no historical counterpart. Nothing else differs.",
+  "rules_inherited_from": {
+    "canonical_sha256": "519102ba451da9c8556ce321c992312ddbeb5f9b7ab99d3dd9bfa10f976b76fe",
+    "source": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1"
+  },
+  "status": "BURNED DEVELOPMENT DATA. Not an evaluation result. Proves the machinery executes; spends no ledger entry.",
+  "structural_ceilings_known_before_any_outcome": {
+    "curves_that_could_yield_a_cell": 960,
+    "curves_with_a_decodable_fee_schedule": 960,
+    "curves_with_a_t0_coordinate": 1136,
+    "entry_coordinate_rule": "signal_slot = t0_slot, delay added by the same launch-plus-delay rule B15M's universe uses (b15h_prospective_entry.entry_target_slot); exit is B10c STATE-IN-FORCE at entry + horizon, taken by agreement between b19b's and b19d's independent implementations.",
+    "evaluable_cohort": 1136,
+    "max_lateness_slots_inherited": 150
+  },
+  "study": "B19G_CAPACITY_WALL_HISTORICAL",
+  "the_one_condition_dropped": "b15l.load_entries selects WHERE t.state='captured' AND o.fork_state='confirmed'. state='captured' is the ONLY condition dropped: it records which launches a running shadow process happened to catch, which is a property of that process and not of the market, and it has no historical counterpart. fork_state='confirmed' is not dropped but AUTOMATICALLY SATISFIED: a historical corpus is read from the canonical finalized chain, so every observation in it is fork-confirmed by construction. The lateness tolerance is NOT dropped -- it is inherited and enforced.",
+  "what_this_population_is_not": "it is not B15M's universe and its figures are not comparable to B15L's or B15M's, are not a continuation of them, and may never be presented as such. It differs by the capture sampling and by that alone, which is a real difference and is stated rather than characterised.",
+  "window_provenance": {
+    "cohort_census": {
+      "evaluable": 1136,
+      "excluded_out_of_regime_mayhem": 465,
+      "in_regime_without_a_path": 0,
+      "mayhem_with_a_path": 0,
+      "subsampled": 1601
+    },
+    "corpus_content_sha256": "4aca86d3756afec09d70725f76d0b51952c1008bcdb0f5730c5b787de62ce7b3",
+    "curves_with_a_creator_reentry": 110,
+    "curves_with_a_non_creator_buy": 727,
+    "curves_with_a_path": 1136,
+    "curves_with_features": 1136,
+    "feature_hash_chain_sha256": "ec64f1194b335714119582b4c6cc80f85bb9bcad1b16dbd9a0bf327e62d8e782",
+    "fee_schedules": {
+      "curves_with_a_schedule": 960,
+      "curves_with_disagreeing_schedules": 17
+    },
+    "freshness": {
+      "burned_extent": {
+        "declared_create_window": [
+          433894233,
+          434097833
+        ],
+        "high": 435536000,
+        "low": 433894233,
+        "observed_extent": [
+          433894233,
+          435536000
+        ],
+        "source": "derived_from_the_burned_corpus"
+      },
+      "rehearsal_observations": 94389
+    },
+    "trade_exclusions_upstream": {
+      "direction_contradicts_reserve_delta": 2,
+      "multiple_reserve_observations": 920,
+      "multiple_trade_instructions": 1232,
+      "no_reserve_observation": 476
+    }
+  },
+  "window_sha256": "d760beb1e9c19154dc3bc14f19a86ce2ff75ca5c36d799e7344d665762b307d5"
+}
