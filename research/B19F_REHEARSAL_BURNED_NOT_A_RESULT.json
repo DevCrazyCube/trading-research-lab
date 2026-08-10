@@ -5,1222 +5,1266 @@
     "statement": "1601 curves were subsampled; 465 are mayhem-mode and out of the frozen regime; 1136 are evaluable. Every coverage figure is out of 1136.",
     "subsampled": 1601
   },
-  "direction_of_the_bias": "for a NEGATIVE result this population is conservative: it grants opportunities a live bot could not have taken, so a rule that fails here also fails on any subset a live feed could actually capture. For a POSITIVE result it is OPTIMISTIC in exactly the same way, and any positive figure below must be read as an upper bound that no live system could attain. This asymmetry is stated before any outcome so it cannot be invoked selectively afterwards.",
   "executable": false,
   "execution_status": "never_executed",
   "family": {
     "E_COMPLETE_OR_HORIZON|delay_1|base": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 578,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 471,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 185,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 156,
+          "X_ENTRY_UNPRICEABLE": 22,
           "X_EXIT_UNPRICEABLE": 3,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 578
+          "X_RULE_NEVER_TRIGGERED": 471
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 82,
+        "at_or_below_zero": 76,
         "max": 77767918,
-        "median": -26172867,
+        "median": -32113890,
         "min": -84299303,
-        "p10": -65280377,
-        "p25": -51294913,
-        "p75": -5281049,
+        "p10": -66515465,
+        "p25": -57718310,
+        "p75": -5442335,
         "p90": 960325,
-        "top_5pct_share_of_positive_denominator": 249572133,
+        "top_5pct_share_of_positive_denominator": 243101451,
         "top_5pct_share_of_positive_numerator": 77767918
       }
     },
     "E_COMPLETE_OR_HORIZON|delay_1|optimistic": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 578,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 471,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 185,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 156,
+          "X_ENTRY_UNPRICEABLE": 22,
           "X_EXIT_UNPRICEABLE": 3,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 578
+          "X_RULE_NEVER_TRIGGERED": 471
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 82,
+        "at_or_below_zero": 76,
         "max": 77965918,
-        "median": -25974867,
+        "median": -31915890,
         "min": -84101303,
-        "p10": -65082377,
-        "p25": -51096913,
-        "p75": -5083049,
+        "p10": -66317465,
+        "p25": -57520310,
+        "p75": -5244335,
         "p90": 1158325,
-        "top_5pct_share_of_positive_denominator": 251750133,
+        "top_5pct_share_of_positive_denominator": 245081451,
         "top_5pct_share_of_positive_numerator": 77965918
       }
     },
     "E_COMPLETE_OR_HORIZON|delay_1|stressed": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 578,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 471,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 185,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 156,
+          "X_ENTRY_UNPRICEABLE": 22,
           "X_EXIT_UNPRICEABLE": 3,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 578
+          "X_RULE_NEVER_TRIGGERED": 471
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 85,
+        "at_or_below_zero": 79,
         "max": 73957918,
-        "median": -29982867,
+        "median": -35923890,
         "min": -88109303,
-        "p10": -69090377,
-        "p25": -55104913,
-        "p75": -9091049,
+        "p10": -70325465,
+        "p25": -61528310,
+        "p75": -9252335,
         "p90": -2849675,
-        "top_5pct_share_of_positive_denominator": 214917720,
+        "top_5pct_share_of_positive_denominator": 212257038,
         "top_5pct_share_of_positive_numerator": 73957918
       }
     },
     "E_COMPLETE_OR_HORIZON|delay_2|base": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 577,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 469,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 184,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 153,
+          "X_ENTRY_UNPRICEABLE": 22,
           "X_EXIT_UNPRICEABLE": 3,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 577
+          "X_RULE_NEVER_TRIGGERED": 469
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 82,
+        "at_or_below_zero": 76,
         "max": 77767918,
-        "median": -27050675,
+        "median": -31193754,
         "min": -85570025,
-        "p10": -65705580,
-        "p25": -53487809,
-        "p75": -5281049,
+        "p10": -66588666,
+        "p25": -58266332,
+        "p75": -5442335,
         "p90": 960325,
-        "top_5pct_share_of_positive_denominator": 233481956,
+        "top_5pct_share_of_positive_denominator": 227011274,
         "top_5pct_share_of_positive_numerator": 77767918
       }
     },
     "E_COMPLETE_OR_HORIZON|delay_2|optimistic": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 577,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 469,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 184,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 153,
+          "X_ENTRY_UNPRICEABLE": 22,
           "X_EXIT_UNPRICEABLE": 3,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 577
+          "X_RULE_NEVER_TRIGGERED": 469
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 82,
+        "at_or_below_zero": 76,
         "max": 77965918,
-        "median": -26852675,
+        "median": -30995754,
         "min": -85372025,
-        "p10": -65507580,
-        "p25": -53289809,
-        "p75": -5083049,
+        "p10": -66390666,
+        "p25": -58068332,
+        "p75": -5244335,
         "p90": 1158325,
-        "top_5pct_share_of_positive_denominator": 235659956,
+        "top_5pct_share_of_positive_denominator": 228991274,
         "top_5pct_share_of_positive_numerator": 77965918
       }
     },
     "E_COMPLETE_OR_HORIZON|delay_2|stressed": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 577,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 469,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 184,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 153,
+          "X_ENTRY_UNPRICEABLE": 22,
           "X_EXIT_UNPRICEABLE": 3,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 577
+          "X_RULE_NEVER_TRIGGERED": 469
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 86,
+        "at_or_below_zero": 80,
         "max": 73957918,
-        "median": -30860675,
+        "median": -35003754,
         "min": -89380025,
-        "p10": -69515580,
-        "p25": -57297809,
-        "p75": -9091049,
+        "p10": -70398666,
+        "p25": -62076332,
+        "p75": -9252335,
         "p90": -2849675,
-        "top_5pct_share_of_positive_denominator": 201112165,
+        "top_5pct_share_of_positive_denominator": 198451483,
         "top_5pct_share_of_positive_numerator": 73957918
       }
     },
     "E_COMPLETE_OR_HORIZON|delay_4|base": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 560,
+        "cells_admitted": 85,
+        "cells_refused": 1051,
+        "censored_rule_never_triggered": 450,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 182,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 151,
+          "X_ENTRY_UNPRICEABLE": 22,
           "X_EXIT_UNPRICEABLE": 3,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 560
+          "X_RULE_NEVER_TRIGGERED": 450
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 83,
+        "at_or_below_zero": 77,
         "max": 77767918,
-        "median": -27914062,
+        "median": -31718296,
         "min": -85570025,
-        "p10": -66970862,
-        "p25": -58454313,
-        "p75": -5380646,
-        "p90": -278525,
-        "top_5pct_share_of_positive_denominator": 246824635,
+        "p10": -67320741,
+        "p25": -59997874,
+        "p75": -5442335,
+        "p90": -1979132,
+        "top_5pct_share_of_positive_denominator": 230482590,
         "top_5pct_share_of_positive_numerator": 77767918
       }
     },
     "E_COMPLETE_OR_HORIZON|delay_4|optimistic": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 560,
+        "cells_admitted": 85,
+        "cells_refused": 1051,
+        "censored_rule_never_triggered": 450,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 182,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 151,
+          "X_ENTRY_UNPRICEABLE": 22,
           "X_EXIT_UNPRICEABLE": 3,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 560
+          "X_RULE_NEVER_TRIGGERED": 450
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 83,
+        "at_or_below_zero": 77,
         "max": 77965918,
-        "median": -27716062,
+        "median": -31520296,
         "min": -85372025,
-        "p10": -66772862,
-        "p25": -58256313,
-        "p75": -5182646,
-        "p90": -80525,
-        "top_5pct_share_of_positive_denominator": 248804635,
+        "p10": -67122741,
+        "p25": -59799874,
+        "p75": -5244335,
+        "p90": -1781132,
+        "top_5pct_share_of_positive_denominator": 232066590,
         "top_5pct_share_of_positive_numerator": 77965918
       }
     },
     "E_COMPLETE_OR_HORIZON|delay_4|stressed": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 560,
+        "cells_admitted": 85,
+        "cells_refused": 1051,
+        "censored_rule_never_triggered": 450,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 182,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 151,
+          "X_ENTRY_UNPRICEABLE": 22,
           "X_EXIT_UNPRICEABLE": 3,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 560
+          "X_RULE_NEVER_TRIGGERED": 450
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 85,
+        "at_or_below_zero": 79,
         "max": 73957918,
-        "median": -31724062,
+        "median": -35528296,
         "min": -89380025,
-        "p10": -70780862,
-        "p25": -62264313,
-        "p75": -9190646,
-        "p90": -4088525,
-        "top_5pct_share_of_positive_denominator": 213123744,
+        "p10": -71130741,
+        "p25": -63807874,
+        "p75": -9252335,
+        "p90": -5789132,
+        "top_5pct_share_of_positive_denominator": 204401699,
         "top_5pct_share_of_positive_numerator": 73957918
       }
     },
     "E_FIRST_EXTERNALLY_PAYABLE|delay_1|base": {
       "coverage": {
-        "cells_admitted": 594,
-        "cells_refused": 542,
-        "censored_rule_never_triggered": 265,
+        "cells_admitted": 570,
+        "cells_refused": 566,
+        "censored_rule_never_triggered": 146,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 265
+          "X_RULE_NEVER_TRIGGERED": 146
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 586,
+        "at_or_below_zero": 563,
         "max": 14891906,
-        "median": -5309724,
+        "median": -5309645,
         "min": -5401103,
-        "p10": -5396850,
-        "p25": -5367856,
-        "p75": -5253120,
-        "p90": -5165549,
-        "top_5pct_share_of_positive_denominator": 76375474,
+        "p10": -5395789,
+        "p25": -5364590,
+        "p75": -5253551,
+        "p90": -5173881,
+        "top_5pct_share_of_positive_denominator": 67771623,
         "top_5pct_share_of_positive_numerator": 14891906
       }
     },
     "E_FIRST_EXTERNALLY_PAYABLE|delay_1|optimistic": {
       "coverage": {
-        "cells_admitted": 594,
-        "cells_refused": 542,
-        "censored_rule_never_triggered": 265,
+        "cells_admitted": 570,
+        "cells_refused": 566,
+        "censored_rule_never_triggered": 146,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 265
+          "X_RULE_NEVER_TRIGGERED": 146
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 586,
+        "at_or_below_zero": 563,
         "max": 15089906,
-        "median": -5111724,
+        "median": -5111645,
         "min": -5203103,
-        "p10": -5198850,
-        "p25": -5169856,
-        "p75": -5055120,
-        "p90": -4967549,
-        "top_5pct_share_of_positive_denominator": 77959474,
+        "p10": -5197789,
+        "p25": -5166590,
+        "p75": -5055551,
+        "p90": -4975881,
+        "top_5pct_share_of_positive_denominator": 69157623,
         "top_5pct_share_of_positive_numerator": 15089906
       }
     },
     "E_FIRST_EXTERNALLY_PAYABLE|delay_1|stressed": {
       "coverage": {
-        "cells_admitted": 594,
-        "cells_refused": 542,
-        "censored_rule_never_triggered": 265,
+        "cells_admitted": 570,
+        "cells_refused": 566,
+        "censored_rule_never_triggered": 146,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 265
+          "X_RULE_NEVER_TRIGGERED": 146
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 587,
+        "at_or_below_zero": 564,
         "max": 11081906,
-        "median": -9119724,
+        "median": -9119645,
         "min": -9211103,
-        "p10": -9206850,
-        "p25": -9177856,
-        "p75": -9063120,
-        "p90": -8975549,
-        "top_5pct_share_of_positive_denominator": 47670470,
+        "p10": -9205789,
+        "p25": -9174590,
+        "p75": -9063551,
+        "p90": -8983881,
+        "top_5pct_share_of_positive_denominator": 42876619,
         "top_5pct_share_of_positive_numerator": 11081906
       }
     },
     "E_FIRST_EXTERNALLY_PAYABLE|delay_2|base": {
       "coverage": {
-        "cells_admitted": 587,
-        "cells_refused": 549,
-        "censored_rule_never_triggered": 270,
+        "cells_admitted": 563,
+        "cells_refused": 573,
+        "censored_rule_never_triggered": 148,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 270
+          "X_RULE_NEVER_TRIGGERED": 148
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 579,
+        "at_or_below_zero": 556,
         "max": 14891906,
-        "median": -5309788,
+        "median": -5309373,
         "min": -5401097,
-        "p10": -5395975,
-        "p25": -5367950,
-        "p75": -5248040,
-        "p90": -5162172,
-        "top_5pct_share_of_positive_denominator": 76375474,
+        "p10": -5393950,
+        "p25": -5363296,
+        "p75": -5249006,
+        "p90": -5169398,
+        "top_5pct_share_of_positive_denominator": 67771623,
         "top_5pct_share_of_positive_numerator": 14891906
       }
     },
     "E_FIRST_EXTERNALLY_PAYABLE|delay_2|optimistic": {
       "coverage": {
-        "cells_admitted": 587,
-        "cells_refused": 549,
-        "censored_rule_never_triggered": 270,
+        "cells_admitted": 563,
+        "cells_refused": 573,
+        "censored_rule_never_triggered": 148,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 270
+          "X_RULE_NEVER_TRIGGERED": 148
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 579,
+        "at_or_below_zero": 556,
         "max": 15089906,
-        "median": -5111788,
+        "median": -5111373,
         "min": -5203097,
-        "p10": -5197975,
-        "p25": -5169950,
-        "p75": -5050040,
-        "p90": -4964172,
-        "top_5pct_share_of_positive_denominator": 77959474,
+        "p10": -5195950,
+        "p25": -5165296,
+        "p75": -5051006,
+        "p90": -4971398,
+        "top_5pct_share_of_positive_denominator": 69157623,
         "top_5pct_share_of_positive_numerator": 15089906
       }
     },
     "E_FIRST_EXTERNALLY_PAYABLE|delay_2|stressed": {
       "coverage": {
-        "cells_admitted": 587,
-        "cells_refused": 549,
-        "censored_rule_never_triggered": 270,
+        "cells_admitted": 563,
+        "cells_refused": 573,
+        "censored_rule_never_triggered": 148,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 270
+          "X_RULE_NEVER_TRIGGERED": 148
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 580,
+        "at_or_below_zero": 557,
         "max": 11081906,
-        "median": -9119788,
+        "median": -9119373,
         "min": -9211097,
-        "p10": -9205975,
-        "p25": -9177950,
-        "p75": -9058040,
-        "p90": -8972172,
-        "top_5pct_share_of_positive_denominator": 47670470,
+        "p10": -9203950,
+        "p25": -9173296,
+        "p75": -9059006,
+        "p90": -8979398,
+        "top_5pct_share_of_positive_denominator": 42876619,
         "top_5pct_share_of_positive_numerator": 11081906
       }
     },
     "E_FIRST_EXTERNALLY_PAYABLE|delay_4|base": {
       "coverage": {
-        "cells_admitted": 583,
-        "cells_refused": 553,
-        "censored_rule_never_triggered": 255,
+        "cells_admitted": 558,
+        "cells_refused": 578,
+        "censored_rule_never_triggered": 131,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 255
+          "X_RULE_NEVER_TRIGGERED": 131
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 576,
+        "at_or_below_zero": 552,
         "max": 14891906,
-        "median": -5311347,
+        "median": -5311188,
         "min": -5401097,
-        "p10": -5395789,
-        "p25": -5371584,
-        "p75": -5234578,
-        "p90": -5147122,
-        "top_5pct_share_of_positive_denominator": 61779411,
+        "p10": -5394760,
+        "p25": -5367856,
+        "p75": -5238773,
+        "p90": -5154183,
+        "top_5pct_share_of_positive_denominator": 53175560,
         "top_5pct_share_of_positive_numerator": 14891906
       }
     },
     "E_FIRST_EXTERNALLY_PAYABLE|delay_4|optimistic": {
       "coverage": {
-        "cells_admitted": 583,
-        "cells_refused": 553,
-        "censored_rule_never_triggered": 255,
+        "cells_admitted": 558,
+        "cells_refused": 578,
+        "censored_rule_never_triggered": 131,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 255
+          "X_RULE_NEVER_TRIGGERED": 131
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 575,
+        "at_or_below_zero": 551,
         "max": 15089906,
-        "median": -5113347,
+        "median": -5113188,
         "min": -5203097,
-        "p10": -5197789,
-        "p25": -5173584,
-        "p75": -5036578,
-        "p90": -4949122,
-        "top_5pct_share_of_positive_denominator": 63175113,
+        "p10": -5196760,
+        "p25": -5169856,
+        "p75": -5040773,
+        "p90": -4956183,
+        "top_5pct_share_of_positive_denominator": 54373262,
         "top_5pct_share_of_positive_numerator": 15089906
       }
     },
     "E_FIRST_EXTERNALLY_PAYABLE|delay_4|stressed": {
       "coverage": {
-        "cells_admitted": 583,
-        "cells_refused": 553,
-        "censored_rule_never_triggered": 255,
+        "cells_admitted": 558,
+        "cells_refused": 578,
+        "censored_rule_never_triggered": 131,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 255
+          "X_RULE_NEVER_TRIGGERED": 131
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 578,
+        "at_or_below_zero": 554,
         "max": 11081906,
-        "median": -9121347,
+        "median": -9121188,
         "min": -9211097,
-        "p10": -9205789,
-        "p25": -9181584,
-        "p75": -9044578,
-        "p90": -8957122,
-        "top_5pct_share_of_positive_denominator": 38662116,
+        "p10": -9204760,
+        "p25": -9177856,
+        "p75": -9048773,
+        "p90": -8964183,
+        "top_5pct_share_of_positive_denominator": 33868265,
         "top_5pct_share_of_positive_numerator": 11081906
       }
     },
     "E_FIRST_OBSERVATION|delay_1|base": {
       "coverage": {
-        "cells_admitted": 537,
-        "cells_refused": 599,
-        "censored_rule_never_triggered": 142,
+        "cells_admitted": 518,
+        "cells_refused": 618,
+        "censored_rule_never_triggered": 66,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 180,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 132,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 142
+          "X_RULE_NEVER_TRIGGERED": 66
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 453,
-        "max": 17578035,
-        "median": -5116651,
+        "at_or_below_zero": 440,
+        "max": 15660900,
+        "median": -5146526,
         "min": -36329500,
-        "p10": -12195624,
-        "p25": -6827453,
-        "p75": -3000130,
-        "p90": 1739815,
-        "top_5pct_share_of_positive_denominator": 371584438,
-        "top_5pct_share_of_positive_numerator": 63086569
+        "p10": -12239892,
+        "p25": -6964922,
+        "p75": -3277356,
+        "p90": 1725973,
+        "top_5pct_share_of_positive_denominator": 335927817,
+        "top_5pct_share_of_positive_numerator": 45508534
       }
     },
     "E_FIRST_OBSERVATION|delay_1|optimistic": {
       "coverage": {
-        "cells_admitted": 537,
-        "cells_refused": 599,
-        "censored_rule_never_triggered": 142,
+        "cells_admitted": 518,
+        "cells_refused": 618,
+        "censored_rule_never_triggered": 66,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 180,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 132,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 142
+          "X_RULE_NEVER_TRIGGERED": 66
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 451,
-        "max": 17776035,
-        "median": -4918651,
+        "at_or_below_zero": 438,
+        "max": 15858900,
+        "median": -4948526,
         "min": -36131500,
-        "p10": -11997624,
-        "p25": -6629453,
-        "p75": -2802130,
-        "p90": 1937815,
-        "top_5pct_share_of_positive_denominator": 388477834,
-        "top_5pct_share_of_positive_numerator": 63878569
+        "p10": -12041892,
+        "p25": -6766922,
+        "p75": -3079356,
+        "p90": 1923973,
+        "top_5pct_share_of_positive_denominator": 351633213,
+        "top_5pct_share_of_positive_numerator": 61192440
       }
     },
     "E_FIRST_OBSERVATION|delay_1|stressed": {
       "coverage": {
-        "cells_admitted": 537,
-        "cells_refused": 599,
-        "censored_rule_never_triggered": 142,
+        "cells_admitted": 518,
+        "cells_refused": 618,
+        "censored_rule_never_triggered": 66,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 180,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 132,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 142
+          "X_RULE_NEVER_TRIGGERED": 66
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 505,
-        "max": 13768035,
-        "median": -8926651,
+        "at_or_below_zero": 489,
+        "max": 11850900,
+        "median": -8956526,
         "min": -40139500,
-        "p10": -16005624,
-        "p25": -10637453,
-        "p75": -6810130,
-        "p90": -2070185,
-        "top_5pct_share_of_positive_denominator": 167947471,
-        "top_5pct_share_of_positive_numerator": 13768035
+        "p10": -16049892,
+        "p25": -10774922,
+        "p75": -7087356,
+        "p90": -2084027,
+        "top_5pct_share_of_positive_denominator": 146724903,
+        "top_5pct_share_of_positive_numerator": 11850900
       }
     },
     "E_FIRST_OBSERVATION|delay_2|base": {
       "coverage": {
-        "cells_admitted": 529,
-        "cells_refused": 607,
-        "censored_rule_never_triggered": 146,
+        "cells_admitted": 510,
+        "cells_refused": 626,
+        "censored_rule_never_triggered": 69,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 182,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 132,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 146
-        }
-      },
-      "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
-      "outcome": {
-        "at_or_below_zero": 445,
-        "max": 51548255,
-        "median": -5225001,
-        "min": -36317321,
-        "p10": -13260387,
-        "p25": -7883553,
-        "p75": -3343763,
-        "p90": 1739815,
-        "top_5pct_share_of_positive_denominator": 482989075,
-        "top_5pct_share_of_positive_numerator": 137862737
-      }
-    },
-    "E_FIRST_OBSERVATION|delay_2|optimistic": {
-      "coverage": {
-        "cells_admitted": 529,
-        "cells_refused": 607,
-        "censored_rule_never_triggered": 146,
-        "cohort_size": 1136,
-        "refused_by_code": {
-          "X_CAPACITY_REFUSED": 182,
-          "X_ENTRY_UNPRICEABLE": 27,
-          "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 146
-        }
-      },
-      "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
-      "outcome": {
-        "at_or_below_zero": 444,
-        "max": 51746255,
-        "median": -5027001,
-        "min": -36119321,
-        "p10": -13062387,
-        "p25": -7685553,
-        "p75": -3145763,
-        "p90": 1937815,
-        "top_5pct_share_of_positive_denominator": 499779778,
-        "top_5pct_share_of_positive_numerator": 138654737
-      }
-    },
-    "E_FIRST_OBSERVATION|delay_2|stressed": {
-      "coverage": {
-        "cells_admitted": 529,
-        "cells_refused": 607,
-        "censored_rule_never_triggered": 146,
-        "cohort_size": 1136,
-        "refused_by_code": {
-          "X_CAPACITY_REFUSED": 182,
-          "X_ENTRY_UNPRICEABLE": 27,
-          "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 146
-        }
-      },
-      "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
-      "outcome": {
-        "at_or_below_zero": 495,
-        "max": 47738255,
-        "median": -9035001,
-        "min": -40127321,
-        "p10": -17070387,
-        "p25": -11693553,
-        "p75": -7153763,
-        "p90": -2070185,
-        "top_5pct_share_of_positive_denominator": 274094883,
-        "top_5pct_share_of_positive_numerator": 47738255
-      }
-    },
-    "E_FIRST_OBSERVATION|delay_4|base": {
-      "coverage": {
-        "cells_admitted": 518,
-        "cells_refused": 618,
-        "censored_rule_never_triggered": 139,
-        "cohort_size": 1136,
-        "refused_by_code": {
-          "X_CAPACITY_REFUSED": 181,
-          "X_ENTRY_UNPRICEABLE": 27,
-          "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 139
-        }
-      },
-      "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
-      "outcome": {
-        "at_or_below_zero": 434,
-        "max": 51548255,
-        "median": -5231845,
-        "min": -31192009,
-        "p10": -13274402,
-        "p25": -7823124,
-        "p75": -3027463,
-        "p90": 1652621,
-        "top_5pct_share_of_positive_denominator": 409920202,
-        "top_5pct_share_of_positive_numerator": 111461397
-      }
-    },
-    "E_FIRST_OBSERVATION|delay_4|optimistic": {
-      "coverage": {
-        "cells_admitted": 518,
-        "cells_refused": 618,
-        "censored_rule_never_triggered": 139,
-        "cohort_size": 1136,
-        "refused_by_code": {
-          "X_CAPACITY_REFUSED": 181,
-          "X_ENTRY_UNPRICEABLE": 27,
-          "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 139
+          "X_RULE_NEVER_TRIGGERED": 69
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
         "at_or_below_zero": 432,
-        "max": 51746255,
-        "median": -5033845,
-        "min": -30994009,
-        "p10": -13076402,
-        "p25": -7625124,
-        "p75": -2829463,
-        "p90": 1850621,
-        "top_5pct_share_of_positive_denominator": 426720607,
-        "top_5pct_share_of_positive_numerator": 112253397
+        "max": 51548255,
+        "median": -5235245,
+        "min": -36317321,
+        "p10": -13306885,
+        "p25": -7937372,
+        "p75": -3494059,
+        "p90": 1725973,
+        "top_5pct_share_of_positive_denominator": 447332454,
+        "top_5pct_share_of_positive_numerator": 120284702
       }
     },
-    "E_FIRST_OBSERVATION|delay_4|stressed": {
+    "E_FIRST_OBSERVATION|delay_2|optimistic": {
       "coverage": {
-        "cells_admitted": 518,
-        "cells_refused": 618,
-        "censored_rule_never_triggered": 139,
+        "cells_admitted": 510,
+        "cells_refused": 626,
+        "censored_rule_never_triggered": 69,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 181,
-          "X_ENTRY_UNPRICEABLE": 27,
-          "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 139
+          "X_CAPACITY_REFUSED": 132,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
+          "X_NO_ENTRY_OBSERVATION": 252,
+          "X_RULE_NEVER_TRIGGERED": 69
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 486,
+        "at_or_below_zero": 431,
+        "max": 51746255,
+        "median": -5037245,
+        "min": -36119321,
+        "p10": -13108885,
+        "p25": -7739372,
+        "p75": -3296059,
+        "p90": 1923973,
+        "top_5pct_share_of_positive_denominator": 462935157,
+        "top_5pct_share_of_positive_numerator": 120878702
+      }
+    },
+    "E_FIRST_OBSERVATION|delay_2|stressed": {
+      "coverage": {
+        "cells_admitted": 510,
+        "cells_refused": 626,
+        "censored_rule_never_triggered": 69,
+        "cohort_size": 1136,
+        "refused_by_code": {
+          "X_CAPACITY_REFUSED": 132,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
+          "X_NO_ENTRY_OBSERVATION": 252,
+          "X_RULE_NEVER_TRIGGERED": 69
+        }
+      },
+      "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
+      "outcome": {
+        "at_or_below_zero": 479,
         "max": 47738255,
-        "median": -9041845,
+        "median": -9045245,
+        "min": -40127321,
+        "p10": -17116885,
+        "p25": -11747372,
+        "p75": -7304059,
+        "p90": -2084027,
+        "top_5pct_share_of_positive_denominator": 252872315,
+        "top_5pct_share_of_positive_numerator": 47738255
+      }
+    },
+    "E_FIRST_OBSERVATION|delay_4|base": {
+      "coverage": {
+        "cells_admitted": 498,
+        "cells_refused": 638,
+        "censored_rule_never_triggered": 60,
+        "cohort_size": 1136,
+        "refused_by_code": {
+          "X_CAPACITY_REFUSED": 131,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
+          "X_NO_ENTRY_OBSERVATION": 271,
+          "X_RULE_NEVER_TRIGGERED": 60
+        }
+      },
+      "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
+      "outcome": {
+        "at_or_below_zero": 420,
+        "max": 51548255,
+        "median": -5242042,
+        "min": -31192009,
+        "p10": -13476125,
+        "p25": -7936230,
+        "p75": -3236505,
+        "p90": 1641713,
+        "top_5pct_share_of_positive_denominator": 374263581,
+        "top_5pct_share_of_positive_numerator": 93883362
+      }
+    },
+    "E_FIRST_OBSERVATION|delay_4|optimistic": {
+      "coverage": {
+        "cells_admitted": 498,
+        "cells_refused": 638,
+        "censored_rule_never_triggered": 60,
+        "cohort_size": 1136,
+        "refused_by_code": {
+          "X_CAPACITY_REFUSED": 131,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
+          "X_NO_ENTRY_OBSERVATION": 271,
+          "X_RULE_NEVER_TRIGGERED": 60
+        }
+      },
+      "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
+      "outcome": {
+        "at_or_below_zero": 418,
+        "max": 51746255,
+        "median": -5044042,
+        "min": -30994009,
+        "p10": -13278125,
+        "p25": -7738230,
+        "p75": -3038505,
+        "p90": 1839713,
+        "top_5pct_share_of_positive_denominator": 389875986,
+        "top_5pct_share_of_positive_numerator": 109567268
+      }
+    },
+    "E_FIRST_OBSERVATION|delay_4|stressed": {
+      "coverage": {
+        "cells_admitted": 498,
+        "cells_refused": 638,
+        "censored_rule_never_triggered": 60,
+        "cohort_size": 1136,
+        "refused_by_code": {
+          "X_CAPACITY_REFUSED": 131,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
+          "X_NO_ENTRY_OBSERVATION": 271,
+          "X_RULE_NEVER_TRIGGERED": 60
+        }
+      },
+      "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
+      "outcome": {
+        "at_or_below_zero": 469,
+        "max": 47738255,
+        "median": -9052042,
         "min": -35002009,
-        "p10": -17084402,
-        "p25": -11633124,
-        "p75": -6837463,
-        "p90": -2157379,
-        "top_5pct_share_of_positive_denominator": 204001672,
+        "p10": -17286125,
+        "p25": -11746230,
+        "p75": -7046505,
+        "p90": -2168287,
+        "top_5pct_share_of_positive_denominator": 182779104,
         "top_5pct_share_of_positive_numerator": 47738255
       }
     },
     "E_FIXED_H10000|delay_1|base": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 581,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 474,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 185,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 156,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 581
+          "X_RULE_NEVER_TRIGGERED": 474
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 82,
+        "at_or_below_zero": 76,
         "max": 77767918,
-        "median": -26172867,
+        "median": -32113890,
         "min": -84299303,
-        "p10": -65280377,
-        "p25": -51294913,
-        "p75": -5281049,
+        "p10": -66515465,
+        "p25": -57718310,
+        "p75": -5442335,
         "p90": 960325,
-        "top_5pct_share_of_positive_denominator": 249572133,
+        "top_5pct_share_of_positive_denominator": 243101451,
         "top_5pct_share_of_positive_numerator": 77767918
       }
     },
     "E_FIXED_H10000|delay_1|optimistic": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 581,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 474,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 185,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 156,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 581
+          "X_RULE_NEVER_TRIGGERED": 474
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 82,
+        "at_or_below_zero": 76,
         "max": 77965918,
-        "median": -25974867,
+        "median": -31915890,
         "min": -84101303,
-        "p10": -65082377,
-        "p25": -51096913,
-        "p75": -5083049,
+        "p10": -66317465,
+        "p25": -57520310,
+        "p75": -5244335,
         "p90": 1158325,
-        "top_5pct_share_of_positive_denominator": 251750133,
+        "top_5pct_share_of_positive_denominator": 245081451,
         "top_5pct_share_of_positive_numerator": 77965918
       }
     },
     "E_FIXED_H10000|delay_1|stressed": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 581,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 474,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 185,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 156,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 581
+          "X_RULE_NEVER_TRIGGERED": 474
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 85,
+        "at_or_below_zero": 79,
         "max": 73957918,
-        "median": -29982867,
+        "median": -35923890,
         "min": -88109303,
-        "p10": -69090377,
-        "p25": -55104913,
-        "p75": -9091049,
+        "p10": -70325465,
+        "p25": -61528310,
+        "p75": -9252335,
         "p90": -2849675,
-        "top_5pct_share_of_positive_denominator": 214917720,
+        "top_5pct_share_of_positive_denominator": 212257038,
         "top_5pct_share_of_positive_numerator": 73957918
       }
     },
     "E_FIXED_H10000|delay_2|base": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 580,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 472,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 184,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 153,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 580
+          "X_RULE_NEVER_TRIGGERED": 472
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 82,
+        "at_or_below_zero": 76,
         "max": 77767918,
-        "median": -27050675,
+        "median": -31193754,
         "min": -85570025,
-        "p10": -65705580,
-        "p25": -53487809,
-        "p75": -5281049,
+        "p10": -66588666,
+        "p25": -58266332,
+        "p75": -5442335,
         "p90": 960325,
-        "top_5pct_share_of_positive_denominator": 233481956,
+        "top_5pct_share_of_positive_denominator": 227011274,
         "top_5pct_share_of_positive_numerator": 77767918
       }
     },
     "E_FIXED_H10000|delay_2|optimistic": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 580,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 472,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 184,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 153,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 580
+          "X_RULE_NEVER_TRIGGERED": 472
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 82,
+        "at_or_below_zero": 76,
         "max": 77965918,
-        "median": -26852675,
+        "median": -30995754,
         "min": -85372025,
-        "p10": -65507580,
-        "p25": -53289809,
-        "p75": -5083049,
+        "p10": -66390666,
+        "p25": -58068332,
+        "p75": -5244335,
         "p90": 1158325,
-        "top_5pct_share_of_positive_denominator": 235659956,
+        "top_5pct_share_of_positive_denominator": 228991274,
         "top_5pct_share_of_positive_numerator": 77965918
       }
     },
     "E_FIXED_H10000|delay_2|stressed": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 580,
+        "cells_admitted": 86,
+        "cells_refused": 1050,
+        "censored_rule_never_triggered": 472,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 184,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 153,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 580
+          "X_RULE_NEVER_TRIGGERED": 472
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 86,
+        "at_or_below_zero": 80,
         "max": 73957918,
-        "median": -30860675,
+        "median": -35003754,
         "min": -89380025,
-        "p10": -69515580,
-        "p25": -57297809,
-        "p75": -9091049,
+        "p10": -70398666,
+        "p25": -62076332,
+        "p75": -9252335,
         "p90": -2849675,
-        "top_5pct_share_of_positive_denominator": 201112165,
+        "top_5pct_share_of_positive_denominator": 198451483,
         "top_5pct_share_of_positive_numerator": 73957918
       }
     },
     "E_FIXED_H10000|delay_4|base": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 563,
+        "cells_admitted": 85,
+        "cells_refused": 1051,
+        "censored_rule_never_triggered": 453,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 182,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 151,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 563
+          "X_RULE_NEVER_TRIGGERED": 453
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 83,
+        "at_or_below_zero": 77,
         "max": 77767918,
-        "median": -27914062,
+        "median": -31718296,
         "min": -85570025,
-        "p10": -66970862,
-        "p25": -58454313,
-        "p75": -5380646,
-        "p90": -278525,
-        "top_5pct_share_of_positive_denominator": 246824635,
+        "p10": -67320741,
+        "p25": -59997874,
+        "p75": -5442335,
+        "p90": -1979132,
+        "top_5pct_share_of_positive_denominator": 230482590,
         "top_5pct_share_of_positive_numerator": 77767918
       }
     },
     "E_FIXED_H10000|delay_4|optimistic": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 563,
+        "cells_admitted": 85,
+        "cells_refused": 1051,
+        "censored_rule_never_triggered": 453,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 182,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 151,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 563
+          "X_RULE_NEVER_TRIGGERED": 453
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 83,
+        "at_or_below_zero": 77,
         "max": 77965918,
-        "median": -27716062,
+        "median": -31520296,
         "min": -85372025,
-        "p10": -66772862,
-        "p25": -58256313,
-        "p75": -5182646,
-        "p90": -80525,
-        "top_5pct_share_of_positive_denominator": 248804635,
+        "p10": -67122741,
+        "p25": -59799874,
+        "p75": -5244335,
+        "p90": -1781132,
+        "top_5pct_share_of_positive_denominator": 232066590,
         "top_5pct_share_of_positive_numerator": 77965918
       }
     },
     "E_FIXED_H10000|delay_4|stressed": {
       "coverage": {
-        "cells_admitted": 93,
-        "cells_refused": 1043,
-        "censored_rule_never_triggered": 563,
+        "cells_admitted": 85,
+        "cells_refused": 1051,
+        "censored_rule_never_triggered": 453,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 182,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 151,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 563
+          "X_RULE_NEVER_TRIGGERED": 453
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 85,
+        "at_or_below_zero": 79,
         "max": 73957918,
-        "median": -31724062,
+        "median": -35528296,
         "min": -89380025,
-        "p10": -70780862,
-        "p25": -62264313,
-        "p75": -9190646,
-        "p90": -4088525,
-        "top_5pct_share_of_positive_denominator": 213123744,
+        "p10": -71130741,
+        "p25": -63807874,
+        "p75": -9252335,
+        "p90": -5789132,
+        "top_5pct_share_of_positive_denominator": 204401699,
         "top_5pct_share_of_positive_numerator": 73957918
       }
     },
     "E_FIXED_H1000|delay_1|base": {
       "coverage": {
-        "cells_admitted": 197,
-        "cells_refused": 939,
-        "censored_rule_never_triggered": 430,
+        "cells_admitted": 183,
+        "cells_refused": 953,
+        "censored_rule_never_triggered": 338,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 232,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 195,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 430
+          "X_RULE_NEVER_TRIGGERED": 338
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 166,
+        "at_or_below_zero": 155,
         "max": 481092154,
-        "median": -14340172,
+        "median": -17411380,
         "min": -84252480,
-        "p10": -58999450,
-        "p25": -39376032,
-        "p75": -4926837,
+        "p10": -59111538,
+        "p25": -41510605,
+        "p75": -5074691,
         "p90": 13812844,
-        "top_5pct_share_of_positive_denominator": 2073043954,
+        "top_5pct_share_of_positive_denominator": 2030121759,
         "top_5pct_share_of_positive_numerator": 481092154
       }
     },
     "E_FIXED_H1000|delay_1|optimistic": {
       "coverage": {
-        "cells_admitted": 197,
-        "cells_refused": 939,
-        "censored_rule_never_triggered": 430,
+        "cells_admitted": 183,
+        "cells_refused": 953,
+        "censored_rule_never_triggered": 338,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 232,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 195,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 430
+          "X_RULE_NEVER_TRIGGERED": 338
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 165,
+        "at_or_below_zero": 154,
         "max": 481290154,
-        "median": -14142172,
+        "median": -17213380,
         "min": -84054480,
-        "p10": -58801450,
-        "p25": -39178032,
-        "p75": -4728837,
+        "p10": -58913538,
+        "p25": -41312605,
+        "p75": -4876691,
         "p90": 14010844,
-        "top_5pct_share_of_positive_denominator": 2079358094,
+        "top_5pct_share_of_positive_denominator": 2035841899,
         "top_5pct_share_of_positive_numerator": 481290154
       }
     },
     "E_FIXED_H1000|delay_1|stressed": {
       "coverage": {
-        "cells_admitted": 197,
-        "cells_refused": 939,
-        "censored_rule_never_triggered": 430,
+        "cells_admitted": 183,
+        "cells_refused": 953,
+        "censored_rule_never_triggered": 338,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 232,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 195,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 430
+          "X_RULE_NEVER_TRIGGERED": 338
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 171,
+        "at_or_below_zero": 159,
         "max": 477282154,
-        "median": -18150172,
+        "median": -21221380,
         "min": -88062480,
-        "p10": -62809450,
-        "p25": -43186032,
-        "p75": -8736837,
+        "p10": -62921538,
+        "p25": -45320605,
+        "p75": -8884691,
         "p90": 10002844,
-        "top_5pct_share_of_positive_denominator": 1966938631,
+        "top_5pct_share_of_positive_denominator": 1933291624,
         "top_5pct_share_of_positive_numerator": 477282154
       }
     },
     "E_FIXED_H1000|delay_2|base": {
       "coverage": {
-        "cells_admitted": 196,
-        "cells_refused": 940,
-        "censored_rule_never_triggered": 430,
+        "cells_admitted": 182,
+        "cells_refused": 954,
+        "censored_rule_never_triggered": 337,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 231,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 192,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 430
+          "X_RULE_NEVER_TRIGGERED": 337
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 165,
+        "at_or_below_zero": 154,
         "max": 514322506,
-        "median": -12116002,
+        "median": -17174836,
         "min": -85374594,
-        "p10": -59672632,
-        "p25": -40408766,
-        "p75": -5056647,
+        "p10": -59910411,
+        "p25": -40648366,
+        "p75": -5147122,
         "p90": 13812844,
-        "top_5pct_share_of_positive_denominator": 2059081160,
+        "top_5pct_share_of_positive_denominator": 2016158965,
         "top_5pct_share_of_positive_numerator": 514322506
       }
     },
     "E_FIXED_H1000|delay_2|optimistic": {
       "coverage": {
-        "cells_admitted": 196,
-        "cells_refused": 940,
-        "censored_rule_never_triggered": 430,
+        "cells_admitted": 182,
+        "cells_refused": 954,
+        "censored_rule_never_triggered": 337,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 231,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 192,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 430
+          "X_RULE_NEVER_TRIGGERED": 337
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 164,
+        "at_or_below_zero": 153,
         "max": 514520506,
-        "median": -11918002,
+        "median": -16976836,
         "min": -85176594,
-        "p10": -59474632,
-        "p25": -40210766,
-        "p75": -4858647,
+        "p10": -59712411,
+        "p25": -40450366,
+        "p75": -4949122,
         "p90": 14010844,
-        "top_5pct_share_of_positive_denominator": 2065395300,
+        "top_5pct_share_of_positive_denominator": 2021879105,
         "top_5pct_share_of_positive_numerator": 514520506
       }
     },
     "E_FIXED_H1000|delay_2|stressed": {
       "coverage": {
-        "cells_admitted": 196,
-        "cells_refused": 940,
-        "censored_rule_never_triggered": 430,
+        "cells_admitted": 182,
+        "cells_refused": 954,
+        "censored_rule_never_triggered": 337,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 231,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 192,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 430
+          "X_RULE_NEVER_TRIGGERED": 337
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 170,
+        "at_or_below_zero": 158,
         "max": 510512506,
-        "median": -15926002,
+        "median": -20984836,
         "min": -89184594,
-        "p10": -63482632,
-        "p25": -44218766,
-        "p75": -8866647,
+        "p10": -63720411,
+        "p25": -44458366,
+        "p75": -8957122,
         "p90": 10002844,
-        "top_5pct_share_of_positive_denominator": 1952969034,
+        "top_5pct_share_of_positive_denominator": 1919322027,
         "top_5pct_share_of_positive_numerator": 510512506
       }
     },
     "E_FIXED_H1000|delay_4|base": {
       "coverage": {
-        "cells_admitted": 197,
-        "cells_refused": 939,
-        "censored_rule_never_triggered": 413,
+        "cells_admitted": 182,
+        "cells_refused": 954,
+        "censored_rule_never_triggered": 318,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 228,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 189,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 413
+          "X_RULE_NEVER_TRIGGERED": 318
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 165,
+        "at_or_below_zero": 154,
         "max": 308442967,
-        "median": -10920200,
+        "median": -14482967,
         "min": -85374594,
-        "p10": -60204890,
-        "p25": -39028653,
-        "p75": -4926837,
+        "p10": -60320876,
+        "p25": -43658273,
+        "p75": -5138691,
         "p90": 12227483,
-        "top_5pct_share_of_positive_denominator": 1804133627,
+        "top_5pct_share_of_positive_denominator": 1750160092,
         "top_5pct_share_of_positive_numerator": 308442967
       }
     },
     "E_FIXED_H1000|delay_4|optimistic": {
       "coverage": {
-        "cells_admitted": 197,
-        "cells_refused": 939,
-        "censored_rule_never_triggered": 413,
+        "cells_admitted": 182,
+        "cells_refused": 954,
+        "censored_rule_never_triggered": 318,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 228,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 189,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 413
+          "X_RULE_NEVER_TRIGGERED": 318
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 164,
+        "at_or_below_zero": 153,
         "max": 308640967,
-        "median": -10722200,
+        "median": -14284967,
         "min": -85176594,
-        "p10": -60006890,
-        "p25": -38830653,
-        "p75": -4728837,
+        "p10": -60122876,
+        "p25": -43460273,
+        "p75": -4940691,
         "p90": 12425483,
-        "top_5pct_share_of_positive_denominator": 1810645767,
+        "top_5pct_share_of_positive_denominator": 1755880232,
         "top_5pct_share_of_positive_numerator": 308640967
       }
     },
     "E_FIXED_H1000|delay_4|stressed": {
       "coverage": {
-        "cells_admitted": 197,
-        "cells_refused": 939,
-        "censored_rule_never_triggered": 413,
+        "cells_admitted": 182,
+        "cells_refused": 954,
+        "censored_rule_never_triggered": 318,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_CAPACITY_REFUSED": 228,
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_CAPACITY_REFUSED": 189,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 413
+          "X_RULE_NEVER_TRIGGERED": 318
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 169,
+        "at_or_below_zero": 157,
         "max": 304632967,
-        "median": -14730200,
+        "median": -18292967,
         "min": -89184594,
-        "p10": -64014890,
-        "p25": -42838653,
-        "p75": -8736837,
+        "p10": -64130876,
+        "p25": -47468273,
+        "p75": -8948691,
         "p90": 8417483,
-        "top_5pct_share_of_positive_denominator": 1691361826,
+        "top_5pct_share_of_positive_denominator": 1650473479,
         "top_5pct_share_of_positive_numerator": 304632967
       }
     },
@@ -1228,12 +1272,13 @@
       "coverage": {
         "cells_admitted": 6,
         "cells_refused": 1130,
-        "censored_rule_never_triggered": 853,
+        "censored_rule_never_triggered": 710,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 853
+          "X_RULE_NEVER_TRIGGERED": 710
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1254,12 +1299,13 @@
       "coverage": {
         "cells_admitted": 6,
         "cells_refused": 1130,
-        "censored_rule_never_triggered": 853,
+        "censored_rule_never_triggered": 710,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 853
+          "X_RULE_NEVER_TRIGGERED": 710
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1280,12 +1326,13 @@
       "coverage": {
         "cells_admitted": 8,
         "cells_refused": 1128,
-        "censored_rule_never_triggered": 851,
+        "censored_rule_never_triggered": 708,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 851
+          "X_RULE_NEVER_TRIGGERED": 708
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1306,12 +1353,13 @@
       "coverage": {
         "cells_admitted": 6,
         "cells_refused": 1130,
-        "censored_rule_never_triggered": 851,
+        "censored_rule_never_triggered": 705,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 851
+          "X_RULE_NEVER_TRIGGERED": 705
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1332,12 +1380,13 @@
       "coverage": {
         "cells_admitted": 6,
         "cells_refused": 1130,
-        "censored_rule_never_triggered": 851,
+        "censored_rule_never_triggered": 705,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 851
+          "X_RULE_NEVER_TRIGGERED": 705
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1358,12 +1407,13 @@
       "coverage": {
         "cells_admitted": 8,
         "cells_refused": 1128,
-        "censored_rule_never_triggered": 849,
+        "censored_rule_never_triggered": 703,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 849
+          "X_RULE_NEVER_TRIGGERED": 703
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1384,12 +1434,13 @@
       "coverage": {
         "cells_admitted": 6,
         "cells_refused": 1130,
-        "censored_rule_never_triggered": 832,
+        "censored_rule_never_triggered": 683,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 832
+          "X_RULE_NEVER_TRIGGERED": 683
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1410,12 +1461,13 @@
       "coverage": {
         "cells_admitted": 6,
         "cells_refused": 1130,
-        "censored_rule_never_triggered": 832,
+        "censored_rule_never_triggered": 683,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 832
+          "X_RULE_NEVER_TRIGGERED": 683
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1436,12 +1488,13 @@
       "coverage": {
         "cells_admitted": 8,
         "cells_refused": 1128,
-        "censored_rule_never_triggered": 830,
+        "censored_rule_never_triggered": 681,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 830
+          "X_RULE_NEVER_TRIGGERED": 681
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1460,14 +1513,15 @@
     },
     "E_PEAK_DRAWDOWN_1_2|delay_1|base": {
       "coverage": {
-        "cells_admitted": 150,
-        "cells_refused": 986,
-        "censored_rule_never_triggered": 709,
+        "cells_admitted": 149,
+        "cells_refused": 987,
+        "censored_rule_never_triggered": 567,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 709
+          "X_RULE_NEVER_TRIGGERED": 567
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1479,47 +1533,49 @@
         "p10": -55210466,
         "p25": -42749068,
         "p75": -1681319,
-        "p90": 21621868,
-        "top_5pct_share_of_positive_denominator": 1512124299,
+        "p90": 20888569,
+        "top_5pct_share_of_positive_denominator": 1464803661,
         "top_5pct_share_of_positive_numerator": 391207211
       }
     },
     "E_PEAK_DRAWDOWN_1_2|delay_1|optimistic": {
       "coverage": {
-        "cells_admitted": 149,
-        "cells_refused": 987,
-        "censored_rule_never_triggered": 710,
+        "cells_admitted": 148,
+        "cells_refused": 988,
+        "censored_rule_never_triggered": 568,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 710
+          "X_RULE_NEVER_TRIGGERED": 568
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
         "at_or_below_zero": 113,
         "max": 391405211,
-        "median": -26787376,
+        "median": -27309904,
         "min": -91736848,
         "p10": -55012466,
-        "p25": -40673424,
-        "p75": -902256,
-        "p90": 21819868,
-        "top_5pct_share_of_positive_denominator": 1502889446,
+        "p25": -42551068,
+        "p75": -1483319,
+        "p90": 21086569,
+        "top_5pct_share_of_positive_denominator": 1455370808,
         "top_5pct_share_of_positive_numerator": 391405211
       }
     },
     "E_PEAK_DRAWDOWN_1_2|delay_1|stressed": {
       "coverage": {
-        "cells_admitted": 154,
-        "cells_refused": 982,
-        "censored_rule_never_triggered": 705,
+        "cells_admitted": 153,
+        "cells_refused": 983,
+        "censored_rule_never_triggered": 563,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 705
+          "X_RULE_NEVER_TRIGGERED": 563
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1531,21 +1587,22 @@
         "p10": -57155895,
         "p25": -46559068,
         "p75": -5491319,
-        "p90": 17078569,
-        "top_5pct_share_of_positive_denominator": 1399789594,
+        "p90": 15987067,
+        "top_5pct_share_of_positive_denominator": 1356278956,
         "top_5pct_share_of_positive_numerator": 387397211
       }
     },
     "E_PEAK_DRAWDOWN_1_2|delay_2|base": {
       "coverage": {
-        "cells_admitted": 146,
-        "cells_refused": 990,
-        "censored_rule_never_triggered": 711,
+        "cells_admitted": 145,
+        "cells_refused": 991,
+        "censored_rule_never_triggered": 566,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 711
+          "X_RULE_NEVER_TRIGGERED": 566
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1557,21 +1614,22 @@
         "p10": -54109096,
         "p25": -43628446,
         "p75": -3842738,
-        "p90": 22890996,
-        "top_5pct_share_of_positive_denominator": 1435104011,
+        "p90": 21621868,
+        "top_5pct_share_of_positive_denominator": 1387783373,
         "top_5pct_share_of_positive_numerator": 351251640
       }
     },
     "E_PEAK_DRAWDOWN_1_2|delay_2|optimistic": {
       "coverage": {
-        "cells_admitted": 146,
-        "cells_refused": 990,
-        "censored_rule_never_triggered": 711,
+        "cells_admitted": 145,
+        "cells_refused": 991,
+        "censored_rule_never_triggered": 566,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 711
+          "X_RULE_NEVER_TRIGGERED": 566
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1583,21 +1641,22 @@
         "p10": -53911096,
         "p25": -43430446,
         "p75": -4263636,
-        "p90": 23088996,
-        "top_5pct_share_of_positive_denominator": 1433338852,
+        "p90": 21819868,
+        "top_5pct_share_of_positive_denominator": 1385820214,
         "top_5pct_share_of_positive_numerator": 351449640
       }
     },
     "E_PEAK_DRAWDOWN_1_2|delay_2|stressed": {
       "coverage": {
-        "cells_admitted": 150,
-        "cells_refused": 986,
-        "censored_rule_never_triggered": 707,
+        "cells_admitted": 149,
+        "cells_refused": 987,
+        "censored_rule_never_triggered": 562,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 707
+          "X_RULE_NEVER_TRIGGERED": 562
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
@@ -1609,106 +1668,110 @@
         "p10": -57316436,
         "p25": -45048967,
         "p75": -8167313,
-        "p90": 19080996,
-        "top_5pct_share_of_positive_denominator": 1332050766,
+        "p90": 17811868,
+        "top_5pct_share_of_positive_denominator": 1288540128,
         "top_5pct_share_of_positive_numerator": 347441640
       }
     },
     "E_PEAK_DRAWDOWN_1_2|delay_4|base": {
       "coverage": {
-        "cells_admitted": 143,
-        "cells_refused": 993,
-        "censored_rule_never_triggered": 695,
+        "cells_admitted": 142,
+        "cells_refused": 994,
+        "censored_rule_never_triggered": 547,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 695
+          "X_RULE_NEVER_TRIGGERED": 547
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
         "at_or_below_zero": 113,
         "max": 272482229,
-        "median": -32372547,
+        "median": -32488754,
         "min": -91934848,
         "p10": -56805147,
         "p25": -45131943,
-        "p75": -6021669,
-        "p90": 22890996,
-        "top_5pct_share_of_positive_denominator": 1320940365,
+        "p75": -8044981,
+        "p90": 21621868,
+        "top_5pct_share_of_positive_denominator": 1273619727,
         "top_5pct_share_of_positive_numerator": 272482229
       }
     },
     "E_PEAK_DRAWDOWN_1_2|delay_4|optimistic": {
       "coverage": {
-        "cells_admitted": 143,
-        "cells_refused": 993,
-        "censored_rule_never_triggered": 695,
+        "cells_admitted": 142,
+        "cells_refused": 994,
+        "censored_rule_never_triggered": 547,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 695
+          "X_RULE_NEVER_TRIGGERED": 547
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
         "at_or_below_zero": 113,
         "max": 272680229,
-        "median": -32174547,
+        "median": -32290754,
         "min": -91736848,
         "p10": -56607147,
         "p25": -44933943,
-        "p75": -5823669,
-        "p90": 23088996,
-        "top_5pct_share_of_positive_denominator": 1320900225,
+        "p75": -7846981,
+        "p90": 21819868,
+        "top_5pct_share_of_positive_denominator": 1273381587,
         "top_5pct_share_of_positive_numerator": 272680229
       }
     },
     "E_PEAK_DRAWDOWN_1_2|delay_4|stressed": {
       "coverage": {
-        "cells_admitted": 147,
-        "cells_refused": 989,
-        "censored_rule_never_triggered": 691,
+        "cells_admitted": 146,
+        "cells_refused": 990,
+        "censored_rule_never_triggered": 543,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 691
+          "X_RULE_NEVER_TRIGGERED": 543
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
         "at_or_below_zero": 118,
         "max": 268672229,
-        "median": -35436460,
+        "median": -36094772,
         "min": -95744848,
         "p10": -57798584,
         "p25": -48127371,
-        "p75": -11152177,
-        "p90": 19080996,
-        "top_5pct_share_of_positive_denominator": 1237370009,
+        "p75": -11854981,
+        "p90": 17811868,
+        "top_5pct_share_of_positive_denominator": 1193859371,
         "top_5pct_share_of_positive_numerator": 268672229
       }
     },
     "E_PEAK_DRAWDOWN_1_4|delay_1|base": {
       "coverage": {
-        "cells_admitted": 35,
-        "cells_refused": 1101,
-        "censored_rule_never_triggered": 824,
+        "cells_admitted": 34,
+        "cells_refused": 1102,
+        "censored_rule_never_triggered": 682,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 824
+          "X_RULE_NEVER_TRIGGERED": 682
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 32,
+        "at_or_below_zero": 31,
         "max": 155060929,
-        "median": -46311498,
+        "median": -47892509,
         "min": -91934848,
         "p10": -70388913,
         "p25": -57165108,
@@ -1720,21 +1783,22 @@
     },
     "E_PEAK_DRAWDOWN_1_4|delay_1|optimistic": {
       "coverage": {
-        "cells_admitted": 35,
-        "cells_refused": 1101,
-        "censored_rule_never_triggered": 824,
+        "cells_admitted": 34,
+        "cells_refused": 1102,
+        "censored_rule_never_triggered": 682,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 824
+          "X_RULE_NEVER_TRIGGERED": 682
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 32,
+        "at_or_below_zero": 31,
         "max": 155258929,
-        "median": -46113498,
+        "median": -48002061,
         "min": -91736848,
         "p10": -70190913,
         "p25": -56967108,
@@ -1746,19 +1810,20 @@
     },
     "E_PEAK_DRAWDOWN_1_4|delay_1|stressed": {
       "coverage": {
-        "cells_admitted": 40,
-        "cells_refused": 1096,
-        "censored_rule_never_triggered": 819,
+        "cells_admitted": 39,
+        "cells_refused": 1097,
+        "censored_rule_never_triggered": 677,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 148,
           "X_NO_ENTRY_OBSERVATION": 250,
-          "X_RULE_NEVER_TRIGGERED": 819
+          "X_RULE_NEVER_TRIGGERED": 677
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 36,
+        "at_or_below_zero": 35,
         "max": 151250929,
         "median": -51099225,
         "min": -95744848,
@@ -1772,21 +1837,22 @@
     },
     "E_PEAK_DRAWDOWN_1_4|delay_2|base": {
       "coverage": {
-        "cells_admitted": 35,
-        "cells_refused": 1101,
-        "censored_rule_never_triggered": 822,
+        "cells_admitted": 34,
+        "cells_refused": 1102,
+        "censored_rule_never_triggered": 677,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 822
+          "X_RULE_NEVER_TRIGGERED": 677
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 32,
+        "at_or_below_zero": 31,
         "max": 134142861,
-        "median": -47892509,
+        "median": -48983499,
         "min": -91934848,
         "p10": -72128873,
         "p25": -59713137,
@@ -1798,21 +1864,22 @@
     },
     "E_PEAK_DRAWDOWN_1_4|delay_2|optimistic": {
       "coverage": {
-        "cells_admitted": 35,
-        "cells_refused": 1101,
-        "censored_rule_never_triggered": 822,
+        "cells_admitted": 34,
+        "cells_refused": 1102,
+        "censored_rule_never_triggered": 677,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 822
+          "X_RULE_NEVER_TRIGGERED": 677
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 32,
+        "at_or_below_zero": 31,
         "max": 134340861,
-        "median": -48785499,
+        "median": -49345525,
         "min": -91736848,
         "p10": -71930873,
         "p25": -59515137,
@@ -1824,19 +1891,20 @@
     },
     "E_PEAK_DRAWDOWN_1_4|delay_2|stressed": {
       "coverage": {
-        "cells_admitted": 40,
-        "cells_refused": 1096,
-        "censored_rule_never_triggered": 817,
+        "cells_admitted": 39,
+        "cells_refused": 1097,
+        "censored_rule_never_triggered": 672,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 151,
           "X_NO_ENTRY_OBSERVATION": 252,
-          "X_RULE_NEVER_TRIGGERED": 817
+          "X_RULE_NEVER_TRIGGERED": 672
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 36,
+        "at_or_below_zero": 35,
         "max": 130332861,
         "median": -51099225,
         "min": -95744848,
@@ -1850,21 +1918,22 @@
     },
     "E_PEAK_DRAWDOWN_1_4|delay_4|base": {
       "coverage": {
-        "cells_admitted": 35,
-        "cells_refused": 1101,
-        "censored_rule_never_triggered": 803,
+        "cells_admitted": 34,
+        "cells_refused": 1102,
+        "censored_rule_never_triggered": 655,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 803
+          "X_RULE_NEVER_TRIGGERED": 655
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 32,
+        "at_or_below_zero": 31,
         "max": 92922571,
-        "median": -47304485,
+        "median": -47373305,
         "min": -91934848,
         "p10": -72194288,
         "p25": -59884906,
@@ -1876,21 +1945,22 @@
     },
     "E_PEAK_DRAWDOWN_1_4|delay_4|optimistic": {
       "coverage": {
-        "cells_admitted": 35,
-        "cells_refused": 1101,
-        "censored_rule_never_triggered": 803,
+        "cells_admitted": 34,
+        "cells_refused": 1102,
+        "censored_rule_never_triggered": 655,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 803
+          "X_RULE_NEVER_TRIGGERED": 655
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 32,
+        "at_or_below_zero": 31,
         "max": 93120571,
-        "median": -47106485,
+        "median": -47175305,
         "min": -91736848,
         "p10": -71996288,
         "p25": -59686906,
@@ -1902,19 +1972,20 @@
     },
     "E_PEAK_DRAWDOWN_1_4|delay_4|stressed": {
       "coverage": {
-        "cells_admitted": 40,
-        "cells_refused": 1096,
-        "censored_rule_never_triggered": 798,
+        "cells_admitted": 39,
+        "cells_refused": 1097,
+        "censored_rule_never_triggered": 650,
         "cohort_size": 1136,
         "refused_by_code": {
-          "X_ENTRY_UNPRICEABLE": 27,
+          "X_ENTRY_UNPRICEABLE": 22,
+          "X_NOT_IN_B15M_UNIVERSE": 154,
           "X_NO_ENTRY_OBSERVATION": 271,
-          "X_RULE_NEVER_TRIGGERED": 798
+          "X_RULE_NEVER_TRIGGERED": 650
         }
       },
       "not_a_return": "no figure here is a return, a profit, an expected value or a performance result, and none may be described as one",
       "outcome": {
-        "at_or_below_zero": 37,
+        "at_or_below_zero": 36,
         "max": 89112571,
         "median": -51183305,
         "min": -95744848,
@@ -1942,8 +2013,8 @@
     "recommendation": "no exit rule is recommended; the grid is reported, never chosen from.",
     "return": "no figure here is a return, a profit or an expected value."
   },
-  "population_is_broader_than_b15m": "this universe includes launches a live process would have missed: uncaptured, late, or fork-orphaned entries. It is therefore strictly MORE inclusive than B15M's, and its figures are NOT comparable to B15L's or B15M's, are not a continuation of them, and may never be presented as such.",
-  "preregistration_canonical_sha256": "7531abbf64578388559c255ba7587daf243e8b1c7d0f33ec0f44a6bf4c8b929c",
+  "population_rule": "B15M's universe MINUS the capture-sampling artifact, and nothing else. A cell is admitted when: (1) the curve carries a t0 coordinate and a decodable fee schedule; (2) the entry coordinate is t0_slot + delay_slots, the launch-plus-delay rule of b15h_prospective_entry.entry_target_slot; (3) the first observation at or after that coordinate is no more than max_lateness_slots late against it, using B15L's own assert_fresh tolerance; (4) b15m.is_admissible holds, applied by call.",
+  "preregistration_canonical_sha256": "f860cd75fcef159f036c303a20abf095af5411d3b1eb8c809214cde330573644",
   "rules_inherited_from": {
     "canonical_sha256": "80017c689b69d986263920cfad20fdbf61fb1b29cf33f876c0fd917525bac6e7",
     "source": "B19B_EXIT_TIMING_POLICY_V1"
@@ -1955,9 +2026,12 @@
     "curves_with_a_t0_coordinate": 1136,
     "entry_coordinate_rule": "signal_slot = t0_slot; b19b adds the delay. Derived from b15h_prospective_entry.entry_target_slot(t0_slot, delay_slots) = t0_slot + delay_slots, which is the universe's own definition, not a choice made here.",
     "evaluable_cohort": 1136,
+    "max_lateness_slots_inherited": 150,
     "statement": "these are ceilings, not results. No cell count below can exceed 960 however the rules behave."
   },
   "study": "B19F_EXIT_TIMING_HISTORICAL",
+  "the_one_condition_dropped": "b15l.load_entries selects WHERE t.state='captured' AND o.fork_state='confirmed'. state='captured' is the ONLY condition dropped: it records which launches a running shadow process happened to catch, which is a property of that process and not of the market, and it has no historical counterpart. fork_state='confirmed' is not dropped but AUTOMATICALLY SATISFIED: a historical corpus is read from the canonical finalized chain, so every observation in it is fork-confirmed by construction. The lateness tolerance is NOT dropped -- it is inherited and enforced.",
+  "what_this_population_is_not": "it is not B15M's universe and its figures are not comparable to B15L's or B15M's, are not a continuation of them, and may never be presented as such. It differs by the capture sampling and by that alone, which is a real difference and is stated rather than characterised.",
   "window_provenance": {
     "cohort_census": {
       "evaluable": 1136,
