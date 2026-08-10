@@ -40,6 +40,12 @@ IDENTITY = WINDOW_DIR / "b11a_identity.sqlite"
 SUBSAMPLE = WINDOW_DIR / "b11a_subsample.sqlite"
 LEDGER = ROOT / "research" / "B19_EVALUATION_LEDGER.json"
 
+# The historical-universe studies. Each pins its OWN document and the document it inherits from.
+B19F_PREREG = ROOT / "research" / "B19F_EXIT_TIMING_HISTORICAL_PREREGISTRATION.json"
+B19F_SHA256 = "7531abbf64578388559c255ba7587daf243e8b1c7d0f33ec0f44a6bf4c8b929c"
+B19G_PREREG = ROOT / "research" / "B19G_CAPACITY_WALL_HISTORICAL_PREREGISTRATION.json"
+B19G_SHA256 = "7cfd9f23e2717d247f43b53a0356b3afd8b72f8a0a920a26586f701f0bf443f0"
+
 
 def _load(name, filename):
     spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / filename)
@@ -573,7 +579,33 @@ def evaluate_b19d(window, progress=False):
     }
 
 
-def evaluate_b19b(window, progress=False):
+def verify_historical(path, expected, inherited_module):
+    """Verify BOTH pins: this document, and the document it inherits its rules from.
+
+    A study that inherits by pin has two ways to become something other than what it says. Its own
+    document can change, and the document it points at can change underneath it. Checking only the
+    first would let every exit rule move while the study still verified clean, which is worse than
+    not pinning at all -- it would carry a proof of integrity it no longer had.
+    """
+    document = json.loads(pathlib.Path(path).read_bytes())
+    actual = hashlib.sha256(
+        json.dumps(document, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    if actual != expected:
+        raise WindowRefused(
+            f"{path.name}: canonical sha256 {actual} does not match the pin {expected}; a study "
+            "does not evaluate against an unpinned specification")
+    inherited = document["everything_else_is_inherited_by_pin_not_restated"]
+    if inherited["canonical_sha256"] != inherited_module.PREREG_CANONICAL_SHA256:
+        raise WindowRefused(
+            f"{path.name} inherits from {inherited['source']} at "
+            f"{inherited['canonical_sha256']}, but that module pins "
+            f"{inherited_module.PREREG_CANONICAL_SHA256}. The inherited rules are not the rules "
+            "this document says it inherits")
+    inherited_module.verify_preregistration()
+    return document
+
+
+def evaluate_b19f(window, progress=False):
     """B19B over the window. Every figure is computed inside b19b, from b19b's frozen document.
 
     THE ENTRY COORDINATE IS DERIVED, NOT CHOSEN. B19B's population is "the IDENTICAL admissible
@@ -590,7 +622,7 @@ def evaluate_b19b(window, progress=False):
     re-implemented here.
     """
     study = _load("b19b_exit_timing_policy", "b19b_exit_timing_policy.py")
-    study.verify_preregistration()
+    document = verify_historical(B19F_PREREG, B19F_SHA256, study)
     b15h = _load("b15h_prospective_entry", "b15h_prospective_entry.py")
 
     priceable = {curve for curve in window["paths"] if window["schedules"].get(curve) is not None}
@@ -648,8 +680,15 @@ def evaluate_b19b(window, progress=False):
 
     census = window["provenance"]["cohort_census"]
     return {
-        "study": "B19B_EXIT_TIMING_POLICY",
-        "preregistration_canonical_sha256": study.PREREG_CANONICAL_SHA256,
+        "study": "B19F_EXIT_TIMING_HISTORICAL",
+        "preregistration_canonical_sha256": B19F_SHA256,
+        "rules_inherited_from": {"source": "B19B_EXIT_TIMING_POLICY_V1",
+                                 "canonical_sha256": study.PREREG_CANONICAL_SHA256},
+        "label": document["status_locks"]["label"],
+        "population_is_broader_than_b15m": document["population"][
+            "this_is_broader_than_b15m_and_that_is_stated_not_hidden"],
+        "direction_of_the_bias": document["population"][
+            "the_direction_of_the_bias_is_declared_in_advance"],
         "executable": False,
         "execution_status": "never_executed",
         "denominator": {
@@ -711,10 +750,10 @@ def select_cell(path, t0_slot, delay, horizon_slots):
     return entry_b, exit_b
 
 
-def evaluate_b19c(window, progress=False):
-    """B19C over the window. Capacity is computed inside b19c, which computes it via B15M."""
+def evaluate_b19g(window, progress=False):
+    """B19G over the window. Capacity is computed inside b19c, which computes it via B15M."""
     study = _load("b19c_capacity_wall", "b19c_capacity_wall.py")
-    study.verify_preregistration()
+    document = verify_historical(B19G_PREREG, B19G_SHA256, study)
 
     priceable = {curve for curve in window["paths"] if window["schedules"].get(curve) is not None}
     with_t0 = {curve for curve in window["paths"]
@@ -767,8 +806,15 @@ def evaluate_b19c(window, progress=False):
 
     census = window["provenance"]["cohort_census"]
     return {
-        "study": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE",
-        "preregistration_canonical_sha256": study.PREREG_CANONICAL_SHA256,
+        "study": "B19G_CAPACITY_WALL_HISTORICAL",
+        "preregistration_canonical_sha256": B19G_SHA256,
+        "rules_inherited_from": {"source": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1",
+                                 "canonical_sha256": study.PREREG_CANONICAL_SHA256},
+        "label": document["status_locks"]["label"],
+        "population_is_broader_than_b15m": document["population"][
+            "this_is_broader_than_b15m_and_that_is_stated_not_hidden"],
+        "previously_cap_hit_subgroup": document[
+            "everything_else_is_inherited_by_pin_not_restated"]["what_is_NOT_inherited"],
         "executable": False,
         "execution_status": "never_executed",
         "denominator": {
@@ -851,24 +897,24 @@ def main(argv=None):
         ROOT / "research" / "B19D_REHEARSAL_BURNED_NOT_A_RESULT.json"))
     rehearsal.add_argument("--progress", action="store_true")
     runner_b = subparsers.add_parser(
-        "run-b19b", help="THE SINGLE PERMITTED EVALUATION PASS for B19B. Spends its ledger entry.")
-    runner_b.add_argument("--out", default=str(ROOT / "research" / "B19B_EVALUATION_RESULT.json"))
+        "run-b19f", help="THE SINGLE PERMITTED EVALUATION PASS for B19B. Spends its ledger entry.")
+    runner_b.add_argument("--out", default=str(ROOT / "research" / "B19F_EVALUATION_RESULT.json"))
     runner_b.add_argument("--progress", action="store_true")
     runner_b.add_argument("--supersede-reason", default=None)
     rehearsal_b = subparsers.add_parser(
-        "rehearse-b19b", help="run B19B end to end on the BURNED corpus. Spends no ledger entry.")
+        "rehearse-b19f", help="run B19B end to end on the BURNED corpus. Spends no ledger entry.")
     rehearsal_b.add_argument("--out", default=str(
-        ROOT / "research" / "B19B_REHEARSAL_BURNED_NOT_A_RESULT.json"))
+        ROOT / "research" / "B19F_REHEARSAL_BURNED_NOT_A_RESULT.json"))
     rehearsal_b.add_argument("--progress", action="store_true")
     runner_c = subparsers.add_parser(
-        "run-b19c", help="THE SINGLE PERMITTED EVALUATION PASS for B19C. Spends its ledger entry.")
-    runner_c.add_argument("--out", default=str(ROOT / "research" / "B19C_EVALUATION_RESULT.json"))
+        "run-b19g", help="THE SINGLE PERMITTED EVALUATION PASS for B19C. Spends its ledger entry.")
+    runner_c.add_argument("--out", default=str(ROOT / "research" / "B19G_EVALUATION_RESULT.json"))
     runner_c.add_argument("--progress", action="store_true")
     runner_c.add_argument("--supersede-reason", default=None)
     rehearsal_c = subparsers.add_parser(
-        "rehearse-b19c", help="run B19C end to end on the BURNED corpus. Spends no ledger entry.")
+        "rehearse-b19g", help="run B19C end to end on the BURNED corpus. Spends no ledger entry.")
     rehearsal_c.add_argument("--out", default=str(
-        ROOT / "research" / "B19C_REHEARSAL_BURNED_NOT_A_RESULT.json"))
+        ROOT / "research" / "B19G_REHEARSAL_BURNED_NOT_A_RESULT.json"))
     rehearsal_c.add_argument("--progress", action="store_true")
     args = parser.parse_args(argv)
 
@@ -889,9 +935,9 @@ def main(argv=None):
         }, indent=2, sort_keys=True))
         return 0
 
-    if args.command in ("rehearse-b19c", "run-b19c"):
-        rehearsing = args.command == "rehearse-b19c"
-        study_id = "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1"
+    if args.command in ("rehearse-b19g", "run-b19g"):
+        rehearsing = args.command == "rehearse-b19g"
+        study_id = "B19G_CAPACITY_WALL_HISTORICAL_V1"
         if not rehearsing:
             assert_unused(study_id, supersede_reason=args.supersede_reason)
         window = build(
@@ -901,7 +947,7 @@ def main(argv=None):
             subsample_path=BURNED_COHORT if rehearsing else SUBSAMPLE,
             cohort_table="outcome" if rehearsing else "cohort_identity",
             rehearsal=rehearsing, progress=1000 if args.progress else None)
-        result = evaluate_b19c(window, progress=args.progress)
+        result = evaluate_b19g(window, progress=args.progress)
         result["window_sha256"] = window_digest(window)
         if rehearsing:
             result["status"] = ("BURNED DEVELOPMENT DATA. Not an evaluation result. Proves the "
@@ -919,9 +965,9 @@ def main(argv=None):
                           "result_sha256": result_sha256}, indent=2, sort_keys=True))
         return 0
 
-    if args.command in ("rehearse-b19b", "run-b19b"):
-        rehearsing = args.command == "rehearse-b19b"
-        study_id = "B19B_EXIT_TIMING_POLICY_V1"
+    if args.command in ("rehearse-b19f", "run-b19f"):
+        rehearsing = args.command == "rehearse-b19f"
+        study_id = "B19F_EXIT_TIMING_HISTORICAL_V1"
         if not rehearsing:
             assert_unused(study_id, supersede_reason=args.supersede_reason)
         window = build(
@@ -931,7 +977,7 @@ def main(argv=None):
             subsample_path=BURNED_COHORT if rehearsing else SUBSAMPLE,
             cohort_table="outcome" if rehearsing else "cohort_identity",
             rehearsal=rehearsing, progress=1000 if args.progress else None)
-        result = evaluate_b19b(window, progress=args.progress)
+        result = evaluate_b19f(window, progress=args.progress)
         result["window_sha256"] = window_digest(window)
         if rehearsing:
             result["status"] = ("BURNED DEVELOPMENT DATA. Not an evaluation result. Proves the "

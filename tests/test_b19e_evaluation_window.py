@@ -283,6 +283,69 @@ class TheInvariantsAreEnforcedNotEyeballed(unittest.TestCase):
             B.assert_complements_partition(NoComplements, {"per_signal": {}}, {"features": {}})
 
 
+class InheritingByPinIsVerifiedBothWays(unittest.TestCase):
+    """B19F and B19G restate no rule; they inherit by pin. Both pins must therefore be checked.
+
+    A study that inherits has two ways to become something other than what it says: its own
+    document can change, or the document it points at can change underneath it. Checking only the
+    first would let every exit rule move while the study still verified clean -- worse than not
+    pinning at all, because it would carry a proof of integrity it no longer had.
+    """
+
+    class _Inherited:
+        PREREG_CANONICAL_SHA256 = (
+            "80017c689b69d986263920cfad20fdbf61fb1b29cf33f876c0fd917525bac6e7")
+
+        @staticmethod
+        def verify_preregistration():
+            return {}
+
+    def test_both_pins_verify_on_the_frozen_documents(self):
+        for path, pin, source in (
+                (B.B19F_PREREG, B.B19F_SHA256, "b19b_exit_timing_policy"),
+                (B.B19G_PREREG, B.B19G_SHA256, "b19c_capacity_wall")):
+            with self.subTest(document=path.name):
+                module = _load(source, f"{source}.py")
+                document = B.verify_historical(path, pin, module)
+                self.assertEqual(
+                    document["everything_else_is_inherited_by_pin_not_restated"]["canonical_sha256"],
+                    module.PREREG_CANONICAL_SHA256)
+
+    def test_a_changed_own_document_is_refused(self):
+        with self.assertRaisesRegex(B.WindowRefused, "does not match the pin"):
+            B.verify_historical(B.B19F_PREREG, "0" * 64, self._Inherited)
+
+    def test_a_drifting_inherited_document_is_refused(self):
+        """The failure the second pin exists for: B19B's rules move, B19F still looks clean."""
+        drifted = type("Drifted", (), {
+            "PREREG_CANONICAL_SHA256": "f" * 64,
+            "verify_preregistration": staticmethod(lambda: {}),
+        })
+        with self.assertRaisesRegex(B.WindowRefused, "not the rules"):
+            B.verify_historical(B.B19F_PREREG, B.B19F_SHA256, drifted)
+
+    def test_the_new_documents_change_population_and_nothing_else(self):
+        """Asserted from the documents, so a later edit adding a rule cannot pass unnoticed."""
+        for path in (B.B19F_PREREG, B.B19G_PREREG):
+            document = json.loads(path.read_bytes())
+            with self.subTest(document=path.name):
+                self.assertIn("population", document)
+                inherited = document["everything_else_is_inherited_by_pin_not_restated"]
+                self.assertIn("population", inherited["what_is_NOT_inherited"])
+                # No frozen rule set may be RESTATED here; restating is how two documents drift.
+                for restated in ("frozen_exit_rules", "frozen_inputs_unchanged", "the_wall_shape"):
+                    self.assertNotIn(restated, document,
+                                     f"{restated} must be inherited by pin, never copied")
+
+    def test_neither_document_spends_the_original_studys_pass(self):
+        """B19B and B19C were established not evaluable here; their passes must stay unspent."""
+        source = (ROOT / "scripts" / "b19e_evaluation_window.py").read_text()
+        for original in ("B19B_EXIT_TIMING_POLICY_V1", "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1"):
+            self.assertNotIn(f'study_id = "{original}"', source,
+                             "the ledger must never record a pass against a study that cannot be "
+                             "evaluated on this window")
+
+
 class OnePassPerStudy(unittest.TestCase):
     def setUp(self):
         self.directory = pathlib.Path(tempfile.mkdtemp(prefix="b19e-ledger-"))

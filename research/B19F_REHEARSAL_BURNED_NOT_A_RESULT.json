@@ -5,6 +5,7 @@
     "statement": "1601 curves were subsampled; 465 are mayhem-mode and out of the frozen regime; 1136 are evaluable. Every coverage figure is out of 1136.",
     "subsampled": 1601
   },
+  "direction_of_the_bias": "for a NEGATIVE result this population is conservative: it grants opportunities a live bot could not have taken, so a rule that fails here also fails on any subset a live feed could actually capture. For a POSITIVE result it is OPTIMISTIC in exactly the same way, and any positive figure below must be read as an upper bound that no live system could attain. This asymmetry is stated before any outcome so it cannot be invoked selectively afterwards.",
   "executable": false,
   "execution_status": "never_executed",
   "family": {
@@ -1926,6 +1927,7 @@
       }
     }
   },
+  "label": "EXIT_TIMING_HISTORICAL_DIAGNOSTIC",
   "multiplicity": {
     "cells_reported": 72,
     "family_size": 24,
@@ -1940,7 +1942,12 @@
     "recommendation": "no exit rule is recommended; the grid is reported, never chosen from.",
     "return": "no figure here is a return, a profit or an expected value."
   },
-  "preregistration_canonical_sha256": "80017c689b69d986263920cfad20fdbf61fb1b29cf33f876c0fd917525bac6e7",
+  "population_is_broader_than_b15m": "this universe includes launches a live process would have missed: uncaptured, late, or fork-orphaned entries. It is therefore strictly MORE inclusive than B15M's, and its figures are NOT comparable to B15L's or B15M's, are not a continuation of them, and may never be presented as such.",
+  "preregistration_canonical_sha256": "7531abbf64578388559c255ba7587daf243e8b1c7d0f33ec0f44a6bf4c8b929c",
+  "rules_inherited_from": {
+    "canonical_sha256": "80017c689b69d986263920cfad20fdbf61fb1b29cf33f876c0fd917525bac6e7",
+    "source": "B19B_EXIT_TIMING_POLICY_V1"
+  },
   "status": "BURNED DEVELOPMENT DATA. Not an evaluation result. Proves the machinery executes; spends no ledger entry.",
   "structural_ceilings_known_before_any_outcome": {
     "curves_that_could_yield_a_cell": 960,
@@ -1950,7 +1957,7 @@
     "evaluable_cohort": 1136,
     "statement": "these are ceilings, not results. No cell count below can exceed 960 however the rules behave."
   },
-  "study": "B19B_EXIT_TIMING_POLICY",
+  "study": "B19F_EXIT_TIMING_HISTORICAL",
   "window_provenance": {
     "cohort_census": {
       "evaluable": 1136,
