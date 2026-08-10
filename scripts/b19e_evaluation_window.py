@@ -63,17 +63,57 @@ class WindowRefused(RuntimeError):
 # Freshness. Asserted against the burned range, never assumed from a filename.
 # ------------------------------------------------------------------------------------------------
 
+BURNED_PATHS = ROOT / "research" / "b10b_observed_paths.sqlite"
+
+
+def burned_extent(burned_paths=BURNED_PATHS, declared=None):
+    """How far the burned corpus ACTUALLY reaches, derived from it rather than restated.
+
+    B16A.BURNED_RANGE is (433,894,233, 434,097,833) and describes the window the burned CREATES
+    were drawn from. The burned OBSERVATIONS run to 435,536,000, because a curve keeps trading long
+    after it launches. Checking freshness against the create window alone would therefore accept a
+    window overlapping 1.4 million slots of data the studies were developed against, and it would
+    pass for the wrong reason rather than fail.
+
+    Every hand-maintained copy of a bound drifts from the thing it describes. This reads the bound
+    off the artifact, and falls back to the declared constant only when the burned corpus is absent
+    -- announcing that fallback in the return value, because a freshness check that silently
+    weakened itself is worse than none.
+    """
+    low, high = B16A.BURNED_RANGE if declared is None else declared
+    path = pathlib.Path(burned_paths)
+    if not path.exists():
+        return {"low": low, "high": high, "source": "declared_constant_only",
+                "warning": ("the burned path corpus is absent, so the extent could not be derived; "
+                            "this bound is the CREATE window and is narrower than the data")}
+    connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        observed_low, observed_high = connection.execute(
+            "SELECT MIN(slot), MAX(slot) FROM observation").fetchone()
+    finally:
+        connection.close()
+    if observed_low is None:
+        return {"low": low, "high": high, "source": "declared_constant_only",
+                "warning": "the burned path corpus carries no observations"}
+    return {"low": min(low, observed_low), "high": max(high, observed_high),
+            "source": "derived_from_the_burned_corpus",
+            "declared_create_window": [low, high],
+            "observed_extent": [observed_low, observed_high]}
+
+
 def assert_fresh(paths_path=PATHS, burned=None):
     """No observation may fall inside the burned development range.
 
-    The studies were developed against B8b/B9/B10/B16, whose corpus sits at slots
-    433,894,233-434,097,833. An evaluation that touched any of it would be reporting a result on
-    data the implementation had already seen -- the exact thing the blind-authorship discipline
-    exists to prevent, and undetectable after the fact from the report alone.
+    The studies were developed against B8b/B9/B10/B16. An evaluation that touched any of it would
+    be reporting a result on data the implementation had already seen -- the exact thing the
+    blind-authorship discipline exists to prevent, and undetectable after the fact from the report
+    alone.
 
     Checked by slot rather than by path name because a filename is a claim and a slot is evidence.
     """
-    low, high = B16A.BURNED_RANGE if burned is None else burned
+    extent = burned_extent() if burned is None else {"low": burned[0], "high": burned[1],
+                                                     "source": "supplied"}
+    low, high = extent["low"], extent["high"]
     connection = sqlite3.connect(f"file:{pathlib.Path(paths_path)}?mode=ro", uri=True)
     try:
         overlap = connection.execute(
@@ -90,7 +130,8 @@ def assert_fresh(paths_path=PATHS, burned=None):
     if span[0] is None:
         raise WindowRefused("the window carries no observations at all")
     return {"window_min_slot": span[0], "window_max_slot": span[1],
-            "burned_range": [low, high], "overlap_observations": 0}
+            "burned_range": [low, high], "burned_extent": extent,
+            "clear_of_burned_by_slots": span[0] - high, "overlap_observations": 0}
 
 
 # ------------------------------------------------------------------------------------------------

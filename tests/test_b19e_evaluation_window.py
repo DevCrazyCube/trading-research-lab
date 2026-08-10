@@ -83,6 +83,63 @@ class FreshnessIsEvidenceNotAFilename(unittest.TestCase):
             B.assert_fresh(self.paths)
 
 
+class TheBurnedBoundIsDerivedNotRestated(unittest.TestCase):
+    """A window can be fresh by the declared constant and still overlap the burned data.
+
+    B16A.BURNED_RANGE describes the window the burned CREATES were drawn from
+    (433,894,233-434,097,833). The burned OBSERVATIONS reach 435,536,000, because a curve keeps
+    trading long after it launches. A freshness check against the create window alone accepts
+    1.4 million slots of data the studies were developed against -- and passes, rather than fails,
+    for the wrong reason.
+    """
+
+    def setUp(self):
+        self.directory = pathlib.Path(tempfile.mkdtemp(prefix="b19e-burned-"))
+        self.burned = self.directory / "burned.sqlite"
+        self.window = self.directory / "window.sqlite"
+
+    def _corpus(self, path, slots):
+        connection = sqlite3.connect(path)
+        connection.execute("CREATE TABLE observation (bonding_curve TEXT, slot INTEGER)")
+        connection.executemany("INSERT INTO observation VALUES ('c', ?)", [(s,) for s in slots])
+        connection.commit()
+        connection.close()
+
+    def test_the_extent_is_wider_than_the_declared_create_window(self):
+        self._corpus(self.burned, [433_894_233, 435_536_000])
+        extent = B.burned_extent(self.burned)
+        self.assertEqual(extent["high"], 435_536_000)
+        self.assertGreater(extent["high"], B.B16A.BURNED_RANGE[1],
+                           "the observed extent must exceed the declared create window")
+        self.assertEqual(extent["source"], "derived_from_the_burned_corpus")
+
+    def test_a_window_the_declared_constant_would_accept_is_refused(self):
+        """The regression: slot 435,000,000 is outside the create window and inside the data."""
+        self._corpus(self.burned, [433_894_233, 435_536_000])
+        self._corpus(self.window, [435_000_000, 435_600_000])
+        self.assertGreater(435_000_000, B.B16A.BURNED_RANGE[1],
+                           "the fixture must be outside the declared window, or it proves nothing")
+        with self.assertRaisesRegex(B.WindowRefused, "burned range"):
+            B.assert_fresh(self.window, burned=(B.burned_extent(self.burned)["low"],
+                                                B.burned_extent(self.burned)["high"]))
+
+    def test_an_absent_burned_corpus_announces_the_weaker_bound(self):
+        """A check that silently weakened itself is worse than no check."""
+        extent = B.burned_extent(self.directory / "does-not-exist.sqlite")
+        self.assertEqual(extent["source"], "declared_constant_only")
+        self.assertIn("narrower than the data", extent["warning"])
+
+    def test_the_real_window_is_clear_of_the_derived_bound(self):
+        """Not a fixture: the actual collected window against the actual burned corpus."""
+        if not B.PATHS.exists() or not B.BURNED_PATHS.exists():
+            self.skipTest("the window or the burned corpus is not present")
+        freshness = B.assert_fresh()
+        self.assertEqual(freshness["overlap_observations"], 0)
+        self.assertGreater(freshness["clear_of_burned_by_slots"], 0,
+                           "the window must start after the burned data ENDS, not after the "
+                           "burned create window ends")
+
+
 class TheDenominatorIsStatedInFull(unittest.TestCase):
     def setUp(self):
         self.directory = pathlib.Path(tempfile.mkdtemp(prefix="b19e-census-"))
