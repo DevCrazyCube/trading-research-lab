@@ -7830,6 +7830,42 @@
     "survives_costs_is_not_an_edge": "a median above zero on one window describes that window. It is not a demonstration of edge, not a return, and not grounds to trade. It would license a next study."
   },
   "status": "BURNED DEVELOPMENT DATA. Not an evaluation result, not a return, not a recommendation. This run exists only to prove the machinery executes end to end, and it spends no ledger entry.",
+  "structural_ceilings_known_before_any_outcome": {
+    "curves_with_a_decodable_fee_schedule": 960,
+    "curves_without_one": 176,
+    "evaluable_cohort": 1136,
+    "per_signal": {
+      "S1_CREATOR_INITIAL_BUY_PRESENT": {
+        "curves_that_can_produce_a_coordinate": 918,
+        "of_those_priceable": 901
+      },
+      "S2_NO_CREATOR_INITIAL_BUY": {
+        "curves_that_can_produce_a_coordinate": 218,
+        "of_those_priceable": 59
+      },
+      "S3_T0_IS_LAUNCH_INSTRUCTION": {
+        "curves_that_can_produce_a_coordinate": 216,
+        "of_those_priceable": 57
+      },
+      "S4_CASHBACK_ENABLED": {
+        "curves_that_can_produce_a_coordinate": 600,
+        "of_those_priceable": 513
+      },
+      "S5_CREATOR_REENTRY_DELAYED_CONFIRMATION": {
+        "curves_that_can_produce_a_coordinate": 110,
+        "of_those_priceable": 104
+      },
+      "baseline_any_buy": {
+        "curves_that_can_produce_a_coordinate": 727,
+        "of_those_priceable": 710
+      },
+      "baseline_launch": {
+        "curves_that_can_produce_a_coordinate": 1136,
+        "of_those_priceable": 960
+      }
+    },
+    "statement": "these are ceilings, not results. A cell can only be admitted for a curve that both produces a coordinate and carries a fee schedule, so no signal below can exceed its `of_those_priceable` count no matter what the outcomes are. They differ between signals and baselines, so a signal-versus-baseline comparison is across different admissibility and not a like-for-like contrast."
+  },
   "study": "B19D_NON_ISSUANCE_SIGNAL",
   "window_provenance": {
     "cohort_census": {
