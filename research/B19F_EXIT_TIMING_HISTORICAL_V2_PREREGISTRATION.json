@@ -1,0 +1,71 @@
+{
+  "author": "codex seat",
+  "date": "2026-08-10",
+  "everything_else_is_inherited_by_pin_not_restated": {
+    "canonical_sha256": "80017c689b69d986263920cfad20fdbf61fb1b29cf33f876c0fd917525bac6e7",
+    "inherited_whole": [
+      "frozen_exit_rules -- all eight, in order, none added, removed, reordered or retuned",
+      "frozen_inputs_unchanged -- entry delays (1, 2, 4), position 100000000 lamports, the three cost scenarios",
+      "right_censoring -- a rule that never triggers leaves the cell RIGHT-CENSORED, carrying no outcome, never zero, never imputed, never silently dropped",
+      "capacity_gate -- B15M external-only payability at the exit coordinate each rule selects",
+      "denominator_and_coverage -- coverage reported BEFORE any outcome figure",
+      "outcome_reporting -- exact integer lamports, order statistics by integer index, never a mean",
+      "multiplicity -- family size 24, reported in full, no rule selected",
+      "determinism -- output identical under any permutation of input rows",
+      "refusal_codes -- the same seven codes",
+      "prohibitions"
+    ],
+    "source": "B19B_EXIT_TIMING_POLICY_V1",
+    "what_is_NOT_inherited": "population, and only population. No exit rule, threshold, delay, horizon, cost, or reporting rule differs from B19B in any respect.",
+    "why_by_pin": "a hand-copied rule set drifts from the thing it copies, and a drift between two documents purporting to hold the same rules is undetectable by reading either one. The implementation verifies both pins, so a change to either document refuses this study rather than silently altering it."
+  },
+  "group": "B19",
+  "known_at_authorship_time": {
+    "b19b_and_b19c_outcomes_on_this_window": "NOT KNOWN. Neither has been evaluated on the evaluation window; both passes are unspent. The only B19B execution to date is a machinery rehearsal on the BURNED corpus, from which this author read cell counts, coverage sums and refusal codes and did NOT read any median, order statistic or outcome value.",
+    "b19d": "B19D_NON_ISSUANCE_SIGNAL_V1 has been evaluated on this exact window. Its result: 0 of 252 cells had a median strictly above zero; the pre-committed primary cell had a median of -26,928,909 lamports on 311 admitted cells of 3,932. KNOWN, and disclosed here because it is knowledge this author holds that B19B's author did not.",
+    "purpose": "so a later reader can AUDIT the fit rather than trust an assurance that none occurred",
+    "what_that_forbids": "no exit rule, delay, horizon or cost scenario below may be justified, placed, ordered or motivated by B19D's outcome. None was: every one is inherited verbatim by pin from a document frozen before B19D ran.",
+    "window_composition": "the window's denominator (5000 subsampled, 1068 out-of-regime mayhem excluded, 3932 evaluable, 3196 with a decodable fee schedule) is KNOWN, having been published as provenance before B19D ran. It is a coverage fact, not an outcome, and no rule here rests on it."
+  },
+  "no_threshold_is_tunable_here": {
+    "rule": "no number in this study may be chosen, moved, or justified by any outcome computed on any window",
+    "the_only_new_number": "there is none. This document introduces no constant, no threshold and no cut. It changes which cells enter the machinery and nothing about what the machinery does to them."
+  },
+  "outcome_reporting": {
+    "coverage_first": "cells admitted, refused by code, and censored per rule are reported BEFORE any outcome figure",
+    "not_a_recommendation": "no exit rule is recommended. The grid is reported in full and never chosen from.",
+    "not_a_return": "no figure is a return, a profit, an expected value or a performance result, and none may be described as one",
+    "structural_ceilings_first": "the number of curves that could yield a cell at all is reported before the family, so a thin result is not read as a weak rule when it is a small denominator"
+  },
+  "population": {
+    "development_vs_evaluation": "runs against the burned corpus are DEVELOPMENT ONLY and may never be reported as an evaluation result.",
+    "exactly_one_condition_of_b15ls_is_dropped_and_it_is_named": "b15l.load_entries selects WHERE t.state='captured' AND o.fork_state='confirmed'. state='captured' is the ONLY condition dropped: it records which launches a running shadow process happened to catch, which is a property of that process and not of the market, and it has no historical counterpart. fork_state='confirmed' is not dropped but AUTOMATICALLY SATISFIED: a historical corpus is read from the canonical finalized chain, so every observation in it is fork-confirmed by construction. The lateness tolerance is NOT dropped -- it is inherited and enforced.",
+    "rule": "B15M's universe MINUS the capture-sampling artifact, and nothing else. A cell is admitted when: (1) the curve carries a t0 coordinate and a decodable fee schedule; (2) the entry coordinate is t0_slot + delay_slots, the launch-plus-delay rule of b15h_prospective_entry.entry_target_slot; (3) the first observation at or after that coordinate is no more than max_lateness_slots late against it, using B15L's own assert_fresh tolerance; (4) b15m.is_admissible holds, applied by call.",
+    "the_lateness_tolerance_is_inherited_never_chosen": "max_lateness_slots is read from B15H_PROSPECTIVE_ENTRY_PREREGISTRATION.json, where it is 150 and declared unchanged from B15F_CHECKPOINT_V1. This document does not restate the number and the implementation does not hardcode it: both read it from that frozen document, so a study that widened it would be reading a different document and would refuse.",
+    "what_this_population_is_not": "it is not B15M's universe and its figures are not comparable to B15L's or B15M's, are not a continuation of them, and may never be presented as such. It differs by the capture sampling and by that alone, which is a real difference and is stated rather than characterised.",
+    "why_mechanical_rather_than_declared_broad": "the first version of this document defined the population as every launch at t0+delay and declared, in advance, which way its breadth would bias a result. Two objections killed that. First, the bias direction was NOT KNOWABLE: an order statistic over a superset is not bounded by the same statistic over a subset in either direction, and the cells the breadth admits -- late entries, which B15L refuses -- are systematically WORSE, so breadth is pessimistic for exactly the cells it adds rather than conservative. Second and more seriously, the breadth was a FREE PARAMETER, and this author already knows B19D returned 0 of 252 on this window. 'Take the broadest population and declare it conservative for a negative result' is precisely the choice that prior would push someone toward, and no amount of introspection can establish that it did not. The clause is therefore mechanical: every condition is inherited or automatically satisfied, exactly one is dropped and named, and NOTHING is left for a known outcome to bias."
+  },
+  "preregistration_id": "B19F_EXIT_TIMING_HISTORICAL_V2",
+  "question": "On a HISTORICAL window, does the CHOICE of exit coordinate change the executable outcome at all, beyond the two fixed horizons already frozen -- and can that be measured without any threshold being tuned on an outcome?",
+  "status": "FROZEN. Committed alone, before any outcome on the evaluation window was computed for it.",
+  "status_locks": {
+    "executable": false,
+    "execution_status": "never_executed",
+    "label": "EXIT_TIMING_HISTORICAL_DIAGNOSTIC",
+    "performance_status": "not_evaluated",
+    "single_pass": "this study reads the evaluation window ONCE. The pass is recorded in B19_EVALUATION_LEDGER.json before any result is written, and a second pass requires an explicit superseding reason with both entries kept."
+  },
+  "supersedes": {
+    "canonical_sha256": "7531abbf64578388559c255ba7587daf243e8b1c7d0f33ec0f44a6bf4c8b929c",
+    "preregistration_id": "B19F_EXIT_TIMING_HISTORICAL_V1",
+    "reason": "V1's population was a free parameter defended by a bias-direction claim that does not hold. NOTHING WAS EVER RUN AGAINST V1: no pass was spent, no ledger entry was recorded, and the only execution was a machinery rehearsal on the BURNED corpus from which no median or order statistic was read. V1's file is kept unedited rather than deleted, because a withdrawn framing is exactly what a later reader needs to see.",
+    "what_changed": "population, and the removal of the bias-direction claim. Nothing else."
+  },
+  "why_this_document_exists_at_all": {
+    "how_this_was_decided": "the codex seat proposed signal_slot = t0_slot as 'the same conditions'; the claude seat refuted it adversarially by reading b15l's selection and b15m's admissibility directly; the refutation was independently verified against both sources before this document was written. The owner chose a new preregistration over declaring the question unanswerable or over reporting a broader population under B19B's name.",
+    "the_consequence": "B19B_EXIT_TIMING_POLICY_V1 is NOT EVALUABLE on a historical window. Its single permitted pass remains unspent and this document does not spend it. This is a different study with a different population, and it says so rather than borrowing B19B's identity.",
+    "the_problem": "B19B_EXIT_TIMING_POLICY_V1 pins its population to 'the IDENTICAL admissible cell universe as B15M_LIQUIDITY_CAPACITY_V1, which is itself B15L's universe, by the same conditions in the same order'. B15L's universe is built by b15l.load_entries, which selects WHERE t.state='captured' AND o.fork_state='confirmed' and carries lateness_slots. Those are LIVE CAPTURE mechanics: they record which launches a running shadow feed actually caught, in time, on the winning fork.",
+    "why_applying_b15m_admissibility_is_not_enough": "b15m.is_admissible tests quote_in == 0, is_payable, and gross_draw >= 1. It is a reserve and payability test ONLY and constrains nothing about entry selection. Applying it per cell reproduces B15M's ADMISSION rule while leaving B15M's CANDIDATE SET unreproduced, so a t0-based population admits launches that were never captured -- cells B15M never had the opportunity to admit or refuse. That violates B19B's 'this study admits no cell those refused'.",
+    "why_that_cannot_be_rebuilt": "a historical corpus has no captures. Every launch is present whether or not a live process would have caught it, and no lateness or fork-confirmation attaches to any of them. The literal universe therefore does not exist on the B11a window and cannot be reconstructed from it."
+  }
+}
