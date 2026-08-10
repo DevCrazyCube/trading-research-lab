@@ -1,0 +1,88 @@
+{
+  "author": "codex seat",
+  "date": "2026-08-10",
+  "everything_else_is_inherited_by_pin_not_restated": {
+    "canonical_sha256": "519102ba451da9c8556ce321c992312ddbeb5f9b7ab99d3dd9bfa10f976b76fe",
+    "cap_hit_is_still_not_a_measurement": "a cell at the ceiling has an unknown capacity above it and is EXCLUDED from every order statistic, exactly as in B19C. A bound folded into a distribution understates the upper tail by construction while looking like a complete answer.",
+    "inherited_whole": [
+      "the_raised_ceiling -- new search ceiling 10000000000 lamports, exactly one hundred times the old 100000000",
+      "the_wall_shape -- the seven-member grid, reported in full, with no size selected, ranked or called optimal",
+      "frozen_inputs_unchanged -- entry delays (1, 2, 4) and the two exit horizons",
+      "primary_estimand",
+      "reporting -- counts first, then order statistics, with the censoring statement attached verbatim",
+      "determinism -- output identical under any permutation of input rows",
+      "differential_tests_required -- capacity is cross-checked against B10b's independent route and against B15M, and a disagreement refuses rather than resolves",
+      "refusal_codes",
+      "prohibitions"
+    ],
+    "source": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1",
+    "what_is_NOT_inherited": "population, and the previously_cap_hit_cells subgroup, which has no historical counterpart. Nothing else differs.",
+    "why_by_pin": "a hand-copied rule set drifts from the thing it copies, and the drift is undetectable by reading either document alone. The implementation verifies both pins."
+  },
+  "group": "B19",
+  "how_monotonicity_is_established": {
+    "b19c_default_behaviour_is_UNCHANGED": "b19c.capacity keeps the scan as its default. This study selects the theorem path explicitly. B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1 is not edited, keeps its own unspent pass, and behaves exactly as before.",
+    "the_executable_checks_are_all_retained": "assert_maximal's q and q+1 probe and the independent B10b token-side differential both still run on every cell. They test the running code rather than an argument about it, and the proof does not replace them. Note they do NOT substitute for the prefix property: a q/q+1 probe cannot detect a payable region far above the located boundary, which is precisely what the proof rules out.",
+    "the_hypotheses_are_discharged_locally": "assert_prefix_shape_by_theorem calls assert_reserves_possible on both states ITSELF. b19c.capacity happens to call it before the scan today, but that is a positional guarantee: reorder the calls and the proof loses its hypothesis silently.",
+    "the_proof": "research/B15M_PAYABILITY_DOWNSET_PROOF.md",
+    "the_requirement_is_unchanged": "bisection may be used only where the admissible inputs form a prefix. That requirement is inherited from B19C verbatim and is not relaxed.",
+    "the_statement": "under virtual_quote >= 1 and virtual_token >= 1 on BOTH states, tokens_for and gross_draw are non-decreasing in the quote input, so payability is a down-set and the resolution floor is a prefix. Both halves of what the scan asserts follow from one monotonicity lemma.",
+    "what_changes_is_the_METHOD": "a proof, bound by hash to the source it certifies, replaces a per-cell brute-force scan of the same property.",
+    "why_it_is_WEAKER_and_how_that_is_answered": "the scan executes the ACTUAL predicate every time; a proof certifies four short function bodies as they are written today. A fee folded into tokens_for, or a rounding change after the next program revision, would silently detach the argument while every test still passed. ANSWERED BY BINDING: b15m.PROVEN_BODIES pins the sha256 of the six bodies the proof depends on, and on ANY drift the code FALLS BACK TO THE SCAN rather than continuing to cite a proof about source that no longer exists. Drift re-arms the brute force; it never downgrades to trust.",
+    "why_this_is_STRONGER_than_the_scan": "the scan verifies the property on the cells it scans. A proof is universally quantified: it covers every cell, including those no run ever reaches. The scan also cannot be run at this study's ceiling at all, so the honest comparison is not proof-versus-scan but proof-versus-nothing."
+  },
+  "known_at_authorship_time": {
+    "b19b_and_b19c_outcomes_on_this_window": "NOT KNOWN. Neither pass is spent. The only B19B execution is a machinery rehearsal on the BURNED corpus, from which this author read cell counts, coverage sums and refusal codes and NO median, order statistic or outcome value. B19C's burned rehearsal was stopped in flight when the population defect was confirmed, and its artifact was deleted unread.",
+    "b19d": "B19D_NON_ISSUANCE_SIGNAL_V1 has been evaluated on this exact window: 0 of 252 cells had a median strictly above zero. KNOWN, and disclosed because it is knowledge this author holds that B19C's author did not. Nothing in this document is placed, ordered or motivated by it; every rule is inherited by pin from a document frozen before B19D ran.",
+    "capacity_on_this_window": "NOT KNOWN. No capacity figure has been computed on the evaluation window by anyone.",
+    "purpose": "so a later reader can AUDIT the fit rather than trust an assurance that none occurred"
+  },
+  "no_threshold_is_tunable_here": {
+    "rule": "no number in this study may be chosen, moved, or justified by any outcome computed on any window",
+    "the_only_new_number": "there is none. This document introduces no constant, no threshold and no cut."
+  },
+  "outcome_reporting": {
+    "coverage_first": "cell counts, refusals by code, and cap-hit counts are reported BEFORE any capacity order statistic",
+    "not_a_recommendation": "no size is selected, ranked or called optimal. The grid is reported and never chosen from.",
+    "not_a_return": "capacity is what the observed book could have absorbed. It is not a return, a profit, an expected value or a performance result.",
+    "structural_ceilings_first": "the number of curves that could yield a cell at all is reported before the family"
+  },
+  "population": {
+    "cell_boundary_is_taken_by_agreement_not_by_a_new_implementation": "B19C takes an entry and an exit state as arguments and does not select them. The selection is performed by calling B19B's and B19D's INDEPENDENT implementations of first_at_or_after and state_in_force and refusing on any disagreement. Two independent implementations agreeing is evidence; one being cited by name is not. No third implementation of B10c STATE-IN-FORCE is written for this study.",
+    "development_vs_evaluation": "runs against the burned corpus are DEVELOPMENT ONLY and may never be reported as an evaluation result.",
+    "exactly_one_condition_of_b15ls_is_dropped_and_it_is_named": "b15l.load_entries selects WHERE t.state='captured' AND o.fork_state='confirmed'. state='captured' is the ONLY condition dropped: it records which launches a running shadow process happened to catch, which is a property of that process and not of the market, and it has no historical counterpart. fork_state='confirmed' is not dropped but AUTOMATICALLY SATISFIED: a historical corpus is read from the canonical finalized chain, so every observation in it is fork-confirmed by construction. The lateness tolerance is NOT dropped -- it is inherited and enforced.",
+    "rule": "B15M's universe MINUS the capture-sampling artifact, and nothing else. A cell is admitted when: (1) the curve carries a t0 coordinate and a decodable fee schedule; (2) the entry coordinate is t0_slot + delay_slots, the launch-plus-delay rule of b15h_prospective_entry.entry_target_slot; (3) the first observation at or after that coordinate is no more than max_lateness_slots late against it, using B15L's own assert_fresh tolerance; (4) b15m.is_admissible holds, applied by call.",
+    "the_lateness_tolerance_is_inherited_never_chosen": "max_lateness_slots is read from B15H_PROSPECTIVE_ENTRY_PREREGISTRATION.json, where it is 150 and declared unchanged from B15F_CHECKPOINT_V1. This document does not restate the number and the implementation does not hardcode it: both read it from that frozen document, so a study that widened it would be reading a different document and would refuse.",
+    "what_a_broader_population_does_to_a_capacity_distribution": "capacity is a property of the OBSERVED BOOK at a cell's coordinates, not of a strategy, so admitting the uncaptured cells changes which books are measured rather than biasing each measurement. It still changes the DISTRIBUTION, and no claim here may treat it as B15M's with more cells.",
+    "what_this_population_is_not": "it is not B15M's universe and its figures are not comparable to B15L's or B15M's, are not a continuation of them, and may never be presented as such. It differs by the capture sampling and by that alone, which is a real difference and is stated rather than characterised.",
+    "why_mechanical_rather_than_declared_broad": "the first version of this document defined the population as every launch at t0+delay and declared, in advance, which way its breadth would bias a result. Two objections killed that. First, the bias direction was NOT KNOWABLE: an order statistic over a superset is not bounded by the same statistic over a subset in either direction, and the cells the breadth admits -- late entries, which B15L refuses -- are systematically WORSE, so breadth is pessimistic for exactly the cells it adds rather than conservative. Second and more seriously, the breadth was a FREE PARAMETER, and this author already knows B19D returned 0 of 252 on this window. 'Take the broadest population and declare it conservative for a negative result' is precisely the choice that prior would push someone toward, and no amount of introspection can establish that it did not. The clause is therefore mechanical: every condition is inherited or automatically satisfied, exactly one is dropped and named, and NOTHING is left for a known outcome to bias."
+  },
+  "preregistration_id": "B19G_CAPACITY_WALL_HISTORICAL_V3",
+  "question": "On a HISTORICAL window, above the frozen 0.1 SOL search ceiling, is external-liquidity capacity a CLIFF or a SLOPE -- and how is capacity distributed relative to that ceiling?",
+  "status": "FROZEN. Committed alone, before any outcome on the evaluation window was computed for it.",
+  "status_locks": {
+    "executable": false,
+    "execution_status": "never_executed",
+    "label": "CAPACITY_WALL_HISTORICAL_DIAGNOSTIC",
+    "performance_status": "not_evaluated",
+    "single_pass": "this study reads the evaluation window ONCE, recorded in B19_EVALUATION_LEDGER.json before any result is written. V2's pass was never spent; this document does not inherit a spent pass."
+  },
+  "supersedes": {
+    "canonical_sha256": "232fa304b7a6ed98b5194f586d4952743db94878dc5b066c9b7b359e638d8a92",
+    "preregistration_id": "B19G_CAPACITY_WALL_HISTORICAL_V2",
+    "reason": "V2 was correct but NOT RUNNABLE. It inherits B19C's requirement that bisection's monotonicity precondition be verified per cell, and B15M verifies it by scanning every integer lamport from the resolution floor to the ceiling. At the raised ceiling of 10,000,000,000 that is ten billion payability evaluations per cell against 23,592 cells, on the order of five hundred thousand hours. V2's pass was never spent and no outcome was ever computed against it.",
+    "what_changed": "how the monotonicity precondition is ESTABLISHED, and nothing else. No exit rule, ceiling, grid size, delay, horizon, cost, population clause, refusal code or reporting rule differs from V2."
+  },
+  "the_proof_was_refuted_once_and_that_is_recorded": {
+    "review": "the corrected proof was reviewed as an argument, lemma by lemma, by a second reviewer who found no further gap, and the refuting agent could not break the corrected version.",
+    "the_corrected_hypotheses_are_enforced_in_code": "assert_reserves_possible already requires both virtual reserves STRICTLY positive, so the refuting state was never reachable in production. The statement was wrong, not the code.",
+    "what_happened": "the first version of the argument stated its hypothesis as 'all reserve fields non-negative', which admits virtual_quote = 0. There is_payable is not total: True at q=0, ZeroDivisionError at q=1, True at q=2. An adversarial agent found it by EXECUTING the predicate rather than reading it.",
+    "why_it_is_disclosed_here": "an argument that has survived one refutation deserves less trust than its conclusion suggests, and a reader weighing this amendment should know the proof was wrong once before deciding what it is worth."
+  },
+  "why_this_document_exists_at_all": {
+    "one_clause_that_differs_from_b19f": "B19C's previously_cap_hit_cells section reports on cells B15M itself recorded as cap-hit. Those records are properties of B15M's run over B15M's universe and cannot be joined to a historical cell that B15M never saw. That subgroup is therefore NOT REPORTED here, and its absence is declared rather than left as a silently missing section.",
+    "the_consequence": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1 is NOT EVALUABLE on a historical window and its single permitted pass remains unspent. This document does not spend it.",
+    "the_problem": "B19C_CAPACITY_WALL_SIZE_DEPENDENCE_V1 pins its population to 'the IDENTICAL admissible cell universe as B15M_LIQUIDITY_CAPACITY_V1, by the same conditions in the same order' -- the same clause, verbatim, that makes B19B unevaluable here. B15L's universe comes from b15l.load_entries, selecting WHERE t.state='captured' AND o.fork_state='confirmed': live capture mechanics that no historical corpus carries.",
+    "why_applying_b15m_admissibility_is_not_enough": "b15m.is_admissible is a reserve and payability test only and constrains nothing about entry selection, so applying it reproduces B15M's admission rule while leaving its candidate set unreproduced."
+  }
+}
