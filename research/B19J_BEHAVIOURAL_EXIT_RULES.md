@@ -89,3 +89,48 @@ a result — this project has already been fooled once by a mean carried entirel
   stands before any such document and not after.
 - **Not cleared:** the dump cannot be outrun by anyone reacting to it on-chain, which closes the
   exit question across both information channels and is worth as much as a positive.
+
+---
+
+# RESULT — the rug cannot be outrun
+
+Grid exactly as frozen at `6831f01`. Burned test split, 107 selected curves. Nothing added,
+dropped or retuned.
+
+**No rule clears the bar. Every rule is worse than the benchmark**, which is exiting immediately
+and not reacting to anything.
+
+| rule | fired | sel. mean (pess) | sel. median (pess) | sel. mean (sellback) | unsel. mean |
+|---|---|---|---|---|---|
+| **BENCHMARK — exit at first observation** | 104 | **−7,289,855** | **−4,760,019** | **−4,524,107** | −53,251,939 |
+| A first creator sell | 97 | −13,714,829 | −13,607,519 | −6,055,433 | −73,783,895 |
+| B any creator sell | 97 | −13,714,829 | −13,607,519 | −6,055,433 | −73,783,895 |
+| C depth sell ≥10% | 101 | −10,036,620 | −11,209,821 | −5,334,219 | −62,689,173 |
+| C depth sell ≥25% | 96 | −28,654,516 | −24,381,032 | −21,678,327 | −67,342,549 |
+| C depth sell ≥50% | 71 | −58,467,179 | −44,699,401 | −36,846,142 | −81,099,277 |
+
+## What it establishes
+
+**Reacting to the dump is worse than never waiting for it.** Every behavioural trigger loses more
+than simply exiting at the first opportunity — first creator sell nearly doubles the loss
+(−13.7M against −7.3M), and the larger the sell you wait for, the worse it gets (−10.0M → −28.7M →
+−58.5M as the depth threshold rises from 10% to 50%).
+
+The mechanism is not subtle and the design anticipated it without knowing the outcome: the exit
+prices at `state-in-force(trigger + 1)`, **after** the dump's own price impact. By the time a rug is
+observable on-chain it is already in the price. There is no reaction fast enough, because the
+information and the damage arrive in the same event. Waiting for a *bigger* confirming signal
+simply means waiting through more of the fall.
+
+**A and B are identical**, as the numbers show. For a single-exit strategy the first creator sell
+*is* the trigger under both rules; "any" only differs for a strategy that re-enters. Recorded as a
+design observation: the grid should have named that degeneracy in advance, and did not.
+
+## The question this closes
+
+Twenty-one price-path rules (B19F's eight, B19H's thirteen) and five behavioural rules, across two
+independent information channels — the chart, and who is trading. **Nothing beats exiting
+immediately, and exiting immediately loses the toll.**
+
+The best exit rule found anywhere in this project is *do not hold the position*. That is not a
+strategy; it is the absence of one.
