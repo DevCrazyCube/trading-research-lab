@@ -11,7 +11,15 @@ deserved a test rather than a shrug.
 ## The comparison
 
 The same measurement, the same admission rules, the same code, on two non-overlapping periods
-about 1.6 million slots apart — roughly a week of chain time — with entirely disjoint curves.
+with entirely disjoint curves.
+
+**The geometry, stated precisely, because the first version of this note got it wrong.** The two
+LAUNCH COHORTS are about 1.47 million slots apart — roughly a week. But the two OBSERVED EXTENTS
+are nearly adjacent: 433,894,233–435,536,000 and 435,569,222–437,210,794, a gap of 33,222 slots,
+**about 3.7 hours edge to edge**. The first version of this note said "about 1.6 million slots
+apart — roughly a week of chain time" while printing the two extents directly beneath it, which is
+the kind of claim a reader checks in ten seconds. As regime samples these are one contiguous
+fortnight of the same market, and that bounds what the replication buys.
 
 | group | burned window (1,136 curves) | fresh window (3,932 curves) |
 |---|---|---|
@@ -38,11 +46,26 @@ Burned corpus: slots 433,894,233–435,536,000. Fresh window: slots 435,569,222�
 
 ## What it supports
 
-The liquidity wall is **structural, not a timestamp artefact**. Two independent periods give
-medians in the same order of magnitude — tens of lamports — and p90 values within 5% of each other.
-The earlier window is somewhat more liquid at the median (34 vs 20), which is a real difference and
-is not being explained away, but it is a difference between "essentially no liquidity" and
-"essentially no liquidity".
+The objection **as posed** — that the evaluation caught an unlucky 22.6 hours — is answered. Two
+non-overlapping periods with disjoint curves give medians in the same order of magnitude in every
+group: tens of lamports. The earlier window is somewhat more liquid at the median (34 vs 20), a
+real difference that is not explained away, but it is a difference between "essentially no
+liquidity" and "essentially no liquidity".
+
+**The p90 claim in the first version was wrong.** It said "p90 values within 5% of each other". That
+holds for the h_1000 groups (4.6%, 1.3%, 3.5%) and fails for h_10000 delay 1 and delay 2, which
+diverge by **21.2%** and **16.8%**. Same order of magnitude everywhere is true, and is all the
+argument requires; "within 5%" was a claim scoped to one group and generalised to six.
+
+**Split the conclusion, because the two halves have different standing.**
+
+- The **SHAPE** of the wall — a cliff near zero with a thin liquid tail orders of magnitude above —
+  has now been seen twice and is plausibly structural to how launches work.
+- The **QUANTILES** — a median of 20 lamports, 17% of curves executable at 0.1 SOL — are magnitudes,
+  and magnitudes are regime-exposed. A mania could move them by orders. Two adjacent weeks of one
+  market do not establish them across regimes.
+
+"Mostly survives" is right for the shape. It is **unestablished** for the magnitudes.
 
 ## What it does NOT support
 
@@ -61,7 +84,12 @@ is not being explained away, but it is a difference between "essentially no liqu
 Some of this programme's findings are arithmetic and some are observations.
 
 - The **fee schedule** (125 bps per leg) and the **slippage arithmetic** are properties of the
-  protocol and of constant-product mechanics. They do not vary by window at all.
+  deployed program and of constant-product mechanics. They do not vary with sampling luck at all.
+  Scope that correctly: they are invariant **until the venue changes its parameters**, which is an
+  observable event rather than sampling noise — 43 curves in this very window carried disagreeing
+  schedules, and the B0 inventories document past program upgrades. Against the unlucky-window
+  objection the cost floor takes zero force; against "the venue could change" it takes some, and
+  that is a monitorable risk rather than a statistical one.
 - The **capacity distribution** is an observation, and it is the one just shown to replicate.
 - The **signal results** are observations on one window and are the most exposed to regime change.
 
