@@ -72,3 +72,59 @@ project has already been fooled once by exactly that.
 
 That the tail is identifiable but not harvestable by any simple exit — which closes the question
 rather than leaving it open, and is worth as much as a positive.
+
+---
+
+# RESULT — the bar is not cleared
+
+Run on the burned corpus, test split, selection = launch deposit ≥ 3 SOL, 107 selected curves.
+Grid exactly as frozen above: nothing added, nothing dropped, nothing retuned.
+
+**No rule clears the bar.** Not one of the thirteen is positive in mean *and* median under *both*
+stuck-position conventions.
+
+| rule | fired | sel. mean (pess) | sel. median (pess) | sel. mean (sellback) | sel. median (sellback) | unsel. mean |
+|---|---|---|---|---|---|---|
+| take_profit +10% | 58 | −38,736,667 | **+10,279,477** | −8,489,522 | **+10,279,477** | −85,341,752 |
+| take_profit +25% | 49 | −42,027,018 | −103,394,280 | −6,282,742 | −6,507,134 | −88,306,153 |
+| take_profit +50% | 35 | −51,368,837 | −103,394,280 | −7,617,102 | −29,011,660 | −92,651,591 |
+| take_profit +100% | 15 | −73,875,209 | −103,394,280 | −19,026,310 | −38,234,695 | −95,391,065 |
+| trail 10% | 64 | −35,090,055 | −9,908,216 | −8,213,706 | −4,749,281 | −77,556,933 |
+| trail 20% | 64 | −35,856,116 | −9,908,216 | −8,979,767 | −4,977,960 | −77,692,368 |
+| trail 33% | 64 | −36,582,229 | −9,908,216 | −9,705,880 | −4,977,960 | −78,827,270 |
+| tp+25% trail10% | 64 | −33,883,389 | −4,977,960 | −7,007,040 | −4,749,281 | −77,906,265 |
+| tp+50% trail10% | 64 | −31,905,496 | −4,977,960 | −5,029,147 | −4,749,281 | −77,636,555 |
+| timebox 100 slots | 69 | −37,345,875 | −43,645,195 | −12,353,961 | −25,616,092 | −72,615,323 |
+| timebox 500 slots | 34 | −67,893,499 | −103,394,280 | −22,585,675 | −37,246,305 | −87,082,119 |
+| **BASE first observation** | 104 | **−7,289,855** | −4,760,019 | **−4,524,107** | −4,749,281 | −53,251,939 |
+
+## What the table says
+
+**1. Selection works and is not enough.** Every rule does far better on selected curves than
+unselected — first-observation exit is −7.3M selected against −53.3M unselected, a 46-million-lamport
+improvement. Selection is doing real work. It does not reach zero.
+
+**2. Waiting is punished, without exception.** The least-bad rule in the entire grid is the one that
+does not wait at all. Every rule that holds for a target, a stop or a clock ends up worse, and the
+longer it waits the worse it gets (timebox 100 → 500 slots: −37M → −68M). This is the same shape
+B19F found and the mechanism now explains it: a held position is exposed to the dump, and the
+deposit that would have floored the loss is drained by the earlier buyers exiting through it.
+
+**3. The one near-miss, named as a hypothesis and not a result.** `take_profit +10%` is the only
+rule with a **positive median under both conventions** (+10,279,477). It fires on 58 of 107 — more
+than half of selected curves do reach +10% at some point. Its mean is destroyed by the 49 that never
+fire and are then held to the end. **This is not a result and must not be quoted as one**: a rule
+that wins on the majority and loses more on the minority is the classic shape of something that
+looks tradeable and is not.
+
+It does isolate the remaining question precisely: *what should be done with the ~46% of selected
+curves that never reach the target?* A "take profit at +10%, otherwise abandon at a deadline" rule
+is **not in this frozen grid**, and running it now — after seeing this table — would be exactly the
+fitting the grid was frozen to prevent. It is a candidate for a future frozen test, on its own
+document, and nothing more than that today.
+
+## The honest headline
+
+The tail is identifiable at entry. It is **not harvestable** by any of thirteen simple exits,
+including the four take-profits and three tight trailing stops that B19F never tested. The question
+this document was written to answer is answered, and the answer is no.
