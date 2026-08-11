@@ -351,13 +351,48 @@ entry is not liquidity.*
 | p75 | 0.0000 SOL | 121.36 SOL |
 | p90 | 0.0050 SOL | 147.24 SOL |
 
-**91% of bonding curves (3,602 of 3,932) end holding less than 0.01 SOL of real quote. Zero of 33
+**91% of bonding curves (3,602 of 3,932) END holding less than 0.01 SOL of real quote. Zero of 33
 graduated pools do.**
 
+> **Corrected before publication — the table above is measured at each curve's LAST observed state,
+> and read alone it is an endpoint artifact.** Curves are empty *at death*, which is nearly a
+> tautology. Measured through a curve's life instead:
+>
+> | measured at | p10 | p50 | p90 |
+> |---|---|---|---|
+> | t0 + 10 slots | 0.0000 | **1.8695** | 14.6158 |
+> | t0 + 100 slots | 0.0000 | 0.0941 | 13.6913 |
+> | t0 + 2000 slots | 0.0000 | 0.0114 | 3.9840 |
+> | **peak over the whole life** | 0.0000 | **1.0000** | 23.6047 |
+>
+> So "the median curve holds no real SOL" is **false as stated**. The median curve holds ~1.9 SOL
+> ten slots in, and its p90 holds ~14.6 SOL. This was self-attacked on the peer's prompting before
+> the claim went anywhere, and the claim has been rewritten to what the data supports.
+
+### What actually survives, stated at the strength the measurement carries
+
+**The median bonding curve's BEST-EVER external capacity is 1.00 SOL** — that is the peak across its
+entire life, not its endpoint. 49% of curves never reach 1 SOL at any point, and **38% never reach
+0.1 SOL**. A graduated pool receives ~85 SOL at graduation and the median still holds 68.5 SOL at
+last observation.
+
+The consequence is about **room to size**, which is where §3b's hurdle table was heading:
+
+- a 1 SOL position is **100% of the median curve's best-ever capacity** — you would be the entire
+  external market, and there is nobody to sell to;
+- the same position is **~1.5% of a graduated pool's**;
+- and for 38% of curves, even B19K's 0.1 SOL position exceeds the total external capacity the curve
+  ever had.
+
+**That is why sizing up was never available on the bonding curve**, and it is the same fact as
+B19G's capacity wall seen from the other side. The hurdle nearly halves between 0.1 and 1 SOL — but
+on the curve that size cannot be exited at the median, so the cheaper hurdle was unreachable. On a
+graduated pool it is reachable. Whether reaching it *helps* is a different question and this does
+not answer it.
+
 This is the mechanism behind B19G's result and it was never a fee or slippage problem. B19G measured
-the median capacity wall at **20 lamports**; the reason is that the median curve holds no real SOL,
-so there is nothing to be paid *from*. Every exit rule the programme tested was, at the median,
-attempting to sell into an empty till.
+the median capacity wall at **20 lamports** under its own frozen admission rules — a stricter and
+separate measurement from the one above, and the two agree in direction rather than in magnitude.
 
 **Graduation is the event that creates a payable counterparty**, and it does so by protocol
 construction — ~85 SOL of real quote is deposited at graduation whatever the token subsequently
@@ -368,9 +403,9 @@ does. That is not a survivorship artifact: the deposit is guaranteed, and §3b s
 
 - **33 pools.** The other 49 were never queried (§4), and they are the ones most likely to be empty.
   Whether the deposit *stays* is measured only on pools that traded.
-- **The curve figure is at each curve's last observed state**, when most are dead. A mid-life curve
-  holds more. B19G's independently measured 20-lamport median across the window is the check that
-  this is not an artifact of choosing the endpoint, but the two are not the same measurement.
+- **The endpoint problem was real and is now corrected above.** The claim rests on PEAK lifetime
+  capacity, not on the endpoint, and it is much weaker than the endpoint version: a median peak of
+  1.00 SOL rather than zero.
 - **A payable counterparty is a necessary condition, not a sufficient one.** It says an exit *can*
   be funded. It says nothing about whether the price ever reaches a level worth exiting at, which
   is the 53%/47% asymmetry and remains untouched.
