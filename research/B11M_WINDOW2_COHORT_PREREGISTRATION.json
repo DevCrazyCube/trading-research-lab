@@ -1,0 +1,99 @@
+{
+  "authorised_next_step": {
+    "not_authorised": [
+      "any analysis before B19L's runner, which is already pinned",
+      "any change to B19L or its runner after collection begins",
+      "reuse of window 1's directory under any circumstance"
+    ],
+    "step_1": "commit this document alone, before any chain or RPC query",
+    "step_2": "re-attest the script manifest, since the collection path changed",
+    "step_3": "peer review of the collection path and this document",
+    "step_4": "start the supervisor, which waits for maturity and then runs the frozen ten-stage pipeline into research/b11m_window2"
+  },
+  "burned_range_register": [
+    {
+      "convention": "half_open",
+      "first": 429998000,
+      "last": 430000000,
+      "origin": "B7e mature cohort"
+    },
+    {
+      "convention": "half_open",
+      "first": 430000000,
+      "last": 430000500,
+      "origin": "B7d engineering pilot"
+    },
+    {
+      "convention": "half_open",
+      "first": 433302364,
+      "last": 433304364,
+      "origin": "B8a cohort"
+    },
+    {
+      "convention": "inclusive",
+      "first": 433894233,
+      "last": 434097833,
+      "origin": "B8b cohort (also the B9d/B10b/B10c corpus)"
+    },
+    {
+      "convention": "half_open",
+      "first": 435564885,
+      "last": 435565324,
+      "origin": "B7j/B7k positive-control envelope"
+    },
+    {
+      "convention": "inclusive",
+      "first": 435566652,
+      "last": 435566690,
+      "origin": "B7b dead-threshold sample"
+    },
+    {
+      "convention": "inclusive",
+      "first": 435569119,
+      "last": 435569149,
+      "origin": "B7c trade-only gap sample"
+    },
+    {
+      "convention": "inclusive",
+      "first": 435569150,
+      "last": 437211659,
+      "origin": "B11a window 1 (first fresh collection)"
+    }
+  ],
+  "committed_before_any_chain_query": true,
+  "derivation": {
+    "endpoints_are_derived_never_restated": "successor_ranges() computes window 1's endpoints from the register that produced them rather than repeating them as literals, which is how a second copy of a geometry drifts from its source",
+    "rule": "identical to B11A: start one slot after the maximum inclusive burned endpoint, carry the B8b launch span and the B9d observation span unchanged",
+    "what_changed": "window 1's FULL OBSERVATION SPAN is now in the burned register, so the same arithmetic places this window after it"
+  },
+  "frozen_window": {
+    "disjoint_from_every_burned_range": true,
+    "disjointness_scope": "checked for BOTH the launch window and the full observation span, against every range INCLUDING window 1",
+    "disjointness_verified_before_freezing": true,
+    "launch_window_first_slot_inclusive": 437211660,
+    "launch_window_last_slot_inclusive": 437415260,
+    "launch_window_span_slots": 203601,
+    "observation_cutoff_slot_inclusive": 438854169,
+    "observation_span_slots": 1642509
+  },
+  "geometry_inheritance": "spans inherited from B8b and B9d through B11A unchanged. No span was chosen with any knowledge of window 1's outcomes.",
+  "observation_maturity": {
+    "estimated_maturity": "approximately 2026-08-16, from 2.3934 slots/s, which is an ESTIMATE and never a commitment. The gate is the tip, not the clock.",
+    "rule": "no stage that reads the observation span may run until the chain's finalized tip is at or beyond the observation cutoff. The supervisor waits; it does not truncate.",
+    "the_launches_already_exist": "the launch window has already passed on chain; it is the observation span that must age. Collecting before it matures would truncate exits and is refused."
+  },
+  "preregistration_id": "B11M_WINDOW2_COHORT_V1",
+  "prohibited_inferences": [
+    "no outcome of window 1 may motivate any choice here; every span and threshold is inherited",
+    "no inspection of this window's contents beyond what enumeration and collection mechanically require",
+    "no model, signal or baseline is fitted during collection",
+    "nothing signs, submits or spends; no wallet or key exists anywhere in this work"
+  ],
+  "purpose": "collect the second fresh window, so B19L can test a frozen exit family out-of-sample on data that did not exist when the family was frozen. Window 1 is contaminated for that test: B19K's take-profit levels descend from ceiling quantiles and its author had seen the fresh-window headroom table before freezing.",
+  "regime": "classified AFTER collection against markers frozen in B19L, never by waiting. Waiting for an undefined marker is discretion wearing patience's name.",
+  "window_status": "fresh_preregistered",
+  "work_directory": {
+    "must_not_be_window_1": "b11c.assert_work_dir_belongs_to refuses a generation configured to write into another's directory, and refuses again when a directory holds a state whose recorded cutoff differs from the derived one. Window 1's artifacts stand behind three spent ledger passes and cannot be recollected.",
+    "path": "research/b11m_window2"
+  }
+}
