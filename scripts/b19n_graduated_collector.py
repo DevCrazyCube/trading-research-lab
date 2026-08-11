@@ -123,6 +123,11 @@ def assert_work_dir_is_ours(path, forbidden=FORBIDDEN_WORK_DIRS, root=None):
     precious directory by construction, including ones that do not exist yet and ones nobody thought
     to name -- because they all have content and none of them carry this collector's witness.
 
+    ONE INHERENT RESIDUAL, recorded because it is the fail-closed rule working as designed and not
+    a gap to be fixed: an EMPTY directory a run is legitimately pointed at cannot be protected
+    retroactively if it later becomes precious. Nothing can protect it -- at the moment of the
+    decision there is nothing to distinguish it from scratch space. That is true of any collector.
+
     The containment check is kept on top of that. It is redundant for safety but not for diagnosis:
     "this belongs to window 1" is a message an operator can act on, where "this directory is not
     empty" is one they will be tempted to work around. It is also NOT redundant for an EMPTY
