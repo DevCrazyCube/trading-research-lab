@@ -224,6 +224,49 @@ Window 1 holds 3,932 launches. **Roughly eight such windows would be needed** to
   That comparison is between two rules on the *same* positions, so it does not depend on the
   absolute level being measurable — which is precisely why it survives when the level does not.
 
+## 8b. The mean was the wrong statistic — and the right one is worse
+
+The peer seat's question: a right-tail strategy is not run for its mean per trade, it is run for
+compounded survival across many trades. Is there a formulation in which 2,000 samples decides
+something useful? There is, and it does — against.
+
+**Kelly sizing.** `f* = mean / variance = 0.0257` — **2.57% of bankroll per position.** At a 0.1 SOL
+position that implies a **3.9 SOL bankroll**, which is itself the first hard fact: the strategy
+cannot be run larger without exceeding the Kelly fraction, and the capacity work (B19N §3c) says the
+market cannot absorb larger positions anyway.
+
+**Median log-wealth**, the statistic a repeated bettor actually maximises:
+
+| fraction | log-growth per trade | over 1,000 trades |
+|---|---|---|
+| 0.010 | +0.000039 | ×1.040 |
+| **0.026 (Kelly)** | **+0.000070** | **×1.072** |
+| 0.050 | +0.000056 | ×1.057 |
+| 0.100 | −0.000147 | ×0.864 |
+| 1.000 | −0.018936 | ×0.000 |
+
+**Simulated campaigns** — 1,000 trades, Kelly-sized, resampled from the observed outcomes, 2,000
+campaigns:
+
+| | |
+|---|---|
+| median final wealth | **×1.042** |
+| p10 | ×0.736 |
+| p90 | ×1.662 |
+| **campaigns ending below the starting bankroll** | **44%** |
+
+### What that means in plain terms
+
+Taking the +0.48% entirely at face value — ignoring that its confidence interval contains zero —
+**one thousand trades returns a median 4.2% on a 3.9 SOL bankroll, with a 44% chance of ending
+down.** That is roughly 0.16 SOL of median profit for a thousand round trips, and 1,000 launches is
+about four days of the *entire* pump.fun market.
+
+**The peer's framing was right and the answer is worse than the mean suggested.** The mean flatters
+the strategy because it ignores variance drag; median log-wealth accounts for it, and once it does,
+the Kelly-optimal growth rate is 0.007% per trade. The variance does not merely make the edge hard
+to measure — it consumes almost all of it.
+
 ## 9. What this actually establishes
 
 Not "it doesn't work" — something much more specific:
