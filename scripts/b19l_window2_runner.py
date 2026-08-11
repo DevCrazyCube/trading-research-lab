@@ -194,8 +194,8 @@ def classify(cell):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--paths", required=True)
-    parser.add_argument("--bodies", required=True)
+    parser.add_argument("--paths")
+    parser.add_argument("--bodies")
     parser.add_argument("--out", default=str(ROOT / "research" / "B19L_WINDOW2_RESULT.json"))
     parser.add_argument("--self-hash", action="store_true",
                         help="print this file's sha256 for the preregistration pin, and exit")
@@ -203,6 +203,8 @@ def main(argv=None):
     if args.self_hash:
         print(self_sha256())
         return 0
+    if not args.paths or not args.bodies:
+        parser.error("--paths and --bodies are required unless --self-hash is given")
 
     rows, census, schedule_census = build(args.paths, args.bodies)
     selected = [r for r in rows if r["selected"]]
