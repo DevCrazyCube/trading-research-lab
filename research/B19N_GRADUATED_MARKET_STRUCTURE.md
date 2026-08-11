@@ -527,6 +527,33 @@ advantage — a counterparty that can pay — is worth about a third of the loss
 advantage is worth nothing once the fixed-cost trade-off is accounted for. The remaining two thirds
 is the shape of the outcome distribution, which is a property of the asset and not of the venue.
 
+### Why deletion is a legitimate upper bound on liquidity — the peer seat's argument
+
+§3d's bound removes never-sellable positions rather than pricing them, and that only bounds liquidity
+if removal is at least as generous as exitability. It is, for this population specifically: **a
+never-sellable curve is a dead curve.** No buyer at any price means it dumped, so under real standing
+liquidity it would exit at a *loss* near the floor, not a profit — and deleting it removes that loss
+entirely. The one case where deletion would fail to bound — a never-sellable position that would have
+exited at a large profit — **cannot occur, because a profit requires buyers and "never-sellable" is
+precisely the absence of buyers.** So −12.78M is a true ceiling, not an approximation.
+
+### The size lever bounded analytically, which is cleaner than §3e's simulation
+
+Size's *only* mechanical benefit is amortising the fixed 2,249,280-lamport round trip. Everything
+else — fee basis points, proportional slippage — scales with position and does not improve. So the
+infinite-size limit is simply B19K's cell with the fixed cost removed, and because that cost is
+additive per position it shifts mean and median by exactly +2,249,280:
+
+| | as measured | size → ∞ |
+|---|---|---|
+| mean | −18.94% | **−16.69%** |
+| median | −8.95% | −6.70% |
+
+**Still an order of magnitude negative.** The abandonment arm (−37,746,043) is **16.8×** the fixed
+cost and the win arm (+9,384,410) is **4.2×** it. Size amortises a 2.25% drag sitting on top of a
+−17% distribution. It cannot save it, for the same reason liquidity could not: the loss is the
+*shape*, and shape is scale-invariant in percentage terms.
+
 ## 4. Why window 1 cannot answer the trading question — and what can
 
 Of the 82 graduated pools, **49 show zero trades**. The naive reading is that most graduated tokens
