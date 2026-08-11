@@ -383,19 +383,82 @@ def assert_manifest_unchanged(state, state_path, manifest=None):
         "this run began. A stage script that changed is a stage that does something else now")
 
 
-def verify_preregistration(document=None):
+# The collection generations. Generation 1 is window 1 and its behaviour is unchanged in every
+# respect; generation 2 derives its window by adding window 1's observation span to the burned
+# register, so the successor is placed by the SAME arithmetic and `assert_disjoint` guarantees it
+# cannot overlap. A new generation must NEVER reuse an existing work directory: the artifacts of a
+# spent, ledgered window are irreplaceable and overwriting them is the one unrecoverable mistake
+# available in this pipeline.
+GENERATIONS = {
+    1: {"work_dir": ROOT / "research" / "b11a",
+        "preregistration": ROOT / "research" / "B11A_FRESH_COHORT_PREREGISTRATION.json",
+        "ranges": None},                       # None => B11A.BURNED_RANGES, i.e. untouched
+    2: {"work_dir": ROOT / "research" / "b11m_window2",
+        "preregistration": ROOT / "research" / "B11M_WINDOW2_COHORT_PREREGISTRATION.json",
+        "ranges": "successor"},
+}
+
+
+def generation_config(generation=1):
+    if generation not in GENERATIONS:
+        raise Quarantined(f"unknown collection generation {generation!r}")
+    config = dict(GENERATIONS[generation])
+    config["ranges"] = (B11A.successor_ranges() if config["ranges"] == "successor"
+                        else B11A.BURNED_RANGES)
+    return config
+
+
+def assert_work_dir_belongs_to(generation):
+    """A generation may only write into its OWN directory, and never into a spent one.
+
+    Separate paths in a config table are a convention, and a convention does not stop a mistake --
+    a mistyped flag, a copied command line, a default that drifts. Window 1's artifacts stand
+    behind three spent ledger passes and cannot be recollected: the window has aged out of the
+    chain's meaning even if the slots remain. Overwriting them is the single unrecoverable action
+    in this pipeline, so it is refused here rather than avoided by care.
+
+    The test is the state file's own recorded window, not the directory name, because a name can be
+    changed and a recorded cutoff cannot be argued with.
+    """
+    config = generation_config(generation)
+    directory = pathlib.Path(config["work_dir"])
+    expected = B11A.derive_window(config["ranges"])["observation_cutoff_slot_inclusive"]
+    for other, spec in GENERATIONS.items():
+        if other == generation and pathlib.Path(spec["work_dir"]) == directory:
+            continue
+        if pathlib.Path(spec["work_dir"]) == directory:
+            raise Quarantined(
+                f"generation {generation} is configured to write into generation {other}'s "
+                f"directory {directory}; refusing")
+    state_file = directory / "supervisor_state.json"
+    if state_file.exists():
+        try:
+            recorded = json.loads(state_file.read_bytes()).get("cutoff_slot_inclusive")
+        except (OSError, json.JSONDecodeError) as error:
+            raise Quarantined(f"{directory} holds an unreadable supervisor state: {error}") from error
+        if recorded is not None and recorded != expected:
+            raise Quarantined(
+                f"REFUSING: {directory} holds a run whose observation cutoff is {recorded:,}, but "
+                f"generation {generation} derives {expected:,}. That directory belongs to a "
+                "different window, and its artifacts are irreplaceable")
+    return directory
+
+
+def verify_preregistration(document=None, generation=1):
     """The frozen document, its canonical hash, and the endpoints recomputed from the register.
 
     `document` is injectable so the endpoint cross-check below is reachable. With the shipped
     document it can never fire — the hash check upstream would have caught any edit — and a guard
     nothing can make fire is a guard nobody can show works.
     """
-    document = B11A.load_preregistration() if document is None else document
-    B11A.assert_matches_preregistration(document)
+    config = generation_config(generation)
+    document = (B11A.load_preregistration(path=config["preregistration"])
+                if document is None else document)
+    B11A.assert_matches_preregistration(document, ranges=config["ranges"])
     # The endpoints are NOT re-compared here. `assert_matches_preregistration` above is exactly
     # that comparison — the document against the burned-range register — and repeating it would add
     # a second check that fires only when the first already has.
-    derived = B11A.derive_window()
+    derived = B11A.derive_window(config["ranges"])
     return {"cutoff_slot_inclusive": derived["observation_cutoff_slot_inclusive"],
             "launch_first_slot_inclusive": derived["launch_window_first_slot_inclusive"],
             "launch_last_slot_inclusive": derived["launch_window_last_slot_inclusive"],

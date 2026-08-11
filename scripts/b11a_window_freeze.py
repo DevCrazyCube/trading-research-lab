@@ -149,6 +149,25 @@ def derive_window(ranges=BURNED_RANGES):
     }
 
 
+def successor_ranges(ranges=BURNED_RANGES, label="B11a window 1 (first fresh collection)"):
+    """The register with the window THIS register derives already burned into it.
+
+    A second collection must not overlap the first, and the cleanest way to guarantee that is to
+    let the same arithmetic place it: add the derived window's full OBSERVATION span to the
+    register, and `derive_window` puts the successor one slot after it, with `assert_disjoint`
+    enforcing the rest.
+
+    The endpoints are DERIVED here, never restated. Writing 435,569,150 and 437,211,659 as
+    literals would create a second copy of window 1's geometry that could drift from the register
+    that produced it -- the failure this project has met from four different directions.
+    """
+    window = derive_window(ranges)
+    return ranges + ((label,
+                      window["launch_window_first_slot_inclusive"],
+                      window["observation_cutoff_slot_inclusive"],
+                      "inclusive"),)
+
+
 def assert_disjoint(first, last, ranges=BURNED_RANGES):
     """No intersection with any burned range. Overlap aborts; it never shifts the window."""
     if last < first:
