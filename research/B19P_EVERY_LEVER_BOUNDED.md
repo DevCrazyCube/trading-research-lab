@@ -48,10 +48,24 @@ promising mechanism in the venue: even trading for free leaves −16.89%.
 
 ## The cashback mechanism — UNIT NOT ESTABLISHED, figures below are in unknown units
 
-> **Read this before the numbers.** Every cashback figure in this section was first written as SOL,
-> on the strength of two indirect signals: `ClaimCashbackEvent` declares `u64` amounts, and the
-> `claim_cashback` instruction touches `system_program` with **no token program, no mint and no
-> token account** — which is how a native-SOL transfer looks.
+> **PARTIALLY SETTLED — and the answer differs by program.** The peer seat resolved PumpSwap's:
+> **cashback there is SOL delivered as WRAPPED SOL.** `amount` equals an inner SPL-token transfer
+> amount in **264 of 264** PumpSwap claims, and that instruction's accounts run
+> `user_volume_accumulator_wsol_token_account → user_wsol_token_account`. A native-balance check
+> fails there because WSOL lands in a *token* account, which is why only the unwrap-in-transaction
+> cases reconciled natively.
+>
+> **That result does not carry to the pump program, which is where 3,172 of the 3,436 claims are.**
+> pump's `claim_cashback` is a *different instruction*: its accounts are `user`,
+> `user_volume_accumulator`, `system_program`, `event_authority`, `program` — **no token program and
+> no token accounts at all.** Tested directly: `amount` matches an inner SPL transfer in **0 of 300**
+> pump claims, and no account in the transaction moves by exactly `amount` in **394 of 400**. So on
+> pump the payout is neither a WSOL transfer nor an identifiable same-transaction lamport movement,
+> and **its unit remains unestablished.**
+>
+> Original reasoning, retained because it was the trap: `ClaimCashbackEvent` declares `u64` amounts,
+> and pump's `claim_cashback` touches `system_program` with no token program — which is how a
+> native-SOL transfer looks.
 >
 > **It does not survive a direct check.** Reconciling each claim's `amount` against the user's own
 > pre/post lamport balance in the same transaction: **4 of 600 match.** Most show a balance delta of
@@ -70,9 +84,29 @@ promising mechanism in the venue: even trading for free leaves −16.89%.
 anyone is demonstrably accruing at scale** — accruing, not necessarily earning, since the unit is
 unknown:
 
-- 508 distinct claimers. Median lifetime cashback **5,800,000 units** — the smallest scale present.
-- Maximum **1,159,990,000,000 units**. Second largest: 5,674,300,000 — **204× smaller**.
-- **One entity is 97% of all cashback in the window.** *(A share, so unit-independent and safe.)*
+> **Corrected: the 97% was the wrong field, and it is not a statement about this window.**
+> The concentration below was computed on `total_cashback_earned`, which is a **LIFETIME running
+> total** carried in each event — mostly accrued *before* the observation window opened. So "one
+> entity is 97%" actually meant: *among the people who happened to claim during this window, one
+> account's all-time accrual is 97% of their all-time accruals.* That is a survivorship statement
+> about lifetime balances, not a measurement of activity in the window, and the framing overstated
+> it. The peer seat was right that something was wrong with the figure, though not about the cause.
+>
+> **Measured on the right field — `amount`, i.e. what was actually claimed inside the window:**
+>
+> | | pump | PumpSwap |
+> |---|---|---|
+> | claims | 3,172 | 264 |
+> | claimers | 508 | 147 |
+> | **top claimer's share of in-window claims** | **12%** | **19%** |
+> | **top / second** | **1×** | **1×** |
+>
+> **There is no concentration in the window.** The largest claimer takes 12% on pump and is barely
+> ahead of the second. The 97% and the 204× are retracted as claims about window activity; they
+> describe lifetime balances of a self-selected set.
+
+- 508 distinct claimers on pump, 147 on PumpSwap.
+- In-window claims total 13.73 (pump) and 1.85 (PumpSwap) — see the unit note above and below.
 
 ### What that entity actually does
 
