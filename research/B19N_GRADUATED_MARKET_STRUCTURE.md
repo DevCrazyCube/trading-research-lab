@@ -29,24 +29,91 @@ has to hold:
 first check against a single base showed 139 "disagreements" — a 46% failure rate that was a base
 mismatch, not a decode error. Reported without the follow-up it would have buried a correct decode.
 
-**Effective rate from the amounts, not the labels.** Summing `lp_fee + protocol_fee +
-coin_creator_fee + buyback_fee` against notional: **27–28 bps on 78 trades, 0.54% round trip.** The
-labels say 25; the difference is the creator and buyback components. Against the bonding curve's
-universal 125 bps per leg this is a **4.5× reduction**, now verified by two independent routes.
+**The field names are therefore confirmed.** Both errors below are errors of AGGREGATION, not of
+decoding — which is worth separating, because a decode error would have required recollection and
+an aggregation error is repairable from the corpus already in hand.
+
+### The rate — corrected twice, and the correction matters more than the original claim
+
+An earlier version of this section reported "27–28 bps on 78 trades, 0.54% round trip, a 4.5×
+reduction against the bonding curve." **That was wrong in two independent ways**, one found by the
+peer seat and one found while checking their finding.
+
+**Error 1 — the cheap tier is a minority, reported as the venue.** The distribution was printed
+sorted ascending and truncated to its first rows, so the cheap tail was read as the market. The full
+per-leg distribution across all **765** trade events — one per instruction coordinate, see the note
+on counting below:
+
+| total bps per leg | trades | share | |
+|---|---|---|---|
+| 25 | 197 | 25% | the "cheap tier" |
+| 95 | 180 | 23% | **median** |
+| 120 | 139 | 18% | |
+| 125 | 196 | 25% | identical to the bonding curve |
+| 100 / 105 / 115 | 42 | 5% | all creator-fee-bearing |
+
+**The median graduated leg pays 95 bps, not 25.** A creator fee is present on **391 of 765 = 51%**
+of trades. A
+quarter of trades get the real break; three-quarters pay 95–125, the same order as the bonding
+curve's 125. This was found independently by the peer seat, whose decode reproduces these counts
+exactly from the same pinned IDL.
+
+**Error 2 — the buyback fee was double-counted.** The first effective-rate figure summed
+`lp + protocol + coin_creator + buyback` against notional. But `buyback_fee` is a *split of the
+protocol fee*, not an additional charge on the trader: `buyback_fee == protocol_fee * bps / 10000`
+holds on **all** events, with `buyback_fee_basis_points` equal to 5000 (50%) on 766 of 769 decodes
+and 0 on 3. Money already counted was counted again.
+
+**Error 3 — the denominator itself.** The first two versions of this section reported 769 and 787
+events for the same quantity, and the peer seat reported 765. All three came from the same corpus;
+the divergence was mine. Iterating every PumpSwap envelope in a transaction and de-duplicating on a
+composite of field VALUES counts an event twice whenever the chosen fields collide, and differently
+for each choice of key. **The canonical count is 765** — 302 `BuyEvent` plus 463 `SellEvent`
+instruction rows, each a distinct `(slot, transaction_index, outer_index, inner_index)` coordinate
+with a stored body, matched to its envelope by that coordinate rather than by its contents. Every
+figure in this document has been recomputed against it. The lesson is the project's own: an
+ordering-or-identity key made of values is not an identity, and canonical coordinates exist
+precisely so that counting does not depend on what a row happens to contain.
+
+### What actually drives the difference — and it is not the fee
+
+At the median 95 bps against the curve's 125, the fee difference is **0.6% of a round trip**. It is
+not the story. The gap between a ~4% graduated toll and the bonding curve's ~22.9% is almost
+entirely **slippage and rent**: a 0.1 SOL order against ~85 SOL of pool depth barely moves the
+price, while the same order against a ~1 SOL bonding-curve reserve *is* the slippage term, and the
+2 M lamport rent is 2% of the position on the curve.
+
+So the correct statement is **"depth is ~85× greater," not "the fee is 4.5× cheaper."** The second
+is false at the median. The first does not depend on the fee tier at all.
+
+> **This makes the depth caveat load-bearing rather than incidental.** The 85 SOL is a graduation
+> *threshold*, not measured post-listing depth — and it is now carrying the entire finding instead
+> of sharing it with a fee advantage that mostly is not there. **If pools drain after listing, the
+> slippage term rises and the toll climbs back toward the curve's.** That is the first thing any
+> graduated-market collection must measure, and §4 explains why this corpus cannot.
 
 ## 2. The pool's invariant, determined exactly
 
 Trade events carry `pool_base_token_reserves`, `pool_quote_token_reserves` **and**
-`virtual_quote_reserves`. Testing both candidate invariants on all 787 trade events with exact
-integer arithmetic:
+`virtual_quote_reserves`. Testing both candidate invariants on all 765 canonical trade events with
+exact integer arithmetic:
 
 | invariant | exact | grows | **breaks** |
 |---|---|---|---|
-| `quote * base` | 0 | 436 | **351** |
-| `(quote + virtual) * base` | 0 | 787 | **0** |
+| `quote * base` | 0 | 422 | **343** |
+| `(quote + virtual) * base` | 0 | **765** | **0** |
 
 **The virtual term is not optional.** Any simulator that prices this venue on plain `quote * base`
 is wrong on 45% of trades.
+
+**But state it precisely: `virtual_quote_reserves` is a per-pool CONSTANT, not a dynamic term.** It
+holds one value throughout the pool's life in **340 of 343** pools, moving in only 3, and takes 183
+distinct values across the population including 0. So the finding is not "the pool has a second
+moving reserve"; it is that **the pool prices against quote plus a fixed per-pool offset**, and a
+simulator must therefore learn that offset per pool and may then treat it as constant. This
+qualification was requested by the peer seat, whose concern was that a constant term could make the
+invariant trivially satisfiable. It does not — plain `quote * base` still breaks on 343 events, so
+the offset is doing real work — but the original phrasing implied a dynamic quantity it is not.
 
 **The carried reserves are PRE-trade.** Chaining trade *N*'s reserves through trade *N*'s own
 amounts reproduces trade *N+1*'s reserves — exactly, on 30 of 61 consecutive pairs in the deepest
@@ -67,8 +134,17 @@ stream alone. That deletes the entire account-polling stage — the expensive pa
 | **graduation rate** | **2.09%** |
 | slots from launch to graduation | min 0, **median 49**, max 686,257 |
 
-**The median graduation completes 49 slots after its own launch — about 20 seconds.** The
-distribution is severely bimodal: half are effectively instantaneous, a tail runs for days.
+**The median graduation completes 49 slots after its own launch — 19.6 seconds.** 51% complete
+within 100 slots (~40 s). The distribution is severely bimodal: half are effectively instantaneous,
+a tail runs for days.
+
+> **Checked against a double-counting attack from the peer seat, and it holds.** Completion is
+> emitted under TWO event names — `CompleteEvent` and `CompletePumpAmmMigrationEvent`, 82 each,
+> **164 canonical events for 82 graduations**, with every one of the 82 mints carrying both names.
+> So the double-count is real in the event stream. It does not reach the figures above, because the
+> population is keyed by MINT and not by event: 82 distinct mints, each timed from its earliest
+> completion coordinate. Recorded rather than waved away — the same class of key error did corrupt
+> the event counts in §1, where the key was made of field values instead of coordinates.
 
 This closes one strategy on structure rather than on backtest. "Detect a token climbing toward
 graduation and ride it" cannot be implemented against a median of 20 seconds — by the time a curve
@@ -121,9 +197,14 @@ not started.
 
 - **Does the graduated market trade at all, for most pools?** Unanswerable from window 1; the
   collector is built and needs an endpoint.
-- **Is the 4.5× cheaper toll enough to change any outcome?** Unknown, and it is not implied by being
-  cheaper. The bonding-curve close rested on a 24.4%-incidence asymmetry where one abandoned
-  position erases five wins — a toll reduction does not by itself repair that shape, and claiming
-  otherwise would repeat the reasoning this programme has spent the whole night retiring.
-- **Does `UserVolumeAccumulator` state determine the fee tier?** Still open; it would explain why
-  some trades pay 27 bps and others several times that.
+- **Does the depth advantage survive listing?** This is now the crux. The ~85× depth claim rests on
+  a graduation THRESHOLD, not on measured post-listing depth, and after the fee correction above it
+  carries the finding alone. If pools drain, the toll climbs toward the curve's.
+- **Is a lower toll enough to change any outcome?** Unknown, and not implied by being lower. The
+  bonding-curve close rested on a 24.4%-incidence asymmetry where one abandoned position erases
+  five wins — a toll reduction does not by itself repair that shape, and claiming otherwise would
+  repeat the reasoning this programme has spent the whole night retiring.
+- **Does `UserVolumeAccumulator` state determine the fee tier?** Sharper now that 25 bps is known to
+  be a 25% minority: whether that tier is reachable BY CHOICE decides whether the cheap quarter is
+  an addressable market or merely the trades that happened to carry a waived creator fee. The
+  corpus does not carry the accumulator state, so this is part of the same collection decision.

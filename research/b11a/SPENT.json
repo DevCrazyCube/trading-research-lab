@@ -1,0 +1,12 @@
+{
+  "artifacts_are_irreplaceable": true,
+  "cutoff_slot_inclusive": 437211659,
+  "generation": 1,
+  "ledger_passes_spent": [
+    "B19D_NON_ISSUANCE",
+    "B19F_EXIT_TIMING_HISTORICAL_V2",
+    "B19G_CAPACITY_WALL_HISTORICAL_V3"
+  ],
+  "spent": true,
+  "why": "Window 1 is collected and its evaluation passes are spent. This file is COMMITTED so that removing the gitignored supervisor_state.json cannot make this directory look unclaimed. The corpus behind it cannot be collected again: the window has aged out of the chain's meaning even where the slots remain."
+}

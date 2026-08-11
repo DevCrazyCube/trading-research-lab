@@ -79,6 +79,12 @@ ARCHIVE_DIR = WORK_DIR / "superseded"
 
 RPC_ENV_VAR = "SOLANA_RPC_URL"
 
+# A COMMITTED marker that a directory holds a spent, irreplaceable corpus. Tracked in git on
+# purpose: supervisor_state.json is gitignored, so it is removed by exactly the `git clean -fdx`
+# that also removes the stage receipts, and something irreplaceable must not rest on a witness the
+# repository has been instructed to discard.
+SPENT_TOMBSTONE = "SPENT.json"
+
 # How many poll intervals a heartbeat may lag before the run is stale. Three, because one missed
 # poll is a slow endpoint and three in a row is a process that is not polling.
 HEARTBEAT_TOLERANCE_INTERVALS = 3
@@ -410,7 +416,103 @@ def generation_config(generation=1):
     return config
 
 
-def assert_work_dir_belongs_to_path(generation, work_dir):
+# Shapes that constitute a COLLECTED CORPUS -- the thing that cannot be gathered again. Bookkeeping
+# is deliberately excluded: state files, locks, pids and stage receipts are all reconstructible or
+# discardable, and a run that stopped before collecting anything leaves exactly those behind. Only
+# the databases and their write-ahead companions are irreplaceable, so only they may cause a
+# fail-closed refusal. Matched by SHAPE, not by an enumerated list of stage outputs, because a list
+# must be kept in step with the stages and a new stage would otherwise be invisible to this guard.
+CORPUS_SUFFIXES = (".sqlite", ".sqlite-wal", ".sqlite-shm", ".jsonl")
+
+
+def collection_artifacts(directory):
+    """The corpus files present in a directory. A corpus is its own witness to who owns it."""
+    directory = pathlib.Path(directory)
+    if not directory.is_dir():
+        return []
+    return [child.name for child in sorted(directory.iterdir())
+            if child.is_file() and not child.name.startswith(".")
+            and any(child.name.endswith(suffix) for suffix in CORPUS_SUFFIXES)]
+
+
+def assert_directory_is_claimable(directory, generation, expected, state_path=None):
+    """Refuse unless this directory is PROVABLY generation's, or provably nothing's. Shared.
+
+    Both guards route through this so they cannot drift apart, and so the reasoning lives once.
+
+    THE HOLE THIS CLOSES. Every earlier version tested `if state_file.exists():` and fell through to
+    ALLOW when it did not. `research/b11a/supervisor_state.json` is gitignored runtime data, so a
+    `git clean -fdx` or a crash cleanup removes the state AND the stage receipts together; after
+    that a bare generation-1 run walks into window 1's own 23 GB with the guard passing by
+    construction -- right directory, no state to contradict it, no receipts to refuse a repeat
+    stage. That is the one unrecoverable action in this pipeline and it was reachable by deleting a
+    file that git was instructed to ignore.
+
+    So evidence is taken in three forms, strongest first:
+
+      1. the COMMITTED tombstone, which is tracked and therefore survives `git clean -fdx`. Runtime
+         state cannot be the sole witness to something irreplaceable;
+      2. the runtime state file, when it is still there;
+      3. the ARTIFACTS THEMSELVES. A directory holding a corpus and no evidence of who owns it is
+         refused rather than adopted -- the previous default. A collection is not restarted into a
+         directory that already holds one, whatever the paperwork says.
+    """
+    directory = pathlib.Path(directory)
+    tombstone = directory / SPENT_TOMBSTONE
+    if tombstone.exists():
+        try:
+            recorded = json.loads(tombstone.read_bytes())
+        except (OSError, json.JSONDecodeError) as error:
+            raise Quarantined(
+                f"REFUSING: {directory} holds an unreadable {SPENT_TOMBSTONE}: {error}. A tombstone "
+                "that cannot be read is treated as a tombstone that forbids, never as one absent."
+            ) from error
+        cutoff = recorded.get("cutoff_slot_inclusive")
+        owner = recorded.get("generation")
+        if cutoff is not None and cutoff != expected:
+            raise Quarantined(
+                f"REFUSING: {directory} is tombstoned to generation {owner} at observation cutoff "
+                f"{cutoff:,}, and generation {generation} derives {expected:,}. That corpus is "
+                "spent and irreplaceable. The tombstone is committed precisely so that losing the "
+                "runtime state cannot make this directory look unclaimed.")
+        if recorded.get("spent") and owner == generation:
+            raise Quarantined(
+                f"REFUSING: {directory} is tombstoned SPENT for generation {generation}. Its "
+                "window has aged out of the chain's meaning even where the slots remain, so "
+                "re-collecting it would not reproduce it -- it would destroy it.")
+
+    # The state file's NAME is injectable, so it must not be assumed: a caller running with its own
+    # state path would otherwise have its live state read as absent, and absence is what triggers
+    # the fail-closed branch below. A guard that mistakes a running collection for an abandoned one
+    # refuses the very run it exists to protect.
+    state_file = pathlib.Path(state_path) if state_path else directory / "supervisor_state.json"
+    if state_file.exists():
+        try:
+            recorded = json.loads(state_file.read_bytes()).get("cutoff_slot_inclusive")
+        except (OSError, json.JSONDecodeError) as error:
+            raise Quarantined(f"{directory} holds an unreadable supervisor state: {error}") from error
+        if recorded is not None and recorded != expected:
+            raise Quarantined(
+                f"REFUSING: {directory} holds a run whose observation cutoff is {recorded:,}, but "
+                f"generation {generation} derives {expected:,}. That directory belongs to a "
+                "different window, and its artifacts are irreplaceable")
+        return directory
+
+    artifacts = collection_artifacts(directory)
+    if artifacts and not tombstone.exists():
+        shown = ", ".join(artifacts[:4]) + (f", and {len(artifacts) - 4} more"
+                                            if len(artifacts) > 4 else "")
+        raise Quarantined(
+            f"REFUSING: {directory} already holds collection artifacts ({shown}) but carries "
+            f"neither a supervisor state nor a {SPENT_TOMBSTONE}. This is the fail-closed case: "
+            "the runtime state is gitignored, so its absence is exactly what a `git clean -fdx` "
+            "produces, and adopting the directory on that basis would overwrite a corpus that "
+            "cannot be collected again. Write a tombstone naming the owning generation, or point "
+            "this run at an empty directory.")
+    return directory
+
+
+def assert_work_dir_belongs_to_path(generation, work_dir, state_path=None):
     """The guard, applied to the directory ACTUALLY being written to.
 
     `assert_work_dir_belongs_to` checks the configured pairing. This checks the one a caller
@@ -425,18 +527,7 @@ def assert_work_dir_belongs_to_path(generation, work_dir):
                 f"{directory}. Those artifacts are irreplaceable")
     expected = B11A.derive_window(
         generation_config(generation)["ranges"])["observation_cutoff_slot_inclusive"]
-    state_file = directory / "supervisor_state.json"
-    if state_file.exists():
-        try:
-            recorded = json.loads(state_file.read_bytes()).get("cutoff_slot_inclusive")
-        except (OSError, json.JSONDecodeError) as error:
-            raise Quarantined(f"{directory} holds an unreadable supervisor state: {error}") from error
-        if recorded is not None and recorded != expected:
-            raise Quarantined(
-                f"REFUSING: {directory} holds a run whose observation cutoff is {recorded:,}, but "
-                f"generation {generation} derives {expected:,}. That directory belongs to a "
-                "different window, and its artifacts are irreplaceable")
-    return directory
+    return assert_directory_is_claimable(directory, generation, expected, state_path=state_path)
 
 
 def assert_work_dir_belongs_to(generation):
@@ -448,8 +539,10 @@ def assert_work_dir_belongs_to(generation):
     chain's meaning even if the slots remain. Overwriting them is the single unrecoverable action
     in this pipeline, so it is refused here rather than avoided by care.
 
-    The test is the state file's own recorded window, not the directory name, because a name can be
-    changed and a recorded cutoff cannot be argued with.
+    The test is not the directory NAME, because a name can be changed. It is the recorded window --
+    from the committed tombstone first and the runtime state second -- and, failing both, the
+    presence of a corpus that nobody has claimed. See `assert_directory_is_claimable`, which both
+    guards route through so that neither can drift from the other.
     """
     config = generation_config(generation)
     directory = pathlib.Path(config["work_dir"])
@@ -461,18 +554,7 @@ def assert_work_dir_belongs_to(generation):
             raise Quarantined(
                 f"generation {generation} is configured to write into generation {other}'s "
                 f"directory {directory}; refusing")
-    state_file = directory / "supervisor_state.json"
-    if state_file.exists():
-        try:
-            recorded = json.loads(state_file.read_bytes()).get("cutoff_slot_inclusive")
-        except (OSError, json.JSONDecodeError) as error:
-            raise Quarantined(f"{directory} holds an unreadable supervisor state: {error}") from error
-        if recorded is not None and recorded != expected:
-            raise Quarantined(
-                f"REFUSING: {directory} holds a run whose observation cutoff is {recorded:,}, but "
-                f"generation {generation} derives {expected:,}. That directory belongs to a "
-                "different window, and its artifacts are irreplaceable")
-    return directory
+    return assert_directory_is_claimable(directory, generation, expected)
 
 
 def verify_preregistration(document=None, generation=1):
@@ -1668,7 +1750,7 @@ def watch(url, poll_seconds=DEFAULT_POLL_SECONDS, transport=None, sleeper=time.s
     """Verify, wait for a finalized cutoff, then run the frozen stages once each."""
     # BEFORE the directory is created, not after: mkdir on a spent window's path is already the
     # damage, and a guard that fires afterwards is an apology.
-    assert_work_dir_belongs_to_path(generation, work_dir)
+    assert_work_dir_belongs_to_path(generation, work_dir, state_path=state_path)
     pathlib.Path(work_dir).mkdir(parents=True, exist_ok=True)
     window = verify_preregistration(generation=generation)
     manifest = build_manifest()

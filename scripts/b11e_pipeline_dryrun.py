@@ -332,9 +332,37 @@ def check_gates_refuse_an_empty_artifact(directory):
     return findings, verdicts
 
 
+def claim_fixture_directory(directory, generation=1):
+    """Declare who owns this fixture, because B11c's guard now demands it of every caller.
+
+    The guard fails closed on a directory that holds a corpus but names no owner: that is exactly
+    what a `git clean -fdx` leaves behind, since the supervisor state is gitignored while the
+    databases are not. This dry run builds real cohort artifacts and only then invokes the watcher,
+    so by the time the guard looks it sees a populated directory with no state file yet -- the same
+    shape as the accident, arriving legitimately.
+
+    So it claims the directory rather than being exempted from the check. There is deliberately no
+    bypass flag: an escape hatch for callers that "know what they are doing" is the hole the guard
+    exists to close, and a dry run that ran under weaker rules than production would be testing a
+    pipeline nobody deploys.
+    """
+    marker = pathlib.Path(directory) / B11C.SPENT_TOMBSTONE
+    marker.write_text(json.dumps({
+        "generation": generation,
+        "spent": False,
+        "cutoff_slot_inclusive": B11C.B11A.derive_window(
+            B11C.generation_config(generation)["ranges"])["observation_cutoff_slot_inclusive"],
+        "why": ("B11e dry-run fixture. Claims this throwaway directory so the watcher's "
+                "fail-closed ownership guard sees a named owner instead of an unclaimed corpus. "
+                "spent=false: this fixture is meant to be run, unlike a real collected window."),
+    }, indent=2, sort_keys=True) + "\n")
+    return marker
+
+
 def check_watcher_behaviour(directory):
     """Receipts, resume, duplicate refusal and manifest drift, through B11c's own seams."""
     findings = []
+    claim_fixture_directory(directory)
     paths = {"work_dir": directory, "state_path": directory / "state.json",
              "receipt_dir": directory / "receipts", "log_dir": directory / "logs"}
     ran = []

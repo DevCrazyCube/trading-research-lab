@@ -31,6 +31,7 @@ def load(name, filename):
 
 
 SWEEP = load("mutation_sweep", "mutation_sweep.py")
+B11C = load("b11c_maturity_watcher", "b11c_maturity_watcher.py")
 
 TOY_SOURCE = '''\
 def check(value):
@@ -645,10 +646,30 @@ class LiveCollectionIsUnreachableTests(unittest.TestCase):
                                  f"{path} is tracked, so a sweep would stage a live artifact")
 
     def test_what_does_stage_from_that_path_is_historical_only(self):
+        """Nothing COLLECTED may be tracked from the live path -- records and markers only.
+
+        SPENT.json is the one tracked file that is not under incidents/ or superseded/, and it is
+        tracked deliberately. It carries no collected data: it names the owning generation and the
+        window's cutoff, so that B11c's ownership guard can still identify this directory after a
+        `git clean -fdx` removes the gitignored supervisor state. A witness to something
+        irreplaceable cannot itself be discardable, which is the whole reason it is committed.
+
+        The rule this test enforces is therefore stated as a shape AND a size: a marker is small and
+        declarative, a corpus is not. A future SPENT.json that grew to hold collected rows would
+        fail here rather than pass on the strength of its name.
+        """
         staged = [p for p in SWEEP.tracked_files(ROOT) if p.startswith("research/b11a/")]
         self.assertTrue(staged, "expected the historical incident records to be tracked")
         for path in staged:
             with self.subTest(path=path):
+                if path == f"research/b11a/{B11C.SPENT_TOMBSTONE}":
+                    body = json.loads((ROOT / path).read_text())
+                    self.assertEqual({"generation", "spent", "cutoff_slot_inclusive", "why",
+                                      "artifacts_are_irreplaceable", "ledger_passes_spent"},
+                                     set(body), "the tombstone grew fields; it must stay a marker")
+                    self.assertLess((ROOT / path).stat().st_size, 4096,
+                                    "a tombstone this large is no longer a marker")
+                    continue
                 self.assertRegex(path, r"^research/b11a/(incidents|superseded)/")
 
 
