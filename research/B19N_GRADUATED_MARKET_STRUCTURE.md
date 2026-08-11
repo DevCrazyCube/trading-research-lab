@@ -210,7 +210,7 @@ size, so **there is no size signal to select on at graduation.**
 > `assert_deposit_uniform` now tests a spread against a stated tolerance in exact integer
 > arithmetic, and it is what caught this.
 
-## 3b. Depth does survive listing, and the toll is flat in size — the strongest result here
+## 3b. Depth survives listing — but the toll claim built on it was retracted
 
 The depth claim was the load-bearing one after the fee correction, and it rested on a graduation
 *threshold* rather than on measured post-listing depth. It can be partly measured after all: trade
@@ -229,42 +229,64 @@ silent pools are precisely the ones most likely to be dead, and §4 explains why
 distinguish "died" from "never queried". This is evidence that depth survives *conditional on the
 pool trading at all*, and it is not evidence about the other 49.
 
-### The round-trip toll, priced with the verified invariant
+### The round-trip toll — RETRACTED AND REBUILT
 
-Using `(quote + virtual) * base` from §2, each observed state's own fee tier, exact integers, buying
-and selling straight back across all 199 observed graduated-pool states:
+An earlier version of this section reported **"1.89% against the bonding curve's 22.9% — a ~12×
+reduction"**, and attributed the flatness to depth absorbing slippage. **Both halves were wrong.**
+The peer seat attacked it and the numbers below were then reproduced independently here.
 
-| position | median toll | as % |
-|---|---|---|
-| 0.01 SOL | 0.0002 SOL | **1.89%** |
-| 0.10 SOL | 0.0019 SOL | **1.89%** |
-| 1.00 SOL | 0.0189 SOL | **1.89%** |
+**Defect 1 — the comparator was a different instrument.** The 1.89% was a buy-and-sell-back at ONE
+state. The 22.9% was fee + *one-way* slippage + rent, i.e. the cost of *holding* a position. An
+instantaneous round trip reverses its own price impact, so slippage **cancels by construction**.
+Pointing the same instantaneous instrument at the bonding curve, on 3,084 burned curves:
 
-**Two things matter here, and the second more than the first.**
+| position | bonding curve, instantaneous |
+|---|---|
+| 0.01 SOL | 24.99% |
+| 0.10 SOL | **4.75%** |
+| 1.00 SOL | 2.72% |
 
-**The level: 1.89% against the bonding curve's measured 22.9%** on a 0.1 SOL position (2.5% fee +
-~18% slippage + 2% rent). A ~12× reduction. On the curve you needed a 23% move to break even; here
-you need a 2% move.
+The curve's own instantaneous round trip at 0.1 SOL is **4.75%, not 22.9%**.
 
-**The flatness: the toll does not change from 0.01 SOL to 1.00 SOL.** On the bonding curve, size was
-the enemy — slippage against a ~1 SOL reserve *was* the toll, so a bigger position was strictly
-worse. Here the depth absorbs it and the toll is essentially pure fee at every size tested. That is
-a structurally different market, not a cheaper version of the same one.
+**Defect 2 — the graduated figure omitted the fixed costs the curve figure charged.** Rent
+(2,039,280 lamports), base fee and priority fee — 2,249,280 per round trip — were in the 22.9% and
+absent from the 1.89%. Charging both sides identically:
 
-### What this does and does not reopen
+| position | graduated | bonding curve | difference |
+|---|---|---|---|
+| 0.01 SOL | 24.38% | 24.99% | **0.61 pp** |
+| 0.10 SOL | 4.14% | 4.75% | **0.61 pp** |
+| 1.00 SOL | 2.12% | 2.72% | **0.60 pp** |
 
-It does **not** show anything is profitable, and it does not overturn the bonding-curve close. That
-close rested on an outcome asymmetry — 53% reaching +6% against 47% abandoned at −32%, where one
-abandoned position erases five wins — and a cheaper toll does not by itself repair that shape.
+**A constant 0.6 percentage points at every size — which is exactly two legs of the 30 bps fee gap
+(125 − 95).** The entire instantaneous-toll advantage is the fee difference and nothing else. There
+is no 12×, no 2.5×; there is 0.6 points.
 
-What it does is remove the reason the shape could never be beaten. At a 22.9% toll no exit rule can
-work, because the toll exceeds almost every move worth capturing. At 1.89% that objection is simply
-gone, and **the outcome distribution becomes the open question rather than a foregone one.** Whether
-the graduated market's distribution differs from the bonding curve's is not answerable here — it
-needs the 49 silent pools resolved and a real panel, which is exactly what the collector is for.
+**Defect 3 — the flatness proved the opposite of what was claimed.** "Depth absorbs it, so the toll
+is pure fee" reverses the causation. The toll is pure fee *because the instrument cancels slippage*,
+and it would read 1.89% against a **1 SOL** pool just as readily. The flatness demonstrates that the
+instrument is slippage-**blind**, not that the pool is deep. That the earlier table was flat to four
+figures at exactly 1.89% = 2 × 0.945% was itself the tell, and it was missed.
 
-*Burned data, survivorship-biased, instantaneous round trips rather than held positions. It is the
-strongest argument yet for collecting, and it is not a result.*
+### What this leaves, stated as the rebuild it is
+
+- **The fee advantage is real and modest: ~0.6% of a round trip.** Consistent with §1b's finding
+  that the payable median is 95–100 bps against the curve's 125.
+- **The 68.5 SOL depth measurement stands but is DECOUPLED from the toll.** It is evidence about
+  depth; the toll table is not, because the toll never touched depth at all.
+- **The genuine structural question is untouched by any of this.** Depth pays off only when a
+  position is BOUGHT, HELD while the price moves, and SOLD at a *different* state — entry slippage
+  plus exit slippage at moved reserves, which is small in a 68 SOL pool and murderous in a 1 SOL
+  one. No figure in this document measures a single lamport of that.
+- **The earlier "at 22.9% no exit rule can work, at 1.89% that objection is gone" is withdrawn.** It
+  was already in tension with this programme's own conclusion: the bonding-curve close rested on the
+  53%/47% outcome asymmetry measured with a *holding* instrument, not on a toll wall. A modestly
+  cheaper round trip does not repair a distribution where one abandonment erases five wins.
+
+**The case for collecting is therefore narrower and better than the retracted version.** It does not
+rest on a toll multiple that was mostly an instrument artifact. It rests on the one real unknown:
+the **held-position** cost and the outcome distribution across the 49 silent pools — the only number
+that could reopen the trading question, and the only one this corpus cannot produce.
 
 ## 4. Why window 1 cannot answer the trading question — and what can
 
