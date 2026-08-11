@@ -66,8 +66,9 @@ promising mechanism in the venue: even trading for free leaves −16.89%.
 > those divide out whatever the unit is.
 
 `ClaimCashbackEvent` fires 3,172 times on pump and 264 on PumpSwap in window 1, alongside a
-`UserVolumeAccumulator` that tracks volume. It pays real SOL. It is also **the only mechanism in
-this data through which anyone is demonstrably earning at scale**:
+`UserVolumeAccumulator` that tracks volume. It is **the only mechanism in this data through which
+anyone is demonstrably accruing at scale** — accruing, not necessarily earning, since the unit is
+unknown:
 
 - 508 distinct claimers. Median lifetime cashback **5,800,000 units** — the smallest scale present.
 - Maximum **1,159,990,000,000 units**. Second largest: 5,674,300,000 — **204× smaller**.
