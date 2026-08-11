@@ -118,7 +118,58 @@ folds return +13.52% and +14.31%; the other eight lose. That is a lottery ticket
 of a strategy, and it is precisely the shape that looks like an edge to anyone who stops at the
 mean.
 
-## 6. What this actually establishes
+## 6. The one configuration that comes close — and it reverses a recommendation
+
+The bar is 3.0% because of the 125 bps fee. But B19N established that a 25 bps tier exists on the
+graduated market, and that a pool's fee is **92% predictable from its first trade**. That was
+recorded as a dead end because pools opening on a cheap *base* still paid ~100 bps total once the
+creator fee stacked. Selecting on the **total** rather than the base is a different test:
+
+| | |
+|---|---|
+| pools with ≥3 observed trades | 60 |
+| whose FIRST trade totals ≤25 bps | 18 |
+| **of those, every later trade also ≤25 bps** | **13 (72%)** |
+| median later-trade fee on cheap-start pools | **25 bps** |
+
+### The accounting
+
+| the bar, 25 bps tier, 0.1 SOL | |
+|---|---|
+| venue fee, 2 legs at 25 bps | 0.50% |
+| slippage, 2 legs (measured) | 0.22% |
+| transaction cost, rent reclaimed | 0.21% |
+| **total** | **0.93%** |
+
+| the edge | |
+|---|---|
+| best held-out gross edge | **0.86%** |
+
+**Gap: 0.07 percentage points short.**
+
+### Why this is still not a result
+
+- **The edge is measured on bonding curves; the fee on graduated pools.** Combining them assumes the
+  edge transfers between populations, and nothing here shows that it does. This is the single
+  largest weakness and it is not a small one.
+- **72% persistence, on a sample of 18 pools.**
+- **28% of cheap-start pools stop being cheap.** A pool that turns expensive *after* entry charges
+  the exit leg at 95–125 bps — alone larger than the entire edge.
+- **0.86% is the maximum of a search** over features and thresholds. Its honest expectation is
+  lower, and the in-sample figure was 2.48%.
+
+### What it changes
+
+It reverses the collection recommendation I gave, and the reversal should be stated plainly rather
+than buried. That recommendation rested on the liquidity and size levers, which **are** properly
+closed. This is a different question: *does the corrected rule shape, run on cheap-tier graduated
+pools, clear a 0.93% bar?* It is 7 basis points from doing so on numbers assembled from two
+populations — which is precisely the kind of question a real panel settles and burned data cannot.
+
+**Owner's call, and the honest framing is: not an edge, a near-miss whose error bars are wider than
+the gap.**
+
+## 7. What this actually establishes
 
 Not "it doesn't work" — something much more specific:
 
