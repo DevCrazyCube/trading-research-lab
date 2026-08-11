@@ -46,40 +46,39 @@ the unchanged number, which is why the check asserts the figure moved.)*
 **This closes the entire cost-reduction direction, including cashback**, which is otherwise the most
 promising mechanism in the venue: even trading for free leaves −16.89%.
 
-## The cashback mechanism — what it is, and what it is not
+## The cashback mechanism — unit settled, concentration retracted
 
 `ClaimCashbackEvent` fires **3,172 times on pump and 264 on PumpSwap** in window 1, alongside a
 `UserVolumeAccumulator` that tracks trading volume. It is the only mechanism in this venue that pays
 the trading side rather than charging it. Two questions had to be settled: what unit it pays in, and
 whether anyone is collecting it at scale.
 
-### The unit — settled for PumpSwap, unestablished for pump
+### The unit — SETTLED. Both programs pay SOL, on two different rails
 
-**PumpSwap: SOL, delivered as WRAPPED SOL.** Established by the peer seat directly rather than by
-inference — `amount` equals an inner SPL-token transfer amount in **264 of 264** claims, and the
-instruction's accounts run `user_volume_accumulator_wsol_token_account → user_wsol_token_account`
-through the quote token program.
+| program | rail | evidence |
+|---|---|---|
+| PumpSwap | **wrapped SOL** | `amount` == an inner SPL transfer in **264 of 264**; accounts run `user_volume_accumulator_wsol_token_account → user_wsol_token_account` |
+| pump (v1) | **native SOL** | `amount` == an inner **system-program** transfer in **384 of 600**; **0 of 600** match any token transfer |
 
-That also explains a failed check of mine: reconciling `amount` against the claimant's **native**
-lamport balance matched only 4 of 600, because WSOL lands in a *token* account. The four that did
-reconcile were the cases where the claimant unwrapped in the same transaction.
+pump carries two claim instructions — `claim_cashback` (v1), whose accounts are `user`,
+`user_volume_accumulator`, `system_program` with no token program, moving native lamports; and
+`claim_cashback_v2`, on the WSOL rail. **Both are SOL. Neither is ever a token.** Amounts are
+directly summable across both programs.
 
-**pump: still unestablished, and this is where 3,172 of the 3,436 claims are.** pump's
-`claim_cashback` is a *different instruction* — accounts are `user`, `user_volume_accumulator`,
-`system_program`, `event_authority`, `program`, with **no token program and no token accounts at
-all.** Measured directly:
+Sanity check on magnitude: median claim **0.000468 SOL**, max 0.595 SOL — coherent as lamports and
+not as a token count.
 
-| test on pump claims | result |
-|---|---|
-| `amount` equals an inner SPL transfer | **0 of 300** |
-| any account moves by exactly `amount` | **6 of 400** |
+The `total_claimed_tokens` / `total_unclaimed_tokens` fields on the volume accumulator are **volume
+bookkeeping**, never the payout. Reading the payout's unit off them was the original error.
 
-So on pump the payout is neither a WSOL transfer nor an identifiable same-transaction lamport
-movement. **Its magnitudes stay in unknown units.**
-
-> The trap worth recording: pump's account list — `system_program`, no token program — is exactly
-> what a native SOL transfer looks like, and `u64` amounts agree. Two indirect signals pointing the
-> same way, and the direct check refuses both.
+> **Two failed checks of mine, and why each failed — both are instrument errors, not data errors.**
+> Reconciling against the claimant's *native balance* matched 4 of 600 on PumpSwap, because WSOL
+> lands in a **token** account; the four that matched were unwrap-in-transaction cases. Then testing
+> pump for an *SPL transfer* matched 0 of 300, because pump v1 uses the **native** rail. And checking
+> whether any account's **net balance delta** equalled `amount` matched 6 of 400 — because a net
+> delta absorbs every other lamport movement in the transaction. The peer seat matched inner
+> **instruction** amounts, which are exact, and got 384. Same data, three wrong instruments and one
+> right one.
 
 ### Concentration — retracted; there is none in the window
 
@@ -120,15 +119,17 @@ position B19K used.
 | never closed | 123 mints, 79.02 SOL sunk |
 | fees paid | 10.24 SOL |
 | **net observed trading** | **−51.56 SOL** |
-| lifetime cashback earned | **1.16×10¹² units, denomination unknown** |
+| lifetime cashback accrued | **1,159.99 SOL** (lifetime, mostly pre-window) |
 
 **Its price prediction is no better than anything this programme measured — 35% winners and a
 negative median round trip.** What it has is a rebate.
 
 ### Why this is not a strategy we can copy
 
-**The rebate side cannot be priced at all until the unit is known**, so no comparison between its
-trading loss and its cashback income is available. What can be said without the unit:
+**The rebate does not fund the trading loss on any reading now that the unit is settled.** Its
+in-window claims total a fraction of a SOL against a −51.56 SOL observed trading result, and its
+1,159.99 SOL lifetime accrual is mostly pre-window and cannot be attributed to activity measured
+here. What stands:
 
 - its observed trading loses **51.56 SOL on 951.77 SOL of volume, about −5.4% of volume**, and that
   figure IS in SOL — it comes from `TradeEvent.sol_amount`, which reconciles against the bonding
