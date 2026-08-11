@@ -92,6 +92,53 @@ is false at the median. The first does not depend on the fee tier at all.
 > slippage term rises and the toll climbs back toward the curve's.** That is the first thing any
 > graduated-market collection must measure, and §4 explains why this corpus cannot.
 
+## 1b. The cheap tier is NOT reachable by choice — the crux question, closed negatively
+
+Both seats flagged the same crux: at a 25% share, whether the 25-bps tier is *selectable* decides
+whether it is an addressable market or merely the trades that happened to carry a waived creator
+fee. It is the second. Four candidate selection mechanisms were tested on the canonical 765 and all
+four fail.
+
+**There are two base structures, not a continuum.** Decomposing every leg into its components:
+
+| base | lp | protocol | + creator | trades |
+|---|---|---|---|---|
+| **25** | 20 | 5 | 0 → 95 | 197 at creator 0, 139 at 95, 42 spread |
+| **95** | 2 | **93** | 0 → 30 | 175 at creator 0, 196 at 30 |
+
+**Not the venue.** Our 82 graduated pools see *both* structures, near 50/50 — 100 trades
+protocol-heavy against 99 lp-heavy. Graduating does not put a pool in either camp.
+
+**Not the instruction.** `buy`, `sell` and `buy_exact_quote_in` each show both structures in similar
+proportion. There is no cheap call to make.
+
+**Not the clock.** The structures fully coexist across the window (slots 435,570,135–436,930,575 and
+435,571,919–437,180,811). By decile the protocol-heavy share bounces 34%→76%→35% with no trend, so
+this is not a protocol change with a before and an after.
+
+**Not the pool, which is the one that looked promising.** The structure *is* fixed per pool in 316
+of 343 pools, so a trader could in principle read a pool's structure off its history and trade only
+the cheap ones. Tested directly on the 122 pools with at least two trades:
+
+- the first trade's base predicts later trades **77%** of the time (27 pools vary);
+- 72 of 122 pools (59%) open on the cheap 25-bps base;
+- **but the total actually paid on those very pools has a median of 100 bps.**
+
+The full distribution on cheap-base pools is 25 bps on 120 legs and 95–125 bps on 154 of them. The
+base is only half the price: the creator fee, 0 to 95 bps, is stacked on top and is neither fixed
+per pool (92% predictive, so it does move) nor anything a counterparty controls. **Selecting on the
+cheap base does not buy a cheap trade.**
+
+So the 25-bps tier is not a tier anyone can opt into. It is the residue of trades whose creator fee
+happened to be zero, and the honest median for a trader who cannot choose is **95–100 bps per leg,
+about 2% round trip.** Against the bonding curve's 125 bps that is a saving of roughly 0.5% on a
+round trip — real, and far too small to matter to any of the asymmetries this programme has
+measured.
+
+*Observation on burned data, not a preregistered test. It is reported because it CLOSES a question
+rather than opening one: no study should now be written on the premise that the cheap tier is
+addressable.*
+
 ## 2. The pool's invariant, determined exactly
 
 Trade events carry `pool_base_token_reserves`, `pool_quote_token_reserves` **and**
