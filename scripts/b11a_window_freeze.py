@@ -181,22 +181,32 @@ def assert_disjoint(first, last, ranges=BURNED_RANGES):
     return True
 
 
-def load_preregistration(path=PREREGISTRATION_PATH, verify_hashes=True):
-    """Read the freeze and verify it is byte-for-byte the document that was committed."""
+def load_preregistration(path=PREREGISTRATION_PATH, verify_hashes=True,
+                         expected_file_sha256=None, expected_canonical_sha256=None):
+    """Read the freeze and verify it is byte-for-byte the document that was committed.
+
+    The expected hashes default to WINDOW 1's, so every existing caller is unchanged. A successor
+    window supplies its own; there is deliberately no way to load a document with verification off
+    while still getting a window out of it, because "unpinned but only this once" is how a pin
+    stops being one.
+    """
+    expected_file = PREREGISTRATION_FILE_SHA256 if expected_file_sha256 is None \
+        else expected_file_sha256
+    expected_canonical = PREREGISTRATION_CANONICAL_SHA256 if expected_canonical_sha256 is None \
+        else expected_canonical_sha256
     raw = pathlib.Path(path).read_bytes()
     document = json.loads(raw)
     if verify_hashes:
         digest = hashlib.sha256(raw).hexdigest()
         canonical = hashlib.sha256(
             json.dumps(document, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-        if digest != PREREGISTRATION_FILE_SHA256:
+        if digest != expected_file:
             raise WindowRefused(
-                f"preregistration file hash is {digest}, pinned {PREREGISTRATION_FILE_SHA256}; the "
+                f"preregistration file hash is {digest}, pinned {expected_file}; the "
                 "frozen document has been edited and no longer fixes the window it claims to")
-        if canonical != PREREGISTRATION_CANONICAL_SHA256:
+        if canonical != expected_canonical:
             raise WindowRefused(
-                f"preregistration canonical hash is {canonical}, pinned "
-                f"{PREREGISTRATION_CANONICAL_SHA256}")
+                f"preregistration canonical hash is {canonical}, pinned {expected_canonical}")
     return document
 
 

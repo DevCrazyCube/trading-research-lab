@@ -395,6 +395,8 @@ GENERATIONS = {
         "ranges": None},                       # None => B11A.BURNED_RANGES, i.e. untouched
     2: {"work_dir": ROOT / "research" / "b11m_window2",
         "preregistration": ROOT / "research" / "B11M_WINDOW2_COHORT_PREREGISTRATION.json",
+        "file_sha256": "f2ae6b23bb09f7920f09f0021da8f216bc0d7bda7371bacb84c3d1e8a374007f",
+        "canonical_sha256": "459e1d16089a1329ed1e2fcdbe26d0a9b76f3ee905a35d38719daa5968dfebd0",
         "ranges": "successor"},
 }
 
@@ -452,7 +454,10 @@ def verify_preregistration(document=None, generation=1):
     nothing can make fire is a guard nobody can show works.
     """
     config = generation_config(generation)
-    document = (B11A.load_preregistration(path=config["preregistration"])
+    document = (B11A.load_preregistration(
+                    path=config["preregistration"],
+                    expected_file_sha256=config.get("file_sha256"),
+                    expected_canonical_sha256=config.get("canonical_sha256"))
                 if document is None else document)
     B11A.assert_matches_preregistration(document, ranges=config["ranges"])
     # The endpoints are NOT re-compared here. `assert_matches_preregistration` above is exactly
@@ -465,8 +470,14 @@ def verify_preregistration(document=None, generation=1):
             # Both hashes, because they answer different questions: the file digest catches any
             # edit at all, the canonical digest catches an edit that changed the meaning rather
             # than only the whitespace. `load_preregistration` has already checked both.
-            "preregistration_file_sha256": B11A.PREREGISTRATION_FILE_SHA256,
-            "preregistration_canonical_sha256": B11A.PREREGISTRATION_CANONICAL_SHA256}
+            # THIS generation's document, not the module's window-1 constants. Returning the
+            # constants here would stamp window 1's provenance onto window 2's receipts -- a false
+            # provenance claim of exactly the kind this project has had to issue an erratum for.
+            "preregistration": str(pathlib.Path(config["preregistration"]).name),
+            "preregistration_file_sha256": config.get(
+                "file_sha256", B11A.PREREGISTRATION_FILE_SHA256),
+            "preregistration_canonical_sha256": config.get(
+                "canonical_sha256", B11A.PREREGISTRATION_CANONICAL_SHA256)}
 
 
 def verify_git_ancestry(relative="research/B11A_FRESH_COHORT_PREREGISTRATION.json", git=None):

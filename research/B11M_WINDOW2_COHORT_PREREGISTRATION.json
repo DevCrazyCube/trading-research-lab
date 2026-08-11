@@ -10,59 +10,88 @@
     "step_3": "peer review of the collection path and this document",
     "step_4": "start the supervisor, which waits for maturity and then runs the frozen ten-stage pipeline into research/b11m_window2"
   },
-  "burned_range_register": [
-    {
-      "convention": "half_open",
-      "first": 429998000,
-      "last": 430000000,
-      "origin": "B7e mature cohort"
-    },
-    {
-      "convention": "half_open",
-      "first": 430000000,
-      "last": 430000500,
-      "origin": "B7d engineering pilot"
-    },
-    {
-      "convention": "half_open",
-      "first": 433302364,
-      "last": 433304364,
-      "origin": "B8a cohort"
-    },
-    {
-      "convention": "inclusive",
-      "first": 433894233,
-      "last": 434097833,
-      "origin": "B8b cohort (also the B9d/B10b/B10c corpus)"
-    },
-    {
-      "convention": "half_open",
-      "first": 435564885,
-      "last": 435565324,
-      "origin": "B7j/B7k positive-control envelope"
-    },
-    {
-      "convention": "inclusive",
-      "first": 435566652,
-      "last": 435566690,
-      "origin": "B7b dead-threshold sample"
-    },
-    {
-      "convention": "inclusive",
-      "first": 435569119,
-      "last": 435569149,
-      "origin": "B7c trade-only gap sample"
-    },
-    {
-      "convention": "inclusive",
-      "first": 435569150,
-      "last": 437211659,
-      "origin": "B11a window 1 (first fresh collection)"
-    }
-  ],
+  "burned_range_register": {
+    "count": 8,
+    "maximum_inclusive_endpoint": 437211659,
+    "note": "B11A's seven ranges plus window 1's full observation span, which this collection must not overlap. Each is normalised to an INCLUSIVE [first, last] pair; a half-open source range [a, b) normalises to [a, b-1].",
+    "ranges": [
+      {
+        "first": 429998000,
+        "inclusive_first": 429998000,
+        "inclusive_last": 429999999,
+        "last": 430000000,
+        "origin": "B7e mature cohort",
+        "source_convention": "half_open"
+      },
+      {
+        "first": 430000000,
+        "inclusive_first": 430000000,
+        "inclusive_last": 430000499,
+        "last": 430000500,
+        "origin": "B7d engineering pilot",
+        "source_convention": "half_open"
+      },
+      {
+        "first": 433302364,
+        "inclusive_first": 433302364,
+        "inclusive_last": 433304363,
+        "last": 433304364,
+        "origin": "B8a cohort",
+        "source_convention": "half_open"
+      },
+      {
+        "first": 433894233,
+        "inclusive_first": 433894233,
+        "inclusive_last": 434097833,
+        "last": 434097833,
+        "origin": "B8b cohort (also the B9d/B10b/B10c corpus)",
+        "source_convention": "inclusive"
+      },
+      {
+        "first": 435564885,
+        "inclusive_first": 435564885,
+        "inclusive_last": 435565323,
+        "last": 435565324,
+        "origin": "B7j/B7k positive-control envelope",
+        "source_convention": "half_open"
+      },
+      {
+        "first": 435566652,
+        "inclusive_first": 435566652,
+        "inclusive_last": 435566690,
+        "last": 435566690,
+        "origin": "B7b dead-threshold sample",
+        "source_convention": "inclusive"
+      },
+      {
+        "first": 435569119,
+        "inclusive_first": 435569119,
+        "inclusive_last": 435569149,
+        "last": 435569149,
+        "origin": "B7c trade-only gap sample",
+        "source_convention": "inclusive"
+      },
+      {
+        "first": 435569150,
+        "inclusive_first": 435569150,
+        "inclusive_last": 437211659,
+        "last": 437211659,
+        "origin": "B11a window 1 (first fresh collection)",
+        "source_convention": "inclusive"
+      }
+    ]
+  },
   "committed_before_any_chain_query": true,
   "derivation": {
     "endpoints_are_derived_never_restated": "successor_ranges() computes window 1's endpoints from the register that produced them rather than repeating them as literals, which is how a second copy of a geometry drifts from its source",
+    "launch_window_span_slots": {
+      "inherited_from": "B8b launch window span, through B11A, unchanged",
+      "value": 203601
+    },
+    "observation_span_slots": {
+      "inherited_from": "B9d observation span, through B11A, unchanged",
+      "value": 1642509
+    },
     "rule": "identical to B11A: start one slot after the maximum inclusive burned endpoint, carry the B8b launch span and the B9d observation span unchanged",
     "what_changed": "window 1's FULL OBSERVATION SPAN is now in the burned register, so the same arithmetic places this window after it"
   },
@@ -74,7 +103,8 @@
     "launch_window_last_slot_inclusive": 437415260,
     "launch_window_span_slots": 203601,
     "observation_cutoff_slot_inclusive": 438854169,
-    "observation_span_slots": 1642509
+    "observation_span_slots": 1642509,
+    "observation_window_end_slot": 438854169
   },
   "geometry_inheritance": "spans inherited from B8b and B9d through B11A unchanged. No span was chosen with any knowledge of window 1's outcomes.",
   "observation_maturity": {
