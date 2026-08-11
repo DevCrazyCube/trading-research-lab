@@ -2337,3 +2337,114 @@ class ReattestInPlaceTests(unittest.TestCase):
         self.state_path.unlink()
         with self.assertRaisesRegex(W.WatcherRefused, "nothing to re-attest"):
             self.reattest()
+
+
+class DirectoryOwnershipRefusalTests(unittest.TestCase):
+    """The guard must REFUSE, and each refusal must be provable by a test that fails without it.
+
+    Why these exist, stated plainly because the gap they close was invisible for a full green run:
+    every other path that touches `assert_directory_is_claimable` drives it in the ALLOW direction.
+    B11e's dry run builds a fixture corpus and expects the guard to succeed, so the suite could only
+    ever catch a guard that wrongly REFUSES -- and it did catch exactly that twice, both fail-closed
+    bugs. It was STRUCTURALLY BLIND to a guard that wrongly ALLOWS, which is the only failure mode
+    that destroys a corpus.
+
+    A peer mutation run proved the blindness rather than asserting it: disabling the fail-closed
+    branch, the spent-tombstone branch, or the state-cutoff comparison each flipped the guard to
+    ALLOW on its scenario, SILENTLY, with 4,403 tests still green. Every case below is one of those
+    mutants' scenarios, so a fail-open regression now has to survive a test written to kill it.
+    """
+
+    def fixture(self, name="corpus"):
+        directory = pathlib.Path(tempfile.mkdtemp(prefix=f"b11c-own-{name}-"))
+        self.addCleanup(shutil.rmtree, directory, True)
+        # A corpus, not bookkeeping: the databases are what cannot be collected again.
+        (directory / "b11a_bodies.sqlite").write_bytes(b"SQLite format 3\x00")
+        return directory
+
+    def expected_cutoff(self, generation=1):
+        return B11A.derive_window(
+            W.generation_config(generation)["ranges"])["observation_cutoff_slot_inclusive"]
+
+    def test_a_corpus_with_no_witness_at_all_is_refused(self):
+        """M1 -- the git-clean hole itself.
+
+        `supervisor_state.json` is gitignored, so a `git clean -fdx` removes it AND the receipts
+        while leaving the databases. This is that directory, exactly.
+        """
+        directory = self.fixture("bare")
+        with self.assertRaises(W.Quarantined) as caught:
+            W.assert_directory_is_claimable(directory, 1, self.expected_cutoff())
+        self.assertIn("already holds collection artifacts", str(caught.exception))
+
+    def test_a_spent_tombstone_refuses_its_own_generation(self):
+        """M2 -- re-collecting a window whose passes are spent."""
+        directory = self.fixture("spent")
+        (directory / W.SPENT_TOMBSTONE).write_text(json.dumps(
+            {"generation": 1, "spent": True, "cutoff_slot_inclusive": self.expected_cutoff()}))
+        with self.assertRaises(W.Quarantined) as caught:
+            W.assert_directory_is_claimable(directory, 1, self.expected_cutoff())
+        self.assertIn("tombstoned SPENT", str(caught.exception))
+
+    def test_a_state_file_recording_another_window_is_refused(self):
+        """M3 -- a run pointed at a corpus belonging to a different window."""
+        directory = self.fixture("wrongstate")
+        state = directory / "supervisor_state.json"
+        state.write_text(json.dumps({"cutoff_slot_inclusive": self.expected_cutoff() + 1}))
+        with self.assertRaises(W.Quarantined) as caught:
+            W.assert_directory_is_claimable(directory, 1, self.expected_cutoff())
+        self.assertIn("belongs to a different window", str(caught.exception))
+
+    def test_a_tombstone_recording_another_window_is_refused_even_when_not_spent(self):
+        """M4 -- the branch the other fixtures cannot reach.
+
+        The spent-flag check sits above the cutoff comparison, so a spent tombstone is caught before
+        the cutoff is ever compared. That ordering is deliberate belt-and-braces, but it makes the
+        cutoff branch coverage-invisible unless a fixture reaches it: a tombstone whose window
+        differs AND whose spent flag is false. Without this case, mutating that comparison survives.
+        """
+        directory = self.fixture("wrongtomb")
+        (directory / W.SPENT_TOMBSTONE).write_text(json.dumps(
+            {"generation": 2, "spent": False, "cutoff_slot_inclusive": self.expected_cutoff() + 1}))
+        with self.assertRaises(W.Quarantined) as caught:
+            W.assert_directory_is_claimable(directory, 1, self.expected_cutoff())
+        self.assertIn("is tombstoned to generation", str(caught.exception))
+
+    def test_an_unreadable_tombstone_forbids_rather_than_being_ignored(self):
+        """A witness that cannot be read is not a witness that is absent."""
+        directory = self.fixture("corrupt")
+        (directory / W.SPENT_TOMBSTONE).write_text("{not json")
+        with self.assertRaises(W.Quarantined):
+            W.assert_directory_is_claimable(directory, 1, self.expected_cutoff())
+
+    def test_bookkeeping_alone_does_not_trip_the_fail_closed_branch(self):
+        """The other direction, so the guard is not merely refusing everything.
+
+        Locks, pids and receipts are reconstructible. A directory holding only those has lost
+        nothing, and refusing it would block legitimate fresh runs -- which is how a guard gets
+        weakened by whoever hits it next.
+        """
+        directory = pathlib.Path(tempfile.mkdtemp(prefix="b11c-own-book-"))
+        self.addCleanup(shutil.rmtree, directory, True)
+        (directory / "supervisor.lock").write_text("")
+        (directory / "watcher.pid").write_text("1")
+        self.assertEqual(directory,
+                         W.assert_directory_is_claimable(directory, 1, self.expected_cutoff()))
+
+    def test_an_empty_directory_is_claimable(self):
+        directory = pathlib.Path(tempfile.mkdtemp(prefix="b11c-own-empty-"))
+        self.addCleanup(shutil.rmtree, directory, True)
+        self.assertEqual(directory,
+                         W.assert_directory_is_claimable(directory, 1, self.expected_cutoff()))
+
+    def test_the_injected_state_path_is_the_one_consulted(self):
+        """A run with its own state path must not have live state read as ABSENT.
+
+        That reading would send it down the fail-closed branch, so the guard would refuse the very
+        run it exists to protect. This was a real bug in the first cut of the fix.
+        """
+        directory = self.fixture("injected")
+        state = directory / "state.json"
+        state.write_text(json.dumps({"cutoff_slot_inclusive": self.expected_cutoff()}))
+        self.assertEqual(directory, W.assert_directory_is_claimable(
+            directory, 1, self.expected_cutoff(), state_path=state))

@@ -1,0 +1,42 @@
+{
+  "sweep_id": "b11c_ownership",
+  "description": "Mutation sweep over the directory-ownership guard that stands between a routine run and window 1's irreplaceable 23 GB corpus. This guard is the single check protecting the only unrecoverable action in the pipeline, and it earned a sweep the hard way: a peer mutation run showed that although the guard was CORRECT, the committed suite could not tell whether it stayed correct. Every other path that reaches assert_directory_is_claimable -- b11e's dry run above all -- drives it in the ALLOW direction and therefore catches only a guard that wrongly REFUSES. It did catch exactly that, twice, both fail-closed. It was structurally blind to a guard that wrongly ALLOWS, which is the only failure mode that destroys data. Each mutant below flipped the guard to ALLOW on its scenario, silently, with 4,403 tests green. Direct tests now kill all four; this declaration re-mutates on every run so the coverage cannot quietly decay again.",
+  "target": "scripts/b11c_maturity_watcher.py",
+  "tests": [
+    "tests/test_b11c_maturity_watcher.py"
+  ],
+  "mutants": [
+    {
+      "name": "fail-closed branch disabled: an unclaimed corpus is adopted",
+      "old": "    if artifacts and not tombstone.exists():",
+      "new": "    if False:"
+    },
+    {
+      "name": "spent tombstone ignored: a spent window is re-collected over itself",
+      "old": "        if recorded.get(\"spent\") and owner == generation:",
+      "new": "        if False:"
+    },
+    {
+      "name": "state cutoff comparison inverted: only the MATCHING window is refused",
+      "old": "        if recorded is not None and recorded != expected:",
+      "new": "        if recorded is not None and recorded == expected:"
+    },
+    {
+      "name": "tombstone cutoff comparison inverted: another window's corpus is admitted",
+      "old": "        if cutoff is not None and cutoff != expected:",
+      "new": "        if cutoff is not None and cutoff == expected:"
+    },
+    {
+      "name": "corpus suffixes emptied: no file ever counts as a collection",
+      "old": "CORPUS_SUFFIXES = (\".sqlite\", \".sqlite-wal\", \".sqlite-shm\", \".jsonl\")",
+      "new": "CORPUS_SUFFIXES = ()"
+    },
+    {
+      "name": "injected state path ignored: a live run's state is read as absent",
+      "old": "    state_file = pathlib.Path(state_path) if state_path else directory / \"supervisor_state.json\"",
+      "new": "    state_file = directory / \"supervisor_state.json\""
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None expected, and none may be added without a fixture proving the branch is reachable. The fourth mutant is the instructive one: the spent-flag check sits ABOVE the tombstone cutoff comparison, so a spent fixture is caught before the cutoff is ever compared and that branch is coverage-invisible unless a fixture reaches it -- a tombstone whose window differs AND whose spent flag is false. That ordering is deliberate belt-and-braces rather than a dead branch, but belt-and-braces is exactly the shape that hides an untested guard, so the fixture exists. The sixth mutant guards the opposite direction: hardcoding the state file's name made a live run's state read as ABSENT, sending it down the fail-closed branch, so the guard refused the very run it protects. A guard that fails closed on legitimate work is the one a future maintainer weakens."
+}
