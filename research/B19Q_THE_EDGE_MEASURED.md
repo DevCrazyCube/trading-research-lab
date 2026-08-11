@@ -267,6 +267,60 @@ the strategy because it ignores variance drag; median log-wealth accounts for it
 the Kelly-optimal growth rate is 0.007% per trade. The variance does not merely make the edge hard
 to measure — it consumes almost all of it.
 
+## 8c. The shape tournament — settled, by the one statistic this sample can decide
+
+The peer seat established the decidable question: at n≈2,000 you can **rank** instrument shapes
+robustly, because a *paired* comparison on the same positions cancels the asset-move variance that
+makes absolute levels unmeasurable. You cannot **certify** levels. So the tournament below reports
+paired differences.
+
+They also measured the thing that makes trailing viable at all, and it reversed their own prior:
+**peaks are plateaus, not spikes.** On 130 selected curves reaching a >+6% peak — median 98% of the
+peak still available one slot later, 93% keep ≥80%, median plateau width 27 observations, **0% pure
+spikes**. Their gap-risk objection was retracted on that data. The top rolls over slowly; the violent
+move comes later.
+
+### Every elaboration loses to plain trailing
+
+| shape | own mean | vs base (paired) | t | folds + |
+|---|---|---|---|---|
+| plain trailing, 15% | +0.22% | +0.20% | 0.98 | 6/10 |
+| **plain trailing, 20% [base]** | +0.02% | — | — | — |
+| plain trailing, 25% | −0.60% | −0.62% | **−3.53** | 2/10 |
+| two-regime: hard 15% → trail 20% @1.2× | +0.01% | −0.01% | −0.06 | 6/10 |
+| two-regime: hard 10% → trail 25% @1.2× | +0.03% | +0.01% | 0.05 | 5/10 |
+| ratchet 25%→15% at 1.5× | −0.12% | −0.14% | −1.01 | 5/10 |
+| ratchet 30%→20% at 2.0× | −1.10% | −1.12% | **−6.60** | 0/10 |
+| floored trail 20%, floor at 1.2× | +0.01% | −0.01% | −0.41 | 5/10 |
+
+**Nothing beats plain trailing.** The two-regime idea — tight stop until a peak establishes, then
+trail — is the peer's own proposal and comes out at −0.01%, t = −0.06: **no difference at all.**
+Ratchets and floors are worse. What *is* robust is the direction: **looser give-back is reliably
+worse** (t = −3.53, −6.60), so the plateau's wobble is narrower than 20% and handing back 25%+ costs
+real money.
+
+### The give-back optimum is broad and flat
+
+| give-back | mean | t | folds + |
+|---|---|---|---|
+| 6% | +0.04% | 0.05 | 3/10 |
+| 8% | +0.28% | 0.29 | 4/10 |
+| **10%** | **+0.48%** | 0.50 | **5/10** |
+| 12% | +0.32% | 0.33 | 5/10 |
+| 15% | +0.22% | 0.22 | 5/10 |
+| 20% | +0.02% | 0.02 | 4/10 |
+| 25% | −0.60% | −0.62 | 3/10 |
+
+Paired against the best: 10% vs 25% is t = **+3.16**, but 10% vs 6%, 15% and 20% are t = 1.35–1.65 —
+**not distinguishable.** The optimum is a plateau from roughly 8% to 18%, which is the good kind of
+result: the rule is not finely tuned and does not depend on hitting a parameter exactly. (The peer
+predicted 15–25% from the wobble measurement; the data says slightly tighter.)
+
+**So the instrument question is closed and the answer is simple:** a plain trailing stop with a
+give-back somewhere in 8–18%, entered after a delay, beating every fixed rule and every elaboration
+tested. That is a real, transferable finding about rule shape — and it is worth exactly as much as
+§8b says, which is a median 4.2% over 1,000 trades at a size the market cannot absorb.
+
 ## 9. What this actually establishes
 
 Not "it doesn't work" — something much more specific:
