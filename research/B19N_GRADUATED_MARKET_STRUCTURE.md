@@ -268,12 +268,57 @@ and it would read 1.89% against a **1 SOL** pool just as readily. The flatness d
 instrument is slippage-**blind**, not that the pool is deep. That the earlier table was flat to four
 figures at exactly 1.89% = 2 × 0.945% was itself the tell, and it was missed.
 
+### The depth claim was also wrong — and the corrected version is what depth really buys
+
+Chasing the peer's point that only a HELD position touches depth produced a third correction, this
+one to the depth figure itself.
+
+**B19N compared a graduated pool's ~68 SOL quote reserve against "the bonding curve's ~1 SOL
+reserve" and called it ~85×. That is the wrong pair of numbers.** A constant-product curve prices
+against **virtual + real** reserves, and pump.fun's virtual quote reserve is a protocol constant:
+
+| | median at last observed state |
+|---|---|
+| bonding curve REAL quote reserve | **0.000 SOL** |
+| bonding curve VIRTUAL quote reserve | **30.000 SOL** ← what actually prices a trade |
+| graduated pool (quote + virtual) | ~86 SOL |
+
+**The effective pricing-depth ratio is 2.9×, not 85×.** The real reserve was never what a trade was
+priced against, so comparing against it overstated the advantage by a factor of ~30.
+
+### One-way entry slippage, measured on both venues
+
+This is the cost an instantaneous round trip cancels and a held position actually pays — so it is
+the right instrument, and the one every earlier figure here missed:
+
+| position | graduated pool | bonding curve | ratio |
+|---|---|---|---|
+| 0.01 SOL | 0.01% | 0.03% | ~3× |
+| 0.10 SOL | 0.11% | 0.33% | ~3× |
+| 1.00 SOL | 1.14% | 3.22% | 2.8× |
+| 5.00 SOL | **5.46%** | **14.28%** | 2.6× |
+
+The measured ratio matches the corrected depth ratio, which is the check that the two agree.
+
+**What this means in practice, and it is the one genuinely useful structural statement in this
+document:** at small size the two venues are nearly equivalent — 0.11% against 0.33% is not a
+difference any strategy lives or dies on. **The advantage only becomes material with size.** At 5
+SOL the gap is 8.8 percentage points, and it widens as position grows. The graduated market is not
+a cheaper version of the bonding curve; it is the same kind of market roughly three times deeper,
+which matters if and only if you want to trade in size.
+
 ### What this leaves, stated as the rebuild it is
 
 - **The fee advantage is real and modest: ~0.6% of a round trip.** Consistent with §1b's finding
   that the payable median is 95–100 bps against the curve's 125.
+- **The depth advantage is real and modest: ~2.9× effective, ~3× on slippage** — not the 85×
+  first claimed, which compared against a reserve that never priced anything.
 - **The 68.5 SOL depth measurement stands but is DECOUPLED from the toll.** It is evidence about
   depth; the toll table is not, because the toll never touched depth at all.
+- **A first held-position probe is negative**, and stated as a probe rather than a result: entering
+  at each observed state and exiting at the NEXT observed trade, 0.1 SOL, across 166 pairs on 15
+  pools, gives a median of −6.34% with 25% positive. Exit-at-next-trade is not an exit RULE — it is
+  whenever somebody else happened to trade — so this measures feasibility and cost, not strategy.
 - **The genuine structural question is untouched by any of this.** Depth pays off only when a
   position is BOUGHT, HELD while the price moves, and SOLD at a *different* state — entry slippage
   plus exit slippage at moved reserves, which is small in a 68 SOL pool and murderous in a 1 SOL
