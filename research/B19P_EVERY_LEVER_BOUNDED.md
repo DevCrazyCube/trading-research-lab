@@ -46,15 +46,32 @@ the unchanged number, which is why the check asserts the figure moved.)*
 **This closes the entire cost-reduction direction, including cashback**, which is otherwise the most
 promising mechanism in the venue: even trading for free leaves −16.89%.
 
-## The cashback mechanism, and what it is actually for
+## The cashback mechanism — UNIT NOT ESTABLISHED, figures below are in unknown units
+
+> **Read this before the numbers.** Every cashback figure in this section was first written as SOL,
+> on the strength of two indirect signals: `ClaimCashbackEvent` declares `u64` amounts, and the
+> `claim_cashback` instruction touches `system_program` with **no token program, no mint and no
+> token account** — which is how a native-SOL transfer looks.
+>
+> **It does not survive a direct check.** Reconciling each claim's `amount` against the user's own
+> pre/post lamport balance in the same transaction: **4 of 600 match.** Most show a balance delta of
+> exactly **zero**. So the claimed amount does not arrive in the claimant's native balance in that
+> transaction, and the SOL denomination is **not established**.
+>
+> Contradicting it further, `CloseUserVolumeAccumulatorEvent` names its quantities
+> `total_claimed_tokens` and `total_unclaimed_tokens` — *tokens*, not lamports.
+>
+> **Every magnitude below is therefore in an unknown unit and must not be read as SOL.** What
+> survives unit-independently is the *distribution*: the ratios, shares and concentration, since
+> those divide out whatever the unit is.
 
 `ClaimCashbackEvent` fires 3,172 times on pump and 264 on PumpSwap in window 1, alongside a
 `UserVolumeAccumulator` that tracks volume. It pays real SOL. It is also **the only mechanism in
 this data through which anyone is demonstrably earning at scale**:
 
-- 508 distinct claimers. Median lifetime cashback **0.0058 SOL** — nothing.
-- Maximum **1,159.99 SOL**. Second largest: 5.67 SOL.
-- **One entity is 97% of all cashback in the window.**
+- 508 distinct claimers. Median lifetime cashback **5,800,000 units** — the smallest scale present.
+- Maximum **1,159,990,000,000 units**. Second largest: 5,674,300,000 — **204× smaller**.
+- **One entity is 97% of all cashback in the window.** *(A share, so unit-independent and safe.)*
 
 ### What that entity actually does
 
@@ -68,22 +85,24 @@ this data through which anyone is demonstrably earning at scale**:
 | never closed | 123 mints, 79.02 SOL sunk |
 | fees paid | 10.24 SOL |
 | **net observed trading** | **−51.56 SOL** |
-| lifetime cashback earned | **+1,159.99 SOL** |
+| lifetime cashback earned | **1.16×10¹² units, denomination unknown** |
 
 **Its price prediction is no better than anything this programme measured — 35% winners and a
 negative median round trip.** What it has is a rebate.
 
 ### Why this is not a strategy we can copy
 
-The arithmetic does not close from here:
+**The rebate side cannot be priced at all until the unit is known**, so no comparison between its
+trading loss and its cashback income is available. What can be said without the unit:
 
-- observed trading loss: **−51.56 SOL on 951.77 SOL of volume ≈ −5.4% of volume**;
-- measured cashback rate: **median 66 bps of volume**, p10 22 bps.
+- its observed trading loses **51.56 SOL on 951.77 SOL of volume, about −5.4% of volume**, and that
+  figure IS in SOL — it comes from `TradeEvent.sol_amount`, which reconciles against the bonding
+  curve's own pricing throughout this project;
+- its price selection is **35% winners with a negative median round trip**, which is the same losing
+  distribution measured everywhere else in this programme.
 
-**A 0.66% rebate does not cover a 5.4% trading loss.** For the rebate to fund the operation its true
-trading performance must be far better than what is visible here, or its rebate rate far higher —
-and neither is observable, because this corpus only captures trades touching window-1 cohort curves.
-**No conclusion about its net profitability is available**, and none is claimed.
+**No conclusion about its net profitability is available**, and none is claimed. The corpus only
+captures trades touching window-1 cohort curves, so even the trading figure is a partial view.
 
 The 79.02 SOL in unclosed positions is counted as sunk, which is the pessimistic convention this
 project uses elsewhere; those positions have some residual value, so −51.56 SOL is a floor and not
@@ -111,6 +130,8 @@ consistent explanation is the one this programme reached three times independent
 trying to route around: **the outcome distribution is a property of the asset, and no venue,
 size, cost or rebate change reaches it.**
 
-The entity earning most in this market earns it from a protocol rebate while losing money on price,
-which is the strongest available evidence that price is not the edge — it comes from a participant
-with far more capital, speed and coverage than this project has.
+The largest participant visible in this data loses money on price — 35% winners, negative median
+round trip, −5.4% of volume — while accruing a protocol rebate whose denomination this corpus cannot
+establish. **That is the strongest available evidence that price is not the edge**, and it comes
+from a participant with far more capital, speed and coverage than this project has. Whether the
+rebate makes it whole is unknown and deliberately left unknown rather than guessed.
