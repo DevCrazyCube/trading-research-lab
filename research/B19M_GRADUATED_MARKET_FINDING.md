@@ -69,3 +69,54 @@ A proper collection of the graduated market, preregistered before it runs, with 
 as B11A/B11M. That is a new pipeline — different program, different accounts, different pool
 addresses — not a parameter change to the existing one. It is the first genuinely new place to look
 that this programme has surfaced since the trading search closed.
+
+---
+
+# What selects the fee tier — evidence, and an unresolved answer
+
+The 25 bps tier is worth 5× the 125 bps bonding-curve rate, so whether it is **reachable by choice
+or only by luck** is the question that decides whether the cheap tier means anything. Our fragment
+does not settle it. What it rules out is worth as much as what it suggests.
+
+## Ruled out
+
+**Not a time-based change.** Both splits span essentially the whole window — `lp 20 / protocol 5`
+over slots 435,570,135–436,930,575 and `lp 2 / protocol 93` over 435,571,919–437,180,811. A
+protocol upgrade would have shown a clean boundary.
+
+**Not purely a user tier.** 49 of 309 distinct users (15.9%) are observed on *both* splits. A
+per-user tier would put that near zero.
+
+**Not purely a pool property.** 27 of 343 pools charge both splits, and among users trading more
+than one pool the evidence splits 34 (one split) against 36 (several) — as close to uninformative
+as a test can land.
+
+**Not simple trade size.** Median trade on the cheap tier is 191,504,283 lamports against
+159,235,353 on the expensive one — overlapping distributions, not a threshold. If `fee_tiers` were
+keyed on the size of a single trade, the cheap tier would sit at one end of the range.
+
+## The leading hypothesis, stated as unconfirmed
+
+**A cumulative user-volume tier.** The pinned IDL carries `FeeConfig { flat_fees, fee_tiers,
+stable_fee_tiers }` and the corpus carries `InitUserVolumeAccumulatorEvent` (43),
+`CloseUserVolumeAccumulatorEvent` (230) and `ClaimCashbackEvent` (264). A tier keyed on
+*accumulated* volume fits every observation above: a user crosses a boundary mid-window (explaining
+the 15.9% seen on both), the same pool serves users at different tiers (explaining the 27), and a
+single trade's size does not determine it (explaining the overlap).
+
+A weak corroborating detail, and it is weak: in all three pools examined that charge both splits,
+the cheap-tier trades had the higher median size — consistent with larger, more active traders
+sitting in a better tier. Three pools is not evidence, and it is recorded as a lead rather than a
+result.
+
+**If this hypothesis is right it is directly actionable** — the cheap tier would be earned by
+accumulating volume rather than granted by luck, and the toll difference is 5×. **If it is wrong,
+the 25 bps tier may be unreachable** and the graduated market's advantage shrinks toward the 95 bps
+figure, which is still under the bonding curve's 125 but far less interesting.
+
+## How it would be settled
+
+Decode `UserVolumeAccumulator` account state alongside the trades and test whether the split is a
+function of accumulated volume at trade time. That needs the accounts, which this corpus does not
+carry — it followed bonding-curve addresses. It is a bounded question with a definite answer, and
+it is the first thing a graduated-market collection should be designed to resolve.
