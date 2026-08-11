@@ -333,6 +333,54 @@ rest on a toll multiple that was mostly an instrument artifact. It rests on the 
 the **held-position** cost and the outcome distribution across the 49 silent pools — the only number
 that could reopen the trading question, and the only one this corpus cannot produce.
 
+## 3c. What graduation actually buys: a counterparty that can pay
+
+Three claims about this venue have now been retracted or cut by an order of magnitude — the fee
+advantage, the toll multiple, and the depth ratio. This one is different in kind, and it is stated
+last because it survived the attacks that killed the others.
+
+**External exit capacity** — the REAL SOL sitting in the venue available to pay a seller. Virtual
+reserves price a trade; they do not fund one. This project's own rule: *an exit funded by your own
+entry is not liquidity.*
+
+| percentile | bonding curve (n=3,932) | graduated pool (n=33) |
+|---|---|---|
+| p10 | 0.0000 SOL | 15.68 SOL |
+| p25 | 0.0000 SOL | 62.38 SOL |
+| **p50** | **0.0000 SOL** | **68.48 SOL** |
+| p75 | 0.0000 SOL | 121.36 SOL |
+| p90 | 0.0050 SOL | 147.24 SOL |
+
+**91% of bonding curves (3,602 of 3,932) end holding less than 0.01 SOL of real quote. Zero of 33
+graduated pools do.**
+
+This is the mechanism behind B19G's result and it was never a fee or slippage problem. B19G measured
+the median capacity wall at **20 lamports**; the reason is that the median curve holds no real SOL,
+so there is nothing to be paid *from*. Every exit rule the programme tested was, at the median,
+attempting to sell into an empty till.
+
+**Graduation is the event that creates a payable counterparty**, and it does so by protocol
+construction — ~85 SOL of real quote is deposited at graduation whatever the token subsequently
+does. That is not a survivorship artifact: the deposit is guaranteed, and §3b shows it is still
+~80% present at the last observed trade for pools that traded.
+
+### The limits, which are severe and are why this is not a result
+
+- **33 pools.** The other 49 were never queried (§4), and they are the ones most likely to be empty.
+  Whether the deposit *stays* is measured only on pools that traded.
+- **The curve figure is at each curve's last observed state**, when most are dead. A mid-life curve
+  holds more. B19G's independently measured 20-lamport median across the window is the check that
+  this is not an artifact of choosing the endpoint, but the two are not the same measurement.
+- **A payable counterparty is a necessary condition, not a sufficient one.** It says an exit *can*
+  be funded. It says nothing about whether the price ever reaches a level worth exiting at, which
+  is the 53%/47% asymmetry and remains untouched.
+
+**This is the collection's actual justification**, and it is narrower and better than the 12× toll
+that preceded it: every exit rule this programme measured was tested against a venue where, at the
+median, no external money existed to pay it. The graduated market is the first venue in this project
+where the exit side is funded by construction — and whether that changes the outcome distribution is
+precisely what the 49 silent pools would settle.
+
 ## 4. Why window 1 cannot answer the trading question — and what can
 
 Of the 82 graduated pools, **49 show zero trades**. The naive reading is that most graduated tokens
