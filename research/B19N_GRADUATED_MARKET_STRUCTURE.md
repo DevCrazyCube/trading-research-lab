@@ -210,6 +210,62 @@ size, so **there is no size signal to select on at graduation.**
 > `assert_deposit_uniform` now tests a spread against a stated tolerance in exact integer
 > arithmetic, and it is what caught this.
 
+## 3b. Depth does survive listing, and the toll is flat in size — the strongest result here
+
+The depth claim was the load-bearing one after the fee correction, and it rested on a graduation
+*threshold* rather than on measured post-listing depth. It can be partly measured after all: trade
+events carry `pool_quote_token_reserves`, so for pools that traded, depth is directly observable.
+
+**Depth holds.** Across the 33 graduated pools with at least one observed trade:
+
+| | |
+|---|---|
+| median last-observed depth | **68.5 SOL — 80% of the graduation deposit** |
+| pools ending ABOVE their deposit | 11 of 33 |
+| pools ending below half their deposit | 7 of 33 |
+
+**The bias is stated first because it is severe: these are only the 33 pools that traded.** The 49
+silent pools are precisely the ones most likely to be dead, and §4 explains why this corpus cannot
+distinguish "died" from "never queried". This is evidence that depth survives *conditional on the
+pool trading at all*, and it is not evidence about the other 49.
+
+### The round-trip toll, priced with the verified invariant
+
+Using `(quote + virtual) * base` from §2, each observed state's own fee tier, exact integers, buying
+and selling straight back across all 199 observed graduated-pool states:
+
+| position | median toll | as % |
+|---|---|---|
+| 0.01 SOL | 0.0002 SOL | **1.89%** |
+| 0.10 SOL | 0.0019 SOL | **1.89%** |
+| 1.00 SOL | 0.0189 SOL | **1.89%** |
+
+**Two things matter here, and the second more than the first.**
+
+**The level: 1.89% against the bonding curve's measured 22.9%** on a 0.1 SOL position (2.5% fee +
+~18% slippage + 2% rent). A ~12× reduction. On the curve you needed a 23% move to break even; here
+you need a 2% move.
+
+**The flatness: the toll does not change from 0.01 SOL to 1.00 SOL.** On the bonding curve, size was
+the enemy — slippage against a ~1 SOL reserve *was* the toll, so a bigger position was strictly
+worse. Here the depth absorbs it and the toll is essentially pure fee at every size tested. That is
+a structurally different market, not a cheaper version of the same one.
+
+### What this does and does not reopen
+
+It does **not** show anything is profitable, and it does not overturn the bonding-curve close. That
+close rested on an outcome asymmetry — 53% reaching +6% against 47% abandoned at −32%, where one
+abandoned position erases five wins — and a cheaper toll does not by itself repair that shape.
+
+What it does is remove the reason the shape could never be beaten. At a 22.9% toll no exit rule can
+work, because the toll exceeds almost every move worth capturing. At 1.89% that objection is simply
+gone, and **the outcome distribution becomes the open question rather than a foregone one.** Whether
+the graduated market's distribution differs from the bonding curve's is not answerable here — it
+needs the 49 silent pools resolved and a real panel, which is exactly what the collector is for.
+
+*Burned data, survivorship-biased, instantaneous round trips rather than held positions. It is the
+strongest argument yet for collecting, and it is not a result.*
+
 ## 4. Why window 1 cannot answer the trading question — and what can
 
 Of the 82 graduated pools, **49 show zero trades**. The naive reading is that most graduated tokens
