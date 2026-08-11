@@ -463,6 +463,70 @@ the wrong side of zero.
 *Burned data. The bound is exact arithmetic on the frozen cell; the generalisation to "no rule in
 this family" is an inference from it, not a measurement.*
 
+## 3e. The size lever, bounded and closed — and a claim of mine retracted with it
+
+After the liquidity bound (§3d), size was the only lever left: B19K traded 0.1 SOL where fixed costs
+are 2.25% of position, and §3b's hurdle table showed the breakeven nearly halving at 1–3 SOL. I
+wrote that *"position size was doing more damage than any rule choice."* **That was wrong**, and the
+measurement that closes the lever is the same one that retracts it.
+
+### Running B19K's frozen cell at larger sizes
+
+Same rule, same population, take-profit held at B19K's frozen +6% *of position*. (The pinned runner
+file is untouched — sha256 `2e39f8a3…` verified identical before and after; only in-memory constants
+were overridden.)
+
+| position | hit rate | median win | median abandon | mean outcome |
+|---|---|---|---|---|
+| 0.10 SOL | 45.42% | 9,384,410 | −37,746,043 | **−18.94%** |
+| 0.50 SOL | 44.98% | 45,744,947 | −180,692,216 | −19.14% |
+| 1.00 SOL | 41.86% | 90,038,396 | −367,167,842 | −22.20% |
+| 3.00 SOL | 32.58% | 270,331,025 | −1,164,019,328 | −31.21% |
+| 10.00 SOL | 15.75% | 808,538,332 | −4,469,758,173 | −52.80% |
+
+**Size makes it strictly worse, and the hit rate collapses from 45% to 16%.** Targeting a return *on
+capital* means a larger position needs a larger price move, while your own entry moves the price
+against you.
+
+### Why — decomposed into two measured components
+
+Total cost is `fixed/position + 2 × one-way slippage`. Both terms are measured, not modelled:
+
+| position | fixed cost | graduated: slip ×2 → total | curve: slip ×2 → total |
+|---|---|---|---|
+| 0.01 SOL | 22.49% | 0.02% → 22.51% | 0.06% → 22.55% |
+| **0.10 SOL** | 2.25% | 0.22% → **2.47%** | 0.66% → **2.91%** |
+| 1.00 SOL | 0.22% | 2.28% → 2.50% | 6.44% → 6.66% |
+| 5.00 SOL | 0.04% | 10.92% → 10.96% | 28.56% → 28.60% |
+
+Sizing 0.1 → 1.0 SOL saves 2.02 pp of fixed cost and adds **5.78 pp** of slippage on the curve — a
+net 3.76 pp worse, which matches the 3.3 pp collapse measured above. On a ~3× deeper venue it adds
+**2.06 pp**, for a net of **+0.04 pp**.
+
+**On the graduated market, sizing up is neither a rescue nor a penalty. It buys nothing.**
+
+### The retraction
+
+**The cost curve has a minimum, and B19K was already sitting in it.** 2.47% at 0.1 SOL against 2.50%
+at 1.0 SOL on the graduated venue — the fixed-cost term and the slippage term trade off, and the
+optimum is a few tenths of a SOL. B19K's 0.1 SOL was near-optimal by construction, not
+badly chosen. My claim that size was doing more damage than any rule choice was an artifact of
+looking at the fixed-cost term alone and never at the term that grows.
+
+### Where this leaves the trading question
+
+Both remaining levers are now bounded on data already held, and both are negative:
+
+| lever | upper bound on what it buys |
+|---|---|
+| perfect liquidity | −18.94% → −12.78%. Still deeply negative (§3d) |
+| optimal sizing | +0.04 pp on a 3× deeper venue. Nothing |
+
+**No collection is required to establish this.** The graduated market's one genuine structural
+advantage — a counterparty that can pay — is worth about a third of the loss, and its depth
+advantage is worth nothing once the fixed-cost trade-off is accounted for. The remaining two thirds
+is the shape of the outcome distribution, which is a property of the asset and not of the venue.
+
 ## 4. Why window 1 cannot answer the trading question — and what can
 
 Of the 82 graduated pools, **49 show zero trades**. The naive reading is that most graduated tokens
