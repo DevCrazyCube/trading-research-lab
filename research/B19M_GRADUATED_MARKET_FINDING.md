@@ -120,3 +120,42 @@ Decode `UserVolumeAccumulator` account state alongside the trades and test wheth
 function of accumulated volume at trade time. That needs the accounts, which this corpus does not
 carry — it followed bonding-curve addresses. It is a bounded question with a definite answer, and
 it is the first thing a graduated-market collection should be designed to resolve.
+
+---
+
+# The decode, verified by a second route
+
+The fee figures above rest entirely on reading `lp_fee_basis_points` and `protocol_fee_basis_points`
+off decoded events. If those field names meant something other than assumed, every number here
+collapses. So they were checked against the events' **own arithmetic** rather than against the IDL's
+labels.
+
+Each event carries both the basis points **and** the lamport fee charged. The identity
+`fee == ceil(base * bps / 10000)` therefore has to hold, and which `base` it holds against is
+itself informative:
+
+| base reproducing `lp_fee` | events |
+|---|---|
+| `quote_amount_in` | 167 |
+| `user_quote_amount_in` | 125 |
+| `quote_amount_in_with_lp_fee` | 9 |
+| **none** | **1** |
+
+**301 of 302 reconcile exactly.** Three instruction variants compute the fee on different bases —
+which is why a naive check against a single base showed 139 "disagreements" that were a base
+mismatch and not a decode error. That distinction matters: the first reading would have reported a
+46% failure rate and buried a correct decode.
+
+## Effective rate, computed from the fee amounts and not the labels
+
+Summing `lp_fee + protocol_fee + coin_creator_fee + buyback_fee` against the notional:
+
+| effective | round trip | trades |
+|---|---|---|
+| **27–28 bps** | **0.54–0.56%** | **78** |
+| 36–116 bps | 0.72–2.32% | remainder, spread |
+
+The cheap tier is real and it is confirmed by an independent route: the labels say 25 bps, the
+arithmetic on the amounts says 27–28 bps effective, and the difference is the creator and buyback
+components that the label sum omits. **Against the bonding curve's universal 125 bps per leg, that
+is a 4.5× reduction, verified twice.**
