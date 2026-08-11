@@ -46,73 +46,73 @@ the unchanged number, which is why the check asserts the figure moved.)*
 **This closes the entire cost-reduction direction, including cashback**, which is otherwise the most
 promising mechanism in the venue: even trading for free leaves −16.89%.
 
-## The cashback mechanism — UNIT NOT ESTABLISHED, figures below are in unknown units
+## The cashback mechanism — what it is, and what it is not
 
-> **PARTIALLY SETTLED — and the answer differs by program.** The peer seat resolved PumpSwap's:
-> **cashback there is SOL delivered as WRAPPED SOL.** `amount` equals an inner SPL-token transfer
-> amount in **264 of 264** PumpSwap claims, and that instruction's accounts run
-> `user_volume_accumulator_wsol_token_account → user_wsol_token_account`. A native-balance check
-> fails there because WSOL lands in a *token* account, which is why only the unwrap-in-transaction
-> cases reconciled natively.
->
-> **That result does not carry to the pump program, which is where 3,172 of the 3,436 claims are.**
-> pump's `claim_cashback` is a *different instruction*: its accounts are `user`,
-> `user_volume_accumulator`, `system_program`, `event_authority`, `program` — **no token program and
-> no token accounts at all.** Tested directly: `amount` matches an inner SPL transfer in **0 of 300**
-> pump claims, and no account in the transaction moves by exactly `amount` in **394 of 400**. So on
-> pump the payout is neither a WSOL transfer nor an identifiable same-transaction lamport movement,
-> and **its unit remains unestablished.**
->
-> Original reasoning, retained because it was the trap: `ClaimCashbackEvent` declares `u64` amounts,
-> and pump's `claim_cashback` touches `system_program` with no token program — which is how a
-> native-SOL transfer looks.
->
-> **It does not survive a direct check.** Reconciling each claim's `amount` against the user's own
-> pre/post lamport balance in the same transaction: **4 of 600 match.** Most show a balance delta of
-> exactly **zero**. So the claimed amount does not arrive in the claimant's native balance in that
-> transaction, and the SOL denomination is **not established**.
->
-> Contradicting it further, `CloseUserVolumeAccumulatorEvent` names its quantities
-> `total_claimed_tokens` and `total_unclaimed_tokens` — *tokens*, not lamports.
->
-> **Every magnitude below is therefore in an unknown unit and must not be read as SOL.** What
-> survives unit-independently is the *distribution*: the ratios, shares and concentration, since
-> those divide out whatever the unit is.
+`ClaimCashbackEvent` fires **3,172 times on pump and 264 on PumpSwap** in window 1, alongside a
+`UserVolumeAccumulator` that tracks trading volume. It is the only mechanism in this venue that pays
+the trading side rather than charging it. Two questions had to be settled: what unit it pays in, and
+whether anyone is collecting it at scale.
 
-`ClaimCashbackEvent` fires 3,172 times on pump and 264 on PumpSwap in window 1, alongside a
-`UserVolumeAccumulator` that tracks volume. It is **the only mechanism in this data through which
-anyone is demonstrably accruing at scale** — accruing, not necessarily earning, since the unit is
-unknown:
+### The unit — settled for PumpSwap, unestablished for pump
 
-> **Corrected: the 97% was the wrong field, and it is not a statement about this window.**
-> The concentration below was computed on `total_cashback_earned`, which is a **LIFETIME running
-> total** carried in each event — mostly accrued *before* the observation window opened. So "one
-> entity is 97%" actually meant: *among the people who happened to claim during this window, one
-> account's all-time accrual is 97% of their all-time accruals.* That is a survivorship statement
-> about lifetime balances, not a measurement of activity in the window, and the framing overstated
-> it. The peer seat was right that something was wrong with the figure, though not about the cause.
->
-> **Measured on the right field — `amount`, i.e. what was actually claimed inside the window:**
->
-> | | pump | PumpSwap |
-> |---|---|---|
-> | claims | 3,172 | 264 |
-> | claimers | 508 | 147 |
-> | **top claimer's share of in-window claims** | **12%** | **19%** |
-> | **top / second** | **1×** | **1×** |
->
-> **There is no concentration in the window.** The largest claimer takes 12% on pump and is barely
-> ahead of the second. The 97% and the 204× are retracted as claims about window activity; they
-> describe lifetime balances of a self-selected set.
+**PumpSwap: SOL, delivered as WRAPPED SOL.** Established by the peer seat directly rather than by
+inference — `amount` equals an inner SPL-token transfer amount in **264 of 264** claims, and the
+instruction's accounts run `user_volume_accumulator_wsol_token_account → user_wsol_token_account`
+through the quote token program.
 
-- 508 distinct claimers on pump, 147 on PumpSwap.
-- In-window claims total 13.73 (pump) and 1.85 (PumpSwap) — see the unit note above and below.
+That also explains a failed check of mine: reconciling `amount` against the claimant's **native**
+lamport balance matched only 4 of 600, because WSOL lands in a *token* account. The four that did
+reconcile were the cases where the claimant unwrapped in the same transaction.
 
-### What that entity actually does
+**pump: still unestablished, and this is where 3,172 of the 3,436 claims are.** pump's
+`claim_cashback` is a *different instruction* — accounts are `user`, `user_volume_accumulator`,
+`system_program`, `event_authority`, `program`, with **no token program and no token accounts at
+all.** Measured directly:
 
-`ARu4n5mFdZogZAravu7CcizaojWnS6oqka37gdLT5SZn`, observed in window 1: 3,027 trades, 1,597 buys and
-1,430 sells, 951.77 SOL of volume, 409 distinct mints, median 2 trades per mint, **median trade size
-0.0979 SOL** — almost exactly the position B19K used.
+| test on pump claims | result |
+|---|---|
+| `amount` equals an inner SPL transfer | **0 of 300** |
+| any account moves by exactly `amount` | **6 of 400** |
+
+So on pump the payout is neither a WSOL transfer nor an identifiable same-transaction lamport
+movement. **Its magnitudes stay in unknown units.**
+
+> The trap worth recording: pump's account list — `system_program`, no token program — is exactly
+> what a native SOL transfer looks like, and `u64` amounts agree. Two indirect signals pointing the
+> same way, and the direct check refuses both.
+
+### Concentration — retracted; there is none in the window
+
+B19P originally reported *"one entity is 97% of all cashback, 204× the second."* **That was the
+wrong field**, and the peer seat was right to challenge it even though their diagnosis (a decode
+error) was not the cause.
+
+| measure | pump | PumpSwap |
+|---|---|---|
+| sum of `amount`, **in-window** | top **12%**, 1× | top **19%**, 1× |
+| max `total_cashback_earned`, **lifetime** | top 97%, 204× | top 99%, 1169× |
+
+`total_cashback_earned` is a **lifetime running total** carried in each event, mostly accrued before
+the window opened. So "97%" meant: *among accounts that happened to claim during this window, one
+account's all-time accrual is 97% of their all-time accruals* — a survivorship statement about
+lifetime balances, not a measurement of activity in the window.
+
+**On the right field, there is no concentration.** The largest in-window claimer takes 12% on pump
+and is barely ahead of the second. **The 97% and the 204× are retracted.**
+
+> The disagreement that produced this correction was itself a mismatch: the peer scanned **PumpSwap**
+> (2,954 instructions, 264 claims) and B19P reports **pump** (703,234 instructions, 3,172 claims).
+> Both counts were correct for their own program and were never the same measurement. Chasing that
+> apparent contradiction is what surfaced the field error underneath it.
+
+### The largest lifetime accruer, and what its trading looks like
+
+`ARu4n5mFdZogZAravu7CcizaojWnS6oqka37gdLT5SZn` holds the largest *lifetime* cashback balance. It is
+**not** the dominant in-window claimer — see the retraction above — but its trading is worth
+recording on its own terms, because those figures are in SOL and are not affected by any of the
+above. Observed in window 1: 3,027 trades, 1,597 buys and 1,430 sells, 951.77 SOL of volume, 409
+distinct mints, median 2 trades per mint, **median trade size 0.0979 SOL** — almost exactly the
+position B19K used.
 
 | | |
 |---|---|
