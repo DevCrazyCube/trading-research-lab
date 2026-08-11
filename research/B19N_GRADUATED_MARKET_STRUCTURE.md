@@ -416,6 +416,53 @@ median, no external money existed to pay it. The graduated market is the first v
 where the exit side is funded by construction — and whether that changes the outcome distribution is
 precisely what the 49 silent pools would settle.
 
+## 3d. An upper bound on what liquidity can buy — computed without spending anything
+
+The peer seat's recommendation was to collect, scoped to one question: *does standing liquidity
+remove the never-sellable mass and change the asymmetry?* That question has an **upper bound that
+can be computed on data already held**, and it should have been computed before anyone proposed
+spending on it.
+
+**The bound.** Take B19K's frozen cell on the selected population and simply **delete every position
+that was never sellable at any observed point**. That is more generous than standing liquidity could
+ever be — it does not merely make those positions exitable, it removes their losses from the
+population entirely. Whatever real liquidity could buy, it cannot buy more than this.
+
+| | as measured | with the never-sellable removed |
+|---|---|---|
+| cells | 927 | 864 |
+| hit rate | 45.42% | 48.73% |
+| median win | 9,384,410 | 9,384,410 |
+| median abandon | −37,746,043 | −37,746,043 |
+| **mean outcome** | **−18,935,634** | **−12,777,191** |
+| median outcome | −8,949,805 | −1,496,253 |
+
+**It is still deeply negative.** Perfect exitability closes about a third of the loss — 6.2M of
+18.9M — and leaves the other two thirds untouched, because the other two thirds is the *shape* of
+the outcome distribution and not the plumbing. The median win is unchanged. The median abandonment
+is unchanged. Only the frequency shifts, by 3.3 points.
+
+**A correction to the premise as well.** The proposal cited "927 of 2,821 positions unsellable — a
+third of the loss." The count is right for the *whole* population but wrong for the one actually
+traded: among the **selected** positions B19K used, only **63 of 927 (6.8%)** were never sellable,
+and 31 of those 63 are positions with no observation after entry at all — a *coverage gap*, not a
+demonstration of unsellability. The genuinely unsellable selected population is **32 positions**.
+The selection rule was already filtering out most of the never-sellable mass.
+
+### What this means for the collection decision
+
+**The graduated market's one surviving structural advantage — a counterparty that can pay — does not
+reach the outcome.** Granting it in full, and granting it more generously than reality could, the
+rule still loses 12.8M lamports per 100M position on average.
+
+This does not prove no rule can work there. It proves that **this rule family cannot be rescued by
+liquidity**, which was the specific hypothesis the collection was to test. A collection scoped to
+that question would spend RPC hours to measure something already bounded here, and the bound is on
+the wrong side of zero.
+
+*Burned data. The bound is exact arithmetic on the frozen cell; the generalisation to "no rule in
+this family" is an inference from it, not a measurement.*
+
 ## 4. Why window 1 cannot answer the trading question — and what can
 
 Of the 82 graduated pools, **49 show zero trades**. The naive reading is that most graduated tokens
