@@ -321,6 +321,50 @@ give-back somewhere in 8–18%, entered after a delay, beating every fixed rule 
 tested. That is a real, transferable finding about rule shape — and it is worth exactly as much as
 §8b says, which is a median 4.2% over 1,000 trades at a size the market cannot absorb.
 
+## 8d. The migration event — the one shape outside Q3's dichotomy, and it is 3 bps
+
+The peer seat's Q3 answer divides every position into *be right about direction and pay the toll*, or
+*be the fee recipient*. There is arguably a third: **be present at a mechanical repricing.** At
+graduation the bonding curve stops and a pool is created with fixed reserves, which sets an opening
+price. The curve had a final price. Nobody had ever asked whether they match.
+
+If they differed systematically, capturing that would not be a directional bet on a memecoin — it
+would be an event arb at a *known moment*, clearing a mechanical gap rather than a random walk. And
+unlike a mean test on a 43%-volatility payoff, a **sign test** on a mechanical gap is decidable at
+n=82.
+
+**The sign test passes perfectly and the magnitude kills it.**
+
+| pool price ÷ curve price | value |
+|---|---|
+| p0 | 9,997 bps |
+| p50 | 9,997 bps |
+| p100 | 9,997 bps |
+| pool opens LOWER | **82 / 82 (100%)** |
+
+**Every percentile is identical.** The migration applies a deterministic transformation: the pool
+opens exactly **0.03% below** the curve's final price, on all 82 graduations, with zero dispersion.
+That is a fixed mechanical constant — a rounding or migration convention — not a market gap.
+
+Perfectly predictable in sign, and **roughly 90× too small to clear the toll.** The third shape dies
+in one measurement, which is what it should do when it is wrong.
+
+### And the post-listing drift cannot be measured here at all
+
+| after trade | n | p25 | median | p75 | up |
+|---|---|---|---|---|---|
+| 1 | 33 | 0.897× | 1.000× | 1.588× | 36% |
+| 2 | 15 | 0.425× | 1.014× | 2.142× | 53% |
+| 3 | **11** | 1.005× | 1.114× | 2.368× | 81% |
+
+The sample collapses from 33 to 11 as the horizon extends, because window 1's PumpSwap coverage is
+incidental (B19N §4). The "81% up" at trade 3 rests on **eleven observations** with a p25–p75 range
+spanning 0.4× to 2.4×. **No conclusion is available**, in either direction, and quoting the 81% would
+be exactly the error this document spent §8 dismantling.
+
+This is the one question the graduated collector was built to answer and it remains unanswered by
+choice, not by oversight.
+
 ## 9. What this actually establishes
 
 Not "it doesn't work" — something much more specific:
