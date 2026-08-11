@@ -1,0 +1,47 @@
+{
+  "sweep_id": "b19n_ownership",
+  "description": "Mutation sweep over the B19N graduated-collector's work-directory guard. This guard needs a sweep more than its B11c sibling does, for a reason specific to it: B11c deliberately has NO --work-dir flag, so its guard sits behind a config table as a backstop, while B19N KEEPS --work-dir and the guard is therefore the ONLY thing between a mistyped command line and an irreplaceable corpus. A peer mutation run found it correct for the cases it checked and covered by exactly zero tests, so all five one-token breaks shipped green. Two findings from that run shaped this declaration. First, the guard was a DENYLIST -- the design B11c had just abandoned -- naming only window 1 and window 2, so any other precious directory was protected only incidentally by sitting inside research/, and a future window would have been unprotected until someone remembered to edit a tuple. It is now fail-closed on the B11c pattern: a directory is writable only if it is EMPTY or carries B19N's own witness, which covers corpora nobody has named and ones that do not exist yet. Second, and this is the reason several mutants below needed purpose-built fixtures, the containment arms are unreachable against a REAL corpus: window 1 is full, so the fail-closed rule refuses it whatever containment does, and every absolute-path test stayed green while containment was dismantled. Only an EMPTY forbidden directory reaches those arms -- exactly the shape a freshly created window has before it collects -- so the fixtures inject synthetic forbidden roots.",
+  "target": "scripts/b19n_graduated_collector.py",
+  "tests": [
+    "tests/test_b19n_graduated_collector.py"
+  ],
+  "mutants": [
+    {
+      "name": "MA exact-path containment arm dropped",
+      "old": "        if target == owned or owned in target.parents or target in owned.parents:",
+      "new": "        if owned in target.parents or target in owned.parents:"
+    },
+    {
+      "name": "MB inside-a-forbidden-directory arm dropped",
+      "old": "        if target == owned or owned in target.parents or target in owned.parents:",
+      "new": "        if target == owned or target in owned.parents:"
+    },
+    {
+      "name": "MC contains-a-forbidden-directory arm dropped",
+      "old": "        if target == owned or owned in target.parents or target in owned.parents:",
+      "new": "        if target == owned or owned in target.parents:"
+    },
+    {
+      "name": "MD the forbidden list emptied",
+      "old": "FORBIDDEN_WORK_DIRS = (\"research/b11a\", \"research/b11m_window2\")",
+      "new": "FORBIDDEN_WORK_DIRS = ()"
+    },
+    {
+      "name": "ME path resolution dropped, so a relative spelling escapes",
+      "old": "    target = pathlib.Path(path).resolve()",
+      "new": "    target = pathlib.Path(path)"
+    },
+    {
+      "name": "MF fail-closed rule disabled, so an unclaimed corpus is adopted",
+      "old": "    if strangers and not our_witness(target).exists():",
+      "new": "    if False:"
+    },
+    {
+      "name": "MG witness test inverted, so only B19N's own corpus is refused",
+      "old": "    if strangers and not our_witness(target).exists():",
+      "new": "    if strangers and our_witness(target).exists():"
+    }
+  ],
+  "expected_survivors": [],
+  "expected_survivors_note": "None expected, and the two that needed work to kill are the instructive ones. ME is invisible to absolute-path fixtures: dropping .resolve() leaves every absolute test passing while a relative spelling of the same directory sails through, so it needs a fixture that chdir's and passes a relative path. MC looked genuinely redundant under mutation, because any directory CONTAINING a forbidden one necessarily has content and the fail-closed rule therefore fires first -- the arm never got a turn. It is reachable in exactly one shape: a directory carrying B19N's OWN witness that also contains a precious directory, which a careless re-run of an earlier collection could produce. There the witness satisfies fail-closed and containment is the sole defence. Both cases are the same lesson at different depths, and it is the lesson that produced this whole sweep: a branch is not redundant because no fixture reaches it, it is untested until one does."
+}

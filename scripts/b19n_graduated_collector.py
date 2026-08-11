@@ -18,8 +18,11 @@ stage, which is what made window 1 expensive. Verified on window 1's own corpus,
   * the carried reserves are PRE-trade. Chaining trade N's reserves through trade N's own amounts
     reproduces trade N+1's reserves exactly, on 30 of 61 consecutive pairs in the deepest pool; the
     31 failures are the gaps this collector exists to close, not arithmetic drift.
-  * the invariant is (quote + virtual) * base, non-decreasing on 787 of 787 events with ZERO
-    breaks. Plain quote * base breaks on 351 of them, so the virtual term is not optional.
+  * the invariant is (quote + virtual) * base, non-decreasing on 765 of 765 canonical events with
+    ZERO breaks. Plain quote * base breaks on 343 of them, so the virtual term is not optional --
+    though it is a per-pool CONSTANT, unchanged in 340 of 343 pools, so a simulator learns the
+    offset once per pool rather than tracking it. (Earlier drafts said 787/351; those counted some
+    events twice by de-duplicating on field VALUES instead of canonical coordinates.)
 
 NOTHING HERE DECIDES ANYTHING. This is a collector. It applies no rule, ranks no cell and reports
 no return. The graduated cohort it builds is an input to a study that does not exist yet, and that
@@ -44,6 +47,13 @@ FORBIDDEN_WORK_DIRS = ("research/b11a", "research/b11m_window2")
 WORK_DIR = "research/b19n_graduated"
 
 RPC_ENV_VAR = "SOLANA_RPC_URL"
+
+# B19N's own marker. A populated directory WITHOUT this is somebody else's, whoever they are --
+# which is what lets the guard protect corpora nobody has thought to name, including future ones.
+OWNERSHIP_WITNESS = "B19N_OWNED.json"
+# Every file this collector writes starts with this stem, so its own output is distinguishable
+# from a stranger's without enumerating filenames that will drift as stages are added.
+DATABASE_STEM = "b19n_"
 
 # The window-1 graduation deposits, measured in LAMPORTS and not in rounded SOL. A first reading of
 # these at one decimal place showed "85.0" for every pool and was written down as a protocol
@@ -80,20 +90,88 @@ def self_sha256():
 # --------------------------------------------------------------------------- guards
 
 
-def assert_work_dir_is_ours(path):
-    """Refuse any target that is, or is inside, a corpus this collector does not own.
+def our_witness(directory):
+    """The marker saying this directory is B19N's. Absence is what makes a directory unclaimable."""
+    return pathlib.Path(directory) / OWNERSHIP_WITNESS
+
+
+def foreign_content(directory):
+    """Anything in `directory` that is not B19N's own output. Shape-matched, not enumerated."""
+    directory = pathlib.Path(directory)
+    if not directory.is_dir():
+        return []
+    return [child.name for child in sorted(directory.iterdir())
+            if not child.name.startswith(".") and child.name != OWNERSHIP_WITNESS
+            and not child.name.startswith(DATABASE_STEM)]
+
+
+def assert_work_dir_is_ours(path, forbidden=FORBIDDEN_WORK_DIRS, root=None):
+    """Refuse unless this directory is PROVABLY B19N's, or provably nobody's.
 
     Checked BEFORE mkdir, so a mistyped path cannot create anything on the way to being rejected.
+
+    WHY THIS IS NOT A DENYLIST ANY MORE. The first version asked "is this one of two names I was
+    told to avoid?" -- and the peer seat showed that is the design b11c had just abandoned, for the
+    reason it abandoned it. A denylist must be hand-maintained against every precious directory in
+    the repository, forever, and it was ALREADY incomplete: only window 1 and window 2 were named,
+    so any other spent corpus was protected only incidentally, by sitting inside `research/`. Point
+    a `--work-dir` one level deeper, at a precious directory nobody remembered to list, and it wrote
+    straight in. A window 3 would have been unprotected until someone edited a tuple.
+
+    So the question is inverted, exactly as `b11c.assert_directory_is_claimable` inverts it. A
+    directory is writable only if it is EMPTY or carries B19N's own witness. That protects every
+    precious directory by construction, including ones that do not exist yet and ones nobody thought
+    to name -- because they all have content and none of them carry this collector's witness.
+
+    The containment check is kept on top of that. It is redundant for safety but not for diagnosis:
+    "this belongs to window 1" is a message an operator can act on, where "this directory is not
+    empty" is one they will be tempted to work around. It is also NOT redundant for an EMPTY
+    forbidden directory -- a freshly created window that has not collected yet has no content for
+    the fail-closed rule to catch, so containment is the only thing standing there.
+
+    `forbidden` and `root` are injectable for exactly that reason. Driving containment against the
+    real window 1 proves nothing about the containment code, because window 1 is full and the
+    fail-closed rule refuses it whatever containment does -- a peer-style mutation run confirmed
+    that dropping any single containment arm left every such test green. Only an EMPTY forbidden
+    directory reaches the branch, and one of those cannot be manufactured out of a real corpus.
     """
     target = pathlib.Path(path).resolve()
-    for forbidden in FORBIDDEN_WORK_DIRS:
-        owned = (ROOT / forbidden).resolve()
+    base = pathlib.Path(root) if root is not None else ROOT
+    for relative in forbidden:
+        owned = (base / relative).resolve()
         if target == owned or owned in target.parents or target in owned.parents:
             raise CollectionRefused(
                 f"REFUSING: {target} is, contains, or lies inside {owned}, which belongs to another "
                 "collection. This collector writes only to its own directory. Window 1 is burned "
                 "and window 2 is mid-flight; neither can be rewritten by a later run.")
+    if target.exists() and not target.is_dir():
+        raise CollectionRefused(f"REFUSING: {target} exists and is not a directory.")
+    strangers = foreign_content(target)
+    if strangers and not our_witness(target).exists():
+        shown = ", ".join(strangers[:4]) + (f", and {len(strangers) - 4} more"
+                                            if len(strangers) > 4 else "")
+        raise CollectionRefused(
+            f"REFUSING: {target} already holds content this collector did not write ({shown}) and "
+            f"carries no {OWNERSHIP_WITNESS}. Fail-closed: a directory that cannot prove it is "
+            "B19N's is treated as somebody else's, because the alternative is a list of precious "
+            "directories that someone must remember to extend. Point this run at an empty "
+            "directory, or at one B19N already owns.")
     return target
+
+
+def claim_work_dir(directory):
+    """Write B19N's witness, so a later run can tell its own corpus from a stranger's."""
+    witness = our_witness(directory)
+    if witness.exists():
+        return witness
+    witness.write_text(json.dumps({
+        "owner": "B19N_GRADUATED_COLLECTOR",
+        "collector_sha256": self_sha256(),
+        "why": ("Marks this directory as B19N's own. Its absence is what makes a populated "
+                "directory unclaimable, so every other corpus in the repository is protected by "
+                "construction rather than by being named in a list."),
+    }, indent=2, sort_keys=True) + "\n")
+    return witness
 
 
 def rpc_endpoint():
@@ -226,6 +304,7 @@ CREATE TABLE IF NOT EXISTS run_meta (key TEXT PRIMARY KEY, value TEXT);
 def open_database(work_dir):
     target = assert_work_dir_is_ours(work_dir)
     target.mkdir(parents=True, exist_ok=True)
+    claim_work_dir(target)
     database = sqlite3.connect(target / "b19n_graduated.sqlite")
     database.executescript(SCHEMA)
     return database
