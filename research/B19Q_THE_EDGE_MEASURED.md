@@ -169,7 +169,62 @@ populations — which is precisely the kind of question a real panel settles and
 **Owner's call, and the honest framing is: not an edge, a near-miss whose error bars are wider than
 the gap.**
 
-## 7. What this actually establishes
+## 7. The right instrument — the owner's idea, and it flips the sign
+
+The owner's objection to everything above: *every rule either seat has ever tested uses FIXED
+thresholds.* Take profit at a constant multiple, stop at a constant fraction, applied identically to
+every curve. The peer seat's framing of the same point: **B19F's drawdown rules and B19K's +6% were
+left-tail instruments pointed at a right-tail asset.**
+
+The right-tail instrument is a **trailing stop**: exit a fixed fraction below the running peak, with
+**no take-profit cap at all**. It cannot truncate the tail, because it has no ceiling.
+
+| rule, entry t0+200, real 125 bps fees, rent reclaimed | mean | winners | folds positive |
+|---|---|---|---|
+| fixed TP 2.00×, SL 0.95× | −2.20% | 6% | **0 / 10** |
+| **trailing stop, 10% give-back** | **+0.48%** | 10% | **5 / 10** |
+
+**The sign flips.** A 2.7-point improvement from changing the instrument alone, with no new
+information, no selection and no venue change. Partial exits (sell half at 2×, ride the rest) were
+tested alongside and are worse everywhere — best −1.29%.
+
+## 8. Why +0.48% still cannot be called an edge
+
+The mean is positive. It is also indistinguishable from zero, and the reason is the same property
+that makes the instrument correct:
+
+| | |
+|---|---|
+| n | 1,978 |
+| mean | **+0.482%** of position |
+| standard deviation | **43.3%** per position |
+| standard error | 0.974% |
+| t-statistic | **0.50** |
+| 95% interval | **[−1.43%, +2.39%]** — contains zero |
+| bootstrap 95% (2,000 resamples) | [−1.21%, +2.65%], 67% above zero |
+| **largest single position** | **138% of the total profit** |
+| **sample needed to distinguish from zero** | **≈ 30,965 positions** |
+
+**One position is more than the entire profit.** The top ten are 483% of it. A right-tail payoff
+concentrates its return in a handful of outcomes by construction — which is exactly why it needs an
+enormous sample before its mean means anything.
+
+Window 1 holds 3,932 launches. **Roughly eight such windows would be needed** to establish whether
++0.48% is real.
+
+### What that implies practically
+
+- **This is not a small-bankroll strategy.** A 43% per-position standard deviation with 10% winners
+  means long losing runs are the norm, and the return arrives in single positions that cannot be
+  predicted or waited for.
+- **It cannot be validated cheaply.** Any backtest on one window — including this one — is inside
+  the noise. The honest statement about any result derived from 2,000 samples of a 43%-volatility
+  payoff is that it is consistent with zero.
+- **The instrument finding stands regardless.** Trailing beats fixed by 2.7 points and 5 folds to 0.
+  That comparison is between two rules on the *same* positions, so it does not depend on the
+  absolute level being measurable — which is precisely why it survives when the level does not.
+
+## 9. What this actually establishes
 
 Not "it doesn't work" — something much more specific:
 
