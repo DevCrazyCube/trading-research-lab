@@ -1,0 +1,42 @@
+{
+  "composition_published": false,
+  "cutoff_slot_inclusive": 437211659,
+  "endpoint": "https://solana-mainnet.core.chainstack.com",
+  "last_poll_at": 1786314498,
+  "last_tip_slot": 438282274,
+  "manifest_sha256": "a42723ea74bf7074cf6fed506a140a6529e83df4214e3e98f3d9cc9c4f675e0a",
+  "poll_seconds": 300,
+  "polls": 7,
+  "preregistration_canonical_sha256": "ae4d2f0351aaba193fe7d87cde8cd68ce83aa8d21515d4d20af0a158f8dafe9f",
+  "quarantine": {
+    "reason_code": "Q02_script_manifest_drift"
+  },
+  "results_unlocked": false,
+  "run_order": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory",
+    "transaction_bodies",
+    "decode_and_reserves",
+    "reserve_coverage_gate",
+    "failure_coverage_gate",
+    "simulator_replay_gate"
+  ],
+  "schema_version": "1.0.0",
+  "stage_heartbeat_at": 1786315368,
+  "stage_in_flight": null,
+  "stage_output_bytes": 0,
+  "stage_pid": null,
+  "stage_progress_at": 1786314498,
+  "stages_completed": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory",
+    "transaction_bodies"
+  ],
+  "state": "quarantined"
+}

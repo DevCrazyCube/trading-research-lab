@@ -1,0 +1,35 @@
+{
+  "archived_at": "20260809T225717Z",
+  "moved": [
+    {
+      "from": "research/b11a/receipts/decode_and_reserves.json",
+      "stage": "decode_and_reserves",
+      "to": "research/b11a/superseded/20260809T225717Z/receipts/decode_and_reserves.json"
+    }
+  ],
+  "quarantine_cleared": {
+    "exit_code": 1,
+    "reason_code": "Q07_stage_failed",
+    "stage": "decode_and_reserves"
+  },
+  "reason": "The failed decode receipt from 'the source is not sealed'. The inventory predates seal_artifact so it declared no content_sha256; it has now been sealed with exactly what the seal would have written at collection time, and the digest independently reproduced 561864... over all 5,230,678 rows. No artifact superseded.",
+  "stages_completed_after": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory",
+    "transaction_bodies"
+  ],
+  "stages_completed_before": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory",
+    "transaction_bodies"
+  ],
+  "superseded_stages": [
+    "decode_and_reserves"
+  ]
+}

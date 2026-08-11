@@ -1,0 +1,10 @@
+{
+  "archived_at": "20260808T130140Z",
+  "composition_published": false,
+  "moved": [
+    "research/b11a/superseded/20260808T130140Z/supervisor_state.json",
+    "research/b11a/superseded/20260808T130140Z/supervisor.lock"
+  ],
+  "reason": "Re-attestation for the pacing-ceiling relaunch.",
+  "stages_completed": []
+}

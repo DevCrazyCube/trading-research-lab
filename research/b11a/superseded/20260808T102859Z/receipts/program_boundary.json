@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/usr/bin/python",
+    "scripts/b9d_transaction_bodies.py",
+    "collect-boundary",
+    "/home/anont/meme/research/b11a/b11a_bodies.sqlite",
+    "--rpc-env",
+    "SOLANA_RPC_URL",
+    "--cutoff-slot",
+    "437211659"
+  ],
+  "completed": true,
+  "endpoint": "https://solana-mainnet.core.chainstack.com",
+  "exit_code": 0,
+  "finished_at": 1786184759,
+  "manifest_sha256": "1c15bd6db530dcfce1002b8b4a3047e493df9707f1aaa5a371f5d75938246f9c",
+  "schema_version": "1.0.0",
+  "stage": "program_boundary",
+  "started_at": 1786184758,
+  "stderr_log": "/home/anont/meme/research/b11a/logs/program_boundary.stderr.log",
+  "stdout_log": "/home/anont/meme/research/b11a/logs/program_boundary.stdout.log"
+}

@@ -1,0 +1,33 @@
+{
+  "what": "stamped content digests into b11a_bodies.sqlite metadata",
+  "why": "verify_source_artifacts compared file BYTES against values that were never hashes of these files: the run stamped b9d's burned B9C_SHA256/B9A_SHA256 constants verbatim. The fix compares digests over ROW CONTENT instead, which requires those digests to be recorded. Nothing existing was overwritten -- two new keys were added.",
+  "authorised_by": "owner, who chose this AFTER both durable fixes rather than before",
+  "durable_fixes_landed_first": [
+    "b9d 1699efb -- verify over content, stamping bug fixed",
+    "b9c 67d01b4 -- seal + content_sha256"
+  ],
+  "values": {
+    "b9c_content_sha256": "561864623be82ad6286d20b5ffde2dddc07e64d4405df47444334fd00e931f80",
+    "b9a_content_sha256": "17128ca487181cfa33111e40d75eb519ab43782f2a05f7247e160eae8cf1be8f"
+  },
+  "evidence_the_content_is_intact": {
+    "verify_raw_replay": "(14027, 5230678) -- every preserved response matches the digest recorded when it was collected, and re-normalising reproduces every row",
+    "stage_log_counts": "observations=5230678 distinct=5230384 in_window_rows=5227740, matching the file exactly",
+    "integrity_check": "ok"
+  },
+  "metadata_before": {
+    "pump_idl_sha256": "b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49",
+    "pumpswap_idl_sha256": "6b5c7ec4e5ef9742fa99dc57b0d75b1031b379bba02a7e1b3c5a4cad68d77e56",
+    "b9c_sha256": "e735c6c59848ff57958402a7488474415c7f20febce7a12cf7227b4267c7391d",
+    "b9a_sha256": "882d47d19a331e805be5796cd7d8ab616c7af65391bd327e0221d3c51c4edc38"
+  },
+  "metadata_after": {
+    "pump_idl_sha256": "b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49",
+    "pumpswap_idl_sha256": "6b5c7ec4e5ef9742fa99dc57b0d75b1031b379bba02a7e1b3c5a4cad68d77e56",
+    "b9c_sha256": "e735c6c59848ff57958402a7488474415c7f20febce7a12cf7227b4267c7391d",
+    "b9a_sha256": "882d47d19a331e805be5796cd7d8ab616c7af65391bd327e0221d3c51c4edc38",
+    "b9c_content_sha256": "561864623be82ad6286d20b5ffde2dddc07e64d4405df47444334fd00e931f80",
+    "b9a_content_sha256": "17128ca487181cfa33111e40d75eb519ab43782f2a05f7247e160eae8cf1be8f"
+  },
+  "at": "20260809T222806Z-content-digest-repin"
+}

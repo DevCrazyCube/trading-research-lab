@@ -1,0 +1,19 @@
+{
+  "archived_at": "20260808T204823Z",
+  "cleared": [
+    "stage_in_flight",
+    "stage_pid"
+  ],
+  "machinery_gap": "b11c has no operator path to clear a stage killed from outside. supersede and reattest both refuse while in_flight is set, correctly. A `clear_dead_stage` that verifies liveness and artifact consistency before clearing belongs in the next cycle -- doing it by hand here, once, recorded, rather than adding untested machinery to a pinned file mid-collection.",
+  "reason": "stage_in_flight was left set by an EXTERNAL kill, not by the stage. The operator's own tool timeout terminated the watcher and its child two minutes after launch; the stage had recorded its pid and written nothing. Q08 exists because a supervisor cannot tell an interrupted stage from a corrupted one -- here the operator can, and the evidence is recorded below rather than asserted.",
+  "verified_before_clearing": {
+    "blocks_stored": 36646,
+    "coordinates_stored": 130902,
+    "coordinates_without_a_stored_block": 0,
+    "pid_alive": false,
+    "recorded_stage_pid": 2654844,
+    "sqlite_quick_check": "ok",
+    "stage_stderr_bytes": 0,
+    "stage_stdout_bytes": 0
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "archived_at": "20260808T102859Z",
+  "composition_published": false,
+  "moved": [
+    "research/b11a/superseded/20260808T102859Z/supervisor_state.json",
+    "research/b11a/superseded/20260808T102859Z/supervisor.lock"
+  ],
+  "reason": "Re-attestation for the post-argv-fix relaunch; the state carried manifest 1c15bd6d.",
+  "stages_completed": []
+}

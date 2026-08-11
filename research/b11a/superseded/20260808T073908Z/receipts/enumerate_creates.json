@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "/usr/bin/python",
+    "scripts/b7d_create_enumerator.py",
+    "--start-slot",
+    "435569150",
+    "--end-slot",
+    "435772751",
+    "--database",
+    "/home/anont/meme/research/b11a/b11a_creates.sqlite",
+    "--export-jsonl",
+    "/home/anont/meme/research/b11a/b11a_creates.jsonl"
+  ],
+  "completed": true,
+  "endpoint": "https://solana-mainnet.core.chainstack.com",
+  "exit_code": 0,
+  "finished_at": 1786142810,
+  "manifest_sha256": "771b60aa6edbed693fa51d39db8c76f23babd43b056a0906efcdb624144343a3",
+  "schema_version": "1.0.0",
+  "stage": "enumerate_creates",
+  "started_at": 1785881591,
+  "stderr_log": "/home/anont/meme/research/b11a/logs/enumerate_creates.stderr.log",
+  "stdout_log": "/home/anont/meme/research/b11a/logs/enumerate_creates.stdout.log"
+}

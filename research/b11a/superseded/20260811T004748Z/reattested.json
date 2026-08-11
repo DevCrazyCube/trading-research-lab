@@ -1,0 +1,20 @@
+{
+  "archived_at": "20260811T004748Z",
+  "manifest_after": "720593319fe69e8989ea534385d9a45f170b09aa6c0e54239f5a28a087be8b29",
+  "manifest_before": "b1ee4739af1766a8d27210d6099893e87dcae0a77ad00419054401970d750507",
+  "manifest_files": 15,
+  "quarantine_cleared": null,
+  "reason": "Window 2's collection path was added: b11a_window_freeze.successor_ranges(), a generation table with its own work directory, generation-aware document pinning, and a guard refusing a run pointed at another generation's directory. Window 1's own derivation, document and defaults are unchanged and were verified so before this re-attestation. Its run is COMPLETE, so no stage could be substituted under it -- the drift was a stale record on a finished run, not a live substitution, and re-attesting keeps --status honest rather than reporting a quarantine that describes nothing.",
+  "stages_preserved": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory",
+    "transaction_bodies",
+    "decode_and_reserves",
+    "reserve_coverage_gate",
+    "failure_coverage_gate",
+    "simulator_replay_gate"
+  ]
+}

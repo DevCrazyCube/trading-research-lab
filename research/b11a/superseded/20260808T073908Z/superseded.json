@@ -1,0 +1,68 @@
+{
+  "archived_at": "20260808T073908Z",
+  "moved": [
+    {
+      "from": "/home/anont/meme/research/b11a/receipts/program_boundary.json",
+      "stage": "program_boundary",
+      "to": "/home/anont/meme/research/b11a/superseded/20260808T073908Z/receipts/program_boundary.json"
+    },
+    {
+      "from": "/home/anont/meme/research/b11a/receipts/enumerate_creates.json",
+      "stage": "enumerate_creates",
+      "to": "/home/anont/meme/research/b11a/superseded/20260808T073908Z/receipts/enumerate_creates.json"
+    },
+    {
+      "from": "/home/anont/meme/research/b11a/receipts/build_cohort.json",
+      "stage": "build_cohort",
+      "to": "/home/anont/meme/research/b11a/superseded/20260808T073908Z/receipts/build_cohort.json"
+    },
+    {
+      "from": "/home/anont/meme/research/b11a/receipts/signature_inventory.json",
+      "stage": "signature_inventory",
+      "to": "/home/anont/meme/research/b11a/superseded/20260808T073908Z/receipts/signature_inventory.json"
+    },
+    {
+      "from": "/home/anont/meme/research/b11a/b11a_program_boundary.json",
+      "stage": null,
+      "to": "/home/anont/meme/research/b11a/superseded/20260808T073908Z/artifacts/b11a_program_boundary.json"
+    },
+    {
+      "from": "/home/anont/meme/research/b11a/b11a_program_boundary.json-shm",
+      "stage": null,
+      "to": "/home/anont/meme/research/b11a/superseded/20260808T073908Z/artifacts/b11a_program_boundary.json-shm"
+    },
+    {
+      "from": "/home/anont/meme/research/b11a/b11a_program_boundary.json-wal",
+      "stage": null,
+      "to": "/home/anont/meme/research/b11a/superseded/20260808T073908Z/artifacts/b11a_program_boundary.json-wal"
+    },
+    {
+      "from": "/home/anont/meme/research/b11a/b11a_program_boundary.json.collector.lock",
+      "stage": null,
+      "to": "/home/anont/meme/research/b11a/superseded/20260808T073908Z/artifacts/b11a_program_boundary.json.collector.lock"
+    },
+    {
+      "from": "/home/anont/meme/research/b11a/b11a_cohort.sqlite",
+      "stage": null,
+      "to": "/home/anont/meme/research/b11a/superseded/20260808T073908Z/artifacts/b11a_cohort.sqlite"
+    }
+  ],
+  "quarantine_cleared": {
+    "exit_code": 1,
+    "reason_code": "Q07_stage_failed",
+    "stage": "signature_inventory"
+  },
+  "reason": "B11a restart at N=5,000. Stage 1's boundary proof covers slots 433,894,233..435,536,742, a range this window does not occupy, so it is wrong in SUBSTANCE and not merely mis-addressed; stage 4 refused on EXPECTED_MEMBERS=1601, a pin from the B9 study. Stages 2-3 are superseded only because the prefix rule requires it -- their DATA is kept: b11a_creates.sqlite and its export are not moved, and stage 3 must reproduce cohort_sha256 01c16e5e from them or the restart aborts. Fixes: a299869 e818253 2339eae afd09a5 67b9fd3 7fa98bf 78ddd5f 34c5bae; subsample preregistered at a55125b/e189fa4, selector 58a430b. Manifest 1c15bd6d, recomputed independently by both seats at 34c5bae.",
+  "stages_completed_after": [],
+  "stages_completed_before": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort"
+  ],
+  "superseded_stages": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "signature_inventory"
+  ]
+}

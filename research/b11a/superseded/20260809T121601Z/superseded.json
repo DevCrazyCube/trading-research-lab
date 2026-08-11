@@ -1,0 +1,33 @@
+{
+  "archived_at": "20260809T121601Z",
+  "moved": [
+    {
+      "from": "research/b11a/receipts/transaction_bodies.json",
+      "stage": "transaction_bodies",
+      "to": "research/b11a/superseded/20260809T121601Z/receipts/transaction_bodies.json"
+    }
+  ],
+  "quarantine_cleared": {
+    "exit_code": 1,
+    "reason_code": "Q07_stage_failed",
+    "stage": "transaction_bodies"
+  },
+  "reason": "The FAILED transaction_bodies receipt from the burned-count refusal at the coordinate seam. The ARTIFACT is deliberately kept: 113,804 blocks and 326,509 coordinates stay, the block phase is FINISHED, and the new exhaustiveness gate was PRE-FLIGHTED against this exact artifact and passes in 14s.",
+  "stages_completed_after": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory"
+  ],
+  "stages_completed_before": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory"
+  ],
+  "superseded_stages": [
+    "transaction_bodies"
+  ]
+}

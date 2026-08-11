@@ -410,6 +410,35 @@ def generation_config(generation=1):
     return config
 
 
+def assert_work_dir_belongs_to_path(generation, work_dir):
+    """The guard, applied to the directory ACTUALLY being written to.
+
+    `assert_work_dir_belongs_to` checks the configured pairing. This checks the one a caller
+    passed, which is the one that matters: a --work-dir flag, a copied command line or a defaulted
+    argument can all put a live run somewhere the config never named.
+    """
+    directory = pathlib.Path(work_dir)
+    for other, spec in GENERATIONS.items():
+        if other != generation and pathlib.Path(spec["work_dir"]) == directory:
+            raise Quarantined(
+                f"REFUSING: generation {generation} was pointed at generation {other}'s directory "
+                f"{directory}. Those artifacts are irreplaceable")
+    expected = B11A.derive_window(
+        generation_config(generation)["ranges"])["observation_cutoff_slot_inclusive"]
+    state_file = directory / "supervisor_state.json"
+    if state_file.exists():
+        try:
+            recorded = json.loads(state_file.read_bytes()).get("cutoff_slot_inclusive")
+        except (OSError, json.JSONDecodeError) as error:
+            raise Quarantined(f"{directory} holds an unreadable supervisor state: {error}") from error
+        if recorded is not None and recorded != expected:
+            raise Quarantined(
+                f"REFUSING: {directory} holds a run whose observation cutoff is {recorded:,}, but "
+                f"generation {generation} derives {expected:,}. That directory belongs to a "
+                "different window, and its artifacts are irreplaceable")
+    return directory
+
+
 def assert_work_dir_belongs_to(generation):
     """A generation may only write into its OWN directory, and never into a spent one.
 
@@ -549,15 +578,20 @@ def verify_stage_order(order=RUN_ORDER):
 # Stage wiring
 # --------------------------------------------------------------------------------------------
 
-def stage_commands(work_dir=WORK_DIR):
+def stage_commands(work_dir=WORK_DIR, generation=1):
     """The exact argv for each stage, with every artifact path isolated under the B11a directory.
 
     `wiring` says whether the stage can be pointed at this directory through its own interface.
     Where it cannot, the stage is `unresolved` and the supervisor quarantines rather than running
     it — collecting a fresh window into the burned corpus's default paths, or reading the burned
     corpus as this window's population, would destroy both.
+
+    `generation` selects WHICH window's endpoints land in the argv. It is threaded rather than
+    defaulted at the call sites because a stage pointed at generation 2's directory while carrying
+    generation 1's slots would collect the wrong span into the right place, and every gate
+    downstream would pass.
     """
-    window = verify_preregistration()
+    window = verify_preregistration(generation=generation)
     first = window["launch_first_slot_inclusive"]
     last = window["launch_last_slot_inclusive"]
     directory = pathlib.Path(work_dir)
@@ -1558,12 +1592,12 @@ def run_stage(stage, command, state, runner=None, log_dir=LOG_DIR, receipt_dir=R
 # Planning and status
 # --------------------------------------------------------------------------------------------
 
-def dry_run_plan(poll_seconds=DEFAULT_POLL_SECONDS, work_dir=WORK_DIR):
+def dry_run_plan(poll_seconds=DEFAULT_POLL_SECONDS, work_dir=WORK_DIR, generation=1):
     """Everything the watcher would do, computed offline. No network, no execution."""
-    window = verify_preregistration()
+    window = verify_preregistration(generation=generation)
     manifest = build_manifest()
     order = verify_stage_order()
-    commands = stage_commands(work_dir)
+    commands = stage_commands(work_dir, generation=generation)
     unresolved = unresolved_stages(commands)
     plan = {
         "schema_version": SCHEMA_VERSION,
@@ -1630,17 +1664,22 @@ def status(state_path=STATE_PATH, receipt_dir=RECEIPT_DIR, lock_path=LOCK_PATH):
 
 def watch(url, poll_seconds=DEFAULT_POLL_SECONDS, transport=None, sleeper=time.sleep,
           runner=None, max_iterations=None, work_dir=WORK_DIR, state_path=STATE_PATH,
-          receipt_dir=RECEIPT_DIR, log_dir=LOG_DIR, commands=None):
+          receipt_dir=RECEIPT_DIR, log_dir=LOG_DIR, commands=None, generation=1):
     """Verify, wait for a finalized cutoff, then run the frozen stages once each."""
+    # BEFORE the directory is created, not after: mkdir on a spent window's path is already the
+    # damage, and a guard that fires afterwards is an apology.
+    assert_work_dir_belongs_to_path(generation, work_dir)
     pathlib.Path(work_dir).mkdir(parents=True, exist_ok=True)
-    window = verify_preregistration()
+    window = verify_preregistration(generation=generation)
     manifest = build_manifest()
-    verify_git_ancestry()
+    verify_git_ancestry(relative=str(pathlib.Path(
+        generation_config(generation)["preregistration"]).relative_to(ROOT)))
     verify_stage_order()
     # Injectable so the whole state machine can be exercised against a fake command set. In the
     # real run this is the wiring computed from the frozen window, and an unresolved stage in it
     # quarantines rather than running.
-    commands = commands if commands is not None else stage_commands(work_dir)
+    commands = commands if commands is not None else stage_commands(
+        work_dir, generation=generation)
 
     state = read_state(state_path) or initial_state(window, manifest, poll_seconds)
     if state.get("state") == STATE_QUARANTINED:
@@ -1700,15 +1739,28 @@ def main(argv=None):
     parser.add_argument("--watch", action="store_true", help="run the watcher")
     parser.add_argument("--poll-seconds", type=int, default=DEFAULT_POLL_SECONDS)
     parser.add_argument("--max-iterations", type=int, default=None)
+    # A collection generation, not a free-form path. There is deliberately NO --work-dir flag:
+    # every generation's directory comes from the GENERATIONS table and is guarded, so no command
+    # line can point a run at a spent window's artifacts.
+    parser.add_argument("--generation", type=int, default=1, choices=sorted(GENERATIONS))
     args = parser.parse_args(argv)
+    config = generation_config(args.generation)
+    work_dir = config["work_dir"]
+    state_path = work_dir / "supervisor_state.json"
+    receipt_dir = work_dir / "receipts"
+    log_dir = work_dir / "logs"
+    lock_path = work_dir / "supervisor.lock"
 
     if args.dry_run:
-        print(json.dumps(dry_run_plan(args.poll_seconds), indent=2, sort_keys=True))
+        print(json.dumps(dry_run_plan(args.poll_seconds, work_dir=work_dir,
+                                      generation=args.generation),
+                         indent=2, sort_keys=True))
         return 0
     if args.verify:
-        window = verify_preregistration()
+        window = verify_preregistration(generation=args.generation)
         manifest = build_manifest()
-        report = {"preregistration": window, "manifest_sha256": manifest_hash(manifest),
+        report = {"generation": args.generation, "work_dir": str(work_dir),
+                  "preregistration": window, "manifest_sha256": manifest_hash(manifest),
                   "manifest_files": len(manifest), "git": verify_git_ancestry(),
                   "run_order": verify_stage_order(),
                   "stages_unresolved": unresolved_stages(),
@@ -1717,7 +1769,8 @@ def main(argv=None):
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0
     if args.status:
-        print(json.dumps(status(), indent=2, sort_keys=True))
+        print(json.dumps(status(state_path=state_path, receipt_dir=receipt_dir,
+                                lock_path=lock_path), indent=2, sort_keys=True))
         return 0
     if args.watch:
         url = os.environ.get(RPC_ENV_VAR)
@@ -1725,9 +1778,12 @@ def main(argv=None):
             raise WatcherRefused(
                 f"{RPC_ENV_VAR} is not set. Credentials are environment-only and this process "
                 "never reads one from a file it wrote")
-        with InstanceLock():
+        with InstanceLock(lock_path):
             state = watch(url, poll_seconds=args.poll_seconds,
-                          max_iterations=args.max_iterations)
+                          max_iterations=args.max_iterations,
+                          work_dir=work_dir, state_path=state_path,
+                          receipt_dir=receipt_dir, log_dir=log_dir,
+                          generation=args.generation)
         print(json.dumps({"state": state["state"], "polls": state["polls"],
                           "composition_published": False}, indent=2, sort_keys=True))
         return 0

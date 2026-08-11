@@ -1,0 +1,16 @@
+{
+  "archived_at": "20260809T222744Z-reattest",
+  "manifest_after": "a42723ea74bf7074cf6fed506a140a6529e83df4214e3e98f3d9cc9c4f675e0a",
+  "manifest_before": "0c89046e3dfd8e8bad9cf524d8fc6d3215a30ac99f5cd031e323d92b540feda0",
+  "manifest_files": 15,
+  "quarantine_cleared": null,
+  "reason": "Adopting b9d 1699efb (source verification over ROW CONTENT rather than file bytes, plus the stamping fix so a fresh run records its own hashes instead of the burned constants) and b9c 67d01b4 (seal + content_sha256). Manifest a42723ea recomputed independently by both seats from git blobs. All six completed stages preserved.",
+  "stages_preserved": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory",
+    "transaction_bodies"
+  ]
+}
