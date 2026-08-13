@@ -1,0 +1,77 @@
+{
+  "authorised_next_step": {
+    "step_1": "commit this document ALONE, before any window-2 data exists",
+    "step_2": "peer review: hostile read, verify the pin against the committed file, confirm blind authorship",
+    "step_3": "owner supplies SOLANA_RPC_URL -- absent at authoring time, which is what makes this blind",
+    "step_4": "start the generation-2 supervisor; it waits for maturity and collects",
+    "step_5": "run the pinned runner ONCE against the collected window and record the pass"
+  },
+  "authorship_is_blind": "Both this document and the implementation it pins were written before the window-2 collection had started. SOLANA_RPC_URL was not set in the authoring environment, so the data was not merely unread but unreadable -- blindness by construction rather than by discipline.",
+  "burned_data_prior_NOT_A_RESULT": {
+    "burned_corpus_peer_seat": {
+      "base_rate_pct": 32.7,
+      "lift_pp": 46.0,
+      "n": 606,
+      "note": "independent pipeline, independent corpus subset",
+      "permutation_p": 0.0
+    },
+    "fresh_window1_exploratory": {
+      "base_rate_pct": 35.3,
+      "lift_pp": 56.7,
+      "n": 2062,
+      "permutation_p": 0.002
+    },
+    "note": "These are the figures the rule was derived from. They are a PRIOR against which the window-2 outcome is compared, and may never be quoted as an outcome of this study.",
+    "pinned_runner_rehearsal_on_burned": {
+      "base_rate_pct": 31.8,
+      "lift_pp": 62.1,
+      "n": 1952,
+      "precision_pct": 68.1,
+      "recall_pct": 89.0
+    },
+    "why_the_rehearsal_differs_from_the_exploratory_pass": "The exploratory code assigned concentration 0.0 to 110 tokens with no net tokens bought, silently marking them SAFE; the runner excludes them as unreadable. Undefined is not zero. The runner is the correct implementation and its numbers supersede the exploratory ones."
+  },
+  "committed_before_any_window2_data_was_read": true,
+  "preregistration_id": "B20B_DEADNESS_SCREEN_WINDOW2_V1",
+  "primary_estimand": {
+    "decision_map_is_in_code": "classify() in the pinned runner makes the call. CONFIRMED requires lift >= 30pp AND passed-rate below the base rate; WEAKENED requires lift >= 10pp; otherwise FAILED. NOT_EVALUABLE if either arm is empty -- a refusal, not a null.",
+    "quantity": "unexitable rate among flagged tokens minus unexitable rate among passed tokens",
+    "reported_as": "percentage points"
+  },
+  "purpose": "Spend one evaluation pass on window 2 to test, out of sample, whether the deadness screen frozen on burned data separates unexitable tokens from exitable ones.",
+  "secondary_non_decisional": {
+    "threshold_plateau": "the passed-rate across thresholds 0.70-1.00 is reported for comparison with the burned-data plateau, and is DECLARED NON-DECISIONAL so that a threshold which happens to look better in window 2 cannot be promoted after the fact. The rule is 0.95 whatever that table says."
+  },
+  "single_use": {
+    "passes": 1,
+    "rule": "one evaluation on window 2, recorded in the ledger. No second look, no re-run with an adjusted threshold, no promotion of a secondary. If the result is FAILED that is the finding."
+  },
+  "the_cost_is_stated_in_advance": {
+    "exitable_tokens_discarded_pct_burned": 19.4,
+    "statement": "The screen throws away roughly one in five tokens that WERE exitable. That cost is part of the finding and must be reported beside the benefit, never after it."
+  },
+  "the_frozen_label": {
+    "definition": "a token is UNEXITABLE if the curve's real quote reserve never reached 50,000,000 lamports at any observation after t0+60 -- i.e. a 0.1 SOL position could not have recovered half its cost from money that was not its own",
+    "inherits_from": "B19G's external-capacity principle: an exit funded by your own entry is not liquidity",
+    "name": "external exitability",
+    "why_this_label": "Two alternatives are broken on this venue and were rejected with measurements. An acute-collapse label is confounded by observation density: collapse rate runs 0.0% at 2-3 post-observations and 21.9% at 73+, because a collapse cannot be OBSERVED when there is nothing to observe it in. A fixed-horizon price label is worse: on a bonding curve the price only moves when someone trades, so a token nobody touches shows a flat price forever and reads as having HELD ITS VALUE while being worthless. Exitability treats 'never traded again' as unexitable, which is the correct answer."
+  },
+  "the_frozen_rule": {
+    "decision_point_slots_after_t0": 60,
+    "exact_arithmetic": "top * 100 >= total * 95, integers only, no float comparison",
+    "feature": "share of all tokens bought in [t0, t0+60] held by the single largest buyer, computed by net position per wallet",
+    "flag_when": "share >= 0.95",
+    "nothing_is_searched": "K, the threshold and the label were all fixed on burned data before this document. No parameter is tuned against window 2."
+  },
+  "the_runner_is_pinned": {
+    "path": "scripts/b20b_deadness_screen_runner.py",
+    "resolves_in_repo": true,
+    "rule": "Any edit after the collection begins breaks this pin and the study refuses. The pin is verified against the COMMITTED file, not the working tree -- the B19L lesson, where a frozen document pinned content that existed on one disk only.",
+    "sha256": "d77f769962a67b5df1d59908e70070fdaafa0297f9ac6c3c04119ee46200c9e3"
+  },
+  "what_is_not_claimed": {
+    "edge": "the screen creates no edge; it avoids a class of losses and nothing more",
+    "fraud": "it predicts unexitability, not fraud or intent",
+    "rescue": "nothing about the toll, the asymmetry or the negative-sum finding is changed by this screen. A screened population is not a profitable one."
+  }
+}
