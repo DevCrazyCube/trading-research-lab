@@ -1,0 +1,150 @@
+# FINDINGS — what this programme established, and how firmly
+
+**Purpose.** Everything below is scattered across ~40 commits and a dozen documents. This is the
+single index: what we know, how confident we are, where the evidence lives, and what was retracted.
+
+**Read the confidence column first.** This project's central lesson is that a number's *distance from
+zero* matters more than its sample size: a −18.9% result at 43% volatility is sixteen standard errors
+out and unkillable; a +0.48% result at the same volatility is noise. Both appear below.
+
+---
+
+## 1. The load-bearing negatives — these are 13–16 sigma and will not move
+
+| finding | figure | t | where |
+|---|---|---|---|
+| The exit-rule family loses money | −18.94% per position | **−16.2** | `B19_EVALUATION_LEDGER.json`, B19K |
+| Perfect liquidity does not rescue it | −12.78% (ceiling) | **−13.2** | `B19P` §liquidity bound |
+| Zero transaction cost does not rescue it | −16.89% | — | `B19P` |
+| Infinite position size does not rescue it | −16.69% | — | `B19P` |
+
+**What this means.** The failure is the *shape* of the outcome distribution — roughly 45% win small,
+55% lose big — and no venue, size, cost or rebate change reaches it. **Even trading for free loses
+16.89%.** That single number closes every cost-reduction idea, including rebates.
+
+## 2. The structural explanation
+
+> **The toll is the house edge, and the house is the creator and the protocol, not the trader.**
+
+Every position on this venue is one of two things: be right about direction and pay the round-trip
+toll, or *be the fee recipient*. The fees **are** the extraction. This is why no directional shape
+dodges the toll for the same reason none beats the asymmetry — both are the house winning by
+construction. `B19P`.
+
+**Independently corroborated**: Marino et al. find all their predictive features *"remained below the
+economic breakeven curve"* — separate data, separate method, same conclusion (`B21A`).
+
+## 3. The one positive that survived every test
+
+**The deadness screen.** At `t0 + 60` slots, if the single largest buyer holds **≥ 0.95** of all
+tokens bought, do not enter.
+
+| held-out | flagged | passed |
+|---|---|---|
+| share of tokens | 39% | 61% |
+| **unexitable rate** | **69.7%** | **13.0%** |
+
+Base rate 35.3%. Catches **77.7%** of all unexitable tokens at 69.7% precision. Train +52.4pp, test
++56.7pp — **no shrinkage**. Verified independently by the peer seat on a *different corpus with a
+different pipeline* (n=606, +46pp, permutation p=0.000).
+
+**Cost, which belongs beside the benefit:** it also discards ~18% of tokens that *were* exitable. One
+good token in five, to cut the bad rate from 35% to 13%.
+
+**It creates no edge.** It avoids a class of guaranteed losses. `B20B`.
+
+**Status: FROZEN and under out-of-sample test.** Preregistration `B20B_DEADNESS_SCREEN_PREREGISTRATION.json`
+(canonical `5f3a2b5e…`), runner pinned `d77f7699…`, committed while the window-2 data was *unreadable*
+— blindness by construction, attested independently by both seats.
+
+## 4. Venue structure — measured facts worth keeping
+
+| fact | value | where |
+|---|---|---|
+| graduation rate, 27–28 Jul 2026 | **2.09%** (82/3,932) | B19N |
+| …and it is wildly regime-dependent | 0.198% → 6.7% in ~7 weeks | `B21A` |
+| graduation deposit | 84.990359056–84.990364132 SOL | B19N — *confirmed by literature at "~85 SOL"* |
+| median time launch → graduation | **49 slots (~20 s)** | B19N |
+| pool pricing invariant | `(quote + virtual) × base`, 765/765, zero breaks | B19N §2 |
+| …virtual reserve is a **per-pool constant** | unchanged in 340/343 pools | B19N §2 |
+| bonding-curve virtual quote reserve | **exactly 30.000 SOL** (protocol constant) | B19N §3b |
+| median *peak lifetime* external capacity | **1.00 SOL** | B19N §3c |
+| effective depth advantage, graduated vs curve | **2.9×**, not 85× | B19N §3b |
+| fee: median payable tier | 95 bps/leg (25 bps tier is 25% and **not selectable**) | B19N §1b |
+| migration price gap | **3 bps**, 82/82 one-directional, deterministic | B19Q §8d |
+| one launch in ten doubles | 10.13% reach 2×; max 13.76× | B19Q §1 |
+| peaks are **plateaus, not spikes** | 93% keep ≥80% one slot later; 0% pure spikes | peer seat, B19Q §7 |
+
+## 5. Instrument findings that transfer beyond this market
+
+- **For right-tail assets, a trailing stop beats fixed thresholds** — +2.7pp and 5 folds to 0, on the
+  *same* positions. Survives even though the absolute level does not. `B19Q` §7.
+- **The give-back optimum is a broad plateau (8–18%), not a point.** A knife-edge optimum would mean
+  the effect lives in the tuning; a plateau means it belongs to the payoff shape.
+- **At n≈2,000 with 43% volatility you can RANK shapes but not CERTIFY levels.** A paired comparison
+  cancels asset variance; an absolute mean does not.
+- **Sizing:** the cost curve has a minimum. B19K's 0.1 SOL was already near-optimal — fixed costs fall
+  with size, slippage rises, and they cross at a few tenths of a SOL.
+
+## 6. Retractions — recorded because the pattern matters more than the items
+
+| claim | why it was wrong |
+|---|---|
+| graduated market 4.5× cheaper on fees | truncated an ascending distribution; median leg is 95 bps not 25 |
+| 12× lower round-trip toll | compared an instrument that **cancels** slippage against one that charges it |
+| 85× depth advantage | compared against the curve's **real** reserve, which never prices anything (virtual is 30 SOL) |
+| graduation deposit "exactly 85.0 SOL" | float formatting; it is 53 distinct values across 5,076 lamports |
+| cheap-tier config misses by 7 bps | ignored that 28% of cheap pools flip; real gap 0.31pp, and the populations never met |
+| cashback "1,159.99 SOL" concentration, 97% | wrong **field** — lifetime accrual, not window activity. In-window: top claimer 12%, no concentration |
+| "the literature doesn't measure early-buyer concentration" | **MemeTrans measures it directly** (17pp separation). One paper's silence is not the field's |
+| curves hold no real SOL | endpoint artifact — curves are empty *at death*; median **peak** is 1.00 SOL |
+
+**Every one of these was flattering.** That is the tell to watch for.
+
+## 7. Where this sits in the literature (`B21A`)
+
+**The published Solana rug-pull work excludes our population by construction:** *"we exclude
+Pump.fun-only tokens that never establish liquidity pools."* Only 2.09% of our tokens ever
+established a pool. The EVM frameworks (RPHunter, LROO) define a rug around **liquidity withdrawal**,
+and a bonding curve has no pool to withdraw.
+
+**Prior art we replicate, not discover:** early-buyer concentration (MemeTrans, 17pp) and
+leakage-resistant evaluation (LROO). **What is genuinely ours:** the *unexitability label* and the
+*bonding-curve-only population*.
+
+**Tested and dismissed:** wallet clustering does not improve the screen. Same-slot co-occurrence on
+this venue is **competition, not collusion** — racing snipers, whose presence means the token attracted
+attention. Clustering flags 11pp more of the population and catches 0% more of the outcome.
+
+## 8. Method rules earned the hard way
+
+- **A layered guard hides its inner branches** from every fixture the outer layer catches. "No test
+  reaches this branch" is never evidence the branch is dead.
+- **Undefined is not zero.** An unreadable SMA, an unbought token, an absent state file — each must
+  refuse, not default.
+- **A key made of field values is not an identity.** It produced three different counts for one
+  quantity.
+- **Two indirect signals agreeing is not a measurement.** Three separate checks of the cashback unit
+  failed because each used the wrong instrument.
+- **Label before feature.** Two rug labels were broken — one by observation density, one because a
+  bonding curve's price only moves when someone trades, so an untouched token reads as *holding its
+  value*.
+- **Verify the diagnostic, not just the system.** Twice a checking tool was wrong rather than the
+  thing checked.
+
+## 9. Data and tooling that survives this session
+
+| artifact | path |
+|---|---|
+| BTC daily, Bitstamp 2013–2026, gap-free | `research/data/btc_usd_daily_bitstamp_2013_2026.csv` |
+| BTC perp funding, Binance 2019–2026 | `research/data/btc_perp_funding_binance_2019_2026.csv` |
+| crash-filter replication (runnable, self-auditing) | `scripts/btc_crash_filter_replicate.py` |
+| deadness-screen runner (**pinned, do not edit**) | `scripts/b20b_deadness_screen_runner.py` |
+| holder extraction | inside the runner — regenerable, not cached |
+| extracted paper text | `research/literature/` |
+
+## 10. Open
+
+- **Window 2 collection** — running; the frozen screen's out-of-sample test.
+- **Common-funding-source clustering** — the one wallet-linking heuristic we could not test.
+- **Whether window 1's regime generalises** — graduation rate moved 25× in eight months.

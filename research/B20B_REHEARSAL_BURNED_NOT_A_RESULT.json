@@ -1,0 +1,86 @@
+{
+  "burned_data_prior_NOT_a_result": {
+    "burned_corpus": {
+      "base_rate_pct": 32.7,
+      "lift_pp": 46.0,
+      "n": 606,
+      "permutation_p": 0.0
+    },
+    "cost_at_threshold": {
+      "exitable_discarded_pct": 18.0
+    },
+    "fresh_window1": {
+      "base_rate_pct": 35.3,
+      "flagged_pct": 69.7,
+      "lift_pp": 56.7,
+      "n": 2062,
+      "passed_pct": 13.0,
+      "permutation_p": 0.002
+    }
+  },
+  "coverage_first": {
+    "no_net_tokens_bought": 110,
+    "no_t0": 272,
+    "scored": 1952,
+    "unreadable_fewer_than_2_buyers": 1177
+  },
+  "frozen_rule": {
+    "concentration_threshold": 0.95,
+    "exit_recovery_lamports": 50000000,
+    "k_slots": 60,
+    "position_lamports": 100000000
+  },
+  "not_claimed": {
+    "edge": "this screen creates no edge. It avoids a class of losses and nothing more.",
+    "fraud": "it predicts unexitability, not fraud or intent.",
+    "return": "no figure here is a return, a profit or an expected value."
+  },
+  "primary_contrast": {
+    "base_rate_pct": 31.762295081967213,
+    "exitable_discarded_pct": 19.444444444444443,
+    "flagged_n": 811,
+    "flagged_unexitable_pct": 68.06411837237978,
+    "lift_pp": 62.10443388508793,
+    "n": 1952,
+    "passed_n": 1141,
+    "passed_unexitable_pct": 5.959684487291849,
+    "precision_pct": 68.06411837237978,
+    "recall_pct": 89.03225806451613
+  },
+  "runner_sha256": "d77f769962a67b5df1d59908e70070fdaafa0297f9ac6c3c04119ee46200c9e3",
+  "secondary_non_decisional": {
+    "threshold_plateau": {
+      "0.70": {
+        "flagged_pct_of_population": 53,
+        "passed_unexitable_pct": 4.918032786885246
+      },
+      "0.80": {
+        "flagged_pct_of_population": 48,
+        "passed_unexitable_pct": 4.885343968095713
+      },
+      "0.85": {
+        "flagged_pct_of_population": 46,
+        "passed_unexitable_pct": 5.009633911368016
+      },
+      "0.90": {
+        "flagged_pct_of_population": 44,
+        "passed_unexitable_pct": 5.2631578947368425
+      },
+      "0.95": {
+        "flagged_pct_of_population": 41,
+        "passed_unexitable_pct": 5.959684487291849
+      },
+      "0.99": {
+        "flagged_pct_of_population": 36,
+        "passed_unexitable_pct": 7.171635777598711
+      },
+      "1.00": {
+        "flagged_pct_of_population": 30,
+        "passed_unexitable_pct": 10.913140311804009
+      }
+    }
+  },
+  "study": "B20B_DEADNESS_SCREEN_WINDOW2",
+  "verdict": "CONFIRMED",
+  "verdict_reason": "the screen reproduces out-of-sample on data that did not exist when the rule was frozen. The deadness screen generalises."
+}

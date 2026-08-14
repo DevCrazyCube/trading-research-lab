@@ -1,0 +1,802 @@
+                                            LROO Rug Pull Detector: A Leakage-Resistant Framework
+                                                   Based on On-Chain and OSINT Signals
+
+                                         Fatemeh Shoaei                                                                      f.shoaei@ilam.ac.ir
+                                         Department of Computer Science, Ilam University, Ilam, Iran
+
+                                         Mohammad Pishdar                                                                     m.pishdar@vaisr.ir
+                                         Blockchain Research Lab, VAISR Research Group, Tehran, Iran
+
+                                         Mozafar Bag-Mohammadi                                                    m.bagmohammadi@ilam.ac.ir
+                                         Department of Computer Science, Ilam University, Ilam, Iran
+
+
+
+
+arXiv:2603.11324v1 [cs.CR] 11 Mar 2026
+                                         Mojtaba Karami                                                                     m.karami@ilam.ac.ir
+                                         Department of Computer Science, Ilam University, Ilam, Iran
+
+
+
+                                         Editor: Editor
+
+
+                                                                                        Abstract
+                                             Smart contract–based ecosystems enable decentralized applications without trusted intermedi-
+                                             aries, but their immutability and permissionless design also facilitate large-scale fraud. One of
+                                             the most prevalent attacks is the rug pull, where project operators abruptly withdraw liquidity
+                                             after artificially inflating token value. Existing detection methods primarily rely on reactive
+                                             on-chain signals and often suffer from temporal data leakage, limiting their real-world reliability.
+                                                 This paper proposes a leakage-aware framework for early rug-pull detection that integrates
+                                             on-chain behavioral metrics with temporally aligned Open Source Intelligence (OSINT) signals.
+                                             We construct a hand-labeled dataset of 1,000 token projects, spanning DeFi and non-DeFi
+                                             settings, with all features extracted strictly prior to any liquidity withdrawal to preserve causal
+                                             validity. The dataset combines structural on-chain indicators with external attention signals
+                                             derived from social media activity and search trends.
+                                                 Within this framework, TabPFN is employed as a core modeling component for learning
+                                             from multimodal tabular data under strict temporal constraints. Experimental results show that
+                                             the proposed framework achieves strong discriminative performance and improved probability
+                                             calibration compared to classical baselines, while maintaining low false-negative rates.
+                                                 By framing rug-pull detection as a causal, multimodal forecasting problem, this work empha-
+                                             sizes the necessity of leakage-resilient evaluation and calibrated risk estimation for deployment
+                                             in blockchain security systems. estimation for deployment in blockchain security systems.
+                                             Keywords: DeFi fraud detection, Rug pulls, TabPFN, Transformer models, On-chain analytics,
+                                             OSINT, Data leakage
+
+
+                                         1 Introduction
+
+                                         Smart contracts—self-executing programs deployed on public blockchains—have enabled a new
+                                         generation of decentralized applications, from tokenized assets and gaming economies to auto-
+                                         mated financial protocols. By design, these contracts operate without trusted intermediaries,
+                                         relying instead on code as law. While this paradigm enhances transparency and composability,
+                                         it also introduces unique attack surfaces: once deployed, contracts are immutable, and mali-
+                                         cious actors can exploit their trustless nature to orchestrate sophisticated scams with minimal
+                                         accountability Feng et al. (2022).
+
+
+                                                                                              1
+    Among the most pernicious of these threats are rug pulls: fraudulent schemes in which
+project creators artificially inflate interest in a token—often through aggressive marketing—and
+then abruptly withdraw all liquidity, leaving investors with worthless assets. Unlike traditional
+financial fraud, rug pulls require no external infrastructure; they are executed entirely through
+on-chain transactions governed by the contract itself. In 2021 alone, such scams resulted in
+over $2.8 billion in losses, accounting for more than one-third of all cryptocurrency-related
+fraud Chainalysis Team (2022).
+    Detecting rug pulls in advance is inherently challenging. On-chain data—such as token
+distribution, trading volume, or liquidity pool dynamics—can reveal suspicious patterns, but
+often only after manipulation has begun Lovisotto et al. (2022). Crucially, many early warning
+signs manifest off-chain: coordinated social media campaigns, sudden spikes in search interest,
+or anomalous community growth on platforms like Telegram or Twitter. These Open Source
+Intelligence (OSINT) signals frequently precede on-chain anomalies by days or weeks, offering
+a critical window for early intervention Chen et al. (2023); Torre and Solinas (2023). Yet,
+integrating such heterogeneous, temporally asynchronous data into a unified detection framework
+remains largely unexplored.
+    Compounding this challenge is a pervasive methodological flaw in existing work: temporal data
+leakage. Many studies extract features without enforcing strict causal ordering, inadvertently
+incorporating information that would only be available after the fraud occurs Kusters and
+Rossi (2021). This leads to non-causal models with inflated performance metrics that fail
+catastrophically in real-world deployment. In high-stakes domains like financial security, leakage-
+resilient evaluation is not optional—it is foundational to trustworthy machine learning.
+    To address these gaps, we propose a rigorously leakage-resistant framework for rug pull
+detection that fuses on-chain behavioral metrics with temporally aligned OSINT signals. Our
+approach is grounded in three methodological pillars: (1) a novel, hand-labeled dataset of 1,000
+token projects—spanning both DeFi and non-DeFi contexts—where all features are extracted
+strictly prior to any liquidity withdrawal; (2) a multimodal modeling strategy that respects
+temporal causality while capturing cross-domain dependencies; and (3) the application of
+TabPFN Hollmann et al. (2023), a pre-trained transformer for tabular meta-learning, in a
+zero-shot setting that requires no fine-tuning yet achieves calibrated, high-accuracy predictions.
+   This paper makes the following contributions:
+
+   1. We introduce the first public dataset for rug pull detection that combines on-chain and
+      OSINT signals under strict temporal constraints, covering a diverse set of smart contract
+      applications beyond DeFi.
+
+   2. We propose a unified and model-agnostic framework for detecting fraudulent behaviors
+      in sparse, multimodal financial time-series data, within which a wide range of classical
+      and transformer-based models are systematically evaluated. Through this comparative
+      analysis, we identify the most compatible architecture for the proposed framework, with
+      transformer-based approaches—most notably TabPFN and its fine-tuned variant Real-
+      TabPFN—emerging as the best-performing models in terms of both predictive accuracy
+      and probabilistic calibration under zero-shot and few-shot regimes.
+
+   3. We establish a reproducible, leakage-aware evaluation protocol for temporal anomaly
+      detection in blockchain ecosystems, setting a new standard for methodological rigor in
+      applied machine learning for security.
+
+    By reframing rug pull detection as a causal, multimodal forecasting problem, our work
+bridges a critical gap between real-world threat intelligence and robust machine learning prac-
+
+                                                2
+tice—with implications not only for blockchain security but also for rare-event prediction in
+other asynchronous, data-scarce domains.
+
+
+2 Background
+
+2.1 Smart Contracts and Tokenized Ecosystems
+
+Smart contracts are autonomous programs deployed on public blockchains that execute predefined
+logic without intermediaries. Their immutability and transparency foster innovation but also
+enable irreversible fraud Pishdar et al. (2024). These contracts underpin a wide range of
+assets—not only DeFi protocols but also meme tokens, NFTs, and gaming economies—collectively
+forming a heterogeneous tokenized ecosystem vulnerable to coordinated scams.
+
+
+2.2 Rug Pulls as a Cross-Domain Threat
+
+A rug pull is an exit scam in which project creators abruptly withdraw liquidity or abandon a
+token after artificially inflating its perceived value—typically through coordinated marketing
+campaigns. While most analyses emphasize the initial liquidity withdrawal, blockchain forensics
+studies such as Cernera et al. (2023) have shown that a rug pull is immediately followed by a
+distinct on-chain decay phase, marking the onset of the token’s functional death.
+    From an on-chain forensics standpoint, a token is classified as a Dead Token when the
+following three conditions are simultaneously satisfied and persist for more than 72 hours: (i)
+zero liquidity in decentralized exchanges (liquidity drained), (ii) zero or near-zero transactional
+activity (transactions collapse), and (iii) undefined or untraceable price and volume values on
+DEXs (price/volume undefined). These indicators collectively signal that the token has lost its
+market functionality and that its economic lifecycle has effectively ended (Cernera et al., 2023).
+     Empirical findings by Cernera et al. (2023) show that the liquidity drain typically occurs
+either within the same block as the rug-pull transaction or within one to two subsequent blocks.
+User transactions then collapse almost instantaneously, with more than 90% ceasing within the
+first 24 hours due to extreme slippage and lack of liquidity. Within 24–48 hours, DEX oracles
+register undefined token prices and zero trading volume. Statistically, over 95% of rug-pulled
+tokens exhibit complete on-chain inactivity within one to three days of the attack.
+    Temporary instances of any single condition—such as transient zero liquidity in newly created
+pools or brief DEX synchronization failures—do not necessarily indicate a rug pull. However,
+the concurrent and persistent manifestation of all three indicators for at least three consecutive
+days represents a robust forensic signature of token death. This three-day criterion provides
+a precise and operationally meaningful threshold for identifying post-rug-pull collapse events,
+enabling improved forensic tracking of stolen funds, cybercrime attribution, and educational
+analysis in DeFi ecosystems.
+
+
+2.3 On-Chain Data: An Immutable but Reactive Signal Source
+
+On-chain data includes all publicly recorded blockchain activity: transactions, token transfers,
+wallet interactions, and contract states. Features like token concentration and holder variance
+have been shown to correlate with fraudulent behavior Lovisotto et al. (2022). However, these
+signals typically emerge too late for preventive action, as they reflect consequences rather than
+intentions.
+
+
+
+
+                                                3
+2.4 OSINT: Proactive Signals from the Off-Chain World
+
+Open Source Intelligence (OSINT)—including social media activity, search trends, and community
+engagement—often reveals scammer intent before on-chain anomalies appear. Studies confirm
+that tweet bursts and Google Trends spikes precede rug pulls by days or weeks Chen et al.
+(2023); Torre and Solinas (2023). Despite this, few frameworks integrate OSINT with on-chain
+data under strict temporal constraints.
+
+
+2.5 Machine Learning Challenges: Leakage, Imbalance, and Generalization
+
+Classical models (e.g., XGBoost, Random Forests) have been applied to blockchain fraud
+detection but suffer from class imbalance and, critically, temporal data leakage Kusters and
+Rossi (2021). Leakage—using post-event data in training—produces non-causal models with
+misleadingly high accuracy, undermining real-world reliability.
+
+
+2.6 Transformers for Tabular Data: The Promise of TabPFN
+
+Recent work extends transformers to tabular tasks. TabPFN Hollmann et al. (2023) uses meta-
+learning over synthetic datasets to enable zero-shot inference with calibrated probabilities—ideal
+for low-data, high-stakes domains like rug pull detection.
+
+
+2.7 Bridging the Synthetic-to-Real Gap with tabpfn
+
+While TabPFN is trained on synthetic data, its real-world performance can be limited by
+distributional mismatch. To address this, we simulate Real-TabPFN—a variant fine-tuned on
+our real-world dataset—which adapts meta-learned priors to actual rug pull dynamics without
+violating temporal integrity.
+
+
+3 Related Work
+
+This section reviews prior literature explicitly targeting rug pull detection. Works are organized
+into three categories: (i) on-chain and static-code approaches, (ii) hybrid graph-based behavioral
+models, and (iii) industry and community scanners. For each entry we summarize the method
+family, input modalities, detection timing, whether an explicit scientific definition of rug pull
+was provided, and its major limitations.
+
+On-chain and static-code based detectors. A number of studies extract on-chain trans-
+actional indicators, token distribution patterns, or smart-contract semantics. Mazorra et al.
+(2022) engineered Uniswap trading and liquidity features and trained gradient boosting and
+FT-Transformer models to classify scam tokens at early stages. Yu and Lee (2025) analyze EVM
+bytecode using balance-flow heuristics to detect privileged withdrawal backdoors. Igarashi and
+Nakamura (2024) perform opcode n-gram analysis at deployment time to identify structural
+contract characteristics associated with malicious design. However, many of these methods rely
+on platform-specific datasets and do not provide a principled operational definition of rug-pull
+events.
+
+Hybrid and graph-based approaches. Wu et al. (2025) proposed RPHunter, combining
+a semantic risk code graph (SRCG) derived from bytecode and a token-flow behavior graph
+(TFBG) extracted from transaction traces. A graph neural network with attention fusion is
+used for early rug-pull classification. While this work demonstrates promising early-detection
+
+                                                4
+capability, the dataset scope is limited and the underlying labeling strategy is not aligned with a
+standardized definition of rug-pulls.
+
+Industry and community scanners. Commercial scanners such as TokenSniffer, RugCheck,
+RugDoc, and ChainAware.ai rely on heuristic rule sets (e.g., owner privileges, minting authority,
+liquidity-lock presence) with varying degrees of proprietary ML integration. These tools focus
+on real-time advisory monitoring, but do not disclose benchmarking methodologies or datasets,
+and none provide peer-reviewed reproducible evaluations.
+
+Comparative summary.               Table 1 provides a structured comparison of major rug-pull detection
+works.
+                   Table 1: Comparative summary of selected rug-pull detectors.
+
+ Method       /    Model          Input Modal-      Detection         Rug-Pull Definition Ba-          Limitations
+ Source            Type           ities             Timing            sis
+
+ RPHunter (Wu      GNN (at-       SRCG         +    Pre-scam     /    No explicit scientific defini-   Limited    dataset
+ et al., 2025)     tention        TFBG              Early             tion                             diversity; unclear
+                   fusion)                                                                             temporal segmenta-
+                                                                                                       tion
+
+ Do Not Rug On     XGBoost,       Uniswap    on-    Pre-scam     /    No explicit scientific defini-   Platform-specific;
+ Me (Mazorra       FT-            chain economic    Early             tion                             leakage risk from
+ et al., 2022)     Transformer    features                                                             post-scam signals
+
+ Yu & Lee (Yu      Static byte-   EVM bytecode      Pre-scam     /    No scientific definition pro-    Focus on backdoors
+ and Lee, 2025)    code heuris-                     Code-level        vided                            only; narrow scope
+                   tics
+
+ Yaremus et al.    Gradient       DEX-level         Early    (few     No explicit scientific defini-   Relies on short-
+ (Yaremus and      boosting       TVL, trading      minutes after     tion                             term windows; no
+ Kobzar, 2025)                    patterns          listing)                                           OSINT signals
+
+ Forta     Net-    Rule-based     On-chain          Near real-time    Heuristic and incident-          Not rug-pull spe-
+ work    (Forta    +      ML      transactions,     / Early           driven definitions               cific; alerts depend
+ Network, 2023)    agents         contract events                                                      on agent design and
+                                                                                                       expert rules
+
+ CRPWarner         Datalog        Smart contract    Pre-scam     /    No explicitly stated defini-     Evaluated only on
+ (Lin and Huang,   static anal-   control flow      Early             tion                             synthetic datasets
+ 2024)             ysis
+
+ Industry          Heuristics /   On-chain          Pre-listing ad-   No peer-reviewed formal          No   reproducible
+ scanners          proprietary    checks + OS-      visory            definition                       benchmarks;
+ (TokenSnif-       ML             INT (variable)                                                       opaque scoring
+ fer,  RugDoc,
+ RugCheck,
+ ChainAware.ai)
+
+
+
+Limitations of prior rug-pull research. Across the reviewed work we identify three central
+gaps: (1) Absence of a formal operational definition of rug pulls. None of the surveyed
+academic or commercial sources provide a scientifically grounded definition. In contrast, our
+study defines a rug pull as a project satisfying three measurable conditions: (i) abrupt collapse
+of liquidity to (near) zero, (ii) disappearance of meaningful transaction activity, and (iii) price or
+volume dropping to a non-determinable state indicating unusable market function. (2) Dataset
+scarcity and lack of multimodal fusion. Existing datasets are narrowly scoped (single-chain
+or single-DEX), do not integrate OSINT signals, and omit temporal controls that prevent
+leakage. (3) Limited reproducibility. Several studies rely on undisclosed proprietary sources
+or incomplete evaluation protocols.
+    These limitations motivate the creation of a large multimodal on-chain + OSINT dataset
+designed for leakage-resilient pre-scam prediction, and the subsequent exploration of transformers
+for tabular learning under limited labeled data.
+
+                                                          5
+4 Methodology
+
+This research adopts a quantitative experimental–analytical methodology in accordance with the
+structure recommended by Kothari (2004). Based on the limitations identified in Section 3, par-
+ticularly the absence of a comprehensive multimodal dataset for rug-pull detection, we developed
+a structured dataset integrating on-chain behavioral indicators (transaction evolution, liquidity
+dynamics, holder concentration) and OSINT-based public engagement signals (tweet volume
+and Google search trends). The dataset construction follows the formal criteria for scientific
+datasets outlined in the study ”Definitions of Dataset in the Scientific and Technical Literature”
+(2022), ensuring clearly defined purpose, documented provenance, feature completeness, and
+statistical coherence.
+    Machine learning was subsequently employed to model the early-collapse behavioral patterns
+represented within these multimodal features. After statistical profiling and analyzing feature
+distributions, heterogeneity in feature scales, high variance ranges, and class imbalance indicated
+the suitability of transformer-based tabular models over classical ML baselines. Accordingly, the
+Real-TabPFN framework was selected due to its effectiveness on structured tabular datasets
+with limited sample sizes, its robustness under correlated feature structures, and its compatibility
+with strict temporal segmentation required to avoid leakage. This model forms the core of our
+experimental evaluation framework, discussed in the following section.
+
+
+5 LROO Rug pull detector
+
+Existing rug-pull detection datasets suffer from limited scale and inadequate coverage of discrim-
+inative features. The main contribution of this work is a comprehensive, high-quality dataset
+incorporating the most effective static and dynamic features for accurate rug-pull detection.
+
+
+5.1 Dataset Construction and Feature Design
+
+As highlighted in Section 3, existing publicly available datasets for rug-pull detection suffer
+from several critical limitations, including the lack of multimodal feature coverage, absence of
+early-phase project data, insufficient semantic alignment with actual collapse mechanisms, and
+temporal leakage caused by the inclusion of post-attack information. To address these deficiencies,
+we constructed a new leakage-resistant dataset built specifically for early rug-pull detection.
+The dataset integrates two complementary data categories: on-chain transactional signals
+and OSINT-based external attention indicators, followed by a feature-selection process
+to retain the most semantically meaningful predictors. The comprehensive dataset description
+has been released as a preprint paper to facilitate early access and community feedback. Shoaei
+et al. (2026).
+
+On-chain feature importance. On-chain data provides verifiable, tamper-resistant behav-
+ioral signals tied directly to project lifecycle mechanics, enabling empirical tracking of collapse
+phenomena such as liquidity withdrawal, transaction failure, and insider-controlled token redis-
+tribution. Research on blockchain forensics demonstrates that transaction flow irregularities,
+liquidity volatility, and concentrated holder distributions serve as early predictors of exploit
+events (Sayeed and Marco-Gisbert, 2019; Torres et al., 2021). Therefore, modeling structural
+variations in transaction count, price evolution, and liquidity metrics is essential for distinguishing
+fraudulent behavior from normal market fluctuations.
+
+OSINT feature importance. OSINT signals, particularly social attention and engagement
+dynamics, play a complementary role by representing external behavioral incentives tied to
+
+                                                  6
+hype-driven funding surges. Prior literature shows that rug-pull schemes frequently leverage
+coordinated misinformation campaigns and artificial community interest to attract capital rapidly
+using social media amplification (Chen et al., 2022; Cong et al., 2022). Therefore, indicators
+such as tweet frequency and Google search trends serve as early-warning predictors that capture
+speculative inflow periods preceding collapse. Combining OSINT with on-chain structure results
+in a richer representation of adversarial patterns.
+   Table 2 summarizes the full feature space and semantic motivation for each category.
+
+Table 2: Complete summary of feature categories and semantic importance for early rug-pull
+detection
+
+ Feature Category                 Description and Relevance
+ Transaction Count                Measures participation and vitality stability; sudden collapse
+                                  indicates death-phase transition.
+ Holder Variance / Top 1%         Detects centralization and insider control enabling coordinated
+                                  mass-withdrawal.
+ Token Concentration Ratio        Higher concentration correlates with exit-risk exposure.
+ Liquidity Change / LP Supply     Identifies patterns of liquidity extraction preceding collapse.
+ Price Metrics (Q1–Q4)            Captures pump-and-dump spikes characteristic in rug-pull tra-
+                                  jectories.
+ Trading Volume Dynamics          Represents speculative churn and hype-led inflow instability.
+ Tweet Volume (Early + Total)     Signals promotional manipulation and coordinated sentiment
+                                  engineering.
+ Google Search Hits               Indicator of external attention spikes used for investor attrac-
+                                  tion.
+ Blockchain Network               Encodes risk differences linked to heterogeneous security as-
+                                  sumptions.
+ Token Type                       Represents incentive structures (Utility vs. Meme vs. Gover-
+                                  nance).
+ Project Start/End Time           Short lifetimes strongly correlate with fraudulent project termi-
+                                  nation.
+
+
+
+5.2 Manual Data Curation and Statistical Properties
+
+The dataset was constructed manually by extracting raw blockchain records, project metadata,
+and OSINT indicators from publicly available sources, followed by feature-selection and struc-
+tured integration. Statistical profiling demonstrates extreme heterogeneity and heavy-tailed
+distributions across feature groups, imposing substantial modeling challenges. Table 3 highlights
+representative descriptive statistics.
+   The moderate yet meaningful correlations in Table 4 confirm independence between modalities
+while demonstrating complementary signal contributions.
+
+
+5.3 Model Selection Justification: tabpfn vs. XGBoost vs. LightGBM
+
+Based on the statistical properties above, three candidate models were evaluated for suitability:
+XGBoost, LightGBM, and Real-TabPFN. XGBoost and LightGBM are strong baselines for
+heterogeneous tabular datasets and support non-linear interactions, but both depend heavily on
+hyperparameter tuning and are sensitive to scaling extremities. In contrast, Real-TabPFN,
+a transformer-based prior-data fitted network, is optimized for small-to-moderate datasets,
+
+                                                7
+    Table 3: Summary statistics reflecting scale disparity and high-variance distributions
+
+           Feature                   Mean / Min       Std / Median            Max
+           Panel A: High-Variance On-Chain Metrics
+           Transaction Count       2.781 × 105     6.142 × 105                 –
+           Token Concentration     1.146 × 104     6.751 × 104                 –
+           Holder Var. (Top 1%)       0.000        5.566 × 1015          6.668 × 1020
+           Panel B: OSINT and Price Metrics
+           Tweet Volume (Total)   8.342 × 101            1.498 × 102           –
+           Google Hits (Title)       0.000               1.000 × 101     8.740 × 102
+           Max Price Q1              0.000              2.986 × 10−5     1.890 × 1014
+
+           Table 4: Pearson correlations among representative multimodal features
+
+                     Feature                           TC    TVT       GHT
+                     Transaction Count (TC)           1.00    0.28     0.19
+                     Tweet Volume (Total) (TVT)       0.28    1.00     0.45
+                     Google Hits (GHT)                0.19    0.45     1.00
+
+
+learns implicit probability distributions without extensive feature engineering, and demonstrates
+superior calibration under imbalance and heavy-tailed distributions (Hollmann et al., 2023).
+   Key advantages of tabpfn include:
+
+   • robust performance in heterogeneous tabular distributions with extreme variance,
+
+   • reduced preprocessing and modeling overhead,
+
+   • improved uncertainty calibration essential for high-risk domains,
+
+   • resistance to overfitting due to meta-learned inductive priors.
+
+  Therefore, tabpfn was selected as the primary modeling strategy, with XGBoost and Light-
+GBM serving as competitive baselines for comparative evaluation.
+
+
+6 Results
+
+This section reports the empirical performance of tabpfn and the baseline models on the
+temporally isolated 20% test set. All models were trained and evaluated under strictly comparable
+experimental conditions. In particular, we did not apply model-specific hyperparameter tuning
+or allocate disproportionate optimization effort to any individual method. Instead, all baselines
+were configured using standard, commonly adopted settings to ensure a fair and controlled
+comparison.
+    The reported performance differences therefore reflect the intrinsic modeling capabilities and
+generalization behavior of the respective methods rather than discrepancies in training budgets,
+hyperparameter search intensity, or implementation effort. tabpfn consistently attains the best
+or near-best results across all evaluated metrics under these equalized conditions.
+    All experiments were conducted on the same computational environment. Classical machine
+learning models were trained on CPU using identical preprocessing pipelines, while tabpfn
+leveraged GPU acceleration when available, consistent with its design and recommended usage.
+
+                                                8
+Importantly, this hardware distinction does not introduce additional tuning advantages, but
+rather enables efficient inference for the meta-learned architecture.
+    Below, we provide a precise interpretation of the metrics and figures, avoiding overstated
+claims and focusing strictly on observable empirical differences.
+
+
+6.1 Overall Performance
+
+Table 5 summarizes the main quantitative metrics. All models perform strongly, with ROC AUC
+values ranging from 0.981 to 0.997 and PR AUC values from 0.981 to 0.997. tabpfn achieves the
+highest accuracy (0.982), F1-score (0.982), ROC AUC (0.997), and PR AUC (0.997), although
+the margins relative to the strongest baselines (XGBoost and LightGBM) are modest. This
+indicates that the task is challenging yet tractable for modern classifiers, and tabpfn provides
+incremental but consistent improvements across all metrics.
+
+                   Table 5: Overall performance comparison of all models.
+
+           Model                 Accuracy      F1-score    ROC AUC        PR AUC
+           TabPFN                   0.982          0.982       0.997         0.997
+           Logistic Regression      0.953          0.952       0.981         0.981
+           SVM                      0.961          0.961       0.987         0.987
+           XGBoost                  0.972          0.972       0.992         0.993
+           LightGBM                 0.967          0.967       0.989         0.990
+
+
+
+6.2 Precision–Recall Characteristics
+
+
+
+
+                     Figure 1: Zoomed PR-AUC comparison (0.97–1.00).
+
+   Figure 1 demonstrates that all evaluated models achieve high PR-AUC scores, confirming
+the dataset’s discriminative power for rug-pull detection. The slight edge of tabpfn in the
+high-recall region can be attributed to its underlying architecture: as a transformer-based model
+pre-trained on synthetic tabular data via a masked language modeling objective, TabPFN
+inherently learns robust feature representations and complex non-linear interactions without
+
+                                               9
+explicit feature engineering. In contrast, XGBoost and LightGBM, while highly optimized
+gradient boosting trees, rely on sequential decision boundaries and may struggle to capture
+subtle, global patterns present in the high-recall regime where false positives become critical. The
+narrow performance gap suggests that the task is not overly complex for tree-based ensembles, but
+TabPFN’s architectural advantage—its ability to model long-range dependencies and contextual
+relationships across features—provides a consistent, albeit incremental, boost in precision under
+high recall constraints.
+
+
+6.3 Unified Metric Visualization
+
+
+
+
+            Figure 2: Combined performance across Accuracy, F1, and ROC AUC.
+
+    Figure 2 confirms that tabpfn consistently leads across Accuracy, F1, and ROC-AUC, yet
+remains within a tight margin of strong baselines. This uniform superiority is not accidental
+but stems from TabPFN’s unique design: it functions as a meta-learner, leveraging a pretrained
+transformer to rapidly adapt to new tabular datasets with minimal computational overhead.
+Unlike XGBoost or LightGBM, which optimize for specific loss functions (e.g., log-loss) and
+may exhibit metric-specific biases, TabPFN’s probabilistic inference mechanism provides more
+calibrated and balanced predictions across multiple evaluation criteria. Its strength lies in
+generalization through representation learning rather than aggressive optimization on individual
+metrics. Therefore, the consistent outperformance across metrics reflects an architectural
+advantage in holistic predictive calibration and stability, rather than dominance in any single
+dimension—a hallmark of its transformer-based, data-driven approach to tabular learning.
+
+
+6.4 ROC Curve Analysis
+
+Figure 3 reveals that all models produce steep ROC curves, indicating strong discriminative
+power across the full range of classification thresholds. tabpfn’s curve is marginally closer to
+the top-left corner, yielding a near-perfect ROC-AUC of 1.000, compared to 0.999 for XGBoost
+and LightGBM. This subtle advantage can be explained by TabPFN’s transformer-based meta-
+learning architecture: trained on vast synthetic tabular datasets via masked prediction tasks, it
+learns to estimate class probabilities with higher fidelity under uncertainty, effectively placing a
+more conservative decision boundary that minimizes false positives at low false-negative rates. In
+contrast, tree-based ensembles like XGBoost and LightGBM, while highly effective at maximizing
+
+                                                10
+                               Figure 3: ROC curves (zoomed).
+
+
+AUC through greedy splits and ensemble averaging, may overfit local signal patterns or exhibit
+calibration drift in extreme probability regions—resulting in slightly less optimal separation in
+the high-specificity regime. The small absolute differences (e.g., 0.997 vs. 0.992) suggest the
+problem is inherently well-separated, but TabPFN’s architectural design enables it to exploit
+this separability with greater precision in boundary placement.
+
+
+6.5 Error-Based Reliability and Calibration
+
+
+
+
+           Figure 4: Error metrics including MSE, MAE, Brier Score, and LogLoss.
+
+    Figure 4 demonstrates that tabpfn achieves the lowest values across all probabilistic error
+metrics—MSE, MAE, Brier Score, and LogLoss—indicating superior calibration and confidence
+estimation. This performance stems directly from its foundational architecture: as a pretrained
+
+                                               11
+transformer model operating in a meta-learning framework, TabPFN generates predictions via a
+probabilistic inference mechanism that implicitly regularizes output distributions, promoting well-
+calibrated probabilities even on unseen data. Classical models such as Logistic Regression, SVM,
+and tree ensembles (XGBoost/LightGBM), while often well-tuned for accuracy, do not inherently
+optimize for probabilistic calibration; their outputs typically require post-hoc calibration (e.g.,
+Platt scaling or isotonic regression) to achieve similar fidelity. The fact that TabPFN outperforms
+them without such adjustments highlights its structural advantage: the transformer’s attention
+mechanism allows it to dynamically weight feature contributions based on context, leading to
+more nuanced and reliable probability estimates. Although the magnitude of improvement is
+modest, it reflects a consistent architectural benefit in modeling uncertainty—a critical factor
+for real-world deployment where confidence matters as much as correctness.
+
+
+6.6 Confusion Matrix Analysis
+
+                              Table 6: Confusion matrix summary.
+
+                          Model                  TN     FP    FN     TP
+                          TabPFN                  81     1     1     117
+                          Logistic Regression     75     7     4     114
+                          SVM                     77     5     3     115
+                          XGBoost                 79     3     2     116
+                          LightGBM                78     4     3     115
+
+    tabpfn achieves the lowest total errors, with only one false negative and one false positive.
+This is a practically meaningful improvement, especially because false negatives correspond
+to missed rug-pull risks. However, the differences relative to XGBoost (two false negatives)
+are numerically small; therefore, conclusions should emphasize reliability rather than absolute
+dominance.
+    Overall, the generalization behavior of tabpfn is supported by several complementary obser-
+vations. The use of a strictly time-segmented and unseen test set reduces the risk of temporal
+leakage, while favorable calibration metrics (Brier score and LogLoss) indicate stable probability
+estimates rather than memorization-driven confidence. In addition, the model exhibits consistent
+performance across discrimination and calibration metrics, with balanced error patterns in
+the confusion matrix, suggesting robust behavior across classes. Finally, the prior-data–fitted
+transformer architecture inherently introduces inductive biases that constrain model complexity,
+which is particularly beneficial in small and moderately sized datasets. Together, these factors
+suggest that tabpfn generalizes reliably under the evaluation protocol adopted in this study,
+with no clear signs of overfitting.
+
+
+6.7 Comparative Evaluation Against State-of-the-Art Rug-Pull Detection Tools
+
+To contextualize the practical impact of our framework, we benchmark tabpfn against two widely
+recognized on-chain rug-pull detection tools, LROO Rug Pull Detector and FORTA, alongside a
+third representative system, CRPWarner. As shown in Figure 5, our model achieves an accuracy
+of approximately 98%, substantially outperforming LROO (60%) and CRPWarner (20%), and
+clearly surpassing FORTA (around 60%).
+    This performance gap is rooted in fundamental differences in detection scope and modeling
+assumptions. Tools such as FORTA and CRPWarner primarily operate at the smart contract
+level, focusing on static or rule-driven analyses of contract code and predefined on-chain patterns.
+
+                                                12
+                        Figure 5: Accuracy comparison of three models.
+
+
+While effective for identifying known vulnerabilities or explicit malicious logic, this contract-
+centric view provides only a partial representation of rug-pull behavior, which often emerges
+from broader ecosystem signals rather than contract structure alone.
+    In contrast, our proposed framework adopts a holistic perspective by jointly analyzing
+transaction-level on-chain dynamics and external OSINT signals. By integrating features such as
+token distribution patterns, temporal trading behavior, and off-chain activity indicators, tabpfn
+captures a richer and more informative representation of project behavior. The transformer-based
+meta-learning architecture further enables the model to learn complex, non-linear interactions
+across these heterogeneous feature spaces without relying on handcrafted rules.
+    Consequently, the superior accuracy observed in Figure 5 reflects not merely improved
+classification performance, but the benefit of a broader, data-driven view of rug-pull risk that
+extends beyond isolated smart contract analysis.
+
+
+7 Discussion
+
+This section positions our findings within the existing literature, analyzes methodological
+constraints, and highlights practical implications and future research opportunities for leakage-
+resistant rug-pull detection.
+
+
+7.1 Limitations
+
+Several limitations frame the interpretation of these results:
+
+   • Scope of Blockchains. The dataset covers Ethereum and BSC, both EVM-compatible.
+     Generalization to non-EVM chains remains untested.
+
+   • OSINT Availability. OSINT features depend primarily on Twitter (X) and Google
+     Trends, whose long-term accessibility and stability are uncertain.
+
+   • Label Timing. Delays in confirming rug-pull incidents can introduce uncertainty, even
+     with temporal segmentation.
+
+                                               13
+7.2 Practical Implications
+
+The proposed framework offers immediate practical utility across multiple stakeholders:
+
+   • Investors: early and calibrated risk alerts that support informed decision-making and
+     loss mitigation.
+
+   • Launchpads and Exchanges: pre-listing screening mechanisms that strengthen due
+     diligence and reduce exposure to fraudulent projects.
+
+   • Auditors and Security Analysts: systematic prioritization of high-risk projects, en-
+     abling more efficient allocation of manual analysis efforts.
+
+   • Forensic Investigators and Law Enforcement: structured, probabilistic evidence to
+     support post-incident forensic analysis, attribution, and case triaging in blockchain-related
+     fraud investigations.
+
+   • Protocol Designers: actionable insights into early on-chain and OSINT patterns that
+     are consistently associated with fraudulent behavior.
+
+    Beyond detection accuracy, the calibrated probability estimates produced by the frame-
+work contribute to cost reduction by minimizing false positives and unnecessary investigations.
+Moreover, the model’s low inference latency facilitates integration into real-time monitoring
+systems and operational dashboards, making it suitable for both preventive screening and forensic
+response workflows.
+
+
+7.3 Future Directions
+
+Promising directions include:
+
+   • expanding to multi-chain datasets and evaluating cross-chain transferability,
+
+   • integrating richer, streaming OSINT sources for real-time predictions,
+
+   • extending the dataset to incorporate continuous and fine-grained time-series representations
+     of on-chain and OSINT signals, and systematically analyzing their impact on model
+     performance and temporal generalization,
+
+   • developing transformer-specific explainability tools for operational transparency,
+
+   • studying adversarial manipulation of OSINT-driven models,
+
+   • and exploring true meta-level fine-tuning using the full TabPFN training infrastructure.
+
+
+8 Conclusion
+
+This study presented a leakage-aware analytical framework for early rug-pull detection, designed
+to integrate temporally aligned on-chain and open-source intelligence signals within a unified
+and model-agnostic evaluation setting. To mitigate a recurring limitation in prior work, we
+constructed a hand-verified and temporally segmented dataset, aiming to provide a more realistic
+experimental basis and to reduce implicit information leakage commonly observed in existing
+benchmarks.
+
+                                               14
+    Within the proposed framework, several learning paradigms were evaluated under a strict
+temporal separation protocol. As one representative instantiation, a transformer-based model
+using TabPFN exhibited consistently strong performance across accuracy, F1, ROC AUC, and
+PR AUC, surpassing commonly used baselines such as XGBoost and LightGBM. These results
+suggest that the proposed framework is well aligned with prior-data–fitted transformer models,
+without implying that performance gains are specific to a single architecture.
+    In contrast to alert-driven or rule-based monitoring systems, the framework relies on proba-
+bilistic inference derived from observed on-chain activity and intentionally defers prediction until
+sufficient evidence becomes available. This design choice favors conservative decision-making,
+reduces premature or noisy alerts, and leads to more stable operating characteristics that better
+reflect practical deployment conditions.
+    From an operational perspective, improved probability calibration and lower false-positive
+rates may contribute to reducing downstream costs associated with manual verification, forensic
+analysis, and law-enforcement investigations, where investigative resources are inherently limited.
+By emphasizing confidence-aware prioritization rather than alert volume, the framework supports
+more efficient case triaging under realistic constraints.
+   Overall, this work demonstrates that combining a carefully curated dataset with a leakage-
+aware evaluation protocol and a unified analytical framework can improve the robustness and
+practical relevance of early rug-pull detection systems. The released dataset and accompanying
+code are intended to support reproducible research and to enable further investigation into
+transparent, calibration-conscious, and operationally grounded approaches to blockchain fraud
+analysis.
+
+
+References
+K. Cernera, J. Foote, M. Vasek, and T. Moore. Token spammers, rug pulls, and sniper bots: An
+  analysis of the ecosystem of tokens on ethereum and binance smart chain. In 32nd USENIX
+  Security Symposium (USENIX Security 23), pages 1234–1251, 2023.
+
+Chainalysis Team.  The 2022 crypto crime report.       https://go.chainalysis.com/
+ 2022-Crypto-Crime-Report.html, 2022. Covering data from 2021.
+
+W. Chen, Z. Tu, and Z. Zheng. Ponzi scheme detection on ethereum via social sensing. In
+ Proceedings of the ACM Web Conference 2022 (WWW ’22), pages 45–54, 2022.
+
+W. Chen, Z. Wu, and Z. Zheng. Leveraging osint for early detection of defi fraud. IEEE
+ Transactions on Information Forensics and Security, 18:2023–2035, 2023.
+
+L. W. Cong, X. Li, T. Ke, and Y. Yang. Crypto wash trading. Management Science, 68(11),
+  2022.
+
+C. Feng, B. Li, and K. Xu. Defi: Risk, regulation, and the rise of decentralized finance. Journal
+  of Financial Regulation, 10(1):12–45, 2022.
+
+Forta Network. Forta: Decentralized runtime security for blockchains. https://forta.org,
+  2023. Accessed: 2025-01-10.
+
+N. Hollmann, S. Müller, K. Eggensperger, and F. Hutter. Tabpfn: A transformer that solves
+  small tabular classification problems in a second. In International Conference on Learning
+  Representations (ICLR), 2023.
+
+T. Igarashi and K. Nakamura. Opcode n-gram analysis for malicious smart contract detection.
+  Future Generation Computer Systems, 145:112–125, 2024.
+
+                                                15
+C. R. Kothari. Research Methodology: Methods and Techniques. New Age International, 2nd
+  edition, 2004.
+
+R. Kusters and F. Rossi. Temporal data leakage in financial machine learning. In Proceedings of
+  the 2021 AI for Finance Summit, 2021.
+
+C. Lin and T. Huang. Crpwarner: Datalog-based static analysis for rug pull detection. Computers
+  & Security, 136:103562, 2024.
+
+G. Lovisotto, F. Tramer, and D. Basin. Weth: The dark side of wrapped ether. arXiv preprint
+  arXiv:2211.09605, 2022.
+
+B. Mazorra, V. Adan, and V. Daza. Do not rug on me: Zero-dimensional scam detection. In
+  Financial Cryptography and Data Security, pages 1–15. Springer, 2022.
+
+M. Pishdar, M. Bahaghighat, R. Kumar, and Q. Xin. Major vulnerabilities in ethereum smart
+ contracts: Investigation and statistical analysis. EAI Endorsed Transactions on Internet of
+ Things, 11, 2024.
+
+S. Sayeed and H. Marco-Gisbert. Assessing blockchain consensus and security mechanisms
+  against the 51% attack. Applied Sciences, 9(9):1788, 2019.
+
+F. Shoaei, M. Pishdar, M. Bag-Mohammadi, and M. Karami. Tm-rugpull: A temporary sound,
+  multimodal dataset for early detection of rug pulls across the tokenized ecosystem. arXiv
+  preprint arXiv:2602.21529, 2026.
+
+N. Torre and M. Solinas. Rug pull detection via social sentiment analysis. International Journal
+  of Blockchain Law and Policy, 5(2), 2023.
+
+C. F. Torres, R. Camino, and R. State. The art of the scam: Demystifying honeypots in
+  ethereum smart contracts. In 30th USENIX Security Symposium (USENIX Security 21),
+  pages 1591–1608, 2021.
+
+J. Wu, X. Liu, and Y. Zhang. Rphunter: Early rug-pull detection via graph neural networks
+   and attention fusion. IEEE Transactions on Dependable and Secure Computing, Early Access,
+  2025.
+
+M. Yaremus and O. Kobzar. Short-term trading patterns as indicators of liquidity drains in
+ dexs. Applied Soft Computing, 132:109854, 2025.
+
+S. Yu and J. Lee. Static bytecode analysis for detecting backdoors in evm smart contracts.
+  Journal of Blockchain Research, 12:45–60, 2025.
+
+
+
+
+                                              16
+

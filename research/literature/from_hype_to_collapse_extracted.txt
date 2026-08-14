@@ -1,0 +1,954 @@
+                                                                                                                                                                                        1
+
+
+
+
+                                             From Hype to Collapse: Investigating Rug Pull Scams on Solana
+                                                               Jiaxin Chen, Ziwei Li, Zigui Jiang, Member, IEEE, Ruihong He, Yantong Zhou,
+                                                                        Jiajing Wu, Senior Member, IEEE, Zibin Zheng, Fellow, IEEE
+
+
+
+                                            Abstract—Solana has experienced rapid growth due to its high               marketing or market manipulation, only to maliciously sell off
+                                         performance and low transaction costs, but the extremely low                  tokens or abruptly withdraw liquidity. Such actions cause the
+                                         barrier to token issuance has also enabled widespread Rug Pulls.              project to collapse and the token price to plummet, leaving in-
+                                         Unlike Ethereum-based Rug Pulls, which often rely on malicious
+                                         smart-contract logic, Solana’s unified SPL Token program shifts               vestors with substantial losses. Rug Pull incidents are rampant
+                                         fraudulent execution toward on-chain behavioral manipulation.                 on Solana, leading to severe economic consequences. Kalal et
+                                         However, existing research has not systematically examined these              al. [4] highlighted that Solana exhibits the highest density of
+
+
+
+
+arXiv:2603.24625v2 [cs.CR] 31 May 2026
+                                         Solana-specific Rug Pull patterns, and no public Solana Rug Pull              Rug Pulls across major blockchains: approximately 55% of
+                                         dataset is available for empirical research. To bridge this gap, we           newly issued tokens or liquidity pools eventually manifest Rug
+                                         present a large-scale measurement study of Rug Pulls on Solana.
+                                         We manually verify 68 community-reported incidents and curate                 Pull behavior. Furthermore, a recent report [5] indicates that
+                                         a benchmark of 117 confirmed Rug Pull tokens, from which                      within the Raydium Decentralized Exchange (DEX) alone, up
+                                         we distill three representative on-chain behavioral patterns:                 to 93% of the 388,000 analyzed liquidity pools were suspected
+                                         Freeze Authority Abuse, Liquidity Withdrawal, and Pump-and-                   of Rug Pull activities, with the largest single incident resulting
+                                         Dump. Guided by these patterns, we design a behavior-guided                   in a $1.9 million loss.
+                                         candidate identification and human-validation pipeline. We apply
+                                         this pipeline to 100,063 tokens newly issued on Orca, Raydium,                   Extensive research [6]–[15] has analyzed the behavioral
+                                         and Meteora during the first half of 2025, identifying 76,469 Rug             patterns of Rug Pulls on Ethereum and proposed automated
+                                         Pull tokens. A random manual audit of 382 samples estimates                   detection methods based on smart contract, transaction se-
+                                         a labeling false-positive rate of 0.26%, supporting the reliability           quences, or deployer behavior. However, these approaches
+                                         of the dataset. We release the resulting dataset and use it to                are largely tied to the Ethereum Virtual Machine (EVM)
+                                         characterize the Solana Rug Pull ecosystem. Our analysis shows
+                                         that Rug Pulls on Solana exhibit extremely short lifecycles,                  execution environment. Owing to architectural differences
+                                         strong price-driven dynamics, severe economic losses, and highly              between Solana and Ethereum, including the programming
+                                         organized group behaviors. These findings provide new insights                model of Solana, account state structures, transaction execu-
+                                         into the Solana Rug Pull landscape and support the development                tion flows, and multi-instruction atomic transaction patterns,
+                                         of effective on-chain defense mechanisms.                                     existing Ethereum-centric methods cannot be directly applied
+                                           Index Terms—Web3, Solana, Rug Pull Scam, Blockchain,                        to Solana. To the best of our knowledge, although prior
+                                         Security.                                                                     studies [4], [16] have included Solana in cross-chain analyses
+                                                                                                                       of Rug Pulls, no systematic study has specifically focused on
+                                                                  I. I NTRODUCTION                                     Rug Pull behaviors in the Solana ecosystem or thoroughly
+                                                                                                                       examined their platform-specific mechanisms and execution
+                                            Solana [1], a high-performance blockchain platform
+                                                                                                                       characteristics. This gap is not merely a matter of incomplete
+                                         launched in 2020, has emerged as a cornerstone of decen-
+                                                                                                                       academic coverage: without a targeted empirical understanding
+                                         tralized infrastructure by integrating Proof-of-History (PoH)
+                                                                                                                       of Rug Pulls on Solana, ecosystem stakeholders lack a reli-
+                                         with Proof-of-Stake (PoS). This architecture enables high
+                                                                                                                       able basis for calibrating risk assessment services, designing
+                                         throughput, low latency, and extremely low transaction costs.
+                                                                                                                       timely warnings, and developing effective mitigation strate-
+                                         As of 2025, Solana has recorded over 1.05 billion active
+                                                                                                                       gies. Therefore, investigating Rug Pulls on Solana and con-
+                                         on-chain addresses and has emerged as the most popular
+                                                                                                                       structing a Solana-specific empirical foundation for behavior-
+                                         blockchain ecosystem throughout 2024 and 2025 [2], [3].
+                                                                                                                       guided analysis are of clear research and practical significance.
+                                            At the same time, the minimal cost of token issuance, the
+                                                                                                                       Our Work. To address this gap, we approach the prob-
+                                         absence of listing barriers, and the lack of mandatory au-
+                                                                                                                       lem from a dataset construction and ecosystem measurement
+                                         dits have fostered a “high-frequency issuance, rapid-turnover”
+                                                                                                                       perspective. We first manually collect and verify fraudulent
+                                         ecosystem on Solana. While this open environment catalyzes
+                                                                                                                       incidents from 68 real-world community reports and cu-
+                                         innovation, it also provides a fertile ground for malicious ac-
+                                                                                                                       rate a manually verified benchmark of 117 confirmed Rug
+                                         tors. Consequently, Rug Pulls have proliferated, evolving into
+                                                                                                                       Pull tokens, from which we distill three representative on-
+                                         a unique and massive fraudulent ecosystem specific to Solana.
+                                                                                                                       chain behavioral patterns: Freeze Authority Abuse, Liquidity
+                                            Rug Pull is a quintessential cryptocurrency fraud wherein                  Withdrawal, and Pump-and-Dump. In this benchmark, every
+                                         project developers attract investor capital through deceptive                 confirmed Rug Pull token can be unambiguously assigned
+                                            The research is supported by the National Natural Science Foundation of    to one of these patterns according to its primary on-chain
+                                         China (62332004, 62472457 and 62372485). (Corresponding author: Zigui         execution and profit-taking mechanism, which defines the
+                                         Jiang.)                                                                       behavioral scope of our subsequent large-scale dataset con-
+                                            Jiaxin Chen, Ziwei Li, Zigui Jiang, Ruihong He, Yantong Zhou, Jiajing Wu
+                                         and Zibin Zheng are with the School of Software Engineering, Sun Yat-sen      struction. Guided by these behavioral patterns, we design a
+                                         University, Zhuhai 519082, China.                                             behavior-guided candidate identification and human-validation
+                                                                                                                                                   2
+
+
+
+pipeline that collects, normalizes, and labels candidate Rug                                      TABLE I
+Pull tokens directly from raw on-chain transaction and state             C OMPARISON OF RUG P ULLS BETWEEN E THEREUM AND S OLANA .
+data. Applying this pipeline to 100,063 tokens newly issued          Category            Property                              Ethereum   Solana
+on Orca, Raydium, and Meteora between January 1 and June
+                                                                                         Custom token contract deployment         ✓         ×
+30, 2025, we construct the first large-scale Solana Rug Pull         Token issuance      One-click token launch platforms         ×         ✓
+dataset, comprising 76,469 candidate Rug Pull tokens whose                               Extremely low token deployment cost      ×         ✓
+labeling reliability is further validated through random manual                          Malicious contract logic                 ✓         ×
+                                                                     Fraud mechanism     Hidden functions in contracts            ✓         ×
+auditing. We then perform a systematic measurement on this                               Behavior-driven Rug Pull                 ✓         ✓
+dataset along five dimensions: token naming characteristics,                             Code analysis as primary signal          ✓         ×
+lifecycle evolution, social media propagation, economic loss         Detection support
+                                                                                         Dedicated academic detection tools       ✓         ×
+scale, and the organizational structure of fraudulent syndicates.
+Contributions. The main contributions of this paper are
+summarized as follows:                                               of their identities, data, and assets. Built on this foundation,
+• We systematically characterize the on-chain mechanisms of          Decentralized Finance (DeFi) reconstructs traditional financial
+   Rug Pulls on Solana, contrast them with their Ethereum            services through smart contracts, enabling intermediary-free
+   counterparts in Section II-C, and trace the full lifecycle from   lending, trading, and asset management. In the DeFi ecosys-
+   token issuance to scam execution. From this analysis we           tem, DEXs serve as the central hubs for asset liquidity. Unlike
+   distill three representative behavioral patterns: Freeze Au-      the order-book model of traditional finance, mainstream DEXs
+   thority Abuse, Liquidity Withdrawal, and Pump-and-Dump,           employ the Automated Market Maker mechanism. Under this
+   and curate a manually verified benchmark of 117 confirmed         paradigm, liquidity providers deposit token pairs into liquidity
+   Rug Pull tokens.                                                  pools managed by code, where trading prices are dynamically
+• We design a behavior-guided identification and human-              adjusted via deterministic mathematical formulas. While this
+   validation pipeline that operates solely on raw on-chain          permissionless design significantly lowers the barrier to token
+   transaction and state data, and apply it to 100,063 tokens        issuance and allows anyone to create tokens and trading pairs,
+   newly listed on Orca, Raydium, and Meteora in the first           it also enables malicious actors to easily introduce low-quality
+   half of 2025. The pipeline yields 76,469 in-the-wild Rug          or fraudulent assets into the public market.
+   Pull tokens whose labels are validated by random manual
+   auditing at a false-positive rate of 0.26%. Together with the
+                                                                     B. Solana
+   117-token benchmark, the resulting corpus constitutes the
+   first publicly released large-scale Solana Rug Pull dataset.         Solana is a high-performance public blockchain platform
+• We measure the Solana Rug Pull ecosystem along five                designed to address the scalability issues within the blockchain
+   dimensions: token naming, off-chain propagation, lifecycle        trilemma. By introducing PoH as a core component of its
+   dynamics, economic impact, and syndicate organization.            consensus mechanism, Solana achieves massive throughput
+   Rug Pull tokens systematically exploit trending topics and        and sub-second confirmation times. As of 2025, Solana has
+   brand impersonation, rely on short-lived or low-credibility       evolved into one of the most active blockchain ecosystems in
+   off-chain presence, and exhibit extremely short lifecycles        the world. Its high concurrency and low latency have made it
+   tightly coupled to the SOL price. We further quantify at          a major platform for Meme token issuance and high-frequency
+   least $151M in direct losses across 7,322 profiting addresses     trading scenarios [17].
+   and identify 78 large-scale syndicates organized into two
+   recurring on-chain topologies, namely Star and Cluster,           C. Rug Pull
+   evidencing a maturing fraud supply chain on Solana.
+                                                                        A Rug Pull is a quintessential fraudulent scheme in the
+Organization. The remainder of this paper is organized as fol-
+                                                                     cryptocurrency domain. It involves project orchestrators at-
+lows. Section II introduces some preliminaries related to this
+                                                                     tracting investor capital through deceptive marketing or market
+study. Section III characterizes the complete attack workflow
+                                                                     manipulation, followed by malicious actions such as dumping
+together with the representative token-level behavioral pat-
+                                                                     tokens or abruptly withdrawing liquidity for profit. These
+terns. Section IV describes the behavior-guided pipeline used
+                                                                     actions cause the project to collapse and the token price to
+to construct the large-scale Solana Rug Pull dataset..Section V
+                                                                     depreciate severely, resulting in significant financial losses for
+analyzes Rug Pulls on Solana in terms of deception features,
+                                                                     investors. Unlike hacking incidents that exploit code vulner-
+economic impact, and scammer behaviors. Section VI dis-
+                                                                     abilities, Rug Pulls typically occur within a functional code
+cusses potential mitigation strategies, and Section VII reviews
+                                                                     framework. Based on the execution method, these scams are
+the related work. Section VIII presents the limitations of
+                                                                     categorized into Hard Rugs, which rely on malicious logic
+our work and future research directions. Finally, the paper is
+                                                                     embedded in contracts, and Soft Rugs, which exploit market
+concluded in Section IX.
+                                                                     mechanisms without technical exploits [18].
+                    II. BACKGROUND
+                                                                     Solana vs. Ethereum. Existing studies [6]–[15] on Rug Pulls
+A. Web3 and DeFi                                                     have primarily focused on EVM-compatible blockchains, par-
+  Web3 represents a decentralized internet built upon                ticularly Ethereum. However, due to differences in underlying
+blockchain technology, aiming to grant users full ownership          architecture and token mechanisms, Rug Pulls on Solana differ
+                                                                                                                                           3
+
+
+
+                                                                   various analysis reports and incident retrospectives published
+                                                                   by blockchain security teams. Chainabuse is a multi-chain
+                                                                   fraud reporting platform co-maintained by multiple blockchain
+                                                                   security institutions. Its reports typically include incident
+                                                                   overviews, attacker addresses, relevant token information,
+                                                                   and on-chain transaction links, providing direct and reliable
+                                                                   leads for identifying Rug Pull tokens. Analysis reports from
+Fig. 1. Workflow of Rug Pulls on Solana                            SlowMist [20] and CertiK [21] further supplement details such
+                                                                   as attack workflows, fund flows, and risk patterns, improving
+substantially from those on EVM-compatible platforms. To           the reliability of fraud labeling. Through this screening pro-
+systematically illustrate these differences, we use Ethereum as    cess, we extract and organize 117 malicious Rug Pull tokens
+a representative EVM-compatible platform and compare Rug           and their associated information from 68 verified reports.
+Pulls on Solana and Ethereum along two key dimensions, as             After completing data collection and screening, we re-
+shown in Table I.                                                  cruit three researchers with over two years of experience
+   (1) The cost and technical threshold for issuing tokens         in blockchain anti-fraud research to manually classify and
+on Solana are significantly lower than on Ethereum. Using          label the identified Rug Pull tokens. We adopt an open
+official tools like the SPL-Token CLI or one-click Meme token      card sorting [22] approach, constructing an analysis card for
+launchpads such as Pump.fun, users can generate and deploy         each fraudulent token that includes basic token information,
+a new token within seconds by simply providing a token name        the time of fraud occurrence, and the fraud type. Basic
+and an image at a negligible cost of less than $20. In contrast,   information including the token name, symbol, creation time,
+Ethereum typically requires developers to write and deploy         and holder count was exported directly via the Solscan API.
+custom smart contracts. This process is susceptible to gas         The time of occurrence and fraud type are determined by
+fee fluctuations, incurs higher costs, and demands specialized     researchers based on data from on-chain platforms, such as
+development expertise, with fewer mechanisms for automated,        Solscan [23], GMGN [24], Dextools [25], Birdeye [26], and
+one-click issuance. Consequently, Solana outpaces Ethereum         Dexscreener [27]. All analysis results are subject to indepen-
+in terms of issuance efficiency, speed, and scale.                 dent assessments by the researchers and are finalized upon
+   (2) Rug Pulls on Solana cannot be executed by modifying         reaching consensus.
+the contract code. Many Rug Pulls on Ethereum exploit the             Finally, we construct a dataset that includes the time of
+programmability of smart contracts to embed malicious logic,       fraud occurrence, token attributes, transaction behavior char-
+such as reserving privileged functions that allow developers       acteristics, and fraudulent tactics, providing a data foundation
+to restrict users from selling or modifying transaction tax        for subsequent Rug Pull token detection and analysis.
+rates. However, such attack vectors are infeasible on Solana.
+All Solana tokens are governed by the SPL-Token Program,
+meaning creators cannot modify the underlying execution logic      B. The Workflow of Rug Pulls on Solana
+of the token or embed custom backdoor functions as they               We analyzed 117 verified Rug Pull tokens and summarize a
+can on Ethereum. Consequently, Rug Pull on Solana relies           universal three-stage process followed by these scams: I. To-
+primarily on on-chain operational behaviors rather than the        ken Offering, II. Promotion, and III. Execution, as illustrated
+implementation of malicious program code.                          in Fig. 1.
+   Therefore, existing studies designed for detecting or analyz-
+ing Rug Pulls on EVM-compatible blockchains are not directly          1) Token Offering: The first stage of a Rug Pull is the
+applicable to Solana due to fundamental differences in archi-      creation of a new token that can circulate and be traded in
+tecture and token mechanisms. This limitation highlights the       the market, which serves as the foundation of the scam. The
+necessity of dedicated research to systematically investigate      Solana ecosystem is characterized by extremely low token
+the unique fraud mechanisms and on-chain behavioral patterns       creation costs, rapid deployment steps, and a lack of identity
+of Rug Pulls on Solana.                                            verification. Such characteristics contribute significantly to the
+         III. A NATOMY OF RUG P ULLS ON S OLANA                    high prevalence of Rug Pulls on the network. According to our
+                                                                   categorization of real-world cases, we further subdivide this
+   In this section, to understand the behavioral characteristics   stage into two steps: Token Creation and Liquidity Injection.
+and token features of Rug Pulls on Solana, we manually
+collect and verify 68 fraud reports, identifying a total of        Step 1: Token Creation. In this sub-stage, fraudsters set the
+117 Rug Pull tokens. Based on these real-world cases, we           basic attributes of the token, including the name, logo, de-
+summarize the overall operational workflow of Rug Pulls on         scription, initial supply, related website or social media links.
+Solana and further analyze the on-chain characteristics of         There are two primary avenues for token creation on Solana:
+these fraudulent tokens.                                           the official Solana token tool SPL-Token and Pump.fun1 .
+                                                                      1 Pump.fun is the fastest-growing Meme coin issuance platform on Solana
+A. Data Collection and Labeling
+                                                                   known for its instant, low-cost, and no-code issuance mechanism. Despite
+  We conduct a comprehensive search using the keywords             massive daily token issuance volumes, most tokens on Pump.fun fail to
+Solana and Rug Pull across Chainabuse [19] reports as well as      establish liquidity pools and enter public markets.
+                                                                                                                                      4
+
+
+
+   A report [5] by Solidus Labs found that up to 98.6% of to-       strong influence on OSNs and can drive a significant number
+kens on Pump.fun become worthless pump-and-dump schemes             of Solana users to buy the fraudulent tokens. Fraudsters often
+shortly after launch. This implies that the vast majority of        secure KOL endorsements by stealing their accounts, paying
+tokens on this platform not only have short lifecycles but          for promotions, or even maintaining their own long-term KOL
+also lack analytical value. Including these obviously fraudulent    personas, thereby significantly enhancing the credibility and
+tokens in our research scope would yield a low return on            reach of the project.
+computational investment and clutter the research sample
+with invalid noise, leading to results that fail to reflect Rug     Tactic 2: Impersonation. Fraudsters may adopt impersonation
+Pull behaviors with substantial impact. Therefore, we exclude       strategies during the token creation stage, mimicking well-
+Pump.fun-only tokens that never establish liquidity pools           known tokens or elements to mislead victims into purchasing
+from our large-scale dataset construction. For Pump.fun-            their tokens. Some tokens directly copy the logos of successful
+originated tokens, we retain only those that are successfully       projects and appear in the transaction histories of victims
+issued and subsequently create liquidity pools.                     through airdrop. Victims are likely to mistakenly purchase the
+   Token creation on Solana via the SPL-Token program               token of the fraudster while intending to buy the legitimate
+is highly streamlined and cost-effective (approximately 0.21        one. Other fraudsters impersonate trending themes, faking
+SOL), allowing users to generate tokens and configure meta-         team introductions and official websites to mislead victims
+data with simple commands [28]. Creators can retain sensitive       into believing the token was issued by a popular team.
+administrative privileges, most notably the Freeze Authority.       Tactic 3: Wash Trading. After issuing the token, fraudsters
+This permission enables the issuer to lock any account, pre-        may manipulate multiple accounts to frequently trade the
+venting the holder from transferring or selling tokens. Scam-       token, artificially inflating trading volume to create an illusion
+mers can exploit this mechanism by maliciously retaining the        of high demand. On Solana, transaction fees are extremely low,
+Freeze Authority to lock victim assets and execute Rug Pulls.       averaging 0.00025 USD [29], allowing fraudsters to execute
+Step 2: Liquidity Injection. Tokens created via the SPL-            wash trading at a very low cost. Wash trading across multiple
+Token program do not possess native liquidity and therefore         accounts pushes up trading volume and reduces the proportion
+cannot be traded directly in on-chain markets. To make a token      of the issued token in the liquidity pool, ultimately driving up
+tradable, the issuer typically needs to create a corresponding      the price and triggering FOMO in victims. Having multiple
+trading pair on a DEX and inject initial capital into a liquidity   accounts within the fraud syndicate hold positions can also, to
+pool, obtaining corresponding LP tokens. This process is a          an extent, forge the illusion of a low top-holder concentration
+pivotal step in transforming a token into a tradable asset; once    and high credibility.
+the liquidity pool is successfully created and activated, the          Some sophisticated fraudsters choose Concentrated Liquid-
+token can be freely traded on the open market. LP tokens            ity Market Maker(CLMM) pools on Raydium. A feature of
+represent the proportional ownership of assets in a liquidity       these pools is that liquidity providers can provide one-sided
+pool held by liquidity providers. Holders may redeem them           liquidity, adding only the project token without adding the
+at any time to withdraw the corresponding share of liquidity.       quote token [30]. The result of adding only one-sided liquidity
+As a result, the ownership and subsequent handling of LP            is that any purchase of the issued token leads to a price
+tokens largely reflect the reliability of a token project. In Rug   increase, creating the illusion that the token price only goes
+Pull schemes, project operators or affiliated addresses may         up. This phenomenon easily attracts victims to buy the token.
+deliberately retain LP tokens and later withdraw pool liquidity
+to realize rapid profits.                                              3) Execution: The Execution stage is the final phase of a
+                                                                    Solana Rug Pull. Its core characteristic is that the fraudster
+   2) Promotion: After completing the token offering, the           uses a series of techniques to rapidly cash out and abandon
+focus of the fraudsters shifts to rapidly inflating attention       the project, causing heavy losses to users. In contrast to
+and trading volume to induce more victims to buy the token,         Ethereum, tokens on Solana are minted based on the official
+thereby creating a liquidity base for the final cash-out phase.     SPL-Token Program. Attackers cannot inject malicious logic
+Case analysis indicates that fraudsters commonly employ three       into the program of the token itself, therefore Rug Pulls on
+promotional tactics: Marketing Campaigns, Impersonation,            Solana are generally not implemented through embedding
+and Wash Trading. These methods can be used individually            malicious functions within token contracts. According to the
+or in combination to achieve more significant effects.              characteristics of the Solana ecosystem, we categorize the final
+                                                                    execution methods into three types: Freeze Authority Abuse,
+Tactic 1: Marketing Campaigns. Fraudsters typically utilize         Liquidity Withdrawal, and Pump-and-Dump.
+mainstream online social networks (OSNs), such as X (for-
+merly Twitter), Telegram, and Reddit to post content claiming       Type 1: Freeze Authority Abuse. Token accounts on Solana
+“the project is about to explode,” creating an atmosphere of        have three distinct states: Uninitialized, Initialized, and Frozen.
+Fear Of Missing Out (FOMO) within the community to induce           Only the account holding the freeze authority can modify the
+users to purchase the token. Some fraudsters purchase bot           state of different token accounts. A frozen account cannot
+accounts to inflate likes and retweets, creating a facade of        perform any token-related operations, including transfers and
+popularity. Moreover, some utilize community Key Opinion            swaps, resulting in a situation where the token can be pur-
+Leaders (KOLs) to promote tokens. These KOLs often have a           chased but cannot be sold.
+                                                                                                                                      5
+
+
+
+                                                               TABLE II
+                                  S TATISTICAL C OMPARISON BETWEEN RUG P ULL AND L EGITIMATE T OKENS
+
+    Statistic     Type       Lifespan(days)       Holders    Liq. Growth Ratio      DeFi Txs     Day-1 DeFi Ratio    Tx Rate (hr)
+                 Rug Pull            1.0339         83.18               42.20%           4.17              95.69%             0.21
+     Mean
+                Legitimate         416.5262    215,952.89      657,910,914.63%     184,802.68               3.40%         3,463.85
+                 Rug Pull            0.0024          5.00                  6.15%         0.00             100.00%             0.04
+      p25
+                Legitimate         164.1428     11,505.00              1,764.71%    26,812.25               0.00%           121.90
+                 Rug Pull            0.0116          9.00                  7.60%         2.00             100.00%             0.08
+    Median
+                Legitimate         375.4549     41,026.00              4,636.00%    92,362.50               0.00%           299.11
+                 Rug Pull            0.0576         24.25                 21.37%         2.00             100.00%             0.22
+      p75
+                Legitimate         538.7596    100,787.00             28,047.62%   234,893.25               0.06%         1,436.01
+
+
+
+   Legitimate project teams typically renounce freeze authority       the behavioral criteria used in large-scale candidate labeling,
+during the token creation phase. However, Rug Pull operators          we construct a small-scale sample dataset of 182 tokens.
+can intentionally retain this authority. Once a victim swaps          The dataset consists of 117 Rug Pull tokens collected from
+a quote token for the project token, the fraudster can invoke         previously identified fraud reports with clear evidence of
+the FreezeAccount instruction to freeze the token account             malicious behavior, and 65 legitimate tokens verified by the
+of victim, preventing any transactions. Meanwhile, accounts           isVerified mechanism [31] of the Jupiter DEX Aggregator with
+controlled internally by the fraudster remain free to sell tokens     an Organic Score [32] of at least 80. Note that the selection
+at any time, thereby directing the resulting profits to accounts      criteria do not restrict the dataset to long-established assets
+controlled by the fraud syndicate.                                    or stablecoins. Specifically, among the legitimate tokens, five
+Type 2: Liquidity Withdrawal. This technique relies on                were created less than one month prior to the experiments,
+the fraudster retaining LP tokens generated during the initial        and twelve were created less than two months earlier, ensuring
+liquidity injection. In the early stages of token issuance,           that the dataset also captures characteristics of newly issued
+fraudsters establish a trading pool by injecting initial liquidity.   yet legitimate tokens.
+This is followed by marketing activities and social media                Following the preceding analysis of the Solana Rug Pull
+promotion to attract additional capital inflows from users,           workflow, we classify each token in the manually verified
+causing pool liquidity to surge and token price to rise. Once         benchmark according to its primary on-chain execution and
+liquidity reaches a sufficient scale, the fraudster uses the          profit-taking mechanism. The resulting taxonomy covers all
+retained LP tokens to redeem the assets originally injected.          117 confirmed Rug Pull tokens in the benchmark: 2 tokens are
+   Since fraudsters usually hold a significant proportion of the      classified as Freeze Authority Abuse Rug Pulls, 26 as Liquidity
+LP tokens, the withdrawal operation rapidly depletes the liq-         Withdrawal Rug Pulls, and 89 as Pump-and-Dump Rug Pulls.
+uidity pool. Without liquidity support, the token price collapses        After completing token labeling, we conduct a multi-
+or drops to zero and market trading becomes dysfunctional             dimensional comparative statistical analysis between fraudu-
+shortly thereafter. Investors are unable to exit their positions      lent and legitimate tokens. The indicators cover four types
+and consequently incur substantial financial losses.                  of on-chain behavioral characteristics: lifecycle length, holder
+                                                                      count, liquidity pool health, and the frequency and temporal
+Type 3: Pump-and-Dump. In these scams, fraudsters often               distribution of DeFi behaviors, aiming to reveal the differences
+employ more subtle market manipulation strategies. They may           in their on-chain behavioral patterns. As detailed in Table II,
+voluntarily renounce LP tokens or choose not to use the               the statistical results reveal differences between Rug Pull and
+account freeze function to present the project as decentralized       legitimate tokens, with Rug Pull tokens generally exhibiting
+and fairly launched, thereby building user trust and attracting       a pattern characterized by extremely short lifecycles, rapid
+more participants. Once the project gains traction and the price      liquidity withdrawal, and a strong temporal concentration of
+rises, the fraudsters execute a concentrated sell-off using a         transaction activity on the first day after deployment. Specif-
+large volume of pre-allocated tokens.                                 ically, fraudulent tokens display a median lifecycle of merely
+   Some skilled fraudsters even disperse large amounts of             0.01 days and minimal holder counts, with the vast majority
+tokens into multiple addresses to evade on-chain monitoring.          of their DeFi interactions occurring on the day of creation,
+When the token price reaches a target level, they liquidate their     accompanied by evident liquidity exhaustion. In contrast,
+holdings at a high rate in exchange for mainstream assets. Due        legitimate tokens demonstrate sustained long-term activity and
+to the sudden influx of tokens into the market, the token price       robust liquidity growth.
+experiences a rapid decline and may approach zero, resulting             Observations. Rug Pull tokens on the Solana chain exhibit
+in a severe devaluation of the holdings of ordinary investors.        a pattern characterized by a short lifecycle and a strong
+                                                                      concentration of activity on the first day in terms of lifecycle,
+C. Token Behavior Characteristics                                     holder growth, liquidity changes, and temporal distribution
+  To systematically analyze the differences between Rug               of behavior. This conclusion is consistent with our empirical
+Pull tokens and legitimate tokens on Solana and to inform             observations of the Solana ecosystem and aligns with prior
+                                                                                                                                         6
+
+
+
+
+Fig. 2. Overview of the behavior-guided dataset construction pipeline.
+
+
+research from Cernera et al. [8] on the behavioral characteris-
+tics of malicious tokens. This design prioritizes high-precision
+labeling of short-lifecycle Rug Pulls and intentionally treats           Fig. 3. Labeling yield under different τdown thresholds.
+slower variants as potential omissions.
+                                                                         then matched against the three behavioral patterns defined
+            IV. DATASET C ONSTRUCTION P IPELINE
+                                                                         in Section III. Freeze Authority Abuse requires that the
+   Building on the three behavioral patterns characterized in            creator retains the SPL-Token freeze authority and that at
+Section III, we design a dataset construction pipeline as shown          least one on-chain FreezeAccount instruction has been
+in Fig. 2 that collects raw on-chain data, assigns candidate Rug         executed against a user account, thereby excluding dormant
+Pull labels, audits these labels through random sampling, and            or formally renounced authorities. Liquidity Withdrawal
+releases a verified dataset. Throughout this process, we adopt           requires a creator-related address, namely the mint authority
+a conservative labeling strategy that prioritizes label precision        or the initial pool deployer, to execute a profitable liquidity
+over coverage.                                                           removal that is followed by a collapse below the activity
+                                                                         threshold, thereby distinguishing malicious exits from routine
+A. Data Collection                                                       LP rebalancing. Pump-and-Dump requires that, within a
+   Token candidates are collected from three DEXes that                  sustained post-launch window, both the holder count and the
+dominate the Solana ecosystem: Orca [33], Raydium [34], and              token balance in the pool decline monotonically, and that
+Meteora [35]. These platforms jointly account for more than              the overall holder reduction exceeds a threshold τdown . This
+80% of Solana trading volume [36], [37], and thus provide                criterion captures the characteristic “cliff” pattern without
+broad ecosystem coverage for newly issued tokens. Between                requiring an instantaneous collapse.
+January 1 and June 30, 2025, after cleaning and deduplication,              Because false positives in labeling directly degrade dataset
+we obtain 100,063 newly issued tokens from these venues.                 quality, τdown is selected conservatively rather than tuned to
+   For each token, we retrieve the time-ordered transac-                 optimize detection-style metrics. We sweep the threshold from
+tion history, together with structured records of token                  0.50 to 1.00 in increments of 0.01 (Fig. 3). The candidate
+creation, pool deployment, and liquidity changes, directly               yield remains stable up to 0.73, but contracts sharply beyond
+from the official Solana RPC and the Solscan API. The                    this point as gradual sell-offs are filtered out. We therefore
+getSignaturesForAddress and getTransaction                               set τdown = 0.73, which is the largest value that still admits
+interfaces provide the raw transaction stream, while the                 gradual variants, and treat the resulting labels as a lower bound
+token meta, market info, defi activities, and                            rather than an over-inclusive collection.
+token transfer endpoints provide structured event
+records. We deliberately avoid aggregated or re-computed                 C. Sampling-Based Quality Assessment
+price feeds. A cross-check across GMGN [24], Birdeye [26],
+                                                                            Following standard practices in large-scale blockchain mea-
+DexTools [25], and DexScreener [27] shows that the reported
+                                                                         surement studies [12], [15], [16], [38], [39], we assess label
+price, percentage change, and FDV of the same token at the
+                                                                         quality through stratified random sampling rather than exhaus-
+same timestamp often differ because of differences in trade-
+                                                                         tive enumeration. Specifically, we stratify the pipeline-labeled
+matching sources, estimation algorithms, pool-selection logic,
+                                                                         candidates by the three behavioral patterns used in our labeling
+and outlier handling [7], [8], [16]. By grounding every labeling
+                                                                         process, namely Freeze Authority Abuse, Liquidity Withdrawal,
+decision in raw on-chain facts, the dataset can be reconstructed
+                                                                         and Pump-and-Dump, and draw samples proportionally from
+from the same primary sources.
+                                                                         each stratum. From the 76,469 pipeline-labeled candidates,
+                                                                         we sample 382 tokens, accounting for approximately 0.5%
+B. Behavior-Guided Labeling                                              of all candidates. Under a binomial model, this sample size
+   A coarse activity filter first removes tokens that are clearly        is sufficient to estimate the false-positive rate at the 95%
+still active. Specifically, a token passes this filter only if its       confidence level.
+average transaction rate over the trailing 24 hours is below                Three researchers with more than two years of experience
+5 transactions per hour. This threshold is intentionally loose,          in blockchain fraud analysis independently audit each sampled
+and candidate inclusion remains stable when the threshold                token. To make the manual assessment reproducible and
+varies within the range of 0.5 to 5. The remaining tokens are            reduce subjective judgment, we follow a structured validation
+                                                                                                                                      7
+
+
+
+protocol. For each token, the auditors review its token creation
+record, authority configuration, pool creation and liquidity
+operations, holder distribution changes, transaction sequence,
+price and trading dynamics, and post-event activity. A token is
+treated as a false positive only when its complete on-chain his-
+tory does not satisfy the corresponding behavioral definition or
+when later evidence indicates that the suspicious behavior was
+not associated with a Rug Pull. After independent annotation,
+the auditors compare their results and resolve disagreements
+through discussion until a consensus label is reached.
+   Only one mislabeled token is identified, The First Rev-
+enue Backed Community Coin2 , which exhibited Rug Pull-
+like behavior at an early stage but was later revived through
+a community takeover. The observed false-positive rate is          Fig. 4. Most Frequent N-grams and Word Cloud of Rug Pull token Names
+0.26%, with a 95% upper bound of 1.45%.                            on Solana
+   To further estimate omissions introduced by our conserva-
+tive labeling strategy, we examine a complementary random
+                                                                   A. RQ1: Deception Feature Analysis
+sample of 100 tokens labeled as non-Rug Pull. Nine tokens
+are confirmed as missed cases, all of which unfold over               To characterize the deception features of Rug Pull projects
+three to seven days and therefore fall outside the 24-hour         on Solana at both the on-chain asset level and off-chain prop-
+observation window. Among the correctly excluded tokens,           agation level, we analyze from two complementary perspec-
+some become malicious only after the labeling window closes,       tives: the on-chain representation reflected by token names and
+some contain too few transactions to form an identifiable          metadata, and the off-chain propagation behavior of projects
+pattern, and roughly 15% remain in normal trading more than        through official websites and social media.
+six months later. We report these numbers as dataset quality
+indicators under our conservative labeling strategy, rather than      1) On-chain Analysis: At the on-chain level, we first
+as detection performance.                                          conduct name parsing and N-gram high-frequency statistics on
+                                                                   the collected large-scale Rug Pull tokens. Overall, the naming
+                                                                   of Rug Pull tokens exhibits a strong dependence on topi-
+                                                                   cal themes, accompanied by deceptive naming practices. As
+D. Released Dataset
+                                                                   shown in Fig. 4, from the perspective of global naming trends,
+   Across the 100,063 crawled tokens, the pipeline labels          AI and politically related themes dominate token names. Key-
+76,469 tokens as Rug Pull candidates. These candidates consist     words such as “AI,” “agent,” and “trump” appear frequently,
+of 60,402 Pump-and-Dump tokens, 15,606 Liquidity With-             indicating that attackers intentionally leverage current hot
+drawal tokens, and 461 Freeze Authority Abuse tokens. The          topics to increase token exposure and trading attractiveness.
+publicly released Solana Rug Pull dataset comprises two com-       Meanwhile, traditional pet-themed Memes, such as “doge” and
+plementary parts: Benchmark-117, a manually verified ground-       “pepe,” maintain strong activity. The combination of classic
+truth set of 117 tokens distilled from community reports in        Memes and emerging topics forms an overlapping naming
+§III; and ITW-76469, the 76,469 pipeline-labeled candidates        structure, allowing Rug Pull tokens to maximize potential
+audited above. Each entry contains the token address, behav-       exposure and market attention.
+ioral category, and an on-chain event summary.                        Based on token naming analysis, we identify two highly
+                                                                   representative malicious naming patterns with explicit de-
+                                                                   ceptive intent, as summarized in Table III. The first pattern
+         V. A NALYSIS OF RUG P ULLS ON S OLANA                     is characterized by deliberate inconsistencies between token
+                                                                   names and symbols. In 3,203 cases, attackers deliberately
+  Using the constructed large-scale candidate dataset, this        assign token symbols that closely resemble mainstream assets
+section analyzes the characteristics, operations, and impacts of   or popular concepts (e.g., USDT, SOLANA, X, SORA), while
+Rug Pull activity on Solana. Focusing on the characteristics,      the corresponding token names exhibit no clear semantic or
+operations, and impacts of Rug Pulls on Solana, we propose         functional association with these symbols. As many DEXs
+and explore the following three research questions:                and wallets prioritize symbol display, this design can lead
+• RQ1: What are the deception characteristics of Rug Pull          to visual misidentification during trading. The second pattern
+  tokens on Solana in both on-chain and off-chain scenarios?       involves high-similarity impersonation through token naming.
+• RQ2: What are the development patterns of Rug Pull on            We identify 1,030 tokens whose names closely resemble
+  Solana, and what impact does it have on Solana?                  well-known tokens or brands through direct imitation, suffix
+• RQ3: Is there a trend of syndicated, batched, or organized       manipulation, or case-based confusion (e.g., USDTea, USDTf,
+  fraudulent activities in Solana Rug Pulls?                       TIKTOK). Such naming strategies exploit existing user trust
+                                                                   and increase the likelihood of erroneous trading decisions.
+  2 zGCwX2FhMWakMfowT9D6kyLD2iU1cHe8Q94pt5cpump
+                                                                                                                                         8
+
+
+
+                                                                   TABLE III
+                                         C LASSIFICATION AND E XAMPLES OF D ETECTED A NOMALOUS T OKENS
+
+                                                                               Examples
+ Category      Count
+                                                       Token Address                         Token Name                           Symbol
+                          1239bythuxigVXPwfZkUk3Kvm8FS3KfxUsDUpzyPMAGA                       OfficialTrumpMelaniaBarron47MAGA     SOLANA
+                          5gU9q7R4AhsStEUkqqootg76vyCzCu8qMiq2SjVwXGTR                       ElonMuskTrumpHarris69Inu             ETH
+Inconsistent              HLMcuxpo5VnY7nLV7CmbEv8KTyY7QgrbetYzs4Wve1uf                       2)                                   USDC
+Metadata       3,203
+                          4dHTQcvYcFvUqhnrYSFWReD14FhFUK5bko2LdKm8pump                       Official Useless Coin                ETH
+                          13iyXpwj2NwQPjvmDoWdP4VhrPYouxHDdfgygFvepump                       I Think                              SOAR
+                          9HqWnfE1vpmvbAcyLKA9GRgaaKeWArC44my85N3spump                       Bloom AI Assistant                   VIDEO
+                          82k69xiFtTBMkDdpV2u8ZcMKUnQ8ECS2NCCr7oAppump                       DeepSeek AI                          DEEP
+                          2A6GpST6j4kV13CHpL2N9V3vbKVEZXVwKZ1yTiSvpump                       USDT0                                USDT0
+Look-alike
+Tokens         1,030      BhEo2muprqjh43whgDz6yaBYA466dQfXHfVxVABrpump                       USDTea                               USDT
+                          BQDgRSCJ1V8Kx8fdvjqcwFa2cT7BUjQLRBpmh4rLQisD                       Official TIKTOK COIN                 TIKTOK
+                          FUHKqRi4nFYJ4Q2zgyQJrRGkx3KB99v2iPBkVgCzb3TT                       OFFICIAL TRUMP                       TRUMP
+
+
+
+                                                                         promotional posts (30.6%), and banned or deactivated
+                                                                         accounts, with only 19.9% exhibiting basic project-level
+                                                                         maintenance and consistently low activity. Overall, these
+                                                                         results indicate that off-chain identities in Solana Rug Pull
+                                                                         projects are highly disposable and weakly bound to the
+                                                                         token itself, which substantially limits the effectiveness of
+                                                                         traditional social-signal-based risk assessment methods.
+                                                                           Answer to RQ1: Rug Pull tokens on Solana demon-
+                                                                           strate systematic camouflage behaviors across both on-
+                                                                           chain and off-chain dimensions. On-chain, their naming
+                                                                           strategies implement visual deception through hot topics
+                                                                           appropriation, name–symbol inconsistencies, and imper-
+ Fig. 5. External Link Availability of Solana Tokens
+                                                                           sonation patterns. Off-chain, such projects generally lack
+                                                                           authentic and sustained construction, with their social
+                                                                           media activity characterized by a high degree of forgery,
+    2) Off-chain Analysis: At the off-chain propagation
+                                                                           strong randomness, and short lifecycles. Overall, neither
+ level, we utilize Get Token Metadata interface from
+                                                                           naming features nor off-chain signals alone enable reli-
+ Moralis [40] to collect social media information for 76,469
+                                                                           able fraud identification, and it is imperative to conduct
+ fraudulent tokens. Considering the functional differences be-
+                                                                           a comprehensive analysis by combining off-chain obser-
+ tween social media platforms, we focus our analysis on
+                                                                           vations with on-chain behavioral analysis.
+ two highly representative dimensions: official websites and X
+ accounts. These channels are selected because official websites
+ are generally regarded as the most core and credible source of          B. RQ2: Evolution and Impact Analysis
+ official information for cryptocurrency projects, while X has a            To characterize the survival status of Rug Pulls in the real
+ significantly higher activity level and propagation speed in the        Solana mainnet environment, we systematically analyze the
+ crypto community compared to other platforms, serving as one            developmental patterns of Rug Pull tokens and their impact
+ of the primary promotional fronts for token issuance. Among             on the ecosystem by combining temporal evolution features
+ 76,469 fraudulent tokens, only 14,552 (19.0%) disclose an               with economic loss quantification.
+ X account, and merely 10,957 (14.3%) provide an official                   Regarding evolutionary characteristics, we define the lifecy-
+ website link, indicating that most projects exhibit minimal or          cle of a Rug Pull token as the time interval between its creation
+ no off-chain presence.                                                  and the first confirmed fraud-related profit-taking transaction.
+    For tokens that did provide off-chain links, both official           As shown in Fig. 6, combined with SOL token price data
+ websites and X accounts show strong signs of inconsistency              sourced from coingecko 3 for the first half of 2025, we find
+ and low credibility, as illustrated in Fig. 5(a) and Fig. 5(b).         that the lifecycle of Rug Pull tokens on Solana is characterized
+ Among the 10,957 website links, only 29.3% correspond to                by short durations and a high correlation with market price
+ authentic and functional project websites, while over 70%               fluctuations. From the overall temporal trend, the volume of
+ are either invalid or replaced by social media homepages and            fraud exhibits a strong temporal correlation with the SOL spot
+ irrelevant sites. A similar pattern is observed on X. Among             price. When market prices rise or speculative sentiment is high,
+ the 14,552 provided X links, over 60% do not correspond to              the number of executed fraud attacks tends to increase rapidly.
+ accounts with normal operational behaviors. These include
+ links to celebrity or trending accounts (9.9%), single-use                3 https://www.coingecko.com/en/coins/solana
+                                                                                                                                                 9
+
+
+
+                                                                                                  TABLE IV
+                                                                      S TATISTICAL D ISTRIBUTION OF C ONTRACT L IFESPAN BY ATTACK T YPE
+
+                                                                                                           Lifespan Statistics (Days)
+                                                                      Attack Type
+                                                                                                  Mean           P25       Median          P75
+                                                                      Rug Pull                  2.913668     0.008681     0.024618      0.064641
+                                                                      Freeze Authority Abuse   14.558860     0.032749     0.483275      4.694080
+                                                                      Liquidity Manipulation    9.873306     0.009039     0.038530      0.966377
+                                                                      Pump-and-Dump             0.058967     0.008519     0.022083      0.048947
+
+
+
+                                                                        Answer to RQ2: Rug Pulls on Solana exhibit an ex-
+                                                                        tremely short lifecycle, with their issuance frequency
+Fig. 6. Evolution of Rug Pull Activities and SOL Market Price           highly synchronized with the SOL price. From an eco-
+                                                                        nomic perspective, such scams have resulted in substan-
+                                                                        tial financial losses, where attackers have cashed out at
+                                                                        least $151 million via stablecoin- and SOL-denominated
+This suggests that attackers strategically time the issuance of         transactions. Rug Pulls have thus become a critical risk
+fraudulent tokens to periods of heightened market activity and          threatening the stability and sustainable development of
+speculative sentiment.                                                  Solana.
+   As shown in Table IV, Rug Pull tokens exhibit extremely
+short lifecycles. For Freeze Authority Abuses, Pump-and-              C. RQ3: Scammers Analysis
+Dump, and Liquidity Manipulation, the median lifecycle is
+less than one hour, and the 75th percentile of the lifecycle             To examine whether Rug Pulls on Solana demonstrate
+distribution generally does not exceed 5 hours. This suggests         organized and collaborative behaviors, we adopt the definitions
+that even fraudulent tokens with relatively longer lifecycles         of fraudulent group roles proposed in the work of Huynh et
+complete profit extraction within a few hours, highlighting the       al. [14]. We define token creators and liquidity providers who
+high-frequency nature of Rug Pulls on Solana.                         injected initial funds and extracted profits as core addresses
+                                                                      associated with fraudulent tokens, and cluster all addresses
+   To quantify the economic impact of Rug Pulls, we adopt             linked to these core entities.
+the on-chain profit tracing methodology proposed in the work             We further restrict our analysis to groups in which the
+of Xia et al. [12]. Based on trackable on-chain profit paths, we      combined number of group members and associated tokens ex-
+quantify economic losses using liquidity changes of fraudulent        ceeds 50, treating them as candidates for organized fraud. This
+tokens, measuring the actual amounts cashed out by attackers          threshold is introduced to ensure that the analyzed samples
+in two core assets: USDT/USDC and SOL. Specifically, we               exhibit sufficient scale and representativeness. Based on this
+collect and analyze the DeFi activities of token and liquidity        criterion, we identify 78 large-scale groups, among which 16
+pool creators throughout the entire token lifecycle. By tracking      correspond to single scammers repeatedly deploying multiple
+balance changes resulting from their liquidity operations, we         tokens from the same address, while the remaining 62 repre-
+estimate the profits realized by attackers and the corresponding      sent collaborative syndicates involving multiple participants.
+economic losses incurred by victims. Notably, the statistics          Overall, these groups exhibit clear organizational patterns
+in this study are limited to quantifiable and fully verifiable        and structured coordination behaviors on-chain. Within these
+on-chain losses, defined as direct withdrawals of funds from          syndicates, two typical on-chain organizational structures can
+victims by attackers. Therefore, the figures presented in this        be observed as illustrated in Fig. 7.
+section should be regarded as conservative estimates of the           • The first type is the Star Topology, in which all illicit
+economic impact of Rug Pulls.                                            profits ultimately converge to a single central address, while
+   As shown in Table V, our in-the-wild detection results                numerous peripheral addresses including token creators,
+identify 7,322 profitable addresses associated with Rug Pull             liquidity pool creators, and temporary operational addresses
+activity, resulting in at least $151 million in quantifiable direct      act as auxiliary nodes to enable high-speed, batch token
+losses, highlighting the scale of the threat posed by Rug Pulls          deployment. In this structure, the core address typically con-
+to the Solana on-chain economic ecosystem. The two profit                ducts continuous, multi-cycle fraudulent activities through
+asset paths exhibit different loss distributions. Stablecoin-            automated scripts, frequently deploying dozens or even
+based Rug Pulls display a strong head-concentration effect,              hundreds of tokens within short time windows and executing
+whereas SOL-based Rug Pulls are characterized by numerous                highly repetitive Rug Pull operations.
+small-value, high-frequency scams with dispersed losses. This         • The second type is the Cluster Topology, which exhibits
+divergence may be partially explained by differences in token            a more complex organizational structure, characterized by
+valuation, as SOL generally has a higher unit price than                 high-density and recurring cross-links among multiple key
+stablecoins, which constrains the scale of individual fraud              nodes, including token creators, liquidity injectors, and
+events and encourages attackers to operate through numerous              final profiting addresses. Different members do not merely
+small-value transactions.                                                engage in one-off collaborations but instead periodically co-
+                                                                                                                                            10
+
+
+
+                                                                    TABLE V
+                                 F INANCIAL L OSS A NALYSIS : P ROFITABLE A DDRESSES AND VOLUME S TATISTICS
+
+
+                                      Profitable               Lost Amount (Native Units)                     Total Value
+                    Asset
+                                        Addr.           Min             Max         Mean     Median             (USD)
+                    USDT/USDC                850    0.000001    10,565,400.13   10,805.06      38.08     17,774,329.19
+                    SOL                    6,612    0.000001         4,576.74       59.96       5.99    133,315,108.61
+                    Total                  7,322                          N/A                           151,089,437.80
+
+
+
+                                                                                                      TABLE VI
+                                                                          D ESCRIPTIVE S TATISTICS OF G ANG S TRUCTURE AND P ROFITABILITY
+
+                                                                                                                  Statistics
+                                                                         Metric
+                                                                                               Min              Max         Mean    Median
+                                                                         Network Structure (Counts)
+                                                                            Members             1                169        43.70     36.00
+                                                                            Tokens Involved    16                219        60.54     48.50
+                                                                            Creators            1                169        32.20     25.00
+                                                                            Profitable Addrs    1                 53        14.45     12.00
+                                                                         Financial Profit (Value)
+Fig. 7. Network Topology Patterns of Rug Pull Schemes                       USDT/USDC          0.47    794,205.13      36,669.34      138.11
+                                                                            SOL                0.13      8,448.53         670.08       90.77
+                                                                            Total (USD)        6.50    988,894.49      56,504.19    5,052.10
+   participate in the deployment, manipulation, and profiting
+   of multiple tokens. This model exhibits a clear division of
+   labor; for example, some addresses primarily perform batch           from our dataset construction and measurement results.
+   token creation, whereas others focus on initial liquidity
+                                                                        • Data and service-level mitigations. Risk assessment ser-
+   injection, price manipulation, and profit aggregation.
+                                                                          vices should move beyond static token metadata and in-
+   Table VI presents descriptive statistics of the organizational
+                                                                          corporate behavior-oriented signals from raw on-chain data.
+structure and profitability of 78 large-scale fraud syndicates.
+                                                                          Our analysis shows that Rug Pulls on Solana are mainly
+Statistics indicate that these groups are highly organized
+                                                                          executed through Freeze Authority Abuse, Liquidity With-
+in terms of both participant scale and token manipulation
+                                                                          drawal, and Pump-and-Dump rather than malicious token
+capacity. The number of members ranges from 1 to 169, with a
+                                                                          contract logic. Service providers should therefore monitor
+median of 36 and a mean of 43.7, suggesting that most groups
+                                                                          token creation, pool deployment, liquidity operations, holder
+operate as stable collaborative networks rather than isolated
+                                                                          evolution, and suspicious fund flows as core risk signals.
+individual actors. In terms of token manipulation scale, the
+                                                                        • Interface and transaction-level mitigations. DEXs, wal-
+data reveals a clear batch-based pattern: most syndicates do
+                                                                          lets, and aggregator front ends can reduce deception by im-
+not profit from a small number of tokens but instead achieve
+                                                                          proving token presentation and pre-transaction warnings. As
+sustained fraudulent output through large-scale, multi-batch
+                                                                          shown in Section V-A, attackers frequently exploit name–
+token deployments. Overall, the statistics highlight an orga-
+                                                                          symbol inconsistencies, look-alike naming, and trending
+nized and systematic fraud model on Solana, characterized by
+                                                                          topics to impersonate mainstream assets. Front-end systems
+large-scale token deployment and centralized profit extraction,
+                                                                          should highlight token addresses, display verified-address
+which imposes sustained economic impact on the ecosystem.
+                                                                          badges, and warn users when a token resembles a well-
+  Answer to RQ3: Rug Pull on Solana has evolved                           known asset but is not linked to an official verified address.
+  into structured, organized on-chain operations. The Star                Because Rug Pulls on Solana often have extremely short
+  Topology underpins a batch attack pattern controlled by                 lifecycles, wallets and DEX interfaces should also provide
+  a single core address, whereas the Cluster Topology rep-                lightweight warnings before swap confirmation when a
+  resents a professionalized pattern featuring multi-account              token is newly created, has abnormal liquidity or holder
+  collaboration and clear division of labor. Drawing on the               dynamics, retains sensitive authorities, or is connected to
+  evidence from 78 large-scale syndicates, we confirm that                suspicious addresses.
+  Rug Pull on Solana has exhibited a distinct trend toward              • Syndicate and user-level mitigations. Defense mechanisms
+  organized, batch-based, and systematic development.                     should account for the organized nature of Rug Pull ac-
+                                                                          tivities. As shown in Section V-C, many fraudulent tokens
+                                                                          are associated with recurring address groups, centralized
+                        VI. M ITIGATIONS                                  profit aggregation, and batch token deployment. Platforms
+  To address the prevalence of Rug Pulls and their economic               can maintain relationship graphs connecting token creators,
+impact within Solana, we derive several mitigation strategies             liquidity deployers, pool addresses, and profitable addresses,
+                                                                                                                                  11
+
+
+
+  and raise stronger warnings when newly issued tokens match        reformulating the underlying problem. Existing studies pre-
+  known high-risk groups or recurring deployment patterns.          dominantly focus on EVM ecosystems, typically analyzing
+  Users should also avoid relying only on token names, sym-         Rug Pulls through smart contract code, the behavior of deploy-
+  bols, locked liquidity, or renounced authority, and should        ers, or cross-chain statistical observations. Even the limited
+  treat newly created social media accounts, inaccessible web-      prior research involving Solana usually treats the platform
+  sites, and sudden hype around new tokens as risk signals.         as a single sample within broader cross-chain comparisons
+                                                                    or focuses on general security issues, rather than specifically
+                     VII. R ELATED W ORK                            characterizing the execution mechanisms of Rug Pulls. In
+A. Rug Pull                                                         contrast, we conceptualize Rug Pulls on Solana as a market
+                                                                    execution process organized around token lifecycles, DEX
+   Existing Rug Pull detection studies mainly fall into two cat-
+                                                                    interactions, and the manipulatio
+egories: contract-level analysis and transaction-based analysis.
+                                                                       n of liquidity. Furthermore, we model this process from
+Representative contract-level studies leverage static analysis
+                                                                    the perspective of account structures specific to Solana,
+techniques to uncover risky functions embedded in token
+                                                                    program-driven interactions, and high-frequency trading envi-
+contracts. Lin et al. [6] applied bytecode analysis to extract
+                                                                    ronments. Building upon this perspective, we develop a repro-
+suspicious manipulation functions. Zhou et al. [7] summarized
+                                                                    ducible evidence-driven dataset construction pipeline tailored
+pump-and-dump risk patterns using Datalog-based contract
+                                                                    to Solana and construct a large-scale dataset to support future
+analysis. Ma et al. [10] combined static analysis and fuzzing to
+                                                                    research, thereby offering a research path different from the
+identify common backdoors in ERC-20 contracts. Transaction-
+                                                                    prevailing EVM-centered paradigm.
+based approaches detect Rug Pulls using market indicators
+such as price, liquidity, and trading volume, through heuristic                           VIII. D ISCUSSION
+rules or machine learning models. Cernera et al. [8] identified
+                                                                    Limitation. Our pipeline is designed for high-precision dataset
+“1-day Rug Pulls” on Ethereum and Binance Smart Chain.
+                                                                    construction rather than real-time pre-attack warning. It as-
+Xia et al. [12] extracted transaction features from Uniswap to
+                                                                    signs candidate Rug Pull labels based on observable on-chain
+detect fraudulent tokens. Mazorra et al. [9] combined contract
+                                                                    transactions and state changes that have already occurred,
+and transaction features to train classifiers for scam detection.
+                                                                    which enables the resulting labels to be grounded in verifiable
+Wu et al. [13] modeled token activities as temporal graphs to
+                                                                    behavioral evidence. However, this design also makes the
+enable early detection of emerging fraud.
+                                                                    pipeline inherently retrospective. It is therefore better suited
+   Several studies further focus on specific ecosystems or
+                                                                    to constructing reliable in-the-wild labels and supporting
+attack perspectives. Huynh et al. [14] analyzed coordinated
+                                                                    ecosystem-level measurement than to warning users before a
+Rug Pull activities through cross-address correlation analysis.
+                                                                    scam is executed. In addition, because we adopt a conservative
+Li et al. [16] examined the trust ecosystem of Meme coins
+                                                                    labeling strategy and restrict the main observation window to
+on Solana via sampled manual analysis. Huang et al. [15]
+                                                                    24 hours, the released labels should be interpreted as a high-
+investigated exit-intent pump-and-dump patterns in Ethereum
+                                                                    precision lower bound rather than a complete census of all Rug
+NFT markets.
+                                                                    Pulls on Solana. Slow-moving scams, extremely low-activity
+                                                                    tokens, and cases whose malicious behavior emerges only after
+B. Solana Security                                                  the observation window may be missed.
+   Solana is a high-performance blockchain platform that            Future work. Future research may extend this work by
+has gained significant adoption in recent years. Its unique         exploring earlier risk assessment based on streaming trans-
+architecture provides high throughput while introducing new         action signals, finer-grained temporal features, and dynamic
+security and operational challenges. Regarding the Solana           models of liquidity and holder evolution. Adaptive observa-
+ecosystem, existing research has conducted analyses across          tion windows may also help capture slow-moving Rug Pull
+multiple dimensions. Zheng et al. [41] conducted the first          variants that unfold over multiple days while preserving label
+large-scale study of failed Solana transactions, identifying        precision. In addition, learning-based models, temporal graph
+dominant error types and a 58.43% failure rate among bots.          analysis, and cross-platform evidence from DEX interfaces
+Andreina et al. [42] analyzed the security practices of Solana      or social channels can be combined with behavior-guided
+smart contracts from the perspective of a developer. In terms of    rules, provided that label verifiability and human validation
+underlying and automated analysis, Yuan et al. [43] proposed        are preserved.
+the formal semantics of Solana eBPF. Cui et al. [44] and            Ethical Considerations. We emphasize that this study does
+Smolka et al. [45] proposed vulnerability detection tools           not raise privacy concerns. First, all data used in our analysis
+for Solana contracts from the perspectives of static analysis       are derived exclusively from publicly accessible transaction
+and binary fuzzing. Wu et al. [46] systematically reviewed          records on the Solana blockchain, which are available to any
+vulnerability types and security risks in Solana smart contracts.   user. Second, the released dataset contains only anonymized
+Furthermore, Li et al. [39] presented the first systematic study    on-chain transaction data and does not include any personally
+of novel phishing attacks on the Solana.                            identifiable information. Based on these considerations, we
+                                                                    believe that our study does not infringe upon individual
+   Rather than merely migrating the detection of Rug Pulls          privacy nor lead to legal or enforcement actions against any
+from Ethereum to Solana, our work distinguishes itself by           individuals.
+                                                                                                                                                             12
+
+
+
+                           IX. C ONCLUSION                                       [12] P. Xia, H. Wang, B. Gao, W. Su, Z. Yu, X. Luo, C. Zhang, X. Xiao,
+                                                                                      and G. Xu, “Trade or trick? detecting and characterizing scam tokens
+   This paper presents a systematic empirical study of Rug                            on uniswap decentralized exchange,” Proc. ACM Meas. Anal. Comput.
+                                                                                      Syst., vol. 5, no. 3, Dec. 2021.
+Pulls on Solana from a dataset construction and measurement                      [13] C. Wu, J. Chen, Z. Zhao, K. He, G. Xu, Y. Wu, H. Wang, H. Li, Y. Liu,
+perspective. Starting from 68 community-reported incidents,                           and Y. Xiang, “Tokenscout: Early detection of ethereum scam tokens via
+we curate a manually verified benchmark of 117 confirmed                              temporal graph learning,” in Proceedings of the 2024 on ACM SIGSAC
+                                                                                      Conference on Computer and Communications Security, ser. CCS ’24.
+Rug Pull tokens and characterize three representative behav-                          Association for Computing Machinery, 2024, p. 956–970.
+ioral patterns: Freeze Authority Abuse, Liquidity Withdrawal,                    [14] P. D. Huynh, S. H. Dau, N. Huppert, J. Cervenjak, H. Sun, H. Y. Tran,
+and Pump-and-Dump. Guided by these observations, we de-                               X. Li, and E. Viterbo, “Serial scammers and attack of the clones: How
+                                                                                      scammers coordinate multiple rug pulls on decentralized exchanges,”
+sign a behavior-guided candidate identification and human-                            in Proceedings of the ACM on Web Conference 2025, ser. WWW ’25.
+validation pipeline based solely on raw on-chain transaction                          Association for Computing Machinery, 2025, p. 1016–1033.
+and state data. Applying this pipeline to 100,063 tokens newly                   [15] J. Huang, N. He, K. Ma, J. Xiao, and H. Wang, “Miracle or mirage? a
+                                                                                      measurement study of nft rug pulls,” Proc. ACM Meas. Anal. Comput.
+issued on Orca, Raydium, and Meteora during the first half of                         Syst., vol. 7, no. 3, Dec. 2023.
+2025, we construct a large-scale Solana Rug Pull dataset con-                    [16] Y. Li, N. Yao, Y. Huo, and W. Cai, “Trust dynamics and bot-driven
+taining 76,469 in-the-wild candidate tokens, with a manually                          responses: An approach to rug pulls in solana meme coin markets,” in
+                                                                                      Proceedings of the 17th ACM Web Science Conference 2025, ser. Websci
+audited false-positive rate of 0.26%. Using this dataset, we                          ’25. Association for Computing Machinery, 2025, p. 106–116.
+further measure the Solana Rug Pull ecosystem across token                       [17] bitrue, “Why Solana Blockchain is Full of Meme Coin Ecosystem,”
+naming, off-chain propagation, lifecycle dynamics, economic                           https://www.bitrue.com/blog/solana-blockchain-meme-coin-ecosystem,
+                                                                                      2025, [Accessed 05-01-2026].
+impact, and syndicate organization. Our results reveal sys-                      [18] “What is a Soft Rugpull vs a Hard Rugpull? - CertiK
+tematic camouflage, extremely short lifecycles, price-driven                          —            certik.com,”          https://www.certik.com/resources/blog/
+dynamics, substantial financial losses, and organized group                           what-is-a-soft-rugpull-vs-a-hard-rugpull, 2022, [Accessed 05-01-
+                                                                                      2026].
+behaviors, providing a reproducible data foundation and empir-                   [19] “chainabuse.com,” https://chainabuse.com/chain/SOL?page=0&filter=
+ical insights for behavior-oriented defenses in high-throughput,                      RUG PULL, 2026, [Accessed 05-01-2026].
+low-barrier blockchain environments.                                             [20] “SlowMist Hacked - SlowMist Zone — hacked.slowmist.io,” https:
+                                                                                      //hacked.slowmist.io/, 2026, [Accessed 05-01-2026].
+                                                                                 [21] “certik.com,” https://www.certik.com/resources, 2026, [Accessed 05-01-
+                                                                                      2026].
+                              R EFERENCES                                        [22] D. Spencer, Card sorting: Designing usable categories. Rosenfeld
+                                                                                      Media, 2009.
+ [1] A. Yakovenko, “Solana: A new architecture for a high performance            [23] “Solana (SOL) Blockchain Explorer — solscan.io,” https://solscan.io/,
+     blockchain v0. 8.13,” https://solana.com/solana-whitepaper.pdf, 2018,            2026, [Accessed 05-01-2026].
+     [Accessed 05-01-2026].                                                      [24] “GMGN.AI Fast Trade, Fast Copy Trade, Fast AFK Automation. —
+                                                                                      gmgn.ai,” https://gmgn.ai/?chain=sol, 2026, [Accessed 05-01-2026].
+ [2] Y. Lim, “Solana & Base Still Lead Despite Lower Mindshare
+                                                                                 [25] “DEXTools — dextools.io,” https://www.dextools.io/, 2026, [Accessed
+     in       2025,”        https://www.coingecko.com/research/publications/
+                                                                                      05-01-2026].
+     most-popular-blockchain-ecosystems, 2025, [Accessed 05-01-2026].
+                                                                                 [26] “Token Tracker — Live Prices, Charts & Trades — Birdeye —
+ [3] O. P. D. Wenser, “Solana 2025 Report Card: Annual Revenue of 15
+                                                                                      birdeye.so,” https://birdeye.so/, 2026, [Accessed 05-01-2026].
+     Billion USD, Surpassing Total of ’Hyperliquid+Ethereum,” https://www.
+                                                                                 [27] “DEX Screener — dexscreener.com,” https://dexscreener.com/, 2026,
+     odaily.news/en/post/5208523, 2025, [Accessed 05-01-2026].
+                                                                                      [Accessed 05-01-2026].
+ [4] B. Kalal, A. Alhaidari, B. Palanisamy, and S. Sural, “The economics         [28] “Solana Token Creator Guide — help.pandatool.org,” https://help.
+     of deception: Structural patterns of rug pull across defi blockchains,”          pandatool.org/english/sol/stardand, 2026, [Accessed 05-01-2026].
+     in Computer Security – ESORICS 2025: 30th European Symposium on             [29] “Understanding Solana Transaction Fees — Solana — solana.com,”
+     Research in Computer Security, 2025, p. 211–232.                                 https://solana.com/learn/understanding-solana-transaction-fees, 2025,
+ [5] S. L. Research, “The 2025 Rug Pull Report: Rug Pulls and                         [Accessed 05-01-2026].
+     Pump-and-Dumps on Solana,” https://www.soliduslabs.com/reports/             [30] “Intro on Concentrated Liquidity — — docs.raydium.io,”
+     solana-rug-pulls-pump-dumps-crypto-compliance, 2025, [Accessed 05-               https://docs.raydium.io/raydium/liquidity-providers/
+     01-2026].                                                                        providing-concentrated-liquidity-clmm/intro-on-concentrated-liquidity,
+ [6] Z. Lin, J. Chen, J. Wu, W. Zhang, Y. Wang, and Z. Zheng, “Crpwarner:             2025, [Accessed 05-01-2026].
+     Warning the risk of contract-related rug pull in defi smart contracts,”     [31] “Verify once, trusted everywhere — verified.jup.ag,” https://verified.jup.
+     IEEE Trans. Softw. Eng., vol. 50, no. 6, p. 1534–1547, Jun. 2024.                ag/tokens, 2026, [Accessed 05-01-2026].
+ [7] Y. Zhou, J. Sun, F. Ma, Y. Chen, Z. Yan, and Y. Jiang, “Stop pulling        [32] “Jupiter Developers — dev.jup.ag,” https://dev.jup.ag/docs/tokens/
+     my rug: Exposing rug pull risks in crypto token to investors,” in Pro-           organic-score, 2026, [Accessed 05-01-2026].
+     ceedings of the 46th International Conference on Software Engineering:      [33] “Orca — Trade — orca.so,” https://www.orca.so/, 2026, [Accessed 05-
+     Software Engineering in Practice, ser. ICSE-SEIP ’24. Association for            01-2026].
+     Computing Machinery, 2024, p. 228–239.                                      [34] “Swap — Raydium — raydium.io,” https://raydium.io/, 2026, [Accessed
+ [8] F. Cernera, M. La Morgia, A. Mei, and F. Sassi, “Token spammers,                 05-01-2026].
+     rug pulls, and sniper bots: an analysis of the ecosystem of tokens in       [35] “Meteora — meteora.ag,” https://www.meteora.ag/, 2026, [Accessed 05-
+     ethereum and in the binance smart chain (bnb),” in Proceedings of                01-2026].
+     the 32nd USENIX Conference on Security Symposium, ser. SEC ’23.             [36] “Top Solana DEXs by 24-Hour Trading Volume,” https://www.
+     USENIX Association, 2023.                                                        coingecko.com/en/exchanges/decentralized/solana, 2026, [Accessed 05-
+ [9] B. Mazorra, V. Adan, and V. Daza, “Do not rug on me: Leveraging ma-              01-2026].
+     chine learning techniques for automated scam detection,” Mathematics,       [37] F. Q. Gómez, “Solanas Best Dex: Top 5 and how to list in 2025,”
+     vol. 10, no. 6, 2022.                                                            https://smithii.io/en/bests-solana-dexs/, 2025, [Accessed 05-01-2026].
+[10] F. Ma, M. Ren, L. Ouyang, Y. Chen, J. Zhu, T. Chen, Y. Zheng,               [38] Z. Shao, J. Zhang, Z. Li, D. Wu, C. Chen, Y. Shen, L. Bao, Y. Wang,
+     X. Dai, Y. Jiang, and J. Sun, “Pied-piper: Revealing the backdoor threats        and J. Chen, “Lost in blockchain address misuse: Hidden cross-platform
+     in ethereum erc token contracts,” ACM Trans. Softw. Eng. Methodol.,              risks and their security impact.”
+     vol. 32, no. 3, Apr. 2023.                                                  [39] Z. Li, Z. Jiang, M. Fang, J. Chen, Z. Wu, J. Wu, L. Zhang, and
+[11] D. Sun, W. Ma, L. Nie, and Y. Liu, “Sok: A taxonomic analysis of defi            Z. Zheng, “Solphishhunter: Toward detecting and understanding phish-
+     rug pulls: Types, dataset, and tool assessment,” Proc. ACM Softw. Eng.,          ing on solana,” IEEE Transactions on Information Forensics and Secu-
+     vol. 2, no. ISSTA, Jun. 2025.                                                    rity, vol. 21, pp. 757–771, 2026.
+                                                                                                                                                              13
+
+
+
+[40] “Solana API - Moralis — Enterprise-Grade Web3 APIs — moralis.com,”                                      Ruihong He is currently pursuing the B.Eng. degree
+     https://moralis.com/chains/solana/, 2026, [Accessed 05-01-2026].                                       in software engineering with the School of Software
+[41] X. Zheng, Z. Wan, D. Lo, D. Xie, and X. Yang, “Why does my trans-                                      Engineering, Sun Yat-sen University, Zhuhai, China.
+     action fail? a first look at failed transactions on the solana blockchain,”                            His current research interests include blockchain
+     Proc. ACM Softw. Eng., vol. 2, no. ISSTA, Jun. 2025.                                                   security, decentralized finance fraud analysis, and
+[42] S. Andreina, T. Cloosters, L. Davi, J.-R. Giesen, M. Gutfleisch,                                       rug pull detection.
+     G. Karame, A. Naiakshina, and H. Naji, “Defying the odds: Solana’s
+     unexpected resilience in spite of the security challenges faced by
+     developers,” in Proceedings of the 2024 on ACM SIGSAC Conference
+     on Computer and Communications Security, ser. CCS ’24. Association
+     for Computing Machinery, 2024, p. 4226–4240.
+[43] S. Yuan, Z. Zhang, J. Lu, D. Sanan, R. Chang, and Y. Zhao, “A complete
+     formal semantics of ebpf instruction set architecture for solana,” Proc.
+     ACM Program. Lang., vol. 9, no. OOPSLA1, Apr. 2025.
+[44] S. Cui, G. Zhao, Y. Gao, T. Tavu, and J. Huang, “Vrust: Automated
+     vulnerability detection for solana smart contracts,” in Proceedings of
+     the 2022 ACM SIGSAC Conference on Computer and Communications
+     Security, ser. CCS ’22. Association for Computing Machinery, 2022,
+     p. 639–652.                                                                                            Yantong Zhou is currently pursuing the B.Eng.
+[45] S. Smolka, J.-R. Giesen, P. Winkler, O. Draissi, L. Davi, G. Karame,                                   degree in software engineering with the School
+     and K. Pohl, “Fuzz on the beach: Fuzzing solana smart contracts,” in                                   of Software Engineering, Sun Yat-sen University,
+     Proceedings of the 2023 ACM SIGSAC Conference on Computer and                                          Zhuhai, China. His current research interests focus
+     Communications Security, ser. CCS ’23. Association for Computing                                       on blockchain security, malicious activity detection,
+     Machinery, 2023, p. 1197–1211.                                                                         and stablecoin de-pegging risk analysis.
+[46] X. Wu, J. Xing, and X. Li, “Exploring vulnerabilities and
+     concerns in solana smart contracts,” 2025. [Online]. Available:
+     https://arxiv.org/abs/2504.07419
+
+
+
+
+                          Jiaxin Chen received the B.Eng. degree in software
+                          engineering from Sun Yat-sen University, Zhuhai,
+                          China, in 2024. He is currently pursuing the M.Eng.
+                          degree with the School of Software Engineering,
+                          Sun Yat-sen University. His current research interests                           Jiajing Wu (Senior Member, IEEE) received the
+                          focus on blockchain security, including cryptocur-                               B.Eng. degree in communication engineering from
+                          rency fraud analysis, Rug Pull and phishing scam                                 Beijing Jiaotong University, Beijing, China, in 2010,
+                          detection.                                                                       and the Ph.D. degree from Hong Kong Polytechnic
+                                                                                                           University, Hong Kong, in 2014. She was awarded
+                                                                                                           the Hong Kong Ph.D. Fellowship Scheme during
+                                                                                                           her Ph.D. study in Hong Kong (2010–2014). She
+                                                                                                           is currently a Professor and the Deputy Dean with
+                                                                                                           the School of Software Engineering, Sun Yat-sen
+                                                                                                           University, Zhuhai, China. Her research focus in-
+                                                                                                           cludes blockchain, graph mining, network science.
+                                                                                   She serves as an Associate Editor for IEEE T RANSACTIONS ON C IRCUITS
+                          Ziwei Li received the B.Eng. degree in computer          AND S YSTEMS II: E XPRESS B RIEFS .
+                          science and technology from Sun Yat-sen University,
+                          Guangzhou, China, in 2024. He is currently pursuing
+                          the Ph.D. degree with the School of Software Engi-
+                          neering, Sun Yat-sen University. His current research
+                          interests include blockchain, fraud detection, and
+                          network science.
+
+
+                                                                                                          Zibin Zheng (Fellow, IEEE) is currently a professor
+                                                                                                          and the dean with the School of Software Engi-
+                                                                                                          neering, Sun Yat-sen University, Zhuhai, China. He
+                                                                                                          authored or coauthored more than 200 international
+                                                                                                          journal and conference papers, including one ESI hot
+                                                                                                          paper and ten ESI highly cited papers. According to
+                                                                                                          Google Scholar, his papers have more than 28,000
+                          Zigui Jiang (Member, IEEE) received the Ph.D                                    citations. His research interests include blockchain,
+                          degree in computer science and technology from                                  software engineering, and services computing. He
+                          the Beijing University of Posts and Telecommuni-                                was the BlockSys’19 and CollaborateCom16 Gen-
+                          cations, Beijing, China, in 2019. She is currently                              eral Co-Chair, SC2’19, ICIOT18 and IoV14 PC Co-
+                          an Associate Professor with the School of Software       Chair. He is a Fellow of the IET. He was the recipient of several awards,
+                          Engineering, Sun Yat-sen University, China. Her re-      including the Top 50 Influential Papers in Blockchain of 2018, the ACM
+                          search interests include blockchain, smart contracts,    SIGSOFT Distinguished Paper Award at ICSE2010, the Best Student Paper
+                          big data analysis, and service recommendation.           Award at ICWS2010. He is a fellow of the IET.
+
