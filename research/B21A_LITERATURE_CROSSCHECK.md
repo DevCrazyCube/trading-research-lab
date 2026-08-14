@@ -106,6 +106,44 @@ post-migration *price collapse* on tokens that graduated; we predict *unexitabil
 never do. Their base rate is 84% high-risk; ours is 35% unexitable — different labels on different
 populations, and neither number is comparable to the other.
 
+## 3b. A concern the literature raised, tested on our data — and it does not apply
+
+MemeTrans clusters wallets before measuring concentration, on three heuristics: same-transaction
+multi-account purchases, common funding sources, and shared Jito bundle IDs. They find **36.5% of
+supply held by bundled accounts**. Practitioner guidance is consistent — *"above 15 percent across
+several wallets, a coordinated launch is the most likely explanation"* — and sniper bots reportedly
+take *"20–40% of total supply in block N+1."*
+
+**That is a direct threat to our frozen rule**, which measures concentration **per wallet**. An
+insider splitting across ten wallets would look *unconcentrated* to us and pass the screen. So I
+tested it rather than assuming either way.
+
+**Same-transaction bundling is rare here.** Only **167 of 3,202 launches (5%)** have two or more
+distinct buyers inside a single transaction, and the maximum is four. That heuristic finds almost
+nothing on this venue.
+
+**Same-slot clustering is common — and using it makes the screen WORSE.** Treating every buyer
+sharing a slot as one entity raises measured concentration by >10pp on 36% of launches, and then:
+
+| | flags | flagged unexitable | passed unexitable | lift |
+|---|---|---|---|---|
+| **per-wallet (the frozen rule)** | 41% | **67.0%** | 2.6% | **+64.3pp** |
+| same-slot clustered | 52% | 52.8% | 3.0% | +49.7pp |
+
+The **215 launches** clustering would additionally flag are **2 of 215 unexitable — 0%** — against a
+29.4% base rate. Clustering flags 11 more percentage points of the population and catches essentially
+none of the outcome.
+
+**Why, and this is the transferable part: on pump.fun, same-slot co-occurrence is COMPETITION, not
+collusion.** Multiple wallets landing in one block are racing snipers, and their presence is evidence
+the token *attracted attention* — the opposite of the deadness we are screening for. The EVM
+intuition that co-occurrence implies one entity inverts on a venue where block space is contested.
+
+**Caveat, stated plainly:** this tests one of MemeTrans's three heuristics adapted to our data.
+Common-funding-source clustering needs account-funding history we do not hold, and could still find
+real Sybil structure. What is established is narrower: *the cheap co-occurrence heuristics do not
+improve this screen, and the naive per-wallet measure is the better instrument for this label.*
+
 ## 4. Where the literature is ahead of us
 
 **LROO independently identifies our central methodological concern**, and got there first:
