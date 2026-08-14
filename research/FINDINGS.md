@@ -109,8 +109,16 @@ established a pool. The EVM frameworks (RPHunter, LROO) define a rug around **li
 and a bonding curve has no pool to withdraw.
 
 **Prior art we replicate, not discover:** early-buyer concentration (MemeTrans, 17pp) and
-leakage-resistant evaluation (LROO). **What is genuinely ours:** the *unexitability label* and the
-*bonding-curve-only population*.
+leakage-resistant evaluation (LROO). **And the label too** — see `B21B`: Liu (2006) named it
+**"lock-in risk"** and measures it by counting zero-trading days; Lesmond, Ogden & Trzcinka (1999)
+use the flat price that broke our first label design *as their measure*. Amihud (2002), the field
+default, is undefined at zero volume — which is exactly why it does not fit here.
+
+**What is genuinely ours, at the right size:** the *venue*, the *mechanism*, and the *population*.
+In equities concentration causes illiquidity through **adverse selection** — the market exists but
+is expensive. On a bonding curve it causes unexitability through **mechanical counterparty absence**
+— the market does not exist at all. The relationship survives a change of mechanism, on a population
+every published rug-pull dataset excludes.
 
 **Tested and dismissed:** wallet clustering does not improve the screen. Same-slot co-occurrence on
 this venue is **competition, not collusion** — racing snipers, whose presence means the token attracted
