@@ -27,30 +27,37 @@ detected price dump**, and that concentrated selling occurs *pre-graduation, par
 creators*. Consistent with our 45%-win/55%-lose asymmetry and with B19N's finding that graduation
 selects the tokens that already pumped.
 
-## 2. Where we DISAGREE, and it needs explaining
+## 2. The graduation-rate discrepancy — RESOLVED, and it validates us
 
-| | graduation rate | population | period |
-|---|---|---|---|
-| Marino et al. | 0.63% | 655,770 tokens | Sep–Oct 2025 |
-| Kamat (survival) | **0.198%** | 832,941 tokens | May–Jun 2026 |
-| **this project, window 1** | **2.09%** | 3,932 tokens | ~22.6-hour window |
+Our 2.09% initially looked like **11× the most recent published rate**, which would have meant window
+1 was atypical and every rate measured on it — including the deadness screen's base rate — was a
+property of that window rather than the venue. It is not.
 
-**We are ~11× the most recent published rate.** Three candidate explanations, and the honest answer is
-that this is unresolved:
+**Window 1 is 27–28 July 2026**, dated from on-chain `block_time`: first block 2026-07-27 16:07:12
+UTC, last 2026-07-28 15:57:21 UTC, 23.8 hours. Against the reported rate history:
 
-- **Regime.** Our launch window is **22.6 hours**; theirs are 34 days and one month. The survival
-  paper itself documents a **3.18× decline over eight months**, so day-to-day variation of this size
-  is not implausible — but 11× is a lot to attribute to regime alone.
-- **Censoring direction.** The survival study measures **24-hour** graduation. Our median
-  time-to-graduate is 49 slots (~20 seconds) but the maximum is 686,257 slots (~76 hours), so we
-  count late graduations they would censor. This pushes our rate *up* relative to theirs.
-- **Population.** Both count `CreateEvent`s, so the denominators should be comparable. No obvious
-  filter explains an order of magnitude.
+| period | graduation rate | source |
+|---|---|---|
+| Sep–Oct 2025 | 0.63% | Marino et al., n=655,770 |
+| Jan 2026 | >1% | daily launches |
+| May 8 – Jun 10 2026 | **0.198%** | Kamat survival, n=832,941 |
+| mid-Jun 2026 | 0.26% | DEXTools |
+| **week before late-July** | **2.5%** | The Block |
+| **our window, 27–28 Jul** | **2.09%** | this project, n=3,932 |
+| late Jul 2026, 4-day avg | 4.7% | The Block |
+| late Jul 2026, peak day | 6.7% | The Block |
 
-**This matters beyond bookkeeping.** If our window is genuinely atypical, then every rate measured on
-it — including the deadness screen's 35% base rate — is a property of that window rather than of the
-venue. The window-2 pass now running is the direct test: it is a different 22.6-hour window, and its
-graduation rate will say whether window 1 was unusual.
+**Our measurement lands exactly where independent reporting says that specific week should be.** The
+comparison was against the wrong regime: pump.fun's BOOST incentive changes drove graduation up an
+order of magnitude in July 2026, and we collected during the ramp. The rate moved 0.198% → 6.7%
+within about seven weeks.
+
+This is now an **independent validation** of our count, from a completely different data source
+(industry reporting versus our own on-chain enumeration), rather than an unresolved discrepancy.
+
+**One consequence worth carrying:** graduation rate on this venue is *wildly* regime-dependent — a
+25× range inside eight months. Any rate we quote must name its window, and window 2 (a different
+day) may legitimately differ from window 1 without either being wrong.
 
 ## 3. Where our work sits in a gap the literature EXCLUDES
 
@@ -73,17 +80,31 @@ both EVM-compatible. Generalization to non-EVM chains remains untested."*
 So the dominant detection frameworks are built on a mechanism that **does not exist** on the venue we
 measured.
 
-**Two specific things the literature does not measure:**
+**CORRECTION to an earlier version of this document.** I first wrote that the literature does not
+measure early-buyer concentration. **That was wrong, and deeper reading found it.** MemeTrans
+(arXiv 2602.13480) measures it directly:
+
+> *"First 10 buyers of high-risk tokens hold **17 percentage points more** of supply than low-risk
+> equivalents"*
+
+It carries an explicit `early_top10_hold_pct` feature, plus sniper holdings, developer holdings and
+bundle clustering across 122 features on 41,470 tokens. It also enforces temporal separation —
+features strictly pre-migration, post-migration data used only for annotation. **So early-buyer
+concentration as a rug signal is established prior art, and our finding is a replication of it, not a
+discovery.**
+
+What remains distinct is narrower and should be stated that way:
 
 | | status in the literature |
 |---|---|
-| early-buyer concentration as a predictor | *"The paper doesn't directly measure early-buyer concentration as a feature"* (Marino et al.). A targeted search returned nothing linking early holder concentration to token death. |
-| what fraction of tokens become **untradeable** | *"provides no explicit metrics on what fraction becomes illiquid or untradeable post-creation"* |
+| early-buyer concentration as a predictor | **established** — MemeTrans, 17pp separation, on 41,470 tokens |
+| …on **bonding-curve-only** tokens | **absent** — MemeTrans covers *"only graduated tokens… bonding-curve-only tokens that never migrated are excluded by design"* |
+| what fraction of tokens become **untradeable** | **absent** — *"no explicit metrics on what fraction becomes illiquid or untradeable post-creation"* |
 
-**Those are precisely B20B's two contributions**: early-buyer concentration at t0+60 as the feature,
-and unexitability as the label. The label is the more novel of the two — the literature measures
-*price collapse* and *liquidity withdrawal*, both of which we showed are broken or inapplicable on a
-bonding curve.
+**So B20B's contribution is the LABEL and the POPULATION, not the feature.** MemeTrans predicts
+post-migration *price collapse* on tokens that graduated; we predict *unexitability* on the ~98% that
+never do. Their base rate is 84% high-risk; ours is 35% unexitable — different labels on different
+populations, and neither number is comparable to the other.
 
 ## 4. Where the literature is ahead of us
 
