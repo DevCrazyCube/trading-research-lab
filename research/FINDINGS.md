@@ -120,6 +120,40 @@ independent implementations. DSR tests return series and does not bear on it.
 method available:** it is *insurance*, not alpha. Anyone reading it as a return enhancer is reading
 it wrong.
 
+## 5c. WHERE DEFLATED SHARPE APPLIES — and where applying it would be an error
+
+DSR corrects **return series** for search-selection. It has two failure modes and this project has
+now hit one of each, so both are recorded:
+
+**False PASS — wrong benchmark.** Running DSR on the crash filter's *own* returns gives **1.000** at
+every trial count. That only asks "is this Sharpe non-zero", which holding BTC through a 74,000% run
+answers yes to regardless of the filter. **The paired difference against buy-and-hold is the correct
+instrument**, and it fails (DSR 0.224).
+
+**False FAIL — wrong object.** The **deadness screen is a classifier, not a strategy with a Sharpe.**
+There is no return series to deflate. Its correct tests are the ones it passed: a **label permutation
+on the flagged-versus-passed difference (p = 0.000, both tails)**, a held-out split with no shrinkage,
+and independent replication on a different corpus. *Applying DSR to it would report a failure that
+does not exist.*
+
+> **Rule:** DSR for anything with a return series that came out of a sweep. Permutation for
+> classifiers. Paired differences whenever a common market move would otherwise dominate.
+
+## 5d. Consolidated ledger after the DSR pass
+
+| candidate | verdict | by what test |
+|---|---|---|
+| trailing stop, return | **dead** — below the chance ceiling | DSR 0.176 |
+| crash filter, return | **dead** — below the chance ceiling, 9/10 lengths lose | DSR 0.224–0.341 |
+| **crash filter, drawdown** | **stands**, ~14–15pp reduction | two sources, two implementations, 5/7 crashes |
+| **deadness screen** | **stands**, frozen, under out-of-sample test | permutation p = 0.000, held-out, replicated |
+| funding carry | **dead** — below risk-free forward | −0.46pp vs T-bills, needs +1.47pp for tail risk |
+| PUMP "own the house" yield | **dead** — the experiment already ran and failed | 9 months, 100% of >$1B revenue, price below launch |
+| PUMP structure ("the house is the protocol") | **stands** | B19P, quantified externally |
+
+**Two things survive the whole programme, and neither makes money:** a drawdown reduction on a
+position you were holding anyway, and a screen that avoids a class of losses.
+
 ## 6. Retractions — recorded because the pattern matters more than the items
 
 | claim | why it was wrong |
