@@ -32,7 +32,7 @@ dodges the toll for the same reason none beats the asymmetry — both are the ho
 construction. `B19P`.
 
 **Independently corroborated**: Marino et al. find all their predictive features *"remained below the
-economic breakeven curve"* — separate data, separate method, same conclusion (`B21A`).
+economic breakeven curve"* — separate data, separate method, same conclusion (`B21C`).
 
 ## 3. The one positive that survived every test
 
@@ -62,7 +62,7 @@ good token in five, to cut the bad rate from 35% to 13%.
 | fact | value | where |
 |---|---|---|
 | graduation rate, 27–28 Jul 2026 | **2.09%** (82/3,932) | B19N |
-| …and it is wildly regime-dependent | 0.198% → 6.7% in ~7 weeks | `B21A` |
+| …and it is wildly regime-dependent | 0.198% → 6.7% in ~7 weeks | `B21C` |
 | graduation deposit | 84.990359056–84.990364132 SOL | B19N — *confirmed by literature at "~85 SOL"* |
 | median time launch → graduation | **49 slots (~20 s)** | B19N |
 | pool pricing invariant | `(quote + virtual) × base`, 765/765, zero breaks | B19N §2 |
@@ -101,7 +101,7 @@ good token in five, to cut the bad rate from 35% to 13%.
 
 **Every one of these was flattering.** That is the tell to watch for.
 
-## 7. Where this sits in the literature (`B21A`)
+## 7. Where this sits in the literature (`B21C`)
 
 **The published Solana rug-pull work excludes our population by construction:** *"we exclude
 Pump.fun-only tokens that never establish liquidity pools."* Only 2.09% of our tokens ever
@@ -109,7 +109,7 @@ established a pool. The EVM frameworks (RPHunter, LROO) define a rug around **li
 and a bonding curve has no pool to withdraw.
 
 **Prior art we replicate, not discover:** early-buyer concentration (MemeTrans, 17pp) and
-leakage-resistant evaluation (LROO). **And the label too** — see `B21B`: Liu (2006) named it
+leakage-resistant evaluation (LROO). **And the label too** — see `B21D`: Liu (2006) named it
 **"lock-in risk"** and measures it by counting zero-trading days; Lesmond, Ogden & Trzcinka (1999)
 use the flat price that broke our first label design *as their measure*. Amihud (2002), the field
 default, is undefined at zero volume — which is exactly why it does not fit here.

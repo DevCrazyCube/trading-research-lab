@@ -1,0 +1,5 @@
+{
+  "collector_sha256": "aab0fe4b6e149210b558f375a1e81918f0192242ae8b166d471719e81cd986bd",
+  "owner": "B19N_GRADUATED_COLLECTOR",
+  "why": "Marks this directory as B19N's own. Its absence is what makes a populated directory unclaimable, so every other corpus in the repository is protected by construction rather than by being named in a list."
+}

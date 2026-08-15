@@ -1,4 +1,4 @@
-# B21B — our unexitability label has a name, and it is twenty years old
+# B21D — our unexitability label has a name, and it is twenty years old
 
 **The question.** B20B's contribution was claimed to be the *label* — measuring unexitability rather
 than price collapse. Before claiming novelty, does traditional finance already have this? It does,
@@ -86,7 +86,7 @@ are no market makers to widen a spread — concentration means the counterparty 
 absent*. Same direction, entirely different cause.
 
 **And the population remains genuinely unstudied**: every published Solana rug-pull dataset excludes
-bonding-curve-only tokens by construction (`B21A`), which is ~98% of what we measured.
+bonding-curve-only tokens by construction (`B21C`), which is ~98% of what we measured.
 
 ## 6. What this changes in how we describe B20B
 

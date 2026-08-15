@@ -187,3 +187,108 @@ Post identifiers are recorded rather than full quotations of every thread, becau
 pages that can be edited or deleted by their authors. The quotations above are verbatim as retrieved
 on the access date; if a source no longer matches, the quotation here is what was read and the
 discrepancy is itself worth noting rather than resolving in the source's favour.
+
+
+---
+
+# Addendum, 2026-08-15 — a wider sweep, and one method we are missing
+
+**Retrieval note.** The 2026-08-07 method has broken: `old.reddit.com` RSS now **302-redirects** and the
+JSON API returns **403**. What works is `www.reddit.com/r/<sub>/top/.rss?t=year` with a browser
+user-agent, following redirects, and tolerating heavy **429** rate-limiting — most requests failed on
+first attempt and needed 20–25 s spacing and up to four retries.
+
+**Sample.** Top-of-year for seven subreddits, 25 posts each (**175 posts**): `algotrading`,
+`wallstreetbets`, `quant`, `CryptoCurrency`, `solana`, `CryptoTradingBot`, `ai_trading`. Still not a
+survey. **No figure below may be used as a threshold, parameter or prior** — the standing rule from §0.
+
+## A1. The fee finding, now with its full table
+
+The 19-of-20 claim from §2 is the same post; the detail was not captured before and the shape is worth
+recording:
+
+| strategy | zero fees | Binance | Coinbase |
+|---|---|---|---|
+| Supertrend + MACD | +$9,330 | −$3,608 | −$9,508 |
+| Donchian Breakout | +$6,664 | −$3,797 | −$9,499 |
+| EMA+RSI+MACD | +$6,579 | −$4,534 | −$9,509 |
+| Triple EMA | +$5,421 | −$4,946 | −$9,511 |
+| RSI Scalper | +$3,288 | −$5,840 | −$9,519 |
+
+**Every one flips from clearly profitable to clearly losing on fees alone.** *"19 out of 20 lost money
+on Binance. But 12 of them were profitable at zero fees. The signals aren't garbage. The fees are
+eating everything."*
+
+**This is our toll finding, on a different venue, by a different person, with a different method.** Our
+B19P result — *even trading for free loses 16.89%* — is the stronger form, because on pump.fun the
+signal does not survive even at zero cost. Theirs survives at zero cost and dies on fees. Two venues,
+two failure points, same conclusion: cost is the binding constraint, not signal.
+
+## A2. Independent confirmation of a test we invented for ourselves
+
+The same poster swept 49 parameter combinations and reports **3 of 4 "optimized" versions were
+overfitted** — great in training, losing on the 40% held out. Their surviving strategy passed six of
+seven "skeptic tests", and the first one listed is **parameter plateau**.
+
+We reached the same instrument independently, twice: the trailing-stop give-back optimum is a **flat
+plateau 8–18%** (`B19Q` §8c) and the crash-filter SMA length is flat across **50–300** (`B21C`). Both
+times we argued that a *knife-edge* optimum would mean the effect lives in the tuning. **A practitioner
+uses that as a named acceptance test.** It is not our idea and it is more standard than we knew.
+
+## A3. The base rate for this kind of project, stated by someone who ran it
+
+The most methodologically relevant post in the sample, from a year of daily work:
+
+> *"Thousands of backtests, hundreds of strategy families, frontier models. **Strategies that survived
+> honest validation with Sharpe above 0.8: zero.**"*
+>
+> *"'Claude, build me a profitable strategy.' It grabs some data, overfits, tests 50 hypotheses and
+> hands you survivorship bias with a smile. Add ML on top and you get look-ahead bias, leaky labels
+> and no real out of sample."*
+>
+> *"The models aren't dumb. Markets are just efficient, and **AI is the most convincing overfitting
+> machine ever built**."*
+
+**That is a precise description of the failure mode this project exhibited repeatedly and caught each
+time**: the obs50 look-ahead, the density-confounded rug label, the two features that passed
+permutation at p=0.003 and vanished under control. It is worth knowing that the outside base rate for
+"survived honest validation" is *zero*, and that our own surviving result is a **screen that avoids
+losses**, not a strategy that makes money.
+
+Their "what does work" list is also our list arrived at independently: LLM as engineer rather than
+trader, deterministic rules you own the validation of, and *"time beats backtests"*.
+
+## A4. The one method we are missing, and it has a name
+
+Two posts point at the same formal machinery — the **López de Prado pipeline: purged cross-validation,
+walk-forward, and DEFLATED SHARPE**.
+
+**We do walk-forward. We do not deflate.** Deflated Sharpe corrects a Sharpe ratio for the number of
+trials that produced it: search enough thresholds and the best one's ratio is inflated by selection
+alone. This project ran exactly that kind of search — TP/SL grids, give-back sweeps, concentration
+thresholds, SMA lengths — and defended itself with permutation tests and held-out splits instead.
+
+Those are legitimate and in some ways stricter, but **deflated Sharpe is the named, citable correction
+for the specific thing we were doing**, and we should either apply it or say why permutation suffices.
+Recorded as a gap, not a defect.
+
+## A5. A resource worth having
+
+`paperswithbacktest.com` — **5,000+ strategies extracted from academic finance papers (1990–2026)**,
+implemented in Python with source links, built on the open-source `pwb-toolbox`. Their stated
+observation matches `B21C` exactly:
+
+> *"Academic papers are almost always ambiguous on critical implementation details. **Transaction cost
+> assumptions**, rebalancing timing, how to handle delistings — these choices matter enormously and are
+> rarely specified clearly."*
+
+**Unverified and not endorsed** — a third-party library whose backtests we have not audited. Noted
+because if we ever need a prior on whether a published signal survives costs, someone has already built
+the apparatus.
+
+## A6. What was NOT found
+
+`r/wallstreetbets`, `r/CryptoCurrency` and `r/solana` top-of-year contained **nothing** bearing on
+method, cost measurement, or validation — they are price commentary and outcome anecdote. The
+methodological content clusters entirely in `r/algotrading`, `r/quant`, `r/CryptoTradingBot` and
+`r/ai_trading`. Recorded so a future sweep can skip the first three.
