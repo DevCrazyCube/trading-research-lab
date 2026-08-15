@@ -83,6 +83,11 @@ good token in five, to cut the bad rate from 35% to 13%.
   the effect lives in the tuning; a plateau means it belongs to the payoff shape.
 - **At n≈2,000 with 43% volatility you can RANK shapes but not CERTIFY levels.** A paired comparison
   cancels asset variance; an absolute mean does not.
+- **Deflated Sharpe (Bailey & López de Prado 2014) is the named correction for search-max results**,
+  and applying it to our own +0.48% is brutal: observed Sharpe **0.01114** against an expected-max
+  under the null of **0.01854 at only ten trials**, DSR **0.176** at our real search size. The result
+  is *below the chance ceiling*. Skewness **+20.2**, kurtosis **521** — which is why every ordinary
+  statistic flattered this payoff. `B19Q` §8e.
 - **Sizing:** the cost curve has a minimum. B19K's 0.1 SOL was already near-optimal — fixed costs fall
   with size, slippage rises, and they cross at a few tenths of a SOL.
 

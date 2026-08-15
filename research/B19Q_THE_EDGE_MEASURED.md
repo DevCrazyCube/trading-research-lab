@@ -365,6 +365,58 @@ be exactly the error this document spent §8 dismantling.
 This is the one question the graduated collector was built to answer and it remains unanswered by
 choice, not by oversight.
 
+## 8e. Deflated Sharpe — the named correction, applied, and it is worse than we said
+
+An external practitioner sweep (`B21A` addendum) identified the one standard method this programme
+was missing: the **López de Prado pipeline's Deflated Sharpe Ratio** (Bailey & López de Prado, 2014).
+We used walk-forward, permutation and held-out splits; we never deflated. DSR corrects a Sharpe for
+**the number of trials that produced it**, plus sample length, skewness and kurtosis — precisely the
+situation created by our give-back sweeps, TP/SL grids and threshold searches.
+
+Applied to the trailing-stop result:
+
+| | |
+|---|---|
+| trades | 1,978 |
+| mean / sd per trade | +0.482% / 43.31% |
+| **observed Sharpe** | **+0.01114** |
+| skewness | **+20.18** |
+| kurtosis | **521.4** |
+| variance across the 10 trial Sharpes | 1.386×10⁻⁴ |
+
+| trials assumed | expected max Sharpe under the null | DSR |
+|---|---|---|
+| 10 | **0.01854** | 0.356 |
+| 60 | 0.02761 | 0.205 |
+| **100** *(≈ our actual search)* | **0.02979** | **0.176** |
+| 1000 | 0.03832 | 0.087 |
+
+**The observed Sharpe (0.01114) is below the expected maximum from ten trials (0.01854).** That is a
+stronger statement than "fails significance": **sweeping ten meaningless parameters on pure noise
+would be expected to produce a better-looking best result than ours.** DSR needs 0.95 to survive at
+the 5% level; we reach 0.176 at our real search size.
+
+### Why this payoff defeats ordinary statistics, quantified
+
+**Kurtosis 521 and skewness +20.** A normal distribution has kurtosis 3. This is not a heavy tail; it
+is a payoff where essentially all variance lives in a handful of observations — consistent with the
+earlier finding that the single largest position was **138% of the total profit**.
+
+That is *why* every naive instrument misled us here, and it is the general lesson: **on a payoff this
+non-normal, a mean, a t-statistic and a fold count are all optimistic.** The permutation test we ran
+(t = 0.50) reached the right verdict; DSR reaches it with a named, citable correction and a much
+wider margin.
+
+### What this does NOT touch
+
+**The deadness screen (`B20B`) is unaffected.** DSR corrects *return series*; the screen is a
+classification result whose evidence is a permutation test on labels, a held-out split, and
+independent replication by a second seat on a different corpus. Different instrument, different
+correction. Nothing here weakens it.
+
+**And nothing here weakens the load-bearing negatives**, which are 13–16 sigma and were never search
+maxima — they are single pre-specified cells, not the best of a sweep.
+
 ## 9. What this actually establishes
 
 Not "it doesn't work" — something much more specific:
