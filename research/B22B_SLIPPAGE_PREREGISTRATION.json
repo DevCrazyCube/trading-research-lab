@@ -1,0 +1,127 @@
+{
+  "document": "B22B_SLIPPAGE_PREREGISTRATION",
+  "created": "2026-08-15",
+  "status": "FROZEN",
+
+  "question": "What fill does a stop-order entry actually receive in the top-20 US stocks by opening relative volume, and how large is the gap against the stop price that Zarattini/Barbon/Aziz (SSRN 4729284) credit in their backtest?",
+
+  "why_this_and_not_a_replication": "The paper reports Sharpe 2.81 while modelling only a $0.0035/share commission. Machine-checked against its extracted text, the strings 'slippage', 'bid-ask', 'market impact', 'capacity' and 'fill' each occur zero times. Its entry is a stop order, i.e. a market order fired at the instant of maximum momentum in the day's fastest-moving names, and the backtest credits a fill at exactly the stop price. Replicating the eight-year backtest would reproduce that same omission at greater cost. Measuring the omitted quantity decides the result directly.",
+
+  "pinned_artifact": {
+    "path": "scripts/b22b_slippage_harness.py",
+    "sha256": "a0f1b4c434d89fe54edb4f835f7c5401a5dbc2ca023d155fd9aefad1d8b57baf",
+    "pinned_before_any_data_existed": true,
+    "blindness_is_structural": "ALPACA_API_KEY_ID / ALPACA_API_SECRET_KEY are unset at pin time, so the harness cannot read market data. Blindness is a property of the environment, not of our discipline.",
+    "collection_stage_deliberately_absent": "The fetch loop is written after the credential exists. It consumes the frozen functions below and cannot alter them without breaking this hash."
+  },
+
+  "scope_limit_stated_before_the_result": {
+    "measures": "ENTRY slippage only",
+    "does_not_measure": "exit slippage (stop-loss market orders, market-on-close)",
+    "therefore": "the number produced is a LOWER BOUND on total friction",
+    "consequence_for_the_verdict": "The classification is asymmetric by construction. A bad result is decisive; a good result is not vindication. The most favourable verdict the harness can emit is NOT_YET_FATAL. There is no verdict named SURVIVES, and a test asserts that no input can produce one."
+  },
+
+  "rule_under_test": {
+    "source": "Zarattini, Barbon & Aziz (2024), Section 2.1 and Section 4",
+    "universe_filters": {
+      "min_open_price_usd": 5,
+      "min_avg_volume_shares_14d": 1000000,
+      "min_atr_14d_usd": 0.50
+    },
+    "opening_range": "09:30:00 to 09:35:00 ET",
+    "direction": "bullish first 5-minute candle => long only; bearish => short only; doji => no trade",
+    "entry": "stop order at the 5-minute high (long) or 5-minute low (short)",
+    "relative_volume_filter": "first-5-minute volume >= 100% of its own 14-day average, then the top 20 by that ratio",
+    "R_unit": "R = 10% of ATR(14), the paper's stop distance and the unit its PnL is reported in"
+  },
+
+  "measurement": {
+    "trigger": "the first TRADE at or through the stop level, at or after 09:35:00 ET, in canonical time order",
+    "fill_priced_from": "the QUOTE prevailing at the trigger instant: a buy stop lifts the ask, a sell stop hits the bid",
+    "sign_convention": "positive slippage is always ADVERSE; the short case is negated so that a cost can never be reported as a benefit",
+    "latency_ladder_ms": [0, 100, 500, 1000],
+    "why_a_ladder": "A retail stop rests at the broker and is routed on trigger, so a fill cannot precede that routing. Zero latency is physically unattainable and is included only because it is the backtest's own implicit assumption; the gap between it and the rest of the ladder is the point.",
+    "units": "basis points of R, computed as (slippage_micros * 100000) // atr_micros, integer division",
+    "also_recorded": "prevailing spread, resting size at the touched side, and quote age at each rung"
+  },
+
+  "decision_rule": {
+    "anchored_to": "the paper's OWN reported per-trade edge, fixed here before any data exists",
+    "paper_edge_at_filter_used_R_bp": 800,
+    "paper_edge_at_best_bucket_R_bp": 3800,
+    "thresholds_on_median_entry_slippage": [
+      { "verdict": "KILLED", "condition": "median >= 3800 bp of R", "meaning": "entry slippage alone exceeds even the most favourable per-trade edge the paper reports (0.38R, RelVol > 30x). Stop." },
+      { "verdict": "SEVERELY_IMPAIRED", "condition": "median >= 1500 bp of R", "meaning": "0.15R. Consumes most of any realistic top-20 edge before the exit is even considered." },
+      { "verdict": "MATERIAL", "condition": "median >= 500 bp of R", "meaning": "0.05R. Real, must be carried in any subsequent model, does not by itself refute." },
+      { "verdict": "NOT_YET_FATAL", "condition": "median < 500 bp of R", "meaning": "entry friction does not kill it. The exit remains unmeasured, so this is permission to continue, not a finding of profitability." },
+      { "verdict": "NOT_EVALUABLE", "condition": "fewer than 100 triggered stock-days", "meaning": "the median is not worth a verdict at this count" }
+    ]
+  },
+
+  "sample": {
+    "window": "2025-01-01 to 2025-12-31",
+    "why_this_window": "Entirely after the paper's 2016-2023 study period, so the measurement is out of sample with respect to the result it tests.",
+    "seed": 22022,
+    "days": 30,
+    "selection": "deterministic weekday sample from the pinned seed, fixed before any data is fetched so the days cannot be chosen after seeing outcomes",
+    "dst_composition": { "edt_days": 23, "est_days": 7 },
+    "pinned_days": [
+      "2025-01-09", "2025-01-27", "2025-01-29", "2025-01-30", "2025-03-10",
+      "2025-03-12", "2025-04-22", "2025-04-24", "2025-05-15", "2025-05-21",
+      "2025-05-22", "2025-06-12", "2025-06-13", "2025-07-01", "2025-07-07",
+      "2025-07-17", "2025-07-31", "2025-08-21", "2025-08-25", "2025-08-27",
+      "2025-09-04", "2025-09-25", "2025-09-29", "2025-10-01", "2025-10-14",
+      "2025-10-24", "2025-10-31", "2025-11-07", "2025-11-18", "2025-12-08"
+    ]
+  },
+
+  "fail_closed_commitments": [
+    "A stock-day whose stop is never touched is NO_TRIGGER, a distinct category. It is NOT a zero-slippage observation and is excluded from the distribution. Undefined is not zero.",
+    "A trigger with no prevailing quote is a refusal, not a free fill.",
+    "ATR(14) requires 15 daily bars, because 14 bars yield only 13 true ranges. The first bar's true range is undefined, not (high - low).",
+    "A percentile of an empty distribution is a refusal, not zero.",
+    "An absent price or size field is a refusal, not zero.",
+    "A doji returns None, and None is never treated as 'long'.",
+    "Every API response is fully paged; a truncated response is a wrong answer, not a small one."
+  ],
+
+  "arithmetic_discipline": {
+    "representation": "integer micro-dollars (USD * 1000000) and integer nanosecond timestamps",
+    "only_float_boundary": "to_micros() at ingest, applied once per value as it arrives from the API",
+    "percentiles": "by integer index, no interpolation; the index rounds DOWN, which for a cost distribution reports the more favourable of the two candidate elements -- stated so the bias is known rather than assumed away",
+    "means_not_reported": "sum and count are recorded instead, so a mean is derivable exactly",
+    "timestamps": "parsed by hand rather than via datetime.timestamp(), which returns a float and loses the sub-microsecond resolution this measurement is about"
+  },
+
+  "defect_found_and_fixed_before_pinning": {
+    "what": "An earlier draft took the ET UTC-offset as a single --tz-offset-hours argument for the whole run.",
+    "why_it_was_wrong": "The 2025 sample spans both DST regimes (23 EDT days, 7 EST). A single offset would have measured a 10:30 or 08:30 'opening range' on the minority regime with nothing in the output to indicate it -- a silent one-hour shift in a quarter of the sample.",
+    "fix": "et_offset_hours() derives the offset per day from the US rule (second Sunday in March to first Sunday in November), refuses pre-2007, and is verified against known 2025 and 2026 boundaries.",
+    "recorded_because": "it was caught by writing the test before freezing, which is the only reason it is not in the pinned artifact"
+  },
+
+  "verification_before_pinning": {
+    "checks_passed": 40,
+    "checks_failed": 0,
+    "covers": [
+      "R-unit and basis-point-of-R arithmetic against hand-computed values",
+      "adverse-sign convention positive for both long and short",
+      "ATR warm-up refusal at 14 bars, success at 15",
+      "undefined-first-bar true range refuses",
+      "empty percentile, absent price and absent size all refuse rather than defaulting to zero",
+      "doji maps to None and never to a direction",
+      "every classify() boundary, on both sides",
+      "no input to classify() can produce a verdict of SURVIVES",
+      "day sample determinism and weekday-only membership",
+      "nanosecond timestamp resolution preserved",
+      "US DST boundaries for 2025 and 2026, 09:30 ET mapping to 13:30Z in EDT and 14:30Z in EST, and a 5-minute opening range on both sides of the transition"
+    ]
+  },
+
+  "what_would_falsify_the_concern": "A median entry slippage below 0.05R across the pinned sample, with the resting size at the touched side large enough to fill a 1%-risk position. That would mean the paper's omission does not change its conclusion, and the next measurement is the exit.",
+
+  "single_use": "This preregistration authorises ONE evaluation pass over the pinned sample. Re-running against different days, a different window, or an altered harness is a new document with a new hash.",
+
+  "not_yet_established": "Nothing in equities has been measured by this programme. This document describes an experiment that has not been run. See research/B22A_EQUITY_DAYTRADING_PIVOT.md for the external literature it is built on, all of which is someone else's measurement."
+}
