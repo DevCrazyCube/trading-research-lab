@@ -100,3 +100,45 @@ than supplied, and a disagreement between document and artifact is a refusal rat
 
 *Recorded as a corrected warning rather than deleted, because "I flagged a risk, checked it, and it
 was already handled" is worth more to a later reader than a note that never mentions it.*
+
+### The cutoff chain, verified end to end
+
+The peer seat traced where the value actually comes from and it is self-consistent with no manual
+hop:
+
+```
+generation_config(2)  →  transaction_bodies argv  --cutoff-slot 438854169   ← VERIFIED in the argv
+                      →  stamped into b11a_bodies.sqlite metadata as cutoff_slot
+                      →  b10c reads   SELECT value FROM metadata WHERE key='cutoff_slot'
+                      →  refuses (LabelRefused) if absent
+```
+
+b10c's own comment on that read: *"Evidence, not an inference: the collection recorded its own end
+slot."* Format confirmed against window 1, whose bodies carry `cutoff_slot: 437211659` — its correct
+value.
+
+### THE REAL LINCHPIN, relocated
+
+Not a mis-passed parameter — **pointing the derivation at the wrong bodies artifact.** Running
+`b10b`/`b10c` against `research/b11a/…` instead of `research/b11m_window2/…` would read window 1's
+cutoff, build a window-1 corpus, and evaluate the frozen screen against **the data it was derived
+from** — in-sample, and looking entirely normal.
+
+**Therefore the paths below are pinned, and no substitution is permitted:**
+
+| step | input | output |
+|---|---|---|
+| b10b | `research/b11m_window2/b11a_bodies.sqlite` | `research/b11m_window2/b11a_paths.sqlite` |
+| b10c | those two | `research/b11m_window2/b11a_identity.sqlite` |
+| runner | those three | `research/B20B_WINDOW2_RESULT.json` |
+
+Every path contains `b11m_window2`. **If any command in the sequence names `b11a/`, stop.**
+
+### Schemas, verified against the runner's SELECTs rather than its help text
+
+| runner reads | producer emits | |
+|---|---|---|
+| `SELECT mint, slot, real_quote FROM observation` | b10b: `observation` with `real_quote` | match |
+| `SELECT mint, t0_slot FROM identity` | b10c: `identity(mint, t0_slot)` | match |
+
+A mismatch would raise, not misread — so this is a crash risk, not a silent-wrong-answer risk.
