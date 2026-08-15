@@ -50,9 +50,8 @@ python scripts/b20b_deadness_screen_runner.py \
     --out      research/B20B_WINDOW2_RESULT.json
 ```
 
-Step 2's exact flag spelling is to be read from `--help` at run time, **not guessed** — the
-observation-cutoff argument must be `438,854,169`, window 2's own value from the frozen B11M window,
-and must not be taken from window 1's `437,211,659`.
+Step 2 takes exactly two positionals — `artifact` (bodies) and `corpus` (paths) — plus `--out`.
+**Verified against `--help`, not guessed.**
 
 ## Why this does not compromise blindness
 
@@ -77,11 +76,27 @@ So the derived corpus **chains by hash back to the collected bodies**, and any s
 with different inputs is detectable. There is one derivation, it is deterministic, and it is written
 down before the data exists.
 
-## The one parameter, and where its value comes from
+## The parameter risk I flagged — CHECKED, and it does not exist
 
-`observation_window_end_slot` is the only value that differs between windows. It is **not a choice**:
-it is the observation cutoff derived by `B11A.derive_window` from the frozen B11M register, and for
-generation 2 it is **438,854,169**. Using window 1's value would silently truncate the label window.
+An earlier version of this note warned that `observation_window_end_slot` must be set to window 2's
+**438,854,169** rather than window 1's **437,211,659**, and called it *"the single place where a wrong
+number would produce a plausible-looking result rather than an error."*
 
-Recorded because it is the single place where a wrong number would produce a plausible-looking result
-rather than an error.
+**That risk is not real, and the check is the point of writing it down.** There is no such argument.
+`b10c build-identity` takes only `artifact` and `corpus`; the window end is read from the **bodies
+artifact's own recorded metadata** (`("observation_window_end_slot", cutoff[0])`), so it cannot be
+passed wrongly because it cannot be passed at all.
+
+**And there is a guard on top of that.** b10c compares the preregistration's stated window end against
+the value the artifact recorded and **refuses on mismatch**:
+
+```
+if document["observation_window_end_slot"] != recorded_window_end_slot:
+    ... "preregistration states observation_window_end_slot X but the artifact recorded Y"
+```
+
+So the one silent-wrong-answer path I could imagine is closed twice over: the value is derived rather
+than supplied, and a disagreement between document and artifact is a refusal rather than a result.
+
+*Recorded as a corrected warning rather than deleted, because "I flagged a risk, checked it, and it
+was already handled" is worth more to a later reader than a note that never mentions it.*
