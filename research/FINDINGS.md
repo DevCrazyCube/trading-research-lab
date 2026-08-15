@@ -91,6 +91,35 @@ good token in five, to cut the bad rate from 35% to 13%.
 - **Sizing:** the cost curve has a minimum. B19K's 0.1 SOL was already near-optimal — fixed costs fall
   with size, slippage rises, and they cross at a few tenths of a SOL.
 
+## 5b. The crash filter under the strongest test we have
+
+The one candidate that might see real money, put through Deflated Sharpe. **The benchmark matters
+enormously and the first version of this test got it wrong.**
+
+**Wrong test:** DSR on the filter's own returns gives 1.000 at every trial count — but that only asks
+*"is this Sharpe non-zero?"*, and holding BTC through a 74,000% run answers yes for anything invested
+most of the time. It is not evidence about the filter.
+
+**Right test — the paired difference against buy-and-hold**, which cancels the common asset move:
+
+| | |
+|---|---|
+| SMA lengths with **negative** excess Sharpe | **9 of 10** |
+| best (SMA 125) | +0.00241/day, **t = +0.17** |
+| expected max Sharpe under the null, 10 trials | **0.00834** |
+| DSR (10 → 100 trials) | **0.341 → 0.224, fails throughout** |
+
+**The return advantage is below the chance ceiling**, and nine of ten filter lengths *lose* return
+versus simply holding.
+
+**What survives untouched:** the **drawdown reduction** — −84.9% → −69.5% full sample, protection in
+5 of 7 measurable crashes, zero harmful, reproduced from two independent data sources by two
+independent implementations. DSR tests return series and does not bear on it.
+
+**So the honest statement is exactly what the playbook already says, now confirmed by the strongest
+method available:** it is *insurance*, not alpha. Anyone reading it as a return enhancer is reading
+it wrong.
+
 ## 6. Retractions — recorded because the pattern matters more than the items
 
 | claim | why it was wrong |
