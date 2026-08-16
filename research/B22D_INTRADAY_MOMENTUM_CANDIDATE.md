@@ -161,6 +161,13 @@ unlocks both tests.
 
 ## 7. The finding that should change how we think about day trading generally
 
+> **CORRECTED 16 Aug 2026 — see [B22F](B22F_OVERNIGHT_INTRADAY_SPLIT.md).** The strong form of the
+> claim below is **false for SPY over 2016–2026**. Measured on our own data: overnight +10.06%/yr,
+> **intraday +5.79%/yr — positive, not negative.** What survives is that overnight is roughly twice as
+> risk-efficient (Sharpe 0.87 vs 0.43) and requires no trading. The "operates entirely inside a
+> negative-return window" framing below was overstated and should not be relied on. Left in place
+> rather than deleted so the error is legible.
+
 Lou, Polk & Skouras, *A Tug of War: Overnight Versus Intraday Expected Returns*, **JFE 2019**, and a
 literature going back to the early 1990s: **essentially the entire long-run equity risk premium is
 earned overnight, between the close and the next open. Intraday returns are on average slightly
