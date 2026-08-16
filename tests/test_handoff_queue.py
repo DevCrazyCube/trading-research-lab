@@ -146,9 +146,14 @@ class HandoffQueueTests(IsolatedDashboard):
 
         message_id, _, _ = DASH.create_handoff("claude", "one", "first")
         seen = []
-        saved = (DASH.pane_id, DASH.pane_command, DASH.agent_busy, DASH.pane_text, DASH.send_line)
+        saved = (DASH.pane_id, DASH.pane_command, DASH.agent_busy, DASH.pane_text,
+                 DASH.send_line, DASH.SEAT_OCCUPANTS)
         DASH.pane_id = lambda agent: "%1"
         DASH.pane_command = lambda pane: "codex"
+        # This scenario simulates the codex SEAT occupied by the codex BINARY. That used to be
+        # implied by the seat's name; it is now stated, because the two are independent and the
+        # codex seat is currently held by a Claude session in production.
+        DASH.SEAT_OCCUPANTS = {"codex": "codex", "claude": "claude"}
         DASH.agent_busy = lambda pane: False
         DASH.pane_text = lambda pane: "› Explain this codebase\n  gpt-5.6-sol default · ~/meme"
         DASH.send_line = lambda pane, text: seen.append(text)
@@ -159,7 +164,7 @@ class HandoffQueueTests(IsolatedDashboard):
             db.close()
         finally:
             (DASH.pane_id, DASH.pane_command, DASH.agent_busy,
-             DASH.pane_text, DASH.send_line) = saved
+             DASH.pane_text, DASH.send_line, DASH.SEAT_OCCUPANTS) = saved
         self.assertIn(f"HANDOFF {message_id}", seen[0])
 
     def test_an_undeliverable_handoff_reports_why_instead_of_stalling_silently(self):
@@ -167,9 +172,13 @@ class HandoffQueueTests(IsolatedDashboard):
         message_id, _, _ = DASH.create_handoff("claude", "one", "first")
         DASH._NOTIFY_SKIPS.clear()
         self.addCleanup(DASH._NOTIFY_SKIPS.clear)
-        saved = (DASH.pane_id, DASH.pane_command, DASH.agent_busy, DASH.pane_text, DASH.send_line)
+        saved = (DASH.pane_id, DASH.pane_command, DASH.agent_busy, DASH.pane_text,
+                 DASH.send_line, DASH.SEAT_OCCUPANTS)
         DASH.pane_id = lambda agent: "%1"
         DASH.pane_command = lambda pane: "codex"
+        # Codex seat occupied by the codex binary -- stated, not implied. See the note in
+        # test_a_placeholder_hint_is_not_a_draft_and_does_not_block_delivery.
+        DASH.SEAT_OCCUPANTS = {"codex": "codex", "claude": "claude"}
         DASH.agent_busy = lambda pane: False
         DASH.pane_text = lambda pane: "› a genuine unsent draft"
         DASH.send_line = lambda pane, text: self.fail("must not type over a real draft")
@@ -182,7 +191,7 @@ class HandoffQueueTests(IsolatedDashboard):
             db.close()
         finally:
             (DASH.pane_id, DASH.pane_command, DASH.agent_busy,
-             DASH.pane_text, DASH.send_line) = saved
+             DASH.pane_text, DASH.send_line, DASH.SEAT_OCCUPANTS) = saved
         lines = [line for line in reported.getvalue().splitlines() if line.strip()]
         self.assertEqual(len(lines), 1, f"report-on-change, not per-poll spam: {lines}")
         self.assertIn(f"handoff {message_id} waiting", lines[0])
@@ -281,7 +290,11 @@ class RealTmuxDeliveryTests(IsolatedDashboard):
         DASH.tmux("new-session", "-d", "-s", session, str(fake))
         pane = DASH.tmux("display-message", "-p", "-t", session, "#{pane_id}", capture=True)
         DASH.tag_pane(pane, "codex")
-        DASH.write_state(mode="auto", panes={"codex": pane})
+        # The fake pane runs a script tmux reports as `codex`, so declare the codex seat as
+        # codex-occupied. Written through state.json rather than the module default, which
+        # exercises the override path end to end.
+        DASH.write_state(mode="auto", panes={"codex": pane},
+                         seat_occupants={"codex": "codex", "claude": "claude"})
         message_id, _, _ = DASH.create_handoff("claude", "real tmux", "execute bounded task")
         db = DASH.queue_connect()
         self.assertTrue(DASH.notify_next(db))

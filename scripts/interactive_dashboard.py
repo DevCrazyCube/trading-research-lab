@@ -43,6 +43,12 @@ AGENTS = ("codex", "claude")
 AGENT_COMMANDS = {
     "claude": "claude --permission-mode auto --effort max --name claude",
 }
+# Which binary currently occupies each seat. See seat_occupant() for why this is separate from
+# the seat name. Overridable at runtime via state.json["seat_occupants"].
+SEAT_OCCUPANTS = {
+    "codex": "claude",   # seat handed over to a Claude session on 2026-08-15 (commit 47e7386)
+    "claude": "claude",
+}
 AGENT_IDENTITIES = {
     "codex": "You are Codex",
     "claude": "You are Claude",
@@ -430,6 +436,27 @@ SHELLS = ("zsh", "bash", "sh", "dash", "fish")
 SHELL_COMMAND = ("zsh", "-i")
 
 
+def seat_occupant(seat):
+    """The binary expected to be running in `seat`'s pane.
+
+    A seat's NAME and the BINARY occupying it are independent. Since 2026-08-15 (commit
+    47e7386) the seat named "codex" has been occupied by a Claude session, so tmux reports
+    `pane_current_command == "claude"` for it.
+
+    Every identity check must compare a pane's command against the OCCUPANT, never against the
+    seat name. Comparing against the seat name makes `enable_auto()` refuse to start ("agents
+    not alive") and `notify_next()` raise ("pane runs 'claude', expected 'codex'"), which is
+    exactly how handoff 416 sat with notify_count=0 and last_notified_at=None while the
+    supervisor ran healthily for sixteen days. Both failures are silent from the owner's side:
+    the only symptom is that handoffs stop arriving and a human has to prompt both agents.
+
+    Override per seat in state.json under "seat_occupants" so a future handover is a data
+    change, not a code edit.
+    """
+    override = read_state().get("seat_occupants") or {}
+    return override.get(seat, SEAT_OCCUPANTS.get(seat, seat))
+
+
 def pane_command(pane):
     """Current foreground command in a pane, or "" if the pane is gone."""
     return tmux("display-message", "-p", "-t", pane, "#{pane_current_command}",
@@ -507,12 +534,20 @@ def wait_for_app(pane, expected=None, timeout=90.0, poll=0.25):
 
 
 def agent_command(name):
-    if name == "codex":
+    """Launch command for a seat, dispatched on its OCCUPANT rather than its name.
+
+    Relaunching by seat name would put the codex binary back into a seat a Claude session now
+    holds, so a pane that died at a shell prompt would come back as the wrong agent.
+    """
+    occupant = seat_occupant(name)
+    if occupant == "codex":
         return (f"codex --no-alt-screen -C {ROOT} "
                 "-a never -s workspace-write "
                 "-c sandbox_workspace_write.network_access=true "
                 "-c check_for_update_on_startup=false")
-    return AGENT_COMMANDS[name]
+    # `--name` carries the SEAT, so the relaunched process still identifies as that seat even
+    # though the binary is claude.
+    return f"{AGENT_COMMANDS[occupant].rsplit(' --name ', 1)[0]} --name {name}"
 
 
 def send_line(pane, text):
@@ -825,7 +860,7 @@ def enable_auto():
         raise RuntimeError(f"tmux session {SESSION!r} does not exist")
     stopped = {agent: pane_command(pane_id(agent)) for agent in AGENTS}
     stopped = {agent: command for agent, command in stopped.items()
-               if command.lower() != agent}
+               if command.lower() != seat_occupant(agent)}
     if stopped:
         details = ", ".join(f"{agent}={command or 'gone'}" for agent, command in stopped.items())
         raise RuntimeError(
@@ -1059,8 +1094,10 @@ def notify_next(db):
                 send_line(pane, agent_command(row["target"]))
                 print(f"relaunching {row['target']} before handoff {row['id']}", flush=True)
             return False
-        if command != row["target"]:
-            raise RuntimeError(f"pane runs {command!r}, expected {row['target']!r}")
+        expected = seat_occupant(row["target"])
+        if command != expected:
+            raise RuntimeError(
+                f"pane for seat {row['target']!r} runs {command!r}, expected {expected!r}")
         # Report the refusal, once per distinct reason. This branch used to return False in total
         # silence, so a handoff that could never be delivered was indistinguishable in the log from
         # one that had been. Report-on-change keeps a genuinely busy agent from spamming the log at
@@ -1105,7 +1142,8 @@ def announce_protocol(db, version=1):
             continue
         try:
             pane = pane_id(agent)
-            if pane_command(pane) != agent or agent_busy(pane) or composer_text(pane).strip():
+            if (pane_command(pane) != seat_occupant(agent) or agent_busy(pane)
+                    or composer_text(pane).strip()):
                 continue
             send_line(
                 pane,
@@ -1230,7 +1268,7 @@ def start(first):
         send_line(pane, agent_command(name))
         # The identity prompt used to be typed immediately after the launch command, while
         # Claude was still booting, so it landed in the shell or was partly swallowed.
-        wait_for_app(pane, name)
+        wait_for_app(pane, seat_occupant(name))
         send_line(
             pane,
             f"{AGENT_IDENTITIES[name]}. Work sequentially: edit only when explicitly handed "
@@ -1242,7 +1280,7 @@ def start(first):
         # Previously a fixed 1s sleep, then `send()` - whose Seq-73 guard refuses a pane still at
         # a shell prompt. Claude takes far longer than 1s to boot, so this path reliably raised
         # "refusing to send a handoff into a shell": the guard was right and the caller was wrong.
-        wait_for_app(pane_id(first), first)
+        wait_for_app(pane_id(first), seat_occupant(first))
         send_line(pane_id(first), "Read AGENTS.md. Wait for a HANDOFF <id> notification; do not "
                   "infer work from the latest Markdown entry. Acknowledge with the supplied "
                   "receive command before starting.")
@@ -1307,7 +1345,7 @@ def upgrade_existing():
             tmux("respawn-pane", "-k", "-t", pane, "-c", str(ROOT), *SHELL_COMMAND)
             wait_for_shell(pane)
             send_line(pane, agent_command(name))
-            wait_for_app(pane, name)
+            wait_for_app(pane, seat_occupant(name))
             send_line(pane, f"{AGENT_IDENTITIES[name]}. Follow AGENTS.md and the sequential "
                             "ownership protocol. Use the dashboard `handoff` and `receive` commands; "
                             "do not use markdown as a work queue.")

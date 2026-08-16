@@ -29,11 +29,53 @@ detail three tests depend on and none of them own is a detail that belongs in on
 
 class DashboardTests(unittest.TestCase):
     def test_codex_launch_command_is_the_owner_selected_command(self):
+        """Unchanged intent: when the codex SEAT is occupied by the codex BINARY, the owner's
+        exact invocation is what gets relaunched. Now stated explicitly, because seat and
+        occupant are independent.
+        """
+        saved = DASH.SEAT_OCCUPANTS
+        DASH.SEAT_OCCUPANTS = {"codex": "codex", "claude": "claude"}
+        self.addCleanup(lambda: setattr(DASH, "SEAT_OCCUPANTS", saved))
         self.assertEqual(
             DASH.agent_command("codex"),
             "codex --no-alt-screen -C /home/anont/meme -a never -s workspace-write "
             "-c sandbox_workspace_write.network_access=true "
             "-c check_for_update_on_startup=false")
+
+    def test_a_seat_relaunches_its_occupant_not_its_name(self):
+        """The bug this guards: handoff 416 sat undelivered with notify_count=0 for days.
+
+        The codex seat has been occupied by a Claude session since 2026-08-15. Every identity
+        check compared `pane_current_command` against the SEAT NAME, so the codex seat -- running
+        `claude` -- was read as a dead agent. `enable_auto()` refused to start and `notify_next()`
+        raised, both silently from the owner's side: the only symptom was that handoffs stopped
+        arriving and a human had to prompt both agents by hand.
+
+        Relaunching by name was the third failure: it would have put the codex binary back into a
+        seat Claude holds.
+        """
+        saved = DASH.SEAT_OCCUPANTS
+        DASH.SEAT_OCCUPANTS = {"codex": "claude", "claude": "claude"}
+        self.addCleanup(lambda: setattr(DASH, "SEAT_OCCUPANTS", saved))
+
+        self.assertEqual(DASH.seat_occupant("codex"), "claude")
+        command = DASH.agent_command("codex")
+        self.assertTrue(command.startswith("claude "),
+                        f"a seat held by claude must relaunch claude, got {command!r}")
+        self.assertTrue(command.endswith("--name codex"),
+                        f"the relaunched process must still identify as the SEAT, got {command!r}")
+        self.assertNotIn("--no-alt-screen", command)
+
+    def test_seat_occupant_is_overridable_without_a_code_edit(self):
+        """A future handover must be a data change. state.json wins over the module default."""
+        saved_state, saved_map = DASH.read_state, DASH.SEAT_OCCUPANTS
+        DASH.SEAT_OCCUPANTS = {"codex": "claude", "claude": "claude"}
+        DASH.read_state = lambda: {"seat_occupants": {"codex": "codex"}}
+        self.addCleanup(lambda: (setattr(DASH, "read_state", saved_state),
+                                 setattr(DASH, "SEAT_OCCUPANTS", saved_map)))
+        self.assertEqual(DASH.seat_occupant("codex"), "codex")
+        self.assertEqual(DASH.seat_occupant("claude"), "claude",
+                         "an override for one seat must not disturb the other")
 
     def test_handoff_requires_terminal_status(self):
         active = ("## 2026-07-28 — Claude — subject\n"
