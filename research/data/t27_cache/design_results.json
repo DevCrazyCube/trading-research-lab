@@ -1,0 +1,1168 @@
+{
+ "N01_ann_long_vs_xs": {
+  "rail": "A",
+  "note": "long every name whose 8-K 2.02 lands in tonight's overnight window, short the equal-weighted rest",
+  "short_notional": 0.5,
+  "net": {
+   "n": 597,
+   "mean_bp": -3.0006432996988615,
+   "sd_bp": 121.45738594085391,
+   "sharpe": -0.3921847592577766,
+   "t": -0.60363944017204,
+   "hit": 0.49246231155778897
+  },
+  "gross": {
+   "n": 597,
+   "mean_bp": -1.3228340962552219,
+   "sd_bp": 121.45774368743685,
+   "sharpe": -0.17289420690186322,
+   "t": -0.2661137634739948,
+   "hit": 0.49748743718592964
+  },
+  "mean_cost_bp": 1.6778092034436378
+ },
+ "N02_ann_long_advneutral": {
+  "rail": "A",
+  "note": "N01 built inside each dollar-ADV tercile and pooled (liquidity-neutral)",
+  "short_notional": 0.5,
+  "net": {
+   "n": 637,
+   "mean_bp": -5.762203410400956,
+   "sd_bp": 141.2397707415757,
+   "sharpe": -0.6476372971002644,
+   "t": -1.029677676672759,
+   "hit": 0.5039246467817896
+  },
+  "gross": {
+   "n": 637,
+   "mean_bp": -4.08378600205395,
+   "sd_bp": 141.23979105842915,
+   "sharpe": -0.45899312458930347,
+   "t": -0.7297525578776479,
+   "hit": 0.5102040816326531
+  },
+  "mean_cost_bp": 1.6784174083470058
+ },
+ "N03_ann_long_hivol": {
+  "rail": "A",
+  "note": "N01 inside the top trailing-vol tercile only",
+  "short_notional": 0.5,
+  "net": {
+   "n": 272,
+   "mean_bp": 0.8842240089691505,
+   "sd_bp": 165.41389266268234,
+   "sharpe": 0.08485757006307487,
+   "t": 0.08816064786339178,
+   "hit": 0.5183823529411765
+  },
+  "gross": {
+   "n": 272,
+   "mean_bp": 2.5587644123995177,
+   "sd_bp": 165.41361064301628,
+   "sharpe": 0.24556096463264995,
+   "t": 0.2551194161685543,
+   "hit": 0.5220588235294118
+  },
+  "mean_cost_bp": 1.6745404034303653
+ },
+ "N04_ann_long_lovol": {
+  "rail": "A",
+  "note": "N01 inside the bottom trailing-vol tercile only",
+  "short_notional": 0.5,
+  "net": {
+   "n": 275,
+   "mean_bp": -13.939556581590287,
+   "sd_bp": 79.65488592945471,
+   "sharpe": -2.778029219756666,
+   "t": -2.902036603630889,
+   "hit": 0.4290909090909091
+  },
+  "gross": {
+   "n": 275,
+   "mean_bp": -12.263710025682132,
+   "sd_bp": 79.65487251485196,
+   "sharpe": -2.4440483692631343,
+   "t": -2.5531473096842614,
+   "hit": 0.43272727272727274
+  },
+  "mean_cost_bp": 1.6758465559081568
+ },
+ "N05_ann_long_hiadv": {
+  "rail": "A",
+  "note": "N01 inside the top dollar-ADV tercile only",
+  "short_notional": 0.5,
+  "net": {
+   "n": 270,
+   "mean_bp": -4.048690887276546,
+   "sd_bp": 106.58456226087203,
+   "sharpe": -0.6030045437662547,
+   "t": -0.6241690016700624,
+   "hit": 0.4925925925925926
+  },
+  "gross": {
+   "n": 270,
+   "mean_bp": -2.3744289662179097,
+   "sd_bp": 106.58510924256336,
+   "sharpe": -0.3536412503610072,
+   "t": -0.3660534708553469,
+   "hit": 0.5
+  },
+  "mean_cost_bp": 1.6742619210586351
+ },
+ "N06_ann_long_loadv": {
+  "rail": "A",
+  "note": "N01 inside the bottom dollar-ADV tercile only",
+  "short_notional": 0.5,
+  "net": {
+   "n": 283,
+   "mean_bp": -7.365462077646386,
+   "sd_bp": 132.8271006567114,
+   "sharpe": -0.880265285571216,
+   "t": -0.9328386302755124,
+   "hit": 0.46996466431095407
+  },
+  "gross": {
+   "n": 283,
+   "mean_bp": -5.691346884751255,
+   "sd_bp": 132.82722584278133,
+   "sharpe": -0.6801868390992529,
+   "t": -0.7208106121156862,
+   "hit": 0.4734982332155477
+  },
+  "mean_cost_bp": 1.6741151928951314
+ },
+ "N07_ann_p10_fade": {
+  "rail": "A",
+  "note": "among tonight's announcers ONLY, fade the 15:49->15:59 move (T3 inside the event set)",
+  "short_notional": 0.5,
+  "net": {
+   "n": 220,
+   "mean_bp": 37.126435462808736,
+   "sd_bp": 155.6788718597662,
+   "sharpe": 3.785766718146437,
+   "t": 3.537243188125842,
+   "hit": 0.6181818181818182
+  },
+  "gross": {
+   "n": 220,
+   "mean_bp": 38.798063239549464,
+   "sd_bp": 155.67962914395073,
+   "sharpe": 3.9562026418198304,
+   "t": 3.6964905361295837,
+   "hit": 0.6272727272727273
+  },
+  "mean_cost_bp": 1.6716277767407126
+ },
+ "N08_ann_day_fade": {
+  "rail": "A",
+  "note": "among tonight's announcers ONLY, fade the full open->15:59 session move",
+  "short_notional": 0.5,
+  "net": {
+   "n": 220,
+   "mean_bp": 10.381025168120816,
+   "sd_bp": 153.84645806516988,
+   "sharpe": 1.0711567088706961,
+   "t": 1.0008386818201211,
+   "hit": 0.55
+  },
+  "gross": {
+   "n": 220,
+   "mean_bp": 12.052652944861535,
+   "sd_bp": 153.8468988915083,
+   "sharpe": 1.2436385482099832,
+   "t": 1.1619976376411039,
+   "hit": 0.5545454545454546
+  },
+  "mean_cost_bp": 1.6716277767407126
+ },
+ "N09_ann_runup_fade": {
+  "rail": "A",
+  "note": "among tonight's announcers ONLY, fade the 5-day run-up into the print",
+  "short_notional": 0.5,
+  "net": {
+   "n": 220,
+   "mean_bp": -5.719140178600443,
+   "sd_bp": 164.4698843950813,
+   "sharpe": -0.5520070503368151,
+   "t": -0.5157695452395307,
+   "hit": 0.4818181818181818
+  },
+  "gross": {
+   "n": 220,
+   "mean_bp": -4.047512401859728,
+   "sd_bp": 164.4702068518301,
+   "sharpe": -0.3906620456828862,
+   "t": -0.36501632636986053,
+   "hit": 0.4818181818181818
+  },
+  "mean_cost_bp": 1.6716277767407126
+ },
+ "N10_ann_hl_fade": {
+  "rail": "A",
+  "note": "among tonight's announcers ONLY, long the ones nearest their 52w LOW, short nearest the 52w HIGH",
+  "short_notional": 0.5,
+  "net": {
+   "n": 220,
+   "mean_bp": -21.01334772770928,
+   "sd_bp": 164.17045467012653,
+   "sharpe": -2.0318915146633723,
+   "t": -1.8985043068825724,
+   "hit": 0.4409090909090909
+  },
+  "gross": {
+   "n": 220,
+   "mean_bp": -19.341719950968567,
+   "sd_bp": 164.17162705133615,
+   "sharpe": -1.870239645094731,
+   "t": -1.7474643678026904,
+   "hit": 0.4409090909090909
+  },
+  "mean_cost_bp": 1.6716277767407126
+ },
+ "N11_ann_long_moclegal": {
+  "rail": "B",
+  "note": "N01 executed MOC-legal: closing auction in, opening auction out",
+  "short_notional": 0.5,
+  "net": {
+   "n": 597,
+   "mean_bp": -2.2623932070462307,
+   "sd_bp": 121.09581243771564,
+   "sharpe": -0.2965782056302675,
+   "t": -0.4564845975980718,
+   "hit": 0.48911222780569513
+  },
+  "gross": {
+   "n": 597,
+   "mean_bp": -1.21458400360259,
+   "sd_bp": 121.09615584123142,
+   "sharpe": -0.15921994538668024,
+   "t": -0.24506673558486236,
+   "hit": 0.49413735343383586
+  },
+  "mean_cost_bp": 1.0478092034436384
+ },
+ "P01_pre15_long": {
+  "rail": "A",
+  "note": "long names 1-5 sessions BEFORE a realised announcement (realised date, pre-announcement drift)",
+  "short_notional": 0.5,
+  "net": {
+   "n": 479,
+   "mean_bp": -0.6941591937769291,
+   "sd_bp": 14.962921837800938,
+   "sharpe": -0.7364494516237208,
+   "t": -1.0153375068460504,
+   "hit": 0.44676409185803756
+  },
+  "gross": {
+   "n": 479,
+   "mean_bp": 0.9946560141554074,
+   "sd_bp": 14.96583197899355,
+   "sharpe": 1.0550482421039145,
+   "t": 1.4545873438811763,
+   "hit": 0.534446764091858
+  },
+  "mean_cost_bp": 1.6888152079323366
+ },
+ "P02_pre15pred_long": {
+  "rail": "A",
+  "note": "P01 with the STRICTLY point-in-time predicted date (last filing + 91 calendar days)",
+  "short_notional": 0.5,
+  "net": {
+   "n": 333,
+   "mean_bp": -1.0124072580247014,
+   "sd_bp": 10.381461380493363,
+   "sharpe": -1.5480929314729286,
+   "t": -1.779585563768274,
+   "hit": 0.44144144144144143
+  },
+  "gross": {
+   "n": 333,
+   "mean_bp": 0.6758029028548638,
+   "sd_bp": 10.380475914758343,
+   "sharpe": 1.033482336030912,
+   "t": 1.1880231530159175,
+   "hit": 0.5165165165165165
+  },
+  "mean_cost_bp": 1.6882101608795648
+ },
+ "P03_pre110pred_long": {
+  "rail": "A",
+  "note": "long names 1-10 sessions before the PREDICTED announcement",
+  "short_notional": 0.5,
+  "net": {
+   "n": 584,
+   "mean_bp": -0.7814036164459213,
+   "sd_bp": 12.870345212184182,
+   "sharpe": -0.9637968253059271,
+   "t": -1.4672078589641502,
+   "hit": 0.4452054794520548
+  },
+  "gross": {
+   "n": 584,
+   "mean_bp": 0.9081587024761898,
+   "sd_bp": 12.869719117343118,
+   "sharpe": 1.120193248581388,
+   "t": 1.705293371718151,
+   "hit": 0.5393835616438356
+  },
+  "mean_cost_bp": 1.6895623189221114
+ },
+ "P04_pre_p10_fade": {
+  "rail": "A",
+  "note": "T3 pressure fade restricted to the 5 sessions before a predicted announcement",
+  "short_notional": 0.5,
+  "net": {
+   "n": 264,
+   "mean_bp": 1.989882204631071,
+   "sd_bp": 21.678866325894184,
+   "sharpe": 1.4571057469398185,
+   "t": 1.4913952794492085,
+   "hit": 0.5492424242424242
+  },
+  "gross": {
+   "n": 264,
+   "mean_bp": 3.6775948547461845,
+   "sd_bp": 21.6785984648483,
+   "sharpe": 2.692978909393864,
+   "t": 2.756351789539793,
+   "hit": 0.5946969696969697
+  },
+  "mean_cost_bp": 1.6877126501151136
+ },
+ "D01_pead1_cont": {
+  "rail": "A",
+  "note": "night 1 after the print: LONG the biggest positive announcement jump, short the biggest negative (PEAD in the overnight leg)",
+  "short_notional": 0.5,
+  "net": {
+   "n": 148,
+   "mean_bp": -3.5452225283837535,
+   "sd_bp": 53.56095921591327,
+   "sharpe": -1.0507403851386126,
+   "t": -0.8052412455979616,
+   "hit": 0.4594594594594595
+  },
+  "gross": {
+   "n": 148,
+   "mean_bp": -1.8561182495669495,
+   "sd_bp": 53.55960595496442,
+   "sharpe": -0.5501340651847144,
+   "t": -0.42159856626884173,
+   "hit": 0.5135135135135135
+  },
+  "mean_cost_bp": 1.6891042788168042
+ },
+ "D02_pead1_rev": {
+  "rail": "A",
+  "note": "night 1 after the print: the reversal sign of D01",
+  "short_notional": 0.5,
+  "net": {
+   "n": 148,
+   "mean_bp": 0.16701397075014637,
+   "sd_bp": 53.55827503558933,
+   "sharpe": 0.049502426855757765,
+   "t": 0.03793648404995292,
+   "hit": 0.44594594594594594
+  },
+  "gross": {
+   "n": 148,
+   "mean_bp": 1.8561182495669495,
+   "sd_bp": 53.55960595496442,
+   "sharpe": 0.5501340651847144,
+   "t": 0.42159856626884173,
+   "hit": 0.4864864864864865
+  },
+  "mean_cost_bp": 1.6891042788168042
+ },
+ "D03_pead13_cont": {
+  "rail": "A",
+  "note": "nights 1-3 after the print, continuation of the announcement jump",
+  "short_notional": 0.5,
+  "net": {
+   "n": 294,
+   "mean_bp": -3.033414422647816,
+   "sd_bp": 27.050946451242165,
+   "sharpe": -1.780121120757495,
+   "t": -1.9227505658980852,
+   "hit": 0.4557823129251701
+  },
+  "gross": {
+   "n": 294,
+   "mean_bp": -1.3416730936726935,
+   "sd_bp": 27.052960722965647,
+   "sharpe": -0.7872853658323308,
+   "t": -0.8503653852684179,
+   "hit": 0.5034013605442177
+  },
+  "mean_cost_bp": 1.6917413289751213
+ },
+ "D04_pead15_cont": {
+  "rail": "A",
+  "note": "nights 1-5 after the print, continuation of the announcement jump",
+  "short_notional": 0.5,
+  "net": {
+   "n": 424,
+   "mean_bp": -3.3038046915377928,
+   "sd_bp": 23.868488607525805,
+   "sharpe": -2.197301824476993,
+   "t": -2.850180564127199,
+   "hit": 0.41509433962264153
+  },
+  "gross": {
+   "n": 424,
+   "mean_bp": -1.6149150708334417,
+   "sd_bp": 23.867282076424466,
+   "sharpe": -1.074105627670772,
+   "t": -1.3932519191056336,
+   "hit": 0.4740566037735849
+  },
+  "mean_cost_bp": 1.6888896207043502
+ },
+ "D05_pead610_cont": {
+  "rail": "A",
+  "note": "nights 6-10 after the print, continuation (does the drift survive the first week?)",
+  "short_notional": 0.5,
+  "net": {
+   "n": 420,
+   "mean_bp": -2.6904452637700333,
+   "sd_bp": 22.966001972069016,
+   "sharpe": -1.8596834815108565,
+   "t": -2.4008410510361915,
+   "hit": 0.4119047619047619
+  },
+  "gross": {
+   "n": 420,
+   "mean_bp": -1.001874813002458,
+   "sd_bp": 22.96605135670131,
+   "sharpe": -0.6925121499174184,
+   "t": -0.894029341225485,
+   "hit": 0.4880952380952381
+  },
+  "mean_cost_bp": 1.6885704507675756
+ },
+ "D06_pead15_c10": {
+  "rail": "A",
+  "note": "D04 at a 10 % tail cut instead of 30 %",
+  "short_notional": 0.5,
+  "net": {
+   "n": 319,
+   "mean_bp": -4.356113417496498,
+   "sd_bp": 37.846680070560275,
+   "sharpe": -1.8271393047950584,
+   "t": -2.0557331122728097,
+   "hit": 0.42946708463949845
+  },
+  "gross": {
+   "n": 319,
+   "mean_bp": -2.6681808381449574,
+   "sd_bp": 37.84678841411059,
+   "sharpe": -1.119145361572736,
+   "t": -1.2591618883102373,
+   "hit": 0.45454545454545453
+  },
+  "mean_cost_bp": 1.687932579351541
+ },
+ "D07_pead15_resid_day": {
+  "rail": "A",
+  "note": "D04 on the cross-sectional residual of the jump on the same-session move",
+  "short_notional": 0.5,
+  "net": {
+   "n": 424,
+   "mean_bp": -2.135246575085716,
+   "sd_bp": 24.34433109066531,
+   "sharpe": -1.3923565378172365,
+   "t": -1.8060639181268188,
+   "hit": 0.41745283018867924
+  },
+  "gross": {
+   "n": 424,
+   "mean_bp": -0.4463569543813657,
+   "sd_bp": 24.343260766835304,
+   "sharpe": -0.2910742751931231,
+   "t": -0.3775604391855989,
+   "hit": 0.47641509433962265
+  },
+  "mean_cost_bp": 1.6888896207043502
+ },
+ "D08_pead15_z_over_vol": {
+  "rail": "A",
+  "note": "D04 with the jump risk-normalised by 21d realised vol",
+  "short_notional": 0.5,
+  "net": {
+   "n": 424,
+   "mean_bp": -2.677410849220398,
+   "sd_bp": 21.93189881254232,
+   "sharpe": -1.9379343280206258,
+   "t": -2.5137478587376134,
+   "hit": 0.4221698113207547
+  },
+  "gross": {
+   "n": 424,
+   "mean_bp": -0.9885212285160486,
+   "sd_bp": 21.929893862745132,
+   "sharpe": -0.7155660723387,
+   "t": -0.928180411543619,
+   "hit": 0.46462264150943394
+  },
+  "mean_cost_bp": 1.6888896207043502
+ },
+ "D09_pead_long_vs_xs": {
+  "rail": "A",
+  "note": "long ONLY the positive-surprise names in nights 1-5, short the cross-section",
+  "short_notional": 0.5,
+  "net": {
+   "n": 398,
+   "mean_bp": -3.3518187788307228,
+   "sd_bp": 10.685024851126403,
+   "sharpe": -4.97972389513391,
+   "t": -6.258158081549615,
+   "hit": 0.3542713567839196
+  },
+  "gross": {
+   "n": 398,
+   "mean_bp": -1.662899954730758,
+   "sd_bp": 10.682421789608837,
+   "sharpe": -2.4711361273964005,
+   "t": -3.1055457796338604,
+   "hit": 0.4396984924623116
+  },
+  "mean_cost_bp": 1.6889188240999655
+ },
+ "D10_pead_short_vs_xs": {
+  "rail": "A",
+  "note": "SHORT ONLY the negative-surprise names in nights 1-5, long the cross-section",
+  "short_notional": 0.5,
+  "net": {
+   "n": 385,
+   "mean_bp": -0.6777268324150656,
+   "sd_bp": 13.849499433927022,
+   "sharpe": -0.7768208507290634,
+   "t": -0.960176269653541,
+   "hit": 0.4597402597402597
+  },
+  "gross": {
+   "n": 385,
+   "mean_bp": 1.0115814158048868,
+   "sd_bp": 13.853087084869431,
+   "sharpe": 1.1591897924488848,
+   "t": 1.4327969308360258,
+   "hit": 0.5116883116883116
+  },
+  "mean_cost_bp": 1.6893082482199515
+ },
+ "D11_pead13_moclegal": {
+  "rail": "B",
+  "note": "D03 executed MOC-legal (closing auction in, opening auction out)",
+  "short_notional": 0.5,
+  "net": {
+   "n": 294,
+   "mean_bp": -2.2607377776177433,
+   "sd_bp": 27.078141021470948,
+   "sharpe": -1.3253531550107436,
+   "t": -1.4315450219068977,
+   "hit": 0.4931972789115646
+  },
+  "gross": {
+   "n": 294,
+   "mean_bp": -1.1989964486426206,
+   "sd_bp": 27.080107179014338,
+   "sharpe": -0.7028583169898956,
+   "t": -0.7591737500218116,
+   "hit": 0.5204081632653061
+  },
+  "mean_cost_bp": 1.0617413289751216
+ },
+ "D12_pead15_advneutral": {
+  "rail": "A",
+  "note": "D04 ranked within dollar-ADV terciles and pooled",
+  "short_notional": 0.5,
+  "net": {
+   "n": 288,
+   "mean_bp": -3.19427875724054,
+   "sd_bp": 19.623933998158932,
+   "sharpe": -2.5839672750635443,
+   "t": -2.7623772119781833,
+   "hit": 0.4131944444444444
+  },
+  "gross": {
+   "n": 288,
+   "mean_bp": -1.5060994280139834,
+   "sd_bp": 19.62547340527914,
+   "sharpe": -1.2182425729989517,
+   "t": -1.3023560920411483,
+   "hit": 0.4791666666666667
+  },
+  "mean_cost_bp": 1.6881793292265566
+ },
+ "D13_post15_long_vs_xs": {
+  "rail": "A",
+  "note": "CONTROL: long EVERY name 1-5 nights after a print, irrespective of the surprise sign, short the cross-section",
+  "short_notional": 0.5,
+  "net": {
+   "n": 773,
+   "mean_bp": -4.007730344605125,
+   "sd_bp": 16.231229125855073,
+   "sharpe": -3.9196505938328032,
+   "t": -6.86494135201606,
+   "hit": 0.3906856403622251
+  },
+  "gross": {
+   "n": 773,
+   "mean_bp": -2.3191835483421332,
+   "sd_bp": 16.23023525363584,
+   "sharpe": -2.268352670581679,
+   "t": -3.9728306583585438,
+   "hit": 0.4540750323415265
+  },
+  "mean_cost_bp": 1.6885467962629928
+ },
+ "D14_pead_neg_long_vs_xs": {
+  "rail": "A",
+  "note": "long ONLY the negative-surprise names in nights 1-5, short the cross-section",
+  "short_notional": 0.5,
+  "net": {
+   "n": 480,
+   "mean_bp": -2.5466890132896443,
+   "sd_bp": 15.055948586752947,
+   "sharpe": -2.685146973089392,
+   "t": -3.7058548958027213,
+   "hit": 0.42083333333333334
+  },
+  "gross": {
+   "n": 480,
+   "mean_bp": -0.8578252213663046,
+   "sd_bp": 15.054647699027134,
+   "sharpe": -0.904541474288039,
+   "t": -1.2483858368058665,
+   "hit": 0.48125
+  },
+  "mean_cost_bp": 1.6888637919233394
+ },
+ "D15_post110_long_vs_xs": {
+  "rail": "A",
+  "note": "CONTROL: D13 over nights 1-10 instead of 1-5",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1108,
+   "mean_bp": -2.5064911574155606,
+   "sd_bp": 14.4821114134348,
+   "sharpe": -2.7474801470255428,
+   "t": -5.76108353847478,
+   "hit": 0.3944043321299639
+  },
+  "gross": {
+   "n": 1108,
+   "mean_bp": -0.8174469836262821,
+   "sd_bp": 14.480805404876364,
+   "sharpe": -0.8961220187076312,
+   "t": -1.8790431719881422,
+   "hit": 0.45938628158844763
+  },
+  "mean_cost_bp": 1.6890441737892792
+ },
+ "D16_post1120_long_vs_xs": {
+  "rail": "A",
+  "note": "PLACEBO: long names 11-20 nights after a print -- the attention window should be over",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1115,
+   "mean_bp": -2.0586480307289654,
+   "sd_bp": 14.364752516279303,
+   "sharpe": -2.275014785036814,
+   "t": -4.785434615378472,
+   "hit": 0.40896860986547084
+  },
+  "gross": {
+   "n": 1115,
+   "mean_bp": -0.3696798812644119,
+   "sd_bp": 14.364487975753862,
+   "sharpe": -0.40854127157770387,
+   "t": -0.8593559723995574,
+   "hit": 0.48071748878923765
+  },
+  "mean_cost_bp": 1.6889681494645532
+ },
+ "D17_absjump_fade": {
+  "rail": "A",
+  "note": "among post-print names, long the SMALLEST absolute surprise, short the largest (an attention, not a direction, sort)",
+  "short_notional": 0.5,
+  "net": {
+   "n": 570,
+   "mean_bp": -0.9865306904623858,
+   "sd_bp": 30.822299147649442,
+   "sharpe": -0.5080960745711336,
+   "t": -0.7641577061501943,
+   "hit": 0.48947368421052634
+  },
+  "gross": {
+   "n": 570,
+   "mean_bp": 0.7031976859200479,
+   "sd_bp": 30.823505725748205,
+   "sharpe": 0.362155988876971,
+   "t": 0.5446692143063135,
+   "hit": 0.519298245614035
+  },
+  "mean_cost_bp": 1.6897283763824338
+ },
+ "X01_covered_vs_uncovered": {
+  "rail": "A",
+  "note": "CONFOUND PROBE, not a strategy: long domestic 8-K filers with no print in 20 sessions, short the ETF/ADR remainder of the top-500-ADV screen",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1229,
+   "mean_bp": -1.0985383883258013,
+   "sd_bp": 12.220330583686975,
+   "sharpe": -1.4270281943342658,
+   "t": -3.151434062243967,
+   "hit": 0.4369406021155411
+  },
+  "gross": {
+   "n": 1229,
+   "mean_bp": 0.5905069616440407,
+   "sd_bp": 12.218974725635327,
+   "sharpe": 0.767168082286669,
+   "t": 1.6942059278040276,
+   "hit": 0.5264442636289667
+  },
+  "mean_cost_bp": 1.6890453499698421
+ },
+ "G01_gapfade_postann": {
+  "rail": "A",
+  "note": "fade this morning's realised close-to-open gap, restricted to names that announced LAST night",
+  "short_notional": 0.5,
+  "net": {
+   "n": 148,
+   "mean_bp": 0.43097066835450076,
+   "sd_bp": 56.15022468083558,
+   "sharpe": 0.12184185021277123,
+   "t": 0.09337423841223094,
+   "hit": 0.4797297297297297
+  },
+  "gross": {
+   "n": 148,
+   "mean_bp": 2.1200749471713043,
+   "sd_bp": 56.15216730900602,
+   "sharpe": 0.5993561431208411,
+   "t": 0.4593202032296005,
+   "hit": 0.5337837837837838
+  },
+  "mean_cost_bp": 1.6891042788168042
+ },
+ "G02_gapfade_quiet": {
+  "rail": "A",
+  "note": "the same gap fade on names with NO announcement within +-10 sessions",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1236,
+   "mean_bp": -3.4048714625626446,
+   "sd_bp": 83.096209391501,
+   "sharpe": -0.6504587779911104,
+   "t": -1.4405513503378775,
+   "hit": 0.4692556634304207
+  },
+  "gross": {
+   "n": 1236,
+   "mean_bp": -1.7158614747234877,
+   "sd_bp": 83.09649406555349,
+   "sharpe": -0.32779308903984994,
+   "t": -0.7259534239912024,
+   "hit": 0.49029126213592233
+  },
+  "mean_cost_bp": 1.6890099878391571
+ },
+ "G03_gapfade_all": {
+  "rail": "A",
+  "note": "the unconditional gap fade (T26's A25, repeated here as the reference)",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1236,
+   "mean_bp": -3.306268596869281,
+   "sd_bp": 74.51808242046957,
+   "sharpe": -0.704330883787935,
+   "t": -1.5598602710212743,
+   "hit": 0.46601941747572817
+  },
+  "gross": {
+   "n": 1236,
+   "mean_bp": -1.6172586090301233,
+   "sd_bp": 74.51803648527094,
+   "sharpe": -0.3445230942995415,
+   "t": -0.7630048598138393,
+   "hit": 0.4935275080906149
+  },
+  "mean_cost_bp": 1.6890099878391571
+ },
+ "T01_p10_quiet": {
+  "rail": "A",
+  "note": "T3 pressure fade restricted to names with NO announcement within +-10 sessions",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1236,
+   "mean_bp": 8.266701000256578,
+   "sd_bp": 59.054997820709744,
+   "sharpe": 2.222162643305126,
+   "t": 4.921356286973401,
+   "hit": 0.5914239482200647
+  },
+  "gross": {
+   "n": 1236,
+   "mean_bp": 9.955710988095733,
+   "sd_bp": 59.05637453501745,
+   "sharpe": 2.676121140865085,
+   "t": 5.926724419104734,
+   "hit": 0.6156957928802589
+  },
+  "mean_cost_bp": 1.6890099878391571
+ },
+ "T02_p10_post15": {
+  "rail": "A",
+  "note": "T3 pressure fade restricted to the 5 sessions after a print",
+  "short_notional": 0.5,
+  "net": {
+   "n": 425,
+   "mean_bp": 4.1259279656871835,
+   "sd_bp": 33.211795996438205,
+   "sharpe": 1.972102802103017,
+   "t": 2.5610835391200264,
+   "hit": 0.5435294117647059
+  },
+  "gross": {
+   "n": 425,
+   "mean_bp": 5.814775652605894,
+   "sd_bp": 33.21210900171155,
+   "sharpe": 2.7793086501617257,
+   "t": 3.609366421706077,
+   "hit": 0.5882352941176471
+  },
+  "mean_cost_bp": 1.6888476869187092
+ },
+ "T03_p10_annnight_excl": {
+  "rail": "A",
+  "note": "T3 pressure fade with tonight's announcers REMOVED from the book",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1236,
+   "mean_bp": 7.506463679768023,
+   "sd_bp": 48.62926706693459,
+   "sharpe": 2.450405361224404,
+   "t": 5.426838519865793,
+   "hit": 0.5865695792880259
+  },
+  "gross": {
+   "n": 1236,
+   "mean_bp": 9.195473667607182,
+   "sd_bp": 48.631027917870995,
+   "sharpe": 3.0016560480299272,
+   "t": 6.647676716107695,
+   "hit": 0.6213592233009708
+  },
+  "mean_cost_bp": 1.6890099878391571
+ },
+ "H01_newhi_cont": {
+  "rail": "A",
+  "note": "long names printing a new 252-day closing high today, short the cross-section, overnight",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1140,
+   "mean_bp": -1.3314601737608573,
+   "sd_bp": 42.17590843237638,
+   "sharpe": -0.5011456963882056,
+   "t": -1.0658992594183399,
+   "hit": 0.46403508771929824
+  },
+  "gross": {
+   "n": 1140,
+   "mean_bp": 0.35776386168710533,
+   "sd_bp": 42.17758921965138,
+   "sharpe": 0.13465267554967383,
+   "t": 0.28639612827466987,
+   "hit": 0.525438596491228
+  },
+  "mean_cost_bp": 1.6892240354479624
+ },
+ "H02_newlo_cont": {
+  "rail": "A",
+  "note": "short names printing a new 252-day closing low today, long the cross-section",
+  "short_notional": 0.5,
+  "net": {
+   "n": 530,
+   "mean_bp": 2.6517227108419776,
+   "sd_bp": 51.22960717869852,
+   "sharpe": 0.8216887723910299,
+   "t": 1.1916398473454637,
+   "hit": 0.5339622641509434
+  },
+  "gross": {
+   "n": 530,
+   "mean_bp": 4.338520200284462,
+   "sd_bp": 51.234180514553955,
+   "sharpe": 1.3442563608162468,
+   "t": 1.949484401417541,
+   "hit": 0.5754716981132075
+  },
+  "mean_cost_bp": 1.6867974894424853
+ },
+ "H03_hl_pos_fade": {
+  "rail": "A",
+  "note": "continuous 52-week range position: long the bottom decile, short the top decile, overnight",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1236,
+   "mean_bp": -4.288899021721733,
+   "sd_bp": 45.18977075042755,
+   "sharpe": -1.5066277196774522,
+   "t": -3.3366827683390765,
+   "hit": 0.41262135922330095
+  },
+  "gross": {
+   "n": 1236,
+   "mean_bp": -2.5998890338825755,
+   "sd_bp": 45.1880275447352,
+   "sharpe": -0.9133383589103393,
+   "t": -2.02274279441218,
+   "hit": 0.44741100323624594
+  },
+  "mean_cost_bp": 1.6890099878391571
+ },
+ "H04_hl_pos_cont": {
+  "rail": "A",
+  "note": "the continuation sign of H03",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1236,
+   "mean_bp": 0.9108790460434177,
+   "sd_bp": 45.186312501822826,
+   "sharpe": 0.32000302262240377,
+   "t": 0.7087009998921195,
+   "hit": 0.5137540453074434
+  },
+  "gross": {
+   "n": 1236,
+   "mean_bp": 2.5998890338825755,
+   "sd_bp": 45.1880275447352,
+   "sharpe": 0.9133383589103393,
+   "t": 2.02274279441218,
+   "hit": 0.5525889967637541
+  },
+  "mean_cost_bp": 1.6890099878391571
+ },
+ "H05_newhi_p10_fade": {
+  "rail": "A",
+  "note": "T3 pressure fade restricted to names at a new 52-week high",
+  "short_notional": 0.5,
+  "net": {
+   "n": 924,
+   "mean_bp": 0.6804441721939133,
+   "sd_bp": 26.990537564518227,
+   "sharpe": 0.40020382470372795,
+   "t": 0.7663319807982296,
+   "hit": 0.5216450216450217
+  },
+  "gross": {
+   "n": 924,
+   "mean_bp": 2.3700902071992904,
+   "sd_bp": 26.990966196989937,
+   "sharpe": 1.3939484553327732,
+   "t": 2.6692080759013446,
+   "hit": 0.5606060606060606
+  },
+  "mean_cost_bp": 1.689646035005377
+ },
+ "H06_newhi_moclegal": {
+  "rail": "B",
+  "note": "H01 executed MOC-legal",
+  "short_notional": 0.5,
+  "net": {
+   "n": 1140,
+   "mean_bp": -0.7089844172818549,
+   "sd_bp": 41.98022189424192,
+   "sharpe": -0.26809717055904175,
+   "t": -0.570222547276294,
+   "hit": 0.4824561403508772
+  },
+  "gross": {
+   "n": 1140,
+   "mean_bp": 0.350239618166108,
+   "sd_bp": 41.981880882559366,
+   "sharpe": 0.13243526628194036,
+   "t": 0.28167986529298883,
+   "hit": 0.525438596491228
+  },
+  "mean_cost_bp": 1.0592240354479627
+ },
+ "R01_rankpromote": {
+  "rail": "A",
+  "note": "PROXY for an index add: names newly entering the point-in-time top-500-ADV screen, first 5 sessions of the month, long vs the cross-section",
+  "short_notional": 0.5,
+  "net": {
+   "n": 293,
+   "mean_bp": -1.948180702514277,
+   "sd_bp": 18.377373254912527,
+   "sharpe": -1.6828525740989804,
+   "t": -1.8145945875681928,
+   "hit": 0.4197952218430034
+  },
+  "gross": {
+   "n": 293,
+   "mean_bp": -0.25931223849061796,
+   "sd_bp": 18.376944884930694,
+   "sharpe": -0.224001007542087,
+   "t": -0.2415369130675766,
+   "hit": 0.4948805460750853
+  },
+  "mean_cost_bp": 1.6888684640236593
+ },
+ "R02_rankpromote_p10": {
+  "rail": "A",
+  "note": "T3 pressure fade restricted to newly promoted names",
+  "short_notional": 0.5,
+  "net": {
+   "n": 297,
+   "mean_bp": 7.374508813468252,
+   "sd_bp": 50.2471587587593,
+   "sharpe": 2.329817268518461,
+   "t": 2.52929691426763,
+   "hit": 0.5555555555555556
+  },
+  "gross": {
+   "n": 297,
+   "mean_bp": 9.063414087979277,
+   "sd_bp": 50.24731922756847,
+   "sharpe": 2.863381379299847,
+   "t": 3.108544942513849,
+   "hit": 0.5993265993265994
+  },
+  "mean_cost_bp": 1.6889052745110233
+ },
+ "M01_spy_tom_first": {
+  "rail": "A",
+  "note": "long SPY overnight on the first 3 sessions of a month (turn-of-month), one half-spread in, auction out",
+  "short_notional": 0.0,
+  "net": {
+   "n": 216,
+   "mean_bp": 2.6940278884450644,
+   "sd_bp": 62.6830322296674,
+   "sharpe": 0.6822638501388196,
+   "t": 0.631653585806727,
+   "hit": 0.5462962962962963
+  },
+  "gross": {
+   "n": 216,
+   "mean_bp": 4.324027888445062,
+   "sd_bp": 62.6830322296674,
+   "sharpe": 1.0950621290638936,
+   "t": 1.0138305295870766,
+   "hit": 0.5462962962962963
+  },
+  "mean_cost_bp": 1.6299999999999997
+ },
+ "M02_spy_tom_last": {
+  "rail": "A",
+  "note": "long SPY overnight on the last 2 sessions of a month",
+  "short_notional": 0.0,
+  "net": {
+   "n": 144,
+   "mean_bp": 9.278068032786658,
+   "sd_bp": 64.00243986335006,
+   "sharpe": 2.3012367073163844,
+   "t": 1.7395714387006531,
+   "hit": 0.6041666666666666
+  },
+  "gross": {
+   "n": 144,
+   "mean_bp": 10.908068032786655,
+   "sd_bp": 64.00243986335006,
+   "sharpe": 2.7055251669041387,
+   "t": 2.0451847878442484,
+   "hit": 0.6180555555555556
+  },
+  "mean_cost_bp": 1.6299999999999997
+ },
+ "M03_spy_fomc_eve": {
+  "rail": "A",
+  "note": "long SPY overnight into an FOMC decision day (the pre-FOMC announcement drift, overnight leg)",
+  "short_notional": 0.0,
+  "net": {
+   "n": 48,
+   "mean_bp": 13.284362895317491,
+   "sd_bp": 44.77275797283509,
+   "sharpe": 4.710067747213896,
+   "t": 2.0556420933312194,
+   "hit": 0.6875
+  },
+  "gross": {
+   "n": 48,
+   "mean_bp": 14.914362895317492,
+   "sd_bp": 44.77275797283509,
+   "sharpe": 5.287996134781868,
+   "t": 2.3078707202163633,
+   "hit": 0.7083333333333334
+  },
+  "mean_cost_bp": 1.6299999999999997
+ },
+ "M04_spy_fomc_night": {
+  "rail": "A",
+  "note": "long SPY overnight AFTER an FOMC decision",
+  "short_notional": 0.0,
+  "net": {
+   "n": 48,
+   "mean_bp": -11.26399757319581,
+   "sd_bp": 64.886577045377,
+   "sharpe": -2.755738185381855,
+   "t": -1.2027027457135808,
+   "hit": 0.4166666666666667
+  },
+  "gross": {
+   "n": 48,
+   "mean_bp": -9.63399757319581,
+   "sd_bp": 64.886577045377,
+   "sharpe": -2.3569585147557364,
+   "t": -1.0286610289275098,
+   "hit": 0.4375
+  },
+  "mean_cost_bp": 1.6299999999999997
+ },
+ "M05_spy_alln": {
+  "rail": "A",
+  "note": "unconditional long SPY overnight -- the benchmark every calendar cut has to beat",
+  "short_notional": 0.0,
+  "net": {
+   "n": 1499,
+   "mean_bp": 2.422616179321385,
+   "sd_bp": 77.34521825263666,
+   "sharpe": 0.4972232345412518,
+   "t": 1.2126960429086209,
+   "hit": 0.5503669112741828
+  },
+  "gross": {
+   "n": 1499,
+   "mean_bp": 4.052616179321382,
+   "sd_bp": 77.34521825263666,
+   "sharpe": 0.8317681282888312,
+   "t": 2.028629894425601,
+   "hit": 0.5630420280186791
+  },
+  "mean_cost_bp": 1.6299999999999997
+ },
+ "M06_spy_tom_moclegal": {
+  "rail": "B",
+  "note": "M01 executed with an MOC order instead of a marketable 15:59 buy",
+  "short_notional": 0.0,
+  "net": {
+   "n": 216,
+   "mean_bp": 2.1855044296681463,
+   "sd_bp": 64.611141991396,
+   "sharpe": 0.536963226333499,
+   "t": 0.49713134777827117,
+   "hit": 0.5509259259259259
+  },
+  "gross": {
+   "n": 216,
+   "mean_bp": 3.185504429668147,
+   "sd_bp": 64.611141991396,
+   "sharpe": 0.7826562659101947,
+   "t": 0.7245989021925889,
+   "hit": 0.5601851851851852
+  },
+  "mean_cost_bp": 1.0000000000000002
+ }
+}
