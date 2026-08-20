@@ -214,7 +214,7 @@ def _cross_demean(w: np.ndarray):
 
 
 class Panel:
-    def __init__(self, path=CACHE / "panel.npz"):
+    def __init__(self, path=CACHE / "panel_rv.npz"):
         z = np.load(path, allow_pickle=False)
         self.ts = z["ts"]
         self.day = z["day"].astype(np.int64)
@@ -959,8 +959,21 @@ def run(stage: str):
         gd, _ = daily_series(P, g, turn, mask, 0.0, reg_bp=0.0)   # true before-cost
         row["sharpe_gross"] = sharpe(gd)
         daily_gross[cfg["name"]] = gd
-        row["daily_turnover"] = float(np.bincount(P.day[mask], weights=turn[mask]).mean()
-                                      if mask.any() else np.nan)
+        # day indices are GLOBAL, so bincount emits a zero for every day outside the window;
+        # averaging over those would understate turnover by the ratio of the two windows.
+        # Average over the days the window actually contains, which is exactly `keep`.
+        tpd = np.bincount(P.day[mask], weights=turn[mask], minlength=P.day.max() + 1)
+        row["daily_turnover"] = float(tpd[keep].mean()) if keep.any() else float("nan")
+        # The TOTAL charge per unit of turnover this config's gross edge can bear before it
+        # is exactly consumed. Reported this way rather than "bp per side" because several
+        # configs cannot even pay REG_BP_PER_TURNOVER (the SEC 31 / FINRA TAF pass-through),
+        # and a per-side figure would come out negative and read as a bug rather than a fact.
+        gross_ret = row["sharpe_gross"] * row["ann_vol"]
+        row["breakeven_bp_per_turnover"] = (
+            float(gross_ret / (row["daily_turnover"] * 252 * 1e-4))
+            if row["daily_turnover"] > 0 and np.isfinite(gross_ret) else float("nan"))
+        row["can_pay_regulatory_floor"] = bool(
+            row["breakeven_bp_per_turnover"] > REG_BP_PER_TURNOVER)
         results.append(row)
         print(f"  [{i+1}/{len(cfgs)}] {cfg['name']:32s} gross={row['sharpe_gross']:+.2f} "
               f"net@1bp={row['sharpe_1.0bp']:+.2f} turn/day={row['daily_turnover']:.2f}",
@@ -1056,7 +1069,7 @@ def main():
                     "signal at all', separately from 'does it survive frictions'",
             "mean": float(np.mean(maxes_gross)), "p95": float(np.percentile(maxes_gross, 95)),
             "p99": float(np.percentile(maxes_gross, 99))}
-        np.savez_compressed(CACHE / "design_daily.npz", **daily)
+        np.savez_compressed(CACHE / "rv_design_daily.npz", **daily)
 
     out = OUT / f"SWEEP_intraday_rv_{args.stage}.json"
     out.write_text(json.dumps(payload, indent=1))

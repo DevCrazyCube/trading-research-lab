@@ -22,13 +22,21 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+
 ET = ZoneInfo("America/New_York")
 CACHE = pathlib.Path(__file__).resolve().parents[2] / "research" / "data" / "rv_cache"
 
 
 def main() -> None:
-    files = sorted(p for p in CACHE.glob("*.npz") if p.name != "panel.npz")
-    syms = [p.stem.replace("_", ".") if p.stem == "BRK_B" else p.stem for p in files]
+    # this cache directory is shared with other sweeps in the agent graph, so the panel is
+    # built from the DECLARED universe rather than from "every .npz in the folder" -- a
+    # neighbour's intermediate file must never silently become a tradable symbol
+    from trading_bot.rv_fetch import UNIVERSE
+    files = [CACHE / f"{s.replace('.', '_')}.npz" for s in UNIVERSE]
+    files = [f for f in files if f.exists()]
+    syms = ["BRK.B" if p.stem == "BRK_B" else p.stem for p in files]
     # Union of timestamps, but only keep bars present in the reference (SPY) so the grid is
     # the trading grid rather than a union polluted by one symbol's odd prints.
     ref = CACHE / "SPY.npz"
@@ -62,13 +70,13 @@ def main() -> None:
     slot = np.array([(x.hour * 60 + x.minute - 570) // 5 for x in dts], dtype=np.int16)
 
     np.savez_compressed(
-        CACHE / "panel.npz", ts=ts, day=day.astype(np.int32), slot=slot,
+        CACHE / "panel_rv.npz", ts=ts, day=day.astype(np.int32), slot=slot,
         daykey=daykey, syms=np.array(syms), close=close, open=opn, vwap=vwap, dvol=dvol,
     )
     cov = np.isfinite(close).mean(axis=0)
     manifest = {s: round(float(c), 4) for s, c in zip(syms, cov)}
     (CACHE / "panel_coverage.json").write_text(json.dumps(manifest, indent=1, sort_keys=True))
-    print("wrote panel.npz", flush=True)
+    print("wrote panel_rv.npz", flush=True)
     print("worst coverage:", sorted(manifest.items(), key=lambda kv: kv[1])[:12], flush=True)
 
 

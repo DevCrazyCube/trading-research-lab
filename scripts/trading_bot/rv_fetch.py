@@ -166,7 +166,10 @@ def main() -> None:
             continue
         # atomic: two shards may race on the same symbol at the wave boundary, and a
         # half-written .npz that a later run treats as "already cached" is a silent data bug
-        tmp = out.with_suffix(f".npz.tmp{os.getpid()}")
+        # np.savez_compressed APPENDS ".npz" unless the name already ends in it, so the temp
+        # name must end in ".npz" too -- otherwise the file lands somewhere the rename cannot
+        # find it and the symbol is silently never cached.
+        tmp = out.with_name(f".{out.stem}.tmp{os.getpid()}.npz")
         np.savez_compressed(tmp, **arrs)
         os.replace(tmp, out)
         manifest[sym] = {
