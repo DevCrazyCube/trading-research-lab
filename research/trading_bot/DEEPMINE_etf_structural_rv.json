@@ -1,0 +1,373 @@
+{
+ "key": "etf_structural_rv",
+ "verdict": "FAMILY_IS_NOISE_AS_A_TRADABLE_CLAIM",
+ "headline": "0 of 51 formulas has a positive net Sharpe on the design window or held out. The BEFORE-COST signal is real and clears its own noise bar (best gross Sharpe +2.93 vs a gross bootstrap p95 of 1.48, 42/51 gross-positive), but it lives entirely inside the half-spread: 45 of 51 formulas lose money at a LITERALLY ZERO spread, because SEC 31 + FINRA TAF alone exceed the gross edge at their turnover.",
+ "sub_family": "ETF structural relative value BEYOND same-index siblings",
+ "excluded_by_design": "same-index sibling pairs (SPY/IVV/VOO, XLK/VGT, GLD/IAU, EFA/IEFA...) -- rv_sweep.py and basket leg L2 already own that claim",
+ "prereg": {
+  "path": "research/trading_bot/DEEPMINE_etf_structural_rv_PREREGISTRATION.md",
+  "sha256": "1a141a67ae5e30102a51aeaaa00dede7a75f3310be227b67bbf6c0feb217f468",
+  "frozen_before": "any design number existed"
+ },
+ "windows": {
+  "design": [
+   "2021-01-04",
+   "2024-12-31"
+  ],
+  "design_days": 1005,
+  "heldout": [
+   "2025-01-02",
+   "2026-08-15"
+  ],
+  "heldout_days": 405,
+  "heldout_read": "once, after the shortlist was written to disk"
+ },
+ "n_formulas_tested": 51,
+ "groups": {
+  "C": {
+   "claim": "country ETF vs a NAV whose local market shut hours ago",
+   "n": 7,
+   "best_sharpe_gross": 2.08,
+   "median_sharpe_gross": 0.303,
+   "best_sharpe_net": -1.57,
+   "median_daily_turnover": 2.5
+  },
+  "L": {
+   "claim": "leveraged/inverse decay carry and levered-complex close rebalance",
+   "n": 9,
+   "best_sharpe_gross": 0.925,
+   "median_sharpe_gross": 0.179,
+   "best_sharpe_net": -1.001,
+   "median_daily_turnover": 2.0
+  },
+  "N": {
+   "claim": "ETF vs its own component sum (free iNAV proxy)",
+   "n": 18,
+   "best_sharpe_gross": 2.462,
+   "median_sharpe_gross": 0.705,
+   "best_sharpe_net": -5.065,
+   "median_daily_turnover": 8.53
+  },
+  "O": {
+   "claim": "overlapping-holdings pairs across different indices, rolling hedge ratio",
+   "n": 12,
+   "best_sharpe_gross": 2.925,
+   "median_sharpe_gross": 1.53,
+   "best_sharpe_net": -8.819,
+   "median_daily_turnover": 11.18
+  },
+  "P": {
+   "claim": "premium/discount as a signal, ETF-only or component-only book",
+   "n": 5,
+   "best_sharpe_gross": 0.542,
+   "median_sharpe_gross": 0.018,
+   "best_sharpe_net": -2.871,
+   "median_daily_turnover": 6.0
+  }
+ },
+ "noise_bar": {
+  "naive_sqrt_2lnN_in_SE_units": 2.804,
+  "one_SE_of_annualised_sharpe": 0.5007,
+  "naive_expected_max_sharpe": 1.404,
+  "block_bootstrap_net": {
+   "method": "stationary block bootstrap (block=5 days) of DEMEANED daily NET pnl, same day indices across every config so cross-config correlation is kept",
+   "n_boot": 800,
+   "mean": 1.0657163128153981,
+   "p50": 1.0473121471627231,
+   "p90": 1.4570919993868177,
+   "p95": 1.61100007391848,
+   "p99": 1.8502036380047084
+  },
+  "block_bootstrap_gross": {
+   "mean": 1.0310944669880826,
+   "p95": 1.4758491999847896
+  },
+  "mean_pairwise_corr_daily_net": 0.131,
+  "effective_independent_configs_participation_ratio": 11.56,
+  "why_bootstrap_exceeds_naive": "daily RV pnl is fat-tailed and autocorrelated; the naive formula assumes neither, so it UNDERSTATES the bar here even though the configs are correlated"
+ },
+ "distribution": {
+  "sharpe_gross": {
+   "n": 51,
+   "min": -1.1296058648591236,
+   "p10": -0.22207048904559085,
+   "p25": 0.15401430572399633,
+   "median": 0.6339041746445815,
+   "p75": 1.0680979211271158,
+   "p90": 1.958165604144738,
+   "max": 2.925457227441886,
+   "mean": 0.7360436893422437,
+   "sd": 0.856256428702682,
+   "n_positive": 42
+  },
+  "sharpe_net": {
+   "n": 51,
+   "min": -66.26540956121407,
+   "p10": -43.528449151857906,
+   "p25": -27.308837854885972,
+   "median": -13.92517888332401,
+   "p75": -5.707053851167778,
+   "p90": -1.614891285179608,
+   "max": -1.0013661064771615,
+   "mean": -18.408474953325904,
+   "sd": 16.6897426702898,
+   "n_positive": 0
+  },
+  "sharpe_flat1.0bp": {
+   "n": 51,
+   "min": -54.66359507631053,
+   "p10": -30.49372555735903,
+   "p25": -19.768706283523514,
+   "median": -7.80654067311336,
+   "p75": -4.0825676031883225,
+   "p90": -1.1201955557790184,
+   "max": -0.331204251312004,
+   "mean": -12.904761434480928,
+   "sd": 12.300987743472751,
+   "n_positive": 0
+  },
+  "sharpe_flat2.0bp": {
+   "n": 51,
+   "min": -74.84084146246057,
+   "p10": -50.52320710066095,
+   "p25": -34.129786808628864,
+   "median": -14.325167726576318,
+   "p75": -7.385230410173557,
+   "p90": -1.8490672767300431,
+   "max": -1.0824215412087201,
+   "mean": -22.052817557172258,
+   "sd": 19.129146119637937,
+   "n_positive": 0
+  },
+  "sharpe_flat2.5bp": {
+   "n": 51,
+   "min": -85.22432524832864,
+   "p10": -57.11250447667542,
+   "p25": -38.75998709636099,
+   "median": -17.666834212744693,
+   "p75": -9.068506785054295,
+   "p90": -2.203259391131604,
+   "max": -1.3018670213650352,
+   "mean": -25.494570962669922,
+   "sd": 21.437636110907057,
+   "n_positive": 0
+  }
+ },
+ "cost_model": {
+  "spread": "per-symbol half-spread, both legs, from spread_proxy.json",
+  "spread_provenance": "TICK_FLOOR_TIMES_ADVERSITY_NOT_A_QUOTE_MEASUREMENT",
+  "regulatory_bp_per_turnover": 0.15,
+  "borrow_annual": 0.0033,
+  "borrow_provenance": "B22G etb_general_collateral median 0.33 %/yr, charged on SHORT notional per calendar day, for overnight configs only",
+  "flat_sensitivity_rungs_bp": [
+   1.0,
+   2.0,
+   2.5
+  ]
+ },
+ "shortability_constraint": {
+  "screened": "2026-08-20, /v2/assets on the traded account",
+  "not_shortable_at_this_broker": [
+   "SDS",
+   "SH",
+   "SQQQ",
+   "TMV",
+   "TNA",
+   "TZA",
+   "USO",
+   "VIS"
+  ],
+  "note": "a broker PRODUCT restriction on leveraged/inverse ETPs, not borrow scarcity; it removes L01/L02 independently of their economics (42-43% of their short notional)"
+ },
+ "shortlist": {
+  "n_passing_all_gates": 0,
+  "below_noise_bar": true,
+  "carried_by_floor_rule": [
+   "L07_rebal_flow_fade_nextopen",
+   "L09_rebal_flow_cont_overnight",
+   "L02_decay_pair_short_both"
+  ]
+ },
+ "heldout_results": [
+  {
+   "name": "L07_rebal_flow_fade_nextopen",
+   "sharpe_gross": 1.629,
+   "sharpe_net": -0.186,
+   "daily_turnover": 2.0,
+   "unshortable_short_share": 0.0,
+   "sharpe_net_at_tick_floor_lower_bound": 0.738,
+   "is_REAL_under_prereg_section6": false
+  },
+  {
+   "name": "L09_rebal_flow_cont_overnight",
+   "sharpe_gross": 0.79,
+   "sharpe_net": -0.159,
+   "daily_turnover": 2.0,
+   "unshortable_short_share": 0.0,
+   "sharpe_net_at_tick_floor_lower_bound": 0.316,
+   "is_REAL_under_prereg_section6": false
+  },
+  {
+   "name": "L02_decay_pair_short_both",
+   "sharpe_gross": -0.708,
+   "sharpe_net": -1.311,
+   "daily_turnover": 0.24,
+   "unshortable_short_share": 0.417,
+   "sharpe_net_at_tick_floor_lower_bound": -1.074,
+   "is_REAL_under_prereg_section6": false
+  }
+ ],
+ "sensitivity_tick_floor_lower_bound": {
+  "what": "raw half-tick (0.5 cent / price), NO adversity multiplier, NO 1.0 bp floor -- the arithmetic lower bound on a US equity leg, not an achievable fill",
+  "design": {
+   "L07_rebal_flow_fade_nextopen": -0.065,
+   "L09_rebal_flow_cont_overnight": -0.437,
+   "L02_decay_pair_short_both": -0.67,
+   "C03_stalenav_cont_overnight": -0.699,
+   "P04_pd_xs_etfonly_hold13": -1.418,
+   "P03_pd_xs_etfonly_band": -1.446,
+   "N16_synth_adv_resid_band": -2.115,
+   "L05_rebal_flow_cont_last30": -2.521,
+   "N10_synth_eq_band_2.0_0.5": -2.613,
+   "N12_synth_eq_lvl_z390_hold13": -3.513,
+   "O05_overlap_beta_band_2.0_0.5": -3.852,
+   "O07_overlap_beta_z390_hold13": -5.053
+  },
+  "heldout": {
+   "L07_rebal_flow_fade_nextopen": 0.738,
+   "L09_rebal_flow_cont_overnight": 0.316,
+   "P03_pd_xs_etfonly_band": -0.475,
+   "L02_decay_pair_short_both": -1.074,
+   "P04_pd_xs_etfonly_hold13": -1.197,
+   "C03_stalenav_cont_overnight": -2.273,
+   "L05_rebal_flow_cont_last30": -2.421,
+   "N10_synth_eq_band_2.0_0.5": -2.671,
+   "N16_synth_adv_resid_band": -2.912,
+   "O05_overlap_beta_band_2.0_0.5": -2.98,
+   "N12_synth_eq_lvl_z390_hold13": -3.156,
+   "O07_overlap_beta_z390_hold13": -3.729
+  },
+  "reading": "every N, O, P and C formula still loses on both windows at the bound. Only the two levered-rebalance-flow rules turn positive, only out of sample, and only at a cost no account can achieve. The verdict does not depend on the adversity judgement."
+ },
+ "breakeven_diagnostic": {
+  "declared": "POST_HOC",
+  "n_zero_spread_still_loses": 45,
+  "of_n": 51,
+  "annualised_vol_of_a_unit_gross_book_pct": [
+   1.09,
+   7.0
+  ],
+  "top_by_gross": [
+   {
+    "name": "O01_overlap_beta_z78",
+    "kind": "overlap",
+    "sharpe_gross": 2.925,
+    "sharpe_net": -60.045,
+    "daily_turnover": 22.43,
+    "gross_bp_per_day": 1.827,
+    "cost_bp_per_day": 37.709,
+    "cost_multiple_of_gross": 20.6,
+    "reg_only_bp_per_day": 3.364,
+    "charged_half_spread_bp": 1.531,
+    "breakeven_half_spread_bp": -0.0685,
+    "zero_spread_still_loses": true,
+    "tightness_needed_x": null
+   },
+   {
+    "name": "O08_overlap_beta_dayanchor",
+    "kind": "overlap",
+    "sharpe_gross": 2.552,
+    "sharpe_net": -45.901,
+    "daily_turnover": 17.75,
+    "gross_bp_per_day": 1.653,
+    "cost_bp_per_day": 29.776,
+    "cost_multiple_of_gross": 18.0,
+    "reg_only_bp_per_day": 2.662,
+    "charged_half_spread_bp": 1.528,
+    "breakeven_half_spread_bp": -0.0568,
+    "zero_spread_still_loses": true,
+    "tightness_needed_x": null
+   },
+   {
+    "name": "N01_synth_eq_lvl_z78",
+    "kind": "synth",
+    "sharpe_gross": 2.462,
+    "sharpe_net": -48.149,
+    "daily_turnover": 18.43,
+    "gross_bp_per_day": 1.653,
+    "cost_bp_per_day": 28.043,
+    "cost_multiple_of_gross": 17.0,
+    "reg_only_bp_per_day": 2.765,
+    "charged_half_spread_bp": 1.371,
+    "breakeven_half_spread_bp": -0.0603,
+    "zero_spread_still_loses": true,
+    "tightness_needed_x": null
+   },
+   {
+    "name": "C06_country_xs_rev_lb6",
+    "kind": "country_xs_rev",
+    "sharpe_gross": 2.08,
+    "sharpe_net": -66.265,
+    "daily_turnover": 49.01,
+    "gross_bp_per_day": 4.769,
+    "cost_bp_per_day": 136.614,
+    "cost_multiple_of_gross": 28.6,
+    "reg_only_bp_per_day": 7.351,
+    "charged_half_spread_bp": 2.638,
+    "breakeven_half_spread_bp": -0.0527,
+    "zero_spread_still_loses": true,
+    "tightness_needed_x": null
+   },
+   {
+    "name": "N08_synth_eq_dayanchor",
+    "kind": "synth",
+    "sharpe_gross": 2.071,
+    "sharpe_net": -36.189,
+    "daily_turnover": 15.3,
+    "gross_bp_per_day": 1.419,
+    "cost_bp_per_day": 23.295,
+    "cost_multiple_of_gross": 16.4,
+    "reg_only_bp_per_day": 2.295,
+    "charged_half_spread_bp": 1.372,
+    "breakeven_half_spread_bp": -0.0573,
+    "zero_spread_still_loses": true,
+    "tightness_needed_x": null
+   },
+   {
+    "name": "O09_overlap_beta_z390_riskparity",
+    "kind": "overlap",
+    "sharpe_gross": 1.958,
+    "sharpe_net": -43.528,
+    "daily_turnover": 13.76,
+    "gross_bp_per_day": 0.884,
+    "cost_bp_per_day": 22.351,
+    "cost_multiple_of_gross": 25.3,
+    "reg_only_bp_per_day": 2.065,
+    "charged_half_spread_bp": 1.474,
+    "breakeven_half_spread_bp": -0.0858,
+    "zero_spread_still_loses": true,
+    "tightness_needed_x": null
+   }
+  ]
+ },
+ "selftest": {
+  "null_max_gross_sharpe": 0.9983916749421806,
+  "null_max_in_SE_units": 1.41,
+  "lookahead_max_gross_sharpe": 2.040768049705936,
+  "lookahead_leak_controls": {
+   "LEAK_N02_no_shift": -26.773,
+   "LEAK_O02_no_shift": -38.074
+  },
+  "planted_N02_with_plant": 11.727,
+  "planted_N02_negated": -12.596,
+  "reading": "a genuine one-bar leak is worth ~30 Sharpe on the lookahead panel; the real configs max at 2.04, so there is no lookahead. The planted OU deviation is found at +11.7 and reverses to -12.6 when negated, so the wiring measures what it claims."
+ },
+ "basket_ready": [],
+ "not_available_stated_not_substituted": {
+  "real_iNAV_IIV": "Alpaca returns ZERO bars for SPY.IV, QQQ.IV, EWJ.IV, XLKIV, SXV, IVSPY, EWJIV. Group N is a PROXY for iNAV and is labelled as one everywhere.",
+  "published_index_weights": "not free here; baskets use equal / ADV-proportional / top-3-by-ADV weights over the cached members only (2 names of XLE, 33 of the S&P 500)",
+  "local_market_index_intraday": "Stooq is daily-only and a US retail account cannot trade Tokyo; group C tests the tradable US-listed formulation instead",
+  "ADR_to_ordinary_and_holdco_maps": "not free on this host. NOT TESTED. Absent, not zero."
+ },
+ "recommendation": "Do not add any of this to the basket. The one hypothesis worth a SEPARATE frozen test is L07 -- fade the levered complex close-rebalance flow, put on at the next open -- restated as a ONCE-A-SESSION rule in the L2 mould rather than a 5-minute one, with execution measured rather than proxied. It must be pre-registered afresh and must NOT be scored on this design window again."
+}

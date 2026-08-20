@@ -1,0 +1,120 @@
+{
+ "n_configs": 51,
+ "probes": {
+  "null": {
+   "leak_controls_gross_sharpe": {
+    "LEAK_N02_no_shift": -0.169,
+    "LEAK_O02_no_shift": 0.714
+   },
+   "n_scored": 51,
+   "years": 1.98,
+   "one_se_of_sharpe": 0.71,
+   "gross_mean": 0.07922600520662601,
+   "gross_sd": 0.4237869540077718,
+   "gross_max": 0.9983916749421806,
+   "gross_max_in_se_units": 1.4063249532715232,
+   "top5": [
+    {
+     "name": "C07_country_xs_rev_lb39",
+     "gross": 0.9983916749421806,
+     "net": -8.46413836458353,
+     "turn": 12.469745884249892
+    },
+    {
+     "name": "P03_pd_xs_etfonly_band",
+     "gross": 0.7585548092238026,
+     "net": -1.6384624052917012,
+     "turn": 4.49325992063492
+    },
+    {
+     "name": "C05_stalenav_cont_nextopen",
+     "gross": 0.7542518637657826,
+     "net": -11.716382689420556,
+     "turn": 5.737529798180288
+    },
+    {
+     "name": "O12_overlap_beta_z390_bw3900",
+     "gross": 0.6424345697240345,
+     "net": -9.471507407093116,
+     "turn": 9.661680615018353
+    },
+    {
+     "name": "O06_overlap_beta_band_1.5_0.25",
+     "gross": 0.6327173371097872,
+     "net": -3.334812559400769,
+     "turn": 4.539899518999197
+    }
+   ]
+  },
+  "lookahead": {
+   "leak_controls_gross_sharpe": {
+    "LEAK_N02_no_shift": -26.773,
+    "LEAK_O02_no_shift": -38.074
+   },
+   "n_scored": 51,
+   "years": 1.98,
+   "one_se_of_sharpe": 0.71,
+   "gross_mean": 0.5848747899477756,
+   "gross_sd": 0.7324578255911105,
+   "gross_max": 2.040768049705936,
+   "gross_max_in_se_units": 2.8746063335383143,
+   "top5": [
+    {
+     "name": "O09_overlap_beta_z390_riskparity",
+     "gross": 2.040768049705936,
+     "net": -9.47100482874343,
+     "turn": 11.28798071675881
+    },
+    {
+     "name": "O12_overlap_beta_z390_bw3900",
+     "gross": 1.9407877395230637,
+     "net": -8.873779035934959,
+     "turn": 9.774970683412302
+    },
+    {
+     "name": "O02_overlap_beta_z390",
+     "gross": 1.8967609813369872,
+     "net": -8.989726340050712,
+     "turn": 9.959025065987051
+    },
+    {
+     "name": "O11_overlap_beta_z390_thr1.5",
+     "gross": 1.76472563859476,
+     "net": -12.606121732471054,
+     "turn": 18.624728531239235
+    },
+    {
+     "name": "O07_overlap_beta_z390_hold13",
+     "gross": 1.6730957307565166,
+     "net": -2.4060691263062868,
+     "turn": 3.8436797592460175
+    }
+   ]
+  },
+  "planted": {
+   "note": "gross Sharpe with zero costs; the plant is an OU deviation of XLK from its own equal-weighted component basket, half-life ~14 bars",
+   "with_plant": {
+    "N01_synth_eq_lvl_z78": 10.766,
+    "N02_synth_eq_lvl_z390": 11.727,
+    "N03_synth_eq_lvl_z1170": 11.365,
+    "N04_synth_adv_lvl_z390": 11.727,
+    "N05_synth_top3_lvl_z390": 9.779,
+    "N06_synth_eq_resid_z390": 11.914,
+    "N07_synth_adv_resid_z390": 11.914,
+    "N08_synth_eq_dayanchor": 8.909,
+    "N09_synth_eq_lvl_ewma78": 13.893
+   },
+   "with_plant_negated": {
+    "N01_synth_eq_lvl_z78": -9.741,
+    "N02_synth_eq_lvl_z390": -12.596,
+    "N03_synth_eq_lvl_z1170": -12.761,
+    "N04_synth_adv_lvl_z390": -12.596,
+    "N05_synth_top3_lvl_z390": -10.976,
+    "N06_synth_eq_resid_z390": -12.278,
+    "N07_synth_adv_resid_z390": -12.278,
+    "N08_synth_eq_dayanchor": -9.902,
+    "N09_synth_eq_lvl_ewma78": -14.487
+   }
+  }
+ }
+}

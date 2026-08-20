@@ -260,13 +260,19 @@ class Panel:
 
 # ------------------------------------------------------------------ costs
 
-def load_costs(P):
+def load_costs(P, model="headline"):
+    """`model="tickfloor"` charges the RAW half-tick and nothing else: no adversity multiplier,
+    no 1.0 bp floor. That is not a realistic fill -- it is the arithmetic LOWER BOUND on what a
+    US equity leg can cost, the number you would get if every order always rested at a
+    one-cent-wide touch. It exists so the verdict can be shown not to depend on the adversity
+    judgement: if a formula loses even at the lower bound, no execution skill rescues it."""
     doc = json.loads((CACHE / "spread_proxy.json").read_text())
+    field = "half_tick_bp" if model == "tickfloor" else "headline_half_bp"
     hs = np.full(P.S, 2.5)
     for j, s in enumerate(P.syms):
         row = doc["symbols"].get(s.replace(".", "_")) or doc["symbols"].get(s)
         if row:
-            hs[j] = row["headline_half_bp"]
+            hs[j] = row[field]
     scr = json.loads((CACHE / "borrow_screen.json").read_text())
     unshortable = np.zeros(P.S, dtype=bool)
     unknown = np.zeros(P.S, dtype=bool)
@@ -287,10 +293,15 @@ def evaluate(P, W, mask, hs_bp, overnight, scale_bp=1.0):
         W[P.last_bar] = 0.0
     W = _norm(W)
     r = np.where(np.isfinite(P.fwd_ret), P.fwd_ret, 0.0)
-    gross = (W * r).sum(axis=1)
-    dW = np.abs(np.diff(np.vstack([np.zeros((1, P.S)), W]), axis=0))
+    gross = np.einsum("ts,ts->t", W, r)
+    # peak RSS matters here: this host has ~4 GB free and a [T,S] float64 is 115 MB, so the
+    # turnover difference is built with two temporaries rather than vstack+diff+abs+multiply
+    prev = np.empty_like(W)
+    prev[0] = 0.0
+    prev[1:] = W[:-1]
+    dW = np.abs(W - prev, out=prev)
     turn = dW.sum(axis=1)
-    spread_cost = (dW * hs_bp[None, :]).sum(axis=1) * scale_bp * 1e-4
+    spread_cost = (dW @ hs_bp) * scale_bp * 1e-4
     reg_cost = turn * REG_BP_PER_TURNOVER * 1e-4
     borrow = np.zeros(P.T)
     if overnight:
@@ -352,8 +363,19 @@ def _basket_logprice(P, cols, mode, adv_win=BARS_PER_DAY * 20):
         w = np.where(rank < 3, 1.0 / 3.0, 0.0)
     else:
         raise ValueError(mode)
-    lb = np.nansum(w * L, axis=1)
-    lb = np.where(np.isfinite(L).all(axis=1), lb, np.nan)
+    # A member with no bar in this minute must not silently shrink the basket. Renormalise the
+    # weights over the members that ARE quoted, and refuse the bar outright if less than 60 %
+    # of the intended weight is present -- for the 33-name SPY proxy, demanding all 33 at once
+    # would throw away a tenth of the sample for no gain, and demanding nothing would fabricate
+    # a basket that is not the one being hedged.
+    ok = np.isfinite(L)
+    wok = np.where(ok, w, 0.0)
+    tot = wok.sum(axis=1, keepdims=True)
+    good = tot[:, 0] >= 0.60
+    w = np.where(tot > 1e-9, wok / np.maximum(tot, 1e-9), 0.0)
+    lb = (w * np.where(ok, L, 0.0)).sum(axis=1)
+    lb = np.where(good, lb, np.nan)
+    w = np.where(good[:, None], w, np.nan)
     return lb, w
 
 
@@ -414,8 +436,13 @@ def build(P, cfg):
                 z = np.where(sd > 1e-12, dev / sd, np.nan)
                 hedge = wts
             elif spread_mode == "resid":
-                rb = np.nansum(wts * P.r[:, cols], axis=1)
-                rb = np.where(np.isfinite(P.r[:, cols]).all(axis=1), rb, np.nan)
+                rm = P.r[:, cols]
+                okr = np.isfinite(rm)
+                wr = np.where(okr & np.isfinite(wts), wts, 0.0)
+                tot = wr.sum(axis=1, keepdims=True)
+                rb = np.where(tot[:, 0] >= 0.60,
+                              (np.where(tot > 1e-9, wr / np.maximum(tot, 1e-9), 0.0)
+                               * np.where(okr, rm, 0.0)).sum(axis=1), np.nan)
                 re = P.r[:, ie]
                 beta = _shift(_rolling_beta(re, rb, cfg.get("betawin", BARS_PER_DAY * 20)), 1)
                 resid = re - beta * rb
@@ -445,9 +472,15 @@ def build(P, cfg):
             s = _entry(z, cfg, P.day)
             if cfg.get("min_slot"):
                 s = np.where(P.slot >= cfg["min_slot"], s, 0.0)
+            # A band rule HOLDS its state through a bar whose basket is unquotable. Holding the
+            # ETF leg while the hedge legs silently become zero is a naked directional position
+            # wearing a market-neutral label, so the whole pair stands down for that bar.
+            hedge = _shift(hedge, 1)
+            valid = np.isfinite(hedge).all(axis=1)
+            s = np.where(valid, s, 0.0)
+            hedge = np.where(np.isfinite(hedge), hedge, 0.0)
             W[:, ie] += s
-            for j, c in enumerate(cols):
-                W[:, c] -= s * hedge[:, j]
+            W[:, cols] -= s[:, None] * hedge
             used += 1
         return _norm(W) if used else None
 
@@ -490,9 +523,10 @@ def build(P, cfg):
                 with np.errstate(divide="ignore", invalid="ignore"):
                     hl = np.log(0.5) / np.log(np.maximum(phi, 1e-6))
                 s = np.where(_shift(hl, 1) <= cfg["hlgate"], s, 0.0)
-            s = np.where(np.isfinite(s), s, 0.0)
+            hb = _shift(hb, 1)
+            s = np.where(np.isfinite(s) & np.isfinite(hb), s, 0.0)
             W[:, ia] += s
-            W[:, ib] -= s * np.where(np.isfinite(hb), hb, 1.0)
+            W[:, ib] -= s * np.where(np.isfinite(hb), hb, 0.0)
             used += 1
         return _norm(W) if used else None
 
@@ -549,12 +583,18 @@ def build(P, cfg):
         at = P.slot == ms
         sig[at] = move[at]
         sig = _ffill_daily(sig, P.day, np.nan)
+        # the move is measured from the CLOSE of bar meas_slot, so the earliest bar it may be
+        # traded in is meas_slot+1 -- without this shift the rule buys bar 66 knowing bar 66
+        sig = _shift(sig, 1)
         sig = np.where(np.isfinite(sig), sig, 0.0)
         if cfg.get("sign", 1.0) < 0:
             sig = -sig
         Wc = _cross_demean(sig)
-        lo, hi = cfg["slots"]
-        keep = (P.slot >= lo) & (P.slot < hi)
+        if cfg["slots"] == "lastbar":
+            keep = P.last_bar
+        else:
+            lo, hi = cfg["slots"]
+            keep = (P.slot >= lo) & (P.slot < hi)
         Wc[~keep] = 0.0
         W[:, cols] = Wc
         return W
@@ -579,8 +619,14 @@ def build(P, cfg):
         sig = np.where(sd > 1e-12, sig / (1.2533 * sd), 0.0)
         sig = np.clip(_shift(sig, 1), -3, 3)
         Wc = _cross_demean(sig)
-        lo, hi = cfg["slots"]
-        keep = (P.slot >= lo) & (P.slot < hi)
+        if cfg["slots"] == "lastbar":
+            # THE overnight formulation: put the book on at the closing bar's VWAP and take it
+            # off at the next open. That is the window in which the local NAV actually updates,
+            # so it is the only window in which a stale-NAV claim can be true.
+            keep = P.last_bar
+        else:
+            lo, hi = cfg["slots"]
+            keep = (P.slot >= lo) & (P.slot < hi)
         Wc[~keep] = 0.0
         W[:, cols] = Wc
         return W
@@ -637,7 +683,7 @@ def build(P, cfg):
             sp = P.logc[:, ie] - lbp
             mu, sd = _nan_roll(sp[:, None], cfg["win"])
             devs.append((sp - mu[:, 0]) / sd[:, 0])
-            memcols.append((mem, wts))
+            memcols.append((mem, np.where(np.isfinite(_shift(wts, 1)), _shift(wts, 1), 0.0)))
         if len(devs) < 4:
             return None
         Z = np.clip(_shift(np.vstack(devs).T, 1), -3, 3)
@@ -724,13 +770,21 @@ def config_list():
        "slots": (66, 78), "sign": -1.0})
     a({"name": "L07_rebal_flow_fade_nextopen", "kind": "rebal_flow", "meas_slot": 77,
        "slots": (0, 6), "sign": -1.0})
+    a({"name": "L08_rebal_flow_fade_overnight", "kind": "rebal_flow", "meas_slot": 72,
+       "slots": "lastbar", "sign": -1.0, "overnight": True})
+    a({"name": "L09_rebal_flow_cont_overnight", "kind": "rebal_flow", "meas_slot": 72,
+       "slots": "lastbar", "sign": 1.0, "overnight": True})
 
     # --- C: country / stale NAV ---------------------------------------------------
     a({"name": "C01_stalenav_cont_close", "kind": "stale_nav", "slots": (72, 78), "sign": 1.0})
     a({"name": "C02_stalenav_fade_close", "kind": "stale_nav", "slots": (72, 78), "sign": -1.0})
-    a({"name": "C03_stalenav_cont_nextopen", "kind": "stale_nav", "slots": (0, 6), "sign": 1.0})
-    a({"name": "C04_country_xs_rev_lb6", "kind": "country_xs_rev", "lb": 6})
-    a({"name": "C05_country_xs_rev_lb39", "kind": "country_xs_rev", "lb": 39})
+    a({"name": "C03_stalenav_cont_overnight", "kind": "stale_nav", "slots": "lastbar",
+       "sign": 1.0, "overnight": True})
+    a({"name": "C04_stalenav_fade_overnight", "kind": "stale_nav", "slots": "lastbar",
+       "sign": -1.0, "overnight": True})
+    a({"name": "C05_stalenav_cont_nextopen", "kind": "stale_nav", "slots": (0, 6), "sign": 1.0})
+    a({"name": "C06_country_xs_rev_lb6", "kind": "country_xs_rev", "lb": 6})
+    a({"name": "C07_country_xs_rev_lb39", "kind": "country_xs_rev", "lb": 39})
 
     # --- P: premium/discount as a signal, ETF-only or component-only book ---------
     a({"name": "P01_pd_xs_etfonly_z390", "kind": "pd_xs", "win": W20})
@@ -744,9 +798,9 @@ def config_list():
 
 # ------------------------------------------------------------------ driver
 
-def run(stage, only=None):
+def run(stage, only=None, cost_model="headline"):
     P = Panel()
-    hs_bp, unshortable, unknown, prov = load_costs(P)
+    hs_bp, unshortable, unknown, prov = load_costs(P, cost_model)
     lo, hi = DESIGN if stage == "design" else HELDOUT
     mask = (P.daykey >= lo) & (P.daykey <= hi)
     print(f"stage={stage} {lo}..{hi} bars={mask.sum()} days={len(set(P.day[mask]))} "
@@ -826,11 +880,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", choices=["design", "heldout"], required=True)
     ap.add_argument("--only", default=None)
+    ap.add_argument("--cost", choices=["headline", "tickfloor"], default="headline",
+                    help="tickfloor = raw half-tick lower bound, a SENSITIVITY rung, never the headline")
     args = ap.parse_args()
     if args.stage == "heldout" and not args.only:
         raise SystemExit("heldout requires --only with the FROZEN shortlist")
 
-    P, rows, daily, daily_gross, prov = run(args.stage, args.only)
+    P, rows, daily, daily_gross, prov = run(args.stage, args.only, args.cost)
     rows.sort(key=lambda r: -(r["sharpe_net"] if np.isfinite(r["sharpe_net"]) else -9))
     payload = {
         "key": KEY,
@@ -872,8 +928,11 @@ def main():
             },
             "bootstrap_gross": {"mean": float(mg.mean()), "p95": float(np.percentile(mg, 95))},
         }
-        np.savez_compressed(CACHE / "deepmine_design_daily.npz", **daily)
-    out = OUT / f"DEEPMINE_{KEY}_{args.stage}.json"
+        if args.cost == "headline":
+            np.savez_compressed(CACHE / "deepmine_design_daily.npz", **daily)
+    payload["cost_model"]["model"] = args.cost
+    suffix = "" if args.cost == "headline" else f"_{args.cost}"
+    out = OUT / f"DEEPMINE_{KEY}_{args.stage}{suffix}.json"
     out.write_text(json.dumps(payload, indent=1))
     print("wrote", out, flush=True)
 

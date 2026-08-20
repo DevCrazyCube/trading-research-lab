@@ -1,0 +1,41 @@
+{
+ "key": "etf_structural_rv",
+ "prereg_sha256": "1a141a67ae5e30102a51aeaaa00dede7a75f3310be227b67bbf6c0feb217f468",
+ "bootstrap_p95_noise_bar": 1.61100007391848,
+ "gates": {
+  "sharpe_net_gt": 1.61100007391848,
+  "daily_turnover_le": 4.0,
+  "n_days_ge": 500,
+  "unshortable_short_share_le": 0.1,
+  "cap": 6
+ },
+ "n_passing_all_gates": 0,
+ "below_noise_bar": true,
+ "below_noise_bar_note": "Fewer than three configs cleared the gates, so \u00a75's floor carried the top three by design sharpe_net to the held-out window anyway. Running them is NOT a promotion.",
+ "shortlist": [
+  {
+   "name": "L07_rebal_flow_fade_nextopen",
+   "kind": "rebal_flow",
+   "design_sharpe_net": -1.0013661064771615,
+   "design_sharpe_gross": 0.8355577254560557,
+   "daily_turnover": 1.9980099502487563,
+   "unshortable_short_share": 0.0
+  },
+  {
+   "name": "L09_rebal_flow_cont_overnight",
+   "kind": "rebal_flow",
+   "design_sharpe_net": -1.1225502572994686,
+   "design_sharpe_gross": 0.2469334387036083,
+   "daily_turnover": 1.9990049751243781,
+   "unshortable_short_share": 0.0
+  },
+  {
+   "name": "L02_decay_pair_short_both",
+   "kind": "decay_pair",
+   "design_sharpe_net": -1.257626146232814,
+   "design_sharpe_gross": 0.12870370525002484,
+   "daily_turnover": 0.5012307151113119,
+   "unshortable_short_share": 0.4166666666666667
+  }
+ ]
+}

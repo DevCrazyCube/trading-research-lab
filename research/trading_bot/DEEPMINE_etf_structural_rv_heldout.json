@@ -1,0 +1,142 @@
+{
+ "key": "etf_structural_rv",
+ "stage": "heldout",
+ "window": [
+  "2025-01-02",
+  "2026-08-15"
+ ],
+ "n_configs": 3,
+ "cost_model": {
+  "spread": "per-symbol half-spread, both legs, from spread_proxy.json",
+  "spread_provenance": "TICK_FLOOR_TIMES_ADVERSITY_NOT_A_QUOTE_MEASUREMENT",
+  "regulatory_bp_per_turnover": 0.15,
+  "borrow_annual": 0.0033,
+  "borrow_provenance": "B22G etb_general_collateral median 0.33 %/yr, charged on SHORT notional per calendar day, for overnight configs only",
+  "flat_sensitivity_rungs_bp": [
+   1.0,
+   2.0,
+   2.5
+  ]
+ },
+ "execution": "signal from closes through t-1, fill at bar-t VWAP, earn vwap[t+1]/vwap[t]-1",
+ "results": [
+  {
+   "name": "L09_rebal_flow_cont_overnight",
+   "kind": "rebal_flow",
+   "overnight": true,
+   "sharpe_net": -0.15866753709254405,
+   "ann_ret": -0.01598938963343331,
+   "ann_vol": 0.10077291124842616,
+   "n_days": 405,
+   "daily_turnover": 2.0,
+   "daily_spread_bp": 3.428481548346069,
+   "daily_borrow_bp": 0.06615479986221463,
+   "sharpe_gross": 0.7902385687948388,
+   "unshortable_short_share": 0.0,
+   "sharpe_flat1.0bp": 0.1985443720028006,
+   "sharpe_flat2.0bp": -0.3015787594431007,
+   "sharpe_flat2.5bp": -0.5516403251660513
+  },
+  {
+   "name": "L07_rebal_flow_fade_nextopen",
+   "kind": "rebal_flow",
+   "overnight": false,
+   "sharpe_net": -0.18623765065458553,
+   "ann_ret": -0.00965247254434947,
+   "ann_vol": 0.051828792461798646,
+   "n_days": 405,
+   "daily_turnover": 2.0,
+   "daily_spread_bp": 3.4382834416082346,
+   "daily_borrow_bp": 0.0,
+   "sharpe_gross": 1.6293814144327925,
+   "unshortable_short_share": 0.0,
+   "sharpe_flat1.0bp": 0.5124516551866989,
+   "sharpe_flat2.0bp": -0.4587916137229478,
+   "sharpe_flat2.5bp": -0.9444132481777708
+  },
+  {
+   "name": "L02_decay_pair_short_both",
+   "kind": "decay_pair",
+   "overnight": true,
+   "sharpe_net": -1.3112820222845554,
+   "ann_ret": -0.037907217876083345,
+   "ann_vol": 0.028908516422760256,
+   "n_days": 405,
+   "daily_turnover": 0.23694529064899436,
+   "daily_spread_bp": 0.5181091831899238,
+   "daily_borrow_bp": 0.1317097919837646,
+   "sharpe_gross": -0.7081254917732387,
+   "unshortable_short_share": 0.4166666666666666,
+   "sharpe_flat1.0bp": -1.0687929599715573,
+   "sharpe_flat2.0bp": -1.2734198750956458,
+   "sharpe_flat2.5bp": -1.3702766059780822
+  }
+ ],
+ "distribution": {
+  "sharpe_gross": {
+   "n": 3,
+   "min": -0.7081254917732387,
+   "p10": -0.4084526796596232,
+   "p25": 0.041056538510800045,
+   "median": 0.7902385687948388,
+   "p75": 1.2098099916138156,
+   "p90": 1.4615528453052018,
+   "max": 1.6293814144327925,
+   "mean": 0.5704981638181309,
+   "sd": 1.1841448468513973,
+   "n_positive": 2
+  },
+  "sharpe_net": {
+   "n": 3,
+   "min": -1.3112820222845554,
+   "p10": -1.0862731479585614,
+   "p25": -0.7487598364695705,
+   "median": -0.18623765065458553,
+   "p75": -0.1724525938735648,
+   "p90": -0.16418155980495236,
+   "max": -0.15866753709254405,
+   "mean": -0.552062403343895,
+   "sd": 0.6576479682389029,
+   "n_positive": 0
+  },
+  "sharpe_flat1.0bp": {
+   "n": 3,
+   "min": -1.0687929599715573,
+   "p10": -0.8153254935766857,
+   "p25": -0.43512429398437835,
+   "median": 0.1985443720028006,
+   "p75": 0.35549801359474975,
+   "p90": 0.44967019854991924,
+   "max": 0.5124516551866989,
+   "mean": -0.11926564426068594,
+   "sd": 0.8371595057513195,
+   "n_positive": 2
+  },
+  "sharpe_flat2.0bp": {
+   "n": 3,
+   "min": -1.2734198750956458,
+   "p10": -1.110494222821106,
+   "p25": -0.8661057444092968,
+   "median": -0.4587916137229478,
+   "p75": -0.38018518658302425,
+   "p90": -0.3330213302990701,
+   "max": -0.3015787594431007,
+   "mean": -0.6779300827538982,
+   "sd": 0.5216656400177392,
+   "n_positive": 0
+  },
+  "sharpe_flat2.5bp": {
+   "n": 3,
+   "min": -1.3702766059780822,
+   "p10": -1.28510393441802,
+   "p25": -1.1573449270779266,
+   "median": -0.9444132481777708,
+   "p75": -0.748026786671911,
+   "p90": -0.6301949097683952,
+   "max": -0.5516403251660513,
+   "mean": -0.9554433931073015,
+   "sd": 0.4094295887430627,
+   "n_positive": 0
+  }
+ }
+}

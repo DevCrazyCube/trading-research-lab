@@ -1,0 +1,1184 @@
+{
+ "AAPL": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Apple Inc. Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "ABBV": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ABBVIE INC.",
+  "shortable": true,
+  "tradable": true
+ },
+ "ADBE": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Adobe Inc. Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "AGG": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Core U.S. Aggregate Bond ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "AMD": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Advanced Micro Devices, Inc. Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "AMZN": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Amazon.com, Inc. Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "AVGO": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Broadcom Inc. Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "BAC": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Bank of America Corporation",
+  "shortable": true,
+  "tradable": true
+ },
+ "BND": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Total Bond Market ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "BRK.B": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "BERKSHIRE HATHAWAY Class B",
+  "shortable": true,
+  "tradable": true
+ },
+ "COST": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Costco Wholesale Corporation Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "CRM": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Salesforce, Inc.",
+  "shortable": true,
+  "tradable": true
+ },
+ "CSCO": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Cisco Systems, Inc. Common Stock (DE)",
+  "shortable": true,
+  "tradable": true
+ },
+ "CVX": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Chevron Corporation",
+  "shortable": true,
+  "tradable": true
+ },
+ "DIA": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street SPDR Dow Jones Industrial Average ETF Trust",
+  "shortable": true,
+  "tradable": true
+ },
+ "EEM": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares MSCI Emerging Markets ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "EFA": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares MSCI EAFE ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "EWJ": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares MSCI Japan ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "EWZ": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares MSCI Brazil ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "FXI": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares China Large-Cap ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "GDX": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "VanEck Gold Miners ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "GDXJ": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "VanEck Junior Gold Miners ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "GLD": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "SPDR Gold Trust, SPDR Gold Shares",
+  "shortable": true,
+  "tradable": true
+ },
+ "GLDM": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "SPDR Gold MiniShares",
+  "shortable": true,
+  "tradable": true
+ },
+ "GOOG": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Alphabet Inc. Class C Capital Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "GOOGL": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Alphabet Inc. Class A Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "HD": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Home Depot, Inc.",
+  "shortable": true,
+  "tradable": true
+ },
+ "HYG": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares iBoxx $ High Yield Corporate Bond ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IAU": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Gold Trust",
+  "shortable": true,
+  "tradable": true
+ },
+ "IBB": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Biotechnology ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IEF": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares 7-10 Year Treasury Bond ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IEFA": {
+  "easy_to_borrow": true,
+  "exchange": "BATS",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Core MSCI EAFE ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IEMG": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Core MSCI Emerging Markets ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IJH": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Core S&P Mid-Cap ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IJR": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Core S&P Small-Cap ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "INTC": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Intel Corporation Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "ITB": {
+  "easy_to_borrow": true,
+  "exchange": "BATS",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares U.S. Home Construction ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "ITOT": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Core S&P Total U.S. Stock Market ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IVV": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Core S&P 500 ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IWB": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Russell 1000 ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IWD": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Russell 1000 Value ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IWF": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Russell 1000 Growth ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "IWM": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Russell 2000 ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "JNJ": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Johnson & Johnson",
+  "shortable": true,
+  "tradable": true
+ },
+ "JNK": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street SPDR Bloomberg High Yield Bond ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "JPM": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "JPMorgan Chase & Co.",
+  "shortable": true,
+  "tradable": true
+ },
+ "KO": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Coca-Cola Company",
+  "shortable": true,
+  "tradable": true
+ },
+ "KRE": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street SPDR S&P Regional Banking ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "LLY": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Eli Lilly & Co.",
+  "shortable": true,
+  "tradable": true
+ },
+ "LQD": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares iBoxx $ Investment Grade Corporate Bond ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "MA": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Mastercard Incorporated",
+  "shortable": true,
+  "tradable": true
+ },
+ "MDY": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street SPDR S&P MIDCAP 400 ETF Trust",
+  "shortable": true,
+  "tradable": true
+ },
+ "META": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Meta Platforms, Inc. Class A Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "MRK": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Merck & Co., Inc.",
+  "shortable": true,
+  "tradable": true
+ },
+ "MSFT": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Microsoft Corporation Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "MTUM": {
+  "easy_to_borrow": true,
+  "exchange": "BATS",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares MSCI USA Momentum Factor ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "NFLX": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Netflix, Inc. Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "NVDA": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "NVIDIA Corporation Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "ORCL": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Oracle Corp",
+  "shortable": true,
+  "tradable": true
+ },
+ "PEP": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "PepsiCo, Inc. Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "PG": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Procter & Gamble Company",
+  "shortable": true,
+  "tradable": true
+ },
+ "PSQ": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ProShares Short QQQ",
+  "shortable": true,
+  "tradable": true
+ },
+ "QLD": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ProShares Ultra QQQ",
+  "shortable": true,
+  "tradable": true
+ },
+ "QQQ": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Invesco QQQ Trust, Series 1",
+  "shortable": true,
+  "tradable": true
+ },
+ "QQQM": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Invesco Exchange-Traded Fund Trust II Invesco NASDAQ 100 ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "QUAL": {
+  "easy_to_borrow": true,
+  "exchange": "BATS",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares MSCI USA Quality Factor ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "SCHB": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Schwab U.S. Broad Market ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "SDS": {
+  "easy_to_borrow": false,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ProShares UltraShort S&P500",
+  "shortable": false,
+  "tradable": true
+ },
+ "SH": {
+  "easy_to_borrow": false,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ProShares Short S&P500",
+  "shortable": false,
+  "tradable": true
+ },
+ "SHY": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares 1-3 Year Treasury Bond ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "SIVR": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "abrdn Physical Silver Shares ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "SLV": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Silver Trust",
+  "shortable": true,
+  "tradable": true
+ },
+ "SMH": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "VanEck Semiconductor ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "SOXX": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares Semiconductor ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "SPLG": {
+  "error": "<HTTPError 404: 'Not Found'>"
+ },
+ "SPXU": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ProShares UltraPro Short S&P 500",
+  "shortable": true,
+  "tradable": true
+ },
+ "SPY": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street SPDR S&P 500 ETF Trust",
+  "shortable": true,
+  "tradable": true
+ },
+ "SPYG": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street SPDR Portfolio S&P 500 Growth ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "SPYV": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street SPDR Portfolio S&P 500 Value ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "SQQQ": {
+  "easy_to_borrow": false,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ProShares UltraPro Short QQQ",
+  "shortable": false,
+  "tradable": true
+ },
+ "SSO": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ProShares Ultra S&P500",
+  "shortable": true,
+  "tradable": true
+ },
+ "TIP": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares TIPS Bond ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "TLT": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares 20 Year Treasury Bond ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "TMF": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Direxion Daily 20+ Year Treasury Bull 3X ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "TMV": {
+  "easy_to_borrow": false,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Direxion Daily 20+ Year Treasury Bear 3X ETF",
+  "shortable": false,
+  "tradable": true
+ },
+ "TNA": {
+  "easy_to_borrow": false,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Direxion Daily Small Cap Bull 3x ETF",
+  "shortable": false,
+  "tradable": true
+ },
+ "TQQQ": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ProShares UltraPro QQQ",
+  "shortable": true,
+  "tradable": true
+ },
+ "TSLA": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Tesla, Inc. Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "TZA": {
+  "easy_to_borrow": false,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Direxion Daily Small Cap Bear 3x ETF",
+  "shortable": false,
+  "tradable": true
+ },
+ "UNG": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "United States Natural Gas Fund, LP Unit",
+  "shortable": true,
+  "tradable": true
+ },
+ "UNH": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "UNITEDHEALTH GROUP INCORPORATED (Delaware)",
+  "shortable": true,
+  "tradable": true
+ },
+ "UPRO": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ProShares UltraPro S&P 500",
+  "shortable": true,
+  "tradable": true
+ },
+ "USMV": {
+  "easy_to_borrow": true,
+  "exchange": "BATS",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares MSCI USA Min Vol Factor ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "USO": {
+  "easy_to_borrow": false,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "United States Oil Fund, LP",
+  "shortable": false,
+  "tradable": true
+ },
+ "V": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "VISA Inc.",
+  "shortable": true,
+  "tradable": true
+ },
+ "VAW": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Materials ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VB": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Morningstar Small-Cap ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VCIT": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Intermediate-Term Corporate Bond ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VCR": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Consumer Discretionary ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VDC": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Consumer Staples ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VDE": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Energy ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VEA": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard FTSE Developed Markets ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VFH": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Financials ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VGLT": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Long-Term Treasury ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VGSH": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Short-Term Treasury ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VGT": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Information Technology ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VHT": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Health Care ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VIS": {
+  "easy_to_borrow": false,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Industrials ETF",
+  "shortable": false,
+  "tradable": true
+ },
+ "VLUE": {
+  "easy_to_borrow": true,
+  "exchange": "BATS",
+  "fractionable": true,
+  "marginable": true,
+  "name": "iShares MSCI USA Value Factor ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VNQ": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Real Estate ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VOO": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard S&P 500 ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VPU": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Utilities ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VTI": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Morningstar Total Stock Market ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VTV": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Morningstar Value ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VTWO": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Scottsdale Funds Vanguard Russell 2000 ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VUG": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard Morningstar Growth ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "VWO": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Vanguard FTSE Emerging Markets ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "WMT": {
+  "easy_to_borrow": true,
+  "exchange": "NASDAQ",
+  "fractionable": true,
+  "marginable": true,
+  "name": "Walmart Inc. Common Stock",
+  "shortable": true,
+  "tradable": true
+ },
+ "XBI": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street SPDR S&P Biotech ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XHB": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street SPDR S&P Homebuilders ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLB": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Materials Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLC": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Communication Services Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLE": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Energy Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLF": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Financial Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLI": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Industrial Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLK": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Technology Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLP": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Consumer Staples Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLRE": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Real Estate Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLU": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Utilities Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLV": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Health Care Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XLY": {
+  "easy_to_borrow": true,
+  "exchange": "ARCA",
+  "fractionable": true,
+  "marginable": true,
+  "name": "State Street Consumer Discretionary Select Sector SPDR ETF",
+  "shortable": true,
+  "tradable": true
+ },
+ "XOM": {
+  "easy_to_borrow": true,
+  "exchange": "NYSE",
+  "fractionable": true,
+  "marginable": true,
+  "name": "ExxonMobil Holdings Corporation",
+  "shortable": true,
+  "tradable": true
+ }
+}
