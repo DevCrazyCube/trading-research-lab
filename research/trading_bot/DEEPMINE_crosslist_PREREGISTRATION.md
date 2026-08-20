@@ -61,3 +61,48 @@ selection device; nothing is chosen from it.
 - Whole sub-family declared noise if no formula's design Sharpe exceeds 1.06.
 - A design survivor that is held-out-negative net is reported dead, not re-tuned.
 - The full result distribution of all 30 is reported, not just the best.
+
+---
+
+## AMENDMENT 1 (2026-08-20, before any Family-B design result was read)
+
+**A one-hour lookahead was found in the signal and closed.**
+
+Yahoo's `<CCY>USD=X` daily bar closes at ~17:00 ET, one hour *after* the 16:00 ET equity
+close. The spread `log(P_us) - log(P_home) - log(FX)` therefore embedded the last hour of
+currency tape. That is not harmless here: a Canadian company's USD-quoted ADR mechanically
+rises when CAD strengthens, so an FX print taken an hour after the close genuinely predicts
+the next US-session return of the ADR. It could have manufactured P&L, not merely added noise.
+
+**Fix, applied to every Family-B formula:** `entry_lag = 1`. The signal is computed from the
+closes of day *t* and the book is entered at the close of day *t+1*, so every input --
+US close, home close, FX print -- is strictly in the past at the moment of trading.
+
+`B9` is repurposed as the **t+0 optimistic bound**: same formula, entered at the close that
+generated it. It is explicitly *not tradable* and exists only to price what the lag costs.
+
+N is unchanged at 30. The windows are unchanged. No design result had been read for the
+Canadian, European or Latin-American blocs when this amendment was made; the only numbers
+seen were harness smoke tests on the Asian bloc, which were deeply negative net of costs and
+from which nothing was selected. The amendment makes every formula strictly more conservative.
+
+## AMENDMENT 2 (same sitting): two cost-model corrections
+
+1. **Corwin-Schultz median -> mean.** The first implementation took the median of the
+   zero-floored CS series. For a high-volatility name CS is negative on more than half of
+   days, so the median was exactly **0.00 bp** -- a free crossing, which is the one cost
+   failure this programme has a written rule against. Now: mean of the zero-floored series
+   (the estimator's own convention), and the charge is
+   `max(CS/2, measured-NBBO/2, half-a-tick)` -- three independent lower bounds, largest wins.
+   The NBBO term is a real point-in-time SIP quote measurement sampled *inside the same
+   window* (`xl_quotes.py`, 18 sessions, 60s at 19:55-19:56Z).
+2. **Borrow has three states, not two.** A live `/v2/assets` snapshot cannot say what a
+   delisted ticker's borrow was in 2018, and reading `inactive` as `not shortable` silently
+   deletes exactly the pairs this study exists to test (CUK, BBL, RDS.A/B, AMOV are all
+   inactive today). So: `etb` -> 33 bp/yr; `unknown` (delisted, or shortable-but-not-ETB)
+   -> charged the **hard-to-borrow 10.28 %/yr**, because absence is refusal and refusal is
+   priced expensively rather than at zero; `htb` (live and flagged not-shortable) -> excluded.
+3. **Turnover-aware spreads.** Cost is now `sum|dw| x half-spread` against the previous
+   book, not a full round trip every period. A complete rebuild reproduces the old number
+   exactly; a persistent signal pays less. This matters most at h=1, where the old model
+   charged ~50 bp a day.
