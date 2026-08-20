@@ -1,0 +1,28 @@
+{
+ "results": {
+  "planted_ou_edge": {
+   "as_specified": 12.452,
+   "negated_control": -12.452,
+   "net_0.5bp": 10.102,
+   "net_1.0bp": 8.044,
+   "net_2.0bp": 3.301,
+   "net_2.5bp": 0.671,
+   "turnover_per_day": 2.895
+  },
+  "null_random_walk": {
+   "as_specified": -0.341,
+   "negated_control": 0.341,
+   "net_0.5bp": -29.188,
+   "net_1.0bp": -33.885,
+   "net_2.0bp": -34.304,
+   "net_2.5bp": -34.069,
+   "turnover_per_day": 2.72
+  }
+ },
+ "checks": {
+  "finds_planted_edge": true,
+  "sign_flips_exactly": true,
+  "no_alpha_from_a_random_walk": true
+ },
+ "all_passed": true
+}
