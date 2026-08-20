@@ -1,0 +1,43 @@
+{
+ "valid_symbol_nights": 1076483,
+ "announcement_nights_in_universe": 12733,
+ "design": {
+  "nights": 1499,
+  "ann_symbol_nights": 6520,
+  "median_announcers_per_night": 2.0,
+  "p90_announcers_per_night": 13.0,
+  "nights_with_ge5": 394
+ },
+ "test": {
+  "nights": 1149,
+  "ann_symbol_nights": 6213,
+  "median_announcers_per_night": 2.0,
+  "nights_with_ge5": 384
+ },
+ "k_since_dist": {
+  "0": 13348,
+  "1": 13342,
+  "2": 13262,
+  "3": 13277,
+  "4": 13292,
+  "5": 13238,
+  "6": 13069,
+  "7": 12782,
+  "8": 12683,
+  "9": 12700,
+  "10": 12646
+ },
+ "k_until_pred_dist": {
+  "0": 35672,
+  "1": 8705,
+  "2": 9227,
+  "3": 9580,
+  "4": 9955,
+  "5": 10768,
+  "6": 10943,
+  "7": 11013,
+  "8": 11123,
+  "9": 11146,
+  "10": 11335
+ }
+}
