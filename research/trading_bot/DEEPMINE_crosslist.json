@@ -1,0 +1,1719 @@
+{
+ "document": "DEEPMINE_crosslist",
+ "created": "2026-08-20",
+ "subfamily": "Cross-listing / multi-ticker identical-claim RV: US ADR vs home ordinary, dual-listed-company (DLC) pairs, and same-issuer ADR share-class pairs",
+ "verdict": "NOISE. No formula clears the noise bar on the design window even at ZERO cost, and the held-out window agrees. The mechanism is diagnosed, not just asserted: the daily-close cross-listing spread on free data is ~pure measurement noise (lag-1 autocorrelation of the spread change = -0.49 against a theoretical -0.50 for iid error), so its mean reversion is the reversion of the quote error itself and is not present in any price that can be transacted.",
+ "n_formulas": 30,
+ "design_window": [
+  "2016-01-04",
+  "2021-12-31"
+ ],
+ "design_years": 6.0,
+ "holdout_window": [
+  "2022-01-03",
+  "2026-08-18"
+ ],
+ "holdout_years": 4.6,
+ "expected_max_t_under_null": 2.608,
+ "expected_max_sharpe_under_null_design": 1.065,
+ "expected_max_sharpe_under_null_holdout": 1.216,
+ "best_by_design_gross_sharpe": {
+  "id": "B22",
+  "gross_sharpe_design": 0.888,
+  "net_sharpe_design": -10.024,
+  "net_bp_design": -50.12,
+  "gross_sharpe_holdout": 0.911,
+  "net_bp_holdout": -53.46,
+  "net_sharpe_holdout": -10.857,
+  "beats_noise_bar": false
+ },
+ "n_design_net_positive": 0,
+ "n_holdout_net_positive": 1,
+ "n_design_gross_clearing_bar": 0,
+ "lookahead_bound_B9": {
+  "what": "identical to B1 but entered at the SAME close that generated the signal",
+  "design_gross_sharpe": 2.336,
+  "design_gross_t": 5.6,
+  "lag2_twin_B1_design_gross_sharpe": -0.37,
+  "reading": "A same-close entry manufactures a bar-clearing gross Sharpe of 2.34 out of a series whose lag-2-entry twin scores -0.37. This is the single most dangerous artefact in the sub-family and it is what an unguarded ADR RV backtest would have reported as a discovery. Even so its NET is -88 bp."
+ },
+ "measurement_noise_diagnostic": {
+  "statistic": "lag-1 autocorrelation of the daily change in the log cross-listing spread",
+  "theoretical_value_if_pure_iid_measurement_error": -0.5,
+  "measured_median_by_region": {
+   "CA": -0.491,
+   "BR": -0.425,
+   "MX": -0.456,
+   "UK": -0.481,
+   "EU": -0.52,
+   "JP": -0.49,
+   "HK": -0.44,
+   "AR": -0.18
+  },
+  "median_daily_spread_change_sd_bp": {
+   "CA": 49,
+   "BR": 102,
+   "MX": 91,
+   "UK": 88,
+   "EU": 102,
+   "JP": 153,
+   "HK": 312,
+   "AR": 211
+  },
+  "reading": "Canada is the cleanest possible test -- TSX and NYSE open and close the same minute, the listings are fully fungible -- and its spread still measures 49 bp of daily change with rho1 = -0.49. The true premium of a fungible interlisted pair moves by single-digit bp. The free daily feed therefore cannot see the effect at all; it sees its own error. Argentina at -0.18 is the one bloc with a genuinely persistent premium component (the contado-con-liqui FX-control channel), and its costs (182 bp a rebalance) bury it anyway."
+ },
+ "cost_measurement": {
+  "half_spread_bp_median": 22.9,
+  "p25": 12.7,
+  "p75": 37.7,
+  "corwin_schultz_median_bp": 22.4,
+  "measured_nbbo_median_bp": 3.6,
+  "note": "charge = max(Corwin-Schultz/2, measured point-in-time SIP NBBO/2, half a tick); turnover-aware, so a persistent book pays less than a full round trip",
+  "borrow": {
+   "etb_33bp_per_yr": 167,
+   "unknown_charged_at_HTB_1028bp": 25,
+   "excluded_not_shortable": 18
+  }
+ },
+ "universe": {
+  "pairs_resolved": 164,
+  "missing_leg": 15,
+  "by_region": {
+   "CA": 60,
+   "BR": 15,
+   "UK": 15,
+   "HK": 13,
+   "EU": 12,
+   "AR": 12,
+   "JP": 7,
+   "MX": 5,
+   "KR": 5,
+   "IN": 5,
+   "IL": 5,
+   "TW": 4,
+   "AU": 3,
+   "CH": 2,
+   "DK": 1
+  },
+  "us_us_tradable_pairs": [
+   "CCL/CUK",
+   "BBL/BHP",
+   "RDS.A/RDS.B",
+   "AMX/AMOV",
+   "PBR/PBR.A"
+  ],
+  "us_us_note": "only 5 pairs have BOTH legs on a US tape with enough history, and 3 of them unified or delisted in or before Jan 2022, so the held-out window for Family A is thin by construction."
+ },
+ "fx_shift_calibration": {
+  "CA": 1,
+  "BR": 1,
+  "MX": 1,
+  "UK": 1,
+  "AU": 1,
+  "EU": 1,
+  "CH": 1,
+  "DK": 1,
+  "JP": 0,
+  "KR": 1,
+  "TW": 1,
+  "HK": 2,
+  "IN": 1,
+  "IL": 1,
+  "AR": 1
+ },
+ "fx_shift_spread_sd_bp": {
+  "CA": {
+   "-1": 81.3,
+   "0": 77.0,
+   "1": 50.2,
+   "2": 77.8
+  },
+  "BR": {
+   "-1": 176.6,
+   "0": 175.9,
+   "1": 113.2,
+   "2": 178.2
+  },
+  "MX": {
+   "-1": 137.6,
+   "0": 115.5,
+   "1": 98.1,
+   "2": 135.5
+  },
+  "UK": {
+   "-1": 112.3,
+   "0": 111.0,
+   "1": 83.6,
+   "2": 112.9
+  },
+  "AU": {
+   "-1": 214.6,
+   "0": 223.1,
+   "1": 194.0,
+   "2": 212.3
+  },
+  "EU": {
+   "-1": 116.3,
+   "0": 113.3,
+   "1": 100.2,
+   "2": 114.5
+  },
+  "CH": {
+   "-1": 101.2,
+   "0": 99.3,
+   "1": 88.2,
+   "2": 101.3
+  },
+  "DK": {
+   "-1": 112.3,
+   "0": 108.8,
+   "1": 96.9,
+   "2": 109.5
+  },
+  "JP": {
+   "-1": 149.0,
+   "0": 138.2,
+   "1": 156.9,
+   "2": 151.9
+  },
+  "KR": {
+   "-1": 151.3,
+   "0": 155.1,
+   "1": 124.3,
+   "2": 150.6
+  },
+  "TW": {
+   "-1": 187.4,
+   "0": 189.1,
+   "1": 180.9,
+   "2": 186.9
+  },
+  "HK": {
+   "-1": 280.6,
+   "0": 281.0,
+   "1": 281.1,
+   "2": 280.3
+  },
+  "IN": {
+   "-1": 150.8,
+   "0": 158.0,
+   "1": 139.9,
+   "2": 153.3
+  },
+  "IL": {
+   "-1": 155.4,
+   "0": 157.9,
+   "1": 153.3,
+   "2": 156.8
+  },
+  "AR": {
+   "-1": 222.1,
+   "0": 212.7,
+   "1": 197.6,
+   "2": 218.6
+  }
+ },
+ "diversifying_vs_existing_legs": "not applicable -- nothing survived to diversify with",
+ "results": [
+  {
+   "id": "A1",
+   "spec": {
+    "fam": "pair",
+    "note": "all US/US same-claim pairs, L250 K2.0 exit0.5 mh20",
+    "L": 250,
+    "K": 2.0,
+    "EXIT": 0.5,
+    "MAXHOLD": 20,
+    "subset": "all"
+   },
+   "design": {
+    "n": 68,
+    "gross_bp": null,
+    "gross_t": null,
+    "gross_sharpe": null,
+    "cost_bp": null,
+    "net_bp": -110.79,
+    "t": -4.65,
+    "sharpe": -1.899,
+    "mean_turnover": null,
+    "universe_n": null
+   },
+   "holdout": {
+    "n": 29,
+    "gross_bp": null,
+    "gross_t": null,
+    "gross_sharpe": null,
+    "cost_bp": null,
+    "net_bp": -123.46,
+    "t": -2.21,
+    "sharpe": -1.03
+   }
+  },
+  {
+   "id": "A2",
+   "spec": {
+    "fam": "pair",
+    "note": "all pairs, faster book L120 K1.5 mh40",
+    "L": 120,
+    "K": 1.5,
+    "EXIT": 0.5,
+    "MAXHOLD": 40,
+    "subset": "all"
+   },
+   "design": {
+    "n": 129,
+    "gross_bp": null,
+    "gross_t": null,
+    "gross_sharpe": null,
+    "cost_bp": null,
+    "net_bp": -114.5,
+    "t": -5.05,
+    "sharpe": -2.064,
+    "mean_turnover": null,
+    "universe_n": null
+   },
+   "holdout": {
+    "n": 52,
+    "gross_bp": null,
+    "gross_t": null,
+    "gross_sharpe": null,
+    "cost_bp": null,
+    "net_bp": -122.8,
+    "t": -4.13,
+    "sharpe": -1.919
+   }
+  },
+  {
+   "id": "A3",
+   "spec": {
+    "fam": "pair",
+    "note": "DLC structures only",
+    "L": 250,
+    "K": 2.0,
+    "EXIT": 0.5,
+    "MAXHOLD": 20,
+    "subset": "dlc"
+   },
+   "design": {
+    "n": 48,
+    "gross_bp": null,
+    "gross_t": null,
+    "gross_sharpe": null,
+    "cost_bp": null,
+    "net_bp": -145.66,
+    "t": -6.35,
+    "sharpe": -2.596,
+    "mean_turnover": null,
+    "universe_n": null
+   },
+   "holdout": {
+    "n": 11,
+    "gross_bp": null,
+    "gross_t": null,
+    "gross_sharpe": null,
+    "cost_bp": null,
+    "net_bp": -254.77,
+    "t": -2.72,
+    "sharpe": -1.266
+   }
+  },
+  {
+   "id": "A4",
+   "spec": {
+    "fam": "pair",
+    "note": "foreign-issuer ADR share-class pairs only",
+    "L": 250,
+    "K": 2.0,
+    "EXIT": 0.5,
+    "MAXHOLD": 20,
+    "subset": "adrclass"
+   },
+   "design": {
+    "n": 20,
+    "gross_bp": null,
+    "gross_t": null,
+    "gross_sharpe": null,
+    "cost_bp": null,
+    "net_bp": -27.09,
+    "t": -0.48,
+    "sharpe": -0.197,
+    "mean_turnover": null,
+    "universe_n": null
+   },
+   "holdout": {
+    "n": 18,
+    "gross_bp": null,
+    "gross_t": null,
+    "gross_sharpe": null,
+    "cost_bp": null,
+    "net_bp": -43.22,
+    "t": -0.68,
+    "sharpe": -0.314
+   }
+  },
+  {
+   "id": "B1",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.1,
+    "h": 1,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 1448,
+    "gross_bp": -4.3,
+    "gross_t": -0.89,
+    "gross_sharpe": -0.37,
+    "cost_bp": 116.28,
+    "net_bp": -120.58,
+    "t": -24.76,
+    "sharpe": -10.329,
+    "mean_turnover": 3.28,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 1097,
+    "gross_bp": 4.07,
+    "gross_t": 0.83,
+    "gross_sharpe": 0.399,
+    "cost_bp": 107.54,
+    "net_bp": -103.46,
+    "t": -21.12,
+    "sharpe": -10.122
+   }
+  },
+  {
+   "id": "B2",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.1,
+    "h": 5,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": -16.97,
+    "gross_t": -0.75,
+    "gross_sharpe": -0.313,
+    "cost_bp": 123.32,
+    "net_bp": -140.29,
+    "t": -6.18,
+    "sharpe": -2.579,
+    "mean_turnover": 3.42,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": 14.7,
+    "gross_t": 0.6,
+    "gross_sharpe": 0.288,
+    "cost_bp": 113.31,
+    "net_bp": -98.62,
+    "t": -4.02,
+    "sharpe": -1.929
+   }
+  },
+  {
+   "id": "B3",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "z",
+    "L": 250,
+    "frac": 0.1,
+    "h": 5,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 251,
+    "gross_bp": -5.26,
+    "gross_t": -0.22,
+    "gross_sharpe": -0.098,
+    "cost_bp": 120.16,
+    "net_bp": -125.41,
+    "t": -5.17,
+    "sharpe": -2.318,
+    "mean_turnover": 3.32,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 181,
+    "gross_bp": 16.07,
+    "gross_t": 0.59,
+    "gross_sharpe": 0.312,
+    "cost_bp": 110.97,
+    "net_bp": -94.9,
+    "t": -3.5,
+    "sharpe": -1.845
+   }
+  },
+  {
+   "id": "B4",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "z",
+    "L": 20,
+    "frac": 0.1,
+    "h": 1,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 1488,
+    "gross_bp": 0.84,
+    "gross_t": 0.18,
+    "gross_sharpe": 0.073,
+    "cost_bp": 118.84,
+    "net_bp": -118.0,
+    "t": -24.75,
+    "sharpe": -10.185,
+    "mean_turnover": 3.33,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 1137,
+    "gross_bp": 4.56,
+    "gross_t": 0.95,
+    "gross_sharpe": 0.448,
+    "cost_bp": 111.75,
+    "net_bp": -107.19,
+    "t": -22.23,
+    "sharpe": -10.467
+   }
+  },
+  {
+   "id": "B5",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "d1",
+    "frac": 0.1,
+    "h": 1,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 1506,
+    "gross_bp": 8.12,
+    "gross_t": 1.6,
+    "gross_sharpe": 0.653,
+    "cost_bp": 154.28,
+    "net_bp": -146.16,
+    "t": -28.55,
+    "sharpe": -11.677,
+    "mean_turnover": 3.69,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 1155,
+    "gross_bp": 13.86,
+    "gross_t": 2.77,
+    "gross_sharpe": 1.293,
+    "cost_bp": 147.84,
+    "net_bp": -133.98,
+    "t": -26.64,
+    "sharpe": -12.444
+   }
+  },
+  {
+   "id": "B6",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "dev",
+    "L": 60,
+    "frac": 0.1,
+    "h": 5,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": -22.68,
+    "gross_t": -0.87,
+    "gross_sharpe": -0.362,
+    "cost_bp": 129.59,
+    "net_bp": -152.27,
+    "t": -5.79,
+    "sharpe": -2.42,
+    "mean_turnover": 3.1,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": -11.29,
+    "gross_t": -0.44,
+    "gross_sharpe": -0.213,
+    "cost_bp": 113.37,
+    "net_bp": -124.66,
+    "t": -4.87,
+    "sharpe": -2.336
+   }
+  },
+  {
+   "id": "B7",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.5,
+    "h": 5,
+    "zgate": 1.5,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 38,
+    "gross_bp": -36.32,
+    "gross_t": -0.73,
+    "gross_sharpe": -0.844,
+    "cost_bp": 95.12,
+    "net_bp": -131.44,
+    "t": -2.61,
+    "sharpe": -3.012,
+    "mean_turnover": 3.22,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 23,
+    "gross_bp": -95.12,
+    "gross_t": -1.69,
+    "gross_sharpe": -2.508,
+    "cost_bp": 102.9,
+    "net_bp": -198.02,
+    "t": -3.56,
+    "sharpe": -5.276
+   }
+  },
+  {
+   "id": "B8",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.2,
+    "h": 5,
+    "weighting": "invvol",
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": -28.11,
+    "gross_t": -1.88,
+    "gross_sharpe": -0.787,
+    "cost_bp": 91.18,
+    "net_bp": -119.29,
+    "t": -7.94,
+    "sharpe": -3.317,
+    "mean_turnover": 3.12,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": 7.94,
+    "gross_t": 0.44,
+    "gross_sharpe": 0.213,
+    "cost_bp": 92.07,
+    "net_bp": -84.12,
+    "t": -4.69,
+    "sharpe": -2.25
+   }
+  },
+  {
+   "id": "B9",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.1,
+    "h": 1,
+    "entry_lag": 0,
+    "note": "OPTIMISTIC BOUND ONLY: enters at the same close that generated the signal, which back-dates the FX quote by an hour. Not tradable; carried to size the cost of the lag-1 discipline every other formula obeys."
+   },
+   "design": {
+    "n": 1450,
+    "gross_bp": 28.54,
+    "gross_t": 5.6,
+    "gross_sharpe": 2.336,
+    "cost_bp": 116.29,
+    "net_bp": -87.75,
+    "t": -17.19,
+    "sharpe": -7.166,
+    "mean_turnover": 3.28,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 1099,
+    "gross_bp": 13.61,
+    "gross_t": 2.73,
+    "gross_sharpe": 1.307,
+    "cost_bp": 107.54,
+    "net_bp": -93.92,
+    "t": -18.69,
+    "sharpe": -8.949
+   }
+  },
+  {
+   "id": "B10",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "ewma",
+    "hl": 30,
+    "L": 60,
+    "frac": 0.1,
+    "h": 5,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": -15.69,
+    "gross_t": -0.67,
+    "gross_sharpe": -0.278,
+    "cost_bp": 122.48,
+    "net_bp": -138.17,
+    "t": -5.83,
+    "sharpe": -2.434,
+    "mean_turnover": 3.39,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": 25.41,
+    "gross_t": 1.01,
+    "gross_sharpe": 0.483,
+    "cost_bp": 111.8,
+    "net_bp": -86.38,
+    "t": -3.4,
+    "sharpe": -1.632
+   }
+  },
+  {
+   "id": "B11",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "BR",
+     "MX"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.2,
+    "h": 5,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": -6.39,
+    "gross_t": -0.3,
+    "gross_sharpe": -0.124,
+    "cost_bp": 87.48,
+    "net_bp": -93.87,
+    "t": -4.34,
+    "sharpe": -1.811,
+    "mean_turnover": 2.66,
+    "universe_n": 19
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": 13.66,
+    "gross_t": 0.71,
+    "gross_sharpe": 0.342,
+    "cost_bp": 69.82,
+    "net_bp": -56.16,
+    "t": -2.92,
+    "sharpe": -1.399
+   }
+  },
+  {
+   "id": "B12",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "BR",
+     "MX"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.2,
+    "h": 1,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 1447,
+    "gross_bp": -1.93,
+    "gross_t": -0.46,
+    "gross_sharpe": -0.191,
+    "cost_bp": 80.95,
+    "net_bp": -82.89,
+    "t": -19.31,
+    "sharpe": -8.058,
+    "mean_turnover": 2.46,
+    "universe_n": 19
+   },
+   "holdout": {
+    "n": 1097,
+    "gross_bp": -3.0,
+    "gross_t": -0.74,
+    "gross_sharpe": -0.353,
+    "cost_bp": 63.79,
+    "net_bp": -66.79,
+    "t": -16.2,
+    "sharpe": -7.763
+   }
+  },
+  {
+   "id": "B13",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA",
+     "BR",
+     "MX"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.1,
+    "h": 5,
+    "region_neutral": true,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": 10.18,
+    "gross_t": 0.63,
+    "gross_sharpe": 0.262,
+    "cost_bp": 103.28,
+    "net_bp": -93.1,
+    "t": -5.71,
+    "sharpe": -2.384,
+    "mean_turnover": 3.05,
+    "universe_n": 72
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": 11.92,
+    "gross_t": 0.64,
+    "gross_sharpe": 0.306,
+    "cost_bp": 95.02,
+    "net_bp": -83.1,
+    "t": -4.41,
+    "sharpe": -2.114
+   }
+  },
+  {
+   "id": "B14",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA",
+     "BR",
+     "MX"
+    ],
+    "mode": "z",
+    "L": 250,
+    "frac": 0.1,
+    "h": 10,
+    "region_neutral": true,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 125,
+    "gross_bp": -4.1,
+    "gross_t": -0.11,
+    "gross_sharpe": -0.049,
+    "cost_bp": 95.77,
+    "net_bp": -99.88,
+    "t": -2.65,
+    "sharpe": -1.192,
+    "mean_turnover": 2.8,
+    "universe_n": 72
+   },
+   "holdout": {
+    "n": 90,
+    "gross_bp": 50.21,
+    "gross_t": 1.11,
+    "gross_sharpe": 0.585,
+    "cost_bp": 89.76,
+    "net_bp": -39.54,
+    "t": -0.87,
+    "sharpe": -0.461
+   }
+  },
+  {
+   "id": "B15",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "UK",
+     "EU",
+     "CH",
+     "DK",
+     "IL"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.2,
+    "h": 5,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": -1.46,
+    "gross_t": -0.1,
+    "gross_sharpe": -0.044,
+    "cost_bp": 37.77,
+    "net_bp": -39.23,
+    "t": -2.8,
+    "sharpe": -1.17,
+    "mean_turnover": 2.8,
+    "universe_n": 34
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": 52.23,
+    "gross_t": 3.34,
+    "gross_sharpe": 1.603,
+    "cost_bp": 42.89,
+    "net_bp": 9.35,
+    "t": 0.6,
+    "sharpe": 0.288
+   }
+  },
+  {
+   "id": "B16",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "UK",
+     "EU",
+     "CH",
+     "DK",
+     "IL"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.2,
+    "h": 1,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 1448,
+    "gross_bp": 3.06,
+    "gross_t": 1.16,
+    "gross_sharpe": 0.483,
+    "cost_bp": 33.6,
+    "net_bp": -30.54,
+    "t": -11.52,
+    "sharpe": -4.804,
+    "mean_turnover": 2.56,
+    "universe_n": 34
+   },
+   "holdout": {
+    "n": 1097,
+    "gross_bp": 4.01,
+    "gross_t": 1.22,
+    "gross_sharpe": 0.584,
+    "cost_bp": 38.73,
+    "net_bp": -34.72,
+    "t": -10.55,
+    "sharpe": -5.057
+   }
+  },
+  {
+   "id": "B17",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "UK",
+     "EU",
+     "CH",
+     "DK",
+     "IL"
+    ],
+    "mode": "d1",
+    "frac": 0.2,
+    "h": 1,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 1506,
+    "gross_bp": 0.27,
+    "gross_t": 0.08,
+    "gross_sharpe": 0.034,
+    "cost_bp": 50.56,
+    "net_bp": -50.29,
+    "t": -15.63,
+    "sharpe": -6.392,
+    "mean_turnover": 3.62,
+    "universe_n": 34
+   },
+   "holdout": {
+    "n": 1155,
+    "gross_bp": 0.33,
+    "gross_t": 0.09,
+    "gross_sharpe": 0.042,
+    "cost_bp": 57.22,
+    "net_bp": -56.88,
+    "t": -15.49,
+    "sharpe": -7.234
+   }
+  },
+  {
+   "id": "B18",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "JP",
+     "KR",
+     "TW",
+     "HK",
+     "IN",
+     "AU"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.2,
+    "h": 5,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": 19.81,
+    "gross_t": 1.27,
+    "gross_sharpe": 0.528,
+    "cost_bp": 38.34,
+    "net_bp": -18.53,
+    "t": -1.18,
+    "sharpe": -0.494,
+    "mean_turnover": 2.73,
+    "universe_n": 29
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": 37.71,
+    "gross_t": 1.68,
+    "gross_sharpe": 0.805,
+    "cost_bp": 56.76,
+    "net_bp": -19.05,
+    "t": -0.85,
+    "sharpe": -0.406
+   }
+  },
+  {
+   "id": "B19",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "JP",
+     "KR",
+     "TW",
+     "HK",
+     "IN",
+     "AU"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.2,
+    "h": 1,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 1448,
+    "gross_bp": 2.94,
+    "gross_t": 0.97,
+    "gross_sharpe": 0.404,
+    "cost_bp": 32.21,
+    "net_bp": -29.26,
+    "t": -9.58,
+    "sharpe": -3.998,
+    "mean_turnover": 2.3,
+    "universe_n": 29
+   },
+   "holdout": {
+    "n": 1097,
+    "gross_bp": 5.16,
+    "gross_t": 1.11,
+    "gross_sharpe": 0.534,
+    "cost_bp": 49.66,
+    "net_bp": -44.51,
+    "t": -9.59,
+    "sharpe": -4.598
+   }
+  },
+  {
+   "id": "B20",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "JP",
+     "KR",
+     "TW",
+     "HK",
+     "IN",
+     "AU"
+    ],
+    "mode": "d1",
+    "frac": 0.2,
+    "h": 1,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 1506,
+    "gross_bp": -0.15,
+    "gross_t": -0.05,
+    "gross_sharpe": -0.019,
+    "cost_bp": 53.17,
+    "net_bp": -53.32,
+    "t": -15.97,
+    "sharpe": -6.533,
+    "mean_turnover": 3.57,
+    "universe_n": 29
+   },
+   "holdout": {
+    "n": 1155,
+    "gross_bp": 6.29,
+    "gross_t": 1.08,
+    "gross_sharpe": 0.503,
+    "cost_bp": 83.89,
+    "net_bp": -77.61,
+    "t": -13.28,
+    "sharpe": -6.202
+   }
+  },
+  {
+   "id": "B21",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA",
+     "BR",
+     "MX",
+     "UK",
+     "EU",
+     "CH",
+     "DK",
+     "IL",
+     "JP",
+     "KR",
+     "TW",
+     "HK",
+     "IN",
+     "AU"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.1,
+    "h": 5,
+    "region_neutral": true,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": 16.84,
+    "gross_t": 1.67,
+    "gross_sharpe": 0.698,
+    "cost_bp": 61.54,
+    "net_bp": -44.7,
+    "t": -4.42,
+    "sharpe": -1.846,
+    "mean_turnover": 2.98,
+    "universe_n": 135
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": 30.79,
+    "gross_t": 2.52,
+    "gross_sharpe": 1.209,
+    "cost_bp": 65.3,
+    "net_bp": -34.51,
+    "t": -2.82,
+    "sharpe": -1.354
+   }
+  },
+  {
+   "id": "B22",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA",
+     "BR",
+     "MX",
+     "UK",
+     "EU",
+     "CH",
+     "DK",
+     "IL",
+     "JP",
+     "KR",
+     "TW",
+     "HK",
+     "IN",
+     "AU"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.1,
+    "h": 1,
+    "region_neutral": true,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 1448,
+    "gross_bp": 4.39,
+    "gross_t": 2.13,
+    "gross_sharpe": 0.888,
+    "cost_bp": 54.51,
+    "net_bp": -50.12,
+    "t": -24.03,
+    "sharpe": -10.024,
+    "mean_turnover": 2.63,
+    "universe_n": 135
+   },
+   "holdout": {
+    "n": 1097,
+    "gross_bp": 4.47,
+    "gross_t": 1.9,
+    "gross_sharpe": 0.911,
+    "cost_bp": 57.93,
+    "net_bp": -53.46,
+    "t": -22.65,
+    "sharpe": -10.857
+   }
+  },
+  {
+   "id": "B23",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA",
+     "BR",
+     "MX",
+     "UK",
+     "EU",
+     "CH",
+     "DK",
+     "IL",
+     "JP",
+     "KR",
+     "TW",
+     "HK",
+     "IN",
+     "AU"
+    ],
+    "mode": "twoscale",
+    "L": 60,
+    "L2": 250,
+    "frac": 0.1,
+    "h": 5,
+    "region_neutral": true,
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 251,
+    "gross_bp": -2.26,
+    "gross_t": -0.19,
+    "gross_sharpe": -0.086,
+    "cost_bp": 51.54,
+    "net_bp": -53.79,
+    "t": -4.55,
+    "sharpe": -2.04,
+    "mean_turnover": 2.49,
+    "universe_n": 135
+   },
+   "holdout": {
+    "n": 181,
+    "gross_bp": 19.88,
+    "gross_t": 1.55,
+    "gross_sharpe": 0.819,
+    "cost_bp": 57.74,
+    "net_bp": -37.86,
+    "t": -2.97,
+    "sharpe": -1.568
+   }
+  },
+  {
+   "id": "B24",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "AR"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.2,
+    "h": 5,
+    "note": "Argentine CCL channel, tagged separately",
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 267,
+    "gross_bp": 16.58,
+    "gross_t": 0.53,
+    "gross_sharpe": 0.232,
+    "cost_bp": 181.81,
+    "net_bp": -165.23,
+    "t": -5.28,
+    "sharpe": -2.295,
+    "mean_turnover": 3.09,
+    "universe_n": 12
+   },
+   "holdout": {
+    "n": 177,
+    "gross_bp": 4.41,
+    "gross_t": 0.11,
+    "gross_sharpe": 0.06,
+    "cost_bp": 182.56,
+    "net_bp": -178.14,
+    "t": -4.5,
+    "sharpe": -2.4
+   }
+  },
+  {
+   "id": "B25",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.5,
+    "h": 20,
+    "zgate": 2.0,
+    "note": "wide-gate slow fade",
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 6,
+    "gross_bp": -277.33,
+    "gross_t": -1.09,
+    "gross_sharpe": -1.587,
+    "cost_bp": 98.16,
+    "net_bp": -375.49,
+    "t": -1.45,
+    "sharpe": -2.106,
+    "mean_turnover": 3.01,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 4,
+    "gross_bp": -110.8,
+    "gross_t": null,
+    "gross_sharpe": null,
+    "cost_bp": 67.45,
+    "net_bp": null,
+    "t": null,
+    "sharpe": null
+   }
+  },
+  {
+   "id": "B26",
+   "spec": {
+    "fam": "xsec",
+    "regions": [
+     "CA"
+    ],
+    "mode": "z",
+    "L": 60,
+    "frac": 0.1,
+    "h": 5,
+    "etb_only": false,
+    "note": "ETB screen OFF -- measures what the screen costs",
+    "entry_lag": 2
+   },
+   "design": {
+    "n": 289,
+    "gross_bp": -15.26,
+    "gross_t": -0.67,
+    "gross_sharpe": -0.282,
+    "cost_bp": 121.8,
+    "net_bp": -137.06,
+    "t": -6.05,
+    "sharpe": -2.528,
+    "mean_turnover": 3.4,
+    "universe_n": 53
+   },
+   "holdout": {
+    "n": 219,
+    "gross_bp": 12.69,
+    "gross_t": 0.53,
+    "gross_sharpe": 0.253,
+    "cost_bp": 113.11,
+    "net_bp": -100.43,
+    "t": -4.17,
+    "sharpe": -1.999
+   }
+  }
+ ],
+ "placebos_design": [
+  {
+   "label": "B2:flip",
+   "n": 289,
+   "net_bp": -112.19,
+   "sd_bp": 386.7,
+   "t": -4.93,
+   "sharpe": -2.06,
+   "hit": 0.36,
+   "years": 5.73,
+   "gross_t": 0.45,
+   "gross_sharpe": 0.188,
+   "gross_bp": 10.25,
+   "cost_bp": 122.45,
+   "mean_names_side": 4.4,
+   "mean_turnover": 3.4,
+   "kind": "placebo"
+  },
+  {
+   "label": "B2:shuffle",
+   "n": 289,
+   "net_bp": -115.67,
+   "sd_bp": 308.6,
+   "t": -6.37,
+   "sharpe": -2.661,
+   "hit": 0.318,
+   "years": 5.73,
+   "gross_t": -0.03,
+   "gross_sharpe": -0.011,
+   "gross_bp": -0.49,
+   "cost_bp": 115.19,
+   "mean_names_side": 4.4,
+   "mean_turnover": 3.62,
+   "kind": "placebo"
+  },
+  {
+   "label": "B13:flip",
+   "n": 289,
+   "net_bp": -115.46,
+   "sd_bp": 275.9,
+   "t": -7.11,
+   "sharpe": -2.971,
+   "hit": 0.294,
+   "years": 5.73,
+   "gross_t": -0.77,
+   "gross_sharpe": -0.321,
+   "gross_bp": -12.47,
+   "cost_bp": 102.99,
+   "mean_names_side": 6.4,
+   "mean_turnover": 3.05,
+   "kind": "placebo"
+  },
+  {
+   "label": "B13:shuffle",
+   "n": 289,
+   "net_bp": -93.4,
+   "sd_bp": 270.2,
+   "t": -5.88,
+   "sharpe": -2.454,
+   "hit": 0.332,
+   "years": 5.73,
+   "gross_t": 1.09,
+   "gross_sharpe": 0.454,
+   "gross_bp": 17.24,
+   "cost_bp": 110.64,
+   "mean_names_side": 6.4,
+   "mean_turnover": 3.44,
+   "kind": "placebo"
+  },
+  {
+   "label": "B16:flip",
+   "n": 1448,
+   "net_bp": -37.14,
+   "sd_bp": 103.3,
+   "t": -13.67,
+   "sharpe": -5.704,
+   "hit": 0.336,
+   "years": 5.75,
+   "gross_t": -1.21,
+   "gross_sharpe": -0.507,
+   "gross_bp": -3.29,
+   "cost_bp": 33.85,
+   "mean_names_side": 6.4,
+   "mean_turnover": 2.57,
+   "kind": "placebo"
+  },
+  {
+   "label": "B16:shuffle",
+   "n": 1448,
+   "net_bp": -42.79,
+   "sd_bp": 86.9,
+   "t": -18.75,
+   "sharpe": -7.82,
+   "hit": 0.273,
+   "years": 5.75,
+   "gross_t": -0.95,
+   "gross_sharpe": -0.398,
+   "gross_bp": -2.17,
+   "cost_bp": 40.62,
+   "mean_names_side": 6.4,
+   "mean_turnover": 3.21,
+   "kind": "placebo"
+  },
+  {
+   "label": "B19:flip",
+   "n": 1448,
+   "net_bp": -35.16,
+   "sd_bp": 116.4,
+   "t": -11.5,
+   "sharpe": -4.796,
+   "hit": 0.354,
+   "years": 5.75,
+   "gross_t": -0.92,
+   "gross_sharpe": -0.382,
+   "gross_bp": -2.78,
+   "cost_bp": 32.39,
+   "mean_names_side": 4.3,
+   "mean_turnover": 2.33,
+   "kind": "placebo"
+  },
+  {
+   "label": "B19:shuffle",
+   "n": 1448,
+   "net_bp": -41.43,
+   "sd_bp": 107.6,
+   "t": -14.65,
+   "sharpe": -6.112,
+   "hit": 0.323,
+   "years": 5.75,
+   "gross_t": 0.58,
+   "gross_sharpe": 0.243,
+   "gross_bp": 1.65,
+   "cost_bp": 43.08,
+   "mean_names_side": 4.3,
+   "mean_turnover": 3.2,
+   "kind": "placebo"
+  },
+  {
+   "label": "B21:flip",
+   "n": 289,
+   "net_bp": -74.74,
+   "sd_bp": 162.9,
+   "t": -7.8,
+   "sharpe": -3.257,
+   "hit": 0.287,
+   "years": 5.73,
+   "gross_t": -1.38,
+   "gross_sharpe": -0.578,
+   "gross_bp": -13.26,
+   "cost_bp": 61.48,
+   "mean_names_side": 12.6,
+   "mean_turnover": 2.98,
+   "kind": "placebo"
+  },
+  {
+   "label": "B21:shuffle",
+   "n": 289,
+   "net_bp": -62.83,
+   "sd_bp": 165.2,
+   "t": -6.47,
+   "sharpe": -2.7,
+   "hit": 0.36,
+   "years": 5.73,
+   "gross_t": 0.41,
+   "gross_sharpe": 0.169,
+   "gross_bp": 3.9,
+   "cost_bp": 66.73,
+   "mean_names_side": 12.6,
+   "mean_turnover": 3.32,
+   "kind": "placebo"
+  }
+ ],
+ "placebos_holdout": [
+  {
+   "label": "B2:flip",
+   "n": 219,
+   "net_bp": -126.1,
+   "sd_bp": 358.3,
+   "t": -5.21,
+   "sharpe": -2.499,
+   "hit": 0.347,
+   "years": 4.35,
+   "gross_t": -0.56,
+   "gross_sharpe": -0.268,
+   "gross_bp": -13.48,
+   "cost_bp": 112.62,
+   "mean_names_side": 5.8,
+   "mean_turnover": 3.18,
+   "kind": "placebo"
+  },
+  {
+   "label": "B2:shuffle",
+   "n": 219,
+   "net_bp": -122.08,
+   "sd_bp": 287.0,
+   "t": -6.29,
+   "sharpe": -3.019,
+   "hit": 0.301,
+   "years": 4.35,
+   "gross_t": -0.53,
+   "gross_sharpe": -0.253,
+   "gross_bp": -10.21,
+   "cost_bp": 111.86,
+   "mean_names_side": 5.8,
+   "mean_turnover": 3.57,
+   "kind": "placebo"
+  },
+  {
+   "label": "B13:flip",
+   "n": 219,
+   "net_bp": -115.77,
+   "sd_bp": 284.1,
+   "t": -6.03,
+   "sharpe": -2.893,
+   "hit": 0.32,
+   "years": 4.35,
+   "gross_t": -1.12,
+   "gross_sharpe": -0.539,
+   "gross_bp": -21.68,
+   "cost_bp": 94.09,
+   "mean_names_side": 7.8,
+   "mean_turnover": 3.04,
+   "kind": "placebo"
+  },
+  {
+   "label": "B13:shuffle",
+   "n": 219,
+   "net_bp": -106.77,
+   "sd_bp": 250.5,
+   "t": -6.31,
+   "sharpe": -3.026,
+   "hit": 0.32,
+   "years": 4.35,
+   "gross_t": -0.23,
+   "gross_sharpe": -0.111,
+   "gross_bp": -3.93,
+   "cost_bp": 102.84,
+   "mean_names_side": 7.8,
+   "mean_turnover": 3.48,
+   "kind": "placebo"
+  },
+  {
+   "label": "B16:flip",
+   "n": 1097,
+   "net_bp": -39.85,
+   "sd_bp": 107.2,
+   "t": -12.31,
+   "sharpe": -5.899,
+   "hit": 0.322,
+   "years": 4.35,
+   "gross_t": -0.27,
+   "gross_sharpe": -0.131,
+   "gross_bp": -0.88,
+   "cost_bp": 38.97,
+   "mean_names_side": 6.9,
+   "mean_turnover": 2.61,
+   "kind": "placebo"
+  },
+  {
+   "label": "B16:shuffle",
+   "n": 1097,
+   "net_bp": -49.15,
+   "sd_bp": 87.7,
+   "t": -18.56,
+   "sharpe": -8.898,
+   "hit": 0.269,
+   "years": 4.35,
+   "gross_t": -1.25,
+   "gross_sharpe": -0.598,
+   "gross_bp": -3.29,
+   "cost_bp": 45.86,
+   "mean_names_side": 6.9,
+   "mean_turnover": 3.17,
+   "kind": "placebo"
+  },
+  {
+   "label": "B19:flip",
+   "n": 1097,
+   "net_bp": -55.82,
+   "sd_bp": 154.3,
+   "t": -11.98,
+   "sharpe": -5.741,
+   "hit": 0.329,
+   "years": 4.35,
+   "gross_t": -1.33,
+   "gross_sharpe": -0.637,
+   "gross_bp": -6.16,
+   "cost_bp": 49.66,
+   "mean_names_side": 6.7,
+   "mean_turnover": 2.48,
+   "kind": "placebo"
+  },
+  {
+   "label": "B19:shuffle",
+   "n": 1097,
+   "net_bp": -62.16,
+   "sd_bp": 112.1,
+   "t": -18.37,
+   "sharpe": -8.803,
+   "hit": 0.273,
+   "years": 4.35,
+   "gross_t": -0.01,
+   "gross_sharpe": -0.002,
+   "gross_bp": -0.02,
+   "cost_bp": 62.14,
+   "mean_names_side": 6.7,
+   "mean_turnover": 3.19,
+   "kind": "placebo"
+  },
+  {
+   "label": "B21:flip",
+   "n": 219,
+   "net_bp": -98.05,
+   "sd_bp": 179.4,
+   "t": -8.09,
+   "sharpe": -3.879,
+   "hit": 0.288,
+   "years": 4.35,
+   "gross_t": -2.77,
+   "gross_sharpe": -1.328,
+   "gross_bp": -33.5,
+   "cost_bp": 64.55,
+   "mean_names_side": 16.3,
+   "mean_turnover": 2.95,
+   "kind": "placebo"
+  },
+  {
+   "label": "B21:shuffle",
+   "n": 219,
+   "net_bp": -82.74,
+   "sd_bp": 166.5,
+   "t": -7.35,
+   "sharpe": -3.527,
+   "hit": 0.26,
+   "years": 4.35,
+   "gross_t": -1.08,
+   "gross_sharpe": -0.519,
+   "gross_bp": -12.18,
+   "cost_bp": 70.55,
+   "mean_names_side": 16.3,
+   "mean_turnover": 3.33,
+   "kind": "placebo"
+  }
+ ]
+}

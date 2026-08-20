@@ -50,11 +50,74 @@ def _ffill_lookup(dmap, dates):
     return out
 
 
-def build_panel():
+def fx_series(fxetf, sym, shift):
+    """FX close indexed by the FX symbol's OWN trading calendar, then shifted by `shift`
+    FX days.
+
+    WHY A SHIFT EXISTS AT ALL. Yahoo's `<CCY>USD=X` daily bar is stamped at 23:00 UTC of the
+    PRIOR calendar day and its `close` runs one FX day stale relative to the equity bars.
+    Left uncorrected, the log spread log(P_us) - log(P_home) - log(FX) carries a whole day of
+    currency move: for RY/RY.TO the daily spread-change sd is 58 bp when the true premium of
+    two fungible listings moves by a fraction of that. Shifting one FX day forward halves it
+    (RY 58 -> 29 bp, VALE 160 -> 73 bp, ITUB 159 -> 80 bp). The shift is chosen per region by
+    MINIMISING SPREAD-CHANGE VARIANCE -- a data-quality criterion computed on prices alone,
+    with no return, P&L or signal anywhere in it -- and never by looking at what pays.
+    """
+    rows = _yb(fxetf[sym])
+    ds = sorted(rows)
+    out = {}
+    for i, d in enumerate(ds):
+        j = i + shift
+        if 0 <= j < len(ds):
+            out[d] = rows[ds[j]]["c"]
+    return out
+
+
+def calibrate_fx_shift(us_raw, home, fxetf, us_dates, lo, hi, shifts=(-1, 0, 1, 2)):
+    """Per-region FX shift, picked on spread-change variance only."""
+    import collections
+    per = collections.defaultdict(lambda: collections.defaultdict(list))
+    for u, (h, reg) in ADR_MAP.items():
+        if u not in us_raw or h not in home:
+            continue
+        R = _byday(us_raw[u])
+        H = _ffill_lookup({d: r["c"] for d, r in _yb(home[h]).items()}, us_dates)
+        for sh in shifts:
+            F = _ffill_lookup(fx_series(fxetf, REGIONS[reg]["fx"], sh), us_dates)
+            v = []
+            for d in us_dates:
+                if not (lo <= d <= hi) or d not in R or d not in H or d not in F:
+                    continue
+                if R[d]["c"] <= 0 or H[d][0] <= 0 or F[d][0] <= 0:
+                    continue
+                v.append(math.log(R[d]["c"]) - math.log(H[d][0]) - math.log(F[d][0]))
+            if len(v) < 200:
+                continue
+            dv = np.diff(np.array(v))
+            dv = dv[np.abs(dv) < 0.1]
+            if len(dv) > 100:
+                per[reg][sh].append(float(np.std(dv)))
+    chosen, table = {}, {}
+    for reg, m in per.items():
+        med = {sh: float(np.median(v)) for sh, v in m.items() if v}
+        if not med:
+            continue
+        chosen[reg] = min(med, key=med.get)
+        table[reg] = {str(k): round(v * 1e4, 1) for k, v in sorted(med.items())}
+    for reg in REGIONS:
+        chosen.setdefault(reg, 0)
+    return chosen, table
+
+
+def build_panel(fx_shift=None):
     us_raw, us_adj, home, fxetf = _load()
     us_dates = sorted({b["t"][:10] for s in us_raw.values() for b in s})
-    fx = {k: _yb(v) for k, v in fxetf.items()}
-    fx_l = {k: _ffill_lookup({d: r["c"] for d, r in v.items()}, us_dates) for k, v in fx.items()}
+    if fx_shift is None:
+        fx_shift = {r: 0 for r in REGIONS}
+    fx_l = {}
+    for reg, sh in fx_shift.items():
+        sym = REGIONS[reg]["fx"]
+        fx_l[reg] = _ffill_lookup(fx_series(fxetf, sym, sh), us_dates)
 
     names = {}
     census = []
@@ -65,7 +128,7 @@ def build_panel():
             continue
         R, A = _byday(us_raw[u]), _byday(us_adj[u])
         H = _ffill_lookup({d: r["c"] for d, r in _yb(home[h]).items()}, us_dates)
-        F = fx_l.get(REGIONS[reg]["fx"], {})
+        F = fx_l.get(reg, {})
         rows = []
         for d in us_dates:
             if d not in R or d not in A or d not in H or d not in F:

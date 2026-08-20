@@ -2,7 +2,8 @@
 import json, math, pathlib, sys, time
 import numpy as np
 sys.path.insert(0, "/home/anont/meme")
-from scripts.t29_crosslist.xl_panel import build_panel, half_spreads, CACHE
+from scripts.t29_crosslist.xl_panel import (build_panel, half_spreads, CACHE,
+                                            calibrate_fx_shift, _load)
 from scripts.t29_crosslist.xl_engine import xsec, pair_rv, BORROW_ETB, BORROW_HTB
 from scripts.t29_crosslist.xl_formulas import FORMULAS
 from scripts.t29_crosslist.xl_universe import US_US_PAIRS
@@ -18,7 +19,17 @@ SUBSETS = {"all": US_US_PAIRS, "dlc": DLC, "adrclass": ADRCLASS}
 
 def run(which, extra=False):
     lo, hi = WINDOWS[which]
-    names, census, us_dates, us_raw, us_adj = build_panel()
+    # FX-shift calibration is a DATA-QUALITY step: it minimises the variance of the daily
+    # spread CHANGE, a statistic built from prices only, with no return or P&L in it. It is
+    # calibrated once on the DESIGN window and the same table is used for the held-out read,
+    # so the held-out window contributes nothing to any choice.
+    _ur, _ua, _home, _fxetf = _load()
+    _uds = sorted({b["t"][:10] for v in _ur.values() for b in v})
+    dlo, dhi = WINDOWS["design"]
+    fx_shift, fx_table = calibrate_fx_shift(_ur, _home, _fxetf, _uds, dlo, dhi)
+    del _ur, _ua, _home, _fxetf, _uds
+    print("FX shift per region:", fx_shift, flush=True)
+    names, census, us_dates, us_raw, us_adj = build_panel(fx_shift=fx_shift)
     dates = [d for d in us_dates if lo <= d <= hi]
     # window-local panel slices
     W = {}
@@ -113,6 +124,8 @@ def run(which, extra=False):
                "placebos": diags,
                "cost_stress": stress,
                "census": census,
+               "fx_shift_per_region": fx_shift,
+               "fx_shift_spread_sd_bp": fx_table,
                "half_spread_detail_bp": hsdet,
                "borrow_state": etb}
     p = OUT / f"DEEPMINE_crosslist_{which.upper()}.json"

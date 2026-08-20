@@ -106,3 +106,35 @@ from which nothing was selected. The amendment makes every formula strictly more
    book, not a full round trip every period. A complete rebuild reproduces the old number
    exactly; a persistent signal pays less. This matters most at h=1, where the old model
    charged ~50 bp a day.
+
+## AMENDMENT 3 (same sitting): the FX series was one day stale, and the first null was an artefact
+
+The first design pass returned all 30 formulas negative. Before accepting that, the spread
+series itself was checked, and it failed the check.
+
+For RY / RY.TO -- two fully fungible listings of one bank, arbitraged continuously across two
+sessions that open and close at the same minute -- the measured daily sd of the log premium
+was **58 bp**. That is not a premium; that is a currency series. Yahoo's `<CCY>USD=X` daily
+bar is timestamped 23:00 UTC of the *prior* calendar day and its `close` runs one FX day stale
+against the equity bars, so the spread was carrying a whole day of CAD move.
+
+Shifting the FX series one FX day forward halves the noise, consistently and across
+currencies: RY 58 -> 29 bp, ENB 60 -> 33, CNI 59 -> 30, VALE 160 -> 73, ITUB 159 -> 80.
+For Japan (home close 14 h before the US close) shift 0 remains best, exactly as the
+mechanism predicts.
+
+**Correction.** The FX shift is now chosen **per region** by minimising the variance of the
+daily spread *change* -- a statistic computed from prices alone, containing no return, no
+signal and no P&L -- calibrated once on the **design** window and reused unchanged for the
+held-out read.
+
+**Consequence for the entry lag.** Since the wall-clock meaning of "the bar one FX day
+forward" cannot be verified from the free feed, the entry lag is raised from 1 to
+**`entry_lag = 2`**: the signal is built from closes of day *t* and the book is entered at the
+close of day *t+2*. Under every plausible reading of that timestamp the whole signal is in
+the past when the trade is made. Two days of decay is the price of the free feed's ambiguity,
+and it is charged rather than assumed away.
+
+The first design pass is therefore **void as evidence about the sub-family** -- it measured a
+corrupted spread. It is kept in the record as `DESIGN_v1` because it is what produced the
+diagnosis. N is unchanged at 30; the windows are unchanged; the held-out window is still unread.

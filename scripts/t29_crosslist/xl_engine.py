@@ -218,6 +218,13 @@ def xsec(names, syms, dates, hs, bstat, *, mode="z", L=60, L2=250, hl=30, frac=0
                        "nL": sum(len(g) for g in Ls), "nS": sum(len(g) for g in Ss)})
     st = _stats(nets, h, label)
     if detail:
+        # The ZERO-COST counterfactual. If a formula cannot clear the noise bar even when
+        # every crossing, fee and borrow charge is set to zero, then no cost model, no
+        # universe screen and no execution improvement can rescue it -- the signal itself
+        # is absent. This is the number the verdict rests on.
+        g = _stats([x["gross"] for x in detail], h, label + " GROSS")
+        st["gross_t"] = g.get("t")
+        st["gross_sharpe"] = g.get("sharpe")
         st["gross_bp"] = round(float(np.mean([x["gross"] for x in detail])) * 1e4, 2)
         st["cost_bp"] = round(float(np.mean([x["cost"] for x in detail])) * 1e4, 2)
         st["mean_names_side"] = round(float(np.mean([x["nL"] for x in detail])), 1)
