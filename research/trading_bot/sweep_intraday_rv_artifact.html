@@ -1,0 +1,272 @@
+<title>The Spread Ate the Signal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root {
+  --ground:#ECF0F0; --surface:#F8FAFA; --raised:#E1E8E8;
+  --ink:#111A1C; --muted:#546668; --faint:#7E9092;
+  --rule:#C9D5D5; --hair:#DCE4E4;
+  --signal:#12676D; --signal-soft:#D3E5E5;
+  --friction:#A2452D; --friction-soft:#F0DDD6;
+  --shadow:0 1px 2px rgba(17,26,28,.06), 0 8px 28px -18px rgba(17,26,28,.30);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:#0D1214; --surface:#141C1E; --raised:#1D272A;
+    --ink:#E2EAEA; --muted:#9BAAAB; --faint:#758586;
+    --rule:#2A3639; --hair:#1F292C;
+    --signal:#5FBDC1; --signal-soft:#153537;
+    --friction:#DE8368; --friction-soft:#37211A;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 8px 28px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"] {
+  --ground:#0D1214; --surface:#141C1E; --raised:#1D272A;
+  --ink:#E2EAEA; --muted:#9BAAAB; --faint:#758586;
+  --rule:#2A3639; --hair:#1F292C;
+  --signal:#5FBDC1; --signal-soft:#153537;
+  --friction:#DE8368; --friction-soft:#37211A;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 8px 28px -18px rgba(0,0,0,.8);
+}
+
+*, *::before, *::after { box-sizing:border-box; }
+body {
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size:16.5px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:1120px; margin:0 auto; padding:clamp(2rem,5vw,4.5rem) clamp(1rem,4vw,2.5rem) 6rem; }
+.col { max-width:68ch; }
+
+.eyebrow {
+  font-family:"IBM Plex Mono", ui-monospace, monospace;
+  font-size:.72rem; letter-spacing:.15em; text-transform:uppercase;
+  color:var(--faint); margin:0 0 1.25rem;
+}
+h1 {
+  font-family:"Newsreader", Georgia, serif; font-weight:500;
+  font-size:clamp(2.3rem,5.2vw,3.5rem); line-height:1.06; letter-spacing:-.015em;
+  text-wrap:balance; margin:0 0 1rem;
+}
+.standfirst {
+  font-family:"Newsreader", Georgia, serif; font-size:clamp(1.12rem,2vw,1.32rem);
+  line-height:1.5; color:var(--muted); margin:0 0 2.5rem; max-width:60ch; text-wrap:pretty;
+}
+h2 {
+  font-family:"Newsreader", Georgia, serif; font-weight:500;
+  font-size:clamp(1.5rem,3vw,1.95rem); line-height:1.15; letter-spacing:-.01em;
+  text-wrap:balance; margin:0 0 .9rem;
+}
+h3 { font-size:.95rem; font-weight:600; letter-spacing:.01em; margin:0 0 .5rem; }
+p { margin:0 0 1.1rem; text-wrap:pretty; }
+a { color:var(--signal); }
+strong { font-weight:600; }
+section { margin-top:clamp(3rem,6vw,4.5rem); }
+.divider { height:1px; background:var(--rule); border:0; margin:0; }
+
+/* ---- verdict panel ---- */
+.verdict {
+  background:var(--surface); border:1px solid var(--rule); border-radius:3px;
+  padding:clamp(1.25rem,3vw,2rem); box-shadow:var(--shadow); margin-bottom:2.5rem;
+}
+.verdict-flag {
+  display:inline-flex; align-items:center; gap:.5rem;
+  font-family:"IBM Plex Mono", monospace; font-size:.72rem; letter-spacing:.14em;
+  text-transform:uppercase; font-weight:600;
+  color:var(--friction); background:var(--friction-soft);
+  padding:.32rem .6rem; border-radius:2px; margin-bottom:1rem;
+}
+.kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); margin:1.5rem 0 0; }
+.kpi { background:var(--surface); padding:1rem 1.1rem; }
+.kpi .v { font-family:"IBM Plex Mono", monospace; font-size:1.6rem; font-weight:500; line-height:1.1; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+.kpi .l { font-size:.78rem; color:var(--muted); margin-top:.35rem; line-height:1.35; }
+.kpi.neg .v { color:var(--friction); }
+.kpi.pos .v { color:var(--signal); }
+
+/* ---- the one diagram ---- */
+figure { margin:0; }
+.scale {
+  background:var(--surface); border:1px solid var(--rule); border-radius:3px;
+  padding:clamp(1.25rem,3vw,1.9rem); box-shadow:var(--shadow);
+}
+.bar-row { display:grid; grid-template-columns:minmax(0,1fr); gap:.4rem; margin-bottom:1.4rem; }
+.bar-row:last-of-type { margin-bottom:0; }
+.bar-label { display:flex; justify-content:space-between; align-items:baseline; gap:1rem; font-size:.83rem; }
+.bar-label .who { font-weight:600; }
+.bar-label .amt { font-family:"IBM Plex Mono", monospace; font-variant-numeric:tabular-nums; }
+.bar-track { height:22px; background:var(--raised); border-radius:2px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:2px; }
+.bar-fill.sig { background:var(--signal); }
+.bar-fill.fri { background:var(--friction); }
+.bar-note { font-size:.78rem; color:var(--muted); }
+.scale-caption { font-size:.83rem; color:var(--muted); margin:1.3rem 0 0; padding-top:1.1rem; border-top:1px solid var(--hair); }
+
+/* ---- tables ---- */
+.tablewrap { overflow-x:auto; border:1px solid var(--rule); border-radius:3px; background:var(--surface); }
+.tablewrap.tall { max-height:min(72vh,720px); overflow-y:auto; }
+table { border-collapse:collapse; width:100%; font-size:.83rem; }
+th, td { text-align:right; padding:.44rem .7rem; white-space:nowrap; border-bottom:1px solid var(--hair); }
+th {
+  position:sticky; top:0; z-index:1; background:var(--raised);
+  font-family:"IBM Plex Mono", monospace; font-size:.68rem; letter-spacing:.07em;
+  text-transform:uppercase; font-weight:600; color:var(--muted);
+}
+td { font-family:"IBM Plex Mono", monospace; font-variant-numeric:tabular-nums; }
+th:first-child, td:first-child, td.nm, th.nm { text-align:left; }
+td.nm { font-weight:500; white-space:nowrap; }
+td.kind, th.kind { text-align:left; color:var(--faint); font-size:.76rem; }
+td.rank { color:var(--faint); }
+td.sig { color:var(--signal); }
+td.fri { color:var(--friction); }
+td.ok { color:var(--signal); }
+td.no { color:var(--friction); }
+tbody tr:last-child td { border-bottom:0; }
+tr.gaprow td { text-align:center; color:var(--faint); font-size:.76rem; background:var(--ground); }
+.tnote { font-size:.8rem; color:var(--muted); margin:.7rem 0 0; }
+
+/* ---- method list ---- */
+dl.method { margin:0; display:grid; grid-template-columns:minmax(0,1fr); gap:0; }
+dl.method > div { padding:.95rem 0; border-bottom:1px solid var(--hair); display:grid; grid-template-columns:minmax(140px,190px) minmax(0,1fr); gap:1.5rem; }
+dl.method > div:last-child { border-bottom:0; }
+dl.method dt { font-family:"IBM Plex Mono", monospace; font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; color:var(--faint); padding-top:.2rem; }
+dl.method dd { margin:0; font-size:.9rem; }
+@media (max-width:640px) { dl.method > div { grid-template-columns:minmax(0,1fr); gap:.3rem; } }
+
+ul.findings { margin:0 0 1.1rem; padding:0; list-style:none; display:grid; gap:1rem; }
+ul.findings li { padding-left:1.15rem; position:relative; }
+ul.findings li::before { content:""; position:absolute; left:0; top:.62em; width:5px; height:5px; background:var(--signal); border-radius:50%; }
+ul.findings li.f::before { background:var(--friction); }
+
+footer { margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--rule); font-size:.82rem; color:var(--muted); }
+code { font-family:"IBM Plex Mono", monospace; font-size:.88em; background:var(--raised); padding:.1em .34em; border-radius:2px; }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Wide formula sweep · 98 formulas · design + held-out</p>
+  <h1>The spread ate the signal</h1>
+  <p class="standfirst">Intraday relative value and mean reversion across ETF siblings, sector baskets and the mega-cap cross-section. The signal is real, large, and it replicates out of sample. It is also, to within a factor of thirty, entirely inside the bid–ask.</p>
+
+  <div class="verdict">
+    <span class="verdict-flag">Verdict · theme is dead</span>
+    <p style="margin-bottom:0"><strong>98 structurally different formulas</strong> were scored on the design window. <strong>Zero</strong> are net-positive at the headline 1.0&nbsp;bp/side cost rung. The best is <code>D1_gap_rev_mega</code> at <strong>-0.27</strong>, against a noise bar — the 95th percentile of best-of-98 Sharpe when nothing has an edge — of <strong>+2.01</strong>. The winner is not near the bar. It is 2.3 Sharpe units below it.</p>
+    <div class="kpis">
+      <div class="kpi neg"><div class="v">0 / 98</div><div class="l">net-positive at 1.0 bp/side</div></div>
+      <div class="kpi pos"><div class="v">50 / 98</div><div class="l">beat the <em>gross</em> noise bar of +1.59</div></div>
+      <div class="kpi neg"><div class="v">37×</div><div class="l">more friction than the best edge can pay</div></div>
+      <div class="kpi neg"><div class="v">82 / 98</div><div class="l">cannot pay even the SEC/FINRA fee</div></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <p>The interesting part is <em>why</em>, and it is not “there is no signal”:</p>
+    <ul class="findings">
+      <li><strong>Before costs the signal is real and it replicates.</strong> 50 of 98 configs beat the gross noise bar (+1.59). The best gross design Sharpe is <strong>+6.86</strong> (<code>A2_pair_z_intraday</code>), and the same formula prints <strong>+5.41</strong> gross on the untouched held-out window.</li>
+      <li class="f"><strong>The edge is smaller than the friction by one to two orders of magnitude.</strong> <code>A2_pair_z_intraday</code> can bear a total charge of <strong>0.031 bp per unit of turnover</strong> before its gross edge is exactly consumed. The headline rung charges 1.15 bp.</li>
+      <li class="f"><strong>It cannot pay the regulatory fee, never mind the spread.</strong> SEC Section&nbsp;31 plus FINRA TAF alone is 0.15 bp per unit of turnover — five times what the best formula earns.</li>
+      <li class="f">Only <strong>3 of 98</strong> configs are positive even at the 0.5 bp/side rung, and the best of those reaches +0.22 — still far under the noise bar.</li>
+    </ul>
+    <p>Mean reversion between ETF siblings and across the short-horizon equity cross-section is not a mispricing a taker can harvest. It is, to a very good approximation, the bid–ask bounce itself. The thing being measured <em>is</em> the spread, which is exactly why the measurement is so stable and the trade is impossible.</p>
+  </div>
+
+  <section>
+    <div class="col"><h2>What the best formula earns, against what it is charged</h2>
+    <p>Both bars are basis points per unit of portfolio turnover, on the same scale.</p></div>
+    <figure class="scale">
+      <div class="bar-row">
+        <div class="bar-label"><span class="who">Gross edge — what <code>A2_pair_z_intraday</code> earns</span><span class="amt">0.031 bp</span></div>
+        <div class="bar-track"><div class="bar-fill sig" style="width:2.68%"></div></div>
+        <div class="bar-note">Gross Sharpe +6.86 on design, +5.41 held out. The signal is not in doubt.</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label"><span class="who">Charged — half-spread plus SEC 31 / FINRA TAF</span><span class="amt">1.15 bp</span></div>
+        <div class="bar-track"><div class="bar-fill fri" style="width:100%"></div></div>
+        <div class="bar-note">Of which 0.15 bp is the regulatory pass-through alone — already five times the edge.</div>
+      </div>
+      <p class="scale-caption">The teal bar is not a rounding error in the drawing. At 0.031&nbsp;bp against 1.15&nbsp;bp it is 2.68% of the clay bar’s width, and it has been floored at one pixel-width so it remains visible at all.</p>
+    </figure>
+  </section>
+
+  <section>
+    <div class="col"><h2>This was predictable before any strategy was scored</h2>
+    <p>The census measured how far each same-claim pair’s log ratio travels from its own 78-bar trailing mean, on the design window, <strong>before</strong> any config ran. A two-leg pair trade crosses four half-spreads per round trip, so it must capture <strong>4.60 bp</strong> to break even.</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="nm">Pair</th><th>sd of dislocation</th><th>p95 |dislocation|</th><th>p95 ÷ round trip</th><th>ac(1)</th></tr></thead>
+        <tbody><tr><td class=nm>SPY/IVV</td><td>0.79</td><td>1.51</td><td class='no'>0.33×</td><td>+0.141</td></tr><tr><td class=nm>SPY/VOO</td><td>0.79</td><td>1.52</td><td class='no'>0.33×</td><td>+0.113</td></tr><tr><td class=nm>IVV/VOO</td><td>0.79</td><td>1.58</td><td class='no'>0.34×</td><td>+0.048</td></tr><tr><td class=nm>GLD/IAU</td><td>1.31</td><td>2.58</td><td class='no'>0.56×</td><td>+0.083</td></tr><tr><td class=nm>SPY/SPLG</td><td>1.32</td><td>2.61</td><td class='no'>0.57×</td><td>+0.055</td></tr><tr><td class=nm>AGG/BND</td><td>1.55</td><td>3.08</td><td class='no'>0.67×</td><td>+0.703</td></tr><tr><td class=nm>VTI/ITOT</td><td>1.68</td><td>3.23</td><td class='no'>0.70×</td><td>+0.234</td></tr><tr><td class=nm>GLD/GLDM</td><td>1.89</td><td>3.77</td><td class='no'>0.82×</td><td>+0.052</td></tr><tr class=gaprow><td colspan=5>… 28 further pairs …</td></tr><tr><td class=nm>XLI/VIS</td><td>10.41</td><td>21.26</td><td class='ok'>4.62×</td><td>+0.710</td></tr><tr><td class=nm>XLV/VHT</td><td>10.84</td><td>22.67</td><td class='ok'>4.93×</td><td>+0.870</td></tr><tr><td class=nm>XLY/VCR</td><td>12.81</td><td>25.73</td><td class='ok'>5.59×</td><td>+0.662</td></tr><tr><td class=nm>SMH/SOXX</td><td>17.89</td><td>35.56</td><td class='ok'>7.73×</td><td>+0.962</td></tr></tbody>
+      </table>
+    </div>
+    <div class="col"><p class="tnote">The genuinely same-claim pairs — SPY/IVV/VOO, where the arbitrage argument is airtight — sit at the top with sub-2&nbsp;bp p95 dislocations and one-bar autocorrelations near zero: the displacement does not survive a single bar, because it is non-synchronous prints rather than a dislocation. The pairs at the bottom have larger, more persistent spreads precisely because they are <em>not</em> the same claim — XLK and VGT hold different books — so no arbitrage force pulls them together and the “reversion” is a directional bet, not a convergence.</p></div>
+  </section>
+
+  <section>
+    <div class="col"><h2>The noise bar</h2>
+    <p>Best-of-98 Sharpe under the null, from a stationary block bootstrap (block = 5 days, 500 resamples) of each config’s <em>demeaned</em> daily PnL, drawing the same day indices for every config so the sweep’s internal correlation survives. A design result is only interesting if it clears the p95 line — none does.</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="nm">Statistic of max Sharpe under H₀</th><th>net (1.0 bp)</th><th>gross</th></tr></thead>
+        <tbody>
+          <tr><td class="nm">mean</td><td>+1.31</td><td>+1.17</td></tr>
+          <tr><td class="nm">p95 — the operative bar</td><td>+2.01</td><td>+1.59</td></tr>
+          <tr><td class="nm">p99</td><td>+2.47</td><td>+1.83</td></tr>
+          <tr><td class="nm">naive √(2 ln N) ÷ √years</td><td>+1.52</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="col"><h2>Full distribution of design results</h2>
+    <p>All 98 configs, not just the winner. The net rows are not close calls: the median config loses roughly 28 Sharpe units to friction.</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="nm">Basis</th><th>min</th><th>p10</th><th>p25</th><th>median</th><th>p75</th><th>p90</th><th>max</th></tr></thead>
+        <tbody><tr><td class=nm>gross (0 bp)</td><td>-3.11</td><td>-0.38</td><td>+0.43</td><td>+1.70</td><td>+3.29</td><td>+5.62</td><td>+6.86</td></tr><tr><td class=nm>net 0.5 bp/side</td><td>-224.31</td><td>-158.89</td><td>-73.31</td><td>-15.65</td><td>-5.16</td><td>-1.16</td><td>+0.22</td></tr><tr><td class=nm>net 1.0 bp/side</td><td>-314.92</td><td>-215.99</td><td>-93.01</td><td>-28.20</td><td>-10.11</td><td>-1.97</td><td>-0.27</td></tr><tr><td class=nm>net 2.0 bp/side</td><td>-406.32</td><td>-236.32</td><td>-124.30</td><td>-50.74</td><td>-19.79</td><td>-3.09</td><td>-0.87</td></tr><tr><td class=nm>net 2.5 bp/side</td><td>-434.56</td><td>-247.14</td><td>-132.08</td><td>-62.50</td><td>-22.52</td><td>-3.66</td><td>-1.18</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="col"><h2>Held out</h2>
+    <p>Nothing cleared the p95 bar, so per the pre-registration these ran out of sample as a <strong>documented negative control</strong>, not as candidates. The two highest-<em>gross</em> formulas were added, labelled, to test whether the before-cost signal itself persists. It does.</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="nm">Formula</th><th>design gross</th><th>held-out gross</th><th>design net 1bp</th><th>held-out net 1bp</th><th>break-even bp/turn</th></tr></thead>
+        <tbody><tr><td class=nm>D1_gap_rev_mega</td><td class=sig>+0.43</td><td class=sig>+0.64</td><td class=fri>-0.27</td><td class=fri>+0.06</td><td>0.711</td></tr><tr><td class=nm>I5_xs_rev_mega_lb6_hold39</td><td class=sig>+0.88</td><td class=sig>+0.21</td><td class=fri>-0.29</td><td class=fri>-0.75</td><td>0.862</td></tr><tr><td class=nm>D4_first30_rev_mega</td><td class=sig>-0.15</td><td class=sig>-0.80</td><td class=fri>-1.01</td><td class=fri>-1.53</td><td>-0.199</td></tr><tr><td class=nm>A2_pair_z_intraday</td><td class=sig>+6.86</td><td class=sig>+5.41</td><td class=fri>-252.58</td><td class=fri>-197.97</td><td>0.031</td></tr><tr><td class=nm>C1_xs_rev_mega_lb1</td><td class=sig>+6.09</td><td class=sig>+4.79</td><td class=fri>-33.71</td><td class=fri>-28.49</td><td>0.175</td></tr></tbody>
+      </table>
+    </div>
+    <div class="col"><p class="tnote">The gross columns are the finding: the mean-reversion signal is stable across a four-year design window and a twenty-month held-out window. The net columns are the verdict: it is unreachable.</p></div>
+  </section>
+
+  <section>
+    <div class="col"><h2>Method</h2></div>
+    <dl class="method">
+      <div><dt>Design window</dt><dd>2021-01-04 → 2024-12-31 · 1005 sessions</dd></div>
+      <div><dt>Held out</dt><dd>2025-01-02 → 2026-08-15 · 405 sessions, not read until the shortlist was frozen. The sweep script refuses to run the held-out stage without an explicit shortlist, so it cannot be used to browse.</dd></div>
+      <div><dt>Universe</dt><dd>132 symbols of Alpaca SIP 5-minute bars, regular hours only, split- and dividend-adjusted. Same-claim ETF clusters, SPDR/Vanguard sector twins, style and regional ETFs, levered and inverse funds, 30+ mega-caps. Survivorship-biased — every ETF is alive today — and price levels are not point-in-time, so no config filters on a level.</dd></div>
+      <div><dt>Execution</dt><dd>Signal from closes through bar <em>t−1</em>; fill at the VWAP of bar <em>t</em>; return <code>vwap[t+1]/vwap[t]−1</code>. A full five-minute bar separates the last observed price from the fill, and the fill is a bar VWAP rather than a touch print. Flat at every close.</dd></div>
+      <div><dt>Costs</dt><dd>0.5 / 1.0 / 2.0 / 2.5 bp per side on <code>|Δw|</code>, headline 1.0 bp, plus 0.15 bp per unit turnover for SEC 31 and FINRA TAF on every rung. Provenance is an adverse proxy: the programme’s own measured half-spread for liquid names is 1.13 bp, and 2.5 bp is the repo’s retail-taker default. Borrow is zero, and that is a claim with a reason — every config is flat at the closing bar and US borrow accrues overnight.</dd></div>
+      <div><dt>Noise bar</dt><dd>Stationary block bootstrap of demeaned daily PnL, same day indices across all configs so cross-config correlation is preserved, max Sharpe per resample, 500 resamples.</dd></div>
+      <div><dt>Harness self-test</dt><dd>Recovers a planted OU dislocation at gross Sharpe +12.45, flips to -12.45 under negation, and returns -0.34 on a random-walk spread with nothing to find. All three checks pass, so the evaluator neither misses a real edge nor manufactures one.</dd></div>
+      <div><dt>Disclosed redundancy</dt><dd><code>D1_gap_rev_mega</code> and <code>D3_gap_resid_rev_mega</code> return identical numbers — subtracting the cross-sectional mean gap before a dollar-neutralising demean is a no-op. That is one formula counted twice, so the effective N is 97. It moves the noise bar by less than 0.01 and is recorded rather than quietly deduplicated.</dd></div>
+    </dl>
+  </section>
+
+  <section>
+    <div class="col"><h2>Every formula</h2>
+    <p>All 98 configs, ranked by net design Sharpe at the headline rung. Scroll for the full list.</p></div>
+    <div class="tablewrap tall">
+      <table>
+        <thead><tr><th>#</th><th class="nm">Formula</th><th class="kind">Kind</th><th>turn/day</th><th>break-even bp/turn</th><th>gross</th><th>net 0.5bp</th><th>net 1bp</th><th>net 2bp</th><th>net 2.5bp</th><th>held-out 1bp</th></tr></thead>
+        <tbody><tr><td class=rank>1</td><td class=nm>D1_gap_rev_mega</td><td class=kind>gap_reversal</td><td>2.0</td><td>0.711</td><td class=sig>+0.43</td><td>+0.04</td><td class=fri>-0.27</td><td>-0.87</td><td>-1.18</td><td>+0.06</td></tr><tr><td class=rank>2</td><td class=nm>D3_gap_resid_rev_mega</td><td class=kind>gap_resid_reversal</td><td>2.0</td><td>0.711</td><td class=sig>+0.43</td><td>+0.04</td><td class=fri>-0.27</td><td>-0.87</td><td>-1.18</td><td>+0.06</td></tr><tr><td class=rank>3</td><td class=nm>I5_xs_rev_mega_lb6_hold39</td><td class=kind>xs_reversal</td><td>3.5</td><td>0.862</td><td class=sig>+0.88</td><td>+0.22</td><td class=fri>-0.29</td><td>-1.32</td><td>-1.83</td><td>-0.75</td></tr><tr><td class=rank>4</td><td class=nm>D4_first30_rev_mega</td><td class=kind>first30_reversal</td><td>2.0</td><td>-0.199</td><td class=sig>-0.15</td><td>-0.63</td><td class=fri>-1.01</td><td>-1.76</td><td>-2.13</td><td>-1.53</td></tr><tr><td class=rank>5</td><td class=nm>D2_gap_cont_mega</td><td class=kind>gap_continuation</td><td>2.0</td><td>-0.711</td><td class=sig>-0.43</td><td>-0.83</td><td class=fri>-1.13</td><td>-1.74</td><td>-2.04</td><td>—</td></tr><tr><td class=rank>6</td><td class=nm>I4_xs_rev_etf_lb6_hold39</td><td class=kind>xs_reversal</td><td>3.5</td><td>0.390</td><td class=sig>+0.61</td><td>-0.40</td><td class=fri>-1.18</td><td>-2.74</td><td>-3.52</td><td>—</td></tr><tr><td class=rank>7</td><td class=nm>D2_gap_cont_etf</td><td class=kind>gap_continuation</td><td>2.0</td><td>0.191</td><td class=sig>+0.24</td><td>-0.58</td><td class=fri>-1.22</td><td>-2.49</td><td>-3.13</td><td>—</td></tr><tr><td class=rank>8</td><td class=nm>D1b_gap_rev_etf_hold78</td><td class=kind>gap_reversal</td><td>2.1</td><td>-0.579</td><td class=sig>-0.47</td><td>-0.99</td><td class=fri>-1.39</td><td>-2.20</td><td>-2.60</td><td>—</td></tr><tr><td class=rank>9</td><td class=nm>D1_gap_rev_etf</td><td class=kind>gap_reversal</td><td>2.0</td><td>-0.191</td><td class=sig>-0.24</td><td>-1.07</td><td class=fri>-1.70</td><td>-2.98</td><td>-3.61</td><td>—</td></tr><tr><td class=rank>10</td><td class=nm>D3_gap_resid_rev_etf</td><td class=kind>gap_resid_reversal</td><td>2.0</td><td>-0.191</td><td class=sig>-0.24</td><td>-1.07</td><td class=fri>-1.70</td><td>-2.98</td><td>-3.61</td><td>—</td></tr><tr><td class=rank>11</td><td class=nm>D4_first30_rev_etf</td><td class=kind>first30_reversal</td><td>2.1</td><td>-0.793</td><td class=sig>-0.85</td><td>-1.54</td><td class=fri>-2.08</td><td>-3.15</td><td>-3.68</td><td>—</td></tr><tr><td class=rank>12</td><td class=nm>I6_vwap_rev_etf_hold13</td><td class=kind>vwap_reversion</td><td>6.3</td><td>0.182</td><td class=sig>+0.47</td><td>-1.19</td><td class=fri>-2.48</td><td>-5.10</td><td>-6.42</td><td>—</td></tr><tr><td class=rank>13</td><td class=nm>I5_xs_rev_mega_lb6_hold13</td><td class=kind>xs_reversal</td><td>9.1</td><td>0.110</td><td class=sig>+0.29</td><td>-1.41</td><td class=fri>-2.73</td><td>-5.38</td><td>-6.71</td><td>—</td></tr><tr><td class=rank>14</td><td class=nm>I3_etfbasket_band_w390_e2_x0.5</td><td class=kind>etf_basket_band</td><td>3.6</td><td>0.122</td><td class=sig>+0.43</td><td>-1.85</td><td class=fri>-3.61</td><td>-7.11</td><td>-8.84</td><td>—</td></tr><tr><td class=rank>15</td><td class=nm>I4_xs_rev_etf_lb6_hold13</td><td class=kind>xs_reversal</td><td>9.1</td><td>0.101</td><td class=sig>+0.37</td><td>-2.02</td><td class=fri>-3.88</td><td>-7.62</td><td>-9.50</td><td>—</td></tr><tr><td class=rank>16</td><td class=nm>C6_xs_rev_etf_lb6_open</td><td class=kind>xs_reversal</td><td>2.0</td><td>-0.063</td><td class=sig>-0.22</td><td>-2.50</td><td class=fri>-4.25</td><td>-7.75</td><td>-9.49</td><td>—</td></tr><tr><td class=rank>17</td><td class=nm>I8_resid_rev_etf_lb12_hold13</td><td class=kind>resid_reversal</td><td>7.7</td><td>0.223</td><td class=sig>+1.05</td><td>-1.97</td><td class=fri>-4.33</td><td>-9.13</td><td>-11.56</td><td>—</td></tr><tr><td class=rank>18</td><td class=nm>D4b_first30_rev_etf_close</td><td class=kind>first30_reversal</td><td>2.0</td><td>0.036</td><td class=sig>+0.16</td><td>-2.68</td><td class=fri>-4.86</td><td>-9.22</td><td>-11.40</td><td>—</td></tr><tr><td class=rank>19</td><td class=nm>F1_triplet_resid_w390</td><td class=kind>triplet_resid</td><td>5.0</td><td>-0.090</td><td class=sig>-0.36</td><td>-2.95</td><td class=fri>-4.89</td><td>-8.24</td><td>-9.54</td><td>—</td></tr><tr><td class=rank>20</td><td class=nm>G1_vwap_rev_mega</td><td class=kind>vwap_reversion</td><td>23.2</td><td>0.275</td><td class=sig>+1.80</td><td>-2.35</td><td class=fri>-5.67</td><td>-12.64</td><td>-16.30</td><td>—</td></tr><tr><td class=rank>21</td><td class=nm>I5_xs_rev_mega_lb6_hold6</td><td class=kind>xs_reversal</td><td>18.1</td><td>0.097</td><td class=sig>+0.55</td><td>-3.16</td><td class=fri>-6.03</td><td>-11.85</td><td>-14.79</td><td>—</td></tr><tr><td class=rank>22</td><td class=nm>I4_xs_rev_etf_lb6_hold6</td><td class=kind>xs_reversal</td><td>18.1</td><td>0.079</td><td class=sig>+0.66</td><td>-4.72</td><td class=fri>-8.92</td><td>-17.51</td><td>-21.90</td><td>—</td></tr><tr><td class=rank>23</td><td class=nm>B4_spy_vs_sectors_w390</td><td class=kind>spy_vs_sector_composite</td><td>5.3</td><td>-0.091</td><td class=sig>-0.70</td><td>-5.76</td><td class=fri>-9.55</td><td>-13.93</td><td>-14.71</td><td>—</td></tr><tr><td class=rank>24</td><td class=nm>F1_triplet_resid_w78</td><td class=kind>triplet_resid</td><td>10.4</td><td>-0.024</td><td class=sig>-0.20</td><td>-5.74</td><td class=fri>-9.77</td><td>-15.77</td><td>-17.66</td><td>—</td></tr><tr><td class=rank>25</td><td class=nm>G1_vwap_rev_sector</td><td class=kind>vwap_reversion</td><td>24.0</td><td>0.172</td><td class=sig>+1.80</td><td>-4.69</td><td class=fri>-10.11</td><td>-22.14</td><td>-28.78</td><td>—</td></tr><tr><td class=rank>26</td><td class=nm>G1b_vwap_rev_etf_after10</td><td class=kind>vwap_reversion</td><td>19.1</td><td>0.104</td><td class=sig>+1.02</td><td>-5.10</td><td class=fri>-10.13</td><td>-21.07</td><td>-26.96</td><td>—</td></tr><tr><td class=rank>27</td><td class=nm>G1_vwap_rev_etf</td><td class=kind>vwap_reversion</td><td>24.1</td><td>0.131</td><td class=sig>+1.34</td><td>-5.11</td><td class=fri>-10.40</td><td>-21.82</td><td>-27.98</td><td>—</td></tr><tr><td class=rank>28</td><td class=nm>C7_xs_rev_etf_lb6_close</td><td class=kind>xs_reversal</td><td>4.5</td><td>-0.071</td><td class=sig>-0.61</td><td>-6.20</td><td class=fri>-10.62</td><td>-19.72</td><td>-24.38</td><td>—</td></tr><tr><td class=rank>29</td><td class=nm>C1_xs_rev_mega_lb12</td><td class=kind>xs_reversal</td><td>31.6</td><td>0.147</td><td class=sig>+1.60</td><td>-5.31</td><td class=fri>-10.80</td><td>-22.25</td><td>-28.20</td><td>—</td></tr><tr><td class=rank>30</td><td class=nm>C2_resid_rev_mega_lb12</td><td class=kind>resid_reversal</td><td>29.5</td><td>0.154</td><td class=sig>+1.87</td><td>-5.89</td><td class=fri>-12.05</td><td>-24.83</td><td>-31.41</td><td>—</td></tr><tr><td class=rank>31</td><td class=nm>B1_etf_vs_basket_w390</td><td class=kind>etf_vs_basket</td><td>8.8</td><td>0.054</td><td class=sig>+0.69</td><td>-7.37</td><td class=fri>-13.95</td><td>-27.11</td><td>-33.17</td><td>—</td></tr><tr><td class=rank>32</td><td class=nm>C1_xs_rev_mega_lb6</td><td class=kind>xs_reversal</td><td>45.6</td><td>0.169</td><td class=sig>+2.55</td><td>-7.07</td><td class=fri>-14.71</td><td>-30.59</td><td>-38.83</td><td>—</td></tr><tr><td class=rank>33</td><td class=nm>C1_xs_rev_mega_lb3</td><td class=kind>xs_reversal</td><td>64.2</td><td>0.251</td><td class=sig>+4.73</td><td>-7.35</td><td class=fri>-16.87</td><td>-36.51</td><td>-46.61</td><td>—</td></tr><tr><td class=rank>34</td><td class=nm>F2b_pca_resid_lb12</td><td class=kind>pca_resid</td><td>34.9</td><td>0.088</td><td class=sig>+1.44</td><td>-8.89</td><td class=fri>-17.34</td><td>-35.37</td><td>-44.82</td><td>—</td></tr><tr><td class=rank>35</td><td class=nm>C9b_xs_rev_mega_lb6_rank</td><td class=kind>xs_reversal</td><td>42.6</td><td>0.155</td><td class=sig>+2.79</td><td>-8.70</td><td class=fri>-17.89</td><td>-37.15</td><td>-47.20</td><td>—</td></tr><tr><td class=rank>36</td><td class=nm>C1_xs_rev_etf_lb12</td><td class=kind>xs_reversal</td><td>31.8</td><td>0.085</td><td class=sig>+1.49</td><td>-9.51</td><td class=fri>-18.45</td><td>-37.52</td><td>-47.60</td><td>—</td></tr><tr><td class=rank>37</td><td class=nm>C3b_xs_rev_mega_lb6_vol</td><td class=kind>xs_reversal</td><td>45.7</td><td>0.156</td><td class=sig>+2.98</td><td>-9.14</td><td class=fri>-18.82</td><td>-39.02</td><td>-49.47</td><td>—</td></tr><tr><td class=rank>38</td><td class=nm>B4_spy_vs_sectors_w78</td><td class=kind>spy_vs_sector_composite</td><td>10.0</td><td>0.002</td><td class=sig>+0.04</td><td>-10.02</td><td class=fri>-18.87</td><td>-26.74</td><td>-26.92</td><td>—</td></tr><tr><td class=rank>39</td><td class=nm>C2_resid_rev_etf_lb12</td><td class=kind>resid_reversal</td><td>29.9</td><td>0.118</td><td class=sig>+2.18</td><td>-9.49</td><td class=fri>-18.95</td><td>-38.93</td><td>-49.29</td><td>—</td></tr><tr><td class=rank>40</td><td class=nm>I2_levered_band_w390_e2_x0.5</td><td class=kind>levered_resid_band</td><td>12.9</td><td>-0.070</td><td class=sig>-1.13</td><td>-16.41</td><td class=fri>-19.01</td><td>-20.02</td><td>-20.14</td><td>—</td></tr><tr><td class=rank>41</td><td class=nm>C1_xs_rev_sector_lb12</td><td class=kind>xs_reversal</td><td>31.9</td><td>0.083</td><td class=sig>+1.51</td><td>-9.86</td><td class=fri>-19.19</td><td>-39.23</td><td>-49.82</td><td>—</td></tr><tr><td class=rank>42</td><td class=nm>C8_xs_rev_etf_lb6_mid</td><td class=kind>xs_reversal</td><td>23.2</td><td>0.104</td><td class=sig>+1.93</td><td>-9.72</td><td class=fri>-19.24</td><td>-39.74</td><td>-50.71</td><td>—</td></tr><tr><td class=rank>43</td><td class=nm>C2_resid_rev_mega_lb3</td><td class=kind>resid_reversal</td><td>62.1</td><td>0.209</td><td class=sig>+4.50</td><td>-9.27</td><td class=fri>-20.09</td><td>-42.05</td><td>-53.08</td><td>—</td></tr><tr><td class=rank>44</td><td class=nm>C4_xs_rev_etf_lb6_hivol</td><td class=kind>xs_reversal</td><td>55.7</td><td>0.019</td><td class=sig>+0.40</td><td>-14.27</td><td class=fri>-23.58</td><td>-35.83</td><td>-39.54</td><td>—</td></tr><tr><td class=rank>45</td><td class=nm>F2_pca_resid_lb6</td><td class=kind>pca_resid</td><td>47.4</td><td>0.033</td><td class=sig>+0.74</td><td>-13.28</td><td class=fri>-24.71</td><td>-48.88</td><td>-61.37</td><td>—</td></tr><tr><td class=rank>46</td><td class=nm>C1_xs_rev_etf_lb6</td><td class=kind>xs_reversal</td><td>45.9</td><td>0.062</td><td class=sig>+1.41</td><td>-13.09</td><td class=fri>-24.89</td><td>-50.17</td><td>-63.62</td><td>—</td></tr><tr><td class=rank>47</td><td class=nm>C1_xs_rev_sector_lb6</td><td class=kind>xs_reversal</td><td>45.7</td><td>0.027</td><td class=sig>+0.61</td><td>-13.84</td><td class=fri>-25.72</td><td>-51.31</td><td>-64.90</td><td>—</td></tr><tr><td class=rank>48</td><td class=nm>C2c_resid_rev_sector_lb6</td><td class=kind>resid_reversal</td><td>43.6</td><td>0.037</td><td class=sig>+0.87</td><td>-14.05</td><td class=fri>-26.33</td><td>-52.43</td><td>-65.91</td><td>—</td></tr><tr><td class=rank>49</td><td class=nm>A7_levered_resid_w390</td><td class=kind>levered_resid</td><td>32.4</td><td>-0.006</td><td class=sig>-0.15</td><td>-25.86</td><td class=fri>-26.90</td><td>-27.08</td><td>-27.07</td><td>—</td></tr><tr><td class=rank>50</td><td class=nm>C1_xs_rev_sector_lb3</td><td class=kind>xs_reversal</td><td>64.0</td><td>0.083</td><td class=sig>+2.31</td><td>-15.26</td><td class=fri>-29.50</td><td>-59.75</td><td>-75.61</td><td>—</td></tr><tr><td class=rank>51</td><td class=nm>C9_xs_rev_etf_lb6_rank</td><td class=kind>xs_reversal</td><td>42.3</td><td>0.039</td><td class=sig>+1.06</td><td>-15.85</td><td class=fri>-29.76</td><td>-59.88</td><td>-76.01</td><td>—</td></tr><tr><td class=rank>52</td><td class=nm>C1_xs_rev_etf_lb3</td><td class=kind>xs_reversal</td><td>64.5</td><td>0.113</td><td class=sig>+3.34</td><td>-15.44</td><td class=fri>-30.51</td><td>-62.22</td><td>-78.81</td><td>—</td></tr><tr><td class=rank>53</td><td class=nm>C3_xs_rev_etf_lb6_vol</td><td class=kind>xs_reversal</td><td>46.0</td><td>0.051</td><td class=sig>+1.45</td><td>-16.44</td><td class=fri>-31.07</td><td>-62.28</td><td>-78.59</td><td>—</td></tr><tr><td class=rank>54</td><td class=nm>C2_resid_rev_etf_lb3</td><td class=kind>resid_reversal</td><td>62.6</td><td>0.107</td><td class=sig>+3.38</td><td>-16.77</td><td class=fri>-32.80</td><td>-65.38</td><td>-81.49</td><td>—</td></tr><tr><td class=rank>55</td><td class=nm>B1_etf_vs_basket_w78</td><td class=kind>etf_vs_basket</td><td>18.5</td><td>0.078</td><td class=sig>+2.47</td><td>-16.11</td><td class=fri>-33.32</td><td>-69.43</td><td>-83.71</td><td>—</td></tr><tr><td class=rank>56</td><td class=nm>C1_xs_rev_mega_lb1</td><td class=kind>xs_reversal</td><td>109.2</td><td>0.175</td><td class=sig>+6.09</td><td>-16.21</td><td class=fri>-33.71</td><td>-69.53</td><td>-87.81</td><td>-28.49</td></tr><tr><td class=rank>57</td><td class=nm>H3b_spy_leads_sectors_beta_rev</td><td class=kind>spy_leads_sectors</td><td>78.5</td><td>0.065</td><td class=sig>+2.07</td><td>-18.99</td><td class=fri>-34.61</td><td>-61.24</td><td>-71.61</td><td>—</td></tr><tr><td class=rank>58</td><td class=nm>H3_spy_leads_sectors_beta</td><td class=kind>spy_leads_sectors</td><td>78.5</td><td>-0.070</td><td class=sig>-2.07</td><td>-22.15</td><td class=fri>-35.96</td><td>-58.11</td><td>-66.55</td><td>—</td></tr><tr><td class=rank>59</td><td class=nm>I1_pair_band_w390_e2.5_x1.0</td><td class=kind>pair_z_band</td><td>23.1</td><td>0.045</td><td class=sig>+1.47</td><td>-28.26</td><td class=fri>-36.55</td><td>-41.01</td><td>-41.69</td><td>—</td></tr><tr><td class=rank>60</td><td class=nm>C5_xs_rev_etf_lb6_lovol</td><td class=kind>xs_reversal</td><td>65.8</td><td>0.041</td><td class=sig>+1.37</td><td>-20.53</td><td class=fri>-36.70</td><td>-65.19</td><td>-77.00</td><td>—</td></tr><tr><td class=rank>61</td><td class=nm>I2b_levered_band_w78_e2_x0.5</td><td class=kind>levered_resid_band</td><td>36.2</td><td>0.013</td><td class=sig>+0.48</td><td>-36.11</td><td class=fri>-42.41</td><td>-44.73</td><td>-44.97</td><td>—</td></tr><tr><td class=rank>62</td><td class=nm>I7_pair_z_w390_hold13</td><td class=kind>pair_z</td><td>6.6</td><td>0.048</td><td class=sig>+2.04</td><td>-26.08</td><td class=fri>-46.93</td><td>-80.32</td><td>-92.01</td><td>—</td></tr><tr><td class=rank>63</td><td class=nm>B1_etf_vs_basket_w39</td><td class=kind>etf_vs_basket</td><td>26.8</td><td>0.067</td><td class=sig>+3.07</td><td>-23.69</td><td class=fri>-48.63</td><td>-101.38</td><td>-122.27</td><td>—</td></tr><tr><td class=rank>64</td><td class=nm>I1_pair_band_w390_e2.0_x0.5</td><td class=kind>pair_z_band</td><td>21.2</td><td>0.047</td><td class=sig>+2.14</td><td>-39.24</td><td class=fri>-51.55</td><td>-57.81</td><td>-58.65</td><td>—</td></tr><tr><td class=rank>65</td><td class=nm>C1_xs_rev_sector_lb1</td><td class=kind>xs_reversal</td><td>107.7</td><td>0.031</td><td class=sig>+1.53</td><td>-30.46</td><td class=fri>-55.90</td><td>-107.64</td><td>-133.21</td><td>—</td></tr><tr><td class=rank>66</td><td class=nm>C1_xs_rev_etf_lb1</td><td class=kind>xs_reversal</td><td>109.2</td><td>0.062</td><td class=sig>+3.34</td><td>-31.12</td><td class=fri>-58.37</td><td>-114.31</td><td>-142.76</td><td>—</td></tr><tr><td class=rank>67</td><td class=nm>I1_pair_band_w78_e2.5_x1.0</td><td class=kind>pair_z_band</td><td>32.7</td><td>0.042</td><td class=sig>+2.34</td><td>-46.68</td><td class=fri>-62.26</td><td>-70.15</td><td>-71.15</td><td>—</td></tr><tr><td class=rank>68</td><td class=nm>A7_levered_resid_w78</td><td class=kind>levered_resid</td><td>73.1</td><td>0.048</td><td class=sig>+2.88</td><td>-63.87</td><td class=fri>-68.58</td><td>-69.39</td><td>-69.33</td><td>—</td></tr><tr><td class=rank>69</td><td class=nm>I1_pair_band_w390_e1.5_x0.25</td><td class=kind>pair_z_band</td><td>20.1</td><td>0.038</td><td class=sig>+2.46</td><td>-51.92</td><td class=fri>-73.20</td><td>-87.16</td><td>-89.44</td><td>—</td></tr><tr><td class=rank>70</td><td class=nm>I1_pair_band_w78_e2.0_x0.5</td><td class=kind>pair_z_band</td><td>30.0</td><td>0.041</td><td class=sig>+2.83</td><td>-60.52</td><td class=fri>-77.95</td><td>-84.38</td><td>-84.79</td><td>—</td></tr><tr><td class=rank>71</td><td class=nm>A6_pair_beta_resid_w390</td><td class=kind>pair_beta_resid</td><td>30.6</td><td>0.048</td><td class=sig>+3.36</td><td>-71.06</td><td class=fri>-79.24</td><td>-81.74</td><td>-81.95</td><td>—</td></tr><tr><td class=rank>72</td><td class=nm>B3_etf_leads_basket_l3</td><td class=kind>etf_leads_basket</td><td>63.2</td><td>-0.022</td><td class=sig>-1.53</td><td>-47.86</td><td class=fri>-79.80</td><td>-129.15</td><td>-146.79</td><td>—</td></tr><tr><td class=rank>73</td><td class=nm>B2_basket_leads_etf_l3</td><td class=kind>basket_leads_etf</td><td>63.1</td><td>0.033</td><td class=sig>+2.48</td><td>-46.02</td><td class=fri>-82.84</td><td>-145.95</td><td>-170.07</td><td>—</td></tr><tr><td class=rank>74</td><td class=nm>A4_pair_open_anchor</td><td class=kind>pair_open_anchor</td><td>39.5</td><td>0.026</td><td class=sig>+2.25</td><td>-74.06</td><td class=fri>-96.40</td><td>-105.78</td><td>-106.60</td><td>—</td></tr><tr><td class=rank>75</td><td class=nm>I1_pair_band_w78_e1.5_x0.25</td><td class=kind>pair_z_band</td><td>26.9</td><td>0.037</td><td class=sig>+3.63</td><td>-79.55</td><td class=fri>-110.93</td><td>-126.98</td><td>-128.69</td><td>—</td></tr><tr><td class=rank>76</td><td class=nm>E1_leadlag_l6</td><td class=kind>leadlag</td><td>45.1</td><td>0.035</td><td class=sig>+3.47</td><td>-84.60</td><td class=fri>-112.27</td><td>-130.99</td><td>-134.62</td><td>—</td></tr><tr><td class=rank>77</td><td class=nm>H1b_pair_z_hlgate_w390_hl60</td><td class=kind>pair_z_hlgate</td><td>53.1</td><td>0.047</td><td class=sig>+4.68</td><td>-101.04</td><td class=fri>-113.64</td><td>-117.92</td><td>-118.36</td><td>—</td></tr><tr><td class=rank>78</td><td class=nm>A1c_pair_z_w78_thr2</td><td class=kind>pair_z</td><td>88.5</td><td>0.033</td><td class=sig>+3.47</td><td>-91.16</td><td class=fri>-118.45</td><td>-132.73</td><td>-134.78</td><td>—</td></tr><tr><td class=rank>79</td><td class=nm>A1_pair_z_w234</td><td class=kind>pair_z</td><td>50.9</td><td>0.048</td><td class=sig>+5.30</td><td>-112.41</td><td class=fri>-124.45</td><td>-126.43</td><td>-126.21</td><td>—</td></tr><tr><td class=rank>80</td><td class=nm>A6_pair_beta_resid_w78</td><td class=kind>pair_beta_resid</td><td>48.8</td><td>0.046</td><td class=sig>+5.61</td><td>-122.30</td><td class=fri>-138.72</td><td>-143.00</td><td>-143.15</td><td>—</td></tr><tr><td class=rank>81</td><td class=nm>A5_pair_ewma_z_hl78</td><td class=kind>pair_ewma_z</td><td>58.6</td><td>0.045</td><td class=sig>+5.50</td><td>-124.03</td><td class=fri>-138.83</td><td>-142.02</td><td>-141.97</td><td>—</td></tr><tr><td class=rank>82</td><td class=nm>B2_basket_leads_etf_l1</td><td class=kind>basket_leads_etf</td><td>105.5</td><td>0.033</td><td class=sig>+4.23</td><td>-82.11</td><td class=fri>-142.30</td><td>-230.05</td><td>-258.29</td><td>—</td></tr><tr><td class=rank>83</td><td class=nm>B3_etf_leads_basket_l1</td><td class=kind>etf_leads_basket</td><td>106.1</td><td>-0.022</td><td class=sig>-2.71</td><td>-89.12</td><td class=fri>-143.94</td><td>-215.56</td><td>-236.89</td><td>—</td></tr><tr><td class=rank>84</td><td class=nm>A1b_pair_z_w78_thr1</td><td class=kind>pair_z</td><td>79.5</td><td>0.041</td><td class=sig>+6.03</td><td>-146.73</td><td class=fri>-167.79</td><td>-172.09</td><td>-171.89</td><td>—</td></tr><tr><td class=rank>85</td><td class=nm>E1_leadlag_l2</td><td class=kind>leadlag</td><td>75.2</td><td>0.020</td><td class=sig>+3.14</td><td>-122.50</td><td class=fri>-178.53</td><td>-226.96</td><td>-237.55</td><td>—</td></tr><tr><td class=rank>86</td><td class=nm>A1_pair_z_w78</td><td class=kind>pair_z</td><td>63.7</td><td>0.038</td><td class=sig>+6.25</td><td>-158.53</td><td class=fri>-184.87</td><td>-191.42</td><td>-191.45</td><td>—</td></tr><tr><td class=rank>87</td><td class=nm>H1_pair_z_hlgate_w78_hl30</td><td class=kind>pair_z_hlgate</td><td>66.5</td><td>0.035</td><td class=sig>+6.16</td><td>-163.94</td><td class=fri>-198.58</td><td>-212.22</td><td>-213.67</td><td>—</td></tr><tr><td class=rank>88</td><td class=nm>E1_leadlag_l1</td><td class=kind>leadlag</td><td>104.7</td><td>0.017</td><td class=sig>+3.11</td><td>-146.79</td><td class=fri>-213.69</td><td>-271.31</td><td>-283.85</td><td>—</td></tr><tr><td class=rank>89</td><td class=nm>A5_pair_ewma_z_hl20</td><td class=kind>pair_ewma_z</td><td>75.1</td><td>0.034</td><td class=sig>+6.57</td><td>-182.33</td><td class=fri>-221.35</td><td>-234.43</td><td>-235.29</td><td>—</td></tr><tr><td class=rank>90</td><td class=nm>A2b_pair_z_intraday_thr1</td><td class=kind>pair_z_intraday</td><td>91.1</td><td>0.032</td><td class=sig>+6.34</td><td>-180.37</td><td class=fri>-223.74</td><td>-240.74</td><td>-242.36</td><td>—</td></tr><tr><td class=rank>91</td><td class=nm>E2_leadlag_l1_rev</td><td class=kind>leadlag</td><td>104.7</td><td>-0.016</td><td class=sig>-3.11</td><td>-158.60</td><td class=fri>-229.10</td><td>-285.99</td><td>-297.12</td><td>—</td></tr><tr><td class=rank>92</td><td class=nm>A1_pair_z_w39</td><td class=kind>pair_z</td><td>74.4</td><td>0.031</td><td class=sig>+6.48</td><td>-190.01</td><td class=fri>-239.17</td><td>-258.29</td><td>-259.94</td><td>—</td></tr><tr><td class=rank>93</td><td class=nm>A3_pair_bar_reversal_l6</td><td class=kind>pair_bar_reversal</td><td>92.9</td><td>0.016</td><td class=sig>+3.48</td><td>-159.56</td><td class=fri>-240.41</td><td>-306.70</td><td>-319.08</td><td>—</td></tr><tr><td class=rank>94</td><td class=nm>H2_pair_z_riskparity_w78</td><td class=kind>pair_z_riskparity</td><td>80.3</td><td>0.028</td><td class=sig>+6.13</td><td>-199.08</td><td class=fri>-249.06</td><td>-275.64</td><td>-279.88</td><td>—</td></tr><tr><td class=rank>95</td><td class=nm>A2_pair_z_intraday</td><td class=kind>pair_z_intraday</td><td>73.3</td><td>0.031</td><td class=sig>+6.86</td><td>-202.18</td><td class=fri>-252.58</td><td>-272.50</td><td>-274.36</td><td>-197.97</td></tr><tr><td class=rank>96</td><td class=nm>A3_pair_bar_reversal_l2</td><td class=kind>pair_bar_reversal</td><td>105.5</td><td>0.012</td><td class=sig>+2.87</td><td>-174.02</td><td class=fri>-279.95</td><td>-399.93</td><td>-430.40</td><td>—</td></tr><tr><td class=rank>97</td><td class=nm>A3_pair_bar_reversal_l1</td><td class=kind>pair_bar_reversal</td><td>129.4</td><td>0.010</td><td class=sig>+2.45</td><td>-187.90</td><td class=fri>-293.42</td><td>-406.32</td><td>-434.56</td><td>—</td></tr><tr><td class=rank>98</td><td class=nm>A1_pair_z_w12</td><td class=kind>pair_z</td><td>90.1</td><td>0.020</td><td class=sig>+5.65</td><td>-224.31</td><td class=fri>-314.92</td><td>-373.84</td><td>-383.25</td><td>—</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Artifacts on disk: <code>research/trading_bot/SWEEP_intraday_rv.{md,json}</code>, the pre-registration written before any design result existed, the design and held-out JSONs, the feasibility census, and the harness self-test. Code in <code>scripts/trading_bot/rv_*.py</code>; 5-minute bar cache in <code>research/data/rv_cache/</code>.
+  </footer>
+</div>
