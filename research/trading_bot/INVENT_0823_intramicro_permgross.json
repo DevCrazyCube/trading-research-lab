@@ -1,0 +1,58 @@
+{
+ "E4_PDPOC_MAGNET": {
+  "observed_gross_sharpe": 1.1243565953860655,
+  "perm_mean": 0.3087737810739933,
+  "perm_sd": 0.3118021424415284,
+  "perm_p95": 0.8420347281752264,
+  "p_value_one_sided": 0.007984031936127744,
+  "n_perm": 500
+ },
+ "F2_LD_REV": {
+  "observed_gross_sharpe": 1.344218819357633,
+  "perm_mean": 0.5096019677468877,
+  "perm_sd": 0.3091510162895402,
+  "perm_p95": 0.9988996820243923,
+  "p_value_one_sided": 0.007984031936127744,
+  "n_perm": 500
+ },
+ "F3_LD_VWAPDEV_REV": {
+  "observed_gross_sharpe": 1.10485217633434,
+  "perm_mean": 0.2865189522373645,
+  "perm_sd": 0.3142573812084006,
+  "perm_p95": 0.8328529169546252,
+  "p_value_one_sided": 0.00998003992015968,
+  "n_perm": 500
+ },
+ "C1_VWAPDEV_MID_REV": {
+  "observed_gross_sharpe": 0.7343927293996495,
+  "perm_mean": -0.07195856995503361,
+  "perm_sd": 0.27904468634725804,
+  "perm_p95": 0.3565492321376503,
+  "p_value_one_sided": 0.001996007984031936,
+  "n_perm": 500
+ },
+ "A5_DRIVE_EX_GAP": {
+  "observed_gross_sharpe": 0.6003918774154564,
+  "perm_mean": 0.20614674923992476,
+  "perm_sd": 0.2907450522472209,
+  "perm_p95": 0.6770174661750948,
+  "p_value_one_sided": 0.09181636726546906,
+  "n_perm": 500
+ },
+ "G3_LD500_CONT_TOP150": {
+  "observed_gross_sharpe": 1.1103176165657382,
+  "perm_mean": 0.5517921638880063,
+  "perm_sd": 0.46793105585200273,
+  "perm_p95": 1.3125348441951918,
+  "p_value_one_sided": 0.12974051896207583,
+  "n_perm": 500
+ },
+ "G1_LD500_CONT": {
+  "observed_gross_sharpe": 0.5490072737223285,
+  "perm_mean": 0.3810405292564983,
+  "perm_sd": 0.4635414953968646,
+  "perm_p95": 1.1877653073782377,
+  "p_value_one_sided": 0.34530938123752497,
+  "n_perm": 500
+ }
+}
