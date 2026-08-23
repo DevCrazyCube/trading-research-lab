@@ -171,7 +171,7 @@ def build_signals(F):
     ctrl = {}
     r5 = c / lag(c, 5) - 1.0
     for nm in ("G2_GEXZ", "S2_DCP1", "P1_PIN_DIST", "F1_FLIP_DIST", "S1_CPRATIO",
-               "G6_GEXFRAC", "S3_DCP5", "C1_CHARM"):
+               "G6_GEXFRAC", "S3_DCP5", "C1_CHARM", "S6_SKEW_TILT", "S4_PUT_SURGE"):
         ctrl["R_" + nm] = residualise(sig[nm], [r1, r5])
     return sig, ctrl
 
