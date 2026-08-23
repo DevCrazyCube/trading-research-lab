@@ -1,0 +1,148 @@
+{
+  "round": "INVENT_0823",
+  "date": "2026-08-23",
+  "themes_run": 3,
+  "themes_noise": 2,
+  "total_formulas_tested": 102,
+  "headline": "2 of 3 themes are honest zeros. One survivor (S6_SKEW_TILT|day, an options order-flow imbalance book on 49 liquid single names) clears the pooled 102-formula bar on both nulls and is held-out net positive at every realistic rail. PROPOSAL ONLY: basket stays frozen at v9; S6 queues for a size-zero forward paper log with a named kill guard.",
+  "pooled_null": {
+    "n": 102,
+    "analytic_exact_p95_maxabs_t": 3.479,
+    "analytic_exact_p99_maxabs_t": 3.894,
+    "sqrt_2lnN_approximation": 3.041,
+    "approximation_understates_pct": 13.0,
+    "size_matched_pooled_placebo_p95_t": 3.691,
+    "size_matched_pooled_placebo_p99_t": 4.167,
+    "ultraconservative_at_programme_max_ratio_1p14": 3.966,
+    "pooled_sharpe_bar_dense_cells_p95": 3.325,
+    "pooled_sharpe_bar_dense_cells_p99": 3.749,
+    "pooled_sharpe_bar_all_cells_p95": 4.286,
+    "construction": "No cross-theme permutation is constructible (disjoint instruments, clocks, statistics). Each theme ran its own size-matched null; the pooled bar scales theme 1's ADV-slot signal permutation (2000 draws, one permutation shared per (draw,day) to preserve cross-formula correlation) from N=48 to N=102 by the exact analytic ratio 3.479/3.272 = 1.063.",
+    "placebo_over_analytic_ratio_measured": 1.061,
+    "ratio_ledger": "1.08x disjoint auction book (0822B); ~2x overlapping weekly CEF pair book (0822); 1.14x disjoint event book (0822C); 0.845x CEF fund-identity permutation; 1.061x this round (one-session-hold cross-sectional book). Inflation tracks HOLDING OVERLAP, not multiplicity."
+  },
+  "themes": [
+    {
+      "name": "Single-name & sector dealer-gamma / options flow (free expired-OPRA bars)",
+      "n_cells": 48,
+      "n_distinct_formulas": 23,
+      "noise": false,
+      "survivors": 1
+    },
+    {
+      "name": "Intraday microstructure beyond the auction (5-min SIP cube + PIT top-500 minute panel)",
+      "n_cells": 28,
+      "noise": true,
+      "survivors": 0,
+      "best_design_gross_sharpe": 1.34,
+      "best_design_net_sharpe": 0.21,
+      "bar": 1.41
+    },
+    {
+      "name": "Intra-group sympathy / same-tight-group lead-lag",
+      "n_cells": 26,
+      "noise": true,
+      "survivors": 0,
+      "best_design_gross_sharpe": 0.72,
+      "best_design_net_sharpe": 0.01,
+      "bar": 1.278,
+      "dies_gross": true
+    }
+  ],
+  "survivors": [
+    {
+      "name": "S6_SKEW_TILT|day",
+      "theme": "Single-name & sector dealer-gamma / options flow (free expired-OPRA bars)",
+      "mechanism_as_named": "Gamma-weighted OTM call-vs-put open-interest tilt, cross-sectionally rank-normalised over 49 liquid single names, dollar-neutral long-top/short-bottom, entered at the OPEN of t+1 and exited at the OPEN of t+2.",
+      "mechanism_as_diagnosed": "OPTIONS ORDER-FLOW IMBALANCE in liquid single names. The Black-Scholes apparatus contributes nothing: a crude greeks-free (callVol-putVol)/(callVol+putVol) does as well in design (3.68) and better out of sample (4.32). |net gamma| vs next-session realised range is weakly POSITIVE (+0.094/+0.035). All pin, flip and charm/vanna cells are noise. NOT a dealer-gamma effect.",
+      "design": {"sharpe": 3.83, "t": 4.53, "fwer_p_own_theme_48": 0.0010, "fwer_p_pooled_102": 0.0021},
+      "held_out": {
+        "window": "2025-07-01..2026-08-21",
+        "n_sessions": 260,
+        "gross_bp_day": 7.90,
+        "gross_sharpe": 3.58,
+        "t": 3.64,
+        "turnover_per_day": 0.49,
+        "break_even_bp_per_side": 16.1,
+        "net_sharpe_1bp": 3.36,
+        "net_sharpe_3bp": 2.92,
+        "net_sharpe_5p5bp": 2.36,
+        "one_day_gap_reentry_placebo": 3.35,
+        "beta_to_universe": 0.036,
+        "beta_hedged_sharpe": 3.42,
+        "spanning_alpha_bp_day": 7.84,
+        "spanning_alpha_t": 3.61,
+        "residual_sharpe": 3.65,
+        "worst_leave_one_name_out_of_49": 3.09,
+        "positive_day_rate": 0.596,
+        "worst_cum_gross_drawdown_bp": 606,
+        "single_names_only_subbook": 3.61,
+        "sector_etf_only_subbook": 0.55
+      },
+      "beats_pooled_analytic_bar": true,
+      "beats_pooled_size_matched_placebo": true,
+      "held_out_net_positive": true,
+      "shared_print_clean": true,
+      "shared_print_note": "Signal at close of t, fill at open of t+1: >=17.5h gap, signal and fill never share a print.",
+      "rho1_gate": "not applicable - not a spread trade; pre-registered substitute is the one-day-gap re-entry placebo, scored +3.35 vs primary +3.58. Gate has teeth: G4_DGEX1|day cleared the analytic bar (t 3.32) and was killed by it (+3.08 -> -0.23).",
+      "diversifies_vs_sized_legs": true,
+      "diversification_argument": "None of T3, DUALCLASS, T12 CEF or ORB reads an option feed. Market beta 0.036; residualised on r1/r5/r20 the Sharpe RISES to 4.03; no CEF in the universe is optionable; S6 holds open-to-open with no intraday leg.",
+      "recommend_freeze": false,
+      "recommendation": "QUEUE - forward paper log at size ZERO. Basket frozen at v9; no exception.",
+      "reasons_not_to_size": [
+        "Only 260 held-out sessions (free expired OPRA starts 2024-02-01, 2.5 years total).",
+        "The stated mechanism is wrong - out-of-sample decay is unbounded even when the statistic is sound.",
+        "Standing programme prior: selection-inflated estimates are upper bounds; +2.92 net is a ceiling."
+      ],
+      "guard": [
+        "Forward paper log, size ZERO, minimum 60 sessions before promotion is reopened.",
+        "Kill if forward gross Sharpe < 0 over any trailing 60 sessions, OR net@3.0bp Sharpe < +1.0 over the full forward log, OR the one-day-gap re-entry placebo drops below +2.0.",
+        "Kill if the single-names-only sub-book decays below +1.5. Exclude the sector-ETF half from the traded book from day one (held-out 0.55, net -0.01) - do not re-include for breadth.",
+        "Data-continuity guard: monthly expiries only, weeklies/0DTE absent, cumulative traded volume is an OI PROXY not open interest. Monthly coverage check; a feed change or expiry-calendar shift VOIDS the log rather than degrades it (cf. XS_GLSR_Z).",
+        "Pre-register the crude greeks-free (callVol-putVol)/(callVol+putVol) book as a competing forward log from the same start date. If it matches or beats S6, the crude book is the promotion candidate.",
+        "Any strike-grid refetch must re-run the shipped fine+coarse grid union and diff strike counts against the cached panel (two grid bugs were caught pre-result)."
+      ],
+      "biggest_open_risk": "Cross-sectionally orthogonalising the S6 SIGNAL on IV + 20d RV cuts held-out Sharpe 3.58 -> 0.95. That strips the vol ORDERING out of the signal (S6 is legitimately +0.25..+0.29 vol-correlated because high-vol names carry more OTM call OI) rather than hedging the vol BOOKS, and is the wrong exposure test - the spanning regression is the right one and IV/RV loadings are statistically zero. Reported in full because it is the single most likely place S6 turns out to be a repackaged vol exposure."
+    }
+  ],
+  "one_place_survivor_fails": {
+    "test": "pooled ALL-CELL Sharpe null p95 = 4.286",
+    "survivor_design_sharpe": 3.83,
+    "clears": false,
+    "why_not_like_for_like": "That null is inflated by four n=77 OpEx cells whose Sharpe has a much fatter null than an n~350 cell. Comparing an n=350 Sharpe to a bar set by n=77 cells is not like-for-like. The t comparison is the correct one (t is n-normalised): 4.53 vs 3.691, clears. Both stated so a reader who ran only the Sharpe null does not conclude the opposite."
+  },
+  "basket_state": {
+    "version": "v9",
+    "frozen": true,
+    "changed_this_round": false,
+    "sized_legs": ["T3 overnight reversal", "DUALCLASS gap-1 no BRK", "T12 CEF discount (anchor, held-out net Sharpe 2.73 t 4.10)", "ORB"],
+    "logging_only": ["ETF-sibling RV (15:45 shared-price bounce artefact, fails rho1)", "T7 ex-dividend (duplicated-dividend data bug, collapses to t 0.81 clean)", "CRYPTO_LOWVOL (published short-alt-borrow-walled factor)"],
+    "data_dead": ["XS_GLSR_Z"],
+    "queue_size_zero": ["S6_SKEW_TILT|day", "crude (callVol-putVol)/(callVol+putVol) competitor - to be pre-registered"]
+  },
+  "dead_do_not_retest": {
+    "theme1_options": ["gamma-flip level as support/resistance F1-F4", "max-gamma-strike pinning P1-P4 incl. OpEx-week and expiry-session windows", "charm, vanna, post-OpEx roll-off, pre-OpEx front-month gamma C1-C4", "GEX level/z-score/1d and 5d change/gamma-x-reversal G1-G6", "put/call ratio level and 1d/5d shift S1-S3", "OTM call surge S5", "the ENTIRE sector/broad-ETF half of the theme"],
+    "theme2_intramicro": ["opening drive", "bar-level order flow / trade size from free 5-min bars", "VWAP deviation", "opening-range breakout beyond the existing ORB leg", "volume-profile value area / POC magnet", "late-day drift"],
+    "theme3_sympathy": ["leader->peer catch-up/fade", "index-heavyweight->QQQ", "group-consensus->laggard", "overnight-gap sympathy", "leader last-30-min -> peer next-morning gap", "volume-shock sympathy", "ETF-leads-members direction", "up/down asymmetry", "cumulative-30-min leader move", "post-shock intra-group dispersion"]
+  },
+  "carry_forward_rules": [
+    "Use the EXACT best-of-N bar, not sqrt(2 ln N). At N=102 the approximation says 3.041 and the truth is 3.479 - a 13% understatement, the difference between a survivor and a false positive.",
+    "Run permutation nulls on GROSS. A net-series permutation null is mis-specified: the permuted book pays full cost, the null sits below zero, everything 'wins'.",
+    "A clean rho1 on the spread does NOT clear the book. If the signal is built from a single own-print close, run the entry-lag decay test (lags 0/1/2). Theme 3's catch-up family passed rho1 (0/41 fail) and died on lag decay (+0.83/+0.33/-0.07).",
+    "Placebo/analytic ratio tracks holding overlap, not multiplicity. One-session hold -> 1.06x; overlapping weekly book -> ~2x.",
+    "The dead pool being the MORE liquid one is evidence for, not against: theme 1's sector ETFs died while single names lived - the opposite of the illiquidity-artefact signature.",
+    "Free 5-minute bars carry no recoverable order-flow information about the rest of the session.",
+    "The Aug-20 intraday-RV gross edge was made of exactly two things: a minutes-long hold and a fill sharing the signal print. Remove both and it vanishes."
+  ],
+  "process_ledger": {
+    "theme1_gamma": {"prereg": "a86abe1", "frozen_design": "e8dd7a0", "result": "914764e", "held_out_window": "2025-07-01..2026-08-21 (260 sessions)"},
+    "theme2_intramicro": {"prereg": "01ef87c", "frozen_shortlist": "0f13929", "result": "3980e86", "artifact": "23cf3df"},
+    "theme3_sympathy": {"prereg_sha256": "2d284d0b7dd22f5b2c068cf8ec9ce7e523463ec09b1ef172a8f1941753db43aa", "result": "45e5bcc", "design": "2021-01-04..2024-12-31 (1005)", "held_out": "2025-01-02..2026-08-14 (405)"}
+  },
+  "artefacts": {
+    "master": ["/home/anont/meme/research/trading_bot/INVENT_0823_MASTER.md", "/home/anont/meme/research/trading_bot/INVENT_0823_MASTER.json"],
+    "theme1": "/home/anont/meme/research/trading_bot/INVENT_0823_gamma.{md,json,_PREREGISTRATION.md,_DESIGN_TABLE.md,_design.json,_heldout.json,_DIAG.json,_nulldraws.json}; scripts/invent0823_gex_{fetch,panel,eval,diag}.py; research/data/inv0823_gex/",
+    "theme2": "/home/anont/meme/research/trading_bot/INVENT_0823_intramicro.{md,json,_PREREGISTRATION.md,_SHORTLIST.md,_selftest.json,_design.json,_null.json,_permgross.json,_heldout.json,_presample.json,_DIAG.json}; scripts/trading_bot/im0823_*.py; research/data/im0823_cache/cube.npz",
+    "theme3": "/home/anont/meme/research/trading_bot/INVENT_0823_sympathy.{md,json} + _SELFTEST/_DESIGN/_DIAG/_NULLS/_SHORTLIST/_HOLDOUT/_ADDENDUM/_TRANSMISSION/_DIRECTIONAL{,_CLUSTERED}.json; scripts/trading_bot/sympathy0823{,_addendum}.py"
+  }
+}
