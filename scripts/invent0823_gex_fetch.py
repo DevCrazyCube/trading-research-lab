@@ -107,33 +107,27 @@ def third_fridays(a, b):
     return out
 
 
-def increment(s):
-    """Smallest standard OCC strike step that is actually listed at this price level.
-
-    Liquid US equity/ETF monthlies: $1 below ~$200, $2.50 in $200-500,
-    $5 in $500-1000, $10 above. Using a step that is NOT a divisor of the true
-    listed step silently drops most of the near-money ladder (the bug that made
-    the first pass fetch only $5 strikes for every $200+ name)."""
-    if s < 20:
-        return 0.5
-    if s < 200:
-        return 1.0
-    if s < 500:
-        return 2.5
-    if s < 1000:
-        return 5.0
-    return 10.0
-
-
 def ladder(refs):
+    """Multi-resolution strike grid.
+
+    The listed increment is NOT knowable in advance: the same underlying carries a
+    $1 ladder on one expiry and a $2.50 ladder on the next. A grid whose step is
+    not a divisor of the true step silently drops most of the ladder -- the first
+    pass used $5 for every $200+ name and got only $5 strikes; the second used $1
+    and got only the multiples of $5 out of a $2.50 ladder. So: a FINE half-step
+    grid over the near-money +/-5% band (a divisor of $1, $2.50 and $5 ladders
+    alike) unioned with a COARSE 5x grid over +/-20% for the wings. Strikes that do
+    not exist simply return no bars."""
     ks = set()
     for s in refs:
-        inc = increment(s)
-        k0 = round(s / inc) * inc
-        for j in range(-NSIDE, NSIDE + 1):
-            k = round(k0 + j * inc, 2)
-            if k > 0:
-                ks.add(round(k * 1000))
+        fine = 0.5 if s < 250 else 2.5 if s < 1000 else 5.0
+        for step, band in ((fine, 0.05), (5 * fine, 0.20)):
+            k0 = round(s / step) * step
+            n = int(band * s / step)
+            for j in range(-n, n + 1):
+                k = round(k0 + j * step, 2)
+                if k > 0:
+                    ks.add(round(k * 1000))
     return sorted(ks)
 
 
