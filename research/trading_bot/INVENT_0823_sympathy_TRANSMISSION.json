@@ -1,0 +1,51 @@
+{
+ "SEMI": {
+  "transmission_at_shock": 0.916,
+  "transmission_unconditional": 0.999,
+  "n_shock_legs": 4768
+ },
+ "MEGATECH": {
+  "transmission_at_shock": 0.913,
+  "transmission_unconditional": 1.003,
+  "n_shock_legs": 10562
+ },
+ "BANK": {
+  "transmission_at_shock": 0.952,
+  "transmission_unconditional": 0.998,
+  "n_shock_legs": 3411
+ },
+ "ENERGY": {
+  "transmission_at_shock": 0.872,
+  "transmission_unconditional": 0.977,
+  "n_shock_legs": 2168
+ },
+ "HEALTH": {
+  "transmission_at_shock": 0.594,
+  "transmission_unconditional": 0.895,
+  "n_shock_legs": 7493
+ },
+ "STAPLE": {
+  "transmission_at_shock": 0.796,
+  "transmission_unconditional": 0.958,
+  "n_shock_legs": 5375
+ },
+ "DISCR": {
+  "transmission_at_shock": 0.773,
+  "transmission_unconditional": 0.969,
+  "n_shock_legs": 3446
+ },
+ "GOLD": {
+  "transmission_at_shock": 1.027,
+  "transmission_unconditional": 1.0,
+  "n_shock_legs": 2424
+ },
+ "PAYMENT": {
+  "transmission_at_shock": 0.645,
+  "transmission_unconditional": 0.884,
+  "n_shock_legs": 1058
+ },
+ "POOLED": {
+  "transmission_at_shock": 0.883,
+  "transmission_unconditional": 0.986
+ }
+}

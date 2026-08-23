@@ -1,0 +1,12 @@
+{
+ "PEER_LATE_lag1_sharpe": 16.253267226610784,
+ "PEER_LATE_lag1_n": 511,
+ "PEER_LATE_lag2_sharpe": 13.253919594118166,
+ "PEER_LATE_lag2_n": 511,
+ "PEER_INSTANT_lag1_sharpe": 1.905173510251938,
+ "PEER_INSTANT_lag1_n": 511,
+ "PEER_INSTANT_lag2_sharpe": 1.1350306948862527,
+ "PEER_INSTANT_lag2_n": 511,
+ "sign_flipped_sharpe": -0.26232176797710327,
+ "PASS": true
+}

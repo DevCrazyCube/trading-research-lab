@@ -1,0 +1,38 @@
+{
+ "window": [
+  "2025-01-02",
+  "2026-08-14"
+ ],
+ "n_sessions": 405,
+ "label": "BELOW THE NOISE BAR -- near-miss report only",
+ "formulas": {
+  "C7b_LATEMOVE_NEXTOPEN_FADE": {
+   "net_sharpe_lag0": 0.5875332468258694,
+   "net_sharpe_lag1": 0.7989849556119293,
+   "gross_sharpe": 1.0364518462772783,
+   "net_sharpe": 0.7989849556119293,
+   "t_net": 1.0128983020492455,
+   "n_legs": 862,
+   "n_events": 211,
+   "active_days": 132,
+   "mean_cost_bp": 2.9963680113234257,
+   "net_sharpe_lag2": 0.7129222475654866,
+   "net_sharpe_lag3": 0.6889547708717066,
+   "net_sharpe_lag6": 0.24833017498966065
+  },
+  "C5a_GAP_CATCHUP_close": {
+   "net_sharpe_lag0": -1.9529559148933735,
+   "net_sharpe_lag1": -1.5765260658531752,
+   "gross_sharpe": -1.272840512412296,
+   "net_sharpe": -1.5765260658531752,
+   "t_net": -1.9986115683693308,
+   "n_legs": 916,
+   "n_events": 223,
+   "active_days": 140,
+   "mean_cost_bp": 3.009011210762332,
+   "net_sharpe_lag2": -1.4628374009878733,
+   "net_sharpe_lag3": -1.4987527650688726,
+   "net_sharpe_lag6": -1.6549240087093602
+  }
+ }
+}

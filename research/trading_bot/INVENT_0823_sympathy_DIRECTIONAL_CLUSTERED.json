@@ -1,0 +1,14 @@
+{
+ "design": {
+  "n_active_days": 968,
+  "mean_tradable_bp_per_day": 0.086,
+  "t_clustered_by_day": 0.1,
+  "naive_leg_t_for_comparison": null
+ },
+ "heldout": {
+  "n_active_days": 390,
+  "mean_tradable_bp_per_day": -0.59,
+  "t_clustered_by_day": -0.52,
+  "naive_leg_t_for_comparison": null
+ }
+}

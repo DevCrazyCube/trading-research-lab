@@ -1,0 +1,116 @@
+{
+ "theme": "INTRA-GROUP SYMPATHY / same-tight-group lead-lag",
+ "verdict": "NOISE as a tradable claim; dead GROSS, before cost",
+ "prereg_sha256": "2d284d0b7dd22f5b2c068cf8ec9ce7e523463ec09b1ef172a8f1941753db43aa",
+ "windows": {
+  "design": [
+   "2021-01-04",
+   "2024-12-31"
+  ],
+  "design_sessions": 1005,
+  "heldout": [
+   "2025-01-02",
+   "2026-08-14"
+  ],
+  "heldout_sessions": 405
+ },
+ "n_formulas": 26,
+ "nulls": {
+  "analytic_bar": 1.2782453206112294,
+  "placeboA_dayshift_p95_max": 0.9040078069801446,
+  "placeboB_signflip_p95_max": 0.8347314293559265,
+  "bar_used": 1.2782453206112294,
+  "ndraw": 400
+ },
+ "design": {
+  "best_gross": "C1d_INTRA_CATCHUP_k3_h3_HEDGED",
+  "best_gross_value": 0.7151030430098908,
+  "best_net": "C7b_LATEMOVE_NEXTOPEN_FADE",
+  "best_net_value": 0.014069397093545807,
+  "n_gross_positive": 18,
+  "n_net_positive": 1,
+  "n_passing_all_gates": 0
+ },
+ "zero_spread_lower_bound": {
+  "n_negative": 18,
+  "n": 26,
+  "best": 0.421
+ },
+ "heldout_nearmiss": {
+  "C7b_LATEMOVE_NEXTOPEN_FADE": {
+   "gross": 1.0364518462772783,
+   "net": 0.7989849556119293,
+   "t_net": 1.0128983020492455,
+   "n_legs": 862
+  },
+  "C5a_GAP_CATCHUP_close": {
+   "gross": -1.272840512412296,
+   "net": -1.5765260658531752,
+   "t_net": -1.9986115683693308,
+   "n_legs": 916
+  }
+ },
+ "heldout_label": "BELOW THE NOISE BAR -- near-miss report only",
+ "mechanism": {
+  "mean_abs_deficit_bp": 19.25,
+  "mean_roundtrip_cost_bp": 3.46,
+  "signed_convergence_60min_bp": 0.355,
+  "signed_convergence_60min_t": 0.87,
+  "peak_convergence_bp": 0.535,
+  "transmission_at_3sigma_shock": 0.883,
+  "transmission_unconditional": 0.986,
+  "pure_direction_trade_tradable_bp_per_day": {
+   "design": 0.086,
+   "heldout": -0.59
+  },
+  "pure_direction_trade_day_clustered_t": {
+   "design": 0.1,
+   "heldout": -0.52
+  }
+ },
+ "rho1_gate": {
+  "n": 41,
+  "min": -0.153,
+  "median": -0.028,
+  "max": -0.005,
+  "n_failing_gate_-0.35": 0
+ },
+ "posthoc_diagnostic_C3b": {
+  "warning": "read AFTER the shortlist was frozen and outside it; a diagnostic, not evidence",
+  "formulas": {
+   "C3b_HEAVY_TO_INDEX_k3_h6_HEDGED": {
+    "net_sharpe_lag0": -3.249,
+    "gross_sharpe_lag0": 0.063,
+    "net_sharpe_lag1": -2.732,
+    "gross_sharpe_lag1": 0.554,
+    "n_legs": 2520,
+    "n_events": 2520,
+    "active_days": 363,
+    "mean_cost_bp": 2.3000000000000003,
+    "net_sharpe_lag2": -2.676,
+    "gross_sharpe_lag2": 0.953,
+    "net_sharpe_lag3": -3.016,
+    "gross_sharpe_lag3": 0.928,
+    "net_sharpe_lag6": -3.647,
+    "gross_sharpe_lag6": 0.658
+   },
+   "C3a_HEAVY_TO_INDEX_k3_h6": {
+    "net_sharpe_lag0": -2.301,
+    "gross_sharpe_lag0": -0.583,
+    "net_sharpe_lag1": -1.173,
+    "gross_sharpe_lag1": 0.602,
+    "n_legs": 2520,
+    "n_events": 2520,
+    "active_days": 363,
+    "mean_cost_bp": 2.3000000000000003,
+    "net_sharpe_lag2": -0.733,
+    "gross_sharpe_lag2": 1.031,
+    "net_sharpe_lag3": -1.352,
+    "gross_sharpe_lag3": 0.811,
+    "net_sharpe_lag6": -2.104,
+    "gross_sharpe_lag6": 0.166
+   }
+  }
+ },
+ "survivors": []
+}
