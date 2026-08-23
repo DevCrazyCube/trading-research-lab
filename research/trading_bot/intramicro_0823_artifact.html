@@ -1,0 +1,421 @@
+<title>Intraday Microstructure Verdict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap">
+
+<style>
+:root{
+  --bg:#E9EBEE; --surface:#F7F8FA; --sunk:#DFE3E8;
+  --ink:#14181E; --body:#252C35; --muted:#5D6672; --faint:#8A929C;
+  --rule:#C7CDD5; --hair:#D8DDE3;
+  --brass:#8A6210; --brass-soft:#E8DCBE;
+  --slate:#2F5D7C; --slate-soft:#D5E1EA;
+  --brick:#8E3D2E; --brick-soft:#EEDBD5;
+  --moss:#2E6B54;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11141A; --surface:#181C23; --sunk:#0C0F14;
+    --ink:#E6EAEF; --body:#C6CDD6; --muted:#8D97A3; --faint:#6A737E;
+    --rule:#2B323B; --hair:#232931;
+    --brass:#D9A73C; --brass-soft:#3A2F14;
+    --slate:#7DB2D4; --slate-soft:#1B2A36;
+    --brick:#D9836C; --brick-soft:#33201B;
+    --moss:#6BBE97;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11141A; --surface:#181C23; --sunk:#0C0F14;
+  --ink:#E6EAEF; --body:#C6CDD6; --muted:#8D97A3; --faint:#6A737E;
+  --rule:#2B323B; --hair:#232931;
+  --brass:#D9A73C; --brass-soft:#3A2F14;
+  --slate:#7DB2D4; --slate-soft:#1B2A36;
+  --brick:#D9836C; --brick-soft:#33201B;
+  --moss:#6BBE97;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--body);
+  font-family:"IBM Plex Serif",Georgia,serif; font-size:17px; line-height:1.62;
+  margin:0; padding:0 20px 96px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto}
+.wide{max-width:960px;margin:0 auto}
+
+h1,h2,h3,.eyebrow,.lede,th,.tag,.num,.gauge-lab{font-family:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif}
+h1{font-size:clamp(2.5rem,7vw,4rem);line-height:.98;font-weight:700;color:var(--ink);letter-spacing:-.02em;text-wrap:balance;margin:0}
+h2{font-size:1.55rem;font-weight:700;color:var(--ink);letter-spacing:-.01em;margin:0;text-wrap:balance}
+h3{font-size:1.02rem;font-weight:600;color:var(--ink);letter-spacing:.01em;margin:0}
+p{margin:0}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic}
+code,.mono,td.n,th.n{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+code{font-size:.86em;background:var(--sunk);padding:.1em .34em;border-radius:2px;color:var(--ink)}
+
+.eyebrow{
+  font-size:.74rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* ---------- masthead ---------- */
+header{padding:80px 0 0}
+.kicker{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:baseline;margin-bottom:26px}
+.lede{
+  font-family:"IBM Plex Serif",Georgia,serif;
+  font-size:1.24rem;line-height:1.5;color:var(--body);margin-top:22px;max-width:60ch;
+}
+.stamp{
+  display:inline-block;margin-top:26px;
+  font-family:"IBM Plex Mono",monospace;font-size:.78rem;letter-spacing:.1em;
+  text-transform:uppercase;font-weight:600;
+  color:var(--brick); border:1.5px solid var(--brick); background:var(--brick-soft);
+  padding:7px 14px; border-radius:2px;
+}
+
+/* ---------- sections ---------- */
+section{padding-top:64px}
+.head{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.stack{display:flex;flex-direction:column;gap:20px}
+hr.rule{border:0;border-top:1px solid var(--rule);margin:0}
+
+/* ---------- gauges ---------- */
+.gauges{display:flex;flex-direction:column;gap:26px;background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:28px 26px}
+.gauge-lab{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:9px}
+.gauge-lab .t{font-size:.86rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.gauge-lab .v{font-family:"IBM Plex Mono",monospace;font-size:1.05rem;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.track{position:relative;height:34px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.fill{position:absolute;top:0;bottom:0;left:0;background:var(--brass);opacity:.85}
+.bar-line{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--slate)}
+.bar-note{display:flex;justify-content:flex-end;margin-top:7px;font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--slate);letter-spacing:.04em}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th{
+  font-size:.7rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
+  text-align:left;padding:0 12px 9px 0;border-bottom:1px solid var(--rule);white-space:nowrap;
+}
+th.n,td.n{text-align:right}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--hair);vertical-align:baseline;color:var(--body)}
+td.n{font-size:.86rem}
+td.name{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--ink);white-space:nowrap}
+.neg{color:var(--brick)}
+.pos{color:var(--moss)}
+tr.hl td{background:var(--brass-soft)}
+
+/* ---------- strip chart ---------- */
+.strip{display:flex;flex-direction:column;gap:3px;background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:22px 20px}
+.row{display:grid;grid-template-columns:168px 1fr 52px;align-items:center;gap:10px}
+.row .nm{font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .v{font-family:"IBM Plex Mono",monospace;font-size:.72rem;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.lane{position:relative;height:12px}
+.lane .zero{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--rule)}
+.lane .seg{position:absolute;top:2px;height:8px;border-radius:1px}
+.lane .seg.n{background:var(--brick);opacity:.55}
+.lane .seg.p{background:var(--brass)}
+.axis{display:grid;grid-template-columns:168px 1fr 52px;gap:10px;margin-top:10px}
+.axis .marks{position:relative;height:22px;font-family:"IBM Plex Mono",monospace;font-size:.68rem;color:var(--faint)}
+.axis .marks span{position:absolute;transform:translateX(-50%);top:4px}
+.barmark{position:absolute;top:0;bottom:0;width:2px;background:var(--slate)}
+.barcap{position:absolute;top:-1px;transform:translateX(-50%);font-family:"IBM Plex Mono",monospace;font-size:.68rem;color:var(--slate);white-space:nowrap;font-weight:600}
+
+/* ---------- figure ---------- */
+figure{margin:0;background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:26px 22px}
+figcaption{margin-top:18px;font-size:.88rem;line-height:1.55;color:var(--muted);max-width:66ch}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.svg-lab{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--muted)}
+.svg-val{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600}
+.svg-tick{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;fill:var(--faint)}
+
+/* ---------- callout ---------- */
+.callout{border-left:2px solid var(--brass);padding:2px 0 2px 20px;color:var(--body)}
+.callout .eyebrow{color:var(--brass);margin-bottom:6px;display:block}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.card{background:var(--surface);padding:18px 18px 20px}
+.card .k{font-family:"IBM Plex Mono",monospace;font-size:1.6rem;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.card .k.bad{color:var(--brick)}
+.card .l{font-size:.78rem;line-height:1.4;color:var(--muted);margin-top:7px}
+
+ol.closes{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:16px}
+ol.closes li::marker{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--brass)}
+
+footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--rule);font-size:.82rem;color:var(--faint);font-family:"IBM Plex Mono",monospace;line-height:1.7}
+
+@media (max-width:620px){
+  body{font-size:16px}
+  .row,.axis{grid-template-columns:120px 1fr 44px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .fill,.lane .seg{transition:none}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="kicker">
+    <span class="eyebrow">Invent 0823</span>
+    <span class="eyebrow" style="color:var(--faint)">2026-08-23 · research only · cached data</span>
+  </div>
+  <h1>Intraday microstructure dies on gross, not on cost</h1>
+  <p class="lede">Twenty-eight low-turnover intraday formulas — opening drive, order flow, VWAP deviation, opening-range breakout, volume-profile value area, late-day drift. None beat the noise bar on net. None beat it on <em>gross</em> either, and that is the finding.</p>
+  <span class="stamp">Verdict — theme is noise</span>
+</header>
+
+<section>
+  <div class="head">
+    <span class="eyebrow">The two bars</span>
+    <h2>The best of 28 sits below the bar before a basis point is charged</h2>
+  </div>
+  <div class="stack">
+    <p>The bar is the 95th percentile of the best-of-28 Sharpe under H0 — a stationary block bootstrap (block = 5 sessions, 2,000 resamples) of each config's demeaned daily PnL, drawing the <em>same</em> day indices for every config so the sweep's internal correlation survives. The analytic <code>√(2 ln N)/√years</code> = +1.29 is reported alongside and is not the operative number.</p>
+
+    <div class="gauges">
+      <div>
+        <div class="gauge-lab"><span class="t">Best design gross · F2_LD_REV</span><span class="v">+1.34</span></div>
+        <div class="track">
+          <div class="fill" style="width:67.0%"></div>
+          <div class="bar-line" style="left:70.0%"></div>
+        </div>
+        <div class="bar-note">noise bar +1.40 →  short by 0.06</div>
+      </div>
+      <div>
+        <div class="gauge-lab"><span class="t">Best design net @1.0 bp · E4_PDPOC_MAGNET</span><span class="v">+0.21</span></div>
+        <div class="track">
+          <div class="fill" style="width:10.5%"></div>
+          <div class="bar-line" style="left:70.5%"></div>
+        </div>
+        <div class="bar-note">noise bar +1.41 →  short by 1.20</div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card"><div class="k bad">0 / 28</div><div class="l">clear the net bar</div></div>
+      <div class="card"><div class="k bad">0 / 28</div><div class="l">clear the gross bar</div></div>
+      <div class="card"><div class="k bad">4 / 4</div><div class="l">shortlisted configs negative out of sample</div></div>
+      <div class="card"><div class="k">1.41 bp</div><div class="l">best design break-even, against a 1.15 bp charge — and it falls to 0.33 bp held out</div></div>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">Why this is a harder negative than the last one</span>
+      <p>The August 20 relative-value sweep found a large, replicable <em>gross</em> edge (design +6.86, held out +5.41) that was unreachable only because of friction — 50 of its 98 configs beat the gross bar. This round changed exactly two things: the holding period went from minutes to hours, and the fill stopped sharing a print with the signal. With those two things removed, the largest gross in 28 tries is +1.34 against a +1.40 bar. The earlier gross number was made of the two things this round took away.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <span class="eyebrow">Mechanism</span>
+    <h2>Where the late-day “drift” actually lives</h2>
+  </div>
+  <div class="stack">
+    <p><code>G1_LD500_CONT</code> buys the day's cross-sectional winners at 15:49 across the point-in-time top-500 and exits in the closing auction. On the design window it looks like a modest positive: gross Sharpe +0.55. Decomposing the hold shows that number is not drift.</p>
+  </div>
+</section>
+</div>
+
+<div class="wide" style="padding-top:24px">
+<figure>
+  <svg viewBox="0 0 900 300" role="img" aria-label="Decomposition of the late-day hold: the 15:49 to 15:59 leg earns +0.605 bp per day while the 15:59 to close leg loses 0.207 bp per day">
+    <!-- session rail -->
+    <line x1="60" y1="150" x2="850" y2="150" stroke="var(--rule)" stroke-width="1"/>
+    <g class="svg-tick" text-anchor="middle">
+      <text x="60"  y="188">09:30 OPEN</text>
+      <text x="380" y="188">15:29 SIGNAL</text>
+      <text x="560" y="188">15:49 FILL</text>
+      <text x="700" y="188">15:59</text>
+      <text x="850" y="188">CLOSE</text>
+    </g>
+    <g stroke="var(--rule)" stroke-width="1">
+      <line x1="60" y1="144" x2="60" y2="156"/>
+      <line x1="380" y1="132" x2="380" y2="168"/>
+      <line x1="560" y1="132" x2="560" y2="168"/>
+      <line x1="700" y1="144" x2="700" y2="156"/>
+      <line x1="850" y1="132" x2="850" y2="168"/>
+    </g>
+
+    <!-- signal span -->
+    <rect x="60" y="118" width="320" height="10" fill="var(--slate)" opacity="0.28"/>
+    <text class="svg-lab" x="220" y="110" text-anchor="middle" fill="var(--slate)">signal: open → 15:29 return, ranked cross-sectionally</text>
+
+    <!-- profitable leg -->
+    <rect x="560" y="62" width="140" height="52" fill="var(--brass)" opacity="0.9"/>
+    <text class="svg-val" x="630" y="52" text-anchor="middle" fill="var(--brass)">+0.605 bp/day</text>
+    <text class="svg-lab" x="630" y="90" text-anchor="middle" fill="var(--bg)" style="font-weight:600">152% of gross</text>
+    <text class="svg-lab" x="630" y="132" text-anchor="middle">10 minutes · Sharpe +0.83</text>
+
+    <!-- losing leg -->
+    <rect x="700" y="150" width="150" height="46" fill="var(--brick)" opacity="0.85"/>
+    <text class="svg-val" x="775" y="216" text-anchor="middle" fill="var(--brick)">−0.207 bp/day</text>
+    <text class="svg-lab" x="775" y="178" text-anchor="middle" fill="var(--bg)" style="font-weight:600">Sharpe −2.27</text>
+    <text class="svg-lab" x="775" y="238" text-anchor="middle">into the closing auction</text>
+
+    <!-- gap test bracket -->
+    <path d="M560 268 L560 258 L700 258 L700 268" fill="none" stroke="var(--slate)" stroke-width="1.5"/>
+    <text class="svg-lab" x="630" y="286" text-anchor="middle" fill="var(--slate)">the ten minutes the gap test removes</text>
+
+    <!-- net -->
+    <text class="svg-lab" x="850" y="42" text-anchor="end">full hold 15:49 → close:  +0.399 bp/day,  Sharpe +0.55</text>
+  </svg>
+  <figcaption>One hundred and fifty-two percent of the gross sits in the ten minutes immediately after the signal, and the position then <em>loses</em> into the closing auction at Sharpe −2.27. That is not late-day drift — it is a short-lived continuation of the signal print that reverses into the close, the same object that died on ρ1 in the auction-imbalance round, seen from the other side. Its gap-filled net Sharpe is −16.4 on design, −19.1 held out, −22.0 on the 2016–2020 pre-sample.</figcaption>
+</figure>
+</div>
+
+<div class="wrap">
+<section>
+  <div class="head">
+    <span class="eyebrow">The gate that caught it</span>
+    <h2>A fill that never shares a print, and a one-bar-gap re-entry test</h2>
+  </div>
+  <div class="stack">
+    <p>ρ1(Δspread) is what killed auction-imbalance and manufactured the ETF-sibling leg. On a 5-minute cube the equivalent discipline was frozen in §3 of the pre-registration: a formula observes bars <code>0..s</code>; the <strong>primary fill is the VWAP of bar s+1</strong>; the <strong>gap fill is the VWAP of bar s+2</strong>; the exit at bar 77 is unconditional and therefore carries no signal. A config is disqualified unless its gap Sharpe is at least half its primary Sharpe and positive — however large the primary number is.</p>
+    <p>The harness self-test proves the gate can see a bounce. A planted signal is recovered at gross +31.85 and mirrors to −32.49 under negation; a random score returns −0.22; and a deliberately planted one-bar artefact — a score that <em>is</em> the next bar's return — scores <strong>+7.84 primary and collapses to +1.53</strong> under the gap fill. All four checks pass.</p>
+    <p>It fired on the one net-positive config too. <code>E4_PDPOC_MAGNET</code>, the previous session's volume-profile point-of-control used as a magnet, goes from <strong>+0.21 to −0.03</strong> when the fill moves one bar later — and then prints −0.57 out of sample.</p>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <span class="eyebrow">Six sub-families</span>
+    <h2>Nothing was close, and the newest instrument was the deadest</h2>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr>
+        <th>Family</th><th class="n">n</th><th>Idea</th><th class="n">Best gross</th><th class="n">Best net @1bp</th><th class="n">Best break-even</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>A</strong> opening drive</td><td class="n">5</td><td>does the first 15–30 min of intraday tape predict the session?</td><td class="n">+0.60</td><td class="n neg">−0.18</td><td class="n">0.89 bp</td></tr>
+        <tr><td><strong>B</strong> order flow</td><td class="n">5</td><td>close-location-value × volume; trade size vs the name's own norm; volume front-loading; trade-count acceleration</td><td class="n">+0.12</td><td class="n neg">−0.98</td><td class="n">0.10 bp</td></tr>
+        <tr><td><strong>C</strong> VWAP deviation</td><td class="n">4</td><td>fade or follow the deviation from running session VWAP at 10:25 and 12:00</td><td class="n">+0.73</td><td class="n neg">−0.73</td><td class="n">0.58 bp</td></tr>
+        <tr><td><strong>D</strong> range breakout</td><td class="n">4</td><td>first-hour and first-30-min range, break and extension</td><td class="n">+0.23</td><td class="n neg">−1.06</td><td class="n">0.21 bp</td></tr>
+        <tr class="hl"><td><strong>E</strong> value area</td><td class="n">4</td><td>20-bin dollar-volume profile, 70% value area, POC magnet</td><td class="n">+1.12</td><td class="n pos">+0.21</td><td class="n">1.41 bp</td></tr>
+        <tr><td><strong>F/G</strong> late-day drift</td><td class="n">6</td><td>last 30–45 min, on 34 mega-caps and on the point-in-time top-500</td><td class="n">+1.34</td><td class="n neg">−0.33</td><td class="n">1.00 bp</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="stack" style="padding-top:22px">
+    <p>Family <strong>B</strong> is the genuinely new instrument: it uses the 5-minute bars' trade count and high/low — fields the earlier panel did not carry — to build order-flow and participation proxies rather than another price reversion. It is the deadest of the six. <strong>Free 5-minute bars do not carry recoverable order-flow information about the rest of the session.</strong></p>
+  </div>
+</section>
+</div>
+
+<div class="wide">
+<section>
+  <div class="head wrap" style="max-width:760px">
+    <span class="eyebrow">All 28, design window</span>
+    <h2>Net Sharpe at 1.0 bp per side</h2>
+  </div>
+  <div class="strip" id="strip"></div>
+</section>
+</div>
+
+<div class="wrap">
+<section>
+  <div class="head">
+    <span class="eyebrow">Held out · untouched until the shortlist was committed</span>
+    <h2>The documented negative control</h2>
+  </div>
+  <div class="stack">
+    <p>Nothing cleared, so per §7 of the pre-registration the top three by design net Sharpe ran out of sample <em>as a negative control, not as candidates</em> — plus one explicitly labelled addition, the highest design gross, to test whether the before-cost signal persists.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th>Config</th><th class="n">Design gross</th><th class="n">Held-out gross</th><th class="n">Design net@1bp</th><th class="n">Held-out net@1bp</th><th class="n">Held-out gap net</th><th class="n">Held-out break-even</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="name">E4_PDPOC_MAGNET</td><td class="n">+1.12</td><td class="n">+0.23</td><td class="n pos">+0.21</td><td class="n neg">−0.57</td><td class="n neg">−0.67</td><td class="n">0.33 bp</td></tr>
+          <tr><td class="name">A5_DRIVE_EX_GAP</td><td class="n">+0.60</td><td class="n">+0.17</td><td class="n neg">−0.18</td><td class="n neg">−0.50</td><td class="n neg">−0.33</td><td class="n">0.29 bp</td></tr>
+          <tr><td class="name">F2_LD_REV <span style="color:var(--faint);font-family:'IBM Plex Sans Condensed'">added</span></td><td class="n">+1.34</td><td class="n">+1.56</td><td class="n neg">−1.54</td><td class="n neg">−0.61</td><td class="n neg">−1.73</td><td class="n">0.83 bp</td></tr>
+          <tr><td class="name">G3_LD500_CONT_TOP150</td><td class="n">+1.11</td><td class="n neg">−1.20</td><td class="n neg">−0.33</td><td class="n neg">−2.20</td><td class="n neg">−19.14</td><td class="n neg">−1.58 bp</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>F2_LD_REV</code> is the only config whose gross both persists (+1.34 → +1.56) and clears the 0.5 bp/side rung net (+0.33). It is still not a signal: it is below the noise bar on design gross, its 0.83 bp break-even is under the repo's measured 1.13 bp liquid-name half-spread, its gap-filled net is −1.73, and its gross decomposition changes sign between windows — the first bar contributes −10% of gross on design and +62% held out. A component that changes sign across windows is noise, not mechanism.</p>
+    <p>The Panel-B pre-sample, declared in advance and unable to promote anything, agrees more loudly: over 2016–2020 across 1,259 sessions of a genuinely point-in-time top-500, <code>G1_LD500_CONT</code> prints gross <strong>−0.27</strong> where 2021–2024 printed +0.55. The raw sign of broad late-day drift is not stable across the two halves.</p>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <span class="eyebrow">Null 2 · a correction, disclosed</span>
+    <h2>A permutation null on a net series is mis-specified</h2>
+  </div>
+  <div class="stack">
+    <p>The cross-sectional null is ADV-slot signal permutation: symbols are bucketed into ADV deciles within each day and the score vector is permuted <em>within</em> buckets, destroying the symbol↔score mapping while preserving the day, the liquidity profile and the score distribution. Rotate-the-returns is broken and is not used.</p>
+    <p>Run first on the <strong>net</strong> series, it is meaningless — a permuted book still pays full cost, so the null distribution sits far below zero and any config with non-negative gross beats it. <code>E4</code> scored p = 0.004 against a null 95th percentile of <strong>−0.33</strong>. Re-run on <strong>gross</strong>, which is the question a permutation actually answers:</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Config</th><th class="n">Observed gross</th><th class="n">Null mean</th><th class="n">Null p95</th><th class="n">One-sided p</th></tr></thead>
+        <tbody>
+          <tr><td class="name">F2_LD_REV</td><td class="n">+1.34</td><td class="n">+0.51</td><td class="n">+1.00</td><td class="n">0.008</td></tr>
+          <tr><td class="name">E4_PDPOC_MAGNET</td><td class="n">+1.12</td><td class="n">+0.31</td><td class="n">+0.84</td><td class="n">0.008</td></tr>
+          <tr><td class="name">F3_LD_VWAPDEV_REV</td><td class="n">+1.10</td><td class="n">+0.29</td><td class="n">+0.83</td><td class="n">0.010</td></tr>
+          <tr><td class="name">C1_VWAPDEV_MID_REV</td><td class="n">+0.73</td><td class="n">−0.07</td><td class="n">+0.36</td><td class="n">0.002</td></tr>
+          <tr><td class="name">A5_DRIVE_EX_GAP</td><td class="n">+0.60</td><td class="n">+0.21</td><td class="n">+0.68</td><td class="n">0.092</td></tr>
+          <tr><td class="name">G3_LD500_CONT_TOP150</td><td class="n">+1.11</td><td class="n">+0.55</td><td class="n">+1.31</td><td class="n">0.130</td></tr>
+          <tr><td class="name">G1_LD500_CONT</td><td class="n">+0.55</td><td class="n">+0.38</td><td class="n">+1.19</td><td class="n">0.345</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Four configs carry a per-config p &lt; 0.01. <strong>This does not make them real, and saying so is why both nulls get run.</strong> These p-values are uncorrected for the 28 draws that produced the ranking; the family-wise bar for that is the best-of-28 bootstrap, and the largest gross in the sweep sits below it. A p-value computed on the winner of a 28-way search is not evidence — and every one of these then fails on cost and out of sample anyway. Note also that the permutation null's <em>mean</em> is positive: the score magnitude profile alone, with the symbol mapping destroyed, already earns something.</p>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <span class="eyebrow">What this closes</span>
+    <h2>Four things that no longer need re-testing</h2>
+  </div>
+  <ol class="closes">
+    <li><strong>Continuous intraday is not different from the auction in the way the theme hoped.</strong> The auction family died on ρ1; the continuous late-day family dies on the same object, caught by the gap test instead.</li>
+    <li><strong>Low turnover removes the friction excuse and reveals there was no gross edge.</strong> The median config here loses ~1.2 Sharpe to friction, not ~28 as in the relative-value sweep — the low-turnover design did exactly what it was meant to do to the cost side. It just found nothing to spend the budget on.</li>
+    <li><strong>Bar-level order-flow proxies are empty.</strong> Close-location-value × volume, average trade size versus a name's own norm, volume front-loading, trade-count acceleration: best gross +0.12, best break-even 0.10 bp.</li>
+    <li><strong>Run cross-sectional permutation nulls on gross, and correct them for the search.</strong> Otherwise the null hands you p = 0.004 for a config that is about to print −0.57 out of sample.</li>
+  </ol>
+  <div class="stack" style="padding-top:26px">
+    <p>Nothing from this theme goes near the basket. The sized basket remains the four legs from the 2026-08-23 v9 scrub — T3, DUALCLASS, T12 CEF discount, ORB — unchanged by this round.</p>
+  </div>
+</section>
+
+<section>
+  <div class="head"><span class="eyebrow">Method</span><h2>How it was run</h2></div>
+  <div class="stack">
+    <p><strong>Windows.</strong> Design 2021-01-04 → 2024-12-31 (1,005 sessions). Held out 2025-01-02 → 2026-08-14 (405 sessions), untouched until the shortlist was committed. Panel-B pre-sample 2016-01-04 → 2020-12-31 (1,259 sessions), declared in advance and barred from promoting anything.</p>
+    <p><strong>Panel A.</strong> Alpaca SIP 5-minute bars, <code>adjustment=all</code>, regular hours, rebuilt into a 1,410 × 78 × 132 cube carrying open, high, low, close, VWAP, dollar volume and trade count. Universes: 34 mega-cap single names, and 49 unlevered non-same-claim ETFs — levered and inverse funds and same-claim siblings are excluded so no config can rediscover the ETF-sibling artefact.</p>
+    <p><strong>Panel B.</strong> The point-in-time top-500-ADV minute panel (1,611 symbols ever, median 497 per day, 2016–2026) with 15:29 / 15:49 / 15:59 prices plus the official open and close. Every Panel-B return is strictly within one session, so its raw unadjusted prices are safe; no overnight return is computed on it.</p>
+    <p><strong>Weights and cost.</strong> Cross-sectionally demeaned, L1-normalised to gross 1.0; turnover 1.88–2.00 per day. Rungs 0.5 / 1.0 / 2.0 / 2.5 bp per side on |Δw|, headline 1.0, plus 0.15 bp per unit turnover for SEC 31 and FINRA TAF. Borrow zero, and that is exact — every config is flat at every close. The closing-auction exit on Panel B is charged 0 bp of spread because M0 <em>measured</em> the official print on 99.96% of top-500 symbol-days, but still pays the fee.</p>
+    <p><strong>Survivorship.</strong> Panel A is survivorship-biased and retroactively adjusted; no config filters on a price level. Panel B is point-in-time in membership and is the honest breadth check on Panel A's survivor set — and it agrees.</p>
+  </div>
+</section>
+
+<footer>
+  research/trading_bot/INVENT_0823_intramicro.{md,json}<br>
+  pre-registration committed 01ef87c · shortlist frozen 0f13929 · results 3980e86<br>
+  scripts/trading_bot/im0823_{panel,sweep,selftest,diag,permgross}.py
+</footer>
+</div>
+
+<script>
+const DATA = [["E4_PDPOC_MAGNET",0.21],["A5_DRIVE_EX_GAP",-0.18],["G3_LD500_CONT_TOP150",-0.33],["A1_OD30_CONT",-0.53],["A4_OD30_CONT_RESID",-0.68],["C1_VWAPDEV_MID_REV",-0.73],["A3_OD15_CONT",-0.75],["B5_NTRADE_ACCEL",-0.98],["D2_ORB_FADE_XS",-1.06],["E2_VA_ACCEPT",-1.09],["B4_VOLFRONT_DRIVE",-1.18],["D3_ORB30_BREAK",-1.18],["A2_OD30_FADE",-1.22],["G1_LD500_CONT",-1.23],["B3_TRDSIZE_TILT",-1.24],["D4_ORB_EXTENSION",-1.25],["B2_OFI_MORN_FADE",-1.33],["C4_VWAPDEV_TWOLEG",-1.51],["D1_ORB_BREAK_XS",-1.52],["C3_VWAPDEV_1030_REV",-1.53],["F2_LD_REV",-1.54],["B1_OFI_MORN_CONT",-1.58],["E3_POC_MAGNET",-1.63],["F3_LD_VWAPDEV_REV",-1.68],["E1_VA_REJECT",-2.06],["C2_VWAPDEV_MID_CONT",-2.20],["G2_LD500_REV",-2.33],["F1_LD_CONT",-4.23]];
+const LO = -4.5, HI = 2.0, BAR = 1.41;
+const pct = v => (v - LO) / (HI - LO) * 100;
+const el = document.getElementById('strip');
+let html = '';
+for (const [name, v] of DATA) {
+  const z = pct(0), x = pct(v);
+  const left = Math.min(z, x), width = Math.abs(x - z);
+  html += `<div class="row"><span class="nm">${name}</span>`
+        + `<span class="lane"><span class="zero" style="left:${z}%"></span>`
+        + `<span class="seg ${v < 0 ? 'n' : 'p'}" style="left:${left}%;width:${width}%"></span></span>`
+        + `<span class="v">${v > 0 ? '+' : '−'}${Math.abs(v).toFixed(2)}</span></div>`;
+}
+html += `<div class="axis"><span></span><span class="marks">`
+      + [-4,-3,-2,-1,0,1,2].map(t => `<span style="left:${pct(t)}%">${t}</span>`).join('')
+      + `<span class="barmark" style="left:${pct(BAR)}%"></span>`
+      + `<span class="barcap" style="left:${pct(BAR)}%">bar +1.41</span>`
+      + `</span><span></span></div>`;
+el.innerHTML = html;
+</script>
