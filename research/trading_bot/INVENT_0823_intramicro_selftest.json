@@ -1,0 +1,33 @@
+{
+ "planted": {
+  "primary_gross_sharpe": 31.85059379346146,
+  "gap_gross_sharpe": 31.717901798110937,
+  "primary_net_1bp": 30.86981908525969,
+  "gap_net_1bp": 30.712102467244005
+ },
+ "negated": {
+  "primary_gross_sharpe": -32.48634826680806,
+  "gap_gross_sharpe": -32.25409993982446,
+  "primary_net_1bp": -33.49075009954248,
+  "gap_net_1bp": -33.281118875622056
+ },
+ "random": {
+  "primary_gross_sharpe": -0.21593723626358652,
+  "gap_gross_sharpe": -0.22610589281700316,
+  "primary_net_1bp": -2.604487676155396,
+  "gap_net_1bp": -2.665342384533019
+ },
+ "one_bar_artefact": {
+  "primary_gross_sharpe": 7.8414507558250355,
+  "gap_gross_sharpe": 1.5293330986442826,
+  "primary_net_1bp": 6.731647294320773,
+  "gap_net_1bp": 0.3784274220031209
+ },
+ "checks": {
+  "planted_recovers": true,
+  "negation_mirrors": true,
+  "random_is_flat": true,
+  "gap_gate_kills_one_bar_artefact": true
+ },
+ "all_pass": true
+}
