@@ -1,0 +1,467 @@
+<title>The Gap-Fade Shortfall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#F4F6F7;
+  --raise:#FFFFFF;
+  --sunk:#EAEEF0;
+  --ink:#0E141A;
+  --slate:#5B6672;
+  --faint:#8A949E;
+  --rule:#D6DBE0;
+  --accent:#0B6E70;
+  --accent-soft:#D8E9E8;
+  --kill:#9E3B33;
+  --kill-soft:#F1DEDC;
+  --shadow:0 1px 2px rgba(14,20,26,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1216;
+    --raise:#141B21;
+    --sunk:#10171C;
+    --ink:#E4E9EC;
+    --slate:#96A2AC;
+    --faint:#6C7883;
+    --rule:#25303A;
+    --accent:#4FB3B0;
+    --accent-soft:#12312F;
+    --kill:#D2756B;
+    --kill-soft:#2C1917;
+    --shadow:0 1px 2px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1216;
+  --raise:#141B21;
+  --sunk:#10171C;
+  --ink:#E4E9EC;
+  --slate:#96A2AC;
+  --faint:#6C7883;
+  --rule:#25303A;
+  --accent:#4FB3B0;
+  --accent-soft:#12312F;
+  --kill:#D2756B;
+  --kill-soft:#2C1917;
+  --shadow:0 1px 2px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1060px;margin:0 auto;padding:0 clamp(20px,5vw,48px) 96px}
+
+/* ---------- gutter-rail layout ---------- */
+.rail{
+  display:grid;
+  grid-template-columns:132px minmax(0,1fr);
+  gap:0 36px;
+  align-items:start;
+  border-top:1px solid var(--rule);
+  padding:38px 0 6px;
+}
+.rail:first-of-type{border-top:none}
+.rail > .tag{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);
+  padding-top:.55em;
+  line-height:1.5;
+}
+.body{min-width:0}
+@media (max-width:760px){
+  .rail{grid-template-columns:minmax(0,1fr);gap:10px}
+  .rail > .tag{padding-top:0}
+}
+
+/* ---------- type ---------- */
+h1,h2,h3{font-family:Spectral,Georgia,"Times New Roman",serif;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.5rem,6.2vw,3.9rem);font-weight:600;line-height:1.03;letter-spacing:-.018em}
+h2{font-size:clamp(1.45rem,2.7vw,1.85rem);font-weight:500;line-height:1.18;letter-spacing:-.011em;margin:0 0 .5em}
+h3{font-size:1.06rem;font-weight:600;line-height:1.3;margin:0 0 .35em}
+p{margin:0 0 1.05em;max-width:66ch}
+p:last-child{margin-bottom:0}
+.lede{font-size:1.16rem;line-height:1.62;color:var(--slate);max-width:64ch}
+.lede strong{color:var(--ink);font-weight:600}
+strong{font-weight:600}
+em{font-style:italic}
+a{color:var(--accent)}
+code,.m{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+code{font-size:.87em;background:var(--sunk);padding:.1em .34em;border-radius:3px}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;font-weight:500}
+.pos{color:var(--accent)}
+.neg{color:var(--kill)}
+
+/* ---------- masthead ---------- */
+header.top{padding:72px 0 44px}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11.5px;font-weight:500;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 22px;
+  display:flex;flex-wrap:wrap;gap:10px 16px;align-items:baseline;
+}
+.eyebrow span:not(:first-child){color:var(--faint)}
+.sub{
+  margin:22px 0 0;font-family:Spectral,Georgia,serif;font-size:1.3rem;
+  font-style:italic;font-weight:400;color:var(--slate);max-width:52ch;line-height:1.45;
+}
+
+/* ---------- the shortfall figure ---------- */
+figure.short{margin:0;background:var(--raise);border:1px solid var(--rule);border-radius:4px;padding:30px 32px 26px;box-shadow:var(--shadow)}
+.short-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;align-items:baseline;margin-bottom:26px}
+.short-head .t{font-family:Spectral,Georgia,serif;font-size:1.15rem;font-weight:500}
+.short-head .u{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint)}
+.track{margin:0 0 4px}
+.bars{position:relative;display:grid;gap:20px}
+.trk-row{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}
+.trk-lab{display:flex;justify-content:space-between;gap:16px;align-items:baseline;font-size:13.5px}
+.trk-lab .who{color:var(--slate)}
+.trk-lab .val{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-weight:600;font-size:14px}
+.bar-bed{position:relative;height:16px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.bar-fill{position:absolute;inset:0 auto 0 0;border-radius:2px 0 0 2px}
+.f-a{background:var(--accent);opacity:.92}
+.f-b{background:var(--accent);opacity:.52}
+.costline{
+  position:absolute;right:0;top:0;bottom:-6px;width:2px;
+  background:var(--kill);pointer-events:none;
+}
+.costcap-row{display:flex;justify-content:flex-end;padding-top:9px}
+.costcap{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.04em;
+  color:var(--kill);white-space:nowrap;
+}
+.short-foot{border-top:1px solid var(--rule);margin-top:22px;padding-top:16px;font-size:13.5px;color:var(--slate);max-width:none}
+
+/* ---------- gate chain ---------- */
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:0 0 6px;padding:0;list-style:none}
+.gate{background:var(--raise);border:1px solid var(--rule);border-radius:4px;padding:15px 16px 14px;position:relative;overflow:hidden}
+.gate::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--accent)}
+.gate.fail::before{background:var(--kill)}
+.gate .g-n{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.15em;color:var(--faint);text-transform:uppercase}
+.gate .g-t{font-size:13.5px;line-height:1.42;margin:5px 0 10px;color:var(--ink)}
+.gate .g-v{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.gate .g-s{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.13em;padding:2px 7px;border-radius:2px;margin-left:8px;vertical-align:1px}
+.gate .g-s.p{background:var(--accent-soft);color:var(--accent)}
+.gate .g-s.f{background:var(--kill-soft);color:var(--kill)}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto;margin:0 0 4px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+caption{
+  text-align:left;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding-bottom:10px;
+}
+th,td{padding:8px 14px 8px 0;text-align:right;border-bottom:1px solid var(--rule);vertical-align:baseline}
+th:first-child,td:first-child{text-align:left;padding-right:22px}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);border-bottom:1px solid var(--ink);white-space:nowrap;
+}
+tbody td:not(:first-child){font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:none}
+tr.hl td{background:var(--sunk);font-weight:600}
+td.first-col-note{color:var(--slate)}
+
+/* ---------- callout ---------- */
+.note{
+  background:var(--sunk);border-left:3px solid var(--accent);
+  padding:16px 20px;border-radius:0 3px 3px 0;font-size:14px;color:var(--slate);
+}
+.note.k{border-left-color:var(--kill)}
+.note strong{color:var(--ink)}
+.note p{max-width:64ch}
+
+/* ---------- kill list ---------- */
+.kills{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.kills li{background:var(--raise);border:1px solid var(--rule);border-radius:4px;padding:17px 20px}
+.kills .k-h{font-family:Spectral,Georgia,serif;font-size:1.02rem;font-weight:600;margin:0 0 6px;display:flex;gap:10px;align-items:baseline}
+.kills .k-h .k-i{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;color:var(--kill);letter-spacing:.1em}
+.kills p{font-size:13.8px;color:var(--slate);margin:0}
+.kills p + p{margin-top:.7em}
+
+.dim{color:var(--faint)}
+footer.end{border-top:1px solid var(--rule);margin-top:56px;padding-top:24px;font-size:12.5px;color:var(--faint);font-family:"IBM Plex Mono",monospace;line-height:1.75}
+footer.end p{max-width:none;margin:0 0 .6em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){
+  .bar-fill{animation:grow .9s cubic-bezier(.22,.7,.3,1) both}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .bar-fill{transform-origin:left center}
+}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow"><span>INVENT_0825</span><span>26 formulas</span><span>0 survivors</span><span>2026-08-25</span></p>
+  <h1>The Gap-Fade Shortfall</h1>
+  <p class="sub">A cross-sectional intraday equity edge that is statistically real, replicates out of sample, and still cannot be traded — because it is smaller than the spread it would have to cross.</p>
+</header>
+
+<section class="rail">
+  <div class="tag">Verdict</div>
+  <div class="body">
+    <p class="lede">Twenty-five of twenty-six pre-registered formulas are noise. The twenty-sixth — <strong>fade the overnight gap, cross-sectionally, in the last half hour of the session</strong> — clears every statistical gate this repo can put in front of it, and then dies on execution cost. It earns <strong>0.90 basis points per unit of turnover</strong> out of sample. Crossing the spread costs <strong>1.13</strong>.</p>
+  </div>
+</section>
+
+<section class="rail">
+  <div class="tag">The finding<br>as one image</div>
+  <div class="body">
+    <figure class="short">
+      <div class="short-head">
+        <span class="t">What the edge earns, against what it must pay</span>
+        <span class="u">basis points per unit turnover · held-out window</span>
+      </div>
+
+      <div class="track">
+        <div class="bars">
+          <div class="trk-row">
+            <div class="trk-lab">
+              <span class="who">Clean rail — 5-min VWAP fills, 34 mega-caps <span class="dim">(the honest number)</span></span>
+              <span class="val">0.90</span>
+            </div>
+            <div class="bar-bed"><div class="bar-fill f-a" style="width:79.6%"></div></div>
+          </div>
+
+          <div class="trk-row last">
+            <div class="trk-lab">
+              <span class="who">Auction rail — 15:49 entry, closing-auction exit <span class="dim">(upper bound)</span></span>
+              <span class="val">0.93</span>
+            </div>
+            <div class="bar-bed"><div class="bar-fill f-b" style="width:82.3%"></div></div>
+          </div>
+
+          <div class="costline" aria-hidden="true"></div>
+        </div>
+        <div class="costcap-row"><span class="costcap">1.13 — measured half-spread</span></div>
+      </div>
+
+      <p class="short-foot">Repo-measured liquid-name close half-spread: <span class="num">1.13 bp</span> across 19,835 symbol-days. The published liquid retail taker is <span class="num">2.5 bp</span> before price improvement. The edge reaches <strong>80%</strong> of its own execution floor and stops — the closest any invented equity formula in this repo has come to clearing it without doing so.</p>
+    </figure>
+  </div>
+</section>
+
+<section class="rail">
+  <div class="tag">Promotion rule<br>a conjunction</div>
+  <div class="body">
+    <h2>Four gates. Three pass.</h2>
+    <p>The rule was fixed in the pre-registration before any number existed: a formula is real only if it clears <em>all four</em>. Three passing is not a partial result — it is a failure with an unusually well-documented cause.</p>
+    <ul class="gates">
+      <li class="gate">
+        <div class="g-n">Gate 1 · family-wise</div>
+        <div class="g-t">Gross Sharpe above the best-of-26 bootstrap bar</div>
+        <div class="g-v">+2.36 vs +1.44 <span class="g-s p">PASS</span></div>
+      </li>
+      <li class="gate">
+        <div class="g-n">Gate 2 · anti-artefact</div>
+        <div class="g-t">Survives the one-bar-gap re-entry fill</div>
+        <div class="g-v">+2.46 ≥ primary <span class="g-s p">PASS</span></div>
+      </li>
+      <li class="gate">
+        <div class="g-n">Gate 3 · mechanism</div>
+        <div class="g-t">ADV-decile signal permutation on gross</div>
+        <div class="g-v">p = 0.0020 <span class="g-s p">PASS</span></div>
+      </li>
+      <li class="gate fail">
+        <div class="g-n">Gate 4 · economics</div>
+        <div class="g-t">Held-out net Sharpe positive at 1.0 bp/side</div>
+        <div class="g-v">−0.57 <span class="g-s f">FAIL</span></div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="rail">
+  <div class="tag">The candidate</div>
+  <div class="body">
+    <h2>PA_GAP_CD_FADE</h2>
+    <p>Score is the negated overnight gap divided by its own trailing 60-day standard deviation, clipped at ±5, across 34 mega-caps. The signal is fully known at 09:30. Entry is the VWAP of the 15:35–15:40 bar; exit is unconditional at the VWAP of the 15:55–16:00 bar. Dollar-neutral, L1 gross 1.0, flat at every close — so borrow cost is zero exactly.</p>
+
+    <div class="scroll">
+      <table>
+        <caption>Design window vs. held-out window</caption>
+        <thead>
+          <tr><th>Statistic</th><th>Design 2021–24</th><th>Held out 2025–26</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Gross Sharpe</td><td class="pos">+2.36</td><td class="pos">+2.09</td></tr>
+          <tr><td>Gross bp / day</td><td>+1.44</td><td>+1.81</td></tr>
+          <tr><td>Break-even, bp / turnover</td><td>0.77</td><td>0.90</td></tr>
+          <tr><td>Net @ 0.5 bp/side</td><td class="pos">+0.37</td><td class="pos">+0.59</td></tr>
+          <tr class="hl"><td>Net @ 1.0 bp/side <span class="dim">headline</span></td><td class="neg">−1.16</td><td class="neg">−0.57</td></tr>
+          <tr><td>Net @ 2.5 bp/side</td><td class="neg">−4.83</td><td class="neg">−4.03</td></tr>
+          <tr><td>Sessions</td><td>1,005</td><td>405</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note" style="margin-top:26px">
+      <p><strong>It got stronger out of sample, not weaker.</strong> Gross Sharpe held at +2.09 and gross bp/day <em>rose</em> from 1.44 to 1.81. Selection flukes do not usually do that. What moved against it was the cost ratio, not the signal.</p>
+    </div>
+  </div>
+</section>
+
+<section class="rail">
+  <div class="tag">Why it isn't<br>the usual fluke</div>
+  <div class="body">
+    <h2>The evidence that separates it from the last 28</h2>
+    <p>The previous round in this family killed 28 formulas, and its strongest candidate died on a specific tell: <strong>152% of its gross sat in the ten minutes immediately after the signal print</strong>, then reversed into the close. That is a bounce artefact, not a drift. This one decomposes the opposite way.</p>
+
+    <div class="scroll">
+      <table>
+        <caption>Where the gross actually lives</caption>
+        <thead>
+          <tr><th>Segment of the hold</th><th>bp / day</th><th>Share of gross</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>First bar after entry <span class="dim">(15:35→15:40)</span></td><td>+0.02</td><td class="pos">1.7%</td></tr>
+          <tr><td>Remainder <span class="dim">(15:40→16:00)</span></td><td>+1.42</td><td>98.3%</td></tr>
+          <tr class="hl"><td>Prior round's killed config, same statistic</td><td>—</td><td class="neg">152%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:26px">Two further checks, both fixed in advance. <strong>The entry-slot profile is positive at all ten slots tested</strong> — gross bp/day falls as the hold shortens and gross Sharpe rises as late-day noise falls, which is the shape of a smooth all-session drift rather than a single lucky slot. And the effect is <strong>monotone in signal magnitude</strong>: sorting the book by the size of the gap gives −0.37, +0.34, +1.54 bp/day across terciles.</p>
+
+    <div class="scroll">
+      <table>
+        <caption>Entry-slot profile · gross Sharpe by 5-minute bar of entry</caption>
+        <thead>
+          <tr><th>Entry bar</th><th>6</th><th>12</th><th>24</th><th>36</th><th>48</th><th>60</th><th>66</th><th>71</th><th>74</th><th>76</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Gross Sharpe</td><td>+1.47</td><td>+1.10</td><td>+0.33</td><td>+1.28</td><td>+1.64</td><td>+2.01</td><td>+2.23</td><td>+2.36</td><td>+2.05</td><td>+0.76</td></tr>
+          <tr><td>Gross bp / day</td><td>3.69</td><td>2.38</td><td>0.61</td><td>1.96</td><td>2.03</td><td>2.00</td><td>1.78</td><td>1.44</td><td>0.96</td><td>0.20</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="rail">
+  <div class="tag">Three kills</div>
+  <div class="body">
+    <h2>Every escape route was tested and closed</h2>
+    <ul class="kills">
+      <li>
+        <p class="k-h"><span class="k-i">01</span> The rescuing rail can only be priced where the signal is absent</p>
+        <p>The pre-registered exit pays a full spread. The obvious fix is to exit in the closing auction, which costs no spread at all — but the 5-minute cube carries no official close. Run on the panel that does, restricted to the same 34 names, gross is positive across all three windows and eleven years: <span class="num">+2.60</span> / <span class="num">+1.23</span> / <span class="num">+1.45</span>. Net at 1.0 bp is still negative in two of three, and the one positive window is the <em>oldest</em>, when spreads were wider — the wrong direction for an execution story.</p>
+        <p>That table is an upper bound in any case. The ten-minutes-later control shows <strong>87% of the held-out return arriving in the ten minutes right after a single-print entry</strong> — precisely the bounce-prone object a 5-minute VWAP fill damps out.</p>
+      </li>
+      <li>
+        <p class="k-h"><span class="k-i">02</span> The survivorship-free version is zero</p>
+        <p>On the point-in-time top-500 panel — real historical membership, no survivorship bias, raw prices, official auction exit — the same gap fade scores <span class="num">+0.28</span> in 2016–20, <span class="num">+0.85</span> in 2021–24, and <span class="num">−0.02</span> out of sample. The breadth version drifts to zero and the design window is its outlier.</p>
+      </li>
+      <li>
+        <p class="k-h"><span class="k-i">03</span> The mechanism story does not hold out</p>
+        <p>The positive-at-every-slot profile was the strongest argument that this is a mechanism rather than a slot, so it was tested directly. The identical score entered at 10:00 instead of 15:35 scores <span class="num pos">+1.47</span> gross on design and <span class="num neg">−0.47</span> held out. A sign flip across windows is noise, not mechanism. <strong>The late-day slot replicated; the all-day drift meant to explain it did not.</strong></p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="rail">
+  <div class="tag">The other 25</div>
+  <div class="body">
+    <h2>Three new instruments, all empty</h2>
+    <p>Three of this theme's four questions were already dead. This round was pre-registered as a disjointness sweep built on instruments the prior round never touched — and each came back flat.</p>
+
+    <div class="scroll">
+      <table>
+        <caption>New instruments · best design gross Sharpe against a +1.44 bar</caption>
+        <thead>
+          <tr><th>Instrument</th><th>n</th><th>Best gross</th><th>Permutation p</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>First-hour path efficiency &amp; choppiness</td><td>4</td><td>+0.43</td><td class="dim">—</td></tr>
+          <tr><td>Opening-print dislocation <span class="dim">open ÷ VWAP(bar 0)</span></td><td>3</td><td>+0.60</td><td>0.2595</td></tr>
+          <tr><td>Vol-scaled drive, point-in-time panel</td><td>5</td><td>+0.58</td><td>0.0958</td></tr>
+          <tr><td>First-hour range as a scaler</td><td>4</td><td>+0.30</td><td class="dim">—</td></tr>
+          <tr><td>Gap vs. the official opening auction</td><td>7</td><td>+0.85</td><td>0.0699</td></tr>
+          <tr class="hl"><td>Open drive → close drive</td><td>3</td><td class="pos">+2.36</td><td class="pos">0.0020</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="scroll" style="margin-top:30px">
+      <table>
+        <caption>Distribution of all 26, design window</caption>
+        <thead>
+          <tr><th>Cost rung</th><th>Min</th><th>Median</th><th>Max</th><th># positive</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Gross</td><td>−0.98</td><td>+0.24</td><td class="pos">+2.36</td><td>17 / 26</td></tr>
+          <tr><td>Net @ 0.5 bp</td><td>−2.99</td><td>−1.05</td><td>+0.37</td><td>2 / 26</td></tr>
+          <tr class="hl"><td>Net @ 1.0 bp</td><td>−4.55</td><td>−1.98</td><td class="neg">−0.26</td><td class="neg">0 / 26</td></tr>
+          <tr><td>Net @ 2.0 bp</td><td>−7.65</td><td>−4.43</td><td>−1.02</td><td>0 / 26</td></tr>
+          <tr><td>Net @ 2.5 bp</td><td>−9.19</td><td>−5.78</td><td>−1.40</td><td>0 / 26</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note k" style="margin-top:26px">
+      <p><strong>A degeneracy worth reusing.</strong> Because every book is cross-sectionally demeaned before normalising, subtracting the cross-sectional mean of a score is a no-op — so two pre-registered pairs turned out to be numerically identical formulas. The 26 formulas are <strong>24 distinct books</strong>. In a dollar-neutral sweep, "market-adjusted X" and "X" are the same formula, and pre-registering both inflates the apparent breadth of the search without inflating the bar it has to clear.</p>
+    </div>
+  </div>
+</section>
+
+<section class="rail">
+  <div class="tag">Both nulls</div>
+  <div class="body">
+    <h2>What the bar was, and how it was built</h2>
+    <p>The operative bar is a stationary block bootstrap of the best-of-26, block length 5 sessions, 2,000 resamples, drawing the <em>same</em> day indices for every config so the sweep's internal correlation survives. The analytic approximation is reported only as a cross-check, and understated the real bar by 12% — consistent with the standing note that it always does.</p>
+
+    <div class="scroll">
+      <table>
+        <caption>Null 1 · best-of-26 block bootstrap</caption>
+        <thead><tr><th>Statistic</th><th>Gross</th><th>Net @ 1.0 bp</th></tr></thead>
+        <tbody>
+          <tr><td>Mean</td><td>+0.93</td><td>+0.93</td></tr>
+          <tr class="hl"><td>p95 — the bar</td><td>+1.44</td><td>+1.41</td></tr>
+          <tr><td>p99</td><td>+1.72</td><td>+1.74</td></tr>
+          <tr><td>Analytic √(2 ln N) <span class="dim">cross-check only</span></td><td>+1.28</td><td class="dim">—</td></tr>
+          <tr><td>Observed maximum</td><td class="pos">+2.36</td><td class="neg">−0.26</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:26px">At +2.36 the candidate sits above the <em>p99</em>, so its family-wise p-value is below 0.01. The second null — permuting the score within same-day ADV deciles, 500 draws, run on gross rather than net because running it on net is mis-specified — returns p = 0.0020 against a null mean of +0.89.</p>
+
+    <div class="note">
+      <p><strong>Harness self-test.</strong> A planted edge scores +41.01 and mirrors exactly to −41.01 under negation; a random score returns +0.58; and a deliberately planted one-bar artefact scores +0.75 on the primary fill and <strong>collapses to −0.98</strong> under the gap fill. The gate can see the object it exists to catch.</p>
+    </div>
+  </div>
+</section>
+
+<section class="rail">
+  <div class="tag">What this closes</div>
+  <div class="body">
+    <h2>The theme is finished, and the margin is the thing to write down</h2>
+    <p>The last untested cell of intraday equity microstructure on free bar data has now been tested. The prior round killed opening drive, close drive and opening range <em>on gross</em>; this round killed path shape, opening-print dislocation and vol-scaled drive on gross too. The one remaining cell turned out to be statistically real and economically unreachable. Nothing further should be spent here.</p>
+    <p>That distinction matters. The prior round died <em>before</em> a single basis point of cost was charged — zero of 28 beat the gross bar. This round produced an effect that clears a family-wise p &lt; 0.01, survives a permutation at p = 0.002, decomposes cleanly away from its entry print, and replicates out of sample with a <em>larger</em> daily return than it had on design — and then dies at 0.90 against 1.13. That is the execution-cost wall in its purest observed form, and the sharpest confirmation yet of the standing lesson that <strong>free data prices a statistic, not a claim</strong>.</p>
+    <div class="note k">
+      <p><strong>Nothing is promoted.</strong> The basket forward clock is locked and this is not added to it. It is logged as a gross-real / net-dead observation — the correct object to re-test first, and only, if the execution assumption itself changes: measured price improvement on mega-cap marketable orders, a mid-point rail, or paid data.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="end">
+  <p>Design 2021-01-04 → 2024-12-31 (1,005 sessions) · Held out 2025-01-02 → 2026-08-14 (405 sessions), untouched until the shortlist was committed · Pre-sample 2016-01-04 → 2020-12-31 (1,259 sessions), declared in advance and able only to kill.</p>
+  <p>Panels are both pre-existing caches, nothing re-downloaded: a 1410 × 78 × 132 five-minute cube (Alpaca SIP, adjustment=all, RTH) and a 2669 × 1611 point-in-time top-500 auction rail carrying official opens and closes, the 15:29 / 15:49 / 15:59 prints and a corporate-action flag. Raw prices, so the only cross-session quantity computed anywhere is the overnight gap, and it is dropped whenever the corporate-action flag is set.</p>
+  <p>Disclosed: the permutation stage ran on the top 8 by design gross, not all 26 — the remaining 18 have design gross ≤ +0.58 against a +1.44 bar. The prior round read the 2025–26 window for four named configs; none of the 26 here is one of them or a re-parameterisation of one.</p>
+  <p>Research only · cached and free data · no orders, no money.</p>
+</footer>
+
+</div>
