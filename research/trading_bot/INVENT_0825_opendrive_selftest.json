@@ -1,0 +1,9 @@
+{
+ "planted_edge_gross": 41.00706829782972,
+ "planted_edge_negated": -41.00706829782972,
+ "random_score_gross": 0.5762818850182309,
+ "onebar_artefact_primary": 0.7485749447423015,
+ "onebar_artefact_gapfill": -0.9791682159561585,
+ "gate_detects_artefact": true,
+ "panelB_planted_edge_gross": 27.577784094045953
+}
