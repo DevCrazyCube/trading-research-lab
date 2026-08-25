@@ -1,0 +1,107 @@
+{
+ "theme": "intraday equity open-drive / close-drive microstructure",
+ "date": "2026-08-25",
+ "verdict": "NOISE as a tradable claim; one formula is real on GROSS and dies on execution cost",
+ "n_formulas_preregistered": 26,
+ "n_distinct_books": 24,
+ "degeneracy_note": "cross-sectional demeaning makes PB_IDIOGAP_FADE == PB_GAPZ_FADE and PB_DRIVE_EXMKT_FADE == PB_DRIVEZ_FADE",
+ "survivors": 0,
+ "windows": {
+  "design": ["2021-01-04", "2024-12-31", 1005],
+  "heldout": ["2025-01-02", "2026-08-14", 405],
+  "presample_panelB_only": ["2016-01-04", "2020-12-31", 1259]
+ },
+ "nulls": {
+  "bootstrap_best_of_26": {
+   "method": "stationary block bootstrap, block=5 sessions, 2000 resamples, same day indices across configs",
+   "gross": {"mean": 0.926, "p95": 1.438, "p99": 1.724},
+   "net_1.0bp": {"mean": 0.930, "p95": 1.408, "p99": 1.741},
+   "analytic_sqrt2lnN": 1.28,
+   "analytic_understates_by_pct": 12
+  },
+  "adv_decile_signal_permutation_on_gross": {
+   "n_draws": 500,
+   "note": "permuted WITHIN within-day ADV deciles; rotate-the-returns not used; run on gross because running it on net is mis-specified",
+   "PA_GAP_CD_FADE": {"observed": 2.357, "null_mean": 0.892, "null_p95": 1.489, "p": 0.0020},
+   "PA_OD30_CD_FADE": {"observed": 0.978, "null_mean": 0.549, "null_p95": 1.093, "p": 0.0878},
+   "PB_GAPZ_FADE": {"observed": 0.845, "null_mean": 0.098, "null_p95": 0.928, "p": 0.0699},
+   "PB_GAPZ_FADE_T150": {"observed": 0.780, "null_mean": -0.050, "null_p95": 0.712, "p": 0.0339},
+   "PA_ODISL_X_GAP": {"observed": 0.597, "null_mean": 0.383, "null_p95": 0.888, "p": 0.2595},
+   "PB_TOTMOVE_FADE": {"observed": 0.597, "null_mean": -0.207, "null_p95": 0.591, "p": 0.0459},
+   "PB_DRIVE_CONF_FADE": {"observed": 0.577, "null_mean": -0.088, "null_p95": 0.732, "p": 0.0958},
+   "truncation": "ran on top 8 by design gross; the other 18 have design gross <= +0.58 vs a +1.44 bar"
+  }
+ },
+ "best": {
+  "name": "PA_GAP_CD_FADE",
+  "desc": "fade the overnight gap z-score (gap / trailing-60d sigma, clipped +-5) cross-sectionally across 34 mega-caps; enter at the VWAP of the 15:35-15:40 bar, exit unconditionally at the VWAP of the 15:55-16:00 bar; dollar-neutral, L1 gross 1.0, flat at every close",
+  "design_gross_sharpe": 2.357,
+  "design_gross_bps_day": 1.444,
+  "design_breakeven_bp": 0.77,
+  "design_net_0.5": 0.372,
+  "design_net_1.0": -1.161,
+  "heldout_gross_sharpe": 2.087,
+  "heldout_gross_bps_day": 1.809,
+  "heldout_breakeven_bp": 0.90,
+  "heldout_net_0.5": 0.594,
+  "heldout_net_1.0": -0.570,
+  "beats_bootstrap_gross_bar": true,
+  "beats_permutation_null": true,
+  "passes_one_bar_gap_gate": true,
+  "heldout_net_positive_at_headline": false,
+  "promoted": false
+ },
+ "anti_artefact": {
+  "hold_decomposition_pct_of_gross_in_first_bar_after_entry": 1.7,
+  "comparison_INVENT_0823_G1_same_statistic_pct": 152,
+  "entry_slot_profile_gross_sharpe": {"bar6": 1.47, "bar12": 1.10, "bar24": 0.33, "bar36": 1.28,
+   "bar48": 1.64, "bar60": 2.01, "bar66": 2.23, "bar71": 2.36, "bar74": 2.05, "bar76": 0.76},
+  "gap_magnitude_tercile_bps_day": {"small": -0.369, "mid": 0.342, "large": 1.543},
+  "selftest": {"planted_edge": 41.01, "negated": -41.01, "random": 0.58,
+   "planted_one_bar_artefact_primary": 0.75, "planted_one_bar_artefact_gapfill": -0.98,
+   "gate_detects_artefact": true, "panelB_planted_edge": 27.58}
+ },
+ "kills": {
+  "cost": "breakeven 0.77 bp design / 0.90 bp heldout per unit turnover vs a repo-measured 1.13 bp liquid-name half-spread; heldout net@1.0bp = -0.57",
+  "auction_rail_posthoc": {
+   "desc": "same 34 mega-caps on Panel B, entry 15:49 print, exit closing auction (0 bp spread, fee only)",
+   "presample_2016_2020": {"gross": 2.599, "bps_day": 1.278, "breakeven_bp": 1.355, "net_1.0": 0.105},
+   "design_2021_2024": {"gross": 1.232, "bps_day": 0.567, "breakeven_bp": 0.571, "net_1.0": -1.574},
+   "heldout_2025_2026": {"gross": 1.454, "bps_day": 0.923, "breakeven_bp": 0.930, "net_1.0": -0.578},
+   "caveat": "UPPER BOUND ONLY - the 10-min-later control shows 75% (design) / 87% (heldout) of the return arriving in the ten minutes right after the single-print 15:49 entry, the bounce-prone object a 5-min VWAP fill damps"
+  },
+  "breadth_no_survivorship": {
+   "desc": "PB_GAPZ_FADE, point-in-time top-500, official auction exit",
+   "presample_gross": 0.283, "design_gross": 0.845, "heldout_gross": -0.017,
+   "note": "the survivorship-free breadth version drifts to zero; the design window is its outlier"
+  },
+  "mechanism_claim_fails_oos": {
+   "desc": "PA_GAP_FADE_ALLDAY - POST-HOC, labelled in the frozen shortlist, never promotable - identical score entered at bar 6 (10:00) instead of bar 71",
+   "design_gross": 1.473, "heldout_gross": -0.468,
+   "note": "sign flip across windows; by the standing rule from INVENT_0823 that is noise, not mechanism. The late-day slot replicated; the all-day drift meant to explain it did not."
+  }
+ },
+ "design_distribution": {
+  "gross": {"min": -0.98, "median": 0.24, "max": 2.36, "n_positive": 17},
+  "net_0.5": {"min": -2.99, "median": -1.05, "max": 0.37, "n_positive": 2},
+  "net_1.0": {"min": -4.55, "median": -1.98, "max": -0.26, "n_positive": 0},
+  "net_2.0": {"min": -7.65, "median": -4.43, "max": -1.02, "n_positive": 0},
+  "net_2.5": {"min": -9.19, "median": -5.78, "max": -1.40, "n_positive": 0}
+ },
+ "new_instruments_all_empty": {
+  "first_hour_path_efficiency_and_choppiness": {"best_gross": 0.43},
+  "opening_print_dislocation_open_over_vwap_bar0": {"best_gross": 0.60, "perm_p": 0.2595},
+  "vol_scaled_drive_on_point_in_time_panel": {"best_gross": 0.58,
+   "diagnostic": "209% of PB_DRIVEZ_FADE's hold sits in the 15:59-print-to-auction leg, the close-auction bounce that killed auction-imbalance on rho1"}
+ },
+ "contamination_disclosed": "INVENT_0823 read the 2025-2026 window for four named configs (E4_PDPOC_MAGNET, A5_DRIVE_EX_GAP, F2_LD_REV, G3_LD500_CONT_TOP150); none of the 26 here is one of them or a monotone re-parameterisation of one",
+ "basket": "NOT added - the basket forward clock is LOCKED; this is a logged gross-real / net-dead observation, not a candidate leg",
+ "artifacts": {
+  "preregistration": "research/trading_bot/INVENT_0825_opendrive_PREREGISTRATION.md",
+  "shortlist_frozen_before_heldout": "research/trading_bot/INVENT_0825_opendrive_SHORTLIST.md",
+  "report": "research/trading_bot/INVENT_0825_opendrive.md",
+  "code": ["scripts/trading_bot/od0825_sweep.py", "scripts/trading_bot/od0825_diag.py",
+           "scripts/trading_bot/od0825_auction_rail.py"],
+  "panels": ["research/data/im0823_cache/cube.npz", "research/data/auc0822_cache/panel.npz"]
+ }
+}

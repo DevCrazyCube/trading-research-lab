@@ -1,0 +1,63 @@
+{
+ "universe": "MEGA-on-PanelB",
+ "n_names": 34,
+ "missing": [],
+ "rail": "entry 15:49 print, exit CLOSING AUCTION (0bp spread, fee only)",
+ "design": {
+  "gross_sharpe": 1.2318722402811075,
+  "bps_day": 0.5668447068298436,
+  "turnover": 0.9930348258706467,
+  "breakeven_bp_auction_exit": 0.5708205715070068,
+  "net_0.5": -0.49459461758783846,
+  "net_1.0": -1.5736011346116883,
+  "net_2.0": -3.7310499007676214,
+  "n_days": 1005,
+  "n_names_median": null,
+  "window": [
+   "2021-01-04",
+   "2024-12-31"
+  ]
+ },
+ "design_gapfill_p59": {
+  "gross_sharpe": 2.3623434350406103,
+  "bps_day": 0.14463395283158872
+ },
+ "heldout": {
+  "gross_sharpe": 1.4537428001111696,
+  "bps_day": 0.9232921751300978,
+  "turnover": 0.9925925925925926,
+  "breakeven_bp_auction_exit": 0.9301824152430089,
+  "net_0.5": 0.2034628547652477,
+  "net_1.0": -0.5779875454919385,
+  "net_2.0": -2.140751554207029,
+  "n_days": 405,
+  "n_names_median": null,
+  "window": [
+   "2025-01-02",
+   "2026-08-14"
+  ]
+ },
+ "heldout_gapfill_p59": {
+  "gross_sharpe": 1.667851756156217,
+  "bps_day": 0.12133350323168977
+ },
+ "presample": {
+  "gross_sharpe": 2.599242409643319,
+  "bps_day": 1.2782439457348613,
+  "turnover": 0.9436060365369341,
+  "breakeven_bp_auction_exit": 1.3546373128621132,
+  "net_0.5": 1.064934408356095,
+  "net_1.0": 0.10492065644257054,
+  "net_2.0": -1.814683545713781,
+  "n_days": 1259,
+  "n_names_median": null,
+  "window": [
+   "2016-01-04",
+   "2020-12-31"
+  ]
+ },
+ "presample_gapfill_p59": {
+  "gross_sharpe": -0.4211682829035411,
+  "bps_day": -0.046074434567073226
+ }
+}
