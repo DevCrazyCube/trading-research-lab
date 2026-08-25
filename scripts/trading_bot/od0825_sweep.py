@@ -277,6 +277,12 @@ def build_configs(P: PanelA, F: FeatA):
     A("PA_OD30_CD_FADE", "MEGA", -F.r30, 70, "od_to_cd")
     A("PA_GAP_CD_FADE", "MEGA", -F.gapz, 70, "od_to_cd")
 
+    # POST-HOC, NOT ONE OF THE 26.  Added after the design window was read, from the
+    # entry-slot diagnostic.  Flagged posthoc=True; it can be reported but it CANNOT be
+    # promoted and does not enter the best-of-N bar as a candidate.
+    cfgs.append(dict(name="PA_GAP_FADE_ALLDAY", panel="A", universe="MEGA", score=-F.gapz,
+                     s=5, family="od_to_cd_POSTHOC", _P=P, posthoc=True))
+
     # --- Panel B: gap families
     Bc("PB_GAPZ_FADE", "gap")
     Bc("PB_GAPZ_GO", "gap")

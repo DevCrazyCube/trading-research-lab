@@ -1,0 +1,172 @@
+{
+ "PA_GAP_CD_FADE_hold_decomp": {
+  "full_71_77": {
+   "bps_day": 1.443961262702942,
+   "sharpe": 2.3569014662668164
+  },
+  "first_bar_71_72": {
+   "bps_day": 0.024524841457605362,
+   "sharpe": 0.1283374157348889,
+   "pct_of_full": 1.698441743850708
+  },
+  "rest_72_77": {
+   "bps_day": 1.4151146411895752,
+   "sharpe": 2.470878175511576
+  }
+ },
+ "PA_OD30_CD_FADE_hold_decomp": {
+  "full_71_77": {
+   "bps_day": 0.6269693374633789,
+   "sharpe": 0.9776634215340764
+  },
+  "first_bar_71_72": {
+   "bps_day": 0.18758325278759003,
+   "sharpe": 0.9567241989067014,
+   "pct_of_full": 29.91904640197754
+  },
+  "rest_72_77": {
+   "bps_day": 0.42808330059051514,
+   "sharpe": 0.7181520251509204
+  }
+ },
+ "PA_GAP_CD_FADE_entry_slot_profile": {
+  "entry_bar_6": {
+   "gross_sharpe": 1.472981578144211,
+   "bps_day": 3.6890366077423096,
+   "hold_bars": 71
+  },
+  "entry_bar_12": {
+   "gross_sharpe": 1.09748229075177,
+   "bps_day": 2.383486747741699,
+   "hold_bars": 65
+  },
+  "entry_bar_24": {
+   "gross_sharpe": 0.3257783549471886,
+   "bps_day": 0.6123524308204651,
+   "hold_bars": 53
+  },
+  "entry_bar_36": {
+   "gross_sharpe": 1.277006854165098,
+   "bps_day": 1.959505558013916,
+   "hold_bars": 41
+  },
+  "entry_bar_48": {
+   "gross_sharpe": 1.6430649056372273,
+   "bps_day": 2.0311248302459717,
+   "hold_bars": 29
+  },
+  "entry_bar_60": {
+   "gross_sharpe": 2.007858988166484,
+   "bps_day": 1.9951709508895874,
+   "hold_bars": 17
+  },
+  "entry_bar_66": {
+   "gross_sharpe": 2.2335701661195797,
+   "bps_day": 1.782067894935608,
+   "hold_bars": 11
+  },
+  "entry_bar_71": {
+   "gross_sharpe": 2.3569014662668164,
+   "bps_day": 1.443961262702942,
+   "hold_bars": 6
+  },
+  "entry_bar_74": {
+   "gross_sharpe": 2.053888376778749,
+   "bps_day": 0.9646438956260681,
+   "hold_bars": 3
+  },
+  "entry_bar_76": {
+   "gross_sharpe": 0.7587118437848358,
+   "bps_day": 0.19666500389575958,
+   "hold_bars": 1
+  }
+ },
+ "PA_GAP_FADE_open_hold_entry6": {
+  "gross_sharpe": 1.472981578144211,
+  "bps_day": 3.6890366077423096,
+  "net_1.0": 0.6095887791944181,
+  "breakeven_bp": 1.9616305828094482
+ },
+ "PA_GAP_FADE_open_hold_entry12": {
+  "gross_sharpe": 1.09748229075177,
+  "bps_day": 2.383486747741699,
+  "net_1.0": 0.10168334187698773,
+  "breakeven_bp": 1.2674096822738647
+ },
+ "PB_GAPZ_FADE_hold_decomp": {
+  "p49_to_close": {
+   "bps_day": 0.3511595853760322,
+   "sharpe": 0.8453301920180722
+  },
+  "p49_to_p59": {
+   "bps_day": 0.2508642182458483,
+   "sharpe": 0.5978779989770301
+  },
+  "p59_to_close": {
+   "bps_day": 0.10051434783388549,
+   "sharpe": 2.7846399494303458
+  },
+  "p29_to_p49": {
+   "bps_day": 0.1553512324738895,
+   "sharpe": 0.31018910281642764
+  },
+  "pct_of_hold_in_last_10min": 28.62355237327545
+ },
+ "PB_DRIVEZ_FADE_hold_decomp": {
+  "p49_to_close": {
+   "bps_day": 0.09304493283754828,
+   "sharpe": 0.23859075504859747
+  },
+  "p49_to_p59": {
+   "bps_day": -0.10117882791366045,
+   "sharpe": -0.25765360288140177
+  },
+  "p59_to_close": {
+   "bps_day": 0.19451603010870858,
+   "sharpe": 6.410052079464307
+  },
+  "p29_to_p49": {
+   "bps_day": 0.6701722962948367,
+   "sharpe": 1.4423214699831328
+  },
+  "pct_of_hold_in_last_10min": 209.05601646069613
+ },
+ "PB_TOTMOVE_FADE_hold_decomp": {
+  "p49_to_close": {
+   "bps_day": 0.24930616255384233,
+   "sharpe": 0.5970712728980712
+  },
+  "p49_to_p59": {
+   "bps_day": 0.032597870709275806,
+   "sharpe": 0.07744938814819123
+  },
+  "p59_to_close": {
+   "bps_day": 0.21706715237773033,
+   "sharpe": 6.207088430061906
+  },
+  "p29_to_p49": {
+   "bps_day": 0.603758495624008,
+   "sharpe": 1.2097102581816643
+  },
+  "pct_of_hold_in_last_10min": 87.06850651188802
+ },
+ "panelA_vs_panelB_gapfade": {
+  "days_aligned": true,
+  "n": 1005,
+  "corr_daily_pnl": 0.22744483532405443
+ },
+ "PA_GAP_CD_FADE_by_gap_tercile": {
+  "small_gap": {
+   "bps_day": -0.36888787150382996,
+   "sharpe": -0.7093676810364927
+  },
+  "mid_gap": {
+   "bps_day": 0.34160956740379333,
+   "sharpe": 0.5116263120540908
+  },
+  "large_gap": {
+   "bps_day": 1.5430666208267212,
+   "sharpe": 1.7857558195323644
+  }
+ }
+}
