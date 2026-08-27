@@ -1,0 +1,37 @@
+{
+  "bankroll_sol": 10.0,
+  "benchmarks": {
+    "gate": "screen expectancy must beat BOTH zero AND the control null to be interesting",
+    "honest_prior": "~0 or negative; target is positive expectancy, NOT 'double every hour'",
+    "metric": "EXPECTANCY = winrate*avgWinR - lossrate*avgLossR per trade, NET of the ~3% round-trip toll",
+    "null": "control = same sizing/stop/target/exit on a deterministic sample of screen-REJECT coins"
+  },
+  "dead_exit": {
+    "after_minutes": 5.0,
+    "flat_band": 0.08,
+    "max_recent_trades": 1
+  },
+  "frozen_utc": "2026-08-25T12:55:30.349261+00:00",
+  "horizon_minutes": 25,
+  "instrument_id": "MEMEBOT_FAST",
+  "kill_switch": {
+    "N_min": 30,
+    "rule": "HALT if, after n>=N_min resolved PASS trades, mean_R + 1.645*SE < 0 (forward expectancy significantly negative)."
+  },
+  "max_control_per_scan": 3,
+  "max_new_per_scan": 4,
+  "max_open_positions": 6,
+  "position_fraction": 0.02,
+  "preregistration_sha256": "44443a221051096c80751ccaa74e0e886dc1ff21e34b238673e8f1e42705b78c",
+  "screen": {
+    "honeypot_min_buys": 15,
+    "max_buys_per_buyer": 4.0,
+    "max_pool_age_minutes": 30.0,
+    "min_fdv_usd": 7000.0,
+    "min_reserve_usd": 3000.0,
+    "min_unique_buyers": 10
+  },
+  "stop_frac": 0.25,
+  "target_frac": 0.5,
+  "toll_per_side": 0.015
+}

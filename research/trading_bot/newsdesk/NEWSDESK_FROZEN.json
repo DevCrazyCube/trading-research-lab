@@ -1,0 +1,76 @@
+{
+  "benchmarks": [
+    "zero",
+    "random_direction_same_instrument_null"
+  ],
+  "crypto_universe": {
+    "avalanche-2": "AVAX",
+    "bitcoin": "BTC",
+    "cardano": "ADA",
+    "chainlink": "LINK",
+    "dogecoin": "DOGE",
+    "ethereum": "ETH",
+    "ripple": "XRP",
+    "solana": "SOL"
+  },
+  "equity_watchlist": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "AMZN",
+    "GOOGL",
+    "META",
+    "TSLA",
+    "AMD",
+    "NFLX",
+    "JPM",
+    "XOM",
+    "AVGO",
+    "COST",
+    "BA",
+    "DIS"
+  ],
+  "framing": "Agent-driven read-the-world forward paper LOGGER. No orders, no real money, no account. An LLM agent reads free live news and commits falsifiable 2:1-asymmetric trades BEFORE the move; realised R-multiples are the only evidence. The honest prior is that news is priced in within seconds and the expectancy is ~0 or negative.",
+  "frozen_utc": "2026-08-23T00:00:00Z",
+  "host_allowlist": [
+    "www.sec.gov",
+    "efts.sec.gov",
+    "feeds.finance.yahoo.com",
+    "query1.finance.yahoo.com",
+    "query2.finance.yahoo.com",
+    "news.google.com",
+    "api.coingecko.com"
+  ],
+  "instrument_id": "NEWSDESK1",
+  "kill_switch": {
+    "N_min": 30,
+    "rule": "after n>=N_min resolved setups, HALT if mean_R + 1.645*se < 0"
+  },
+  "notional_account_usd": 100000.0,
+  "preregistration_sha256": "89a6b74df6f46b8e48ff92e0768696ba643f4e4ddedd8b8f628a45a43f43aa89",
+  "rules": {
+    "adverse_tie_break": "stop",
+    "allowed_asset_classes": [
+      "equity",
+      "crypto"
+    ],
+    "entry_model": "reference_price_at_freeze",
+    "horizon_hours_max": 240,
+    "horizon_hours_min": 1,
+    "max_account_risk_pct": 1.0,
+    "max_concurrent_open": 5,
+    "min_reward_to_risk": 2.0
+  },
+  "sources": {
+    "coingecko_market_chart": "https://api.coingecko.com/api/v3/coins/{id}/market_chart/range",
+    "coingecko_trending": "https://api.coingecko.com/api/v3/search/trending",
+    "google_news_rss": "https://news.google.com/rss/search?q={query}",
+    "sec_edgar_fts": "https://efts.sec.gov/LATEST/search-index",
+    "sec_edgar_latest": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&output=atom",
+    "yahoo_chart": "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
+    "yahoo_headline_rss": "https://feeds.finance.yahoo.com/rss/2.0/headline?s={ticker}"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "benchmarks": [
+    "the_market_itself_agent_brier_must_beat_market_brier",
+    "calibration_curve_predicted_vs_realized_frequency"
+  ],
+  "cost_model": {
+    "kalshi_fee_coeff": 0.07,
+    "kalshi_fee_formula": "per contract per side = ceil(coeff*p*(1-p)*100)/100; round trip ~= 2 sides + half-spread",
+    "polymarket_fee": 0.0,
+    "notes": "half-spread is measured per market from the live book (ask-bid)/2; the edge floor is fee+half-spread"
+  },
+  "categories_concentrated_on": [
+    "politics",
+    "policy",
+    "soft-news",
+    "elections",
+    "world/geopolitics"
+  ],
+  "categories_skipped_efficient": [
+    "macro-print (CPI/Fed/jobs/GDP/PCE)",
+    "crypto price-threshold"
+  ],
+  "framing": "Agent-driven prediction-market forward CALIBRATION tracker. No bets, no real money, no account, no wallet. An LLM agent reads OPEN politics/policy/soft-news markets and commits its OWN probability q_agent (sha256+UTC) BEFORE resolution; p_market is recorded at the same instant. PRIMARY metric: is the agent's Brier score BETTER than the market's after N_min=50 resolved markets? Hypothetical bet-expectancy net of the fee/spread wall is a noisy secondary. Honest prior: roughly calibration-competitive but not decisively better; expectancy near zero by fees.",
+  "frozen_utc": "2026-08-23T00:00:00Z",
+  "host_allowlist": [
+    "api.elections.kalshi.com",
+    "gamma-api.polymarket.com",
+    "clob.polymarket.com"
+  ],
+  "forbidden_hosts": [
+    "trading-api.kalshi.com",
+    "demo-api.kalshi.com"
+  ],
+  "instrument_id": "PREDMARKET1",
+  "kill_switch": {
+    "N_min": 50,
+    "rule": "after n>=N_min resolved markets, HALT if the agent's mean Brier is NOT significantly below the market's at one-sided 95%: mean(brier_market - brier_agent) - 1.645*se <= 0"
+  },
+  "preregistration_sha256": "98acac4a1acbcfe8d61feaab033e43e2decd578fb17d08e7e24175e28d2b7929",
+  "primary_metric": "calibration: agent Brier vs market Brier (paired, one-sided 95%)",
+  "rules": {
+    "forward_only": "market close/resolution date must be strictly in the future; the proposer is never run on a resolved market",
+    "probability_range": "q_agent and p_market strictly in (0,1)",
+    "edge_floor": "a hypothetical bet is logged only where |q_agent - p_market| > round_trip_cost(venue,p); otherwise side=abstain (frozen for calibration only)",
+    "thesis_min_chars": 40,
+    "abstention": "default; a no-edge or sub-cost read bets nothing but is still frozen for calibration",
+    "settlement": "official venue result only, strictly later than the freeze; PENDING until definite"
+  },
+  "sources": {
+    "kalshi_events": "https://api.elections.kalshi.com/trade-api/v2/events?status=open&with_nested_markets=true",
+    "kalshi_market": "https://api.elections.kalshi.com/trade-api/v2/markets/{ticker}",
+    "polymarket_events": "https://gamma-api.polymarket.com/events?closed=false&tag_slug={tag}",
+    "polymarket_market": "https://gamma-api.polymarket.com/markets/{id}",
+    "polymarket_clob": "https://clob.polymarket.com"
+  },
+  "venues": [
+    "kalshi",
+    "polymarket"
+  ]
+}

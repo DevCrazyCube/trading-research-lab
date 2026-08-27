@@ -1,0 +1,43 @@
+{
+  "bankroll_sol": 10.0,
+  "benchmarks": {
+    "gate": "full-loss-stressed PASS expectancy must beat zero and the in-scope Pump control",
+    "honest_prior": "negative; demonstrated sellers and speed may reduce rugs but do not imply alpha",
+    "metric": "closed-PASS paper bankroll, UNEXITABLE_TIMEOUT rate, and expectancy net of toll with unavailable exits at full loss",
+    "null": "same paper execution on a deterministic sample of in-scope Pump.fun coins rejected by another screen rule"
+  },
+  "dead_exit": {
+    "after_minutes": 5.0,
+    "flat_band": 0.08,
+    "max_recent_trades": 1
+  },
+  "frozen_utc": "2026-08-27T09:55:05+00:00",
+  "gap_fill_mode": "worse_observed",
+  "horizon_minutes": 8,
+  "instrument_id": "MEMEBOT_EXIT_V2",
+  "kill_switch": {
+    "N_min": 30,
+    "rule": "HALT if, after n>=N_min terminal PASS trades, stressed mean_R + 1.645*SE < 0."
+  },
+  "max_control_per_scan": 3,
+  "max_new_per_scan": 4,
+  "max_open_positions": 6,
+  "position_fraction": 0.02,
+  "preregistration_sha256": "8ffeeb2c250b7fa3c7a8276cfe2263f7a65c682a3d3495d93c51cf7341ae3e96",
+  "screen": {
+    "allowed_dexes": [
+      "pump-fun"
+    ],
+    "honeypot_min_buys": 15,
+    "max_buys_per_buyer": 4.0,
+    "max_pool_age_minutes": 30.0,
+    "min_fdv_usd": 7000.0,
+    "min_reserve_usd": 3000.0,
+    "min_sellers": 3,
+    "min_unique_buyers": 10
+  },
+  "stop_frac": 0.25,
+  "target_frac": 0.5,
+  "toll_per_side": 0.015,
+  "unexitable_loss_frac": 1.0
+}

@@ -1,0 +1,14 @@
+{
+  "instrument_id": "MEMEBOT_EVO_V2",
+  "frozen_utc": "2026-08-27T11:39:00.000000+00:00",
+  "preregistration_sha256": "7175b655af987d2d4cfdba46c14136930f4dcb6574a2116f2dd5df3613e441e4",
+  "constants": {
+    "N_MIN_EVAL": 20,
+    "MIN_MATURE_FOR_SELECTION": 3,
+    "MIN_SURVIVORS": 3,
+    "MIN_CHILDREN_PER_GEN": 4,
+    "POP_CEILING": 60,
+    "FITNESS_VERSION": 2
+  },
+  "note": "constants MIRROR the running engine.py; frozen.py asserts each engine constant equals these (drift check)"
+}

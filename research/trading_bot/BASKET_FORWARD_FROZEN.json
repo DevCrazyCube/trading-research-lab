@@ -1,0 +1,1268 @@
+{
+  "schema_version": 1,
+  "preregistration": "research/trading_bot/BASKET_FORWARD_PREREGISTRATION.md",
+  "preregistration_sha256": "fdf3730488953c1cb8cc7afbe00714375fcf2b49e59d77b7269427fc3bda4cde",
+  "frozen_utc": "2026-08-20T16:20:00+00:00",
+  "basket_id": "BASKET1",
+  "family": "imperfect-edge basket (positive-but-unproven Pile B)",
+  "note": "The machine-readable freeze. The runner (scripts/trading_bot/basket_forward.py) verifies preregistration_sha256 against the .md on every run and REFUSES if it moved. A forward row is never logged for a session dated before frozen_utc's date. This is a LOGGER: it places NO orders, holds NO position, touches only the read-only market-data host.",
+  "instrument_note": "All P&L is hypothetical mark-to-market. NOT a validated money-maker. Realised-Sharpe prior is ~0.3-0.6 and could be zero; every backtested number is a selection-inflated upper bound.",
+  "vol_overlay": {
+    "rule_id": "T13-VOL-L60-T0.1-WMAX1.0",
+    "symbol": "SPY",
+    "L": 60,
+    "target": 0.1,
+    "wmax": 1.0,
+    "timing_convention": "T13-L1: exposure for session t uses SPY closes through t-2",
+    "source": "research/trading_bot/T13_FROZEN_CONFIG.json; consumed from scripts.t13_risk_shaping.vol_exposure, cross-checked against an independent recomputation each run",
+    "removed_from_combined_book_v9": true,
+    "removal_note": "REMOVED from the combined book at v9 (INVENT_0822C_MASTER.md N1). The T13 SPY vol overlay COSTS Sharpe on the dollar-neutral book in every window on every panel (dSharpe held-out -0.031/-0.215/-0.189, full-window -0.050/-0.313/-0.308). T13 was validated on a LONG-SPY book; the basket legs are dollar-neutral so SPY vol is uninformative about them, and wmax=1.0 makes it a one-sided drag. The combined book is now unlevered (effective w_vol = 1.0). The overlay weight is still COMPUTED and logged as a non-applied reference (w_vol_overlay_reference) so the forward record carries the book WITH and WITHOUT the overlay; only WITHOUT is deployed."
+  },
+  "benchmark": {
+    "definition": "by-year T-bills (FRED DTB3), compounded daily on the whole book",
+    "hurdle_to_count_pp_per_year": 1.0,
+    "source": "T23/T25 bar: an unlevered market-neutral book must beat T-bills + 1.00 pp/yr"
+  },
+  "combined_gate": {
+    "read_only_after_minimum": true,
+    "t_threshold": 2.8,
+    "dsr_threshold": 0.95,
+    "declared_trials_now": 8,
+    "declared_trials_note": "= number of legs ever stood up in this basket family (8 = L1-L6 + L7 XS_GLSR_Z + L9 CEFMUNIEQ; the unsized XS_SMART sibling is the same hypothesis as L7 and is logged but not separately counted). Demoting a leg to UNSIZED does NOT remove it from this count -- killed/retired/demoted legs keep counting forever, raising the DSR bar. As of v5 the SIZED legs are L1-L6 (six); L7 and L9 are logged UNSIZED, and both still count here. Per-leg DSR accounting: L7 XS_GLSR_Z carries 380 declared trials in its own family (the full cross-theme sweep); L9 CEFMUNIEQ carries 132 (the DEEPMINE CEF-family formula count that defines its conservative sqrt(2 ln 132)=3.125 bar). v7 (2026-08-21): two ADDITIVE UNSIZED band-variant loggers were stood up -- L10 ETFRV_Z20 (L2's |z|>=2.0 entry band) and L11 DUALCLASS_EXIT10 (L3's exit |z|~1.0). Both carry ZERO risk budget and never touch the combined book. Like the XS_SMART sibling of L7, each is the SAME hypothesis as its parent sized leg (L2 / L3) at a different band, so it is LOGGED and kill-switched forward but NOT separately added to declared_trials_now (stays 8); each carries its own per-leg declared_trials_in_leg_family (5 and 18) for its own DSR. v9 (2026-08-22): L2 ETFRV and L4 T7 were DE-SIZED to UNSIZED (0.0) -- a demotion does NOT remove a leg from declared_trials_now, which STAYS 8; the DSR bar does not shrink. The SIZED sleeve is now the four legs L1 T3, L3 DUALCLASS, L5 T12CEF, L6 ORB at 1/4 each (risk_budgets_active_v11)."
+  },
+  "minimum_before_verdict": {
+    "per_leg_settled_observations": 40,
+    "combined_settled_sessions": 252
+  },
+  "kill_switch": {
+    "N_min": 40,
+    "rule": "drop leg when, after n>=N_min settled observations, mean_net + 1.645*se < 0 (one-sided upper 95% CB below zero, i.e. per-obs t < -1.645)",
+    "verdict_on_fire": "DEAD -- significantly negative forward",
+    "budget_reallocation": "NONE -- a killed leg's risk budget is not reallocated to survivors (that would be a search on a forward outcome)",
+    "secondary_retirement": {
+      "N_max": 500,
+      "rule": "a leg that has never reached net t>2.80 after N_max settled observations is retired UNPROVEN -- did not certify"
+    }
+  },
+  "legs": [
+    {
+      "slot": "L1",
+      "id": "T3",
+      "name": "end-of-day cross-sectional pressure reversal (anchor)",
+      "family": "overnight cross-sectional reversal",
+      "horizon": "overnight",
+      "status": "ACTIVE",
+      "risk_budget_fraction_active": 0.5,
+      "risk_budget_fraction_full_basket": 0.3333333333333333,
+      "declared_trials_in_leg_family": 8,
+      "universe": {
+        "kind": "top_adv_us_common",
+        "top_n": 300,
+        "price_min": 5.0,
+        "adv_min_usd": 20000000.0,
+        "screen": "point-in-time monthly: month m trades the set ranked by month m-1 raw dollar ADV; identical to scripts/t3_pressure_reversal.build_universe(300)"
+      },
+      "signal": {
+        "r10": "P(15:59)/P(15:49)-1",
+        "cut": 0.1,
+        "long": "cut most-negative r10 (fade by buying)",
+        "short": "cut most-positive r10 (fade by selling)",
+        "weight": "dollar-neutral 50/50, equal within decile",
+        "min_names": 100
+      },
+      "execution": {
+        "entry": "marketable ~15:59, pays 1 quoted half-spread",
+        "exit": "next opening auction (MOO) at official print po"
+      },
+      "cost_bp": {
+        "entry_half_spread": 1.43,
+        "exit_auction": 0.0,
+        "regulatory_round_trip": 0.31,
+        "borrow_annual_bp_on_short": 30.0,
+        "short_fraction": 0.5
+      },
+      "exclusions": [
+        "corporate action on the exit date",
+        "night with <100 surviving names",
+        "missing 15:49/15:59 minute or next-open auction print"
+      ],
+      "prior_verdict": "ALIVE for a small forward test: net +5.04 bp/night, t +2.57, OOS Sharpe 1.21, bootstrap P(mean<=0)=0.46%, permutation p=0.0001. Killed only on DSR 0.917<0.95 (certainty miss)."
+    },
+    {
+      "slot": "L2",
+      "id": "ETFRV",
+      "name": "ETF-sibling relative value (Arm B)",
+      "family": "identical-claim market-neutral RV",
+      "horizon": "intraday",
+      "status": "ACTIVE_UNSIZED",
+      "risk_budget_fraction_active": 0.0,
+      "risk_budget_fraction_full_basket": 0.0,
+      "declared_trials_in_leg_family": 2,
+      "pairs": [
+        [
+          "IVV",
+          "SPY"
+        ],
+        [
+          "VOO",
+          "SPY"
+        ],
+        [
+          "QQQM",
+          "QQQ"
+        ],
+        [
+          "VTWO",
+          "IWM"
+        ],
+        [
+          "IJH",
+          "MDY"
+        ]
+      ],
+      "index_factors": 4,
+      "signal": {
+        "spread": "s_t = ln(P_A/P_B) at 15:45",
+        "z": "(s_t - mean_60)/sd_60 over trailing 60 sessions ending t-1",
+        "trigger_abs_z": 1.5,
+        "position": "fade: sign(-z), long cheap wrapper / short rich, dollar-neutral within pair"
+      },
+      "execution": {
+        "entry": "15:45 continuous, cross each leg half-spread",
+        "exit": "same-session 16:00 closing print (single-price cross)"
+      },
+      "cost_bp": {
+        "entry_half_spread_by_symbol": {
+          "SPY": 0.13,
+          "IVV": 0.35,
+          "VOO": 0.35,
+          "QQQ": 0.15,
+          "QQQM": 0.5,
+          "IWM": 0.2,
+          "VTWO": 0.5,
+          "MDY": 0.4,
+          "IJH": 0.4
+        },
+        "exit_auction": 0.0,
+        "sec31_bp_on_sold": 0.278
+      },
+      "exclusions": [
+        "pair-session within +/-1 session of either leg ex-distribution date"
+      ],
+      "prior_verdict": "DE-SIZED to UNSIZED at v9 (E1). Shared-price 15:45-signal/15:45-fill artefact: all 5 pairs fail rho1 (< -0.44), and moving the fill to 15:50 collapses gross t 17.95 -> 1.05 and net SR 0.74 -> -8.0. Standalone net t was only +1.41 anyway. Logged forward, zero budget; re-spec on a 15:50 fill before any resize. Not run OOS. Expected gross 1.7-2.2 bp/pair-session, net 1.0-1.5 bp, market-neutral. Expected to die on its own gate ~70%.",
+      "logged_unsized": true,
+      "guard_mandatory": {
+        "name": "UNSIZED (v9) -- zero risk budget: 15:45 shared-price artefact, re-spec on a 15:50 fill",
+        "rule": "DE-SIZED from the v1 sized leg (0.5 active / 1/6 deployed) to logging-only (0.0) at the v9 corrective freeze (INVENT_0822C_MASTER.md E1). All five pairs FAIL the rho1(ds) bounce gate (-0.503/-0.463/-0.457/-0.441/-0.491 vs the -0.35 bar). The frozen spec computes z from the 15:45 print and FILLS AT THAT SAME 15:45 print (R3 shared-price failure). Moving the fill to 15:50: GROSS +1.295 bp (t 17.95) -> +0.076 bp (t 1.05); NET +0.10 bp / SR 0.74 -> -1.12 bp / t -15.4 / SR -8.0. The gross t of 17.95 clears any multiple-testing correction and is still entirely fake -- the gross bar is necessary but not sufficient. It keeps LOGGING forward and accrues its kill-switch stream, but carries NO risk budget and never touches the combined book; it must be re-spec'd on a 15:50 fill before any resize. Its signal/execution spec is UNCHANGED; only status and sizing move.",
+        "risk_budget_fraction_active": 0.0,
+        "respec_required": "move the fill from the 15:45 signal print to a 15:50 continuous print"
+      }
+    },
+    {
+      "slot": "L3",
+      "id": "DUALCLASS",
+      "name": "dual-class voting-premium relative value (two-timescale z-fade)",
+      "family": "identical-claim market-neutral RV",
+      "horizon": "multi-day (mean hold ~16 trading days, max 20)",
+      "status": "ACTIVE",
+      "freeze_utc": "2026-08-20T20:00:00+00:00",
+      "risk_budget_fraction_active": 0.13,
+      "declared_trials_in_leg_family": 18,
+      "pairs": [
+        [
+          "GOOGL",
+          "GOOG"
+        ],
+        [
+          "FOXA",
+          "FOX"
+        ],
+        [
+          "NWSA",
+          "NWS"
+        ],
+        [
+          "UAA",
+          "UA"
+        ],
+        [
+          "HEI",
+          "HEI.A"
+        ],
+        [
+          "CWEN",
+          "CWEN.A"
+        ],
+        [
+          "LGF.A",
+          "LGF.B"
+        ],
+        [
+          "CENTA",
+          "CENT"
+        ],
+        [
+          "LBRDA",
+          "LBRDK"
+        ],
+        [
+          "LSXMA",
+          "LSXMK"
+        ],
+        [
+          "FWONA",
+          "FWONK"
+        ],
+        [
+          "Z",
+          "ZG"
+        ],
+        [
+          "DISCA",
+          "DISCK"
+        ],
+        [
+          "PBR",
+          "PBR.A"
+        ],
+        [
+          "LILA",
+          "LILAK"
+        ]
+      ],
+      "signal": {
+        "spread": "s_t = ln(P_A_raw / P_B_raw) on RAW (unadjusted) daily closes",
+        "z": "(s_t - mean_L)/pstdev_L over trailing L raw-close log-spreads (population sd)",
+        "L": 250,
+        "K_entry_abs_z": 2.0,
+        "exit_abs_z": 0.5,
+        "max_hold_days": 20,
+        "min_dollar_volume": 1000000.0,
+        "min_price": 2.0,
+        "structural_break_reset_abs_log_jump": 0.15,
+        "position": "sgn=-1 if z>0 (rich A: SHORT A / LONG B); sgn=+1 if z<0 (cheap A: LONG A / SHORT B); dollar-neutral $1 per leg; P&L on ADJUSTED closes",
+        "observation": "one completed round-trip (entry->exit) = one settled observation"
+      },
+      "execution": {
+        "rail": "Alpaca SIP daily bars, close-to-close; MOC/MOO on paper account",
+        "signal_series": "raw (unadjusted) closes",
+        "pnl_series": "split/dividend-adjusted closes"
+      },
+      "cost_bp": {
+        "half_spread_by_symbol": {
+          "GOOGL": 0.42,
+          "GOOG": 0.52,
+          "FOXA": 1.54,
+          "FOX": 1.73,
+          "NWSA": 1.93,
+          "NWS": 1.83,
+          "UAA": 6.98,
+          "UA": 7.71,
+          "HEI": 4.84,
+          "HEI.A": 6.76,
+          "CWEN": 2.33,
+          "CWEN.A": 3.62,
+          "LGF.A": 5.58,
+          "LGF.B": 5.98,
+          "CENTA": 6.69,
+          "CENT": 9.66,
+          "LBRDA": 5.98,
+          "LBRDK": 3.1,
+          "LSXMA": 1.89,
+          "LSXMK": 1.66,
+          "FWONA": 8.42,
+          "FWONK": 3.03,
+          "Z": 1.51,
+          "ZG": 3.37,
+          "PBR": 3.44,
+          "PBR.A": 3.78,
+          "LILA": 6.34,
+          "LILAK": 6.33
+        },
+        "cost_formula": "2*(hs_A+hs_B) + 2*0.278 (SEC s31 per sale) + borrow*(hold_days/252), bp",
+        "sec31_bp_per_sale": 0.278,
+        "borrow_annual_bp_on_short": 33.0
+      },
+      "guard_mandatory": {
+        "name": "easy-to-borrow short-leg screen",
+        "rule": "a round-trip whose SHORT leg is NOT easy-to-borrow is DROPPED (never taken). At HTB rates (~1028 bp/yr) this edge is -45 bp; the frozen spec excludes HTB names by construction.",
+        "etb_whitelist": [
+          "GOOGL",
+          "GOOG",
+          "FOXA",
+          "FOX",
+          "NWSA",
+          "NWS",
+          "UAA",
+          "UA",
+          "HEI",
+          "HEI.A",
+          "CWEN",
+          "CENTA",
+          "CENT",
+          "LBRDA",
+          "LBRDK",
+          "FWONA",
+          "FWONK",
+          "Z",
+          "ZG",
+          "PBR",
+          "PBR.A",
+          "LILA",
+          "LILAK"
+        ],
+        "etb_source": "Alpaca /v2/assets easy_to_borrow snapshot frozen at research/data/t28_dualclass_cache/etb_flags_frozen.json (2026-08-20); an executability bound applied forward, not a historical screen"
+      },
+      "asof": "close(t) signal strictly precedes close(t+h) mark; z window ends at the entry/exit bar",
+      "prior_verdict": "v9: sized on the honest GAP-1 rung ~23.73 bp/round-trip (t 3.59), NOT the 50.09 bp same-close headline (half was bounce); BRK.A/BRK.B dropped (rho1 -0.459). held-out liquid 16-subset RAW +18.36 bp/round-trip, t=2.13, n=201, book Sharpe 0.99, bootstrap P(mean<=0)=1.75%. ETB-screened (frozen guard) +12.68 bp, t=1.31, n=165 on the same cached held-out window (both selection-inflated upper bounds; 4.2x design->heldout shrinkage).",
+      "spec_sha256": "1e9834e3c02880ad51ba5fa3d02ef241d1f9bb79256276789633df8b630d75f9",
+      "forward_kill_expectation": {
+        "note": "v9 (E2): the honest forward expectation is the GAP-1 rung ~23.73 bp/round-trip (t 3.59), NOT the 50.09 bp (t 6.54) headline -- half of the headline was same-close bounce (the one-day-gap re-entry test: 50.09 -> 23.73 at gap 1, 19.97 at gap 2). BRK.A/BRK.B was REMOVED from the universe (fails rho1 -0.459; 15 of the other 16 pairs pass). The forward kill-switch judges L3 against this ~23.73 bp gap-1 expectation, so it is not flagged as underperforming a 50.09 bp spec it never honestly had. The kill rule itself (drop at upper-95% < 0 after N_min=40) is unchanged.",
+        "honest_expectation_bp_per_round_trip": 23.73,
+        "honest_expectation_t": 3.59,
+        "headline_bp_rejected": 50.09,
+        "brk_removed_rho1": -0.459
+      }
+    },
+    {
+      "slot": "L4",
+      "id": "T7",
+      "name": "ex-open dividend residual (cum-close -> ex-date opening auction)",
+      "family": "ex-dividend overnight event",
+      "horizon": "overnight (cum-close(t) -> ex-open(t+1))",
+      "status": "ACTIVE_UNSIZED",
+      "freeze_utc": "2026-08-20T20:00:00+00:00",
+      "risk_budget_fraction_active": 0.0,
+      "risk_budget_shared_with": "L1 (overnight source; half diversification credit -- satellite, not an anchor)",
+      "declared_trials_in_leg_family": 9,
+      "universe": {
+        "kind": "top_adv_us_common",
+        "top_n": 500,
+        "price_min": 5.0,
+        "adv_min_usd": 20000000.0,
+        "include_special": true,
+        "max_yield": 0.2,
+        "screen": "point-in-time monthly top-500 ADV (scripts.t3_pressure_reversal.build_universe(500)); a name must be eligible in BOTH the cum-month and ex-month"
+      },
+      "signal": {
+        "event": "cash dividend; ex_date from /v1/corporate-actions; cum-day = trading session immediately before ex_date",
+        "per_event_return": "(ex_open_auction - cum_close_auction + rate)/cum_close_auction, long the ex-div name",
+        "portfolio": "g = 0.5*mean(event_returns) - 0.5*r_spy ; r_spy = SPY(ex_open)/SPY(cum_close) - 1 (50% short SPY hedge, dollar-neutral)",
+        "control_watch": "0.5*mean(non-ex-div universe cum-close->ex-open) - 0.5*r_spy (differencing series, watched not traded)",
+        "exclusions": [
+          "other corporate action on cum or ex date",
+          "SPY itself ex-div on cum or ex",
+          "early close on cum or ex",
+          "missing/non-positive auction print",
+          "rate/cum_close > 0.20 (partial liquidation)"
+        ],
+        "observation": "one ex-date event-day portfolio return = one settled observation"
+      },
+      "execution": {
+        "entry": "MOC on cum-day (type=market, tif=cls, before 15:50 ET cutoff; no intraday signal so the cutoff costs nothing)",
+        "exit": "MOO on ex-date (type=market, tif=opg)",
+        "rail": "M0-verified single-price auction, hs=0 (99.96% open-print coverage top-500-ADV)"
+      },
+      "cost_bp": {
+        "entry_half_spread": 0.0,
+        "exit_auction": 0.0,
+        "sec31_bp_on_sold": 0.278,
+        "taf_micros_per_share": 166.0,
+        "borrow_annual_bp_on_spy_short": 33.0,
+        "short_fraction": 0.5,
+        "cost_formula": "SEC31*1.0 + TAF*0.5*(mean(1/p_cum)+mean(1/p_exopen)) + TAF/spy_price + 0.5*borrow*gap_days/365.25"
+      },
+      "guard_mandatory": {
+        "name": "UNSIZED (v9) -- zero risk budget: held-out edge was doubled-dividend inflation",
+        "rule": "DE-SIZED from the v2 satellite (0.07) to logging-only (0.0) at the v9 corrective freeze (INVENT_0822C_MASTER.md 3.1). The frozen prior (+3.347 bp/event-day, t 2.96, n 1018) was reproduced VERBATIM on the corrupted t7 dividend cache; re-run on the DEDUPLICATED cache with the identical t7_d1_net_reassess machinery it COLLAPSES to net +0.90 bp/event-day (t 0.81), gross t 3.29 -> 1.14, net-minus-control +0.81 bp (t 0.73), DSR@8 0.855 -> 0.139, and NEGATIVE (-1.96 bp, t -1.77) at a real half-spread rung. Only 440 of 6239 events (~7%) changed rate, yet they carried the entire edge -- the doubled dividend on ~8% of ex-dates was fully load-bearing. Fails 'still positive, t meaningfully > 0 net of cost'. It keeps LOGGING forward and accrues its kill-switch stream, but carries NO risk budget and never touches the combined book. Signal/execution spec UNCHANGED; only status and sizing move. The satellite guard below is retained for the record.",
+        "risk_budget_fraction_active": 0.0,
+        "clean_cache_heldout_net_bp_per_event_day": 0.9,
+        "clean_cache_heldout_t": 0.81,
+        "superseded_satellite_guard": {
+          "name": "satellite risk budget",
+          "rule": "size SMALL (capacity ~$100k-$600k of book; ~6 names/night); it SHARES T3's overnight session factor, so it is risk-budgeted as a satellite (0.07), never a second anchor. Taxable-account IRC 1211(b) problem noted (irrelevant to a paper forward test)."
+        }
+      },
+      "asof": "cum-close(t) signal strictly precedes ex-open(t+1) mark; enforced by _assert_asof",
+      "prior_verdict": "DE-SIZED to UNSIZED at v9: the frozen +3.347 bp / t 2.96 held-out prior was an artefact of 26,701 duplicated dividend records (doubled rate on ~8% of ex-dates). On the deduplicated cache: net +0.90 bp/event-day, t 0.81 (gross t 1.14), NEGATIVE at any real half-spread. Logged forward, zero budget. held-out (2022-2026, NOT out of sample -- window already looked at) +3.347 bp/event-day NET, t=2.96, ann Sharpe 1.38, n=1018; net-minus-control +3.263 bp, t=2.86; positive in BOTH halves (design +2.25 bp, t=2.99). Full measured half-spread on all four legs -> +0.487 bp, t=0.43 (stress). Selection-inflated; the forward log is the arbiter.",
+      "spec_sha256": "fc1238078ef7dc47d816b2e536f5dd1b6643168af47382a5a67673909d1c984e",
+      "logged_unsized": true
+    },
+    {
+      "slot": "L5",
+      "id": "T12CEF",
+      "name": "closed-end-fund discount-LEVEL tilt (borrowable-short, H=4)",
+      "family": "closed-end-fund discount convergence",
+      "horizon": "4-week hold, weekly rebalanced (overlapping tranches)",
+      "status": "ACTIVE",
+      "freeze_utc": "2026-08-20T20:00:00+00:00",
+      "risk_budget_fraction_active": 0.3,
+      "declared_trials_in_leg_family": 6,
+      "universe": {
+        "source": "CEFConnect /api/v3/DailyPricing (free, keyless; ~360 live CEFs)",
+        "price_min": 5.0,
+        "borrowable_short_screen": "short leg restricted to Alpaca easy_to_borrow=true (borrowable), frozen at research/data/t12_cache/alpaca_assets.json.gz (2026 snapshot applied forward; executability bound, not a clean backtest)",
+        "live_only_caveat": "CEFConnect serves only funds alive today; survivorship runs plausibly CONSERVATIVE (liquidations/open-endings pay near NAV), recorded not smoothed over"
+      },
+      "signal": {
+        "measure": "weekly discount level = CEFConnect Discount field (price vs NAV, %, negative=discount)",
+        "rank": "sort borrowable price>$5 CEFs by Discount ascending (most negative = widest discount first)",
+        "long": "~36 widest-discount names (equal-weight)",
+        "short": "~36 narrowest/premium borrowable names (equal-weight)",
+        "n_side": 36,
+        "hold_weeks": 4,
+        "rebalance": "weekly; overlapping tranches, 1/hold_weeks weight each; a name entered is held 4 weekly rebalances",
+        "dollar_neutral": true,
+        "point_in_time_nav": "the discount/NAV is used ONLY to form the entry signal from the as-of snapshot; it is NEVER used to mark. Marking is realised market Price only. No lookahead on NAV.",
+        "observation": "one weekly rebalance's realised net portfolio return over the tranche completing its 4-week hold = one settled observation"
+      },
+      "execution": {
+        "rail": "Alpaca equities; marking on the fund market Price (CEFConnect snapshot Price, EOD)",
+        "cadence": "weekly discount snapshot -- ONE keyless GET; inline-safe (not a crawl)"
+      },
+      "cost_bp": {
+        "half_spread_bp": 11.53,
+        "half_spread_source": "T12 measured median CEF half-spread (research/data/t12_cache/cef_half_spread.json.gz)",
+        "cost_formula": "half_spread charged both sides on realised turnover + borrow(realised)*hold + SEC31 on sold",
+        "sec31_bp_on_sold": 0.278
+      },
+      "guard_mandatory": {
+        "name": "realised short-borrow rate, not the ETB floor",
+        "rule": "borrow on the short leg is charged at a REALISED short rate of 200 bp/yr (NOT the 33 bp ETB floor). Borrowable-short screen keeps names executable; a genuinely HTB premium-CEF short would cost 1-3 bp/wk more and such names are excluded by the easy_to_borrow screen.",
+        "borrow_annual_bp_on_short_realised": 200.0,
+        "capacity": "SIZE-capped to low single-digit $M (CEF closing auctions clear $0.0-0.3M)"
+      },
+      "asof": "entry discount snapshot (week w) strictly precedes the marking prices (weeks w..w+4)",
+      "prior_verdict": "held-out (2024-03..2026-08, 116 wks) +13.44 bp/week NET, t=3.51, ann Sharpe 2.35; DSR 0.9971 at 6 declared trials (already deflated, above 0.95); permutation p=0.0005; block-bootstrap P(>0)=0.9999 over 29 independent rebalances; disjoint design 2021-2024 +13.85 bp/wk, t=3.11. Honest realised prior after survivorship+PIT-NAV+borrow haircuts ~1.0-1.5 Sharpe. Most diversifying leg available.",
+      "spec_sha256": "c60ceb57b8e0eec92c3c6dd056c00048b175a24cb782d384282052f851522687"
+    },
+    {
+      "slot": "L6",
+      "id": "ORB",
+      "name": "opening-range breakout, no intraday stop, exit MOC (residual)",
+      "family": "intraday directional US equity (session diversifier)",
+      "horizon": "intraday (09:35 breakout -> 16:00 MOC, same session)",
+      "status": "ACTIVE",
+      "freeze_utc": "2026-08-20T20:00:00+00:00",
+      "risk_budget_fraction_active": 0.05,
+      "declared_trials_in_leg_family": 16,
+      "universe": {
+        "base_screen": "point-in-time at 09:30: raw open>=$5.00, 14-session avg share volume>=1,000,000, ATR(14 ending d-1)>=$0.50 (t17_screen)",
+        "selection": "candidates with relvol_pct>=100 and a non-doji opening candle, sorted by (-relvol_pct, symbol), TOP 20 ('Stocks in Play')"
+      },
+      "signal": {
+        "opening_range": "single [09:30,09:35) ET 5-minute bar; OR_high=bar.h, OR_low=bar.l",
+        "relvol_pct": "today opening-5min volume as integer % of that stock's trailing-14-session average opening-5min volume; requires >=10 of 14 prior obs",
+        "relvol_threshold_frozen": 100,
+        "top_n": 20,
+        "conditioning_note": "FROZEN UNCONDITIONAL book (base screen + relvol>=100 + top-20 IS the conditioning). The relvol>=500% subset is REJECTED as post-hoc and non-monotone (0.43 at 600%, 0.54 at 700%).",
+        "direction": "long if opening candle close>open; short if close<open; doji (==) skipped -- one side only per name",
+        "entry": "stop at the breakout level; FILL AT the breakout level (OR_high long / OR_low short); adverse slippage charged separately (cost model). No touch of the level all session => NO_TRIGGER (no position).",
+        "exit": "MOC official closing print (bars[-1].c). NO intraday stop.",
+        "weighting": "equal-weight 1/N over FIRED (triggered) names, 1x gross, no leverage, no ATR normalisation",
+        "observation": "one session = equal-weighted mean of net per-name returns over that day's fired names = one settled observation"
+      },
+      "execution": {
+        "rail": "Alpaca 1-min bars (opening 5-min bar + 09:35->16:00 path) + MOC official close",
+        "cost_free_moc": "MOC charged ZERO (measured -0.96 bp, favourable; 99.76% official-print coverage)"
+      },
+      "cost_bp": {
+        "entry_slippage_bp": 9.02,
+        "entry_slippage_source": "T18 tick measurement on T17's own selected stock-days (fill vs breakout level, 100ms rung, decontaminated n=810)",
+        "sec_taf_bp": 0.28,
+        "moc_exit_bp": 0.0,
+        "cost_formula": "net_ret_i = sign_i*(close_i - level_i)/level_i - 0.000902 - 0.000028 ; day = mean over fired names"
+      },
+      "guard_mandatory": {
+        "name": "REDUCED / logging-only budget",
+        "rule": "weakest revive (t=1.06 over 4.6y; unconditional collapses to Sharpe 0.15 dropping the 2026 stub; no-stop book has an UNBOUNDED intraday tail, worst day -9.6% at 1x). Risk budget CAPPED BELOW the market-neutral legs (0.05). A hypothesis test, never fundable, never an allocation. Threshold (relvol>=100, top-20) and weighting (equal 1/N over fired) are FROZEN in advance."
+      },
+      "asof": "opening candle (09:30-09:35) and breakout (>=09:35) strictly precede the 16:00 MOC mark",
+      "prior_verdict": "held-out (2022-2026, 1158 sessions) +4.81 bp/day NET, ann Sharpe 0.494, t=1.06 (reproduced EXACTLY from the t17 cache under this frozen spec). Gross +14.11 bp/day. Two of four full held-out years negative. Selection-inflated, post-hoc variant on a spent window; the forward log is the arbiter.",
+      "spec_sha256": "b875c2fc0fa7b0b42cf201d4558adf91e13b87f383c37556e9a3235a38129e8c"
+    },
+    {
+      "slot": "L7",
+      "id": "XS_GLSR_Z",
+      "name": "Binance USD-M perp account-positioning fade (cross-sectional GLSR z-score) -- UNSIZED logging-only (perp taker slippage unmeasured)",
+      "family": "crypto-perp cross-sectional positioning",
+      "horizon": "24h hold, open-to-open next-bar execution",
+      "status": "ACTIVE_UNSIZED",
+      "freeze_utc": "2026-08-20T22:00:00+00:00",
+      "risk_budget_fraction_active": 0.0,
+      "declared_trials_in_leg_family": 380,
+      "universe": {
+        "source": "Binance USD-M perpetual futures; orphanflush cache (5m klines + 5m metrics) aggregated to a causal 1h panel by scripts/trading_bot/perpmicro_panel.py -> research/data/perpmicro_cache/panel1h.npz",
+        "kind": "point_in_time_top_quote_volume",
+        "top_n": 50,
+        "min_names": 30,
+        "quantile": 0.2,
+        "screen": "at each 1h bar keep the TOP 50 symbols by trailing-7d (168h) quote volume that have a finite signal, a positive open and positive current-bar quote volume. Point-in-time (no survivorship, no untradeable names). TOP-50 is the ONLY universe where the 5.5 bp/side fill is defensible; top-120 is the full-universe upper bound, NOT the deployed universe."
+      },
+      "signal": {
+        "feature": "glsr = count_long_short_ratio (Binance global retail ACCOUNT long/short ratio), last 5m observation in the hour",
+        "z": "own-history z-score of log(glsr) over the trailing 168h (7d), causal: the window ends at the CLOSE of bar t",
+        "sign": -1,
+        "position": "NEGATIVE sign / FADE: SHORT the names whose retail account L/S z-score just spiked most LONG, LONG the names whose z-score spiked most SHORT",
+        "scheme": "cross-sectional quintile: long the top 20% by signed signal, short the bottom 20%, demeaned dollar-neutral within the live universe, gross normalised to 1",
+        "quantile": 0.2,
+        "hold_hours": 24,
+        "execution_lag_bars": 1,
+        "observation": "one UTC day's realised net portfolio return (open-to-open, 24 overlapping hourly tranches) = one settled observation"
+      },
+      "execution": {
+        "rail": "holding at bar j = mean(W[:, j-24 .. j-1]) (lag >= 1 bar, 24 overlapping tranches); bar return = open[j+1]/open[j] - 1; the close that FORMED the signal is NEVER a fill price",
+        "settlement": "24h; entry and exit at the OPEN of a bar the signal cannot see; funding accrual charged/received at the bar a settlement lands in"
+      },
+      "cost_bp": {
+        "cost_side_bp": 5.5,
+        "cost_source": "4.5 bp published Binance USD-M taker fee (VIP0, no BNB discount) + 1.0 bp DECLARED, never-measured half-spread, charged on turnover per side. Breakeven cost per side is logged so the number can be re-charged when perp slippage is finally measured.",
+        "cost_formula": "net_daily = sign*(price_pnl + funding_accrual) - turnover*cost_side_bp*1e-4"
+      },
+      "guard_mandatory": {
+        "name": "UNSIZED -- zero risk budget until perp taker slippage is MEASURED",
+        "rule": "DEMOTED from sized (v3: 0.12) to logging-only (v4: 0.0). The deployable top-50 held-out net Sharpe is only +0.73 at 5.5 bp/side and -1.19 at the 15 bp/side cascade stress, on a SINGLE held-out regime (2024-04..2025-01, 275d; the Binance positioning feed thins after 2024-12, so there is no 2025-26 confirmation), and perp taker slippage has NEVER been measured (the 5.5 bp rail carries a 1.0 bp declared, never-measured half-spread; breakeven ~9 bp/side). It carries NO basket weight until a separate perp-taker-slippage measurement clears it. A live naming ambiguity is also flagged: FORMULA_SWEEP_MASTER.md names the promoted perp candidate XS_GLSR_Z (this leg); a later round-2 workflow names X2_FLOWSTREAK (taker-flow fade, held-out +2.31 @5.5bp / +0.54 @15bp / -0.67 intermediate). Carrying the perp exposure at ZERO size makes the disagreement moot for the book.",
+        "deployable_top50_heldout_net_sharpe": 0.73,
+        "cost_shock_top50_heldout_net_sharpe_at_15bp_per_side": -1.19,
+        "risk_budget_fraction_active": 0.0,
+        "capacity_caveat": "bookdepth is in the cache and was NOT used; capacity untested beyond the 7d-volume screen. One held-out regime, no walk-forward."
+      },
+      "asof": "signal x(s,t) uses data through the CLOSE of bar t; weights are held from the OPEN of bar t+1; open-to-open marking. The sweep's lookahead audit (destroy every panel input after the design cut and re-derive) reproduced bit-identical weights: 0 violations.",
+      "robustness_sibling": "XS_SMART (L8) is logged UNSIZED (zero risk budget) under this same freeze as the pre-declared robustness confirmation. It is the SAME hypothesis (both are built from the Binance long/short-ratio fields) and just missed the pooled design bar (gross 3.25 vs 3.36).",
+      "prior_verdict": "UNSIZED logging-only. DEPLOYABLE (top-50, the deployed universe): held-out net Sharpe +0.73 (+15.2%/yr) at 5.5 bp/side, -1.19 at a 15 bp/side cascade shock; single regime 2024-04..2025-01, breakeven ~9.1 bp/side. FULL-UNIVERSE (top-120) UPPER BOUND (NOT deployed): held-out net +2.38 (+34.5%/yr). Cleared the 380-formula pooled bar as the only formula of 380 to pass all three gates, but the thin single-regime deployable margin + unmeasured perp slippage mean it is logged, not sized. The forward log is the arbiter.",
+      "spec_sha256": "0df494cff7bb7e348358d86c1291717ea5cb677bace718673835bb0056466ca2",
+      "logged_unsized": true
+    },
+    {
+      "slot": "L8",
+      "id": "XS_SMART",
+      "name": "smart-vs-crowd positioning spread (log top-trader L/S minus log global-account L/S) -- UNSIZED robustness sibling",
+      "family": "crypto-perp cross-sectional positioning",
+      "horizon": "24h hold, open-to-open next-bar execution",
+      "status": "ACTIVE_UNSIZED",
+      "freeze_utc": "2026-08-20T22:00:00+00:00",
+      "risk_budget_fraction_active": 0.0,
+      "logged_unsized": true,
+      "declared_trials_in_leg_family": 380,
+      "universe": {
+        "source": "Binance USD-M perpetual futures; orphanflush cache (5m klines + 5m metrics) aggregated to a causal 1h panel by scripts/trading_bot/perpmicro_panel.py -> research/data/perpmicro_cache/panel1h.npz",
+        "kind": "point_in_time_top_quote_volume",
+        "top_n": 50,
+        "min_names": 30,
+        "quantile": 0.2,
+        "screen": "at each 1h bar keep the TOP 50 symbols by trailing-7d (168h) quote volume that have a finite signal, a positive open and positive current-bar quote volume. Point-in-time (no survivorship, no untradeable names). TOP-50 is the ONLY universe where the 5.5 bp/side fill is defensible; top-120 is the full-universe upper bound, NOT the deployed universe."
+      },
+      "signal": {
+        "feature": "smart = log(tts) - log(glsr) = log(top-trader POSITION long/short ratio) - log(global retail ACCOUNT long/short ratio): smart-vs-crowd divergence",
+        "sign": 1,
+        "position": "POSITIVE sign: long where top traders are positioned long relative to the retail crowd, short the reverse",
+        "scheme": "cross-sectional quintile (top/bottom 20%), demeaned dollar-neutral, gross normalised to 1",
+        "quantile": 0.2,
+        "hold_hours": 24,
+        "execution_lag_bars": 1,
+        "observation": "one UTC day's realised net portfolio return = one (UNSIZED) settled observation"
+      },
+      "execution": {
+        "rail": "identical engine to L7: holding at bar j = mean(W[:, j-24 .. j-1]); open-to-open; the signal close is never a fill price",
+        "settlement": "24h"
+      },
+      "cost_bp": {
+        "cost_side_bp": 5.5,
+        "cost_source": "identical to L7: 4.5 bp published Binance USD-M taker + 1.0 bp declared half-spread"
+      },
+      "guard_mandatory": {
+        "name": "UNSIZED -- zero risk budget",
+        "rule": "recorded for CONFIRMATION, NOT allocated. Same hypothesis as L7 (both are Binance long/short-ratio fields). It SURVIVES the capacity cut (top-50 held-out net +1.53) but just MISSED the pooled design bar (gross 3.25 vs the 3.36 bar). If L7 (XS_GLSR_Z) forward-dies and this does not, that is INFORMATION, not a licence to swap the sized leg.",
+        "risk_budget_fraction_active": 0.0
+      },
+      "asof": "same open-to-open causal discipline as L7; 0 lookahead violations in the sweep audit.",
+      "prior_verdict": "DEPLOYABLE (top-50) held-out net Sharpe +1.53 (+34.4%/yr) at 5.5 bp/side; +0.80 at a 15 bp/side shock. Design gross 3.25 (MISSED the 3.36 pooled bar by 0.11), net 2.74. Logged UNSIZED as the pre-declared robustness sibling of L7.",
+      "spec_sha256": "28bb4edc1c12ddf410f1c6904724357913ca2a2a9d4a84e5fcef57305b7d9455"
+    },
+    {
+      "slot": "L9",
+      "id": "CEFMUNIEQ",
+      "name": "muni+equity CEF discount-LEVEL decile tilt (Y05, H=1 week) -- UNSIZED logging-only (below the conservative multiple-testing bar; redundant with L5 T12CEF)",
+      "family": "closed-end-fund discount convergence",
+      "horizon": "1-week hold, weekly rebalanced",
+      "status": "ACTIVE_UNSIZED",
+      "logged_unsized": true,
+      "freeze_utc": "2026-08-20T22:30:00+00:00",
+      "risk_budget_fraction_active": 0.0,
+      "declared_trials_in_leg_family": 132,
+      "universe": {
+        "source": "CEFConnect /api/v3/DailyPricing weekly snapshot (reuses the L5 keyless GET) + research/data/t12_cache/universe.json.gz Morningstar CategoryName statics",
+        "restriction": "Morningstar category in MUNI or EQUITY ONLY; TAXABLE-CREDIT CEFs EXCLUDED (in a credit CEF the discount is a yield-spread instrument, not a NAV-convergence instrument). This is the signal-defining choice, not a filter.",
+        "group_rule": "MUNI if CategoryName contains 'Municipal' or 'Taxable Muni'; the named Morningstar US CEF credit categories (High Yield, Senior Loans, Investment Grade, Preferreds, Multi-Sector, Global Income, Convertibles, Limited Duration, Emerging Market Income) -> TAXFI (EXCLUDED); 'Allocation' -> HYBRID (EXCLUDED); else EQUITY. Matches scripts.trading_bot.deepmine_cefnav.group().",
+        "price_min": 5.0,
+        "borrowable_short_screen": "short leg restricted to Alpaca easy_to_borrow=true, frozen at research/data/t12_cache/alpaca_assets.json.gz; HTB is a HARD exclusion applied forward, never a price",
+        "typical_book": "18 long / 8 short (medians)"
+      },
+      "signal": {
+        "measure": "Discount = (Price - NAV)/NAV from the point-in-time weekly NAV; score = -Discount (raw cross-sectional LEVEL -- deliberately NOT a z-score, NOT a change, NOT an acceleration; every z/change/accel branch of this family is closing-print bounce)",
+        "rank": "within the MUNI+EQUITY restricted universe, sort by score (-Discount)",
+        "long": "widest-discount decile (highest score)",
+        "short": "narrowest/premium decile (lowest score), ETB-screened",
+        "frac": 0.1,
+        "hold_weeks": 1,
+        "rebalance": "weekly",
+        "dollar_neutral": true,
+        "turnover_per_week_approx": 0.33,
+        "distribution_adjusted": "P&L on Alpaca adjustment=all distribution-adjusted closes; CEFs pay 7-8%/yr so a raw-price series misstates the long leg badly",
+        "observation": "one weekly rebalance's realised net portfolio return over the 1-week hold = one settled observation"
+      },
+      "execution": {
+        "rail": "Alpaca equities, weekly close-to-close on distribution-adjusted bars",
+        "implementation_lag_trading_days": 1,
+        "implementation_lag_note": "MANDATORY. CEFConnect publishes NAV AFTER the close (NAVPublished trails LastUpdated by a session), so a discount observed on grid date k is actionable no earlier than the NEXT session's close. Without the lag the book trades a price it could not have seen; this single correction turns this family's headline Sharpe-5 formulas negative.",
+        "cadence": "weekly discount snapshot -- ONE keyless CEFConnect GET (reuses the L5 fetch), inline-safe"
+      },
+      "cost_bp": {
+        "half_spread_bp": 27.25,
+        "half_spread_source": "p90 (NOT the 11.53 bp median) -- the book deliberately holds the EXTREMES of a universe whose half-spread distribution is 11.5/18.4/27.2 at median/p75/p90; charging the median is the wrong statistic by construction",
+        "sec31_bp_on_sold": 0.278,
+        "borrow_annual_bp_on_short_realised": 200.0,
+        "cost_formula": "half_spread charged on realised turnover BOTH sides + 0.5*SEC31 on turnover + borrow(realised 200bp/yr)*7/365 on short notional"
+      },
+      "guard_mandatory": {
+        "name": "UNSIZED (v5) -- zero risk budget: below the conservative multiple-testing bar and redundant with L5",
+        "demoted_to_unsized_v5": "DE-SIZED from the v4 satellite (0.08) to logging-only (0.0) at the v5 freeze. Y05/CEFMUNIEQ's honestly-stressed 2-factor alpha to L5 is t 2.93, only 0.94x of the conservative multiple-testing bar sqrt(2 ln 132) = 3.125 (132 = the DEEPMINE CEF-family formula count that defines the conservative bar; the leg CLEARS only the looser 2.751 second-round bar at 1.06x). By our discipline a below-noise-bar leg carries no risk budget. It is ALSO structurally adjacent to L5 T12CEF -- same CEFConnect NAV pipeline, closing-auction regime, ~360-fund live-only universe and ETB list (design-window return corr +0.585) -- so it adds little independent diversification even if real. It still LOGS forward and accrues its kill-switch stream; it simply carries no allocation and never touches the combined book. Its SIGNAL/execution spec is UNCHANGED from v4 (only status, sizing and DSR-trial accounting move).",
+        "satellite_risk_budget_fraction": 0.0,
+        "combined_cef_cap_fraction": 0.25,
+        "combined_cef_cap_rule": "L5 (T12CEF) + L9 (CEFMUNIEQ) <= 25% of basket risk. (The source spec DEEPMINE_MASTER.md calls this the 'L5+L8 cap'; slot L8 was already occupied by XS_SMART, so the CEF satellite is L9 and the cap binds T12CEF+CEFMUNIEQ.) They are uncorrelated in RETURNS (held-out corr -0.10) but adjacent in STRUCTURE (same CEFConnect NAV pipeline, closing-auction regime, ~360-fund live-only universe, ETB list; design-window corr was +0.585 and could revert). This cap FORCES T12CEF's deployed budget down from 0.27 to 0.17 in risk_budgets_active_v8; T12CEF's own leg-spec fraction 0.30 is unchanged.",
+        "borrow_annual_bp_on_short_realised": 200.0,
+        "hard_notional_cap": "capacity trivial -- the short leg is ~7 names and CEF closing auctions clear $0.0-0.3M; low single-digit $M at best. Size to the auction, not the Sharpe.",
+        "half_sample_recheck_weeks": 26,
+        "half_sample_recheck_rule": "the stressed held-out edge is entirely in one half (first 57 wk Sharpe 0.54 / second 57 wk Sharpe 3.53; 37% of the stressed mean is the 5 best of 114 weeks). Re-check the split after 26 settled weeks; NO budget increase before that re-check under any forward result.",
+        "short_screen": "short leg easy_to_borrow only; price>$5 both legs"
+      },
+      "asof": "discount snapshot (lagged 1 trading day) strictly precedes the marking closes; P&L on distribution-adjusted closes only, marking never uses NAV",
+      "prior_verdict": "design (2021-08..2024-02, 125 wk) net t 4.98, ann Sharpe 3.213 (+28.95 bp/wk @11.53); held out (2024-03..2026-08, 114 wk) +33.26 bp/wk NET, Sharpe 3.07, t 4.54 @11.53; HONESTLY STRESSED (1-day lag + p90 27.25 bp both legs + 200 bp/yr borrow) +18.58 bp/wk, ann Sharpe 1.95, t 2.89; stressed 2-factor alpha to L5 t 2.93 vs the 2.751 second-round bar (1.06x, and FAILS the conservative 132-formula bar sqrt(2 ln 132)=3.125 at 0.94x); held-out corr/beta to L5 -0.10/-0.003. Secondary pick whose pre-committed primary (Y04) failed; below the conservative multiple-testing bar and structurally adjacent to L5, so DE-SIZED to logging-only at v5. Selection-inflated upper bound; the forward log is the arbiter.",
+      "spec_sha256": "7af4baa2c08064b2ba00a4dd70801b7f53102e1865f75f0f6a21e98b3114b059"
+    },
+    {
+      "slot": "L10",
+      "id": "ETFRV_Z20",
+      "name": "ETF-sibling relative value -- |z|>=2.0 entry-band VARIANT (OU-recommended wider band) -- UNSIZED logging-only (band chosen on the held-out window)",
+      "family": "identical-claim market-neutral RV",
+      "horizon": "intraday",
+      "status": "ACTIVE_UNSIZED",
+      "risk_budget_fraction_active": 0.0,
+      "declared_trials_in_leg_family": 5,
+      "pairs": [
+        [
+          "IVV",
+          "SPY"
+        ],
+        [
+          "VOO",
+          "SPY"
+        ],
+        [
+          "QQQM",
+          "QQQ"
+        ],
+        [
+          "VTWO",
+          "IWM"
+        ],
+        [
+          "IJH",
+          "MDY"
+        ]
+      ],
+      "index_factors": 4,
+      "signal": {
+        "spread": "s_t = ln(P_A/P_B) at 15:45",
+        "z": "(s_t - mean_60)/sd_60 over trailing 60 sessions ending t-1",
+        "trigger_abs_z": 2.0,
+        "position": "fade: sign(-z), long cheap wrapper / short rich, dollar-neutral within pair"
+      },
+      "execution": {
+        "entry": "15:45 continuous, cross each leg half-spread",
+        "exit": "same-session 16:00 closing print (single-price cross)"
+      },
+      "cost_bp": {
+        "entry_half_spread_by_symbol": {
+          "SPY": 0.13,
+          "IVV": 0.35,
+          "VOO": 0.35,
+          "QQQ": 0.15,
+          "QQQM": 0.5,
+          "IWM": 0.2,
+          "VTWO": 0.5,
+          "MDY": 0.4,
+          "IJH": 0.4
+        },
+        "exit_auction": 0.0,
+        "sec31_bp_on_sold": 0.278
+      },
+      "exclusions": [
+        "pair-session within +/-1 session of either leg ex-distribution date"
+      ],
+      "prior_verdict": "UNSIZED band variant (OU_MEAN_REVERSION.md A2). At |z|>=2.0: design 392 obs / +0.67 bp / t +4.85 / Sharpe +3.89; held-out 164 obs / +0.09 bp / t +0.74 / Sharpe +0.92 (vs the frozen 1.5 band's held-out -0.13 bp / t -1.78 / Sharpe -1.62). The band was selected on the held-out window (in-sample), so this is logged UNSIZED and the forward log is the arbiter. Selection-inflated upper bound.",
+      "freeze_utc": "2026-08-21T02:00:00+00:00",
+      "logged_unsized": true,
+      "variant_of": "L2 ETFRV",
+      "variant_change": "entry trigger_abs_z 1.5 -> 2.0; every other field (5 pairs, execution rail, per-symbol cost model, distribution screen) byte-identical to L2",
+      "guard_mandatory": {
+        "name": "UNSIZED -- zero risk budget (forward-adjudicated band variant)",
+        "rule": "Logging-only parallel variant of the SIZED L2 ETFRV leg. OU_MEAN_REVERSION.md A2 found the frozen |z|>=1.5 band is bounce-dominated (rho1(ds)~-0.5) and net-NEGATIVE out of sample (-0.13 bp/session, t -1.78, Sharpe -1.62), while |z|>=2.0 is the first net-positive band OOS (+0.09 bp, t +0.74, Sharpe +0.92; |z|>=2.5 stronger). BUT that band was CHOSEN on the held-out window, so re-freezing the sized L2 to it would be in-sample selection. This variant is therefore logged at ZERO risk budget and kill-switched forward; genuinely-forward data -- not a spent backtest -- decides whether |z|>=2.0 beats the frozen 1.5. It NEVER touches the combined book and the sized L2 leg's band/spec/hash stay byte-identical.",
+        "risk_budget_fraction_active": 0.0,
+        "capacity_caveat": "the wider band fires far less often (OOS 164 vs 303 sessions) -- even more capacity-tiny than L2 -- and OU used a simplified 5-min fill, so the sign of the finding is robust, the third decimal is not.",
+        "shared_defect_v9": "FAKE-UNTIL-RESPECCED (v9). This band variant inherits L2 ETFRV's shared-price defect: it is built from the same 15:45-signal/15:45-fill fired-pair book, whose rho1(ds) ~ -0.5 makes the 'reversion' bid-ask bounce (E1: moving the fill to 15:50 collapses L2's gross t 17.95 -> 1.05 and net SR 0.74 -> -8.0). Its parent L2 was DE-SIZED to 0.0 at v9. L10 was already 0.0 / logging-only, so no budget changes; it stays kill-switched forward and must be re-spec'd on a 15:50 fill (like L2) before it could ever be sized."
+      },
+      "spec_sha256": "b572b0a65e2d8a81e060751edf16d99f66ced99c4b2af31f05ce2ef209b6111a"
+    },
+    {
+      "slot": "L11",
+      "id": "DUALCLASS_EXIT10",
+      "name": "dual-class voting-premium RV -- exit |z|~1.0 band VARIANT (OU-recommended wider exit) -- UNSIZED logging-only (band chosen on the held-out window)",
+      "family": "identical-claim market-neutral RV",
+      "horizon": "multi-day (mean hold ~16 trading days, max 20)",
+      "status": "ACTIVE_UNSIZED",
+      "freeze_utc": "2026-08-21T02:00:00+00:00",
+      "risk_budget_fraction_active": 0.0,
+      "declared_trials_in_leg_family": 18,
+      "pairs": [
+        [
+          "GOOGL",
+          "GOOG"
+        ],
+        [
+          "FOXA",
+          "FOX"
+        ],
+        [
+          "NWSA",
+          "NWS"
+        ],
+        [
+          "UAA",
+          "UA"
+        ],
+        [
+          "HEI",
+          "HEI.A"
+        ],
+        [
+          "CWEN",
+          "CWEN.A"
+        ],
+        [
+          "LGF.A",
+          "LGF.B"
+        ],
+        [
+          "CENTA",
+          "CENT"
+        ],
+        [
+          "LBRDA",
+          "LBRDK"
+        ],
+        [
+          "LSXMA",
+          "LSXMK"
+        ],
+        [
+          "FWONA",
+          "FWONK"
+        ],
+        [
+          "Z",
+          "ZG"
+        ],
+        [
+          "DISCA",
+          "DISCK"
+        ],
+        [
+          "PBR",
+          "PBR.A"
+        ],
+        [
+          "LILA",
+          "LILAK"
+        ]
+      ],
+      "signal": {
+        "spread": "s_t = ln(P_A_raw / P_B_raw) on RAW (unadjusted) daily closes",
+        "z": "(s_t - mean_L)/pstdev_L over trailing L raw-close log-spreads (population sd)",
+        "L": 250,
+        "K_entry_abs_z": 2.0,
+        "exit_abs_z": 1.0,
+        "max_hold_days": 20,
+        "min_dollar_volume": 1000000.0,
+        "min_price": 2.0,
+        "structural_break_reset_abs_log_jump": 0.15,
+        "position": "sgn=-1 if z>0 (rich A: SHORT A / LONG B); sgn=+1 if z<0 (cheap A: LONG A / SHORT B); dollar-neutral $1 per leg; P&L on ADJUSTED closes",
+        "observation": "one completed round-trip (entry->exit) = one settled observation"
+      },
+      "execution": {
+        "rail": "Alpaca SIP daily bars, close-to-close; MOC/MOO on paper account",
+        "signal_series": "raw (unadjusted) closes",
+        "pnl_series": "split/dividend-adjusted closes"
+      },
+      "cost_bp": {
+        "half_spread_by_symbol": {
+          "GOOGL": 0.42,
+          "GOOG": 0.52,
+          "FOXA": 1.54,
+          "FOX": 1.73,
+          "NWSA": 1.93,
+          "NWS": 1.83,
+          "UAA": 6.98,
+          "UA": 7.71,
+          "HEI": 4.84,
+          "HEI.A": 6.76,
+          "CWEN": 2.33,
+          "CWEN.A": 3.62,
+          "LGF.A": 5.58,
+          "LGF.B": 5.98,
+          "CENTA": 6.69,
+          "CENT": 9.66,
+          "LBRDA": 5.98,
+          "LBRDK": 3.1,
+          "LSXMA": 1.89,
+          "LSXMK": 1.66,
+          "FWONA": 8.42,
+          "FWONK": 3.03,
+          "Z": 1.51,
+          "ZG": 3.37,
+          "PBR": 3.44,
+          "PBR.A": 3.78,
+          "LILA": 6.34,
+          "LILAK": 6.33
+        },
+        "cost_formula": "2*(hs_A+hs_B) + 2*0.278 (SEC s31 per sale) + borrow*(hold_days/252), bp",
+        "sec31_bp_per_sale": 0.278,
+        "borrow_annual_bp_on_short": 33.0
+      },
+      "guard_mandatory": {
+        "name": "easy-to-borrow short-leg screen",
+        "rule": "a round-trip whose SHORT leg is NOT easy-to-borrow is DROPPED (never taken). At HTB rates (~1028 bp/yr) this edge is -45 bp; the frozen spec excludes HTB names by construction.",
+        "etb_whitelist": [
+          "GOOGL",
+          "GOOG",
+          "FOXA",
+          "FOX",
+          "NWSA",
+          "NWS",
+          "UAA",
+          "UA",
+          "HEI",
+          "HEI.A",
+          "CWEN",
+          "CENTA",
+          "CENT",
+          "LBRDA",
+          "LBRDK",
+          "FWONA",
+          "FWONK",
+          "Z",
+          "ZG",
+          "PBR",
+          "PBR.A",
+          "LILA",
+          "LILAK"
+        ],
+        "etb_source": "Alpaca /v2/assets easy_to_borrow snapshot frozen at research/data/t28_dualclass_cache/etb_flags_frozen.json (2026-08-20); an executability bound applied forward, not a historical screen"
+      },
+      "asof": "close(t) signal strictly precedes close(t+h) mark; z window ends at the entry/exit bar",
+      "prior_verdict": "UNSIZED band variant (OU_MEAN_REVERSION.md A2 / Bertram). Widening the exit 0.5->1.0 (the design-Sharpe-optimal K1.5/X1.0 cell, and the direction Bertram's optimum prefers) lifts held-out book Sharpe 0.50->0.66 and t 1.08->1.42 on MORE trades (315 vs 150). No band clears a real significance bar OOS (best t 1.62 at n 33; design->held-out net shrinks ~7x) -- it sharpens a weak-but-real leg, it does not rescue it. The band was chosen on the held-out window (in-sample), so this is logged UNSIZED and the forward log is the arbiter. Selection-inflated upper bound.",
+      "spec_sha256": "1e0ab117d9440829e77b81b29344c6e9fd155a0d2ae7af0a239fed7997d2ab51",
+      "logged_unsized": true,
+      "variant_of": "L3 DUALCLASS",
+      "variant_change": "exit_abs_z 0.5 -> 1.0; every other field (16-pair universe, K_entry=2.0, L=250, max_hold=20, per-symbol cost model, the MANDATORY easy-to-borrow short-leg guard + frozen ETB whitelist) byte-identical to L3"
+    },
+    {
+      "slot": "L12",
+      "id": "CRYPTO_LOWVOL",
+      "name": "cross-sectional realised-volatility on Binance spot USDT top-50 (S1_VOL30|H20, long 10 lowest-vol / short 10 highest-vol) -- UNSIZED logging-only (short-leg-driven, borrow-walled; no free feed prices the alt borrow)",
+      "family": "crypto-spot cross-sectional volatility",
+      "horizon": "20-day hold, 20 overlapping daily VWAP tranches",
+      "status": "ACTIVE_UNSIZED",
+      "freeze_utc": "2026-08-22T10:00:00+00:00",
+      "risk_budget_fraction_active": 0.0,
+      "logged_unsized": true,
+      "declared_trials_in_leg_family": 177,
+      "universe": {
+        "source": "Binance spot USDT daily klines; research/data/xspot_cache/spot_daily.npz (built by scripts/trading_bot/inv0822b_xs_sweep.py from the inv0822b crypto-spot fetch). NO crypto venue, NO key, NO order -- only the already-downloaded local cache, exactly as L7/L8 read the frozen local perp panel.",
+        "kind": "point_in_time_top_volume",
+        "top_n": 50,
+        "extreme_k": 10,
+        "adv_floor_usd": 1000000.0,
+        "adv_lookback_days": 30,
+        "min_names": 25,
+        "exclusions": "stablecoins and wrapped/staked/gold tokens EXCLUDED by base symbol (USDC, FDUSD, TUSD, BUSD, DAI, USDP, PAX, PYUSD, USDE, ..., WBTC, WBETH, BETH, BNSOL, XAUT, PAXG -- the frozen STABLE_BASES set in inv0822b_xs_lib.py); VWAP must sit inside the day's [low,high] range (1% slack).",
+        "screen": "at each day t keep the TOP 50 USDT spot symbols by trailing-30d dollar ADV (quote volume) through day t-1, with a >=$1M ADV floor and a usable VWAP on entry day t and mark day t+1. Point-in-time (ranks on info through t-1), no survivorship."
+      },
+      "signal": {
+        "feature": "S1_VOL30 = 30-day trailing realised volatility of daily VWAP log-returns (VWAP = quote_volume/base_volume, the true volume-weighted traded price); causal -- uses data through the CLOSE of day t-1",
+        "rank": "rank the ~50-name cross-section by 30d realised vol of VWAP returns",
+        "sign": -1,
+        "position": "LONG the 10 LOWEST-vol names, SHORT the 10 HIGHEST-vol names, equal weight, dollar-neutral, unit gross (0.5 per side spread over 10 names)",
+        "hold_days": 20,
+        "tranches": "20 overlapping daily tranches, 1/20 of capital each (turnover ~0.047/day)",
+        "observation": "one UTC day's realised net portfolio return (VWAP(t)->VWAP(t+1), 20 overlapping tranches) = one settled observation; the LONG (low-vol) and SHORT (high-vol) sleeves are logged SEPARATELY so the gate-4 short-leg-fraction kill-switch is computable forward."
+      },
+      "execution": {
+        "rail": "signal through the CLOSE of day t-1; entry at the VWAP of day t; marked to the VWAP of day t+1; cost = 10 bp/side on realised turnover sum|dw|. Signal and P&L are TWO lags apart (VWAP mirror artefact neutralised -- method correction b).",
+        "engine": "the frozen inv0822b crypto-XS engine (scripts/trading_bot/inv0822b_xs_lib.py extremes_book/tranche/evaluate + inv0822b_xs_forms.S1_VOL30), driven entirely by this leg's frozen fields (top_n, extreme_k, adv_floor, adv_lookback, hold_days, sign, cost); nothing re-typed."
+      },
+      "cost_bp": {
+        "cost_side_bp": 10.0,
+        "cost_source": "10 bp/side published Binance spot taker fee, charged on turnover per side. Break-even ~390 bp/side held out. This does NOT include the SHORT-leg alt borrow, which no free feed prices -- see gate 1; the frozen net Sharpe is quoted BEFORE any short borrow.",
+        "cost_formula": "net_daily = sign*(w*R).sum(0) - turnover*cost_side_bp*1e-4"
+      },
+      "guard_mandatory": {
+        "name": "UNSIZED -- zero risk budget until FOUR pre-sizing gates clear",
+        "rule": "logging-only. The premium is ENTIRELY the SHORT high-vol alt-bleed leg whose borrow cost no free feed prices; capacity is low single-digit $M; P&L overlap with L7 XS_GLSR_Z is unmeasured. Carries NO basket weight and never touches the combined book until ALL FOUR gates below clear. It is a FOUND PUBLISHED FACTOR (the crypto low-volatility / lottery-MAX anomaly), not an invention -- it sits against the standing 'invent, don't replicate' instruction and was worn on a held-out window already read by several rounds; logged, not sized.",
+        "risk_budget_fraction_active": 0.0,
+        "gate_1_borrow_curve": "BORROW GATE. A collected Binance spot alt borrow-rate AND borrow-limit curve. The trade does not die on any plausible number (held-out net 2.45 at 5 bp/day, 2.04 at 10 bp/day, 1.24 at 20 bp/day; 1.52 at a $25M ADV floor + 10 bp/day) -- it dies on NOT HAVING the number. This is exactly lesson 7.",
+        "gate_2_capacity": "CAPACITY GATE. 20 names at a $1M ADV floor; the edge halves at a $100M floor. Low single-digit $M. Any size beyond that is untested.",
+        "gate_3_overlap": "OVERLAP GATE. Measure P&L correlation to L7 XS_GLSR_Z (the perp positioning fade over the SAME alt universe on the SAME exchange) BEFORE it shares risk budget with it. UNMEASURED as of this freeze -- 'diversifying' is established against the equity sleeve, unmeasured against the crypto sleeve.",
+        "gate_4_longshort_killswitch": "KILL SWITCH. The premium is ONE leg. Log the LONG (low-vol) and SHORT (high-vol) sleeves SEPARATELY from day one; if the SHORT sleeve's contribution to gross P&L falls below ~70% over a rolling quarter, the thing being collected is NOT what was frozen. Held-out short-leg gross P&L fraction 0.91 (short sleeve +60.3%/yr vs long sleeve +5.8%/yr).",
+        "capacity_caveat": "held-out net Sharpe +2.85 (t 5.39) at 10 bp/side is a selection-inflated upper bound on a window already read by D0821 crypto-spot, rounds 2/3 on perps and this round; the realised prior is far lower."
+      },
+      "asof": "signal uses VWAP data through the CLOSE of day t-1 (the one-day lag is baked into inv0822b_xs_forms.build, applied once at the end); entry at the VWAP of day t, mark at the VWAP of day t+1 -- signal and P&L are two lags apart, which neutralises the VWAP-mirror fake-momentum artefact (method correction b). The engine's no-lookahead universe check is identical to the sweep's.",
+      "diversification_note": "US-equity sleeve (L1-L6): fully diversifying, zero instrument overlap. Crypto sleeve: P&L overlap with L7 XS_GLSR_Z is UNMEASURED (gate 3).",
+      "prior_verdict": "UNSIZED logging-only. Held out (2023-01-01..2026-08-01, sign FROZEN to _cryptoXS_DESIGN.json before the window was opened) net Sharpe +2.85 (t 5.39) at 10 bp/side, +2.77 at a 20 bp shock; 64.5%/yr on 22.6% vol; break-even 390 bp/side; positive in every calendar year 2019-2026, 69/92 months, min rolling-1y net SR +0.08, skew +0.02. Short-leg gross P&L fraction 0.91 (short +60.3%/yr, long +5.8%/yr) -- the entire premium is the short high-vol alt-bleed leg, so it is borrow-walled. Design net +1.95 (t 3.91). FOUND PUBLISHED FACTOR (crypto low-volatility / lottery anomaly), not an invention. Selection-inflated upper bound; the forward log is the arbiter.",
+      "spec_sha256": "08f7e5a11b22872e549a1f1de99247ba001d6663baa06e9792e041bcc2ec7059"
+    },
+    {
+      "slot": "L13",
+      "id": "SKEW_TILT",
+      "name": "single-name options order-flow imbalance -- gamma-weighted OTM call-vs-put OI tilt (S6_SKEW_TILT), cross-sectional over single names, dollar-neutral long-top/short-bottom, OPEN t+1 -> OPEN t+2 -- UNSIZED logging-only (2.5y monthly-expiry-only OPRA; named dealer-gamma mechanism is mis-named; open vol-exposure risk)",
+      "family": "single-name options order-flow imbalance",
+      "horizon": "1 session (signal close t -> enter open t+1 -> exit open t+2)",
+      "status": "ACTIVE_UNSIZED",
+      "freeze_utc": "2026-08-23T12:00:00+00:00",
+      "risk_budget_fraction_active": 0.0,
+      "logged_unsized": true,
+      "declared_trials_in_leg_family": 48,
+      "declared_trials_note": "48 = 24 pre-registered formulas x 2 horizons (the null was run over all 48 cells; the analytic multiple-testing bar is for 48 tests, so the leg-family DSR bar is if anything conservative). This is an UNSIZED logging-only leg carrying NO combined-book weight, so it does NOT raise combined_gate.declared_trials_now (stays 8), exactly as L8/L10/L11/L12 did not; it carries this count for its OWN DSR.",
+      "universe": {
+        "source": "Alpaca expired-OPRA DAILY bars (every monthly 3rd-Friday expiry 2024-02..2026-08); the frozen 1h-independent options panel research/data/inv0823_gex/panel.json.gz, built by scripts/invent0823_gex_{fetch,panel}.py. NO options venue, NO key, NO order forward -- only the already-downloaded local panel, exactly as L7/L8 read the frozen perp panel and L12 the frozen spot panel.",
+        "kind": "single_names_only_top_decile_adv",
+        "single_names": [
+          "AAPL",
+          "MSFT",
+          "NVDA",
+          "TSLA",
+          "AMZN",
+          "META",
+          "GOOGL",
+          "AMD",
+          "NFLX",
+          "AVGO",
+          "JPM",
+          "BAC",
+          "XOM",
+          "CVX",
+          "WMT",
+          "COST",
+          "CRM",
+          "INTC",
+          "MU",
+          "PLTR",
+          "COIN",
+          "BA",
+          "DIS",
+          "UBER",
+          "PYPL",
+          "GS",
+          "PFE",
+          "JNJ",
+          "T",
+          "VZ",
+          "ORCL",
+          "QCOM",
+          "CAT",
+          "LLY"
+        ],
+        "n_single_names": 34,
+        "excluded_sector_etfs": [
+          "XLF",
+          "XLE",
+          "XLK",
+          "XLV",
+          "XLI",
+          "XLP",
+          "XLU",
+          "XLB",
+          "XLRE",
+          "XLC",
+          "SMH",
+          "IWM",
+          "QQQ",
+          "DIA",
+          "EEM"
+        ],
+        "exclusion_rule": "the sector/broad-ETF half of the theme is DEAD (held-out Sharpe 0.55, net -0.01 at 3 bp) and is EXCLUDED by construction; the survivor is a single-name effect (single-name-only held-out Sharpe 3.61). No illiquid tail exists in this universe by construction (all top-decile ADV).",
+        "greeks": "Black-Scholes with a flat per-(name,expiry,day) ATM implied vol backed out from the nearest-to-money call and put closes (applied identically to every name).",
+        "oi_proxy": "cumulative traded contract volume per strike over [E-70d, E] through the close of day t (front AND next monthly); a proxy, not OI -- misses accumulation older than 70 days and counts closing trades as opening (documented, not hidden)."
+      },
+      "signal": {
+        "formula": "S6_SKEW_TILT",
+        "definition": "S6 = ( sum_{K>S} gamma_K*callOI_K - sum_{K<S} gamma_K*putOI_K ) / sum_all gamma_K*OI_K -- gamma-weighted OTM call-OI minus OTM put-OI over total gamma-OI (BS gamma weighting, OTM/ITM split, /gross normaliser).",
+        "rank": "cross-sectional rank-normalise to [-1,1], zero-mean, over the single-name cross-section each day",
+        "position": "dollar-neutral rank book: LONG the top (highest S6, most call-tilted), SHORT the bottom (most put-tilted), gross normalised to 1; sign FROZEN from the gamma design table (positive = long high-S6).",
+        "observation": "one 'day'-horizon session's realised net portfolio return (open t+1 -> open t+2) = one settled observation"
+      },
+      "execution": {
+        "rail": "signal from option bars through the CLOSE of day t; ENTER at the OPEN of day t+1 (>=17.5 h after the signal print, never a shared print); EXIT at the OPEN of day t+2 ('day' horizon). Underlying returns on Alpaca adjustment=all (split+dividend).",
+        "signal_print": "close of day t",
+        "entry": "open of day t+1",
+        "exit": "open of day t+2",
+        "horizon_frozen": "day",
+        "engine": "the frozen gamma sweep engine scripts/invent0823_gex_eval.py (build_signals/returns/book/stats/turnover_of), reused VERBATIM and driven entirely by this leg's frozen fields (single-name universe, formula, 'day' horizon, cost); nothing re-typed."
+      },
+      "cost_bp": {
+        "cost_side_bp_primary": 3.0,
+        "cost_side_bp_grid": [
+          1.0,
+          3.0,
+          5.5
+        ],
+        "cost_source": "EXECUTION_COST_WALL.md s1: 1.0 bp (auction rail 0 + 0.5 fee), 3.0 bp (Dyhrberg liquid retail taker 2.5 + 0.5 fee -- the PRIMARY rail for this liquid single-name universe), 5.5 bp (conservative sweep default). Turnover measured, not assumed.",
+        "cost_formula": "net_daily_sharpe = (gross_bp - turnover*cost_side_bp*1e-4)/sd*sqrt(252)"
+      },
+      "guard_mandatory": {
+        "name": "UNSIZED (v10) -- zero risk budget: strong invention survivor, logged forward under seven kill-guards",
+        "rule": "The strong invention survivor of the INVENT-0823 single-name gamma/options-flow sweep (INVENT_0823_gamma.md; pre-registration INVENT_0823_gamma_PREREGISTRATION.md, committed a86abe1 before any backtest number). One cell of 48 cleared every bar: design gross Sharpe 3.83 (t 4.53), permutation FWER p 0.0010; held-out (untouched until the design table was committed) it was again the STRONGEST of all 48 cells -- full-universe gross 7.90 bp/day, Sharpe 3.58, t 3.64, break-even 16.1 bp/side vs a 3.0 bp rail, net Sharpe +2.92 at 3 bp; single-name-only held-out Sharpe 3.61. Not bounce (one-day-gap re-entry keeps SR +3.35), not reversal (spanning alpha t +3.61), not beta (0.036), not one name (worst leave-one-out 3.09/3.58). It is a CANDIDATE FOR FORWARD PAPER LOGGING, NOT a sized leg (owner recommendation). Logged UNSIZED at 0.0 budget and adjudicated forward by the seven kill-guards; it NEVER touches the combined book. This freeze changes NO sized leg, NO risk budget and NO existing hash.",
+        "risk_budget_fraction_active": 0.0,
+        "seven_kill_guards": {
+          "1_minimum_before_verdict_settled_sessions": 60,
+          "2_kill_if_trailing60_forward_gross_sharpe_below": 0.0,
+          "3_kill_if_trailing60_net_sharpe_at_3bp_below": 1.0,
+          "4_kill_if_trailing60_gap_placebo_sharpe_below": 2.0,
+          "5_kill_if_single_names_subbook_sharpe_below": 1.5,
+          "6_data_continuity_VOID_rule": "treat ANY feed/expiry change as VOIDING the log, not degrading it. A change in the OPRA data vendor/feed, the expiry cycle, the strike-ladder convention, the panel schema, or weeklies/0DTE entering the volume-OI proxy VOIDS the accrued forward log (it is discarded and a NEW frozen forward test begins) -- a data discontinuity is NEVER silently absorbed as a bad forward result. Freeze precedes observation; only like-for-like data accrues.",
+          "7_monthly_coverage_check": "each month, verify the OPRA panel actually covered that month's monthly (3rd-Friday) expiries for the single-name universe (front AND next monthly). A month with missing or partial coverage is VOID for that month, not a zero -- a phantom mark is never fabricated."
+        },
+        "adjudication_note": "The seven kill-guards are the owner's pre-registered forward-decision rule, adjudicated on the FORWARD log (the trailing-60 gross/net@3bp/gap-placebo/single-names bars, the 60-session minimum, the data-continuity VOID rule and the monthly coverage check) -- recorded here VERBATIM, exactly as L12's four pre-sizing gates are recorded-not-auto-coded. The code's standing per-leg kill switch (N_min=40, drop at one-sided upper-95% < 0) also applies underneath them. This leg carries NO risk budget and never touches the combined book.",
+        "open_risks": "(a) only 2.5y of expired-OPRA history (held-out 260 sessions); (b) MONTHLY-EXPIRY-ONLY -- weeklies/0DTE, now the majority of single-name option volume, are absent from the OI proxy; (c) VOLUME is not open interest (cumulative 70-day volume misses older accumulation and counts closing trades as opening); (d) the named dealer-gamma MECHANISM is mis-named -- a raw call/put volume imbalance does as well or better OOS, so this is an options ORDER-FLOW imbalance predictor, NOT a dealer-gamma effect; (e) OPEN vol-exposure risk -- S6 is legitimately correlated with implied/realised vol (+0.25 to +0.29), and cross-sectionally orthogonalising the S6 signal on IV+RV cuts the held-out Sharpe 3.58 -> 0.95 (the spanning regression prices the vol-BOOK loadings out -- IV/RV loadings statistically zero held-out, alpha +7.84 bp/day t +3.61 -- but the raw signal's vol tilt is a real, unhedged exposure the forward log must watch)."
+      },
+      "asof": "signal uses option bars through the CLOSE of day t; the book is held from the OPEN of day t+1 and marked to the OPEN of day t+2 -- signal and fill never share a print (>=17.5 h gap). Enforced by the frozen engine's t+1/t+2 return construction.",
+      "diversification_note": "structurally uncorrelated with all four SIZED legs (T3 overnight reversal, DUALCLASS, T12 CEF discount, ORB) -- none reads an option feed. A genuinely new instrument family for the basket.",
+      "prior_verdict": "UNSIZED logging-only. Held out (2025-07-01..2026-08-21, 260 sessions, sign frozen from the gamma design table) single-name-only gross Sharpe 3.61, gross 12.05 bp/day, t 3.66, net Sharpe +3.06 at 3 bp/side, one-day-gap placebo +3.53, break-even 19.9 bp/side, turnover 0.61; design (2024-02-01..2025-06-30, 352 sessions) Sharpe 3.87, net@3 +3.25, gap placebo +3.04. First non-noise theme in six consecutive sweeps. CAVEATS: 2.5y total / monthly-expiry-only / volume-not-OI proxy / mechanism mis-named / open vol-exposure. Selection-inflated upper bound; the forward log is the arbiter.",
+      "spec_sha256": "51b1d87e5474172656f6cfc2b6289548ab40be5b41be8e6aabdf881c0ada1ed6"
+    },
+    {
+      "slot": "L14",
+      "id": "SKEW_TILT_CRUDE",
+      "name": "pre-registered greeks-free competitor to S6 -- crude (callVol-putVol)/(callVol+putVol) call/put VOLUME imbalance, NO greeks/moneyness split/gamma, cross-sectional over single names, dollar-neutral long-top/short-bottom, OPEN t+1 -> OPEN t+2 -- UNSIZED logging-only (if it matches/beats S6 forward, the CRUDE is the promotion candidate)",
+      "family": "single-name options order-flow imbalance",
+      "horizon": "1 session (signal close t -> enter open t+1 -> exit open t+2)",
+      "status": "ACTIVE_UNSIZED",
+      "freeze_utc": "2026-08-23T12:00:00+00:00",
+      "risk_budget_fraction_active": 0.0,
+      "logged_unsized": true,
+      "declared_trials_in_leg_family": 48,
+      "declared_trials_note": "shares the 48-cell gamma-sweep family (conservative). This is the greeks-free MECHANISM competitor: in the dossier it was constructed AFTER both windows were read (post-hoc mechanism diagnostic, NOT a second survivor), and round 4 pre-registers it to test forward. UNSIZED/logging-only, carries NO combined-book weight, does NOT raise combined_gate.declared_trials_now (stays 8).",
+      "universe": {
+        "source": "Alpaca expired-OPRA DAILY bars (every monthly 3rd-Friday expiry 2024-02..2026-08); the frozen 1h-independent options panel research/data/inv0823_gex/panel.json.gz, built by scripts/invent0823_gex_{fetch,panel}.py. NO options venue, NO key, NO order forward -- only the already-downloaded local panel, exactly as L7/L8 read the frozen perp panel and L12 the frozen spot panel.",
+        "kind": "single_names_only_top_decile_adv",
+        "single_names": [
+          "AAPL",
+          "MSFT",
+          "NVDA",
+          "TSLA",
+          "AMZN",
+          "META",
+          "GOOGL",
+          "AMD",
+          "NFLX",
+          "AVGO",
+          "JPM",
+          "BAC",
+          "XOM",
+          "CVX",
+          "WMT",
+          "COST",
+          "CRM",
+          "INTC",
+          "MU",
+          "PLTR",
+          "COIN",
+          "BA",
+          "DIS",
+          "UBER",
+          "PYPL",
+          "GS",
+          "PFE",
+          "JNJ",
+          "T",
+          "VZ",
+          "ORCL",
+          "QCOM",
+          "CAT",
+          "LLY"
+        ],
+        "n_single_names": 34,
+        "excluded_sector_etfs": [
+          "XLF",
+          "XLE",
+          "XLK",
+          "XLV",
+          "XLI",
+          "XLP",
+          "XLU",
+          "XLB",
+          "XLRE",
+          "XLC",
+          "SMH",
+          "IWM",
+          "QQQ",
+          "DIA",
+          "EEM"
+        ],
+        "exclusion_rule": "the sector/broad-ETF half of the theme is DEAD (held-out Sharpe 0.55, net -0.01 at 3 bp) and is EXCLUDED by construction; the survivor is a single-name effect (single-name-only held-out Sharpe 3.61). No illiquid tail exists in this universe by construction (all top-decile ADV).",
+        "greeks": "Black-Scholes with a flat per-(name,expiry,day) ATM implied vol backed out from the nearest-to-money call and put closes (applied identically to every name).",
+        "oi_proxy": "cumulative traded contract volume per strike over [E-70d, E] through the close of day t (front AND next monthly); a proxy, not OI -- misses accumulation older than 70 days and counts closing trades as opening (documented, not hidden)."
+      },
+      "signal": {
+        "formula": "CRUDE_VOL_IMBALANCE",
+        "definition": "crude = (callVol - putVol) / (callVol + putVol) -- the day's call minus put traded contract VOLUME over their sum. NO Black-Scholes, NO greeks, NO gamma weighting, NO OTM/ITM moneyness split.",
+        "rank": "cross-sectional rank-normalise to [-1,1], zero-mean, over the single-name cross-section each day",
+        "position": "dollar-neutral rank book: LONG the top (most call-tilted volume), SHORT the bottom (most put-tilted volume), gross normalised to 1; sign FROZEN positive.",
+        "observation": "one 'day'-horizon session's realised net portfolio return (open t+1 -> open t+2) = one settled observation"
+      },
+      "execution": {
+        "rail": "signal from option bars through the CLOSE of day t; ENTER at the OPEN of day t+1 (>=17.5 h after the signal print, never a shared print); EXIT at the OPEN of day t+2 ('day' horizon). Underlying returns on Alpaca adjustment=all (split+dividend).",
+        "signal_print": "close of day t",
+        "entry": "open of day t+1",
+        "exit": "open of day t+2",
+        "horizon_frozen": "day",
+        "engine": "the frozen gamma sweep engine scripts/invent0823_gex_eval.py (build_signals/returns/book/stats/turnover_of), reused VERBATIM and driven entirely by this leg's frozen fields (single-name universe, formula, 'day' horizon, cost); nothing re-typed."
+      },
+      "cost_bp": {
+        "cost_side_bp_primary": 3.0,
+        "cost_side_bp_grid": [
+          1.0,
+          3.0,
+          5.5
+        ],
+        "cost_source": "EXECUTION_COST_WALL.md s1: 1.0 bp (auction rail 0 + 0.5 fee), 3.0 bp (Dyhrberg liquid retail taker 2.5 + 0.5 fee -- the PRIMARY rail for this liquid single-name universe), 5.5 bp (conservative sweep default). Turnover measured, not assumed.",
+        "cost_formula": "net_daily_sharpe = (gross_bp - turnover*cost_side_bp*1e-4)/sd*sqrt(252)"
+      },
+      "guard_mandatory": {
+        "name": "UNSIZED (v10) -- zero risk budget: pre-registered greeks-free competitor to S6",
+        "rule": "The pre-registered greeks-free competitor to L13 SKEW_TILT. INVENT_0823_gamma.md s5: the entire Black-Scholes apparatus (IV solve, gamma weighting, OTM/ITM split) ADDS NOTHING -- the crude call-minus-put VOLUME imbalance does as well in design and BETTER out of sample (full-universe held-out Sharpe 4.32 vs S6 3.58). So the real effect is an options ORDER-FLOW imbalance predictor, NOT a dealer-gamma effect. PROMOTION RULE (per the dossier recommendation): if the CRUDE book MATCHES OR BEATS S6 on the forward log, the CRUDE is the promotion candidate (simpler = less overfit). Same single-name universe, entry, exit and cost as L13. Logged UNSIZED at 0.0 budget and adjudicated forward by the same seven kill-guards; NEVER touches the combined book. Changes NO sized leg, NO risk budget, NO existing hash.",
+        "risk_budget_fraction_active": 0.0,
+        "seven_kill_guards": {
+          "1_minimum_before_verdict_settled_sessions": 60,
+          "2_kill_if_trailing60_forward_gross_sharpe_below": 0.0,
+          "3_kill_if_trailing60_net_sharpe_at_3bp_below": 1.0,
+          "4_kill_if_trailing60_gap_placebo_sharpe_below": 2.0,
+          "5_kill_if_single_names_subbook_sharpe_below": 1.5,
+          "6_data_continuity_VOID_rule": "treat ANY feed/expiry change as VOIDING the log, not degrading it. A change in the OPRA data vendor/feed, the expiry cycle, the strike-ladder convention, the panel schema, or weeklies/0DTE entering the volume-OI proxy VOIDS the accrued forward log (it is discarded and a NEW frozen forward test begins) -- a data discontinuity is NEVER silently absorbed as a bad forward result. Freeze precedes observation; only like-for-like data accrues.",
+          "7_monthly_coverage_check": "each month, verify the OPRA panel actually covered that month's monthly (3rd-Friday) expiries for the single-name universe (front AND next monthly). A month with missing or partial coverage is VOID for that month, not a zero -- a phantom mark is never fabricated."
+        },
+        "adjudication_note": "The seven kill-guards are the owner's pre-registered forward-decision rule, adjudicated on the FORWARD log (the trailing-60 gross/net@3bp/gap-placebo/single-names bars, the 60-session minimum, the data-continuity VOID rule and the monthly coverage check) -- recorded here VERBATIM, exactly as L12's four pre-sizing gates are recorded-not-auto-coded. The code's standing per-leg kill switch (N_min=40, drop at one-sided upper-95% < 0) also applies underneath them. This leg carries NO risk budget and never touches the combined book.",
+        "open_risks": "(a) only 2.5y of expired-OPRA history (held-out 260 sessions); (b) MONTHLY-EXPIRY-ONLY -- weeklies/0DTE, now the majority of single-name option volume, are absent from the OI proxy; (c) VOLUME is not open interest (cumulative 70-day volume misses older accumulation and counts closing trades as opening); (d) the named dealer-gamma MECHANISM is mis-named -- a raw call/put volume imbalance does as well or better OOS, so this is an options ORDER-FLOW imbalance predictor, NOT a dealer-gamma effect; (e) OPEN vol-exposure risk -- S6 is legitimately correlated with implied/realised vol (+0.25 to +0.29), and cross-sectionally orthogonalising the S6 signal on IV+RV cuts the held-out Sharpe 3.58 -> 0.95 (the spanning regression prices the vol-BOOK loadings out -- IV/RV loadings statistically zero held-out, alpha +7.84 bp/day t +3.61 -- but the raw signal's vol tilt is a real, unhedged exposure the forward log must watch)."
+      },
+      "asof": "signal uses option-volume bars through the CLOSE of day t; the book is held from the OPEN of day t+1 and marked to the OPEN of day t+2 -- signal and fill never share a print (>=17.5 h gap).",
+      "diversification_note": "same instrument family as L13 (the SAME hypothesis at a cruder signal); logged to adjudicate crude-vs-greeks forward, not as an independent source.",
+      "prior_verdict": "UNSIZED logging-only. Single-name-only held out (2025-07-01..2026-08-21, 260 sessions) gross Sharpe 4.47, gross 14.0 bp/day, t 4.54, net Sharpe +4.33 at 3 bp/side, one-day-gap placebo +4.36, break-even 93.6 bp/side, turnover 0.15; design (2024-02-01..2025-06-30, 352 sessions) Sharpe 3.69, net@3 +3.56, gap placebo +3.23. The crude competitor is stronger and far cheaper (turnover 0.15 vs S6's 0.61) OOS, but was constructed post-hoc in the dossier -- this is its first pre-registered forward test. Selection-inflated upper bound; the forward log is the arbiter.",
+      "spec_sha256": "b3f61b8f1813a46e9680d9a1dedceb09d109b9ddab3cf660e548cac4a3b94837"
+    }
+  ],
+  "freeze2_utc": "2026-08-20T20:00:00+00:00",
+  "freeze2_note": "Follow-up freeze: fills the reserved L3 (DUALCLASS) and L4 (T7) slots and adds L5 (T12CEF) and L6 (ORB) as new frozen legs, each with its OWN spec_sha256 verified by the logger. L1/L2 spec objects and the original freeze are UNCHANGED. preregistration_sha256 is re-pinned to the extended .md (this is the version bump the reserved-slot mechanism requires, not an edit to a running leg).",
+  "risk_budgets_active_v6": {
+    "note": "deployed risk fractions for the 6-leg configuration (sum=1.0); read by the logger's combined book. Three roughly-independent sources + a tiny ORB probe: overnight(T3+T7)=0.32, identical-claim RV(ETFRV+DUALCLASS)=0.33, CEF(T12CEF)=0.30, ORB probe=0.05.",
+    "T3": 0.25,
+    "ETFRV": 0.2,
+    "DUALCLASS": 0.13,
+    "T7": 0.07,
+    "T12CEF": 0.3,
+    "ORB": 0.05
+  },
+  "preregistration_sha256_v1": "4eaac92f09f0376d350dd0f4ae420dbf78b129c845525cb91a4e13ef4a24a5a5",
+  "preregistration_sha256_v2": "2e72ac08f9e2d619aa47709ae7f607323032b803c06666ac7be5b8a69fb38631",
+  "risk_budgets_active_v7": {
+    "note": "deployed risk fractions for the 7 SIZED-leg configuration (sum=1.0); read by the logger's combined book. FOUR roughly-independent sources plus a tiny ORB probe: overnight(T3+T7)=0.28, identical-claim RV(ETFRV+DUALCLASS)=0.29, CEF(T12CEF)=0.27, crypto-perp(XS_GLSR_Z)=0.12, ORB probe=0.04. Existing legs keep their v6 RELATIVE weights (each scaled by 0.88). L7 is real-but-modest -- larger than the ORB probe and the T7 satellite, smaller than every anchor source -- honoring its thin deployable top-50 net Sharpe ~0.73, not the top-120 upper bound. XS_SMART (L8) carries ZERO budget and never touches the combined book.",
+    "T3": 0.22,
+    "ETFRV": 0.18,
+    "DUALCLASS": 0.11,
+    "T7": 0.06,
+    "T12CEF": 0.27,
+    "ORB": 0.04,
+    "XS_GLSR_Z": 0.12,
+    "XS_SMART": 0.0
+  },
+  "freeze3_utc": "2026-08-20T22:00:00+00:00",
+  "freeze3_note": "Third freeze: adds L7 (XS_GLSR_Z), the single formula that survived the 380-formula cross-theme sweep (FORMULA_SWEEP_MASTER.md), as a new sized leg with its OWN spec_sha256; and pre-declares L8 (XS_SMART) as an UNSIZED (zero risk budget) robustness sibling, also with its own spec_sha256. L1-L6 spec objects and the earlier freezes are UNCHANGED. preregistration_sha256 is re-pinned to the extended .md (the version bump the reserved-slot mechanism requires, not an edit to a running leg). L7/L8 read only the frozen local 1h perp panel (research/data/perpmicro_cache/panel1h.npz) -- no crypto venue, no key, no orders. combined_gate.declared_trials_now 6->7; risk_budgets_active_v7 supersedes v6 for the combined book.",
+  "risk_budgets_active_v8": {
+    "note": "deployed risk fractions for the v4 basket (sum=1.0); read by the logger's combined book. THREE roughly-independent sources + a tiny ORB probe, with the perp exposure logged UNSIZED: overnight(T3+T7)=0.343, identical-claim RV(ETFRV+DUALCLASS)=0.353, CEF class (T12CEF+CEFMUNIEQ)=0.25 AT THE HARD CAP, ORB probe=0.054, perp(XS_GLSR_Z+XS_SMART)=0.00. The 0.25 CEF cap forces T12CEF's deployed weight from 0.27 (v7) to 0.17; CEFMUNIEQ is the 0.08 satellite. XS_GLSR_Z is DEMOTED to 0.00 (was 0.12 in v7) -- perp taker slippage is unmeasured. supersedes v7 for the combined book.",
+    "T3": 0.268,
+    "ETFRV": 0.214,
+    "DUALCLASS": 0.139,
+    "T7": 0.075,
+    "T12CEF": 0.17,
+    "ORB": 0.054,
+    "CEFMUNIEQ": 0.08,
+    "XS_GLSR_Z": 0.0,
+    "XS_SMART": 0.0
+  },
+  "preregistration_sha256_v3": "403e513212b0793bad808368ec106dff69a00b40a2c73c5c8b2ae7f019686df3",
+  "freeze4_utc": "2026-08-20T22:30:00+00:00",
+  "freeze4_note": "Fourth freeze: adds L9 (CEFMUNIEQ), the muni+equity CEF discount-LEVEL H=1 tilt (Y05 from DEEPMINE_MASTER.md), as a SATELLITE (8%) under a combined CEF-class cap of 25% (T12CEF+CEFMUNIEQ), with its OWN spec_sha256; and DEMOTES L7 (XS_GLSR_Z) from sized (0.12) to UNSIZED/logging-only (0.0) -- its universe+signal are unchanged from freeze3, only its sizing and spec_sha256 move, because perp taker slippage is unmeasured and its deployable top-50 margin is thin (+0.73 net Sharpe, single regime). L1-L6 and L8 spec objects are UNCHANGED. Reconciliation: freeze3 had already added L7/L8, so this freeze does NOT duplicate the perp leg -- it re-sizes it to zero and adds only the CEF muni satellite (slot L9, since L8 was occupied by XS_SMART). preregistration_sha256 re-pinned to the extended .md; risk_budgets_active_v8 supersedes v7; combined_gate.declared_trials_now 7->8. Ledger empty at this freeze -- freeze precedes observation.",
+  "preregistration_sha256_v4": "d348e575ef7cb3e7faf559e5d1f3b840d6e500dd4290de619761b5890819e92c",
+  "risk_budgets_active_v9": {
+    "note": "deployed risk fractions for the v5 basket (sum=1.0); read by the logger's combined book. L9 (CEFMUNIEQ) is DE-SIZED to UNSIZED/logging-only (was 0.08 in v8) -- it fails the conservative multiple-testing bar (0.94x of sqrt(2 ln 132)=3.125) and is structurally adjacent to L5. Its 0.08 is renormalized across the six remaining SIZED legs by a single uniform factor (1/0.92 ~ 1.087), preserving their relative weights and the three-independent-sources-plus-ORB-probe structure: overnight(T3+T7)=0.372826, identical-claim RV(ETFRV+DUALCLASS)=0.383696, CEF(T12CEF)=0.184783, ORB probe=0.058695. All three UNSIZED loggers (CEFMUNIEQ, XS_GLSR_Z, XS_SMART) carry ZERO. supersedes v8 for the combined book.",
+    "T3": 0.291304,
+    "ETFRV": 0.232609,
+    "DUALCLASS": 0.151087,
+    "T7": 0.081522,
+    "T12CEF": 0.184783,
+    "ORB": 0.058695,
+    "CEFMUNIEQ": 0.0,
+    "XS_GLSR_Z": 0.0,
+    "XS_SMART": 0.0
+  },
+  "freeze5_utc": "2026-08-20T23:30:00+00:00",
+  "freeze5_note": "Fifth freeze (v5). Two sizing/accounting changes plus a data-availability fix; NO leg's frozen SIGNAL or execution spec changes. (1) L9 (CEFMUNIEQ) is DE-SIZED from the v4 satellite (0.08) to UNSIZED/logging-only (0.0): its honestly-stressed 2-factor alpha to L5 (t 2.93) is only 0.94x of the conservative multiple-testing bar sqrt(2 ln 132)=3.125, and it is structurally adjacent to L5 T12CEF (shared CEFConnect NAV pipeline / failure space), so it carries no risk budget. It still LOGS forward and accrues its kill-switch stream; it never touches the combined book. status ACTIVE->ACTIVE_UNSIZED, risk_budget_fraction_active 0.08->0.0, declared_trials_in_leg_family 66->132 (the DEEPMINE CEF-family count behind the 3.125 bar), logged_unsized added; ONLY L9's spec_sha256 is recomputed (2033a89a...->7af4baa2...), exactly as L7 was re-frozen when demoted in v4. L7 (XS_GLSR_Z) stays UNSIZED as in v4. (2) The six remaining SIZED legs (L1 T3, L2 ETFRV, L3 DUALCLASS, L4 T7, L5 T12CEF, L6 ORB) are renormalized to sum to 1.0 by a single uniform 1/0.92 factor in risk_budgets_active_v9 (relative weights and the 3-source+ORB structure preserved). (3) Lag-aware session selection: the logger targets the latest post-freeze un-logged session whose FULL settlement data clears the free-tier recent-SIP embargo (probed empirically, catching the 403), and refuses gracefully when none is available yet -- the as-of/lookahead and no-pre-freeze-row guards are untouched. L1-L6 and L8 spec objects are byte-identical to earlier freezes and their spec_sha256 values are UNCHANGED. combined_gate.declared_trials_now stays 8 (demotion does not remove a leg from the count). preregistration_sha256 re-pinned to the extended .md (v4 hash preserved as preregistration_sha256_v4). Ledger empty at this freeze -- freeze precedes observation.",
+  "preregistration_sha256_v5": "85b5103f6925c4f4baf8fe051b69a7a19dcec1861f57ba44aebd18835c8e63b7",
+  "risk_budgets_active_v10": {
+    "note": "SIXTH FREEZE (v6), 2026-08-21 -- the deployed risk-budget dict, DE-FIT to zero fitted parameters. Read by the logger's combined book (it supersedes v9). Round 3 (INVENT_R3_MASTER.md P1 ENS_EQRISK_ALL3) proved that FITTING the budgets cost -0.48 Sharpe out of sample (fitted v5 held-out 2.45 vs 2.93 for the un-fitted default); the whole weighting family showed the overfit signature (the more the weights learn, the worse they travel). This is the only honest moment to switch -- the ledger is empty. TARGET: equal-RISK-contribution, weight_i proportional to 1/(design vol of leg i) over the six SIZED legs. FALLBACK TAKEN: L2 ETFRV carries no usable design vol (prior_verdict has no Sharpe/t/n and there is no wired cached design series to compute one from), and the other five legs settle on heterogeneous native cadences that would need a hand-picked common-calendar normalization -- both are hand-tuning this de-fit exists to remove. Per the pre-registered contingency, fall back to equal-DOLLAR: the six SIZED legs (L1 T3, L2 ETFRV, L3 DUALCLASS, L4 T7, L5 T12CEF, L6 ORB) each get 1/6 (sum 1.0, equal risk under the a-priori default). The three logging-only legs (L7 XS_GLSR_Z, L8 XS_SMART, L9 CEFMUNIEQ) stay at ZERO. Combined CEF class = T12CEF alone = 0.166667, under the retained 0.25 cap. Recorded-not-deployed per-observation design vols: T3 ~66 bp/night, T7 ~36 bp/event-day, DUALCLASS ~124 bp/round-trip, T12CEF ~41 bp/week, ORB ~155 bp/day, ETFRV none. NO leg's signal/universe/execution spec changed; every per-leg spec_sha256 is byte-identical to v5; declared_trials_now stays 8 (a de-fit, not a new trial).",
+    "T3": 0.16666666666666666,
+    "ETFRV": 0.16666666666666666,
+    "DUALCLASS": 0.16666666666666666,
+    "T7": 0.16666666666666666,
+    "T12CEF": 0.16666666666666666,
+    "ORB": 0.16666666666666666,
+    "CEFMUNIEQ": 0.0,
+    "XS_GLSR_Z": 0.0,
+    "XS_SMART": 0.0
+  },
+  "freeze6_utc": "2026-08-21T00:00:00+00:00",
+  "freeze6_note": "Sixth freeze (v6). RISK-BUDGET CHANGE ONLY. The fitted v5/v9 risk budgets are replaced by a zero-parameter equal-risk weighting, published as risk_budgets_active_v10 (which the logger now reads as the active dict). Motivation: INVENT_R3_MASTER.md P1 (ENS_EQRISK_ALL3) measured the fitted budgets at -0.48 Sharpe out of sample versus the un-fitted default; fitting the weights overfits, so while the ledger is empty we switch to the parameter-free default. Because L2 ETFRV has no usable design volatility (and clean common-calendar inverse-vol across the six heterogeneous cadences would require hand-judgment), the pre-registered fallback is taken: equal-DOLLAR 1/6 per sized leg. NOTHING ELSE MOVES: no leg's universe/signal/execution/cost/guard spec changes, so every per-leg spec_sha256 is byte-identical to v5 (DUALCLASS fa67c73f, T7 e12cb470, T12CEF c60ceb57, ORB b875c2fc, XS_GLSR_Z 0df494cf, XS_SMART 28bb4edc, CEFMUNIEQ 7af4baa2; L1/L2 carry none). The T13 vol overlay, the per-leg kill switch (N_min=40, drop at upper-95%<0), the T-bill benchmark, the as-of/lookahead guards and the no-pre-freeze-row guard are all untouched. The three logging-only legs (XS_GLSR_Z, XS_SMART, CEFMUNIEQ) stay ACTIVE_UNSIZED at 0.0. combined_gate.declared_trials_now stays 8 -- this is a de-fit, not a new trial or a new leg. The selftest's budget assertions are updated to enforce the equal-risk scheme (six sized legs equal, sum 1.0, unsized zero, CEF class under cap) in place of the old fitted uniform-1/0.92 renorm + forced-0.25-CEF-cap assertions. preregistration_sha256 re-pinned to the extended .md (v5 hash preserved as preregistration_sha256_v5). Ledger empty at this freeze -- freeze precedes observation.",
+  "preregistration_sha256_v6": "891771c75249dc1d2985ee6b8578f872885391a24b5d599bb1b0887df11f14c4",
+  "freeze7_utc": "2026-08-21T02:00:00+00:00",
+  "freeze7_note": "Seventh freeze (v7), 2026-08-21. ADDITIVE, LOGGING-ONLY. Adds TWO new ACTIVE_UNSIZED (risk budget 0.0) band-variant loggers, each with its OWN spec_sha256, mirroring the L7-L9 unsized pattern: L10 ETFRV_Z20 (identical to the SIZED L2 ETFRV leg in every way EXCEPT the entry band is |z|>=2.0, the OU-recommended wider band) and L11 DUALCLASS_EXIT10 (identical to the SIZED L3 DUALCLASS leg EXCEPT the exit band is widened to |z|~1.0). WHY: OU_MEAN_REVERSION.md found the frozen L2 |z|>=1.5 band is bounce-dominated (rho1(ds)~-0.5) and net-NEGATIVE OOS while >=2.0 is net-positive, and that L3's exit widened to ~1.0 travels better OOS (book Sharpe 0.50->0.66) -- BUT both bands were CHOSEN on the held-out window, so re-freezing the SIZED legs to them would be in-sample selection. The disciplined move is to log the variants UNSIZED in parallel and let genuinely-forward data adjudicate. This freeze changes NO sized leg's spec/band/budget and NO existing spec_sha256: L1-L9 spec objects are byte-identical to v6 (DUALCLASS fa67c73f, T7 e12cb470, T12CEF c60ceb57, ORB b875c2fc, XS_GLSR_Z 0df494cf, XS_SMART 28bb4edc, CEFMUNIEQ 7af4baa2; L1/L2 carry no per-leg hash). L10 shares L2's fired-pair book (its fired set is the subset clearing |z|>=2.0) and L11 shares L3's daily-bar series, so NO new data source or fetch is added. risk_budgets_active_v10 (the deployed dict) is UNCHANGED -- the six SIZED legs still carry 1/6 each summing to 1.0, and L10/L11 join L7/L8/L9 at ZERO. combined_gate.declared_trials_now stays 8 (the two variants are the SAME hypotheses as L2/L3 and are logged, not separately counted -- exactly as the XS_SMART sibling of L7). A STANDING pre-registration RULE is added to the .md: any FUTURE relative-value leg must show rho1(ds) meaningfully above -0.5 (not bounce-dominated) in addition to Hurst<0.5 + ADF rejection before it can be frozen as a leg -- documentation of a forward rule, changing no existing leg. The T13 vol overlay, the T-bill benchmark, the as-of/lookahead guards, the no-pre-freeze-row guard and the per-leg kill switch (N_min=40) are untouched. preregistration_sha256 re-pinned to the extended .md (v6 hash preserved as preregistration_sha256_v6). Because this is a new freeze version, a new ledger begins under it (the code's own contract: a state written under a different freeze hash must start a new ledger); the archived v6 ledger held one session row with ZERO settled observations, so no evidence is lost. Ledger empty at this freeze -- freeze precedes observation.",
+  "preregistration_sha256_v7": "cdeab3c920ba12f0172dd253617971d45a7a59019a12306fc511a136f98eaf27",
+  "freeze8_utc": "2026-08-22T10:00:00+00:00",
+  "freeze8_note": "Eighth freeze (v8), 2026-08-22. ADDITIVE, LOGGING-ONLY. Adds ONE new ACTIVE_UNSIZED (risk budget 0.0) logging leg with its OWN spec_sha256, mirroring the L7-L11 unsized pattern: L12 CRYPTO_LOWVOL -- cross-sectional realised-volatility on Binance spot USDT top-50 (INVENT_0822B_MASTER.md S1_VOL30|H20): each rebalance rank the point-in-time top-50-by-30d-ADV USDT spot cross-section by 30d realised VWAP-return volatility, LONG the 10 lowest-vol / SHORT the 10 highest-vol, equal-weight dollar-neutral, 20 overlapping daily VWAP tranches, 10 bp/side. Held-out (2023-01-01..2026-08-01, sign frozen to _cryptoXS_DESIGN.json before the window opened) net Sharpe +2.85 (t 5.39). It is UNSIZED because (1) the premium is ENTIRELY the short high-vol alt-bleed leg whose borrow cost no free feed prices (borrow-walled, lesson 7); (2) capacity is low single-digit $M; and (3) its P&L overlap with L7 XS_GLSR_Z (same alt universe, same exchange) is unmeasured. The four pre-sizing gates (borrow-curve, capacity, XS_GLSR_Z overlap, long/short-split kill-switch) are recorded VERBATIM in the leg's guard_mandatory, and the LONG (low-vol) and SHORT (high-vol) sleeves are logged SEPARATELY so the 'short leg must be >=70% of gross' check is computable forward (held-out short-leg gross fraction 0.91). It is a FOUND PUBLISHED FACTOR (crypto low-volatility / lottery anomaly), not an invention. Data: research/data/xspot_cache/spot_daily.npz (already cached through 2026-08-20; built by the inv0822b crypto-spot fetch) -- NO crypto venue, NO key, NO order, NO new fetch; the proof reproduces the held-out number from this cache and the forward step records a data-availability gate (the frozen snapshot ends in the past; forward settlement is pending a maintained panel extension) and contributes NOTHING, exactly as L7/L8 do off the frozen perp panel. This freeze changes NO sized leg's spec/band/budget and NO existing spec_sha256: L1-L11 spec objects are byte-identical to v7 (DUALCLASS fa67c73f, T7 e12cb470, T12CEF c60ceb57, ORB b875c2fc, XS_GLSR_Z 0df494cf, XS_SMART 28bb4edc, CEFMUNIEQ 7af4baa2, ETFRV_Z20 4b4a1229, DUALCLASS_EXIT10 54e199ac; L1/L2 carry no per-leg hash). risk_budgets_active_v10 (the deployed dict) is UNCHANGED -- the six SIZED legs still carry 1/6 each summing to 1.0, and L12 joins L7-L11 at ZERO and never touches the combined book (never added to contributions). combined_gate.declared_trials_now stays 8 (L12 is a new hypothesis but is UNSIZED/logging-only and carries no combined-book weight; it carries its own per-leg declared_trials_in_leg_family=177, the round's pre-registered formula count, for its own DSR). TWO methodology corrections from this round are added to the .md as STANDING RULES (\u00a77e): (a) the rotate-the-returns placebo null is BROKEN (it silently injects a directional leg because coins not yet listed at the rotated date have no return); use ADV-slot signal permutation for cross-sectional nulls instead; (b) the rho1 mirror artefact produces fake MOMENTUM on VWAP/averaged-price rails, not only fake reversion -- kill it with a one-day-gap re-entry test (signal through close t-1, entry at VWAP t). The T13 vol overlay, the T-bill benchmark, the as-of/lookahead guards, the no-pre-freeze-row guard and the per-leg kill switch (N_min=40) are untouched. preregistration_sha256 re-pinned to the extended .md (v7 hash preserved as preregistration_sha256_v7). Because this is a new freeze version, a new ledger begins under it (the code's contract: a state under a different freeze hash starts a new ledger). Ledger empty at this freeze -- freeze precedes observation.",
+  "risk_budgets_active_v11": {
+    "note": "NINTH FREEZE (v9), 2026-08-22 -- the deployed risk-budget dict, read by the logger's combined book (supersedes v10). After DE-SIZING L2 ETFRV (15:45 shared-price artefact) and L4 T7 (held-out edge was doubled-dividend inflation), FOUR SIZED legs remain: L1 T3, L3 DUALCLASS (gap-1, no BRK), L5 T12CEF, L6 ORB. Zero-parameter EQUAL DOLLAR weight, 1/4 = 0.25 each, sum 1.0 (the round-3 anti-fitting lesson: fitting the budgets cost -0.48 Sharpe OOS; the ledger is empty, so this is the honest moment). Combined CEF class = T12CEF alone = 0.25, exactly at the retained 0.25 cap. All eight logging-only legs (ETFRV, T7, XS_GLSR_Z, XS_SMART, CEFMUNIEQ, ETFRV_Z20, DUALCLASS_EXIT10, CRYPTO_LOWVOL) carry ZERO and never touch the combined book. No leg's signal/universe/execution spec changed except the two BRK-pair removals (L3/L11) and the two de-sizings; declared_trials_now stays 8 (demotions keep counting).",
+    "T3": 0.25,
+    "ETFRV": 0.0,
+    "DUALCLASS": 0.25,
+    "T7": 0.0,
+    "T12CEF": 0.25,
+    "ORB": 0.25,
+    "CEFMUNIEQ": 0.0,
+    "XS_GLSR_Z": 0.0,
+    "XS_SMART": 0.0
+  },
+  "freeze9_utc": "2026-08-22T23:59:00+00:00",
+  "freeze9_note": "Ninth freeze (v9), 2026-08-22. CORRECTIVE / SUBTRACTIVE re-freeze made while the ledger is EMPTY (zero forward observations) -- every change is a bug fix or a risk-reducing subtraction, costless now, before real data accrues. NO new signal or leg. Five corrections from INVENT_0822C_MASTER.md: (1) research/data/t7_cache/corporate_actions_all.json.gz was DEDUPLICATED in place (26,701 duplicate cash-dividend rows removed 385845->359144; 245 duplicate splits removed; original at *.corrupt.bak) -- the overlapping-paging bug doubled the published dividend on ~8% of ex-dates. (2) L4 T7 DE-SIZED to ACTIVE_UNSIZED (0.0): its held-out prior (+3.347 bp, t 2.96) reproduced verbatim on the corrupted cache but COLLAPSES to +0.90 bp (t 0.81), negative at any real half-spread, on the clean cache -- the ~7% of events whose rate was doubled carried the entire edge; spec_sha256 recomputed (e12cb470->fc123807). (3) L2 ETFRV DE-SIZED to ACTIVE_UNSIZED (0.0): 15:45-signal/15:45-fill shared-price artefact, all 5 pairs fail rho1, gross t 17.95->1.05 and net SR 0.74->-8.0 on a 15:50 fill; its band-variant L10 ETFRV_Z20 marked fake-until-respecced in its guard (already 0.0; spec_sha256 4b4a1229->b572b0a6). (4) L3 DUALCLASS stays SIZED but resized to the gap-1 honest expectation ~23.73 bp/round-trip (not the 50.09 bp same-close headline) and BRK.A/BRK.B removed from its universe/cost/whitelist (rho1 -0.459); L11 DUALCLASS_EXIT10 gets the same BRK removal; both spec_sha256 recomputed (DUALCLASS fa67c73f->1e9834e3, DUALCLASS_EXIT10 54e199ac->1e0ab117). (5) The T13 SPY vol overlay (T13-VOL-L60-T0.1-WMAX1.0) is REMOVED from the combined book (vol_overlay.removed_from_combined_book_v9=true): it costs Sharpe in every window on the dollar-neutral book; the book is now unlevered (effective w_vol=1.0) and the overlay weight is logged as a non-applied reference (w_vol_overlay_reference), so the record carries the book WITH and WITHOUT it. The SIZED sleeve is re-normalised to equal 1/4 (risk_budgets_active_v11: T3, DUALCLASS, T12CEF, ORB = 0.25 each, sum 1.0). L1 and the unchanged legs' spec objects are byte-identical (L1/L2 carry no per-leg hash; L5 T12CEF c60ceb57, L6 ORB b875c2fc, L7 XS_GLSR_Z 0df494cf, L8 XS_SMART 28bb4edc, L9 CEFMUNIEQ 7af4baa2, L12 CRYPTO_LOWVOL 08f7e5a1 unchanged). combined_gate.declared_trials_now STAYS 8 (demotions keep counting; the DSR bar does not shrink). The per-leg kill switch (N_min=40), the T-bill benchmark, the as-of/lookahead guards, the no-pre-freeze-row guard and minimum_before_verdict are untouched. preregistration_sha256 re-pinned to the extended .md (v8 hash preserved as preregistration_sha256_v8). Because this is a new freeze version a new ledger begins under it. Ledger empty at this freeze -- freeze precedes observation.",
+  "preregistration_sha256_v8": "cb494729a583a7a905b8caef8e57f44cf8de1e06eb90908931e429197c263961",
+  "preregistration_sha256_v9": "596541302c078077f4e9ce2c2a9c15fb6b86c09043d98691c310183efc405cba",
+  "freeze10_utc": "2026-08-23T12:00:00+00:00",
+  "freeze10_note": "Tenth freeze (v10), 2026-08-23. ADDITIVE, LOGGING-ONLY -- the LAST additions before the forward clock starts Monday, while the ledger is still EMPTY (zero forward observations), so costless now. Adds TWO new ACTIVE_UNSIZED (risk budget 0.0) options-flow legs, each with its OWN spec_sha256, mirroring the L7-L12 unsized pattern, from the INVENT-0823 single-name gamma/options-flow sweep (INVENT_0823_gamma.md; pre-registration INVENT_0823_gamma_PREREGISTRATION.md committed a86abe1 before any backtest number, design table e8dd7a0 before the held-out read) -- the first non-noise theme in six consecutive sweeps. L13 SKEW_TILT = the strong invention survivor S6_SKEW_TILT: the gamma-weighted OTM call-vs-put OI tilt (S6 = (sum_{K>S} g_K*callOI - sum_{K<S} g_K*putOI)/sum g_K*OI), cross-sectionally rank-normalised over the 34 SINGLE NAMES ONLY (the 15 sector/broad ETFs are EXCLUDED -- that half is dead, held-out Sharpe 0.55/net -0.01), dollar-neutral long-top/short-bottom, signal close t -> ENTER open t+1 -> EXIT open t+2, 3.0 bp/side primary; single-name-only held-out gross Sharpe 3.61, net +3.06 @3bp, one-day-gap placebo +3.53, break-even 19.9 bp. L14 SKEW_TILT_CRUDE = the pre-registered greeks-free competitor (callVol-putVol)/(callVol+putVol) with NO greeks/moneyness/gamma, same universe/entry/exit/cost; single-name-only held-out Sharpe 4.47, net +4.33 @3bp -- the Black-Scholes apparatus is decoration, so the real effect is an options ORDER-FLOW imbalance predictor, NOT a dealer-gamma effect. PROMOTION RULE: if the CRUDE matches/beats S6 forward, the CRUDE is the promotion candidate (simpler = less overfit). BOTH are logged UNSIZED, kill-switched forward under the SEVEN kill-guards recorded VERBATIM in each leg's guard_mandatory.seven_kill_guards (60-session minimum; kill if trailing-60 forward gross Sharpe<0 / net@3bp<+1.0 / gap-placebo<+2.0 / single-names sub-book<+1.5; data-continuity VOID rule -- ANY feed/expiry change VOIDS the log rather than degrading it; monthly coverage check), and DELIBERATELY excluded from the combined sized book (never added to contributions). S6's OPEN vol-exposure risk is recorded on both legs' guard_mandatory.open_risks (signal-orthogonalisation on IV+RV cuts held-out Sharpe 3.58->0.95, while the spanning regression prices the vol-book loadings out -- alpha +7.84 bp/day t +3.61 held-out), alongside the 2.5y / monthly-expiry-only / volume-not-OI / mechanism-mis-named caveats. Data: research/data/inv0823_gex/panel.json.gz (already cached; built by scripts/invent0823_gex_{fetch,panel}.py from Alpaca expired-OPRA daily bars) -- NO options venue, NO key, NO order, NO new fetch; the proof reproduces the held-out single-name numbers from this cache via the frozen invent0823_gex_eval engine, and the forward step records a data-availability gate (the frozen panel ends in the past; forward settlement is pending a maintained panel extension -- a DETACHED background expired-OPRA fetch, never inline) and contributes NOTHING, exactly as L7/L8/L12 do. This freeze changes NO sized leg's spec/band/budget and NO existing spec_sha256: L1-L12 spec objects are byte-identical to v9 (L1/L2 carry no per-leg hash; DUALCLASS 1e9834e3, T7 fc123807, T12CEF c60ceb57, ORB b875c2fc, XS_GLSR_Z 0df494cf, XS_SMART 28bb4edc, CEFMUNIEQ 7af4baa2, ETFRV_Z20 b572b0a6, DUALCLASS_EXIT10 1e0ab117, CRYPTO_LOWVOL 08f7e5a1). risk_budgets_active_v11 (the deployed dict) is UNCHANGED -- the four SIZED legs (T3, DUALCLASS, T12CEF, ORB) still carry 1/4 each summing to 1.0, and L13/L14 join L7-L12 at ZERO. combined_gate.declared_trials_now STAYS 8 (both legs are UNSIZED/logging-only, carry no combined-book weight, and are the same options-flow hypothesis at two signal grains; each carries its own declared_trials_in_leg_family=48 for its own DSR, exactly as L8/L10/L11/L12 did not raise the combined count). The per-leg kill switch (N_min=40), the T-bill benchmark, the as-of/lookahead guards, the no-pre-freeze-row guard and minimum_before_verdict are untouched. preregistration_sha256 re-pinned to the extended .md (v9 hash preserved as preregistration_sha256_v9). Because this is a new freeze version a new ledger begins under it. Ledger empty at this freeze -- freeze precedes observation."
+}

@@ -2601,3 +2601,288 @@ The two do not imply each other. A user-ratified decision can remain provisional
   could not see bandwidth, random sampling that could not see a float boundary, and a within-stage
   slot meter read as whole-run progress. That pattern, rather than any individual figure, is the
   finding worth carrying forward.
+
+## 2026-08-17 — B22B has been RUN; `MEASURED_B22B` becomes a gate on an artifact, not a flat refusal
+
+- **Status:** decision, implemented. `scripts/trading_bot/costs.py`, `scripts/trading_bot/__init__.py`,
+  `tests/test_t2_backtest_harness.py`. New data artifacts `research/B22B_SLIPPAGE_RESULT.json` and
+  `research/B22G_BORROW_COST.json`. **Nothing committed; the frozen harness is untouched and still
+  hashes to `a0f1b4c4…`.**
+
+- **What changed and why.** `SlippageProvenance.MEASURED_B22B.assert_available()` used to refuse
+  unconditionally, on the true statement that B22B had never been run. It has now been run over the
+  full pinned 30-day 2025 sample, so that statement is false and the refusal would have been
+  asserting a stale fact. The *rule* behind it is what must survive, so the refusal became a **gate
+  on the result file**: the provenance is available only while `research/B22B_SLIPPAGE_RESULT.json`
+  exists **and reports all 30 pinned days**. Delete it, or truncate it to a partial pass, and the rig
+  refuses again. A partial pass presenting itself as the measurement is exactly the failure the
+  checkpointed runner was added to prevent, so the gate refuses that case by name.
+
+- **The measurement.** 429 triggered stock-days. At the 100 ms rung the median entry slippage is
+  **0 bp of R** — 166 of 429 fill exactly at the stop — verdict **NOT_YET_FATAL**, the most
+  favourable verdict the preregistration permits. The tail is where it bites: p90 **1181 bp of R**
+  and p95 **1654 bp of R**, against the **800 bp of R** the paper reports as its own per-trade edge
+  at the filter it uses. **Roughly one entry in ten costs more than the paper's whole edge**, and
+  this is entry only.
+
+- **Why the cost model charges the MEAN and not the median.** A backtest charges friction on every
+  trade and sums it, so the quantity that governs the equity curve is the mean per trade. The median
+  is zero, and a cost model whose headline number is zero is one bad inference from the failure this
+  module exists to prevent. B22B records `sum` and `n` rather than a mean precisely so the mean can
+  be taken exactly downstream.
+
+- **Precision, deliberately changed.** The cost model reads `notional_centibp` (hundredths of a basis
+  point), not `notional_bp`. Whole basis points are too coarse for this measurement: the typical
+  entry gap is a fraction of a bp on a $50 stock, so integer bp truncates most of the distribution
+  to 0 and makes a genuine small cost indistinguishable from no cost. The mean at 100 ms is
+  **0.81 bp of notional**, which whole-bp arithmetic would have reported as zero.
+
+- **`half_spread` is zero in the measured model, and that is not an omission.** B22B prices the fill
+  at the prevailing ask (long) or bid (short) against a stop set at a traded level, so its number
+  already contains the half-spread. Adding the 2.5 bp half-spread on top would double-count it. The
+  component says so in its own source string rather than relying on a reader knowing it.
+
+- **Borrow is now measured, and the old warning held.** `retail_taker_costs()` carried
+  `borrow_annual = 0.003` with a source string warning that hard-to-borrow names are not that. B22G
+  measured the ORB most-actives pool: easy-to-borrow median **0.33 %/yr**, hard-to-borrow median
+  **10.28 %/yr**, p90 **123 %/yr**, max **259.96 %/yr**. New provenance `VENDOR_FEED_SNAPSHOT` for
+  it, because a snapshot of somebody else's published feed is stronger than a paper's assumption and
+  weaker than our own controlled measurement, and blurring it into either neighbour would lose that.
+
+- **The finding a rate cannot express.** **36 of the 100 names in the ORB pool are hard-to-borrow AND
+  `shortable=False` at Alpaca** — not an expensive short, no short at any price. The short leg is the
+  *majority* of the rule's signals in this sample (227 of 429 triggered stock-days), and **17.2 % of
+  those shorts are in names that cannot be shorted at this broker today**. That is not a cost the
+  model can carry; it removes the trade. `measured_borrow_annual()` states it in the component's
+  source string so it cannot be read as priced-in.
+
+- **What was NOT done.** The frozen harness was not edited — only the runner, and only its fetch
+  layer (per-stock-day checkpointing, backoff-retry, and a worker partition over the pinned days).
+  Early-stopping the trade paging would have cut the run time several-fold and was **rejected after
+  testing**: Alpaca's SIP trade pages are **not** monotonic in time (verified on NVDA, 138,665 trades
+  over 14 pages), so truncating them could miss an earlier-timestamped breach. The run was left slow
+  rather than made subtly wrong.
+
+## 2026-08-17 — The cost model is PER SIDE; the exit leg was being charged the entry's zero spread
+
+- **Status:** decision, implemented. **Ratified by:** agent-proposed (T6, correcting T5).
+  `scripts/trading_bot/costs.py`, `scripts/trading_bot/engine.py`, `scripts/trading_bot/README.md`,
+  `tests/test_t2_backtest_harness.py` (113 tests, all passing). New blocks appended to
+  `research/B22B_SLIPPAGE_RESULT.json` and `research/B22G_BORROW_COST.json`. **Nothing committed;
+  the frozen harness is untouched and still hashes to `a0f1b4c4…`.**
+
+- **The defect.** `b22b_measured_costs()` carries `half_spread = 0`, and the entry above explains
+  why that is correct: B22B prices the fill at the far side of the book against a stop set at a
+  traded level, so its number already contains the spread. But `CostModel.trade_cost_fraction()`
+  charged that single number **side-agnostically**, and `engine.py` handed it the lumped
+  `|pos − prev|`. So every **exit** — a stop-loss market order or a market-on-close, neither of
+  which B22B ever measured — was charged a **zero half-spread** and the entry's small measured
+  drift. The task whose entire purpose was honest net returns shipped a cost model **3.44× cheaper
+  than its own honest lower bound**, biased in the strategy's favour. That is the exact
+  self-deception this programme exists to prevent, and it survived because "the half-spread is
+  legitimately zero here" was true of the leg it was written about and false of the other one.
+
+- **The fix.** There is no side-agnostic spread/slippage number any more.
+  `split_turnover(previous, target)` decomposes each position change into the part that OPENS
+  exposure and the part that CLOSES it — a +1 → −1 reversal is a 1.0 exit *and* a 1.0 entry, not
+  "2.0 of turnover" — and the two legs are priced separately. The decomposition is asserted to sum
+  to the old `|Δpos|`, so it reallocates turnover rather than inventing a charge.
+  `spread_and_slippage_fraction()` and the one-argument `trade_cost_fraction()` both **refuse by
+  name** instead of quietly pricing at the cheaper side, and a `CostModel` built without an exit
+  side refuses to construct: absence is a refusal, never a zero.
+
+- **What the exit is charged, and on what authority.** `exit_half_spread` = max(2.5 bp from
+  Dyhrberg/Shkilko/Werner JFE 168 (2025), half of B22B's own **measured** mean quoted spread over
+  the 429 triggered stock-days = 2.409 bp) → **2.5 bp**. Two unrelated sources landing within 4% of
+  each other is the useful part; charging the larger is the guardrail. `exit_extra_slippage` = the
+  entry's measured magnitude charged **again**, under a new provenance
+  `ADVERSE_PROXY_FOR_AN_UNMEASURED_LEG` so it can never be read as a measurement of the exit. A
+  stop exit is triggered *by* the move going against the position and an MOC takes whatever the
+  auction clears at; no mechanism makes either systematically gentler than a stop entry, and the
+  alternative was zero.
+
+- **Round trip, corrected: 1.63 bp → 5.59 bp** (entry 1.55 + exit 4.05), against
+  `retail_taker_costs()` at 5.00 bp. The measured model is now the *more* expensive of the two,
+  which is the right way round: it is the one carrying an unmeasured leg.
+
+- **The headline entry mean was contaminated, and the contamination flattered us.** The
+  preregistered trigger is "first trade at or through the stop", and SIP includes odd-lot and
+  out-of-sequence prints, so a dislocated print triggers a stock-day at a level nobody could trade;
+  the fill is then measured against a stop that was never really touched, lands in the
+  **favourable** tail, and pulls the charged **mean** down. The 1-ATR sensitivity already in the
+  result file is too loose to catch the very print its own prose cites — TSLA 2025-03-12, a sell
+  stop at $244.30 triggered by a $223.92 print against a $248.07 bid, is **0.92 ATR** through and
+  survives it. `measured_extra_slippage(atr_filter=…)` now names a rung of a published ladder;
+  default **0.1 ATR**, which is not arbitrary but **one full R** (R ≡ 10% of ATR(14), the paper's
+  own risk unit). Mean charged: **0.813 → 1.545 bp (+90%)**. Sensitivity, reported next to it and
+  in the component's own source string: 1.0 ATR 0.852 (+4.8%), 0.5 ATR 1.210 (+48.8%), 0.1 ATR
+  1.545 (+90.0%). `atr_filter=None` still gives the raw preregistered mean and the component then
+  calls itself CONTAMINATED.
+
+- **Two claims from the previous entry are withdrawn as overstated.**
+  1. **"36 of the 100 names cannot be shorted at any price"** — wrong denominator and an overclaim.
+     100 is the size of the ORB **screen input**; the B22B rule only ever screened **52** names, of
+     which **8 are hard-to-borrow and not shortable at Alpaca — 15.4%, not 36%**. And a broker flag
+     measures *this broker's* willingness to locate, not the borrow market: **7 of the 11**
+     hard-to-borrow names with an obtainable IBKR rate have shares **available** to borrow there at
+     2.32–259.96%/yr. They are expensive, not impossible — a **cost** elsewhere, not a constraint.
+     The correct wording is **"not shortable at Alpaca"**.
+  2. **"17.2% of shorts are unavailable"** is arithmetically right (39 of 227) but was presented as
+     a borrow-market fact. **38 of those 39** signals are in **leveraged or inverse ETPs** (SQQQ,
+     TSLL, SOXL, SOXS, MSTU) — an Alpaca **product** restriction, not borrow scarcity. Exactly
+     **one** is an ordinary common stock (ONDS). A universe filter or a different broker removes
+     most of the constraint. The corrected figures live in
+     `B22G_BORROW_COST.json → t6_correction_screened_universe` and are read from there by the cost
+     component, which refuses if the block is missing rather than reverting to the old wording.
+
+- **Tests were changed to CATCH the old behaviour, not to record the new one.** The new
+  `PerSideCostTests` were run against a rebuilt pre-T6 model as a negative control: the exit-costs-
+  more assertion, the ≥5 bp round-trip assertion and the lumped-turnover refusal all **fail**
+  against it and pass against the fix. `test_the_measured_model_does_not_charge_the_spread_twice`
+  was kept (the entry zero is still right) and extended to require the exit spread to be non-zero
+  — the two halves of that test are exactly the distinction that was missed.
+
+- **Stated limit, not fixed here.** A position still open on the final bar is never closed and so
+  never pays an exit; that is honest marking, but it means buy-and-hold pays one entry and no exit,
+  and a comparison against it must not credit the difference. Also unchanged: the exit proxy is a
+  proxy. The real fix is a measured exit, which needs a new pinned harness — B22B is entry-only by
+  design and was not touched.
+
+## 2026-08-18 — The T4 paper bot never filled: `tif=cls` EXPIRES on Alpaca paper, and a non-fill was accruing a phantom weight
+
+- **The defect is measured, not inferred.** T4 was scheduled, firing, owner-authorised and
+  arithmetically correct, and it had placed exactly one order: `3a5487f8-b9bc-46b2-89a1-f19ba46e964c`,
+  93 SPY BUY, `type=market`, `time_in_force=cls`, submitted `2026-08-17T13:50:54Z`. At the close it
+  came back `status="expired"`, `filled_qty=0`, `filled_avg_price=null`, and `GET /v2/positions/SPY`
+  returned 404. **Alpaca's PAPER account does not run the closing auction; a market-on-close order
+  sits all day and expires.** The account's whole order history says the same thing — four orders,
+  three `cls`/`opg` probes and this one, zero fills, ever. So the forward test was not accruing
+  slowly, it was accruing *never*, and would have done so indefinitely without saying so.
+
+- **The execution mechanism changed and nothing else did.** The order is now
+  `type=market, time_in_force=day`, submitted inside `ACTION_WINDOW_ET = 15:50–15:58 ET`, which
+  fills immediately against the paper book. **Verified byte-identical across the change on a pinned
+  clock**, which is the §3 test and the reason this is being reported as maintenance at all:
+  `target_weight = 0.7242369236978444`, `realised_vol_annual = 0.13807636248289454`,
+  reference close `2026-08-14`, **93 shares BUY** — before and after, along with the entire
+  `decision`, `data` and `sizing` blocks. Only `type` and `time_in_force` moved. `T13_FROZEN_CONFIG`,
+  `T13_PREREGISTRATION.md` and `T4_FORWARD_PREREGISTRATION.md` were not touched and their hashes
+  still verify (`0eda5f7a…`, `42ef30e1…`, `52f3eea2…`).
+
+- **THE SECOND BUG WAS WORSE THAN THE FIRST, and it was invisible.** Nothing noticed the non-fill.
+  The decision the expired order was meant to execute stayed queued in `pending_weights`, and two
+  runs later `bind_pending_weight` would have filed a **0.724 weight** into `weight_changes` and
+  `settle` would have advanced the curves for a position **the account never held**. That is a
+  fabricated track record, and in the PnL a phantom weight is indistinguishable from a real one.
+  `reconcile_fill` now resolves an order into one of three states: filled (decision stands; a
+  *partial* fill is flagged for FG3, never silently re-derived), terminal with zero shares (**the
+  pending weight is dropped** — no position was established, so the previous weight stayed in force,
+  which is what the account actually did), or still live (order *and* decision left outstanding and
+  re-asked next run; dropping either would be guessing). Six tests pin this, including an end-to-end
+  one that expires an order and then asserts `weight_changes == {}`, `settled == []` and
+  `equity == 1.0`.
+
+- **The priced rail is now knowingly NOT the executed rail, and that is recorded rather than
+  restated.** The cost model is still M0's auction rail — a MEASURED zero half-spread, measured for
+  an auction this bot no longer trades. A near-close market order crosses the spread and takes a few
+  minutes of drift, so the auction number is a **lower bound** and `cost_if_taker_rail` (2.5 bp/side)
+  is the better model of what is actually paid. **The primary model was deliberately not switched**:
+  restating an accrual mid-flight is exactly what the frozen protocol reserves to FG4, which measures
+  the realised shortfall, and to T4 prereg §5, which restates the entire accrual at the taker rail if
+  FG4 fails. Every record now carries `costs.rail_note` saying so, and `forward_eval`'s FG4 block
+  carries `rail_measured`, derived from `ACTION_WINDOW_ET` so the label cannot drift from the
+  schedule it describes. Note also that `shortfall_bp_adverse_positive` **changed meaning** on this
+  date — near-close market fill vs the print, not auction fill vs the print. Same field, not the same
+  measurement; the drift is unbiased so FG4's *median* threshold still reads correctly, but the
+  dispersion will be wider.
+
+- **OPEN SCOPE CALL FOR THE OWNER — the classification is genuinely ambiguous and is not the agent's
+  to settle.** §3's *operative test* — "would the fix change the weight the strategy targets on a day
+  it already traded?" — is verified **NO**, which makes this maintenance and the ledger continues.
+  But §3's *table* lists **"the execution rail or order type"** in the rule-change column, and
+  `FORWARD_REGISTER.json` describes T4's rail as `"market-on-close both sides, Alpaca PAPER"`, which
+  is now false. §3 itself says ambiguous cases go to the owner with a recommendation.
+  **Recommendation: treat it as maintenance and continue the ledger** — the operative test is
+  unambiguous, and the register records **0 settled sessions and 0 fills**, so there is no accrued
+  evidence that continuing could launder; standing up a new forward test to repair a bot that never
+  once executed would be ceremony over substance. **Either way the register's `rail` field must be
+  corrected**, and because the register is a control document that edit was left to the owner rather
+  than made unilaterally. Proposed value:
+  `"near-close market order (type=market, tif=day, 15:50-15:58 ET) both sides, Alpaca PAPER; was market-on-close until 2026-08-18, which expired unfilled"`.
+
+- **NOT CONFIRMED: a live fill.** The fix was completed while the market was closed (18:47 ET, next
+  open 09:30 ET 2026-08-18), so **no order has yet filled on the paper account and this entry does
+  not claim one.** What was proven: the submit path refuses correctly against the *real* broker clock
+  while the market is closed; the exact payload `run_session` POSTs is `type=market`,
+  `time_in_force=day`, `qty=93`; and a full end-to-end `run_session` submit against a stubbed
+  transport (real class, real gates, real payload builder) writes the fill, the pending order and the
+  byte-identical sizing. **The 2026-08-18 session at 15:50 ET is what will confirm an actual fill**,
+  and until `fill_reconciliation.position_established` is `true` on a real record, it is unconfirmed.
+
+- **The scheduler is now part of the execution price, and the installed cron is thin.** A market DAY
+  order fills *when it is sent*. The window's lower bound is 15:50 specifically because the installed
+  `*/10 12-23 * * 1-5` fires on ten-minute marks — a tighter 15:55–15:58 window would never fire, and
+  a fix that needs a second uninstalled fix is not a fix. That leaves **one attempt per day**;
+  `50-58 12-23 * * 1-5` gives nine and is recommended in `T4_FORWARD.md`. **The crontab was not
+  edited** (the change was blocked by the permission layer and is an operator action). A separate
+  named guard, `SUBMIT_HARD_CUTOFF_ET = 15:59`, refuses submission independently of the window,
+  because a market DAY order landing after the bell queues to the **next open** and would establish
+  the weight one session late at a price from the wrong session — the one execution failure that
+  would corrupt the ledger rather than merely miss a day.
+
+## 2026-08-27 — Memecoin paper evaluation uses executable/full-loss adjudication; clean V3 replaces mixed sniper ledgers
+
+- **Status:** decision, implemented; **PAPER ONLY**. No wallet, signer, key, order, transfer or on-chain
+  write was added or enabled. Old append-only ledgers and frozen instruments were not rewritten.
+
+- **Verified fact — legacy sniper accounting was not one experiment.** The local all-ledger audit found
+  that `live_trades*.jsonl` mixed rows that were gross of toll/tip with later rows that charged both.
+  Its typical inverse-vol order was about **$0.10** while the pinned fixed priority-fee estimate was
+  **$0.075 round trip**, or 75% of notional before venue toll and slippage. Repricing the legacy arms
+  under the current pinned costs makes every arm strongly negative (roughly −1.3R mean). Those files
+  persisted only resolutions: 13 historical watchdog restarts could silently lose open positions and
+  their `frozen_sha256` cannot be recomputed from retained fields. At controlled retirement, the final
+  scorecards still showed **70 open paper positions**; their point-in-time counts and source hashes are
+  preserved in `SNIPER_LEGACY_CUTOVER_2026-08-27.json` and full-loss stressed. Earlier dropout identities
+  remain unknowable.
+
+- **Decision — explicit USD/equity units and append-only lifecycle.** Sniper sizing is now an explicit
+  **$1,000 paper equity per arm**, 2% of *current* equity, $2 minimum, Pump bonding-curve only. Losses
+  change subsequent order sizes. Entry events fsync the full signal, intent, fill, costs, config, equity,
+  canonical commitment and hashes before outcome; a terminal event carries both reported and stress R.
+  Gap-through stops use the worse observed close. A silent horizon has no executable stale-price fill and
+  is full-loss adjudicated. A true process restart terminally marks unresolved entries
+  `INVALID_RESTART_GAP`, charges −100% plus pinned costs, and restores the next process from that reduced
+  adjudication equity.
+
+- **Decision — reconnect is not restart.** V2 immediately demonstrated that ordinary public-stream
+  disconnects rebuilt the strategy book every few minutes. The runtime now exists once per OS process;
+  provider reconnects preserve positions, peaks and flow streaks. V2 remains immutable engineering
+  evidence, including deployment-triggered invalidations, and is not used as the clean strategy cohort.
+  Clean **V3** began only after that fix with empty `v3_*` ledgers and preregistration SHA-256
+  `ea486d591f426bfaec0c8d12a2d7e3b2a711405659b78d9e441582d76191e5e9`. Its primary gate is stress
+  equity/mean R after 100 terminal entries per arm; that paper gate still does not authorize live trading.
+
+- **Verified fact — EXIT did not test Pump.fun.** At the audit snapshot, all 20 resolved PASS trades in
+  `MEMEBOT_EXIT` were non-Pump venues; its $10k reserve floor selected away from the repository's initial
+  Pump bonding-curve scope. It also valued an unavailable exit at the −25% stop floor. The old freeze and
+  ledger remain untouched. New `MEMEBOT_EXIT_V2` is separately frozen: Pump-only scope (off-venue rows
+  enter neither PASS nor control), ≥3 demonstrated sellers, $3k reserve floor, eight-minute horizon,
+  worse-observed stop gaps and −100% unavailable-exit recovery. Its pre-registration hash is
+  `8ffeeb2c250b7fa3c7a8276cfe2263f7a65c682a3d3495d93c51cf7341ae3e96`.
+
+- **Verified fact and decision — genome fitness had survivorship bias.** Terminal `UNPRICED` PASS rows
+  outnumbered priced PASS rows, yet v1 excluded them from `pass_R`; one genome could also be simultaneously
+  falsified and re-declared because the declaration pass ignored the falsified registry. Fitness v2 ranks,
+  kills, declares and confirms on a terminal stream in which `UNPRICED`/`UNEXITABLE` receive the full-loss
+  bound; a claim must clear both displayed priced R and stress R on a fresh slice. Falsified ids cannot
+  re-declare. Provider refusal/budget exhaustion is labeled `UNPRICED_PROVIDER_UNAVAILABLE`, not a fake
+  executable stop, and refresh work is call/wall-clock bounded so a 429 cannot block state persistence or
+  selection. Existing generations remain adaptive-search history, not clean evidence. At implementation,
+  no genome cleared the K-corrected bar after full-loss stress and no edge was confirmed.
+
+- **Verification.** Hermetic MEMEBOT and genome selftests pass; sniper strategy selftest passes 34/34;
+  V2/V3 ledger selftest proves recomputable entry commitments, idempotent restart invalidation and reduced-
+  equity restoration. `memecoin_trade_audit.py` hash-pins the exact byte snapshots it reads and reports
+  legacy, V2/V3, all frozen MEMEBOT instruments and every genome ledger without summing parallel arms into
+  a fictitious portfolio.

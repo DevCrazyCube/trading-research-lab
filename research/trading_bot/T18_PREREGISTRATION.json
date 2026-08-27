@@ -1,0 +1,18 @@
+{
+ "document": "T18_PREREGISTRATION",
+ "status": "FROZEN",
+ "pinned_utc": "2026-08-17T17:57:07+00:00",
+ "hashes": {
+  "scripts/trading_bot/t18_exit_ticks.py": "4973e7619ccf438d56cec2772896e54f7085f949849eae438862741b5946ebdf",
+  "scripts/trading_bot/t18_recost.py": "8ef0cae495ebc6d6e0436e46af02cf9c9240bd17061c5933bfc1faca9edc8202",
+  "scripts/b22b_slippage_harness.py": "a0f1b4c434d89fe54edb4f835f7c5401a5dbc2ca023d155fd9aefad1d8b57baf",
+  "scripts/trading_bot/costs.py": "a8c1c0562b0a1c7136b685a0aa346a404d7872092e4d1f8daa867085be8dbf13",
+  "scripts/trading_bot/t17_orb.py": "c54b0349a847fa05a68bb1050fe8855a74afd549516c910026181458975907c6",
+  "scripts/trading_bot/t17_run.py": "62f0818c4481c73bcb8555c4b911c11c35cb5ec553ccc442599366b2dbf2c7ae"
+ },
+ "results_absent_at_pin_time": [
+  "research/trading_bot/T18_EXIT_MEASUREMENT.json",
+  "research/trading_bot/T18_RECOST_RESULT.json"
+ ],
+ "prereg_sha256_after_substitution": "044090c400b1b21692c73b4d1da45297e4b4960730d4a33788fad94e800c92c4"
+}

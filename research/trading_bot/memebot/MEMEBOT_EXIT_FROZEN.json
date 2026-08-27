@@ -1,0 +1,38 @@
+{
+  "bankroll_sol": 10.0,
+  "benchmarks": {
+    "gate": "screen expectancy must beat BOTH zero AND the control null; the DECIDER is the unexitable-dump rate",
+    "honest_prior": "most memecoins are unexitable traps; enter only proven-exitable ones and leave before the exit closes",
+    "metric": "EXPECTANCY (NET of toll) + the unexitable-dump rate (fraction of PASS trades ending UNEXITABLE_TIMEOUT)",
+    "null": "control = same sizing/stop/target/exit on a deterministic sample of screen-REJECT coins"
+  },
+  "dead_exit": {
+    "after_minutes": 5.0,
+    "flat_band": 0.08,
+    "max_recent_trades": 1
+  },
+  "frozen_utc": "2026-08-27T00:18:04.000000+00:00",
+  "horizon_minutes": 12,
+  "instrument_id": "MEMEBOT_EXIT",
+  "kill_switch": {
+    "N_min": 30,
+    "rule": "HALT if, after n>=N_min resolved PASS trades, mean_R + 1.645*SE < 0 (forward expectancy significantly negative)."
+  },
+  "max_control_per_scan": 3,
+  "max_new_per_scan": 4,
+  "max_open_positions": 6,
+  "position_fraction": 0.02,
+  "preregistration_sha256": "3219c8c67085223f38ed5464d257ac3f742d79bda5b98cf7ac912a846920510b",
+  "screen": {
+    "honeypot_min_buys": 15,
+    "max_buys_per_buyer": 4.0,
+    "max_pool_age_minutes": 30.0,
+    "min_fdv_usd": 7000.0,
+    "min_reserve_usd": 10000.0,
+    "min_sellers": 3,
+    "min_unique_buyers": 12
+  },
+  "stop_frac": 0.25,
+  "target_frac": 0.5,
+  "toll_per_side": 0.015
+}

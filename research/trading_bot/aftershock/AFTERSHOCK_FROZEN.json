@@ -1,0 +1,57 @@
+{
+  "instrument_id": "AFTERSHOCK",
+  "frozen_utc": "2026-08-27T00:30:00.000000+00:00",
+  "preregistration_sha256": "637aaf5f6c9371b873dec179df59b488f3d9ec99241c1aca7910f4638e7b3505",
+  "bankroll_sol": 5.0,
+  "position_fraction": 0.02,
+  "toll_per_side": 0.0125,
+  "stop_frac": 0.5,
+  "target_frac": 0.5,
+  "detector": {
+    "q_sol": 0.1,
+    "cluster_window_slots": 60,
+    "early_buyer_top_k": 3,
+    "material_sell_sol_floor": 0.5,
+    "material_sell_frac_of_R": 0.25,
+    "absorption_window_slots": 60,
+    "absorb_mult": 1.0,
+    "absorb_min_new_wallets": 3,
+    "capacity_recover_frac": 0.9,
+    "capacity_tail_slots": 10,
+    "k60_max": 0.95,
+    "coverage_entry_floor": 10.0
+  },
+  "exit": {
+    "coverage_exit_buffer": 6.0,
+    "cluster_resume_frac_of_R": 0.25,
+    "flow_flip_sell_frac": 0.65,
+    "flow_window_slots": 60,
+    "trail_frac": 0.12,
+    "max_hold_slots": 3000,
+    "flow_min_window_sol": 0.1,
+    "flow_min_trades": 3
+  },
+  "kill_switch": {
+    "N_min": 30,
+    "rule": "HALT if, after n>=N_min resolved PASS trades, upper95(log-growth g) < 0 OR dump_rate >= dump_rate_max"
+  },
+  "dump_rate_max": 0.13,
+  "ecr_fee_schedule": {
+    "fee_bps": 95,
+    "creator_fee_bps": 30,
+    "cashback_fee_bps": 0,
+    "buyback_fee_bps": 5000
+  },
+  "ecr_stress_policy": {
+    "base_fee_lamports": 5000,
+    "priority_fee_lamports": 100000,
+    "tip_lamports": 0,
+    "ata_rent_lamports": 2039280,
+    "failed_attempts": 1
+  },
+  "benchmarks": {
+    "score": "pot growth G = sum ln(1 + position_fraction * stressed_net_return); dump-rate is a hard kill-gate, not the score",
+    "null": "control = a material cluster sell fired but absorption was NOT confirmed; scored identically -> G_control",
+    "honest_prior": "most memecoins are unexitable traps; enter only proven-absorbing survivors and leave before the exit closes"
+  }
+}

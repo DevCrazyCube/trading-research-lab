@@ -1,0 +1,7 @@
+# CONVEXITY pre-registration pins. Lines starting with '#' are audit trail, not pins.
+# v1 (2026-08-26 03:00 CEST, T35): doc 5bded3eaa4fd091954d3f9501ccda4055b0b2e6744847a43a15bd96264295c94
+# A1 (2026-08-26 15:00 CEST, T36): evaluator pinned, doc re-pinned; no rule change.
+505072ce9dcafaab6ba81f8b1fc686680b7effaf3f4751bea7cba22762c484f9  research/trading_bot/CONVEXITY_PREREGISTRATION.md
+d41039dcbae1ed569e7fe7092f34076cb08e0dd8b9c6fe8e8e3a6afa14a2fc30  scripts/trading_bot/convexity_design_costing.py
+1d3e53c425f87f8b1e51c7f634317045166db620bb5494705cb12b75f2b855ed  research/trading_bot/CONVEXITY_DESIGN_COSTING.json
+ba6bb2683436dac889eaf55af4543fd024e570e026dcfdc05b04bf1904b12504  scripts/trading_bot/convexity_evaluate.py
