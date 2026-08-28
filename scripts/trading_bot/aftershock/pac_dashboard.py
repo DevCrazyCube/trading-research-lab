@@ -24,7 +24,7 @@ RESEARCH = ROOT / "research" / "trading_bot" / "aftershock"
 STATE_PATH = RESEARCH / "AFTERSHOCK_PAC_V1_RUNNER_STATE.json"
 LEDGER_PATH = RESEARCH / "AFTERSHOCK_PAC_V1_SCENARIO_LEDGER.jsonl"
 LEDGER_SCHEMA = 2
-STATE_SCHEMA = 2
+STATE_SCHEMA = 3
 _STATUS_TTL_SECONDS = 60.0
 _STATUS_CACHE: dict = {"at": 0.0, "value": None}
 _STATUS_LOCK = threading.Lock()
@@ -369,11 +369,24 @@ def snapshot(*, ledger_path: pathlib.Path = LEDGER_PATH, state_path: pathlib.Pat
         errors.append("ledger rows exist while the current PAC seal/session is not anchored")
         performance = _performance([])
     elif rows:
-        evidence_status = "VALID_PAPER_SCENARIO"
+        evidence_status = ("VALID_PAPER_SCENARIO"
+                           if status.get("latency_calibration") == "CALIBRATED_FORWARD_CLOCKS"
+                           else "VALID_UNCALIBRATED_PAPER_SCENARIO")
         performance = _performance(resolved, performance_events)
     else:
         evidence_status = "NO_FORWARD_EVIDENCE"
         performance = _performance([])
+
+    scenario_resolved = performance["resolved"]
+    calibrated = status.get("latency_calibration") == "CALIBRATED_FORWARD_CLOCKS"
+    promotion_resolved = scenario_resolved if calibrated else 0
+    performance["scenario_resolved"] = scenario_resolved
+    performance["promotion_discovery_resolved"] = promotion_resolved
+    performance["discovery_progress"] = _decimal(Fraction(min(promotion_resolved, 100), 100), 4)
+    performance["calibration_note"] = (
+        "Scenario outcomes do not count toward the 100-position promotion gate until build/sign/send/land "
+        "and failure clocks are measured and separately frozen."
+        if not calibrated else "Measured forward-clock outcomes count toward promotion discovery.")
 
     return {
         "instrument_id": "AFTERSHOCK_PAC_V1",
@@ -395,6 +408,7 @@ def snapshot(*, ledger_path: pathlib.Path = LEDGER_PATH, state_path: pathlib.Pat
         "performance": performance,
         "open_positions": opens,
         "pending_orders": state.get("pending_orders", []),
+        "last_measurement_refusal": state.get("last_measurement_refusal"),
         "activity": list(reversed(activity[-100:])),
         "ledger_rows": len(rows),
         "generated_at": time.time(),

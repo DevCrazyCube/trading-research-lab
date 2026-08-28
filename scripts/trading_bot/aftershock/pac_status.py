@@ -96,6 +96,8 @@ def status() -> dict:
         "runner_state": runner_state,
         "runner_core": "READY_PAPER_SCENARIO",
         "runner_audit": "GO_CAUSAL_ALL_COST_CRASH_ATOMIC",
+        "latency_calibration": "CALIBRATION_UNCALIBRATED",
+        "promotion_discovery_enabled": False,
         "runner_command": "python -m scripts.trading_bot.aftershock.pac_runner --reaction-nanos <EXPLICIT>",
         "boundary": "PAPER SCENARIO ONLY; no wallet/order path",
         "computed_seal_sha256": computed["seal_sha256"],

@@ -30,6 +30,30 @@ invalid as return evidence. PAC V1 inherits only its mechanism hypothesis—exte
 they can pay sellers—and runs through the causal measurement chain as a new instrument. Old ledgers are
 preserved and never merged.
 
+**Post-activation measurement repair, 2026-08-28.** The first anchored session produced one entry
+decision but no attempted fill, open position, ledger row, resolved outcome, or performance observation.
+It exposed two runner liveness defects before any outcome existed: candidate enumeration used an older
+cutoff than the internal decision clock, so a newly materialised pre-decision observation permanently
+invalidated the saved prefix; and a right-censored attempt remained fillable forever. That session is
+burned as a measurement diagnostic and cannot enter any denominator. The replacement session freezes:
+
+- schema-3 state records the last measurement refusal independently of the performance ledger;
+- a late pre-decision observation invalidates the incomplete decision, records a no-cost diagnostic,
+  and releases the single-position lock. It never receives a retrospective fill;
+- a right-censored entry is one closed no-trade diagnostic, not an indefinitely pending order;
+- a right-censored trail/capacity exit releases that attempt and requires a fresh decision. At the
+  12-minute hard horizon, a still-unobservable execution boundary is stressed to exact full loss;
+- a priceable exit whose all-cost wallet proceeds are non-positive may hold for recovery, but once the
+  frozen trail, capacity, or horizon rule requests exit it settles as exact full loss without inventing
+  a successful sell or charging an unobserved attempt;
+- candidate inventory is refreshed immediately before the internally clocked decision. Any remaining
+  snapshot race still fails closed under the invalidation rule above.
+
+The `800,000,000` ns runner setting remains `CALIBRATION_UNCALIBRATED`. Resolved rows from that setting
+are feasibility scenarios only and **do not increment the 100-position promotion discovery counter**.
+That counter starts only under a separately frozen engine backed by measured build/sign/send/land clocks
+and failure observations. No threshold, detector formula, size, trail, coverage, or horizon changed.
+
 ## Hypothesis and unique formula
 
 Pump.fun losses in this repository have two dominant forms: no executable exit, or frequent churn whose

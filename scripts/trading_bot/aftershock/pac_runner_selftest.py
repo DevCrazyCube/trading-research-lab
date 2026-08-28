@@ -94,6 +94,41 @@ def main() -> int:
                                                "point-in-time-fixture", "d" * 64),
                     decision_unix_nanos=T0 + 1_600_000_000, max_staleness_nanos=100_000_000)
 
+                # Reproduce the production liveness defect: the admitted prefix ends at +1.6s,
+                # decision time is +1.9s, and a +1.8s observation appears on the next read.  It must
+                # invalidate the incomplete decision and release the book, never fill retrospectively.
+                state = runner.load_state()
+                with mock.patch.object(execution.time, "time_ns", return_value=T0 + 1_900_000_000):
+                    runner.drive_once(events[:4], state, ctx, q_lamports=q,
+                                      latency=latency, price_fn=price_fn)
+                with mock.patch.object(runner.time, "time_ns", return_value=T0 + 2_100_000_000):
+                    with mock.patch.object(execution.time, "time_ns", return_value=T0 + 2_100_000_000):
+                        runner.drive_once(events[:6], state, ctx, q_lamports=q,
+                                          latency=latency, price_fn=price_fn)
+                ok &= _check("late pre-decision observation invalidates instead of wedging/filling",
+                             not state["pending_orders"] and not state["open_positions"]
+                             and not _rows()
+                             and state["last_measurement_refusal"]["reason"]
+                             == "LATE_PREDECISION_OBSERVATION")
+
+                # A decision with no post-landing observation is one closed censored attempt, not an
+                # indefinitely fillable pseudo-order that monopolises the one-position book.
+                _reset_files()
+                state = runner.load_state()
+                with mock.patch.object(execution.time, "time_ns", return_value=T0 + 1_600_000_000):
+                    runner.drive_once(events[:4], state, ctx, q_lamports=q,
+                                      latency=latency, price_fn=price_fn)
+                with mock.patch.object(runner.time, "time_ns", return_value=T0 + 1_900_000_000):
+                    with mock.patch.object(execution.time, "time_ns", return_value=T0 + 1_900_000_000):
+                        runner.drive_once(events[:4], state, ctx, q_lamports=q,
+                                          latency=latency, price_fn=price_fn)
+                ok &= _check("right-censored entry releases the book as a no-trade diagnostic",
+                             not state["pending_orders"] and not state["open_positions"]
+                             and not _rows()
+                             and state["last_measurement_refusal"]["reason"]
+                             == "RIGHT_CENSORED_NO_BOUNDARY")
+
+                _reset_files()
                 state = runner.load_state()
                 with mock.patch.object(execution.time, "time_ns", return_value=T0 + 1_600_000_000):
                     runner.drive_once(events[:4], state, ctx, q_lamports=q,
@@ -175,6 +210,56 @@ def main() -> int:
                              loss["unexitable_full_loss"] is True
                              and loss["net_return_num"] == -loss["net_return_den"]
                              and loss["exit_attempt_id"] is None)
+
+                # A priceable exit whose gas exceeds gross proceeds is economically zero, not a
+                # ValueError/refusal loop.  It may HOLD for recovery, but an actual horizon trigger
+                # settles conservatively as an exact full loss without inventing a sell attempt.
+                _reset_files()
+                state = runner._new_state()
+                state["session_event_sha256"] = ctx.session.session_event_sha256
+                state["activation_root_sha256"] = ctx.session.activation_root_sha256
+                state["open_positions"] = [runner.position_to_dict(position)]
+                runner.save_state(state)
+                negative_exit = {
+                    "side": "EXIT", "out_amount": 100_000, "out_unit": execution.Unit.LAMPORTS,
+                    "gross_quote_lamports": 100_000, "curve_fee_lamports": 10_000,
+                    "attempt_cost_lamports": 200_000, "ata_rent_lamports": 0,
+                    "wallet_delta_lamports": -110_000,
+                }
+                horizon_time = T0 + 800_000_000_000
+                with mock.patch.object(feasibility, "kernel_accounting", return_value=negative_exit):
+                    with mock.patch.object(execution.time, "time_ns", return_value=horizon_time):
+                        runner.drive_once(events[:6], state, ctx, q_lamports=q,
+                                          latency=latency, price_fn=price_fn)
+                dust_loss = [r for r in _rows() if r["kind"] == "resolved"][0]
+                ok &= _check("net-nonpositive horizon exit settles full loss and releases lock",
+                             not state["open_positions"] and not state["pending_orders"]
+                             and dust_loss["unexitable_full_loss"] is True
+                             and dust_loss["net_return_num"] == -dust_loss["net_return_den"]
+                             and "NET_EXIT_NONPOSITIVE_AT_ATTEMPT_FULL_EXIT_HORIZON"
+                             in dust_loss["labels"])
+
+                # A positive horizon quote can still lack a later execution boundary.  At the hard
+                # horizon that censor is stressed to full loss, so one dead tape cannot wedge forever.
+                _reset_files()
+                state = runner._new_state()
+                state["session_event_sha256"] = ctx.session.session_event_sha256
+                state["activation_root_sha256"] = ctx.session.activation_root_sha256
+                state["open_positions"] = [runner.position_to_dict(position)]
+                runner.save_state(state)
+                with mock.patch.object(execution.time, "time_ns", return_value=horizon_time):
+                    runner.drive_once(events[:6], state, ctx, q_lamports=q,
+                                      latency=latency, price_fn=price_fn)
+                with mock.patch.object(runner.time, "time_ns", return_value=horizon_time + 1):
+                    with mock.patch.object(execution.time, "time_ns", return_value=horizon_time + 1):
+                        runner.drive_once(events[:6], state, ctx, q_lamports=q,
+                                          latency=latency, price_fn=price_fn)
+                censored_loss = [r for r in _rows() if r["kind"] == "resolved"][0]
+                ok &= _check("right-censored hard-horizon exit becomes full loss, never a permanent lock",
+                             not state["open_positions"] and not state["pending_orders"]
+                             and censored_loss["unexitable_full_loss"] is True
+                             and "HORIZON_EXIT_RIGHT_CENSORED_FULL_LOSS"
+                             in censored_loss["labels"])
 
                 # Write-ahead ledger: crash before append and crash after append each recover once.
                 for crash_point in ("before_append", "after_append"):

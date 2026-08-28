@@ -32,7 +32,7 @@ from .execution import (
 INSTRUMENT = "AFTERSHOCK_PAC_V1"
 RUNNER_PATH = "scripts/trading_bot/aftershock/pac_runner.py"
 DETECTOR_PATH = "scripts/trading_bot/aftershock/pac_detector.py"
-STATE_SCHEMA = 2
+STATE_SCHEMA = 3
 LEDGER_SCHEMA = 2
 SLIPPAGE_BPS = 1_000
 SLIPPAGE_DEN = 10_000
@@ -106,6 +106,7 @@ def _new_state() -> dict:
         "pending_ledger_rows": [],
         "scan_watermark_unix_nanos": None,
         "last_entry_signal_observation_unix_nanos": None,
+        "last_measurement_refusal": None,
     }
 
 
@@ -267,6 +268,22 @@ def _validate_state(state: dict) -> dict:
         value = state[name]
         if value is not None and (type(value) is not int or value < 0):
             raise RefusedExecution(f"runner {name} is invalid")
+    refusal = state["last_measurement_refusal"]
+    if refusal is not None:
+        required = {"reason", "side", "mint", "decision_id", "recorded_unix_nanos"}
+        if not isinstance(refusal, dict) or set(refusal) != required:
+            raise RefusedExecution("runner measurement refusal is malformed")
+        if refusal["reason"] not in {
+                "LATE_PREDECISION_OBSERVATION", "RIGHT_CENSORED_NO_BOUNDARY"}:
+            raise RefusedExecution("runner measurement refusal reason is unknown")
+        if refusal["side"] not in {"ENTRY", "EXIT"}:
+            raise RefusedExecution("runner measurement refusal side is invalid")
+        if (not isinstance(refusal["mint"], str) or not refusal["mint"]
+                or not isinstance(refusal["decision_id"], str)
+                or len(refusal["decision_id"]) != 64
+                or type(refusal["recorded_unix_nanos"]) is not int
+                or refusal["recorded_unix_nanos"] < 0):
+            raise RefusedExecution("runner measurement refusal fields are invalid")
     session_values = (state["session_event_sha256"], state["activation_root_sha256"])
     if (session_values[0] is None) != (session_values[1] is None):
         raise RefusedExecution("runner session binding is partial")
@@ -356,19 +373,23 @@ def _nonfill_row(pending: dict, attempt, ctx: ExecutionContext) -> dict:
 
 
 def _resolved_row(position: OpenPosition, *, action: str, decision_id: str,
-                  attempt=None, accounting: dict | None, ctx: ExecutionContext) -> dict:
+                  attempt=None, accounting: dict | None, ctx: ExecutionContext,
+                  extra_labels: tuple[str, ...] = ()) -> dict:
     unavailable = accounting is None
     exit_net = 0 if unavailable else int(accounting["wallet_delta_lamports"])
     if exit_net < 0:
         raise RefusedExecution("exit net proceeds cannot be negative")
     boundary_obs = None
-    labels: list[str] = []
+    if (not isinstance(extra_labels, tuple)
+            or any(not isinstance(label, str) or not label for label in extra_labels)):
+        raise RefusedExecution("resolved extra labels must be non-empty strings in a tuple")
+    labels: list[str] = list(extra_labels)
     outcome = Outcome.SCENARIO_UNAVAILABLE.value
     attempt_id = None
     if attempt is not None:
         attempt_id = attempt.attempt_id
         outcome = attempt.outcome.value
-        labels = list(attempt.labels)
+        labels.extend(attempt.labels)
         boundary_obs = attempt.clocks.scenario_boundary_observation_unix_nanos
     return _ledger_row({
         "kind": "resolved", "mint": position.mint, "action": action,
@@ -395,6 +416,19 @@ def _resolved_row(position: OpenPosition, *, action: str, decision_id: str,
     }, ctx)
 
 
+def _record_measurement_refusal(state: dict, pending: dict, reason: str) -> None:
+    if reason not in {"LATE_PREDECISION_OBSERVATION", "RIGHT_CENSORED_NO_BOUNDARY"}:
+        raise RefusedExecution("unknown bounded measurement refusal")
+    decision = _decision_from_dict(pending["decision"])
+    state["last_measurement_refusal"] = {
+        "reason": reason,
+        "side": pending["side"],
+        "mint": pending["mint"],
+        "decision_id": decision.decision_id,
+        "recorded_unix_nanos": time.time_ns(),
+    }
+
+
 def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
                      latency: LatencyModel, price_fn) -> bool:
     """Advance one durable order. Return True when it remains right-censored."""
@@ -406,9 +440,36 @@ def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
     decision = _decision_from_dict(pending["decision"])
     kind = IntentKind.EXACT_QUOTE_BUY if pending["side"] == "ENTRY" else IntentKind.EXACT_TOKEN_SELL
     intent = OrderIntent(kind, pending["amount"], pending["min_out"])
-    attempt = attempt_order(events, decision, intent, latency, ctx, price_fn)
+    try:
+        attempt = attempt_order(events, decision, intent, latency, ctx, price_fn)
+    except RefusedExecution as exc:
+        if str(exc) != "DecisionRecord omitted an observation already available at decision time":
+            raise
+        # A feed observation materialised between the runner's admission snapshot and its internal
+        # decision clock.  The original decision is no longer a complete prefix, so it may never fill
+        # retrospectively.  Invalidate it durably and release the single-position lock.
+        state["pending_orders"] = []
+        _record_measurement_refusal(state, pending, "LATE_PREDECISION_OBSERVATION")
+        save_state(state)
+        return False
     if attempt.outcome is Outcome.RIGHT_CENSORED_NO_BOUNDARY:
-        return True
+        # One historical decision cannot remain fillable forever.  ENTRY becomes a no-trade
+        # measurement refusal.  A censored non-horizon EXIT is retried only via a fresh decision;
+        # at the hard horizon the conservative portfolio outcome is an exact full loss.
+        state["pending_orders"] = []
+        _record_measurement_refusal(state, pending, "RIGHT_CENSORED_NO_BOUNDARY")
+        if (pending["side"] == "EXIT"
+                and pending["action"] == _policy.ExitAction.ATTEMPT_FULL_EXIT_HORIZON.value):
+            position = position_from_dict(state["open_positions"][0])
+            row = _resolved_row(
+                position, action=_policy.ExitAction.UNEXITABLE_FULL_LOSS.value,
+                decision_id=decision.decision_id, accounting=None, ctx=ctx,
+                extra_labels=("HORIZON_EXIT_RIGHT_CENSORED_FULL_LOSS",))
+            state["open_positions"] = []
+            _commit(state, [row])
+        else:
+            save_state(state)
+        return False
 
     state["pending_orders"] = []
     if attempt.outcome is not Outcome.SCENARIO_FILLED:
@@ -478,10 +539,15 @@ def _build_exit(state: dict, position: OpenPosition, events: list, ctx: Executio
     intent = OrderIntent(IntentKind.EXACT_TOKEN_SELL, position.token_atoms, 1)
     try:
         quote = feasibility.kernel_accounting(observed.post_state, intent)
-        net_quote = int(quote["wallet_delta_lamports"])
+        raw_net_quote = int(quote["wallet_delta_lamports"])
+        # The pure policy consumes non-negative executable value.  A priceable dust exit can have
+        # negative wallet value once gas exceeds proceeds; treat its economic value as zero while
+        # still allowing recovery before an actual exit trigger.
+        net_quote = max(0, raw_net_quote)
         reserve = observed.post_state.real_quote
     except PriceUnavailable:
         quote = None
+        raw_net_quote = None
         net_quote = None
         reserve = None
     policy_state = _policy.PositionState(
@@ -501,6 +567,18 @@ def _build_exit(state: dict, position: OpenPosition, events: list, ctx: Executio
     if exit_decision.action is _policy.ExitAction.UNEXITABLE_FULL_LOSS:
         row = _resolved_row(position, action=exit_decision.action.value,
                             decision_id=decision.decision_id, accounting=None, ctx=ctx)
+        state["open_positions"] = []
+        _commit(state, [row])
+        return
+    if raw_net_quote is not None and raw_net_quote <= 0:
+        # HOLD above is deliberate: dust may recover.  Once trail/capacity/horizon requests an exit,
+        # sending a transaction whose all-cost proceeds are non-positive only worsens the wallet.
+        # Settle the already-paid entry as an exact full loss and release the book without inventing
+        # a successful sell or charging an unobserved attempt.
+        row = _resolved_row(
+            position, action=_policy.ExitAction.UNEXITABLE_FULL_LOSS.value,
+            decision_id=decision.decision_id, accounting=None, ctx=ctx,
+            extra_labels=(f"NET_EXIT_NONPOSITIVE_AT_{exit_decision.action.value}",))
         state["open_positions"] = []
         _commit(state, [row])
         return
@@ -664,8 +742,12 @@ def _run_cycle_unlocked(*, reaction_nanos: int) -> dict:
             events = _causal_events(mint, ctx.session, cutoff)
             if events and events[-1].observation_unix_nanos > previous:
                 candidates.append((events[-1].observation_unix_nanos, mint, events))
-    for _latest, mint, events in sorted(candidates):
-        drive_once(events, state, ctx, q_lamports=q, latency=latency,
+    for _latest, mint, _admission_events in sorted(candidates):
+        # Candidate inventory can take seconds across thousands of mint files.  Refresh the chosen
+        # mint immediately before its internally-clocked decision so a stale admission snapshot does
+        # not poison every later attempt.  The watermark still prevents retrospective admission.
+        decision_events = _causal_events(mint, ctx.session, time.time_ns())
+        drive_once(decision_events, state, ctx, q_lamports=q, latency=latency,
                    entry_after_unix_nanos=previous)
         if _active_mint(state) is not None:
             return {"status": "ENTRY_DECISION_PERSISTED", "cutoff_unix_nanos": cutoff,

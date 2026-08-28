@@ -19,11 +19,13 @@ def _check(label, condition):
     return bool(condition)
 
 
-def _status(anchored=True):
+def _status(anchored=True, calibrated=False):
     return {"status": "NOT_ACTIVE", "strategy_process": False,
             "seal": "ANCHORED" if anchored else "UNANCHORED",
             "activation": "ANCHORED" if anchored else "ABSENT_OR_UNANCHORED",
-            "dependency_count": 25, "open_gates": []}
+            "dependency_count": 25, "open_gates": [],
+            "latency_calibration": ("CALIBRATED_FORWARD_CLOCKS" if calibrated
+                                    else "CALIBRATION_UNCALIBRATED")}
 
 
 def _seal(body):
@@ -88,11 +90,20 @@ def main() -> int:
         _write(state, _state())
         good = dash.snapshot(ledger_path=ledger, state_path=state, status_snapshot=_status(True))
         ok &= _check("all-cost rows include failed-attempt gas in the portfolio curve",
-                     good["evidence_status"] == "VALID_PAPER_SCENARIO"
+                     good["evidence_status"] == "VALID_UNCALIBRATED_PAPER_SCENARIO"
                      and good["performance"]["equity_curve"]
                      == ["100.0000", "102.0000", "101.9000", "91.9000"]
                      and good["performance"]["full_losses"] == 1
-                     and good["performance"]["failed_attempt_cost_events"] == 1)
+                     and good["performance"]["failed_attempt_cost_events"] == 1
+                     and good["performance"]["scenario_resolved"] == 2
+                     and good["performance"]["promotion_discovery_resolved"] == 0)
+
+        calibrated = dash.snapshot(
+            ledger_path=ledger, state_path=state, status_snapshot=_status(True, calibrated=True))
+        ok &= _check("only measured forward-clock rows increment promotion discovery",
+                     calibrated["evidence_status"] == "VALID_PAPER_SCENARIO"
+                     and calibrated["performance"]["promotion_discovery_resolved"] == 2
+                     and calibrated["performance"]["discovery_progress"] == "0.0200")
 
         legacy = dict(rows[1]); legacy.pop("entry_all_in_lamports")
         ledger.write_text(json.dumps(rows[0]) + "\n" + json.dumps(legacy) + "\n")

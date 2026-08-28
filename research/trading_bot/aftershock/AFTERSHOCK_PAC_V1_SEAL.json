@@ -16,7 +16,7 @@
     "scripts/trading_bot/aftershock/pac_detector.py": "4f2465a90bab65cc8ef7be2ee6382d589d8ed9dd1752a332a42d73644263f486",
     "scripts/trading_bot/aftershock/pac_feed.py": "4abb1f9d7ee8f7ff95d9905fa61192461f1275c86ff6829372b3166f6ee9e5f1",
     "scripts/trading_bot/aftershock/pac_policy.py": "c97d676a780708ba54d40f37c99f8c4a9a1326640de597682d37d1bab2e3bd09",
-    "scripts/trading_bot/aftershock/pac_runner.py": "de322d7ee0a0f486a4de742b60fd7dba549a26d5094a00ba86ca9f781d4f1aa1",
+    "scripts/trading_bot/aftershock/pac_runner.py": "c5bcfc5a5f4ce40789ee0c7ea98d2a24c18f85122e2957fe8e98b80e7c466676",
     "scripts/trading_bot/aftershock/solusd_recorder.py": "2ec9f2b0fbd23c2a439bbea554404275bb50a998ab6a7bf8c7ce2ee90cee46e5",
     "scripts/trading_bot/aftershock/tape.py": "6868e8e7959c0b4b1d1bdd743a59a3831b473514ca2e72441a3c7fb9543e7f7c",
     "scripts/trading_bot/memebot/__init__.py": "b067ae15baaabd11c3d15b6c5c38b68047637692590a4688ecb31b28dd4fcb28",
@@ -26,9 +26,9 @@
     "scripts/trading_bot/memestream/rpc_ingest.py": "e88750a2fef2853c70a4c7152c714acf4608dc08ac8e8e8460c553cf85a448fe",
     "scripts/trading_bot/sniper/data/_common.py": "d07d43bdf1c356be621defc138968c6e4314d704245dacf3463764e2c5de7f9e"
   },
-  "frozen_json_canonical_sha256": "c1e8d744e92904c89b222da2186a7334b3cdc9fd6930131a6f075b2491fb0aca",
+  "frozen_json_canonical_sha256": "8f5c56fe9f941f0adb8666750a9a6186d6e359bc981f8c060af426498cdd6d63",
   "instrument_id": "AFTERSHOCK_PAC_V1",
-  "prereg_sha256": "972124ce32f6cd52f7e22f55e70e497bc6a9911fa7716be0f66ad6a4baca8e5c",
+  "prereg_sha256": "e1a92a00b997e43c818ca6ea3d16fb9b5984893dfb1ff43e0e17e13233ddd7d9",
   "schema_version": 3,
-  "seal_sha256": "e9fb7a9ba6bb64063a9fd0ba4147d28fb8fc20e5be89373fa12c0a003cebbe82"
+  "seal_sha256": "eaa7cce92068355c1c719b743c4ca3cf208cc0c0e5ecd1707b0588e656928108"
 }

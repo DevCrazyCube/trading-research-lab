@@ -91,6 +91,20 @@ Outcomes are explicitly scenario outcomes:
 - `SCENARIO_UNAVAILABLE`
 - `RIGHT_CENSORED_NO_BOUNDARY`
 
+### Persistent PAC orchestration boundary
+
+`RIGHT_CENSORED_NO_BOUNDARY` closes one attempt; it is not permission for a saved historical decision
+to remain fillable forever. PAC schema-3 therefore clears a censored entry as a no-trade diagnostic. A
+censored trail/capacity sell can be requested again only through a fresh exit DecisionRecord. If the
+12-minute hard-horizon sell is still censored, the portfolio stress outcome is exact full loss and the
+single-position lock is released. Likewise, a triggered priceable exit with non-positive all-cost wallet
+proceeds settles as exact full loss rather than crashing on a negative value or inventing a successful
+sell. These are runner portfolio semantics; they do not relabel the engine AttemptRecord.
+
+If a feed observation materialises between candidate snapshot and internal decision clock, the saved
+prefix is incomplete. PAC invalidates that decision as a no-cost/no-fill diagnostic and releases it.
+The raw observation remains preserved; it is never deleted to make the decision validate.
+
 ## Orders, costs, and retries
 
 Only typed intents exist:

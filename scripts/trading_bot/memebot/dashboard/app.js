@@ -951,7 +951,7 @@ function pacPct(v){
   if(v==null || v==="") return "—";
   const n=Number(v); return Number.isFinite(n)?(n*100).toFixed(1)+"%":"—";
 }
-function pacEquityChart(raw, evidenceStatus){
+function pacEquityChart(raw, evidenceStatus, pendingCount=0){
   const vals=(raw||[]).map(Number).filter(Number.isFinite);
   const data=vals.length?vals:[100];
   const w=920,h=250,l=58,r=18,t=18,b=34, innerW=w-l-r, innerH=h-t-b;
@@ -968,7 +968,12 @@ function pacEquityChart(raw, evidenceStatus){
     data.map((v,i)=>`${x(i)},${y(v)}`).join(" ");
   const baseY=y(100), last=data[data.length-1], cls=last>=100?"up":"down";
   const area=`${l},${baseY} ${pts} ${w-r},${baseY}`;
-  const waiting=data.length===1?`<text x="${l+innerW/2}" y="${t+innerH/2}" text-anchor="middle" class="pac-wait">${esc(evidenceStatus==="NO_FORWARD_EVIDENCE"?"WAITING FOR ANCHORED FORWARD TRADES":"PERFORMANCE REFUSED BY EVIDENCE GATE")}</text>`:"";
+  const waitingLabel=pendingCount>0
+    ? `${pendingCount} ENTRY SIGNAL${pendingCount===1?"":"S"} · WAITING FOR CAUSAL FILL`
+    : (evidenceStatus==="NO_FORWARD_EVIDENCE"
+      ? "WAITING FOR ANCHORED FORWARD TRADES"
+      : "PERFORMANCE REFUSED BY EVIDENCE GATE");
+  const waiting=data.length===1?`<text x="${l+innerW/2}" y="${t+innerH/2}" text-anchor="middle" class="pac-wait">${esc(waitingLabel)}</text>`:"";
   return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="PAC normalized performance index">
     ${grid}<line x1="${l}" y1="${baseY}" x2="${w-r}" y2="${baseY}" class="pac-baseline"/>
     <polygon points="${area}" class="pac-area ${cls}"/><polyline points="${pts}" class="pac-line ${cls}"/>
@@ -996,23 +1001,31 @@ function renderPAC(){
 function renderPACView(){
   const d=state.pac, strip=document.getElementById("pacStrip"); if(!strip||!d) return;
   const perf=d.performance||{}, op=d.operational||{}, errors=d.integrity_errors||[];
-  const valid=d.evidence_status==="VALID_PAPER_SCENARIO", noData=d.evidence_status==="NO_FORWARD_EVIDENCE";
+  const pendings=d.pending_orders||[], opens=d.open_positions||[];
+  const validScenario=String(d.evidence_status||"").startsWith("VALID_");
+  const validPromotion=d.evidence_status==="VALID_PAPER_SCENARIO";
+  const noData=d.evidence_status==="NO_FORWARD_EVIDENCE";
   const statusBadge=document.getElementById("pacStatusBadge");
-  if(statusBadge){ statusBadge.className=`killtag ${valid?'alive':'halt'}`; statusBadge.textContent=esc(d.evidence_status||"REFUSED"); }
+  if(statusBadge){ statusBadge.className=`killtag ${validScenario?'alive':'halt'}`; statusBadge.textContent=esc(d.evidence_status||"REFUSED"); }
   const boundary=document.getElementById("pacBoundary");
-  if(boundary) boundary.innerHTML=`<strong>${esc(d.boundary||"")}</strong><span>${esc(errors[0]||(!noData?"Only fully-costed anchored rows can move this chart.":"No forward rows exist yet; baseline is not a performance result."))}</span>`;
+  if(boundary) boundary.innerHTML=`<strong>${esc(d.boundary||"")}</strong><span>${esc(errors[0]||(!noData
+    ? "Only fully-costed anchored rows can move this chart."
+    : (pendings.length
+      ? `${pendings.length} causal order pending; it is not a fill and cannot move performance.`
+      : "No forward rows exist yet; baseline is not a performance result.")))}</span>`;
   const cells=[
-    ["Capital index",pacNum(perf.normalized_capital_index,2),`start 100 · normalized, not USD`,valid?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
+    ["Capital index",pacNum(perf.normalized_capital_index,2),`uncalibrated scenario index`,validScenario?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
     ["Mean all-cost R",perf.mean_return_r==null?"—":(Number(perf.mean_return_r)>=0?"+":"")+pacNum(perf.mean_return_r,3),`${perf.resolved||0} fully reconciled`,perf.mean_return_r==null?"muted":(Number(perf.mean_return_r)>0?"pos":"neg")],
     ["Win rate",pacPct(perf.win_rate),`${perf.wins||0} wins · ${perf.losses||0} losses`,""],
     ["Unexitable",pacPct(perf.unexitable_rate),`${perf.full_losses||0} full losses`,perf.unexitable_rate==null?"muted":(Number(perf.unexitable_rate)<.13?"pos":"neg")],
     ["Max drawdown",pacPct(perf.max_drawdown),"normalized 100-index",perf.max_drawdown==null?"muted":""],
-    ["Discovery",`${perf.resolved||0} / ${perf.minimum_discovery||100}`,`${pacPct(perf.discovery_progress)} complete`,""],
-    ["Open",String((d.open_positions||[]).length),"max one position",""],
+    ["Discovery",`${perf.promotion_discovery_resolved||0} / ${perf.minimum_discovery||100}`,`${perf.scenario_resolved||0} uncalibrated scenario outcomes`,""],
+    ["Pending",String(pendings.length),pendings.length?`${String(pendings[0].side||"order").toLowerCase()} awaiting causal fill`:"no order waiting",pendings.length?"warn":""],
+    ["Open",String(opens.length),"max one filled position",""],
     ["Seal",esc(op.seal||"?"),`activation ${op.activation||"?"} · ${op.dependency_count||"?"} deps`,op.seal==="ANCHORED"?"pos":"neg"],
   ];
   strip.innerHTML=cells.map(c=>`<div class="cell"><div class="lbl">${esc(c[0])}</div><div class="val ${c[3]||""}">${c[1]}</div><div class="sub">${esc(c[2])}</div></div>`).join("");
-  const chart=document.getElementById("pacChart"); if(chart) chart.innerHTML=pacEquityChart(perf.equity_curve,d.evidence_status);
+  const chart=document.getElementById("pacChart"); if(chart) chart.innerHTML=pacEquityChart(perf.equity_curve,d.evidence_status,pendings.length);
   const last=document.getElementById("pacLast"); if(last){last.textContent=pacNum(perf.normalized_capital_index,2);last.className=`pac-last ${Number(perf.normalized_capital_index)>=100?'pos':'neg'}`;}
   const note=document.getElementById("pacChartNote"); if(note) note.textContent=perf.numeraire_note||"Performance stays blank until evidence passes every gate.";
   const formula=document.getElementById("pacFormula"); if(formula) formula.textContent=d.formula||"—";
@@ -1026,17 +1039,31 @@ function renderPACView(){
       [(op.tape_files_with_current_causal_schema||0)>0,"causal tape",`${op.tape_files_with_current_causal_schema||0} mint files`],
       [op.runner_audit==="PASS"||String(op.runner_audit||"").startsWith("GO_"),
         "runner audit",op.runner_audit||"not recorded"],
-      [valid,"performance evidence",d.evidence_status||"unknown"],
+      [op.latency_calibration==="CALIBRATED_FORWARD_CLOCKS","latency",op.latency_calibration||"unknown"],
+      [validPromotion,"promotion evidence",d.evidence_status||"unknown"],
     ];
     gates.innerHTML=rows.map(r=>`<div class="pac-gate"><span class="dot ${r[0]?'ok':'bad'}"></span><span>${esc(r[1])}</span><strong>${esc(r[2])}</strong></div>`).join("")+
       (op.open_gates||[]).map(g=>`<div class="pac-open-gate">OPEN · ${esc(g)}</div>`).join("");
   }
-  const body=document.getElementById("pacBody"), opens=d.open_positions||[], activity=d.activity||[];
+  const body=document.getElementById("pacBody"), activity=d.activity||[];
+  const refusal=d.last_measurement_refusal;
+  const pendingRows=pendings.map(p=>{
+    const isEntry=p.side==="ENTRY";
+    const allIn=Number(p.return_denominator_lamports);
+    const amount=Number(p.amount);
+    const entryCost=Number.isFinite(allIn)?`${(allIn/1e9).toFixed(6)} SOL`:"—";
+    const size=isEntry&&Number.isFinite(amount)?`${(amount/1e9).toFixed(6)} SOL quote`:"full token position";
+    const reason=isEntry
+      ? `signal committed · ${size} · waiting for first mint observation after the causal landing boundary`
+      : `exit committed · ${size} · waiting for a strictly later executable boundary`;
+    return `<tr class="pac-pending-row"><td class="l mono">${esc(p.mint)}</td><td><span class="badge b-pending">pending ${esc(String(p.side||"order").toLowerCase())}</span></td><td>—</td><td>${entryCost}</td><td>—</td><td class="l warn">${esc(reason)}</td></tr>`;
+  });
   const openRows=opens.map(p=>`<tr><td class="l mono">${esc(p.mint)}</td><td><span class="badge b-open">open</span></td><td>—</td><td>${(p.entry_all_in_lamports/1e9).toFixed(6)} SOL</td><td>—</td><td class="l muted">watching executable full-position quote</td></tr>`);
   const closedRows=activity.filter(a=>a.kind==="resolved").map(a=>`<tr><td class="l mono">${esc(a.mint)}</td><td><span class="badge ${a.unexitable_full_loss?'b-dead':'b-null'}">closed</span></td><td class="${Number(a.return_r)>0?'pos':(Number(a.return_r)<0?'neg':'')}">${Number(a.return_r)>=0?'+':''}${pacNum(a.return_r,3)}R</td><td>${(a.entry_all_in_lamports/1e9).toFixed(6)} SOL</td><td>${(a.exit_net_proceeds_lamports/1e9).toFixed(6)} SOL</td><td class="l ${a.unexitable_full_loss?'neg':''}">${esc(a.action)}</td></tr>`);
   const costRows=activity.filter(a=>a.kind==="attempt_cost").map(a=>`<tr><td class="l mono">${esc(a.mint)}</td><td><span class="badge b-dead">failed attempt</span></td><td class="neg">${pacNum(a.return_r,3)}R</td><td>${((a.attempt_cost_lamports||0)/1e9).toFixed(6)} SOL fee</td><td>0</td><td class="l neg">${esc(a.status||"attempt cost")}</td></tr>`);
-  if(body) body.innerHTML=(openRows.join("")+closedRows.join("")+costRows.join(""))||`<tr><td class="empty l" colspan="6">No valid forward trades yet. The chart will move only after anchored, fully-costed scenario resolutions.</td></tr>`;
-  const count=document.getElementById("pacTradeCount"); if(count) count.textContent=`${perf.resolved||0} resolved · ${perf.failed_attempt_cost_events||0} failed-cost · ${opens.length} open`;
+  const refusalRows=refusal?[`<tr><td class="l mono">${esc(refusal.mint)}</td><td><span class="badge b-horizon">no trade</span></td><td>—</td><td>0</td><td>—</td><td class="l warn">measurement refused · ${esc(refusal.reason)}</td></tr>`]:[];
+  if(body) body.innerHTML=(pendingRows.join("")+openRows.join("")+refusalRows.join("")+closedRows.join("")+costRows.join(""))||`<tr><td class="empty l" colspan="6">No signal, fill, or resolved forward trade yet. The chart moves only after anchored, fully-costed scenario resolutions.</td></tr>`;
+  const count=document.getElementById("pacTradeCount"); if(count) count.textContent=`${pendings.length} pending · ${opens.length} open · ${perf.resolved||0} resolved · ${perf.failed_attempt_cost_events||0} failed-cost`;
 }
 
 /* ---------------- polling ---------------- */
