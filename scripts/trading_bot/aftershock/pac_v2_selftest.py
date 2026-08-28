@@ -11,6 +11,9 @@ import struct
 import tempfile
 import time
 
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+
 from .execution import ReserveState, RefusedExecution
 from . import pac_v2_calibration as calibration
 from .pac_v2_calibration import ArtifactPins, CalibrationRefused, load as load_calibration
@@ -90,16 +93,21 @@ def calibration_bundle(tmp: pathlib.Path, *, count: int = 100,
     tmp.mkdir(parents=True, exist_ok=True)
     started = 1_700_000_000_000_000_000
     campaign_id = hashlib.sha256(b"campaign").hexdigest()
-    payer_raw = hashlib.sha256(b"payer").digest()
+    # Real ed25519 test key: the fee payer must actually sign each memo message now that _wire_identity
+    # verifies the signature. A separate real key stands in for a "wrong signer" attestation wire.
+    _payer_key = Ed25519PrivateKey.from_private_bytes(hashlib.sha256(b"pac-v2-test-payer-seed").digest())
+    payer_raw = _payer_key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
     payer = calibration._b58encode(payer_raw)
+    _other_key = Ed25519PrivateKey.from_private_bytes(hashlib.sha256(b"pac-v2-test-other-seed").digest())
+    _other_raw = _other_key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
     campaign_body = {
         "schema": calibration.CAMPAIGN_SCHEMA,
         "instrument_id": calibration.INSTRUMENT,
         "campaign_id": campaign_id,
         "seal_sha256": "a" * 64,
         "calibration_fee_payer": payer,
-        "submit_endpoint_scheme_host": "https://submit.invalid",
-        "verification_endpoint_scheme_host": "https://verify.invalid",
+        "submit_endpoint_scheme_host": "https://submit.example.com",
+        "verification_endpoint_scheme_host": "https://verify.example.com",
         "started_unix_nanos": started,
         "evidence_mode": "LOCAL_MONOTONIC_PLUS_FINALIZED_INDEPENDENT_RPC",
         "transaction_profile": calibration.TRANSACTION_PROFILE,
@@ -112,20 +120,20 @@ def calibration_bundle(tmp: pathlib.Path, *, count: int = 100,
     attestations: list[dict] = []
     previous = campaign_id
     for index in range(count):
-        signature_raw = hashlib.sha512(f"signature-{index}".encode()).digest()
-        signature = calibration._b58encode(signature_raw)
         memo = calibration._campaign_memo(campaign_id, index, previous)
         if wrong_campaign_memo and index == count - 1:
             memo = b"PACV2|" + b"0" * 64
         memo_program = calibration._b58decode(
             "memo program", calibration.MEMO_PROGRAM_ID, exact_length=32)
 
-        def memo_wire(fee_payer: bytes) -> bytes:
+        def memo_wire(fee_payer: bytes, key: Ed25519PrivateKey) -> bytes:
             message = (bytes([1, 0, 1, 2]) + fee_payer + memo_program + bytes(32)
                        + bytes([1, 1, 0, len(memo)]) + memo)
-            return bytes([1]) + signature_raw + message
+            return bytes([1]) + key.sign(message) + message
 
-        wire = memo_wire(payer_raw)
+        wire = memo_wire(payer_raw, _payer_key)
+        signature_raw = wire[1:65]
+        signature = calibration._b58encode(signature_raw)
         wire_b64 = base64.b64encode(wire).decode()
         decision = started + 10_000_000_000 + index * 2_000_000_000
         reaction = (index + 1) * 1_000_000
@@ -165,8 +173,7 @@ def calibration_bundle(tmp: pathlib.Path, *, count: int = 100,
         previous = sample["sample_id"]
         attested_wire = wire
         if wrong_attestation_wire and index == count - 1:
-            other_payer = hashlib.sha256(b"other-payer").digest()
-            attested_wire = memo_wire(other_payer)
+            attested_wire = memo_wire(_other_raw, _other_key)
         request = {"jsonrpc": "2.0", "id": index + 1, "method": "getTransaction",
                    "params": [signature, {"commitment": "finalized", "encoding": "base64",
                                           "maxSupportedTransactionVersion": 0}]}
@@ -185,7 +192,7 @@ def calibration_bundle(tmp: pathlib.Path, *, count: int = 100,
             "campaign_id": campaign_id,
             "sample_id": sample["sample_id"],
             "transaction_signature": signature,
-            "verification_endpoint_scheme_host": "https://verify.invalid",
+            "verification_endpoint_scheme_host": "https://verify.example.com",
             "request_started_unix_nanos": wall_clocks["land_observed"] + 1,
             "response_received_unix_nanos": wall_clocks["land_observed"] + 2,
             "request_json": request, "response_json": response,

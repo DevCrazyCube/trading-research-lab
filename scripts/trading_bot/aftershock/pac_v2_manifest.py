@@ -19,10 +19,12 @@ import urllib.parse
 from .execution import RefusedExecution
 from .pac_v2_calibration import (
     ArtifactPins,
+    CAMPAIGN_SCHEMA,
     CalibrationRefused,
     load as load_calibration,
     load_campaign,
 )
+from . import pac_v2_calibration_attestation as attestation
 from .pac_v2_runner import RuntimeProof
 
 
@@ -58,6 +60,7 @@ DEPENDENCY_PATHS = (
     "scripts/trading_bot/aftershock/pac_v2_policy.py",
     "scripts/trading_bot/aftershock/pac_v2_runner.py",
     "scripts/trading_bot/aftershock/pac_v2_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v2_send.py",
     "scripts/trading_bot/aftershock/pac_v2_snapshot.py",
     "scripts/trading_bot/aftershock/pac_v2_status.py",
     "scripts/trading_bot/aftershock/pac_v2_supervisor.py",
@@ -252,7 +255,7 @@ def write_campaign(*, calibration_fee_payer: str, submit_endpoint_scheme_host: s
     started = time.time_ns()
     campaign_id = _sha(os.urandom(32) + started.to_bytes(8, "big") + seal["seal_sha256"].encode())
     body = {
-        "schema": 1, "instrument_id": INSTRUMENT, "campaign_id": campaign_id,
+        "schema": CAMPAIGN_SCHEMA, "instrument_id": INSTRUMENT, "campaign_id": campaign_id,
         "seal_sha256": seal["seal_sha256"],
         "calibration_fee_payer": calibration_fee_payer,
         "submit_endpoint_scheme_host": submit,
@@ -302,12 +305,31 @@ def write_activation(*, calibration_path: pathlib.Path, attestation_path: pathli
         raise RefusedExecution(f"PAC V2 calibration refused: {exc}") from exc
     if campaign.seal_sha256 != seal["seal_sha256"]:
         raise RefusedExecution("PAC V2 calibration campaign references another seal")
+    # ANCHOR TO ON-CHAIN REALITY: re-contact the pre-committed independent finalized RPC LIVE and confirm
+    # every sample actually landed. This is what the offline bundle validation cannot do — a hand-written
+    # or never-broadcast calibration fails here because getTransaction has no finalized result for its
+    # signatures. The verification origin is pinned to the committed campaign, not caller-chosen.
+    rpc_url = os.environ.get(attestation.ENV_NAME)
+    if not rpc_url:
+        raise RefusedExecution(
+            f"PAC V2 activation requires {attestation.ENV_NAME} for live independent on-chain verification")
+    try:
+        live = attestation.live_verify(
+            campaign_path=paths[0], campaign_sha256=pins.campaign_sha256,
+            calibration_path=paths[1], calibration_sha256=pins.calibration_sha256, rpc_url=rpc_url)
+    except (RefusedExecution, CalibrationRefused, OSError, ValueError) as exc:
+        raise RefusedExecution(f"PAC V2 live on-chain verification failed: {exc}") from exc
+    if live["verification_origin"] != campaign.verification_endpoint_scheme_host:
+        raise RefusedExecution("PAC V2 live verification origin drifted from the campaign")
     recorded = time.time_ns()
     _require_fresh_activation(recorded, calibration)
     body = {"schema": 1, "instrument_id": INSTRUMENT, "seal_sha256": seal["seal_sha256"],
             "campaign_path": relatives[0], "campaign_sha256": pins.campaign_sha256,
             "calibration_path": relatives[1], "calibration_sha256": pins.calibration_sha256,
             "attestation_path": relatives[2], "attestation_sha256": pins.attestation_sha256,
+            "live_verification_endpoint": live["verification_origin"],
+            "live_verified_samples": live["verified"],
+            "live_verification_digest": live["digest"],
             "activation_unix_nanos": recorded}
     event = {**body, "activation_sha256": _sha(_canonical(body))}
     _exclusive_durable_json(ACTIVATION, event)
@@ -325,7 +347,9 @@ def load_runtime_proof() -> RuntimeProof:
     required = {"schema", "instrument_id", "seal_sha256",
                 "campaign_path", "campaign_sha256",
                 "calibration_path", "calibration_sha256",
-                "attestation_path", "attestation_sha256", "activation_unix_nanos"}
+                "attestation_path", "attestation_sha256",
+                "live_verification_endpoint", "live_verified_samples", "live_verification_digest",
+                "activation_unix_nanos"}
     if (set(body) != required or stored != _sha(_canonical(body)) or body["schema"] != 1
             or body["instrument_id"] != INSTRUMENT or body["seal_sha256"] != seal["seal_sha256"]):
         raise RefusedExecution("PAC V2 activation is malformed, forged, or references another seal")
@@ -350,6 +374,28 @@ def load_runtime_proof() -> RuntimeProof:
         raise RefusedExecution(f"PAC V2 calibration refused: {exc}") from exc
     if campaign.seal_sha256 != seal["seal_sha256"]:
         raise RefusedExecution("PAC V2 activation campaign references another seal")
+    if type(body["live_verified_samples"]) is not int or body["live_verified_samples"] < 1:
+        raise RefusedExecution("PAC V2 activation records no live-verified samples")
+    # RUNTIME ANCHOR TO ON-CHAIN REALITY: the runtime gate ITSELF contacts the pre-committed independent
+    # finalized RPC and re-confirms every sample landed on chain (getTransaction per signature). This is
+    # what closes the forgery — a hand-written ACTIVATION.json over a never-broadcast or offline-forged
+    # bundle fails here because the RPC returns no finalized result. The stored digest is NOT trusted as
+    # evidence on its own; it is only cross-checked against the LIVE provider-returned result (which binds
+    # on-chain blockTime and cannot be reconstructed from the calibration file offline).
+    rpc_url = os.environ.get(attestation.ENV_NAME)
+    if not rpc_url:
+        raise RefusedExecution(
+            f"PAC V2 runtime requires {attestation.ENV_NAME} to live-verify the calibration on chain")
+    try:
+        live = attestation.live_verify(
+            campaign_path=campaign_path, campaign_sha256=pins.campaign_sha256,
+            calibration_path=calibration_path, calibration_sha256=pins.calibration_sha256, rpc_url=rpc_url)
+    except (RefusedExecution, CalibrationRefused, OSError, ValueError) as exc:
+        raise RefusedExecution(f"PAC V2 runtime live on-chain verification failed: {exc}") from exc
+    if (live["verification_origin"] != campaign.verification_endpoint_scheme_host
+            or live["digest"] != body["live_verification_digest"]
+            or live["verified"] != body["live_verified_samples"]):
+        raise RefusedExecution("PAC V2 runtime live verification does not match the anchored activation")
     _require_fresh_activation(body["activation_unix_nanos"], calibration)
     return RuntimeProof(seal["seal_sha256"], body["activation_unix_nanos"], calibration)
 

@@ -24,6 +24,7 @@
     "scripts/trading_bot/aftershock/pac_v2_policy.py",
     "scripts/trading_bot/aftershock/pac_v2_runner.py",
     "scripts/trading_bot/aftershock/pac_v2_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v2_send.py",
     "scripts/trading_bot/aftershock/pac_v2_snapshot.py",
     "scripts/trading_bot/aftershock/pac_v2_status.py",
     "scripts/trading_bot/aftershock/pac_v2_supervisor.py",

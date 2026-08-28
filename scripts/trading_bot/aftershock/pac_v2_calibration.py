@@ -15,9 +15,14 @@ from __future__ import annotations
 import base64
 from dataclasses import dataclass
 import hashlib
+import ipaddress
 import json
 import pathlib
+import socket
 import urllib.parse
+
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 
 INSTRUMENT = "AFTERSHOCK_PAC_V2"
@@ -61,6 +66,35 @@ def _canonical(value: object) -> bytes:
 
 def _canonical_sha(value: object) -> str:
     return hashlib.sha256(_canonical(value)).hexdigest()
+
+
+_RESERVED_SUFFIXES = (".localhost", ".local", ".invalid", ".test", ".example", ".internal", ".home.arpa")
+
+
+def _is_public_rpc_host(hostname: str) -> bool:
+    """A campaign RPC origin must be a genuine public host, never a loopback/private/reserved endpoint an
+    operator could stand up locally to fabricate finalized results. This blocks the casual self-deception
+    of pointing the 'independent' verifier at a machine the operator controls; a genuine independent public
+    RPC is still the operator's responsibility."""
+    host = hostname.lower().rstrip(".")
+    if not host or host == "localhost" or any(host.endswith(suffix) for suffix in _RESERVED_SUFFIXES):
+        return False
+    # IPv4 in ANY form (canonical, octal, hex, or dotless integer) — inet_aton canonicalizes 127.1,
+    # 0177.0.0.1, 0x7f.0.0.1, 2130706433 all to 127.0.0.1, so a disguised loopback cannot be laundered
+    # through ipaddress's strict parser. Require the canonical address to be globally routable.
+    try:
+        return bool(ipaddress.ip_address(socket.inet_ntoa(socket.inet_aton(host))).is_global)
+    except OSError:
+        pass                                                # not an IPv4 literal in any form
+    try:
+        return bool(ipaddress.ip_address(host).is_global)   # bare IPv6 literal (rejects ::1 etc.)
+    except ValueError:
+        pass
+    # A DNS name: require a dotted domain whose labels are not all-numeric (an all-numeric dotted string
+    # is a malformed/disguised IP, never a real host). Live resolution is enforced at the network layer.
+    if "." not in host or all(all(c in "0123456789" for c in label) for label in host.split(".")):
+        return False
+    return True
 
 
 def _b58decode(label: str, text: object, *, exact_length: int) -> bytes:
@@ -118,6 +152,7 @@ def _wire_identity(encoded: object, *, expected_memo: bytes | None = None) -> tu
         raise CalibrationRefused("wire transaction signature vector is invalid")
     signature = wire[message_offset:message_offset + 64]
     message_offset += count * 64
+    message_start = message_offset
     if wire[message_offset] & 0x80:
         raise CalibrationRefused("calibration transaction must use the frozen legacy profile")
     if message_offset + 3 >= len(wire):
@@ -164,6 +199,18 @@ def _wire_identity(encoded: object, *, expected_memo: bytes | None = None) -> tu
                 or instructions != [(1, (), expected_memo)]):
             raise CalibrationRefused(
                 "wire transaction is not the frozen campaign-bound memo-only profile")
+    # The fee payer (accounts[0]) must have produced a valid ed25519 signature over the message bytes.
+    # This closes the "any 64 bytes as a signature" forgery: a bundle now requires a real keypair that
+    # actually signed the memo message, not an arbitrary string. (On-chain landing is separately proven
+    # by the live finalized-RPC verification wired into activation.)
+    try:
+        Ed25519PublicKey.from_public_bytes(fee_payer).verify(signature, wire[message_start:])
+    except InvalidSignature as exc:
+        raise CalibrationRefused(
+            "wire transaction signature is not a valid ed25519 signature by the fee payer") from exc
+    except ValueError as exc:
+        raise CalibrationRefused(
+            "wire transaction fee-payer key is not a valid ed25519 public key") from exc
     return wire, _b58encode(signature), _b58encode(fee_payer)
 
 
@@ -266,12 +313,14 @@ def load_campaign(path: pathlib.Path, *, expected_sha256: str) -> Campaign:
     def strict_origin(value: str) -> str | None:
         parsed = urllib.parse.urlsplit(value)
         if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
-                or parsed.path not in {"", "/"} or parsed.query or parsed.fragment):
+                or parsed.path not in {"", "/"} or parsed.query or parsed.fragment
+                or not _is_public_rpc_host(parsed.hostname)):
             return None
         port = f":{parsed.port}" if parsed.port is not None else ""
         return f"https://{parsed.hostname}{port}"
     if strict_origin(submit) != submit or strict_origin(verify) != verify or submit == verify:
-        raise CalibrationRefused("campaign must use distinct HTTPS submit and verification origins")
+        raise CalibrationRefused(
+            "campaign must use distinct HTTPS submit and verification origins on genuine public hosts")
     started = _integer("campaign started clock", body["started_unix_nanos"], minimum=1)
     return Campaign(campaign_id, seal, body["calibration_fee_payer"], submit, verify,
                     started, hashlib.sha256(payload).hexdigest())
