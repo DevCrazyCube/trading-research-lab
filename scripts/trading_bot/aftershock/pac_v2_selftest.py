@@ -298,10 +298,10 @@ def main() -> int:
             receipts_path=run_receipts, initialize_at_eof=False),
             "runtime binding tamper REFUSES before feed or pricing")
 
-        check(manifest.anchor_status() in {"UNSEALED", "UNANCHORED"},
-              "uncommitted V2 closure is visibly non-activatable")
+        check(manifest.anchor_status() == "ANCHORED",
+              "committed V2 dependency closure and seal re-anchor exactly")
         refuses(RefusedExecution, manifest.load_runtime_proof,
-                "runtime refuses absent anchored seal/calibrated activation")
+                "anchored runtime still refuses absent calibrated activation")
 
     print(f"PAC V2 SELFTEST: PASS — {CHECKS} checks")
     return 0
