@@ -21,7 +21,7 @@
     "scripts/trading_bot/aftershock/pac_v2_policy.py": "9c5ec30f75eae37a977f373512008cb26ace95d36fda3b7478c91aa16eeacc53",
     "scripts/trading_bot/aftershock/pac_v2_runner.py": "22136e7aa0ae1c27cda2bc9197193a976c960b9273cb8e26f1764d708c8dfdbb",
     "scripts/trading_bot/aftershock/pac_v2_selftest.py": "33b19e80a6ed6d800cec7650c9caa46fd40ebd4c58f1951ae2d6bfa265950423",
-    "scripts/trading_bot/aftershock/pac_v2_send.py": "c03005094bf52f38ea0c42bb437fa3c4598f9acae149670297aa1a7ed7f6d062",
+    "scripts/trading_bot/aftershock/pac_v2_send.py": "155d191f5576df2a0e03fcab6ab713c49da34eccd9f1f266659c0e0cadb04d9f",
     "scripts/trading_bot/aftershock/pac_v2_snapshot.py": "287ad1852b75c852e69e2e050c8eefbe458f2c7ed7c1ceaa94c7464d080798c9",
     "scripts/trading_bot/aftershock/pac_v2_status.py": "cb9fa480db5b8e27c087bff5f530c2ea1cbae275259fe39a5ef273e16fc6963b",
     "scripts/trading_bot/aftershock/pac_v2_supervisor.py": "ce4d861a0e90f4a845d4f0aed2bf92fcc8c8c32ea3942a4b81566156f6ee0c8b",
@@ -33,5 +33,5 @@
   "instrument_id": "AFTERSHOCK_PAC_V2",
   "preregistration_sha256": "1c3676f84fa1dddc4e5e88f919d78f118218f5cfc73c5ddc1626060d5d2ed3b0",
   "schema": 1,
-  "seal_sha256": "3f1dd5e0bf9c804fadca6b61e4c754850520d6de22af471eaff509e4f1577087"
+  "seal_sha256": "e0c0e358a87f4599e9fc5bb3404820701d9485fbda3f0bfa4cb15162915e7a4a"
 }

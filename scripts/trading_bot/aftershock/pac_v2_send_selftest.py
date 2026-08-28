@@ -119,6 +119,37 @@ def _make_opener(onchain: dict, *, break_slot=False, missing=False):
     return opener
 
 
+class _FakeChain:
+    """A stateful mock RPC: answers getLatestBlockhash / sendTransaction / getTransaction so the send
+    tool's broadcast path runs end-to-end without real network. Counts how many txs it 'sent'."""
+    def __init__(self):
+        self.by_sig = {}
+        self.slot = 1000
+    def __call__(self, request, timeout=None):
+        body = json.loads(request.data)
+        method = body["method"]
+        if method == "getLatestBlockhash":
+            return _Resp({"result": {"value": {"blockhash": cal._b58encode(bytes(range(32)))}}})
+        if method == "sendTransaction":
+            wire_b64 = body["params"][0]
+            sig = cal._b58encode(base64.b64decode(wire_b64)[1:65])
+            self.slot += 1
+            self.by_sig[sig] = (wire_b64, self.slot)
+            return _Resp({"result": sig})
+        if method == "getTransaction":
+            wire_b64, slot = self.by_sig[body["params"][0]]
+            return _Resp({"result": {"slot": slot, "blockTime": 1_700_000_000, "meta": {"err": None},
+                                     "transaction": [wire_b64, "base64"]}})
+        return _Resp({"error": {"message": "unknown method"}})
+
+
+def _clocks():
+    import itertools
+    wc = itertools.count(1_700_000_000_000_000_000, 1000)
+    mc = itertools.count(5_000_000_000_000, 1000)
+    return (lambda: next(wc)), (lambda: next(mc))
+
+
 def main() -> int:
     key, pub, payer = _key(b"pac-v2-send-selftest-payer")
     with tempfile.TemporaryDirectory() as d:
@@ -199,6 +230,42 @@ def main() -> int:
         refuses(lambda: att._scheme_host("https://sneaky-fake-rpc.com",
                                          resolver=lambda *a, **k: [(2, 1, 6, "", ("127.0.0.1", 443))]),
                 "B2b/host: a public-looking host resolving to loopback is refused")
+
+        # B3 RESUME + campaign-wide budget (Codex handoff 442): a broadcast that stops must resume from
+        # persisted samples, never re-send, never lose landed work, and never reset the budget cap.
+        rtmp = tmp / "resume"; rtmp.mkdir()
+        rk, rpub, rpayer = _key(b"pac-v2-resume-payer")
+        rcpath, rcsha, _c, _cs, _o = _fixture(rtmp, 1, rk, rpub, rpayer)   # only the campaign is reused
+        rkp = _kpfile(rtmp, rk, rpub)
+        rout = rtmp / "resume_calibration.jsonl"
+        chain = _FakeChain()
+        clk, mon = _clocks()
+
+        def _broadcast(count, max_tx=8, max_lam=1_000_000):
+            return send.run(campaign_path=rcpath, campaign_sha256=rcsha, keypair_path=rkp, out_path=rout,
+                            max_transactions=max_tx, max_lamports=max_lam, broadcast=True,
+                            submit_rpc_url="https://submit.example.com", count=count, opener=chain,
+                            clock=clk, monotonic=mon, sleep=lambda *_: None)
+
+        r1 = _broadcast(3)
+        n_after_3 = len(chain.by_sig)
+        check(r1["landed"] == 3 and r1["resumed_from"] == 0 and n_after_3 == 3
+              and len(rout.read_text().splitlines()) == 3,
+              "B3 resume: first run persists 3 samples incrementally")
+        r2 = _broadcast(3)
+        check(r2["landed"] == 3 and r2["resumed_from"] == 3 and len(chain.by_sig) == 3,
+              "B3 resume: re-run at the same count re-sends NOTHING (idempotent)")
+        r3 = _broadcast(5)
+        check(r3["landed"] == 5 and r3["resumed_from"] == 3 and len(chain.by_sig) == 5
+              and r3["spent_lamports"] == 5 * send.DEFAULT_FEE_LAMPORTS,
+              "B3 resume: a later run continues the chain and only sends the missing 2")
+        # persisted chain still validates as a loadable calibration bundle prefix
+        refuses(lambda: _broadcast(5, max_tx=4),
+                "B3 campaign-wide budget: persisted sends count toward the cap (over-cap refused)")
+        # tamper a persisted sample -> resume refuses (chain integrity)
+        lines = rout.read_text().splitlines(); lines[1] = lines[1].replace('"outcome":"LANDED"', '"outcome":"FAILED"', 1)
+        rout.write_text("\n".join(lines) + "\n")
+        refuses(lambda: _broadcast(5), "B3 resume: a tampered persisted sample refuses to resume")
 
     print("PAC V2 send/attest selftest:", "PASS" if OK else "FAIL")
     return 0 if OK else 1

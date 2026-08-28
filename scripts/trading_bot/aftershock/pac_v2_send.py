@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import os
 import pathlib
@@ -191,20 +192,29 @@ def run(*, campaign_path: pathlib.Path, campaign_sha256: str, keypair_path: path
                 or f"https://{parsed.hostname}{port}" != campaign.submit_endpoint_scheme_host):
             raise SendRefused("submit RPC origin differs from the pre-committed campaign submit origin")
 
-    samples: list[dict] = []
-    previous = campaign.campaign_id
-    dry_built = 0
-    for index in range(count):
-        guard.admit()
-        memo = calibration._campaign_memo(campaign.campaign_id, index, previous)
-        if not broadcast:
-            # Dry-run: prove the builder + signature + memo-only profile with a placeholder blockhash.
+    if not broadcast:
+        # DRY-RUN: build + self-verify `count` memo txs with a placeholder blockhash; send nothing.
+        for index in range(count):
+            guard.admit()
+            memo = calibration._campaign_memo(campaign.campaign_id, index, campaign.campaign_id)
             build_signed_memo(private, fee_payer_b58, memo, bytes(32))
             guard.charge()
-            dry_built += 1
-            # previous cannot advance without a real sample_id; dry-run is per-index independent.
-            continue
+        return {"broadcast": False, "dry_run_built": count, "spent_lamports": 0,
+                "note": "no transaction was sent; pass --broadcast with a funded fee payer to sample latency"}
 
+    # BROADCAST: resume from any already-persisted samples so a crash/stop never re-sends, loses landed
+    # work, or resets the budget. The budget is CAMPAIGN-WIDE — prior sends count toward the same cap.
+    out = pathlib.Path(out_path)
+    samples = _load_existing_samples(out, campaign)
+    guard.sent = len(samples)
+    guard.spent = len(samples) * guard.fee_lamports_per_tx
+    if guard.sent > guard.max_transactions or guard.spent > guard.max_lamports:
+        raise SendRefused("already-persisted samples exceed the campaign budget cap")
+    resumed_from = len(samples)
+    previous = samples[-1]["sample_id"] if samples else campaign.campaign_id
+    for index in range(len(samples), count):
+        guard.admit()                                              # campaign-wide cap, seeded from disk
+        memo = calibration._campaign_memo(campaign.campaign_id, index, previous)
         decision_w, decision_m = clock(), monotonic()
         blockhash = _b58decode_blockhash(_latest_blockhash(submit_rpc_url, opener=opener))
         build_w, build_m = clock(), monotonic()
@@ -218,13 +228,12 @@ def run(*, campaign_path: pathlib.Path, campaign_sha256: str, keypair_path: path
         ack_w, ack_m = clock(), monotonic()
         if response_json.get("result") != signature or response_json.get("error") is not None:
             raise SendRefused(f"sample {index} send was not acknowledged with its signature")
-        guard.charge()
         land_slot, land_w, land_m = _await_finalized(
             submit_rpc_url, signature, opener=opener, clock=clock, monotonic=monotonic, sleep=sleep)
-        wall = [decision_w, build_w, sign_w, send_w, ack_w, land_w]
-        mono = [decision_m, build_m, sign_m, send_m, ack_m, land_m]
-        wall_map, mono_map = _clock_pair(names, wall, mono)
-        wire_sha = calibration.hashlib.sha256(base64.b64decode(wire_b64)).hexdigest()
+        wall_map, mono_map = _clock_pair(
+            names, [decision_w, build_w, sign_w, send_w, ack_w, land_w],
+            [decision_m, build_m, sign_m, send_m, ack_m, land_m])
+        wire_sha = hashlib.sha256(base64.b64decode(wire_b64)).hexdigest()
         raw_evidence = {
             "wire_transaction_base64": wire_b64, "wire_transaction_sha256": wire_sha,
             "send_request_json": request_json,
@@ -240,14 +249,38 @@ def run(*, campaign_path: pathlib.Path, campaign_sha256: str, keypair_path: path
             "raw_evidence_sha256": calibration._canonical_sha(raw_evidence)}
         sample = {**body, "sample_id": calibration._canonical_sha(body)}
         samples.append(sample)
+        _atomic_write_jsonl(out, samples)          # crash-safe persist AFTER each finalized send
+        guard.charge()
         previous = sample["sample_id"]
+    return {"broadcast": True, "landed": len(samples), "resumed_from": resumed_from,
+            "out": str(out), "spent_lamports": guard.spent}
 
-    if broadcast:
-        _atomic_write_jsonl(pathlib.Path(out_path), samples)
-        return {"broadcast": True, "landed": len(samples),
-                "out": str(out_path), "spent_lamports": guard.spent}
-    return {"broadcast": False, "dry_run_built": dry_built, "spent_lamports": 0,
-            "note": "no transaction was sent; pass --broadcast with a funded fee payer to sample latency"}
+
+def _load_existing_samples(out_path: pathlib.Path, campaign) -> list[dict]:
+    """Resume support: read the samples already landed+persisted for THIS campaign and validate they chain
+    correctly, so a re-run continues from where it stopped instead of re-sending or losing budget."""
+    path = pathlib.Path(out_path)
+    if not path.exists():
+        return []
+    samples: list[dict] = []
+    previous = campaign.campaign_id
+    for number, line in enumerate(path.read_text().splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise SendRefused(f"persisted calibration line {number} is corrupt JSON") from exc
+        if (not isinstance(row, dict) or row.get("campaign_id") != campaign.campaign_id
+                or row.get("previous_sample_id") != previous or row.get("outcome") != "LANDED"
+                or not isinstance(row.get("sample_id"), str)):
+            raise SendRefused(f"persisted calibration sample {number} does not chain to this campaign")
+        body = {k: v for k, v in row.items() if k != "sample_id"}
+        if calibration._canonical_sha(body) != row["sample_id"]:
+            raise SendRefused(f"persisted calibration sample {number} self-hash mismatch")
+        samples.append(row)
+        previous = row["sample_id"]
+    return samples
 
 
 def _latest_blockhash(url: str, *, opener=None) -> str:
