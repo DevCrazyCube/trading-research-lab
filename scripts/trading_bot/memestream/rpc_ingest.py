@@ -67,10 +67,12 @@ def _ws_url() -> str:
     return PUBLIC_WS_URL
 
 
-def _ev_to_tape(ev: dict, recv_ts: float) -> dict:
+def _ev_to_tape(ev: dict, recv_ts: float, recv_ns: int, signature: str | None) -> dict:
     """Decoded pump.fun TradeEvent -> a tape line in WHOLE-SOL / WHOLE-token units (matches ecr)."""
     return {
         "ts": recv_ts,
+        "received_unix_nanos": recv_ns,
+        "observation_source": "public_rpc_processed",
         "mint": ev["mint"],
         "trader": ev.get("user"),
         "side": ev["side"],
@@ -79,7 +81,7 @@ def _ev_to_tape(ev: dict, recv_ts: float) -> dict:
         "v_sol": ev.get("virtual_sol", 0) / LAMPORTS_PER_SOL,
         "v_tokens": ev.get("virtual_tok", 0) / TOKEN_ATOMS,
         "pool": "pump",
-        "sig": None,
+        "sig": signature,
     }
 
 
@@ -118,8 +120,11 @@ def _run_once() -> None:
                 if isinstance(msg, dict) and msg.get("method") == "logsNotification":
                     value = (((msg.get("params") or {}).get("result") or {}).get("value")) or {}
                     if value.get("err") is None:
-                        recv_ts = time.time()
                         for ev in decode_pump_trades_from_logs(value.get("logs") or [], SOL_USD_DEFAULT):
+                            # The decision engine observes decoded events sequentially. Record that actual
+                            # local observation clock per event; never synthesize tie-breaking timestamps.
+                            recv_ns = time.time_ns()
+                            recv_ts = recv_ns / 1_000_000_000
                             mint = ev["mint"]
                             if mint not in seen:
                                 seen.add(mint)
@@ -127,7 +132,9 @@ def _run_once() -> None:
                                 creates += 1
                                 if len(seen) > _MAX_SEEN:
                                     seen.clear()   # cheap bound; a re-seen mint just re-emits a create
-                            _tape.append_trade(_ev_to_tape(ev, recv_ts))
+                            _tape.append_trade(_ev_to_tape(
+                                ev, recv_ts, recv_ns,
+                                value.get("signature") if isinstance(value.get("signature"), str) else None))
                             trades += 1
                             if mint in mint_pool:
                                 agg.add(_ev_to_tick(ev, recv_ts))

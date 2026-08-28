@@ -7,8 +7,11 @@ Every line carries the exact post-trade bonding-curve reserves and the taker wal
 detector/resolver/ECR need and the candle cache does NOT carry. This module is the schema + a bounded
 writer + the readers.
 
-Tape line schema (all present, never fabricated):
-    {ts (epoch s), mint, trader, side ("buy"|"sell"), sol_amount, token_amount, v_sol, v_tokens, pool, sig}
+Tape line schema for new causal observations (all present, never fabricated):
+    {ts (epoch s display only), received_unix_nanos (local receive clock), observation_source, mint, trader,
+     side ("buy"|"sell"), sol_amount, token_amount, v_sol, v_tokens, pool, sig}
+Legacy lines without ``received_unix_nanos`` remain readable by legacy diagnostics but are INELIGIBLE for
+the causal execution engine; consumers must refuse rather than derive a receive clock from ``ts``.
 Create line schema:
     {ts, mint, symbol, pool}
 """
@@ -24,7 +27,8 @@ CREATES_PATH = TAPE_DIR / "_creates.jsonl"
 
 _MAX_TAPE_LINES = 4000      # per mint; a pump.fun coin's whole life fits far under this
 _MAX_CREATES_LINES = 20000
-TAPE_FIELDS = ("ts", "mint", "trader", "side", "sol_amount", "token_amount", "v_sol", "v_tokens", "pool", "sig")
+TAPE_FIELDS = ("ts", "received_unix_nanos", "observation_source", "mint", "trader", "side", "sol_amount",
+               "token_amount", "v_sol", "v_tokens", "pool", "sig")
 
 
 def _mint_path(mint: str) -> pathlib.Path:

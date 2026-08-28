@@ -2825,8 +2825,15 @@ def rpc_request(endpoint, method, params, request_id=1, timeout=60, opener=None,
                 response_headers = getattr(response, "headers", None)
                 if response_headers is not None:
                     content_length = response_headers.get("Content-Length")
-        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as error:
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError) as error:
             # One shared classification, so this transport and b7d's and b9c's cannot drift apart.
+            # OSError is in the tuple because a connection reset during `response.read()` (a large
+            # getBlock body cut mid-stream by an aggressive public endpoint) surfaces as a bare
+            # ConnectionResetError -- an OSError that is NOT a urllib.error subclass -- so without
+            # it the read escaped the loop and killed an otherwise resumable multi-hour collection
+            # on a single transient reset. `is_retryable_error` already accepts OSError, so this
+            # only widens what reaches that one shared classifier; a genuinely fatal OSError still
+            # exhausts the retries and raises.
             retryable = HTTP.is_retryable_error(error)
             if not retryable or attempt == retries:
                 raise FreezeViolation(f"{method} transport failed after {attempt + 1} attempt(s): "

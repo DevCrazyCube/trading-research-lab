@@ -1,0 +1,116 @@
+{
+  "boundary": "paper-only simulated observed path; no wallet, order, or executable-evidence claim",
+  "execution_realism": {
+    "ata_rent_treatment": "charged_on_entry_not_reclaimed_without_separate_close_attempt",
+    "dependency_paths": [
+      "research/pump_amm_idl_9c82f61.json",
+      "research/pump_idl_9c82f61.json",
+      "scripts/b10a_simulator_kernel.py",
+      "scripts/b10b_position_path.py",
+      "scripts/b9d_transaction_bodies.py",
+      "scripts/b9i_quote_reproduction.py",
+      "scripts/rpc_http_identity.py",
+      "scripts/trading_bot/aftershock/__init__.py",
+      "scripts/trading_bot/aftershock/ecr.py",
+      "scripts/trading_bot/aftershock/execution.py",
+      "scripts/trading_bot/aftershock/feasibility.py",
+      "scripts/trading_bot/aftershock/frozen.py",
+      "scripts/trading_bot/aftershock/manifest.py",
+      "scripts/trading_bot/aftershock/pac_detector.py",
+      "scripts/trading_bot/aftershock/pac_feed.py",
+      "scripts/trading_bot/aftershock/pac_policy.py",
+      "scripts/trading_bot/aftershock/pac_runner.py",
+      "scripts/trading_bot/aftershock/solusd_recorder.py",
+      "scripts/trading_bot/aftershock/tape.py",
+      "scripts/trading_bot/memebot/__init__.py",
+      "scripts/trading_bot/memebot/frozen.py",
+      "scripts/trading_bot/memestream/bitquery_ingest.py",
+      "scripts/trading_bot/memestream/chainstack_ingest.py",
+      "scripts/trading_bot/memestream/rpc_ingest.py",
+      "scripts/trading_bot/sniper/data/_common.py"
+    ],
+    "detector_callable_name": "detector",
+    "detector_module_path": "scripts/trading_bot/aftershock/pac_detector.py",
+    "experiment_dependency_paths": [
+      "scripts/trading_bot/aftershock/pac_detector.py",
+      "scripts/trading_bot/aftershock/pac_feed.py",
+      "scripts/trading_bot/aftershock/pac_policy.py",
+      "scripts/trading_bot/aftershock/pac_runner.py",
+      "scripts/trading_bot/aftershock/solusd_recorder.py",
+      "scripts/trading_bot/aftershock/tape.py",
+      "scripts/trading_bot/memestream/bitquery_ingest.py",
+      "scripts/trading_bot/memestream/chainstack_ingest.py",
+      "scripts/trading_bot/memestream/rpc_ingest.py",
+      "scripts/trading_bot/sniper/data/_common.py"
+    ],
+    "failed_attempt_costs_are_portfolio_costs": true,
+    "first_watermark_skips_backlog": true,
+    "ledger_schema_version": 2,
+    "no_backfill_state_first_watermark": true,
+    "order_state_machine": "persist_decision_then_attempt_strictly_later_boundary",
+    "reaction_nanos_requires_explicit_positive_value": true,
+    "state_schema_version": 2,
+    "write_ahead_ledger_replay": "self_hashed_idempotent_exactly_once",
+    "warmup_scope": "feed_global",
+    "warmup_min_events": 8,
+    "warmup_min_span_nanos": 600000000
+  },
+  "exit": {
+    "coverage_multiple": 6,
+    "max_hold_nanos": 720000000000,
+    "partial_exits": false,
+    "single_full_exit_only": true,
+    "slippage_bps_from_decision_quote": 1000,
+    "trail_frac_den": 100,
+    "trail_frac_num": 12,
+    "trail_on": "curve-exact executable full-position quote"
+  },
+  "family": "payable absorption compression",
+  "frozen_utc": "2026-08-28T00:30:45+00:00",
+  "instrument_id": "AFTERSHOCK_PAC_V1",
+  "lineage": {
+    "burned_predecessor": "AFTERSHOCK_V2_C",
+    "predecessor_outcomes_inherited": false,
+    "predecessor_state_inherited": false
+  },
+  "pac": {
+    "formula": "min(W2/W1,D1/D2,B2/B1,E2/E1)>=1",
+    "max_pattern_span_nanos": 180000000000,
+    "min_cycle_withdrawal_lamports": 50000000,
+    "required_cycles": 2,
+    "second_recovery_must_be_latest": true
+  },
+  "preregistration": "research/trading_bot/aftershock/AFTERSHOCK_PAC_V1_PREREGISTRATION.md",
+  "preregistration_sha256": "972124ce32f6cd52f7e22f55e70e497bc6a9911fa7716be0f66ad6a4baca8e5c",
+  "promotion": {
+    "confirmation_required": true,
+    "drop_max_must_remain_positive": true,
+    "max_unavailable_rate": "0.13",
+    "minimum_resolved_discovery": 100,
+    "positive_after_all_costs": true,
+    "positive_by_day_and_creator_cluster": true
+  },
+  "sizing": {
+    "bankroll_usd": "100.00",
+    "compounding_during_discovery": false,
+    "max_concurrent_positions": 1,
+    "probe_usd": "10.00",
+    "second_tranche": false,
+    "size_must_fit_both_withdrawals": true
+  },
+  "solusd": {
+    "max_local_age_nanos": 5000000000,
+    "max_provider_age_at_receipt_nanos": 30000000000,
+    "max_provider_future_skew_nanos": 5000000000,
+    "product": "SOL-USD",
+    "quote_currency": "USD",
+    "source": "coinbase-exchange:SOL-USD:last-trade",
+    "source_url": "https://api.exchange.coinbase.com/products/SOL-USD/ticker"
+  },
+  "tape_source": {
+    "canonical_instruction_coordinates": false,
+    "required": "public_rpc_processed",
+    "requires_exact_receive_nanos": true,
+    "requires_transaction_signature": true
+  }
+}

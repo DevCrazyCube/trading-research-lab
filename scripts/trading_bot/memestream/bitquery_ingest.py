@@ -36,6 +36,25 @@ STREAM_URL = "wss://streaming.bitquery.io/eap?token="
 # stays tiny, and candles are exactly what the charts + the tick-vs-strategy analysis need.
 FLUSH_EVERY_S = 8.0        # how often to append completed 1s buckets to disk
 IDLE_PRUNE_S = 600.0       # drop a mint's in-memory state after this many seconds with no trades
+QUOTA_RETRY_S = 300.0      # a quota refusal is not a transient socket drop; do not hammer the provider
+
+
+class StreamServerError(RuntimeError):
+    """A typed server-side refusal so the outer loop always sleeps before reconnecting."""
+
+
+def _server_retry_delay(payload: object, backoff: float) -> float:
+    """Return the fail-closed reconnect delay for a server error.
+
+    Bitquery acknowledges the websocket before reporting an exhausted traffic allowance.  The old
+    loop treated that path as a clean ``break`` and immediately reconnected, hundreds of times per
+    minute.  Quota/traffic refusals therefore get a long circuit-breaker; other server errors use the
+    ordinary exponential backoff.
+    """
+    text = json.dumps(payload, sort_keys=True).lower()
+    if "quota" in text or "traffic limit" in text or "rate limit" in text:
+        return max(float(backoff), QUOTA_RETRY_S)
+    return max(2.0, float(backoff))
 
 # Only the venues the memebot plays, AND only trades whose buy leg is >= MIN_TRADE_USD. The unfiltered
 # firehose (~500 trades/s, mostly sub-$1 dust) burned the free Bitquery quota in ~90 min. Filtering at
@@ -234,7 +253,6 @@ async def run() -> None:
                     if mt == "connection_ack":
                         await ws.send(json.dumps({"id": "1", "type": "subscribe", "payload": SUBSCRIPTION}))
                         _log("connection_ack -> subscribed (Pumpfun + Pumpswap); aggregating 1s candles")
-                        backoff = 2.0
                         last_flush = _time.monotonic()
                     elif mt in ("next", "data"):
                         trades = (((m.get("payload") or {}).get("data") or {})
@@ -244,6 +262,9 @@ async def run() -> None:
                             if rec:
                                 agg.add(rec)
                                 trades_seen += 1
+                        # Only actual data proves the subscription is healthy.  A connection ACK followed
+                        # by a quota error must not reset the retry backoff.
+                        backoff = 2.0
                         now = _time.monotonic()
                         if now - last_flush >= FLUSH_EVERY_S:
                             w = agg.flush()
@@ -253,11 +274,15 @@ async def run() -> None:
                             _log(f"flush: +{w} bars ({bars_written} total, {trades_seen} trades seen, "
                                  f"{len(agg.open)} live mints)")
                     elif mt in ("error", "connection_error"):
-                        _log(f"server {mt}: {json.dumps(m.get('payload'))[:300]}")
-                        break
+                        payload = m.get("payload")
+                        raise StreamServerError(f"server {mt}: {json.dumps(payload)[:300]}")
                     elif mt == "complete":
-                        _log("subscription complete -> reconnecting")
-                        break
+                        raise StreamServerError("subscription complete")
+        except StreamServerError as e:
+            delay = _server_retry_delay(str(e), backoff)
+            _log(f"{e} -- reconnect in {delay:.0f}s")
+            await asyncio.sleep(delay)
+            backoff = min(60.0, backoff * 1.7)
         except Exception as e:  # noqa: BLE001 -- any drop -> reconnect with backoff
             _log(f"connection dropped: {repr(e)[:160]} -- reconnect in {backoff:.0f}s")
             await asyncio.sleep(backoff)

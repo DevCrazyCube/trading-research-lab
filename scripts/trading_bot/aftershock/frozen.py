@@ -22,8 +22,14 @@ from scripts.trading_bot.memebot.frozen import canonical_sha256  # noqa: F401  (
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 RESEARCH = ROOT / "research" / "trading_bot" / "aftershock"
 
-INSTRUMENTS = {"AFTERSHOCK": "AFTERSHOCK"}
-ACTIVE_INSTRUMENTS = ("AFTERSHOCK",)
+INSTRUMENTS = {"AFTERSHOCK": "AFTERSHOCK", "AFTERSHOCK_V2": "AFTERSHOCK_V2",
+               "AFTERSHOCK_V3": "AFTERSHOCK_V3", "AFTERSHOCK_V4": "AFTERSHOCK_V4",
+               "AFTERSHOCK_V5": "AFTERSHOCK_V5", "AFTERSHOCK_PAC_V1": "AFTERSHOCK_PAC_V1"}
+# V2/V3 are FROZEN (loadable + hash-verified) and run via their OWN detached loops (scan_v2 / scan_v3)
+# writing per-arm ledgers; ACTIVE_INSTRUMENTS is only the periodic-scan registry (V1). Kept minimal so
+# active_specs() never tries to run an arm-family through the single-instrument path.  Legacy V1 is
+# retired operationally; PAC stays inactive until its seal/activation anchors and calibration gate exist.
+ACTIVE_INSTRUMENTS = ()
 
 SCHEMA_VERSION = 1
 
@@ -40,6 +46,27 @@ def paths_for(prefix: str) -> dict:
 
 def _sha256_file(path: pathlib.Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def freeze_epoch(spec: dict) -> float:
+    """The freeze instant as epoch seconds. NO shock whose event time (t_shock) predates this may be
+    entered — a pre-freeze shock is a LOOKAHEAD, not a forward trade (Codex audit 2026-08-27: 31% of the
+    'forward' V3 entries, incl. the two biggest winners, had shocks before the freeze).
+
+    FAIL-CLOSED (handoff 422 defect 2): a missing/malformed/naive `frozen_utc` REFUSES — never a silent
+    0.0 (which would admit everything) and never a naive string interpreted in local Amsterdam time. Only
+    an explicit-offset ISO-8601 instant is accepted (its offset is honoured; the returned epoch is UTC)."""
+    import datetime as _dt
+    raw = spec.get("frozen_utc")
+    if not isinstance(raw, str) or not raw.strip():
+        raise Refused("frozen_utc missing/empty — refusing (fail-closed)")
+    try:
+        parsed = _dt.datetime.fromisoformat(raw)
+    except (ValueError, TypeError) as exc:
+        raise Refused(f"frozen_utc {raw!r} is malformed: {exc}") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise Refused(f"frozen_utc {raw!r} is naive (no timezone) — refusing; must carry an explicit UTC offset")
+    return parsed.timestamp()
 
 
 def frozen_spec(instrument: str = "AFTERSHOCK") -> dict:
