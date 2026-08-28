@@ -1,0 +1,21 @@
+{
+  "instrument_id": "AFTERSHOCK_PAC_V1",
+  "session_number": 2,
+  "retired_utc": "2026-08-28T02:44:00Z",
+  "status": "BURNED_MEASUREMENT_SESSION_NO_OUTCOMES",
+  "reason": "first repaired signal demonstrated that receive-clock pipeline lag after the hashed processed prefix is common on active mints; conservative invalidation worked but would suppress valid post-gap scenario attempts",
+  "seal_sha256": "eaa7cce92068355c1c719b743c4ca3cf208cc0c0e5ecd1707b0588e656928108",
+  "session_event_sha256": "a3396c582bfa086d07346e01243d1a831fd7f2676995d0d55dfad211bad83fae",
+  "activation_root_sha256": "26ec13576435908ec95f905e2397db645dbd56f503b1476669cf35845898e1fa",
+  "diagnostic_decision_id": "0b14a6c67646597b6305d2bf2b9f4e4ae692cb49004f75339a63f74468807ce0",
+  "diagnostic_mint": "AxDBCnwQ7u5w5omDb7iNQxzZtCouarPEMnGmP9W9pump",
+  "measurement_refusals": 1,
+  "attempt_records": 0,
+  "fills": 0,
+  "open_positions": 0,
+  "ledger_rows": 0,
+  "resolved_outcomes": 0,
+  "performance_observations": 0,
+  "backfill_permitted": false,
+  "inherited_by_replacement_session": false
+}

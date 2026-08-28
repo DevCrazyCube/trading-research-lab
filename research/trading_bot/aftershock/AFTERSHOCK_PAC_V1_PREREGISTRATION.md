@@ -38,8 +38,11 @@ invalidated the saved prefix; and a right-censored attempt remained fillable for
 burned as a measurement diagnostic and cannot enter any denominator. The replacement session freezes:
 
 - schema-3 state records the last measurement refusal independently of the performance ledger;
-- a late pre-decision observation invalidates the incomplete decision, records a no-cost diagnostic,
-  and releases the single-position lock. It never receives a retrospective fill;
+- the DecisionRecord's hashed prefix is the complete **processed** snapshot. A row appended after that
+  prefix whose receive clock is at/before the decision is measured pipeline lag: it is excluded from
+  detector replay and labelled, never added retrospectively to the signal. Its reserve effect remains
+  inside the later boundary's `pre_state`, so fill pricing stays post-gap. Any mutation/omission inside
+  the hashed prefix still invalidates and releases the decision;
 - a right-censored entry is one closed no-trade diagnostic, not an indefinitely pending order;
 - a right-censored trail/capacity exit releases that attempt and requires a fresh decision. At the
   12-minute hard horizon, a still-unobservable execution boundary is stressed to exact full loss;

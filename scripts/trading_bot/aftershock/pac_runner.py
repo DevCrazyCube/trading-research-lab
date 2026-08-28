@@ -270,7 +270,8 @@ def _validate_state(state: dict) -> dict:
             raise RefusedExecution(f"runner {name} is invalid")
     refusal = state["last_measurement_refusal"]
     if refusal is not None:
-        required = {"reason", "side", "mint", "decision_id", "recorded_unix_nanos"}
+        required = {"reason", "side", "mint", "decision_id", "recorded_unix_nanos",
+                    "excluded_late_predecision_count"}
         if not isinstance(refusal, dict) or set(refusal) != required:
             raise RefusedExecution("runner measurement refusal is malformed")
         if refusal["reason"] not in {
@@ -282,7 +283,9 @@ def _validate_state(state: dict) -> dict:
                 or not isinstance(refusal["decision_id"], str)
                 or len(refusal["decision_id"]) != 64
                 or type(refusal["recorded_unix_nanos"]) is not int
-                or refusal["recorded_unix_nanos"] < 0):
+                or refusal["recorded_unix_nanos"] < 0
+                or type(refusal["excluded_late_predecision_count"]) is not int
+                or refusal["excluded_late_predecision_count"] < 0):
             raise RefusedExecution("runner measurement refusal fields are invalid")
     session_values = (state["session_event_sha256"], state["activation_root_sha256"])
     if (session_values[0] is None) != (session_values[1] is None):
@@ -360,7 +363,11 @@ def _min_out(quote: int) -> int:
     return max(1, quote * (SLIPPAGE_DEN - SLIPPAGE_BPS) // SLIPPAGE_DEN)
 
 
-def _nonfill_row(pending: dict, attempt, ctx: ExecutionContext) -> dict:
+def _nonfill_row(pending: dict, attempt, ctx: ExecutionContext,
+                 *, extra_labels: tuple[str, ...] = ()) -> dict:
+    if (not isinstance(extra_labels, tuple)
+            or any(not isinstance(label, str) or not label for label in extra_labels)):
+        raise RefusedExecution("nonfill extra labels must be non-empty strings in a tuple")
     return _ledger_row({
         "kind": "attempt_cost", "side": pending["side"], "mint": pending["mint"],
         "attempt_id": attempt.attempt_id, "entry_attempt_id": pending["entry_attempt_id"],
@@ -368,7 +375,7 @@ def _nonfill_row(pending: dict, attempt, ctx: ExecutionContext) -> dict:
         "attempt_cost_lamports": int(attempt.cost_lamports or 0),
         "cost_observed": attempt.cost_lamports is not None,
         "denominator_lamports": pending["return_denominator_lamports"],
-        "labels": list(attempt.labels),
+        "labels": list(extra_labels) + list(attempt.labels),
     }, ctx)
 
 
@@ -416,17 +423,45 @@ def _resolved_row(position: OpenPosition, *, action: str, decision_id: str,
     }, ctx)
 
 
-def _record_measurement_refusal(state: dict, pending: dict, reason: str) -> None:
+def _record_measurement_refusal(state: dict, pending: dict, reason: str,
+                                *, excluded_late_predecision_count: int = 0) -> None:
     if reason not in {"LATE_PREDECISION_OBSERVATION", "RIGHT_CENSORED_NO_BOUNDARY"}:
         raise RefusedExecution("unknown bounded measurement refusal")
     decision = _decision_from_dict(pending["decision"])
+    if (type(excluded_late_predecision_count) is not int
+            or excluded_late_predecision_count < 0):
+        raise RefusedExecution("excluded late-predecision count is invalid")
     state["last_measurement_refusal"] = {
         "reason": reason,
         "side": pending["side"],
         "mint": pending["mint"],
         "decision_id": decision.decision_id,
         "recorded_unix_nanos": time.time_ns(),
+        "excluded_late_predecision_count": excluded_late_predecision_count,
     }
+
+
+def _attempt_stream(events: list, decision: DecisionRecord) -> tuple[list, int]:
+    """Reconstruct the exact processed decision prefix plus genuinely post-decision observations.
+
+    Per-mint files are append-only, but RPC decode/materialisation can lag their recorded receive clock.
+    Rows appended after the hashed decision prefix with a receive clock at/before the internal decision
+    were not part of the processed decision snapshot.  They cannot retroactively invalidate or improve
+    the signal.  Exclude them from detector replay; the first later boundary's ``pre_state`` still
+    contains their reserve effects, so entry/exit pricing remains post-gap and conservative.
+    """
+    if not isinstance(decision, DecisionRecord):
+        raise RefusedExecution("attempt stream requires a DecisionRecord")
+    snapshot_end = decision.stream_snapshot_count
+    if snapshot_end > len(events):
+        return events, 0  # public engine emits the precise out-of-stream refusal
+    tail = events[snapshot_end:]
+    late = [event for event in tail
+            if event.observation_unix_nanos <= decision.decision_unix_nanos]
+    # Keep the complete append-only stream so reserve-state continuity remains independently
+    # checkable.  DecisionRecord validation applies the omission test only inside its committed
+    # snapshot; attempt boundary search naturally skips tail rows earlier than modeled landing.
+    return events, len(late)
 
 
 def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
@@ -440,8 +475,11 @@ def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
     decision = _decision_from_dict(pending["decision"])
     kind = IntentKind.EXACT_QUOTE_BUY if pending["side"] == "ENTRY" else IntentKind.EXACT_TOKEN_SELL
     intent = OrderIntent(kind, pending["amount"], pending["min_out"])
+    attempt_events, late_count = _attempt_stream(events, decision)
+    late_labels = ((f"PIPELINE_LAG_PREDECISION_EXCLUDED_{late_count}",)
+                   if late_count else ())
     try:
-        attempt = attempt_order(events, decision, intent, latency, ctx, price_fn)
+        attempt = attempt_order(attempt_events, decision, intent, latency, ctx, price_fn)
     except RefusedExecution as exc:
         if str(exc) != "DecisionRecord omitted an observation already available at decision time":
             raise
@@ -449,7 +487,9 @@ def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
         # decision clock.  The original decision is no longer a complete prefix, so it may never fill
         # retrospectively.  Invalidate it durably and release the single-position lock.
         state["pending_orders"] = []
-        _record_measurement_refusal(state, pending, "LATE_PREDECISION_OBSERVATION")
+        _record_measurement_refusal(
+            state, pending, "LATE_PREDECISION_OBSERVATION",
+            excluded_late_predecision_count=late_count)
         save_state(state)
         return False
     if attempt.outcome is Outcome.RIGHT_CENSORED_NO_BOUNDARY:
@@ -457,14 +497,16 @@ def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
         # measurement refusal.  A censored non-horizon EXIT is retried only via a fresh decision;
         # at the hard horizon the conservative portfolio outcome is an exact full loss.
         state["pending_orders"] = []
-        _record_measurement_refusal(state, pending, "RIGHT_CENSORED_NO_BOUNDARY")
+        _record_measurement_refusal(
+            state, pending, "RIGHT_CENSORED_NO_BOUNDARY",
+            excluded_late_predecision_count=late_count)
         if (pending["side"] == "EXIT"
                 and pending["action"] == _policy.ExitAction.ATTEMPT_FULL_EXIT_HORIZON.value):
             position = position_from_dict(state["open_positions"][0])
             row = _resolved_row(
                 position, action=_policy.ExitAction.UNEXITABLE_FULL_LOSS.value,
                 decision_id=decision.decision_id, accounting=None, ctx=ctx,
-                extra_labels=("HORIZON_EXIT_RIGHT_CENSORED_FULL_LOSS",))
+                extra_labels=("HORIZON_EXIT_RIGHT_CENSORED_FULL_LOSS",) + late_labels)
             state["open_positions"] = []
             _commit(state, [row])
         else:
@@ -473,12 +515,12 @@ def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
 
     state["pending_orders"] = []
     if attempt.outcome is not Outcome.SCENARIO_FILLED:
-        rows = [_nonfill_row(pending, attempt, ctx)]
+        rows = [_nonfill_row(pending, attempt, ctx, extra_labels=late_labels)]
         if pending["side"] == "EXIT" and attempt.outcome is Outcome.SCENARIO_UNAVAILABLE:
             position = position_from_dict(state["open_positions"][0])
             rows.append(_resolved_row(position, action=_policy.ExitAction.UNEXITABLE_FULL_LOSS.value,
                                       decision_id=decision.decision_id, attempt=attempt,
-                                      accounting=None, ctx=ctx))
+                                      accounting=None, ctx=ctx, extra_labels=late_labels))
             state["open_positions"] = []
         _commit(state, rows)
         return False
@@ -515,7 +557,7 @@ def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
             "entry_observation_unix_nanos": position.entry_observation_unix_nanos,
             "entry_decision_id": position.entry_decision_id,
             "entry_attempt_id": position.entry_attempt_id,
-            "labels": list(attempt.labels),
+            "labels": list(late_labels) + list(attempt.labels),
         }, ctx)
         _commit(state, [row])
         return False
@@ -524,7 +566,8 @@ def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
     if position.entry_attempt_id != pending["entry_attempt_id"]:
         raise RefusedExecution("pending exit references another entry")
     row = _resolved_row(position, action=pending["action"], decision_id=decision.decision_id,
-                        attempt=attempt, accounting=accounting, ctx=ctx)
+                        attempt=attempt, accounting=accounting, ctx=ctx,
+                        extra_labels=late_labels)
     state["open_positions"] = []
     _commit(state, [row])
     return False

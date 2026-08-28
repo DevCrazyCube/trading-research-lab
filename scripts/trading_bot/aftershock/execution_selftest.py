@@ -280,7 +280,31 @@ def _manifest_and_execution_checks(c: Checks) -> None:
                 record.activation_root_sha256 == proof.activation_root_sha256 and
                 record.decision_id == decision.decision_id)
         c.check("DecisionRecord pins full receive-time prefix and sealed detector output",
-                decision.evaluated_through_index == 2 and decision.evidence_indices == (2,))
+                decision.evaluated_through_index == 2 and decision.evidence_indices == (2,)
+                and decision.stream_snapshot_count == 4
+                and decision.stream_snapshot_sha256 == _execution._hash_json([
+                    _execution.event_commitment(event) for event in first_events]))
+
+        # A row can materialise after the committed processed snapshot with a receive clock before
+        # the decision.  It remains in the reserve chain but cannot rewrite detector evidence.
+        with mock.patch("scripts.trading_bot.aftershock.execution.time.time_ns", return_value=T0 + 350):
+            snapshot_decision = build_decision_record(
+                first_events[:3], ctx, detector_module_path=DETECTOR_PATH,
+                detector_callable_name=DETECTOR_CALLABLE, detector_sha256=detector_sha,
+                spec_sha256=seal["frozen_json_canonical_sha256"])
+        late = replace(
+            first_events[3], observation_unix_nanos=T0 + 340,
+            post_state=first_events[3].pre_state, evidence_sha="b" * 64,
+            coord=CanonicalCoord(103, 0, 0, 0))
+        boundary = replace(first_events[3], coord=CanonicalCoord(104, 0, 0, 0),
+                           evidence_sha="c" * 64)
+        lag_record = attempt_order(
+            first_events[:3] + [late, boundary], snapshot_decision, sell,
+            LatencyModel(100), ctx, _price(1_000_000, Unit.LAMPORTS))
+        c.check("post-snapshot pipeline lag preserves reserve chain without changing decision prefix",
+                lag_record.outcome is Outcome.SCENARIO_FILLED
+                and lag_record.boundary_index == 4
+                and snapshot_decision.evidence_indices == (2,))
 
         incomplete = replace(
             decision, evaluated_through_index=3,
@@ -326,7 +350,7 @@ def _manifest_and_execution_checks(c: Checks) -> None:
                 unavailable_record.cost_lamports is None)
 
         short_events = first_events[:3]
-        censored = attempt_order(short_events, decision, sell, LatencyModel(100), ctx,
+        censored = attempt_order(short_events, snapshot_decision, sell, LatencyModel(100), ctx,
                                  _price(1, Unit.LAMPORTS))
         c.check("missing future boundary is right-censored, not 'never sent'",
                 censored.outcome is Outcome.RIGHT_CENSORED_NO_BOUNDARY and

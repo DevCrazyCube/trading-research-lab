@@ -95,8 +95,9 @@ def main() -> int:
                     decision_unix_nanos=T0 + 1_600_000_000, max_staleness_nanos=100_000_000)
 
                 # Reproduce the production liveness defect: the admitted prefix ends at +1.6s,
-                # decision time is +1.9s, and a +1.8s observation appears on the next read.  It must
-                # invalidate the incomplete decision and release the book, never fill retrospectively.
+                # decision time is +1.9s, and a +1.8s observation materialises on the next read.  It
+                # was not in the processed prefix, so detector replay excludes it; the +2.0s boundary
+                # still prices from a pre-state that contains its reserve effect.
                 state = runner.load_state()
                 with mock.patch.object(execution.time, "time_ns", return_value=T0 + 1_900_000_000):
                     runner.drive_once(events[:4], state, ctx, q_lamports=q,
@@ -105,11 +106,14 @@ def main() -> int:
                     with mock.patch.object(execution.time, "time_ns", return_value=T0 + 2_100_000_000):
                         runner.drive_once(events[:6], state, ctx, q_lamports=q,
                                           latency=latency, price_fn=price_fn)
-                ok &= _check("late pre-decision observation invalidates instead of wedging/filling",
-                             not state["pending_orders"] and not state["open_positions"]
-                             and not _rows()
-                             and state["last_measurement_refusal"]["reason"]
-                             == "LATE_PREDECISION_OBSERVATION")
+                lag_opened = [row for row in _rows() if row["kind"] == "opened"]
+                ok &= _check("late-materialised pre-decision row cannot wedge or alter detector prefix",
+                             not state["pending_orders"] and len(state["open_positions"]) == 1
+                             and len(lag_opened) == 1
+                             and "PIPELINE_LAG_PREDECISION_EXCLUDED_1"
+                             in lag_opened[0]["labels"]
+                             and state["open_positions"][0]["entry_observation_unix_nanos"]
+                             == T0 + 2_000_000_000)
 
                 # A decision with no post-landing observation is one closed censored attempt, not an
                 # indefinitely fillable pseudo-order that monopolises the one-position book.

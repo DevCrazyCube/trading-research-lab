@@ -2,7 +2,7 @@
   "boundary": "paper-only simulated observed path; no wallet, order, or executable-evidence claim",
   "execution_realism": {
     "ata_rent_treatment": "charged_on_entry_not_reclaimed_without_separate_close_attempt",
-    "dependency_paths": [
+        "dependency_paths": [
       "research/pump_amm_idl_9c82f61.json",
       "research/pump_idl_9c82f61.json",
       "scripts/b10a_simulator_kernel.py",
@@ -28,7 +28,8 @@
       "scripts/trading_bot/memestream/chainstack_ingest.py",
       "scripts/trading_bot/memestream/rpc_ingest.py",
       "scripts/trading_bot/sniper/data/_common.py"
-    ],
+        ],
+        "decision_stream_snapshot": "count_plus_sha256_full_processed_stream",
     "detector_callable_name": "detector",
     "detector_module_path": "scripts/trading_bot/aftershock/pac_detector.py",
     "experiment_dependency_paths": [
@@ -46,7 +47,8 @@
     "failed_attempt_costs_are_portfolio_costs": true,
     "first_watermark_skips_backlog": true,
         "ledger_schema_version": 2,
-        "late_predecision_observation": "invalidate_no_trade_and_release_lock",
+        "late_materialized_predecision_tail": "exclude_from_detector_label_pipeline_lag_keep_effect_in_boundary_prestate",
+        "mutated_or_incomplete_hashed_prefix": "invalidate_no_trade_and_release_lock",
         "right_censored_entry": "no_trade_diagnostic_and_release_lock",
         "right_censored_exit_before_horizon": "fresh_decision_required",
         "right_censored_exit_at_horizon": "exact_full_loss",
@@ -73,6 +75,7 @@
   "family": "payable absorption compression",
     "frozen_utc": "2026-08-28T00:30:45+00:00",
     "measurement_repair_utc": "2026-08-28T02:28:00+00:00",
+    "pipeline_lag_repair_utc": "2026-08-28T02:44:00+00:00",
   "instrument_id": "AFTERSHOCK_PAC_V1",
   "lineage": {
     "burned_predecessor": "AFTERSHOCK_V2_C",
@@ -87,7 +90,7 @@
     "second_recovery_must_be_latest": true
   },
   "preregistration": "research/trading_bot/aftershock/AFTERSHOCK_PAC_V1_PREREGISTRATION.md",
-    "preregistration_sha256": "e1a92a00b997e43c818ca6ea3d16fb9b5984893dfb1ff43e0e17e13233ddd7d9",
+    "preregistration_sha256": "cac1536bda2509080e268f7f65cd9649853468748855d70657ccb4f6af59b744",
   "promotion": {
     "confirmation_required": true,
     "drop_max_must_remain_positive": true,

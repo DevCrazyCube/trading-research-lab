@@ -59,11 +59,14 @@ and no later than the evaluated prefix. `signal_index` is always their maximum.
 - seal, session, and activation-root hashes;
 - frozen-spec hash and detector path/hash/callable;
 - the full evaluated-prefix root and last evaluated index;
+- the count and root of the complete processed stream snapshot supplied at decision construction;
 - all detector evidence commitments and their maximum receive/canonical coordinate;
 - the internally observed decision clock.
 
-Every attempt recomputes the record hash, the available-prefix maximum, and the evidence commitments,
-then reruns the sealed detector. A publicly rehashed record that omits detector evidence therefore refuses.
+Every attempt recomputes the record hash, processed-snapshot root, evaluated-prefix maximum, and evidence
+commitments, then reruns the sealed detector. A publicly rehashed record that mutates its original
+snapshot or omits detector evidence therefore refuses. Append-only rows beyond that committed snapshot
+cannot retroactively enter detector evidence.
 
 ## Attempt and clock semantics
 
@@ -101,9 +104,12 @@ single-position lock is released. Likewise, a triggered priceable exit with non-
 proceeds settles as exact full loss rather than crashing on a negative value or inventing a successful
 sell. These are runner portfolio semantics; they do not relabel the engine AttemptRecord.
 
-If a feed observation materialises between candidate snapshot and internal decision clock, the saved
-prefix is incomplete. PAC invalidates that decision as a no-cost/no-fill diagnostic and releases it.
-The raw observation remains preserved; it is never deleted to make the decision validate.
+The DecisionRecord commits the complete processed snapshot. If an append-only feed row materialises
+after that hash boundary but carries a receive clock at/before the decision, PAC labels it as pipeline
+lag and excludes it from detector replay; it never improves the historical signal. The later scenario
+boundary's `pre_state` already contains the intervening reserve effects, so pricing remains post-gap.
+Mutation or omission inside the hashed prefix still invalidates as a no-cost/no-fill diagnostic. Raw
+observations remain preserved and are never deleted to make a decision validate.
 
 ## Orders, costs, and retries
 

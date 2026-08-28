@@ -355,6 +355,8 @@ class DecisionRecord:
     spec_sha256: str
     evaluated_through_index: int
     evaluated_prefix_sha256: str
+    stream_snapshot_count: int
+    stream_snapshot_sha256: str
     evidence_indices: tuple[int, ...]
     evidence_commitments: tuple[str, ...]
     signal_index: int
@@ -364,7 +366,8 @@ class DecisionRecord:
 
     def __post_init__(self) -> None:
         for name in ("decision_id", "seal_sha256", "session_event_sha256", "activation_root_sha256",
-                     "detector_sha256", "spec_sha256", "evaluated_prefix_sha256"):
+                     "detector_sha256", "spec_sha256", "evaluated_prefix_sha256",
+                     "stream_snapshot_sha256"):
             _require_hash(f"DecisionRecord.{name}", getattr(self, name))
         if not isinstance(self.instrument_id, str) or not self.instrument_id:
             raise RefusedExecution("DecisionRecord.instrument_id is required")
@@ -374,6 +377,9 @@ class DecisionRecord:
                 not self.detector_callable_name.isidentifier()):
             raise RefusedExecution("DecisionRecord.detector_callable_name must be an identifier")
         _require_exact_int("DecisionRecord.evaluated_through_index", self.evaluated_through_index, minimum=0)
+        _require_exact_int("DecisionRecord.stream_snapshot_count", self.stream_snapshot_count, minimum=1)
+        if self.evaluated_through_index >= self.stream_snapshot_count:
+            raise RefusedExecution("DecisionRecord evaluated prefix exceeds its stream snapshot")
         if not isinstance(self.evidence_indices, tuple) or not self.evidence_indices:
             raise RefusedExecution("DecisionRecord requires detector evidence indices")
         if tuple(sorted(set(self.evidence_indices))) != self.evidence_indices:
@@ -412,6 +418,8 @@ def _decision_body(record: DecisionRecord) -> dict:
         "spec_sha256": record.spec_sha256,
         "evaluated_through_index": record.evaluated_through_index,
         "evaluated_prefix_sha256": record.evaluated_prefix_sha256,
+        "stream_snapshot_count": record.stream_snapshot_count,
+        "stream_snapshot_sha256": record.stream_snapshot_sha256,
         "evidence_indices": list(record.evidence_indices),
         "evidence_commitments": list(record.evidence_commitments),
         "signal_index": record.signal_index,
@@ -489,6 +497,7 @@ def build_decision_record(events: list[ObservedEvent], ctx: ExecutionContext, *,
     if decision_ns < max_event.observation_unix_nanos:
         raise RefusedExecution("decision clock precedes the maximum evidence receive clock")
     prefix_sha = _hash_json([event_commitment(event) for event in events[:through + 1]])
+    snapshot_sha = _hash_json([event_commitment(event) for event in events])
     body = {
         "instrument_id": proof.instrument_id,
         "seal_sha256": proof.seal_sha256,
@@ -500,6 +509,8 @@ def build_decision_record(events: list[ObservedEvent], ctx: ExecutionContext, *,
         "spec_sha256": spec_sha256,
         "evaluated_through_index": through,
         "evaluated_prefix_sha256": prefix_sha,
+        "stream_snapshot_count": len(events),
+        "stream_snapshot_sha256": snapshot_sha,
         "evidence_indices": list(evidence_indices),
         "evidence_commitments": [event_commitment(event) for event in evidence],
         "signal_index": evidence_indices[-1],
@@ -526,11 +537,17 @@ def validate_decision_record(record: DecisionRecord, events: list[ObservedEvent]
         raise RefusedExecution("DecisionRecord references a different manifest session")
     if record.spec_sha256 != proof.frozen_json_canonical_sha256:
         raise RefusedExecution("DecisionRecord spec differs from the sealed frozen JSON")
-    if record.evaluated_through_index >= len(events):
+    if record.stream_snapshot_count > len(events):
+        raise RefusedExecution("DecisionRecord stream snapshot is outside the current stream")
+    snapshot_sha = _hash_json([
+        event_commitment(event) for event in events[:record.stream_snapshot_count]])
+    if snapshot_sha != record.stream_snapshot_sha256:
+        raise RefusedExecution("DecisionRecord stream snapshot root does not match the stream")
+    if record.evaluated_through_index >= record.stream_snapshot_count:
         raise RefusedExecution("DecisionRecord evaluated prefix is outside the stream")
     if events[record.evaluated_through_index].observation_unix_nanos > record.decision_unix_nanos:
         raise RefusedExecution("DecisionRecord evaluated a future receive-time observation")
-    if (record.evaluated_through_index + 1 < len(events) and
+    if (record.evaluated_through_index + 1 < record.stream_snapshot_count and
             events[record.evaluated_through_index + 1].observation_unix_nanos <= record.decision_unix_nanos):
         raise RefusedExecution("DecisionRecord omitted an observation already available at decision time")
     prefix_sha = _hash_json([
