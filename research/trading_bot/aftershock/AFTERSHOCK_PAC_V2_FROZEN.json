@@ -1,0 +1,76 @@
+{
+  "instrument_id": "AFTERSHOCK_PAC_V2",
+  "schema_version": 1,
+  "preregistration_sha256": "5013669e4157179dbe664c4b8c0e09e3e90fd43b010cdda1d2259635ecf3dce2",
+  "dependency_paths": [
+    "research/pump_amm_idl_9c82f61.json",
+    "research/pump_idl_9c82f61.json",
+    "scripts/b10a_simulator_kernel.py",
+    "scripts/b10b_position_path.py",
+    "scripts/b15a_websocket.py",
+    "scripts/b9d_transaction_bodies.py",
+    "scripts/b9i_quote_reproduction.py",
+    "scripts/rpc_http_identity.py",
+    "scripts/trading_bot/aftershock/__init__.py",
+    "scripts/trading_bot/aftershock/ecr.py",
+    "scripts/trading_bot/aftershock/execution.py",
+    "scripts/trading_bot/aftershock/feasibility.py",
+    "scripts/trading_bot/aftershock/pac_detector.py",
+    "scripts/trading_bot/aftershock/pac_v2_calibration.py",
+    "scripts/trading_bot/aftershock/pac_v2_detector.py",
+    "scripts/trading_bot/aftershock/pac_v2_feed.py",
+    "scripts/trading_bot/aftershock/pac_v2_manifest.py",
+    "scripts/trading_bot/aftershock/pac_v2_policy.py",
+    "scripts/trading_bot/aftershock/pac_v2_runner.py",
+    "scripts/trading_bot/aftershock/pac_v2_snapshot.py",
+    "scripts/trading_bot/aftershock/pac_v2_status.py",
+    "scripts/trading_bot/aftershock/solusd_recorder.py",
+    "scripts/trading_bot/sniper/data/_common.py",
+    "scripts/trading_bot/sniper/types.py"
+  ],
+  "status": "CALIBRATION_REQUIRED_NOT_ACTIVE",
+  "paper_scenario_only": true,
+  "live_trading_authorized": false,
+  "entry": {
+    "buyer_breadth_min": 3,
+    "discovery_probe_usd": "10",
+    "max_pattern_span_nanos": 180000000000,
+    "minimum_cycle_withdrawal_lamports": 50000000,
+    "reserve_shock_cover_multiple": 6,
+    "snapshot_observation_timeout_nanos": 30000000000,
+    "slippage_bps": 1000,
+    "required_cycles": 2
+  },
+  "exit": {
+    "absolute_horizon_nanos": 720000000000,
+    "capacity_multiple": 6,
+    "net_negative_at_horizon": "UNEXITABLE_FULL_LOSS_RELEASE_LOCK",
+    "rent_primary_treatment": "CHARGED_NOT_RECLAIMED_WITHOUT_OBSERVED_CLOSE",
+    "trail_percent": 12
+  },
+  "calibration": {
+    "default_latency_nanos": null,
+    "minimum_landed_samples": 100,
+    "percentile": "nearest_rank_p90",
+    "required_clocks": [
+      "decision_unix_nanos",
+      "build_start_unix_nanos",
+      "sign_done_unix_nanos",
+      "send_start_unix_nanos",
+      "send_ack_unix_nanos",
+      "land_observed_unix_nanos"
+    ]
+  },
+  "evidence_labels": [
+    "SIMULATED_OBSERVED_PATH",
+    "PUBLIC_RPC_PROCESSED_ACCOUNT_SNAPSHOT",
+    "PAPER_SCENARIO_ONLY"
+  ],
+  "promotion_gate": {
+    "resolved_positions": 100,
+    "mean_all_cost_return_positive": true,
+    "capital_index_above": 100,
+    "full_loss_rate_no_worse_than_v1": true,
+    "authorizes_real_money": false
+  }
+}
