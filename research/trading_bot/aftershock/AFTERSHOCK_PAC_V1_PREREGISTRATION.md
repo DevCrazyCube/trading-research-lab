@@ -68,6 +68,10 @@ The optimized runner freezes these measurement rules before its next signal:
 - scan starts are scheduled on a fixed 250 ms deadline, including compute time. This changes only how
   quickly a receive-time signal is observed; modeled landing remains the explicit uncalibrated
   `800,000,000` ns and is not shortened;
+- a service poll before modeled landing is `WAITING`, never a censored attempt. After landing, the
+  decision waits at most `2,000,000,000` ns for a post-landing observed-state boundary; only then may
+  the already-frozen right-censor terminal rule release or stress the order. This preserves the bounded
+  wait implicit in the old two-second cadence without making a sub-landing fill;
 - flat discovery first reads only the latest 180-second receive-time tail and runs the unchanged sealed
   PAC comparisons on exact reserve states. This is admission-only: every positive candidate is rebuilt
   from the complete mint tape and must pass the full hashes, provenance, ordering, detector, coverage,

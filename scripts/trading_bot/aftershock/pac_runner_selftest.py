@@ -135,6 +135,13 @@ def main() -> int:
                     with mock.patch.object(execution.time, "time_ns", return_value=T0 + 1_900_000_000):
                         runner.drive_once(events[:4], state, ctx, q_lamports=q,
                                           latency=latency, price_fn=price_fn)
+                ok &= _check("pre-boundary fast poll remains pending instead of false censoring",
+                             len(state["pending_orders"]) == 1 and not state["open_positions"]
+                             and state["last_measurement_refusal"] is None)
+                with mock.patch.object(runner.time, "time_ns", return_value=T0 + 3_800_000_000):
+                    with mock.patch.object(execution.time, "time_ns", return_value=T0 + 3_800_000_000):
+                        runner.drive_once(events[:4], state, ctx, q_lamports=q,
+                                          latency=latency, price_fn=price_fn)
                 ok &= _check("right-censored entry releases the book as a no-trade diagnostic",
                              not state["pending_orders"] and not state["open_positions"]
                              and not _rows()
@@ -263,8 +270,10 @@ def main() -> int:
                 with mock.patch.object(execution.time, "time_ns", return_value=horizon_time):
                     runner.drive_once(events[:6], state, ctx, q_lamports=q,
                                       latency=latency, price_fn=price_fn)
-                with mock.patch.object(runner.time, "time_ns", return_value=horizon_time + 1):
-                    with mock.patch.object(execution.time, "time_ns", return_value=horizon_time + 1):
+                timeout_time = (horizon_time + latency.reaction_nanos
+                                + runner.BOUNDARY_OBSERVATION_TIMEOUT_NANOS + 1)
+                with mock.patch.object(runner.time, "time_ns", return_value=timeout_time):
+                    with mock.patch.object(execution.time, "time_ns", return_value=timeout_time):
                         runner.drive_once(events[:6], state, ctx, q_lamports=q,
                                           latency=latency, price_fn=price_fn)
                 censored_loss = [r for r in _rows() if r["kind"] == "resolved"][0]
@@ -328,6 +337,8 @@ def main() -> int:
                 ok &= _check("optimized production cadence is pinned to 250ms",
                              runner.DEFAULT_SCAN_INTERVAL_SECONDS == 0.25
                              and runner.SESSION_REVERIFY_SECONDS == 5.0)
+                ok &= _check("post-landing observation wait remains bounded at two seconds",
+                             runner.BOUNDARY_OBSERVATION_TIMEOUT_NANOS == 2_000_000_000)
 
                 _reset_files()
                 with mock.patch.object(runner.time, "time_ns", return_value=T0 + 3_000_000_000):

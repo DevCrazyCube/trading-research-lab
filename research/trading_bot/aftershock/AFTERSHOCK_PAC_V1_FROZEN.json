@@ -2,6 +2,7 @@
   "boundary": "paper-only simulated observed path; no wallet, order, or executable-evidence claim",
   "execution_realism": {
     "ata_rent_treatment": "charged_on_entry_not_reclaimed_without_separate_close_attempt",
+    "boundary_observation_timeout_nanos": 2000000000,
         "dependency_paths": [
       "research/pump_amm_idl_9c82f61.json",
       "research/pump_idl_9c82f61.json",
@@ -99,7 +100,7 @@
     "second_recovery_must_be_latest": true
   },
   "preregistration": "research/trading_bot/aftershock/AFTERSHOCK_PAC_V1_PREREGISTRATION.md",
-    "preregistration_sha256": "5161d837f8d2359ff7f6e28c56e9e45c8e2f8777599ee9a4024da382d65daa5e",
+    "preregistration_sha256": "642f9662f85236b72b89c3a509b86fb9f354b21d171831d2f0a318257e9534ef",
   "promotion": {
     "confirmation_required": true,
     "drop_max_must_remain_positive": true,

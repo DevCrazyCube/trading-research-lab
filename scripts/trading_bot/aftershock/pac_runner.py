@@ -39,6 +39,7 @@ SLIPPAGE_BPS = 1_000
 SLIPPAGE_DEN = 10_000
 DEFAULT_SCAN_INTERVAL_SECONDS = 0.25
 SESSION_REVERIFY_SECONDS = 5.0
+BOUNDARY_OBSERVATION_TIMEOUT_NANOS = 2_000_000_000
 
 
 def exit_poll(events: tuple, warmup_count: int) -> tuple:
@@ -489,6 +490,13 @@ def _advance_pending(state: dict, events: list, ctx: ExecutionContext, *,
     attempt_events, late_count = _attempt_stream(events, decision)
     late_labels = ((f"PIPELINE_LAG_PREDECISION_EXCLUDED_{late_count}",)
                    if late_count else ())
+    modeled_landing = decision.decision_unix_nanos + latency.reaction_nanos
+    # A 250ms service cycle will normally revisit an order before its 800ms modeled landing. That is
+    # WAITING, not right-censoring. Keep the durable decision until a post-landing receive boundary is
+    # observable, bounded by the same two-second wall wait the old production cadence implicitly gave.
+    if (attempt_events[-1].observation_unix_nanos < modeled_landing
+            and time.time_ns() < modeled_landing + BOUNDARY_OBSERVATION_TIMEOUT_NANOS):
+        return True
     try:
         attempt = attempt_order(attempt_events, decision, intent, latency, ctx, price_fn)
     except RefusedExecution as exc:

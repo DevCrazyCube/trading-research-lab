@@ -1,0 +1,22 @@
+{
+  "instrument_id": "AFTERSHOCK_PAC_V1",
+  "session_number": 4,
+  "retired_utc": "2026-08-28T03:17:00Z",
+  "status": "BURNED_FAST_POLL_MEASUREMENT_DIAGNOSTIC_NO_OUTCOMES",
+  "reason": "250ms service revisited pending entries before the 800ms modeled landing and the prior terminal rule confused not-yet-landed with right-censored",
+  "seal_sha256": "06dfc353dc7d4d66616f484e30ad8ab8d22bb097fedd353e3353498329e2f40d",
+  "session_event_sha256": "cc3da1bdd380629458e9de093b4868abc30d89358405af46891bed29fd918463",
+  "activation_root_sha256": "91597e8699da0c95937501d163c1ccd1c48759e51876d8a659888bee6b4d7aaf",
+  "state_sha256": "1b98a680c49aa418a5b71706ffc66ee632e33c0a27c8384426d43236518c74a0",
+  "runner_log_sha256": "b7cda2a0a189ff466d8bdc6e93a61a90b1a69bede21aedd061571984d395fb34",
+  "activation_log_sha256": "ecc0659e53069deb0274b88631caa1a07a4b787f26647c74c5a16e8dab0cd700",
+  "service_cycles": 340,
+  "entry_decisions_persisted": 15,
+  "attempt_records": 0,
+  "fills": 0,
+  "ledger_rows": 0,
+  "resolved_outcomes": 0,
+  "performance_observations": 0,
+  "backfill_permitted": false,
+  "inherited_by_replacement_session": false
+}
