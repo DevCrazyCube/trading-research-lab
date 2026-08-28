@@ -10,6 +10,7 @@ own modules (frozen/ledger/feed/scoring/paper) so every number matches the bot e
   GET  /                    the SPA (dashboard.html + app.css + app.js)
   GET  /api/summary         honest scorecard (expectancy, win-rate, totals, #open)  [read-only]
   GET  /api/positions       every paper position, OPEN + CLOSED, with LIVE P&L (% and R)
+  GET  /api/pac             fail-closed AFTERSHOCK PAC performance + operational gates [read-only]
   GET  /api/coin/{pool}     one coin's detail: entry, live stats, screen decision, stop/target, markers
   GET  /api/ohlcv/{pool}    GeckoTerminal candles, server-side proxied (avoids CORS)
 
@@ -693,18 +694,65 @@ def _closed_row(res: dict, entry_by_hash: dict) -> dict:
     }
 
 
+# ---------- short-TTL view cache (single-flight) ----------
+# The heavy JSON views (positions/summary/evo/exit/aftershock) each re-read every ledger JSONL from
+# disk and re-run scoring.score PER REQUEST. With a 6s poll from every open tab this was rebuilding a
+# multi-MB payload continuously and requests piled up faster than they completed (the "lag"). The
+# underlying ledgers only change when the bot scans (~90s) and live prices come from the background
+# refresher, so a few seconds of staleness is invisible. This memoizes each view for a short TTL and
+# runs at most ONE build at a time per view (single-flight): concurrent/queued polls get the last
+# value instantly instead of each launching another full rebuild.
+_VIEW_CACHE: dict = {}                     # name -> (expires_at, value)
+_VIEW_LOCKS: dict = {}                     # name -> threading.Lock
+_VIEW_REGISTRY_LOCK = threading.Lock()
+
+# Most closed trades a positions payload ever carries. The table is a recent-activity view; the full
+# history lives in the ledgers. Capping this is what turns a ~5 MB / 7k-row response into a small one.
+CLOSED_ROWS_CAP = 250
+
+
+def cached_view(name: str, ttl: float, builder):
+    now = time.time()
+    hit = _VIEW_CACHE.get(name)
+    if hit and hit[0] > now:
+        return hit[1]
+    with _VIEW_REGISTRY_LOCK:
+        lock = _VIEW_LOCKS.get(name)
+        if lock is None:
+            lock = _VIEW_LOCKS[name] = threading.Lock()
+    if lock.acquire(blocking=False):
+        try:
+            value = builder()
+            _VIEW_CACHE[name] = (time.time() + ttl, value)
+            return value
+        finally:
+            lock.release()
+    # A build is already in flight elsewhere. Serve the last value if we have one (stale-while-
+    # rebuilding); only if there is nothing cached yet do we wait for that build to finish.
+    if hit:
+        return hit[1]
+    with lock:
+        again = _VIEW_CACHE.get(name)
+        return again[1] if again else builder()
+
+
 def positions_view() -> dict:
     open_rows, closed_rows = [], []
+    closed_total = 0
     for spec in load_specs():
         entries = ledger.read_entries(spec)
         entry_by_hash = {e.get("setup_sha256"): e for e in entries if e.get("kind") == "entry"}
         for setup in ledger.open_positions(spec):
             open_rows.append(_live_row(setup))
         for res in ledger.resolved_r_stream(spec):
+            closed_total += 1
             closed_rows.append(_closed_row(res, entry_by_hash))
     closed_rows.sort(key=lambda r: r.get("resolved_utc") or "", reverse=True)
     open_rows.sort(key=lambda r: r.get("decided_utc") or "", reverse=True)
+    closed_rows = closed_rows[:CLOSED_ROWS_CAP]      # recent-activity view; full history is in the ledgers
     return {"open": open_rows, "closed": closed_rows,
+            "closed_total": closed_total, "closed_shown": len(closed_rows),
+            "closed_truncated": closed_total > len(closed_rows),
             "generated_at": time.time(), "server_utc": dt.datetime.now(dt.timezone.utc).isoformat()}
 
 
@@ -1185,6 +1233,205 @@ def aftershock_view() -> dict:
     }
 
 
+def pac_view() -> dict:
+    """Sole active memecoin research candidate. The adapter itself refuses unanchored, gross-only,
+    duplicate, partially committed, or state/ledger-inconsistent rows; this HTTP layer performs no
+    performance arithmetic and never mutates the runner."""
+    try:
+        from scripts.trading_bot.aftershock import pac_dashboard as _pac_dashboard
+        return _pac_dashboard.snapshot()
+    except Exception as e:  # noqa: BLE001 -- a broken evidence adapter must stay visibly unavailable
+        return {
+            "instrument_id": "AFTERSHOCK_PAC_V1",
+            "boundary": "PAPER SCENARIO ONLY · NO WALLET · NO ORDERS",
+            "evidence_status": "REFUSED_ADAPTER_ERROR",
+            "integrity_errors": [f"{type(e).__name__}: {str(e)[:180]}"],
+            "_error": "PAC performance adapter refused the current evidence",
+        }
+
+
+def aftershock_v2_view() -> dict:
+    """AFTERSHOCK V2 (PAYABLE ABSORPTION) — the 3 forward arms A/B/C, each scored on its OWN frozen
+    ledger. A compact per-arm summary (verdict + pot-growth + dump-gate + edge-vs-null + open + spark)."""
+    try:
+        from scripts.trading_bot.aftershock import frozen as _asfrozen, scoring as _asscore, scan_v2 as _asv2
+        from scripts.trading_bot.memebot import ledger as _asledger
+    except Exception as e:  # noqa: BLE001
+        return {"_error": f"aftershock v2 not importable: {e}"}
+    try:
+        base = _asfrozen.frozen_spec("AFTERSHOCK_V2")
+    except Exception as e:  # noqa: BLE001
+        return {"_error": f"AFTERSHOCK_V2 not loadable: {e}"}
+    import math as _math
+    frac = float(base.get("position_fraction", 0.02))
+    arms_out = []
+    for arm in base["arms"]:
+        aspec = _asv2.arm_spec(base, arm)
+        try:
+            resolved = _asledger.resolved_r_stream(aspec)
+            rep = _asscore.score(aspec, resolved)
+            body = rep.get("inputs_that_are_not_results", rep)
+            d = body.get("dump") or {}
+            cn = body.get("control_null") or {}
+            kg = rep.get("kill_switch") or {}
+            eq, curve = 1.0, []
+            for r in resolved:
+                if r.get("control") or r.get("stressed_net_return") is None:
+                    continue
+                eq *= _math.exp(_math.log(max(1e-12, 1.0 + frac * max(-1.0, float(r["stressed_net_return"])))))
+                curve.append(round(eq, 5))
+            arms_out.append({
+                "arm": arm["arm"], "label": arm["label"],
+                "verdict": rep.get("verdict"),
+                "resolved_pass": rep.get("resolved_pass_trades"),
+                "minimum": rep.get("minimum_before_verdict"),
+                "per_trade_growth": body.get("per_trade_growth"),
+                "pot_multiple": body.get("pot_multiple"),
+                "log_growth_G": body.get("log_growth_G"),
+                "dump_rate": d.get("dump_rate"),
+                "unexitable_dumps": d.get("unexitable_dumps"),
+                "pass_resolved": d.get("pass_resolved"),
+                "edge_vs_null": cn.get("edge_per_trade"),
+                "n_control": cn.get("n_control"),
+                "open": len(_asledger.open_positions(aspec)),
+                "kill": ((kg.get("expectancy_gate") or {}).get("verdict") or rep.get("verdict") or "").split(" ")[0],
+                "equity_curve": curve[-120:],
+            })
+        except Exception as e:  # noqa: BLE001
+            arms_out.append({"arm": arm["arm"], "label": arm.get("label"), "_error": str(e)[:140]})
+    return {
+        "framing": ("PAYABLE ABSORPTION — enter only shocks whose dumped inventory was NET-replaced by real "
+                    "external SOL, veto flipping tape, trail on the executable full-position quote. 3 arms "
+                    "isolate one change each. PAPER, free tape, curve-exact ECR."),
+        "arms": arms_out,
+        "generated_at": time.time(),
+    }
+
+
+def aftershock_v3_view() -> dict:
+    """AFTERSHOCK V3 (QUOTE-HARVEST) — 3 forward arms A/B/C (trail / ratchet / rollover), each scored on
+    its OWN frozen ledger. Same compact per-arm summary as V2."""
+    try:
+        from scripts.trading_bot.aftershock import frozen as _asfrozen, scoring as _asscore, scan_v3 as _asv3
+        from scripts.trading_bot.memebot import ledger as _asledger
+    except Exception as e:  # noqa: BLE001
+        return {"_error": f"aftershock v3 not importable: {e}"}
+    try:
+        base = _asfrozen.frozen_spec("AFTERSHOCK_V3")
+    except Exception as e:  # noqa: BLE001
+        return {"_error": f"AFTERSHOCK_V3 not loadable: {e}"}
+    import math as _math
+    frac = float(base.get("position_fraction", 0.02))
+    arms_out = []
+    for arm in base["arms"]:
+        aspec = _asv3.arm_spec(base, arm)
+        try:
+            resolved = _asledger.resolved_r_stream(aspec)
+            rep = _asscore.score(aspec, resolved)
+            body = rep.get("inputs_that_are_not_results", rep)
+            d = body.get("dump") or {}
+            cn = body.get("control_null") or {}
+            kg = rep.get("kill_switch") or {}
+            eq, curve = 1.0, []
+            for r in resolved:
+                if r.get("control") or r.get("stressed_net_return") is None:
+                    continue
+                eq *= _math.exp(_math.log(max(1e-12, 1.0 + frac * max(-1.0, float(r["stressed_net_return"])))))
+                curve.append(round(eq, 5))
+            arms_out.append({
+                "arm": arm["arm"], "label": arm["label"],
+                "verdict": rep.get("verdict"),
+                "resolved_pass": rep.get("resolved_pass_trades"),
+                "minimum": rep.get("minimum_before_verdict"),
+                "per_trade_growth": body.get("per_trade_growth"),
+                "pot_multiple": body.get("pot_multiple"),
+                "log_growth_G": body.get("log_growth_G"),
+                "dump_rate": d.get("dump_rate"),
+                "unexitable_dumps": d.get("unexitable_dumps"),
+                "pass_resolved": d.get("pass_resolved"),
+                "edge_vs_null": cn.get("edge_per_trade"),
+                "n_control": cn.get("n_control"),
+                "open": len(_asledger.open_positions(aspec)),
+                "kill": ((kg.get("expectancy_gate") or {}).get("verdict") or rep.get("verdict") or "").split(" ")[0],
+                "equity_curve": curve[-120:],
+            })
+        except Exception as e:  # noqa: BLE001
+            arms_out.append({"arm": arm["arm"], "label": arm.get("label"), "_error": str(e)[:140]})
+    return {
+        "framing": ("QUOTE-HARVEST — V2's net-replacement entry (veto dropped) + break-even gate, trailing the "
+                    "executable full-position quote. A=12% trail · B=+ratchet (tighten to 5% once +10%) · "
+                    "C=+rollover harvest. PAPER, free tape, curve-exact ECR."),
+        "arms": arms_out,
+        "generated_at": time.time(),
+    }
+
+
+def _aftershock_family_view(instrument_id, arm_spec_mod, framing):
+    """Shared per-arm summary for an AFTERSHOCK arm-family (V3/V4)."""
+    try:
+        from scripts.trading_bot.aftershock import frozen as _asfrozen, scoring as _asscore
+        from scripts.trading_bot.memebot import ledger as _asledger
+    except Exception as e:  # noqa: BLE001
+        return {"_error": f"aftershock not importable: {e}"}
+    try:
+        base = _asfrozen.frozen_spec(instrument_id)
+    except Exception as e:  # noqa: BLE001
+        return {"_error": f"{instrument_id} not loadable: {e}"}
+    import math as _math
+    frac = float(base.get("position_fraction", 0.02))
+    arms_out = []
+    for arm in base["arms"]:
+        aspec = arm_spec_mod.arm_spec(base, arm)
+        try:
+            resolved = _asledger.resolved_r_stream(aspec)
+            rep = _asscore.score(aspec, resolved)
+            body = rep.get("inputs_that_are_not_results", rep)
+            d = body.get("dump") or {}
+            cn = body.get("control_null") or {}
+            kg = rep.get("kill_switch") or {}
+            eq, curve = 1.0, []
+            for r in resolved:
+                if r.get("control") or r.get("stressed_net_return") is None:
+                    continue
+                eq *= _math.exp(_math.log(max(1e-12, 1.0 + frac * max(-1.0, float(r["stressed_net_return"])))))
+                curve.append(round(eq, 5))
+            arms_out.append({
+                "arm": arm["arm"], "label": arm["label"],
+                "verdict": rep.get("verdict"), "resolved_pass": rep.get("resolved_pass_trades"),
+                "minimum": rep.get("minimum_before_verdict"),
+                "per_trade_growth": body.get("per_trade_growth"), "pot_multiple": body.get("pot_multiple"),
+                "log_growth_G": body.get("log_growth_G"), "dump_rate": d.get("dump_rate"),
+                "unexitable_dumps": d.get("unexitable_dumps"), "pass_resolved": d.get("pass_resolved"),
+                "edge_vs_null": cn.get("edge_per_trade"), "n_control": cn.get("n_control"),
+                "open": len(_asledger.open_positions(aspec)),
+                "kill": ((kg.get("expectancy_gate") or {}).get("verdict") or rep.get("verdict") or "").split(" ")[0],
+                "equity_curve": curve[-120:],
+            })
+        except Exception as e:  # noqa: BLE001
+            arms_out.append({"arm": arm["arm"], "label": arm.get("label"), "_error": str(e)[:140]})
+    return {"framing": framing, "arms": arms_out, "generated_at": time.time()}
+
+
+def aftershock_v4_view() -> dict:
+    """AFTERSHOCK V4 (PROFIT-LOCK) — 3 arms (trail / trail+lock / lock-early), each scored on its own ledger."""
+    from scripts.trading_bot.aftershock import scan_v4 as _asv4
+    return _aftershock_family_view(
+        "AFTERSHOCK_V4", _asv4,
+        "PROFIT-LOCK — V3's net-replacement + quote-trail entry, plus a one-way break-even floor so green "
+        "trades can't round-trip to a loss (without capping runners). A=plain trail · B=lock 1.05/1.02 · "
+        "C=lock-early 1.02/1.01. PAPER, free tape, curve-exact ECR.")
+
+
+def aftershock_v5_view() -> dict:
+    """AFTERSHOCK V5 (SCALE-OUT) — 3 arms (trail / scale-50@+50% / scale-50@+100%), each on its own ledger."""
+    from scripts.trading_bot.aftershock import scan_v5 as _asv5
+    return _aftershock_family_view(
+        "AFTERSHOCK_V5", _asv5,
+        "SCALE-OUT — same net-replacement entry, but sell HALF at a green target (banks a gap-proof gain "
+        "on the spike-then-gap losers) and ride HALF on the 12% trail (keeps the fat tail). A=plain trail · "
+        "B=scale-half@+50% · C=scale-half@+100%. Both legs costed. PAPER, free tape, curve-exact ECR.")
+
+
 # ---------- http ----------
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
@@ -1233,15 +1480,25 @@ class H(BaseHTTPRequestHandler):
         q = urllib.parse.parse_qs(parsed.query)
         try:
             if path == "/api/summary":
-                return self._json(summary_view())
+                return self._json(cached_view("summary", 4.0, summary_view))
             if path == "/api/positions":
-                return self._json(positions_view())
+                return self._json(cached_view("positions", 4.0, positions_view))
             if path == "/api/evo":
-                return self._json(evo_view())
+                return self._json(cached_view("evo", 8.0, evo_view))
             if path == "/api/exit":
-                return self._json(exit_view())
+                return self._json(cached_view("exit", 5.0, exit_view))
             if path == "/api/aftershock":
-                return self._json(aftershock_view())
+                return self._json(cached_view("aftershock", 8.0, aftershock_view))
+            if path == "/api/pac":
+                return self._json(cached_view("pac", 1.0, pac_view))
+            if path == "/api/aftershock_v2":
+                return self._json(cached_view("aftershock_v2", 8.0, aftershock_v2_view))
+            if path == "/api/aftershock_v3":
+                return self._json(cached_view("aftershock_v3", 8.0, aftershock_v3_view))
+            if path == "/api/aftershock_v4":
+                return self._json(cached_view("aftershock_v4", 8.0, aftershock_v4_view))
+            if path == "/api/aftershock_v5":
+                return self._json(cached_view("aftershock_v5", 8.0, aftershock_v5_view))
             if path.startswith("/api/coin/"):
                 return self._json(coin_view(path[len("/api/coin/"):]))
             if path.startswith("/api/ohlcv/"):

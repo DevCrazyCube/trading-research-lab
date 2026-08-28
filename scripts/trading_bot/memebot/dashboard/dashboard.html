@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEMEBOT · paper terminal</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <a class="brand" href="#/">
+      <span class="logo">◈</span>
+      <span class="bt">MEMEBOT</span><span class="bs">paper terminal</span>
+    </a>
+    <span class="paperflag" title="Read-only display of PAPER positions. No orders, no wallet, no real money.">PAPER · READ-ONLY · NO WALLET / NO ORDERS</span>
+    <nav class="nav">
+      <a class="navlink" href="#/" data-route="portfolio">PORTFOLIO</a>
+      <a class="navlink focusnav" href="#/pac" data-route="pac">PAC · FOCUS</a>
+      <a class="navlink" href="#/exit" data-route="exit">EXIT-SCALP</a>
+      <a class="navlink" href="#/aftershock" data-route="aftershock">AS·V1</a>
+      <a class="navlink" href="#/aftershock-v2" data-route="av2">AS·V2</a>
+      <a class="navlink" href="#/aftershock-v3" data-route="av3">AS·V3</a>
+      <a class="navlink" href="#/aftershock-v4" data-route="av4">AS·V4</a>
+      <a class="navlink" href="#/aftershock-v5" data-route="av5">AS·V5</a>
+      <a class="navlink" href="#/evo" data-route="evo">EVOLUTION</a>
+    </nav>
+    <span class="grow"></span>
+    <span class="live"><span id="liveDot" class="ld"></span><span id="liveText">connecting</span></span>
+    <span id="updAt" class="upd mono">—</span>
+  </header>
+  <main id="app"></main>
+  <footer class="foot mono">memebot research dashboard · read-only evidence feeds and frozen ledgers · no wallet / no orders · 127.0.0.1:8791</footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
