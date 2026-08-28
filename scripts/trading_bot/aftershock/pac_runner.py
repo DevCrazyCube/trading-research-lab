@@ -20,6 +20,7 @@ from dataclasses import asdict, dataclass
 
 from . import feasibility
 from . import manifest as _manifest
+from . import pac_detector as _detector
 from . import pac_feed
 from . import pac_policy as _policy
 from . import solusd_recorder
@@ -36,6 +37,8 @@ STATE_SCHEMA = 3
 LEDGER_SCHEMA = 2
 SLIPPAGE_BPS = 1_000
 SLIPPAGE_DEN = 10_000
+DEFAULT_SCAN_INTERVAL_SECONDS = 0.25
+SESSION_REVERIFY_SECONDS = 5.0
 
 
 def exit_poll(events: tuple, warmup_count: int) -> tuple:
@@ -82,6 +85,14 @@ class OpenPosition:
             value = getattr(self, name)
             if not isinstance(value, str) or len(value) != 64:
                 raise RefusedExecution(f"open position {name} is invalid")
+
+
+@dataclass(frozen=True, slots=True)
+class _PrefilterEvent:
+    """Minimal detector-compatible event; never sufficient to create a DecisionRecord."""
+    observation_unix_nanos: int
+    pre_state: object
+    post_state: object
 
 
 def _state_path() -> pathlib.Path:
@@ -722,6 +733,54 @@ def _causal_events(mint: str, proof, cutoff_unix_nanos: int) -> list:
     return [event for event in events if event.observation_unix_nanos <= cutoff_unix_nanos]
 
 
+def _prefilter_pac(lines: list[dict], *, after_unix_nanos: int) -> int | None:
+    """Return the latest receive clock only when the bounded tail can contain PAC.
+
+    This deliberately omits evidence hashes and typed execution records. A positive result merely
+    earns a complete-tape rebuild through ``_causal_events``; only that full path can make a decision.
+    The reserve conversion, causal/provenance checks, and sealed detector are otherwise identical.
+    """
+    if type(after_unix_nanos) is not int or after_unix_nanos < 0:
+        raise RefusedExecution("PAC prefilter boundary is invalid")
+    if not isinstance(lines, list):
+        raise RefusedExecution("PAC prefilter lines must be a list")
+    events: list[_PrefilterEvent] = []
+    previous_state = None
+    mint = None
+    previous_received = None
+    for line in lines:
+        if not isinstance(line, dict):
+            raise RefusedExecution("PAC tape row must be an object")
+        post = pac_feed._state(line)
+        pre = previous_state or post
+        previous_state = post
+        received = line.get("received_unix_nanos")
+        if received is None:
+            continue
+        if type(received) is not int or received < 0:
+            raise RefusedExecution("PAC tape receive clock must be an exact non-negative integer")
+        if received <= after_unix_nanos:
+            continue
+        row_mint = line.get("mint")
+        signature = line.get("sig")
+        if (not isinstance(row_mint, str) or not row_mint
+                or not isinstance(signature, str) or not signature
+                or line.get("observation_source") != pac_feed.PAC_SOURCE):
+            raise RefusedExecution("PAC evidence lacks mint/signature/public-RPC provenance")
+        if mint is None:
+            mint = row_mint
+        elif row_mint != mint:
+            raise RefusedExecution("one PAC mint stream cannot mix mints")
+        if previous_received is not None and received <= previous_received:
+            raise RefusedExecution("PAC prefilter has duplicate/backward receive clocks")
+        previous_received = received
+        events.append(_PrefilterEvent(received, pre, post))
+    if not events:
+        return None
+    evidence = _detector.detector(tuple(events), 0)
+    return events[-1].observation_unix_nanos if evidence else None
+
+
 def _probe_lamports(decision_unix_nanos: int) -> int:
     quote = solusd_recorder.latest_observation(decision_unix_nanos=decision_unix_nanos)
     return q_lamports_for_usd(
@@ -737,7 +796,49 @@ def _active_mint(state: dict) -> str | None:
     return None
 
 
-def _run_cycle_unlocked(*, reaction_nanos: int) -> dict:
+def _candidate_inventory(*, warmup_completed_unix_nanos: int,
+                         previous_unix_nanos: int, cutoff_unix_nanos: int) -> dict:
+    """Cheap, fail-isolated inventory pass. It has no authority to make a decision."""
+    for label, value in (("warmup_completed_unix_nanos", warmup_completed_unix_nanos),
+                         ("previous_unix_nanos", previous_unix_nanos),
+                         ("cutoff_unix_nanos", cutoff_unix_nanos)):
+        if type(value) is not int or value < 0:
+            raise RefusedExecution(f"PAC {label} is invalid")
+    if cutoff_unix_nanos < previous_unix_nanos:
+        raise RefusedExecution("PAC inventory cutoff precedes its watermark")
+    candidates: list[tuple[int, str]] = []
+    changed_files = 0
+    rejected_files = 0
+    rejection_samples: list[dict[str, str]] = []
+    if tape.TAPE_DIR.exists():
+        for path in tape.TAPE_DIR.glob("*.jsonl"):
+            if path.name.startswith("_"):
+                continue
+            try:
+                if path.stat().st_mtime_ns <= previous_unix_nanos:
+                    continue
+            except OSError:
+                continue  # incomplete inventory is a missed opportunity, never permission to backfill
+            changed_files += 1
+            mint = path.stem
+            try:
+                lines, effective_after = tape.read_tape_receive_window(
+                    mint, after_unix_nanos=warmup_completed_unix_nanos,
+                    through_unix_nanos=cutoff_unix_nanos,
+                    span_nanos=_detector.MAX_PATTERN_SPAN_NANOS)
+                latest = _prefilter_pac(lines, after_unix_nanos=effective_after)
+                if latest is not None and latest > previous_unix_nanos:
+                    candidates.append((latest, mint))
+            except RefusedExecution as exc:
+                rejected_files += 1
+                if len(rejection_samples) < 3:
+                    rejection_samples.append({"mint": mint, "reason": str(exc)[:120]})
+    return {"candidates": sorted(candidates), "changed_files": changed_files,
+            "rejected_files": rejected_files, "rejection_samples": rejection_samples}
+
+
+def _run_cycle_unlocked(*, reaction_nanos: int,
+                        session_ctx: ExecutionContext | None = None) -> dict:
     """One forward-only pass. The watermark is committed before file discovery.
 
     On a crash, this can skip an interval but cannot buy a pattern retrospectively. An existing position
@@ -745,7 +846,9 @@ def _run_cycle_unlocked(*, reaction_nanos: int) -> dict:
     any runner state is created or mutated.
     """
     latency = LatencyModel(reaction_nanos)
-    ctx = session_context()
+    ctx = session_ctx if session_ctx is not None else session_context()
+    if not isinstance(ctx, ExecutionContext):
+        raise RefusedExecution("PAC internal session context is invalid")
     cutoff = time.time_ns()
     state = load_state()
     _bind_session(state, ctx)
@@ -770,26 +873,27 @@ def _run_cycle_unlocked(*, reaction_nanos: int) -> dict:
                 "mint": active, "open": len(state["open_positions"]),
                 "pending": len(state["pending_orders"])}
 
-    q = _probe_lamports(cutoff)
-    candidates: list[tuple[int, str, list]] = []
-    if tape.TAPE_DIR.exists():
-        for path in tape.TAPE_DIR.glob("*.jsonl"):
-            if path.name.startswith("_"):
-                continue
-            try:
-                if path.stat().st_mtime_ns <= previous:
-                    continue
-            except OSError:
-                continue  # incomplete inventory is a missed opportunity, never permission to backfill
-            mint = path.stem
-            events = _causal_events(mint, ctx.session, cutoff)
-            if events and events[-1].observation_unix_nanos > previous:
-                candidates.append((events[-1].observation_unix_nanos, mint, events))
-    for _latest, mint, _admission_events in sorted(candidates):
+    inventory = _candidate_inventory(
+        warmup_completed_unix_nanos=ctx.session.warmup_completed_unix_nanos,
+        previous_unix_nanos=previous, cutoff_unix_nanos=cutoff)
+    candidates = inventory["candidates"]
+    changed_files = inventory["changed_files"]
+    rejected_files = inventory["rejected_files"]
+    rejection_samples = inventory["rejection_samples"]
+    q = _probe_lamports(cutoff) if candidates else None
+    for _latest, mint in candidates:
         # Candidate inventory can take seconds across thousands of mint files.  Refresh the chosen
         # mint immediately before its internally-clocked decision so a stale admission snapshot does
         # not poison every later attempt.  The watermark still prevents retrospective admission.
-        decision_events = _causal_events(mint, ctx.session, time.time_ns())
+        try:
+            decision_events = _causal_events(mint, ctx.session, time.time_ns())
+        except RefusedExecution as exc:
+            rejected_files += 1
+            if len(rejection_samples) < 3:
+                rejection_samples.append({"mint": mint, "reason": str(exc)[:120]})
+            continue
+        if q is None:
+            raise RefusedExecution("PAC qualifying candidate lacks a causal USD size")
         drive_once(decision_events, state, ctx, q_lamports=q, latency=latency,
                    entry_after_unix_nanos=previous)
         if _active_mint(state) is not None:
@@ -797,7 +901,9 @@ def _run_cycle_unlocked(*, reaction_nanos: int) -> dict:
                     "mint": mint, "open": len(state["open_positions"]),
                     "pending": len(state["pending_orders"])}
     return {"status": "NO_ELIGIBLE_SIGNAL", "cutoff_unix_nanos": cutoff,
-            "candidates": len(candidates), "open": 0, "pending": 0}
+            "candidates": len(candidates), "changed_files": changed_files,
+            "rejected_files": rejected_files, "rejection_samples": rejection_samples,
+            "open": 0, "pending": 0}
 
 
 def run_cycle(*, reaction_nanos: int) -> dict:
@@ -809,21 +915,38 @@ def run_loop(*, reaction_nanos: int, interval_seconds: float) -> None:
     if type(interval_seconds) not in {int, float} or isinstance(interval_seconds, bool) or interval_seconds <= 0:
         raise RefusedExecution("PAC loop interval must be positive")
     with runner_lock():
+        ctx = session_context()
+        last_session_verify = time.monotonic()
+        next_start = time.monotonic()
         while True:
+            cycle_start = time.monotonic_ns()
             try:
-                print(json.dumps(_run_cycle_unlocked(reaction_nanos=reaction_nanos),
-                                 sort_keys=True), flush=True)
+                now = time.monotonic()
+                if now - last_session_verify >= SESSION_REVERIFY_SECONDS:
+                    ctx = session_context()
+                    last_session_verify = now
+                result = _run_cycle_unlocked(
+                    reaction_nanos=reaction_nanos, session_ctx=ctx)
             except RefusedExecution as exc:
-                print(json.dumps({"status": "REFUSED", "reason": str(exc)[:240]},
-                                 sort_keys=True), flush=True)
-            time.sleep(interval_seconds)
+                result = {"status": "REFUSED", "reason": str(exc)[:240]}
+            elapsed = time.monotonic_ns() - cycle_start
+            next_start += interval_seconds
+            remaining = next_start - time.monotonic()
+            if remaining < 0:
+                next_start = time.monotonic()
+                remaining = 0.0
+            result["cycle_compute_nanos"] = elapsed
+            result["scheduled_sleep_nanos"] = int(remaining * 1_000_000_000)
+            print(json.dumps(result, sort_keys=True), flush=True)
+            if remaining:
+                time.sleep(remaining)
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="PAC paper-scenario runner (no wallet/order path)")
     parser.add_argument("--reaction-nanos", type=int, required=True,
                         help="explicit uncalibrated scenario latency; deliberately no default")
-    parser.add_argument("--interval", type=float, default=2.0)
+    parser.add_argument("--interval", type=float, default=DEFAULT_SCAN_INTERVAL_SECONDS)
     parser.add_argument("--once", action="store_true")
     args = parser.parse_args(argv)
     try:

@@ -27,6 +27,15 @@ def _events(points):
     return list(feasibility.tape_to_events(tape))
 
 
+def _raw_lines(points):
+    return [{"ts": t / 1_000_000_000, "received_unix_nanos": t,
+             "observation_source": "public_rpc_processed", "mint": "PACMINT",
+             "trader": "TRADER", "side": "sell" if i in {8, 10} else "buy",
+             "sol_amount": 0.1, "token_amount": 1.0, "v_sol": float(v),
+             "v_tokens": 30 * 1_073_000_000 / float(v), "pool": "pump", "sig": f"SIG{i}"}
+            for i, (t, v) in enumerate(points)]
+
+
 def _tape():
     points = [(T0 + (i + 1) * 100_000_000, 46.0) for i in range(8)]
     points += [(T0 + 900_000_000, 45.90), (T0 + 1_300_000_000, 46.00),
@@ -305,6 +314,20 @@ def main() -> int:
                 ok &= _check("continuous runner requires latency explicitly (no research default)",
                              inspect.signature(runner.run_cycle).parameters["reaction_nanos"].default
                              is inspect.Parameter.empty)
+                ok &= _check("fast prefilter is equivalent on valid PAC and stale latest-event tapes",
+                             runner._prefilter_pac(
+                                 _raw_lines(_tape()[:12]), after_unix_nanos=T0 + 800_000_000)
+                             == T0 + 1_600_000_000
+                             and runner._prefilter_pac(
+                                 _raw_lines(_tape()[:13]), after_unix_nanos=T0 + 800_000_000)
+                             is None)
+                poisoned = _raw_lines(_tape()[:12]); poisoned[9]["v_sol"] = -1.0
+                ok &= _check("poisoned mint prefilter fails visibly and cannot become admission",
+                             _raises(lambda: runner._prefilter_pac(
+                                 poisoned, after_unix_nanos=T0 + 800_000_000)))
+                ok &= _check("optimized production cadence is pinned to 250ms",
+                             runner.DEFAULT_SCAN_INTERVAL_SECONDS == 0.25
+                             and runner.SESSION_REVERIFY_SECONDS == 5.0)
 
                 _reset_files()
                 with mock.patch.object(runner.time, "time_ns", return_value=T0 + 3_000_000_000):

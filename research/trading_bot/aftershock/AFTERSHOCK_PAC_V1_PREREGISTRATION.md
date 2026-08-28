@@ -57,6 +57,35 @@ are feasibility scenarios only and **do not increment the 100-position promotion
 That counter starts only under a separately frozen engine backed by measured build/sign/send/land clocks
 and failure observations. No threshold, detector formula, size, trail, coverage, or horizon changed.
 
+**Post-outcome pipeline amendment, 2026-08-28.** Session 3 produced exactly two fully costed
+`CALIBRATION_UNCALIBRATED` scenarios before this amendment (`+17.9620%` and `-19.9845%` all-cost R).
+They remain preserved as plumbing evidence but are excluded from the fresh optimized-session denominator.
+No detector, sizing, or exit threshold is fitted to those returns. The plumbing change is justified by
+the production wall-time profile: 126 changed mints required 5.55 s, of which 4.54 s was repeated
+full-tape decode, while the configured loop slept another 2 s after work.
+The optimized runner freezes these measurement rules before its next signal:
+
+- scan starts are scheduled on a fixed 250 ms deadline, including compute time. This changes only how
+  quickly a receive-time signal is observed; modeled landing remains the explicit uncalibrated
+  `800,000,000` ns and is not shortened;
+- flat discovery first reads only the latest 180-second receive-time tail and runs the unchanged sealed
+  PAC comparisons on exact reserve states. This is admission-only: every positive candidate is rebuilt
+  from the complete mint tape and must pass the full hashes, provenance, ordering, detector, coverage,
+  decision, and later-boundary path before it can become pending;
+- a candidate-local decode refusal is reported and skipped for that mint. It can never authorize a
+  trade or halt unrelated valid mints. Active-position corruption still fails closed;
+- the append-only SOL/USD consumer searches backward to the latest record available at the decision
+  clock, then performs the same raw-response hash and derived-field reconciliation. Future receipts are
+  skipped rather than leaked and stale quotes still refuse;
+- the anchored SessionProof is loaded once and reverified at most 5 seconds later. Every actual decision
+  or attempt independently re-verifies it through the sealed execution engine;
+- the fixed supervisor restarts an unexpectedly exited paper runner after 250 ms. State validation,
+  session binding, the state-first watermark, and the exactly-once ledger journal run again on restart.
+
+The PAC formula, `$10` probe, one-position limit, 12% trail, 6x capacity exit, 12-minute horizon,
+slippage guard, fees, rent, full-loss rules, and promotion gates are unchanged. This amendment does not
+create a wallet or make the 800 ms setting calibrated.
+
 ## Hypothesis and unique formula
 
 Pump.fun losses in this repository have two dominant forms: no executable exit, or frequent churn whose

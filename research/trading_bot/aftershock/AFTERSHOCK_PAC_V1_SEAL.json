@@ -16,9 +16,10 @@
     "scripts/trading_bot/aftershock/pac_detector.py": "4f2465a90bab65cc8ef7be2ee6382d589d8ed9dd1752a332a42d73644263f486",
     "scripts/trading_bot/aftershock/pac_feed.py": "4abb1f9d7ee8f7ff95d9905fa61192461f1275c86ff6829372b3166f6ee9e5f1",
     "scripts/trading_bot/aftershock/pac_policy.py": "c97d676a780708ba54d40f37c99f8c4a9a1326640de597682d37d1bab2e3bd09",
-    "scripts/trading_bot/aftershock/pac_runner.py": "0be55fda223b33b039c302712201db731c1ac77ef23704f4c19ea37c1f701a82",
-    "scripts/trading_bot/aftershock/solusd_recorder.py": "2ec9f2b0fbd23c2a439bbea554404275bb50a998ab6a7bf8c7ce2ee90cee46e5",
-    "scripts/trading_bot/aftershock/tape.py": "6868e8e7959c0b4b1d1bdd743a59a3831b473514ca2e72441a3c7fb9543e7f7c",
+    "scripts/trading_bot/aftershock/pac_runner.py": "e33bbfbd023114cd8ee07716162812ccad1c6dfccfc05ba9bbc7efd2d88bc956",
+    "scripts/trading_bot/aftershock/pac_runner_supervisor.sh": "004beb536de6c0bb1d08040be168badb112cd7bcddcb7a6d84fa8a7ccd050119",
+    "scripts/trading_bot/aftershock/solusd_recorder.py": "44462454607f88b0c45891c7da5d23c663f41bde4729abebd0fe0a1ca0a88ebd",
+    "scripts/trading_bot/aftershock/tape.py": "dd19b4aae991b919ff3346888d0748ee2a957e35b5aa6994a92d8b7b9eb1c24d",
     "scripts/trading_bot/memebot/__init__.py": "b067ae15baaabd11c3d15b6c5c38b68047637692590a4688ecb31b28dd4fcb28",
     "scripts/trading_bot/memebot/frozen.py": "b8097bf58c109dd09db57dba83ff6338472d27349fb09b283d5a0505a393ebde",
     "scripts/trading_bot/memestream/bitquery_ingest.py": "ee46dd361973d9795f09bcfa3a4cbe730f59ed4d7b025115f34cfa479aeee838",
@@ -26,9 +27,9 @@
     "scripts/trading_bot/memestream/rpc_ingest.py": "e88750a2fef2853c70a4c7152c714acf4608dc08ac8e8e8460c553cf85a448fe",
     "scripts/trading_bot/sniper/data/_common.py": "d07d43bdf1c356be621defc138968c6e4314d704245dacf3463764e2c5de7f9e"
   },
-  "frozen_json_canonical_sha256": "3b04ef76408e84c2b4d1cca5245a2cf2f52ceaacf0a6d2fd3fb898f7fc778e5b",
+  "frozen_json_canonical_sha256": "54ee5076caaf50659963b1b86dc0dd24d7bec8810ed12c9336df1ee724d40337",
   "instrument_id": "AFTERSHOCK_PAC_V1",
-  "prereg_sha256": "cac1536bda2509080e268f7f65cd9649853468748855d70657ccb4f6af59b744",
+  "prereg_sha256": "5161d837f8d2359ff7f6e28c56e9e45c8e2f8777599ee9a4024da382d65daa5e",
   "schema_version": 3,
-  "seal_sha256": "f1d4249d1f164e97278a027b51b31750f527fc3e4a731a5cbeefda215c693186"
+  "seal_sha256": "06dfc353dc7d4d66616f484e30ad8ab8d22bb097fedd353e3353498329e2f40d"
 }

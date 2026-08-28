@@ -2,6 +2,12 @@
 """Negative controls for the PAC causal tape adapter."""
 from __future__ import annotations
 
+import json
+import pathlib
+import tempfile
+from unittest import mock
+
+from . import tape
 from .execution import RefusedExecution, Source
 from .pac_feed import causal_events_from_lines
 
@@ -44,6 +50,19 @@ def main() -> int:
         [_line(101, 45.0), _line(101, 45.1)], after_unix_nanos=100)))
     ok &= _check("cross-mint decision stream refuses", _raises(lambda: causal_events_from_lines(
         [_line(101, 45.0), _line(102, 45.1, mint="N")], after_unix_nanos=100)))
+    with tempfile.TemporaryDirectory(prefix="pac_tail_") as directory:
+        tape_dir = pathlib.Path(directory)
+        rows = [_line(100, 45.0), _line(200, 45.1), _line(300, 45.2), _line(400, 45.3)]
+        legacy_seed = _line(None, 45.15); legacy_seed.pop("received_unix_nanos")
+        rows.insert(2, legacy_seed)
+        with mock.patch.object(tape, "TAPE_DIR", tape_dir):
+            path = tape._mint_path("M")
+            path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+            window, boundary = tape.read_tape_receive_window(
+                "M", after_unix_nanos=0, through_unix_nanos=400, span_nanos=150)
+        clocks = [row.get("received_unix_nanos") for row in window]
+        ok &= _check("bounded tail includes one state seed and all in-window causal rows",
+                     boundary == 249 and clocks == [200, None, 300, 400])
     print("\nPAC FEED SELFTEST: " + ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 

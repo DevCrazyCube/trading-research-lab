@@ -106,16 +106,42 @@ def latest_observation(*, decision_unix_nanos: int, output: pathlib.Path = OUTPU
     if decision_unix_nanos < 0 or max_local_age_nanos < 0 or not output.is_file():
         raise RefusedExecution("no causal SOL/USD observation file is available")
     candidate = None
-    for line in output.read_text().splitlines():
-        if not line.strip():
-            continue
-        try:
-            record = json.loads(line)
-        except json.JSONDecodeError as exc:
-            raise RefusedExecution("SOL/USD record contains invalid JSON") from exc
-        received = record.get("received_unix_nanos")
-        if type(received) is int and received <= decision_unix_nanos:
-            candidate = record
+    # The recorder is append-only and receive clocks are monotonic. Read backwards so a multi-day
+    # archive does not sit on the entry hot path. Any malformed row encountered before the causal
+    # candidate still fails closed; older rows are preserved for independent archive reconciliation.
+    try:
+        with output.open("rb") as handle:
+            handle.seek(0, 2)
+            position = handle.tell()
+            remainder = b""
+            while position > 0 and candidate is None:
+                size = min(65_536, position)
+                position -= size
+                handle.seek(position)
+                block = handle.read(size) + remainder
+                pieces = block.split(b"\n")
+                remainder = pieces[0]
+                for raw_line in reversed(pieces[1:]):
+                    if not raw_line.strip():
+                        continue
+                    try:
+                        record = json.loads(raw_line)
+                    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                        raise RefusedExecution("SOL/USD record contains invalid JSON") from exc
+                    received = record.get("received_unix_nanos")
+                    if type(received) is int and received <= decision_unix_nanos:
+                        candidate = record
+                        break
+            if candidate is None and remainder.strip():
+                try:
+                    record = json.loads(remainder)
+                except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                    raise RefusedExecution("SOL/USD record contains invalid JSON") from exc
+                received = record.get("received_unix_nanos")
+                if type(received) is int and received <= decision_unix_nanos:
+                    candidate = record
+    except OSError as exc:
+        raise RefusedExecution("SOL/USD observation file is unreadable") from exc
     if not isinstance(candidate, dict):
         raise RefusedExecution("no SOL/USD observation existed at the decision clock")
     received = candidate.get("received_unix_nanos")

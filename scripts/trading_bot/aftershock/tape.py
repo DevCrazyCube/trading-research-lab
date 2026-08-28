@@ -73,6 +73,84 @@ def read_tape(mint: str, since_ts: float | None = None) -> list:
     return out
 
 
+def read_tape_receive_window(mint: str, *, after_unix_nanos: int,
+                             through_unix_nanos: int, span_nanos: int) -> tuple[list, int]:
+    """Read only the causal tail needed to prefilter a bounded receive-time pattern.
+
+    The returned rows include one state-seed row at or before the effective lower bound when one
+    exists.  ``effective_after`` is returned separately so a decoder can use that row to establish
+    pre-state while excluding it from evidence.  This is an admission accelerator only: a positive
+    prefilter is still rebuilt and validated from the complete mint tape before any DecisionRecord.
+    """
+    for label, value in (("after_unix_nanos", after_unix_nanos),
+                         ("through_unix_nanos", through_unix_nanos),
+                         ("span_nanos", span_nanos)):
+        if type(value) is not int or value < 0:
+            raise ValueError(f"{label} must be an exact non-negative integer")
+    if through_unix_nanos < after_unix_nanos:
+        raise ValueError("receive window ends before its activation boundary")
+    path = _mint_path(mint)
+    if not path.is_file():
+        return [], after_unix_nanos
+
+    selected_reverse: list[dict] = []
+    latest_received = None
+    effective_after = after_unix_nanos
+    stop = False
+    try:
+        with path.open("rb") as handle:
+            handle.seek(0, 2)
+            position = handle.tell()
+            remainder = b""
+            while position > 0 and not stop:
+                size = min(65_536, position)
+                position -= size
+                handle.seek(position)
+                block = handle.read(size) + remainder
+                pieces = block.split(b"\n")
+                remainder = pieces[0]
+                for raw in reversed(pieces[1:]):
+                    if not raw.strip():
+                        continue
+                    try:
+                        row = json.loads(raw)
+                    except (json.JSONDecodeError, UnicodeDecodeError):
+                        continue  # identical to read_tape: malformed partial rows are not evidence
+                    received = row.get("received_unix_nanos")
+                    if type(received) is not int:
+                        if latest_received is not None:
+                            selected_reverse.append(row)  # legacy state transition, never evidence
+                        continue
+                    if received > through_unix_nanos:
+                        continue
+                    if latest_received is None:
+                        latest_received = received
+                        effective_after = max(after_unix_nanos, latest_received - span_nanos - 1)
+                    selected_reverse.append(row)
+                    if received <= effective_after:
+                        stop = True
+                        break
+            if not stop and remainder.strip():
+                try:
+                    row = json.loads(remainder)
+                except (json.JSONDecodeError, UnicodeDecodeError):
+                    row = None
+                if isinstance(row, dict):
+                    received = row.get("received_unix_nanos")
+                    if type(received) is int and received <= through_unix_nanos:
+                        if latest_received is None:
+                            latest_received = received
+                            effective_after = max(
+                                after_unix_nanos, latest_received - span_nanos - 1)
+                        selected_reverse.append(row)
+                    elif latest_received is not None and received is None:
+                        selected_reverse.append(row)
+    except OSError:
+        return [], after_unix_nanos
+    selected_reverse.reverse()
+    return selected_reverse, effective_after
+
+
 def read_creates(since_ts: float | None = None) -> list:
     if not CREATES_PATH.exists():
         return []

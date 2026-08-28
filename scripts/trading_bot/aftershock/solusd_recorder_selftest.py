@@ -53,10 +53,17 @@ def main() -> int:
         observation = recorder.latest_observation(decision_unix_nanos=T0 + 1, output=path)
         ok &= _check("Decimal USD price and local receive clock survive raw-hash reconciliation",
                      observation.value_str == "200.00" and observation.observed_unix_nanos == T0)
+        future = dict(record); future["received_unix_nanos"] = T0 + 100
+        with path.open("a") as handle:
+            handle.write(json.dumps(future) + "\n")
+        asof = recorder.latest_observation(decision_unix_nanos=T0 + 1, output=path)
+        ok &= _check("reverse hot-path scan skips a later receipt without future leakage",
+                     asof.observed_unix_nanos == T0)
         ok &= _check("future decision cannot backfill a stale quote",
                      _raises(lambda: recorder.latest_observation(
-                         decision_unix_nanos=T0 + recorder.MAX_LOCAL_AGE_NANOS + 1, output=path)))
-        tampered = json.loads(path.read_text())
+                         decision_unix_nanos=T0 + 100 + recorder.MAX_LOCAL_AGE_NANOS + 1,
+                         output=path)))
+        tampered = json.loads(path.read_text().splitlines()[0])
         tampered["price"] = "999.00"
         path.write_text(json.dumps(tampered) + "\n")
         ok &= _check("tampered derived price refuses against raw response hash/source",

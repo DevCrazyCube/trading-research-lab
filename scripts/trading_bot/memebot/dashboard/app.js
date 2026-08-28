@@ -1039,6 +1039,8 @@ function renderPACView(){
       [(op.tape_files_with_current_causal_schema||0)>0,"causal tape",`${op.tape_files_with_current_causal_schema||0} mint files`],
       [op.runner_audit==="PASS"||String(op.runner_audit||"").startsWith("GO_"),
         "runner audit",op.runner_audit||"not recorded"],
+      [Number(op.scan_interval_millis)===250,"scan cadence",
+        `${op.scan_interval_millis||"?"}ms fixed deadline · 5s seal reverify`],
       [op.latency_calibration==="CALIBRATED_FORWARD_CLOCKS","latency",op.latency_calibration||"unknown"],
       [validPromotion,"promotion evidence",d.evidence_status||"unknown"],
     ];
