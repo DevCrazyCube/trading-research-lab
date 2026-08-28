@@ -1,0 +1,9 @@
+{
+  "activation_chain_prefix_sha256": "e065435636917d32a268d45f6e8a0cd572e6f8c0e182e1759f02931a991e3e43",
+  "activation_root_sha256": "b8e5ffc1b2f6752127f81f10c2fe5e14a16e90acd594d0c54962bb7b21f7213d",
+  "anchor_sha256": "9cdd53ddf52a61398d7869b96cf6543a0976c2db8f4e4d7a2208c8f66e14866b",
+  "instrument_id": "AFTERSHOCK_PAC_V1",
+  "schema_version": 1,
+  "seal_sha256": "33f3a37907f0b846e804f3ed7056e1e009adc81a4d42885084c3c5a2d52a8470",
+  "session_event_sha256": "a19b857f9e83a28eb25a3f30fff33f9bd60e5752d9ffd0437e98101549974e9a"
+}
