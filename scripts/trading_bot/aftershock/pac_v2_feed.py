@@ -37,7 +37,8 @@ EVENTS = DATA / "feed_events.jsonl"
 RECEIPTS = DATA / "feed_materialization.jsonl"
 PUBLIC_WS_URL = "wss://api.mainnet-beta.solana.com"
 SOURCE = "public_rpc_processed_pac_v2"
-SCHEMA = 1
+SCHEMA = 2
+MAX_RECORDED_REJECTIONS = 1_024
 
 
 def _canonical_sha(body: dict) -> str:
@@ -47,14 +48,22 @@ def _canonical_sha(body: dict) -> str:
 
 def _append(path: pathlib.Path, row: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    existed = path.exists()
     payload = (json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n").encode()
     descriptor = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
     try:
         written = os.write(descriptor, payload)
         if written != len(payload):
             raise OSError(f"short append {written}/{len(payload)}")
+        os.fsync(descriptor)
     finally:
         os.close(descriptor)
+    if not existed:
+        directory = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
 
 
 def _state(ev: dict) -> ReserveState:
@@ -81,6 +90,8 @@ class ClockedEvent:
     runner_seen_unix_nanos: int
     pre_state: ReserveState
     post_state: ReserveState
+    continuity_proven: bool = True
+    materialization_recovered: bool = False
 
     @property
     def observation_unix_nanos(self) -> int:
@@ -99,6 +110,11 @@ class ClockedEvent:
                 isinstance(value, str) and value for value in (
                     self.event_id, self.collector_epoch, self.mint, self.trader, self.signature)):
             raise RefusedExecution("PAC V2 event identity is incomplete")
+        if self.continuity_proven is not True or not isinstance(
+                self.materialization_recovered, bool):
+            raise RefusedExecution("PAC V2 strategy event lacks proven reserve continuity")
+        if not isinstance(self.pre_state, ReserveState) or not isinstance(self.post_state, ReserveState):
+            raise RefusedExecution("PAC V2 strategy event reserve state is untyped")
 
 
 class FeedWriter:
@@ -108,6 +124,44 @@ class FeedWriter:
         self.receipts_path = pathlib.Path(receipts_path)
         self.epoch = epoch or uuid.uuid4().hex
         self.previous: dict[str, ReserveState] = {}
+        self._recover_unmaterialized()
+
+    def _recover_unmaterialized(self) -> None:
+        """Finish the receipt half of any fsynced event interrupted by a crash.
+
+        Recovery time is the materialization time; it is never backdated to event receipt time.
+        """
+        events, _ = _read_complete(self.events_path, 0)
+        receipts, _ = _read_complete(self.receipts_path, 0)
+        receipt_ids: set[str] = set()
+        for row in receipts:
+            if row.get("schema") != SCHEMA:
+                continue
+            body = {key: value for key, value in row.items() if key != "receipt_sha256"}
+            if (_canonical_sha(body) != row.get("receipt_sha256")
+                    or not isinstance(row.get("event_id"), str)):
+                raise RefusedExecution("PAC V2 cannot recover through a forged receipt")
+            receipt_ids.add(row["event_id"])
+        for row in events:
+            if row.get("schema") != SCHEMA:
+                continue
+            event_id = row.get("event_id")
+            body = {key: value for key, value in row.items() if key != "event_id"}
+            if not isinstance(event_id, str) or _canonical_sha(body) != event_id:
+                raise RefusedExecution("PAC V2 cannot recover a forged feed event")
+            if event_id in receipt_ids:
+                continue
+            source_clock = row.get("source_received_unix_nanos")
+            if type(source_clock) is not int or source_clock < 0:
+                raise RefusedExecution("PAC V2 cannot recover an event with an invalid clock")
+            receipt_body = {
+                "schema": SCHEMA, "event_id": event_id,
+                "materialized_unix_nanos": max(time.time_ns(), source_clock),
+                "recovered_after_crash": True,
+            }
+            _append(self.receipts_path, {
+                **receipt_body, "receipt_sha256": _canonical_sha(receipt_body)})
+            receipt_ids.add(event_id)
 
     def append_decoded(self, ev: dict, *, signature: str, slot: int,
                        source_received_unix_nanos: int) -> str:
@@ -117,18 +171,23 @@ class FeedWriter:
         mint, trader, side = ev.get("mint"), ev.get("user"), ev.get("side")
         if not all(isinstance(value, str) and value for value in (mint, trader)) or side not in {"buy", "sell"}:
             raise RefusedExecution("PAC V2 decoded trade lacks mint/trader/side")
-        post = _state(ev); pre = self.previous.get(mint, post)
+        post = _state(ev)
+        pre = self.previous.get(mint)
+        continuity = pre is not None
         body = {
             "schema": SCHEMA, "source": SOURCE, "collector_epoch": self.epoch,
             "mint": mint, "trader": trader, "signature": signature, "slot": slot, "side": side,
             "source_received_unix_nanos": source_received_unix_nanos,
-            "pre_state": asdict(pre), "post_state": asdict(post),
+            "continuity_proven": continuity,
+            "pre_state": asdict(pre) if pre is not None else None,
+            "post_state": asdict(post),
         }
         event_id = _canonical_sha(body)
         _append(self.events_path, {**body, "event_id": event_id})
         materialized = time.time_ns()
         receipt_body = {"schema": SCHEMA, "event_id": event_id,
-                        "materialized_unix_nanos": materialized}
+                        "materialized_unix_nanos": materialized,
+                        "recovered_after_crash": False}
         _append(self.receipts_path, {**receipt_body, "receipt_sha256": _canonical_sha(receipt_body)})
         self.previous[mint] = post
         return event_id
@@ -168,10 +227,15 @@ class Cursor:
     event_offset: int = 0
     receipt_offset: int = 0
     pending: dict[str, dict] | None = None
+    rejected_receipts: list[dict] | None = None
 
     def __post_init__(self):
         if self.pending is None:
             self.pending = {}
+        if self.rejected_receipts is None:
+            self.rejected_receipts = []
+        if not isinstance(self.pending, dict) or not isinstance(self.rejected_receipts, list):
+            raise RefusedExecution("PAC V2 cursor collections are invalid")
 
 
 def consume(cursor: Cursor, *, events_path: pathlib.Path = EVENTS,
@@ -193,38 +257,58 @@ def consume(cursor: Cursor, *, events_path: pathlib.Path = EVENTS,
     for row in receipts:
         body = {key: value for key, value in row.items() if key != "receipt_sha256"}
         if (row.get("schema") != SCHEMA or _canonical_sha(body) != row.get("receipt_sha256")
-                or type(row.get("materialized_unix_nanos")) is not int):
+                or type(row.get("materialized_unix_nanos")) is not int
+                or not isinstance(row.get("recovered_after_crash"), bool)):
             raise RefusedExecution("PAC V2 materialization receipt is invalid")
         event_id = row.get("event_id")
         if event_id in materialized:
-            raise RefusedExecution("PAC V2 materialization receipt is duplicated")
-        materialized[event_id] = row["materialized_unix_nanos"]
+            cursor.rejected_receipts.append({
+                "event_id": event_id, "reason": "DUPLICATE_RECEIPT",
+                "receipt_sha256": row["receipt_sha256"]})
+            continue
+        materialized[event_id] = row
     seen = time.time_ns() if runner_seen_unix_nanos is None else runner_seen_unix_nanos
     if type(seen) is not int or seen < 0:
         raise RefusedExecution("PAC V2 runner-seen clock is invalid")
     out = []
-    for event_id, stamp in materialized.items():
+    for event_id, receipt in materialized.items():
         row = cursor.pending.get(event_id)
         if row is None:
-            raise RefusedExecution("PAC V2 receipt does not reference a pending event")
+            cursor.rejected_receipts.append({
+                "event_id": event_id, "reason": "ORPHAN_RECEIPT",
+                "receipt_sha256": receipt["receipt_sha256"]})
+            continue
+        stamp = receipt["materialized_unix_nanos"]
         try:
-            pre = ReserveState(**row["pre_state"]); post = ReserveState(**row["post_state"])
+            continuity = row.get("continuity_proven")
+            pre_raw = row.get("pre_state")
+            if not isinstance(continuity, bool) or (continuity != (pre_raw is not None)):
+                raise TypeError("continuity/pre-state mismatch")
+            pre = ReserveState(**pre_raw) if pre_raw is not None else None
+            post = ReserveState(**row["post_state"])
         except (KeyError, TypeError, ValueError) as exc:
             raise RefusedExecution("PAC V2 reserve state is invalid") from exc
-        out.append(ClockedEvent(
-            event_id=event_id, collector_epoch=row["collector_epoch"], mint=row["mint"],
-            trader=row["trader"], signature=row["signature"], slot=row["slot"], side=row["side"],
-            source_received_unix_nanos=row["source_received_unix_nanos"],
-            materialized_unix_nanos=stamp, runner_seen_unix_nanos=seen,
-            pre_state=pre, post_state=post))
+        source_clock = row.get("source_received_unix_nanos")
+        if (type(source_clock) is not int or source_clock < 0 or type(stamp) is not int
+                or not source_clock <= stamp <= seen):
+            raise RefusedExecution("PAC V2 seed/materialization clocks are invalid")
+        if continuity:
+            out.append(ClockedEvent(
+                event_id=event_id, collector_epoch=row["collector_epoch"], mint=row["mint"],
+                trader=row["trader"], signature=row["signature"], slot=row["slot"], side=row["side"],
+                source_received_unix_nanos=row["source_received_unix_nanos"],
+                materialized_unix_nanos=stamp, runner_seen_unix_nanos=seen,
+                pre_state=pre, post_state=post, continuity_proven=True,
+                materialization_recovered=receipt["recovered_after_crash"]))
         del cursor.pending[event_id]
+    if len(cursor.rejected_receipts) > MAX_RECORDED_REJECTIONS:
+        cursor.rejected_receipts[:] = cursor.rejected_receipts[-MAX_RECORDED_REJECTIONS:]
     cursor.event_offset = event_offset; cursor.receipt_offset = receipt_offset
     return sorted(out, key=lambda event: (
         event.runner_seen_unix_nanos, event.source_received_unix_nanos, event.event_id))
 
 
 def run_collector() -> None:
-    writer = FeedWriter()
     subscription = {"jsonrpc": "2.0", "id": 1, "method": "logsSubscribe",
                     "params": [{"mentions": [PUMP_PROGRAM]}, {"commitment": "processed"}]}
     while True:
@@ -232,6 +316,8 @@ def run_collector() -> None:
         try:
             ws = ws_client.WebSocket(PUBLIC_WS_URL, timeout=30.0).connect()
             ws.send_json(subscription); ws.recv()
+            # A reconnect starts a new continuity epoch. Its first event per mint is a seed only.
+            writer = FeedWriter()
             while True:
                 raw = ws.recv()
                 if raw is None:

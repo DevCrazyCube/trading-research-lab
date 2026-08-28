@@ -1015,8 +1015,9 @@ function renderPACView(){
       ? `${pendings.length} causal order pending; it is not a fill and cannot move performance.`
       : "No forward rows exist yet; baseline is not a performance result.")))}</span>`;
   const challenger=d.challenger||{}, challengerBox=document.getElementById("pacChallenger");
+  const cp=challenger.processes||{};
   if(challengerBox) challengerBox.innerHTML=`<strong>PAC V2 · ${esc(challenger.status||"UNKNOWN")}</strong>`+
-    `<span>${esc(challenger.entry_formula||"")} · ${esc(challenger.execution||"")} · seal ${esc(challenger.seal||"?")} · calibration ${esc(challenger.calibration||"?")}${challenger.runtime_refusal?` · ${esc(challenger.runtime_refusal)}`:""}</span>`;
+    `<span>${esc(challenger.entry_formula||"")} · ${esc(challenger.execution||"")} · seal ${esc(challenger.seal||"?")} · campaign ${esc(challenger.campaign||"?")} · calibration ${esc(challenger.calibration||"?")} · processes supervisor/feed/runner ${cp.supervisor?"up":"down"}/${cp.feed?"up":"down"}/${cp.runner?"up":"down"} · next ${esc(challenger.next_required_action||"?")}${challenger.runtime_refusal?` · ${esc(challenger.runtime_refusal)}`:""}</span>`;
   const cells=[
     ["Capital index",pacNum(perf.normalized_capital_index,2),`uncalibrated scenario index`,validScenario?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
     ["Mean all-cost R",perf.mean_return_r==null?"—":(Number(perf.mean_return_r)>=0?"+":"")+pacNum(perf.mean_return_r,3),`${perf.resolved||0} fully reconciled`,perf.mean_return_r==null?"muted":(Number(perf.mean_return_r)>0?"pos":"neg")],

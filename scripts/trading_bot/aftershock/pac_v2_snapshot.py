@@ -28,6 +28,7 @@ EXCHANGES = ROOT / "research" / "data" / "aftershock" / "pac_v2" / "snapshot_exc
 PUBLIC_RPC_URL = "https://api.mainnet-beta.solana.com"
 SCHEMA = 1
 SOURCE = "public_rpc_processed_account_snapshot"
+MAX_SNAPSHOT_STALENESS_NANOS = 30_000_000_000
 PUMP_PROGRAM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
 _DISCRIMINATOR = bytes.fromhex("17b7f83760d8ac60")
 _ACCOUNT_LENGTH = 115
@@ -100,6 +101,7 @@ def _canonical_sha(value: object) -> str:
 
 def _append(path: pathlib.Path, row: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    existed = path.exists()
     payload = (json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n").encode()
     descriptor = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
     try:
@@ -109,6 +111,12 @@ def _append(path: pathlib.Path, row: dict) -> None:
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+    if not existed:
+        directory = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
 
 
 @dataclass(frozen=True)
@@ -116,6 +124,7 @@ class LandingSnapshot:
     mint: str
     bonding_curve: str
     modeled_target_unix_nanos: int
+    minimum_context_slot: int
     request_started_unix_nanos: int
     response_received_unix_nanos: int
     context_slot: int
@@ -129,6 +138,7 @@ class LandingSnapshot:
                 self.mint, self.bonding_curve, self.endpoint_scheme_host)):
             raise RefusedExecution("PAC V2 snapshot identity is incomplete")
         for label, value in (("modeled target", self.modeled_target_unix_nanos),
+                             ("minimum context slot", self.minimum_context_slot),
                              ("request start", self.request_started_unix_nanos),
                              ("response receive", self.response_received_unix_nanos),
                              ("context slot", self.context_slot)):
@@ -137,6 +147,10 @@ class LandingSnapshot:
         if not (self.modeled_target_unix_nanos <= self.request_started_unix_nanos
                 <= self.response_received_unix_nanos):
             raise RefusedExecution("PAC V2 snapshot precedes its modeled landing target")
+        if self.response_received_unix_nanos - self.modeled_target_unix_nanos > MAX_SNAPSHOT_STALENESS_NANOS:
+            raise RefusedExecution("PAC V2 snapshot is too stale to represent the modeled landing")
+        if self.context_slot < self.minimum_context_slot:
+            raise RefusedExecution("PAC V2 snapshot context predates its decision evidence")
         if not isinstance(self.state, ReserveState):
             raise RefusedExecution("PAC V2 snapshot state is untyped")
         if (not isinstance(self.raw_response_sha256, str)
@@ -148,7 +162,8 @@ class LandingSnapshot:
 
 
 class SnapshotProvider(Protocol):
-    def capture(self, mint: str, modeled_target_unix_nanos: int) -> LandingSnapshot: ...
+    def capture(self, mint: str, modeled_target_unix_nanos: int,
+                minimum_context_slot: int) -> LandingSnapshot: ...
 
 
 def _decode_state(raw: bytes) -> ReserveState:
@@ -189,9 +204,11 @@ class PublicRpcSnapshotProvider:
         self.timeout_seconds = float(timeout_seconds)
         self.opener = opener
 
-    def capture(self, mint: str, modeled_target_unix_nanos: int) -> LandingSnapshot:
+    def capture(self, mint: str, modeled_target_unix_nanos: int,
+                minimum_context_slot: int) -> LandingSnapshot:
         if (not isinstance(mint, str) or not mint or type(modeled_target_unix_nanos) is not int
-                or modeled_target_unix_nanos < 0):
+                or modeled_target_unix_nanos < 0 or type(minimum_context_slot) is not int
+                or minimum_context_slot < 0):
             raise RefusedExecution("PAC V2 snapshot request is malformed")
         started = time.time_ns()
         if started < modeled_target_unix_nanos:
@@ -200,7 +217,8 @@ class PublicRpcSnapshotProvider:
         if not curve:
             raise RefusedExecution("PAC V2 cannot derive the bonding-curve PDA")
         request_body = {"jsonrpc": "2.0", "id": 1, "method": "getAccountInfo",
-                        "params": [curve, {"encoding": "base64", "commitment": "processed"}]}
+                        "params": [curve, {"encoding": "base64", "commitment": "processed",
+                                           "minContextSlot": minimum_context_slot}]}
         encoded = json.dumps(request_body, separators=(",", ":")).encode()
         request = urllib.request.Request(
             self.url, data=encoded, headers={"Content-Type": "application/json"}, method="POST")
@@ -256,6 +274,7 @@ class PublicRpcSnapshotProvider:
         endpoint = "/".join(self.url.split("/", 3)[:3])
         return LandingSnapshot(
             mint=mint, bonding_curve=curve, modeled_target_unix_nanos=modeled_target_unix_nanos,
+            minimum_context_slot=minimum_context_slot,
             request_started_unix_nanos=started, response_received_unix_nanos=received,
             context_slot=slot, state=_decode_state(raw), endpoint_scheme_host=endpoint,
             raw_response_sha256=raw_sha)

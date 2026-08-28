@@ -24,19 +24,20 @@ from . import pac_v2_feed as feed
 from . import pac_v2_policy as policy
 from .pac_v2_calibration import Calibration
 from .pac_v2_snapshot import (
-    LandingSnapshot, PublicRpcSnapshotProvider, SnapshotProvider, SnapshotUnavailable,
+    LandingSnapshot, MAX_SNAPSHOT_STALENESS_NANOS, PublicRpcSnapshotProvider,
+    SnapshotProvider, SnapshotUnavailable,
     snapshot_to_dict,
 )
 from . import solusd_recorder
 
 
 INSTRUMENT = "AFTERSHOCK_PAC_V2"
-SCHEMA = 1
-LEDGER_SCHEMA = 1
+SCHEMA = 2
+LEDGER_SCHEMA = 2
 PROBE_USD = "10"
 SLIPPAGE_BPS = 1_000
 SLIPPAGE_DEN = 10_000
-SNAPSHOT_TIMEOUT_NANOS = 30_000_000_000
+SNAPSHOT_TIMEOUT_NANOS = MAX_SNAPSHOT_STALENESS_NANOS
 SCAN_INTERVAL_SECONDS = 0.10
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 RESEARCH = ROOT / "research" / "trading_bot" / "aftershock"
@@ -64,8 +65,9 @@ class RuntimeProof:
             raise RefusedExecution("PAC V2 activation is invalid")
         if not isinstance(self.calibration, Calibration):
             raise RefusedExecution("PAC V2 runtime lacks typed latency calibration")
-        if self.calibration.last_land_unix_nanos >= self.activation_unix_nanos:
-            raise RefusedExecution("PAC V2 activation must follow the complete calibration artifact")
+        if max(self.calibration.last_land_unix_nanos,
+               self.calibration.last_attested_unix_nanos) >= self.activation_unix_nanos:
+            raise RefusedExecution("PAC V2 activation must follow the attested calibration artifact")
 
 
 @dataclass
@@ -81,6 +83,7 @@ class OpenPosition:
     peak_net_exit_lamports: int
     failed_exit_cost_lamports: int
     entry_id: str
+    last_context_slot: int
     last_state: dict
 
     def __post_init__(self) -> None:
@@ -90,7 +93,8 @@ class OpenPosition:
             if type(getattr(self, name)) is not int or getattr(self, name) <= 0:
                 raise RefusedExecution(f"PAC V2 open position {name} is invalid")
         for name in ("entry_curve_fee_lamports", "entry_attempt_cost_lamports", "ata_rent_lamports",
-                     "entry_unix_nanos", "peak_net_exit_lamports", "failed_exit_cost_lamports"):
+                     "entry_unix_nanos", "peak_net_exit_lamports", "failed_exit_cost_lamports",
+                     "last_context_slot"):
             if type(getattr(self, name)) is not int or getattr(self, name) < 0:
                 raise RefusedExecution(f"PAC V2 open position {name} is invalid")
         if self.entry_all_in_lamports != (self.quote_input_lamports + self.entry_curve_fee_lamports
@@ -112,7 +116,8 @@ def _new_state(proof: RuntimeProof, *, event_offset: int, receipt_offset: int) -
         "activation_unix_nanos": proof.activation_unix_nanos,
         "calibration_sha256": proof.calibration.artifact_sha256,
         "reaction_p90_nanos": proof.calibration.reaction_p90_nanos,
-        "cursor": {"event_offset": event_offset, "receipt_offset": receipt_offset, "pending": {}},
+        "cursor": {"event_offset": event_offset, "receipt_offset": receipt_offset,
+                   "pending": {}, "rejected_receipts": []},
         "buffers": {}, "open_position": None, "pending_order": None,
         "entry_watermark_source_unix_nanos": proof.activation_unix_nanos,
         "pending_ledger_rows": [], "last_status": "INITIALIZED_NO_BACKFILL",
@@ -134,11 +139,23 @@ def _validate_state(state: dict, proof: RuntimeProof) -> None:
     if not bindings:
         raise RefusedExecution("PAC V2 runner state is bound to a different runtime proof")
     cursor = state["cursor"]
-    if (not isinstance(cursor, dict) or set(cursor) != {"event_offset", "receipt_offset", "pending"}
+    if (not isinstance(cursor, dict) or set(cursor) != {
+            "event_offset", "receipt_offset", "pending", "rejected_receipts"}
             or any(type(cursor[key]) is not int or cursor[key] < 0
                    for key in ("event_offset", "receipt_offset"))
-            or not isinstance(cursor["pending"], dict)):
+            or not isinstance(cursor["pending"], dict)
+            or not isinstance(cursor["rejected_receipts"], list)):
         raise RefusedExecution("PAC V2 runner cursor is invalid")
+    for rejection in cursor["rejected_receipts"]:
+        if (not isinstance(rejection, dict)
+                or set(rejection) != {"event_id", "reason", "receipt_sha256"}
+                or rejection["reason"] not in {"ORPHAN_RECEIPT", "DUPLICATE_RECEIPT"}
+                or not isinstance(rejection["event_id"], str)
+                or not isinstance(rejection["receipt_sha256"], str)
+                or len(rejection["receipt_sha256"]) != 64
+                or any(c not in "0123456789abcdef"
+                       for c in rejection["receipt_sha256"])):
+            raise RefusedExecution("PAC V2 runner cursor contains a malformed receipt refusal")
     if not isinstance(state["buffers"], dict) or not isinstance(state["pending_ledger_rows"], list):
         raise RefusedExecution("PAC V2 runner collections are invalid")
     if type(state["entry_watermark_source_unix_nanos"]) is not int:
@@ -154,12 +171,14 @@ def _validate_state(state: dict, proof: RuntimeProof) -> None:
     if pending is not None:
         required_pending = {"side", "mint", "amount", "min_out", "decision_id",
                             "decision_unix_nanos", "target_unix_nanos", "action", "entry_id",
-                            "observation_failures", "last_observation_failure"}
+                            "minimum_context_slot", "observation_failures",
+                            "last_observation_failure"}
         if not isinstance(pending, dict) or set(pending) != required_pending:
             raise RefusedExecution("PAC V2 pending-order schema mismatch")
         if pending["side"] not in {"ENTRY", "EXIT"}:
             raise RefusedExecution("PAC V2 pending-order side is invalid")
-        for name in ("amount", "min_out", "decision_unix_nanos", "target_unix_nanos"):
+        for name in ("amount", "min_out", "decision_unix_nanos", "target_unix_nanos",
+                     "minimum_context_slot"):
             if type(pending[name]) is not int or pending[name] <= 0:
                 raise RefusedExecution(f"PAC V2 pending-order {name} is invalid")
         if (pending["target_unix_nanos"]
@@ -228,12 +247,13 @@ def _event(raw: dict) -> feed.ClockedEvent:
 
 def _cursor(raw: dict) -> feed.Cursor:
     return feed.Cursor(event_offset=raw["event_offset"], receipt_offset=raw["receipt_offset"],
-                       pending=dict(raw["pending"]))
+                       pending=dict(raw["pending"]),
+                       rejected_receipts=list(raw["rejected_receipts"]))
 
 
 def _cursor_dict(cursor: feed.Cursor) -> dict:
     return {"event_offset": cursor.event_offset, "receipt_offset": cursor.receipt_offset,
-            "pending": cursor.pending}
+            "pending": cursor.pending, "rejected_receipts": cursor.rejected_receipts}
 
 
 def _ledger_row(state: dict, kind: str, body: dict) -> dict:
@@ -271,6 +291,7 @@ def _flush(state: dict, *, state_path: pathlib.Path, ledger_path: pathlib.Path) 
             existing[row["event_id"]] = row
     if state["pending_ledger_rows"]:
         ledger_path.parent.mkdir(parents=True, exist_ok=True)
+        ledger_existed = ledger_path.exists()
         with ledger_path.open("a") as handle:
             for row in state["pending_ledger_rows"]:
                 _validate_ledger(row)
@@ -278,6 +299,12 @@ def _flush(state: dict, *, state_path: pathlib.Path, ledger_path: pathlib.Path) 
                     handle.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
                     existing[row["event_id"]] = row
             handle.flush(); os.fsync(handle.fileno())
+        if not ledger_existed:
+            directory = os.open(ledger_path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
         state["pending_ledger_rows"] = []
         _atomic_write(state_path, state)
 
@@ -295,8 +322,9 @@ def _snapshot_attempt_id(pending: dict, snapshot: LandingSnapshot) -> str:
 
 
 def _resolve_full_loss(state: dict, position: OpenPosition, *, now: int, action: str,
-                       reason: str, attempt_id: str | None = None) -> dict:
-    return _ledger_row(state, "resolved", {
+                       reason: str, attempt_id: str | None = None,
+                       evidence_refusal: str | None = None) -> dict:
+    body = {
         "mint": position.mint, "entry_id": position.entry_id, "exit_attempt_id": attempt_id,
         "action": action, "reason": reason, "resolved_unix_nanos": now,
         "entry_all_in_lamports": position.entry_all_in_lamports,
@@ -305,39 +333,62 @@ def _resolve_full_loss(state: dict, position: OpenPosition, *, now: int, action:
         "net_return_num": -position.entry_all_in_lamports - position.failed_exit_cost_lamports,
         "net_return_den": position.entry_all_in_lamports, "unexitable_full_loss": True,
         "ata_rent_treatment": "CHARGED_NOT_RECLAIMED_WITHOUT_OBSERVED_CLOSE",
-    })
+    }
+    if evidence_refusal is not None:
+        body["evidence_refusal"] = evidence_refusal
+    return _ledger_row(state, "resolved", body)
 
 
 def _complete_pending(state: dict, provider: SnapshotProvider, *, now: int) -> list[dict]:
     pending = state["pending_order"]
     if pending is None or now < pending["target_unix_nanos"]:
         return []
-    try:
-        snapshot = provider.capture(pending["mint"], pending["target_unix_nanos"])
-    except SnapshotUnavailable as exc:
-        pending["observation_failures"] += 1
-        pending["last_observation_failure"] = str(exc)[:200]
-        expired = now - pending["target_unix_nanos"] >= SNAPSHOT_TIMEOUT_NANOS
-        if not expired:
-            return []
+    if now - pending["target_unix_nanos"] >= SNAPSHOT_TIMEOUT_NANOS:
+        state["pending_order"] = None
         if pending["side"] == "ENTRY":
-            state["pending_order"] = None
             return [_ledger_row(state, "entry_rejected", {
                 "mint": pending["mint"], "decision_id": pending["decision_id"],
-                "reason": "SNAPSHOT_TIMEOUT", "decision_unix_nanos": pending["decision_unix_nanos"],
+                "reason": "SNAPSHOT_DEADLINE_ELAPSED",
+                "decision_unix_nanos": pending["decision_unix_nanos"],
                 "target_unix_nanos": pending["target_unix_nanos"],
                 "observation_failures": pending["observation_failures"]})]
         position = OpenPosition(**state["open_position"])
-        state["pending_order"] = None
         if pending["action"] == policy.ExitAction.EXIT_HORIZON.value:
             state["open_position"] = None
-            return [_resolve_full_loss(state, position, now=now, action=pending["action"],
-                                       reason="HORIZON_SNAPSHOT_TIMEOUT")]
+            return [_resolve_full_loss(
+                state, position, now=now, action=pending["action"],
+                reason="HORIZON_SNAPSHOT_DEADLINE_ELAPSED")]
         return [_ledger_row(state, "exit_rejected", {
             "mint": pending["mint"], "entry_id": pending["entry_id"],
             "decision_id": pending["decision_id"], "action": pending["action"],
-            "reason": "SNAPSHOT_TIMEOUT_RETURN_TO_HOLD",
+            "reason": "SNAPSHOT_DEADLINE_RETURN_TO_HOLD",
             "observation_failures": pending["observation_failures"]})]
+    try:
+        snapshot = provider.capture(
+            pending["mint"], pending["target_unix_nanos"], pending["minimum_context_slot"])
+    except SnapshotUnavailable as exc:
+        pending["observation_failures"] += 1
+        pending["last_observation_failure"] = str(exc)[:200]
+        return []
+    except RefusedExecution as exc:
+        # Decode/owner/layout/regime refusals are permanent for this requested fill. They must
+        # advance the state rather than crash-looping the single-position lock.
+        pending["observation_failures"] += 1
+        state["pending_order"] = None
+        if pending["side"] == "ENTRY":
+            return [_ledger_row(state, "entry_rejected", {
+                "mint": pending["mint"], "decision_id": pending["decision_id"],
+                "reason": "SNAPSHOT_PERMANENT_REFUSAL",
+                "refusal": str(exc)[:200],
+                "decision_unix_nanos": pending["decision_unix_nanos"],
+                "target_unix_nanos": pending["target_unix_nanos"],
+                "observation_failures": pending["observation_failures"]})]
+        position = OpenPosition(**state["open_position"])
+        state["open_position"] = None
+        return [_resolve_full_loss(
+            state, position, now=now, action=pending["action"],
+            reason="EXIT_SNAPSHOT_PERMANENT_REFUSAL",
+            evidence_refusal=str(exc)[:200])]
 
     attempt_id = _snapshot_attempt_id(pending, snapshot)
     intent = OrderIntent(IntentKind.EXACT_QUOTE_BUY if pending["side"] == "ENTRY"
@@ -364,6 +415,7 @@ def _complete_pending(state: dict, provider: SnapshotProvider, *, now: int) -> l
             ata_rent_lamports=accounting["ata_rent_lamports"],
             entry_unix_nanos=snapshot.response_received_unix_nanos,
             peak_net_exit_lamports=0, failed_exit_cost_lamports=0, entry_id=entry_id,
+            last_context_slot=snapshot.context_slot,
             last_state=asdict(snapshot.state))
         state["open_position"] = asdict(position)
         return [_ledger_row(state, "entry_filled", {
@@ -414,6 +466,10 @@ def _service_position(state: dict, *, now: int) -> list[dict]:
     if state["open_position"] is None or state["pending_order"] is not None:
         return []
     position = OpenPosition(**state["open_position"])
+    # The account response that established the entry can arrive after this cycle's initial clock
+    # sample. Never run an exit policy backward; service begins on a later cycle.
+    if now < position.entry_unix_nanos:
+        return []
     reserve = feed.ReserveState(**position.last_state)
     intent = OrderIntent(IntentKind.EXACT_TOKEN_SELL, position.token_atoms, 1)
     try:
@@ -426,8 +482,12 @@ def _service_position(state: dict, *, now: int) -> list[dict]:
     decision_position = policy.Position(
         position.token_atoms, position.quote_input_lamports, position.entry_unix_nanos,
         position.peak_net_exit_lamports)
-    outcome = policy.decide(decision_position, now_unix_nanos=now, net_exit_lamports=net,
-                            real_quote_lamports=(reserve.real_quote if net is not None else None))
+    try:
+        outcome = policy.decide(
+            decision_position, now_unix_nanos=now, net_exit_lamports=net,
+            real_quote_lamports=(reserve.real_quote if net is not None else None))
+    except ValueError as exc:
+        raise RefusedExecution("PAC V2 exit policy refused an invalid causal clock/quote") from exc
     position.peak_net_exit_lamports = outcome.position.peak_net_exit_lamports
     state["open_position"] = asdict(position)
     if outcome.action == policy.ExitAction.HOLD:
@@ -445,6 +505,7 @@ def _service_position(state: dict, *, now: int) -> list[dict]:
         "min_out": max(1, quote["out_amount"] * (SLIPPAGE_DEN - SLIPPAGE_BPS) // SLIPPAGE_DEN),
         "decision_id": decision_id, "decision_unix_nanos": now,
         "target_unix_nanos": now + state["reaction_p90_nanos"],
+        "minimum_context_slot": position.last_context_slot,
         "action": outcome.action.value, "entry_id": position.entry_id,
         "observation_failures": 0, "last_observation_failure": None,
     }
@@ -452,6 +513,7 @@ def _service_position(state: dict, *, now: int) -> list[dict]:
         "mint": position.mint, "entry_id": position.entry_id, "decision_id": decision_id,
         "action": outcome.action.value, "decision_unix_nanos": now,
         "target_unix_nanos": state["pending_order"]["target_unix_nanos"],
+        "minimum_context_slot": state["pending_order"]["minimum_context_slot"],
         "decision_net_exit_lamports": net})]
 
 
@@ -495,6 +557,7 @@ def _admit_candidate(state: dict, *, now: int, quote_input_lamports: int) -> lis
                        * (SLIPPAGE_DEN - SLIPPAGE_BPS) // SLIPPAGE_DEN),
         "decision_id": decision_id, "decision_unix_nanos": now,
         "target_unix_nanos": now + state["reaction_p90_nanos"], "action": None,
+        "minimum_context_slot": max(event.slot for event in events),
         "entry_id": None, "observation_failures": 0, "last_observation_failure": None,
     }
     state["entry_watermark_source_unix_nanos"] = max(
@@ -502,6 +565,7 @@ def _admit_candidate(state: dict, *, now: int, quote_input_lamports: int) -> lis
     return [_ledger_row(state, "entry_decision", {
         "mint": mint, "decision_id": decision_id, "decision_unix_nanos": now,
         "target_unix_nanos": state["pending_order"]["target_unix_nanos"],
+        "minimum_context_slot": state["pending_order"]["minimum_context_slot"],
         "quote_input_lamports": quote_input_lamports,
         "decision_tokens_out": decision_quote["out_amount"],
         "evidence_event_ids": list(qualification.evidence_event_ids),
@@ -523,6 +587,8 @@ def _update_buffers(state: dict, events: list[feed.ClockedEvent], *, now: int) -
         state["buffers"].setdefault(event.mint, []).append(_event_dict(event))
         if state["open_position"] is not None and event.mint == state["open_position"]["mint"]:
             state["open_position"]["last_state"] = asdict(event.post_state)
+            state["open_position"]["last_context_slot"] = max(
+                state["open_position"]["last_context_slot"], event.slot)
     cutoff = now - detector.pac_detector.MAX_PATTERN_SPAN_NANOS
     for mint in list(state["buffers"]):
         kept = [item for item in state["buffers"][mint]
@@ -542,13 +608,14 @@ def _quote_input(now: int) -> int:
         max_staleness_nanos=solusd_recorder.MAX_LOCAL_AGE_NANOS)
 
 
-def run_once(proof: RuntimeProof, provider: SnapshotProvider, *, now_unix_nanos: int | None = None,
-             quote_input_lamports: int | None = None, state_path: pathlib.Path = STATE,
-             ledger_path: pathlib.Path = LEDGER, events_path: pathlib.Path = feed.EVENTS,
-             receipts_path: pathlib.Path = feed.RECEIPTS, initialize_at_eof: bool = True) -> dict:
+def _run_once_at(proof: RuntimeProof, provider: SnapshotProvider, *, now: int,
+                 quote_input_lamports: int | None = None, state_path: pathlib.Path = STATE,
+                 ledger_path: pathlib.Path = LEDGER, events_path: pathlib.Path = feed.EVENTS,
+                 receipts_path: pathlib.Path = feed.RECEIPTS,
+                 initialize_at_eof: bool = True) -> dict:
+    """Deterministic test seam. Production callers use run_once, whose clock is internal."""
     if not isinstance(proof, RuntimeProof) or not hasattr(provider, "capture"):
         raise RefusedExecution("PAC V2 run requires runtime proof and snapshot provider")
-    now = time.time_ns() if now_unix_nanos is None else now_unix_nanos
     if type(now) is not int or now <= proof.activation_unix_nanos:
         raise RefusedExecution("PAC V2 runner clock is not post-activation")
     state_path = pathlib.Path(state_path); ledger_path = pathlib.Path(ledger_path)
@@ -565,12 +632,38 @@ def run_once(proof: RuntimeProof, provider: SnapshotProvider, *, now_unix_nanos:
     _validate_state(state, proof)
     _flush(state, state_path=state_path, ledger_path=ledger_path)
     cursor = _cursor(state["cursor"])
+    rejected_before = len(cursor.rejected_receipts)
     new_events = feed.consume(cursor, events_path=events_path, receipts_path=receipts_path,
                               runner_seen_unix_nanos=now)
     state["cursor"] = _cursor_dict(cursor)
     _update_buffers(state, new_events, now=now)
-    rows = _complete_pending(state, provider, now=now)
-    rows += _service_position(state, now=now)
+    rows = [_ledger_row(state, "feed_refusal", item)
+            for item in cursor.rejected_receipts[rejected_before:]]
+    if rows:
+        # An authenticated but orphan/duplicate receipt is advanced and recorded once. The whole
+        # coincident event batch is conservatively ineligible rather than replayed after restart.
+        if new_events:
+            state["entry_watermark_source_unix_nanos"] = max(
+                state["entry_watermark_source_unix_nanos"],
+                max(event.source_received_unix_nanos for event in new_events))
+        state["last_status"] = "FEED_REFUSAL_ADVANCED"
+        _commit(state, rows, state_path=state_path, ledger_path=ledger_path)
+        return {"status": state["last_status"],
+                "open": int(state["open_position"] is not None),
+                "pending": int(state["pending_order"] is not None),
+                "new_events": len(new_events), "ledger_rows": len(rows)}
+    completion_rows = _complete_pending(state, provider, now=now)
+    rows += completion_rows
+    opened_this_cycle = any(row["kind"] == "entry_filled" for row in completion_rows)
+    # Persist a completed fill/terminal transition before any later policy work. A downstream
+    # refusal can no longer replay the entry snapshot after restart.
+    committed_rows = 0
+    if completion_rows:
+        _commit(state, rows, state_path=state_path, ledger_path=ledger_path)
+        committed_rows = len(rows)
+        rows = []
+    if not opened_this_cycle:
+        rows += _service_position(state, now=now)
     if state["open_position"] is None and state["pending_order"] is None:
         q = quote_input_lamports if quote_input_lamports is not None else _quote_input(now)
         if type(q) is not int or q <= 0:
@@ -586,7 +679,19 @@ def run_once(proof: RuntimeProof, provider: SnapshotProvider, *, now_unix_nanos:
     _commit(state, rows, state_path=state_path, ledger_path=ledger_path)
     return {"status": state["last_status"], "open": int(state["open_position"] is not None),
             "pending": int(state["pending_order"] is not None), "new_events": len(new_events),
-            "ledger_rows": len(rows)}
+            "ledger_rows": committed_rows + len(rows)}
+
+
+def run_once(proof: RuntimeProof, provider: SnapshotProvider, *,
+             quote_input_lamports: int | None = None, state_path: pathlib.Path = STATE,
+             ledger_path: pathlib.Path = LEDGER, events_path: pathlib.Path = feed.EVENTS,
+             receipts_path: pathlib.Path = feed.RECEIPTS,
+             initialize_at_eof: bool = True) -> dict:
+    """Run one production cycle using only the engine-owned wall clock."""
+    return _run_once_at(
+        proof, provider, now=time.time_ns(), quote_input_lamports=quote_input_lamports,
+        state_path=state_path, ledger_path=ledger_path, events_path=events_path,
+        receipts_path=receipts_path, initialize_at_eof=initialize_at_eof)
 
 
 def _lock(path: pathlib.Path = LOCK):
@@ -613,7 +718,15 @@ def main(argv=None) -> int:
         with _lock():
             while True:
                 started = time.monotonic()
-                print(json.dumps(run_once(proof, provider), sort_keys=True), flush=True)
+                try:
+                    result = run_once(proof, provider)
+                except RefusedExecution as exc:
+                    result = {"status": "CYCLE_REFUSED", "reason": str(exc)[:240]}
+                    print(json.dumps(result, sort_keys=True), flush=True)
+                    if args.once:
+                        return 2
+                else:
+                    print(json.dumps(result, sort_keys=True), flush=True)
                 if args.once:
                     break
                 remaining = args.interval - (time.monotonic() - started)
