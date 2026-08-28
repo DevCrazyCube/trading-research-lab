@@ -15,7 +15,7 @@ import pathlib
 import threading
 import time
 
-from . import pac_policy, pac_runner, pac_status, solusd_recorder
+from . import pac_policy, pac_runner, pac_status, pac_v2_status, solusd_recorder
 from .execution import RefusedExecution
 
 
@@ -160,6 +160,11 @@ def _validate_rows(rows: list[dict], opens: list[dict], state: dict) -> tuple[li
     event_ids: set[str] = set()
     opened: dict[str, dict] = {}
     closed_attempts: set[str] = set()
+    # A known-unavailable exit is represented by two authenticated facts from the sealed V1 producer:
+    # (1) the attempt had no observable cost/output, and (2) that same attempt terminally resolved the
+    # position at the full-loss bound.  This is one attempt referenced by two event rows, not a duplicate
+    # attempt.  Retain the complete first row so only that exact producer relation is admitted below.
+    unavailable_exit_attempts: dict[str, dict] = {}
     resolved: list[dict] = []
     performance_events: list[dict] = []
     activity: list[dict] = []
@@ -205,11 +210,22 @@ def _validate_rows(rows: list[dict], opens: list[dict], state: dict) -> tuple[li
             observed = row.get("cost_observed")
             if type(observed) is not bool or (not observed and cost != 0):
                 raise RefusedExecution("PAC failed-attempt cost observability does not reconcile")
+            side = _text("attempt_cost.side", row.get("side"))
+            outcome = _text("attempt_cost.outcome", row.get("outcome"))
+            if side not in {"ENTRY", "EXIT"}:
+                raise RefusedExecution("PAC failed-attempt side is invalid")
+            if side == "EXIT" and outcome == "SCENARIO_UNAVAILABLE":
+                unavailable_exit_attempts[attempt_id] = {
+                    "mint": mint,
+                    "entry_attempt_id": row.get("entry_attempt_id"),
+                    "cost_observed": observed,
+                    "attempt_cost_lamports": cost,
+                }
             ret = Fraction(-cost, denominator)
             performance_events.append({"kind": kind, "return": ret,
                                        "unexitable_full_loss": False})
             activity.append({"kind": kind, "mint": mint,
-                             "status": _text("attempt_cost.outcome", row.get("outcome")),
+                             "status": outcome,
                              "attempt_cost_lamports": cost,
                              "return_r": _decimal(ret)})
             continue
@@ -221,8 +237,17 @@ def _validate_rows(rows: list[dict], opens: list[dict], state: dict) -> tuple[li
         if exit_attempt is not None:
             exit_attempt = _text("resolved.exit_attempt_id", exit_attempt)
             if exit_attempt in closed_attempts:
-                raise RefusedExecution("PAC ledger contains a duplicate exit attempt")
-            closed_attempts.add(exit_attempt)
+                unavailable = unavailable_exit_attempts.get(exit_attempt)
+                if not (unavailable is not None
+                        and unavailable["mint"] == mint
+                        and unavailable["entry_attempt_id"] == entry_attempt
+                        and unavailable["cost_observed"] is False
+                        and unavailable["attempt_cost_lamports"] == 0
+                        and row.get("exit_outcome") == "SCENARIO_UNAVAILABLE"
+                        and row.get("unexitable_full_loss") is True):
+                    raise RefusedExecution("PAC ledger contains a duplicate exit attempt")
+            else:
+                closed_attempts.add(exit_attempt)
         if entry_attempt not in opened:
             raise RefusedExecution("PAC resolution does not reference an earlier opened entry")
         if any(r["entry_attempt_id"] == entry_attempt for r in resolved):
@@ -411,6 +436,7 @@ def snapshot(*, ledger_path: pathlib.Path = LEDGER_PATH, state_path: pathlib.Pat
         "last_measurement_refusal": state.get("last_measurement_refusal"),
         "activity": list(reversed(activity[-100:])),
         "ledger_rows": len(rows),
+        "challenger": pac_v2_status.status(),
         "generated_at": time.time(),
     }
 

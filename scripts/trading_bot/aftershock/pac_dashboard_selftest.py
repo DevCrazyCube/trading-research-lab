@@ -74,6 +74,22 @@ def _attempt_cost():
                   "cost_observed": True, "denominator_lamports": 10_000_000, "labels": []})
 
 
+def _unavailable_exit_pair(i=3):
+    attempt_id = f"unavailable-exit-{i}"
+    attempt = _seal({"kind": "attempt_cost", "side": "EXIT", "mint": f"M{i}",
+                     "attempt_id": attempt_id, "entry_attempt_id": f"entry-{i}",
+                     "outcome": "SCENARIO_UNAVAILABLE", "attempt_cost_lamports": 0,
+                     "cost_observed": False, "denominator_lamports": 10_000_000,
+                     "labels": []})
+    resolved = _resolved(i, 0, full_loss=True)
+    resolved["exit_attempt_id"] = attempt_id
+    resolved["exit_outcome"] = "SCENARIO_UNAVAILABLE"
+    resolved = _seal({key: value for key, value in resolved.items()
+                      if key not in {"schema_version", "instrument_id", "seal_sha256",
+                                     "session_event_sha256", "activation_root_sha256", "event_id"}})
+    return attempt, resolved
+
+
 def main() -> int:
     ok = True
     with tempfile.TemporaryDirectory(prefix="pac_dash_") as td:
@@ -104,6 +120,28 @@ def main() -> int:
                      calibrated["evidence_status"] == "VALID_PAPER_SCENARIO"
                      and calibrated["performance"]["promotion_discovery_resolved"] == 2
                      and calibrated["performance"]["discovery_progress"] == "0.0200")
+
+        unavailable_attempt, unavailable_resolution = _unavailable_exit_pair()
+        unavailable_rows = [_opened(3), unavailable_attempt, unavailable_resolution]
+        ledger.write_text("".join(json.dumps(row) + "\n" for row in unavailable_rows))
+        unavailable = dash.snapshot(
+            ledger_path=ledger, state_path=state, status_snapshot=_status(True))
+        ok &= _check("one unavailable EXIT attempt may cause one matching full-loss resolution",
+                     unavailable["evidence_status"] == "VALID_UNCALIBRATED_PAPER_SCENARIO"
+                     and unavailable["performance"]["resolved"] == 1
+                     and unavailable["performance"]["full_losses"] == 1
+                     and unavailable["performance"]["failed_attempt_cost_events"] == 1)
+
+        wrong_pair = dict(unavailable_resolution)
+        wrong_pair["mint"] = "ANOTHER-MINT"
+        wrong_pair = _seal({key: value for key, value in wrong_pair.items()
+                            if key not in {"schema_version", "instrument_id", "seal_sha256",
+                                           "session_event_sha256", "activation_root_sha256", "event_id"}})
+        ledger.write_text("".join(json.dumps(row) + "\n"
+                                  for row in [_opened(3), unavailable_attempt, wrong_pair]))
+        wrong = dash.snapshot(ledger_path=ledger, state_path=state, status_snapshot=_status(True))
+        ok &= _check("unavailable attempt reuse across another mint REFUSES",
+                     wrong["evidence_status"] == "REFUSED_LEDGER_INTEGRITY")
 
         legacy = dict(rows[1]); legacy.pop("entry_all_in_lamports")
         ledger.write_text(json.dumps(rows[0]) + "\n" + json.dumps(legacy) + "\n")

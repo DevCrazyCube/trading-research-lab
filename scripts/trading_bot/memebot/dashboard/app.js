@@ -984,8 +984,9 @@ function pacEquityChart(raw, evidenceStatus, pendingCount=0){
 function renderPAC(){
   const app=document.getElementById("app"), d=state.pac;
   app.innerHTML=`
-    <div class="pagehd pac-head"><h2>Aftershock PAC V1 · focused candidate</h2><span class="pill">PAYABLE ABSORPTION COMPRESSION</span><span class="grow"></span><span id="pacStatusBadge" class="killtag halt">loading</span></div>
+    <div class="pagehd pac-head"><h2>Aftershock PAC · V1 baseline / V2 challenger</h2><span class="pill">PAYABLE ABSORPTION COMPRESSION</span><span class="grow"></span><span id="pacStatusBadge" class="killtag halt">loading</span></div>
     <div id="pacBoundary" class="pac-boundary"></div>
+    <section id="pacChallenger" class="pac-boundary"></section>
     <section id="pacStrip" class="strip"></section>
     <div class="pac-layout">
       <section class="pac-chart-card"><div class="pac-card-head"><div><span class="pac-eyebrow">PERFORMANCE</span><h3>Normalized discovery capital</h3></div><div class="pac-last" id="pacLast">—</div></div><div class="pac-chart" id="pacChart"></div><div class="pac-chart-note" id="pacChartNote"></div></section>
@@ -1013,6 +1014,9 @@ function renderPACView(){
     : (pendings.length
       ? `${pendings.length} causal order pending; it is not a fill and cannot move performance.`
       : "No forward rows exist yet; baseline is not a performance result.")))}</span>`;
+  const challenger=d.challenger||{}, challengerBox=document.getElementById("pacChallenger");
+  if(challengerBox) challengerBox.innerHTML=`<strong>PAC V2 · ${esc(challenger.status||"UNKNOWN")}</strong>`+
+    `<span>${esc(challenger.entry_formula||"")} · ${esc(challenger.execution||"")} · seal ${esc(challenger.seal||"?")} · calibration ${esc(challenger.calibration||"?")}${challenger.runtime_refusal?` · ${esc(challenger.runtime_refusal)}`:""}</span>`;
   const cells=[
     ["Capital index",pacNum(perf.normalized_capital_index,2),`uncalibrated scenario index`,validScenario?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
     ["Mean all-cost R",perf.mean_return_r==null?"—":(Number(perf.mean_return_r)>=0?"+":"")+pacNum(perf.mean_return_r,3),`${perf.resolved||0} fully reconciled`,perf.mean_return_r==null?"muted":(Number(perf.mean_return_r)>0?"pos":"neg")],
