@@ -1,0 +1,16 @@
+{
+  "activation_sha256": "cbb83dc632704350207bf85f006d7207bc3b15b37991d395e3e14ca2fcb2286c",
+  "activation_unix_nanos": 1787959850691695810,
+  "attestation_path": "research/trading_bot/aftershock/AFTERSHOCK_PAC_V2_ATTESTATION.jsonl",
+  "attestation_sha256": "f9bd302811a996bf59c59adf3bfa556a1fbab8f46faa4376e2ed3a117b5112eb",
+  "calibration_path": "research/trading_bot/aftershock/AFTERSHOCK_PAC_V2_CALIBRATION.jsonl",
+  "calibration_sha256": "cb22aaf56e8f7d5776c13a8456f993bc41b75d26d358827741115f5b66fa1597",
+  "campaign_path": "research/trading_bot/aftershock/AFTERSHOCK_PAC_V2_CALIBRATION_CAMPAIGN.json",
+  "campaign_sha256": "0de139ad39f8abe9ac90f3bf4cbf2674e70a4936a53ee6c44416dcc798e6bc67",
+  "instrument_id": "AFTERSHOCK_PAC_V2",
+  "live_verification_digest": "82255db41821ae94b2bb51f00aba21e5ca3cc81ffc57a7c833b56f128fe742b6",
+  "live_verification_endpoint": "https://api.mainnet-beta.solana.com",
+  "live_verified_samples": 100,
+  "schema": 1,
+  "seal_sha256": "e0c0e358a87f4599e9fc5bb3404820701d9485fbda3f0bfa4cb15162915e7a4a"
+}
