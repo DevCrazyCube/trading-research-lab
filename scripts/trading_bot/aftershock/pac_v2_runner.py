@@ -262,6 +262,10 @@ def _ledger_row(state: dict, kind: str, body: dict) -> dict:
            "calibration_sha256": state["calibration_sha256"],
            "activation_unix_nanos": state["activation_unix_nanos"],
            "kind": kind, **body}
+    # A body payload (e.g. a rejected feed receipt) may carry its OWN "event_id"; our ledger id must be the
+    # hash of the row WITHOUT any event_id, exactly as _validate_ledger recomputes it — otherwise a foreign
+    # event_id pollutes the hash and every later _validate_ledger refuses the row (blocking the runner).
+    row.pop("event_id", None)
     row["event_id"] = _hash(row)
     return row
 
