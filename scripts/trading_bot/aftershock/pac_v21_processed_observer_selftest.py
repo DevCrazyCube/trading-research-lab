@@ -101,6 +101,26 @@ def main() -> int:
     else:
         raise AssertionError("mismatched JSON-RPC id must refuse")
 
+    transport_clock = Clock()
+    transport_calls = 0
+    def transport(request):
+        nonlocal transport_calls
+        transport_calls += 1
+        if transport_calls == 1:
+            return {**response(None), "id": request["id"]}
+        raise TimeoutError("synthetic")
+    try:
+        observer.observe(
+            base._b58encode(bytes(range(64))), rpc=transport,
+            decision_monotonic_nanos=transport_clock.mono,
+            clock=transport_clock.wall_now, monotonic=transport_clock.mono_now,
+            sleep=transport_clock.sleep)
+    except observer.ProcessedTransportFailure as exc:
+        check(len(exc.polls) == 1,
+              "transport failure preserves every earlier completed poll")
+    else:
+        raise AssertionError("transport failure must remain a typed refusal")
+
     invalid_clock = Clock()
     try:
         observer.observe("not-base58", rpc=lambda _request: response(None),

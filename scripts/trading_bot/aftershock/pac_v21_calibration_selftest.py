@@ -97,6 +97,9 @@ def bundle(root: pathlib.Path, count: int = 100) -> tuple[
         blockhash = hashlib.sha256(f"blockhash-{index}".encode()).digest()
         wire_b64, signature = send.build_signed_memo(private, payer, memo, blockhash)
         wire = base64.b64decode(wire_b64)
+        signature_count, message_offset = v2._shortvec(wire, 0)
+        message_offset += signature_count * 64
+        message_b64 = base64.b64encode(wire[message_offset:]).decode("ascii")
         decision = started + 1_000_000_000 + index * 2_000_000_000
         reaction = 500_000_000 + index * 1_000_000
         mono_decision = 9_000_000_000_000 + index * 2_000_000_000
@@ -124,6 +127,10 @@ def bundle(root: pathlib.Path, count: int = 100) -> tuple[
                         "params": [wire_b64, {"encoding": "base64", "skipPreflight": False,
                                               "preflightCommitment": "processed"}]}
         send_response = {"jsonrpc": "2.0", "id": index + 1, "result": signature}
+        fee_request = {"jsonrpc": "2.0", "id": index + 1, "method": "getFeeForMessage",
+                       "params": [message_b64, {"commitment": "processed"}]}
+        fee_response = {"jsonrpc": "2.0", "id": index + 1,
+                        "result": {"context": {"slot": slot}, "value": 5_000}}
         raw = {
             "wire_transaction_base64": wire_b64,
             "wire_transaction_sha256": hashlib.sha256(wire).hexdigest(),
@@ -131,10 +138,16 @@ def bundle(root: pathlib.Path, count: int = 100) -> tuple[
             "send_request_sha256": calibration._sha(send_request),
             "send_response_json": send_response,
             "send_response_sha256": calibration._sha(send_response),
+            "fee_request_json": fee_request,
+            "fee_request_sha256": calibration._sha(fee_request),
+            "fee_response_json": fee_response,
+            "fee_response_sha256": calibration._sha(fee_response),
+            "quoted_fee_lamports": 5_000,
         }
         sample_body = {
             "schema": calibration.SAMPLE_SCHEMA, "instrument_id": calibration.INSTRUMENT,
-            "campaign_id": campaign_id, "previous_sample_id": previous,
+            "campaign_id": campaign_id, "campaign_attempt_index": index,
+            "previous_sample_id": previous,
             "transaction_signature": signature, "outcome": "PROCESSED",
             "processed_slot": slot, "confirmation_status": "processed",
             "clocks_unix_nanos": wall, "clocks_monotonic_nanos": mono,
@@ -281,6 +294,19 @@ def main() -> int:
             campaign_path=campaign_path, samples_path=sample_path,
             attestations_path=over_budget_path, pins=over_budget_pins),
             "finalized aggregate fee above campaign budget refuses")
+
+        fee_mismatch = deepcopy(attestations)
+        fee_mismatch[-1]["response_json"]["result"]["meta"]["fee"] = 4_999
+        fee_mismatch[-1]["raw_response_sha256"] = calibration._sha(
+            fee_mismatch[-1]["response_json"])
+        reseal_attestation(fee_mismatch[-1]); fee_mismatch_path = root / "fee-mismatch.jsonl"
+        fee_mismatch_pins = calibration.Pins(
+            pins.campaign_sha256, pins.samples_sha256,
+            write_jsonl(fee_mismatch_path, fee_mismatch))
+        refuses(lambda: calibration.load(
+            campaign_path=campaign_path, samples_path=sample_path,
+            attestations_path=fee_mismatch_path, pins=fee_mismatch_pins),
+            "finalized fee differing from the signed-message fee quote refuses")
 
         campaign = json.loads(campaign_path.read_text())
         campaign["verification_endpoint_scheme_host"] = campaign["submit_endpoint_scheme_host"]

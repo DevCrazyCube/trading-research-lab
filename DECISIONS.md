@@ -3459,3 +3459,24 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
 - **Decision:** Every process launched from the watchdog, including the tmux sessions and loop timer,
   explicitly closes fd 9. Only the watchdog bash may own the singleton lock. This is operational process
   recovery only: no PAC V2 seal, activation, strategy threshold, state, ledger, or evidence row changes.
+
+## 2026-08-30 — PAC V2.1 measurement chain is sealable but broadcast remains owner-gated
+
+- **Verified fact:** The preregistered single-shock detector, processed-status observer, exact-fee
+  calibration validator, all-attempt journal, independent finalized attester, isolated paper runner, and
+  activation manifest pass 84 direct checks. The inherited AFTERSHOCK regression bundle also remains
+  green. These are implementation tests, not trade outcomes or evidence of profitability.
+- **Decision:** Every attempted campaign transaction is hash-chained and durably records its signed wire
+  before send. A missing/uncertain acknowledgement, status timeout, boot change, or explicit RPC failure
+  becomes a terminal visible failure; it cannot be omitted, resent under the same signature, or included
+  in the processed-latency p90. Every successful sample binds an exact pre-send `getFeeForMessage` quote,
+  which must equal independently finalized `meta.fee`. Activation binds the complete terminal journal,
+  its exact successful-sample projection, all attestations, counts, p90, and a fresh live reread.
+- **Decision:** The V2 execution/exit core remains byte-unchanged. V2.1 runs through an isolated adapter
+  with separate state/ledger paths and restores V2 module globals after every call. It starts at EOF after
+  activation, never backfills the inspected V2 interval, and remains paper-scenario only.
+- **Open owner gate:** Code and seal anchoring authorizes no spend. Broadcast additionally requires the
+  fixed campaign artifact to be cleanly committed in a strict descendant commit of the seal, the exact
+  precommitted fee payer and distinct public RPC origins, an explicit `--broadcast`, and a campaign-wide
+  transaction/lamport cap. No campaign, calibration evidence, activation, V2.1 paper fill, or live order
+  exists at this decision point.

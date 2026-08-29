@@ -20,6 +20,10 @@ class ProcessedObservationRefused(RuntimeError):
         self.polls = polls
 
 
+class ProcessedTransportFailure(ProcessedObservationRefused):
+    """A status request produced no complete RPC response; prior completed polls remain attached."""
+
+
 @dataclass(frozen=True)
 class ProcessedObservation:
     slot: int
@@ -54,7 +58,11 @@ def observe(signature: str, *, rpc: Callable[[dict], dict],
                    "method": "getSignatureStatuses",
                    "params": [[signature], {"searchTransactionHistory": True}]}
         start_wall, start_mono = clock(), monotonic()
-        response = rpc(request)
+        try:
+            response = rpc(request)
+        except Exception as exc:
+            raise ProcessedTransportFailure(
+                f"processed status transport failed: {type(exc).__name__}", tuple(polls)) from exc
         end_wall, end_mono = clock(), monotonic()
         body = {
             "request_started_unix_nanos": start_wall,

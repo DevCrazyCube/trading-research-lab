@@ -20,8 +20,10 @@ never finalizes remains a visible failure and cannot enter the p90.
 1. Commit a campaign before sampling. It binds instrument, V2.1 seal, exact fee payer, distinct submit and
    verifier HTTPS origins, start time, maximum transaction count, maximum lamports, 100 ms polling cadence,
    30-second processed deadline, and the memo-only transaction profile.
-2. Each unique transaction contains one deterministic memo challenge over campaign id, sample index, and
-   previous sample id. Persist each attempted send atomically before beginning the next index.
+2. Each unique transaction contains one deterministic memo challenge over campaign id, attempt index, and
+   previous successful sample id. Broadcast refuses until the fixed campaign artifact is committed cleanly
+   after the current seal. Persist the exact signed wire atomically before sending its first byte; an
+   uncertain send is a visible failed attempt and its signature is never reused.
 3. Preserve exact wall and monotonic clocks for decision, build start, sign done, send start, send ack and
    processed observation. Preserve the signed wire, send request/response, and every status-poll request,
    response, start/end clock and digest.
@@ -29,9 +31,11 @@ never finalizes remains a visible failure and cannot enter the p90.
    first recorded non-null status, have null `err`, exact signature identity, an exact positive slot, and a
    declared confirmation status in the ordered set. RPC/program errors, timeout and ambiguous schemas are
    durable failure outcomes; they are never omitted or rewritten as latency.
-5. An independent verifier later calls `getTransaction(..., commitment=finalized, encoding=base64)` for
+5. Before send, preserve the exact `getFeeForMessage` request/response for the signed message. An
+   independent verifier later calls `getTransaction(..., commitment=finalized, encoding=base64)` for
    every processed success. It must recover the identical wire bytes, signature, fee payer, successful meta
-   and processed-observed slot. Missing/different/fork-dropped samples remain failures.
+   and processed-observed slot, and finalized `meta.fee` must equal the pre-send quote. Missing/different/
+   fork-dropped samples remain failures.
 
 Activation requires at least 100 independently finalized processed successes plus every campaign failure.
 The nearest-rank p90 uses only those authenticated successes; failure rate is separately mandatory and a

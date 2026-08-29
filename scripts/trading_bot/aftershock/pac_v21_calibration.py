@@ -282,7 +282,8 @@ def _polls(row: dict, index: int, *, signature: str, processed_slot: int,
 
 def _sample(row: dict, index: int, campaign: Campaign, previous: str) -> dict:
     required = {
-        "schema", "instrument_id", "campaign_id", "previous_sample_id", "sample_id",
+        "schema", "instrument_id", "campaign_id", "campaign_attempt_index",
+        "previous_sample_id", "sample_id",
         "transaction_signature", "outcome", "processed_slot", "confirmation_status",
         "clocks_unix_nanos", "clocks_monotonic_nanos", "raw_evidence",
         "raw_evidence_sha256", "status_polls",
@@ -296,6 +297,8 @@ def _sample(row: dict, index: int, campaign: Campaign, previous: str) -> dict:
         raise CalibrationRefused(f"sample[{index}] content id mismatch")
     signature = _text("transaction signature", row["transaction_signature"])
     base._b58decode("transaction signature", signature, exact_length=64)
+    attempt_index = _integer(f"sample[{index}].campaign_attempt_index",
+                             row["campaign_attempt_index"])
     processed_slot = _integer("processed slot", row["processed_slot"], minimum=1)
     confirmation = _text("confirmation_status", row["confirmation_status"])
     decision, processed, reaction, wall, mono = _clocks(row, index)
@@ -305,26 +308,51 @@ def _sample(row: dict, index: int, campaign: Campaign, previous: str) -> dict:
     required_raw = {
         "wire_transaction_base64", "wire_transaction_sha256", "send_request_json",
         "send_request_sha256", "send_response_json", "send_response_sha256",
+        "fee_request_json", "fee_request_sha256", "fee_response_json",
+        "fee_response_sha256", "quoted_fee_lamports",
     }
     if not isinstance(raw, dict) or set(raw) != required_raw or _hash(
             "raw evidence hash", row["raw_evidence_sha256"]) != _sha(raw):
         raise CalibrationRefused(f"sample[{index}] raw evidence binding fails")
     wire, wire_signature, payer = base._wire_identity(
         raw["wire_transaction_base64"],
-        expected_memo=base._campaign_memo(campaign.campaign_id, index, previous))
+        expected_memo=base._campaign_memo(campaign.campaign_id, attempt_index, previous))
     wire_sha = hashlib.sha256(wire).hexdigest()
     if (wire_sha != _hash("wire hash", raw["wire_transaction_sha256"])
             or wire_signature != signature or payer != campaign.calibration_fee_payer):
         raise CalibrationRefused(f"sample[{index}] signed wire identity mismatch")
+    signature_count, message_offset = base._shortvec(wire, 0)
+    message_offset += signature_count * 64
+    message_base64 = base64.b64encode(wire[message_offset:]).decode("ascii")
+    fee_request = {
+        "jsonrpc": "2.0", "id": attempt_index + 1, "method": "getFeeForMessage",
+        "params": [message_base64, {"commitment": "processed"}],
+    }
+    fee_response = raw["fee_response_json"]
+    quoted_fee = _integer("quoted fee", raw["quoted_fee_lamports"], minimum=1)
+    if (raw["fee_request_json"] != fee_request
+            or _hash("fee request hash", raw["fee_request_sha256"]) != _sha(fee_request)
+            or not isinstance(fee_response, dict)
+            or set(fee_response) != {"jsonrpc", "id", "result"}
+            or fee_response.get("jsonrpc") != "2.0"
+            or fee_response.get("id") != attempt_index + 1
+            or not isinstance(fee_response.get("result"), dict)
+            or set(fee_response["result"]) != {"context", "value"}
+            or not isinstance(fee_response["result"].get("context"), dict)
+            or type(fee_response["result"]["context"].get("slot")) is not int
+            or fee_response["result"]["context"]["slot"] <= 0
+            or fee_response["result"].get("value") != quoted_fee
+            or _hash("fee response hash", raw["fee_response_sha256"]) != _sha(fee_response)):
+        raise CalibrationRefused(f"sample[{index}] fee quote evidence mismatch")
     request, response = raw["send_request_json"], raw["send_response_json"]
     expected_request = {
-        "jsonrpc": "2.0", "id": index + 1, "method": "sendTransaction",
+        "jsonrpc": "2.0", "id": attempt_index + 1, "method": "sendTransaction",
         "params": [raw["wire_transaction_base64"], {
             "encoding": "base64", "skipPreflight": False,
             "preflightCommitment": "processed",
         }],
     }
-    expected_response = {"jsonrpc": "2.0", "id": index + 1, "result": signature}
+    expected_response = {"jsonrpc": "2.0", "id": attempt_index + 1, "result": signature}
     if (request != expected_request
             or _hash("send request hash", raw["send_request_sha256"]) != _sha(request)
             or response != expected_response
@@ -334,7 +362,7 @@ def _sample(row: dict, index: int, campaign: Campaign, previous: str) -> dict:
            confirmation_status=confirmation, wall=wall, mono=mono)
     return {"sample_id": sample_id, "signature": signature, "wire_sha256": wire_sha,
             "processed_slot": processed_slot, "decision": decision, "processed": processed,
-            "reaction": reaction}
+            "reaction": reaction, "quoted_fee": quoted_fee}
 
 
 def _attestation(row: dict, index: int, campaign: Campaign, sample: dict) -> tuple[int, int]:
@@ -373,7 +401,8 @@ def _attestation(row: dict, index: int, campaign: Campaign, sample: dict) -> tup
     if (not isinstance(result, dict) or result.get("slot") != sample["processed_slot"]
             or not isinstance(result.get("blockTime"), int)
             or not isinstance(result.get("meta"), dict) or result["meta"].get("err") is not None
-            or type(result["meta"].get("fee")) is not int or result["meta"]["fee"] < 0):
+            or type(result["meta"].get("fee")) is not int
+            or result["meta"]["fee"] != sample["quoted_fee"]):
         raise CalibrationRefused(f"attestation[{index}] does not prove finalized successful landing")
     tx = result.get("transaction")
     if not isinstance(tx, list) or len(tx) != 2 or tx[1] != "base64":
@@ -401,11 +430,16 @@ def load(*, campaign_path: pathlib.Path, samples_path: pathlib.Path,
     samples = []
     previous = campaign.campaign_id
     signatures = set()
+    previous_attempt_index = -1
     for index, row in enumerate(sample_rows):
         sample = _sample(row, index, campaign, previous)
+        attempt_index = row["campaign_attempt_index"]
+        if attempt_index <= previous_attempt_index:
+            raise CalibrationRefused("V2.1 successful campaign attempt indices are not increasing")
         if sample["signature"] in signatures:
             raise CalibrationRefused("V2.1 calibration reuses a transaction signature")
         signatures.add(sample["signature"]); samples.append(sample); previous = sample["sample_id"]
+        previous_attempt_index = attempt_index
     attested = [_attestation(row, index, campaign, samples[index])
                 for index, row in enumerate(attestation_rows)]
     if sum(fee for _received, fee in attested) > campaign.max_lamports:
