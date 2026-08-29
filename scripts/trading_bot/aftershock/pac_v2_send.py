@@ -147,20 +147,37 @@ class BudgetGuard:
 
 
 # ----------------------------- RPC (broadcast path only) -----------------------------
+_RETRY_DELAYS = (0.5, 1.0, 2.0, 4.0, 8.0, 12.0)
+_TRANSIENT_HTTP = (429, 500, 502, 503, 504)
+
+
 def _rpc(url: str, request_json: dict, *, opener=None) -> dict:
+    """One submit-RPC call, resilient to transient 429/5xx/network failures. getLatestBlockhash and
+    getTransaction are reads; sendTransaction is idempotent by signature (a retried identical wire
+    dedupes to the same on-chain transaction), so retrying is safe and cannot double-spend fees."""
     data = calibration._canonical(request_json)
     request = urllib.request.Request(
         url, data=data, headers={"Content-Type": "application/json"}, method="POST")
-    try:
-        response = (opener or urllib.request.urlopen)(request, timeout=TIMEOUT_SECONDS)
-        with response:
-            payload = response.read()
-        result = json.loads(payload)
-    except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
-        raise SendRefused(f"PAC V2 submit RPC failed: {type(exc).__name__}") from exc
-    if not isinstance(result, dict):
-        raise SendRefused("PAC V2 submit RPC returned a non-object")
-    return result
+    for attempt in range(len(_RETRY_DELAYS) + 1):
+        try:
+            response = (opener or urllib.request.urlopen)(request, timeout=TIMEOUT_SECONDS)
+            with response:
+                payload = response.read()
+            result = json.loads(payload)
+        except urllib.error.HTTPError as exc:
+            if exc.code in _TRANSIENT_HTTP and attempt < len(_RETRY_DELAYS):
+                time.sleep(_RETRY_DELAYS[attempt]); continue
+            raise SendRefused("PAC V2 submit RPC failed: HTTPError") from exc
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            if attempt < len(_RETRY_DELAYS):
+                time.sleep(_RETRY_DELAYS[attempt]); continue
+            raise SendRefused(f"PAC V2 submit RPC failed: {type(exc).__name__}") from exc
+        except json.JSONDecodeError as exc:
+            raise SendRefused("PAC V2 submit RPC returned invalid JSON") from exc
+        if not isinstance(result, dict):
+            raise SendRefused("PAC V2 submit RPC returned a non-object")
+        return result
+    raise SendRefused("PAC V2 submit RPC exhausted retries")
 
 
 def _clock_pair(names: tuple[str, ...], wall: list[int], mono: list[int]) -> tuple[dict, dict]:

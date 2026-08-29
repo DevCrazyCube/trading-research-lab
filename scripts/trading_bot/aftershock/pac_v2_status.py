@@ -52,7 +52,10 @@ def status() -> dict:
     runtime = None
     runtime_refusal = None
     try:
-        runtime = manifest.load_runtime_proof()
+        # Display path: validate the fully anchored, git-committed, offline-checked activation WITHOUT the
+        # ~100 live getTransaction round-trips (that heavy on-chain re-verification is the runner's gate,
+        # not a per-refresh dashboard cost). The activation was live-verified + committed at write time.
+        runtime = manifest.load_runtime_proof(verify_live=False)
     except RefusedExecution as exc:
         runtime_refusal = str(exc)[:240]
     state_status = "ABSENT"

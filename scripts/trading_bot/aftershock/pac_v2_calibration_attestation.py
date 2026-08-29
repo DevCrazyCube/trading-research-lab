@@ -73,26 +73,43 @@ def _atomic_write(path: pathlib.Path, rows: list[dict]) -> None:
             os.unlink(temporary)
 
 
+_RETRY_DELAYS = (0.5, 1.0, 2.0, 4.0, 8.0, 12.0)
+_TRANSIENT_HTTP = (429, 500, 502, 503, 504)
+
+
 def _rpc(url: str, request_json: dict, *, opener=None) -> tuple[int, int, dict]:
-    started = time.time_ns()
+    """One finalized-RPC call, resilient to TRANSIENT failures (public RPCs rate-limit under bursts of
+    getTransaction). Retries 429/5xx and network/timeout errors with backoff; a malformed body or a
+    genuine non-transient error still fails closed. Read-only getTransaction is safe to retry."""
     request = urllib.request.Request(
         url, data=calibration._canonical(request_json),
         headers={"Content-Type": "application/json"}, method="POST")
-    try:
-        if opener is None:
-            response = urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS)
-        else:
-            response = opener(request, timeout=TIMEOUT_SECONDS)
-        with response:
-            status = getattr(response, "status", None)
-            payload = response.read()
-        result = json.loads(payload)
-    except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
-        raise RefusedExecution(f"PAC V2 independent RPC attestation failed: {type(exc).__name__}") from exc
-    received = time.time_ns()
-    if status != 200 or not isinstance(result, dict):
-        raise RefusedExecution("PAC V2 independent RPC attestation returned a non-200/non-object")
-    return started, received, result
+    for attempt in range(len(_RETRY_DELAYS) + 1):
+        started = time.time_ns()
+        try:
+            response = (opener or urllib.request.urlopen)(request, timeout=TIMEOUT_SECONDS)
+            with response:
+                status = getattr(response, "status", None)
+                payload = response.read()
+            result = json.loads(payload)
+        except urllib.error.HTTPError as exc:
+            if exc.code in _TRANSIENT_HTTP and attempt < len(_RETRY_DELAYS):
+                time.sleep(_RETRY_DELAYS[attempt]); continue
+            raise RefusedExecution("PAC V2 independent RPC attestation failed: HTTPError") from exc
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            if attempt < len(_RETRY_DELAYS):
+                time.sleep(_RETRY_DELAYS[attempt]); continue
+            raise RefusedExecution(
+                f"PAC V2 independent RPC attestation failed: {type(exc).__name__}") from exc
+        except json.JSONDecodeError as exc:
+            raise RefusedExecution("PAC V2 independent RPC attestation returned invalid JSON") from exc
+        received = time.time_ns()
+        if status != 200 or not isinstance(result, dict):
+            if attempt < len(_RETRY_DELAYS):
+                time.sleep(_RETRY_DELAYS[attempt]); continue
+            raise RefusedExecution("PAC V2 independent RPC attestation returned a non-200/non-object")
+        return started, received, result
+    raise RefusedExecution("PAC V2 independent RPC attestation exhausted retries")
 
 
 def attest(*, campaign_path: pathlib.Path, campaign_sha256: str,

@@ -184,7 +184,10 @@ class FeedWriter:
         }
         event_id = _canonical_sha(body)
         _append(self.events_path, {**body, "event_id": event_id})
-        materialized = time.time_ns()
+        # materialized must never precede the source receive clock, or consume() rightly refuses the event
+        # (source_received <= materialized <= runner_seen). A provider clock slightly ahead of local wall
+        # time would otherwise fail the invariant; clamp exactly like the continuity-seed path.
+        materialized = max(time.time_ns(), source_received_unix_nanos)
         receipt_body = {"schema": SCHEMA, "event_id": event_id,
                         "materialized_unix_nanos": materialized,
                         "recovered_after_crash": False}

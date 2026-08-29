@@ -614,7 +614,11 @@ def _run_once_at(proof: RuntimeProof, provider: SnapshotProvider, *, now: int,
                  receipts_path: pathlib.Path = feed.RECEIPTS,
                  initialize_at_eof: bool = True) -> dict:
     """Deterministic test seam. Production callers use run_once, whose clock is internal."""
-    if not isinstance(proof, RuntimeProof) or not hasattr(provider, "capture"):
+    # Duck-typed on purpose: when the runner is launched via `python -m …pac_v2_runner` it executes as
+    # __main__, so its RuntimeProof class object differs from the manifest-imported package class, and a
+    # strict isinstance would reject a genuine, manifest-built proof. Verify the required attributes instead.
+    if (not all(hasattr(proof, attr) for attr in ("activation_unix_nanos", "calibration", "seal_sha256"))
+            or not hasattr(provider, "capture")):
         raise RefusedExecution("PAC V2 run requires runtime proof and snapshot provider")
     if type(now) is not int or now <= proof.activation_unix_nanos:
         raise RefusedExecution("PAC V2 runner clock is not post-activation")
