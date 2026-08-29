@@ -31,13 +31,16 @@ module_running() {
 
 launch_supervisor() {
   tmux kill-session -t pac-v2 2>/dev/null || true
-  tmux new-session -d -s pac-v2 "$0 --supervise"
+  # Never leak the watchdog's singleton-lock descriptor into the tmux server. If the watchdog is
+  # interrupted (for example by a laptop/session crash), an inherited fd 9 would otherwise keep the
+  # lock alive forever and prevent the watchdog itself from restarting.
+  tmux new-session -d -s pac-v2 "$0 --supervise" 9>&-
   printf '%s supervisor launch requested\n' "$(date -u +%FT%TZ)" >> "$WATCHDOG_LOG"
 }
 
 launch_dashboard() {
   tmux kill-session -t pac-dash 2>/dev/null || true
-  tmux new-session -d -s pac-dash "$0 --dashboard"
+  tmux new-session -d -s pac-dash "$0 --dashboard" 9>&-
   printf '%s dashboard launch requested\n' "$(date -u +%FT%TZ)" >> "$WATCHDOG_LOG"
 }
 
@@ -99,5 +102,6 @@ while true; do
   if ! module_running "$DASHBOARD_MODULE"; then
     launch_dashboard
   fi
-  sleep 5
+  # The child timer is not the lock owner and must not transiently inherit fd 9 either.
+  sleep 5 9>&-
 done

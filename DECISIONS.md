@@ -3448,3 +3448,14 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
   candidates, not a runtime seal. A crash-safe all-attempt journal/sender, independent attester, V2.1
   runner, closed dependency manifest, and tests for those paths do not yet exist. No campaign, spend,
   calibration, activation, paper fill, performance claim, or live order is authorized by this decision.
+
+## 2026-08-30 — PAC V2 watchdog lock ownership survives host/process crashes
+
+- **Verified fact:** After the laptop crash, PAC V2's supervisor, feed, and runner were absent while the
+  watchdog could not restart: file descriptor 9, which owned the singleton `flock`, had been inherited by
+  the tmux server. Killing only the watchdog therefore did not release the lock. The scenario state had
+  no open position or pending order and was preserved; once relaunched, the authenticated supervisor
+  again spawned both feed and runner and reported its original 100-sample calibration.
+- **Decision:** Every process launched from the watchdog, including the tmux sessions and loop timer,
+  explicitly closes fd 9. Only the watchdog bash may own the singleton lock. This is operational process
+  recovery only: no PAC V2 seal, activation, strategy threshold, state, ledger, or evidence row changes.
