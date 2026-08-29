@@ -243,6 +243,8 @@ table.grid.evogrid tbody tr.killed td{text-decoration:line-through;text-decorati
 .pac-gate .dot{width:6px;height:6px}.pac-gate .dot.ok{background:var(--mint);box-shadow:0 0 4px var(--mint)}
 .pac-gate .dot.bad{background:var(--red)}.pac-open-gate{padding:5px 0 0;color:var(--amber);font:9px var(--mono)}
 .pac-table{max-height:300px}
+.pac-candidate-table{max-height:340px}
+.pac-gate-detail{display:block;margin-top:3px;color:var(--text3);font:9px/1.25 var(--mono)}
 .pac-pending-row{background:linear-gradient(90deg,rgba(232,177,83,.075),transparent 62%)}
 .pac-pending-row td{border-bottom-color:rgba(232,177,83,.18)}
 @media(max-width:950px){.pac-layout{grid-template-columns:1fr}.pac-chart-card{border-right:0;border-bottom:1px solid var(--line)}.pac-chart{height:245px}}

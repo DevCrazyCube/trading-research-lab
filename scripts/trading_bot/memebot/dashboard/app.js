@@ -968,11 +968,14 @@ function pacEquityChart(raw, evidenceStatus, pendingCount=0){
     data.map((v,i)=>`${x(i)},${y(v)}`).join(" ");
   const baseY=y(100), last=data[data.length-1], cls=last>=100?"up":"down";
   const area=`${l},${baseY} ${pts} ${w-r},${baseY}`;
+  const activeScanning=String(evidenceStatus||"").startsWith("ACTIVE_CALIBRATED_");
   const waitingLabel=pendingCount>0
     ? `${pendingCount} ENTRY SIGNAL${pendingCount===1?"":"S"} · WAITING FOR CAUSAL FILL`
+    : (activeScanning
+      ? "SCANNING LIVE CANDIDATES · NO QUALIFIED ENTRY YET"
     : (evidenceStatus==="NO_FORWARD_EVIDENCE"
       ? "WAITING FOR ANCHORED FORWARD TRADES"
-      : "PERFORMANCE REFUSED BY EVIDENCE GATE");
+      : "PERFORMANCE REFUSED BY EVIDENCE GATE"));
   const waiting=data.length===1?`<text x="${l+innerW/2}" y="${t+innerH/2}" text-anchor="middle" class="pac-wait">${esc(waitingLabel)}</text>`:"";
   return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="PAC normalized performance index">
     ${grid}<line x1="${l}" y1="${baseY}" x2="${w-r}" y2="${baseY}" class="pac-baseline"/>
@@ -995,6 +998,8 @@ function renderPAC(){
         <section class="pac-panel"><div class="pac-panel-title">Measurement gates</div><div id="pacGates" class="pac-gates"></div></section>
       </aside>
     </div>
+    <div class="pagehd"><h3 style="margin:0">Live candidate funnel</h3><span class="pill" id="pacCandidateCount">0 mint buffers</span></div>
+    <div class="tablewrap pac-candidate-table"><table class="grid"><thead><tr><th class="l">Mint</th><th>Events</th><th class="l">Deepest frozen gate</th><th>Dwell / p90</th><th>Buyers</th><th>Reserve / required</th><th>Last seen</th></tr></thead><tbody id="pacCandidateBody"></tbody></table></div>
     <div class="pagehd"><h3 style="margin:0">Scenario activity</h3><span class="pill" id="pacTradeCount">0 resolved</span></div>
     <div class="tablewrap pac-table"><table class="grid"><thead><tr><th class="l">Mint</th><th>State</th><th>All-cost R</th><th>Entry cost</th><th>Net exit</th><th class="l">Reason</th></tr></thead><tbody id="pacBody"></tbody></table></div>`;
   renderPACView();
@@ -1004,10 +1009,12 @@ function renderPACView(){
   const perf=d.performance||{}, op=d.operational||{}, errors=d.integrity_errors||[];
   const pendings=d.pending_orders||[], opens=d.open_positions||[];
   const validScenario=String(d.evidence_status||"").startsWith("VALID_");
+  const activeScanning=String(d.evidence_status||"").startsWith("ACTIVE_CALIBRATED_");
+  const healthyScenario=validScenario||activeScanning;
   const validPromotion=d.evidence_status==="VALID_PAPER_SCENARIO";
   const noData=d.evidence_status==="NO_FORWARD_EVIDENCE";
   const statusBadge=document.getElementById("pacStatusBadge");
-  if(statusBadge){ statusBadge.className=`killtag ${validScenario?'alive':'halt'}`; statusBadge.textContent=esc(d.evidence_status||"REFUSED"); }
+  if(statusBadge){ statusBadge.className=`killtag ${healthyScenario?'alive':'halt'}`; statusBadge.textContent=esc(d.evidence_status||"REFUSED"); }
   const boundary=document.getElementById("pacBoundary");
   if(boundary) boundary.innerHTML=`<strong>${esc(d.boundary||"")}</strong><span>${esc(errors[0]||(!noData
     ? "Only fully-costed anchored rows can move this chart."
@@ -1043,21 +1050,37 @@ function renderPACView(){
   const formulaNote=document.getElementById("pacFormulaNote"); if(formulaNote) formulaNote.textContent=d.formula_note||"";
   const gates=document.getElementById("pacGates"); if(gates){
     const feed=(op.solusd||{}).status==="FRESH";
+    const bufferCount=Number(op.active_mint_buffers||0);
+    const stateValid=op.state==="VALID" && cp.supervisor && cp.feed && cp.runner;
+    const calibrated=op.latency_calibration==="CALIBRATED_FINALIZED_RPC" || op.latency_calibration==="CALIBRATED_FORWARD_CLOCKS";
     const rows=[
       [op.seal==="ANCHORED","seal",op.seal||"unknown"],
       [op.activation==="ANCHORED","activation",op.activation||"unknown"],
       [feed,"SOL/USD",feed?`fresh · $${op.solusd.price}`:(op.solusd||{}).reason||"refused"],
-      [(op.tape_files_with_current_causal_schema||0)>0,"causal tape",`${op.tape_files_with_current_causal_schema||0} mint files`],
-      [op.runner_audit==="PASS"||String(op.runner_audit||"").startsWith("GO_"),
+      [stateValid,"live causal buffers",`${bufferCount} mints · ${op.eligible_feed_events||0} eligible events`],
+      [stateValid && (String(op.runner_audit||"").startsWith("PASS_") || String(op.runner_audit||"").startsWith("GO_")),
         "runner audit",op.runner_audit||"not recorded"],
-      [Number(op.scan_interval_millis)===250,"scan cadence",
-        `${op.scan_interval_millis||"?"}ms fixed deadline · 5s seal reverify`],
-      [op.latency_calibration==="CALIBRATED_FORWARD_CLOCKS","latency",op.latency_calibration||"unknown"],
+      [Number(op.scan_interval_millis)===100,"scan cadence",
+        `${op.scan_interval_millis||"?"}ms causal runner loop`],
+      [calibrated,"latency",calibrated?`${p90s} p90 · ${op.latency_calibration}`:(op.latency_calibration||"unknown")],
       [validPromotion,"promotion evidence",d.evidence_status||"unknown"],
     ];
     gates.innerHTML=rows.map(r=>`<div class="pac-gate"><span class="dot ${r[0]?'ok':'bad'}"></span><span>${esc(r[1])}</span><strong>${esc(r[2])}</strong></div>`).join("")+
       (op.open_gates||[]).map(g=>`<div class="pac-open-gate">OPEN · ${esc(g)}</div>`).join("");
   }
+  const funnel=d.candidate_funnel||{}, funnelSummary=funnel.summary||{}, candidates=funnel.candidates||[];
+  const candidateBody=document.getElementById("pacCandidateBody");
+  const gateBadge=gate=>gate==="QUALIFIED"?"b-open":(gate==="NO_PAC_CORE"?"b-null":"b-pending");
+  const candidateRows=candidates.map(c=>{
+    const dwell=c.dwell_nanos==null?"—":`${(Number(c.dwell_nanos)/1e9).toFixed(2)}s / ${(Number(c.reaction_p90_nanos)/1e9).toFixed(2)}s`;
+    const cover=c.reserve_cover_milli==null?"—":`${(Number(c.current_reserve_lamports)/1e9).toFixed(3)} / ${(Number(c.reserve_cover_lamports)/1e9).toFixed(3)} SOL`;
+    const ageSeconds=Number(c.age_millis)/1000;
+    const age=Number.isFinite(ageSeconds)?`${ageSeconds<1?"<1":ageSeconds.toFixed(1)}s ago`:"—";
+    return `<tr><td class="l mono">${esc(c.mint)}</td><td>${esc(c.event_count)}</td><td class="l"><span class="badge ${gateBadge(c.gate)}">${esc(c.gate)}</span><span class="pac-gate-detail">${esc(c.gate_detail||c.gate_label||"")}</span></td><td>${esc(dwell)}</td><td>${esc(c.buyer_breadth||0)} / 3</td><td>${esc(cover)}</td><td>${esc(age)}</td></tr>`;
+  });
+  if(candidateBody) candidateBody.innerHTML=candidateRows.join("")||`<tr><td class="empty l" colspan="7">No active mint buffer in the current 180-second causal window. The feed can still be healthy between Pump trades.</td></tr>`;
+  const candidateCount=document.getElementById("pacCandidateCount");
+  if(candidateCount) candidateCount.textContent=`${funnelSummary.buffered_mints||0} mints · ${funnelSummary.eligible_events||0} events · ${funnelSummary.pac_core_mints||0} PAC core · ${funnelSummary.p90_dwell_mints||0} dwell pass · ${funnelSummary.qualified_mints||0} qualified`;
   const body=document.getElementById("pacBody"), activity=d.activity||[];
   const refusal=d.last_measurement_refusal;
   const pendingRows=pendings.map(p=>{

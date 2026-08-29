@@ -3412,3 +3412,18 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
 - **Boundary:** This is sealed runtime behavior. The existing activation cannot authorize the repaired
   code; a fresh seal, campaign-bound calibration, independent finalized attestations, and activation are
   required before restarting PAC V2. No calibration sample is reused across that seal change.
+
+## 2026-08-29 — PAC V2 live candidate diagnostics are not ledger evidence
+
+- **Verified fact:** The PAC page previously rendered only pending, open, and resolved scenario-ledger
+  rows. A healthy runner could therefore hold dozens of causal mint buffers and consume feed data while
+  the activity table incorrectly appeared completely empty. The page also evaluated V2 with retired V1
+  status fields and marked authenticated scanning and its finalized-RPC latency calibration red.
+- **Decision:** The read-only dashboard may expose each current V2 runner buffer with its event count and
+  the deepest frozen entry gate reached. The trace calls the sealed detector primitives, cross-checks a
+  `QUALIFIED` trace against `pac_v2_detector.qualify()`, refuses malformed, discontinuous, or future
+  evidence, and never writes runner state or creates a decision. Current buffers are diagnostics only:
+  they are neither orders nor performance rows and expire with the runner's causal 180-second window.
+- **Boundary:** This display adapter is outside the PAC V2 dependency closure and changes no strategy,
+  sizing, entry, exit, calibration, activation, state, or ledger behavior. Only fully costed scenario
+  resolutions may move the performance chart or discovery count.

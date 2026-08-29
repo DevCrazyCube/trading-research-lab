@@ -9,6 +9,8 @@ import tempfile
 import time
 
 from . import pac_dashboard as dash
+from .execution import ReserveState
+from .pac_v2_feed import ClockedEvent
 
 
 def _write(path: pathlib.Path, obj) -> None:
@@ -89,6 +91,23 @@ def _unavailable_exit_pair(i=3):
                       if key not in {"schema_version", "instrument_id", "seal_sha256",
                                      "session_event_sha256", "activation_root_sha256", "event_id"}})
     return attempt, resolved
+
+
+def _candidate_event(index: int, *, mint: str, base: int,
+                     pre_quote: int = 1_000_000_000,
+                     post_quote: int = 1_010_000_000,
+                     trader: str | None = None, side: str = "buy") -> ClockedEvent:
+    source = base + index * 1_000_000_000
+    pre = ReserveState(30_000_000_000 + pre_quote, 1_000_000_000_000_000,
+                       pre_quote, 720_100_000_000_000, False)
+    post = ReserveState(30_000_000_000 + post_quote, 1_000_000_000_000_000,
+                        post_quote, 720_100_000_000_000, False)
+    return ClockedEvent(
+        event_id=hashlib.sha256(f"candidate-{mint}-{index}".encode()).hexdigest(),
+        collector_epoch="epoch", mint=mint, trader=trader or f"buyer-{index}",
+        signature=f"signature-{index}", slot=index + 1, side=side,
+        source_received_unix_nanos=source, materialized_unix_nanos=source + 1,
+        runner_seen_unix_nanos=source + 2, pre_state=pre, post_state=post)
 
 
 def main() -> int:
@@ -195,6 +214,60 @@ def main() -> int:
             dash.solusd_recorder.OUTPUT = original_output
         ok &= _check("fresh reconciled SOL/USD is displayed instead of hidden as unavailable",
                      displayed["status"] == "FRESH" and displayed["price"] == "123.45")
+
+        base = time.time_ns() - 2_000_000_000
+        candidate = _candidate_event(0, mint="VISIBLE-MINT", base=base)
+        funnel = dash._v2_candidate_funnel(
+            {candidate.mint: [dash.pac_v2_runner._event_dict(candidate)]},
+            reaction_p90_nanos=12_000_000_000, quote_input_lamports=100_000_000,
+            now=base + 1_000_000_000)
+        ok &= _check("live V2 mint buffers remain visible before any entry decision",
+                     funnel["summary"]["buffered_mints"] == 1
+                     and funnel["summary"]["eligible_events"] == 1
+                     and funnel["candidates"][0]["mint"] == "VISIBLE-MINT"
+                     and funnel["candidates"][0]["gate"] == "NO_PAC_CORE")
+
+        qualifying = (
+            _candidate_event(0, mint="QUALIFIED-MINT", base=base,
+                             pre_quote=1_000_000_000, post_quote=900_000_000,
+                             trader="seller-1", side="sell"),
+            _candidate_event(2, mint="QUALIFIED-MINT", base=base,
+                             pre_quote=900_000_000, post_quote=1_000_000_000,
+                             trader="buyer-0"),
+            _candidate_event(3, mint="QUALIFIED-MINT", base=base,
+                             pre_quote=1_000_000_000, post_quote=900_000_000,
+                             trader="seller-2", side="sell"),
+            _candidate_event(4, mint="QUALIFIED-MINT", base=base,
+                             pre_quote=900_000_000, post_quote=1_000_000_000,
+                             trader="buyer-1"),
+            _candidate_event(5, mint="QUALIFIED-MINT", base=base,
+                             pre_quote=1_000_000_000, post_quote=1_010_000_000,
+                             trader="buyer-2"),
+            _candidate_event(6, mint="QUALIFIED-MINT", base=base,
+                             pre_quote=1_010_000_000, post_quote=1_020_000_000,
+                             trader="buyer-3"),
+        )
+        qualified_funnel = dash._v2_candidate_funnel(
+            {"QUALIFIED-MINT": [dash.pac_v2_runner._event_dict(item)
+                                for item in qualifying]},
+            reaction_p90_nanos=1_000_000_000, quote_input_lamports=50_000_000,
+            now=base + 7_000_000_000)
+        ok &= _check("dashboard gate trace reaches QUALIFIED iff frozen detector does",
+                     qualified_funnel["summary"]["qualified_mints"] == 1
+                     and qualified_funnel["candidates"][0]["gate"] == "QUALIFIED"
+                     and qualified_funnel["candidates"][0]["buyer_breadth"] == 3)
+
+        future = _candidate_event(2, mint="FUTURE-MINT", base=base)
+        try:
+            dash._v2_candidate_funnel(
+                {future.mint: [dash.pac_v2_runner._event_dict(future)]},
+                reaction_p90_nanos=12_000_000_000, quote_input_lamports=100_000_000,
+                now=base + 1_000_000_000)
+        except dash.RefusedExecution:
+            refused_future = True
+        else:
+            refused_future = False
+        ok &= _check("candidate diagnostics refuse future evidence", refused_future)
 
     print("PAC DASHBOARD SELFTEST:", "PASS" if ok else "FAIL")
     return 0 if ok else 1

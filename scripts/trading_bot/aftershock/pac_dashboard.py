@@ -15,7 +15,15 @@ import pathlib
 import threading
 import time
 
-from . import pac_policy, pac_runner, pac_status, pac_v2_status, solusd_recorder
+from . import (
+    pac_policy,
+    pac_runner,
+    pac_status,
+    pac_v2_detector,
+    pac_v2_runner,
+    pac_v2_status,
+    solusd_recorder,
+)
 from .execution import RefusedExecution
 
 
@@ -119,6 +127,158 @@ def _latest_solusd_status() -> dict:
                 "source": solusd_recorder.SOURCE}
     except (OSError, json.JSONDecodeError, UnicodeDecodeError, RefusedExecution) as exc:
         return {"status": "REFUSED", "reason": str(exc)[:180]}
+
+
+_V2_GATE_LABELS = {
+    "NO_PAC_CORE": "waiting for 2 sell/recovery cycles",
+    "P90_DWELL": "PAC core · waiting for p90 dwell",
+    "PROBE_COVER": "dwell passed · $10 probe too large",
+    "RECOVERY_SURVIVAL": "probe covered · recovery eroded",
+    "BUYER_BREADTH": "recovery held · waiting for 3 buyers",
+    "RESERVE_COVER": "buyers passed · waiting for 6× cover",
+    "QUALIFIED": "all frozen entry gates passed",
+}
+
+
+def _v2_candidate_row(mint: str, raw_events: list[dict], *, reaction_p90_nanos: int,
+                      quote_input_lamports: int, now: int) -> dict:
+    """Explain the deepest frozen V2 entry gate reached by one causal in-memory mint buffer.
+
+    This is display-only diagnostics over evidence already admitted by the sealed runner. It neither
+    mutates the runner nor creates a decision, and calls the frozen detector primitives instead of
+    inventing looser UI thresholds.
+    """
+    if (not isinstance(mint, str) or not mint or not isinstance(raw_events, list)
+            or type(reaction_p90_nanos) is not int or reaction_p90_nanos <= 0
+            or type(quote_input_lamports) is not int or quote_input_lamports <= 0
+            or type(now) is not int or now < 0):
+        raise RefusedExecution("PAC V2 candidate diagnostic input is invalid")
+    events = tuple(pac_v2_runner._event(item) for item in raw_events)
+    if not events or any(event.mint != mint for event in events):
+        raise RefusedExecution("PAC V2 candidate diagnostic mint/buffer mismatch")
+    if not pac_v2_detector._valid_stream(events):
+        raise RefusedExecution("PAC V2 candidate diagnostic stream is not causal and contiguous")
+    latest = events[-1]
+    if latest.source_received_unix_nanos > now:
+        raise RefusedExecution("PAC V2 candidate diagnostic contains future evidence")
+
+    best = {
+        "depth": 0,
+        "gate": "NO_PAC_CORE",
+        "gate_detail": _V2_GATE_LABELS["NO_PAC_CORE"],
+        "dwell_nanos": None,
+        "buyer_breadth": 0,
+        "largest_observed_sell_lamports": None,
+        "reserve_cover_lamports": None,
+    }
+
+    def reached(depth: int, gate: str, detail: str, **metrics) -> bool:
+        # recovery2 is scanned newest-first, so equal-depth ties retain the newest causal setup.
+        if depth <= best["depth"]:
+            return False
+        best.update({"depth": depth, "gate": gate, "gate_detail": detail, **metrics})
+        return True
+
+    for recovery2 in range(len(events) - 1, 2, -1):
+        prefix = events[:recovery2 + 1]
+        pac_indices = pac_v2_detector.pac_detector.detector(prefix, 0)
+        if not pac_indices or pac_indices[-1] != recovery2:
+            continue
+        w1, _r1, _w2, r2 = pac_indices
+        dwell = latest.source_received_unix_nanos - events[r2].source_received_unix_nanos
+        total_span = latest.source_received_unix_nanos - events[w1].source_received_unix_nanos
+        newest_at_depth = reached(
+            1, "P90_DWELL", _V2_GATE_LABELS["P90_DWELL"], dwell_nanos=dwell)
+        if dwell < reaction_p90_nanos:
+            if newest_at_depth:
+                best["gate_detail"] = (
+                    f"dwell {dwell / 1_000_000_000:.3f}s < p90 "
+                    f"{reaction_p90_nanos / 1_000_000_000:.3f}s")
+            continue
+        if total_span > pac_v2_detector.pac_detector.MAX_PATTERN_SPAN_NANOS:
+            if newest_at_depth:
+                best["gate_detail"] = (
+                    f"total span {total_span / 1_000_000_000:.3f}s exceeds 180s")
+            continue
+        reached(2, "PROBE_COVER", _V2_GATE_LABELS["PROBE_COVER"], dwell_nanos=dwell)
+        if not pac_v2_detector.pac_detector.position_size_is_covered(
+                prefix, pac_indices, quote_input_lamports):
+            continue
+        recovered = events[r2].post_state.real_quote
+        dwell_events = events[r2:]
+        reached(3, "RECOVERY_SURVIVAL", _V2_GATE_LABELS["RECOVERY_SURVIVAL"],
+                dwell_nanos=dwell)
+        if any(event.post_state.real_quote < recovered for event in dwell_events):
+            continue
+        buyers = {event.trader for event in dwell_events if event.side == "buy"}
+        reached(4, "BUYER_BREADTH", _V2_GATE_LABELS["BUYER_BREADTH"],
+                dwell_nanos=dwell, buyer_breadth=len(buyers))
+        if len(buyers) < pac_v2_detector.BUYER_BREADTH_MIN:
+            continue
+        setup = events[w1:]
+        largest = max((max(0, event.pre_state.real_quote - event.post_state.real_quote)
+                       for event in setup), default=0)
+        cover = pac_v2_detector.RESERVE_SHOCK_COVER_MULTIPLE * max(
+            quote_input_lamports, largest)
+        reached(5, "RESERVE_COVER", _V2_GATE_LABELS["RESERVE_COVER"],
+                dwell_nanos=dwell, buyer_breadth=len(buyers),
+                largest_observed_sell_lamports=largest, reserve_cover_lamports=cover)
+        if latest.post_state.real_quote < cover:
+            continue
+        reached(6, "QUALIFIED", _V2_GATE_LABELS["QUALIFIED"], dwell_nanos=dwell,
+                buyer_breadth=len(buyers), largest_observed_sell_lamports=largest,
+                reserve_cover_lamports=cover)
+
+    qualification = pac_v2_detector.qualify(
+        events, reaction_p90_nanos=reaction_p90_nanos,
+        quote_input_lamports=quote_input_lamports)
+    if (qualification is None) != (best["depth"] < 6):
+        raise RefusedExecution("PAC V2 dashboard gate trace diverged from frozen qualification")
+    current_reserve = latest.post_state.real_quote
+    required_cover = best["reserve_cover_lamports"]
+    return {
+        "mint": mint,
+        "event_count": len(events),
+        "latest_source_received_unix_nanos": latest.source_received_unix_nanos,
+        "age_millis": (now - latest.source_received_unix_nanos) // 1_000_000,
+        "current_reserve_lamports": current_reserve,
+        "gate_depth": best.pop("depth"),
+        "gate_label": _V2_GATE_LABELS[best["gate"]],
+        "reaction_p90_nanos": reaction_p90_nanos,
+        "reserve_cover_milli": (current_reserve * 1_000 // required_cover
+                                 if isinstance(required_cover, int) and required_cover > 0 else None),
+        **best,
+    }
+
+
+def _v2_candidate_funnel(buffers: dict, *, reaction_p90_nanos: int,
+                         quote_input_lamports: int, now: int) -> dict:
+    """Build a bounded, causal, read-only funnel for the PAC dashboard."""
+    if not isinstance(buffers, dict):
+        raise RefusedExecution("PAC V2 candidate buffers are invalid")
+    candidates = [
+        _v2_candidate_row(mint, raw_events, reaction_p90_nanos=reaction_p90_nanos,
+                          quote_input_lamports=quote_input_lamports, now=now)
+        for mint, raw_events in buffers.items()
+    ]
+    candidates.sort(key=lambda row: (
+        -row["gate_depth"], -row["latest_source_received_unix_nanos"], row["mint"]))
+    summary = {
+        "buffered_mints": len(candidates),
+        "eligible_events": sum(row["event_count"] for row in candidates),
+        "pac_core_mints": sum(row["gate_depth"] >= 1 for row in candidates),
+        "p90_dwell_mints": sum(row["gate_depth"] >= 2 for row in candidates),
+        "probe_cover_mints": sum(row["gate_depth"] >= 3 for row in candidates),
+        "recovery_survival_mints": sum(row["gate_depth"] >= 4 for row in candidates),
+        "buyer_breadth_mints": sum(row["gate_depth"] >= 5 for row in candidates),
+        "qualified_mints": sum(row["gate_depth"] >= 6 for row in candidates),
+    }
+    return {
+        "boundary": "READ_ONLY_CAUSAL_BUFFER_DIAGNOSTIC_NOT_A_TRADE_OR_PERFORMANCE_ROW",
+        "quote_input_lamports": quote_input_lamports,
+        "summary": summary,
+        "candidates": candidates[:100],
+    }
 
 
 def _validate_open(raw: dict) -> dict:
@@ -475,10 +635,12 @@ def v2_snapshot() -> dict:
     performance["promotion_discovery_resolved"] = performance["resolved"]
     performance["discovery_progress"] = _decimal(Fraction(min(performance["resolved"], 100), 100), 4)
 
+    state_error = None
     try:
         state = json.loads((RESEARCH / "AFTERSHOCK_PAC_V2_RUNNER_STATE.json").read_text())
-    except (OSError, ValueError):
+    except (OSError, ValueError) as exc:
         state = {}
+        state_error = f"PAC V2 dashboard state unreadable: {type(exc).__name__}"
     op, pend = state.get("open_position"), state.get("pending_order")
     open_positions = ([{"mint": op.get("mint", "—"),
                         "entry_all_in_lamports": int(op.get("entry_all_in_lamports") or 0)}]
@@ -491,12 +653,37 @@ def v2_snapshot() -> dict:
     # value_str (not price_usd); the old duplicate adapter referenced the latter and hid every fresh
     # observation behind a blanket "unavailable" label.
     solusd = _latest_solusd_status()
+    candidate_funnel = {
+        "boundary": "READ_ONLY_CAUSAL_BUFFER_DIAGNOSTIC_NOT_A_TRADE_OR_PERFORMANCE_ROW",
+        "quote_input_lamports": None,
+        "summary": {"buffered_mints": 0, "eligible_events": 0, "pac_core_mints": 0,
+                    "p90_dwell_mints": 0, "probe_cover_mints": 0,
+                    "recovery_survival_mints": 0, "buyer_breadth_mints": 0,
+                    "qualified_mints": 0},
+        "candidates": [],
+    }
+    if state_error is None and state:
+        try:
+            now = time.time_ns()
+            candidate_funnel = _v2_candidate_funnel(
+                state.get("buffers"),
+                reaction_p90_nanos=_exact_int(
+                    "PAC V2 reaction_p90_nanos", state.get("reaction_p90_nanos"), minimum=1),
+                quote_input_lamports=pac_v2_runner._quote_input(now), now=now)
+        except (OSError, ValueError, RefusedExecution) as exc:
+            state_error = f"PAC V2 candidate funnel refused: {str(exc)[:180]}"
+    funnel_summary = candidate_funnel["summary"]
     operational = {
         **status,
         "solusd": solusd,
         "latency_calibration": "CALIBRATED_FINALIZED_RPC" if status.get("activation") == "ANCHORED" else None,
         "last_status": state.get("last_status"),
         "events_consumed_bytes": (state.get("cursor") or {}).get("event_offset") or 0,
+        "active_mint_buffers": funnel_summary["buffered_mints"],
+        "eligible_feed_events": funnel_summary["eligible_events"],
+        "scan_interval_millis": int(pac_v2_runner.SCAN_INTERVAL_SECONDS * 1_000),
+        "runner_audit": ("PASS_CAUSAL_STATE_VALID"
+                         if status.get("state") == "VALID" else status.get("state")),
     }
     evidence = ("VALID_CALIBRATED_PAPER_SCENARIO" if resolved_rows
                 else "ACTIVE_CALIBRATED_SCANNING_NO_FILLS_YET")
@@ -505,7 +692,7 @@ def v2_snapshot() -> dict:
         "title": "Payable Absorption Compression · V2 (mainnet-calibrated)",
         "boundary": "PAPER SCENARIO ONLY · NO WALLET · NO ORDERS · NOT A PROFIT CLAIM",
         "evidence_status": evidence,
-        "integrity_errors": [],
+        "integrity_errors": [state_error] if state_error else [],
         "operational": operational,
         "formula": "W2≥W1 · D2≤D1 · B2≥B1 · E2≥E1  +  p90 dwell · ≥3 buyers · 6× cover",
         "formula_note": "PAC pattern plus measured-p90 dwell, ≥3 observed buyers, and 6× largest-shock cover",
@@ -516,6 +703,7 @@ def v2_snapshot() -> dict:
         "open_positions": open_positions,
         "pending_orders": pending_orders,
         "last_measurement_refusal": None,
+        "candidate_funnel": candidate_funnel,
         "activity": list(reversed(activity[-100:])),
         "ledger_rows": len(rows),
         "challenger": {"instrument_id": "AFTERSHOCK_PAC_V1", "status": "BURNED_BASELINE",
