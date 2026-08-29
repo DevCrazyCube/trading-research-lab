@@ -3427,3 +3427,24 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
 - **Boundary:** This display adapter is outside the PAC V2 dependency closure and changes no strategy,
   sizing, entry, exit, calibration, activation, state, or ledger behavior. Only fully costed scenario
   resolutions may move the performance chart or discovery count.
+
+## 2026-08-29 — PAC V2.1 single-shock candidate and processed-clock boundary
+
+- **Verified fact:** The preregistration-time V2 census contained 819 usable post-activation events over
+  169 mints. Twenty-two mints completed at least one withdrawal/recovery cycle, one reached the complete
+  two-cycle PAC core, and none survived V2's 12.164662268-second decision-to-finalized-observation dwell.
+  V2 therefore supplied no forward performance evidence and its inspected interval is burned for V2.1.
+- **Decision:** V2 remains an untouched frozen control. V2.1 tests one preregistered simplification: one
+  observed reserve withdrawal at least as large as the exact fresh USD 10 probe, full recovery, no later
+  erosion below the pre-shock reserve, at least three observed buyer addresses excluding the seller,
+  processed-p90 dwell, and current reserve at least six times the larger of probe and shock. Exit behavior
+  remains the V2 12-minute/capacity/12%-trail policy. Address breadth is not owner independence.
+- **Decision:** V2's finalized-observation p90 cannot be relabelled as processed inclusion. V2.1 requires
+  a new precommitted memo-only campaign that records every 100ms status poll and monotonic decision-to-
+  first-successful-status time, followed by independent finalized attestation of identical wire bytes.
+  The validator enforces strict JSON-RPC identities, exact signed memo challenges, unique signatures,
+  finalized slot/wire/payer identity, exact on-chain fees against the campaign cap, and 100+ successes.
+- **Open gate:** The pure detector, read-only processed observer, and bundle validator are implementation
+  candidates, not a runtime seal. A crash-safe all-attempt journal/sender, independent attester, V2.1
+  runner, closed dependency manifest, and tests for those paths do not yet exist. No campaign, spend,
+  calibration, activation, paper fill, performance claim, or live order is authorized by this decision.
