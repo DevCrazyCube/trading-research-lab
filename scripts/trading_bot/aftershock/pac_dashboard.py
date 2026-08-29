@@ -487,11 +487,10 @@ def v2_snapshot() -> dict:
                         "amount": int(pend.get("amount") or 0),
                         "return_denominator_lamports": int(pend.get("amount") or 0)}]
                       if isinstance(pend, dict) else [])
-    try:
-        sol = solusd_recorder.latest_observation(decision_unix_nanos=int(time.time() * 1e9))
-        solusd = {"price": str(sol.price_usd)} if sol else {"reason": "unavailable"}
-    except Exception:  # noqa: BLE001
-        solusd = {"reason": "unavailable"}
+    # Reuse the dashboard's reconciled raw-record view. SolUsdObservation intentionally exposes
+    # value_str (not price_usd); the old duplicate adapter referenced the latter and hid every fresh
+    # observation behind a blanket "unavailable" label.
+    solusd = _latest_solusd_status()
     operational = {
         **status,
         "solusd": solusd,

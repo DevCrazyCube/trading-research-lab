@@ -19,7 +19,7 @@ module_running() {
   local -a argv=()
   for cmdline in /proc/[0-9]*/cmdline; do
     argv=()
-    mapfile -d '' -t argv < "$cmdline" 2>/dev/null || continue
+    mapfile -d '' -t argv 2>/dev/null < "$cmdline" || continue
     for ((index = 0; index + 1 < ${#argv[@]}; index++)); do
       if [[ "${argv[$index]}" == "-m" && "${argv[$((index + 1))]}" == "$target" ]]; then
         return 0

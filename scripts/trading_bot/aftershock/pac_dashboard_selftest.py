@@ -6,6 +6,7 @@ import json
 import hashlib
 import pathlib
 import tempfile
+import time
 
 from . import pac_dashboard as dash
 
@@ -175,6 +176,25 @@ def main() -> int:
         ok &= _check("unanchored rows never become evidence",
                      unanchored["evidence_status"] == "REFUSED_UNANCHORED_EVIDENCE"
                      and unanchored["performance"]["resolved"] == 0)
+
+        solusd_path = root / "solusd.jsonl"
+        received = time.time_ns()
+        raw = json.dumps({"price": "123.45", "time": "2026-08-29T00:00:00Z"},
+                         separators=(",", ":"))
+        _write(solusd_path, {
+            "source": dash.solusd_recorder.SOURCE, "quote_currency": "USD",
+            "price": "123.45", "provider_trade_time": "2026-08-29T00:00:00Z",
+            "received_unix_nanos": received, "raw_response_utf8": raw,
+            "raw_response_sha256": hashlib.sha256(raw.encode()).hexdigest(),
+        })
+        original_output = dash.solusd_recorder.OUTPUT
+        try:
+            dash.solusd_recorder.OUTPUT = solusd_path
+            displayed = dash._latest_solusd_status()
+        finally:
+            dash.solusd_recorder.OUTPUT = original_output
+        ok &= _check("fresh reconciled SOL/USD is displayed instead of hidden as unavailable",
+                     displayed["status"] == "FRESH" and displayed["price"] == "123.45")
 
     print("PAC DASHBOARD SELFTEST:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
