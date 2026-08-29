@@ -588,7 +588,14 @@ def _update_buffers(state: dict, events: list[feed.ClockedEvent], *, now: int) -
     for event in events:
         if event.source_received_unix_nanos <= state["activation_unix_nanos"]:
             continue
-        state["buffers"].setdefault(event.mint, []).append(_event_dict(event))
+        buffer = state["buffers"].setdefault(event.mint, [])
+        # A collector reconnect starts a new continuity epoch.  Its first event is a seed and is
+        # intentionally omitted by feed.consume(); the first usable event therefore cannot be
+        # reconciled to the previous epoch's last reserve.  Retaining both epochs would make every
+        # subsequent state validation fail closed on a legitimate reconnect.
+        if buffer and buffer[-1].get("collector_epoch") != event.collector_epoch:
+            buffer.clear()
+        buffer.append(_event_dict(event))
         if state["open_position"] is not None and event.mint == state["open_position"]["mint"]:
             state["open_position"]["last_state"] = asdict(event.post_state)
             state["open_position"]["last_context_slot"] = max(

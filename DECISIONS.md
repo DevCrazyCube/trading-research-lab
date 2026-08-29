@@ -2886,3 +2886,516 @@ The two do not imply each other. A user-ratified decision can remain provisional
   equity restoration. `memecoin_trade_audit.py` hash-pins the exact byte snapshots it reads and reports
   legacy, V2/V3, all frozen MEMEBOT instruments and every genome ledger without summing parallel arms into
   a fictitious portfolio.
+
+## 2026-08-27 — Failed memecoin gates now stop entries; archived EVO remains inside the all-trade census
+
+- **Status:** decision, implemented and independently re-verified; **PAPER ONLY**. No wallet, signer,
+  order, transfer or on-chain write was added or enabled. Historical/frozen rows were not rewritten.
+
+- **Verified fact — Claude's honest-measurement continuation is present and passes locally.** Sniper
+  entry/mark/resolution events now reopen reconstructable positions across a true process restart and
+  invalidate only malformed/unreconstructable entries; the restart selftest passes and the controlled
+  runtime restart reported zero invalidations. MEMEBOT scoring makes full-loss stress the displayed
+  decider, its seen-pool cache evicts by recency, and EVO V2 refuses preregistration/hash or engine-
+  constant drift. EVO V1 was moved intact to `memebot_evo/v1_archive` and V2 began at generation zero.
+
+- **Decision — a HALTED decider is an entry gate, not dashboard decoration.** MEMEBOT previously showed
+  `honest-kill HALTED` while `scan_once` continued opening PASS and control rows. The scanner now records
+  the newly-seen universe and continues resolving existing positions, but opens nothing new for an
+  instrument whose full-loss-stress kill is HALTED. Sniper V3 similarly kept accumulating hundreds of
+  entries after its frozen N=100 review gate had failed. Its entry path now permanently closes at/after
+  N=100 unless stress mean R > 0, stress equity exceeds the $1,000 initial equity, and accounting is
+  clean. All three V3 arms failed, so V3 is retired from new entries; one last-open position was left to
+  drain normally. The point-in-time basis is pinned in `SNIPER_V3_RETIREMENT_2026-08-27.json`.
+
+- **Verified fact — the loss mechanism is broad, not one tunable threshold.** In the clean V3 cohort,
+  every fixed surge, buy-fraction, liquidity and notional slice with at least 20 terminal observations
+  remained negative. `exit:maxhold_timeout` supplied roughly 34–48% of negative R and trail exits roughly
+  32–42%. The CONFIRM state machine was not a strict BALANCED subset: after waiting it rechecked only buy
+  fraction, so some entries fired below the base surge/liquidity thresholds and it accumulated more
+  entries than BALANCED. This is recorded as a mechanism defect for any future design; the frozen V3
+  detector is not silently edited.
+
+- **Verified fact and working-hypothesis boundary — EXIT_V2 is still killed by the unavailable tail.**
+  At 16 terminal PASS rows, six targets contributed +11.28R, four stop gaps −7.33R and four unavailable
+  exits −16.48R. The unavailable rows supplied 68.8% of all negative R. Conditional on the observed
+  non-unavailable payoff, break-even would require an unavailable rate below about 8.18%, versus 25%
+  observed. That 8.18% is explicitly post-hoc and is not a new screen rule. EXIT_V2 remains unchanged
+  until its frozen N=30 minimum; no V3/V4 threshold is selected from these rows.
+
+- **Decision — experiment namespace is part of genome identity.** The all-trade audit now scans both
+  current `ledgers/` and `v1_archive/ledgers/`, with separate population/state/K bars. Two deterministic
+  seed ids recur in both experiments, so bare genome id cannot key a combined census. At the snapshot,
+  V1 contained 94 ledger arms, 2,354 terminal PASS arm-observations and a 64.4% unpriced rate; its priced
+  mean was +0.585R but full-loss stress was −4.732R, with no K-corrected clearer. Current V2 remains
+  immature and unchanged.
+
+- **Verification and artifacts.** `memecoin_audit_selftest` pins archive inclusion, duplicate ids across
+  experiments, loss attribution and the exitability mixture equation. Sniper restart/strategy/execution/
+  signal, MEMEBOT and EVO selftests pass. `MEMECOIN_TRADE_AUDIT.{json,md}` is the complete hash-pinned
+  census; `MEMECOIN_LOSS_DIAGNOSTICS.{json,md}` is explicitly post-hoc causal attribution, not a result
+  or a license to optimize on the same observations.
+
+## 2026-08-27 — AFTERSHOCK execution-realism engine (handoff 422 durable choices)
+
+Building the measurement-chain repair BEFORE any secondary-sell test. Pure, paper-only, no network/wallet/signing. Not integrated into V1–V5; current V1–V5 post-reset books are BURNED / plumbing-only, never evidence.
+
+- **Latency is a REQUIRED caller-supplied parameter, no default.** The 2-slot/4-slot values from the first design are WITHDRAWN — landing/latency/slippage/failure distributions are UNMEASURED (B17B records clocks, no calibrated distribution). Missing latency ⇒ refuse. Any sensitivity ladder is `CALIBRATION_UNCALIBRATED` robustness plumbing — not strategy arms, not executable evidence, cannot promote real money.
+- **Observation ≠ canonical identity.** Input carries `observation_unix_nanos` (local receive) separate from a canonical coordinate `(slot, transaction_index, outer_index, inner_index)` + integer pre/post reserves + source/evidence hashes. Decisions use only locally-observed events; later reconciliation may canonicalize but never rewrites a decision. Late/out-of-order/conflicting ⇒ no-trade/invalid, never retrospective reorder. PumpPortal-only tape has no canonical order ⇒ every result labeled `PUMPPORTAL_RECEIVE_TIME_SCENARIO` + uncalibrated, never "canonical" or "executable".
+- **Fill semantics.** Order sent ⇒ lands against the reserve state *immediately before* its landing coordinate, subject to a frozen max-in/min-out/slippage bound; bound violated ⇒ `failed_on_chain/dropped/expired`, attempt cost charged, each retry a distinct attempt. Fill coordinate STRICTLY AFTER all signal evidence; never the trigger state. Cannot bracket the landing state ⇒ refuse (or bounded worst-case), never a stale state. Clock invariant: observation ≤ decision ≤ build ≤ send < land.
+- **Own impact = b10a integer kernel only (immediate).** We do NOT persist our reserve delta into later observed states nor replay external orders against shifted reserves (repo proves no Pump instruction variant makes that exact). Every path keeps the b10b `SIMULATED_OBSERVED_PATH` limitation. Returns are an observed-state SCENARIO until a separately-authorized Phase-2 forward-fill calibration; not "executable".
+- **Restart is event-sourced.** Append-only session record + last-observed canonical coordinate persisted (fsync) before processing; on restart resume state-sourced; gap/state-loss ⇒ no entries until a full post-restart warm-up window; pre-activation state is a point snapshot only, may not seed wallet/flow/shock windows. Activation event fsynced before subscribe/scan, referencing already-sealed hashes; never mutate a manifest to insert activation after evidence.
+- **Fail-CLOSED freeze.** `freeze_epoch` refuses missing/malformed/naive/non-UTC timestamps (no `return 0.0`); parse explicit-offset UTC only.
+- **Manifest seal (no self-referential cycle).** Seal prereg-md + canonical-JSON + engine/constants hashes FIRST; then append a separately-hashed activation event that REFERENCES that seal.
+- **Numeraire/rent.** SOL_USD is per-entry point-in-time evidence (source+timestamp+value), not one frozen constant; `q_sol = target_usd / observed_SOLUSD`. Remove the impossible simultaneous `bankroll_usd=100` & `bankroll_sol=5`. Report return in SOL AND USD-equity separately (SOL beta ≠ memecoin edge). ATA rent is LOCKED capital with an explicit lifecycle: `NOT_CREATED/PREEXISTING | LOCKED | RECLAIMED_FULL_SELL_CLOSE | CLOSE_FAILED | STRANDED_AT_HORIZON`; reclaim only on proven zero balance + successful close; a partial exit never reclaims. Pin the caller-stated rent + actual close-tx cost.
+
+## 2026-08-28 — AFTERSHOCK handoff 424 closes caller-verification, activation-root, detector-evidence, and clock seams
+
+- **Status:** decision, implemented and locally verified; **PAPER-ONLY MEASUREMENT PLUMBING**. No strategy
+  thresholds, outcome books, wallet, signing, submission, devnet, or live-trading path changed. V1–V5
+  remain burned/plumbing evidence and are not integrated with this chain.
+
+- **Verified fact — caller attestation was removed.** `ExecutionContext` now contains only a
+  manifest-derived `SessionProof`; the former caller-set `verified` and `warmup_complete` booleans no
+  longer exist. The public decision and attempt paths reload the latest seal/session proof every time.
+  A seal must be tracked and clean against `HEAD` before activation, and every completed first/restart
+  session needs a separately tracked, clean activation-root file. Rehashing the complete activation chain
+  after backdating fails against those committed roots. Deleting or dirtying any known historical root
+  also refuses.
+
+- **Decision — restart state is a new authorization epoch.** Every activation uses an internal clock.
+  The frozen JSON states a minimum post-activation event count and receive-time span; the warm-up record
+  stores and reconciles both endpoints and every event commitment. A restart requires a monotonic
+  persisted canonical coordinate, invalidates the old proof immediately, and admits no decision until
+  all warm-up coordinates are strictly post-resume and the new root is externally anchored.
+
+- **Decision — the engine, not the caller, runs the sealed detector.** A `DecisionRecord` names the
+  detector's repository-relative module path, callable, and sealed hash. The engine derives the complete
+  receive-time prefix available at its internally recorded decision clock, loads the exact sealed module,
+  and records the full prefix root plus every detector evidence commitment; `signal_index` is their
+  maximum. Every attempt reruns that detector against the same prefix. A publicly rehashed record that
+  omits a detector evidence item refuses rather than trusting a caller's evidence list.
+
+- **Decision — unmeasured execution clocks stay null.** The latency input remains required and
+  `CALIBRATION_UNCALIBRATED`, but it creates a `modeled_land_target`, not a claimed send/land time. The
+  first later observation is named `scenario_boundary_observation`; build/send/land remain null. No
+  future boundary yields `RIGHT_CENSORED_NO_BOUNDARY` with unknown cost, not “never sent.” Positive quote
+  results are explicitly `SCENARIO_*`, always `SIMULATED_OBSERVED_PATH`, and PumpPortal additionally
+  `PUMPPORTAL_RECEIVE_TIME_SCENARIO`.
+
+- **Verified fact — cost, unit, state, sizing, and rent seams are fail-closed.** B10a is invoked with
+  `failed_attempts=0`, so retries cannot hide inside another record's 210k cost; each retry has a distinct
+  content id and immediate predecessor. Only B10a's named `SimulationRefused` maps to quote unavailability;
+  unknown exceptions propagate. Intent/output units, reserve signs, exact integers, costs, slippage bounds,
+  point-in-time SOL/USD evidence, sub-lamport sizing, and the full ATA lifecycle are validated.
+
+- **Dependency and verification boundary.** The seal uses the real `b10b_position_path.py` and pins the
+  B10a/B9i/B9d chain, RPC identity module, official pinned IDLs, generic execution modules, and an exact
+  non-empty future-experiment module list declared in canonical frozen JSON. The 56-check adversarial
+  execution selftest and the full AFTERSHOCK bundle pass. Positive unit fixtures emulate git anchoring;
+  no real experiment seal/activation root was created or committed. Secondary-sell preregistration remains
+  **NO-GO** until a separate frozen experiment and its owner-gated anchors exist; forward clock calibration
+  and every promotion gate remain open.
+
+## 2026-08-28 — Latest memecoin audit retires non-causal loops and fails closed on dead tick data
+
+- **Status:** decision, implemented and locally verified; **PAPER ONLY**. No wallet, signer, order,
+  transfer, or on-chain write was added or enabled. Existing ledgers were preserved byte-for-byte.
+
+- **Verified fact — operations were productive, returns were not yet profitable.** The point-in-time
+  all-trade census at `2026-08-27T23:48:03Z` contains 16,458 legacy sniper resolutions, 1,640 terminal
+  clean V3 sniper rows, 141 frozen MEMEBOT PASS rows, and 4,566 current EVO V2 resolutions. Every
+  investable frozen arm remains negative after honest costs/stress. `MEMEBOT_EXIT_V2` reduced the
+  unavailable-exit rate to 15.62% versus 40--58% in older fast/exit variants and outperformed its control,
+  but still lost `-0.7770R` per PASS trade and its frozen honest-kill gate is closed. Increasing size would
+  multiply a measured negative expectancy; it is not a fee fix.
+
+- **Verified fact — the current evolutionary sub-minute search measured a dead oracle.** Its Bitquery
+  mint-keyed candle cache stopped advancing on 2026-08-25. The server reports `usage quota reached`, while
+  the ingester's server-error branch performed a clean `break`, reset backoff on the preceding ACK, and
+  reconnected hundreds of times per minute. The sub-minute census was 1,851/1,851 terminal outcomes
+  without a priced tick path (PASS and controls combined). `status` also crashed when a stress-mature
+  genome had no priced t-statistic.
+
+- **Decision — unavailable entry data refuses before an entry exists.** Every sub-minute PASS and control
+  candidate now requires a causal local tick at or before the common scan decision time and no more than
+  ten seconds old. Missing, future-only, malformed, or stale data refuses. Ten seconds is a data-validity
+  ceiling tied to the existing 4--8 second writer flush cadence, not a fitted return threshold. The
+  Bitquery ingester now treats server errors as typed failures, resets health only after actual data, and
+  applies a 300-second quota/traffic circuit-breaker. The running read-only ingester was restarted and the
+  observed quota path now logs one `reconnect in 300s`, not a busy loop.
+
+- **Decision — EVO V2 and legacy AFTERSHOCK V1--V3 are retired, not silently amended.** EVO V2 results
+  existed before the entry-data repair, so continuing under the same freeze would mix measurement regimes.
+  `EVO_V2_RETIREMENT.json` closes track/scan/selection while preserving all files; a future search requires
+  a separately frozen V3. AFTERSHOCK V1--V3 still used the burned historical entry/exit resolver even after
+  the causal engine was built. Their watchdogs now terminate exact legacy loop command lines and never
+  restart them. V4/V5 remain retired. No old AFTERSHOCK book is evidence.
+
+- **Decision — secondary-sell claims match observable data.** `AFTERSHOCK_SS` now detects two sequential
+  0.05-SOL reserve-withdrawal/recovery cycles; it does not claim independent sellers or fresh independent
+  capital because actor/cluster completeness is absent. Recovery 2 must be the newest observed event, so
+  an old pattern cannot fire later. Its evidence is exactly four coordinates. Exact point-in-time $10
+  sizing must be no larger than the fixed 0.05-SOL evidence floor (thus refuses below SOL/USD $200), and
+  selftests write only in a temporary evidence directory. SS remains scenario-only and NO-GO: add/exit,
+  calibrated latency, capacity/cluster gates, and an anchored forward runner are still incomplete.
+
+- **Verification.** MEMEBOT_EVO selftest passes including missing/stale/future-only tick refusal; the
+  read-only `status` path now reports the zero-priced case without crashing. Bitquery circuit-breaker
+  selftest passes. AFTERSHOCK_SS detector + public decision/attempt path passes, including stale-pattern
+  refusal, sizing coverage, and temp-only manifest artifacts. The full AFTERSHOCK execution bundle remains
+  required before any future freeze. These tests verify machinery, not edge.
+
+## 2026-08-28 — Consolidate memecoin research into one PAC successor; retire all strategy loops
+
+- **Status:** decision, implemented and locally verified; **PAPER/SCENARIO ONLY**. No wallet, signer,
+  transaction construction, submission, funding, or live execution was added. No legacy ledger was
+  deleted or rewritten.
+
+- **Verified fact — there is no currently proven profitable bot to select.** Every investable frozen
+  sniper/MEMEBOT/EVO arm failed honest costs or had no priced path. The least-bad legacy AFTERSHOCK
+  headline was V2 arm C at roughly +2.3% pot growth, but both entry and exit selected historical boundary
+  states unavailable at the bot's action time. `AFTERSHOCK_V2_RETIREMENT.json` therefore records it as
+  burned non-causal evidence; a reset may not inherit its P&L, positions, or thresholds.
+
+- **Decision — operational consolidation.** The MEMEBOT and sniper watchdogs now terminate only their
+  exact strategy command lines and never restart them, matching the already retired EVO V2 and AFTERSHOCK
+  V1--V5 watchdogs. Host-process verification found none of those strategy loops alive. The read-only
+  RPC tape ingester, quota-backed Bitquery collector, MEMEBOT listener, and dashboard remain because they
+  collect/display evidence and cannot place orders. `aftershock.frozen.ACTIVE_INSTRUMENTS` is empty.
+
+- **Working hypothesis — Payable Absorption Compression (PAC).** A fresh instrument,
+  `AFTERSHOCK_PAC_V1`, observes two sequential full reserve-recovery cycles and admits only when the second
+  withdrawal is at least as large, its recovery is no slower, and both the pre-withdrawal and recovered
+  external-SOL baselines do not decline. Equivalently, with withdrawals `W`, durations `D`, pre-reserves
+  `B`, and recovered reserves `E`, `min(W2/W1, D1/D2, B2/B1, E2/E1) >= 1`, evaluated component-wise using
+  exact integers. This is a causal mechanism hypothesis, not a fitted or verified edge; no independent-
+  wallet/fresh-capital claim is made.
+
+- **Decision — meaningful but non-compounding discovery size.** The frozen paper probe is exactly $10
+  from a $100 bankroll, at most one position, no add and no $2 dust. Point-in-time Decimal SOL/USD sizing
+  must fit inside both demonstrated withdrawals. Scaling/compounding requires a new frozen policy after
+  positive discovery and untouched confirmation; it cannot be inferred from the invalid V2 headline.
+
+- **Decision — uncapped causal exit hypothesis.** PAC has no take-profit or partial exit. It tracks the
+  curve-exact quote for selling the whole position, requests one causal exit after a 12% give-back,
+  coverage below 6x, or 12 minutes, and records an unavailable quote as unexitable full loss rather than a
+  fictitious exit/mark. Every actual scenario sell still requires a later boundary through the execution
+  engine; the pure policy is not a fill.
+
+- **Burned feasibility only.** After freezing the formula, a read-only terminal-prefix census found 12
+  PAC signals among 1,979 valid cached prefixes (0.61%) versus 47 for the weaker secondary-sell rule.
+  Median pattern span was 23.20 seconds and median smaller withdrawal 0.157 SOL. Duplicate provider-second
+  timestamps required a deterministic +1ns diagnostic tie-break. These numbers prove only that the rule
+  is non-empty; they contain no returns and cannot select or tune a threshold.
+
+- **Decision — causal feed provenance is part of the instrument.** Live tape rows now retain an exact
+  local `received_unix_nanos`, explicit observation source, mint, reconciled reserves, and transaction
+  signature. Legacy float/provider-time rows may seed the preceding reserve state but may never become
+  PAC evidence. Public-RPC observations are labelled `PUBLIC_RPC_PROCESSED`, not PumpPortal. The global
+  warm-up proof is receive-ordered across mints; a per-mint decision stream must begin strictly after that
+  global boundary. This repairs the earlier one-mint activation assumption without inventing cross-mint
+  state continuity.
+
+- **Decision — point-in-time USD sizing uses retained primary evidence.** The read-only recorder stores
+  Coinbase Exchange `SOL-USD` last-trade raw JSON, its SHA-256, provider trade time, request-start clock,
+  local receipt clock, and the exact Decimal price. It refuses stale, future, malformed, tampered, or
+  wrong-numeraire observations. Primary documentation accessed 2026-08-28:
+  `https://docs.cdp.coinbase.com/api-reference/exchange-api/rest-api/products/get-product-ticker` and
+  `https://docs.cdp.coinbase.com/api-reference/exchange-api/rest-api/products/get-single-product`.
+
+- **Verification and open gates.** PAC detector/policy tests pass 17 controls, the tape adapter passes 7,
+  and the SOL/USD recorder passes 4. They cover stale/weaker/slower/eroded/forged evidence, unavailable
+  quotes, exact-$10 sizing, cross-mint global warm-up, source/signature enforcement, raw-price
+  reconciliation, and a later-boundary real-kernel entry. The execution engine's 56-control regression
+  also passes. `AFTERSHOCK_PAC_V1_SEAL.json` now verifies 25 declared dependencies, including the proposed
+  runner, but is **UNANCHORED**. It is not committed and no activation chain/root exists. The runner core
+  is built but failed the subsequent accounting/causality re-audit described below; latency and
+  submission-failure scenarios remain uncalibrated. Therefore no PAC trade, return, promotion, or
+  real-money claim exists.
+
+## 2026-08-28 — PAC dashboard is fail-closed; proposed runner remains NO-GO after re-audit
+
+- **Verified fact — the proposed exit loop decides after simulating the sell.** `pac_runner.poll_exit`
+  first creates an `EXACT_TOKEN_SELL` AttemptRecord and only then gives that attempt's output to
+  `pac_policy.decide_exit`. When the policy returns `HOLD`, a `SCENARIO_FILLED` sell attempt is discarded
+  as if it were merely a quote. A causal implementation must observe a non-mutating quote at decision
+  time, decide whether to request an exit, and only then create an order attempt that can land at a later
+  boundary. The existing nine positive runner tests do not exercise this ordering defect.
+
+- **Verified fact — the proposed resolved return is gross/incomplete.** Its ledger calculates
+  `sell_quote - quote_input`; it does not subtract entry/exit curve fees, entry and exit attempt costs, or
+  measured ATA rent. The execution adapter exposes attempt gas separately and the B10a kernel exposes the
+  exact curve fees and wallet deltas, but the runner does not persist/reconcile them. That output cannot
+  satisfy the frozen `positive_after_all_costs` gate.
+
+- **Verified fact — state and ledger are not crash-atomic.** Resolution is appended before the updated
+  open book is saved, while opening is appended before the newly open book is saved. A crash between
+  those files can double-resolve/reopen or leave an orphan event; there is no event id/idempotent replay or
+  pending transaction journal. No PAC production state/ledger exists yet, so this finding burns no data.
+
+- **Decision — performance display refuses incomplete evidence.** The new read-only `#/pac` dashboard
+  polls its small state/ledger every two seconds and displays formula, operational gates, feed freshness, discovery progress,
+  open book, exact all-cost R, win/full-loss rates, drawdown, activity, and a visible 100-index curve. Its
+  adapter publishes performance only for anchored schema-2 rows where each resolution references one
+  earlier entry and exactly reconciles all-in entry cost to net exit proceeds. Gross/legacy rows,
+  duplicate event ids, state/ledger mismatch, an unfinished crash transaction, malformed rows, or
+  unanchored evidence all fail closed and leave the chart at an explicitly labelled baseline. The index
+  is `100 + 10 × all-cost return` per fixed discovery probe; it is labelled normalized and is not USD P&L.
+  The slow seal/tape inventory is cached for 60 seconds, while SOL/USD freshness is independently checked
+  from the latest raw-hash-reconciled recorder row, so fast chart refresh does not compete with ingestion.
+
+- **Verification.** PAC dashboard negative controls pass 7/7. Python compilation and JavaScript syntax
+  checks pass. The live local API reports `NO_FORWARD_EVIDENCE`, `NOT_ACTIVE`, `UNANCHORED`, zero resolved,
+  and no open position; a headless browser render confirms the chart, gates, table, and two-second live
+  indicator are visible. The read-only dashboard process was restarted; no strategy process was enabled.
+
+## 2026-08-28 — PAC runner mechanics promoted from NO-GO to paper-scenario GO
+
+- **Verified fact — no PAC outcome existed before repair.** The production PAC state and scenario ledger
+  were absent, the seal was uncommitted, and no activation chain existed. The runner defects could
+  therefore be corrected and preregistered before observing a strategy outcome; no result was discarded,
+  migrated, or used to choose the repair parameters.
+
+- **Decision — quote, decision, and order are separate causal states.** The exit policy now consumes a
+  non-mutating, curve-exact net full-position quote at the newest decision-state reserve. `HOLD` persists
+  only its peak and creates no attempt. Trail, capacity, or horizon persists a complete sealed
+  DecisionRecord and a 1,000-bps decision-quote guard before a sell can be attempted; the attempt can fill
+  only at the first observed boundary after decision time plus explicit positive latency. Entry uses the
+  same durable decision-before-attempt chain. Production code no longer accepts a caller-injected clock.
+
+- **Decision — every wallet component is retained.** Entry all-in cost is quote input plus curve fee,
+  recorded attempt cost, and ATA rent. Exit net proceeds are gross curve quote minus curve fee and
+  recorded attempt cost. No separately evidenced ATA-close attempt exists, so discovery conservatively
+  charges rent and invents no refund. Slippage failures are separate portfolio-cost events. Unavailable
+  exit evidence remains an exact full loss and never becomes a mark or fictitious fill.
+
+- **Decision — state/ledger is restart-exact.** Schema-2 state holds at most one open position and one
+  pending order, binds to one activation session, and journals self-hashed schema-2 ledger rows before
+  append. Append is idempotent by authenticated event id; restart replays an interrupted journal exactly
+  once. A continuous paper command now holds a single-process lock and writes the next scan watermark
+  before discovery. First start skips backlog; crashes may omit a window but cannot admit it later.
+  Reaction latency is mandatory on the command line and deliberately has no default.
+
+- **Decision — scope of GO.** `runner_audit=GO_CAUSAL_ALL_COST_CRASH_ATOMIC` means the paper-scenario
+  plumbing cleared these four defects. It is not evidence of edge, executable calibration, activation,
+  wallet readiness, or profit. The regenerated 25-dependency seal
+  `e9fb7a9ba6bb64063a9fd0ba4147d28fb8fc20e5be89373fa12c0a003cebbe82` verifies locally but remains
+  UNANCHORED; owner-gated commit, activation/warm-up anchor, measured latency/failure calibration, 100
+  resolved discovery positions, and untouched confirmation remain open.
+
+- **Verification.** Execution engine 56/56; runner 18/18 including HOLD-without-attempt, later-boundary
+  entry/exit, exact all-cost reconciliation, unavailable full loss, two injected crash boundaries,
+  tamper refusal, explicit latency, no-backfill watermark, and exclusive lock; dashboard 7/7 including
+  failed-attempt cost in the portfolio curve. The dashboard runner gate recognizes the scoped `GO_`
+  status and failed attempts appear as activity. Its watchdog now matches exact argv fields instead of a
+  loose process-name substring that could mistake an inspector command for the server. The read-only
+  server was restarted and its local API reports the new runner GO. These tests validate mechanics, not
+  strategy performance.
+
+## 2026-08-28 — PAC seal anchored and first paper-scenario session activated
+
+- **Decision — owner gate opened explicitly.** The user explicitly authorized committing and activating
+  PAC. Commit `e202719` contains the complete dirty portion of the 25-dependency seal closure plus the
+  preregistration, frozen JSON, and seal; it does not sweep unrelated worktree changes. Seal
+  `e9fb7a9ba6bb64063a9fd0ba4147d28fb8fc20e5be89373fa12c0a003cebbe82` now reports `ANCHORED`.
+
+- **Verified fact — the activation evidence is strictly post-commit and post-activation.** The set-once
+  first activation is `335d3c874e00c3cfcefba19d21a4558d1b7e01ea4074f94e68328c8d61af07b5`.
+  Feed-global warm-up selected 30 valid `public_rpc_processed` observations spanning 700,619,697 ns; the
+  root is `f7327fb45bcc2d3fed3965d3731ceabafff813e43f30952629180f975208416b` and its anchor is
+  `e1a569422f8c42e363bfc06b42e3f3f7f03966396dcb8d5d06f51fb821d262c9`. One mint file failed closed on
+  impossible negative reserves and was neither repaired nor admitted. Commit `244b523` anchors both the
+  activation hash-chain and root; manifest-derived SessionProof re-verifies them from disk.
+
+- **Decision — start one uncalibrated paper scenario, not a performance claim.** The first foreground
+  cycle returned exactly `WATERMARK_INITIALIZED_NO_BACKFILL`. The persistent sealed runner then started
+  with explicit `reaction_nanos=800000000`, the original two-slot scenario proposal; this remains
+  `CALIBRATION_UNCALIBRATED` and cannot be relabelled executable. The read-only dashboard reports
+  `ACTIVE_PAPER_SCENARIO`, live process/watermark, both anchors, and the remaining calibration/discovery/
+  confirmation gates. A first $10-sized entry decision is pending a strictly later observed boundary;
+  there are still zero fills, ledger rows, or performance observations, so `NO_FORWARD_EVIDENCE` is the
+  only valid performance status.
+
+- **Boundary.** No wallet, key, signer, transaction construction, transaction submission, real SOL, live
+  order, compounding, or promotion was added. Activation licenses only the anchored uncalibrated paper
+  collection already preregistered.
+## 2026-08-28 — PAC incomplete-prefix and terminal-exit liveness repair
+
+- **Verified fact:** PAC session 1 created one entry DecisionRecord and no AttemptRecord, fill, open
+  position, ledger row, resolved outcome, or performance observation. The mint tape later contained 431
+  observations, but the runner refused every service cycle with `DecisionRecord omitted an observation
+  already available at decision time`. Candidate enumeration had captured an older cutoff than the
+  engine-owned decision clock, so the persisted prefix became incomplete before its first attempt.
+- **Decision:** Burn sessions 1 and 2 as measurement diagnostics. Never backfill either missed signal or
+  score a hypothetical buy/sell. Schema-3 binds each DecisionRecord to the exact processed-stream count
+  and hash available to the detector. Rows materialized later are excluded from that frozen detector
+  prefix even when their receive clock predates the decision, but remain in the full reserve path so the
+  eventual fill boundary inherits every intervening trade. Mutation or omission inside the committed
+  snapshot still refuses. Right-censored entries become no-trades and release their lock; a censored
+  non-horizon exit requires a fresh decision; a censored hard-horizon exit is an exact stressed full loss.
+  When gas makes triggered all-cost exit proceeds non-positive, settle an exact full loss without
+  inventing a sale or charging an unobserved attempt.
+- **Decision:** `800,000,000` ns remains `CALIBRATION_UNCALIBRATED`. Its resolved feasibility scenarios
+  may be charted with that label but contribute zero to the 100-position promotion discovery count.
+  Promotion counting requires separately frozen measured build/sign/send/land and failure clocks.
+- **Verified fact:** Under the third anchored session, a fresh signal passed the processed-snapshot path,
+  the first terminal entry chain released without wedging, a subsequent fresh decision filled strictly
+  later, and one schema-2 `opened` ledger row was reconciled to the schema-3 state. The runner continues
+  causal exit polling; this verifies liveness mechanics only, not profitability.
+- **Open question:** No measured sign/send/land path exists in this paper-only repository. Closing that
+  gate requires a separately authorized forward-clock stage; it cannot be inferred from public market
+  receive timestamps.
+
+## 2026-08-28 — PAC fixed-deadline pipeline optimization
+
+- **Verified fact:** The pre-optimization session completed two all-cost uncalibrated scenarios:
+  `+17437723/97080989 R` and `-19433241/97241491 R`. Their combined normalized 100-index is
+  `99.7977521167743469620453624452`. Both rows, state, activation chain, and seal are preserved in the
+  session-3 archive. They remain plumbing evidence and contribute zero to promotion discovery.
+- **Verified fact:** A production profile found 126 changed mint streams required 5.55 seconds per flat
+  pass; repeated complete-tape decode consumed 4.54 seconds, after which the old loop slept another two
+  seconds. On the same two-second inventory slice, bounded admission took 115.136 ms versus 721.701 ms
+  for full decode (`6.27x`) with the same signal set.
+- **Decision:** The optimized experiment starts a fresh denominator. Flat discovery runs the unchanged
+  PAC detector on an exact-reserve receive-time tail bounded by the already-frozen 180-second pattern
+  horizon. That result has admission authority only. A positive mint must still rebuild from the complete
+  tape and pass the sealed provenance, ordering, hash, detector, coverage, decision, and later-boundary
+  path. A per-mint decode refusal is surfaced and isolated; it can neither authorize entry nor halt other
+  mints. Active-position corruption remains fail-closed.
+- **Decision:** Scan starts use a fixed 250 ms deadline including compute time. Append-only SOL/USD sizing
+  reads backward to the latest record available at the decision clock and retains full raw-hash/derived
+  reconciliation. The SessionProof is cached for the flat hot path, reverified within five seconds, and
+  independently reverified by every decision/attempt. A sealed supervisor restarts an unexpectedly
+  exited runner after 250 ms and relies on the same state/session/journal validations after restart.
+- **Verified fact:** The first 250 ms diagnostic session persisted 15 decisions across 340 cycles but
+  produced zero attempts, fills, ledger rows, or outcomes: a poll before the modeled 800 ms landing was
+  being mistaken for terminal right-censoring. That empty session is burned. The replacement distinguishes
+  `WAITING_FOR_LANDING`; after landing it permits a fixed two-second observed-boundary wait before the
+  existing bounded censor rule applies. This restores liveness without admitting a pre-landing fill.
+- **Boundary:** The modeled landing delay remains `800,000,000` ns and
+  `CALIBRATION_UNCALIBRATED`. Formula, thresholds, `$10` size, costs, trail, horizon, and promotion gates
+  are unchanged. Faster local observation is not measured transaction execution and adds no wallet path.
+
+## 2026-08-28 — PAC V1 killed as a strategy; PAC V2 challenger fixes the measurement boundary
+
+- **Verified fact — V1 is decisively negative even before its full-loss tail.** The repaired dashboard
+  validator now admits the sealed producer's exact two-row unavailable-exit relation without admitting a
+  duplicate attempt. It validates 525 resolved all-cost scenarios: 113 wins, 412 losses, 28 full losses,
+  21.52% win rate, mean −0.1255R, median −0.1286R, and normalized index −559.0818. The underlying curve
+  move itself averages −8.21% (median −8.53%); entry friction averages 3.53% of quote and exit friction
+  1.25%. Removing all 28 full losses still leaves the remaining book negative. Capacity exits are 1/56
+  winners; the supposedly protective trail is 112/440 winners with mean −0.0691R. These are uncalibrated
+  paper scenarios, not executable PnL, but they refute V1 as the focused mechanism rather than justify
+  tuning it.
+
+- **Verified fact — V1's liveness boundary remains structurally wrong.** Its current open position has a
+  persisted trail-exit decision but waits for a later trade event; the mint can remain silent long after
+  the observable spike/dump. The scanner's 800ms value remains unmeasured, and decision, materialization,
+  and runner clocks cannot establish transaction landing. V1's sealed detector/policy/runner are therefore
+  left byte-identical as a burned baseline. Its ledger is preserved and may not seed V2 thresholds.
+
+- **Decision — PAC V2 is a separate frozen challenger, not a V1 retune.** It retains the two-cycle PAC
+  core and exact $10 probe, then requires the second recovery to survive an authentic measured-p90
+  execution dwell, at least three distinct observed buyer addresses, and real quote reserve at least 6×
+  the larger of planned size and largest observed setup withdrawal. Address breadth is explicitly not
+  ownership/funding independence. These gates were fixed from the causal failure analysis before V2 has
+  any forward outcome.
+
+- **Decision — account snapshots replace later-trade fills.** Entry and each requested full-position exit
+  persist decision + calibrated-p90 target, then price the first processed bonding-curve account snapshot
+  requested at/after that target through the existing exact-integer B10a kernel. No later trade is needed.
+  Source-received, event-materialized, and runner-seen clocks remain separate. The consumer is incremental
+  by durable byte offset and refuses truncation, orphan receipts, duplicate identities, backward clocks,
+  wrong-owner/closed accounts, pinned-IDL drift, and state/runtime binding drift.
+
+- **Decision — exit liveness is absolute and bounded.** Horizon is evaluated first at 12 minutes even
+  when no event arrives; capacity <6× and the 12% quote trail follow. Snapshot observation may retry for
+  30 seconds. At the horizon, unavailable/net-negative dust or observation timeout settles the conservative
+  full-loss bound and releases the one-position lock. A non-horizon timeout returns to HOLD/redecision.
+  Primary all-cost return continues charging ATA rent; no refund is claimed without a separately observed
+  close-account attempt and cost.
+
+- **Decision — authentic latency is a hard activation dependency.** There is no latency default and the
+  old 800ms scenario cannot migrate. Activation requires a whole-file-hash-pinned artifact with at least
+  100 unique authentic landed transactions and ordered decision/build/sign/send/ack/land clocks; exact
+  nearest-rank p90 is derived by the loader. The repository has no authorized signer/sender/landing recorder,
+  so V2 remains `CALIBRATION_REQUIRED_NOT_ACTIVE`. Synthetic selftest fixtures prove refusal/causality but
+  cannot activate or become performance evidence.
+
+- **Verification.** PAC V2 passes 23 controls including calibration count/tamper, dwell/breadth/erosion,
+  horizon priority, exact account layout, incremental/orphan feed handling, post-target entry, no-new-trade
+  horizon exit, restart non-replay, bounded horizon outage, and runtime-binding tamper. The complete
+  AFTERSHOCK regression suite passes. The dashboard now labels V1 as baseline and surfaces V2's seal,
+  calibration, activation, formula, and snapshot-execution status separately.
+
+## 2026-08-28 — PAC V2 handoff-439 authenticity and liveness repair
+
+- **Verified fact — the prior V2 seal was NO-GO.** The calibration file could validate caller-chosen
+  clocks without proving a Solana landing; first-fill response time could exceed the cycle clock and
+  crash before commit; permanent account-decode refusals escaped the bounded exit path. Snapshot age,
+  activation freshness, first-event continuity, receipt recovery, and durable appends also had gaps.
+
+- **Decision — authenticity is a campaign-bound three-artifact bundle.** A pre-sampling git commit binds
+  one fee payer, distinct submit/verifier origins, and a memo-only transaction profile. Each sample's
+  signed wire contains a deterministic SPL Memo challenge over campaign id, sample index, and previous
+  sample id. A separate finalized RPC read must return the identical signature, wire bytes, fee payer,
+  successful metadata and slot. Whole-file hashes and campaign → evidence → activation commit ancestry
+  are rechecked on every runtime load. This prevents unrelated fee-payer transactions and self-hashed
+  handwritten rows from satisfying the gate; it does not make local clocks a remote cryptographic oracle.
+
+- **Decision — every lock-affecting refusal is durable and terminal where required.** Entry fills commit
+  before policy service. A permanent snapshot/schema refusal rejects an entry and conservatively settles
+  an open position as full loss; transport retries are bounded to 30 seconds, with horizon priority.
+  Snapshot context must not predate decision evidence. Feed seeds cannot become evidence, interrupted
+  event/receipt pairs recover with a later clock, orphan receipts advance visibly, and authority/state/
+  ledger directory entries are fsynced.
+
+- **Open gate — V2 is not active.** The repaired seal may be anchored, but no authentic 100-landing
+  campaign, independent attestation, or later activation exists. Creating/funding a payer and sending
+  the campaign transactions remains a separately authorized measurement stage. Until it exists, the
+  supervisor must refuse and the dashboard must say `CALIBRATION_REQUIRED_NOT_ACTIVE`.
+
+## 2026-08-29 — PAC V2 live cutoff deferral and allocated-account boundary
+
+- **Verified fact — the cycle-cutoff refusal was structural.** In the handoff-444 live run,
+  `consume()` read receipts appended after the runner sampled its engine-owned cycle clock and rejected
+  the entire batch because `materialized_unix_nanos > runner_seen_unix_nanos`. Because consumption
+  preceded pending-order completion, this also delayed an otherwise ready entry snapshot. The repair
+  snapshots receipts before events, consumes only the receipt prefix materialized at or before the
+  cycle cutoff, and leaves the first later receipt's byte offset plus its pending event for the next
+  cycle. This also closes the valid event/receipt orphan race created by the prior events-first read.
+
+- **Verified fact — the fill-time rejection rate was a decoder mismatch, not failed qualification.**
+  The preserved processed-RPC exchanges accessed 2026-08-29 from
+  `https://api.mainnet-beta.solana.com` contain 110/110 Pump-owned BondingCurve accounts over context
+  slots 442,464,290–442,487,089 with the pinned discriminator and the pinned 115-byte IDL body inside
+  an exact 151-byte allocation; every 36-byte allocation suffix is zero. The old exact-length check
+  rejected all 30 attempted entries as `SNAPSHOT_PERMANENT_REFUSAL` before pricing. All 110 accounts
+  also encode the native-SOL sentinel (`11111111111111111111111111111111`) in the quote-mint field;
+  the old fixture and decoder incorrectly required the SPL wSOL mint instead.
+
+- **Decision — allocated padding is admitted narrowly and visibly.** Snapshot decoding accepts the
+  exact 115-byte IDL serialization or the observed 151-byte allocation only when bytes 115–150 are all
+  zero, and requires the native-SOL sentinel in the quote field. The wSOL mint and any other length,
+  discriminator, non-boolean field, quote mint, or non-zero reserved suffix refuse. This does not infer
+  or ignore an unknown extension. The cutoff, allocation, and quote-sentinel changes are measurement-
+  chain changes, so the old seal-bound calibration/activation cannot authorize the repaired runner; a
+  new sealed campaign and clean calibration are required before restart.
+
+## 2026-08-29 — PAC V2 collector reconnect is a reserve-continuity boundary
+
+- **Verified fact:** The first post-activation paper run initialized successfully, then began refusing
+  every cycle with `PAC V2 durable buffer ordering/reconciliation failed`. The durable per-mint buffer
+  contained usable events from two collector epochs; the later epoch had correctly restarted its own
+  continuity chain, so its first usable event could not reconcile to the prior epoch's last reserve.
+  No PAC scenario ledger row or open/pending position was created by this run. The diagnostic state is
+  preserved under `research/data/aftershock/pac_v2/superseded/`.
+- **Decision:** A collector reconnect is a hard continuity boundary for strategy buffers. When the first
+  usable event from a new `collector_epoch` arrives, the runner clears that mint's prior buffer before
+  appending the event. `feed.consume()` continues to omit the epoch seed, so no synthetic cross-epoch
+  reserve delta is admitted. An open position may still receive the newest observed post-state, but its
+  qualification history cannot bridge the reconnect.
+- **Boundary:** This is sealed runtime behavior. The existing activation cannot authorize the repaired
+  code; a fresh seal, campaign-bound calibration, independent finalized attestations, and activation are
+  required before restarting PAC V2. No calibration sample is reused across that seal change.

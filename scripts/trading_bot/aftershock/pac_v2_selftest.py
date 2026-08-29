@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from dataclasses import replace
 import hashlib
 import inspect
 import json
@@ -504,6 +505,23 @@ def main() -> int:
               and defer_cursor.receipt_offset == defer_receipts.stat().st_size
               and defer_cursor.pending == {},
               "newer-than-seen receipt is deferred without cursor loss and consumed once later")
+
+        # A reconnect is a continuity boundary.  The first seed is omitted by consume(), so the
+        # first usable event from the new epoch must not be joined to the prior epoch's reserve chain.
+        epoch_state = {
+            "buffers": {"mint": [runner._event_dict(event(0, 900_000_000, 1_000_000_000,
+                                                             base=base, trader="old", side="buy"))]},
+            "open_position": None, "pending_order": None,
+            "activation_unix_nanos": base - 1_000_000_000,
+        }
+        reconnect_event = replace(
+            event(1, 123_000_000, 456_000_000, base=base,
+                  trader="new", side="buy"), collector_epoch="reconnected")
+        runner._update_buffers(epoch_state, [reconnect_event], now=base + 5_000_000_000)
+        check(len(epoch_state["buffers"]["mint"]) == 1
+              and epoch_state["buffers"]["mint"][0]["collector_epoch"] == "reconnected"
+              and epoch_state["buffers"]["mint"][0]["pre_state"]["real_quote"] == 123_000_000,
+              "collector reconnect resets the per-mint continuity buffer")
 
         # Full runner: first fill is committed and not serviced on its older cycle clock.
         run_events = tmp / "run-events.jsonl"
