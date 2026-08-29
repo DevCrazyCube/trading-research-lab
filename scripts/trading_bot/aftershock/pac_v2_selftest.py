@@ -382,12 +382,22 @@ def main() -> int:
                    + struct.pack("<5Q", 1_000_000_000_000_000, 31_000_000_000,
                                  720_100_000_000_000, 1_000_000_000, 1_000_000_000_000_000)
                    + bytes([0]) + bytes([1]) * 32 + bytes([0, 0])
-                   + snapshot._b58decode(snapshot._ACCOUNT_SOL_QUOTE_MINT))
+                   + snapshot._b58decode(snapshot._NATIVE_SOL_QUOTE_SENTINEL))
         decoded = snapshot._decode_state(account)
         check(decoded.real_quote == 1_000_000_000 and not decoded.complete,
               "exact 115-byte native-SOL account snapshot decodes")
+        padded = snapshot._decode_state(account + bytes(36))
+        check(padded == decoded,
+              "live 151-byte allocation decodes only with exact 36-byte zero padding")
         refuses(RefusedExecution, lambda: snapshot._decode_state(account + bytes([0])),
                 "account layout suffix drift REFUSES")
+        refuses(RefusedExecution, lambda: snapshot._decode_state(
+            account + bytes(35) + bytes([1])),
+            "non-zero reserved account padding REFUSES")
+        refuses(RefusedExecution, lambda: snapshot._decode_state(
+            account[:83] + snapshot._b58decode(
+                "So11111111111111111111111111111111111111112")),
+            "wSOL mint is not accepted in Pump's native quote-sentinel field")
         refuses(RefusedExecution, lambda: snapshot.LandingSnapshot(
             mint="mint", bonding_curve="curve", modeled_target_unix_nanos=1,
             minimum_context_slot=1,
@@ -468,6 +478,33 @@ def main() -> int:
                 runner_seen_unix_nanos=time.time_ns()) == [],
             "orphan receipt is advanced and recorded exactly once")
 
+        # A writer may append after the runner samples its cycle clock. Consume only
+        # the causally eligible prefix, retain the future receipt offset, and admit it
+        # exactly once on the next cycle instead of refusing the whole live batch.
+        defer_events = tmp / "defer-events.jsonl"
+        defer_receipts = tmp / "defer-receipts.jsonl"
+        defer_seen = time.time_ns()
+        defer_base = defer_seen - 1_500_000_000
+        older = event(1, 1_000_000_000, 1_010_000_000, base=defer_base,
+                      trader="older", side="buy")
+        newer = event(2, 1_010_000_000, 1_020_000_000, base=defer_base,
+                      trader="newer", side="buy")
+        append_runner_events(defer_events, defer_receipts, (older, newer))
+        defer_cursor = feed.Cursor()
+        first_prefix = feed.consume(
+            defer_cursor, events_path=defer_events, receipts_path=defer_receipts,
+            runner_seen_unix_nanos=defer_seen)
+        first_receipt_offset = defer_cursor.receipt_offset
+        second_prefix = feed.consume(
+            defer_cursor, events_path=defer_events, receipts_path=defer_receipts,
+            runner_seen_unix_nanos=defer_seen + 1_000_000_000)
+        check([item.trader for item in first_prefix] == ["older"]
+              and [item.trader for item in second_prefix] == ["newer"]
+              and first_receipt_offset < defer_receipts.stat().st_size
+              and defer_cursor.receipt_offset == defer_receipts.stat().st_size
+              and defer_cursor.pending == {},
+              "newer-than-seen receipt is deferred without cursor loss and consumed once later")
+
         # Full runner: first fill is committed and not serviced on its older cycle clock.
         run_events = tmp / "run-events.jsonl"
         run_receipts = tmp / "run-receipts.jsonl"
@@ -490,6 +527,11 @@ def main() -> int:
             events_path=run_events, receipts_path=run_receipts, initialize_at_eof=False)
         check(decided["pending"] == 1 and decided["new_events"] == len(events),
               "entry decision is incremental and persists a future snapshot target")
+        live_future = event(
+            99, 1_020_000_000, 1_021_000_000,
+            base=decision_now + 3_000_000 - 99_000_000_000,
+            trader="future-buyer", side="buy")
+        append_runner_events(run_events, run_receipts, (live_future,))
         entered = runner._run_once_at(
             proof, fake, now=decision_now + 2_000_000,
             quote_input_lamports=50_000_000, state_path=state_path,
@@ -499,16 +541,18 @@ def main() -> int:
         entry_time = stored["open_position"]["entry_unix_nanos"]
         check(entered["open"] == 1 and entered["pending"] == 0
               and entry_time > decision_now + 2_000_000
+              and len(stored["cursor"]["pending"]) == 1
+              and stored["cursor"]["receipt_offset"] < run_receipts.stat().st_size
               and sum(json.loads(line)["kind"] == "entry_filled"
                       for line in ledger_path.read_text().splitlines()) == 1,
-              "first fill commits once and skips same-tick backward-clock service")
+              "ready pending fills while a concurrently newer feed event is safely deferred")
 
         horizon_now = entry_time + policy.MAX_HOLD_NANOS
         exit_decided = runner._run_once_at(
             proof, fake, now=horizon_now, quote_input_lamports=50_000_000,
             state_path=state_path, ledger_path=ledger_path,
             events_path=run_events, receipts_path=run_receipts, initialize_at_eof=False)
-        check(exit_decided["pending"] == 1 and exit_decided["new_events"] == 0,
+        check(exit_decided["pending"] == 1 and exit_decided["new_events"] == 1,
               "wall-clock horizon decides an exit without another trade")
         resolved = runner._run_once_at(
             proof, fake, now=horizon_now + 2_000_000,

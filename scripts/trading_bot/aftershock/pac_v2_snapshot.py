@@ -31,8 +31,10 @@ SOURCE = "public_rpc_processed_account_snapshot"
 MAX_SNAPSHOT_STALENESS_NANOS = 30_000_000_000
 PUMP_PROGRAM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
 _DISCRIMINATOR = bytes.fromhex("17b7f83760d8ac60")
-_ACCOUNT_LENGTH = 115
-_ACCOUNT_SOL_QUOTE_MINT = "So11111111111111111111111111111111111111112"
+_IDL_ACCOUNT_LENGTH = 115
+_ALLOCATED_ACCOUNT_LENGTH = 151
+_RESERVED_ZERO_PADDING = _ALLOCATED_ACCOUNT_LENGTH - _IDL_ACCOUNT_LENGTH
+_NATIVE_SOL_QUOTE_SENTINEL = "11111111111111111111111111111111"
 _B58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 _ED_Q = 2 ** 255 - 19
 _ED_D = (-121665 * pow(121666, _ED_Q - 2, _ED_Q)) % _ED_Q
@@ -170,11 +172,18 @@ def _decode_state(raw: bytes) -> ReserveState:
     """Decode only the exact BondingCurve layout in the pinned Pump IDL.
 
     Layout after the discriminator: five little-endian u64 values, bool, creator pubkey, mayhem bool,
-    cashback bool, quote-mint pubkey.  Refusing any suffix makes an upstream layout extension visible
-    instead of silently parsing old offsets as the current schema.
+    cashback bool, quote-mint pubkey. The current on-chain allocation is also admitted only as that
+    exact 115-byte serialization followed by its observed 36-byte all-zero reserved region; any
+    non-zero extension remains a visible refusal instead of being silently ignored.
     """
-    if not isinstance(raw, bytes) or len(raw) != _ACCOUNT_LENGTH or raw[:8] != _DISCRIMINATOR:
-        raise RefusedExecution("PAC V2 account bytes differ from the pinned 115-byte BondingCurve schema")
+    if (not isinstance(raw, bytes) or len(raw) not in {
+            _IDL_ACCOUNT_LENGTH, _ALLOCATED_ACCOUNT_LENGTH}
+            or raw[:8] != _DISCRIMINATOR):
+        raise RefusedExecution(
+            "PAC V2 account bytes differ from the pinned BondingCurve layout/allocation")
+    if (len(raw) == _ALLOCATED_ACCOUNT_LENGTH
+            and raw[_IDL_ACCOUNT_LENGTH:] != bytes(_RESERVED_ZERO_PADDING)):
+        raise RefusedExecution("PAC V2 account reserved allocation suffix is non-zero")
     virtual_token, virtual_quote, real_token, real_quote, _supply = struct.unpack_from("<5Q", raw, 8)
     complete = raw[48]
     mayhem = raw[81]
@@ -183,7 +192,7 @@ def _decode_state(raw: bytes) -> ReserveState:
         raise RefusedExecution("PAC V2 account contains a non-boolean schema byte")
     if mayhem:
         raise RefusedExecution("PAC V2 account entered unsupported mayhem mode")
-    if raw[83:115] != _b58decode(_ACCOUNT_SOL_QUOTE_MINT):
+    if raw[83:115] != _b58decode(_NATIVE_SOL_QUOTE_SENTINEL):
         raise RefusedExecution("PAC V2 account is not native-SOL quoted")
     return ReserveState(
         virtual_quote=virtual_quote, virtual_token=virtual_token,

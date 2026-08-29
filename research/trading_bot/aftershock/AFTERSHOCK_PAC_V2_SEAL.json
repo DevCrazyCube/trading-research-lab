@@ -16,22 +16,22 @@
     "scripts/trading_bot/aftershock/pac_v2_calibration.py": "97e71cb306d943a99644c38c51e40ae4d8524b307b81941de658124fa8de0103",
     "scripts/trading_bot/aftershock/pac_v2_calibration_attestation.py": "892e8012f27ae03a19e2ada3f4f4dfad969e5ce8766472091ef62b91855ea6c7",
     "scripts/trading_bot/aftershock/pac_v2_detector.py": "b59dc9f3d098d565a0c223a73a0ed221a42ce95c0fb935a85bc1ad31016c531a",
-    "scripts/trading_bot/aftershock/pac_v2_feed.py": "111bbb65cd419beeb4a07b0924d620b9d6b07c04b67917d3749a3ed0dc4030fa",
+    "scripts/trading_bot/aftershock/pac_v2_feed.py": "b629013905af7d0b39a012362424ddaf792610124aae9a1882632d309c2cf5a5",
     "scripts/trading_bot/aftershock/pac_v2_manifest.py": "47eb3d589e788cf2753286fe16fe204058c232dfb62a75d0e535a85181542ef1",
     "scripts/trading_bot/aftershock/pac_v2_policy.py": "9c5ec30f75eae37a977f373512008cb26ace95d36fda3b7478c91aa16eeacc53",
     "scripts/trading_bot/aftershock/pac_v2_runner.py": "fef01e7bfcb5b753d59ac64ccb27eae3d2cc984a28574b404b80545c6008bc0c",
-    "scripts/trading_bot/aftershock/pac_v2_selftest.py": "33b19e80a6ed6d800cec7650c9caa46fd40ebd4c58f1951ae2d6bfa265950423",
+    "scripts/trading_bot/aftershock/pac_v2_selftest.py": "674f3a67c9f8a07f21ed074a8beefdba9c7d5c0b8b0cabf6555af27269dc21b5",
     "scripts/trading_bot/aftershock/pac_v2_send.py": "49b6ef643b1726a8a1fb2cfd3d705d91cbe3870029eebda8e25d13cc6e7bca82",
-    "scripts/trading_bot/aftershock/pac_v2_snapshot.py": "287ad1852b75c852e69e2e050c8eefbe458f2c7ed7c1ceaa94c7464d080798c9",
+    "scripts/trading_bot/aftershock/pac_v2_snapshot.py": "1787c5794480c85255471f253bb49d52ef042b1464f4f4495bcdb6f5bc555355",
     "scripts/trading_bot/aftershock/pac_v2_status.py": "f15ca73a63ee87b2b70ddf7651cb61a3b3b453c4a556420bb09423b608a70224",
     "scripts/trading_bot/aftershock/pac_v2_supervisor.py": "ce4d861a0e90f4a845d4f0aed2bf92fcc8c8c32ea3942a4b81566156f6ee0c8b",
     "scripts/trading_bot/aftershock/solusd_recorder.py": "44462454607f88b0c45891c7da5d23c663f41bde4729abebd0fe0a1ca0a88ebd",
     "scripts/trading_bot/sniper/data/_common.py": "d07d43bdf1c356be621defc138968c6e4314d704245dacf3463764e2c5de7f9e",
     "scripts/trading_bot/sniper/types.py": "7d83a5c6ae36bdad1bcc66666332c802f6a332b18f8af6bb8d81267ea5a065e6"
   },
-  "frozen_canonical_sha256": "9655b01b8671f4c576f2226e87d696a5ba8c3512e13dd4ea52e73f9a5200c621",
+  "frozen_canonical_sha256": "3ac2bb231ff339e83909d08419419adc06dcedc4a3a28951edf03a3dc03163c0",
   "instrument_id": "AFTERSHOCK_PAC_V2",
   "preregistration_sha256": "1c3676f84fa1dddc4e5e88f919d78f118218f5cfc73c5ddc1626060d5d2ed3b0",
   "schema": 1,
-  "seal_sha256": "c35cbf71cf30df5a21748868b240b08721152bfbbd2c246acba9473cfec09d75"
+  "seal_sha256": "b11288dc3961828c116e1d78f0558669a48e1a37d6fe6d6527095eebecaddec9"
 }

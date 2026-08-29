@@ -196,7 +196,8 @@ class FeedWriter:
         return event_id
 
 
-def _read_complete(path: pathlib.Path, offset: int) -> tuple[list[dict], int]:
+def _read_complete_records(path: pathlib.Path, offset: int) -> tuple[list[tuple[dict, int]], int]:
+    """Read complete JSONL rows and the byte offset immediately after each row."""
     if type(offset) is not int or offset < 0:
         raise RefusedExecution("PAC V2 incremental offset is invalid")
     try:
@@ -214,15 +215,23 @@ def _read_complete(path: pathlib.Path, offset: int) -> tuple[list[dict], int]:
         return [], offset
     complete = payload[:end + 1]
     rows = []
-    for raw in complete.splitlines():
+    position = offset
+    for encoded_line in complete.splitlines(keepends=True):
+        position += len(encoded_line)
+        raw = encoded_line.rstrip(b"\r\n")
         try:
             row = json.loads(raw)
         except json.JSONDecodeError as exc:
             raise RefusedExecution("PAC V2 append-only feed contains invalid JSON") from exc
         if not isinstance(row, dict):
             raise RefusedExecution("PAC V2 feed row is not an object")
-        rows.append(row)
+        rows.append((row, position))
     return rows, offset + len(complete)
+
+
+def _read_complete(path: pathlib.Path, offset: int) -> tuple[list[dict], int]:
+    records, complete_offset = _read_complete_records(path, offset)
+    return [row for row, _ in records], complete_offset
 
 
 @dataclass
@@ -246,8 +255,15 @@ def consume(cursor: Cursor, *, events_path: pathlib.Path = EVENTS,
             runner_seen_unix_nanos: int | None = None) -> list[ClockedEvent]:
     if not isinstance(cursor, Cursor):
         raise RefusedExecution("PAC V2 Cursor required")
+    seen = time.time_ns() if runner_seen_unix_nanos is None else runner_seen_unix_nanos
+    if type(seen) is not int or seen < 0:
+        raise RefusedExecution("PAC V2 runner-seen clock is invalid")
+
+    # Snapshot receipts first, then events. FeedWriter fsyncs the event first, so this
+    # ordering cannot misclassify a concurrently appended valid pair as an orphan.
+    receipt_records, _receipt_complete_offset = _read_complete_records(
+        pathlib.Path(receipts_path), cursor.receipt_offset)
     events, event_offset = _read_complete(pathlib.Path(events_path), cursor.event_offset)
-    receipts, receipt_offset = _read_complete(pathlib.Path(receipts_path), cursor.receipt_offset)
     for row in events:
         if row.get("schema") != SCHEMA or row.get("source") != SOURCE:
             raise RefusedExecution("PAC V2 event schema/source mismatch")
@@ -256,32 +272,35 @@ def consume(cursor: Cursor, *, events_path: pathlib.Path = EVENTS,
         if not isinstance(event_id, str) or _canonical_sha(body) != event_id or event_id in cursor.pending:
             raise RefusedExecution("PAC V2 event id is forged or duplicated")
         cursor.pending[event_id] = row
-    materialized: dict[str, int] = {}
-    for row in receipts:
+    out = []
+    receipt_ids: set[str] = set()
+    receipt_offset = cursor.receipt_offset
+    for row, row_end_offset in receipt_records:
         body = {key: value for key, value in row.items() if key != "receipt_sha256"}
         if (row.get("schema") != SCHEMA or _canonical_sha(body) != row.get("receipt_sha256")
                 or type(row.get("materialized_unix_nanos")) is not int
                 or not isinstance(row.get("recovered_after_crash"), bool)):
             raise RefusedExecution("PAC V2 materialization receipt is invalid")
         event_id = row.get("event_id")
-        if event_id in materialized:
+        stamp = row["materialized_unix_nanos"]
+        # This receipt was appended after the engine-owned cycle cutoff. Leave its
+        # byte offset untouched, along with all later appends, for the next cycle.
+        if stamp > seen:
+            break
+        receipt_offset = row_end_offset
+        if event_id in receipt_ids:
             cursor.rejected_receipts.append({
                 "event_id": event_id, "reason": "DUPLICATE_RECEIPT",
                 "receipt_sha256": row["receipt_sha256"]})
             continue
-        materialized[event_id] = row
-    seen = time.time_ns() if runner_seen_unix_nanos is None else runner_seen_unix_nanos
-    if type(seen) is not int or seen < 0:
-        raise RefusedExecution("PAC V2 runner-seen clock is invalid")
-    out = []
-    for event_id, receipt in materialized.items():
+        receipt_ids.add(event_id)
+        receipt = row
         row = cursor.pending.get(event_id)
         if row is None:
             cursor.rejected_receipts.append({
                 "event_id": event_id, "reason": "ORPHAN_RECEIPT",
                 "receipt_sha256": receipt["receipt_sha256"]})
             continue
-        stamp = receipt["materialized_unix_nanos"]
         try:
             continuity = row.get("continuity_proven")
             pre_raw = row.get("pre_state")
@@ -292,7 +311,7 @@ def consume(cursor: Cursor, *, events_path: pathlib.Path = EVENTS,
         except (KeyError, TypeError, ValueError) as exc:
             raise RefusedExecution("PAC V2 reserve state is invalid") from exc
         source_clock = row.get("source_received_unix_nanos")
-        if (type(source_clock) is not int or source_clock < 0 or type(stamp) is not int
+        if (type(source_clock) is not int or source_clock < 0
                 or not source_clock <= stamp <= seen):
             raise RefusedExecution("PAC V2 seed/materialization clocks are invalid")
         if continuity:

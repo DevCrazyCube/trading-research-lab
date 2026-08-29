@@ -43,6 +43,8 @@
     "reserve_shock_cover_multiple": 6,
     "snapshot_min_context_slot": "NEWEST_DECISION_OR_POSITION_EVIDENCE_SLOT",
     "snapshot_max_staleness_nanos": 30000000000,
+    "snapshot_account_allocation": "PINNED_IDL_115_OR_151_WITH_EXACT_36_ZERO_RESERVED_SUFFIX",
+    "snapshot_native_quote_sentinel": "11111111111111111111111111111111",
     "snapshot_observation_timeout_nanos": 30000000000,
     "slippage_bps": 1000,
     "required_cycles": 2
