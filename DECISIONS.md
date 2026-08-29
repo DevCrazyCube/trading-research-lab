@@ -3383,6 +3383,19 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
   chain changes, so the old seal-bound calibration/activation cannot authorize the repaired runner; a
   new sealed campaign and clean calibration are required before restart.
 
+## 2026-08-29 — PAC V2 operational watchdog preserves authenticated runtime state
+
+- **Verified fact — the temporary watchdog was both false-live and destructive.** Its broad
+  `pgrep -f` matched the tmux server command string even when no PAC V2 supervisor, feed, or runner
+  existed. Its restart branch also deleted `AFTERSHOCK_PAC_V2_RUNNER_STATE.json`, which would destroy
+  restart-safe cursor, pending-order, and open-position state.
+- **Decision — operational launchers may restart processes, never research state.** The repo-owned PAC
+  V2 watchdog identifies Python modules from exact `/proc/<pid>/cmdline` argument boundaries, uses a
+  singleton lock, and starts the sealed supervisor and read-only dashboard in tmux. It never deletes,
+  rewrites, repairs, or migrates state or ledger data. The watchdog is not part of the strategy or
+  measurement closure: the supervisor it launches independently verifies the anchored seal and live
+  calibration before spawning either child, and both children remain one fail-closed domain.
+
 ## 2026-08-29 — PAC V2 collector reconnect is a reserve-continuity boundary
 
 - **Verified fact:** The first post-activation paper run initialized successfully, then began refusing
