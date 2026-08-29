@@ -1,0 +1,14 @@
+{
+  "calibration_fee_payer": "4eksqZt6RNwFazUJ93MdKtE3rpWcTv3ZTtGhKUBfXk3L",
+  "campaign_id": "e255c704b1752c5011f91c9d8c27a10903edfea2428675c45f2ed4cc03c19d73",
+  "campaign_sha256": "9a9ba47aea01b73920606cd6234ae2dabb1e11588d1b169b3e438182113171d7",
+  "evidence_mode": "LOCAL_MONOTONIC_PLUS_FINALIZED_INDEPENDENT_RPC",
+  "instrument_id": "AFTERSHOCK_PAC_V2",
+  "memo_program_id": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+  "schema": 2,
+  "seal_sha256": "b20fd571dac749e92b126604184c55bdb93d646d1ffbc1824e3c4bf393a07d92",
+  "started_unix_nanos": 1787962473077905207,
+  "submit_endpoint_scheme_host": "https://api.mainnet.solana.com",
+  "transaction_profile": "LEGACY_SINGLE_SIGNER_CAMPAIGN_MEMO_ONLY",
+  "verification_endpoint_scheme_host": "https://api.mainnet-beta.solana.com"
+}
