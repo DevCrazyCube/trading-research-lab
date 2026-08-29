@@ -436,9 +436,44 @@ def snapshot(*, ledger_path: pathlib.Path = LEDGER_PATH, state_path: pathlib.Pat
         "last_measurement_refusal": state.get("last_measurement_refusal"),
         "activity": list(reversed(activity[-100:])),
         "ledger_rows": len(rows),
-        "challenger": pac_v2_status.status(),
+        "challenger": {**pac_v2_status.status(), "live": _v2_live()},
         "generated_at": time.time(),
     }
+
+
+def _v2_live() -> dict:
+    """Live V2 runner activity read offline from its own state + scenario ledger, so the dashboard shows
+    the running challenger doing work (scanning / positions / resolved fills) distinct from the V1 baseline."""
+    out = {"last_status": None, "events_consumed_bytes": 0, "open": 0, "pending": 0,
+           "resolved": 0, "wins": 0, "losses": 0, "full_losses": 0}
+    try:
+        s = json.loads((RESEARCH / "AFTERSHOCK_PAC_V2_RUNNER_STATE.json").read_text())
+        out["last_status"] = s.get("last_status")
+        out["events_consumed_bytes"] = (s.get("cursor") or {}).get("event_offset") or 0
+        out["open"] = int(s.get("open_position") is not None)
+        out["pending"] = int(s.get("pending_order") is not None)
+    except (OSError, ValueError):
+        pass
+    led = RESEARCH / "AFTERSHOCK_PAC_V2_SCENARIO_LEDGER.jsonl"
+    try:
+        for line in led.read_text().splitlines() if led.exists() else []:
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue
+            if row.get("kind") != "resolved":
+                continue
+            out["resolved"] += 1
+            if row.get("unexitable_full_loss"):
+                out["full_losses"] += 1
+            num, den = row.get("net_return_num"), row.get("net_return_den")
+            if isinstance(num, int) and isinstance(den, int) and den:
+                out["wins" if num > 0 else "losses"] += 1
+    except OSError:
+        pass
+    return out
 
 
 if __name__ == "__main__":

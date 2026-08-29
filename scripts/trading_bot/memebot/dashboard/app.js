@@ -1015,9 +1015,15 @@ function renderPACView(){
       ? `${pendings.length} causal order pending; it is not a fill and cannot move performance.`
       : "No forward rows exist yet; baseline is not a performance result.")))}</span>`;
   const challenger=d.challenger||{}, challengerBox=document.getElementById("pacChallenger");
-  const cp=challenger.processes||{};
+  const cp=challenger.processes||{}, lv=challenger.live||{};
+  const p90s=challenger.reaction_p90_nanos?(challenger.reaction_p90_nanos/1e9).toFixed(2)+"s":"—";
+  const scannedMB=((lv.events_consumed_bytes||0)/1e6).toFixed(0);
+  const v2Active=(challenger.status||"").indexOf("ACTIVE")===0;
   if(challengerBox) challengerBox.innerHTML=`<strong>PAC V2 · ${esc(challenger.status||"UNKNOWN")}</strong>`+
-    `<span>${esc(challenger.entry_formula||"")} · ${esc(challenger.execution||"")} · seal ${esc(challenger.seal||"?")} · campaign ${esc(challenger.campaign||"?")} · calibration ${esc(challenger.calibration||"?")} · processes supervisor/feed/runner ${cp.supervisor?"up":"down"}/${cp.feed?"up":"down"}/${cp.runner?"up":"down"} · next ${esc(challenger.next_required_action||"?")}${challenger.runtime_refusal?` · ${esc(challenger.runtime_refusal)}`:""}</span>`;
+    `<span class="pac-v2-live" style="display:block;margin:4px 0;color:${v2Active?"#5fd07a":"#c8c8c8"};font-weight:600">`+
+    `▸ LIVE: ${esc(lv.last_status||"—")} · p90 ${p90s} · ${lv.resolved||0} resolved (${lv.wins||0}W/${lv.losses||0}L · ${lv.full_losses||0} rug) · open ${lv.open||0} · pending ${lv.pending||0} · scanned ${scannedMB}MB feed`+
+    `${(lv.resolved||0)===0?` · <em style="color:#c8c8c8;font-weight:400">no PAC entry has fired yet — the −559 chart below is the V1 baseline, not V2</em>`:``}</span>`+
+    `<span>${esc(challenger.entry_formula||"")} · seal ${esc(challenger.seal||"?")} · campaign ${esc(challenger.campaign||"?")} · calibration ${esc(challenger.calibration||"?")} · processes supervisor/feed/runner ${cp.supervisor?"up":"down"}/${cp.feed?"up":"down"}/${cp.runner?"up":"down"} · next ${esc(challenger.next_required_action||"?")}${challenger.runtime_refusal?` · ${esc(challenger.runtime_refusal)}`:""}</span>`;
   const cells=[
     ["Capital index",pacNum(perf.normalized_capital_index,2),`uncalibrated scenario index`,validScenario?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
     ["Mean all-cost R",perf.mean_return_r==null?"—":(Number(perf.mean_return_r)>=0?"+":"")+pacNum(perf.mean_return_r,3),`${perf.resolved||0} fully reconciled`,perf.mean_return_r==null?"muted":(Number(perf.mean_return_r)>0?"pos":"neg")],
