@@ -22,6 +22,7 @@ from . import (
     pac_v2_detector,
     pac_v2_runner,
     pac_v2_status,
+    pac_v21_manifest,
     solusd_recorder,
 )
 from .execution import RefusedExecution
@@ -127,6 +128,42 @@ def _latest_solusd_status() -> dict:
                 "source": solusd_recorder.SOURCE}
     except (OSError, json.JSONDecodeError, UnicodeDecodeError, RefusedExecution) as exc:
         return {"status": "REFUSED", "reason": str(exc)[:180]}
+
+
+def _v21_successor_status() -> dict:
+    """Read-only V2.1 authority progress; never loads a signer, sends, or runs the candidate."""
+    seal = pac_v21_manifest.anchor_status()
+
+    def artifact(path: pathlib.Path) -> str:
+        if not path.exists():
+            return "ABSENT"
+        return "ANCHORED" if pac_v21_manifest._git_clean(path) else "UNANCHORED"
+
+    campaign = artifact(pac_v21_manifest.CAMPAIGN)
+    activation = artifact(pac_v21_manifest.ACTIVATION)
+    if seal != "ANCHORED":
+        stage = "SEAL_NOT_ANCHORED"
+    elif campaign == "ABSENT":
+        stage = "SEALED_DEFAULT_OFF_AWAITING_OWNER_CAMPAIGN"
+    elif campaign != "ANCHORED":
+        stage = "CAMPAIGN_AWAITING_GIT_ANCHOR"
+    elif activation == "ABSENT":
+        stage = "CAMPAIGN_ANCHORED_CALIBRATION_AND_ATTESTATION_REQUIRED"
+    elif activation != "ANCHORED":
+        stage = "ACTIVATION_AWAITING_GIT_ANCHOR"
+    else:
+        # Runtime still repeats live finalized verification; the dashboard never weakens that gate.
+        stage = "ACTIVATION_ANCHORED_RUNTIME_LIVE_VERIFY_REQUIRED"
+    return {
+        "instrument_id": pac_v21_manifest.INSTRUMENT,
+        "status": stage,
+        "seal": seal,
+        "campaign": campaign,
+        "activation": activation,
+        "dependency_count": len(pac_v21_manifest.DEPENDENCY_PATHS),
+        "formula": "1 payable shock · full recovery/floor · processed p90 · ≥3 buyers · 6× cover",
+        "boundary": "PAPER CANDIDATE · DEFAULT OFF · NO PERFORMANCE EVIDENCE",
+    }
 
 
 _V2_GATE_LABELS = {
@@ -709,6 +746,7 @@ def v2_snapshot() -> dict:
         "challenger": {"instrument_id": "AFTERSHOCK_PAC_V1", "status": "BURNED_BASELINE",
                        "note": "V1 was falsified (525 scenarios, index −559) and is retired; kept only as "
                                "a reference, not shown here.", "live": {}, "processes": {}},
+        "successor": _v21_successor_status(),
         "generated_at": time.time(),
     }
 

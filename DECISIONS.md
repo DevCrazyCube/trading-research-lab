@@ -3480,3 +3480,10 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
   precommitted fee payer and distinct public RPC origins, an explicit `--broadcast`, and a campaign-wide
   transaction/lamport cap. No campaign, calibration evidence, activation, V2.1 paper fill, or live order
   exists at this decision point.
+
+## 2026-08-30 — PAC dashboard exposes V2.1 authority progress without performance substitution
+
+- **Decision:** While active PAC V2 remains the focused performance book, the same page displays V2.1's
+  seal/campaign/activation stages and frozen formula as a successor banner. Missing artifacts remain
+  visibly absent; the dashboard does not create campaigns, run verification, start V2.1, or map V2 data
+  into V2.1 performance. This read-only adapter is outside both strategy dependency closures.

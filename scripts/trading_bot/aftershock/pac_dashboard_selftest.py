@@ -7,6 +7,7 @@ import hashlib
 import pathlib
 import tempfile
 import time
+from unittest.mock import patch
 
 from . import pac_dashboard as dash
 from .execution import ReserveState
@@ -268,6 +269,23 @@ def main() -> int:
         else:
             refused_future = False
         ok &= _check("candidate diagnostics refuse future evidence", refused_future)
+
+        v21_campaign, v21_activation = root / "v21-campaign.json", root / "v21-activation.json"
+        with (patch.object(dash.pac_v21_manifest, "anchor_status", return_value="ANCHORED"),
+              patch.object(dash.pac_v21_manifest, "CAMPAIGN", v21_campaign),
+              patch.object(dash.pac_v21_manifest, "ACTIVATION", v21_activation)):
+            successor = dash._v21_successor_status()
+            ok &= _check("anchored V2.1 seal is visible without inventing campaign or performance",
+                         successor["status"] == "SEALED_DEFAULT_OFF_AWAITING_OWNER_CAMPAIGN"
+                         and successor["campaign"] == "ABSENT"
+                         and successor["activation"] == "ABSENT")
+
+            v21_campaign.write_text("{}\n")
+            with patch.object(dash.pac_v21_manifest, "_git_clean", return_value=True):
+                successor = dash._v21_successor_status()
+            ok &= _check("anchored campaign remains visibly gated on calibration and attestation",
+                         successor["status"]
+                         == "CAMPAIGN_ANCHORED_CALIBRATION_AND_ATTESTATION_REQUIRED")
 
     print("PAC DASHBOARD SELFTEST:", "PASS" if ok else "FAIL")
     return 0 if ok else 1

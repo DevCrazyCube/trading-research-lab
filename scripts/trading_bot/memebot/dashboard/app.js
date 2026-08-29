@@ -1021,7 +1021,7 @@ function renderPACView(){
     : (pendings.length
       ? `${pendings.length} causal order pending; it is not a fill and cannot move performance.`
       : "No forward rows exist yet; baseline is not a performance result.")))}</span>`;
-  const challenger=d.challenger||{}, challengerBox=document.getElementById("pacChallenger");
+  const challenger=d.challenger||{}, successor=d.successor||{}, challengerBox=document.getElementById("pacChallenger");
   const op0=d.operational||{}, cp=op0.processes||{};
   const p90s=op0.reaction_p90_nanos?(op0.reaction_p90_nanos/1e9).toFixed(2)+"s":"—";
   const scannedMB=((op0.events_consumed_bytes||0)/1e6).toFixed(0);
@@ -1030,7 +1030,10 @@ function renderPACView(){
     `<strong style="color:${v2Active?"#5fd07a":"#c8c8c8"}">▸ V2 LIVE · ${esc(op0.status||"—")}</strong>`+
     `<span class="pac-v2-live" style="display:block;margin:4px 0;color:${v2Active?"#5fd07a":"#c8c8c8"};font-weight:600">`+
     `${esc(op0.last_status||"—")} · p90 ${p90s} · scanned ${scannedMB}MB feed · seal ${esc(op0.seal||"?")} · activation ${esc(op0.activation||"?")} · processes supervisor/feed/runner ${cp.supervisor?"up":"down"}/${cp.feed?"up":"down"}/${cp.runner?"up":"down"}</span>`+
-    `<span style="color:#8a8a8a">${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V1")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`;
+    `<span style="display:block;margin:4px 0;color:${successor.seal==="ANCHORED"?"#e8b153":"#ff4d4d"};font-weight:600">`+
+    `▸ NEXT · ${esc(successor.instrument_id||"AFTERSHOCK_PAC_V21")} · ${esc(successor.status||"UNKNOWN")} · seal ${esc(successor.seal||"?")} · campaign ${esc(successor.campaign||"?")} · activation ${esc(successor.activation||"?")}</span>`+
+    `<span style="display:block;color:#8a93a0">${esc(successor.formula||"")} · ${esc(successor.boundary||"")}</span>`+
+    `<span style="display:block;color:#8a8a8a">${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V1")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`;
   const cells=[
     ["Capital index",pacNum(perf.normalized_capital_index,2),`uncalibrated scenario index`,validScenario?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
     ["Mean all-cost R",perf.mean_return_r==null?"—":(Number(perf.mean_return_r)>=0?"+":"")+pacNum(perf.mean_return_r,3),`${perf.resolved||0} fully reconciled`,perf.mean_return_r==null?"muted":(Number(perf.mean_return_r)>0?"pos":"neg")],
