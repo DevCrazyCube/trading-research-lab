@@ -984,7 +984,7 @@ function pacEquityChart(raw, evidenceStatus, pendingCount=0){
 function renderPAC(){
   const app=document.getElementById("app"), d=state.pac;
   app.innerHTML=`
-    <div class="pagehd pac-head"><h2>Aftershock PAC · V1 baseline / V2 challenger</h2><span class="pill">PAYABLE ABSORPTION COMPRESSION</span><span class="grow"></span><span id="pacStatusBadge" class="killtag halt">loading</span></div>
+    <div class="pagehd pac-head"><h2>Aftershock PAC · V2 · mainnet-calibrated</h2><span class="pill">PAYABLE ABSORPTION COMPRESSION</span><span class="grow"></span><span id="pacStatusBadge" class="killtag halt">loading</span></div>
     <div id="pacBoundary" class="pac-boundary"></div>
     <section id="pacChallenger" class="pac-boundary"></section>
     <section id="pacStrip" class="strip"></section>
@@ -1015,15 +1015,15 @@ function renderPACView(){
       ? `${pendings.length} causal order pending; it is not a fill and cannot move performance.`
       : "No forward rows exist yet; baseline is not a performance result.")))}</span>`;
   const challenger=d.challenger||{}, challengerBox=document.getElementById("pacChallenger");
-  const cp=challenger.processes||{}, lv=challenger.live||{};
-  const p90s=challenger.reaction_p90_nanos?(challenger.reaction_p90_nanos/1e9).toFixed(2)+"s":"—";
-  const scannedMB=((lv.events_consumed_bytes||0)/1e6).toFixed(0);
-  const v2Active=(challenger.status||"").indexOf("ACTIVE")===0;
-  if(challengerBox) challengerBox.innerHTML=`<strong>PAC V2 · ${esc(challenger.status||"UNKNOWN")}</strong>`+
+  const op0=d.operational||{}, cp=op0.processes||{};
+  const p90s=op0.reaction_p90_nanos?(op0.reaction_p90_nanos/1e9).toFixed(2)+"s":"—";
+  const scannedMB=((op0.events_consumed_bytes||0)/1e6).toFixed(0);
+  const v2Active=(op0.status||"").indexOf("ACTIVE")===0;
+  if(challengerBox) challengerBox.innerHTML=
+    `<strong style="color:${v2Active?"#5fd07a":"#c8c8c8"}">▸ V2 LIVE · ${esc(op0.status||"—")}</strong>`+
     `<span class="pac-v2-live" style="display:block;margin:4px 0;color:${v2Active?"#5fd07a":"#c8c8c8"};font-weight:600">`+
-    `▸ LIVE: ${esc(lv.last_status||"—")} · p90 ${p90s} · ${lv.resolved||0} resolved (${lv.wins||0}W/${lv.losses||0}L · ${lv.full_losses||0} rug) · open ${lv.open||0} · pending ${lv.pending||0} · scanned ${scannedMB}MB feed`+
-    `${(lv.resolved||0)===0?` · <em style="color:#c8c8c8;font-weight:400">no PAC entry has fired yet — the −559 chart below is the V1 baseline, not V2</em>`:``}</span>`+
-    `<span>${esc(challenger.entry_formula||"")} · seal ${esc(challenger.seal||"?")} · campaign ${esc(challenger.campaign||"?")} · calibration ${esc(challenger.calibration||"?")} · processes supervisor/feed/runner ${cp.supervisor?"up":"down"}/${cp.feed?"up":"down"}/${cp.runner?"up":"down"} · next ${esc(challenger.next_required_action||"?")}${challenger.runtime_refusal?` · ${esc(challenger.runtime_refusal)}`:""}</span>`;
+    `${esc(op0.last_status||"—")} · p90 ${p90s} · scanned ${scannedMB}MB feed · seal ${esc(op0.seal||"?")} · activation ${esc(op0.activation||"?")} · processes supervisor/feed/runner ${cp.supervisor?"up":"down"}/${cp.feed?"up":"down"}/${cp.runner?"up":"down"}</span>`+
+    `<span style="color:#8a8a8a">${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V1")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`;
   const cells=[
     ["Capital index",pacNum(perf.normalized_capital_index,2),`uncalibrated scenario index`,validScenario?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
     ["Mean all-cost R",perf.mean_return_r==null?"—":(Number(perf.mean_return_r)>=0?"+":"")+pacNum(perf.mean_return_r,3),`${perf.resolved||0} fully reconciled`,perf.mean_return_r==null?"muted":(Number(perf.mean_return_r)>0?"pos":"neg")],

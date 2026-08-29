@@ -1239,10 +1239,10 @@ def pac_view() -> dict:
     performance arithmetic and never mutates the runner."""
     try:
         from scripts.trading_bot.aftershock import pac_dashboard as _pac_dashboard
-        return _pac_dashboard.snapshot()
+        return _pac_dashboard.v2_snapshot()
     except Exception as e:  # noqa: BLE001 -- a broken evidence adapter must stay visibly unavailable
         return {
-            "instrument_id": "AFTERSHOCK_PAC_V1",
+            "instrument_id": "AFTERSHOCK_PAC_V2",
             "boundary": "PAPER SCENARIO ONLY · NO WALLET · NO ORDERS",
             "evidence_status": "REFUSED_ADAPTER_ERROR",
             "integrity_errors": [f"{type(e).__name__}: {str(e)[:180]}"],

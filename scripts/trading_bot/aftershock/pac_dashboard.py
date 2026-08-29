@@ -441,6 +441,91 @@ def snapshot(*, ledger_path: pathlib.Path = LEDGER_PATH, state_path: pathlib.Pat
     }
 
 
+def v2_snapshot() -> dict:
+    """The PAC focus page's MAIN content, built from the live V2 calibrated runner's own scenario ledger +
+    state — so the page shows the running challenger (its chart, positions, and resolved fills) instead of
+    the burned V1 baseline. V1 is retired to a compact footnote in `challenger`."""
+    status = pac_v2_status.status()
+    led = RESEARCH / "AFTERSHOCK_PAC_V2_SCENARIO_LEDGER.jsonl"
+    rows: list[dict] = []
+    if led.exists():
+        for line in led.read_text().splitlines():
+            if line.strip():
+                try:
+                    rows.append(json.loads(line))
+                except ValueError:
+                    continue
+    resolved_rows = [r for r in rows if r.get("kind") == "resolved"]
+    perf_rows, activity = [], []
+    for r in resolved_rows:
+        num, den = r.get("net_return_num"), r.get("net_return_den")
+        if not (isinstance(num, int) and isinstance(den, int) and den):
+            continue
+        full = bool(r.get("unexitable_full_loss"))
+        perf_rows.append({"return": Fraction(num, den), "unexitable_full_loss": full})
+        entry_all_in = int(r.get("entry_all_in_lamports") or 0)
+        activity.append({
+            "kind": "resolved", "mint": r.get("mint", "—"),
+            "return_r": _decimal(Fraction(num, den), 4),
+            "entry_all_in_lamports": entry_all_in,
+            "exit_net_proceeds_lamports": max(0, num + entry_all_in),
+            "action": r.get("action", "—"), "unexitable_full_loss": full})
+    performance = _performance(perf_rows)
+    performance["scenario_resolved"] = performance["resolved"]
+    performance["promotion_discovery_resolved"] = performance["resolved"]
+    performance["discovery_progress"] = _decimal(Fraction(min(performance["resolved"], 100), 100), 4)
+
+    try:
+        state = json.loads((RESEARCH / "AFTERSHOCK_PAC_V2_RUNNER_STATE.json").read_text())
+    except (OSError, ValueError):
+        state = {}
+    op, pend = state.get("open_position"), state.get("pending_order")
+    open_positions = ([{"mint": op.get("mint", "—"),
+                        "entry_all_in_lamports": int(op.get("entry_all_in_lamports") or 0)}]
+                      if isinstance(op, dict) else [])
+    pending_orders = ([{"mint": pend.get("mint", "—"), "side": pend.get("side", "ORDER"),
+                        "amount": int(pend.get("amount") or 0),
+                        "return_denominator_lamports": int(pend.get("amount") or 0)}]
+                      if isinstance(pend, dict) else [])
+    try:
+        sol = solusd_recorder.latest_observation(decision_unix_nanos=int(time.time() * 1e9))
+        solusd = {"price": str(sol.price_usd)} if sol else {"reason": "unavailable"}
+    except Exception:  # noqa: BLE001
+        solusd = {"reason": "unavailable"}
+    operational = {
+        **status,
+        "solusd": solusd,
+        "latency_calibration": "CALIBRATED_FINALIZED_RPC" if status.get("activation") == "ANCHORED" else None,
+        "last_status": state.get("last_status"),
+        "events_consumed_bytes": (state.get("cursor") or {}).get("event_offset") or 0,
+    }
+    evidence = ("VALID_CALIBRATED_PAPER_SCENARIO" if resolved_rows
+                else "ACTIVE_CALIBRATED_SCANNING_NO_FILLS_YET")
+    return {
+        "instrument_id": "AFTERSHOCK_PAC_V2",
+        "title": "Payable Absorption Compression · V2 (mainnet-calibrated)",
+        "boundary": "PAPER SCENARIO ONLY · NO WALLET · NO ORDERS · NOT A PROFIT CLAIM",
+        "evidence_status": evidence,
+        "integrity_errors": [],
+        "operational": operational,
+        "formula": "W2≥W1 · D2≤D1 · B2≥B1 · E2≥E1  +  p90 dwell · ≥3 buyers · 6× cover",
+        "formula_note": "PAC pattern plus measured-p90 dwell, ≥3 observed buyers, and 6× largest-shock cover",
+        "policy": {"bankroll_index_start": "100.00", "probe_index_points": "10.00",
+                   "trail_percent": 12, "coverage_multiple": 6,
+                   "max_hold_minutes": 12, "max_concurrent_positions": 1},
+        "performance": performance,
+        "open_positions": open_positions,
+        "pending_orders": pending_orders,
+        "last_measurement_refusal": None,
+        "activity": list(reversed(activity[-100:])),
+        "ledger_rows": len(rows),
+        "challenger": {"instrument_id": "AFTERSHOCK_PAC_V1", "status": "BURNED_BASELINE",
+                       "note": "V1 was falsified (525 scenarios, index −559) and is retired; kept only as "
+                               "a reference, not shown here.", "live": {}, "processes": {}},
+        "generated_at": time.time(),
+    }
+
+
 def _v2_live() -> dict:
     """Live V2 runner activity read offline from its own state + scenario ledger, so the dashboard shows
     the running challenger doing work (scanning / positions / resolved fills) distinct from the V1 baseline."""
