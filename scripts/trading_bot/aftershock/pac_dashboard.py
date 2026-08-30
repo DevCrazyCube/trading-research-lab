@@ -29,6 +29,8 @@ from . import (
     pac_v22_feed,
     pac_v22_manifest,
     pac_v22_runner,
+    pac_v23_manifest,
+    pac_v23_runner,
     solusd_recorder,
 )
 from .execution import RefusedExecution
@@ -57,6 +59,8 @@ _V22_DIAGNOSTIC: dict = {
 }
 _V22_PROOF_CACHE: dict = {"key": None, "value": None}
 _V22_VIEW_LOCK = threading.RLock()
+_V23_PROOF_CACHE: dict = {"key": None, "value": None}
+_V23_VIEW_LOCK = threading.RLock()
 
 
 def _exact_int(label: str, value, *, minimum: int | None = None) -> int:
@@ -1378,7 +1382,122 @@ def v21_snapshot(*, successor_status: dict | None = None) -> dict:
     }
 
 
+def _v23_successor_status() -> dict:
+    """Read-only V2.3 authority status; reuses the shared V2.2 low-lag feed. Starts nothing."""
+    seal = pac_v23_manifest.anchor_status()
+
+    def artifact(path: pathlib.Path) -> str:
+        if not path.exists():
+            return "ABSENT"
+        return "ANCHORED" if pac_v23_manifest._git_clean(path) else "UNANCHORED"
+
+    campaign = artifact(pac_v23_manifest.CAMPAIGN)
+    activation = artifact(pac_v23_manifest.ACTIVATION)
+    try:
+        health = pac_v22_feed.load_health()
+        health_age = max(0, time.time_ns() - health["observed_unix_nanos"])
+        feed_status = ("FRESH" if health["status"] == "FRESH"
+                       and health_age <= pac_v22_feed.MAX_HEALTH_AGE_NANOS
+                       and health["head_slot_lag"] is not None
+                       and health["head_slot_lag"] <= pac_v22_feed.MAX_HEAD_SLOT_LAG
+                       else "DEGRADED")
+    except RefusedExecution as exc:
+        health = {"status": "REFUSED", "reason": str(exc)[:180], "head_slot_lag": None,
+                  "observed_unix_nanos": None}
+        feed_status = "REFUSED"
+    if activation == "ANCHORED":
+        stage = "ACTIVATED_CROSS_VENUE_PAPER_RUNTIME"
+    elif campaign == "ANCHORED":
+        stage = "SEALED_CAMPAIGN_ANCHORED_BROADCAST_OWNER_GATED"
+    elif seal == "ANCHORED":
+        stage = "SEALED_CROSS_VENUE_EXIT_CALIBRATION_CAMPAIGN_REQUIRED"
+    else:
+        stage = "V23_SEAL_NOT_ANCHORED"
+    return {
+        "instrument_id": pac_v23_manifest.INSTRUMENT, "status": stage,
+        "seal": seal, "campaign": campaign, "activation": activation,
+        "dependency_count": len(pac_v23_manifest.DEPENDENCY_PATHS),
+        "feed": {**health, "effective_status": feed_status,
+                 "process": _tmux_running("pac-v23-feed")},
+        "formula": "V2.1 single-shock rule unchanged · low-lag feed · PumpSwap cross-venue exit",
+        "boundary": "PAPER ONLY · READ-ONLY PUMPSWAP PRICING · NO WALLET · NO ORDERS",
+    }
+
+
+def _v23_offline_proof() -> pac_v23_runner.RuntimeProof:
+    """Validate anchored V2.3 authority without the production live-RPC reread."""
+    paths = (pac_v23_manifest.SEAL, pac_v23_manifest.CAMPAIGN,
+             pac_v23_manifest.JOURNAL, pac_v23_manifest.SAMPLES,
+             pac_v23_manifest.ATTESTATIONS, pac_v23_manifest.ACTIVATION,
+             ROOT / ".git" / "HEAD", ROOT / ".git" / "index")
+    key = tuple((str(path), path.stat().st_mtime_ns, path.stat().st_size)
+                if path.exists() else (str(path), None, None) for path in paths)
+    with _V23_VIEW_LOCK:
+        if _V23_PROOF_CACHE["key"] == key:
+            return _V23_PROOF_CACHE["value"]
+        with pac_v23_manifest._configured():
+            legacy = pac_v23_manifest.legacy
+            seal = legacy.verify_seal()
+            if (legacy.anchor_status() != "ANCHORED"
+                    or not legacy._git_clean(legacy.ACTIVATION)):
+                raise RefusedExecution("PAC V2.3 dashboard authority is not anchored")
+            activation = legacy._json(legacy.ACTIVATION)
+            legacy._activation_body(activation, seal)
+            closed = legacy._load_bound_evidence(activation)
+            legacy._activation_body(activation, seal, closed)
+        proof = pac_v23_runner.RuntimeProof(
+            seal["seal_sha256"], activation["activation_unix_nanos"], closed.calibration)
+        _V23_PROOF_CACHE.update({"key": key, "value": proof})
+        return proof
+
+
+def v23_snapshot() -> dict:
+    """Activated V2.3 cross-venue state/ledger view, reusing the identical V2.1 book validator."""
+    global pac_v21_manifest, pac_v21_runner, _v21_offline_proof
+    authority = _v23_successor_status()
+    with _V23_VIEW_LOCK:
+        old_manifest, old_runner, old_proof = (
+            pac_v21_manifest, pac_v21_runner, _v21_offline_proof)
+        pac_v21_manifest, pac_v21_runner, _v21_offline_proof = (
+            pac_v23_manifest, pac_v23_runner, _v23_offline_proof)
+        try:
+            result = v21_snapshot(successor_status=authority)
+        finally:
+            pac_v21_manifest, pac_v21_runner, _v21_offline_proof = (
+                old_manifest, old_runner, old_proof)
+    processes = result["operational"]["processes"]
+    processes.update({"supervisor": _tmux_running("pac-wd") or _tmux_running("pac-v23"),
+                      "feed": _tmux_running("pac-v23-feed"),
+                      "runner": _tmux_running("pac-v23")})
+    healthy = result["operational"]["state"] == "VALID" and all(processes.values())
+    result.update({
+        "title": "Single-Shock Payable Absorption · V2.3 (cross-venue PumpSwap exit)",
+        "formula": "W≥$10 · full recovery/floor · processed p90 · ≥3 buyers · 6× max(probe, shock)",
+        "formula_note": "V2.1 entry + V2.2 low-lag feed unchanged; graduated positions exit honestly on PumpSwap",
+        "challenger": {"instrument_id": "AFTERSHOCK_PAC_V22",
+                       "status": "RETIRED_PUMP_ONLY_EXIT_MIGRATION_BLIND",
+                       "note": "V2.2 was falsified by graduation casualties (see AFTERSHOCK_PAC_V22_EVALUATION.md); superseded by V2.3."},
+        "successor": authority,
+    })
+    result["operational"].update({
+        "status": ("ACTIVE_AUTHENTICATED_PAPER_SCENARIO" if healthy
+                   else "ACTIVE_RUNTIME_REFUSED"),
+        "seal": authority["seal"], "campaign": authority["campaign"],
+        "activation": authority["activation"],
+        "dependency_count": authority["dependency_count"],
+    })
+    if result["operational"]["state"] == "VALID":
+        result["evidence_status"] = ("VALID_CALIBRATED_PAPER_SCENARIO"
+                                     if result["performance"]["resolved"]
+                                     else "VALID_CALIBRATED_AWAITING_FIRST_RESOLVED")
+    return result
+
+
 def focus_snapshot() -> dict:
+    # V2.3 (cross-venue PumpSwap exit) supersedes V2.2 once activated: it is the operational focus.
+    v23 = _v23_successor_status()
+    if v23["activation"] == "ANCHORED":
+        return v23_snapshot()
     v22 = _v22_successor_status()
     # Once its campaign is anchored, V2.2 is the operational focus even before activation: this
     # exposes fresh feed traffic and the remaining calibration gate instead of silently showing the
