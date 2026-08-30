@@ -1099,7 +1099,8 @@ def v2_snapshot() -> dict:
         if not (isinstance(num, int) and isinstance(den, int) and den):
             continue
         full = bool(r.get("unexitable_full_loss"))
-        perf_rows.append({"return": Fraction(num, den), "unexitable_full_loss": full})
+        perf_rows.append({"kind": "resolved", "return": Fraction(num, den),
+                          "unexitable_full_loss": full})
         entry_all_in = int(r.get("entry_all_in_lamports") or 0)
         activity.append({
             "kind": "resolved", "mint": r.get("mint", "—"),
@@ -1194,7 +1195,7 @@ def v2_snapshot() -> dict:
 def _tmux_running(name: str) -> bool:
     try:
         return subprocess.run(
-            ["tmux", "has-session", "-t", name], capture_output=True,
+            ["tmux", "has-session", "-t", f"={name}"], capture_output=True,
             timeout=2, check=False).returncode == 0
     except (OSError, subprocess.SubprocessError):
         return False

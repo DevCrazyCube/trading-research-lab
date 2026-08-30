@@ -149,6 +149,13 @@ def main() -> int:
                      direct_resolved["resolved"] == 1
                      and direct_resolved["mean_return_r"] == "-0.050000")
 
+        fake_tmux = type("Completed", (), {"returncode": 0})()
+        with patch.object(dash.subprocess, "run", return_value=fake_tmux) as tmux_run:
+            exact_session = dash._tmux_running("pac-v22")
+        ok &= _check("tmux process health uses an exact session target, never a feed-prefix match",
+                     exact_session
+                     and tmux_run.call_args.args[0][-1] == "=pac-v22")
+
         unavailable_attempt, unavailable_resolution = _unavailable_exit_pair()
         unavailable_rows = [_opened(3), unavailable_attempt, unavailable_resolution]
         ledger.write_text("".join(json.dumps(row) + "\n" for row in unavailable_rows))

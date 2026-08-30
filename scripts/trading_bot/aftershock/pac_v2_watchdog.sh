@@ -60,15 +60,16 @@ env_value() {
 }
 
 v21_running() {
-  tmux has-session -t pac-v21 2>/dev/null
+  tmux has-session -t =pac-v21 2>/dev/null
 }
 
 v22_feed_running() {
-  tmux has-session -t pac-v22-feed 2>/dev/null
+  tmux has-session -t =pac-v22-feed 2>/dev/null
 }
 
 v22_runner_running() {
-  tmux has-session -t pac-v22 2>/dev/null
+  # tmux accepts prefix matches by default: `pac-v22` used to falsely match `pac-v22-feed`.
+  tmux has-session -t =pac-v22 2>/dev/null
 }
 
 launch_supervisor() {

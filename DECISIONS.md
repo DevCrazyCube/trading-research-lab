@@ -3553,4 +3553,8 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
   imports and calls the package module's `main`, as the established V2.1 launcher already did; this
   changes no sealed dependency or proof. After that operational fix the anchored V2.2 paper runner
   initialized at EOF, consumed live events, created causal paper entries/exits, and remained supervised.
-  Early rows are forward evidence but far below the 100-resolution discovery gate and imply no verdict.
+  Tmux's default prefix matching also let the `pac-v22-feed` session falsely satisfy a query for
+  `pac-v22`; both the watchdog and dashboard now require exact (`=name`) session targets. A forced runner
+  restart then restored the same open mint and advanced its existing cursor without deleting or replaying
+  state. Early rows are forward evidence but far below the 100-resolution discovery gate and imply no
+  verdict.
