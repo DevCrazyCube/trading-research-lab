@@ -999,7 +999,7 @@ function renderPAC(){
       </aside>
     </div>
     <div class="pagehd"><h3 style="margin:0">Live candidate funnel</h3><span class="pill" id="pacCandidateCount">0 mint buffers</span></div>
-    <div class="tablewrap pac-candidate-table"><table class="grid"><thead><tr><th class="l">Mint</th><th>Events</th><th class="l">Deepest frozen gate</th><th>Dwell / p90</th><th>Buyers</th><th>Reserve / required</th><th>Last seen</th></tr></thead><tbody id="pacCandidateBody"></tbody></table></div>
+    <div class="tablewrap pac-candidate-table"><table class="grid"><thead><tr><th class="l">Mint</th><th>Events</th><th class="l">Deepest frozen gate</th><th>Event dwell / p90</th><th>Observed buyers</th><th>Reserve / required</th><th>Last seen</th></tr></thead><tbody id="pacCandidateBody"></tbody></table></div>
     <div class="pagehd"><h3 style="margin:0">Scenario activity</h3><span class="pill" id="pacTradeCount">0 resolved</span></div>
     <div class="tablewrap pac-table"><table class="grid"><thead><tr><th class="l">Mint</th><th>State</th><th>All-cost R</th><th>Entry cost</th><th>Net exit</th><th class="l">Reason</th></tr></thead><tbody id="pacBody"></tbody></table></div>`;
   renderPACView();
@@ -1079,7 +1079,7 @@ function renderPACView(){
   const candidateBody=document.getElementById("pacCandidateBody");
   const gateBadge=gate=>gate==="QUALIFIED"?"b-open":(["NO_PAC_CORE","NO_PAYABLE_SHOCK"].includes(gate)?"b-null":"b-pending");
   const candidateRows=candidates.map(c=>{
-    const dwell=c.dwell_nanos==null?"—":`${(Number(c.dwell_nanos)/1e9).toFixed(2)}s / ${(Number(c.reaction_p90_nanos)/1e9).toFixed(2)}s`;
+    const dwell=c.dwell_nanos==null?"—":`${(Number(c.dwell_nanos)/1e9).toFixed(2)}s / ${(Number(c.reaction_p90_nanos)/1e9).toFixed(2)}s event-time`;
     const cover=c.reserve_cover_milli==null?"—":`${(Number(c.current_reserve_lamports)/1e9).toFixed(3)} / ${(Number(c.reserve_cover_lamports)/1e9).toFixed(3)} SOL`;
     const ageSeconds=Number(c.age_millis)/1000;
     const age=Number.isFinite(ageSeconds)?`${ageSeconds<1?"<1":ageSeconds.toFixed(1)}s ago`:"—";

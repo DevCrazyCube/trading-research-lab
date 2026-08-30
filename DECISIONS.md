@@ -3502,7 +3502,10 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
   events, payable shocks, dwell, buyer breadth, reserve cover, and the exact deepest sealed gate—rather
   than presenting an empty activity table as if the scanner were idle. The trace cross-checks
   qualification against the sealed detector and cannot create an order or performance row. V2 remains a
-  labelled control only; its outcomes are never substituted into V2.1.
+  labelled control only; its outcomes are never substituted into V2.1. Dwell is labelled and displayed as
+  same-mint **event time**, not a wall-clock countdown: silence cannot prove reserve survival. Observed
+  post-shock buyer addresses are displayed immediately even when dwell has not passed; this diagnostic
+  visibility does not reorder or weaken the frozen gates.
 - **Decision:** The existing operational watchdog also owns V2.1 process recovery after activation. It
   launches only the paper runner, preserves its restart-safe state/ledger, and never sends a strategy
   transaction. It reads only the required RPC assignment from the operator environment instead of

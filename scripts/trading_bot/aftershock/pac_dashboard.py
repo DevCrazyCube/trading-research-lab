@@ -356,7 +356,7 @@ def _v2_candidate_funnel(buffers: dict, *, reaction_p90_nanos: int,
 _V21_GATE_LABELS = {
     "NO_PAYABLE_SHOCK": "waiting for one sell at least as large as the $10 probe",
     "FULL_RECOVERY": "payable shock · waiting for full reserve recovery",
-    "P90_DWELL": "recovered · waiting for processed-p90 dwell",
+    "P90_DWELL": "recovered · waiting for a later same-mint event ≥ processed-p90",
     "FLOOR_SURVIVAL": "dwell passed · recovery floor eroded",
     "BUYER_BREADTH": "floor held · waiting for 3 buyers excluding seller",
     "RESERVE_COVER": "buyers passed · waiting for 6× probe/shock cover",
@@ -392,7 +392,16 @@ def _v21_candidate_row(mint: str, raw_events: list[dict], *, processed_p90_nanos
         shock_lamports = shock.pre_state.real_quote - shock.post_state.real_quote
         if shock.side != "sell" or shock_lamports < quote_input_lamports:
             continue
-        reached(1, "FULL_RECOVERY", largest_observed_sell_lamports=shock_lamports)
+        buyers = {event.trader for event in events[shock_index + 1:]
+                  if event.side == "buy" and event.trader != shock.trader}
+        cover = pac_v21_detector.RESERVE_SHOCK_COVER_MULTIPLE * max(
+            quote_input_lamports, shock_lamports)
+        observed = {
+            "buyer_breadth": len(buyers),
+            "largest_observed_sell_lamports": shock_lamports,
+            "reserve_cover_lamports": cover,
+        }
+        reached(1, "FULL_RECOVERY", **observed)
         recovery_index = next((index for index in range(shock_index + 1, len(events))
                                if events[index].post_state.real_quote
                                >= shock.pre_state.real_quote), None)
@@ -400,31 +409,20 @@ def _v21_candidate_row(mint: str, raw_events: list[dict], *, processed_p90_nanos
             continue
         dwell = latest.source_received_unix_nanos - events[recovery_index].source_received_unix_nanos
         span = latest.source_received_unix_nanos - shock.source_received_unix_nanos
-        reached(2, "P90_DWELL", dwell_nanos=dwell,
-                largest_observed_sell_lamports=shock_lamports)
+        reached(2, "P90_DWELL", dwell_nanos=dwell, **observed)
         if dwell < processed_p90_nanos or span > 180_000_000_000:
             continue
-        reached(3, "FLOOR_SURVIVAL", dwell_nanos=dwell,
-                largest_observed_sell_lamports=shock_lamports)
+        reached(3, "FLOOR_SURVIVAL", dwell_nanos=dwell, **observed)
         if any(event.post_state.real_quote < shock.pre_state.real_quote
                for event in events[recovery_index:]):
             continue
-        buyers = {event.trader for event in events[shock_index + 1:]
-                  if event.side == "buy" and event.trader != shock.trader}
-        reached(4, "BUYER_BREADTH", dwell_nanos=dwell, buyer_breadth=len(buyers),
-                largest_observed_sell_lamports=shock_lamports)
+        reached(4, "BUYER_BREADTH", dwell_nanos=dwell, **observed)
         if len(buyers) < pac_v21_detector.BUYER_BREADTH_MIN:
             continue
-        cover = pac_v21_detector.RESERVE_SHOCK_COVER_MULTIPLE * max(
-            quote_input_lamports, shock_lamports)
-        reached(5, "RESERVE_COVER", dwell_nanos=dwell, buyer_breadth=len(buyers),
-                largest_observed_sell_lamports=shock_lamports,
-                reserve_cover_lamports=cover)
+        reached(5, "RESERVE_COVER", dwell_nanos=dwell, **observed)
         if latest.post_state.real_quote < cover:
             continue
-        reached(6, "QUALIFIED", dwell_nanos=dwell, buyer_breadth=len(buyers),
-                largest_observed_sell_lamports=shock_lamports,
-                reserve_cover_lamports=cover)
+        reached(6, "QUALIFIED", dwell_nanos=dwell, **observed)
 
     qualification = pac_v21_detector.qualify(
         events, processed_p90_nanos=processed_p90_nanos,
@@ -440,6 +438,7 @@ def _v21_candidate_row(mint: str, raw_events: list[dict], *, processed_p90_nanos
         "current_reserve_lamports": current,
         "gate_depth": best.pop("depth"), "gate_label": _V21_GATE_LABELS[best["gate"]],
         "reaction_p90_nanos": processed_p90_nanos,
+        "dwell_clock": "SAME_MINT_EVENT_TIME_NOT_WALL_CLOCK",
         "reserve_cover_milli": (current * 1_000 // required
                                  if isinstance(required, int) and required > 0 else None),
         **best,

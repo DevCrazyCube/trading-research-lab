@@ -289,6 +289,29 @@ def main() -> int:
                      and v21_funnel["candidates"][0]["largest_observed_sell_lamports"]
                      == 150_000_000)
 
+        short_v21_rows = [dash.pac_v2_runner._event_dict(item)
+                          for item in v21_qualifying[:4]]
+        short_v21 = dash._v21_candidate_funnel(
+            {"V21-QUALIFIED-MINT": short_v21_rows},
+            processed_p90_nanos=2_000_000_000,
+            quote_input_lamports=100_000_000,
+            now=base + 4_000_000_000)
+        later_wall_clock = dash._v21_candidate_funnel(
+            {"V21-QUALIFIED-MINT": short_v21_rows},
+            processed_p90_nanos=2_000_000_000,
+            quote_input_lamports=100_000_000,
+            now=base + 10_000_000_000)
+        short_row = short_v21["candidates"][0]
+        ok &= _check("V2.1 UI shows observed buyers before dwell while wall time cannot fake dwell",
+                     short_row["gate"] == "P90_DWELL"
+                     and short_row["buyer_breadth"] == 3
+                     and short_row["dwell_nanos"] == 1_000_000_000
+                     and short_row["dwell_clock"] == "SAME_MINT_EVENT_TIME_NOT_WALL_CLOCK"
+                     and later_wall_clock["candidates"][0]["dwell_nanos"]
+                     == short_row["dwell_nanos"]
+                     and later_wall_clock["candidates"][0]["age_millis"]
+                     > short_row["age_millis"])
+
         future = _candidate_event(2, mint="FUTURE-MINT", base=base)
         try:
             dash._v2_candidate_funnel(
