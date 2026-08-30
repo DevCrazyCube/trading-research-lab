@@ -1,0 +1,18 @@
+{
+  "calibration_fee_payer": "4eksqZt6RNwFazUJ93MdKtE3rpWcTv3ZTtGhKUBfXk3L",
+  "campaign_id": "3c484545d3a6f4d9a17dd6df339df0ab08c36faadeb3f3dcbf5bffa02124c2b1",
+  "campaign_sha256": "3f9bcb61f6a5efbdfa978971877f1ef5e5bde9bffe03047aed929abbf95de5fc",
+  "evidence_mode": "FIRST_STATUS_OBSERVATION_PLUS_INDEPENDENT_FINALIZED_WIRE",
+  "instrument_id": "AFTERSHOCK_PAC_V22",
+  "max_lamports": 1000000,
+  "max_transactions": 120,
+  "memo_program_id": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+  "poll_interval_nanos": 100000000,
+  "processed_deadline_nanos": 30000000000,
+  "schema": 1,
+  "seal_sha256": "9f96201967587828152dd323f10f66415142be8f3414a239f1af9eade26e85d9",
+  "started_unix_nanos": 1788104915193179182,
+  "submit_endpoint_scheme_host": "https://api.mainnet.solana.com",
+  "transaction_profile": "LEGACY_SINGLE_SIGNER_CAMPAIGN_MEMO_ONLY",
+  "verification_endpoint_scheme_host": "https://api.mainnet-beta.solana.com"
+}
