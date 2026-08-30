@@ -258,6 +258,37 @@ def main() -> int:
                      and qualified_funnel["candidates"][0]["gate"] == "QUALIFIED"
                      and qualified_funnel["candidates"][0]["buyer_breadth"] == 3)
 
+        v21_qualifying = (
+            _candidate_event(0, mint="V21-QUALIFIED-MINT", base=base,
+                             pre_quote=1_200_000_000, post_quote=1_050_000_000,
+                             trader="seller", side="sell"),
+            _candidate_event(1, mint="V21-QUALIFIED-MINT", base=base,
+                             pre_quote=1_050_000_000, post_quote=1_120_000_000,
+                             trader="buyer-1"),
+            _candidate_event(2, mint="V21-QUALIFIED-MINT", base=base,
+                             pre_quote=1_120_000_000, post_quote=1_200_000_000,
+                             trader="buyer-2"),
+            _candidate_event(3, mint="V21-QUALIFIED-MINT", base=base,
+                             pre_quote=1_200_000_000, post_quote=1_240_000_000,
+                             trader="buyer-3"),
+            _candidate_event(4, mint="V21-QUALIFIED-MINT", base=base,
+                             pre_quote=1_240_000_000, post_quote=1_260_000_000,
+                             trader="buyer-3"),
+        )
+        v21_funnel = dash._v21_candidate_funnel(
+            {"V21-QUALIFIED-MINT": [dash.pac_v2_runner._event_dict(item)
+                                    for item in v21_qualifying]},
+            processed_p90_nanos=2_000_000_000,
+            quote_input_lamports=100_000_000,
+            now=base + 5_000_000_000)
+        ok &= _check("V2.1 dashboard trace matches the sealed single-shock detector",
+                     v21_funnel["summary"]["qualified_mints"] == 1
+                     and v21_funnel["summary"]["pac_core_mints"] == 1
+                     and v21_funnel["candidates"][0]["gate"] == "QUALIFIED"
+                     and v21_funnel["candidates"][0]["buyer_breadth"] == 3
+                     and v21_funnel["candidates"][0]["largest_observed_sell_lamports"]
+                     == 150_000_000)
+
         future = _candidate_event(2, mint="FUTURE-MINT", base=base)
         try:
             dash._v2_candidate_funnel(
@@ -286,6 +317,22 @@ def main() -> int:
             ok &= _check("anchored campaign remains visibly gated on calibration and attestation",
                          successor["status"]
                          == "CAMPAIGN_ANCHORED_CALIBRATION_AND_ATTESTATION_REQUIRED")
+
+        with (patch.object(dash, "_v21_successor_status",
+                           return_value={"activation": "ANCHORED"}),
+              patch.object(dash, "v21_snapshot",
+                           return_value={"instrument_id": "AFTERSHOCK_PAC_V21"})):
+            focused = dash.focus_snapshot()
+        ok &= _check("anchored V2.1 activation selects V2.1 as the dashboard focus",
+                     focused["instrument_id"] == "AFTERSHOCK_PAC_V21")
+
+        with (patch.object(dash, "_v21_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "v2_snapshot",
+                           return_value={"instrument_id": "AFTERSHOCK_PAC_V2"})):
+            focused = dash.focus_snapshot()
+        ok &= _check("dashboard keeps V2 control focused before V2.1 activation",
+                     focused["instrument_id"] == "AFTERSHOCK_PAC_V2")
 
     print("PAC DASHBOARD SELFTEST:", "PASS" if ok else "FAIL")
     return 0 if ok else 1

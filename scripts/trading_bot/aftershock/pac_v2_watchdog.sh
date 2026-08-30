@@ -10,6 +10,8 @@ WATCHDOG_LOCK="$RESEARCH/AFTERSHOCK_PAC_V2_WATCHDOG.lock"
 WATCHDOG_LOG="$RESEARCH/AFTERSHOCK_PAC_V2_WATCHDOG.log"
 SUPERVISOR_LOG="$RESEARCH/AFTERSHOCK_PAC_V2_SUPERVISOR.log"
 DASHBOARD_LOG="$RESEARCH/AFTERSHOCK_PAC_V2_DASHBOARD.log"
+V21_RUNNER_LOG="$RESEARCH/AFTERSHOCK_PAC_V21_RUNNER.log"
+V21_ACTIVATION="$RESEARCH/AFTERSHOCK_PAC_V21_ACTIVATION.json"
 ENV_FILE="${PAC_V2_ENV_FILE:-$ROOT/.env}"
 SUPERVISOR_MODULE="scripts.trading_bot.aftershock.pac_v2_supervisor"
 DASHBOARD_MODULE="scripts.trading_bot.memebot.dashboard.server"
@@ -29,6 +31,33 @@ module_running() {
   return 1
 }
 
+# Read one exact NAME=value assignment without sourcing the operator-owned file.  The previous
+# launcher sourced the whole file, so an unrelated malformed line could execute as a shell command
+# and pollute (or abort) PAC startup.
+env_value() {
+  local wanted="$1" line value
+  [[ -f "$ENV_FILE" ]] || return 1
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    case "$line" in
+      "$wanted="*)
+        value="${line#*=}"
+        if [[ "$value" == \'*\' && "$value" == *\' && ${#value} -ge 2 ]]; then
+          value="${value:1:${#value}-2}"
+        elif [[ "$value" == \"*\" && "$value" == *\" && ${#value} -ge 2 ]]; then
+          value="${value:1:${#value}-2}"
+        fi
+        printf '%s' "$value"
+        return 0
+        ;;
+    esac
+  done < "$ENV_FILE"
+  return 1
+}
+
+v21_running() {
+  tmux has-session -t pac-v21 2>/dev/null
+}
+
 launch_supervisor() {
   tmux kill-session -t pac-v2 2>/dev/null || true
   # Never leak the watchdog's singleton-lock descriptor into the tmux server. If the watchdog is
@@ -44,23 +73,37 @@ launch_dashboard() {
   printf '%s dashboard launch requested\n' "$(date -u +%FT%TZ)" >> "$WATCHDOG_LOG"
 }
 
+launch_v21() {
+  tmux kill-session -t pac-v21 2>/dev/null || true
+  tmux new-session -d -s pac-v21 "$0 --v21-runner" 9>&-
+  printf '%s PAC V2.1 runner launch requested\n' "$(date -u +%FT%TZ)" >> "$WATCHDOG_LOG"
+}
+
 case "${1:-}" in
   --supervise)
     cd "$ROOT" || exit 2
-    if [[ ! -f "$ENV_FILE" ]]; then
-      printf 'PAC V2 env file is absent\n' >&2
-      exit 2
-    fi
-    set -a
-    # The operator-owned file may contain unrelated shell lines; authority still fails closed below.
-    # shellcheck disable=SC1090
-    source "$ENV_FILE"
-    set +a
     if [[ -z "${PAC_V2_ATTEST_RPC_URL:-}" ]]; then
-      printf 'PAC_V2_ATTEST_RPC_URL is absent\n' >&2
-      exit 2
+      PAC_V2_ATTEST_RPC_URL="$(env_value PAC_V2_ATTEST_RPC_URL)" || {
+        printf 'PAC_V2_ATTEST_RPC_URL is absent\n' >&2
+        exit 2
+      }
     fi
+    export PAC_V2_ATTEST_RPC_URL
     exec python3 -m "$SUPERVISOR_MODULE" >> "$SUPERVISOR_LOG" 2>&1
+    ;;
+  --v21-runner)
+    cd "$ROOT" || exit 2
+    if [[ -z "${PAC_V21_ATTEST_RPC_URL:-}" ]]; then
+      PAC_V21_ATTEST_RPC_URL="$(env_value PAC_V21_ATTEST_RPC_URL)" || \
+        PAC_V21_ATTEST_RPC_URL="$(env_value PAC_V2_ATTEST_RPC_URL)" || {
+          printf 'PAC_V21_ATTEST_RPC_URL is absent\n' >&2
+          exit 2
+        }
+    fi
+    export PAC_V21_ATTEST_RPC_URL
+    exec python3 -c \
+      'from scripts.trading_bot.aftershock.pac_v21_runner import main; raise SystemExit(main())' \
+      >> "$V21_RUNNER_LOG" 2>&1
     ;;
   --dashboard)
     cd "$ROOT" || exit 2
@@ -76,6 +119,11 @@ case "${1:-}" in
       printf 'dashboard=running\n'
     else
       printf 'dashboard=stopped\n'
+    fi
+    if v21_running; then
+      printf 'pac_v21_runner=running\n'
+    else
+      printf 'pac_v21_runner=stopped\n'
     fi
     exit 0
     ;;
@@ -101,6 +149,9 @@ while true; do
   fi
   if ! module_running "$DASHBOARD_MODULE"; then
     launch_dashboard
+  fi
+  if [[ -f "$V21_ACTIVATION" ]] && ! v21_running; then
+    launch_v21
   fi
   # The child timer is not the lock owner and must not transiently inherit fd 9 either.
   sleep 5 9>&-

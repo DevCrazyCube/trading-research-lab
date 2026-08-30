@@ -1239,7 +1239,7 @@ def pac_view() -> dict:
     performance arithmetic and never mutates the runner."""
     try:
         from scripts.trading_bot.aftershock import pac_dashboard as _pac_dashboard
-        return _pac_dashboard.v2_snapshot()
+        return _pac_dashboard.focus_snapshot()
     except Exception as e:  # noqa: BLE001 -- a broken evidence adapter must stay visibly unavailable
         return {
             "instrument_id": "AFTERSHOCK_PAC_V2",

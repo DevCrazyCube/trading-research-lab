@@ -987,7 +987,7 @@ function pacEquityChart(raw, evidenceStatus, pendingCount=0){
 function renderPAC(){
   const app=document.getElementById("app"), d=state.pac;
   app.innerHTML=`
-    <div class="pagehd pac-head"><h2>Aftershock PAC · V2 · mainnet-calibrated</h2><span class="pill">PAYABLE ABSORPTION COMPRESSION</span><span class="grow"></span><span id="pacStatusBadge" class="killtag halt">loading</span></div>
+    <div class="pagehd pac-head"><h2 id="pacTitle">Aftershock PAC</h2><span class="pill">PAYABLE ABSORPTION COMPRESSION</span><span class="grow"></span><span id="pacStatusBadge" class="killtag halt">loading</span></div>
     <div id="pacBoundary" class="pac-boundary"></div>
     <section id="pacChallenger" class="pac-boundary"></section>
     <section id="pacStrip" class="strip"></section>
@@ -1013,6 +1013,8 @@ function renderPACView(){
   const healthyScenario=validScenario||activeScanning;
   const validPromotion=d.evidence_status==="VALID_PAPER_SCENARIO";
   const noData=d.evidence_status==="NO_FORWARD_EVIDENCE";
+  const isV21=d.instrument_id==="AFTERSHOCK_PAC_V21";
+  const title=document.getElementById("pacTitle"); if(title) title.textContent=d.title||d.instrument_id||"Aftershock PAC";
   const statusBadge=document.getElementById("pacStatusBadge");
   if(statusBadge){ statusBadge.className=`killtag ${healthyScenario?'alive':'halt'}`; statusBadge.textContent=esc(d.evidence_status||"REFUSED"); }
   const boundary=document.getElementById("pacBoundary");
@@ -1027,20 +1029,22 @@ function renderPACView(){
   const scannedMB=((op0.events_consumed_bytes||0)/1e6).toFixed(0);
   const v2Active=(op0.status||"").indexOf("ACTIVE")===0;
   if(challengerBox) challengerBox.innerHTML=
-    `<strong style="color:${v2Active?"#5fd07a":"#c8c8c8"}">▸ V2 LIVE · ${esc(op0.status||"—")}</strong>`+
+    `<strong style="color:${v2Active?"#5fd07a":"#c8c8c8"}">▸ ${isV21?"V2.1":"V2"} LIVE · ${esc(op0.status||"—")}</strong>`+
     `<span class="pac-v2-live" style="display:block;margin:4px 0;color:${v2Active?"#5fd07a":"#c8c8c8"};font-weight:600">`+
     `${esc(op0.last_status||"—")} · p90 ${p90s} · scanned ${scannedMB}MB feed · seal ${esc(op0.seal||"?")} · activation ${esc(op0.activation||"?")} · processes supervisor/feed/runner ${cp.supervisor?"up":"down"}/${cp.feed?"up":"down"}/${cp.runner?"up":"down"}</span>`+
-    `<span style="display:block;margin:4px 0;color:${successor.seal==="ANCHORED"?"#e8b153":"#ff4d4d"};font-weight:600">`+
+    (isV21
+      ? `<span style="display:block;color:#8a8a8a">CONTROL · ${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V2")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`
+      : `<span style="display:block;margin:4px 0;color:${successor.seal==="ANCHORED"?"#e8b153":"#ff4d4d"};font-weight:600">`+
     `▸ NEXT · ${esc(successor.instrument_id||"AFTERSHOCK_PAC_V21")} · ${esc(successor.status||"UNKNOWN")} · seal ${esc(successor.seal||"?")} · campaign ${esc(successor.campaign||"?")} · activation ${esc(successor.activation||"?")}</span>`+
     `<span style="display:block;color:#8a93a0">${esc(successor.formula||"")} · ${esc(successor.boundary||"")}</span>`+
-    `<span style="display:block;color:#8a8a8a">${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V1")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`;
+    `<span style="display:block;color:#8a8a8a">${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V1")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`);
   const cells=[
-    ["Capital index",pacNum(perf.normalized_capital_index,2),`uncalibrated scenario index`,validScenario?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
+    ["Capital index",pacNum(perf.normalized_capital_index,2),`normalized paper index`,validScenario?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
     ["Mean all-cost R",perf.mean_return_r==null?"—":(Number(perf.mean_return_r)>=0?"+":"")+pacNum(perf.mean_return_r,3),`${perf.resolved||0} fully reconciled`,perf.mean_return_r==null?"muted":(Number(perf.mean_return_r)>0?"pos":"neg")],
     ["Win rate",pacPct(perf.win_rate),`${perf.wins||0} wins · ${perf.losses||0} losses`,""],
     ["Unexitable",pacPct(perf.unexitable_rate),`${perf.full_losses||0} full losses`,perf.unexitable_rate==null?"muted":(Number(perf.unexitable_rate)<.13?"pos":"neg")],
     ["Max drawdown",pacPct(perf.max_drawdown),"normalized 100-index",perf.max_drawdown==null?"muted":""],
-    ["Discovery",`${perf.promotion_discovery_resolved||0} / ${perf.minimum_discovery||100}`,`${perf.scenario_resolved||0} uncalibrated scenario outcomes`,""],
+    ["Discovery",`${perf.promotion_discovery_resolved||0} / ${perf.minimum_discovery||100}`,`${perf.scenario_resolved||0} fully-costed paper outcomes`,""],
     ["Pending",String(pendings.length),pendings.length?`${String(pendings[0].side||"order").toLowerCase()} awaiting causal fill`:"no order waiting",pendings.length?"warn":""],
     ["Open",String(opens.length),"max one filled position",""],
     ["Seal",esc(op.seal||"?"),`activation ${op.activation||"?"} · ${op.dependency_count||"?"} deps`,op.seal==="ANCHORED"?"pos":"neg"],
@@ -1055,7 +1059,7 @@ function renderPACView(){
     const feed=(op.solusd||{}).status==="FRESH";
     const bufferCount=Number(op.active_mint_buffers||0);
     const stateValid=op.state==="VALID" && cp.supervisor && cp.feed && cp.runner;
-    const calibrated=op.latency_calibration==="CALIBRATED_FINALIZED_RPC" || op.latency_calibration==="CALIBRATED_FORWARD_CLOCKS";
+    const calibrated=String(op.latency_calibration||"").startsWith("CALIBRATED_");
     const rows=[
       [op.seal==="ANCHORED","seal",op.seal||"unknown"],
       [op.activation==="ANCHORED","activation",op.activation||"unknown"],
@@ -1073,7 +1077,7 @@ function renderPACView(){
   }
   const funnel=d.candidate_funnel||{}, funnelSummary=funnel.summary||{}, candidates=funnel.candidates||[];
   const candidateBody=document.getElementById("pacCandidateBody");
-  const gateBadge=gate=>gate==="QUALIFIED"?"b-open":(gate==="NO_PAC_CORE"?"b-null":"b-pending");
+  const gateBadge=gate=>gate==="QUALIFIED"?"b-open":(["NO_PAC_CORE","NO_PAYABLE_SHOCK"].includes(gate)?"b-null":"b-pending");
   const candidateRows=candidates.map(c=>{
     const dwell=c.dwell_nanos==null?"—":`${(Number(c.dwell_nanos)/1e9).toFixed(2)}s / ${(Number(c.reaction_p90_nanos)/1e9).toFixed(2)}s`;
     const cover=c.reserve_cover_milli==null?"—":`${(Number(c.current_reserve_lamports)/1e9).toFixed(3)} / ${(Number(c.reserve_cover_lamports)/1e9).toFixed(3)} SOL`;
@@ -1083,7 +1087,9 @@ function renderPACView(){
   });
   if(candidateBody) candidateBody.innerHTML=candidateRows.join("")||`<tr><td class="empty l" colspan="7">No active mint buffer in the current 180-second causal window. The feed can still be healthy between Pump trades.</td></tr>`;
   const candidateCount=document.getElementById("pacCandidateCount");
-  if(candidateCount) candidateCount.textContent=`${funnelSummary.buffered_mints||0} mints · ${funnelSummary.eligible_events||0} events · ${funnelSummary.pac_core_mints||0} PAC core · ${funnelSummary.p90_dwell_mints||0} dwell pass · ${funnelSummary.qualified_mints||0} qualified`;
+  if(candidateCount) candidateCount.textContent=isV21
+    ? `${funnelSummary.buffered_mints||0} mints · ${funnelSummary.eligible_events||0} events · ${funnelSummary.pac_core_mints||0} payable shocks · ${funnelSummary.p90_dwell_mints||0} dwell pass · ${funnelSummary.qualified_mints||0} qualified`
+    : `${funnelSummary.buffered_mints||0} mints · ${funnelSummary.eligible_events||0} events · ${funnelSummary.pac_core_mints||0} PAC core · ${funnelSummary.p90_dwell_mints||0} dwell pass · ${funnelSummary.qualified_mints||0} qualified`;
   const body=document.getElementById("pacBody"), activity=d.activity||[];
   const refusal=d.last_measurement_refusal;
   const pendingRows=pendings.map(p=>{

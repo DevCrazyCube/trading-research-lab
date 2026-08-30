@@ -3487,3 +3487,28 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
   seal/campaign/activation stages and frozen formula as a successor banner. Missing artifacts remain
   visibly absent; the dashboard does not create campaigns, run verification, start V2.1, or map V2 data
   into V2.1 performance. This read-only adapter is outside both strategy dependency closures.
+
+## 2026-08-30 — PAC V2.1 activated paper runtime becomes the dashboard focus
+
+- **Verified fact:** The owner-approved, memo-only V2.1 calibration campaign made 107 attempts: 100
+  reached processed status and seven failed visibly. Independent rereads against the separately pinned
+  verification RPC matched all 100 signed transactions. The measured decision-to-processed p90 is
+  5,072,175,666 ns. The fee payer's finalized balance decreased by 510,000 lamports, within the explicit
+  1,000,000-lamport campaign cap. The campaign, complete evidence, attestation, and set-once activation
+  are anchored in separate ordered commits. These memo transactions calibrate a scenario clock; they are
+  not strategy orders and provide no trading-performance evidence.
+- **Decision:** Once that V2.1 activation is anchored, `#/pac` focuses the isolated V2.1 state and ledger.
+  Before any resolved fill, the page exposes the live causal one-shock funnel—mint buffers, eligible
+  events, payable shocks, dwell, buyer breadth, reserve cover, and the exact deepest sealed gate—rather
+  than presenting an empty activity table as if the scanner were idle. The trace cross-checks
+  qualification against the sealed detector and cannot create an order or performance row. V2 remains a
+  labelled control only; its outcomes are never substituted into V2.1.
+- **Decision:** The existing operational watchdog also owns V2.1 process recovery after activation. It
+  launches only the paper runner, preserves its restart-safe state/ledger, and never sends a strategy
+  transaction. It reads only the required RPC assignment from the operator environment instead of
+  sourcing unrelated shell lines. Immutable V2.1 authority validation is cached by file/Git metadata for
+  the read-only dashboard; causal state, process health, candidate gates, and performance remain freshly
+  read on every API refresh.
+- **Boundary:** V2.1 is `PAPER SCENARIO ONLY · NO WALLET · NO ORDERS`. Zero resolved fills means zero
+  performance evidence, not zero scanner activity. Profitability, promotion, and real-money trading all
+  remain refused until the project gates are independently met.

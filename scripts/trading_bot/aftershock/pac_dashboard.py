@@ -12,6 +12,7 @@ import copy
 import hashlib
 import json
 import pathlib
+import subprocess
 import threading
 import time
 
@@ -23,6 +24,8 @@ from . import (
     pac_v2_runner,
     pac_v2_status,
     pac_v21_manifest,
+    pac_v21_detector,
+    pac_v21_runner,
     solusd_recorder,
 )
 from .execution import RefusedExecution
@@ -37,6 +40,11 @@ STATE_SCHEMA = 3
 _STATUS_TTL_SECONDS = 60.0
 _STATUS_CACHE: dict = {"at": 0.0, "value": None}
 _STATUS_LOCK = threading.Lock()
+_V21_AUTHORITY_LOCK = threading.Lock()
+_V21_SUCCESSOR_CACHE: dict = {"key": None, "value": None}
+_V21_PROOF_CACHE: dict = {"key": None, "value": None}
+_V2_CONTROL_CACHE: dict = {"at": 0.0, "value": None}
+_V2_CONTROL_TTL_SECONDS = 30.0
 
 
 def _exact_int(label: str, value, *, minimum: int | None = None) -> int:
@@ -130,8 +138,32 @@ def _latest_solusd_status() -> dict:
         return {"status": "REFUSED", "reason": str(exc)[:180]}
 
 
+def _v21_authority_key() -> tuple:
+    """Cheap invalidation key for immutable authority checks; live state is never cached here."""
+    paths = (
+        pac_v21_manifest.PREREG, pac_v21_manifest.FROZEN, pac_v21_manifest.SEAL,
+        pac_v21_manifest.CAMPAIGN, pac_v21_manifest.JOURNAL, pac_v21_manifest.SAMPLES,
+        pac_v21_manifest.ATTESTATIONS, pac_v21_manifest.ACTIVATION,
+        *(ROOT / relative for relative in pac_v21_manifest.DEPENDENCY_PATHS),
+        ROOT / ".git" / "HEAD", ROOT / ".git" / "index",
+    )
+    key = []
+    for path in paths:
+        try:
+            stat = path.stat()
+        except OSError:
+            key.append((str(path), None, None))
+        else:
+            key.append((str(path), stat.st_mtime_ns, stat.st_size))
+    return tuple(key)
+
+
 def _v21_successor_status() -> dict:
     """Read-only V2.1 authority progress; never loads a signer, sends, or runs the candidate."""
+    key = _v21_authority_key()
+    with _V21_AUTHORITY_LOCK:
+        if _V21_SUCCESSOR_CACHE["key"] == key:
+            return copy.deepcopy(_V21_SUCCESSOR_CACHE["value"])
     seal = pac_v21_manifest.anchor_status()
 
     def artifact(path: pathlib.Path) -> str:
@@ -154,7 +186,7 @@ def _v21_successor_status() -> dict:
     else:
         # Runtime still repeats live finalized verification; the dashboard never weakens that gate.
         stage = "ACTIVATION_ANCHORED_RUNTIME_LIVE_VERIFY_REQUIRED"
-    return {
+    value = {
         "instrument_id": pac_v21_manifest.INSTRUMENT,
         "status": stage,
         "seal": seal,
@@ -164,6 +196,9 @@ def _v21_successor_status() -> dict:
         "formula": "1 payable shock · full recovery/floor · processed p90 · ≥3 buyers · 6× cover",
         "boundary": "PAPER CANDIDATE · DEFAULT OFF · NO PERFORMANCE EVIDENCE",
     }
+    with _V21_AUTHORITY_LOCK:
+        _V21_SUCCESSOR_CACHE.update({"key": key, "value": copy.deepcopy(value)})
+    return value
 
 
 _V2_GATE_LABELS = {
@@ -314,6 +349,126 @@ def _v2_candidate_funnel(buffers: dict, *, reaction_p90_nanos: int,
         "boundary": "READ_ONLY_CAUSAL_BUFFER_DIAGNOSTIC_NOT_A_TRADE_OR_PERFORMANCE_ROW",
         "quote_input_lamports": quote_input_lamports,
         "summary": summary,
+        "candidates": candidates[:100],
+    }
+
+
+_V21_GATE_LABELS = {
+    "NO_PAYABLE_SHOCK": "waiting for one sell at least as large as the $10 probe",
+    "FULL_RECOVERY": "payable shock · waiting for full reserve recovery",
+    "P90_DWELL": "recovered · waiting for processed-p90 dwell",
+    "FLOOR_SURVIVAL": "dwell passed · recovery floor eroded",
+    "BUYER_BREADTH": "floor held · waiting for 3 buyers excluding seller",
+    "RESERVE_COVER": "buyers passed · waiting for 6× probe/shock cover",
+    "QUALIFIED": "all frozen V2.1 entry gates passed",
+}
+
+
+def _v21_candidate_row(mint: str, raw_events: list[dict], *, processed_p90_nanos: int,
+                       quote_input_lamports: int, now: int) -> dict:
+    if (not isinstance(mint, str) or not mint or not isinstance(raw_events, list)
+            or type(processed_p90_nanos) is not int or processed_p90_nanos <= 0
+            or type(quote_input_lamports) is not int or quote_input_lamports <= 0
+            or type(now) is not int or now < 0):
+        raise RefusedExecution("PAC V2.1 candidate diagnostic input is invalid")
+    events = tuple(pac_v2_runner._event(item) for item in raw_events)
+    if (not events or any(event.mint != mint for event in events)
+            or not pac_v2_detector._valid_stream(events)
+            or events[-1].source_received_unix_nanos > now):
+        raise RefusedExecution("PAC V2.1 candidate stream is non-causal or mismatched")
+    latest = events[-1]
+    best = {"depth": 0, "gate": "NO_PAYABLE_SHOCK",
+            "gate_detail": _V21_GATE_LABELS["NO_PAYABLE_SHOCK"],
+            "dwell_nanos": None, "buyer_breadth": 0,
+            "largest_observed_sell_lamports": None, "reserve_cover_lamports": None}
+
+    def reached(depth: int, gate: str, **metrics) -> None:
+        if depth > best["depth"]:
+            best.update({"depth": depth, "gate": gate,
+                         "gate_detail": _V21_GATE_LABELS[gate], **metrics})
+
+    for shock_index in range(len(events) - 2, -1, -1):
+        shock = events[shock_index]
+        shock_lamports = shock.pre_state.real_quote - shock.post_state.real_quote
+        if shock.side != "sell" or shock_lamports < quote_input_lamports:
+            continue
+        reached(1, "FULL_RECOVERY", largest_observed_sell_lamports=shock_lamports)
+        recovery_index = next((index for index in range(shock_index + 1, len(events))
+                               if events[index].post_state.real_quote
+                               >= shock.pre_state.real_quote), None)
+        if recovery_index is None:
+            continue
+        dwell = latest.source_received_unix_nanos - events[recovery_index].source_received_unix_nanos
+        span = latest.source_received_unix_nanos - shock.source_received_unix_nanos
+        reached(2, "P90_DWELL", dwell_nanos=dwell,
+                largest_observed_sell_lamports=shock_lamports)
+        if dwell < processed_p90_nanos or span > 180_000_000_000:
+            continue
+        reached(3, "FLOOR_SURVIVAL", dwell_nanos=dwell,
+                largest_observed_sell_lamports=shock_lamports)
+        if any(event.post_state.real_quote < shock.pre_state.real_quote
+               for event in events[recovery_index:]):
+            continue
+        buyers = {event.trader for event in events[shock_index + 1:]
+                  if event.side == "buy" and event.trader != shock.trader}
+        reached(4, "BUYER_BREADTH", dwell_nanos=dwell, buyer_breadth=len(buyers),
+                largest_observed_sell_lamports=shock_lamports)
+        if len(buyers) < pac_v21_detector.BUYER_BREADTH_MIN:
+            continue
+        cover = pac_v21_detector.RESERVE_SHOCK_COVER_MULTIPLE * max(
+            quote_input_lamports, shock_lamports)
+        reached(5, "RESERVE_COVER", dwell_nanos=dwell, buyer_breadth=len(buyers),
+                largest_observed_sell_lamports=shock_lamports,
+                reserve_cover_lamports=cover)
+        if latest.post_state.real_quote < cover:
+            continue
+        reached(6, "QUALIFIED", dwell_nanos=dwell, buyer_breadth=len(buyers),
+                largest_observed_sell_lamports=shock_lamports,
+                reserve_cover_lamports=cover)
+
+    qualification = pac_v21_detector.qualify(
+        events, processed_p90_nanos=processed_p90_nanos,
+        quote_input_lamports=quote_input_lamports)
+    if (qualification is None) != (best["depth"] < 6):
+        raise RefusedExecution("PAC V2.1 dashboard trace diverged from sealed qualification")
+    current = latest.post_state.real_quote
+    required = best["reserve_cover_lamports"]
+    return {
+        "mint": mint, "event_count": len(events),
+        "latest_source_received_unix_nanos": latest.source_received_unix_nanos,
+        "age_millis": (now - latest.source_received_unix_nanos) // 1_000_000,
+        "current_reserve_lamports": current,
+        "gate_depth": best.pop("depth"), "gate_label": _V21_GATE_LABELS[best["gate"]],
+        "reaction_p90_nanos": processed_p90_nanos,
+        "reserve_cover_milli": (current * 1_000 // required
+                                 if isinstance(required, int) and required > 0 else None),
+        **best,
+    }
+
+
+def _v21_candidate_funnel(buffers: dict, *, processed_p90_nanos: int,
+                          quote_input_lamports: int, now: int) -> dict:
+    if not isinstance(buffers, dict):
+        raise RefusedExecution("PAC V2.1 candidate buffers are invalid")
+    candidates = [_v21_candidate_row(
+        mint, rows, processed_p90_nanos=processed_p90_nanos,
+        quote_input_lamports=quote_input_lamports, now=now)
+        for mint, rows in buffers.items()]
+    candidates.sort(key=lambda row: (-row["gate_depth"],
+                                     -row["latest_source_received_unix_nanos"], row["mint"]))
+    return {
+        "boundary": "READ_ONLY_V21_CAUSAL_BUFFER_DIAGNOSTIC_NOT_TRADE_OR_PERFORMANCE",
+        "quote_input_lamports": quote_input_lamports,
+        "summary": {
+            "buffered_mints": len(candidates),
+            "eligible_events": sum(row["event_count"] for row in candidates),
+            "pac_core_mints": sum(row["gate_depth"] >= 1 for row in candidates),
+            "p90_dwell_mints": sum(row["gate_depth"] >= 3 for row in candidates),
+            "probe_cover_mints": sum(row["gate_depth"] >= 1 for row in candidates),
+            "recovery_survival_mints": sum(row["gate_depth"] >= 4 for row in candidates),
+            "buyer_breadth_mints": sum(row["gate_depth"] >= 5 for row in candidates),
+            "qualified_mints": sum(row["gate_depth"] >= 6 for row in candidates),
+        },
         "candidates": candidates[:100],
     }
 
@@ -749,6 +904,198 @@ def v2_snapshot() -> dict:
         "successor": _v21_successor_status(),
         "generated_at": time.time(),
     }
+
+
+def _tmux_running(name: str) -> bool:
+    try:
+        return subprocess.run(
+            ["tmux", "has-session", "-t", name], capture_output=True,
+            timeout=2, check=False).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def _v21_offline_proof() -> pac_v21_runner.RuntimeProof:
+    key = _v21_authority_key()
+    with _V21_AUTHORITY_LOCK:
+        if _V21_PROOF_CACHE["key"] == key:
+            return _V21_PROOF_CACHE["value"]
+    seal = pac_v21_manifest.verify_seal()
+    if (pac_v21_manifest.anchor_status() != "ANCHORED"
+            or not pac_v21_manifest._git_clean(pac_v21_manifest.ACTIVATION)):
+        raise RefusedExecution("PAC V2.1 dashboard authority is not anchored")
+    activation = pac_v21_manifest._json(pac_v21_manifest.ACTIVATION)
+    pac_v21_manifest._activation_body(activation, seal)
+    closed = pac_v21_manifest._load_bound_evidence(activation)
+    pac_v21_manifest._activation_body(activation, seal, closed)
+    proof = pac_v21_runner.RuntimeProof(
+        seal["seal_sha256"], activation["activation_unix_nanos"], closed.calibration)
+    with _V21_AUTHORITY_LOCK:
+        _V21_PROOF_CACHE.update({"key": key, "value": proof})
+    return proof
+
+
+def _v2_processes() -> dict:
+    return {
+        "supervisor": pac_v2_status._module_process(
+            "scripts.trading_bot.aftershock.pac_v2_supervisor"),
+        "feed": pac_v2_status._module_process(
+            "scripts.trading_bot.aftershock.pac_v2_feed"),
+        "runner": pac_v2_status._module_process(
+            "scripts.trading_bot.aftershock.pac_v2_runner"),
+    }
+
+
+def _v2_control_status() -> dict:
+    """Cache V2's immutable authority audit; refresh its process health on every dashboard read."""
+    now = time.monotonic()
+    with _STATUS_LOCK:
+        cached = _V2_CONTROL_CACHE["value"]
+        if cached is None or now - _V2_CONTROL_CACHE["at"] >= _V2_CONTROL_TTL_SECONDS:
+            cached = pac_v2_status.status()
+            _V2_CONTROL_CACHE.update({"at": now, "value": copy.deepcopy(cached)})
+        value = copy.deepcopy(cached)
+    processes = _v2_processes()
+    value["processes"] = processes
+    if value.get("state") == "VALID":
+        value["status"] = ("ACTIVE_AUTHENTICATED_PAPER_SCENARIO"
+                           if all(processes.values()) else "READY_AUTHENTICATED_NOT_RUNNING")
+    return value
+
+
+def v21_snapshot(*, successor_status: dict | None = None) -> dict:
+    """Authenticated V2.1 paper book and causal candidate funnel; performs no live verification RPC."""
+    led, state_path = pac_v21_runner.LEDGER, pac_v21_runner.STATE
+    rows: list[dict] = []
+    state: dict = {}
+    state_error = None
+    try:
+        proof = _v21_offline_proof()
+        state = json.loads(state_path.read_text())
+        with pac_v21_runner._configured_core():
+            pac_v2_runner._validate_state(state, pac_v21_runner._bridge(proof))
+            if led.exists():
+                for number, line in enumerate(led.read_text().splitlines(), 1):
+                    if not line.strip():
+                        continue
+                    try:
+                        row = json.loads(line)
+                    except json.JSONDecodeError as exc:
+                        raise RefusedExecution(
+                            f"PAC V2.1 ledger line {number} is malformed") from exc
+                    pac_v2_runner._validate_ledger(row)
+                    rows.append(row)
+    except (OSError, ValueError, RefusedExecution) as exc:
+        proof = None
+        state_error = f"PAC V2.1 dashboard refused: {str(exc)[:180]}"
+
+    resolved_rows = [row for row in rows if row.get("kind") == "resolved"]
+    perf_rows, activity = [], []
+    for row in resolved_rows:
+        num, den = row.get("net_return_num"), row.get("net_return_den")
+        if not (type(num) is int and type(den) is int and den > 0):
+            state_error = "PAC V2.1 resolved return is not exact"
+            perf_rows, activity = [], []
+            break
+        full = bool(row.get("unexitable_full_loss"))
+        ret = Fraction(num, den)
+        perf_rows.append({"return": ret, "unexitable_full_loss": full})
+        entry_all_in = int(row.get("entry_all_in_lamports") or 0)
+        activity.append({
+            "kind": "resolved", "mint": row.get("mint", "—"),
+            "return_r": _decimal(ret, 4), "entry_all_in_lamports": entry_all_in,
+            "exit_net_proceeds_lamports": max(0, num + entry_all_in),
+            "action": row.get("action", "—"), "unexitable_full_loss": full})
+    performance = _performance(perf_rows)
+    performance["scenario_resolved"] = performance["resolved"]
+    performance["promotion_discovery_resolved"] = performance["resolved"]
+    performance["discovery_progress"] = _decimal(
+        Fraction(min(performance["resolved"], 100), 100), 4)
+
+    op, pending = state.get("open_position"), state.get("pending_order")
+    open_positions = ([{"mint": op.get("mint", "—"),
+                        "entry_all_in_lamports": int(op.get("entry_all_in_lamports") or 0)}]
+                      if isinstance(op, dict) else [])
+    pending_orders = ([{"mint": pending.get("mint", "—"),
+                        "side": pending.get("side", "ORDER"),
+                        "amount": int(pending.get("amount") or 0),
+                        "return_denominator_lamports": int(pending.get("amount") or 0)}]
+                      if isinstance(pending, dict) else [])
+    empty_summary = {"buffered_mints": 0, "eligible_events": 0, "pac_core_mints": 0,
+                     "p90_dwell_mints": 0, "probe_cover_mints": 0,
+                     "recovery_survival_mints": 0, "buyer_breadth_mints": 0,
+                     "qualified_mints": 0}
+    candidate_funnel = {"boundary": "V21_DIAGNOSTIC_UNAVAILABLE",
+                        "quote_input_lamports": None, "summary": empty_summary,
+                        "candidates": []}
+    if state_error is None and proof is not None:
+        try:
+            now = time.time_ns()
+            candidate_funnel = _v21_candidate_funnel(
+                state["buffers"], processed_p90_nanos=proof.calibration.processed_p90_nanos,
+                quote_input_lamports=pac_v2_runner._quote_input(now), now=now)
+        except (OSError, ValueError, RefusedExecution) as exc:
+            state_error = f"PAC V2.1 candidate funnel refused: {str(exc)[:180]}"
+    summary = candidate_funnel["summary"]
+    v2 = _v2_control_status()
+    runner_up = _tmux_running("pac-v21")
+    operational = {
+        "instrument_id": pac_v21_manifest.INSTRUMENT,
+        "status": ("ACTIVE_AUTHENTICATED_PAPER_SCENARIO" if runner_up and state_error is None
+                   else "ACTIVE_RUNTIME_REFUSED"),
+        "seal": pac_v21_manifest.anchor_status(), "campaign": "ANCHORED_PRE_SAMPLING",
+        "activation": "ANCHORED", "dependency_count": len(pac_v21_manifest.DEPENDENCY_PATHS),
+        "reaction_p90_nanos": (proof.calibration.processed_p90_nanos if proof else None),
+        "processed_samples": (proof.calibration.processed_samples if proof else None),
+        "failed_samples": (proof.calibration.failed_samples if proof else None),
+        "state": "VALID" if state_error is None else "REFUSED",
+        "processes": {"supervisor": bool((v2.get("processes") or {}).get("supervisor")),
+                      "feed": bool((v2.get("processes") or {}).get("feed")),
+                      "runner": runner_up},
+        "solusd": _latest_solusd_status(), "latency_calibration": "CALIBRATED_PROCESSED_RPC",
+        "last_status": state.get("last_status"),
+        "events_consumed_bytes": (state.get("cursor") or {}).get("event_offset") or 0,
+        "active_mint_buffers": summary["buffered_mints"],
+        "eligible_feed_events": summary["eligible_events"],
+        "scan_interval_millis": int(pac_v21_runner.SCAN_INTERVAL_SECONDS * 1_000),
+        "runner_audit": "PASS_CAUSAL_STATE_VALID" if state_error is None else "REFUSED",
+        "open_gates": (["100 resolved forward paper positions"]
+                       if performance["resolved"] < 100 else []),
+    }
+    evidence_status = ("VALID_CALIBRATED_PAPER_SCENARIO" if resolved_rows
+                       else "ACTIVE_CALIBRATED_SCANNING_NO_FILLS_YET")
+    if state_error:
+        evidence_status = "REFUSED_LEDGER_OR_RUNTIME_INTEGRITY"
+    return {
+        "instrument_id": pac_v21_manifest.INSTRUMENT,
+        "title": "Single-Shock Payable Absorption · V2.1 (processed-calibrated)",
+        "boundary": "PAPER SCENARIO ONLY · NO WALLET · NO ORDERS · NOT A PROFIT CLAIM",
+        "evidence_status": evidence_status,
+        "integrity_errors": [state_error] if state_error else [],
+        "operational": operational,
+        "formula": "W≥$10 · full recovery/floor · processed p90 · ≥3 buyers · 6× max(probe, shock)",
+        "formula_note": "one payable sell absorbed, reserve recovery survives, then causal paper entry",
+        "policy": {"bankroll_index_start": "100.00", "probe_index_points": "10.00",
+                   "trail_percent": 12, "coverage_multiple": 6,
+                   "max_hold_minutes": 12, "max_concurrent_positions": 1},
+        "performance": performance, "open_positions": open_positions,
+        "pending_orders": pending_orders, "last_measurement_refusal": None,
+        "candidate_funnel": candidate_funnel,
+        "activity": list(reversed(activity[-100:])), "ledger_rows": len(rows),
+        "challenger": {"instrument_id": "AFTERSHOCK_PAC_V2", "status": v2.get("status"),
+                       "note": "V2 remains the frozen two-shock control; V2.1 is now the focused book.",
+                       "live": _v2_live(), "processes": v2.get("processes") or {}},
+        "successor": (copy.deepcopy(successor_status) if successor_status is not None
+                      else _v21_successor_status()),
+        "generated_at": time.time(),
+    }
+
+
+def focus_snapshot() -> dict:
+    successor = _v21_successor_status()
+    if successor["activation"] == "ANCHORED":
+        return v21_snapshot(successor_status=successor)
+    return v2_snapshot()
 
 
 def _v2_live() -> dict:
