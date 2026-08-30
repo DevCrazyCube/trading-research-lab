@@ -1,0 +1,16 @@
+{
+  "activation_sha256": "e5a1208f1f750d37d1cfec1b1fa2e2efdf2cd1763dddc7c4e06d21d914d6fa9c",
+  "activation_unix_nanos": 1788133375175169562,
+  "attestations_sha256": "4ac18a307b2760435f71d8acad63171b95f97ef5d86513c8bfcd1f50e0cd85ae",
+  "campaign_sha256": "d3424342930d0338c1080e39954818aa61dfb69263cb96fbfabb5c2379748c9a",
+  "failed_samples": 6,
+  "instrument_id": "AFTERSHOCK_PAC_V24",
+  "journal_sha256": "a0932891e3a0a1c685bc8494afa6ae9ba1d342536bb2075fa497b87ce6f653d9",
+  "live_verification_digest": "88a28589d05a23516ebb24b63faa4085f22bea8dc1e5a310683c37480ef2f425",
+  "live_verification_origin": "https://api.mainnet-beta.solana.com",
+  "processed_p90_nanos": 3788307712,
+  "processed_samples": 100,
+  "samples_sha256": "6ba0fb51e08af237ec14a2e21b30e6836bdb35398d0f3a991e64651279511a15",
+  "schema": 1,
+  "seal_sha256": "0a9885d2c55a660e4fd7f18667d38db790af9b3535c3c59d5f284cb4ff228ac1"
+}
