@@ -49,6 +49,12 @@ SCAN_INTERVAL_SECONDS = 0.10
 # observable before an unexitable full loss is booked (the 12-minute horizon is the hard backstop).
 POSITION_REFRESH_INTERVAL_NANOS = 2_000_000_000
 POOL_GRACE_NANOS = 120_000_000_000
+# On a CONFIRMED full-position exit the token account is emptied and can be closed, refunding its
+# rent-exemption deposit (the single largest toll component) minus one closeAccount transaction's gas.
+# A real bot always reclaims this; charging it as a permanent sunk cost understates every trade by
+# ~2%.  Reclaimed only on an observed full exit, never on an unexitable full loss (the position is
+# stuck and its close cannot be confirmed).
+ATA_CLOSE_GAS_LAMPORTS = 5_000
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 RESEARCH = ROOT / "research" / "trading_bot" / "aftershock"
 STATE = RESEARCH / f"{INSTRUMENT}_RUNNER_STATE.json"
@@ -486,9 +492,11 @@ def _complete_pending(state: dict, provider: SnapshotProvider, pumpswap_provider
         "failed_exit_cost_lamports": position.failed_exit_cost_lamports,
         "net_exit_lamports": net_exit,
         "net_return_num": net_exit - position.entry_all_in_lamports
-                          - position.failed_exit_cost_lamports,
+                          - position.failed_exit_cost_lamports
+                          + position.ata_rent_lamports - ATA_CLOSE_GAS_LAMPORTS,
         "net_return_den": position.entry_all_in_lamports, "unexitable_full_loss": False,
-        "ata_rent_treatment": "CHARGED_NOT_RECLAIMED_WITHOUT_OBSERVED_CLOSE",
+        "ata_rent_reclaimed_lamports": position.ata_rent_lamports - ATA_CLOSE_GAS_LAMPORTS,
+        "ata_rent_treatment": "RECLAIMED_ON_CONFIRMED_FULL_EXIT_NET_CLOSE_GAS",
         "snapshot": snapshot_to_dict(snapshot)})]
 
 
@@ -612,9 +620,11 @@ def _complete_pumpswap_exit(state: dict, pumpswap_provider, pending: dict, *, no
         "failed_exit_cost_lamports": position.failed_exit_cost_lamports,
         "net_exit_lamports": net_exit, "exit_gas_lamports": exit_gas,
         "net_return_num": net_exit - position.entry_all_in_lamports
-                          - position.failed_exit_cost_lamports,
+                          - position.failed_exit_cost_lamports
+                          + position.ata_rent_lamports - ATA_CLOSE_GAS_LAMPORTS,
         "net_return_den": position.entry_all_in_lamports, "unexitable_full_loss": False,
-        "ata_rent_treatment": "CHARGED_NOT_RECLAIMED_WITHOUT_OBSERVED_CLOSE",
+        "ata_rent_reclaimed_lamports": position.ata_rent_lamports - ATA_CLOSE_GAS_LAMPORTS,
+        "ata_rent_treatment": "RECLAIMED_ON_CONFIRMED_FULL_EXIT_NET_CLOSE_GAS",
         "pumpswap": observation_to_dict(observation), "pumpswap_quote": quote})]
 
 

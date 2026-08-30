@@ -685,7 +685,10 @@ def main() -> int:
               and grad_rows[-1]["unexitable_full_loss"] is False
               and grad_rows[-1]["net_exit_lamports"] == expected_net
               and grad_rows[-1]["net_return_num"]
-                  == expected_net - grad_pos.entry_all_in_lamports,
+                  == expected_net - grad_pos.entry_all_in_lamports
+                     + grad_pos.ata_rent_lamports - runner.ATA_CLOSE_GAS_LAMPORTS
+              and grad_rows[-1]["ata_rent_treatment"]
+                  == "RECLAIMED_ON_CONFIRMED_FULL_EXIT_NET_CLOSE_GAS",
               "graduated position exits honestly at the real PumpSwap constant-product price")
 
         # Before the grace window and the horizon, a not-yet-observable pool is a bounded HOLD --
