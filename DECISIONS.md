@@ -3541,8 +3541,16 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
   watchdog always recovers the read-only V2.2 feed, but launches the V2.2 strategy runner only after an
   anchored activation exists. Dashboard binding occurs before expensive background refresh work so a
   restart exposes port 8791 immediately.
-- **Open owner gate:** V2.2 has an anchored seal and default-off campaign, but no calibration evidence or
-  activation. Broadcasting the memo calibration would spend up to the campaign's fixed 1,000,000-lamport
-  cap and still requires explicit owner authorization. Until then the truthful state is
-  `ACTIVE_FEED_SOAK_NO_PERFORMANCE_AUTHORITY`: feed alive, strategy runner off, zero trades, and no profit
-  claim.
+- **Verified fact — activation completed after explicit authorization:** The V2.2 campaign made 111
+  attempts: 100 reached processed status and 11 failed visibly. It charged 555,000 lamports against the
+  fixed 1,000,000-lamport cap. The initial unthrottled public-RPC burst hit HTTP 429; crash-safe resume
+  with 1.2-second request pacing completed the remaining attempts without another failure. One hundred
+  independent finalized rereads matched wire bytes, payer, slots, and fees. The anchored activation pins
+  a processed p90 of 6,378,252,335 ns. These are Memo calibration transactions, not strategy orders or
+  profit evidence.
+- **Verified fact — production launch boundary:** Executing `pac_v22_runner` through `python -m` creates
+  a second `__main__.RuntimeProof` class identity and the sealed adapter refuses it. The watchdog now
+  imports and calls the package module's `main`, as the established V2.1 launcher already did; this
+  changes no sealed dependency or proof. After that operational fix the anchored V2.2 paper runner
+  initialized at EOF, consumed live events, created causal paper entries/exits, and remained supervised.
+  Early rows are forward evidence but far below the 100-resolution discovery gate and imply no verdict.

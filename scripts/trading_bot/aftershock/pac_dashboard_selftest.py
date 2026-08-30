@@ -142,6 +142,13 @@ def main() -> int:
                      and calibrated["performance"]["promotion_discovery_resolved"] == 2
                      and calibrated["performance"]["discovery_progress"] == "0.0200")
 
+        direct_resolved = dash._performance([
+            {"kind": "resolved", "return": dash.Fraction(-1, 20),
+             "unexitable_full_loss": False}])
+        ok &= _check("activated V2.x resolved rows retain their kind in performance accounting",
+                     direct_resolved["resolved"] == 1
+                     and direct_resolved["mean_return_r"] == "-0.050000")
+
         unavailable_attempt, unavailable_resolution = _unavailable_exit_pair()
         unavailable_rows = [_opened(3), unavailable_attempt, unavailable_resolution]
         ledger.write_text("".join(json.dumps(row) + "\n" for row in unavailable_rows))

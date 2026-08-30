@@ -144,7 +144,11 @@ case "${1:-}" in
         }
     fi
     export PAC_V22_ATTEST_RPC_URL
-    exec python3 -m scripts.trading_bot.aftershock.pac_v22_runner \
+    # Import as the package module instead of executing it as __main__.  The manifest returns the
+    # package's RuntimeProof class; `python -m` creates a second __main__.RuntimeProof identity and
+    # the sealed adapter correctly refuses that otherwise-valid proof before any state is touched.
+    exec python3 -c \
+      'from scripts.trading_bot.aftershock.pac_v22_runner import main; raise SystemExit(main())' \
       >> "$V22_RUNNER_LOG" 2>&1
     ;;
   --dashboard)

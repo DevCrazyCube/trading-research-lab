@@ -1284,7 +1284,8 @@ def v21_snapshot(*, successor_status: dict | None = None) -> dict:
             break
         full = bool(row.get("unexitable_full_loss"))
         ret = Fraction(num, den)
-        perf_rows.append({"return": ret, "unexitable_full_loss": full})
+        perf_rows.append({"kind": "resolved", "return": ret,
+                          "unexitable_full_loss": full})
         entry_all_in = int(row.get("entry_all_in_lamports") or 0)
         activity.append({
             "kind": "resolved", "mint": row.get("mint", "—"),
