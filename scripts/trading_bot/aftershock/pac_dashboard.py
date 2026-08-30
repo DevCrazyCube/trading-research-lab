@@ -26,6 +26,9 @@ from . import (
     pac_v21_manifest,
     pac_v21_detector,
     pac_v21_runner,
+    pac_v22_feed,
+    pac_v22_manifest,
+    pac_v22_runner,
     solusd_recorder,
 )
 from .execution import RefusedExecution
@@ -45,6 +48,15 @@ _V21_SUCCESSOR_CACHE: dict = {"key": None, "value": None}
 _V21_PROOF_CACHE: dict = {"key": None, "value": None}
 _V2_CONTROL_CACHE: dict = {"at": 0.0, "value": None}
 _V2_CONTROL_TTL_SECONDS = 30.0
+_V22_DIAGNOSTIC_LOCK = threading.Lock()
+_V22_DIAGNOSTIC: dict = {
+    "initialized": False,
+    "cursor": None,
+    "buffers": {},
+    "last_error": None,
+}
+_V22_PROOF_CACHE: dict = {"key": None, "value": None}
+_V22_VIEW_LOCK = threading.RLock()
 
 
 def _exact_int(label: str, value, *, minimum: int | None = None) -> int:
@@ -199,6 +211,280 @@ def _v21_successor_status() -> dict:
     with _V21_AUTHORITY_LOCK:
         _V21_SUCCESSOR_CACHE.update({"key": key, "value": copy.deepcopy(value)})
     return value
+
+
+def _v22_successor_status() -> dict:
+    """Read-only V2.2 authority and low-lag feed status; never starts or activates anything."""
+    seal = pac_v22_manifest.anchor_status()
+
+    def artifact(path: pathlib.Path) -> str:
+        if not path.exists():
+            return "ABSENT"
+        return "ANCHORED" if pac_v22_manifest._git_clean(path) else "UNANCHORED"
+
+    campaign = artifact(pac_v22_manifest.CAMPAIGN)
+    activation = artifact(pac_v22_manifest.ACTIVATION)
+    try:
+        health = pac_v22_feed.load_health()
+        health_age = max(0, time.time_ns() - health["observed_unix_nanos"])
+        feed_status = ("FRESH" if health["status"] == "FRESH"
+                       and health_age <= pac_v22_feed.MAX_HEALTH_AGE_NANOS
+                       and health["head_slot_lag"] is not None
+                       and health["head_slot_lag"] <= pac_v22_feed.MAX_HEAD_SLOT_LAG
+                       else "DEGRADED")
+    except RefusedExecution as exc:
+        health = {"status": "REFUSED", "reason": str(exc)[:180], "head_slot_lag": None,
+                  "observed_unix_nanos": None}
+        feed_status = "REFUSED"
+    if activation == "ANCHORED":
+        stage = "ACTIVATED_LOW_LAG_PAPER_RUNTIME"
+    elif campaign == "ANCHORED":
+        stage = "SEALED_CAMPAIGN_ANCHORED_BROADCAST_OWNER_GATED"
+    elif seal == "ANCHORED":
+        stage = "SEALED_LOW_LAG_FEED_CALIBRATION_CAMPAIGN_REQUIRED"
+    else:
+        stage = "V22_SEAL_NOT_ANCHORED"
+    return {
+        "instrument_id": pac_v22_manifest.INSTRUMENT, "status": stage,
+        "seal": seal, "campaign": campaign, "activation": activation,
+        "dependency_count": len(pac_v22_manifest.DEPENDENCY_PATHS),
+        "feed": {**health, "effective_status": feed_status,
+                 "process": _tmux_running("pac-v22-feed")},
+        "formula": "V2.1 single-shock rule unchanged · low-lag causal feed",
+        "boundary": "PAPER ONLY · PRE-ACTIVATION FEED DIAGNOSTIC · NO PERFORMANCE",
+    }
+
+
+def _v22_feed_diagnostic(*, now: int | None = None,
+                         events_path: pathlib.Path | None = None,
+                         receipts_path: pathlib.Path | None = None) -> dict:
+    """Incremental, non-authoritative display of V2.2 traffic observed after dashboard startup.
+
+    The first call starts at EOF, so the UI cannot accidentally present the pre-activation soak as
+    forward strategy evidence.  Subsequent calls use the same authenticated feed consumer as the
+    runner and retain only the causal 180-second window.  This never evaluates the strategy.
+    """
+    clock = time.time_ns() if now is None else now
+    event_file = pac_v22_feed.EVENTS if events_path is None else pathlib.Path(events_path)
+    receipt_file = pac_v22_feed.RECEIPTS if receipts_path is None else pathlib.Path(receipts_path)
+    if type(clock) is not int or clock < 0:
+        raise RefusedExecution("PAC V2.2 diagnostic clock is invalid")
+    with _V22_DIAGNOSTIC_LOCK:
+        if not _V22_DIAGNOSTIC["initialized"]:
+            # Receipts are sampled before events, matching consume().  An event appended between the
+            # two observations is retained as pending until its later receipt; no historical scan.
+            receipt_offset = receipt_file.stat().st_size if receipt_file.exists() else 0
+            event_offset = event_file.stat().st_size if event_file.exists() else 0
+            _V22_DIAGNOSTIC.update({
+                "initialized": True,
+                "cursor": pac_v22_feed.Cursor(
+                    event_offset=event_offset, receipt_offset=receipt_offset),
+                "buffers": {},
+                "last_error": None,
+            })
+        cursor = _V22_DIAGNOSTIC["cursor"]
+        try:
+            events = pac_v22_feed.consume(
+                cursor, events_path=event_file, receipts_path=receipt_file,
+                runner_seen_unix_nanos=clock)
+            buffers = _V22_DIAGNOSTIC["buffers"]
+            for event in events:
+                rows = buffers.setdefault(event.mint, [])
+                if rows and rows[-1].collector_epoch != event.collector_epoch:
+                    rows.clear()
+                rows.append(event)
+            cutoff = clock - pac_v2_detector.pac_detector.MAX_PATTERN_SPAN_NANOS
+            for mint in list(buffers):
+                kept = [event for event in buffers[mint]
+                        if event.source_received_unix_nanos >= cutoff]
+                if kept:
+                    buffers[mint] = kept
+                else:
+                    del buffers[mint]
+            _V22_DIAGNOSTIC["last_error"] = None
+        except (OSError, ValueError, RefusedExecution) as exc:
+            _V22_DIAGNOSTIC["last_error"] = str(exc)[:180]
+            raise
+
+        candidates = []
+        for mint, rows in _V22_DIAGNOSTIC["buffers"].items():
+            latest = rows[-1]
+            buyers = {event.trader for event in rows if event.side == "buy"}
+            candidates.append({
+                "mint": mint,
+                "event_count": len(rows),
+                "latest_source_received_unix_nanos": latest.source_received_unix_nanos,
+                "age_millis": max(0, clock - latest.source_received_unix_nanos) // 1_000_000,
+                "current_reserve_lamports": latest.post_state.real_quote,
+                "reserve_cover_lamports": None,
+                "reserve_cover_milli": None,
+                "gate": "FEED_ONLY",
+                "gate_depth": 0,
+                "gate_label": "low-lag event observed; strategy evaluation begins after activation",
+                "dwell_nanos": None,
+                "reaction_p90_nanos": None,
+                "buyer_breadth": len(buyers),
+                "dwell_clock": "V22_FRAME_RECEIVE_TIME_DIAGNOSTIC",
+            })
+        candidates.sort(key=lambda row: (-row["latest_source_received_unix_nanos"], row["mint"]))
+        count = sum(row["event_count"] for row in candidates)
+        return {
+            "boundary": "DASHBOARD_LOCAL_V22_FEED_DIAGNOSTIC_NOT_RUNNER_STATE_OR_PERFORMANCE",
+            "quote_input_lamports": None,
+            "summary": {
+                "buffered_mints": len(candidates), "eligible_events": count,
+                "pac_core_mints": 0, "p90_dwell_mints": 0,
+                "probe_cover_mints": 0, "recovery_survival_mints": 0,
+                "buyer_breadth_mints": 0, "qualified_mints": 0,
+            },
+            "candidates": candidates[:100],
+        }
+
+
+def v22_feed_snapshot() -> dict:
+    """Show the anchored V2.2 feed soak without manufacturing fills or performance authority."""
+    authority = _v22_successor_status()
+    feed_status = authority["feed"]
+    errors: list[str] = []
+    try:
+        candidate_funnel = _v22_feed_diagnostic()
+    except (OSError, ValueError, RefusedExecution) as exc:
+        errors.append(f"PAC V2.2 feed diagnostic refused: {str(exc)[:180]}")
+        candidate_funnel = {
+            "boundary": "V22_FEED_DIAGNOSTIC_REFUSED",
+            "quote_input_lamports": None,
+            "summary": {"buffered_mints": 0, "eligible_events": 0,
+                        "pac_core_mints": 0, "p90_dwell_mints": 0,
+                        "probe_cover_mints": 0, "recovery_survival_mints": 0,
+                        "buyer_breadth_mints": 0, "qualified_mints": 0},
+            "candidates": [],
+        }
+    summary = candidate_funnel["summary"]
+    performance = _performance([])
+    performance.update({"scenario_resolved": 0, "promotion_discovery_resolved": 0,
+                        "discovery_progress": "0.0000"})
+    fresh = feed_status.get("effective_status") == "FRESH" and feed_status.get("process") is True
+    evidence_status = ("ACTIVE_FEED_SOAK_NO_PERFORMANCE_AUTHORITY" if fresh and not errors
+                       else "REFUSED_V22_FEED_HEALTH")
+    health_age = None
+    observed = feed_status.get("observed_unix_nanos")
+    if type(observed) is int:
+        health_age = max(0, time.time_ns() - observed) // 1_000_000
+    operational = {
+        "instrument_id": pac_v22_manifest.INSTRUMENT,
+        "status": authority["status"],
+        "seal": authority["seal"], "campaign": authority["campaign"],
+        "activation": authority["activation"],
+        "dependency_count": authority["dependency_count"],
+        "reaction_p90_nanos": None, "processed_samples": 0, "failed_samples": 0,
+        "state": "FEED_HEALTH_VALID" if fresh and not errors else "REFUSED",
+        "processes": {"supervisor": _tmux_running("pac-wd"),
+                      "feed": bool(feed_status.get("process")), "runner": False},
+        "solusd": _latest_solusd_status(), "latency_calibration": "CALIBRATION_REQUIRED",
+        "last_status": f"{feed_status.get('effective_status', 'UNKNOWN')} · head lag "
+                       f"{feed_status.get('head_slot_lag', '—')} slots · health age "
+                       f"{health_age if health_age is not None else '—'}ms",
+        "events_consumed_bytes": (pac_v22_feed.EVENTS.stat().st_size
+                                  if pac_v22_feed.EVENTS.exists() else 0),
+        "active_mint_buffers": summary["buffered_mints"],
+        "eligible_feed_events": summary["eligible_events"],
+        "scan_interval_millis": None,
+        "runner_audit": "FEED_ONLY_SOAK_RUNNER_NOT_ACTIVATED",
+        "head_slot_lag": feed_status.get("head_slot_lag"),
+        "feed_health_age_millis": health_age,
+        "open_gates": ["owner-authorized mainnet latency calibration",
+                       "anchored V2.2 activation", "100 resolved forward paper positions"],
+    }
+    return {
+        "instrument_id": pac_v22_manifest.INSTRUMENT,
+        "title": "Single-Shock Payable Absorption · V2.2 low-lag feed",
+        "boundary": "PRE-ACTIVATION FEED SOAK ONLY · NO PAPER FILLS · NO WALLET · NO ORDERS",
+        "evidence_status": evidence_status,
+        "integrity_errors": errors,
+        "operational": operational,
+        "formula": "V2.1 rule unchanged · one subscription · receive-time clock · ≤32-slot lag",
+        "formula_note": "mint rows below prove fresh feed processing only; they are not signals or trades",
+        "policy": {"bankroll_index_start": "100.00", "probe_index_points": "10.00",
+                   "trail_percent": 12, "coverage_multiple": 6,
+                   "max_hold_minutes": 12, "max_concurrent_positions": 1},
+        "performance": performance, "open_positions": [], "pending_orders": [],
+        "last_measurement_refusal": None, "candidate_funnel": candidate_funnel,
+        "activity": [], "ledger_rows": 0,
+        "challenger": {"instrument_id": pac_v21_manifest.INSTRUMENT,
+                       "status": "BURNED_FEED_CLOCK_INVALID_ZERO_FILLS",
+                       "note": "V2.1 recorded zero fills; its lagged/compressed feed clock invalidates it."},
+        "successor": authority,
+        "generated_at": time.time(),
+    }
+
+
+def _v22_offline_proof() -> pac_v22_runner.RuntimeProof:
+    """Validate anchored V2.2 authority without performing the production live-RPC reread."""
+    paths = (pac_v22_manifest.SEAL, pac_v22_manifest.CAMPAIGN,
+             pac_v22_manifest.JOURNAL, pac_v22_manifest.SAMPLES,
+             pac_v22_manifest.ATTESTATIONS, pac_v22_manifest.ACTIVATION,
+             ROOT / ".git" / "HEAD", ROOT / ".git" / "index")
+    key = tuple((str(path), path.stat().st_mtime_ns, path.stat().st_size)
+                if path.exists() else (str(path), None, None) for path in paths)
+    with _V22_VIEW_LOCK:
+        if _V22_PROOF_CACHE["key"] == key:
+            return _V22_PROOF_CACHE["value"]
+        with pac_v22_manifest._configured():
+            legacy = pac_v22_manifest.legacy
+            seal = legacy.verify_seal()
+            if (legacy.anchor_status() != "ANCHORED"
+                    or not legacy._git_clean(legacy.ACTIVATION)):
+                raise RefusedExecution("PAC V2.2 dashboard authority is not anchored")
+            activation = legacy._json(legacy.ACTIVATION)
+            legacy._activation_body(activation, seal)
+            closed = legacy._load_bound_evidence(activation)
+            legacy._activation_body(activation, seal, closed)
+        proof = pac_v22_runner.RuntimeProof(
+            seal["seal_sha256"], activation["activation_unix_nanos"], closed.calibration)
+        _V22_PROOF_CACHE.update({"key": key, "value": proof})
+        return proof
+
+
+def v22_snapshot() -> dict:
+    """Activated V2.2 state/ledger view, reusing the identical V2.1 book validator."""
+    global pac_v21_manifest, pac_v21_runner, _v21_offline_proof
+    authority = _v22_successor_status()
+    with _V22_VIEW_LOCK:
+        old_manifest, old_runner, old_proof = (
+            pac_v21_manifest, pac_v21_runner, _v21_offline_proof)
+        pac_v21_manifest, pac_v21_runner, _v21_offline_proof = (
+            pac_v22_manifest, pac_v22_runner, _v22_offline_proof)
+        try:
+            result = v21_snapshot(successor_status=authority)
+        finally:
+            pac_v21_manifest, pac_v21_runner, _v21_offline_proof = (
+                old_manifest, old_runner, old_proof)
+    processes = result["operational"]["processes"]
+    processes.update({"supervisor": _tmux_running("pac-wd"),
+                      "feed": _tmux_running("pac-v22-feed"),
+                      "runner": _tmux_running("pac-v22")})
+    healthy = result["operational"]["state"] == "VALID" and all(processes.values())
+    result.update({
+        "title": "Single-Shock Payable Absorption · V2.2 (low-lag calibrated)",
+        "formula": "W≥$10 · full recovery/floor · processed p90 · ≥3 buyers · 6× max(probe, shock)",
+        "formula_note": "V2.1 strategy unchanged; one-subscription low-lag causal feed",
+        "challenger": {"instrument_id": "AFTERSHOCK_PAC_V21",
+                       "status": "BURNED_FEED_CLOCK_INVALID_ZERO_FILLS",
+                       "note": "V2.1 produced no fills and is retired; no outcome is carried forward."},
+        "successor": authority,
+    })
+    result["operational"].update({
+        "status": ("ACTIVE_AUTHENTICATED_PAPER_SCENARIO" if healthy
+                   else "ACTIVE_RUNTIME_REFUSED"),
+        "seal": authority["seal"], "campaign": authority["campaign"],
+        "activation": authority["activation"],
+        "dependency_count": authority["dependency_count"],
+    })
+    if result["operational"]["state"] == "VALID":
+        result["evidence_status"] = ("VALID_CALIBRATED_PAPER_SCENARIO"
+                                     if result["performance"]["resolved"]
+                                     else "ACTIVE_CALIBRATED_SCANNING_NO_FILLS_YET")
+    return result
 
 
 _V2_GATE_LABELS = {
@@ -1091,9 +1377,17 @@ def v21_snapshot(*, successor_status: dict | None = None) -> dict:
 
 
 def focus_snapshot() -> dict:
+    v22 = _v22_successor_status()
+    # Once its campaign is anchored, V2.2 is the operational focus even before activation: this
+    # exposes fresh feed traffic and the remaining calibration gate instead of silently showing the
+    # known-invalid V2.1 clock.  The pre-activation snapshot cannot publish strategy performance.
+    if v22["activation"] == "ANCHORED":
+        return v22_snapshot()
+    if v22["campaign"] == "ANCHORED":
+        return v22_feed_snapshot()
     successor = _v21_successor_status()
     if successor["activation"] == "ANCHORED":
-        return v21_snapshot(successor_status=successor)
+        return v21_snapshot(successor_status=v22)
     return v2_snapshot()
 
 

@@ -3515,3 +3515,34 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
 - **Boundary:** V2.1 is `PAPER SCENARIO ONLY · NO WALLET · NO ORDERS`. Zero resolved fills means zero
   performance evidence, not zero scanner activity. Profitability, promotion, and real-money trading all
   remain refused until the project gates are independently met.
+
+## 2026-08-30 — PAC V2.1 event-time evidence is burned; V2.2 repairs the collector as a new instrument
+
+- **Verified fact:** V2.1's stored event ordering was internally consistent, but its observation clock was
+  not a reliable realtime clock. The collector repeatedly disconnected and then full-scanned roughly
+  966 MB of append-only event/receipt history before reading again. At inspection its newest event was
+  521 processed slots behind an independent head and approximately 112 seconds after that slot's block
+  time; queued backlog was therefore compressed into short local inter-event intervals. This explains
+  why displayed dwell and buyer counts appeared static or misleading. V2.1 produced zero fills, open
+  positions, pending orders, or resolved rows, so there is no performance result to preserve.
+- **Decision:** V2.1 is retired as `BURNED_FEED_CLOCK_INVALID_ZERO_FILLS`. It is not patched in place.
+  V2.2 is a separately preregistered and sealed feed-only repair: exactly one logs subscription, raw-frame
+  receive time captured before decode, O(1) unmatched-tail recovery, independent processed-head polling,
+  a maximum 32-slot lag and five-second head/health age. It inherits V2.1's entry and exit thresholds
+  byte-for-byte. Any pre-activation V2.2 soak is feed engineering evidence only and is burned for strategy
+  outcomes.
+- **Verified fact:** The V2.2 feed and runner/manifest negative tests pass (14/14, 7/7, and 6/6). During
+  the live soak the feed reported zero-slot head lag, advanced by 707 authenticated events and 570,981
+  bytes between dashboard samples, and used about 10% CPU/0.1% memory versus the old collector's roughly
+  94% CPU/10.9% memory at inspection. Killing its tmux session caused the watchdog to relaunch it with a
+  new process within the five-second supervision interval. The read-only dashboard now starts its local
+  diagnostic cursor at EOF and visibly updates recent mints without calling them signals or fills.
+- **Decision:** An anchored V2.2 campaign retires automatic launch of the old V2/V2.1 processes. The
+  watchdog always recovers the read-only V2.2 feed, but launches the V2.2 strategy runner only after an
+  anchored activation exists. Dashboard binding occurs before expensive background refresh work so a
+  restart exposes port 8791 immediately.
+- **Open owner gate:** V2.2 has an anchored seal and default-off campaign, but no calibration evidence or
+  activation. Broadcasting the memo calibration would spend up to the campaign's fixed 1,000,000-lamport
+  cap and still requires explicit owner authorization. Until then the truthful state is
+  `ACTIVE_FEED_SOAK_NO_PERFORMANCE_AUTHORITY`: feed alive, strategy runner off, zero trades, and no profit
+  claim.

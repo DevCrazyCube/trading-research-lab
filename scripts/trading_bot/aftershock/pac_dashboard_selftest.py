@@ -343,6 +343,8 @@ def main() -> int:
 
         with (patch.object(dash, "_v21_successor_status",
                            return_value={"activation": "ANCHORED"}),
+              patch.object(dash, "_v22_successor_status",
+                           return_value={"campaign": "ABSENT", "activation": "ABSENT"}),
               patch.object(dash, "v21_snapshot",
                            return_value={"instrument_id": "AFTERSHOCK_PAC_V21"})):
             focused = dash.focus_snapshot()
@@ -351,11 +353,57 @@ def main() -> int:
 
         with (patch.object(dash, "_v21_successor_status",
                            return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v22_successor_status",
+                           return_value={"campaign": "ABSENT", "activation": "ABSENT"}),
               patch.object(dash, "v2_snapshot",
                            return_value={"instrument_id": "AFTERSHOCK_PAC_V2"})):
             focused = dash.focus_snapshot()
         ok &= _check("dashboard keeps V2 control focused before V2.1 activation",
                      focused["instrument_id"] == "AFTERSHOCK_PAC_V2")
+
+        with (patch.object(dash, "_v22_successor_status",
+                           return_value={"campaign": "ANCHORED", "activation": "ABSENT"}),
+              patch.object(dash, "v22_feed_snapshot",
+                           return_value={"instrument_id": "AFTERSHOCK_PAC_V22"})):
+            focused = dash.focus_snapshot()
+        ok &= _check("anchored V2.2 campaign selects the honest feed-soak dashboard",
+                     focused["instrument_id"] == "AFTERSHOCK_PAC_V22")
+
+        with (patch.object(dash, "_v22_successor_status",
+                           return_value={"campaign": "ANCHORED", "activation": "ANCHORED"}),
+              patch.object(dash, "v22_snapshot",
+                           return_value={"instrument_id": "AFTERSHOCK_PAC_V22_ACTIVE"})):
+            focused = dash.focus_snapshot()
+        ok &= _check("anchored V2.2 activation selects its state/ledger view",
+                     focused["instrument_id"] == "AFTERSHOCK_PAC_V22_ACTIVE")
+
+        v22_events, v22_receipts = root / "v22-events.jsonl", root / "v22-receipts.jsonl"
+        writer = dash.pac_v22_feed.FeedWriter(
+            events_path=v22_events, receipts_path=v22_receipts, epoch="diagnostic-epoch")
+        raw = {"mint": "V22-LIVE-MINT", "user": "buyer-0", "side": "buy",
+               "virtual_sol": 31_000_000_000, "virtual_tok": 1_000_000_000_000_000,
+               "real_sol": 1_000_000_000, "real_tok": 720_100_000_000_000}
+        writer.append_decoded(raw, signature="seed-signature", slot=10,
+                              frame_received_unix_nanos=time.time_ns())
+        old_diagnostic = dict(dash._V22_DIAGNOSTIC)
+        try:
+            dash._V22_DIAGNOSTIC.update({"initialized": False, "cursor": None,
+                                         "buffers": {}, "last_error": None})
+            initial = dash._v22_feed_diagnostic(
+                events_path=v22_events, receipts_path=v22_receipts, now=time.time_ns())
+            raw.update({"user": "buyer-1", "real_sol": 1_010_000_000,
+                        "virtual_sol": 31_010_000_000})
+            writer.append_decoded(raw, signature="live-signature", slot=11,
+                                  frame_received_unix_nanos=time.time_ns())
+            observed = dash._v22_feed_diagnostic(
+                events_path=v22_events, receipts_path=v22_receipts, now=time.time_ns())
+        finally:
+            dash._V22_DIAGNOSTIC.clear(); dash._V22_DIAGNOSTIC.update(old_diagnostic)
+        ok &= _check("V2.2 dashboard starts at EOF and then displays authenticated new events",
+                     initial["summary"]["eligible_events"] == 0
+                     and observed["summary"]["eligible_events"] == 1
+                     and observed["candidates"][0]["mint"] == "V22-LIVE-MINT"
+                     and observed["candidates"][0]["gate"] == "FEED_ONLY")
 
     print("PAC DASHBOARD SELFTEST:", "PASS" if ok else "FAIL")
     return 0 if ok else 1

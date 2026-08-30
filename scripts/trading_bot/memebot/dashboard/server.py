@@ -1522,10 +1522,14 @@ class H(BaseHTTPRequestHandler):
 
 
 def main():
+    # Bind before starting the potentially expensive ledger refresh.  On a large research tree the
+    # old order let the refresh thread enter a long JSON/index build before the main thread created
+    # the socket, leaving localhost:8791 visibly offline after every watchdog restart.
+    server = ThreadingHTTPServer(("127.0.0.1", PORT), H)
     threading.Thread(target=refresher_loop, daemon=True).start()
     threading.Thread(target=logo_loop, daemon=True).start()
     print(f"memebot paper dashboard -> http://localhost:{PORT}  (Ctrl-C to stop)  [READ-ONLY PAPER]")
-    ThreadingHTTPServer(("127.0.0.1", PORT), H).serve_forever()
+    server.serve_forever()
 
 
 if __name__ == "__main__":

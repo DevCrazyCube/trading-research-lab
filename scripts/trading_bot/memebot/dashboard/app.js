@@ -968,11 +968,14 @@ function pacEquityChart(raw, evidenceStatus, pendingCount=0){
     data.map((v,i)=>`${x(i)},${y(v)}`).join(" ");
   const baseY=y(100), last=data[data.length-1], cls=last>=100?"up":"down";
   const area=`${l},${baseY} ${pts} ${w-r},${baseY}`;
-  const activeScanning=String(evidenceStatus||"").startsWith("ACTIVE_CALIBRATED_");
+  const activeScanning=String(evidenceStatus||"").startsWith("ACTIVE_CALIBRATED_") ||
+    String(evidenceStatus||"").startsWith("ACTIVE_FEED_SOAK_");
   const waitingLabel=pendingCount>0
     ? `${pendingCount} ENTRY SIGNAL${pendingCount===1?"":"S"} · WAITING FOR CAUSAL FILL`
     : (activeScanning
-      ? "SCANNING LIVE CANDIDATES · NO QUALIFIED ENTRY YET"
+      ? (String(evidenceStatus||"").startsWith("ACTIVE_FEED_SOAK_")
+        ? "LOW-LAG FEED SOAK LIVE · PERFORMANCE DISABLED UNTIL ACTIVATION"
+        : "SCANNING LIVE CANDIDATES · NO QUALIFIED ENTRY YET")
     : (evidenceStatus==="NO_FORWARD_EVIDENCE"
       ? "WAITING FOR ANCHORED FORWARD TRADES"
       : "PERFORMANCE REFUSED BY EVIDENCE GATE"));
@@ -1010,10 +1013,12 @@ function renderPACView(){
   const pendings=d.pending_orders||[], opens=d.open_positions||[];
   const validScenario=String(d.evidence_status||"").startsWith("VALID_");
   const activeScanning=String(d.evidence_status||"").startsWith("ACTIVE_CALIBRATED_");
-  const healthyScenario=validScenario||activeScanning;
+  const activeFeedSoak=String(d.evidence_status||"").startsWith("ACTIVE_FEED_SOAK_");
+  const healthyScenario=validScenario||activeScanning||activeFeedSoak;
   const validPromotion=d.evidence_status==="VALID_PAPER_SCENARIO";
   const noData=d.evidence_status==="NO_FORWARD_EVIDENCE";
   const isV21=d.instrument_id==="AFTERSHOCK_PAC_V21";
+  const isV22=d.instrument_id==="AFTERSHOCK_PAC_V22";
   const title=document.getElementById("pacTitle"); if(title) title.textContent=d.title||d.instrument_id||"Aftershock PAC";
   const statusBadge=document.getElementById("pacStatusBadge");
   if(statusBadge){ statusBadge.className=`killtag ${healthyScenario?'alive':'halt'}`; statusBadge.textContent=esc(d.evidence_status||"REFUSED"); }
@@ -1027,12 +1032,15 @@ function renderPACView(){
   const op0=d.operational||{}, cp=op0.processes||{};
   const p90s=op0.reaction_p90_nanos?(op0.reaction_p90_nanos/1e9).toFixed(2)+"s":"—";
   const scannedMB=((op0.events_consumed_bytes||0)/1e6).toFixed(0);
-  const v2Active=(op0.status||"").indexOf("ACTIVE")===0;
+  const v2Active=(op0.status||"").indexOf("ACTIVE")===0 || activeFeedSoak;
+  const versionLabel=isV22?"V2.2 FEED":(isV21?"V2.1":"V2");
   if(challengerBox) challengerBox.innerHTML=
-    `<strong style="color:${v2Active?"#5fd07a":"#c8c8c8"}">▸ ${isV21?"V2.1":"V2"} LIVE · ${esc(op0.status||"—")}</strong>`+
+    `<strong style="color:${v2Active?"#5fd07a":"#c8c8c8"}">▸ ${versionLabel} LIVE · ${esc(op0.status||"—")}</strong>`+
     `<span class="pac-v2-live" style="display:block;margin:4px 0;color:${v2Active?"#5fd07a":"#c8c8c8"};font-weight:600">`+
     `${esc(op0.last_status||"—")} · p90 ${p90s} · scanned ${scannedMB}MB feed · seal ${esc(op0.seal||"?")} · activation ${esc(op0.activation||"?")} · processes supervisor/feed/runner ${cp.supervisor?"up":"down"}/${cp.feed?"up":"down"}/${cp.runner?"up":"down"}</span>`+
-    (isV21
+    (isV22
+      ? `<span style="display:block;color:#8a8a8a">PRE-ACTIVATION · feed diagnostics only · strategy runner intentionally off · ${esc(challenger.note||"")}</span>`
+      : isV21
       ? `<span style="display:block;color:#8a8a8a">CONTROL · ${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V2")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`
       : `<span style="display:block;margin:4px 0;color:${successor.seal==="ANCHORED"?"#e8b153":"#ff4d4d"};font-weight:600">`+
     `▸ NEXT · ${esc(successor.instrument_id||"AFTERSHOCK_PAC_V21")} · ${esc(successor.status||"UNKNOWN")} · seal ${esc(successor.seal||"?")} · campaign ${esc(successor.campaign||"?")} · activation ${esc(successor.activation||"?")}</span>`+
@@ -1058,17 +1066,22 @@ function renderPACView(){
   const gates=document.getElementById("pacGates"); if(gates){
     const feed=(op.solusd||{}).status==="FRESH";
     const bufferCount=Number(op.active_mint_buffers||0);
-    const stateValid=op.state==="VALID" && cp.supervisor && cp.feed && cp.runner;
+    const stateValid=activeFeedSoak
+      ? op.state==="FEED_HEALTH_VALID" && cp.feed
+      : op.state==="VALID" && cp.supervisor && cp.feed && cp.runner;
     const calibrated=String(op.latency_calibration||"").startsWith("CALIBRATED_");
     const rows=[
       [op.seal==="ANCHORED","seal",op.seal||"unknown"],
       [op.activation==="ANCHORED","activation",op.activation||"unknown"],
       [feed,"SOL/USD",feed?`fresh · $${op.solusd.price}`:(op.solusd||{}).reason||"refused"],
-      [stateValid,"live causal buffers",`${bufferCount} mints · ${op.eligible_feed_events||0} eligible events`],
-      [stateValid && (String(op.runner_audit||"").startsWith("PASS_") || String(op.runner_audit||"").startsWith("GO_")),
-        "runner audit",op.runner_audit||"not recorded"],
-      [Number(op.scan_interval_millis)===100,"scan cadence",
-        `${op.scan_interval_millis||"?"}ms causal runner loop`],
+      [stateValid,activeFeedSoak?"low-lag feed":"live causal buffers",
+        activeFeedSoak
+          ? `${bufferCount} recent mints · ${op.eligible_feed_events||0} observed events · lag ${op.head_slot_lag??"?"} slots`
+          : `${bufferCount} mints · ${op.eligible_feed_events||0} eligible events`],
+      [activeFeedSoak?stateValid:(stateValid && (String(op.runner_audit||"").startsWith("PASS_") || String(op.runner_audit||"").startsWith("GO_"))),
+        activeFeedSoak?"feed boundary":"runner audit",op.runner_audit||"not recorded"],
+      [activeFeedSoak?false:Number(op.scan_interval_millis)===100,activeFeedSoak?"strategy runner":"scan cadence",
+        activeFeedSoak?"OFF until calibrated activation":`${op.scan_interval_millis||"?"}ms causal runner loop`],
       [calibrated,"latency",calibrated?`${p90s} p90 · ${op.latency_calibration}`:(op.latency_calibration||"unknown")],
       [validPromotion,"promotion evidence",d.evidence_status||"unknown"],
     ];
@@ -1077,17 +1090,20 @@ function renderPACView(){
   }
   const funnel=d.candidate_funnel||{}, funnelSummary=funnel.summary||{}, candidates=funnel.candidates||[];
   const candidateBody=document.getElementById("pacCandidateBody");
-  const gateBadge=gate=>gate==="QUALIFIED"?"b-open":(["NO_PAC_CORE","NO_PAYABLE_SHOCK"].includes(gate)?"b-null":"b-pending");
+  const gateBadge=gate=>gate==="QUALIFIED"?"b-open":(["NO_PAC_CORE","NO_PAYABLE_SHOCK","FEED_ONLY"].includes(gate)?"b-null":"b-pending");
   const candidateRows=candidates.map(c=>{
     const dwell=c.dwell_nanos==null?"—":`${(Number(c.dwell_nanos)/1e9).toFixed(2)}s / ${(Number(c.reaction_p90_nanos)/1e9).toFixed(2)}s event-time`;
     const cover=c.reserve_cover_milli==null?"—":`${(Number(c.current_reserve_lamports)/1e9).toFixed(3)} / ${(Number(c.reserve_cover_lamports)/1e9).toFixed(3)} SOL`;
     const ageSeconds=Number(c.age_millis)/1000;
     const age=Number.isFinite(ageSeconds)?`${ageSeconds<1?"<1":ageSeconds.toFixed(1)}s ago`:"—";
-    return `<tr><td class="l mono">${esc(c.mint)}</td><td>${esc(c.event_count)}</td><td class="l"><span class="badge ${gateBadge(c.gate)}">${esc(c.gate)}</span><span class="pac-gate-detail">${esc(c.gate_detail||c.gate_label||"")}</span></td><td>${esc(dwell)}</td><td>${esc(c.buyer_breadth||0)} / 3</td><td>${esc(cover)}</td><td>${esc(age)}</td></tr>`;
+    const buyers=isV22?String(c.buyer_breadth||0):`${c.buyer_breadth||0} / 3`;
+    return `<tr><td class="l mono">${esc(c.mint)}</td><td>${esc(c.event_count)}</td><td class="l"><span class="badge ${gateBadge(c.gate)}">${esc(c.gate)}</span><span class="pac-gate-detail">${esc(c.gate_detail||c.gate_label||"")}</span></td><td>${esc(dwell)}</td><td>${esc(buyers)}</td><td>${esc(cover)}</td><td>${esc(age)}</td></tr>`;
   });
   if(candidateBody) candidateBody.innerHTML=candidateRows.join("")||`<tr><td class="empty l" colspan="7">No active mint buffer in the current 180-second causal window. The feed can still be healthy between Pump trades.</td></tr>`;
   const candidateCount=document.getElementById("pacCandidateCount");
-  if(candidateCount) candidateCount.textContent=isV21
+  if(candidateCount) candidateCount.textContent=isV22
+    ? `${funnelSummary.buffered_mints||0} recent mints · ${funnelSummary.eligible_events||0} authenticated post-dashboard events · feed-only`
+    : isV21
     ? `${funnelSummary.buffered_mints||0} mints · ${funnelSummary.eligible_events||0} events · ${funnelSummary.pac_core_mints||0} payable shocks · ${funnelSummary.p90_dwell_mints||0} dwell pass · ${funnelSummary.qualified_mints||0} qualified`
     : `${funnelSummary.buffered_mints||0} mints · ${funnelSummary.eligible_events||0} events · ${funnelSummary.pac_core_mints||0} PAC core · ${funnelSummary.p90_dwell_mints||0} dwell pass · ${funnelSummary.qualified_mints||0} qualified`;
   const body=document.getElementById("pacBody"), activity=d.activity||[];

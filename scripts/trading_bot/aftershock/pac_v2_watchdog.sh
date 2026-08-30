@@ -12,9 +12,14 @@ SUPERVISOR_LOG="$RESEARCH/AFTERSHOCK_PAC_V2_SUPERVISOR.log"
 DASHBOARD_LOG="$RESEARCH/AFTERSHOCK_PAC_V2_DASHBOARD.log"
 V21_RUNNER_LOG="$RESEARCH/AFTERSHOCK_PAC_V21_RUNNER.log"
 V21_ACTIVATION="$RESEARCH/AFTERSHOCK_PAC_V21_ACTIVATION.json"
+V22_FEED_LOG="$RESEARCH/AFTERSHOCK_PAC_V22_FEED.log"
+V22_RUNNER_LOG="$RESEARCH/AFTERSHOCK_PAC_V22_RUNNER.log"
+V22_CAMPAIGN="$RESEARCH/AFTERSHOCK_PAC_V22_CALIBRATION_CAMPAIGN.json"
+V22_ACTIVATION="$RESEARCH/AFTERSHOCK_PAC_V22_ACTIVATION.json"
 ENV_FILE="${PAC_V2_ENV_FILE:-$ROOT/.env}"
 SUPERVISOR_MODULE="scripts.trading_bot.aftershock.pac_v2_supervisor"
 DASHBOARD_MODULE="scripts.trading_bot.memebot.dashboard.server"
+V22_FEED_MODULE="scripts.trading_bot.aftershock.pac_v22_feed"
 
 module_running() {
   local target="$1" cmdline index
@@ -58,6 +63,14 @@ v21_running() {
   tmux has-session -t pac-v21 2>/dev/null
 }
 
+v22_feed_running() {
+  tmux has-session -t pac-v22-feed 2>/dev/null
+}
+
+v22_runner_running() {
+  tmux has-session -t pac-v22 2>/dev/null
+}
+
 launch_supervisor() {
   tmux kill-session -t pac-v2 2>/dev/null || true
   # Never leak the watchdog's singleton-lock descriptor into the tmux server. If the watchdog is
@@ -77,6 +90,18 @@ launch_v21() {
   tmux kill-session -t pac-v21 2>/dev/null || true
   tmux new-session -d -s pac-v21 "$0 --v21-runner" 9>&-
   printf '%s PAC V2.1 runner launch requested\n' "$(date -u +%FT%TZ)" >> "$WATCHDOG_LOG"
+}
+
+launch_v22_feed() {
+  tmux kill-session -t pac-v22-feed 2>/dev/null || true
+  tmux new-session -d -s pac-v22-feed "$0 --v22-feed" 9>&-
+  printf '%s PAC V2.2 low-lag feed launch requested\n' "$(date -u +%FT%TZ)" >> "$WATCHDOG_LOG"
+}
+
+launch_v22_runner() {
+  tmux kill-session -t pac-v22 2>/dev/null || true
+  tmux new-session -d -s pac-v22 "$0 --v22-runner" 9>&-
+  printf '%s PAC V2.2 runner launch requested\n' "$(date -u +%FT%TZ)" >> "$WATCHDOG_LOG"
 }
 
 case "${1:-}" in
@@ -105,6 +130,23 @@ case "${1:-}" in
       'from scripts.trading_bot.aftershock.pac_v21_runner import main; raise SystemExit(main())' \
       >> "$V21_RUNNER_LOG" 2>&1
     ;;
+  --v22-feed)
+    cd "$ROOT" || exit 2
+    exec python3 -m "$V22_FEED_MODULE" >> "$V22_FEED_LOG" 2>&1
+    ;;
+  --v22-runner)
+    cd "$ROOT" || exit 2
+    if [[ -z "${PAC_V22_ATTEST_RPC_URL:-}" ]]; then
+      PAC_V22_ATTEST_RPC_URL="$(env_value PAC_V22_ATTEST_RPC_URL)" || \
+        PAC_V22_ATTEST_RPC_URL="$(env_value PAC_V2_ATTEST_RPC_URL)" || {
+          printf 'PAC_V22_ATTEST_RPC_URL is absent\n' >&2
+          exit 2
+        }
+    fi
+    export PAC_V22_ATTEST_RPC_URL
+    exec python3 -m scripts.trading_bot.aftershock.pac_v22_runner \
+      >> "$V22_RUNNER_LOG" 2>&1
+    ;;
   --dashboard)
     cd "$ROOT" || exit 2
     exec python3 -m "$DASHBOARD_MODULE" >> "$DASHBOARD_LOG" 2>&1
@@ -125,6 +167,16 @@ case "${1:-}" in
     else
       printf 'pac_v21_runner=stopped\n'
     fi
+    if v22_feed_running; then
+      printf 'pac_v22_feed=running\n'
+    else
+      printf 'pac_v22_feed=stopped\n'
+    fi
+    if v22_runner_running; then
+      printf 'pac_v22_runner=running\n'
+    else
+      printf 'pac_v22_runner=stopped\n'
+    fi
     exit 0
     ;;
   "")
@@ -144,14 +196,24 @@ if ! flock -n 9; then
 fi
 
 while true; do
-  if ! module_running "$SUPERVISOR_MODULE"; then
+  # An anchored V2.2 campaign retires the known-laggy V2/V2.1 observation path.  V2.2's feed is
+  # always safe to supervise (read-only); its strategy runner remains impossible until a distinct,
+  # anchored activation exists.
+  if [[ -f "$V22_CAMPAIGN" ]]; then
+    if ! v22_feed_running; then
+      launch_v22_feed
+    fi
+  elif ! module_running "$SUPERVISOR_MODULE"; then
     launch_supervisor
   fi
   if ! module_running "$DASHBOARD_MODULE"; then
     launch_dashboard
   fi
-  if [[ -f "$V21_ACTIVATION" ]] && ! v21_running; then
+  if [[ ! -f "$V22_CAMPAIGN" && -f "$V21_ACTIVATION" ]] && ! v21_running; then
     launch_v21
+  fi
+  if [[ -f "$V22_ACTIVATION" ]] && ! v22_runner_running; then
+    launch_v22_runner
   fi
   # The child timer is not the lock owner and must not transiently inherit fd 9 either.
   sleep 5 9>&-
