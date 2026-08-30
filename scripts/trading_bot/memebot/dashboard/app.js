@@ -1039,7 +1039,9 @@ function renderPACView(){
     `<span class="pac-v2-live" style="display:block;margin:4px 0;color:${v2Active?"#5fd07a":"#c8c8c8"};font-weight:600">`+
     `${esc(op0.last_status||"—")} · p90 ${p90s} · scanned ${scannedMB}MB feed · seal ${esc(op0.seal||"?")} · activation ${esc(op0.activation||"?")} · processes supervisor/feed/runner ${cp.supervisor?"up":"down"}/${cp.feed?"up":"down"}/${cp.runner?"up":"down"}</span>`+
     (isV22
-      ? `<span style="display:block;color:#8a8a8a">PRE-ACTIVATION · feed diagnostics only · strategy runner intentionally off · ${esc(challenger.note||"")}</span>`
+      ? (activeFeedSoak
+        ? `<span style="display:block;color:#8a8a8a">PRE-ACTIVATION · feed diagnostics only · strategy runner intentionally off · ${esc(challenger.note||"")}</span>`
+        : `<span style="display:block;color:#8a8a8a">CONTROL · ${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V21")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`)
       : isV21
       ? `<span style="display:block;color:#8a8a8a">CONTROL · ${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V2")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`
       : `<span style="display:block;margin:4px 0;color:${successor.seal==="ANCHORED"?"#e8b153":"#ff4d4d"};font-weight:600">`+
@@ -1101,9 +1103,9 @@ function renderPACView(){
   });
   if(candidateBody) candidateBody.innerHTML=candidateRows.join("")||`<tr><td class="empty l" colspan="7">No active mint buffer in the current 180-second causal window. The feed can still be healthy between Pump trades.</td></tr>`;
   const candidateCount=document.getElementById("pacCandidateCount");
-  if(candidateCount) candidateCount.textContent=isV22
+  if(candidateCount) candidateCount.textContent=isV22 && activeFeedSoak
     ? `${funnelSummary.buffered_mints||0} recent mints · ${funnelSummary.eligible_events||0} authenticated post-dashboard events · feed-only`
-    : isV21
+    : (isV21 || isV22)
     ? `${funnelSummary.buffered_mints||0} mints · ${funnelSummary.eligible_events||0} events · ${funnelSummary.pac_core_mints||0} payable shocks · ${funnelSummary.p90_dwell_mints||0} dwell pass · ${funnelSummary.qualified_mints||0} qualified`
     : `${funnelSummary.buffered_mints||0} mints · ${funnelSummary.eligible_events||0} events · ${funnelSummary.pac_core_mints||0} PAC core · ${funnelSummary.p90_dwell_mints||0} dwell pass · ${funnelSummary.qualified_mints||0} qualified`;
   const body=document.getElementById("pacBody"), activity=d.activity||[];
