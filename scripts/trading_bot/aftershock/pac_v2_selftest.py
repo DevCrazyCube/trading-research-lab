@@ -22,6 +22,7 @@ from . import pac_v2_detector as detector
 from . import pac_v2_feed as feed
 from . import pac_v2_manifest as manifest
 from . import pac_v2_policy as policy
+from . import pac_v2_pumpswap as pumpswap
 from . import pac_v2_runner as runner
 from . import pac_v2_snapshot as snapshot
 
@@ -220,22 +221,30 @@ def fake_calibration(base: int) -> calibration.Calibration:
 
 
 class FakeSnapshots:
-    def __init__(self, states: list[ReserveState], *, response_delay: int = 1):
+    def __init__(self, states: list[ReserveState], *, response_delay: int = 1,
+                 hold_state: ReserveState | None = None):
         self.states = list(states)
         self.calls: list[tuple[str, int]] = []
         self.response_delay = response_delay
+        # When set, an exhausted list keeps returning this healthy state so the active liveness
+        # refresh of an open position never spuriously exhausts the curve provider.
+        self.hold_state = hold_state
 
     def capture(self, mint: str, modeled_target_unix_nanos: int,
                 minimum_context_slot: int) -> snapshot.LandingSnapshot:
         self.calls.append((mint, modeled_target_unix_nanos))
-        if not self.states:
+        if self.states:
+            current = self.states.pop(0)
+        elif self.hold_state is not None:
+            current = self.hold_state
+        else:
             raise AssertionError("unexpected snapshot")
         return snapshot.LandingSnapshot(
             mint=mint, bonding_curve="curve", modeled_target_unix_nanos=modeled_target_unix_nanos,
             minimum_context_slot=minimum_context_slot,
             request_started_unix_nanos=modeled_target_unix_nanos,
             response_received_unix_nanos=modeled_target_unix_nanos + self.response_delay,
-            context_slot=max(minimum_context_slot, len(self.calls)), state=self.states.pop(0),
+            context_slot=max(minimum_context_slot, len(self.calls)), state=current,
             endpoint_scheme_host="https://rpc.invalid",
             raw_response_sha256=hashlib.sha256(f"snapshot-{len(self.calls)}".encode()).hexdigest())
 
@@ -250,6 +259,36 @@ class DecodeRefusalSnapshots:
     def capture(self, mint: str, modeled_target_unix_nanos: int,
                 minimum_context_slot: int):
         raise RefusedExecution("synthetic mayhem/layout refusal")
+
+
+class FakePumpSwap:
+    """Configurable PumpSwap provider: yields observations, or raises a bounded/hard failure."""
+
+    def __init__(self, *, reserves: pumpswap.PumpSwapReserves | None = None,
+                 raises: Exception | None = None, pool: str = "pool-pubkey"):
+        self.reserves = reserves
+        self.raises = raises
+        self.pool = pool
+        self.calls: list[tuple[str, int]] = []
+
+    def capture(self, mint: str, minimum_context_slot: int) -> pumpswap.PumpSwapObservation:
+        self.calls.append((mint, minimum_context_slot))
+        if self.raises is not None:
+            raise self.raises
+        now = time.time_ns()
+        return pumpswap.PumpSwapObservation(
+            mint=mint, pool=self.pool, base_vault="base-vault", quote_vault="quote-vault",
+            reserves=self.reserves, context_slot=max(minimum_context_slot, len(self.calls)),
+            request_started_unix_nanos=now, response_received_unix_nanos=now + 1,
+            endpoint_scheme_host="https://rpc.invalid",
+            raw_response_sha256=hashlib.sha256(f"pumpswap-{len(self.calls)}".encode()).hexdigest())
+
+
+class NeverGraduated:
+    """A PumpSwap provider that always reports no pool — used to prove non-graduated holds."""
+
+    def capture(self, mint: str, minimum_context_slot: int):
+        raise pumpswap.PumpSwapUnavailable("no PumpSwap pool for mint")
 
 
 def append_runner_events(events_path: pathlib.Path, receipts_path: pathlib.Path,
@@ -529,10 +568,15 @@ def main() -> int:
         state_path = tmp / "runner-state.json"
         ledger_path = tmp / "runner-ledger.jsonl"
         proof = runner.RuntimeProof("a" * 64, base - 1_000_000_000, fake_calibration(base))
+        # A healthy curve that never graduates: the active liveness refresh always finds it live,
+        # so the exit path is driven by the trail/horizon exactly as before, and the PumpSwap
+        # provider is never consulted on the happy path.
         fake = FakeSnapshots(
-            [state(1_020_000_000), state(1_020_000_000)], response_delay=5_000_000)
+            [state(1_020_000_000), state(1_020_000_000)], response_delay=5_000_000,
+            hold_state=state(1_020_000_000))
+        never_grad = NeverGraduated()
         initialized = runner._run_once_at(
-            proof, fake, now=base, quote_input_lamports=50_000_000,
+            proof, fake, never_grad, now=base, quote_input_lamports=50_000_000,
             state_path=state_path, ledger_path=ledger_path,
             events_path=run_events, receipts_path=run_receipts, initialize_at_eof=False)
         check(initialized["status"] == "INITIALIZED_NO_BACKFILL",
@@ -540,7 +584,7 @@ def main() -> int:
         append_runner_events(run_events, run_receipts, events)
         decision_now = time.time_ns()
         decided = runner._run_once_at(
-            proof, fake, now=decision_now, quote_input_lamports=50_000_000,
+            proof, fake, never_grad, now=decision_now, quote_input_lamports=50_000_000,
             state_path=state_path, ledger_path=ledger_path,
             events_path=run_events, receipts_path=run_receipts, initialize_at_eof=False)
         check(decided["pending"] == 1 and decided["new_events"] == len(events),
@@ -551,7 +595,7 @@ def main() -> int:
             trader="future-buyer", side="buy")
         append_runner_events(run_events, run_receipts, (live_future,))
         entered = runner._run_once_at(
-            proof, fake, now=decision_now + 2_000_000,
+            proof, fake, never_grad, now=decision_now + 2_000_000,
             quote_input_lamports=50_000_000, state_path=state_path,
             ledger_path=ledger_path, events_path=run_events,
             receipts_path=run_receipts, initialize_at_eof=False)
@@ -567,13 +611,13 @@ def main() -> int:
 
         horizon_now = entry_time + policy.MAX_HOLD_NANOS
         exit_decided = runner._run_once_at(
-            proof, fake, now=horizon_now, quote_input_lamports=50_000_000,
+            proof, fake, never_grad, now=horizon_now, quote_input_lamports=50_000_000,
             state_path=state_path, ledger_path=ledger_path,
             events_path=run_events, receipts_path=run_receipts, initialize_at_eof=False)
         check(exit_decided["pending"] == 1 and exit_decided["new_events"] == 1,
               "wall-clock horizon decides an exit without another trade")
         resolved = runner._run_once_at(
-            proof, fake, now=horizon_now + 2_000_000,
+            proof, fake, never_grad, now=horizon_now + 2_000_000,
             quote_input_lamports=50_000_000, state_path=state_path,
             ledger_path=ledger_path, events_path=run_events,
             receipts_path=run_receipts, initialize_at_eof=False)
@@ -582,59 +626,116 @@ def main() -> int:
               and sum(row["kind"] == "resolved" for row in ledger_rows) == 1,
               "horizon snapshot resolves without a post-decision trade")
 
-        # Decode-class snapshot refusal is terminal and releases the single-position lock.
-        refusal_state_path = tmp / "refusal-state.json"
-        refusal_ledger = tmp / "refusal-ledger.jsonl"
-        refusal_state = runner._new_state(proof, event_offset=0, receipt_offset=0)
-        open_position, _ = make_open_position(base)
-        refusal_state["open_position"] = runner.asdict(open_position)
-        runner._atomic_write(refusal_state_path, refusal_state)
-        runner._run_once_at(
-            proof, DecodeRefusalSnapshots(), now=base + policy.MAX_HOLD_NANOS,
-            quote_input_lamports=50_000_000, state_path=refusal_state_path,
-            ledger_path=refusal_ledger, events_path=tmp / "none-events",
-            receipts_path=tmp / "none-receipts", initialize_at_eof=False)
-        pending = json.loads(refusal_state_path.read_text())["pending_order"]
-        refused = runner._run_once_at(
-            proof, DecodeRefusalSnapshots(), now=pending["target_unix_nanos"] + 1,
-            quote_input_lamports=50_000_000, state_path=refusal_state_path,
-            ledger_path=refusal_ledger, events_path=tmp / "none-events",
-            receipts_path=tmp / "none-receipts", initialize_at_eof=False)
-        refusal_rows = [json.loads(line) for line in refusal_ledger.read_text().splitlines()]
-        check(refused["open"] == refused["pending"] == 0
-              and refusal_rows[-1]["reason"] == "EXIT_SNAPSHOT_PERMANENT_REFUSAL"
-              and refusal_rows[-1]["unexitable_full_loss"] is True,
-              "decode-class snapshot refusal books full loss and releases lock")
+        # A graduated position (bonding curve gone zeroed/closed) with NO PumpSwap sale route is
+        # an honest unexitable full loss at the horizon -- never a fabricated frozen-curve price.
+        def _graduated_state(tmp_name: str) -> tuple[pathlib.Path, pathlib.Path, runner.OpenPosition]:
+            sp = tmp / tmp_name
+            lp = tmp / (tmp_name.replace("state", "ledger").replace(".json", ".jsonl"))
+            st = runner._new_state(proof, event_offset=0, receipt_offset=0)
+            pos, _ = make_open_position(base)
+            st["open_position"] = runner.asdict(pos)
+            runner._atomic_write(sp, st)
+            return sp, lp, pos
 
-        # Transport outage retains retry semantics, then horizon deadline terminates.
-        timeout_state_path = tmp / "timeout-state.json"
-        timeout_ledger = tmp / "timeout-ledger.jsonl"
-        timeout_state = runner._new_state(proof, event_offset=0, receipt_offset=0)
-        timeout_position, _ = make_open_position(base)
-        timeout_state["open_position"] = runner.asdict(timeout_position)
-        runner._atomic_write(timeout_state_path, timeout_state)
+        noroute_sp, noroute_lp, _ = _graduated_state("noroute-state.json")
         runner._run_once_at(
-            proof, UnavailableSnapshots(), now=base + policy.MAX_HOLD_NANOS,
-            quote_input_lamports=50_000_000, state_path=timeout_state_path,
-            ledger_path=timeout_ledger, events_path=tmp / "none-events",
+            proof, UnavailableSnapshots(), NeverGraduated(), now=base + policy.MAX_HOLD_NANOS,
+            quote_input_lamports=50_000_000, state_path=noroute_sp,
+            ledger_path=noroute_lp, events_path=tmp / "none-events",
             receipts_path=tmp / "none-receipts", initialize_at_eof=False)
-        timeout_pending = json.loads(timeout_state_path.read_text())["pending_order"]
-        terminal = runner._run_once_at(
-            proof, UnavailableSnapshots(),
-            now=timeout_pending["target_unix_nanos"] + runner.SNAPSHOT_TIMEOUT_NANOS,
-            quote_input_lamports=50_000_000, state_path=timeout_state_path,
-            ledger_path=timeout_ledger, events_path=tmp / "none-events",
+        noroute_pending = json.loads(noroute_sp.read_text())["pending_order"]
+        check(noroute_pending is not None and noroute_pending["venue"] == "PUMPSWAP"
+              and noroute_pending["action"] == "EXIT_VENUE_TRANSITION",
+              "silent bonding curve escalates a held position to a PumpSwap venue transition")
+        noroute = runner._run_once_at(
+            proof, UnavailableSnapshots(), NeverGraduated(),
+            now=noroute_pending["target_unix_nanos"] + 1,
+            quote_input_lamports=50_000_000, state_path=noroute_sp,
+            ledger_path=noroute_lp, events_path=tmp / "none-events",
             receipts_path=tmp / "none-receipts", initialize_at_eof=False)
-        timeout_rows = [json.loads(line) for line in timeout_ledger.read_text().splitlines()]
-        check(terminal["open"] == terminal["pending"] == 0
-              and timeout_rows[-1]["reason"] == "HORIZON_SNAPSHOT_DEADLINE_ELAPSED",
-              "30-second horizon deadline books full loss and releases lock")
+        noroute_rows = [json.loads(line) for line in noroute_lp.read_text().splitlines()]
+        check(noroute["open"] == noroute["pending"] == 0
+              and noroute_rows[-1]["reason"] == "VENUE_TRANSITION_NO_ROUTE"
+              and noroute_rows[-1]["unexitable_full_loss"] is True,
+              "graduated position with no PumpSwap route books an honest full loss at horizon")
+
+        # A graduated position WITH a live PumpSwap pool exits honestly on the new venue at the
+        # real constant-product sell price -- the core V2.3 fix for migration blindness.
+        grad_sp, grad_lp, grad_pos = _graduated_state("graduated-state.json")
+        pool_reserves = pumpswap.PumpSwapReserves(
+            base_reserve=1_000_000_000_000_000, quote_reserve=200_000_000_000,
+            lp_fee_bps=20, protocol_fee_bps=5, creator_fee_bps=5)
+        expected_net = (pumpswap.sell_quote(grad_pos.token_atoms, pool_reserves)["net_quote_lamports"]
+                        - grad_pos.entry_attempt_cost_lamports)
+        pool = FakePumpSwap(reserves=pool_reserves)
+        runner._run_once_at(
+            proof, UnavailableSnapshots(), pool, now=base + 1_000_000,
+            quote_input_lamports=50_000_000, state_path=grad_sp,
+            ledger_path=grad_lp, events_path=tmp / "none-events",
+            receipts_path=tmp / "none-receipts", initialize_at_eof=False)
+        grad_pending = json.loads(grad_sp.read_text())["pending_order"]
+        grad_resolved = runner._run_once_at(
+            proof, UnavailableSnapshots(), pool, now=grad_pending["target_unix_nanos"] + 1,
+            quote_input_lamports=50_000_000, state_path=grad_sp,
+            ledger_path=grad_lp, events_path=tmp / "none-events",
+            receipts_path=tmp / "none-receipts", initialize_at_eof=False)
+        grad_rows = [json.loads(line) for line in grad_lp.read_text().splitlines()]
+        check(grad_resolved["open"] == grad_resolved["pending"] == 0
+              and grad_rows[-1]["reason"] == "PUMPSWAP_POOL_SNAPSHOT_FILLED"
+              and grad_rows[-1]["unexitable_full_loss"] is False
+              and grad_rows[-1]["net_exit_lamports"] == expected_net
+              and grad_rows[-1]["net_return_num"]
+                  == expected_net - grad_pos.entry_all_in_lamports,
+              "graduated position exits honestly at the real PumpSwap constant-product price")
+
+        # Before the grace window and the horizon, a not-yet-observable pool is a bounded HOLD --
+        # never a premature full loss.  The position is retained and retried.
+        hold_sp, hold_lp, _ = _graduated_state("poolwait-state.json")
+        runner._run_once_at(
+            proof, UnavailableSnapshots(), NeverGraduated(), now=base + 1_000_000,
+            quote_input_lamports=50_000_000, state_path=hold_sp,
+            ledger_path=hold_lp, events_path=tmp / "none-events",
+            receipts_path=tmp / "none-receipts", initialize_at_eof=False)
+        hold_pending = json.loads(hold_sp.read_text())["pending_order"]
+        held = runner._run_once_at(
+            proof, UnavailableSnapshots(), NeverGraduated(),
+            now=hold_pending["target_unix_nanos"] + 1,
+            quote_input_lamports=50_000_000, state_path=hold_sp,
+            ledger_path=hold_lp, events_path=tmp / "none-events",
+            receipts_path=tmp / "none-receipts", initialize_at_eof=False)
+        hold_rows = [json.loads(line) for line in hold_lp.read_text().splitlines()]
+        check(held["open"] == 1 and held["pending"] == 0
+              and hold_rows[-1]["reason"] == "VENUE_TRANSITION_NO_ROUTE_RETRY"
+              and all(row["kind"] != "resolved" for row in hold_rows),
+              "pre-grace missing PumpSwap pool holds the position instead of a premature full loss")
+
+        # A transient curve blip must NOT poison the graduation grace clock: once the curve reads
+        # healthy again the stamp is re-armed, so a genuine graduation minutes later gets the FULL
+        # grace window instead of an instant zero-grace false full loss (adversarial-review HIGH).
+        rearm_sp, _, rearm_pos = _graduated_state("rearm-state.json")
+        rearm_state = json.loads(rearm_sp.read_text())
+        blip_now = base + 5_000_000
+        blip_rows = runner._refresh_and_check_graduation(
+            rearm_state, runner.OpenPosition(**rearm_state["open_position"]),
+            UnavailableSnapshots(), NeverGraduated(), now=blip_now)
+        check(blip_rows is not None
+              and rearm_state["open_position"]["graduated_first_seen_unix_nanos"] == blip_now,
+              "a transient curve blip stamps the graduation grace clock")
+        rearm_state["pending_order"] = None  # the sub-grace retry returned the position to HOLD
+        heal_now = blip_now + runner.POSITION_REFRESH_INTERVAL_NANOS + 1
+        healed = runner._refresh_and_check_graduation(
+            rearm_state, runner.OpenPosition(**rearm_state["open_position"]),
+            FakeSnapshots([state(1_020_000_000)], hold_state=state(1_020_000_000)),
+            NeverGraduated(), now=heal_now)
+        check(healed is None
+              and rearm_state["open_position"]["graduated_first_seen_unix_nanos"] == 0,
+              "a recovered curve re-arms the grace clock so a later graduation is not falsely liquidated")
 
         tampered_state = json.loads(state_path.read_text())
         tampered_state["calibration_sha256"] = "0" * 64
         runner._atomic_write(tmp / "tampered-state.json", tampered_state)
         refuses(RefusedExecution, lambda: runner._run_once_at(
-            proof, fake, now=horizon_now + 4_000_000,
+            proof, fake, never_grad, now=horizon_now + 4_000_000,
             quote_input_lamports=50_000_000, state_path=tmp / "tampered-state.json",
             ledger_path=tmp / "tampered-ledger.jsonl", events_path=run_events,
             receipts_path=run_receipts, initialize_at_eof=False),

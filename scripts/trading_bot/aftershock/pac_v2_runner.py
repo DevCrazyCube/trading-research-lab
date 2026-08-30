@@ -28,6 +28,10 @@ from .pac_v2_snapshot import (
     SnapshotProvider, SnapshotUnavailable,
     snapshot_to_dict,
 )
+from .pac_v2_pumpswap import (
+    PumpSwapProvider, PumpSwapUnavailable, observation_to_dict,
+    sell_quote as pumpswap_sell_quote,
+)
 from . import solusd_recorder
 
 
@@ -39,6 +43,12 @@ SLIPPAGE_BPS = 1_000
 SLIPPAGE_DEN = 10_000
 SNAPSHOT_TIMEOUT_NANOS = MAX_SNAPSHOT_STALENESS_NANOS
 SCAN_INTERVAL_SECONDS = 0.10
+# The bonding-curve feed goes permanently silent when a mint graduates to PumpSwap, so a held
+# position must be actively re-observed on-chain.  This is the throttled cadence of that liveness
+# probe for the single open position, and the bounded window a graduated pool has to become
+# observable before an unexitable full loss is booked (the 12-minute horizon is the hard backstop).
+POSITION_REFRESH_INTERVAL_NANOS = 2_000_000_000
+POOL_GRACE_NANOS = 120_000_000_000
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 RESEARCH = ROOT / "research" / "trading_bot" / "aftershock"
 STATE = RESEARCH / f"{INSTRUMENT}_RUNNER_STATE.json"
@@ -85,6 +95,8 @@ class OpenPosition:
     entry_id: str
     last_context_slot: int
     last_state: dict
+    graduated_first_seen_unix_nanos: int = 0
+    last_refresh_unix_nanos: int = 0
 
     def __post_init__(self) -> None:
         if not isinstance(self.mint, str) or not self.mint:
@@ -94,7 +106,8 @@ class OpenPosition:
                 raise RefusedExecution(f"PAC V2 open position {name} is invalid")
         for name in ("entry_curve_fee_lamports", "entry_attempt_cost_lamports", "ata_rent_lamports",
                      "entry_unix_nanos", "peak_net_exit_lamports", "failed_exit_cost_lamports",
-                     "last_context_slot"):
+                     "last_context_slot", "graduated_first_seen_unix_nanos",
+                     "last_refresh_unix_nanos"):
             if type(getattr(self, name)) is not int or getattr(self, name) < 0:
                 raise RefusedExecution(f"PAC V2 open position {name} is invalid")
         if self.entry_all_in_lamports != (self.quote_input_lamports + self.entry_curve_fee_lamports
@@ -173,8 +186,15 @@ def _validate_state(state: dict, proof: RuntimeProof) -> None:
                             "decision_unix_nanos", "target_unix_nanos", "action", "entry_id",
                             "minimum_context_slot", "observation_failures",
                             "last_observation_failure"}
-        if not isinstance(pending, dict) or set(pending) != required_pending:
+        venue = pending.get("venue") if isinstance(pending, dict) else None
+        allowed = required_pending | ({"venue", "graduated_first_seen_unix_nanos"}
+                                      if venue is not None else set())
+        if not isinstance(pending, dict) or set(pending) != allowed:
             raise RefusedExecution("PAC V2 pending-order schema mismatch")
+        if venue is not None and (venue != "PUMPSWAP"
+                or type(pending["graduated_first_seen_unix_nanos"]) is not int
+                or pending["graduated_first_seen_unix_nanos"] <= 0):
+            raise RefusedExecution("PAC V2 pending-order venue is invalid")
         if pending["side"] not in {"ENTRY", "EXIT"}:
             raise RefusedExecution("PAC V2 pending-order side is invalid")
         for name in ("amount", "min_out", "decision_unix_nanos", "target_unix_nanos",
@@ -192,9 +212,12 @@ def _validate_state(state: dict, proof: RuntimeProof) -> None:
             if pending["action"] is not None or pending["entry_id"] is not None or state["open_position"] is not None:
                 raise RefusedExecution("PAC V2 pending entry carries exit/open-position fields")
         else:
-            allowed = {value.value for value in policy.ExitAction} - {
-                policy.ExitAction.HOLD.value, policy.ExitAction.UNEXITABLE_FULL_LOSS.value}
-            if (pending["action"] not in allowed or not isinstance(pending["entry_id"], str)
+            if venue == "PUMPSWAP":
+                exit_allowed = {"EXIT_VENUE_TRANSITION"}
+            else:
+                exit_allowed = {value.value for value in policy.ExitAction} - {
+                    policy.ExitAction.HOLD.value, policy.ExitAction.UNEXITABLE_FULL_LOSS.value}
+            if (pending["action"] not in exit_allowed or not isinstance(pending["entry_id"], str)
                     or state["open_position"] is None
                     or pending["mint"] != state["open_position"]["mint"]
                     or pending["entry_id"] != state["open_position"]["entry_id"]):
@@ -343,10 +366,13 @@ def _resolve_full_loss(state: dict, position: OpenPosition, *, now: int, action:
     return _ledger_row(state, "resolved", body)
 
 
-def _complete_pending(state: dict, provider: SnapshotProvider, *, now: int) -> list[dict]:
+def _complete_pending(state: dict, provider: SnapshotProvider, pumpswap_provider, *,
+                      now: int) -> list[dict]:
     pending = state["pending_order"]
     if pending is None or now < pending["target_unix_nanos"]:
         return []
+    if pending.get("venue") == "PUMPSWAP":
+        return _complete_pumpswap_exit(state, pumpswap_provider, pending, now=now)
     if now - pending["target_unix_nanos"] >= SNAPSHOT_TIMEOUT_NANOS:
         state["pending_order"] = None
         if pending["side"] == "ENTRY":
@@ -466,7 +492,134 @@ def _complete_pending(state: dict, provider: SnapshotProvider, *, now: int) -> l
         "snapshot": snapshot_to_dict(snapshot)})]
 
 
-def _service_position(state: dict, *, now: int) -> list[dict]:
+def _refresh_and_check_graduation(state: dict, position: OpenPosition, provider: SnapshotProvider,
+                                  pumpswap_provider, *, now: int) -> list[dict] | None:
+    """Throttled active on-chain liveness probe for the open position.
+
+    The bonding-curve feed goes permanently silent the moment a mint graduates, so the passively
+    fed trail state can freeze on a healthy-looking price forever.  This re-reads the curve on a
+    bounded cadence.  A healthy live curve refreshes ``last_state`` (so the fast feed trail is never
+    stale) and returns ``None`` to fall through to the normal trail.  Any non-tradeable curve (a
+    zeroed/closed/complete account, or a transient read failure) escalates to a PumpSwap venue
+    transition — the pool's existence is the definitive graduation test.
+    """
+    if now - position.last_refresh_unix_nanos < POSITION_REFRESH_INTERVAL_NANOS:
+        return None
+    position.last_refresh_unix_nanos = now
+    state["open_position"] = asdict(position)  # persist the throttle stamp even on a failed read
+    tradeable = None
+    try:
+        tradeable = provider.capture(position.mint, now, position.last_context_slot)
+    except (SnapshotUnavailable, RefusedExecution):
+        # Missing/closed/zeroed/complete curve, or a transient malformed read: the PumpSwap probe
+        # in _complete_pumpswap_exit decides graduation-vs-transient, bounded by the grace window.
+        tradeable = None
+    if tradeable is not None and not tradeable.state.complete:
+        position.last_state = asdict(tradeable.state)
+        position.last_context_slot = max(position.last_context_slot, tradeable.context_slot)
+        # The curve is live again: re-arm the graduation grace clock so a prior transient blip can
+        # never poison a genuine graduation minutes later into a zero-grace false full loss. The
+        # grace window must only ever accumulate over one contiguous graduation-belief episode.
+        position.graduated_first_seen_unix_nanos = 0
+        state["open_position"] = asdict(position)
+        return None
+    if position.graduated_first_seen_unix_nanos == 0:
+        position.graduated_first_seen_unix_nanos = now
+        state["open_position"] = asdict(position)
+    return _open_venue_transition(state, position, now=now)
+
+
+def _open_venue_transition(state: dict, position: OpenPosition, *, now: int) -> list[dict]:
+    """Set a forced cross-venue liquidation of a graduated position on PumpSwap.
+
+    This is not a trailed exit: our feed can no longer track the mint, so the honest action is to
+    liquidate at the live pool price (``min_out`` = 1; the resolution books whatever the AMM gives,
+    a loss included).  The modeled p90 landing latency still applies at resolution.
+    """
+    decision_id = _hash({"instrument": INSTRUMENT, "side": "EXIT_VENUE", "mint": position.mint,
+                         "entry_id": position.entry_id, "decision_unix_nanos": now})
+    state["pending_order"] = {
+        "side": "EXIT", "venue": "PUMPSWAP", "mint": position.mint, "amount": position.token_atoms,
+        "min_out": 1, "decision_id": decision_id, "decision_unix_nanos": now,
+        "target_unix_nanos": now + state["reaction_p90_nanos"],
+        "minimum_context_slot": position.last_context_slot,
+        "action": "EXIT_VENUE_TRANSITION", "entry_id": position.entry_id,
+        "graduated_first_seen_unix_nanos": position.graduated_first_seen_unix_nanos,
+        "observation_failures": 0, "last_observation_failure": None,
+    }
+    return [_ledger_row(state, "exit_decision", {
+        "mint": position.mint, "entry_id": position.entry_id, "decision_id": decision_id,
+        "action": "EXIT_VENUE_TRANSITION", "decision_unix_nanos": now,
+        "target_unix_nanos": state["pending_order"]["target_unix_nanos"],
+        "minimum_context_slot": state["pending_order"]["minimum_context_slot"],
+        "venue": "PUMPSWAP", "decision_net_exit_lamports": None})]
+
+
+def _complete_pumpswap_exit(state: dict, pumpswap_provider, pending: dict, *, now: int) -> list[dict]:
+    """Resolve a graduated position against the live PumpSwap pool, honestly and boundedly.
+
+    Pool observed -> price the constant-product sell (all-cost, exit gas charged at the same modeled
+    per-tx cost the entry paid) and resolve.  Pool not yet observable -> return to HOLD and retry
+    until the grace window or the 12-minute horizon, at which point the honest outcome is an
+    unexitable full loss: no provable sale route exists.
+    """
+    position = OpenPosition(**state["open_position"])
+    grace_exceeded = now - pending["graduated_first_seen_unix_nanos"] >= POOL_GRACE_NANOS
+    horizon_reached = now - position.entry_unix_nanos >= policy.MAX_HOLD_NANOS
+
+    def _bounded_or_full_loss(reason: str, exc: Exception) -> list[dict]:
+        state["pending_order"] = None
+        if grace_exceeded or horizon_reached:
+            state["open_position"] = None
+            return [_resolve_full_loss(state, position, now=now, action="EXIT_VENUE_TRANSITION",
+                                       reason=reason, evidence_refusal=str(exc)[:200])]
+        return [_ledger_row(state, "exit_rejected", {
+            "mint": position.mint, "entry_id": position.entry_id, "action": "EXIT_VENUE_TRANSITION",
+            "reason": f"{reason}_RETRY", "attempt_cost_lamports": 0,
+            "observation_failures": pending["observation_failures"] + 1})]
+
+    try:
+        observation = pumpswap_provider.capture(position.mint, pending["minimum_context_slot"])
+    except PumpSwapUnavailable as exc:
+        return _bounded_or_full_loss("VENUE_TRANSITION_NO_ROUTE", exc)
+    except RefusedExecution as exc:
+        return _bounded_or_full_loss("VENUE_TRANSITION_REFUSED", exc)
+
+    state["pending_order"] = None
+    attempt_id = _hash({"venue": "PUMPSWAP", "pool": observation.pool, "mint": position.mint,
+                        "entry_id": position.entry_id, "context_slot": observation.context_slot})
+    try:
+        quote = pumpswap_sell_quote(position.token_atoms, observation.reserves)
+    except PriceUnavailable as exc:
+        state["open_position"] = None
+        return [_resolve_full_loss(state, position, now=now, action="EXIT_VENUE_TRANSITION",
+                                   reason="VENUE_TRANSITION_UNPRICEABLE", attempt_id=attempt_id,
+                                   evidence_refusal=str(exc)[:200])]
+    # Exit gas is a Solana per-tx cost, not venue-specific: charge the same modeled cost the entry
+    # paid so the return stays all-cost.  A net that cannot cover its own gas is an honest full loss.
+    exit_gas = position.entry_attempt_cost_lamports
+    net_exit = quote["net_quote_lamports"] - exit_gas
+    if net_exit <= 0:
+        state["open_position"] = None
+        return [_resolve_full_loss(state, position, now=now, action="EXIT_VENUE_TRANSITION",
+                                   reason="VENUE_TRANSITION_NET_NONPOSITIVE", attempt_id=attempt_id)]
+    state["open_position"] = None
+    return [_ledger_row(state, "resolved", {
+        "mint": position.mint, "entry_id": position.entry_id, "exit_attempt_id": attempt_id,
+        "action": "EXIT_VENUE_TRANSITION", "reason": "PUMPSWAP_POOL_SNAPSHOT_FILLED",
+        "resolved_unix_nanos": observation.response_received_unix_nanos,
+        "entry_all_in_lamports": position.entry_all_in_lamports,
+        "failed_exit_cost_lamports": position.failed_exit_cost_lamports,
+        "net_exit_lamports": net_exit, "exit_gas_lamports": exit_gas,
+        "net_return_num": net_exit - position.entry_all_in_lamports
+                          - position.failed_exit_cost_lamports,
+        "net_return_den": position.entry_all_in_lamports, "unexitable_full_loss": False,
+        "ata_rent_treatment": "CHARGED_NOT_RECLAIMED_WITHOUT_OBSERVED_CLOSE",
+        "pumpswap": observation_to_dict(observation), "pumpswap_quote": quote})]
+
+
+def _service_position(state: dict, provider: SnapshotProvider, pumpswap_provider, *,
+                      now: int) -> list[dict]:
     if state["open_position"] is None or state["pending_order"] is not None:
         return []
     position = OpenPosition(**state["open_position"])
@@ -474,6 +627,11 @@ def _service_position(state: dict, *, now: int) -> list[dict]:
     # sample. Never run an exit policy backward; service begins on a later cycle.
     if now < position.entry_unix_nanos:
         return []
+    graduation_rows = _refresh_and_check_graduation(
+        state, position, provider, pumpswap_provider, now=now)
+    if graduation_rows is not None:
+        return graduation_rows
+    position = OpenPosition(**state["open_position"])  # last_state/refresh stamp may have changed
     reserve = feed.ReserveState(**position.last_state)
     intent = OrderIntent(IntentKind.EXACT_TOKEN_SELL, position.token_atoms, 1)
     try:
@@ -619,7 +777,8 @@ def _quote_input(now: int) -> int:
         max_staleness_nanos=solusd_recorder.MAX_LOCAL_AGE_NANOS)
 
 
-def _run_once_at(proof: RuntimeProof, provider: SnapshotProvider, *, now: int,
+def _run_once_at(proof: RuntimeProof, provider: SnapshotProvider, pumpswap_provider=None, *,
+                 now: int,
                  quote_input_lamports: int | None = None, state_path: pathlib.Path = STATE,
                  ledger_path: pathlib.Path = LEDGER, events_path: pathlib.Path = feed.EVENTS,
                  receipts_path: pathlib.Path = feed.RECEIPTS,
@@ -629,8 +788,8 @@ def _run_once_at(proof: RuntimeProof, provider: SnapshotProvider, *, now: int,
     # __main__, so its RuntimeProof class object differs from the manifest-imported package class, and a
     # strict isinstance would reject a genuine, manifest-built proof. Verify the required attributes instead.
     if (not all(hasattr(proof, attr) for attr in ("activation_unix_nanos", "calibration", "seal_sha256"))
-            or not hasattr(provider, "capture")):
-        raise RefusedExecution("PAC V2 run requires runtime proof and snapshot provider")
+            or not hasattr(provider, "capture") or not hasattr(pumpswap_provider, "capture")):
+        raise RefusedExecution("PAC V2 run requires runtime proof and both venue providers")
     if type(now) is not int or now <= proof.activation_unix_nanos:
         raise RefusedExecution("PAC V2 runner clock is not post-activation")
     state_path = pathlib.Path(state_path); ledger_path = pathlib.Path(ledger_path)
@@ -667,7 +826,7 @@ def _run_once_at(proof: RuntimeProof, provider: SnapshotProvider, *, now: int,
                 "open": int(state["open_position"] is not None),
                 "pending": int(state["pending_order"] is not None),
                 "new_events": len(new_events), "ledger_rows": len(rows)}
-    completion_rows = _complete_pending(state, provider, now=now)
+    completion_rows = _complete_pending(state, provider, pumpswap_provider, now=now)
     rows += completion_rows
     opened_this_cycle = any(row["kind"] == "entry_filled" for row in completion_rows)
     # Persist a completed fill/terminal transition before any later policy work. A downstream
@@ -678,7 +837,7 @@ def _run_once_at(proof: RuntimeProof, provider: SnapshotProvider, *, now: int,
         committed_rows = len(rows)
         rows = []
     if not opened_this_cycle:
-        rows += _service_position(state, now=now)
+        rows += _service_position(state, provider, pumpswap_provider, now=now)
     if state["open_position"] is None and state["pending_order"] is None:
         q = quote_input_lamports if quote_input_lamports is not None else _quote_input(now)
         if type(q) is not int or q <= 0:
@@ -697,14 +856,15 @@ def _run_once_at(proof: RuntimeProof, provider: SnapshotProvider, *, now: int,
             "ledger_rows": committed_rows + len(rows)}
 
 
-def run_once(proof: RuntimeProof, provider: SnapshotProvider, *,
+def run_once(proof: RuntimeProof, provider: SnapshotProvider, pumpswap_provider=None, *,
              quote_input_lamports: int | None = None, state_path: pathlib.Path = STATE,
              ledger_path: pathlib.Path = LEDGER, events_path: pathlib.Path = feed.EVENTS,
              receipts_path: pathlib.Path = feed.RECEIPTS,
              initialize_at_eof: bool = True) -> dict:
     """Run one production cycle using only the engine-owned wall clock."""
     return _run_once_at(
-        proof, provider, now=time.time_ns(), quote_input_lamports=quote_input_lamports,
+        proof, provider, pumpswap_provider, now=time.time_ns(),
+        quote_input_lamports=quote_input_lamports,
         state_path=state_path, ledger_path=ledger_path, events_path=events_path,
         receipts_path=receipts_path, initialize_at_eof=initialize_at_eof)
 
@@ -730,11 +890,12 @@ def main(argv=None) -> int:
         from .pac_v2_manifest import load_runtime_proof
         proof = load_runtime_proof()
         provider = PublicRpcSnapshotProvider()
+        pumpswap_provider = PumpSwapProvider()
         with _lock():
             while True:
                 started = time.monotonic()
                 try:
-                    result = run_once(proof, provider)
+                    result = run_once(proof, provider, pumpswap_provider)
                 except RefusedExecution as exc:
                     result = {"status": "CYCLE_REFUSED", "reason": str(exc)[:240]}
                     print(json.dumps(result, sort_keys=True), flush=True)

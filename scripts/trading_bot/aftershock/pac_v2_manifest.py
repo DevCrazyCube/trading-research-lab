@@ -58,6 +58,7 @@ DEPENDENCY_PATHS = (
     "scripts/trading_bot/aftershock/pac_v2_feed.py",
     "scripts/trading_bot/aftershock/pac_v2_manifest.py",
     "scripts/trading_bot/aftershock/pac_v2_policy.py",
+    "scripts/trading_bot/aftershock/pac_v2_pumpswap.py",
     "scripts/trading_bot/aftershock/pac_v2_runner.py",
     "scripts/trading_bot/aftershock/pac_v2_selftest.py",
     "scripts/trading_bot/aftershock/pac_v2_send.py",
