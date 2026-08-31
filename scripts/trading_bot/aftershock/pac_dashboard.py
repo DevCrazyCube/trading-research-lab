@@ -36,6 +36,8 @@ from . import (
     pac_v24_runner,
     pac_v25_manifest,
     pac_v25_runner,
+    pac_v26_manifest,
+    pac_v26_runner,
     solusd_recorder,
 )
 from .execution import RefusedExecution
@@ -70,6 +72,8 @@ _V24_PROOF_CACHE: dict = {"key": None, "value": None}
 _V24_VIEW_LOCK = threading.RLock()
 _V25_PROOF_CACHE: dict = {"key": None, "value": None}
 _V25_VIEW_LOCK = threading.RLock()
+_V26_PROOF_CACHE: dict = {"key": None, "value": None}
+_V26_VIEW_LOCK = threading.RLock()
 
 
 def _exact_int(label: str, value, *, minimum: int | None = None) -> int:
@@ -1780,8 +1784,123 @@ def v25_snapshot() -> dict:
     return result
 
 
+def _v26_successor_status() -> dict:
+    """Offline authority/process summary for the activated V2.6 risk-budget challenger."""
+    try:
+        pac_v26_manifest.verify_seal(require_anchor=True)
+        seal = "ANCHORED"
+    except RefusedExecution:
+        seal = "REFUSED"
+    activation = ("ANCHORED" if pac_v26_manifest.ACTIVATION.exists()
+                  and pac_v26_manifest._anchored(pac_v26_manifest.ACTIVATION)
+                  else "ABSENT_OR_DIRTY")
+    try:
+        health = pac_v22_feed.load_health()
+        age = max(0, time.time_ns() - health["observed_unix_nanos"])
+        effective = ("FRESH" if health["status"] == "FRESH"
+                     and age <= pac_v22_feed.MAX_HEALTH_AGE_NANOS
+                     and health["head_slot_lag"] is not None
+                     and health["head_slot_lag"] <= pac_v22_feed.MAX_HEAD_SLOT_LAG
+                     else "DEGRADED")
+    except RefusedExecution as exc:
+        health = {"status": "REFUSED", "reason": str(exc)[:180], "head_slot_lag": None}
+        effective = "REFUSED"
+    return {
+        "instrument_id": pac_v26_manifest.INSTRUMENT,
+        "status": ("ACTIVATED_ALL_COST_RISK_PAPER_CHALLENGER"
+                   if seal == activation == "ANCHORED" else "V26_AUTHORITY_REFUSED"),
+        "seal": seal, "campaign": "INHERITED_V25_EXECUTOR_ONLY", "activation": activation,
+        "dependency_count": len(pac_v26_manifest.DEPENDENCY_PATHS),
+        "feed": {**health, "effective_status": effective,
+                 "process": _tmux_running("pac-v25-feed")},
+        "formula": "V2.5 entry unchanged · full right tail · exact -8% all-cost risk exit",
+        "boundary": "PAPER ONLY · NO WALLET · NO ORDERS · NOT A PROFIT CLAIM",
+    }
+
+
+def _v26_offline_proof() -> pac_v26_runner.RuntimeProof:
+    paths = (pac_v26_manifest.SEAL, pac_v26_manifest.ACTIVATION,
+             pac_v25_manifest.ACTIVATION, ROOT / ".git" / "HEAD", ROOT / ".git" / "index")
+    key = tuple((str(path), path.stat().st_mtime_ns, path.stat().st_size)
+                if path.exists() else (str(path), None, None) for path in paths)
+    with _V26_VIEW_LOCK:
+        if _V26_PROOF_CACHE["key"] == key:
+            return _V26_PROOF_CACHE["value"]
+        seal = pac_v26_manifest.verify_seal(require_anchor=True)
+        activation = pac_v26_manifest._json(pac_v26_manifest.ACTIVATION)
+        body = dict(activation); observed = body.pop("activation_sha256", None)
+        if (observed != pac_v26_manifest._sha(pac_v26_manifest._canonical(body))
+                or activation.get("seal_sha256") != seal["seal_sha256"]
+                or not pac_v26_manifest._anchored(pac_v26_manifest.ACTIVATION)):
+            raise RefusedExecution("PAC V2.6 dashboard activation refuses")
+        inherited = _v25_offline_proof()
+        source_activation = pac_v25_manifest._json(pac_v25_manifest.ACTIVATION)
+        if (activation.get("source_activation_sha256")
+                != source_activation.get("activation_sha256")
+                or activation.get("source_seal_sha256") != inherited.seal_sha256
+                or activation.get("processed_p90_nanos")
+                != inherited.calibration.processed_p90_nanos):
+            raise RefusedExecution("PAC V2.6 dashboard calibration inheritance refuses")
+        proof = pac_v26_runner.RuntimeProof(
+            seal["seal_sha256"], activation["activation_unix_nanos"], inherited.calibration)
+        _V26_PROOF_CACHE.update({"key": key, "value": proof})
+        return proof
+
+
+def v26_snapshot() -> dict:
+    """V2.6 forward book with the exact shared ledger validator and causal funnel."""
+    global pac_v21_manifest, pac_v21_runner, _v21_offline_proof
+    authority = _v26_successor_status()
+    facade = SimpleNamespace(
+        INSTRUMENT=pac_v26_manifest.INSTRUMENT,
+        DEPENDENCY_PATHS=pac_v26_manifest.DEPENDENCY_PATHS,
+        anchor_status=lambda: authority["seal"])
+    with _V26_VIEW_LOCK:
+        old_manifest, old_runner, old_proof = (
+            pac_v21_manifest, pac_v21_runner, _v21_offline_proof)
+        pac_v21_manifest, pac_v21_runner, _v21_offline_proof = (
+            facade, pac_v26_runner, _v26_offline_proof)
+        try:
+            result = v21_snapshot(successor_status=authority)
+        finally:
+            pac_v21_manifest, pac_v21_runner, _v21_offline_proof = (
+                old_manifest, old_runner, old_proof)
+    processes = result["operational"]["processes"]
+    processes.update({"supervisor": _tmux_running("pac-wd") or _tmux_running("pac-v26"),
+                      "feed": _tmux_running("pac-v25-feed"),
+                      "runner": _tmux_running("pac-v26")})
+    healthy = result["operational"]["state"] == "VALID" and all(processes.values())
+    try:
+        state = json.loads(pac_v26_runner.STATE.read_text())
+        result["candidate_funnel"] = _v25_candidate_funnel(state, _v26_offline_proof())
+    except (OSError, ValueError, RefusedExecution):
+        pass
+    result.update({
+        "title": "Paid Absorption · V2.6 (right-tail + all-cost risk budget)",
+        "formula": "V2.5 paid absorption · full runner · exact all-cost R≤-8% exit",
+        "formula_note": "same entries as V2.5; full-size p90-landed risk exit; promotion must remain positive without its best trade",
+        "challenger": {"instrument_id": "AFTERSHOCK_PAC_V25",
+                       "status": "ACTIVE_FROZEN_BASELINE",
+                       "note": "V2.5 continues unchanged to n=100; no row is copied into V2.6."},
+        "successor": authority,
+    })
+    result["operational"].update({
+        "status": "ACTIVE_AUTHENTICATED_PAPER_SCENARIO" if healthy else "ACTIVE_RUNTIME_REFUSED",
+        "seal": authority["seal"], "campaign": authority["campaign"],
+        "activation": authority["activation"], "dependency_count": authority["dependency_count"],
+    })
+    if result["operational"]["state"] == "VALID":
+        result["evidence_status"] = ("VALID_CALIBRATED_PAPER_SCENARIO"
+                                     if result["performance"]["resolved"]
+                                     else "ACTIVE_CALIBRATED_SCANNING_NO_FILLS_YET")
+    return result
+
+
 def focus_snapshot() -> dict:
-    # V2.5 supersedes V2.4 only after its separate activation anchor exists.
+    # Each successor becomes focus only after its separate activation anchor exists.
+    v26 = _v26_successor_status()
+    if v26["activation"] == "ANCHORED":
+        return v26_snapshot()
     v25 = _v25_successor_status()
     if v25["activation"] == "ANCHORED":
         return v25_snapshot()

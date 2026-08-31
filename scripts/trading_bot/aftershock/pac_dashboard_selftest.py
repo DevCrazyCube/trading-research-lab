@@ -357,6 +357,14 @@ def main() -> int:
 
         with (patch.object(dash, "_v21_successor_status",
                            return_value={"activation": "ANCHORED"}),
+              patch.object(dash, "_v26_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v25_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v24_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v23_successor_status",
+                           return_value={"activation": "ABSENT"}),
               patch.object(dash, "_v22_successor_status",
                            return_value={"campaign": "ABSENT", "activation": "ABSENT"}),
               patch.object(dash, "v21_snapshot",
@@ -366,6 +374,14 @@ def main() -> int:
                      focused["instrument_id"] == "AFTERSHOCK_PAC_V21")
 
         with (patch.object(dash, "_v21_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v26_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v25_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v24_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v23_successor_status",
                            return_value={"activation": "ABSENT"}),
               patch.object(dash, "_v22_successor_status",
                            return_value={"campaign": "ABSENT", "activation": "ABSENT"}),
@@ -377,6 +393,14 @@ def main() -> int:
 
         with (patch.object(dash, "_v22_successor_status",
                            return_value={"campaign": "ANCHORED", "activation": "ABSENT"}),
+              patch.object(dash, "_v26_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v25_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v24_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v23_successor_status",
+                           return_value={"activation": "ABSENT"}),
               patch.object(dash, "v22_feed_snapshot",
                            return_value={"instrument_id": "AFTERSHOCK_PAC_V22"})):
             focused = dash.focus_snapshot()
@@ -385,11 +409,27 @@ def main() -> int:
 
         with (patch.object(dash, "_v22_successor_status",
                            return_value={"campaign": "ANCHORED", "activation": "ANCHORED"}),
+              patch.object(dash, "_v26_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v25_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v24_successor_status",
+                           return_value={"activation": "ABSENT"}),
+              patch.object(dash, "_v23_successor_status",
+                           return_value={"activation": "ABSENT"}),
               patch.object(dash, "v22_snapshot",
                            return_value={"instrument_id": "AFTERSHOCK_PAC_V22_ACTIVE"})):
             focused = dash.focus_snapshot()
         ok &= _check("anchored V2.2 activation selects its state/ledger view",
                      focused["instrument_id"] == "AFTERSHOCK_PAC_V22_ACTIVE")
+
+        with (patch.object(dash, "_v26_successor_status",
+                           return_value={"activation": "ANCHORED"}),
+              patch.object(dash, "v26_snapshot",
+                           return_value={"instrument_id": "AFTERSHOCK_PAC_V26"})):
+            focused = dash.focus_snapshot()
+        ok &= _check("anchored V2.6 activation selects the risk-budget forward book",
+                     focused["instrument_id"] == "AFTERSHOCK_PAC_V26")
 
         v22_events, v22_receipts = root / "v22-events.jsonl", root / "v22-receipts.jsonl"
         writer = dash.pac_v22_feed.FeedWriter(

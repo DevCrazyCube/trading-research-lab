@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Supervise only the activated PAC V2.5 paper runner, shared read-only feed, and dashboard.
+# Supervise the activated V2.5 baseline, V2.6 paper challenger, shared feed, and dashboard.
 set -u
 
 ROOT="/home/anont/meme"
@@ -9,14 +9,17 @@ WATCHDOG_LOCK="$RESEARCH/AFTERSHOCK_PAC_V25_WATCHDOG.lock"
 WATCHDOG_LOG="$RESEARCH/AFTERSHOCK_PAC_V25_WATCHDOG.log"
 FEED_LOG="$RESEARCH/AFTERSHOCK_PAC_V25_FEED.log"
 RUNNER_LOG="$RESEARCH/AFTERSHOCK_PAC_V25_RUNNER.log"
+V26_RUNNER_LOG="$RESEARCH/AFTERSHOCK_PAC_V26_RUNNER.log"
 DASH_LOG="$RESEARCH/AFTERSHOCK_PAC_V25_DASHBOARD.log"
 
 FEED_SESSION="pac-v25-feed"
 RUNNER_SESSION="pac-v25"
+V26_RUNNER_SESSION="pac-v26"
 DASH_SESSION="pac-dash"
 
 FEED_CMD="cd $ROOT && set -a && source '$ENV_FILE' 2>/dev/null && set +a && exec python3 -m scripts.trading_bot.aftershock.pac_v22_feed"
 RUNNER_CMD="cd $ROOT && set -a && source '$ENV_FILE' 2>/dev/null && set +a && exec python3 -m scripts.trading_bot.aftershock.pac_v25_launch"
+V26_RUNNER_CMD="cd $ROOT && set -a && source '$ENV_FILE' 2>/dev/null && set +a && exec python3 -m scripts.trading_bot.aftershock.pac_v26_launch"
 DASH_CMD="cd $ROOT && set -a && source '$ENV_FILE' 2>/dev/null && set +a && exec python3 -m scripts.trading_bot.memebot.dashboard.server"
 
 log() { printf '%s %s\n' "$(date -u +%FT%TZ)" "$1" >> "$WATCHDOG_LOG"; }
@@ -38,6 +41,7 @@ log "watchdog up"
 while true; do
   ensure_session "$FEED_SESSION" "$FEED_CMD" "$FEED_LOG"
   ensure_session "$RUNNER_SESSION" "$RUNNER_CMD" "$RUNNER_LOG"
+  ensure_session "$V26_RUNNER_SESSION" "$V26_RUNNER_CMD" "$V26_RUNNER_LOG"
   ensure_session "$DASH_SESSION" "$DASH_CMD" "$DASH_LOG"
   sleep 5
 done
