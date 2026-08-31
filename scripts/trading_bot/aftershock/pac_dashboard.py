@@ -15,6 +15,7 @@ import pathlib
 import subprocess
 import threading
 import time
+from types import SimpleNamespace
 
 from . import (
     pac_policy,
@@ -33,6 +34,9 @@ from . import (
     pac_v23_runner,
     pac_v24_manifest,
     pac_v24_runner,
+    pac_v25_detector,
+    pac_v25_manifest,
+    pac_v25_runner,
     solusd_recorder,
 )
 from .execution import RefusedExecution
@@ -65,6 +69,8 @@ _V23_PROOF_CACHE: dict = {"key": None, "value": None}
 _V23_VIEW_LOCK = threading.RLock()
 _V24_PROOF_CACHE: dict = {"key": None, "value": None}
 _V24_VIEW_LOCK = threading.RLock()
+_V25_PROOF_CACHE: dict = {"key": None, "value": None}
+_V25_VIEW_LOCK = threading.RLock()
 
 
 def _exact_int(label: str, value, *, minimum: int | None = None) -> int:
@@ -1608,8 +1614,169 @@ def v24_snapshot() -> dict:
     return result
 
 
+def _v25_successor_status() -> dict:
+    """Offline authority/process summary for the activated V2.5 paper successor."""
+    try:
+        pac_v25_manifest.verify_seal(require_anchor=True)
+        seal = "ANCHORED"
+    except RefusedExecution:
+        seal = "REFUSED"
+    activation = ("ANCHORED" if pac_v25_manifest.ACTIVATION.exists()
+                  and pac_v25_manifest._anchored(pac_v25_manifest.ACTIVATION) else "ABSENT_OR_DIRTY")
+    try:
+        health = pac_v22_feed.load_health()
+        age = max(0, time.time_ns() - health["observed_unix_nanos"])
+        effective = ("FRESH" if health["status"] == "FRESH"
+                     and age <= pac_v22_feed.MAX_HEALTH_AGE_NANOS
+                     and health["head_slot_lag"] is not None
+                     and health["head_slot_lag"] <= pac_v22_feed.MAX_HEAD_SLOT_LAG
+                     else "DEGRADED")
+    except RefusedExecution as exc:
+        health = {"status": "REFUSED", "reason": str(exc)[:180], "head_slot_lag": None}
+        effective = "REFUSED"
+    return {
+        "instrument_id": pac_v25_manifest.INSTRUMENT,
+        "status": ("ACTIVATED_PREMISE_BOUND_PAPER_RUNTIME"
+                   if seal == activation == "ANCHORED" else "V25_AUTHORITY_REFUSED"),
+        "seal": seal, "campaign": "INHERITED_V24_EXECUTOR_ONLY", "activation": activation,
+        "dependency_count": len(pac_v25_manifest.DEPENDENCY_PATHS),
+        "feed": {**health, "effective_status": effective,
+                 "process": _tmux_running("pac-v25-feed")},
+        "formula": "paid overshoot · p90 survival · runway · one fill/mint · premise exit",
+        "boundary": "PAPER ONLY · NO WALLET · NO ORDERS · NOT A PROFIT CLAIM",
+    }
+
+
+def _v25_offline_proof() -> pac_v25_runner.RuntimeProof:
+    paths = (pac_v25_manifest.SEAL, pac_v25_manifest.ACTIVATION,
+             pac_v24_manifest.ACTIVATION, ROOT / ".git" / "HEAD", ROOT / ".git" / "index")
+    key = tuple((str(path), path.stat().st_mtime_ns, path.stat().st_size)
+                if path.exists() else (str(path), None, None) for path in paths)
+    with _V25_VIEW_LOCK:
+        if _V25_PROOF_CACHE["key"] == key:
+            return _V25_PROOF_CACHE["value"]
+        seal = pac_v25_manifest.verify_seal(require_anchor=True)
+        activation = pac_v25_manifest._json(pac_v25_manifest.ACTIVATION)
+        body = dict(activation); observed = body.pop("activation_sha256", None)
+        if (observed != pac_v25_manifest._sha(pac_v25_manifest._canonical(body))
+                or activation.get("seal_sha256") != seal["seal_sha256"]
+                or not pac_v25_manifest._anchored(pac_v25_manifest.ACTIVATION)):
+            raise RefusedExecution("PAC V2.5 dashboard activation refuses")
+        inherited = _v24_offline_proof()
+        source_activation = pac_v24_manifest._json(pac_v24_manifest.ACTIVATION)
+        if (activation.get("source_activation_sha256")
+                != source_activation.get("activation_sha256")
+                or activation.get("source_seal_sha256") != inherited.seal_sha256
+                or activation.get("processed_p90_nanos")
+                != inherited.calibration.processed_p90_nanos):
+            raise RefusedExecution("PAC V2.5 dashboard calibration inheritance refuses")
+        proof = pac_v25_runner.RuntimeProof(
+            seal["seal_sha256"], activation["activation_unix_nanos"], inherited.calibration)
+        _V25_PROOF_CACHE.update({"key": key, "value": proof})
+        return proof
+
+
+def _v25_candidate_funnel(state: dict, proof) -> dict:
+    summary = {"buffered_mints": 0, "eligible_events": 0, "pac_core_mints": 0,
+               "p90_dwell_mints": 0, "probe_cover_mints": 0,
+               "recovery_survival_mints": 0, "buyer_breadth_mints": 0,
+               "qualified_mints": 0}
+    candidates = []
+    now = time.time_ns()
+    try:
+        q = pac_v2_runner._quote_input(now)
+    except (OSError, ValueError, RefusedExecution):
+        q = None
+    for mint, raw in (state.get("buffers") or {}).items():
+        try:
+            events = tuple(pac_v2_runner._event(item) for item in raw)
+        except RefusedExecution:
+            continue
+        if not events:
+            continue
+        summary["buffered_mints"] += 1
+        summary["eligible_events"] += len(events)
+        result = (pac_v25_detector.qualify(
+            events, processed_p90_nanos=proof.calibration.processed_p90_nanos,
+            quote_input_lamports=q) if q else None)
+        buyers = len({event.trader for event in events if event.side == "buy"})
+        if any(event.side == "sell" for event in events):
+            summary["pac_core_mints"] += 1
+        if result:
+            summary["p90_dwell_mints"] += 1
+            summary["probe_cover_mints"] += 1
+            summary["recovery_survival_mints"] += 1
+            summary["buyer_breadth_mints"] += 1
+            summary["qualified_mints"] += 1
+        candidates.append({
+            "mint": mint, "event_count": len(events),
+            "gate": "QUALIFIED" if result else "PAID_OVERSHOOT_P90_OR_RUNWAY",
+            "dwell_nanos": result.dwell_nanos if result else 0,
+            "buyer_breadth": result.buyer_breadth_ex_seller if result else buyers,
+            "reserve_cover_lamports": result.reserve_cover_lamports if result else None,
+            "dwell_clock": "processed_event_time",
+            "age_millis": max(0, (now - events[-1].source_received_unix_nanos) // 1_000_000),
+        })
+    candidates.sort(key=lambda item: (item["gate"] != "QUALIFIED", item["age_millis"]))
+    return {"boundary": "V25_CAUSAL_DIAGNOSTIC_NOT_PERFORMANCE_EVIDENCE",
+            "quote_input_lamports": q, "summary": summary, "candidates": candidates[:100]}
+
+
+def v25_snapshot() -> dict:
+    """V2.5 book using the shared exact ledger validator and a V2.5-specific causal funnel."""
+    global pac_v21_manifest, pac_v21_runner, _v21_offline_proof
+    authority = _v25_successor_status()
+    facade = SimpleNamespace(
+        INSTRUMENT=pac_v25_manifest.INSTRUMENT,
+        DEPENDENCY_PATHS=pac_v25_manifest.DEPENDENCY_PATHS,
+        anchor_status=lambda: authority["seal"])
+    with _V25_VIEW_LOCK:
+        old_manifest, old_runner, old_proof = (
+            pac_v21_manifest, pac_v21_runner, _v21_offline_proof)
+        pac_v21_manifest, pac_v21_runner, _v21_offline_proof = (
+            facade, pac_v25_runner, _v25_offline_proof)
+        try:
+            result = v21_snapshot(successor_status=authority)
+        finally:
+            pac_v21_manifest, pac_v21_runner, _v21_offline_proof = (
+                old_manifest, old_runner, old_proof)
+    processes = result["operational"]["processes"]
+    processes.update({"supervisor": _tmux_running("pac-wd") or _tmux_running("pac-v25"),
+                      "feed": _tmux_running("pac-v25-feed"),
+                      "runner": _tmux_running("pac-v25")})
+    healthy = result["operational"]["state"] == "VALID" and all(processes.values())
+    try:
+        state = json.loads(pac_v25_runner.STATE.read_text())
+        proof = _v25_offline_proof()
+        result["candidate_funnel"] = _v25_candidate_funnel(state, proof)
+    except (OSError, ValueError, RefusedExecution):
+        pass
+    result.update({
+        "title": "Paid Absorption · V2.5 (premise-bound house-edge test)",
+        "formula": "sell≥$10 · reserve≥pre-shock+$10 for p90 · ≥3 buyers · 6× cover · 2× runway",
+        "formula_note": "one fill per mint; premise-floor break exits immediately; unpriceable curve tests PumpSwap first",
+        "challenger": {"instrument_id": "AFTERSHOCK_PAC_V24",
+                       "status": "RETIRED_NEGATIVE_TYPICAL_TRADE",
+                       "note": "V2.4 stopped at n=10 plus one right-censored open row; no result is copied into V2.5."},
+        "successor": authority,
+    })
+    result["operational"].update({
+        "status": "ACTIVE_AUTHENTICATED_PAPER_SCENARIO" if healthy else "ACTIVE_RUNTIME_REFUSED",
+        "seal": authority["seal"], "campaign": authority["campaign"],
+        "activation": authority["activation"], "dependency_count": authority["dependency_count"],
+    })
+    if result["operational"]["state"] == "VALID":
+        result["evidence_status"] = ("VALID_CALIBRATED_PAPER_SCENARIO"
+                                     if result["performance"]["resolved"]
+                                     else "ACTIVE_CALIBRATED_SCANNING_NO_FILLS_YET")
+    return result
+
+
 def focus_snapshot() -> dict:
-    # V2.4 (honest toll) supersedes V2.3 once activated: it is the operational focus.
+    # V2.5 supersedes V2.4 only after its separate activation anchor exists.
+    v25 = _v25_successor_status()
+    if v25["activation"] == "ANCHORED":
+        return v25_snapshot()
     v24 = _v24_successor_status()
     if v24["activation"] == "ANCHORED":
         return v24_snapshot()
