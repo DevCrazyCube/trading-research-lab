@@ -3581,3 +3581,22 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
 - **Decision:** V2.5 may inherit V2.4's anchored executor p90 by exact artifact hash because the public
   RPC send/sign/processed-land measurement path and causal execution kernel are unchanged. It inherits
   no strategy rows, begins from a new post-seal activation watermark, and remains paper-scenario only.
+
+## 2026-08-31 — PAC V2.6 isolates an all-cost downside budget without rewriting V2.5
+
+- **Verified fact:** The burned V2.5 design snapshot contained 21 resolved paper positions. One
+  +318.13% outcome supplied more than the aggregate gain; removing it changed the mean to -6.48%.
+  The immediately executable entry-state round trip averaged about -3.01%, while losing positions
+  subsequently lost another 9.31 percentage points on average. These rows cannot score V2.6.
+- **Working hypothesis:** The PAC setup may be useful as an exitability screen for an intrinsically
+  right-tailed payoff, but the inherited premise/trail exits allow ordinary losing paths to consume
+  too much of the rare winner. A fixed all-cost risk allowance can test this asymmetry without
+  retroactively claiming that entry features identify moonshots.
+- **Decision:** V2.5 remains frozen and active. V2.6 inherits its entry and all executor/venue rules
+  byte-for-byte and adds one exact full-position decision: `EXIT_RISK_BUDGET` at or below -8/100 of
+  entry all-in after costs and conditional ATA recovery. It still lands after the anchored p90, so a
+  gap through the threshold is booked honestly. The threshold is a stated design allowance (roughly
+  the measured 3% toll plus five adverse points), not an optimized estimate.
+- **Decision:** V2.6 starts at a new post-seal activation watermark and is judged only at 100 terminal
+  positions. In addition to positive mean and capital index, its mean must remain positive after the
+  single best outcome is removed. Passing remains paper evidence and cannot authorize live money.
