@@ -3558,3 +3558,26 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
   restart then restored the same open mint and advanced its existing cursor without deleting or replaying
   state. Early rows are forward evidence but far below the 100-resolution discovery gate and imply no
   verdict.
+
+## 2026-08-31 — PAC V2.4 is retired; V2.5 tests paid overshoot with premise-bound exits
+
+- **Verified fact:** PAC V2.4 was stopped without rewriting its book after 10 terminal paper positions
+  (mean all-cost return −0.42%, median −10.51%, two wins/eight losses) and one still-open position. The
+  open row is preserved as right-censored. One +93% outlier concealed a negative typical trade; ATA-rent
+  reclaim improved accounting by roughly two percentage points per confirmed full exit but did not by
+  itself establish an edge.
+- **Verified fact:** The shared V2.3/V2.4 service path could classify a stale/unpriceable curve state as
+  an immediate full loss while its two-second active refresh was throttled, bypassing the intended
+  PumpSwap transition. A rejected pending curve exit had an equivalent bypass. V2.5 routes both cases
+  through the bounded venue-transition test before any no-route full-loss outcome.
+- **Working hypothesis:** A recovery is not payable absorption unless subsequent buyers leave at least
+  one planned probe of net quote above the pre-shock reserve for one authenticated p90. V2.5 additionally
+  requires two observed p90 token-depletion windows of graduation runway and allows only one filled
+  entry per mint. These constraints may lower entry count and tail losses; they are not yet evidence of
+  positive expectancy.
+- **Decision:** The combined paid-flow/6× reserve gate becomes an entry premise. Its causal break creates
+  a full-position `EXIT_PREMISE_BREAK` order instead of waiting for a trail. USD 10 sizing remains fixed;
+  portfolio scaling is prohibited until the 100-resolution all-cost gate is positive.
+- **Decision:** V2.5 may inherit V2.4's anchored executor p90 by exact artifact hash because the public
+  RPC send/sign/processed-land measurement path and causal execution kernel are unchanged. It inherits
+  no strategy rows, begins from a new post-seal activation watermark, and remains paper-scenario only.
