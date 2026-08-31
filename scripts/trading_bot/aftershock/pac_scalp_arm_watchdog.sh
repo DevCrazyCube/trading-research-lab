@@ -14,6 +14,8 @@ WATCHDOG_LOCK="$RESEARCH/AFTERSHOCK_PAC_SCALP_ARM_WATCHDOG.lock"
 WATCHDOG_LOG="$RESEARCH/AFTERSHOCK_PAC_SCALP_ARM_WATCHDOG.log"
 DIP_LOG="$RESEARCH/AFTERSHOCK_PAC_SCALP_DIP_RUNNER.log"
 EARLY_LOG="$RESEARCH/AFTERSHOCK_PAC_SCALP_EARLY_RUNNER.log"
+DIP_RETIREMENT="$RESEARCH/AFTERSHOCK_PAC_SCALP_DIP_RETIREMENT.json"
+EARLY_RETIREMENT="$RESEARCH/AFTERSHOCK_PAC_SCALP_EARLY_RETIREMENT.json"
 
 DIP_SESSION="pac-scalp-dip"
 EARLY_SESSION="pac-scalp-early"
@@ -22,6 +24,11 @@ DIP_CMD="cd $ROOT && set -a && source '$ENV_FILE' 2>/dev/null && set +a && exec 
 EARLY_CMD="cd $ROOT && set -a && source '$ENV_FILE' 2>/dev/null && set +a && exec python3 -m scripts.trading_bot.aftershock.pac_scalp_arm_launch early"
 
 log() { printf '%s %s\n' "$(date -u +%FT%TZ)" "$1" >> "$WATCHDOG_LOG"; }
+
+if [[ -e "$DIP_RETIREMENT" || -e "$EARLY_RETIREMENT" ]]; then
+  echo "PAC SCALP anti-exhaustion arms are retired; automatic restart refused" >&2
+  exit 2
+fi
 
 session_alive() { tmux has-session -t "=$1" 2>/dev/null; }
 
