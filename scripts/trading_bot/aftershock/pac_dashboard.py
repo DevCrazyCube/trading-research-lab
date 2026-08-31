@@ -74,6 +74,7 @@ _V25_PROOF_CACHE: dict = {"key": None, "value": None}
 _V25_VIEW_LOCK = threading.RLock()
 _V26_PROOF_CACHE: dict = {"key": None, "value": None}
 _V26_VIEW_LOCK = threading.RLock()
+V26_RETIREMENT = RESEARCH / "AFTERSHOCK_PAC_V26_RETIREMENT.json"
 
 
 def _exact_int(label: str, value, *, minimum: int | None = None) -> int:
@@ -1805,10 +1806,20 @@ def _v26_successor_status() -> dict:
     except RefusedExecution as exc:
         health = {"status": "REFUSED", "reason": str(exc)[:180], "head_slot_lag": None}
         effective = "REFUSED"
+    retirement = ("ANCHORED" if V26_RETIREMENT.exists()
+                  and not subprocess.run(
+                      ("git", "status", "--porcelain", "--", str(V26_RETIREMENT.relative_to(ROOT))),
+                      cwd=ROOT, text=True, capture_output=True, check=False).stdout.strip()
+                  and subprocess.run(
+                      ("git", "ls-files", "--error-unmatch", str(V26_RETIREMENT.relative_to(ROOT))),
+                      cwd=ROOT, text=True, capture_output=True, check=False).returncode == 0
+                  else "ABSENT_OR_DIRTY")
+    status = ("RETIRED_FALSIFIED_EARLY_SAFETY_STOP" if retirement == "ANCHORED"
+              else "ACTIVATED_ALL_COST_RISK_PAPER_CHALLENGER"
+              if seal == activation == "ANCHORED" else "V26_AUTHORITY_REFUSED")
     return {
         "instrument_id": pac_v26_manifest.INSTRUMENT,
-        "status": ("ACTIVATED_ALL_COST_RISK_PAPER_CHALLENGER"
-                   if seal == activation == "ANCHORED" else "V26_AUTHORITY_REFUSED"),
+        "status": status, "retirement": retirement,
         "seal": seal, "campaign": "INHERITED_V25_EXECUTOR_ONLY", "activation": activation,
         "dependency_count": len(pac_v26_manifest.DEPENDENCY_PATHS),
         "feed": {**health, "effective_status": effective,
@@ -1896,10 +1907,98 @@ def v26_snapshot() -> dict:
     return result
 
 
+def scalp_snapshot() -> dict:
+    """Multi-position portfolio convexity scalper view: the book, its ledger, and the mark meter."""
+    from . import pac_scalp_manifest as sm
+    from . import pac_scalp_runner as sr
+    try:
+        sm.verify_seal(require_anchor=True)
+        seal = "ANCHORED"
+    except Exception:  # noqa: BLE001
+        seal = "UNANCHORED"
+    activation = ("ANCHORED" if sm.ACTIVATION.exists() and sm._anchored(sm.ACTIVATION)
+                  else "ABSENT")
+    book, pending, last_status = [], 0, None
+    try:
+        st = json.loads(sr.STATE.read_text())
+        last_status = st.get("last_status")
+        pending = len(st.get("pending_orders", {}))
+        for mint, p in st.get("open_positions", {}).items():
+            book.append({"mint": mint, "entry_all_in_lamports": p.get("entry_all_in_lamports"),
+                         "peak_net_exit_lamports": p.get("peak_net_exit_lamports", 0)})
+    except (OSError, ValueError):
+        pass
+    resolved = wins = losses = full = 0
+    rs, actions = [], {}
+    try:
+        for line in sr.LEDGER.read_text().splitlines():
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            if r.get("kind") != "resolved":
+                continue
+            resolved += 1
+            actions[r.get("action")] = actions.get(r.get("action"), 0) + 1
+            if r.get("unexitable_full_loss"):
+                full += 1
+            num, den = r.get("net_return_num"), r.get("net_return_den")
+            if isinstance(num, int) and isinstance(den, int) and den:
+                value = num / den
+                rs.append(value)
+                wins += value > 0
+                losses += value <= 0
+    except OSError:
+        pass
+    mean = sum(rs) / len(rs) if rs else 0.0
+    marks = 0
+    try:
+        marks = sum(1 for _ in sr.MARKS.read_text().splitlines())
+    except OSError:
+        pass
+    processes = {"supervisor": _tmux_running("pac-wd"), "feed": _tmux_running("pac-scalp-feed"),
+                 "runner": _tmux_running("pac-scalp")}
+    healthy = activation == "ANCHORED" and all(processes.values())
+    return {
+        "instrument_id": "AFTERSHOCK_PAC_SCALP",
+        "title": "Portfolio Convexity Scalper · multi-position (cut losers small, run winners)",
+        "formula": "momentum entry · N=4 book · -6% hard stop · widening let-run peak-trail (18/25/35%)",
+        "formula_note": "not an edge (entry is proven edgeless); harvests convexity — grab often, cut rugs small, ride runners",
+        "boundary": "PAPER SCENARIO ONLY · NO WALLET · NO ORDERS · MEASUREMENT INSTRUMENT (honest EV negative on current evidence)",
+        "operational": {
+            "status": ("ACTIVE_MEASURING_PAPER_SCENARIO" if healthy else "ACTIVE_RUNTIME_DEGRADED"),
+            "seal": seal, "activation": activation, "campaign": "INHERITED_V24_EXECUTOR_ONLY",
+            "processes": processes, "last_status": last_status,
+            "book_open": len(book), "pending_orders": pending, "marks_logged": marks,
+            "reaction_p90_nanos": 3_788_307_712},
+        "open_positions": book, "pending_orders": pending,
+        "performance": {
+            "resolved": resolved, "wins": wins, "losses": losses, "full_losses": full,
+            "mean_return_r": round(mean, 4), "sum_return_r": round(sum(rs), 3),
+            "win_rate": round(wins / resolved, 3) if resolved else 0.0,
+            "exit_actions": actions, "marks_logged": marks},
+        "evidence_status": "MEASURING_CONVEXITY_HINGE_FORWARD_NOT_A_PROFIT_CLAIM",
+        "challenger": {"instrument_id": "AFTERSHOCK_PAC_V25",
+                       "status": "RETIRED_EDGELESS_PAC_FAMILY",
+                       "note": "PAC shock-absorption is proven edgeless; the convexity scalper supersedes the whole family."},
+        "successor": {"instrument_id": "AFTERSHOCK_PAC_SCALP", "status": "ACTIVE_INSTRUMENT"},
+    }
+
+
+def _scalp_active() -> bool:
+    try:
+        from . import pac_scalp_manifest as sm
+        return sm.ACTIVATION.exists() and sm._anchored(sm.ACTIVATION)
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def focus_snapshot() -> dict:
+    # The multi-position convexity scalper supersedes the whole edgeless PAC family once activated.
+    if _scalp_active():
+        return scalp_snapshot()
     # Each successor becomes focus only after its separate activation anchor exists.
     v26 = _v26_successor_status()
-    if v26["activation"] == "ANCHORED":
+    if v26.get("status") == "ACTIVATED_ALL_COST_RISK_PAPER_CHALLENGER":
         return v26_snapshot()
     v25 = _v25_successor_status()
     if v25["activation"] == "ANCHORED":
