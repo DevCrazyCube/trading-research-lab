@@ -13,10 +13,13 @@ import fcntl
 import json
 import os
 import pathlib
+import tempfile
 
-from .execution import RefusedExecution
-from . import pac_v2_runner as core
+from .execution import IntentKind, OrderIntent, RefusedExecution, ReserveState
+from .feasibility import kernel_accounting
 from . import pac_scalp_ll_marklog as marks
+from . import pac_scalp_ll_route as routes
+from .pac_v2_pumpswap import PumpSwapReserves, sell_quote
 
 
 SCHEMA = 2
@@ -43,7 +46,7 @@ PAYLOAD_FIELDS = {
     "ENTRY_FILLED": frozenset({
         "decision_id", "attempt_id", "snapshot_sha256", "landing_unix_nanos", "token_atoms",
         "quote_input_lamports", "curve_fee_lamports", "route_cost_lamports",
-        "ata_rent_lamports", "entry_all_in_lamports"}),
+        "ata_rent_lamports", "entry_all_in_lamports", "pricing_evidence"}),
     "ENTRY_REFUSED": frozenset({"decision_id", "reason"}),
     "EXIT_DECISION": frozenset({
         "decision_id", "action", "venue", "decision_unix_nanos", "target_unix_nanos",
@@ -51,7 +54,7 @@ PAYLOAD_FIELDS = {
     "EXIT_FILLED": frozenset({
         "decision_id", "attempt_id", "venue", "snapshot_sha256", "landing_unix_nanos",
         "full_sale_token_atoms", "gross_quote_lamports", "venue_fee_lamports",
-        "route_cost_lamports", "wallet_proceeds_lamports"}),
+        "route_cost_lamports", "wallet_proceeds_lamports", "pricing_evidence"}),
     "VENUE_STATE": frozenset({
         "state", "reason", "decision_id", "target_unix_nanos",
         "deadline_unix_nanos", "failed_attempt_cost_lamports"}),
@@ -79,6 +82,112 @@ def _sha(value: object) -> str:
 def _is_sha(value: object) -> bool:
     return (isinstance(value, str) and len(value) == 64
             and all(c in "0123456789abcdef" for c in value))
+
+
+def _attempt_cost(value: object, *, expected_sha256: str) -> routes.AttemptCost:
+    expected_keys = {
+        "base_fee_lamports", "priority_fee_lamports", "jito_tip_lamports",
+        "failed_attempt_fees_lamports", "infra_subscription_num_lamports",
+        "infra_subscription_den_trades",
+    }
+    if not isinstance(value, dict) or set(value) != expected_keys or _sha(value) != expected_sha256:
+        raise RefusedExecution("ledger attempt-cost evidence differs from its route profile hash")
+    try:
+        return routes.AttemptCost(**value)
+    except TypeError as exc:
+        raise RefusedExecution("ledger attempt-cost evidence is malformed") from exc
+
+
+def _entry_pricing(payload: dict, row: dict) -> None:
+    evidence = payload["pricing_evidence"]
+    if (not isinstance(evidence, dict)
+            or set(evidence) != {"kind", "reserve_state", "attempt_cost"}
+            or evidence["kind"] != "PUMP_CURVE_ENTRY_KERNEL_V1"):
+        raise RefusedExecution("entry fill lacks exact curve pricing evidence")
+    try:
+        state = ReserveState(**evidence["reserve_state"])
+        cost = _attempt_cost(
+            evidence["attempt_cost"], expected_sha256=row["entry_cost_profile_sha256"])
+        quote = kernel_accounting(
+            state, OrderIntent(IntentKind.EXACT_QUOTE_BUY,
+                               payload["quote_input_lamports"], 1))
+    except (TypeError, ValueError) as exc:
+        raise RefusedExecution("entry fill pricing evidence is malformed") from exc
+    expected_all_in = (payload["quote_input_lamports"] + quote["curve_fee_lamports"]
+                       + cost.all_cost_lamports + quote["ata_rent_lamports"])
+    if (payload["token_atoms"] != quote["out_amount"]
+            or payload["curve_fee_lamports"] != quote["curve_fee_lamports"]
+            or payload["route_cost_lamports"] != cost.all_cost_lamports
+            or payload["ata_rent_lamports"] != quote["ata_rent_lamports"]
+            or payload["entry_all_in_lamports"] != expected_all_in):
+        raise RefusedExecution("entry fill values do not derive from its exact pricing evidence")
+
+
+def _exit_pricing(payload: dict, row: dict) -> None:
+    evidence = payload["pricing_evidence"]
+    if (not isinstance(evidence, dict)
+            or set(evidence) != {"kind", "reserve_state", "pumpswap_reserves", "attempt_cost"}):
+        raise RefusedExecution("exit fill lacks exact pricing evidence")
+    cost = _attempt_cost(
+        evidence["attempt_cost"], expected_sha256=row["exit_cost_profile_sha256"])
+    if evidence["kind"] == "PUMP_CURVE_EXIT_KERNEL_V1":
+        if evidence["pumpswap_reserves"] is not None:
+            raise RefusedExecution("curve exit carries PumpSwap pricing inputs")
+        try:
+            state = ReserveState(**evidence["reserve_state"])
+            quote = kernel_accounting(
+                state, OrderIntent(IntentKind.EXACT_TOKEN_SELL,
+                                   payload["full_sale_token_atoms"], 1))
+        except (TypeError, ValueError) as exc:
+            raise RefusedExecution("curve exit pricing evidence is malformed") from exc
+        expected_gross = quote["gross_quote_lamports"]
+        expected_venue_fee = quote["curve_fee_lamports"]
+        if payload["venue"] != "PUMP_CURVE":
+            raise RefusedExecution("curve pricing evidence is relabelled to another venue")
+    elif evidence["kind"] == "PUMPSWAP_EXIT_CONSTANT_PRODUCT_V1":
+        if evidence["reserve_state"] is not None:
+            raise RefusedExecution("PumpSwap exit carries curve pricing inputs")
+        try:
+            quote = sell_quote(
+                payload["full_sale_token_atoms"],
+                PumpSwapReserves(**evidence["pumpswap_reserves"]))
+        except (TypeError, ValueError) as exc:
+            raise RefusedExecution("PumpSwap exit pricing evidence is malformed") from exc
+        expected_gross = quote["gross_quote_lamports"]
+        expected_venue_fee = (quote["lp_fee_lamports"] + quote["protocol_fee_lamports"]
+                              + quote["creator_fee_lamports"])
+        if payload["venue"] != "PUMPSWAP":
+            raise RefusedExecution("PumpSwap pricing evidence is relabelled to another venue")
+    else:
+        raise RefusedExecution("exit pricing evidence kind is unknown")
+    expected_route = cost.attempt_cost_lamports
+    expected_wallet = expected_gross - expected_venue_fee - expected_route
+    if (payload["gross_quote_lamports"] != expected_gross
+            or payload["venue_fee_lamports"] != expected_venue_fee
+            or payload["route_cost_lamports"] != expected_route
+            or payload["wallet_proceeds_lamports"] != expected_wallet
+            or expected_wallet <= 0):
+        raise RefusedExecution("exit fill values do not derive from its exact pricing evidence")
+
+
+def _atomic_write(path: pathlib.Path, value: dict) -> None:
+    path = pathlib.Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(
+        dir=path.parent, prefix=".pac_scalp_ll_state_", suffix=".json")
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(_canonical(value))
+            handle.flush(); os.fsync(handle.fileno())
+        os.replace(temporary, path)
+        directory = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def genesis() -> dict:
@@ -185,7 +294,24 @@ def _validate_semantics(row: dict) -> None:
                            "full_sale_token_atoms", "net_return_den"}:
             if value is not None and not _integer(value):
                 raise RefusedExecution(f"low-latency ledger {kind}.{key} is not exact")
+    required_ids = {
+        "ENTRY_DECISION": ("decision_id",),
+        "ENTRY_REFUSED": ("decision_id",),
+        "ENTRY_FILLED": ("decision_id", "attempt_id", "snapshot_sha256"),
+        "EXIT_DECISION": ("decision_id",),
+        "EXIT_FILLED": ("decision_id", "attempt_id", "snapshot_sha256"),
+        "VENUE_STATE": ("decision_id",),
+        "ATA_CLOSE": ("decision_id", "attempt_id"),
+    }.get(kind, ())
+    if any(not _is_sha(payload.get(key)) for key in required_ids):
+        raise RefusedExecution(f"low-latency ledger {kind} lacks a required evidence id")
+    if kind == "REFUSAL" and (payload["charged_lamports"] > 0
+                              or payload.get("attempt_id") is not None) \
+            and (not _is_sha(payload.get("decision_id"))
+                 or not _is_sha(payload.get("attempt_id"))):
+        raise RefusedExecution("charged low-latency refusal lacks decision/attempt ids")
     if kind == "ENTRY_FILLED":
+        _entry_pricing(payload, row)
         expected_all_in = (payload["quote_input_lamports"] + payload["curve_fee_lamports"]
                            + payload["route_cost_lamports"] + payload["ata_rent_lamports"])
         if (payload["entry_all_in_lamports"] != expected_all_in
@@ -194,6 +320,7 @@ def _validate_semantics(row: dict) -> None:
         if payload["landing_unix_nanos"] != body["event_unix_nanos"]:
             raise RefusedExecution("entry fill event clock differs from landing")
     elif kind == "EXIT_FILLED":
+        _exit_pricing(payload, row)
         expected_wallet = (payload["gross_quote_lamports"] - payload["venue_fee_lamports"]
                            - payload["route_cost_lamports"])
         if (payload["wallet_proceeds_lamports"] != expected_wallet
@@ -339,6 +466,8 @@ def _advance_semantic(state: dict, row: dict) -> None:
                     or row["event_unix_nanos"] < payload["deadline_unix_nanos"]:
                 raise RefusedExecution("sold close timeout is early/unbound")
             entry["phase"] = "CLOSE_TIMEOUT"
+        if payload["failed_attempt_cost_lamports"] < entry["failed_cost_lamports"]:
+            raise RefusedExecution("venue state cannot erase accumulated failed-attempt cost")
         entry["failed_cost_lamports"] = payload["failed_attempt_cost_lamports"]
         entry["venue_deadline_unix_nanos"] = payload["deadline_unix_nanos"]
     elif kind == "ATA_CLOSE":
@@ -384,12 +513,13 @@ def _advance_semantic(state: dict, row: dict) -> None:
         entry["failed_cost_lamports"] += payload["charged_lamports"]
 
 
-def _row_identity(row: dict) -> tuple:
-    return tuple(row[key] for key in (
+def _row_identity(row: dict) -> list:
+    # JSON-stable because the semantic checkpoint is durably serialized between batches.
+    return [row[key] for key in (
         "mint", "arm", "provider_id", "calibration_sha256", "campaign_sha256",
         "submit_endpoint_identity", "observe_endpoint_identity", "config_fingerprint_sha256",
         "entry_cost_profile_sha256", "exit_cost_profile_sha256",
-        "ata_close_cost_profile_sha256"))
+        "ata_close_cost_profile_sha256")]
 
 
 def _validate_row(row: dict, *, instrument_id: str, seal_sha256: str,
@@ -507,7 +637,7 @@ def _flush_locked(state: dict, *, state_path: pathlib.Path, ledger_path: pathlib
     }
     state["ledger_semantic_state"] = semantic
     state["pending_ledger_rows"] = []
-    core._atomic_write(pathlib.Path(state_path), state)
+    _atomic_write(pathlib.Path(state_path), state)
 
 
 def flush(state: dict, *, state_path: pathlib.Path, ledger_path: pathlib.Path) -> None:
@@ -528,6 +658,52 @@ def flush(state: dict, *, state_path: pathlib.Path, ledger_path: pathlib.Path) -
 
 def commit(state: dict, rows: list[dict], *, state_path: pathlib.Path,
            ledger_path: pathlib.Path) -> None:
-    state["pending_ledger_rows"].extend(rows)
-    core._atomic_write(pathlib.Path(state_path), state)
-    flush(state, state_path=pathlib.Path(state_path), ledger_path=pathlib.Path(ledger_path))
+    if not isinstance(state, dict) or not isinstance(rows, list) or not rows:
+        raise RefusedExecution("low-latency ledger commit inputs are invalid")
+    state_path, ledger_path = pathlib.Path(state_path), pathlib.Path(ledger_path)
+    lock_path = ledger_path.with_name(ledger_path.name + ".writer.lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+b") as handle:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise RefusedExecution("another low-latency ledger writer owns the append CAS") from exc
+        try:
+            if state.get("pending_ledger_rows"):
+                raise RefusedExecution("new commit cannot overtake a pending crash-recovery batch")
+            if state_path.exists():
+                try:
+                    durable = json.loads(state_path.read_text())
+                except (OSError, json.JSONDecodeError) as exc:
+                    raise RefusedExecution("low-latency durable state is unreadable") from exc
+                if (not isinstance(durable, dict)
+                        or durable.get("ledger_head") != state.get("ledger_head")
+                        or durable.get("pending_ledger_rows") != []):
+                    raise RefusedExecution("low-latency state CAS lost before write-ahead persistence")
+            working = json.loads(json.dumps(state))
+            working["pending_ledger_rows"].extend(rows)
+            # Validate the entire relational batch under the writer lock before the WAL can replace
+            # durable state. A syntactically hashed but economically invalid losing proposal therefore
+            # makes zero durable writes.
+            head = _validate_head(working["ledger_head"])
+            observed_size = ledger_path.stat().st_size if ledger_path.exists() else 0
+            if observed_size != head["byte_offset"]:
+                raise RefusedExecution("low-latency ledger/state offset differs before commit")
+            semantic = json.loads(json.dumps(working.get("ledger_semantic_state")))
+            previous = head
+            for row in working["pending_ledger_rows"]:
+                _validate_row(
+                    row, instrument_id=working["instrument_id"],
+                    seal_sha256=working["seal_sha256"],
+                    activation_unix_nanos=working["activation_unix_nanos"],
+                    calibration_sha256=working["calibration_sha256"],
+                    campaign_sha256=working["campaign_sha256"], previous=previous)
+                _advance_semantic(semantic, row)
+                previous = {"sequence": row["sequence"],
+                            "record_sha256": row["record_sha256"], "byte_offset": 0}
+            _atomic_write(state_path, working)
+            # Once the WAL is durable, the caller must carry the same pending state even if append fails.
+            state.clear(); state.update(working)
+            _flush_locked(state, state_path=state_path, ledger_path=ledger_path)
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)

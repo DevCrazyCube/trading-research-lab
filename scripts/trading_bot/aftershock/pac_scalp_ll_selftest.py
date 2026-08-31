@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import base64
 import hashlib
-from dataclasses import replace
+from dataclasses import asdict, replace
 import pathlib
 import tempfile
 import time
@@ -13,13 +13,18 @@ from unittest.mock import patch
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from .execution import RefusedExecution, ReserveState
+from .execution import IntentKind, OrderIntent, RefusedExecution, ReserveState
 from . import pac_scalp_ll_accounting as accounting
+from . import pac_scalp_ll_attest as ll_attest
+from . import pac_scalp_ll_campaign as ll_campaign
+from . import pac_scalp_ll_calibration as ll_calibration
 from . import pac_scalp_ll_clock as clocking
 from . import pac_scalp_ll_ledger as ledger
 from . import pac_scalp_ll_engine as engine
 from . import pac_scalp_ll_marklog as marks
+from . import pac_scalp_ll_manifest as ll_manifest
 from . import pac_scalp_ll_policy as policy
+from . import pac_scalp_ll_portfolio as portfolio
 from . import pac_scalp_ll_route as routes
 from . import pac_scalp_ll_venue as venue
 from . import pac_scalp_ll_tx as tx
@@ -75,6 +80,66 @@ def _record_fields(**updates) -> dict:
 
 
 def main() -> int:
+    # $100 starts at $10; only realised all-cost results compound, with a profit reserve.
+    day_ns = 21_000 * portfolio.UTC_DAY_NANOS + 1_000
+    book = portfolio.Portfolio()
+    check(portfolio.next_position_cents(book, curve_exit_capacity_cents=100_000) == 1_000,
+          "$100 book starts with a meaningful $10 position")
+    with patch.object(portfolio.time, "time_ns", return_value=day_ns):
+        book, auth = portfolio.authorize_next(
+            book, position_id="position-1", curve_exit_capacity_cents=100_000)
+        opened = portfolio.open_authorized(book, auth)
+        won = portfolio.settle_position(
+            opened, position_id="position-1", resolution_id="resolution-1",
+            net_return_num=20, net_return_den=100)
+    check(won.trading_equity_cents == 10_150 and won.locked_profit_cents == 50,
+          "realised profit compounds 75 percent and locks 25 percent")
+    check(portfolio.next_position_cents(won, curve_exit_capacity_cents=100_000) == 1_015,
+          "next position scales from realised trading equity")
+    four = portfolio.Portfolio()
+    with patch.object(portfolio.time, "time_ns", return_value=day_ns):
+        for index in range(4):
+            four, auth = portfolio.authorize_next(
+                four, position_id=f"gross-{index}", curve_exit_capacity_cents=100_000)
+            four = portfolio.open_authorized(four, auth)
+    check(portfolio.next_position_cents(four, curve_exit_capacity_cents=100_000) is None,
+          "four $10 positions consume the $100 book gross cap")
+    with patch.object(portfolio.time, "time_ns", return_value=day_ns):
+        check(portfolio.authorize_next(
+            four, position_id="gross-4", curve_exit_capacity_cents=100_000) is None,
+            "portfolio gross cap refuses a fifth concurrent position")
+        refuses(lambda: portfolio.open_authorized(
+            book, replace(auth, notional_cents=5_000)),
+            "portfolio forged oversize authorization refuses")
+        refuses(lambda: portfolio.settle_position(
+            book, position_id="missing", resolution_id="fake-resolution",
+            net_return_num=1, net_return_den=1),
+            "portfolio cannot settle a nonexistent position")
+        loss_book = portfolio.Portfolio()
+        for index in range(2):
+            loss_book, loss_auth = portfolio.authorize_next(
+                loss_book, position_id=f"loss-{index}", curve_exit_capacity_cents=100_000)
+            loss_book = portfolio.open_authorized(loss_book, loss_auth)
+            loss_book = portfolio.settle_position(
+                loss_book, position_id=f"loss-{index}", resolution_id=f"loss-r-{index}",
+                net_return_num=-1, net_return_den=1)
+    check(loss_book.halted_for_day and portfolio.next_position_cents(
+        loss_book, curve_exit_capacity_cents=100_000) is None,
+        "two $10 full losses halt the initial book for the UTC day")
+    with patch.object(portfolio.time, "time_ns",
+                      return_value=day_ns + portfolio.UTC_DAY_NANOS):
+        rolled_auth = portfolio.authorize_next(
+            loss_book, position_id="tomorrow", curve_exit_capacity_cents=100_000)
+    check(rolled_auth is not None and not rolled_auth[0].halted_for_day
+          and rolled_auth[0].day_start_trading_cents == 8_000,
+          "trusted new UTC day clears only the halt and never restores losses")
+    future = replace(loss_book, day_id=loss_book.day_id + 2)
+    with patch.object(portfolio.time, "time_ns",
+                      return_value=day_ns + portfolio.UTC_DAY_NANOS):
+        refuses(lambda: portfolio.authorize_next(
+            future, position_id="backdated", curve_exit_capacity_cents=100_000),
+            "portfolio trusted UTC clock cannot be spoofed backwards")
+
     # One exact equity convention everywhere.
     eq = accounting.liquidation_equity(
         wallet_proceeds_lamports=90, ata_rent_lamports=15,
@@ -164,6 +229,227 @@ def main() -> int:
                 "credential/path mutation cannot retain the old safe route fingerprint")
     refuses(lambda: routes.assigned_arm(campaign, 0, True), "boolean member index refuses")
 
+    campaign_profile = tx.Profile(50_000, 10_000, 5_000, tx.TIP_ACCOUNTS[0])
+    campaign_row = ll_campaign.build(
+        created_unix_nanos=1_000, fee_payer_fingerprint_sha256="8" * 64,
+        public_submit_url=env["PAC_SCALP_LL_PUBLIC_SUBMIT_RPC_URL"],
+        intervention_submit_url=env["PAC_SCALP_LL_INTERVENTION_SUBMIT_RPC_URL"],
+        verification_url="https://neutral.example.net/rpc?key=verify-secret",
+        samples_per_arm=100, max_lamports=2_000_000, profile=campaign_profile)
+    campaign_payload = ll_campaign.canonical(campaign_row)
+    check(b"secret" not in campaign_payload and b"?key=" not in campaign_payload,
+          "commit-safe campaign never serializes runtime URLs or credentials")
+    with tempfile.TemporaryDirectory() as directory:
+        campaign_path = pathlib.Path(directory) / "campaign.json"
+        campaign_path.write_bytes(campaign_payload)
+        loaded_campaign = ll_campaign.load(
+            campaign_path, expected_sha256=hashlib.sha256(campaign_payload).hexdigest())
+        ll_campaign.assert_runtime_urls(
+            loaded_campaign,
+            public_submit_url=env["PAC_SCALP_LL_PUBLIC_SUBMIT_RPC_URL"],
+            intervention_submit_url=env["PAC_SCALP_LL_INTERVENTION_SUBMIT_RPC_URL"],
+            verification_url="https://neutral.example.net/rpc?key=verify-secret")
+        check(True, "campaign runtime URLs match credential-safe committed pins")
+        refuses(lambda: ll_campaign.assert_runtime_urls(
+            loaded_campaign,
+            public_submit_url=env["PAC_SCALP_LL_PUBLIC_SUBMIT_RPC_URL"],
+            intervention_submit_url="https://amsterdam.example.net/submit?key=changed",
+            verification_url="https://neutral.example.net/rpc?key=verify-secret"),
+            "campaign refuses runtime credential mutation without exposing the credential")
+        tampered = dict(campaign_row)
+        tampered["max_lamports"] += 1
+        tampered_payload = ll_campaign.canonical(tampered)
+        campaign_path.write_bytes(tampered_payload)
+        refuses(lambda: ll_campaign.load(
+            campaign_path, expected_sha256=hashlib.sha256(tampered_payload).hexdigest()),
+            "rehash-valid campaign field tampering breaks its content identity")
+
+        campaign_path.write_bytes(campaign_payload)
+        key_path = pathlib.Path(directory) / "payer.json"
+        raw_private = Ed25519PrivateKey.from_private_bytes(bytes(range(32)))
+        raw_public = raw_private.public_key().public_bytes_raw()
+        key_path.write_text(json.dumps(list(bytes(range(32)) + raw_public)))
+        key_path.chmod(0o600)
+        payer_b58 = __import__(
+            "scripts.trading_bot.aftershock.pac_v2_calibration",
+            fromlist=["_b58encode"])._b58encode(raw_public)
+        payer_campaign_row = ll_campaign.build(
+            created_unix_nanos=1_000,
+            fee_payer_fingerprint_sha256=hashlib.sha256(payer_b58.encode()).hexdigest(),
+            public_submit_url=env["PAC_SCALP_LL_PUBLIC_SUBMIT_RPC_URL"],
+            intervention_submit_url=env["PAC_SCALP_LL_INTERVENTION_SUBMIT_RPC_URL"],
+            verification_url="https://neutral.example.net/rpc?key=verify-secret",
+            samples_per_arm=100, max_lamports=2_000_000, profile=campaign_profile)
+        payer_payload = ll_campaign.canonical(payer_campaign_row)
+        campaign_path.write_bytes(payer_payload)
+        dry = ll_calibration.run(
+            campaign_path=campaign_path,
+            campaign_file_sha256=hashlib.sha256(payer_payload).hexdigest(),
+            keypair_path=key_path,
+            journal_path=pathlib.Path(directory) / "absent-journal.json",
+            summary_path=pathlib.Path(directory) / "absent-summary.json",
+            public_submit_url=env["PAC_SCALP_LL_PUBLIC_SUBMIT_RPC_URL"],
+            intervention_submit_url=env["PAC_SCALP_LL_INTERVENTION_SUBMIT_RPC_URL"],
+            verification_url="https://neutral.example.net/rpc?key=verify-secret",
+            broadcast=False)
+        check(dry == {"broadcast": False, "built": 200, "reserved_lamports": 0}
+              and not (pathlib.Path(directory) / "absent-journal.json").exists(),
+              "default-off calibration builds exact wires and emits no evidence")
+        refuses(lambda: ll_calibration.run(
+            campaign_path=campaign_path,
+            campaign_file_sha256=hashlib.sha256(payer_payload).hexdigest(),
+            keypair_path=key_path,
+            journal_path=pathlib.Path(directory) / "forbidden-journal.json",
+            summary_path=pathlib.Path(directory) / "forbidden-summary.json",
+            public_submit_url=env["PAC_SCALP_LL_PUBLIC_SUBMIT_RPC_URL"],
+            intervention_submit_url=env["PAC_SCALP_LL_INTERVENTION_SUBMIT_RPC_URL"],
+            verification_url="https://neutral.example.net/rpc?key=verify-secret",
+            broadcast=True),
+            "broadcast refuses a campaign outside the manifest-owned anchored path")
+
+        loaded_payer_campaign = ll_campaign.load(
+            campaign_path, expected_sha256=hashlib.sha256(payer_payload).hexdigest())
+        synthetic = ll_calibration._new_journal(loaded_payer_campaign)
+        for attempt_index in (0, 1):
+            arm = ll_campaign.arm_for(loaded_payer_campaign.campaign_sha256, attempt_index)
+            wire, signature, _payer = tx.build(
+                raw_private, recent_blockhash=bytes([attempt_index + 1]) * 32,
+                memo=tx.campaign_memo(
+                    loaded_payer_campaign.campaign_sha256, arm, attempt_index),
+                profile=campaign_profile)
+            clocks = {
+                "build_start_wall": 1_000, "build_start_mono": 1_000,
+                "sign_done_wall": 1_100, "sign_done_mono": 1_100,
+                "fee_start_mono": 1_200, "fee_done_mono": 1_300,
+                "send_start_wall": 1_400, "send_start_mono": 1_400,
+                "send_ack_wall": 1_450, "send_ack_mono": 1_450,
+                "processed_wall": 2_000 + attempt_index * 100,
+                "processed_mono": 2_000 + attempt_index * 100,
+            }
+            synthetic["attempts"].append(ll_calibration._attempt_body(
+                campaign=loaded_payer_campaign, attempt_index=attempt_index, arm=arm,
+                boot_id="synthetic", stage="PROCESSED", wire_base64=wire,
+                signature=signature, fee_lamports=5_500, clocks=clocks, polls=[{
+                    "request_start_wall": 1_800 + attempt_index * 100,
+                    "request_start_mono": 1_800 + attempt_index * 100,
+                    "response_wall": 2_000 + attempt_index * 100,
+                    "response_mono": 2_000 + attempt_index * 100,
+                    "status": {"slot": 100 + attempt_index,
+                               "confirmation": "processed"},
+                }],
+                processed_slot=100 + attempt_index, confirmation_status="processed",
+                failure=None))
+        journal_path = pathlib.Path(directory) / "journal.json"
+        ll_calibration._persist(journal_path, synthetic)
+        reloaded = ll_calibration.load_journal(journal_path, loaded_payer_campaign)
+        local_summary = ll_calibration.summary(
+            reloaded, loaded_payer_campaign, raw_path=journal_path)
+        check(local_summary["attempted_pairs"] == 1
+              and local_summary["evidence_status"] == "UNATTESTED_LOCAL_INCOMPLETE"
+              and {row["paired_samples"] for row in local_summary["arms"].values()} == {1},
+              "matched calibration summary uses only complete paired landings")
+        first_attempt = reloaded["attempts"][0]
+        overlap = json.loads(json.dumps(first_attempt))
+        overlap["clocks"]["fee_done_mono"] = overlap["clocks"]["send_start_mono"] + 1
+        overlap = ll_calibration._hash_row(overlap, "attempt_sha256")
+        refuses(lambda: ll_calibration._validate_attempt(
+            overlap, loaded_payer_campaign, 0),
+            "latency sample refuses overlapping fee-query and send clocks")
+        later_success = json.loads(json.dumps(first_attempt))
+        first_poll = dict(later_success["status_polls"][0])
+        first_poll.update(request_start_wall=1_500, request_start_mono=1_500,
+                          response_wall=1_600, response_mono=1_600)
+        later_success["status_polls"].insert(0, first_poll)
+        later_success = ll_calibration._hash_row(later_success, "attempt_sha256")
+        refuses(lambda: ll_calibration._validate_attempt(
+            later_success, loaded_payer_campaign, 0),
+            "latency sample refuses a non-first successful status poll")
+        after_deadline = json.loads(json.dumps(first_attempt))
+        late = (after_deadline["clocks"]["send_start_mono"]
+                + ll_campaign.LANDING_DEADLINE_NANOS + 1)
+        after_deadline["clocks"]["processed_mono"] = late
+        after_deadline["status_polls"][-1]["response_mono"] = late
+        after_deadline = ll_calibration._hash_row(after_deadline, "attempt_sha256")
+        refuses(lambda: ll_calibration._validate_attempt(
+            after_deadline, loaded_payer_campaign, 0),
+            "latency sample refuses a processed observation after its deadline")
+        failed_success = json.loads(json.dumps(first_attempt))
+        failed_success.update(stage="FAILED", processed_slot=None,
+                              confirmation_status=None, failure="FORGED_FAILURE")
+        failed_success["clocks"].update(processed_wall=None, processed_mono=None)
+        failed_success = ll_calibration._hash_row(failed_success, "attempt_sha256")
+        refuses(lambda: ll_calibration._validate_attempt(
+            failed_success, loaded_payer_campaign, 0),
+            "failed latency sample cannot retain a successful status poll")
+        other_private = Ed25519PrivateKey.from_private_bytes(bytes(range(1, 33)))
+        wrong_wire, wrong_signature, _ = tx.build(
+            other_private, recent_blockhash=bytes([9]) * 32,
+            memo=tx.campaign_memo(loaded_payer_campaign.campaign_sha256,
+                                  first_attempt["arm"], 0),
+            profile=campaign_profile)
+        wrong_payer = json.loads(json.dumps(first_attempt))
+        wrong_payer.update(wire_base64=wrong_wire, signature=wrong_signature,
+                           wire_sha256=hashlib.sha256(base64.b64decode(wrong_wire)).hexdigest())
+        wrong_payer = ll_calibration._hash_row(wrong_payer, "attempt_sha256")
+        refuses(lambda: ll_calibration._validate_attempt(
+            wrong_payer, loaded_payer_campaign, 0),
+            "validly signed wire from the wrong fee payer refuses")
+        finalized = {"jsonrpc": "2.0", "id": 1, "result": {
+            "slot": first_attempt["processed_slot"],
+            "transaction": [first_attempt["wire_base64"], "base64"],
+            "meta": {"err": None, "fee": first_attempt["fee_lamports"]},
+        }}
+        verified_final = ll_attest._verify_finalized(
+            first_attempt, finalized, loaded_payer_campaign)
+        check(verified_final["finalized_slot"] == first_attempt["processed_slot"],
+              "finalized attester re-verifies exact wire, fee and identical slot")
+        wrong_slot = json.loads(json.dumps(finalized))
+        wrong_slot["result"]["slot"] += 1
+        refuses(lambda: ll_attest._verify_finalized(
+            first_attempt, wrong_slot, loaded_payer_campaign),
+            "finalized attester refuses processed/finalized slot mismatch")
+        wrong_fee = json.loads(json.dumps(finalized))
+        wrong_fee["result"]["meta"]["fee"] += 1
+        refuses(lambda: ll_attest._verify_finalized(
+            first_attempt, wrong_fee, loaded_payer_campaign),
+            "finalized attester refuses a one-lamport fee mismatch")
+        wrong_wire = json.loads(json.dumps(finalized))
+        wrong_wire["result"]["transaction"][0] = reloaded["attempts"][1]["wire_base64"]
+        refuses(lambda: ll_attest._verify_finalized(
+            first_attempt, wrong_wire, loaded_payer_campaign),
+            "finalized attester refuses transaction substitution")
+        fake_summary = json.loads(json.dumps(local_summary))
+        fake_summary["arms"][first_attempt["arm"]]["p90_effective_nanos"] = 1
+        fake_body = dict(fake_summary); fake_body.pop("summary_sha256")
+        fake_summary["summary_sha256"] = ll_campaign.sha(fake_body)
+        fake_summary_path = pathlib.Path(directory) / "fake-summary.json"
+        fake_summary_path.write_bytes(ll_campaign.canonical(fake_summary))
+        refuses(lambda: ll_attest._load_summary(
+            fake_summary_path,
+            expected_sha256=hashlib.sha256(fake_summary_path.read_bytes()).hexdigest(),
+            campaign=loaded_payer_campaign, raw_journal_path=journal_path,
+            journal=reloaded),
+            "attester recomputes latency summary instead of trusting a rehashed headline")
+        forged = json.loads(journal_path.read_text())
+        forged["attempts"][0]["arm"] = (
+            routes.LOW_LATENCY_INTERVENTION
+            if forged["attempts"][0]["arm"] == routes.PUBLIC_CONTROL
+            else routes.PUBLIC_CONTROL)
+        forged["attempts"][0] = ll_calibration._hash_row(
+            forged["attempts"][0], "attempt_sha256")
+        forged = ll_calibration._hash_row(forged, "journal_sha256")
+        journal_path.write_bytes(ll_campaign.canonical(forged))
+        refuses(lambda: ll_calibration.load_journal(journal_path, loaded_payer_campaign),
+                "rehash-valid calibration arm switch refuses through the real journal loader")
+
+    computed_seal = ll_manifest.compute_seal()
+    check(computed_seal["instrument_id"] == ll_campaign.INSTRUMENT
+          and len(computed_seal["dependency_sha256"]) == len(ll_manifest.DEPENDENCY_PATHS),
+          "preseal computation closes every frozen low-latency dependency")
+    with ll_manifest.exclusive_campaign():
+        refuses(lambda: ll_manifest.exclusive_campaign().__enter__(),
+                "a concurrent calibration writer cannot acquire the global campaign lock")
+
     authority = _authority()
     with tempfile.TemporaryDirectory() as directory:
         path = pathlib.Path(directory) / "marks.jsonl"
@@ -222,28 +508,47 @@ def main() -> int:
                  "calibration_sha256": "b" * 64, "campaign_sha256": "c" * 64,
                  "pending_ledger_rows": [], "ledger_semantic_state": ledger.semantic_genesis()}
 
+        ledger_cost = routes.AttemptCost(5_000, 100_000, 0, 0, 0, 1)
+        ledger_state = ReserveState(
+            virtual_quote=40_000_000_000, virtual_token=900_000_000_000_000,
+            real_quote=10_000_000_000, real_token=620_100_000_000_000,
+            complete=False)
+        ledger_quote_input = 50_000_000
+        ledger_entry_quote = engine.kernel_accounting(
+            ledger_state, OrderIntent(IntentKind.EXACT_QUOTE_BUY, ledger_quote_input, 1))
+        ledger_cost_sha = engine.cost_profile_sha256(ledger_cost)
+
         def event_body(*, entry_id, payload, event_unix_nanos=2_000):
             return {"entry_id": entry_id, "mint": "m1", "arm": routes.PUBLIC_CONTROL,
                     "provider_id": "public", "event_unix_nanos": event_unix_nanos,
                     "submit_endpoint_identity": "https://submit.example",
                     "observe_endpoint_identity": "https://observe.example",
                     "config_fingerprint_sha256": "3" * 64,
-                    "entry_cost_profile_sha256": "4" * 64,
-                    "exit_cost_profile_sha256": "5" * 64,
+                    "entry_cost_profile_sha256": ledger_cost_sha,
+                    "exit_cost_profile_sha256": ledger_cost_sha,
                     "ata_close_cost_profile_sha256": "6" * 64,
                     "payload": payload}
 
         entry_decision_payload = {
             "decision_id": "d" * 64, "evidence_sha256": "e" * 64,
-            "quote_input_lamports": 50, "min_tokens_out": 1,
+            "quote_input_lamports": ledger_quote_input, "min_tokens_out": 1,
             "decision_unix_nanos": 1_100, "target_unix_nanos": 1_900,
             "minimum_context_slot": 1}
         entry_fill_payload = {
             "decision_id": "d" * 64, "attempt_id": "f" * 64,
             "snapshot_sha256": "1" * 64, "landing_unix_nanos": 2_000,
-            "token_atoms": 10, "quote_input_lamports": 50,
-            "curve_fee_lamports": 20, "route_cost_lamports": 10,
-            "ata_rent_lamports": 20, "entry_all_in_lamports": 100}
+            "token_atoms": ledger_entry_quote["out_amount"],
+            "quote_input_lamports": ledger_quote_input,
+            "curve_fee_lamports": ledger_entry_quote["curve_fee_lamports"],
+            "route_cost_lamports": ledger_cost.all_cost_lamports,
+            "ata_rent_lamports": ledger_entry_quote["ata_rent_lamports"],
+            "entry_all_in_lamports": (
+                ledger_quote_input + ledger_entry_quote["curve_fee_lamports"]
+                + ledger_cost.all_cost_lamports + ledger_entry_quote["ata_rent_lamports"]),
+            "pricing_evidence": {
+                "kind": "PUMP_CURVE_ENTRY_KERNEL_V1",
+                "reserve_state": asdict(ledger_state), "attempt_cost": asdict(ledger_cost),
+            }}
         row1 = ledger.make_row(state, "ENTRY_DECISION", event_body(
             entry_id=None, payload=entry_decision_payload, event_unix_nanos=1_100))
         state["pending_ledger_rows"].append(row1)
@@ -265,6 +570,94 @@ def main() -> int:
                                  campaign_sha256=state["campaign_sha256"])
         check(verified == state["ledger_head"] and verified["sequence"] == 2,
               "ledger appends new rows once and verifies the full authority chain")
+        missing_attempt = dict(entry_fill_payload); missing_attempt["attempt_id"] = None
+        refuses(lambda: ledger.make_row(state, "ENTRY_FILLED", event_body(
+            entry_id="7" * 64, payload=missing_attempt, event_unix_nanos=2_100)),
+            "filled entry cannot omit its decision/attempt evidence ids")
+        forged_pricing = json.loads(json.dumps(entry_fill_payload))
+        forged_pricing["token_atoms"] += 1
+        refuses(lambda: ledger.make_row(state, "ENTRY_FILLED", event_body(
+            entry_id="7" * 64, payload=forged_pricing, event_unix_nanos=2_100)),
+            "locally consistent entry amounts cannot detach from exact kernel pricing evidence")
+        check(state["ledger_semantic_state"]["entries"]["2" * 64]["phase"] == "OPEN",
+              "durable ledger checkpoint retains the open entry lifecycle")
+
+        transition_id = "8" * 64
+        exit_decision_payload = {
+            "decision_id": transition_id, "action": "VENUE_TRANSITION_REQUIRED",
+            "venue": "PUMP_CURVE", "decision_unix_nanos": 2_100,
+            "target_unix_nanos": 2_200, "minimum_context_slot": 2,
+            "decision_liquidation_equity_lamports": 0}
+        exit_decision_row = ledger.make_row(state, "EXIT_DECISION", event_body(
+            entry_id="2" * 64, payload=exit_decision_payload, event_unix_nanos=2_100))
+        check(ledger._row_identity(exit_decision_row)
+              == state["ledger_semantic_state"]["entries"]["2" * 64]["identity"],
+              "exit decision retains the entry route/cost identity")
+        ledger.commit(state, [exit_decision_row], state_path=state_path,
+                      ledger_path=ledger_path)
+        refusal_payload = {
+            "stage": "CURVE_EXIT", "reason": "LANDED_SLIPPAGE",
+            "evidence_sha256": "9" * 64, "decision_id": transition_id,
+            "attempt_id": "a" * 64, "charged_lamports": 100}
+        refusal_row = ledger.make_row(state, "REFUSAL", event_body(
+            entry_id="2" * 64, payload=refusal_payload, event_unix_nanos=2_250))
+        ledger.commit(state, [refusal_row], state_path=state_path, ledger_path=ledger_path)
+        before_reset_attempt = state_path.read_bytes()
+        reset_payload = {
+            "state": "AWAITING_POOL", "reason": "CURVE_UNAVAILABLE",
+            "decision_id": transition_id, "target_unix_nanos": 2_200,
+            "deadline_unix_nanos": 3_000,
+            "failed_attempt_cost_lamports": 0}
+        reset_row = ledger.make_row(state, "VENUE_STATE", event_body(
+            entry_id="2" * 64, payload=reset_payload, event_unix_nanos=2_300))
+        refuses(lambda: ledger.commit(state, [reset_row], state_path=state_path,
+                                      ledger_path=ledger_path),
+                "venue transition cannot reset already charged failed-attempt cost")
+        check(state_path.read_bytes() == before_reset_attempt,
+              "economically invalid batch makes zero durable state writes")
+
+        losing_state = json.loads(json.dumps(state))
+        winner_payload = {**entry_decision_payload, "decision_id": "b" * 64,
+                          "decision_unix_nanos": 2_400, "target_unix_nanos": 2_500}
+        winner_row = ledger.make_row(state, "ENTRY_DECISION", event_body(
+            entry_id=None, payload=winner_payload, event_unix_nanos=2_400))
+        ledger.commit(state, [winner_row], state_path=state_path, ledger_path=ledger_path)
+        after_winner = state_path.read_bytes()
+        loser_payload = {**entry_decision_payload, "decision_id": "c" * 64,
+                         "decision_unix_nanos": 2_410, "target_unix_nanos": 2_510}
+        loser_row = ledger.make_row(losing_state, "ENTRY_DECISION", event_body(
+            entry_id=None, payload=loser_payload, event_unix_nanos=2_410))
+        refuses(lambda: ledger.commit(
+            losing_state, [loser_row], state_path=state_path, ledger_path=ledger_path),
+            "losing stale CAS refuses before replacing winner state")
+        check(state_path.read_bytes() == after_winner,
+              "losing stale CAS makes zero durable writes")
+
+        ledger_exit_quote = engine.kernel_accounting(
+            ledger_state, OrderIntent(
+                IntentKind.EXACT_TOKEN_SELL, entry_fill_payload["token_atoms"], 1))
+        valid_exit_payload = {
+            "decision_id": "e" * 64, "attempt_id": "f" * 64,
+            "venue": "PUMP_CURVE", "snapshot_sha256": "1" * 64,
+            "landing_unix_nanos": 2_700,
+            "full_sale_token_atoms": entry_fill_payload["token_atoms"],
+            "gross_quote_lamports": ledger_exit_quote["gross_quote_lamports"],
+            "venue_fee_lamports": ledger_exit_quote["curve_fee_lamports"],
+            "route_cost_lamports": ledger_cost.attempt_cost_lamports,
+            "wallet_proceeds_lamports": (
+                ledger_exit_quote["gross_quote_lamports"]
+                - ledger_exit_quote["curve_fee_lamports"]
+                - ledger_cost.attempt_cost_lamports),
+            "pricing_evidence": {
+                "kind": "PUMP_CURVE_EXIT_KERNEL_V1",
+                "reserve_state": asdict(ledger_state), "pumpswap_reserves": None,
+                "attempt_cost": asdict(ledger_cost)}}
+        forged_exit_payload = json.loads(json.dumps(valid_exit_payload))
+        forged_exit_payload["gross_quote_lamports"] += 10_000
+        forged_exit_payload["wallet_proceeds_lamports"] += 10_000
+        refuses(lambda: ledger.make_row(state, "EXIT_FILLED", event_body(
+            entry_id="2" * 64, payload=forged_exit_payload, event_unix_nanos=2_700)),
+            "locally reconciled exit proceeds cannot detach from exact quote/cost evidence")
         forged_state = {**state, "ledger_head": ledger.genesis(),
                         "pending_ledger_rows": [],
                         "ledger_semantic_state": ledger.semantic_genesis()}
