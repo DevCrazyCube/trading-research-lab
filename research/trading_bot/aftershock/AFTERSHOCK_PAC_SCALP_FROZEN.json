@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "instrument_id": "AFTERSHOCK_PAC_SCALP",
+  "status": "SEALED_INSTRUMENT_CALIBRATION_INHERITED_HONEST_EV_NEGATIVE",
+  "preregistration_sha256": "be9cebe80ac1a3fd7bda9ace39c94a006be684261562e10d66533c441da22dfc",
+  "paper_scenario_only": true,
+  "live_trading": false,
+  "calibration": "INHERITED_V24_EXECUTOR_PROCESSED_P90_3788307712NS",
+  "architecture": {
+    "multi_position": true,
+    "n_max": 4,
+    "gross_notional_cap_lamports": 800000000,
+    "per_mint_reentry_cooldown_nanos": 90000000000,
+    "correlated_dump_breaker": "GE_50PCT_OPEN_STOP_IN_30S_HALTS_5MIN"
+  },
+  "entry": {
+    "type": "OBSERVABLE_MOMENTUM_GATE_NOT_PREDICTIVE",
+    "window_nanos": 4000000000,
+    "rules": "REAL_QUOTE_RISING_AND_BUY_GT_SELL_AND_GE3_BUYERS_AND_6X_LIQUIDITY_FLOOR"
+  },
+  "exit": {
+    "ordering": "HORIZON_HARD_STOP_CAPACITY_LETRUN_TRAIL",
+    "hard_stop_pct": 6,
+    "proven_peak_pct": 12,
+    "let_run_trail_tiers": [
+      [
+        150,
+        35
+      ],
+      [
+        50,
+        25
+      ],
+      [
+        12,
+        18
+      ]
+    ],
+    "absolute_horizon_nanos": 720000000000,
+    "toll": "ATA_RENT_RECLAIMED_ON_CONFIRMED_FULL_EXIT",
+    "cross_venue": "PUMPSWAP_ON_GRADUATION_ELSE_HONEST_UNEXITABLE_FULL_LOSS"
+  },
+  "measurement": "CONTINUOUS_INTRA_TRADE_MARK_LOGGER_FOR_RUG_CATCH_FRACTION",
+  "honest_status": "NAIVE_BREAKEVEN_FALSIFIED_AS_LOOKAHEAD_EV_NEGATIVE_HINGE_MEASURED_FORWARD",
+  "dependency_paths": [
+    "research/pump_amm_idl_9c82f61.json",
+    "research/pump_idl_9c82f61.json",
+    "research/trading_bot/aftershock/PAC_V21_PROCESSED_CALIBRATION_DESIGN.md",
+    "scripts/b10a_simulator_kernel.py",
+    "scripts/b10b_position_path.py",
+    "scripts/b15a_websocket.py",
+    "scripts/b9d_transaction_bodies.py",
+    "scripts/b9i_quote_reproduction.py",
+    "scripts/rpc_http_identity.py",
+    "scripts/trading_bot/aftershock/__init__.py",
+    "scripts/trading_bot/aftershock/ecr.py",
+    "scripts/trading_bot/aftershock/execution.py",
+    "scripts/trading_bot/aftershock/feasibility.py",
+    "scripts/trading_bot/aftershock/pac_detector.py",
+    "scripts/trading_bot/aftershock/pac_v2_calibration.py",
+    "scripts/trading_bot/aftershock/pac_v2_calibration_attestation.py",
+    "scripts/trading_bot/aftershock/pac_v2_detector.py",
+    "scripts/trading_bot/aftershock/pac_v2_feed.py",
+    "scripts/trading_bot/aftershock/pac_v2_policy.py",
+    "scripts/trading_bot/aftershock/pac_v2_runner.py",
+    "scripts/trading_bot/aftershock/pac_v2_send.py",
+    "scripts/trading_bot/aftershock/pac_v2_snapshot.py",
+    "scripts/trading_bot/aftershock/pac_v21_attestation.py",
+    "scripts/trading_bot/aftershock/pac_v21_attestation_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v21_calibration.py",
+    "scripts/trading_bot/aftershock/pac_v21_calibration_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v21_detector.py",
+    "scripts/trading_bot/aftershock/pac_v21_detector_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v21_evidence.py",
+    "scripts/trading_bot/aftershock/pac_v21_evidence_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v21_manifest.py",
+    "scripts/trading_bot/aftershock/pac_v21_manifest_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v21_processed_observer.py",
+    "scripts/trading_bot/aftershock/pac_v21_processed_observer_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v21_runner.py",
+    "scripts/trading_bot/aftershock/pac_v21_runner_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v21_send.py",
+    "scripts/trading_bot/aftershock/pac_v21_send_selftest.py",
+    "scripts/trading_bot/aftershock/solusd_recorder.py",
+    "scripts/trading_bot/sniper/data/_common.py",
+    "scripts/trading_bot/sniper/types.py",
+    "scripts/trading_bot/aftershock/pac_v22_feed.py",
+    "scripts/trading_bot/aftershock/pac_v22_feed_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v2_pumpswap.py",
+    "scripts/trading_bot/aftershock/pac_v2_pumpswap_selftest.py",
+    "scripts/trading_bot/aftershock/pac_v24_runner.py",
+    "scripts/trading_bot/aftershock/pac_v24_manifest.py",
+    "scripts/trading_bot/aftershock/pac_scalp_detector.py",
+    "scripts/trading_bot/aftershock/pac_scalp_policy.py",
+    "scripts/trading_bot/aftershock/pac_scalp_marklog.py",
+    "scripts/trading_bot/aftershock/pac_scalp_runner.py",
+    "scripts/trading_bot/aftershock/pac_scalp_selftest.py",
+    "scripts/trading_bot/aftershock/pac_scalp_manifest.py"
+  ]
+}
