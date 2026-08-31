@@ -34,7 +34,6 @@ from . import (
     pac_v23_runner,
     pac_v24_manifest,
     pac_v24_runner,
-    pac_v25_detector,
     pac_v25_manifest,
     pac_v25_runner,
     solusd_recorder,
@@ -1677,6 +1676,12 @@ def _v25_offline_proof() -> pac_v25_runner.RuntimeProof:
 
 
 def _v25_candidate_funnel(state: dict, proof) -> dict:
+    """Linear operational view; the sealed runner remains the only qualification authority.
+
+    Re-running the quadratic detector over every 180-second buffer on every HTTP request can block
+    the single-threaded read-only dashboard.  This view therefore reports causal traffic and the
+    runner's durable pending/open verdict only; it never invents an independent qualification.
+    """
     summary = {"buffered_mints": 0, "eligible_events": 0, "pac_core_mints": 0,
                "p90_dwell_mints": 0, "probe_cover_mints": 0,
                "recovery_survival_mints": 0, "buyer_breadth_mints": 0,
@@ -1687,6 +1692,10 @@ def _v25_candidate_funnel(state: dict, proof) -> dict:
         q = pac_v2_runner._quote_input(now)
     except (OSError, ValueError, RefusedExecution):
         q = None
+    pending_mint = ((state.get("pending_order") or {}).get("mint")
+                    if isinstance(state.get("pending_order"), dict) else None)
+    open_mint = ((state.get("open_position") or {}).get("mint")
+                 if isinstance(state.get("open_position"), dict) else None)
     for mint, raw in (state.get("buffers") or {}).items():
         try:
             events = tuple(pac_v2_runner._event(item) for item in raw)
@@ -1696,13 +1705,11 @@ def _v25_candidate_funnel(state: dict, proof) -> dict:
             continue
         summary["buffered_mints"] += 1
         summary["eligible_events"] += len(events)
-        result = (pac_v25_detector.qualify(
-            events, processed_p90_nanos=proof.calibration.processed_p90_nanos,
-            quote_input_lamports=q) if q else None)
         buyers = len({event.trader for event in events if event.side == "buy"})
         if any(event.side == "sell" for event in events):
             summary["pac_core_mints"] += 1
-        if result:
+        qualified = mint in {pending_mint, open_mint}
+        if qualified:
             summary["p90_dwell_mints"] += 1
             summary["probe_cover_mints"] += 1
             summary["recovery_survival_mints"] += 1
@@ -1710,15 +1717,16 @@ def _v25_candidate_funnel(state: dict, proof) -> dict:
             summary["qualified_mints"] += 1
         candidates.append({
             "mint": mint, "event_count": len(events),
-            "gate": "QUALIFIED" if result else "PAID_OVERSHOOT_P90_OR_RUNWAY",
-            "dwell_nanos": result.dwell_nanos if result else 0,
-            "buyer_breadth": result.buyer_breadth_ex_seller if result else buyers,
-            "reserve_cover_lamports": result.reserve_cover_lamports if result else None,
+            "gate": ("RUNNER_PENDING_OR_OPEN" if qualified
+                     else "RUNNER_SCANNING_PAID_OVERSHOOT_P90_RUNWAY"),
+            "dwell_nanos": 0, "buyer_breadth": buyers,
+            "reserve_cover_lamports": None,
             "dwell_clock": "processed_event_time",
             "age_millis": max(0, (now - events[-1].source_received_unix_nanos) // 1_000_000),
         })
-    candidates.sort(key=lambda item: (item["gate"] != "QUALIFIED", item["age_millis"]))
-    return {"boundary": "V25_CAUSAL_DIAGNOSTIC_NOT_PERFORMANCE_EVIDENCE",
+    candidates.sort(key=lambda item: (item["gate"] != "RUNNER_PENDING_OR_OPEN",
+                                      item["age_millis"]))
+    return {"boundary": "V25_LINEAR_RUNNER_AUTHORITY_DIAGNOSTIC_NOT_A_SECOND_DETECTOR",
             "quote_input_lamports": q, "summary": summary, "candidates": candidates[:100]}
 
 
