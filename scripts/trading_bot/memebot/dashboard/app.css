@@ -247,4 +247,18 @@ table.grid.evogrid tbody tr.killed td{text-decoration:line-through;text-decorati
 .pac-gate-detail{display:block;margin-top:3px;color:var(--text3);font:9px/1.25 var(--mono)}
 .pac-pending-row{background:linear-gradient(90deg,rgba(232,177,83,.075),transparent 62%)}
 .pac-pending-row td{border-bottom-color:rgba(232,177,83,.18)}
+#pacArms:not(:empty){display:block;background:var(--panel);border:1px solid var(--line);border-radius:4px;margin:0 0 2px;overflow:hidden}
+.pac-arms-hd{padding:9px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.pac-arms-hd strong{font:600 11px var(--mono);color:var(--text);letter-spacing:.04em}
+.pac-arms-hd span{font:9.5px var(--mono);color:var(--text3)}
+.pac-arm-row{display:grid;grid-template-columns:minmax(230px,1.4fr) repeat(5,minmax(70px,1fr));align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line)}
+.pac-arm-row:last-child{border-bottom:none}
+.pac-arm-control{background:linear-gradient(90deg,rgba(255,255,255,.025),transparent 70%)}
+.pac-arm-name{font:600 11px var(--mono);color:var(--text);display:flex;flex-direction:column;gap:1px}
+.pac-arm-name em{display:inline;font-style:normal;color:var(--text3);font-weight:400;font-size:9px}
+.pac-arm-entry{font:9px var(--mono);color:var(--text2);font-weight:400}
+.pac-arm-metric{display:flex;flex-direction:column;gap:1px;text-align:right}
+.pac-arm-metric .v{font:600 12px var(--mono);color:var(--text);font-variant-numeric:tabular-nums}
+.pac-arm-metric .v.pos{color:var(--mint)}.pac-arm-metric .v.neg{color:var(--red)}.pac-arm-metric .v.muted{color:var(--text3)}
+.pac-arm-metric .k{font:8.5px var(--mono);color:var(--text3);letter-spacing:.03em}
 @media(max-width:950px){.pac-layout{grid-template-columns:1fr}.pac-chart-card{border-right:0;border-bottom:1px solid var(--line)}.pac-chart{height:245px}}

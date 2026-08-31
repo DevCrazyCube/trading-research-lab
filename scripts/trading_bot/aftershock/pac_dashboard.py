@@ -1907,6 +1907,73 @@ def v26_snapshot() -> dict:
     return result
 
 
+def _entry_arm_stats() -> list:
+    """Matched 3-way anti-exhaustion entry comparison: momentum control vs dip-reclaim vs early-curve.
+    Each reuses the identical sealed exit engine; only the entry gate differs. Read-only, honest raw
+    ledger stats (no promotion gate) so the arms are visible from the moment they fire."""
+    arms = [
+        ("MOMENTUM", "AFTERSHOCK_PAC_SCALP", "pac-scalp", "buy-the-spike (control · edgeless)"),
+        ("DIP-RECLAIM", "AFTERSHOCK_PAC_SCALP_DIP", "pac-scalp-dip", "buy the shakeout-reclaim"),
+        ("EARLY-CURVE", "AFTERSHOCK_PAC_SCALP_EARLY", "pac-scalp-early", "buy early on the curve"),
+    ]
+    out = []
+    for name, inst, session, entry in arms:
+        led = RESEARCH / f"{inst}_SCENARIO_LEDGER.jsonl"
+        st = RESEARCH / f"{inst}_RUNNER_STATE.json"
+        entries = resolved = wins = full = 0
+        rs = []
+        try:
+            for line in led.read_text().splitlines():
+                if not line.strip():
+                    continue
+                r = json.loads(line)
+                k = r.get("kind")
+                if k == "entry_decision":
+                    entries += 1
+                elif k == "resolved":
+                    resolved += 1
+                    if r.get("unexitable_full_loss"):
+                        full += 1
+                    num, den = r.get("net_return_num"), r.get("net_return_den")
+                    if isinstance(num, int) and isinstance(den, int) and den:
+                        rs.append(num / den)
+        except OSError:
+            pass
+        open_n = pending = 0
+        last_status = None
+        try:
+            s = json.loads(st.read_text())
+            open_n = len(s.get("open_positions", {}))
+            pending = len(s.get("pending_orders", {}))
+            last_status = s.get("last_status")
+        except (OSError, ValueError):
+            pass
+        # sum net return in SOL from the ledger's lamport fields
+        net_lamports = 0
+        try:
+            for line in led.read_text().splitlines():
+                if not line.strip():
+                    continue
+                r = json.loads(line)
+                if r.get("kind") == "resolved" and isinstance(r.get("net_return_num"), int):
+                    net_lamports += r["net_return_num"]
+        except OSError:
+            pass
+        out.append({
+            "name": name, "instrument_id": inst, "entry": entry,
+            "alive": _tmux_running(session),
+            "entries": entries, "resolved": resolved,
+            "wins": wins if rs == [] else sum(1 for v in rs if v > 0),
+            "win_rate": round(sum(1 for v in rs if v > 0) / len(rs), 3) if rs else None,
+            "mean_return_r": round(sum(rs) / len(rs), 4) if rs else None,
+            "full_losses": full,
+            "net_sol": round(net_lamports / 1e9, 4),
+            "open": open_n, "pending": pending, "last_status": last_status,
+            "is_control": inst == "AFTERSHOCK_PAC_SCALP",
+        })
+    return out
+
+
 def scalp_snapshot() -> dict:
     """Multi-position portfolio convexity scalper view: the book, its ledger, and the mark meter."""
     from . import pac_scalp_manifest as sm
@@ -1977,6 +2044,7 @@ def scalp_snapshot() -> dict:
             "win_rate": round(wins / resolved, 3) if resolved else 0.0,
             "exit_actions": actions, "marks_logged": marks},
         "evidence_status": "MEASURING_CONVEXITY_HINGE_FORWARD_NOT_A_PROFIT_CLAIM",
+        "entry_arms": _entry_arm_stats(),
         "challenger": {"instrument_id": "AFTERSHOCK_PAC_V25",
                        "status": "RETIRED_EDGELESS_PAC_FAMILY",
                        "note": "PAC shock-absorption is proven edgeless; the convexity scalper supersedes the whole family."},

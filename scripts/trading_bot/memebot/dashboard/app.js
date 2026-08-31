@@ -993,6 +993,7 @@ function renderPAC(){
     <div class="pagehd pac-head"><h2 id="pacTitle">Aftershock PAC</h2><span class="pill">PAYABLE ABSORPTION COMPRESSION</span><span class="grow"></span><span id="pacStatusBadge" class="killtag halt">loading</span></div>
     <div id="pacBoundary" class="pac-boundary"></div>
     <section id="pacChallenger" class="pac-boundary"></section>
+    <section id="pacArms"></section>
     <section id="pacStrip" class="strip"></section>
     <div class="pac-layout">
       <section class="pac-chart-card"><div class="pac-card-head"><div><span class="pac-eyebrow">PERFORMANCE</span><h3>Normalized discovery capital</h3></div><div class="pac-last" id="pacLast">—</div></div><div class="pac-chart" id="pacChart"></div><div class="pac-chart-note" id="pacChartNote"></div></section>
@@ -1048,6 +1049,31 @@ function renderPACView(){
     `▸ NEXT · ${esc(successor.instrument_id||"AFTERSHOCK_PAC_V21")} · ${esc(successor.status||"UNKNOWN")} · seal ${esc(successor.seal||"?")} · campaign ${esc(successor.campaign||"?")} · activation ${esc(successor.activation||"?")}</span>`+
     `<span style="display:block;color:#8a93a0">${esc(successor.formula||"")} · ${esc(successor.boundary||"")}</span>`+
     `<span style="display:block;color:#8a8a8a">${esc(challenger.instrument_id||"AFTERSHOCK_PAC_V1")} · ${esc(challenger.status||"—")} · ${esc(challenger.note||"")}</span>`);
+  const armsBox=document.getElementById("pacArms");
+  if(armsBox){
+    const arms=d.entry_arms||[];
+    if(!arms.length){ armsBox.innerHTML=""; }
+    else {
+      const hdr=`<div class="pac-arms-hd"><strong>Anti-exhaustion entry A/B · matched 3-way</strong>`+
+        `<span>same sealed exit engine · only the entry gate differs · raw ledger, not a promotion claim · forward-only since launch</span></div>`;
+      const rows=arms.map(a=>{
+        const mr=(a.mean_return_r==null)?"—":((a.mean_return_r>0?"+":"")+(a.mean_return_r*100).toFixed(1)+"%");
+        const mrc=(a.mean_return_r==null)?"muted":(a.mean_return_r>0?"pos":"neg");
+        const ns=(a.net_sol==null)?"—":((a.net_sol>0?"+":"")+a.net_sol.toFixed(4));
+        const wr=(a.win_rate==null)?"—":(a.win_rate*100).toFixed(0)+"%";
+        const dot=a.alive?'<span style="color:#5fd07a">●</span>':'<span style="color:#ff4d4d">●</span>';
+        return `<div class="pac-arm-row${a.is_control?' pac-arm-control':''}">`+
+          `<div class="pac-arm-name">${dot} ${esc(a.name)}${a.is_control?' <em>control</em>':''}<span class="pac-arm-entry">${esc(a.entry)}</span></div>`+
+          `<div class="pac-arm-metric"><span class="v">${a.entries}→${a.resolved}</span><span class="k">entries→resolved</span></div>`+
+          `<div class="pac-arm-metric"><span class="v">${wr}</span><span class="k">win</span></div>`+
+          `<div class="pac-arm-metric"><span class="v ${mrc}">${mr}</span><span class="k">mean R</span></div>`+
+          `<div class="pac-arm-metric"><span class="v ${a.net_sol>0?'pos':(a.net_sol<0?'neg':'')}">${ns}</span><span class="k">net SOL</span></div>`+
+          `<div class="pac-arm-metric"><span class="v">${a.open}/${a.pending}</span><span class="k">open/pend</span></div>`+
+        `</div>`;
+      }).join("");
+      armsBox.innerHTML=hdr+rows;
+    }
+  }
   const cells=[
     ["Capital index",pacNum(perf.normalized_capital_index,2),`normalized paper index`,validScenario?(Number(perf.normalized_capital_index)>=100?"pos":"neg"):"muted"],
     ["Mean all-cost R",perf.mean_return_r==null?"—":(Number(perf.mean_return_r)>=0?"+":"")+pacNum(perf.mean_return_r,3),`${perf.resolved||0} fully reconciled`,perf.mean_return_r==null?"muted":(Number(perf.mean_return_r)>0?"pos":"neg")],
