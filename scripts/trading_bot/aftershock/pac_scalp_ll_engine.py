@@ -82,6 +82,60 @@ class ArmRuntime:
             raise RefusedExecution("arm runtime lacks typed all-cost attempts")
 
 
+# --- Blocker #1 closure: the per-arm p90 is bound to committed on-chain-attested evidence, never an
+# operator scalar.  The ONLY honest ArmRuntime for the trading path is built from a git-anchored
+# activation whose per-arm p90 was derived from the matched attested calibration; assert_runtime_activated
+# refuses any runtime whose p90/binding is not the committed one, so ArmRuntime(...p90=1...) cannot trade.
+ACTIVATION_BINDING = "PAC_SCALP_LL_ACTIVATION_P90_V1"
+
+
+def arm_p90_binding(activation: dict, arm: str) -> str:
+    """Engine-recomputable canonical binding over the committed per-arm p90 + its evidence."""
+    if not isinstance(activation, dict) or arm not in routes.ARMS:
+        raise RefusedExecution("activation binding requires a typed activation and known arm")
+    arms = activation.get("arms")
+    if not isinstance(arms, dict) or arm not in arms or not isinstance(arms[arm], dict):
+        raise RefusedExecution("activation lacks the requested arm's committed p90")
+    return _hash({"kind": ACTIVATION_BINDING, "campaign": activation["campaign_sha256"],
+                  "arm": arm, "p90": arms[arm]["p90_nanos"],
+                  "evidence_digest": arms[arm]["evidence_digest"],
+                  "samples": activation["samples_sha256"],
+                  "attestations": activation["attestations_sha256"]})
+
+
+def arm_runtime_from_activation(activation: dict, arm: str, *, provider_id: str,
+                                submit_endpoint_identity: str, observe_endpoint_identity: str,
+                                config_fingerprint_sha256: str,
+                                entry_attempt_cost: "routes.AttemptCost",
+                                exit_attempt_cost: "routes.AttemptCost",
+                                ata_close_attempt_cost: "routes.AttemptCost") -> "ArmRuntime":
+    """The SOLE legitimate ArmRuntime constructor for the trading path: p90 comes from the committed
+    activation, never the caller."""
+    if not isinstance(activation, dict) or arm not in activation.get("arms", {}):
+        raise RefusedExecution("activation does not authorize this arm")
+    return ArmRuntime(
+        arm=arm, provider_id=provider_id,
+        calibrated_p90_nanos=activation["arms"][arm]["p90_nanos"],
+        calibration_sha256=arm_p90_binding(activation, arm),
+        campaign_sha256=activation["campaign_sha256"],
+        submit_endpoint_identity=submit_endpoint_identity,
+        observe_endpoint_identity=observe_endpoint_identity,
+        config_fingerprint_sha256=config_fingerprint_sha256,
+        entry_attempt_cost=entry_attempt_cost, exit_attempt_cost=exit_attempt_cost,
+        ata_close_attempt_cost=ata_close_attempt_cost)
+
+
+def assert_runtime_activated(runtime: "ArmRuntime", activation: dict) -> None:
+    """Refuse any runtime whose p90 is not the one proven by the committed evidence activation."""
+    if not isinstance(runtime, ArmRuntime):
+        raise RefusedExecution("activation gate requires a typed arm runtime")
+    if (runtime.arm not in activation.get("arms", {})
+            or runtime.campaign_sha256 != activation.get("campaign_sha256")
+            or runtime.calibrated_p90_nanos != activation["arms"][runtime.arm]["p90_nanos"]
+            or runtime.calibration_sha256 != arm_p90_binding(activation, runtime.arm)):
+        raise RefusedExecution("arm runtime p90 is not bound to the committed evidence activation")
+
+
 @dataclass(frozen=True)
 class Position:
     mint: str
