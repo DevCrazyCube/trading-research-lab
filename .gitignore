@@ -84,3 +84,13 @@ research/b15p/
 research/data/spy_30min_bars.json
 research/data/t29_crosslist_cache/
 research/data/rv_cache/
+research/data/gex_cache/
+research/data/fund0825_cache/
+
+# AFTERSHOCK PAC mutable paper-scenario state/evidence. The frozen code and activation roots are
+# committed; live state, lock, and append-only ledger remain on disk and are authenticated internally.
+research/trading_bot/aftershock/AFTERSHOCK_PAC_V1_RUNNER_STATE.json
+research/trading_bot/aftershock/AFTERSHOCK_PAC_V1_RUNNER.lock
+research/trading_bot/aftershock/AFTERSHOCK_PAC_V1_SCENARIO_LEDGER.jsonl
+
+research/data/aftershock/pac_lws/
