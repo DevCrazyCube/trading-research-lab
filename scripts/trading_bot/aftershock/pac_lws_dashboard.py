@@ -164,7 +164,7 @@ def _read_ledger(path: Path) -> dict:
                 filled += 1
             elif kind == "entry_decision":
                 decisions += 1
-            elif kind in ("entry_vetoed", "entry_rejected"):
+            elif kind == "entry_vetoed":
                 vetoed += 1
 
         resolved_rows.sort(key=lambda r: r[0])
@@ -188,18 +188,22 @@ def _read_ledger(path: Path) -> dict:
     return _cached(path, build)
 
 
-def _read_coverage(path: Path) -> tuple[int, int]:
-    """(reconciled_true, total) over the creation registry. (0, 0) if missing."""
-    def build(p):
-        if p is None:
-            return (0, 0)
-        total = recon = 0
-        for obj in _iter_json_lines(p):
-            total += 1
-            if obj.get("reconciled") is True:
-                recon += 1
-        return (recon, total)
-    return _cached(path, build)
+def _read_coverage(registry_path: Path, feed_path: Path) -> tuple[int, int]:
+    """(reconciled distinct mints, total created distinct mints). The `reconciled` flag lives on the
+    FEED events (a mint's first trade reconciled to its seeded t0 state), not on the registry — so
+    coverage = distinct mints with a reconciled trade / distinct created mints. (0, 0) if missing."""
+    creates = set()
+    for obj in _iter_json_lines(registry_path):
+        m = obj.get("mint")
+        if m:
+            creates.add(m)
+    recon = set()
+    for obj in _iter_json_lines(feed_path):
+        if obj.get("reconciled") is True:
+            m = obj.get("mint")
+            if m:
+                recon.add(m)
+    return (len(recon & creates), len(creates))
 
 
 def _read_tape(path: Path) -> list[dict]:
@@ -247,13 +251,15 @@ def _read_health() -> dict:
 def build_state() -> dict:
     lws = _read_ledger(LEDGER_LWS)
     null = _read_ledger(LEDGER_NULL)
-    recon, creates = _read_coverage(CREATION_REGISTRY)
+    recon, creates = _read_coverage(CREATION_REGISTRY, FEED_EVENTS)
     tape = _read_tape(FEED_EVENTS)
     feed_count = _count_lines(FEED_EVENTS)
     health = _read_health()
 
     open_book = max(lws["filled"] - lws["resolved"], 0)
-    veto_rate = (lws["vetoed"] / lws["decisions"] * 100.0) if lws["decisions"] else None
+    # veto rate = B20B vetoes / (vetoes + admitted decisions); entry_rejected (coverage floor) is not a veto
+    veto_attempts = lws["vetoed"] + lws["decisions"]
+    veto_rate = (lws["vetoed"] / veto_attempts * 100.0) if veto_attempts else None
     coverage = (recon / creates * 100.0) if creates else None
     unex_pct = (lws["unexitable"] / lws["resolved"] * 100.0) if lws["resolved"] else 0.0
 
@@ -267,7 +273,7 @@ def build_state() -> dict:
         "unexitable_pct": unex_pct,
         "veto_rate": veto_rate,
         "veto_v": lws["vetoed"],
-        "veto_d": lws["decisions"],
+        "veto_d": veto_attempts,
         "coverage": coverage,
         "coverage_r": recon,
         "coverage_c": creates,
