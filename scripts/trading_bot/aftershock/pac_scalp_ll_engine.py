@@ -261,12 +261,15 @@ class CurveExitOrder:
     evidence_clock: ClockStamp
     decision_gross_quote_lamports: int
     calibrated_p90_nanos: int
+    minimum_context_slot: int
 
     def __post_init__(self) -> None:
         if (self.action not in {action.value for action in policy.ExitAction
                                if action is not policy.ExitAction.HOLD}
                 or type(self.min_gross_quote_lamports) is not int
                 or self.min_gross_quote_lamports <= 0
+                or type(self.minimum_context_slot) is not int
+                or self.minimum_context_slot < 0
                 or self.target_unix_nanos != (self.decision_clock.wall_unix_nanos
                                               + self.calibrated_p90_nanos)
                 or self.evidence_clock.boot_id != self.decision_clock.boot_id
@@ -275,7 +278,8 @@ class CurveExitOrder:
         expected = _hash({"entry": self.position.entry_id, "action": self.action,
                           "decision": self.decision_clock.wall_unix_nanos,
                           "gross": self.decision_gross_quote_lamports,
-                          "target": self.target_unix_nanos})
+                          "target": self.target_unix_nanos,
+                          "min_slot": self.minimum_context_slot})
         if self.decision_id != expected:
             raise RefusedExecution("curve exit order id does not bind its target/economics")
 
@@ -491,6 +495,7 @@ def make_curve_exit_order(position: Position, decision: ServiceDecision, *,
     if (not isinstance(position, Position) or not isinstance(decision, ServiceDecision)
             or decision.action not in {action.value for action in policy.ExitAction if action is not policy.ExitAction.HOLD}
             or decision.target_unix_nanos is None or decision.gross_quote_lamports is None
+            or decision.context_slot is None
             or type(slippage_bps) is not int or not 0 <= slippage_bps < 10_000):
         raise RefusedExecution("curve exit decision is not executable")
     if (decision.mint != position.mint or decision.arm != position.arm
@@ -500,11 +505,13 @@ def make_curve_exit_order(position: Position, decision: ServiceDecision, *,
     decision_id = _hash({"entry": position.entry_id, "action": decision.action,
                          "decision": decision.decision_clock.wall_unix_nanos,
                          "gross": decision.gross_quote_lamports,
-                         "target": decision.target_unix_nanos})
+                         "target": decision.target_unix_nanos,
+                         "min_slot": decision.context_slot})
     return CurveExitOrder(position, decision.action, minimum, decision_id,
                           decision.decision_clock, decision.target_unix_nanos,
                           decision.evidence_clock, decision.gross_quote_lamports,
-                          decision.target_unix_nanos - decision.decision_clock.wall_unix_nanos)
+                          decision.target_unix_nanos - decision.decision_clock.wall_unix_nanos,
+                          decision.context_slot)
 
 
 def land_curve_exit(order: CurveExitOrder, runtime: ArmRuntime, snapshot: LandingSnapshot, *,
@@ -523,6 +530,7 @@ def land_curve_exit(order: CurveExitOrder, runtime: ArmRuntime, snapshot: Landin
     if (snapshot.mint != position.mint
             or snapshot.endpoint_scheme_host != runtime.observe_endpoint_identity
             or snapshot.context_slot < position.last_context_slot
+            or snapshot.context_slot < order.minimum_context_slot
             or snapshot.modeled_target_unix_nanos != order.target_unix_nanos
             or snapshot.request_started_unix_nanos < order.target_unix_nanos
             or snapshot.response_received_unix_nanos < order.target_unix_nanos

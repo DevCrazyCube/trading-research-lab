@@ -368,8 +368,8 @@ def _advance_semantic(state: dict, row: dict) -> None:
         entry = entries.get(entry_id)
         lifecycle = payload["lifecycle"]
         prior = mark_lifecycle.get(entry_id)
-        if entry is None:
-            raise RefusedExecution("mark references an unknown entry")
+        if entry is None or entry["identity"] != _row_identity(row):
+            raise RefusedExecution("mark references an unknown/drifted entry")
         if lifecycle == "OPEN" and (entry["phase"] == "RESOLVED" or prior in {"TERMINAL", "GHOST"}):
             raise RefusedExecution("open mark follows terminal resolution")
         if lifecycle == "TERMINAL" and (prior in {"TERMINAL", "GHOST"}):
