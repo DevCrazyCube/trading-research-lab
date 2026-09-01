@@ -48,6 +48,9 @@ def _find_mint(text: str) -> str | None:
 
 
 def _buy_cta(mint: str) -> str:
+    """Referral-attributed Buy CTA. Trojan's start-param carries ONLY the referral (r-<code>) — a
+    contract cannot be safely pre-loaded without breaking attribution — so the link opens Trojan with
+    the referral attributed and the mint is presented for a one-tap paste."""
     template = os.environ.get("EXITGUARD_REF_TEMPLATE")
     ref = os.environ.get("EXITGUARD_REF_CODE", "")
     if not template:
@@ -56,7 +59,8 @@ def _buy_cta(mint: str) -> str:
         link = template.format(mint=mint, ref=ref)
     except (KeyError, IndexError):
         return ""
-    return f"\n\n➡️ One-click Buy (exitable): {link}"
+    return (f"\n\n➡️ Trade it on Trojan (referral — cheaper 0.9% fee): {link}\n"
+            f"then paste this mint in the bot:\n{mint}")
 
 
 def _reply_for(text: str) -> str | None:
