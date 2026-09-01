@@ -103,3 +103,9 @@ research/data/virality/watchdog.lock
 research/data/virality/tracker_state_v2.json
 research/data/virality/paper_trades_v2.jsonl
 research/data/virality/*.tmp
+
+# x2_flowstreak slippage: transient runtime
+research/data/x2_slippage/*.log
+research/data/x2_slippage/band_med_*.json
+research/data/x2_slippage/*.lock
+research/data/x2_slippage/*.tmp
