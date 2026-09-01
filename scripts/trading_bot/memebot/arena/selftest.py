@@ -37,7 +37,8 @@ def main() -> int:
     # 2. exit: winner trails out positive; a rug is a total loss (F1, both bases).
     p = EX.Position("m", "a", "snapshot", entry_price=1.0, opened_ts=0.0)
     for mark, t in [(1.4, 60), (1.4 * 0.8, 120)]:
-        r = EX.exit_signal(p, mark, t)
+        r = EX.exit_signal(p, mark, t,
+                           all_cost_net_return=F.honest_fill_snapshot(1.0, mark).net_return)
         if r:
             break
     check(r == "TRAIL" and EX.resolve(p, r, exit_mark=1.4 * 0.8, now_ts=120)["net_return"] > 0,
@@ -55,11 +56,11 @@ def main() -> int:
     # 4. ledger: chain verifies, tamper breaks it, drift refuses to resolve.
     with tempfile.TemporaryDirectory() as d:
         L = ChainLedger(pathlib.Path(d) / "l.jsonl", "a", "code", "pre", "spec")
-        L.append_resolved({"mint": "m1", "net_return": 0.1})
+        L.append_resolved({"resolution_id": "r1", "mint": "m1", "net_return": 0.1})
         check(L.verify(), "hash-chained ledger verifies")
         drifted = ChainLedger(L.path, "a", "CODE2", "pre", "spec")
         try:
-            drifted.append_resolved({"mint": "m2", "net_return": 0.0})
+            drifted.append_resolved({"resolution_id": "r2", "mint": "m2", "net_return": 0.0})
             raise AssertionError("drift should refuse")
         except RuntimeError:
             check(True, "ledger refuses to resolve when code/prereg drifts from genesis")

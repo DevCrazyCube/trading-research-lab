@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MEME ARENA — ARM 1: VIRALITY_ARRIVAL_V2_1 (snapshot basis, free data, ships today).
+"""MEME ARENA — ARM 1: VIRALITY_ARRIVAL_V2_2 (snapshot-basis KILL filter).
 
 Enters exitable, past-t0 coins on buyer-breadth acceleration (m5 buy-rate up >=40% on the pinned pair,
 net demand, confirming price rise), tier-1-gated, convex exit. It is an OPTIMISTIC-BOUND cheap filter:
@@ -16,14 +16,16 @@ from __future__ import annotations
 import hashlib
 import pathlib
 
-from ..arm import Arm
+from ..arm import Arm, closure_sha256
 
 MIN_AGE_MIN = 60
 M5_BUYS_FLOOR = 10
 BREADTH_INFLECT_MIN = 0.40
 _SPEC = {"MIN_AGE_MIN": MIN_AGE_MIN, "M5_BUYS_FLOOR": M5_BUYS_FLOOR,
-         "BREADTH_INFLECT_MIN": BREADTH_INFLECT_MIN, "fill_basis": "snapshot"}
-PREREG = pathlib.Path(__file__).resolve().parents[1] / "arms" / "VIRALITY_ARRIVAL_PREREGISTRATION.md"
+         "BREADTH_INFLECT_MIN": BREADTH_INFLECT_MIN, "fill_basis": "snapshot",
+         "history_max_gap_s": 330.0, "target_n": 120, "extended_cap": 200,
+         "one_sample_per_mint": True}
+PREREG = pathlib.Path(__file__).with_name("VIRALITY_ARRIVAL_V2_2_PREREGISTRATION.md")
 
 
 def _sha_str(s: str) -> str:
@@ -31,13 +33,17 @@ def _sha_str(s: str) -> str:
 
 
 class ViralityArrival(Arm):
-    instrument = "VIRALITY_ARRIVAL_V2_1"
+    instrument = "VIRALITY_ARRIVAL_V2_2"
     fill_basis = "snapshot"
     target_n = 120
     extended_cap = 200
+    history_max_gap_s = 330.0
 
     def code_sha256(self) -> str:
-        return hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()
+        arena = pathlib.Path(__file__).resolve().parents[1]
+        return closure_sha256([pathlib.Path(__file__)] + [arena / name for name in (
+            "arm.py", "chainledger.py", "exit_engine.py", "fill.py", "gate.py", "hub.py",
+            "manifest.py", "runtime.py", "scorer.py")])
 
     def prereg_sha256(self) -> str:
         try:
@@ -70,7 +76,7 @@ ARM = ViralityArrival()
 
 if __name__ == "__main__":
     a = ViralityArrival()
-    assert a.instrument == "VIRALITY_ARRIVAL_V2_1" and a.fill_basis == "snapshot"
+    assert a.instrument == "VIRALITY_ARRIVAL_V2_2" and a.fill_basis == "snapshot"
     assert len(a.code_sha256()) == 64 and len(a.spec_sha256()) == 64
     # entry predicate: needs accel + net demand + price up (gate is checked last; use a passing-ish coin)
     hist = [{"m5_buys": 10, "price": 1.0}]

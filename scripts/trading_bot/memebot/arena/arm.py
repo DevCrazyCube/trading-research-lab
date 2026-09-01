@@ -8,6 +8,8 @@ ledger directly — those go through the shared honest modules, which is what ke
 from __future__ import annotations
 
 import abc
+import hashlib
+import pathlib
 
 
 class Arm(abc.ABC):
@@ -18,6 +20,10 @@ class Arm(abc.ABC):
     #: pre-registered decision sample and (optional) one-time extension cap
     target_n: int = 120
     extended_cap: int | None = 200
+    history_max_gap_s: float = 330.0
+    one_sample_per_mint: bool = True
+    service_kind: str = "snapshot"
+    requires_trade_data: bool = False
 
     @abc.abstractmethod
     def code_sha256(self) -> str:
@@ -45,6 +51,22 @@ class Arm(abc.ABC):
         """The bootstrap cluster for a resolved trade — default (mint, entry-day). Override if needed."""
         day = int(resolved_row.get("held_s", 0))  # placeholder; runtime injects entry-day
         return (resolved_row.get("mint"), resolved_row.get("entry_day", day))
+
+    def include_resolution(self, resolved_row: dict) -> bool:
+        return True
+
+    def final_verdict(self, decision: dict, rows: list[dict], all_rows: list[dict]) -> dict:
+        """Arm-specific frozen decision gates. Default leaves the shared bootstrap result unchanged."""
+        return decision
+
+
+def closure_sha256(paths: list[pathlib.Path]) -> str:
+    """Bind a ledger genesis to the complete executable closure, not only the thin arm file."""
+    digest = hashlib.sha256()
+    for path in sorted((pathlib.Path(p).resolve() for p in paths), key=str):
+        digest.update(str(path).encode()); digest.update(b"\0")
+        digest.update(path.read_bytes()); digest.update(b"\0")
+    return digest.hexdigest()
 
 
 if __name__ == "__main__":

@@ -53,7 +53,7 @@ def decide(net_returns: list[float], clusters: list, target_n: int,
         return {"verdict": "KILL", "reason": f"event rate {events_per_week:.2f}/wk < {min_events_per_week}",
                 **ci, "target_n": target_n}
     # early decisive KILL allowed once the upper bound is below zero
-    if ci["ci_hi"] is not None and ci["ci_hi"] < 0:
+    if n >= 40 and ci["ci_hi"] is not None and ci["ci_hi"] < 0:
         return {"verdict": "KILL", "reason": "bootstrap 95% CI upper bound < 0 (decisive)",
                 **ci, "target_n": target_n}
     if n < target_n:

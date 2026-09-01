@@ -26,6 +26,7 @@ class Position:
     entry_price: float               # marginal/observed mark at entry (for exit-trigger math)
     opened_ts: float
     peak: float = 0.0
+    peak_net_return: float = -1.0
     size_sol: float = 0.5            # causal_cp only
     entry_reserves: tuple | None = None   # (v_sol, v_tokens) at entry (causal_cp only)
     meta: dict = field(default_factory=dict)
@@ -41,13 +42,18 @@ def _trail_for(peak_gain: float) -> float:
     return TRAIL_TIERS[-1][1]
 
 
-def exit_signal(pos: Position, mark: float, now_ts: float) -> str | None:
+def exit_signal(pos: Position, mark: float | None, now_ts: float,
+                *, all_cost_net_return: float | None) -> str | None:
     """Exit reason on the observed mark, or None to hold. Marks drive the trigger; fill.py prices it."""
     if mark is not None and mark > 0:
         pos.peak = max(pos.peak, mark)
         gain = mark / pos.entry_price - 1.0
         peak_gain = pos.peak / pos.entry_price - 1.0
-        if gain <= -HARD_STOP:
+        if all_cost_net_return is not None:
+            pos.peak_net_return = max(pos.peak_net_return, all_cost_net_return)
+        # The frozen stop is all-cost.  Triggering on raw price (the old behavior) silently moved the
+        # stop roughly another round-trip toll lower.
+        if all_cost_net_return is not None and all_cost_net_return <= -HARD_STOP:
             return "HARD_STOP"
         if peak_gain >= 0.12 and mark <= pos.peak * (1.0 - _trail_for(peak_gain)):
             return "TRAIL"
@@ -88,10 +94,10 @@ def resolve(pos: Position, reason: str, *, exit_mark: float | None = None,
 if __name__ == "__main__":
     # winner: peaks then gives back the trail -> TRAIL exit, positive net
     p = Position("m", "arm", "snapshot", entry_price=1.0, opened_ts=0.0)
-    assert exit_signal(p, 1.3, 60) is None            # rising, hold
+    assert exit_signal(p, 1.3, 60, all_cost_net_return=0.25) is None
     r = None
     for mark, t in [(1.4, 120), (1.4 * 0.80, 180)]:   # peak 1.4 (gain .4 -> 0.18 tier) then -20% give-back
-        r = exit_signal(p, mark, t)
+        r = exit_signal(p, mark, t, all_cost_net_return=mark - 1.0)
         if r:
             break
     assert r == "TRAIL", r
@@ -103,7 +109,7 @@ if __name__ == "__main__":
     assert abs(rug["net_return"] + 1.0) < 1e-9, "rug must be a total loss"
     # hard stop
     p3 = Position("m3", "arm", "snapshot", entry_price=1.0, opened_ts=0.0)
-    assert exit_signal(p3, 0.85, 60) == "HARD_STOP"
+    assert exit_signal(p3, 0.90, 60, all_cost_net_return=-0.125) == "HARD_STOP"
     # causal rug (unreadable reserves) also total loss
     p4 = Position("m4", "arm", "causal_cp", entry_price=1.0, opened_ts=0.0, entry_reserves=(30.0, 1e9))
     assert abs(resolve(p4, "RUG_UNPRICED", now_ts=1)["net_return"] + 1.0) < 1e-9

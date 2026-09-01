@@ -67,14 +67,19 @@ def causal_fill_cp(entry_reserves: tuple[float, float], exit_reserves: tuple[flo
     S2, T2 = exit_reserves
     if S <= 0 or T <= 0 or S2 <= 0 or T2 <= 0 or size_sol <= 0:
         raise ValueError("causal_cp fill needs positive reserves and size")
-    tokens_in = T * size_sol / (S + size_sol)
-    entry_avg = size_sol / tokens_in                       # SOL per token actually paid (incl. impact)
+    # Pump-style fees reduce the quote that reaches the invariant on entry and the quote that reaches
+    # the wallet on exit.  The previous implementation charged neither leg in the causal path even
+    # though the snapshot path charged both; that made the supposedly stricter result optimistic.
+    effective_entry = size_sol * (1.0 - TOLL_BUY)
+    tokens_in = T * effective_entry / (S + effective_entry)
+    entry_avg = size_sol / tokens_in                       # total SOL paid / tokens received
     sol_out_raw = S2 * tokens_in / (T2 + tokens_in)
     bound_hit = False
     sol_out = sol_out_raw
     if real_sol_withdrawable_at_exit is not None and sol_out > real_sol_withdrawable_at_exit:
         sol_out = max(0.0, real_sol_withdrawable_at_exit)
         bound_hit = True
+    sol_out *= (1.0 - TOLL_SELL)
     exit_avg = sol_out / tokens_in if tokens_in else 0.0
     lam = lamport_cost_roundtrip / LAMPORTS_PER_SOL
     net = (sol_out - size_sol - lam) / size_sol            # honest realized return on capital deployed
@@ -92,6 +97,7 @@ def causal_fill_cp(entry_reserves: tuple[float, float], exit_reserves: tuple[flo
         "gap_total": net_marg - net,
         "entry_impact_frac": entry_impact, "exit_impact_frac": exit_impact,
         "latency_s": latency_s, "lamport_cost_sol": lam,
+        "buy_toll": TOLL_BUY, "sell_toll": TOLL_SELL,
         "real_reserve_bound_hit": bound_hit,
     }
     return FillResult("causal_cp", entry_avg, exit_avg, sol_out / size_sol - 1.0, net, net_marg,

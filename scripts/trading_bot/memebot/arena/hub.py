@@ -6,6 +6,10 @@ tape + migration lane (Codex / owner-gated). Read-only; the network chokepoint s
 """
 from __future__ import annotations
 
+import hashlib
+import json
+import time
+
 from .. import virality_tracker as VT   # proven feed: _universe, _deepest_pair, _pinned_pair, _shape
 
 
@@ -23,9 +27,22 @@ class Hub:
             if c is None or not c.get("pair") or not c.get("price") or c["price"] <= 0:
                 continue
             self._pinned[mint] = c["pair"]     # pin identity on first sight
-            out[mint] = c
+            observed = time.time_ns()
+            body = dict(c)
+            body["observed_unix_nanos"] = observed
+            body["normalized_evidence_sha256"] = hashlib.sha256(json.dumps(
+                c, sort_keys=True, separators=(",", ":"), default=str).encode()).hexdigest()
+            out[mint] = body
         return out
 
     def refresh_pair(self, pair_addr: str) -> dict | None:
         """Re-fetch one pinned pair (used to mark an open position on its own market)."""
-        return VT._pinned_pair(pair_addr)
+        c = VT._pinned_pair(pair_addr)
+        if c is None:
+            return None
+        c = dict(c)
+        c["observed_unix_nanos"] = time.time_ns()
+        c["normalized_evidence_sha256"] = hashlib.sha256(json.dumps(
+            {k: v for k, v in c.items() if k not in {"observed_unix_nanos", "normalized_evidence_sha256"}},
+            sort_keys=True, separators=(",", ":"), default=str).encode()).hexdigest()
+        return c

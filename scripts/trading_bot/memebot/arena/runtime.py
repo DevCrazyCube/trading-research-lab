@@ -11,44 +11,109 @@ verdict is the cluster-bootstrap scorer's PASS/KILL per arm.
 from __future__ import annotations
 
 import datetime as dt
+import fcntl
+import hashlib
 import json
+import os
 import pathlib
 import sys
+import tempfile
 import time
 
 from . import exit_engine as EX
+from . import fill as F
 from . import scorer as SC
 from .chainledger import ChainLedger
 from .hub import Hub
+from . import manifest as MF
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 DATA = ROOT / "research" / "data" / "arena"
 POLL_SECONDS = 150
 HISTORY = 6
+STATE_SCHEMA = 2
+MAX_MARK_AGE_NS = 330_000_000_000
 
 
 def _registered_arms():
     from .arms.virality_arrival import ARM as VIRALITY
-    return [VIRALITY]                      # ARM 2 (Codex) / ARM 3 (owner-gated) register here when built
+    from .arms.bundle_momentum import ARM as BUNDLE
+    from .arms.graduation import ARM as GRADUATION
+    return [VIRALITY, BUNDLE, GRADUATION]
 
 
 def _load(path, default):
+    if not path.exists():
+        return default
     try:
         return json.loads(path.read_text())
-    except (OSError, ValueError):
-        return default
+    except (OSError, ValueError) as exc:
+        raise RuntimeError(f"arena state is malformed: {path}") from exc
 
 
 def _save(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(value))
-    tmp.replace(path)
+    fd, temporary = tempfile.mkstemp(dir=path.parent, prefix=".arena_state_", suffix=".json")
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(json.dumps(value, sort_keys=True, separators=(",", ":")).encode())
+            handle.flush(); os.fsync(handle.fileno())
+        os.replace(temporary, path)
+        directory = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def _sha(value) -> str:
+    return hashlib.sha256(json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()).hexdigest()
+
+
+def _new_state(activation_ns: int) -> dict:
+    return {"schema": STATE_SCHEMA, "activation_unix_nanos": activation_ns, "open": {}, "hist": {},
+            "first_seen": {}, "sampled_mints": {}, "pending_events": [], "cycles": 0}
+
+
+def _validate_state(state: dict) -> None:
+    if (not isinstance(state, dict) or state.get("schema") != STATE_SCHEMA
+            or type(state.get("activation_unix_nanos")) is not int
+            or state["activation_unix_nanos"] <= 0
+            or not all(isinstance(state.get(k), dict) for k in (
+                "open", "hist", "first_seen", "sampled_mints"))
+            or not isinstance(state.get("pending_events"), list)
+            or type(state.get("cycles")) is not int or state["cycles"] < 0):
+        raise RuntimeError("arena state schema refuses")
+
+
+def _drain_pending(state: dict, ledger: ChainLedger, state_path: pathlib.Path) -> None:
+    """State-first WAL: replay the exact event idempotently, then apply its final state transition."""
+    while state["pending_events"]:
+        pending = state["pending_events"][0]
+        if not isinstance(pending, dict) or set(pending) != {"kind", "row", "finalize"}:
+            raise RuntimeError("arena pending event is malformed")
+        if pending["kind"] == "opened":
+            ledger.append_opened(pending["row"])
+        elif pending["kind"] == "resolved":
+            ledger.append_resolved(pending["row"])
+            mint = pending["finalize"].get("remove_open_mint")
+            if mint:
+                state["open"].pop(mint, None)
+        else:
+            raise RuntimeError("arena pending event kind refuses")
+        state["pending_events"].pop(0)
+        _save(state_path, state)
 
 
 def _ledger(arm) -> ChainLedger:
+    authority = MF.require_activation(arm)
     return ChainLedger(DATA / arm.instrument / "ledger.jsonl", arm.instrument,
-                       arm.code_sha256(), arm.prereg_sha256(), arm.spec_sha256())
+                       arm.code_sha256(), arm.prereg_sha256(), arm.spec_sha256(),
+                       authority["activation_sha256"])
 
 
 def _day(ts: float) -> str:
@@ -56,74 +121,174 @@ def _day(ts: float) -> str:
 
 
 def service_arm(arm, feed: dict, hub: Hub) -> dict:
-    state = _load(DATA / arm.instrument / "state.json", {"open": {}, "hist": {}, "first_seen": {}})
+    state_path = DATA / arm.instrument / "state.json"
+    lock_path = DATA / arm.instrument / "runtime.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError as exc:
+        os.close(lock_fd)
+        raise RuntimeError(f"{arm.instrument}: another runtime owns the arm") from exc
+    try:
+        return _service_arm_unlocked(arm, feed, hub, state_path=state_path)
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
+
+
+def _service_arm_unlocked(arm, feed: dict, hub: Hub, *, state_path: pathlib.Path) -> dict:
+    authority = MF.require_activation(arm)
+    initialized = not state_path.exists()
+    now_ns = time.time_ns()
+    state = _load(state_path, _new_state(authority["activated_unix_nanos"]))
+    _validate_state(state)
+    if state["activation_unix_nanos"] != authority["activated_unix_nanos"]:
+        raise RuntimeError(f"{arm.instrument}: state activation does not match authority")
     ledger = _ledger(arm)
     ledger.ensure_genesis()
-    now = time.time()
+    _drain_pending(state, ledger, state_path)
+    now = now_ns / 1_000_000_000
     opened = closed = 0
 
     # 1. service open positions on their own pinned market
     for mint, pos in list(state["open"].items()):
         c = hub.refresh_pair(pos["pair"]) if pos.get("pair") else feed.get(mint)
-        mark = c["price"] if (c and c.get("price")) else None
+        receipt_ns = c.get("observed_unix_nanos") if isinstance(c, dict) else None
+        fresh = (type(receipt_ns) is int and state["activation_unix_nanos"] < receipt_ns <= now_ns
+                 and now_ns - receipt_ns <= MAX_MARK_AGE_NS)
+        mark = c["price"] if (fresh and c.get("price")) else None
         p = EX.Position(mint=mint, arm=arm.instrument, basis=arm.fill_basis,
-                        entry_price=pos["entry_price"], opened_ts=pos["opened_ts"], peak=pos["peak"])
-        reason = EX.exit_signal(p, mark, now)
+                        entry_price=pos["entry_price"], opened_ts=pos["opened_ts"], peak=pos["peak"],
+                        peak_net_return=pos.get("peak_net_return", -1.0))
+        current_fill = F.honest_fill_snapshot(pos["entry_price"], mark) if mark is not None else None
+        reason = EX.exit_signal(
+            p, mark, now,
+            all_cost_net_return=(current_fill.net_return if current_fill is not None else None))
         pos["peak"] = p.peak                                   # persist the updated peak
+        pos["peak_net_return"] = p.peak_net_return
+        pos["unpriced_count"] = 0 if mark is not None else pos.get("unpriced_count", 0) + 1
         if reason is None and mark is None:
-            reason = "RUG_UNPRICED" if now - pos["opened_ts"] > 3 * 3600 else None
+            reason = "RUG_UNPRICED" if pos["unpriced_count"] >= 3 else None
         if reason:
             row = EX.resolve(p, reason, exit_mark=mark, now_ts=now)
             row["entry_day"] = pos.get("entry_day")
             row["minutes_since_first_seen"] = pos.get("entry_delay_min")   # F6 mirage split
-            ledger.append_resolved(row)
-            del state["open"][mint]
+            row["entry_id"] = pos["entry_id"]
+            row["resolution_id"] = _sha({"entry_id": pos["entry_id"], "reason": reason,
+                                           "evidence": c.get("normalized_evidence_sha256") if c else None,
+                                           "receipt": receipt_ns})
+            state["pending_events"].append({
+                "kind": "resolved", "row": row, "finalize": {"remove_open_mint": mint}})
+            _save(state_path, state)
+            _drain_pending(state, ledger, state_path)
             closed += 1
 
     # 2. update per-mint history + first-seen
     for mint, c in feed.items():
-        state["first_seen"].setdefault(mint, now)
+        receipt_ns = c.get("observed_unix_nanos")
+        if (type(receipt_ns) is not int or receipt_ns <= state["activation_unix_nanos"]
+                or receipt_ns > now_ns):
+            continue
+        state["first_seen"].setdefault(mint, receipt_ns)
         h = state["hist"].setdefault(mint, [])
-        h.append({"t": now, "m5_buys": c.get("m5_buys", 0), "m5_sells": c.get("m5_sells", 0),
-                  "price": c.get("price")})
+        h.append({"received_ns": receipt_ns, "m5_buys": c.get("m5_buys", 0),
+                  "m5_sells": c.get("m5_sells", 0), "price": c.get("price"),
+                  "normalized_evidence_sha256": c.get("normalized_evidence_sha256")})
         del h[:-HISTORY]
 
     # 3. offer candidates to the frozen entry predicate
     for c in arm.candidates(feed):
         mint = c["mint"]
-        if mint in state["open"]:
+        if mint in state["open"] or (arm.one_sample_per_mint and mint in state["sampled_mints"]):
             continue
         hist = state["hist"].get(mint, [])[:-1]                # exclude the just-appended current obs
-        if arm.entry_ok(c, hist):
+        receipt_ns = c.get("observed_unix_nanos")
+        previous_ns = hist[-1].get("received_ns") if hist else None
+        cadence_ok = (type(receipt_ns) is int and type(previous_ns) is int
+                      and 0 < receipt_ns - previous_ns <= int(arm.history_max_gap_s * 1e9))
+        if not initialized and cadence_ok and arm.entry_ok(c, hist):
+            entry_id = _sha({"instrument": arm.instrument, "mint": mint,
+                             "decision_unix_nanos": receipt_ns,
+                             "evidence": c.get("normalized_evidence_sha256"),
+                             "previous_evidence": hist[-1].get("normalized_evidence_sha256")})
             state["open"][mint] = {
                 "entry_price": c["price"], "peak": c["price"], "opened_ts": now, "pair": c.get("pair"),
                 "entry_day": _day(now),
-                "entry_delay_min": round((now - state["first_seen"].get(mint, now)) / 60.0, 1)}
+                "entry_delay_min": round((receipt_ns - state["first_seen"].get(mint, receipt_ns))
+                                         / 60_000_000_000, 1),
+                "entry_id": entry_id, "peak_net_return": -1.0, "unpriced_count": 0}
+            state["sampled_mints"][mint] = entry_id
+            open_row = {"entry_id": entry_id, "mint": mint, "entry_day": _day(now),
+                        "entry_price": c["price"], "decision_unix_nanos": receipt_ns,
+                        "evidence_sha256": c.get("normalized_evidence_sha256"),
+                        "previous_evidence_sha256": hist[-1].get("normalized_evidence_sha256"),
+                        "gate_tier": "TIER1_COUNT_PROXY", "basis": arm.fill_basis}
+            state["pending_events"].append(
+                {"kind": "opened", "row": open_row, "finalize": {}})
+            _save(state_path, state)
+            _drain_pending(state, ledger, state_path)
             opened += 1
 
     # prune stale history
-    state["hist"] = {m: h for m, h in state["hist"].items() if h and now - h[-1]["t"] < 6 * 3600}
-    state["first_seen"] = {m: t for m, t in state["first_seen"].items() if now - t < 24 * 3600
+    state["hist"] = {m: h for m, h in state["hist"].items()
+                     if h and now_ns - h[-1]["received_ns"] < 6 * 3600 * 1_000_000_000}
+    state["first_seen"] = {m: t for m, t in state["first_seen"].items()
+                           if now_ns - t < 24 * 3600 * 1_000_000_000
                            or m in state["open"]}
-    _save(DATA / arm.instrument / "state.json", state)
+    state["cycles"] += 1
+    _save(state_path, state)
     return {"arm": arm.instrument, "open": len(state["open"]), "opened": opened, "closed": closed}
 
 
 def report_arm(arm) -> dict:
+    try:
+        authority = MF.require_activation(arm)
+    except RuntimeError as exc:
+        return {"arm": arm.instrument, "resolved": 0, "open": 0, "pending": 0,
+                "distinct_mints": True, "chain_ok": False, "basis": arm.fill_basis,
+                "verdict": "NOT_ACTIVE", "reason": str(exc), "mean": None, "ci_lo": None,
+                "ci_hi": None, "target_n": arm.target_n}
     ledger = _ledger(arm)
-    res = ledger.resolved()
+    all_res = ledger.resolved()
+    res = [row for row in all_res if arm.include_resolution(row)]
     rets = [r["net_return"] for r in res]
     clusters = [(r.get("mint"), r.get("entry_day")) for r in res]
-    d = SC.decide(rets, clusters, arm.target_n, extended_cap=arm.extended_cap)
-    state = _load(DATA / arm.instrument / "state.json", {"open": {}})
+    state = _load(DATA / arm.instrument / "state.json",
+                  _new_state(authority["activated_unix_nanos"]))
+    chain_ok = ledger.verify()
+    distinct = len({r.get("mint") for r in res}) == len(res)
+    pending = len(state.get("pending_events", []))
+    elapsed_weeks = max(1 / 7, (time.time_ns() - state["activation_unix_nanos"])
+                        / (7 * 24 * 3600 * 1e9))
+    events_per_week = len(res) / elapsed_weeks
+    d = SC.decide(rets, clusters, arm.target_n,
+                  events_per_week=(events_per_week if len(res) and arm.service_kind == "snapshot" else None),
+                  extended_cap=arm.extended_cap)
+    if not chain_ok or not distinct or pending:
+        d = {**d, "verdict": "INVALID", "reason": "chain/distinct-mint/pending lifecycle gate refuses"}
+    if len(res) >= arm.target_n and arm.service_kind == "snapshot":
+        delayed = sorted((float(r.get("minutes_since_first_seen") or 0), r["net_return"])
+                         for r in res)
+        buckets = [delayed[i * len(delayed) // 3:(i + 1) * len(delayed) // 3] for i in range(3)]
+        means = [sum(v for _, v in bucket) / len(bucket) for bucket in buckets if bucket]
+        if len(means) == 3 and means[0] > means[1] > means[2] and means[2] < 0:
+            d = {**d, "verdict": "KILL", "reason": "predeclared lagging-entry exhaustion split"}
+        rugs = [r for r in res if r.get("reason") == "RUG_UNPRICED"]
+        nonrugs = [r["net_return"] for r in res if r.get("reason") != "RUG_UNPRICED"]
+        if rugs and sum(rets) / len(rets) < 0 and nonrugs and sum(nonrugs) / len(nonrugs) >= 0:
+            d = {**d, "verdict": "KILL", "reason": "full-loss rug tail carries the negative sign"}
+    d = arm.final_verdict(d, res, all_res)
     return {"arm": arm.instrument, "resolved": len(res), "open": len(state.get("open", {})),
-            "chain_ok": ledger.verify(), "basis": arm.fill_basis, **d}
+            "pending": pending, "distinct_mints": distinct, "chain_ok": chain_ok,
+            "basis": arm.fill_basis, **d}
 
 
 def run_once(hub: Hub | None = None) -> list[dict]:
     hub = hub or Hub()
     feed = hub.snapshot()
-    return [service_arm(arm, feed, hub) for arm in _registered_arms()]
+    return [service_arm(arm, feed, hub) for arm in _registered_arms()
+            if arm.service_kind == "snapshot"]
 
 
 def main(argv=None) -> int:

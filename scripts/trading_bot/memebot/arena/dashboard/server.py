@@ -15,7 +15,8 @@ from .. import runtime as RT
 
 HOST, PORT = "127.0.0.1", 8795
 VCOL = {"PASS": "#1a9e5f", "COLLECTING": "#5b6bd6", "UNDECIDED_EXTEND": "#c99a00",
-        "KILL": "#d0453b", "UNSET": "#7a7f87"}
+        "PASS_TO_CONFIRMATION": "#1a9e5f", "PASS_PENDING_SENSITIVITY": "#c99a00",
+        "KILL": "#d0453b", "NOT_ACTIVE": "#d0453b", "INVALID": "#d0453b", "UNSET": "#7a7f87"}
 
 
 def _fmt(x, nd=4):
@@ -46,7 +47,7 @@ def _equity_svg(rows: list[dict]) -> str:
 
 def _card(arm) -> str:
     rep = RT.report_arm(arm)
-    rows = RT._ledger(arm)._rows()
+    rows = RT._ledger(arm)._rows() if rep.get("verdict") != "NOT_ACTIVE" else []
     v = rep["verdict"]
     col = VCOL.get(v, "#7a7f87")
     ci = (f'[{_fmt(rep.get("ci_lo"))}, {_fmt(rep.get("ci_hi"))}]'
