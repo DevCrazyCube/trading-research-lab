@@ -111,3 +111,8 @@ research/data/x2_slippage/*.lock
 research/data/x2_slippage/*.tmp
 research/b20c_run.log
 research/swf_run.log
+
+# MEME ARENA runtime data (ledgers committed at decision read)
+research/data/arena/*/state.json
+research/data/arena/*/*.log
+research/data/arena/*.log
