@@ -1,0 +1,47 @@
+{
+  "coverage": {
+    "b20b_flagged_skip": 1469,
+    "fewer_than_K_buys": 170,
+    "no_net_bought": 629,
+    "no_t0_or_price": 272,
+    "scored": 971
+  },
+  "fingerprint_distribution_slot_span": {
+    "1": 364,
+    "2": 311,
+    "3": 193,
+    "4": 68,
+    "5": 28,
+    "6": 7
+  },
+  "held_out_paired_lift": {
+    "lift": -0.7139033806101476,
+    "mean_net_r_all": 0.8186391518771341,
+    "mean_net_r_screened": 0.10473577126698648,
+    "n_holdout": 484
+  },
+  "n_scored": 971,
+  "not_claimed": {
+    "edge": "a toxicity screen at best avoids losses; it is not a return oracle.",
+    "oos": "window-1 is burned; a real verdict needs a frozen forward pass."
+  },
+  "note": "DEV on burned window-1 \u2014 NOT frozen OOS. Universe = B20B-PASS launches only. Label = realized net-R under a 10% trailing exit (bonding-curve price), net of 3% toll.",
+  "params": {
+    "bundle_slot_span_max": 2,
+    "fingerprint_k": 6,
+    "toll": 0.03,
+    "trail": 0.1
+  },
+  "runner_sha256": "d0cbe7169b7796396ca764e751aa3d5bc282f72f2dc482453f602fb191ba0b1c",
+  "signed_separation": {
+    "diff_bundle_minus_organic": 1.0375909988129,
+    "mean_bundle": 1.1668954167486256,
+    "mean_organic": 0.12930441793572559,
+    "n_bundle": 675,
+    "n_organic": 296,
+    "permutation_p_two_tail": 0.0004997501249375312
+  },
+  "study": "SWF_SNIPER_WALL_FINGERPRINT_WINDOW1_DEV",
+  "top_class_share": 0.3748712667353244,
+  "verdict": "DEAD_WRONG_SIGN_OR_NO_SEP"
+}
