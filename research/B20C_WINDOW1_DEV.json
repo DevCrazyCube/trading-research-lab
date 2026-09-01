@@ -1,0 +1,59 @@
+{
+  "coordination_key": {
+    "amount_bin_decimals": 1,
+    "basis": "first-buy size (templated-bundle signature)",
+    "first_buy_slot": "exact"
+  },
+  "coverage": {
+    "no_net_tokens_bought": 110,
+    "no_t0": 272,
+    "scored": 1952,
+    "unreadable_fewer_than_2_buyers": 1177
+  },
+  "delta": {
+    "base_rate_pct": 31.762295081967213,
+    "lift_change_pp": -1.1688854394876458,
+    "mints_with_any_merge": 1258,
+    "newly_flagged_n": 33,
+    "newly_flagged_unexitable_pct": 24.242424242424242,
+    "precision_change_pp": -1.7134074719058532,
+    "recall_gain_pp": 1.2903225806451672
+  },
+  "grouping_permutation": {
+    "iters": 1000,
+    "observed_recall_gain_pp": 1.2903225806451672,
+    "permutation_p": 0.000999000999000999
+  },
+  "not_claimed": {
+    "edge": "this is a loss-avoidance screen; it creates no edge.",
+    "oos": "window-1 is burned; a real verdict needs the frozen window-2 pass."
+  },
+  "note": "DEV on burned window-1 \u2014 NOT a frozen out-of-sample result. B20C == B20B when the coordination key is identity; this measures whether collapsing coordinated wallets adds lift.",
+  "primary_b20b_wallet": {
+    "base_rate_pct": 31.762295081967213,
+    "exitable_discarded_pct": 19.444444444444443,
+    "flagged_n": 811,
+    "flagged_unexitable_pct": 68.06411837237978,
+    "lift_pp": 62.10443388508793,
+    "n": 1952,
+    "passed_n": 1141,
+    "passed_unexitable_pct": 5.959684487291849,
+    "precision_pct": 68.06411837237978,
+    "recall_pct": 89.03225806451613
+  },
+  "primary_b20c_entity": {
+    "base_rate_pct": 31.762295081967213,
+    "exitable_discarded_pct": 21.32132132132132,
+    "flagged_n": 844,
+    "flagged_unexitable_pct": 66.35071090047393,
+    "lift_pp": 60.93554844560028,
+    "n": 1952,
+    "passed_n": 1108,
+    "passed_unexitable_pct": 5.415162454873646,
+    "precision_pct": 66.35071090047393,
+    "recall_pct": 90.3225806451613
+  },
+  "runner_sha256": "f81339c19bb725208ae8c1b167142408b8bd6ac9c1aa844800ad51a6e83f80a3",
+  "study": "B20C_CLUSTER_COLLAPSE_WINDOW1_DEV",
+  "verdict": "DEAD_PRECISION_LOSS"
+}

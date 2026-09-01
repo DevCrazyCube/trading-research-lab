@@ -109,3 +109,4 @@ research/data/x2_slippage/*.log
 research/data/x2_slippage/band_med_*.json
 research/data/x2_slippage/*.lock
 research/data/x2_slippage/*.tmp
+research/b20c_run.log
