@@ -1,16 +1,27 @@
 #!/usr/bin/env python3
-"""Virality forward paper-decider (Gate B) — measures, honestly and $0, whether the virality thesis is +EV.
+"""Virality forward paper-decider — Gate B, V2. Measures, honestly and $0, whether the virality thesis
+is +EV as a cheap directional screen.
 
-Each cycle: pull the DexScreener attention universe (boosted Solana tokens — a coin-mapped proxy for
-"getting pushed right now"), fetch each pair's live trading data, keep a per-mint unique-buyer HISTORY,
-and PAPER-ENTER a coin the instant its buyer breadth INFLECTS (the crowd is arriving) WHILE it is
-exitable (screen PASS) and past the t0 dev-casino (age gate). Then track forward and exit by a convex
-rule (tight all-cost stop, let winners run on a widening trail). Every resolved trade is appended to a
-hash-chained ledger with its realized return. NO wallet, no orders, no spend — a pure forward
-measurement toward the pre-registered N=120 decision.
+V2 supersedes V1 (retired 2026-09-01, `RETIREMENT_20260901.json`): an adversarial audit correctly found
+two real *signal* bugs that made the V1 ledger invalid — (1) it read DexScreener's rolling h1 trade
+count as "unique-buyer breadth", a count that can FALL as the window ages, and (2) it re-picked the
+"deepest pair" each cycle, so it compared counts/prices across DIFFERENT pools. V2 fixes both:
 
-Run detached:  python -m scripts.trading_bot.memebot.virality_tracker
-Read the result any time:  python -m scripts.trading_bot.memebot.virality_tracker --report
+  * PAIR IDENTITY IS PINNED. A mint's pair is chosen once (deepest at first sight) and every later
+    observation re-fetches THAT exact pair address — the count and price series are one market.
+  * BREADTH = the m5 (5-minute) buy RATE on that pinned pair, not a cumulative rolling count. Entry
+    fires only on m5-buy acceleration WITH net demand (buys > sells) AND a confirming price rise —
+    three independent conditions, so a lone rolling-window wobble cannot trigger it.
+
+What V2 deliberately does NOT fix (and does not hide): fills use the observed pair price with a flat
+toll, not a causal decision-to-landing execution path with exact costs. So V2 is an OPTIMISTIC BOUND and
+a cheap FILTER: a KILL is decisive (real execution only makes it worse); a PASS is necessary-but-not-
+sufficient — it would justify building the causal-fill V3, never a claim of live money. The ledger is
+hash-chained for tamper-EVIDENCE; the real external append-only anchor is committing it to git (a local
+self-hash is not a security boundary for a single-operator paper log — do not pretend otherwise).
+
+Run:    python -m scripts.trading_bot.memebot.virality_tracker
+Report: python -m scripts.trading_bot.memebot.virality_tracker --report
 """
 from __future__ import annotations
 
@@ -25,23 +36,46 @@ from . import net
 from . import screen
 from .virality_probe import SPEC
 
+INSTRUMENT = "VIRALITY_GATE_B_V2"
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 DATA = ROOT / "research" / "data" / "virality"
-STATE = DATA / "tracker_state.json"
-LEDGER = DATA / "paper_trades.jsonl"
+STATE = DATA / "tracker_state_v2.json"
+LEDGER = DATA / "paper_trades_v2.jsonl"
+PREREG = DATA / "PREREGISTRATION_V2.md"
+RETIREMENT = DATA / "RETIREMENT_V2.json"
 GENESIS = "0" * 64
 
 POLL_SECONDS = 150
 MIN_AGE_MIN = 60                 # past the t0 dev/sniper casino
-BREADTH_INFLECT_MIN = 0.15       # unique buyers up >= 15% vs the prior observation = crowd arriving
-HARD_STOP = 0.12                 # −12% all-cost stop (the honest, toll-doubled memecoin stop)
-TOLL = 0.03                      # ~3% round-trip toll charged on every resolved trade
+M5_BUYS_FLOOR = 10               # ignore micro-counts where a delta is pure noise
+BREADTH_INFLECT_MIN = 0.40       # m5 buy-rate up >= 40% vs the prior observation on the SAME pair
+HARD_STOP = 0.12                 # -12% all-cost stop (the honest, toll-doubled memecoin stop)
+TOLL = 0.03                      # ~3% round-trip toll charged on every resolved trade (optimistic bound)
 TARGET_N = 120                   # pre-registered decision sample
 HISTORY = 6
 
 
 def _sha(v) -> str:
     return hashlib.sha256(json.dumps(v, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def _file_sha(path: pathlib.Path) -> str:
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return ""
+
+
+def _require_not_retired() -> None:
+    """Kept from V1's hardening: if a valid retirement authority is dropped for THIS instrument, refuse."""
+    if not RETIREMENT.exists():
+        return
+    try:
+        row = json.loads(RETIREMENT.read_text())
+    except (OSError, ValueError) as exc:
+        raise RuntimeError("virality V2 retirement authority is unreadable") from exc
+    if isinstance(row, dict) and row.get("instrument") == INSTRUMENT:
+        raise RuntimeError(f"{INSTRUMENT} is retired: {row.get('status')}")
 
 
 def _load(path, default):
@@ -79,8 +113,27 @@ def _universe() -> list[str]:
     return list(dict.fromkeys(mints))
 
 
-def _pair(mint: str) -> dict | None:
-    """Best (deepest, actively-traded) Solana pair for a token."""
+def _shape(p: dict) -> dict:
+    """Normalise one DexScreener pair dict into the fields the screen + signal need."""
+    tx5 = (p.get("txns") or {}).get("m5") or {}
+    tx1 = (p.get("txns") or {}).get("h1") or {}
+    created = p.get("pairCreatedAt")
+    return {
+        "mint": (p.get("baseToken") or {}).get("address"),
+        "pair": p.get("pairAddress"),
+        "symbol": (p.get("baseToken") or {}).get("symbol"),
+        "price": _f(p.get("priceUsd")),
+        "reserve_usd": _f((p.get("liquidity") or {}).get("usd")),
+        "fdv_usd": _f(p.get("fdv")) or _f(p.get("marketCap")),
+        "age_minutes": ((time.time() * 1000 - created) / 60000.0) if created else None,
+        "m5_buys": int(tx5.get("buys") or 0), "m5_sells": int(tx5.get("sells") or 0),
+        # the exitability screen wants the coarse cumulative counts (its wash / honeypot proxies)
+        "buys": int(tx1.get("buys") or 0), "sells": int(tx1.get("sells") or 0),
+        "dex": p.get("dexId"),
+    }
+
+
+def _deepest_pair(mint: str) -> dict | None:
     try:
         d = net.http_get_json("https://api.dexscreener.com/latest/dex/tokens/" + mint)
     except Exception:  # noqa: BLE001
@@ -92,19 +145,17 @@ def _pair(mint: str) -> dict | None:
         liq = _f((p.get("liquidity") or {}).get("usd")) or 0
         if best is None or liq > best[0]:
             best = (liq, p)
-    if best is None:
+    return _shape(best[1]) if best else None
+
+
+def _pinned_pair(pair_addr: str) -> dict | None:
+    """Re-fetch ONE specific pair by address — this is what pins market identity across observations."""
+    try:
+        d = net.http_get_json("https://api.dexscreener.com/latest/dex/pairs/solana/" + pair_addr)
+    except Exception:  # noqa: BLE001
         return None
-    p = best[1]
-    tx = (p.get("txns") or {}).get("h1") or (p.get("txns") or {}).get("h24") or {}
-    created = p.get("pairCreatedAt")
-    return {
-        "mint": mint, "symbol": (p.get("baseToken") or {}).get("symbol"),
-        "price": _f(p.get("priceUsd")), "reserve_usd": _f((p.get("liquidity") or {}).get("usd")),
-        "fdv_usd": _f(p.get("fdv")) or _f(p.get("marketCap")),
-        "age_minutes": ((time.time() * 1000 - created) / 60000.0) if created else None,
-        "buys": int(tx.get("buys") or 0), "sells": int(tx.get("sells") or 0),
-        "dex": p.get("dexId"),
-    }
+    pairs = d.get("pairs") or ([d["pair"]] if d.get("pair") else [])
+    return _shape(pairs[0]) if pairs else None
 
 
 def _screen_ok(c: dict) -> bool:
@@ -112,53 +163,74 @@ def _screen_ok(c: dict) -> bool:
     return screen.screen_coin(coin, {"screen": SPEC}).get("verdict") == "PASS"
 
 
+def _ledger_head() -> str:
+    if not LEDGER.exists():
+        return GENESIS
+    try:
+        return json.loads(LEDGER.read_text().splitlines()[-1]).get("record_hash", GENESIS)
+    except (OSError, ValueError, IndexError):
+        return GENESIS
+
+
 def _append_ledger(row: dict) -> None:
-    prev = GENESIS
-    if LEDGER.exists():
-        try:
-            last = LEDGER.read_text().splitlines()[-1]
-            prev = json.loads(last).get("record_hash", GENESIS)
-        except (OSError, ValueError, IndexError):
-            prev = GENESIS
-    body = {**row, "prev_hash": prev}
+    body = {**row, "prev_hash": _ledger_head()}
     line = json.dumps({**body, "record_hash": _sha(body)}, separators=(",", ":"))
     LEDGER.parent.mkdir(parents=True, exist_ok=True)
     with LEDGER.open("a") as fh:
         fh.write(line + "\n")
 
 
+def _ensure_genesis() -> None:
+    """Bind the ledger to this code + prereg once, up front (tamper-EVIDENCE; git is the real anchor)."""
+    if LEDGER.exists():
+        return
+    _append_ledger({"kind": "genesis", "instrument": INSTRUMENT,
+                    "code_sha256": _file_sha(pathlib.Path(__file__)),
+                    "prereg_sha256": _file_sha(PREREG),
+                    "spec_sha256": _sha(SPEC), "created_unix": int(time.time())})
+
+
 def run_once() -> dict:
+    _require_not_retired()
+    _ensure_genesis()
     st = _load(STATE, {"hist": {}, "open": {}})
     now = int(time.time())
     universe = _universe()
     entered = closed = 0
 
     for mint in universe:
-        c = _pair(mint)
-        if c is None or c["price"] is None or c["price"] <= 0:
+        h = st["hist"].get(mint)
+        # observe the SAME pinned pair once we've chosen one; otherwise pick the deepest and pin it
+        c = _pinned_pair(h[-1]["pair"]) if (h and h[-1].get("pair")) else _deepest_pair(mint)
+        if c is None or c["pair"] is None or not c["price"] or c["price"] <= 0:
             continue
         h = st["hist"].setdefault(mint, [])
-        h.append({"t": now, "buys": c["buys"], "price": c["price"]})
+        h.append({"t": now, "pair": c["pair"], "m5_buys": c["m5_buys"],
+                  "m5_sells": c["m5_sells"], "price": c["price"]})
         del h[:-HISTORY]
-        # --- entry: breadth inflection + exitable + past the t0 casino + not already open ---
-        if mint not in st["open"] and len(h) >= 2 and (c["age_minutes"] or 0) >= MIN_AGE_MIN:
-            prev_b = h[-2]["buys"]
-            inflect = prev_b > 0 and (c["buys"] - prev_b) / prev_b >= BREADTH_INFLECT_MIN
-            if inflect and _screen_ok(c):
+        # entry: m5-buy acceleration + net demand + confirming price rise, on the SAME pinned pair,
+        # past t0, exitable, not already open. Three conditions guard the rolling-window artifact.
+        if mint not in st["open"] and len(h) >= 2 and h[-1]["pair"] == h[-2]["pair"] \
+                and (c["age_minutes"] or 0) >= MIN_AGE_MIN:
+            prev = h[-2]
+            accel = (prev["m5_buys"] > 0 and c["m5_buys"] >= M5_BUYS_FLOOR
+                     and (c["m5_buys"] - prev["m5_buys"]) / prev["m5_buys"] >= BREADTH_INFLECT_MIN)
+            net_demand = c["m5_buys"] > c["m5_sells"]
+            price_up = c["price"] > prev["price"]
+            if accel and net_demand and price_up and _screen_ok(c):
                 st["open"][mint] = {"entry": c["price"], "peak": c["price"], "t0": now,
-                                    "symbol": c["symbol"]}
+                                    "pair": c["pair"], "symbol": c["symbol"]}
                 entered += 1
 
-    # --- service open positions: mark, convex exit ---
+    # service open positions on their pinned pair: mark, convex exit
     for mint, pos in list(st["open"].items()):
-        c = _pair(mint)
+        c = _pinned_pair(pos["pair"])
         price = c["price"] if c and c["price"] else None
         if price is None:
             continue
         pos["peak"] = max(pos["peak"], price)
         gain = price / pos["entry"] - 1.0
         peak_gain = pos["peak"] / pos["entry"] - 1.0
-        # widening trail: let winners run — the wider the peak, the looser the give-back allowed
         trail = 0.18 if peak_gain < 0.5 else (0.25 if peak_gain < 1.5 else 0.35)
         exit_now = reason = None
         if gain <= -HARD_STOP:
@@ -168,11 +240,11 @@ def run_once() -> dict:
         elif now - pos["t0"] > 12 * 3600:
             exit_now, reason = True, "HORIZON"
         if exit_now:
-            r = gain - TOLL   # all-cost realized return
+            r = gain - TOLL
             _append_ledger({"kind": "resolved", "mint": mint, "symbol": pos.get("symbol"),
-                            "entry": pos["entry"], "exit": price, "gross_return": round(gain, 5),
-                            "net_return": round(r, 5), "reason": reason, "held_s": now - pos["t0"],
-                            "resolved_unix": now})
+                            "pair": pos["pair"], "entry": pos["entry"], "exit": price,
+                            "gross_return": round(gain, 5), "net_return": round(r, 5),
+                            "reason": reason, "held_s": now - pos["t0"], "resolved_unix": now})
             del st["open"][mint]
             closed += 1
 
@@ -186,19 +258,19 @@ def report() -> dict:
     res = [r for r in rows if r.get("kind") == "resolved"]
     n = len(res)
     if not n:
-        return {"resolved": 0, "message": "no resolved paper trades yet"}
+        return {"instrument": INSTRUMENT, "resolved": 0, "message": "no resolved paper trades yet"}
     rets = [r["net_return"] for r in res]
     mean = sum(rets) / n
     sd = math.sqrt(sum((x - mean) ** 2 for x in rets) / n) if n > 1 else 0.0
     se = sd / math.sqrt(n) if n else 0.0
     wins = sum(1 for x in rets if x > 0)
     st = _load(STATE, {"open": {}})
-    return {"resolved": n, "target": TARGET_N, "open": len(st.get("open", {})),
+    return {"instrument": INSTRUMENT, "resolved": n, "target": TARGET_N, "open": len(st.get("open", {})),
             "mean_net_R": round(mean, 4), "ci95_lo": round(mean - 1.96 * se, 4),
             "ci95_hi": round(mean + 1.96 * se, 4), "win_rate": round(wins / n, 3),
             "verdict": ("PASS_so_far" if mean - 1.96 * se > 0 else
                         "KILL_so_far" if mean + 1.96 * se < 0 else "UNDECIDED"),
-            "note": f"pre-registered decision at N={TARGET_N}"}
+            "note": f"optimistic-bound cheap filter; decision at N={TARGET_N}"}
 
 
 def main(argv=None) -> int:
@@ -207,13 +279,14 @@ def main(argv=None) -> int:
         print(json.dumps(report(), indent=2))
         return 0
     once = "--once" in argv
-    print(f"virality tracker: forward paper decider (poll {POLL_SECONDS}s, target N={TARGET_N})", flush=True)
+    print(f"virality tracker {INSTRUMENT}: forward paper decider (poll {POLL_SECONDS}s, N={TARGET_N})",
+          flush=True)
     while True:
         try:
             r = run_once()
             print(json.dumps({"ts": int(time.time()), **r, **report()}, separators=(",", ":")), flush=True)
         except Exception as exc:  # noqa: BLE001 — a bad cycle must not kill the collector
-            print(json.dumps({"cycle_error": str(exc)[:160]}), flush=True)
+            print(json.dumps({"cycle_error": str(exc)[:200]}), flush=True)
         if once:
             break
         time.sleep(POLL_SECONDS)

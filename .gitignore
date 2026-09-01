@@ -94,3 +94,12 @@ research/trading_bot/aftershock/AFTERSHOCK_PAC_V1_RUNNER.lock
 research/trading_bot/aftershock/AFTERSHOCK_PAC_V1_SCENARIO_LEDGER.jsonl
 
 research/data/aftershock/pac_lws/
+
+# virality Gate-B: transient runtime state (ledger committed at the decision read)
+research/data/virality/tracker.log
+research/data/virality/tracker_state.json
+research/data/virality/watchdog.log
+research/data/virality/watchdog.lock
+research/data/virality/tracker_state_v2.json
+research/data/virality/paper_trades_v2.jsonl
+research/data/virality/*.tmp

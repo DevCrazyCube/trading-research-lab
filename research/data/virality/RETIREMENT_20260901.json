@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "instrument": "VIRALITY_GATE_B_V1",
+  "status": "RETIRED_INVALID_MEASUREMENT",
+  "retired_utc": "2026-09-01T16:26:26Z",
+  "paper_only": true,
+  "resolved": 1,
+  "open_at_retirement": 0,
+  "mean_reported_net_return": -0.17504,
+  "paper_ledger_sha256": "1211e03d2fef9d08419a21996b3010060ad998b5521a448b237f03924b3f1509",
+  "state_sha256": "29288e8100db2edd656b3148d2542a02aef2ae7da029233eea63f411f155d792",
+  "evidence_use": "DIAGNOSTIC_ONLY_NEVER_PROMOTION_EVIDENCE",
+  "reasons": [
+    "DexScreener rolling h1 transaction counts were mislabeled as unique-buyer breadth and can fall when the rolling window changes.",
+    "The deepest pair can change between observations, so the compared count and price series are not pair-identity pinned.",
+    "Entry and exit use observed API prices without a causal decision-to-landing execution path.",
+    "The flat 3 percent toll is not exact all-cost executable accounting.",
+    "There is no anchored activation or frozen dependency closure binding the running code to the preregistration."
+  ],
+  "decision": "Do not restart this runner. A future organic-attention experiment must first provide source-receipt clocks, stable pair identity, causal executable fills, and exact costs."
+}

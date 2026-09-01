@@ -6,6 +6,9 @@ set -u
 
 ROOT="/home/anont/meme"
 DATA="$ROOT/research/data/virality"
+# V1 was retired (RETIREMENT_20260901.json) for two real signal bugs; V2 fixes them and is a fresh
+# instrument with its own retirement authority. Only a V2 retirement stops the V2 runner.
+RETIREMENT="$DATA/RETIREMENT_V2.json"
 LOCK="$DATA/watchdog.lock"
 LOG="$DATA/watchdog.log"
 RUN_LOG="$DATA/tracker.log"
@@ -13,6 +16,10 @@ SESSION="virality-tracker"
 CMD="cd $ROOT && exec python3 -m scripts.trading_bot.memebot.virality_tracker"
 
 mkdir -p "$DATA"
+if [[ -f "$RETIREMENT" ]]; then
+  echo "REFUSED: VIRALITY_GATE_B_V2 is retired; see $RETIREMENT" >&2
+  exit 2
+fi
 log() { printf '%s %s\n' "$(date -u +%FT%TZ)" "$1" >> "$LOG"; }
 session_alive() { tmux has-session -t "=$1" 2>/dev/null; }
 
