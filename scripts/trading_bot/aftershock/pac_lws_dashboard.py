@@ -51,6 +51,28 @@ PORT = 8793
 
 LAMPORTS_PER_SOL = 1_000_000_000
 TAPE_ROWS = 48       # newest feed rows sent to the client (not a firehose)
+MINT_ROWS = 16       # most-recently-active mints shown in the mint list
+MINT_SCAN = 6000     # feed rows scanned (tail) to aggregate the mint list
+
+# pump.fun bonding-curve market-cap constants (pinned; match scripts/.../ecr.py + runner reconstruction)
+_VTOK_OFFSET = 279_900_000_000_000       # virtual_token = real_token + this
+_CURVE_K = 30_000_000_000 * 1_073_000_000_000_000   # constant product from the initial virtual reserves
+_TOTAL_SUPPLY_ATOMS = 1_000_000_000_000_000          # 1e9 tokens * 1e6 decimals
+
+
+def _market_cap_sol(real_token) -> float:
+    """pump.fun market cap in SOL from the token-side reserve: price(SOL/atom) * total supply.
+    price = virtual_quote / virtual_token, virtual_token = real_token + offset, virtual_quote = K/vtok.
+    A fresh curve (~793.1e12 real_token) returns ~28 SOL, exactly as the curve implies. 0 if unusable."""
+    try:
+        rt = int(real_token)
+        if rt <= 0:
+            return 0.0
+        vtok = rt + _VTOK_OFFSET
+        vq = _CURVE_K // vtok
+        return (vq / vtok) * _TOTAL_SUPPLY_ATOMS / LAMPORTS_PER_SOL
+    except (TypeError, ValueError, ZeroDivisionError):
+        return 0.0
 
 # --------------------------------------------------------------------------- #
 # Tiny stat-keyed cache so a growing file is not fully re-parsed every poll.
@@ -228,6 +250,54 @@ def _read_tape(path: Path) -> list[dict]:
     return rows
 
 
+def _read_mints(path: Path) -> list[dict]:
+    """Per-mint rollup over the feed tail: distinct buyers, buy/sell counts, and the live market cap
+    from the latest token reserve. Most-recently-active first. The owner's requested mint list."""
+    agg: dict = {}
+    for line in _tail_lines(path, MINT_SCAN):
+        try:
+            obj = json.loads(line)
+        except (ValueError, TypeError):
+            continue
+        mint = obj.get("mint")
+        if not mint:
+            continue
+        m = agg.get(mint)
+        if m is None:
+            m = agg[mint] = {"mint": mint, "buyers": set(), "buys": 0, "sells": 0,
+                             "last_rt": None, "last_ns": None, "anchored": False}
+        is_buy = bool(obj.get("is_buy"))
+        if is_buy:
+            m["buys"] += 1
+            trader = obj.get("trader")
+            if trader:
+                m["buyers"].add(trader)
+        else:
+            m["sells"] += 1
+        rt = obj.get("post_real_token")
+        if isinstance(rt, int):
+            m["last_rt"] = rt
+        ns = obj.get("received_unix_nanos")
+        if ns and (m["last_ns"] is None or ns > m["last_ns"]):
+            m["last_ns"] = ns
+        if obj.get("anchored"):
+            m["anchored"] = True
+    rows = []
+    for m in agg.values():
+        rows.append({
+            "mint": m["mint"],
+            "buyers": len(m["buyers"]),
+            "buys": m["buys"],
+            "sells": m["sells"],
+            "trades": m["buys"] + m["sells"],
+            "mcap_sol": round(_market_cap_sol(m["last_rt"]), 1) if m["last_rt"] else 0.0,
+            "t": (m["last_ns"] / 1e9) if m["last_ns"] else None,
+            "anchored": m["anchored"],
+        })
+    rows.sort(key=lambda r: (r["t"] or 0), reverse=True)   # most-recently-active first
+    return rows[:MINT_ROWS]
+
+
 def _read_health() -> dict:
     """feed_health.json projection + a present/stale flag. Never raises."""
     try:
@@ -284,6 +354,7 @@ def build_state() -> dict:
         "equity_lws": lws["points"],
         "equity_null": null["points"],
         "tape": tape,
+        "mints": _read_mints(FEED_EVENTS),
         "feed_count": feed_count,
         "tiles": tiles,
         "health": health,
@@ -324,7 +395,8 @@ PAGE = r"""<!doctype html>
   /* ---- desk frame: centered, capped, single-screen ---------------------- */
   .desk{
     max-width:1600px; margin:0 auto; height:100vh;
-    display:grid; grid-template-rows:auto auto minmax(0,1fr) 28vh;
+    /* chrome, strip, HERO (dominant 1fr — the graph), mints, tape */
+    display:grid; grid-template-rows:auto auto minmax(0,1fr) minmax(0,24vh) minmax(0,24vh);
     background:var(--ground);
   }
 
@@ -382,6 +454,31 @@ PAGE = r"""<!doctype html>
              padding:12px 0 8px; font-size:11px; letter-spacing:.06em;
              text-transform:uppercase; color:var(--muted);}
   .tape-head .split{font-family:var(--mono); font-variant-numeric:tabular-nums;}
+  /* mint list — live buyers & market cap */
+  .mints{border-top:1px solid var(--hair); display:flex; flex-direction:column; min-height:0;}
+  .mints-head{display:flex; align-items:center; justify-content:space-between;
+              padding:12px 0 8px; font-size:11px; letter-spacing:.06em;
+              text-transform:uppercase; color:var(--muted);}
+  .mints-head .split{font-family:var(--mono); font-variant-numeric:tabular-nums;}
+  .mints-body{flex:1 1 auto; overflow-y:auto; min-height:0; background:var(--panel);
+              border-radius:4px;}
+  .mrow{display:grid; grid-template-columns:1.4fr 1fr 1.2fr 1.1fr auto;
+        align-items:center; gap:14px; padding:8px 14px; font-family:var(--mono);
+        font-variant-numeric:tabular-nums; border-bottom:1px solid var(--hair); font-size:12.5px;}
+  .mrow:last-child{border-bottom:none;}
+  .mrow .m-mint{color:var(--ink);}
+  .copyable{cursor:pointer; transition:color .12s ease;}
+  .copyable:hover{color:var(--amber);}
+  .copyable.copied{color:var(--buy);}
+  .mrow .m-cell{display:flex; flex-direction:column; gap:1px; text-align:right;}
+  .mrow .m-cell .v{color:var(--ink);}
+  .mrow .m-cell .k{font-size:9px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted);}
+  .mrow .m-buyers .v{color:var(--amber);}
+  .mrow .m-bs{text-align:right;}
+  .mrow .m-bs .b{color:var(--buy);} .mrow .m-bs .s{color:var(--sell);}
+  .mrow .m-anchor{width:7px; height:7px; border-radius:50%; border:1px solid var(--hairLit);
+                  justify-self:center;}
+  .mrow .m-anchor.on{background:var(--muted); border-color:var(--muted);}
   .tape-body{flex:1 1 auto; overflow-y:auto; min-height:0; background:var(--panel);
              border-radius:4px;}
   .tape-empty{display:flex; align-items:center; justify-content:center; height:100%;
@@ -455,7 +552,15 @@ PAGE = r"""<!doctype html>
     <div id="chart"></div>
   </section>
 
-  <!-- 4. tape -->
+  <!-- 4. mints -->
+  <section class="mints">
+    <div class="mints-head"><span>Mints · live buyers &amp; market cap</span><span class="split" id="mints-count">—</span></div>
+    <div class="mints-body" id="mints-body">
+      <div class="tape-empty">no mints yet · awaiting launches</div>
+    </div>
+  </section>
+
+  <!-- 5. tape -->
   <section class="tape">
     <div class="tape-head"><span>Live Tape · buys / sells</span><span class="split" id="tape-split">—</span></div>
     <div class="tape-body" id="tape-body">
@@ -480,6 +585,23 @@ let lastFirstT=null;     // track newest tape row so only genuinely new rows ani
 function fmtSigned(v,dp){ const s=v>=0?'+':'−'; return s+Math.abs(v).toFixed(dp); }
 function fmtSol(v){ return fmtSigned(v,3); }
 function shortMint(m){ return (m&&m.length>10)? m.slice(0,4)+'…'+m.slice(-4) : (m||'—'); }
+// click a mint address to copy the FULL address to the clipboard (localhost is a secure context)
+function copyText(txt, elm){
+  if(!txt) return;
+  const flash=()=>{ if(!elm) return; const orig=elm.textContent; elm.textContent='copied ✓';
+    elm.classList.add('copied'); setTimeout(()=>{ elm.textContent=orig; elm.classList.remove('copied'); }, 900); };
+  const fallback=()=>{ const ta=document.createElement('textarea'); ta.value=txt;
+    ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); flash(); };
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(flash, fallback); } else { fallback(); } }
+  catch(e){ fallback(); }
+}
+function copyableMint(fullMint){
+  const s=el('span','m-mint copyable', shortMint(fullMint));
+  s.title=(fullMint||'')+' · click to copy';
+  s.addEventListener('click', (ev)=>{ ev.stopPropagation(); copyText(fullMint, s); });
+  return s;
+}
 function pad2(n){ return (n<10?'0':'')+n; }
 function hhmm(sec){ const d=new Date(sec*1000); return pad2(d.getHours())+':'+pad2(d.getMinutes()); }
 function relTime(sec){
@@ -736,7 +858,10 @@ function drawTape(tape){
     r.appendChild(el('span','tick'));
     r.appendChild(el('span','side',e.is_buy?'BUY':'SELL'));
     r.appendChild(el('span','sol',e.sol.toFixed(3)));
-    r.appendChild(el('span','mint',shortMint(e.mint)));
+    const mintEl=el('span','mint copyable',shortMint(e.mint));
+    mintEl.title=(e.mint||'')+' · click to copy';
+    mintEl.addEventListener('click',(ev)=>{ ev.stopPropagation(); copyText(e.mint,mintEl); });
+    r.appendChild(mintEl);
     r.appendChild(el('span','rt',relTime(e.t)));
     const integ=el('span','integ'+((e.anchored||e.reconciled)?' on':''));
     r.appendChild(integ);
@@ -744,6 +869,39 @@ function drawTape(tape){
   }
   body.innerHTML=''; body.appendChild(frag);
   lastFirstT=newestT;
+}
+
+// --------- mint list — live buyers & market cap ---------------------------
+function drawMints(mints){
+  const body=document.getElementById('mints-body');
+  const count=document.getElementById('mints-count');
+  if(!body) return;
+  if(!mints || !mints.length){
+    body.innerHTML='<div class="tape-empty">no mints yet · awaiting launches</div>';
+    if(count) count.textContent='—';
+    return;
+  }
+  if(count) count.textContent=mints.length+' active';
+  const frag=document.createDocumentFragment();
+  for(const m of mints){
+    const r=el('div','mrow');
+    r.appendChild(copyableMint(m.mint));
+    const b=el('div','m-cell m-buyers');
+    b.appendChild(el('span','v',String(m.buyers)));
+    b.appendChild(el('span','k','buyers'));
+    r.appendChild(b);
+    const mc=el('div','m-cell');
+    mc.appendChild(el('span','v', (m.mcap_sol!=null? m.mcap_sol.toFixed(1):'—')+' ◎'));
+    mc.appendChild(el('span','k','mcap sol'));
+    r.appendChild(mc);
+    const bs=el('div','m-bs');
+    const bb=el('span','b',String(m.buys)); const sl=el('span','s',String(m.sells));
+    bs.appendChild(bb); bs.appendChild(document.createTextNode(' / ')); bs.appendChild(sl);
+    r.appendChild(bs);
+    r.appendChild(el('span','m-anchor'+(m.anchored?' on':'')));
+    frag.appendChild(r);
+  }
+  body.innerHTML=''; body.appendChild(frag);
 }
 
 // --------- chrome liveness -------------------------------------------------
@@ -772,6 +930,7 @@ async function poll(){
     drawHealth(s.health);
     drawTiles(s.tiles||{});
     drawChart(s);
+    drawMints(s.mints||[]);
     drawTape(s.tape||[]);
   }catch(e){
     const line=document.getElementById('liveline');

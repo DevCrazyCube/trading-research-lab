@@ -52,7 +52,9 @@ from . import pac_v2_runner as core
 from . import pac_lws_screen as screen
 from . import pac_scalp_policy as policy
 from . import pac_scalp_marklog as marklog
-from .pac_v2_snapshot import LandingSnapshot, SnapshotUnavailable, SOURCE as SNAPSHOT_SOURCE
+from .pac_v2_snapshot import (LandingSnapshot, PublicRpcSnapshotProvider, SnapshotUnavailable,
+                             SOURCE as SNAPSHOT_SOURCE)
+from .pac_v2_pumpswap import PumpSwapProvider
 from . import solusd_recorder
 
 
@@ -786,6 +788,86 @@ def _quote_input(now: int) -> int:
                               max_staleness_nanos=solusd_recorder.MAX_LOCAL_AGE_NANOS)
 
 
+# ==============================================================================================
+# Live — consume the SAME growing creation-anchored feed forward-only and price every fill against
+# the LIVE public-RPC curve snapshot + PumpSwap venue, wiring the providers exactly as
+# ``pac_scalp_runner`` does.  The heavy lifting — the incremental feed consume + no-lookahead
+# admission + fill/resolve/graduation/exit + the B20B veto — is the already-sealed, already-
+# selftested ``_run_once_at`` path, reused byte-unchanged; this only wires the live providers, the
+# STANDARD forward-test output paths, and the poll loop.  Still paper-only: no wallet/signer/order.
+# ==============================================================================================
+
+LIVE_SCAN_INTERVAL_SECONDS = 0.2
+
+
+def _live_paths(veto_enabled: bool) -> dict:
+    """The STANDARD forward-test paths for one arm (veto -> LWS, null -> LWS_NULL)."""
+    tag = INSTRUMENT if veto_enabled else f"{INSTRUMENT}_NULL"
+    return {
+        "tag": tag,
+        "state_path": RESEARCH / f"{tag}_RUNNER_STATE.json",
+        "ledger_path": RESEARCH / f"{tag}_SCENARIO_LEDGER.jsonl",
+        "marks_path": DATA / f"marks_{tag}.jsonl",
+        "lock_path": RESEARCH / f"{tag}_RUNNER.lock",
+    }
+
+
+def run_live_once(proof: RuntimeProof, provider, pumpswap_provider, *, veto_enabled: bool,
+                  state_path: pathlib.Path, ledger_path: pathlib.Path, marks_path: pathlib.Path,
+                  events_path: pathlib.Path = FEED_EVENTS,
+                  registry_path: pathlib.Path = FEED_REGISTRY,
+                  now: int | None = None, quote_input_lamports: int | None = None,
+                  initialize_at_eof: bool = True) -> dict:
+    """One live cycle: reuse the audited ``_run_once_at`` at wall-clock ``now`` with a $10 probe
+    sized from the local SOL/USD recorder.  Forward-only: the first cycle initializes the durable
+    byte cursor at the CURRENT feed EOF (no backfill), exactly like ``pac_scalp_runner``."""
+    now = time.time_ns() if now is None else now
+    q = quote_input_lamports if quote_input_lamports is not None else _quote_input(now)
+    return _run_once_at(
+        proof, provider, pumpswap_provider, now=now, veto_enabled=veto_enabled,
+        quote_input_lamports=q, state_path=state_path, ledger_path=ledger_path,
+        marks_path=marks_path, events_path=events_path, registry_path=registry_path,
+        initialize_at_eof=initialize_at_eof)
+
+
+def _run_live(*, veto_enabled: bool, interval: float, once: bool) -> int:
+    """Load the sealed+activated runtime proof for this arm, wire the LIVE providers, hold the state
+    lock, and poll the growing feed.  Prints one JSON status line per cycle."""
+    try:
+        if veto_enabled:
+            from . import pac_lws_manifest as manifest
+        else:
+            from . import pac_lws_null_manifest as manifest
+        proof = manifest.load_runtime_proof()
+        provider = PublicRpcSnapshotProvider()
+        pumpswap_provider = PumpSwapProvider()
+    except (RefusedExecution, ImportError) as exc:
+        print(json.dumps({"status": "REFUSED", "reason": str(exc)[:240]}, sort_keys=True), flush=True)
+        return 2
+    paths = _live_paths(veto_enabled)
+    try:
+        with _lock(paths["lock_path"]):
+            while True:
+                started = time.monotonic()
+                try:
+                    result = run_live_once(
+                        proof, provider, pumpswap_provider, veto_enabled=veto_enabled,
+                        state_path=paths["state_path"], ledger_path=paths["ledger_path"],
+                        marks_path=paths["marks_path"])
+                except RefusedExecution as exc:
+                    result = {"status": "CYCLE_REFUSED", "reason": str(exc)[:240]}
+                print(json.dumps({"arm": paths["tag"], **result}, sort_keys=True), flush=True)
+                if once:
+                    break
+                remaining = interval - (time.monotonic() - started)
+                if remaining > 0:
+                    time.sleep(remaining)
+        return 0
+    except RefusedExecution as exc:
+        print(json.dumps({"status": "REFUSED", "reason": str(exc)[:240]}, sort_keys=True), flush=True)
+        return 2
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="PAC Launch-Window Sentinel Scalper (paper-scenario)")
     sub = parser.add_subparsers(dest="command")
@@ -797,7 +879,15 @@ def main(argv=None) -> int:
     rp.set_defaults(veto=True)
     rp.add_argument("--quote-lamports", type=int, default=50_000_000)
     rp.add_argument("--out-dir", default=str(DATA / "replay"))
+    lv = sub.add_parser("live", help="live paper-scenario over the growing feed (live RPC providers)")
+    lv.add_argument("--veto", dest="veto", action="store_true", help="veto arm (LWS)")
+    lv.add_argument("--no-veto", dest="veto", action="store_false", help="null arm (LWS_NULL)")
+    lv.set_defaults(veto=True)
+    lv.add_argument("--interval", type=float, default=LIVE_SCAN_INTERVAL_SECONDS)
+    lv.add_argument("--once", action="store_true")
     args = parser.parse_args(argv)
+    if args.command == "live":
+        return _run_live(veto_enabled=args.veto, interval=args.interval, once=args.once)
     if args.command != "replay":
         parser.print_help()
         return 2
