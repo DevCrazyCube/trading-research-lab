@@ -83,19 +83,27 @@ def _drain(state: dict) -> None:
         state["pending_ledger"].pop(0); _save(state)
 
 
-def _decimal(row: dict, key: str) -> Decimal:
-    try:
-        value = Decimal(row[key])
-    except (KeyError, InvalidOperation, TypeError) as exc:
-        raise RuntimeError(f"bundle reserve {key} invalid") from exc
-    if not value.is_finite() or value <= 0:
-        raise RuntimeError(f"bundle reserve {key} nonpositive")
-    return value
+def _decimal(row: dict, key: str, *aliases: str) -> Decimal:
+    """Read a positive Decimal reserve. The live PumpPortal tape names the bonding-curve virtual reserves
+    `vSolInBondingCurve` / `vTokensInBondingCurve`; earlier normalized rows used `virtual_sol` /
+    `virtual_tokens`. Accept either so the arm reads the tape as it actually arrives. Values come as JSON
+    numbers, so coerce through str() to avoid float-binary noise in the Decimal."""
+    label = key
+    for candidate in (key, *aliases):
+        if candidate in row and row[candidate] is not None:
+            try:
+                value = Decimal(str(row[candidate]))
+            except (InvalidOperation, TypeError) as exc:
+                raise RuntimeError(f"bundle reserve {label} invalid") from exc
+            if not value.is_finite() or value <= 0:
+                raise RuntimeError(f"bundle reserve {label} nonpositive")
+            return value
+    raise RuntimeError(f"bundle reserve {label} invalid")
 
 
 def _reserves(row: dict) -> tuple[float, float, float]:
-    virtual_sol = _decimal(row, "virtual_sol")
-    virtual_tokens = _decimal(row, "virtual_tokens")
+    virtual_sol = _decimal(row, "virtual_sol", "vSolInBondingCurve")
+    virtual_tokens = _decimal(row, "virtual_tokens", "vTokensInBondingCurve")
     return float(virtual_sol), float(virtual_tokens), float(max(Decimal(0), virtual_sol - Decimal(30)))
 
 
