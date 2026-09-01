@@ -52,7 +52,23 @@ PORT = 8793
 LAMPORTS_PER_SOL = 1_000_000_000
 TAPE_ROWS = 48       # newest feed rows sent to the client (not a firehose)
 MINT_ROWS = 16       # most-recently-active mints shown in the mint list
-MINT_SCAN = 6000     # feed rows scanned (tail) to aggregate the mint list
+MINT_SCAN = 3500     # feed rows scanned (tail) to aggregate the mint list
+
+import time as _time
+_TTL_CACHE: dict = {}
+
+
+def _ttl(key: str, ttl: float, fn):
+    """Recompute fn() at most once per `ttl` seconds — keeps the ~2s poll snappy for the slow
+    whole-feed scans (coverage, feed_count) that change only slowly, while the tail-based equity/
+    tape/mints stay live every poll."""
+    now = _time.time()
+    hit = _TTL_CACHE.get(key)
+    if hit is not None and now - hit[0] < ttl:
+        return hit[1]
+    val = fn()
+    _TTL_CACHE[key] = (now, val)
+    return val
 
 # pump.fun bonding-curve market-cap constants (pinned; match scripts/.../ecr.py + runner reconstruction)
 _VTOK_OFFSET = 279_900_000_000_000       # virtual_token = real_token + this
@@ -250,9 +266,26 @@ def _read_tape(path: Path) -> list[dict]:
     return rows
 
 
-def _read_mints(path: Path) -> list[dict]:
+def _read_bot_mints(ledger_path: Path) -> tuple[set, set]:
+    """Which mints the bot actually acted on: (entered, vetoed). Lets the mint list show the bot's
+    own footprint — a green 'BOUGHT' or a muted 'VETOED' tag next to the launches it decided on."""
+    entered, vetoed = set(), set()
+    for obj in _iter_json_lines(ledger_path):
+        m = obj.get("mint")
+        if not m:
+            continue
+        kind = obj.get("kind")
+        if kind in ("entry_filled", "entry_decision"):
+            entered.add(m)
+        elif kind == "entry_vetoed":
+            vetoed.add(m)
+    return entered, vetoed
+
+
+def _read_mints(path: Path, entered: set = frozenset(), vetoed: set = frozenset()) -> list[dict]:
     """Per-mint rollup over the feed tail: distinct buyers, buy/sell counts, and the live market cap
-    from the latest token reserve. Most-recently-active first. The owner's requested mint list."""
+    from the latest token reserve. Most-recently-active first. The owner's requested mint list —
+    tagged with whether the bot bought or vetoed each launch."""
     agg: dict = {}
     for line in _tail_lines(path, MINT_SCAN):
         try:
@@ -284,8 +317,9 @@ def _read_mints(path: Path) -> list[dict]:
             m["anchored"] = True
     rows = []
     for m in agg.values():
+        mint = m["mint"]
         rows.append({
-            "mint": m["mint"],
+            "mint": mint,
             "buyers": len(m["buyers"]),
             "buys": m["buys"],
             "sells": m["sells"],
@@ -293,6 +327,7 @@ def _read_mints(path: Path) -> list[dict]:
             "mcap_sol": round(_market_cap_sol(m["last_rt"]), 1) if m["last_rt"] else 0.0,
             "t": (m["last_ns"] / 1e9) if m["last_ns"] else None,
             "anchored": m["anchored"],
+            "bot": "bought" if mint in entered else ("vetoed" if mint in vetoed else None),
         })
     rows.sort(key=lambda r: (r["t"] or 0), reverse=True)   # most-recently-active first
     return rows[:MINT_ROWS]
@@ -321,9 +356,11 @@ def _read_health() -> dict:
 def build_state() -> dict:
     lws = _read_ledger(LEDGER_LWS)
     null = _read_ledger(LEDGER_NULL)
-    recon, creates = _read_coverage(CREATION_REGISTRY, FEED_EVENTS)
+    # coverage + feed_count scan the whole (large, live-growing) feed — refresh them at most every
+    # ~12s so the poll stays snappy; the tail-based equity/tape/mints stay live every poll.
+    recon, creates = _ttl("coverage", 12.0, lambda: _read_coverage(CREATION_REGISTRY, FEED_EVENTS))
     tape = _read_tape(FEED_EVENTS)
-    feed_count = _count_lines(FEED_EVENTS)
+    feed_count = _ttl("feed_count", 12.0, lambda: _count_lines(FEED_EVENTS))
     health = _read_health()
 
     open_book = max(lws["filled"] - lws["resolved"], 0)
@@ -370,7 +407,7 @@ def build_state() -> dict:
         "primary_label": prim_label,
         "other_label": other_label,
         "tape": tape,
-        "mints": _read_mints(FEED_EVENTS),
+        "mints": _ttl("mints", 3.0, lambda: _read_mints(FEED_EVENTS, *_read_bot_mints(LEDGER_LWS))),
         "feed_count": feed_count,
         "tiles": tiles,
         "health": health,
@@ -392,132 +429,155 @@ PAGE = r"""<!doctype html>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ground:#0F1216; --panel:#171B22; --hair:#262C35; --hair-lit:#39424E;
-    --muted:#828B98; --ink:#E7EAEF;
-    --amber:#D6A85B; --buy:#57B98C; --sell:#CB6F6A;
+    --ground:#0E1116; --panel:#161A21; --panel-2:#1B2028; --hair:#242A33; --hair-lit:#3A434F;
+    --muted:#7E8794; --muted-2:#9AA3AF; --ink:#EAEDF2;
+    --amber:#E0B266; --amber-dim:rgba(224,178,102,.13); --buy:#5BC08F; --sell:#D3746E;
+    --row-hover:rgba(255,255,255,.028);
     --inter:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ease:cubic-bezier(.2,.6,.2,1);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0; background:var(--ground); color:var(--ink);
-    font-family:var(--inter); font-size:14px;
-    -webkit-font-smoothing:antialiased;
+    margin:0; color:var(--ink);
+    background:
+      radial-gradient(120% 80% at 50% -8%, rgba(224,178,102,.045), transparent 55%),
+      var(--ground);
+    font-family:var(--inter); font-size:14px; letter-spacing:.005em;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   }
   .num{font-family:var(--mono); font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;}
-  .kick{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);}
+  ::selection{background:rgba(224,178,102,.24);}
+  /* quiet scrollbars everywhere */
+  *::-webkit-scrollbar{width:9px; height:9px;}
+  *::-webkit-scrollbar-thumb{background:var(--hair); border-radius:8px; border:2px solid transparent; background-clip:content-box;}
+  *::-webkit-scrollbar-thumb:hover{background:var(--hair-lit); background-clip:content-box;}
+  *::-webkit-scrollbar-track{background:transparent;}
 
   /* ---- desk frame: centered, capped, single-screen ---------------------- */
   .desk{
-    max-width:1600px; margin:0 auto; height:100vh;
+    max-width:1560px; margin:0 auto; height:100vh;
     /* chrome, strip, HERO (dominant 1fr — the graph), mints, tape */
-    display:grid; grid-template-rows:auto auto minmax(0,1fr) minmax(0,24vh) minmax(0,24vh);
-    background:var(--ground);
+    display:grid; grid-template-rows:auto auto minmax(0,1fr) minmax(0,23vh) minmax(0,23vh);
   }
 
   /* ---- 1. chrome -------------------------------------------------------- */
   .chrome{
     display:flex; align-items:center; justify-content:space-between;
-    padding:14px 30px; gap:16px;
+    padding:15px 32px; gap:16px;
   }
-  .wm{display:flex; align-items:center; gap:12px;}
-  .wm .mark{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);}
+  .wm{display:flex; align-items:center; gap:11px;}
+  .wm .mark{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted-2); font-weight:500;}
   .pill{
-    font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
-    border:1px solid var(--hair); border-radius:999px; padding:3px 9px;
+    font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
+    border:1px solid var(--hair); border-radius:999px; padding:3px 10px; white-space:nowrap;
   }
-  .live{display:flex; align-items:center; gap:9px; font-size:11px; letter-spacing:.06em;
-        text-transform:uppercase; color:var(--muted);}
+  .pill.seal{color:var(--amber); border-color:rgba(224,178,102,.32);}
+  .live{display:flex; align-items:center; gap:9px; font-size:11px; letter-spacing:.05em;
+        text-transform:uppercase; color:var(--muted); font-family:var(--mono);}
   .dot{width:8px; height:8px; border-radius:50%; background:var(--amber);
-       box-shadow:0 0 0 0 rgba(214,168,91,.45); animation:breathe 3s ease-in-out infinite;}
+       box-shadow:0 0 0 0 rgba(224,178,102,.5); animation:breathe 3.2s var(--ease) infinite;}
+  .dot.stale{background:var(--sell); animation:none;}
   @keyframes breathe{
-    0%,100%{box-shadow:0 0 0 0 rgba(214,168,91,.40);}
-    50%{box-shadow:0 0 0 5px rgba(214,168,91,0);}
+    0%,100%{box-shadow:0 0 0 0 rgba(224,178,102,.42);}
+    55%{box-shadow:0 0 0 6px rgba(224,178,102,0);}
   }
 
   /* ---- 2. stat strip ---------------------------------------------------- */
   .strip{display:flex; border-top:1px solid var(--hair);}
   .tile{
-    flex:1 1 0; padding:14px 24px; min-width:0;
-    display:flex; flex-direction:column; gap:3px;
+    flex:1 1 0; padding:15px 26px; min-width:0;
+    display:flex; flex-direction:column; gap:4px;
+    transition:background .18s var(--ease);
   }
+  .tile:hover{background:var(--row-hover);}
   .tile + .tile{border-left:1px solid var(--hair);}
-  .tile .val{font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:500;
-             font-size:26px; line-height:1.05; color:var(--ink);}
+  .tile .val{font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:400;
+             font-size:29px; line-height:1.02; color:var(--ink); letter-spacing:-.01em;
+             transition:color .2s var(--ease);}
+  .tile:first-child .val{font-size:33px;}
   .tile .val.amber{color:var(--amber);}
   .tile .val.sell{color:var(--sell);}
-  .tile .lab{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);}
+  .tile .val.pos{color:var(--buy);}
+  .tile .lab{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); font-weight:500;}
   .tile .sub{font-family:var(--mono); font-variant-numeric:tabular-nums;
-             font-size:11px; color:var(--muted);}
+             font-size:11px; color:var(--muted); letter-spacing:0;}
 
   /* ---- 3. hero curve ---------------------------------------------------- */
-  .hero{border-top:1px solid var(--hair); padding:16px 30px 8px; display:flex;
+  .hero{border-top:1px solid var(--hair); padding:16px 32px 10px; display:flex;
         flex-direction:column; min-height:0;}
-  .hero-head{display:flex; align-items:baseline; justify-content:space-between; gap:16px;}
-  .hero-key{display:flex; align-items:center; gap:18px; font-size:11px; color:var(--muted);}
-  .hero-key .k{display:flex; align-items:center; gap:7px; letter-spacing:.04em;}
-  .swatch{width:16px; height:2px; border-radius:2px; display:inline-block;}
-  .swatch.lws{background:var(--amber);}
-  .swatch.null{background:var(--muted); height:0; border-top:2px dashed var(--muted);}
-  #chart{flex:1 1 auto; min-height:0; position:relative;}
+  .hero-head{display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:2px;}
+  .kick{font-size:10.5px; text-transform:uppercase; letter-spacing:.11em; color:var(--muted); font-weight:500;}
+  .hero-key{display:flex; align-items:center; gap:18px; font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em;}
+  .hero-key .k{display:flex; align-items:center; gap:7px;}
+  .swatch{width:15px; height:2px; border-radius:2px; display:inline-block;}
+  .swatch.lws{background:var(--amber); box-shadow:0 0 6px rgba(224,178,102,.5);}
+  .swatch.null{background:transparent; height:0; border-top:2px dashed var(--muted);}
+  #chart{flex:1 1 auto; min-height:0; position:relative;
+         background:linear-gradient(180deg, rgba(255,255,255,.008), transparent 40%);
+         border-radius:6px;}
   #chart svg{display:block; width:100%; height:100%;}
 
-  /* ---- 4. tape ---------------------------------------------------------- */
-  .tape{border-top:1px solid var(--hair); display:flex; flex-direction:column; min-height:0;
-        padding:0 30px 12px;}
-  .tape-head{display:flex; align-items:center; justify-content:space-between;
-             padding:12px 0 8px; font-size:11px; letter-spacing:.06em;
-             text-transform:uppercase; color:var(--muted);}
-  .tape-head .split{font-family:var(--mono); font-variant-numeric:tabular-nums;}
-  /* mint list — live buyers & market cap */
-  .mints{border-top:1px solid var(--hair); display:flex; flex-direction:column; min-height:0;}
-  .mints-head{display:flex; align-items:center; justify-content:space-between;
-              padding:12px 0 8px; font-size:11px; letter-spacing:.06em;
-              text-transform:uppercase; color:var(--muted);}
-  .mints-head .split{font-family:var(--mono); font-variant-numeric:tabular-nums;}
-  .mints-body{flex:1 1 auto; overflow-y:auto; min-height:0; background:var(--panel);
-              border-radius:4px;}
-  .mrow{display:grid; grid-template-columns:1.4fr 1fr 1.2fr 1.1fr auto;
-        align-items:center; gap:14px; padding:8px 14px; font-family:var(--mono);
-        font-variant-numeric:tabular-nums; border-bottom:1px solid var(--hair); font-size:12.5px;}
+  /* ---- shared: section shells (mints, tape) ----------------------------- */
+  .mints,.tape{border-top:1px solid var(--hair); display:flex; flex-direction:column; min-height:0;
+               padding:0 32px 12px;}
+  .mints-head,.tape-head{display:flex; align-items:center; justify-content:space-between;
+             padding:12px 0 8px; font-size:10.5px; letter-spacing:.09em;
+             text-transform:uppercase; color:var(--muted); font-weight:500;}
+  .mints-head .split,.tape-head .split{font-family:var(--mono); font-variant-numeric:tabular-nums; color:var(--muted-2);}
+  .mints-body,.tape-body{flex:1 1 auto; overflow-y:auto; min-height:0; background:var(--panel);
+              border:1px solid var(--hair); border-radius:7px;}
+
+  /* mint list — live buyers & market cap + the bot's own footprint */
+  .mrow{display:grid; grid-template-columns:minmax(0,1.5fr) .9fr 1.15fr 1fr 16px;
+        align-items:center; gap:14px; padding:9px 15px; font-family:var(--mono);
+        font-variant-numeric:tabular-nums; border-bottom:1px solid var(--hair); font-size:12.5px;
+        transition:background .14s var(--ease);}
   .mrow:last-child{border-bottom:none;}
-  .mrow .m-mint{color:var(--ink);}
-  .copyable{cursor:pointer; transition:color .12s ease;}
-  .copyable:hover{color:var(--amber);}
-  .copyable.copied{color:var(--buy);}
-  .mrow .m-cell{display:flex; flex-direction:column; gap:1px; text-align:right;}
-  .mrow .m-cell .v{color:var(--ink);}
-  .mrow .m-cell .k{font-size:9px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted);}
-  .mrow .m-buyers .v{color:var(--amber);}
-  .mrow .m-bs{text-align:right;}
-  .mrow .m-bs .b{color:var(--buy);} .mrow .m-bs .s{color:var(--sell);}
-  .mrow .m-anchor{width:7px; height:7px; border-radius:50%; border:1px solid var(--hairLit);
+  .mrow:hover{background:var(--row-hover);}
+  .m-name{display:flex; align-items:center; gap:9px; min-width:0;}
+  .m-mint{color:var(--ink); white-space:nowrap;}
+  .copyable{cursor:pointer; transition:color .12s var(--ease); border-bottom:1px dashed transparent;}
+  .copyable:hover{color:var(--amber); border-bottom-color:rgba(224,178,102,.4);}
+  .copyable.copied{color:var(--buy); border-bottom-color:transparent;}
+  .m-bot{font-size:8.5px; letter-spacing:.08em; text-transform:uppercase; padding:2px 6px;
+         border-radius:4px; white-space:nowrap; font-family:var(--inter); font-weight:600;}
+  .m-bot.bought{color:var(--buy); background:rgba(91,192,143,.12);}
+  .m-bot.vetoed{color:var(--muted); background:rgba(255,255,255,.05);}
+  .m-cell{display:flex; flex-direction:column; gap:1px; text-align:right;}
+  .m-cell .v{color:var(--ink);}
+  .m-cell .k{font-size:8.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted);}
+  .m-buyers .v{color:var(--amber);}
+  .m-bs{text-align:right; color:var(--muted);}
+  .m-bs .b{color:var(--buy);} .m-bs .s{color:var(--sell);}
+  .m-anchor{width:7px; height:7px; border-radius:50%; border:1px solid var(--hair-lit);
                   justify-self:center;}
-  .mrow .m-anchor.on{background:var(--muted); border-color:var(--muted);}
-  .tape-body{flex:1 1 auto; overflow-y:auto; min-height:0; background:var(--panel);
-             border-radius:4px;}
+  .m-anchor.on{background:var(--muted); border-color:var(--muted);}
+
+  /* tape */
   .tape-empty{display:flex; align-items:center; justify-content:center; height:100%;
               color:var(--muted); font-size:12px; letter-spacing:.04em;}
   .row{
-    display:grid; grid-template-columns:14px 46px 82px 1fr 62px 12px;
-    align-items:center; gap:12px; height:29px; padding:0 14px;
+    display:grid; grid-template-columns:14px 44px 84px minmax(0,1fr) 58px 12px;
+    align-items:center; gap:12px; height:30px; padding:0 15px;
     font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:12.5px;
-    color:var(--muted);
+    color:var(--muted); transition:background .14s var(--ease);
   }
+  .row:hover{background:var(--row-hover);}
   .row .tick{width:8px; height:8px; border-radius:2px; justify-self:center;}
   .row.buy .side{color:var(--buy);} .row.buy .tick{background:var(--buy);}
   .row.sell .side{color:var(--sell);} .row.sell .tick{background:var(--sell);}
-  .row .side{font-size:11px; letter-spacing:.05em;}
+  .row .side{font-size:10.5px; letter-spacing:.06em; font-weight:500;}
   .row .sol{text-align:right; color:var(--ink);}
   .row .mint{color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .row .rt{text-align:right; color:var(--muted); font-size:11px;}
   .row .integ{width:7px; height:7px; border-radius:50%; justify-self:center;
-              border:1px solid var(--muted);}
+              border:1px solid var(--hair-lit);}
   .row .integ.on{background:var(--muted); border-color:var(--muted);}
-  .row.dust{opacity:.55;}
-  .row.fresh{animation:slidein .15s ease-out;}
-  @keyframes slidein{from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:none;}}
+  .row.dust{opacity:.5;}
+  .row.fresh{animation:slidein .16s var(--ease);}
+  @keyframes slidein{from{opacity:0; transform:translateY(-7px);} to{opacity:1; transform:none;}}
 
   /* ---- narrow ----------------------------------------------------------- */
   @media (max-width:820px){
@@ -525,13 +585,9 @@ PAGE = r"""<!doctype html>
     .strip{flex-wrap:wrap;}
     .tile{flex:1 1 33%; border-top:1px solid var(--hair);}
     .tile + .tile{border-left:none;}
-    .hero{height:52vh;}
-    .tape{height:44vh;}
+    .hero{height:52vh;} .mints{height:40vh;} .tape{height:44vh;}
   }
-  /* scrollbar — quiet */
-  .tape-body::-webkit-scrollbar{width:8px;}
-  .tape-body::-webkit-scrollbar-thumb{background:var(--hair); border-radius:8px;}
-  .tape-body::-webkit-scrollbar-track{background:transparent;}
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important;} }
 </style>
 </head>
 <body>
@@ -542,6 +598,7 @@ PAGE = r"""<!doctype html>
     <div class="wm">
       <span class="mark">AFTERSHOCK · PAC / LWS</span>
       <span class="pill">PAPER · READ-ONLY</span>
+      <span class="pill seal">SEALED · LIVE</span>
     </div>
     <div class="live"><span class="dot" id="dot"></span><span id="liveline">connecting…</span></div>
   </header>
@@ -590,8 +647,8 @@ PAGE = r"""<!doctype html>
 "use strict";
 // --------- palette (mirrors CSS so the SVG stays in the same grammar) ------
 const C = {
-  ground:'#0F1216', panel:'#171B22', hair:'#262C35', hairLit:'#39424E',
-  muted:'#828B98', ink:'#E7EAEF', amber:'#D6A85B', buy:'#57B98C', sell:'#CB6F6A'
+  ground:'#0E1116', panel:'#161A21', hair:'#242A33', hairLit:'#3A434F',
+  muted:'#7E8794', ink:'#EAEDF2', amber:'#E0B266', buy:'#5BC08F', sell:'#D3746E'
 };
 const SVGNS='http://www.w3.org/2000/svg';
 let CHART=null;          // last-drawn scale params, for the hover crosshair
@@ -724,12 +781,14 @@ function drawChart(state){
         'stroke-width':1.5,'stroke-dasharray':'4 3','opacity':0.75,
         'stroke-linejoin':'round'}));
     }
-    // LWS area fill + line
+    // PRIMARY (amber) area fill + a soft halo behind a crisp line
     if(lws.length){
       const d=pathD(lws);
       const area=d+` L ${xOf(lws[lws.length-1].t).toFixed(1)} ${yOf(ys.lo).toFixed(1)}`+
                  ` L ${xOf(lws[0].t).toFixed(1)} ${yOf(ys.lo).toFixed(1)} Z`;
       svg.appendChild(mk('path',{d:area,fill:'url(#fillA)',stroke:'none'}));
+      svg.appendChild(mk('path',{d:d,fill:'none',stroke:C.amber,'stroke-width':5,
+        'opacity':0.16,'stroke-linejoin':'round','stroke-linecap':'round'}));   // halo
       svg.appendChild(mk('path',{d:d,fill:'none',stroke:C.amber,'stroke-width':2,
         'stroke-linejoin':'round','stroke-linecap':'round'}));
     }
@@ -793,9 +852,15 @@ function endpoint(svg,mk,pts,color,label){
   if(!pts.length) return;
   const last=pts[pts.length-1];
   const x=CHART.xOf(last.t), y=CHART.yOf(last.net);
-  svg.appendChild(mk('circle',{cx:x,cy:y,r:3.2,fill:color}));
+  const isL=(color===C.amber);   // the primary (amber) arm gets the pulse + coloured chip border
+  if(isL){
+    const ring=mk('circle',{cx:x,cy:y,r:3.4,fill:'none',stroke:color,'stroke-width':1.4,opacity:0.5});
+    ring.innerHTML='<animate attributeName="r" values="3.4;11" dur="1.9s" repeatCount="indefinite"/>'+
+                   '<animate attributeName="opacity" values="0.5;0" dur="1.9s" repeatCount="indefinite"/>';
+    svg.appendChild(ring);
+  }
+  svg.appendChild(mk('circle',{cx:x,cy:y,r:3.4,fill:color}));
   // floating chip on the panel gutter at the right edge
-  const isL=(color===C.amber);   // the primary (amber) arm gets the coloured chip border
   const txt=fmtSol(last.net)+' SOL';
   const w=txt.length*6.6+16, cx=CHART.W-CHART.R+10;
   let cy=Math.max(CHART.T+11, Math.min(CHART.H-CHART.B-11, y));
@@ -905,7 +970,10 @@ function drawMints(mints){
   const frag=document.createDocumentFragment();
   for(const m of mints){
     const r=el('div','mrow');
-    r.appendChild(copyableMint(m.mint));
+    const name=el('div','m-name');
+    name.appendChild(copyableMint(m.mint));
+    if(m.bot){ name.appendChild(el('span','m-bot '+m.bot, m.bot==='bought'?'bought':'vetoed')); }
+    r.appendChild(name);
     const b=el('div','m-cell m-buyers');
     b.appendChild(el('span','v',String(m.buyers)));
     b.appendChild(el('span','k','buyers'));
@@ -929,7 +997,7 @@ function drawHealth(h){
   const line=document.getElementById('liveline');
   const dot=document.getElementById('dot');
   if(!h || !h.present){
-    line.textContent='FEED STALE'; dot.style.background=C.amber; return;
+    line.textContent='FEED STALE'; if(dot) dot.classList.add('stale'); return;
   }
   const fresh = (h.status==='FRESH');
   const ago = h.observed_sec!=null ? relTime(h.observed_sec) : '—';
@@ -937,7 +1005,7 @@ function drawHealth(h){
   line.textContent = fresh
     ? ('FEED FRESH · lag '+lag+' · updated '+ago+' ago')
     : ('FEED '+(h.status||'STALE')+' · updated '+ago+' ago');
-  dot.style.background=C.amber; // amber = ours/live, always
+  if(dot) dot.classList.toggle('stale', !fresh);
 }
 
 // --------- poll loop -------------------------------------------------------
