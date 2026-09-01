@@ -68,6 +68,7 @@
     "scripts/trading_bot/aftershock/pac_scalp_ll_campaign.py",
     "scripts/trading_bot/aftershock/pac_scalp_ll_calibration.py",
     "scripts/trading_bot/aftershock/pac_scalp_ll_attest.py",
+    "scripts/trading_bot/aftershock/pac_scalp_ll_runtime.py",
     "scripts/trading_bot/aftershock/pac_scalp_ll_manifest.py",
     "scripts/trading_bot/aftershock/pac_scalp_ll_selftest.py"
   ]

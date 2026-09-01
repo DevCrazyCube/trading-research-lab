@@ -26,6 +26,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[3]
 OUTPUT = ROOT / "research" / "data" / "aftershock" / "solusd_coinbase.jsonl"
 URL = "https://api.exchange.coinbase.com/products/SOL-USD/ticker"
 SOURCE = "coinbase-exchange:SOL-USD:last-trade"
+SCHEMA_VERSION = 2
+GENESIS_HASH = "0" * 64
 POLL_SECONDS = 2.0
 MAX_LOCAL_AGE_NANOS = 5_000_000_000
 MAX_PROVIDER_AGE_AT_RECEIPT_NANOS = 30_000_000_000
@@ -54,6 +56,39 @@ def _price_string(value: object) -> str:
     return value
 
 
+def _canonical(value: object) -> bytes:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
+
+
+def _last_complete_json(path: pathlib.Path) -> dict | None:
+    if not path.exists() or path.stat().st_size == 0:
+        return None
+    with path.open("rb") as handle:
+        end = handle.seek(0, 2); cursor = end
+        if end:
+            handle.seek(end - 1)
+            if handle.read(1) != b"\n":
+                while cursor > 0:
+                    size = min(65_536, cursor); cursor -= size; handle.seek(cursor)
+                    block = handle.read(size); index = block.rfind(b"\n")
+                    if index >= 0:
+                        end = cursor + index + 1; break
+                else:
+                    return None
+        cursor = end; data = b""
+        while cursor > 0 and data.count(b"\n") < 2:
+            size = min(65_536, cursor); cursor -= size; handle.seek(cursor)
+            data = handle.read(size) + data
+    lines = [line for line in data.split(b"\n") if line.strip()]
+    if not lines:
+        return None
+    try:
+        row = json.loads(lines[-1])
+    except json.JSONDecodeError as exc:
+        raise RefusedExecution("SOL/USD complete tail record is invalid JSON") from exc
+    return row if isinstance(row, dict) else None
+
+
 def fetch_once(*, output: pathlib.Path = OUTPUT) -> dict:
     request_started = time.time_ns()
     request = urllib.request.Request(URL, headers={"User-Agent": "aftershock-pac-research/1.0"})
@@ -78,8 +113,18 @@ def fetch_once(*, output: pathlib.Path = OUTPUT) -> dict:
         raise RefusedExecution("SOL/USD provider trade time is implausibly in the future")
     if received - provider_ns > MAX_PROVIDER_AGE_AT_RECEIPT_NANOS:
         raise RefusedExecution("SOL/USD provider last trade is stale at receipt")
-    record = {
-        "schema_version": 1,
+    prior = _last_complete_json(output)
+    if prior is not None and prior.get("schema_version") == SCHEMA_VERSION:
+        previous_hash = prior.get("record_sha256")
+        sequence = prior.get("sequence", -1) + 1
+        prior_body = dict(prior); prior_observed = prior_body.pop("record_sha256", None)
+        if (not isinstance(previous_hash, str) or previous_hash != hashlib.sha256(
+                _canonical(prior_body)).hexdigest() or type(sequence) is not int or sequence <= 0):
+            raise RefusedExecution("SOL/USD prior chain head refuses")
+    else:
+        previous_hash, sequence = GENESIS_HASH, 0
+    body = {
+        "schema_version": SCHEMA_VERSION,
         "source": SOURCE,
         "source_url": URL,
         "product": "SOL-USD",
@@ -91,7 +136,9 @@ def fetch_once(*, output: pathlib.Path = OUTPUT) -> dict:
         "received_unix_nanos": received,
         "raw_response_sha256": hashlib.sha256(raw).hexdigest(),
         "raw_response_utf8": raw.decode("utf-8"),
+        "sequence": sequence, "previous_record_sha256": previous_hash,
     }
+    record = {**body, "record_sha256": hashlib.sha256(_canonical(body)).hexdigest()}
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("a") as handle:
         handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
@@ -114,6 +161,20 @@ def latest_observation(*, decision_unix_nanos: int, output: pathlib.Path = OUTPU
             handle.seek(0, 2)
             position = handle.tell()
             remainder = b""
+            # A concurrent append is allowed to leave an unterminated tail temporarily.  That tail
+            # is not a record yet: ignore it and select the newest *complete* causal record.  Older
+            # malformed newline-terminated rows still refuse below, preserving archive integrity.
+            if position:
+                handle.seek(position - 1)
+                if handle.read(1) != b"\n":
+                    cursor = position
+                    while cursor > 0:
+                        size = min(65_536, cursor); cursor -= size; handle.seek(cursor)
+                        block = handle.read(size); index = block.rfind(b"\n")
+                        if index >= 0:
+                            position = cursor + index + 1; break
+                    else:
+                        position = 0
             while position > 0 and candidate is None:
                 size = min(65_536, position)
                 position -= size
@@ -144,6 +205,18 @@ def latest_observation(*, decision_unix_nanos: int, output: pathlib.Path = OUTPU
         raise RefusedExecution("SOL/USD observation file is unreadable") from exc
     if not isinstance(candidate, dict):
         raise RefusedExecution("no SOL/USD observation existed at the decision clock")
+    expected_keys = {
+        "schema_version", "source", "source_url", "product", "quote_currency", "price",
+        "provider_trade_time", "provider_trade_unix_nanos", "request_started_unix_nanos",
+        "received_unix_nanos", "raw_response_sha256", "raw_response_utf8", "sequence",
+        "previous_record_sha256", "record_sha256"}
+    candidate_body = dict(candidate); candidate_hash = candidate_body.pop("record_sha256", None)
+    if (set(candidate) != expected_keys or candidate.get("schema_version") != SCHEMA_VERSION
+            or candidate_hash != hashlib.sha256(_canonical(candidate_body)).hexdigest()
+            or type(candidate.get("sequence")) is not int or candidate["sequence"] < 0
+            or not isinstance(candidate.get("previous_record_sha256"), str)
+            or len(candidate["previous_record_sha256"]) != 64):
+        raise RefusedExecution("SOL/USD record schema/hash chain refuses")
     received = candidate.get("received_unix_nanos")
     if decision_unix_nanos - received > max_local_age_nanos:
         raise RefusedExecution("latest causal SOL/USD observation is stale")
@@ -162,6 +235,15 @@ def latest_observation(*, decision_unix_nanos: int, output: pathlib.Path = OUTPU
         raise RefusedExecution("SOL/USD derived fields do not reconcile to preserved raw bytes")
     if candidate.get("source") != SOURCE or candidate.get("quote_currency") != "USD":
         raise RefusedExecution("SOL/USD record source/numeraire mismatch")
+    request_started = candidate.get("request_started_unix_nanos")
+    provider_ns = candidate.get("provider_trade_unix_nanos")
+    if (candidate.get("source_url") != URL or candidate.get("product") != "SOL-USD"
+            or type(request_started) is not int or request_started <= 0
+            or type(received) is not int or request_started > received
+            or type(provider_ns) is not int
+            or provider_ns > received + MAX_PROVIDER_FUTURE_SKEW_NANOS
+            or received - provider_ns > MAX_PROVIDER_AGE_AT_RECEIPT_NANOS):
+        raise RefusedExecution("SOL/USD source/request/provider clocks refuse")
     price = _price_string(candidate.get("price"))
     return SolUsdObservation(price, received, SOURCE, digest)
 

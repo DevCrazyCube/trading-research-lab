@@ -37,6 +37,7 @@ ATTEMPT_SCHEMA = 1
 SUMMARY_SCHEMA = 1
 TIMEOUT_SECONDS = 20.0
 BOOT_ID_PATH = pathlib.Path("/proc/sys/kernel/random/boot_id")
+_BROADCAST_CAPABILITY = object()
 
 
 class CalibrationRefused(RefusedExecution):
@@ -484,7 +485,7 @@ def _run_unlocked(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
         keypair_path: pathlib.Path, journal_path: pathlib.Path, summary_path: pathlib.Path,
         public_submit_url: str, intervention_submit_url: str, verification_url: str,
         broadcast: bool, rpc=_rpc, clock=time.time_ns, monotonic=time.monotonic_ns,
-        sleep=time.sleep, boot_id: str | None = None) -> dict:
+        sleep=time.sleep, boot_id: str | None = None, _capability=None) -> dict:
     campaign = campaigns.load(campaign_path, expected_sha256=campaign_file_sha256)
     if broadcast:
         # Local import avoids a module cycle: the manifest seals this sender and is consulted only
@@ -492,6 +493,12 @@ def _run_unlocked(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
         from . import pac_scalp_ll_manifest as manifest
         manifest.require_campaign_authority(
             pathlib.Path(campaign_path), file_sha256=campaign_file_sha256)
+        manifest.require_exact_path(journal_path, manifest.RAW_JOURNAL, label="raw journal")
+        manifest.require_exact_path(
+            summary_path, manifest.CALIBRATION_SUMMARY, label="calibration summary")
+        manifest.require_spend_authority(campaign)
+        if _capability is not _BROADCAST_CAPABILITY:
+            raise CalibrationRefused("broadcast requires the locked public run wrapper")
     campaigns.assert_runtime_urls(
         campaign, public_submit_url=public_submit_url,
         intervention_submit_url=intervention_submit_url, verification_url=verification_url)
@@ -632,7 +639,8 @@ def run(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
             public_submit_url=public_submit_url,
             intervention_submit_url=intervention_submit_url,
             verification_url=verification_url, broadcast=True, rpc=rpc, clock=clock,
-            monotonic=monotonic, sleep=sleep, boot_id=boot_id)
+            monotonic=monotonic, sleep=sleep, boot_id=boot_id,
+            _capability=_BROADCAST_CAPABILITY)
 
 
 def main(argv=None) -> int:

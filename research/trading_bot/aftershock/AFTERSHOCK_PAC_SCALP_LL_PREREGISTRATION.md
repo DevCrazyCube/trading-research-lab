@@ -42,6 +42,9 @@ otherwise unexitable rugs. This is a hypothesis, not a profit claim.
 
 - The entry detector is unchanged between route arms. A decision is filled only on a fresh provider-bound
   state at or after that arm's attested p90 landing target, with own curve impact and all costs.
+- Before activation, one commit-safe runtime profile binds each arm's submit/observe identity and exact
+  entry, exit, and ATA-close AttemptCost. The profile is committed after the campaign and is reverified
+  with the calibration summary and finalized attestation; caller-supplied provider/cost drift refuses.
 - Exit policy is fixed before data: full-position exit at all-cost equity `<=88/100` of entry, an absolute
   horizon, or the existing upside trail. The stop is a trigger, never a guaranteed fill price.
 - Curve failure/completion routes through the typed PumpSwap state machine. A full loss is legal only at

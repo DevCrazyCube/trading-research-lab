@@ -53,12 +53,40 @@ def main() -> int:
         observation = recorder.latest_observation(decision_unix_nanos=T0 + 1, output=path)
         ok &= _check("Decimal USD price and local receive clock survive raw-hash reconciliation",
                      observation.value_str == "200.00" and observation.observed_unix_nanos == T0)
+        with path.open("ab") as handle:
+            handle.write(b"x" * 70_000)
+        long_partial = recorder.latest_observation(decision_unix_nanos=T0 + 1, output=path)
+        ok &= _check("unterminated tail larger than one read block is ignored",
+                     long_partial.observed_unix_nanos == T0)
+        path.write_bytes((json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n").encode())
+        retimed = dict(record)
+        retimed["request_started_unix_nanos"] += 86_400_000_000_000
+        retimed["received_unix_nanos"] += 86_400_000_000_000
+        retimed_body = dict(retimed); retimed_body.pop("record_sha256")
+        retimed["record_sha256"] = __import__("hashlib").sha256(
+            recorder._canonical(retimed_body)).hexdigest()
+        path.write_text(json.dumps(retimed) + "\n")
+        ok &= _check("rehash-valid receipt retiming cannot hide a stale provider quote",
+                     _raises(lambda: recorder.latest_observation(
+                         decision_unix_nanos=retimed["received_unix_nanos"] + 1, output=path)))
+        path.write_bytes((json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n").encode())
         future = dict(record); future["received_unix_nanos"] = T0 + 100
         with path.open("a") as handle:
             handle.write(json.dumps(future) + "\n")
         asof = recorder.latest_observation(decision_unix_nanos=T0 + 1, output=path)
         ok &= _check("reverse hot-path scan skips a later receipt without future leakage",
                      asof.observed_unix_nanos == T0)
+        with path.open("ab") as handle:
+            handle.write(b'{"received_unix_nanos":')
+        asof_partial = recorder.latest_observation(decision_unix_nanos=T0 + 1, output=path)
+        ok &= _check("concurrent unterminated append is ignored until it becomes a record",
+                     asof_partial.observed_unix_nanos == T0)
+        with path.open("ab") as handle:
+            handle.write(b"not-json}\n")
+        ok &= _check("newline-terminated malformed append still refuses",
+                     _raises(lambda: recorder.latest_observation(
+                         decision_unix_nanos=T0 + 1, output=path)))
+        path.write_bytes((json.dumps(record) + "\n" + json.dumps(future) + "\n").encode())
         ok &= _check("future decision cannot backfill a stale quote",
                      _raises(lambda: recorder.latest_observation(
                          decision_unix_nanos=T0 + 100 + recorder.MAX_LOCAL_AGE_NANOS + 1,

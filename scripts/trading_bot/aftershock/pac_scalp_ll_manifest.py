@@ -17,6 +17,7 @@ import os
 import pathlib
 import subprocess
 import tempfile
+import time
 
 from .execution import RefusedExecution
 from . import pac_scalp_ll_campaign as campaigns
@@ -32,6 +33,8 @@ CAMPAIGN = RESEARCH / f"{INSTRUMENT}_CAMPAIGN.json"
 CALIBRATION_SUMMARY = RESEARCH / f"{INSTRUMENT}_CALIBRATION_SUMMARY.json"
 ATTESTATION = RESEARCH / f"{INSTRUMENT}_CALIBRATION_ATTESTATION.json"
 ACTIVATION = RESEARCH / f"{INSTRUMENT}_ACTIVATION.json"
+RUNTIME_PROFILE = RESEARCH / f"{INSTRUMENT}_RUNTIME_PROFILE.json"
+SPEND_AUTHORITY = RESEARCH / f"{INSTRUMENT}_SPEND_AUTHORITY.json"
 RAW_ROOT = ROOT / "research" / "data" / "aftershock" / "pac_scalp_ll"
 RAW_JOURNAL = RAW_ROOT / "calibration_journal.json"
 RAW_ATTESTATION = RAW_ROOT / "calibration_attestation_raw.json"
@@ -61,6 +64,7 @@ DEPENDENCY_PATHS = (
     "scripts/trading_bot/aftershock/pac_scalp_ll_campaign.py",
     "scripts/trading_bot/aftershock/pac_scalp_ll_calibration.py",
     "scripts/trading_bot/aftershock/pac_scalp_ll_attest.py",
+    "scripts/trading_bot/aftershock/pac_scalp_ll_runtime.py",
     "scripts/trading_bot/aftershock/pac_scalp_ll_manifest.py",
     "scripts/trading_bot/aftershock/pac_scalp_ll_selftest.py",
 )
@@ -222,6 +226,154 @@ def require_campaign_authority(path: pathlib.Path, *, file_sha256: str) -> campa
     return campaign
 
 
+def write_spend_authority() -> dict:
+    """Create the set-once, pre-spend journal genesis and its commit-safe authority artifact."""
+    from . import pac_scalp_ll_calibration as calibration
+    if SPEND_AUTHORITY.exists():
+        raise RefusedExecution("PAC_SCALP_LL spend authority is set-once")
+    campaign = require_campaign_authority(CAMPAIGN, file_sha256=_sha_bytes(CAMPAIGN.read_bytes()))
+    genesis = calibration._new_journal(campaign)
+    if RAW_JOURNAL.exists():
+        observed = calibration.load_journal(RAW_JOURNAL, campaign)
+        if observed != genesis:
+            raise RefusedExecution("PAC_SCALP_LL pre-authority journal is not pristine genesis")
+    else:
+        calibration._atomic_json(RAW_JOURNAL, genesis)
+    body = {"schema": 1, "instrument_id": INSTRUMENT,
+            "campaign_sha256": campaign.campaign_sha256,
+            "max_lamports": campaign.max_lamports,
+            "journal_genesis_sha256": _sha_bytes(RAW_JOURNAL.read_bytes()),
+            "created_unix_nanos": time.time_ns(),
+            "boundary": "SET_ONCE_CALIBRATION_SPEND_CAP_NO_TRADING"}
+    value = {**body, "spend_authority_sha256": _sha_bytes(_canonical(body))}
+    _atomic(SPEND_AUTHORITY, value)
+    return value
+
+
+def require_spend_authority(campaign: campaigns.Campaign) -> dict:
+    from . import pac_scalp_ll_calibration as calibration
+    if not _anchored(SPEND_AUTHORITY) or not _strict_ancestor(CAMPAIGN, SPEND_AUTHORITY):
+        raise RefusedExecution("PAC_SCALP_LL spend authority must be clean-anchored after campaign")
+    value = _json(SPEND_AUTHORITY); body = dict(value)
+    observed = body.pop("spend_authority_sha256", None)
+    if (observed != _sha_bytes(_canonical(body)) or value.get("schema") != 1
+            or value.get("instrument_id") != INSTRUMENT
+            or value.get("campaign_sha256") != campaign.campaign_sha256
+            or value.get("max_lamports") != campaign.max_lamports
+            or value.get("boundary") != "SET_ONCE_CALIBRATION_SPEND_CAP_NO_TRADING"):
+        raise RefusedExecution("PAC_SCALP_LL spend authority content refuses")
+    if not RAW_JOURNAL.exists():
+        raise RefusedExecution("PAC_SCALP_LL campaign journal is missing after spend authorization")
+    calibration.load_journal(RAW_JOURNAL, campaign)
+    return value
+
+
+def _evidence_bundle() -> tuple[campaigns.Campaign, dict, dict, dict]:
+    """Recompute the complete calibration authority from canonical local+anchored artifacts."""
+    from . import pac_scalp_ll_calibration as calibration
+    from . import pac_scalp_ll_runtime as runtime
+    campaign = require_campaign_authority(CAMPAIGN, file_sha256=_sha_bytes(CAMPAIGN.read_bytes()))
+    journal = calibration.load_journal(RAW_JOURNAL, campaign)
+    expected_summary = calibration.summary(journal, campaign, raw_path=RAW_JOURNAL)
+    summary = _json(CALIBRATION_SUMMARY)
+    if summary != expected_summary or summary.get("evidence_status") != "UNATTESTED_LOCAL_COMPLETE":
+        raise RefusedExecution("PAC_SCALP_LL calibration summary does not recompute from raw evidence")
+    attestation = _json(ATTESTATION)
+    attestation_body = dict(attestation); attestation_sha = attestation_body.pop("attestation_sha256", None)
+    selected = journal["attempts"][:campaign.samples_per_arm * 2]
+    safe = attestation.get("selected_attempts")
+    if (attestation_sha != campaigns.sha(attestation_body)
+            or attestation.get("instrument_id") != INSTRUMENT
+            or attestation.get("campaign_sha256") != campaign.campaign_sha256
+            or attestation.get("calibration_summary_sha256") != summary["summary_sha256"]
+            or attestation.get("calibration_summary_file_sha256")
+            != _sha_bytes(CALIBRATION_SUMMARY.read_bytes())
+            or attestation.get("raw_journal_sha256") != _sha_bytes(RAW_JOURNAL.read_bytes())
+            or attestation.get("raw_attestation_sha256") != _sha_bytes(RAW_ATTESTATION.read_bytes())
+            or attestation.get("evidence_status") != "FINALIZED_ATTESTED_COMPLETE"
+            or attestation.get("attested_attempts") != len(selected)
+            or attestation.get("attested_pairs") != campaign.samples_per_arm
+            or not isinstance(safe, list) or len(safe) != len(selected)):
+        raise RefusedExecution("PAC_SCALP_LL finalized attestation authority refuses")
+    for attempt, row in zip(selected, safe):
+        if (not isinstance(row, dict) or row.get("pair_index") != attempt["pair_index"]
+                or row.get("arm") != attempt["arm"]
+                or row.get("attempt_sha256") != attempt["attempt_sha256"]
+                or row.get("wire_sha256") != attempt["wire_sha256"]):
+            raise RefusedExecution("PAC_SCALP_LL attested sample differs from selected ITT attempt")
+        if attempt["stage"] == "PROCESSED":
+            if (row.get("finalized_slot") != attempt["processed_slot"]
+                    or row.get("meta_fee_lamports") != attempt["fee_lamports"]):
+                raise RefusedExecution("PAC_SCALP_LL processed attempt lacks exact finalized evidence")
+        elif attempt["stage"] == "FAILED":
+            if row.get("finalized_slot") is not None or row.get("meta_fee_lamports") is not None:
+                raise RefusedExecution("PAC_SCALP_LL failed ITT attempt gained invented finalized evidence")
+        else:
+            raise RefusedExecution("PAC_SCALP_LL activation saw a nonterminal ITT attempt")
+    profile = runtime.load(
+        RUNTIME_PROFILE, expected_file_sha256=_sha_bytes(RUNTIME_PROFILE.read_bytes()),
+        campaign=campaign)
+    return campaign, summary, attestation, profile
+
+
+def _activation_body(*, activated_unix_nanos: int) -> dict:
+    campaign, summary, attestation, profile = _evidence_bundle()
+    frozen = _json(FROZEN); rule = frozen.get("calibration", {})
+    public = summary["arms"].get("PUBLIC_CONTROL", {})
+    intervention = summary["arms"].get("LOW_LATENCY_INTERVENTION", {})
+    p_public, p_intervention = public.get("p90_effective_nanos"), intervention.get("p90_effective_nanos")
+    if (type(p_public) is not int or type(p_intervention) is not int
+            or public.get("paired_samples") != campaign.samples_per_arm
+            or intervention.get("paired_samples") != campaign.samples_per_arm
+            or p_intervention > rule.get("intervention_p90_max_nanos")
+            or p_intervention * rule.get("intervention_to_control_p90_max_den", 0)
+            > p_public * rule.get("intervention_to_control_p90_max_num", 0)):
+        raise RefusedExecution("PAC_SCALP_LL measured latency failed the frozen promotion threshold")
+    arms = {}
+    for arm in sorted(("PUBLIC_CONTROL", "LOW_LATENCY_INTERVENTION")):
+        value = summary["arms"][arm]
+        arms[arm] = {"p90_nanos": value["p90_effective_nanos"],
+                     "paired_samples": value["paired_samples"],
+                     "failed_samples": value["failed_samples"],
+                     "evidence_digest": campaigns.sha({
+                         "arm": arm, "summary": summary["summary_sha256"],
+                         "attestation": attestation["attestation_sha256"],
+                         "p90": value["p90_effective_nanos"]})}
+    return {
+        "schema": 1, "instrument_id": INSTRUMENT, "activated_unix_nanos": activated_unix_nanos,
+        "seal_sha256": verify_seal(require_anchor=True)["seal_sha256"],
+        "campaign_sha256": campaign.campaign_sha256,
+        "samples_sha256": summary["summary_sha256"],
+        "attestations_sha256": attestation["attestation_sha256"],
+        "runtime_profile_sha256": profile["runtime_profile_sha256"], "arms": arms,
+        "boundary": "PAPER_SCENARIO_ONLY_NO_LIVE_ORDERS",
+    }
+
+
+def write_activation() -> dict:
+    if ACTIVATION.exists():
+        raise RefusedExecution("PAC_SCALP_LL activation is set-once")
+    for artifact in (CALIBRATION_SUMMARY, ATTESTATION, RUNTIME_PROFILE):
+        if not _anchored(artifact) or not _strict_ancestor(CAMPAIGN, artifact):
+            raise RefusedExecution("PAC_SCALP_LL evidence/runtime must be clean-anchored after campaign")
+    body = _activation_body(activated_unix_nanos=time.time_ns())
+    value = {**body, "activation_sha256": _sha_bytes(_canonical(body))}
+    _atomic(ACTIVATION, value)
+    return value
+
+
+def verify_activation(*, require_anchor: bool = True) -> dict:
+    observed = _json(ACTIVATION)
+    clock = observed.get("activated_unix_nanos")
+    if type(clock) is not int or clock <= 0:
+        raise RefusedExecution("PAC_SCALP_LL activation clock refuses")
+    body = _activation_body(activated_unix_nanos=clock)
+    expected = {**body, "activation_sha256": _sha_bytes(_canonical(body))}
+    if observed != expected or (require_anchor and not _anchored(ACTIVATION)):
+        raise RefusedExecution("PAC_SCALP_LL activation/evidence drift refuses")
+    return observed
+
+
 def status() -> dict:
     def safe_anchor(path: pathlib.Path) -> bool:
         return path.exists() and _anchored(path)
@@ -230,10 +382,14 @@ def status() -> dict:
         "seal": "ANCHORED" if safe_anchor(SEAL) else ("UNANCHORED" if SEAL.exists() else "ABSENT"),
         "campaign": ("ANCHORED" if safe_anchor(CAMPAIGN)
                      else "UNANCHORED" if CAMPAIGN.exists() else "ABSENT"),
+        "spend_authority": ("ANCHORED" if safe_anchor(SPEND_AUTHORITY)
+                            else "UNANCHORED" if SPEND_AUTHORITY.exists() else "ABSENT"),
         "calibration": ("ANCHORED" if safe_anchor(CALIBRATION_SUMMARY)
                         else "UNANCHORED" if CALIBRATION_SUMMARY.exists() else "ABSENT"),
         "attestation": ("ANCHORED" if safe_anchor(ATTESTATION)
                         else "UNANCHORED" if ATTESTATION.exists() else "ABSENT"),
+        "runtime_profile": ("ANCHORED" if safe_anchor(RUNTIME_PROFILE)
+                            else "UNANCHORED" if RUNTIME_PROFILE.exists() else "ABSENT"),
         "activation": ("ANCHORED" if safe_anchor(ACTIVATION)
                        else "UNANCHORED" if ACTIVATION.exists() else "ABSENT"),
         "authority": "DEFAULT_OFF_NO_BROADCAST" if not safe_anchor(CAMPAIGN)
@@ -243,9 +399,12 @@ def status() -> dict:
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="PAC_SCALP_LL manifest")
-    parser.add_argument("command", choices=("status", "write-seal"))
+    parser.add_argument("command", choices=(
+        "status", "write-seal", "write-spend-authority", "write-activation"))
     args = parser.parse_args(argv)
-    result = write_seal() if args.command == "write-seal" else status()
+    result = (write_seal() if args.command == "write-seal" else
+              write_spend_authority() if args.command == "write-spend-authority" else
+              write_activation() if args.command == "write-activation" else status())
     print(json.dumps(result, sort_keys=True))
     return 0
 

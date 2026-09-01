@@ -45,6 +45,8 @@ LEDGER_NULL = ROOT / "research/trading_bot/aftershock/AFTERSHOCK_PAC_LWS_NULL_SC
 FEED_EVENTS = ROOT / "research/data/aftershock/pac_lws/feed_events.jsonl"
 CREATION_REGISTRY = ROOT / "research/data/aftershock/pac_lws/creation_registry.jsonl"
 FEED_HEALTH = ROOT / "research/data/aftershock/pac_lws/feed_health.json"
+ELIGIBILITY = ROOT / "research/data/aftershock/pac_lws/eligibility_v2.jsonl"
+ELIGIBILITY_HEALTH = ROOT / "research/data/aftershock/pac_lws/eligibility_v2_health.json"
 
 HOST = "127.0.0.1"   # localhost only — never bind 0.0.0.0
 PORT = 8793
@@ -55,7 +57,9 @@ MINT_ROWS = 16       # most-recently-active mints shown in the mint list
 MINT_SCAN = 3500     # feed rows scanned (tail) to aggregate the mint list
 
 import time as _time
+import threading as _threading
 _TTL_CACHE: dict = {}
+_TTL_LOCK = _threading.Lock()
 
 
 def _ttl(key: str, ttl: float, fn):
@@ -66,9 +70,13 @@ def _ttl(key: str, ttl: float, fn):
     hit = _TTL_CACHE.get(key)
     if hit is not None and now - hit[0] < ttl:
         return hit[1]
-    val = fn()
-    _TTL_CACHE[key] = (now, val)
-    return val
+    with _TTL_LOCK:
+        hit = _TTL_CACHE.get(key)
+        if hit is not None and now - hit[0] < ttl:
+            return hit[1]
+        val = fn()
+        _TTL_CACHE[key] = (now, val)
+        return val
 
 # pump.fun bonding-curve market-cap constants (pinned; match scripts/.../ecr.py + runner reconstruction)
 _VTOK_OFFSET = 279_900_000_000_000       # virtual_token = real_token + this
@@ -244,6 +252,31 @@ def _read_coverage(registry_path: Path, feed_path: Path) -> tuple[int, int]:
     return (len(recon & creates), len(creates))
 
 
+def _tail_feed_count(path: Path) -> int:
+    """The hash-chained feed carries a monotonic seq; do not rescan a multi-GB file in HTTP."""
+    lines = _tail_lines(path, 2)
+    for line in reversed(lines):
+        try:
+            seq = json.loads(line).get("seq")
+        except (ValueError, TypeError):
+            continue
+        if isinstance(seq, int) and seq >= 0:
+            return seq + 1
+    return 0
+
+
+def _read_eligibility(path: Path) -> dict:
+    def build(candidate):
+        total = base = veto = unreadable = 0
+        if candidate is not None:
+            for row in _iter_json_lines(candidate):
+                total += 1; base += int(row.get("base_eligible") is True)
+                veto += int(row.get("veto_eligible") is True)
+                unreadable += int(row.get("filter") in ("UNREADABLE", "NO_NET_TOKENS"))
+        return {"total": total, "base": base, "veto": veto, "unreadable": unreadable}
+    return _cached(path, build)
+
+
 def _read_tape(path: Path) -> list[dict]:
     """Newest-first list of the last TAPE_ROWS feed events (lean projection)."""
     rows = []
@@ -356,18 +389,19 @@ def _read_health() -> dict:
 def build_state() -> dict:
     lws = _read_ledger(LEDGER_LWS)
     null = _read_ledger(LEDGER_NULL)
-    # coverage + feed_count scan the whole (large, live-growing) feed — refresh them at most every
-    # ~12s so the poll stays snappy; the tail-based equity/tape/mints stay live every poll.
-    recon, creates = _ttl("coverage", 12.0, lambda: _read_coverage(CREATION_REGISTRY, FEED_EVENTS))
+    # Never scan the multi-GB feed from an HTTP request. Eligibility is a small incremental ledger;
+    # feed volume comes from the tail's monotonic seq.
+    eligibility = _read_eligibility(ELIGIBILITY)
     tape = _read_tape(FEED_EVENTS)
-    feed_count = _ttl("feed_count", 12.0, lambda: _count_lines(FEED_EVENTS))
+    feed_count = _tail_feed_count(FEED_EVENTS)
     health = _read_health()
 
     open_book = max(lws["filled"] - lws["resolved"], 0)
     # veto rate = B20B vetoes / (vetoes + admitted decisions); entry_rejected (coverage floor) is not a veto
     veto_attempts = lws["vetoed"] + lws["decisions"]
     veto_rate = (lws["vetoed"] / veto_attempts * 100.0) if veto_attempts else None
-    coverage = (recon / creates * 100.0) if creates else None
+    coverage = (eligibility["veto"] / eligibility["total"] * 100.0
+                if eligibility["total"] else None)
     unex_pct = (lws["unexitable"] / lws["resolved"] * 100.0) if lws["resolved"] else 0.0
 
     # The PRIMARY arm = whichever is actually trading, so the hero number/line is never confusingly
@@ -397,8 +431,8 @@ def build_state() -> dict:
         "veto_v": lws["vetoed"],
         "veto_d": veto_attempts,
         "coverage": coverage,
-        "coverage_r": recon,
-        "coverage_c": creates,
+        "coverage_r": eligibility["veto"],
+        "coverage_c": eligibility["total"],
     }
 
     return {
@@ -411,6 +445,7 @@ def build_state() -> dict:
         "feed_count": feed_count,
         "tiles": tiles,
         "health": health,
+        "eligibility": eligibility,
     }
 
 
@@ -598,7 +633,7 @@ PAGE = r"""<!doctype html>
     <div class="wm">
       <span class="mark">AFTERSHOCK · PAC / LWS</span>
       <span class="pill">PAPER · READ-ONLY</span>
-      <span class="pill seal">SEALED · LIVE</span>
+      <span class="pill seal">EXECUTORS RETIRED · DATA LIVE</span>
     </div>
     <div class="live"><span class="dot" id="dot"></span><span id="liveline">connecting…</span></div>
   </header>
@@ -608,15 +643,15 @@ PAGE = r"""<!doctype html>
     <div class="tile"><div class="val amber num" id="t-net">—</div><div class="lab" id="t-net-lab">Net SOL</div><div class="sub" id="t-net-sub">no trades yet</div></div>
     <div class="tile"><div class="val num" id="t-resolved">0</div><div class="lab">Resolved</div><div class="sub" id="t-resolved-sub">0 open</div></div>
     <div class="tile"><div class="val num" id="t-unex">0</div><div class="lab">Unexitable</div><div class="sub" id="t-unex-sub">0% of resolved</div></div>
-    <div class="tile"><div class="val num" id="t-open">0</div><div class="lab">Open Book</div><div class="sub">positions live</div></div>
+    <div class="tile"><div class="val num" id="t-open">0</div><div class="lab">Censored</div><div class="sub">open at retirement</div></div>
     <div class="tile"><div class="val num" id="t-veto">—</div><div class="lab">B20B Veto</div><div class="sub" id="t-veto-sub">0 / 0 decisions</div></div>
-    <div class="tile"><div class="val num" id="t-cov">—</div><div class="lab">Coverage</div><div class="sub" id="t-cov-sub">0 / 0 reconciled</div></div>
+    <div class="tile"><div class="val num" id="t-cov">—</div><div class="lab">V2 eligible</div><div class="sub" id="t-cov-sub">0 / 0 classified</div></div>
   </section>
 
   <!-- 3. hero curve -->
   <section class="hero">
     <div class="hero-head">
-      <span class="kick">Cumulative Net SOL · live paper book</span>
+      <span class="kick">Cumulative Net SOL · retired paper books (immutable)</span>
       <div class="hero-key">
         <span class="k"><span class="swatch lws"></span><span id="key-prim">live</span></span>
         <span class="k" id="key-null"><span class="swatch null"></span><span id="key-other">control</span></span>
@@ -915,7 +950,7 @@ function drawTiles(t){
   set('t-veto-sub', t.veto_v+' / '+t.veto_d+' decisions');
   // 6 COVERAGE
   set('t-cov', t.coverage==null ? '—' : t.coverage.toFixed(0)+'%');
-  set('t-cov-sub', t.coverage_r+' / '+t.coverage_c+' reconciled');
+  set('t-cov-sub', t.coverage_r+' / '+t.coverage_c+' classified');
 
   // graph key labels — reflect which arm is the live (amber) line vs the control
   const kp=document.getElementById('key-prim'); if(kp) kp.textContent=(t.primary_label||'live');

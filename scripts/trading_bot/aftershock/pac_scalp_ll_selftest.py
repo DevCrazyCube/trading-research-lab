@@ -26,6 +26,7 @@ from . import pac_scalp_ll_manifest as ll_manifest
 from . import pac_scalp_ll_policy as policy
 from . import pac_scalp_ll_portfolio as portfolio
 from . import pac_scalp_ll_route as routes
+from . import pac_scalp_ll_runtime as ll_runtime
 from . import pac_scalp_ll_venue as venue
 from . import pac_scalp_ll_tx as tx
 from .pac_v2_snapshot import LandingSnapshot, SnapshotUnavailable
@@ -250,6 +251,69 @@ def main() -> int:
             intervention_submit_url=env["PAC_SCALP_LL_INTERVENTION_SUBMIT_RPC_URL"],
             verification_url="https://neutral.example.net/rpc?key=verify-secret")
         check(True, "campaign runtime URLs match credential-safe committed pins")
+        runtime_cost = routes.AttemptCost(5_000, 50, 0, 0, 1_000, 100)
+        runtime_row = ll_runtime.build(
+            campaign=loaded_campaign,
+            route_by_arm={routes.PUBLIC_CONTROL: public,
+                          routes.LOW_LATENCY_INTERVENTION: paid},
+            costs_by_arm={arm: {name: runtime_cost for name in ll_runtime.COST_NAMES}
+                          for arm in routes.ARMS})
+        runtime_path = pathlib.Path(directory) / "runtime.json"
+        runtime_payload = json.dumps(
+            runtime_row, sort_keys=True, separators=(",", ":")).encode() + b"\n"
+        runtime_path.write_bytes(runtime_payload)
+        loaded_runtime = ll_runtime.load(
+            runtime_path, expected_file_sha256=hashlib.sha256(runtime_payload).hexdigest(),
+            campaign=loaded_campaign)
+        ll_runtime.assert_environment(
+            loaded_runtime, {routes.PUBLIC_CONTROL: public,
+                             routes.LOW_LATENCY_INTERVENTION: paid})
+        check(ll_runtime.attempt_cost(
+            loaded_runtime, routes.LOW_LATENCY_INTERVENTION, "exit") == runtime_cost,
+            "runtime profile binds both routes and every exact attempt cost")
+        mutated_route = routes.Route(
+            paid.arm, "different-provider", paid.region, paid.submit_url, paid.observe_url,
+            paid.submit_endpoint_identity, paid.observe_endpoint_identity,
+            routes.derived_config_fingerprint(
+                provider_id="different-provider", region=paid.region,
+                submit_url=paid.submit_url, observe_url=paid.observe_url))
+        refuses(lambda: ll_runtime.assert_environment(
+            loaded_runtime, {routes.PUBLIC_CONTROL: public,
+                             routes.LOW_LATENCY_INTERVENTION: mutated_route}),
+            "runtime provider drift refuses before paper execution")
+        tampered_runtime = json.loads(runtime_payload)
+        tampered_runtime["arms"][routes.LOW_LATENCY_INTERVENTION]["costs"]["exit"][
+            "priority_fee_lamports"] += 1
+        tampered_bytes = json.dumps(
+            tampered_runtime, sort_keys=True, separators=(",", ":")).encode() + b"\n"
+        runtime_path.write_bytes(tampered_bytes)
+        refuses(lambda: ll_runtime.load(
+            runtime_path, expected_file_sha256=hashlib.sha256(tampered_bytes).hexdigest(),
+            campaign=loaded_campaign),
+            "rehash-valid runtime cost mutation breaks the inner profile authority")
+        runtime_path.write_bytes(runtime_payload)
+
+        activation_summary = {
+            "summary_sha256": "1" * 64,
+            "arms": {
+                routes.PUBLIC_CONTROL: {"p90_effective_nanos": 1_800_000_000,
+                                        "paired_samples": 100, "failed_samples": 0},
+                routes.LOW_LATENCY_INTERVENTION: {"p90_effective_nanos": 800_000_000,
+                                                  "paired_samples": 100, "failed_samples": 0}}}
+        activation_attestation = {"attestation_sha256": "2" * 64}
+        with patch.object(ll_manifest, "_evidence_bundle", return_value=(
+                loaded_campaign, activation_summary, activation_attestation, loaded_runtime)), \
+             patch.object(ll_manifest, "verify_seal", return_value={"seal_sha256": "3" * 64}):
+            activation_body = ll_manifest._activation_body(activated_unix_nanos=10_000)
+        check(activation_body["arms"][routes.LOW_LATENCY_INTERVENTION]["p90_nanos"]
+              == 800_000_000 and activation_body["boundary"].startswith("PAPER_SCENARIO"),
+              "activation derives the passing p90 from attested evidence, never a caller scalar")
+        failed_summary = json.loads(json.dumps(activation_summary))
+        failed_summary["arms"][routes.LOW_LATENCY_INTERVENTION]["p90_effective_nanos"] = 1_100_000_000
+        with patch.object(ll_manifest, "_evidence_bundle", return_value=(
+                loaded_campaign, failed_summary, activation_attestation, loaded_runtime)):
+            refuses(lambda: ll_manifest._activation_body(activated_unix_nanos=10_000),
+                    "activation refuses a campaign that misses the frozen low-latency threshold")
         refuses(lambda: ll_campaign.assert_runtime_urls(
             loaded_campaign,
             public_submit_url=env["PAC_SCALP_LL_PUBLIC_SUBMIT_RPC_URL"],
