@@ -36,6 +36,9 @@ if ! flock -n 9; then
 fi
 
 log "arena watchdog up (listener + three paper arms + dashboard; no wallet/orders)"
+if [[ -z "${PUMPPORTAL_DATA_API_KEY:-}" ]]; then
+  log "paid arms blocked: PUMPPORTAL_DATA_API_KEY absent (free create/migration listener only)"
+fi
 while true; do
   alive "$FEED_SESSION" || { log "starting read-only listener"; tmux new-session -d -s "$FEED_SESSION" "bash -lc \"$FEED_CMD >> '$DATA/listener.log' 2>&1\""; }
   [[ ! -f "$ACT_DIR/VIRALITY_ARRIVAL_V2_2.json" ]] || alive "$RUN_SESSION" || { log "starting runtime"; tmux new-session -d -s "$RUN_SESSION" "bash -lc \"$RUN_CMD >> '$DATA/runtime.log' 2>&1\""; }

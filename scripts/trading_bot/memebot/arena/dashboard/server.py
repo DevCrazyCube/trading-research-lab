@@ -12,10 +12,12 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from .. import runtime as RT
+from ... import ws_data
 
 HOST, PORT = "127.0.0.1", 8795
 VCOL = {"PASS": "#1a9e5f", "COLLECTING": "#5b6bd6", "UNDECIDED_EXTEND": "#c99a00",
         "PASS_TO_CONFIRMATION": "#1a9e5f", "PASS_PENDING_SENSITIVITY": "#c99a00",
+        "BLOCKED_DATA_AUTH": "#c99a00",
         "KILL": "#d0453b", "NOT_ACTIVE": "#d0453b", "INVALID": "#d0453b", "UNSET": "#7a7f87"}
 
 
@@ -49,6 +51,11 @@ def _card(arm) -> str:
     rep = RT.report_arm(arm)
     rows = RT._ledger(arm)._rows() if rep.get("verdict") != "NOT_ACTIVE" else []
     v = rep["verdict"]
+    if v == "NOT_ACTIVE" and getattr(arm, "requires_trade_data", False) \
+            and not ws_data.trade_data_authorized():
+        v = "BLOCKED_DATA_AUTH"
+        rep["reason"] = ("code/prereg ready; dedicated paid PumpPortal data key absent — no trade tape, "
+                         "no activation, no fabricated evidence")
     col = VCOL.get(v, "#7a7f87")
     ci = (f'[{_fmt(rep.get("ci_lo"))}, {_fmt(rep.get("ci_hi"))}]'
           if rep.get("ci_lo") is not None else "—")
