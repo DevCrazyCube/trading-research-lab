@@ -333,26 +333,42 @@ def build_state() -> dict:
     coverage = (recon / creates * 100.0) if creates else None
     unex_pct = (lws["unexitable"] / lws["resolved"] * 100.0) if lws["resolved"] else 0.0
 
+    # The PRIMARY arm = whichever is actually trading, so the hero number/line is never confusingly
+    # blank while a live arm quietly works. Prefer the veto arm (LWS); fall back to the control (NULL).
+    lws_live = lws["resolved"] > 0 or lws["filled"] > 0
+    null_live = null["resolved"] > 0 or null["filled"] > 0
+    if lws_live or not null_live:
+        prim, other = lws, null
+        prim_label, other_label = "veto arm", "control"
+    else:
+        prim, other = null, lws
+        prim_label, other_label = "control arm", "veto"
+    prim_open = max(prim["filled"] - prim["resolved"], 0)
+    prim_unex_pct = (prim["unexitable"] / prim["resolved"] * 100.0) if prim["resolved"] else 0.0
+
     tiles = {
-        "net_sol_lws": lws["net_sol"],
-        "net_sol_null": null["net_sol"],
-        "vs_null": lws["net_sol"] - null["net_sol"],
-        "resolved": lws["resolved"],
-        "open": open_book,
-        "unexitable": lws["unexitable"],
-        "unexitable_pct": unex_pct,
-        "veto_rate": veto_rate,
+        "net_sol": prim["net_sol"],                 # the LIVE book — the hero number
+        "primary_label": prim_label,
+        "other_label": other_label,
+        "net_sol_other": other["net_sol"],
+        "vs_other": prim["net_sol"] - other["net_sol"],
+        "resolved": prim["resolved"],
+        "open": prim_open,
+        "unexitable": prim["unexitable"],
+        "unexitable_pct": prim_unex_pct,
+        "veto_rate": veto_rate,                     # veto is an LWS property; None until the veto arm decides
         "veto_v": lws["vetoed"],
         "veto_d": veto_attempts,
         "coverage": coverage,
         "coverage_r": recon,
         "coverage_c": creates,
-        "null_present": LEDGER_NULL.exists(),
     }
 
     return {
-        "equity_lws": lws["points"],
-        "equity_null": null["points"],
+        "equity_primary": prim["points"],
+        "equity_secondary": other["points"],
+        "primary_label": prim_label,
+        "other_label": other_label,
         "tape": tape,
         "mints": _read_mints(FEED_EVENTS),
         "feed_count": feed_count,
@@ -532,7 +548,7 @@ PAGE = r"""<!doctype html>
 
   <!-- 2. stat strip -->
   <section class="strip" id="strip">
-    <div class="tile"><div class="val amber num" id="t-net">—</div><div class="lab">Net SOL · LWS</div><div class="sub" id="t-net-sub">no trades yet</div></div>
+    <div class="tile"><div class="val amber num" id="t-net">—</div><div class="lab" id="t-net-lab">Net SOL</div><div class="sub" id="t-net-sub">no trades yet</div></div>
     <div class="tile"><div class="val num" id="t-resolved">0</div><div class="lab">Resolved</div><div class="sub" id="t-resolved-sub">0 open</div></div>
     <div class="tile"><div class="val num" id="t-unex">0</div><div class="lab">Unexitable</div><div class="sub" id="t-unex-sub">0% of resolved</div></div>
     <div class="tile"><div class="val num" id="t-open">0</div><div class="lab">Open Book</div><div class="sub">positions live</div></div>
@@ -543,10 +559,10 @@ PAGE = r"""<!doctype html>
   <!-- 3. hero curve -->
   <section class="hero">
     <div class="hero-head">
-      <span class="kick">Cumulative Net SOL · LWS vs NULL</span>
+      <span class="kick">Cumulative Net SOL · live paper book</span>
       <div class="hero-key">
-        <span class="k"><span class="swatch lws"></span>LWS</span>
-        <span class="k" id="key-null"><span class="swatch null"></span>NULL</span>
+        <span class="k"><span class="swatch lws"></span><span id="key-prim">live</span></span>
+        <span class="k" id="key-null"><span class="swatch null"></span><span id="key-other">control</span></span>
       </div>
     </div>
     <div id="chart"></div>
@@ -635,7 +651,10 @@ function drawChart(state){
   const host=document.getElementById('chart');
   const W=host.clientWidth||800, H=host.clientHeight||300;
   const L=58,R=98,T=22,B=30, plotW=Math.max(10,W-L-R), plotH=Math.max(10,H-T-B);
-  const lws=state.equity_lws||[], nul=state.equity_null||[];
+  // amber line = the PRIMARY (live-trading) arm; muted dashed = the secondary control
+  const lws=state.equity_primary||[], nul=state.equity_secondary||[];
+  const primTag=(state.primary_label||'live').split(' ')[0].toUpperCase();
+  const otherTag=(state.other_label||'').split(' ')[0].toUpperCase();
   const hasData = lws.length>0 || nul.length>0;
 
   // x/y domains ---------------------------------------------------------
@@ -715,8 +734,8 @@ function drawChart(state){
         'stroke-linejoin':'round','stroke-linecap':'round'}));
     }
     // endpoints + floating chips
-    endpoint(svg,mk,lws,C.amber,'LWS');
-    endpoint(svg,mk,nul,C.muted,'NULL');
+    endpoint(svg,mk,lws,C.amber,primTag);
+    endpoint(svg,mk,nul,C.muted,otherTag);
   } else {
     // honest empty state — framed chart, centered message + live sub-line
     const cx=L+plotW/2, cy=T+plotH/2;
@@ -752,8 +771,8 @@ function drawChart(state){
     const x=Math.max(L,Math.min(W-R,sx));
     cline.setAttribute('x1',x); cline.setAttribute('x2',x);
     let parts=[hhmm(t)];
-    if(a) parts.push('LWS '+fmtSol(a.net));
-    if(b) parts.push('NULL '+fmtSol(b.net));
+    if(a) parts.push(primTag+' '+fmtSol(a.net));
+    if(b) parts.push(otherTag+' '+fmtSol(b.net));
     if(a&&b) parts.push('Δ '+fmtSol(a.net-b.net));
     readTx.textContent=parts.join('  ·  ');
     // position readout box, kept inside the plot
@@ -776,7 +795,7 @@ function endpoint(svg,mk,pts,color,label){
   const x=CHART.xOf(last.t), y=CHART.yOf(last.net);
   svg.appendChild(mk('circle',{cx:x,cy:y,r:3.2,fill:color}));
   // floating chip on the panel gutter at the right edge
-  const isL=label==='LWS';
+  const isL=(color===C.amber);   // the primary (amber) arm gets the coloured chip border
   const txt=fmtSol(last.net)+' SOL';
   const w=txt.length*6.6+16, cx=CHART.W-CHART.R+10;
   let cy=Math.max(CHART.T+11, Math.min(CHART.H-CHART.B-11, y));
@@ -808,11 +827,13 @@ function drawTiles(t){
   const set=(id,v)=>{ const e=document.getElementById(id); if(e)e.textContent=v; };
   const cls=(id,c)=>{ const e=document.getElementById(id); if(e)e.className='val num'+(c?(' '+c):''); };
 
-  // 1 NET SOL · LWS
+  // 1 NET SOL — the LIVE trading arm (never blank while an arm is working)
+  const netLab=document.getElementById('t-net-lab');
+  if(netLab) netLab.textContent='Net SOL · '+(t.primary_label||'live');
   if(t.resolved>0){
-    set('t-net',fmtSol(t.net_sol_lws));
-    cls('t-net', t.net_sol_lws<0 ? 'sell' : 'amber');
-    set('t-net-sub','vs NULL '+fmtSol(t.vs_null));
+    set('t-net',fmtSol(t.net_sol));
+    cls('t-net', t.net_sol<0 ? 'sell' : 'amber');
+    set('t-net-sub', (t.other_label||'other')+' '+fmtSol(t.net_sol_other));
   } else {
     set('t-net','—'); cls('t-net','amber'); set('t-net-sub','no trades yet');
   }
@@ -831,10 +852,9 @@ function drawTiles(t){
   set('t-cov', t.coverage==null ? '—' : t.coverage.toFixed(0)+'%');
   set('t-cov-sub', t.coverage_r+' / '+t.coverage_c+' reconciled');
 
-  // NULL key annotation
-  const kn=document.getElementById('key-null');
-  if(kn){ kn.style.opacity = t.null_present ? '1' : '0.5';
-    kn.lastChild.textContent = t.null_present ? 'NULL' : 'NULL · awaiting'; }
+  // graph key labels — reflect which arm is the live (amber) line vs the control
+  const kp=document.getElementById('key-prim'); if(kp) kp.textContent=(t.primary_label||'live');
+  const ko=document.getElementById('key-other'); if(ko) ko.textContent=(t.other_label||'control');
 }
 
 // --------- tape ------------------------------------------------------------
@@ -970,7 +990,7 @@ class Handler(BaseHTTPRequestHandler):
                 body = json.dumps(build_state()).encode("utf-8")
             except Exception as exc:  # never 500 the poll — return an empty shell
                 body = json.dumps({
-                    "equity_lws": [], "equity_null": [], "tape": [],
+                    "equity_primary": [], "equity_secondary": [], "tape": [], "mints": [],
                     "feed_count": 0, "tiles": {}, "health": {"present": False},
                     "error": str(exc),
                 }).encode("utf-8")
