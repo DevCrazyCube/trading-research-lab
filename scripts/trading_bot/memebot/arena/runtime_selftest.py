@@ -95,6 +95,21 @@ def main() -> int:
         assert dead["verdict"] == "RUG_CONFIRMED", dead
         checks += 1
 
+        # PROOF (handoff 460) — a stale process (boot closure != current on-disk closure) REFUSES, so an
+        # old resolver can never run under a freshly-written activation.
+        class _StaleArm:
+            instrument = "BOOTX"
+            def code_sha256(self): return "disk_after_commit"
+        RT._BOOT_SHAS["BOOTX"] = "code_loaded_at_boot"       # process booted with the OLD code
+        try:
+            RT._boot_guard(_StaleArm()); raise AssertionError("stale process allowed to run old code")
+        except RuntimeError as exc:
+            assert "BOOT CLOSURE DRIFT" in str(exc)
+        RT._BOOT_SHAS["BOOTX"] = "disk_after_commit"         # after a real restart boot==disk -> allowed
+        RT._boot_guard(_StaleArm())                          # no raise
+        del RT._BOOT_SHAS["BOOTX"]
+        checks += 1
+
         # PumpPortal tape append is chained; changing a persisted byte is refused.
         old_tape, old_reserve = ws_data.TRADE_BUFFER_PATH, ws_data._RESERVE_BYTES
         ws_data.TRADE_BUFFER_PATH, ws_data._RESERVE_BYTES = root / "trade.jsonl", 0

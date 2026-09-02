@@ -42,6 +42,23 @@ def _registered_arms():
     return [VIRALITY, BUNDLE, GRADUATION]
 
 
+# Boot-closure guard (handoff 460): the closure sha of the code ACTUALLY LOADED, captured at import time
+# (= process boot). `arm.code_sha256()` and `require_activation` both read the current DISK files, so after
+# a commit they match a new on-disk activation even though this long-lived process still runs the OLD
+# resolver from memory (exactly the bug that made virality's 11 rows -100% with no arbiter). Comparing the
+# current disk sha to this boot capture catches that: a stale process refuses instead of trading old code.
+_BOOT_SHAS = {arm.instrument: arm.code_sha256() for arm in _registered_arms()}
+
+
+def _boot_guard(arm) -> None:
+    boot = _BOOT_SHAS.get(arm.instrument)
+    if boot is not None and arm.code_sha256() != boot:
+        raise RuntimeError(
+            f"{arm.instrument}: BOOT CLOSURE DRIFT — this process loaded code {boot[:8]} but the on-disk "
+            f"closure is now {arm.code_sha256()[:8]}. A stale process must NOT run its old resolver under a "
+            "freshly-written activation (handoff 460). Restart the runtime.")
+
+
 def _load(path, default):
     if not path.exists():
         return default
@@ -115,6 +132,7 @@ def _drain_pending(state: dict, ledger: ChainLedger, state_path: pathlib.Path) -
 
 
 def _ledger(arm) -> ChainLedger:
+    _boot_guard(arm)                      # a stale process refuses before it can touch the ledger (460)
     authority = MF.require_activation(arm)
     return ChainLedger(DATA / arm.instrument / "ledger.jsonl", arm.instrument,
                        arm.code_sha256(), arm.prereg_sha256(), arm.spec_sha256(),
