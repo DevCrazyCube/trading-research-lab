@@ -26,6 +26,7 @@ exactly like the arena runtime it watches. Bound to 127.0.0.1 only. Reuses the a
 """
 from __future__ import annotations
 
+import importlib
 import json
 import pathlib
 import threading
@@ -33,8 +34,55 @@ import time
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+from .. import manifest as MF
 from .. import runtime as RT
 from ... import ws_data
+
+
+# ---- which arms the dashboard renders -------------------------------------------------------------
+# NOT runtime._registered_arms(): that is the CLOSURE registry (virality + the archived V1 bundle/graduation
+# controls), so it would both HIDE the live causal V2 arms — which are deliberately kept out of the registry
+# so a scorer edit can't drift their closures — AND surface the retired V1 controls as if they were still
+# running (the display bug Codex flagged). The honest "what is actually live" set is instead: every arm that
+# has an activation file on disk. We key candidate arms by their own .instrument (no hard-coded strings) and
+# keep only the activated ones, in a stable display order.
+_ARM_MODULES = ("virality_arrival", "bundle_momentum_v2", "migration_acceptance",
+                "bundle_momentum", "graduation")
+_DISPLAY_ORDER = ("VIRALITY_ARRIVAL_V2_2", "BUNDLE_MOMENTUM_V2", "MIGRATION_ACCEPTANCE_V1")
+
+
+def _candidate_arms() -> list:
+    pkg = __package__.rsplit(".", 1)[0]        # scripts...arena.dashboard -> scripts...arena
+    arms = []
+    for mod in _ARM_MODULES:
+        try:
+            arms.append(importlib.import_module(f"{pkg}.arms.{mod}").ARM)
+        except Exception:  # noqa: BLE001 — a missing/broken arm module simply isn't shown
+            continue
+    return arms
+
+
+def _display_arms() -> list:
+    """The arms to render = every arm with an activation file on disk (the honest live set), ordered by
+    _DISPLAY_ORDER then instrument. Falls back to the closure registry only when nothing is activated yet,
+    so the page is never blank on a cold start."""
+    active = []
+    for arm in _candidate_arms():
+        try:
+            if MF.activation_path(arm).exists():
+                active.append(arm)
+        except Exception:  # noqa: BLE001
+            continue
+    if not active:
+        return RT._registered_arms()
+
+    def _key(a):
+        try:
+            return (_DISPLAY_ORDER.index(a.instrument), a.instrument)
+        except ValueError:
+            return (len(_DISPLAY_ORDER), a.instrument)
+
+    return sorted(active, key=_key)
 
 HOST, PORT = "127.0.0.1", 8795
 ROOT = pathlib.Path(__file__).resolve().parents[5]
@@ -219,7 +267,7 @@ def _wanted_mints() -> list[tuple[str, str | None, object]]:
     """Every mint worth enriching this pass: open positions + recent resolved, across all arms.
     Returns (mint, pinned_pair_or_None, market_cap_sol_or_None)."""
     seen: dict[str, tuple[str | None, object]] = {}
-    for arm in RT._registered_arms():
+    for arm in _display_arms():
         try:
             state = RT._load(RT.DATA / arm.instrument / "state.json", {"open": {}})
         except Exception:  # noqa: BLE001
@@ -422,7 +470,7 @@ _state_lock = threading.Lock()
 
 def _build_state() -> dict:
     sol_usd, sol_src = _sol_usd()
-    arms = [_arm_view(a) for a in RT._registered_arms()]
+    arms = [_arm_view(a) for a in _display_arms()]
     return {
         "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "generated_unix": time.time(),
