@@ -90,6 +90,36 @@ def release_primary(instrument: str, mint: str, portfolio_path) -> None:
         fcntl.flock(fd, fcntl.LOCK_UN); os.close(fd)
 
 
+def reconcile_slots(instrument: str, open_mints, portfolio_path) -> list[str]:
+    """Startup self-heal for the acquire-side leak: a crash between claiming a slot and fsync'ing the open
+    position orphans the slot forever. At cycle start each runtime calls this to release any of ITS OWN
+    `{instrument}:{mint}` slots whose mint is not in its live open set — converting every crash-orphan into
+    a self-heal, and never touching another arm's slots. Returns the freed mint list."""
+    p = _slot_path(portfolio_path)
+    if not p.exists():
+        return []
+    live = set(open_mints)
+    freed = []
+    fd = os.open(p, os.O_RDWR, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        try:
+            slots = json.loads(os.read(fd, 1_000_000).decode() or "{}")
+        except ValueError:
+            slots = {}
+        prefix = f"{instrument}:"
+        for key in list(slots):
+            if key.startswith(prefix) and key[len(prefix):] not in live:
+                del slots[key]
+                freed.append(key[len(prefix):])
+        if freed:
+            os.lseek(fd, 0, 0); os.ftruncate(fd, 0)
+            os.write(fd, json.dumps(slots).encode()); os.fsync(fd)
+        return freed
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN); os.close(fd)
+
+
 def kelly_clip_usd(win_prob: float, win_loss_ratio: float, bankroll_usd: float = BANKROLL_USD) -> float:
     """Conservative fractional-Kelly clip, capped at MAX_KELLY_FRAC of bankroll. USE ONLY after a real
     forward PASS — never on an unvalidated arm (where the honest clip stays the fixed $10)."""
@@ -114,6 +144,16 @@ if __name__ == "__main__":
         assert try_acquire_primary("A", "m1", pf)            # idempotent re-claim ok
         release_primary("A", "m1", pf)
         assert try_acquire_primary("A", "m3", pf)            # freed a slot -> now ok
+    # acquire-side LEAK self-heal, clean scenario in a fresh slot file:
+    with tempfile.TemporaryDirectory() as d2:
+        pf2 = pathlib.Path(d2) / "portfolio.json"
+        assert try_acquire_primary("A", "real", pf2)         # a genuine open we WILL record
+        assert try_acquire_primary("A", "orphan", pf2)       # claimed, then "crash" before recording the open
+        assert not try_acquire_primary("B", "x", pf2)        # wedged at 2 (one slot is an orphan)
+        assert reconcile_slots("A", ["real"], pf2) == ["orphan"]   # A live={real} -> orphan freed
+        assert try_acquire_primary("B", "x", pf2)            # reconcile un-wedged the arena
+        assert reconcile_slots("B", ["x"], pf2) == []        # B:x is live -> NOT freed (no false release)
+        assert reconcile_slots("G", [], pf2) == []           # G owns no slots -> nothing to free
     assert kelly_clip_usd(0.6, 2.0) <= MAX_KELLY_FRAC * BANKROLL_USD
     assert kelly_clip_usd(0.3, 1.0) == 0.0                   # no edge -> no size
     print("sizer.py self-check OK: $10 clip, 5% exit-cap gate, global max-2 flock slots, capped Kelly")

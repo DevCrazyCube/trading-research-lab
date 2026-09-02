@@ -103,6 +103,11 @@ def _drain_pending(state: dict, ledger: ChainLedger, state_path: pathlib.Path) -
             mint = pending["finalize"].get("remove_open_mint")
             if mint:
                 state["open"].pop(mint, None)
+        elif pending["kind"] == "void":
+            ledger.append_void(pending["row"])
+            mint = pending["finalize"].get("remove_open_mint")
+            if mint:
+                state["open"].pop(mint, None)
         else:
             raise RuntimeError("arena pending event kind refuses")
         state["pending_events"].pop(0)
@@ -170,6 +175,27 @@ def _service_arm_unlocked(arm, feed: dict, hub: Hub, *, state_path: pathlib.Path
         pos["unpriced_count"] = 0 if mark is not None else pos.get("unpriced_count", 0) + 1
         if reason is None and mark is None:
             reason = "RUG_UNPRICED" if pos["unpriced_count"] >= 3 else None
+        if reason == "RUG_UNPRICED":
+            # an unpriceable position is NOT auto a -100% rug (that fabricated virality's 6 false rugs).
+            # Ask Helius: only a positively-dead coin is a real loss; an alive coin is a measurement VOID.
+            from .helius_rug_arbiter import classify_unpriced
+            try:
+                arb = classify_unpriced(mint, pos.get("pair"))
+            except Exception as exc:  # noqa: BLE001 — arbiter failure is a measurement failure, not a rug
+                arb = {"verdict": "INDETERMINATE_VOID", "reason": f"arbiter error: {str(exc)[:80]}"}
+            if arb["verdict"] != "RUG_CONFIRMED":
+                void_row = {"mint": mint, "arm": arm.instrument, "reason": "MEASUREMENT_FAILURE",
+                            "cohort": pos.get("cohort", "PRIMARY"), "entry_day": pos.get("entry_day"),
+                            "arbiter_verdict": arb["verdict"], "arbiter_reason": arb.get("reason"),
+                            "entry_id": pos["entry_id"],
+                            "void_id": _sha({"entry_id": pos["entry_id"], "kind": "measurement_void"})}
+                state["pending_events"].append({
+                    "kind": "void", "row": void_row, "finalize": {"remove_open_mint": mint}})
+                _save(state_path, state)
+                _drain_pending(state, ledger, state_path)
+                closed += 1
+                continue
+            reason = "RUG_CONFIRMED"     # positively dead on-chain -> a real -100% primary loss
         if reason:
             row = EX.resolve(p, reason, exit_mark=mark, now_ts=now)
             row["entry_day"] = pos.get("entry_day")
@@ -251,6 +277,9 @@ def report_arm(arm) -> dict:
                 "ci_hi": None, "target_n": arm.target_n}
     ledger = _ledger(arm)
     all_res = ledger.resolved()
+    void_rows = [r for r in ledger._rows() if r.get("kind") == "void"]
+    from . import cohorts as CH
+    coh = CH.split_cohorts(all_res, void_rows)
     res = [row for row in all_res if arm.include_resolution(row)]
     rets = [r["net_return"] for r in res]
     clusters = [(r.get("mint"), r.get("entry_day")) for r in res]
@@ -267,6 +296,9 @@ def report_arm(arm) -> dict:
                   extended_cap=arm.extended_cap)
     if not chain_ok or not distinct or pending:
         d = {**d, "verdict": "INVALID", "reason": "chain/distinct-mint/pending lifecycle gate refuses"}
+    if len(res) >= arm.target_n and not coh["censored_valid"]:
+        d = {**d, "verdict": "INVALID", "reason": f"censored fraction {coh['censored_fraction']:.0%} "
+             f"> {CH.CENSORED_FRACTION_LIMIT:.0%} — too many unpriceable positions to read honestly"}
     if len(res) >= arm.target_n and arm.service_kind == "snapshot":
         delayed = sorted((float(r.get("minutes_since_first_seen") or 0), r["net_return"])
                          for r in res)
@@ -281,7 +313,9 @@ def report_arm(arm) -> dict:
     d = arm.final_verdict(d, res, all_res)
     return {"arm": arm.instrument, "resolved": len(res), "open": len(state.get("open", {})),
             "pending": pending, "distinct_mints": distinct, "chain_ok": chain_ok,
-            "basis": arm.fill_basis, **d}
+            "basis": arm.fill_basis, "control_n": coh["control_n"],
+            "measurement_failures": coh["measurement_failure_n"], "strategy_voids": coh["strategy_void_n"],
+            "censored_fraction": coh["censored_fraction"], **d}
 
 
 def run_once(hub: Hub | None = None) -> list[dict]:

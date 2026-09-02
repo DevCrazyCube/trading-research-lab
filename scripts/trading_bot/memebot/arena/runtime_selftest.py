@@ -67,6 +67,34 @@ def main() -> int:
         assert sum(r.get("kind") == "opened" for r in ledger._rows()) == 1
         checks += 1
 
+        # Phase-0 #4 PROOF — an API-outage MEASUREMENT_FAILURE drains as a VOID (NOT a -100% resolved),
+        # pops the open (F1), and is excluded from primary N by the cohort split.
+        from . import cohorts as CH
+        L2 = ChainLedger(root / "l2.jsonl", "V", "c", "p", "s", "a")
+        sp2 = root / "s2.json"
+        st2 = {"pending_events": [{"kind": "void", "row": {"void_id": "v1", "mint": "mm",
+               "reason": "MEASUREMENT_FAILURE", "cohort": "PRIMARY"},
+               "finalize": {"remove_open_mint": "mm"}}], "open": {"mm": {"entry_id": "e"}}}
+        RT._save(sp2, st2); RT._drain_pending(st2, L2, sp2)
+        assert "mm" not in st2["open"]                                  # void terminated the position
+        voids = [r for r in L2._rows() if r.get("kind") == "void"]
+        assert len(voids) == 1 and voids[0]["reason"] == "MEASUREMENT_FAILURE" and not L2.resolved()
+        coh = CH.split_cohorts(L2.resolved(), voids)
+        assert coh["primary_n"] == 0 and coh["measurement_failure_n"] == 1
+        checks += 1
+
+        # PROOF — the arbiter never fabricates a rug: an alive coin (recent txns) -> MEASUREMENT_VOID; a
+        # positively-dead one (no trades + drained balance) -> RUG_CONFIRMED.
+        from . import helius_rug_arbiter as ARB
+        NOW = 2_000_000_000 * 1_000_000_000
+        sec = NOW // 1_000_000_000
+        alive = ARB.classify_unpriced("m", None, now_ns=NOW, rpc=lambda meth, p: [{"blockTime": sec - 30}] * 5)
+        assert alive["verdict"] == "MEASUREMENT_VOID", alive
+        dead = ARB.classify_unpriced("m", "pool", now_ns=NOW,
+               rpc=lambda meth, p: {"value": 0} if meth == "getBalance" else [{"blockTime": sec - 9 * 3600}])
+        assert dead["verdict"] == "RUG_CONFIRMED", dead
+        checks += 1
+
         # PumpPortal tape append is chained; changing a persisted byte is refused.
         old_tape, old_reserve = ws_data.TRADE_BUFFER_PATH, ws_data._RESERVE_BYTES
         ws_data.TRADE_BUFFER_PATH, ws_data._RESERVE_BYTES = root / "trade.jsonl", 0
