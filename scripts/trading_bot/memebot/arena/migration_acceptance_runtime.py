@@ -434,6 +434,12 @@ def cycle(provider: PumpSwapProvider | None = None) -> dict:
 
 def main(argv=None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
+    if "--activate" in argv:
+        # Match the standalone Bundle arm: activation is a set-once administrative action and must exit
+        # immediately. Falling through into the forever-loop can hide a successful activation behind later
+        # stream-health errors and prevent the caller from anchoring it.
+        print(json.dumps(MF.write_activation(MA.ARM), sort_keys=True))
+        return 0
     if "--report" in argv:
         print(json.dumps(RT.report_arm(MA.ARM), indent=2, sort_keys=True))
         return 0
