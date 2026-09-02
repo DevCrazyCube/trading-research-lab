@@ -91,7 +91,13 @@ _DEDUP_MAX = 200_000                          # session-local replay guard
 # The ONLY websocket hosts this listener may open. There is no shared allowlist covering this path
 # (net.assert_data_ws is PumpPortal-only and helius_tape bypasses it), so the allowlist lives here,
 # module-local, and is compared as an exact parsed hostname — never a substring.
-ALLOWED_WS_HOSTS = frozenset({"mainnet.helius-rpc.com", "atlas-mainnet.helius-rpc.com"})
+# `api.mainnet-beta.solana.com` is the FREE public Solana RPC. It is added deliberately: our Helius
+# credits are exhausted ("max usage reached"), and the whole point of this collector is to run at $0.
+# It is a read-only public JSON-RPC endpoint — no key, no wallet, no write path — so admitting it does
+# not widen the trust boundary this allowlist exists to protect (which is: never open a socket to an
+# unvetted host, and never a submit endpoint).
+ALLOWED_WS_HOSTS = frozenset({"mainnet.helius-rpc.com", "atlas-mainnet.helius-rpc.com",
+                              "api.mainnet-beta.solana.com"})
 
 
 class Refused(Exception):
@@ -132,7 +138,8 @@ def assert_allowed_ws(url: str) -> str:
 
 
 def _ws_url() -> str:
-    rpc = _env("HELIUS_RPC_URL")
+    # explicit override first: lets the collector run on the free public RPC while Helius is 429
+    rpc = _env("MULTIVENUE_RPC_URL") or _env("HELIUS_RPC_URL")
     if not rpc:
         key = _env("HELIUS_API_KEY")
         if key:
@@ -747,10 +754,13 @@ def _selftest() -> None:
         other = {**decoded[0], "signature": "sig2"}
         assert _dedup_key(other) != _dedup_key(decoded[0])
 
-    # --- host allowlist: only wss to an allowlisted Helius read host -------------------------------
+    # --- host allowlist: only wss to an allowlisted read host --------------------------------------
     assert assert_allowed_ws("wss://mainnet.helius-rpc.com/?api-key=x")
+    # the free public Solana RPC is deliberately admitted (Helius credits exhausted; $0 operation)
+    assert assert_allowed_ws("wss://api.mainnet-beta.solana.com/")
     for bad in ("https://mainnet.helius-rpc.com/", "ws://mainnet.helius-rpc.com/",
-                "wss://pumpportal.fun/api/data", "wss://api.mainnet-beta.solana.com/",
+                "wss://pumpportal.fun/api/data",
+                "wss://api.mainnet-beta.solana.com.attacker.tld/",   # suffix-attack on the public host
                 "wss://evil.mainnet.helius-rpc.com.attacker.tld/",
                 "wss://mainnet.helius-rpc.com.attacker.tld/"):
         try:

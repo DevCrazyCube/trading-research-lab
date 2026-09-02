@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "measured_utc": "2026-09-02T18:02:41Z",
+  "source": "https://api.mainnet-beta.solana.com (free public RPC)",
+  "method": "getProgramAccounts dataSlice0 + memcmp(PoolState disc@0, status@17)",
+  "program": "LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj",
+  "counts": {
+    "funding": 1278659,
+    "awaiting_migration": 0,
+    "migrated": 13694
+  },
+  "total_curves": 1292353,
+  "graduations": 13694,
+  "graduation_rate_p": 0.010596176122158574,
+  "labels_vs_b11a": {
+    "b11a_labels": 82,
+    "launchlab_labels": 13694,
+    "multiple": 167.0
+  },
+  "cross_check": {
+    "previous_measured_utc": "2026-09-02T17:21:43Z",
+    "previous_p": 0.010596217117989892,
+    "measured_p": 0.010596176122158574,
+    "delta_p": -4.099583131821072e-08,
+    "note": "independent confirmation: measured p matches the transcribed census to 4 decimal places"
+  },
+  "elapsed_seconds": {
+    "funding": 24.3,
+    "awaiting_migration": 1.2,
+    "migrated": 0.9
+  },
+  "cost_usd": 0.0
+}
