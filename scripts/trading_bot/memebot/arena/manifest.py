@@ -60,8 +60,8 @@ def _atomic_create(path: pathlib.Path, payload: bytes) -> None:
 def write_activation(arm) -> dict:
     """Write once, after code/prereg commit and before evidence. Caller commits the record separately."""
     if getattr(arm, "requires_trade_data", False) and not ws_data.trade_data_authorized():
-        raise RuntimeError(f"{arm.instrument} requires PUMPPORTAL_DATA_API_KEY; paid trade data is not "
-                           "authorized in this process")
+        raise RuntimeError(f"{arm.instrument} requires an authorized realtime trade-data endpoint "
+                           "(Helius or PumpPortal); none is configured")
     head = _git("rev-parse", "HEAD")
     sequence, tape_head = ws_data._trade_head()
     record = {

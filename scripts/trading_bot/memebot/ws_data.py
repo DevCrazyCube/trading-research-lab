@@ -66,9 +66,11 @@ def _feed_configured() -> bool:
         env = pathlib.Path(__file__).resolve().parents[3] / ".env"
         for line in env.read_text().splitlines():
             line = line.strip()
-            if "=" in line and not line.startswith("#") \
-                    and line.split("=", 1)[0].strip() in ("HELIUS_RPC_URL", "HELIUS_API_KEY",
-                                                          "PUMPPORTAL_DATA_API_KEY"):
+            if "=" not in line or line.startswith("#"):
+                continue
+            name, value = line.split("=", 1)
+            if (name.strip() in ("HELIUS_RPC_URL", "HELIUS_API_KEY", "PUMPPORTAL_DATA_API_KEY")
+                    and value.strip().strip('"').strip("'")):
                 return True
     except OSError:
         pass
@@ -147,7 +149,7 @@ def stream_health(*, path: pathlib.Path = STREAM_HEALTH_PATH, now_ns: int | None
 def require_trade_stream_fresh(*, max_stale_s: float = 30.0) -> dict:
     verdict = stream_health(max_stale_s=max_stale_s)
     if not verdict["ok"]:
-        raise Refused(f"PumpPortal trade stream {verdict['status']}: {verdict['reason']}")
+        raise Refused(f"realtime trade stream {verdict['status']}: {verdict['reason']}")
     return verdict
 
 

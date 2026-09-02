@@ -249,6 +249,21 @@ def main() -> int:
                 setattr(MOD, attr, keep)
                 MOD._boot_guard()                                            # boot == disk after restart → ok
             checks += 1
+
+            # A living PID is not evidence of a living feed. Missing, provider-blocked and stale health
+            # all fail closed; only a recent websocket message admits causal tape processing.
+            now = 10_000_000_000
+            assert not ws_data.assess_stream_health(None, now_ns=now)["ok"]
+            checks += 1
+            blocked = {"schema": 1, "status": "HTTP_403_COOLDOWN", "reason": "blocked"}
+            assert ws_data.assess_stream_health(blocked, now_ns=now)["status"] == "HTTP_403_COOLDOWN"
+            checks += 1
+            stale = {"schema": 1, "status": "CONNECTED", "last_message_unix_nanos": 1}
+            assert ws_data.assess_stream_health(stale, now_ns=now, max_stale_s=1)["status"] == "STALE"
+            checks += 1
+            fresh = {"schema": 1, "status": "CONNECTED", "last_message_unix_nanos": now - 1}
+            assert ws_data.assess_stream_health(fresh, now_ns=now, max_stale_s=1)["ok"]
+            checks += 1
         finally:
             (RT.DATA, BV2.PORTFOLIO_PATH, MR.PORTFOLIO, BV2._ledger, MR._ledger,
              MR.classify_unpriced) = saved

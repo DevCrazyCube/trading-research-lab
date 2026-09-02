@@ -153,11 +153,14 @@ class MigrationAcceptance(Arm):
     def code_sha256(self):
         arena = pathlib.Path(__file__).resolve().parents[1]
         aftershock = arena.parents[1] / "aftershock"
+        repo = arena.parents[3]
         return closure_sha256([pathlib.Path(__file__)] + [arena / name for name in (
             "arm.py", "chainledger.py", "cohorts.py", "exit_engine.py", "fill.py",
             "helius_rug_arbiter.py", "manifest.py", "migration_acceptance_runtime.py", "runtime.py",
             "scorer.py", "sizer.py")]
-            + [arena / "arms" / "bundle_momentum.py", arena.parent / "ws_data.py",
+            + [arena / "arms" / "bundle_momentum.py", arena.parent / "__main__.py",
+               arena.parent / "ws_data.py", arena.parent / "helius_tape.py",
+               arena.parent / "helius_pump_decode.py", repo / "research" / "pump_idl_9c82f61.json",
                aftershock / "pac_v2_pumpswap.py", aftershock / "solusd_recorder.py",
                aftershock / "execution.py"])
 

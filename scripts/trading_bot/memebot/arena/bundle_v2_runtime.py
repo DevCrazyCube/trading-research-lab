@@ -41,7 +41,8 @@ from .arms import bundle_momentum_v2 as BM2
 from .chainledger import ChainLedger
 from .helius_coverage import coverage_ok
 from .helius_rug_arbiter import classify_unpriced
-from .sizer import CLIP_USD, clip_sol, try_acquire_primary, release_primary, reconcile_slots
+from .sizer import (CLIP_USD, clip_sol, exit_capacity_ok, try_acquire_primary, release_primary,
+                    reconcile_slots)
 from .. import ws_data
 from ...aftershock import solusd_recorder
 from ...aftershock.execution import PriceUnavailable
@@ -340,11 +341,12 @@ def _service_migration(state: dict, mint: str, raw: dict, provider: PumpSwapProv
             _measurement_void(state, mint, raw, arb, pending["trigger_record_sha256"])
 
 
-def _size_clip(landing_ns: int) -> float:
+def _size_clip(landing_ns: int) -> tuple[float, float]:
     """The shared $10 money-book clip, in SOL, frozen at the fill boundary from the causal SOL/USD recorder.
     Raises if no fresh causal SOL/USD observation exists (the caller then strategy-voids rather than size blind)."""
     observation = solusd_recorder.latest_observation(decision_unix_nanos=landing_ns)
-    return clip_sol(float(observation.value_str))
+    sol_usd = float(observation.value_str)
+    return clip_sol(sol_usd), sol_usd
 
 
 def _emit_candidate_void(state: dict, mint: str, entry_id: str, reason: str,
@@ -403,10 +405,20 @@ def _process_row(state: dict, row: dict, created: dict[str, int]) -> None:
         landing_ns = row["received_unix_nanos"]
         # (2) SIZE the shared $10 clip at the fill boundary. No causal SOL/USD => strategy void, not blind size.
         try:
-            size_sol = _size_clip(landing_ns)
+            size_sol, sol_usd = _size_clip(landing_ns)
         except Exception as exc:  # noqa: BLE001
             _emit_candidate_void(state, mint, entry_id, "SOL_USD_UNAVAILABLE",
                                  pending["decision_ns"], detail=str(exc)[:120])
+            state["tape_cursor"], state["tape_head"] = row["sequence"], row["record_sha256"]
+            _save(state); return
+        # The shared money-book contract says the clip may consume at most 5% of exit capacity. The real
+        # withdrawable SOL at the causal landing boundary is the hardest observable upper bound on that
+        # capacity; unknown or insufficient capacity is a strategy void, never a small-pool gamble.
+        capacity_usd = reserves[2] * sol_usd
+        capacity_ok, capacity_reason = exit_capacity_ok(CLIP_USD, capacity_usd)
+        if not capacity_ok:
+            _emit_candidate_void(state, mint, entry_id, "EXIT_CAPACITY_VOID",
+                                 pending["decision_ns"], detail=capacity_reason)
             state["tape_cursor"], state["tape_head"] = row["sequence"], row["record_sha256"]
             _save(state); return
         # (3) Take one of the <=2 GLOBAL primary slots. Full => strategy void (never a blind over-limit trade).
@@ -420,6 +432,7 @@ def _process_row(state: dict, row: dict, created: dict[str, int]) -> None:
         state["open"][mint] = {"mint": mint, "entry_id": entry_id, "size_sol": size_sol,
             "entry_reserves": list(reserves[:2]), "entry_price": entry_math.entry_price,
             "opened_unix_nanos": landing_ns, "entry_day": RT._day(time.time()),
+            "entry_exit_capacity_usd": capacity_usd,
             "last_event_ns": landing_ns, "last_reserves": list(reserves),
             "last_record_sha256": row["record_sha256"], "pool": row.get("pool"),
             "token_atoms": _entry_token_atoms(reserves, size_sol), "migration": None,
@@ -431,6 +444,7 @@ def _process_row(state: dict, row: dict, created: dict[str, int]) -> None:
         del state["pending_entries"][mint]
         open_row = {"entry_id": entry_id, "mint": mint, "entry_day": RT._day(time.time()),
                     "entry_price": entry_math.entry_price, "size_sol": size_sol, "clip_usd": CLIP_USD,
+                    "entry_exit_capacity_usd": capacity_usd,
                     "decision_unix_nanos": pending["decision_ns"],
                     "landing_unix_nanos": landing_ns,
                     "evidence_sha256": pending["evidence_sha256"],
@@ -547,8 +561,9 @@ def _new_tape_rows(state: dict) -> list[tuple[dict, int]]:
 
 def _cycle_unlocked(provider: PumpSwapProvider) -> dict:
     if not ws_data.trade_data_authorized():
-        raise RuntimeError("bundle v2 arm refuses without PUMPPORTAL_DATA_API_KEY")
+        raise RuntimeError("bundle v2 arm refuses without an authorized realtime trade-data endpoint")
     _boot_guard()                                        # a stale process refuses before it touches anything
+    ws_data.require_trade_stream_fresh()                 # process-up is not feed-up; stale/403 means NO EVIDENCE
     state, fresh = _load_state(); _ledger().ensure_genesis(); _drain(state)
     # Startup self-heal for the acquire-side slot leak: release any of OUR OWN portfolio slots whose mint is
     # not in this arm's live open set (a crash between acquire and the open fsync orphans the slot).

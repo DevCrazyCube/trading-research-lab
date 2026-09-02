@@ -6,8 +6,10 @@ verbatim from `bundle_momentum.first_six_signal`, no entry drift), wired into th
 V1 was built before. It is a NEW instrument with its own activation and ledger
 (`research/data/arena/BUNDLE_MOMENTUM_V2/`); the V1 instrument dir and ledger are untouched. The burned
 `+1.167R` window-1 DEV number carries zero prior weight and used non-executable marginal fills. The
-PumpPortal `subscribeTokenTrade` lane is paid data and must fail closed without a dedicated
-`PUMPPORTAL_DATA_API_KEY`; a Lightning/trading credential is never accepted as a substitute.
+Realtime trades come from the Pump program's official Anchor events through an authorized Helius
+`logsSubscribe` endpoint (or a legacy dedicated PumpPortal data credential). The decoder, pinned official
+IDL and listener are part of the frozen closure; a missing/stale stream fails closed. Trading credentials
+are never accepted as a data substitute.
 
 Runtime: `scripts/trading_bot/memebot/arena/bundle_v2_runtime.py` (standalone; NOT wired into the snapshot
 `runtime.py` loop, so activating V2 does not drift the V1/graduation/virality closures). Activation is
@@ -16,7 +18,7 @@ written set-once and git-anchored via `python -m scripts.trading_bot.memebot.are
 
 ## Frozen cohort and entry (identical to V1)
 
-- Universe is only PumpPortal mints observed by this host at CREATE and then subscribed for trades.
+- Universe is only SOL-quoted, non-Mayhem Pump mints observed by this host at CREATE and then followed for trades.
   Mid-stream first sights are excluded and counted. Local receive nanoseconds are the ordering clock;
   chain slots are diagnostic because the public websocket may omit them.
 - The first six buy events must span no more than 1.0 second. At the sixth buy, wallet net token holdings
@@ -37,8 +39,11 @@ written set-once and git-anchored via `python -m scripts.trading_bot.memebot.are
 2. **The shared $10 money-book clip.** The SOL size is not V1's constant 0.5. It is `sizer.clip_sol` of
    the fixed `CLIP_USD = $10` clip, frozen at the fill boundary from the causal `solusd_recorder`
    observation (`<= 5s` staleness). No fresh causal SOL/USD at the fill => `SOL_USD_UNAVAILABLE` strategy
-   void (never size blind). The frozen `size_sol` is threaded through every leg of `causal_fill_cp` and the
-   PumpSwap migration exit, and recorded on the open and resolved rows.
+   void (never size blind). At the same causal boundary, `$10` must be no more than 5% of the USD value of
+   the curve's real withdrawable SOL; unknown or insufficient capacity is `EXIT_CAPACITY_VOID`. This is an
+   observable upper bound rather than a promise of future depth, so passing it cannot promote the arm by
+   itself. The frozen `size_sol` is threaded through every leg of `causal_fill_cp` and the PumpSwap
+   migration exit, and recorded on the open and resolved rows.
 3. **The GLOBAL primary slot.** Opening a position atomically claims one of the `MAX_CONCURRENT_PRIMARY = 2`
    PRIMARY slots across ALL arms via `sizer.try_acquire_primary` over one flock'd shared
    `research/data/arena/portfolio.json`. The slot is released at the ledger drain of the resolved (or

@@ -1,7 +1,9 @@
 # ARM — MIGRATION_ACCEPTANCE_V1 — Pre-Registration
 
 Status: PRE-ACTIVATION paper measurement. No wallet, signer, transaction sender, or live-money authority.
-A NEW instrument with its own ledger dir `research/data/arena/MIGRATION_ACCEPTANCE_V1/`. It models the
+A NEW instrument with its own ledger dir `research/data/arena/MIGRATION_ACCEPTANCE_V1/`. Its realtime
+create/trade/migration tape is decoded from official Pump Anchor events via an authorized Helius endpoint;
+the pinned IDL, decoder and listener are part of the frozen closure and stale data fails closed. It models the
 `MEMEBOT_GRAD_V1` PumpSwap-exact-CP runtime but adds an executable EXIT-CAPACITY STRESS TEST as a hard
 entry precondition and routes every real total-loss through the Helius arbiter.
 

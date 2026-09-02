@@ -370,7 +370,8 @@ def _service_open(state: dict, mint: str, raw: dict, provider: PumpSwapProvider)
 def _cycle_unlocked(provider: PumpSwapProvider) -> dict:
     _boot_guard()
     if not ws_data.trade_data_authorized():
-        raise RuntimeError("migration_acceptance arm refuses without PUMPPORTAL_DATA_API_KEY")
+        raise RuntimeError("migration_acceptance arm refuses without an authorized realtime trade-data endpoint")
+    ws_data.require_trade_stream_fresh()
     state, fresh = _load(); _ledger().ensure_genesis(); _drain(state)
     # STARTUP self-heal for the acquire-side leak: release any of OUR slots whose mint is not a live
     # slot-holding open (a crash between try_acquire_primary and recording the open orphans a slot forever).

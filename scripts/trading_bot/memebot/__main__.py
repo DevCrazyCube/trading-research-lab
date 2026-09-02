@@ -2,7 +2,7 @@
 """MEMEBOT CLI -- the fast, light, reactive PAPER memecoin bot (TWO parallel frozen variants).
 
     python -m scripts.trading_bot.memebot selftest         # hermetic wiring check, NO network
-    python -m scripts.trading_bot.memebot listen [--seconds N]  # PumpPortal realtime new-token stream
+    python -m scripts.trading_bot.memebot listen [--seconds N]  # official Pump events via Helius
     python -m scripts.trading_bot.memebot feed [--limit N] # the eyes: today's free new-coin stream
     python -m scripts.trading_bot.memebot scan             # screen the feed, open frozen paper entries
     python -m scripts.trading_bot.memebot track            # refresh + resolve open paper positions
@@ -122,7 +122,7 @@ def main(argv=None) -> int:
     f = sub.add_parser("feed", help="pull today's free new-coin stream (with screen verdicts)")
     f.add_argument("--limit", type=int, default=40)
     f.add_argument("--pages", type=int, default=1)
-    ln = sub.add_parser("listen", help="PumpPortal realtime new-token stream (read-only data websocket)")
+    ln = sub.add_parser("listen", help="official Pump event stream via Helius (read-only websocket)")
     ln.add_argument("--seconds", type=float, default=None,
                     help="bounded test duration; omit to run until interrupted (detached mode)")
     sc = sub.add_parser("scan", help="screen the feed and open frozen paper entries (both variants)")

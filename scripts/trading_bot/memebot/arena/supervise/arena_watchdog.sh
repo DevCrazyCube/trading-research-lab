@@ -48,8 +48,7 @@ fi
 # (PumpPortal IP-banned us 2026-09-02). A Helius endpoint in env OR the repo .env is what authorizes the
 # trade-consuming arms now; a legacy PUMPPORTAL_DATA_API_KEY still counts.
 feed_ready() {
-  [[ -n "${HELIUS_API_KEY:-}${HELIUS_RPC_URL:-}${PUMPPORTAL_DATA_API_KEY:-}" ]] && return 0
-  grep -qE '^(HELIUS_API_KEY|HELIUS_RPC_URL|PUMPPORTAL_DATA_API_KEY)=' "$ROOT/.env" 2>/dev/null
+  [[ -n "${HELIUS_API_KEY:-}${HELIUS_RPC_URL:-}${PUMPPORTAL_DATA_API_KEY:-}" ]]
 }
 
 log "arena watchdog up (listener + three paper arms + dashboard; no wallet/orders)"
