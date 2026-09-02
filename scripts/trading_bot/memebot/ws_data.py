@@ -27,6 +27,7 @@ import json
 import os
 import pathlib
 import shutil
+import tempfile
 import time
 import urllib.parse
 
@@ -42,10 +43,16 @@ except ImportError:  # pragma: no cover
 DATA_WS_URL = "wss://pumpportal.fun/api/data"
 BUFFER_PATH = CACHE / "pumpportal_newtokens.jsonl"
 TRADE_BUFFER_PATH = CACHE / "pumpportal_trades_v2.jsonl"
+STREAM_HEALTH_PATH = CACHE / "pumpportal_stream_health.json"
 _MAX_BUFFER_LINES = 6000  # bound the on-disk buffer so a long run never grows without limit
 _MAX_TRADE_BYTES = 1024 * 1024 * 1024
 _RESERVE_BYTES = 10 * 1024 * 1024 * 1024
 _GENESIS = "0" * 64
+_HEALTH_SCHEMA = 1
+_HTTP_403_COOLDOWN_S = 3600.0
+_HEALTH_FLUSH_S = 2.0
+_TRADE_IDLE_UNSUBSCRIBE_S = 900.0
+_MAX_ACTIVE_TRADE_SUBSCRIPTIONS = 5000
 
 
 def trade_data_authorized() -> bool:
@@ -66,12 +73,75 @@ def _now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat()
 
 
-def _normalize_event(ev: dict, *, received_unix_nanos: int | None = None) -> dict | None:
+def _write_stream_health(record: dict, path: pathlib.Path = STREAM_HEALTH_PATH) -> None:
+    """Atomically persist non-secret stream health. Never store the endpoint or API key."""
+    body = {"schema": _HEALTH_SCHEMA, **record, "updated_unix_nanos": time.time_ns()}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w") as handle:
+            json.dump(body, handle, sort_keys=True, separators=(",", ":"))
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(name, path)
+        directory = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+
+
+def assess_stream_health(record: dict | None, *, now_ns: int | None = None,
+                         max_stale_s: float = 30.0) -> dict:
+    """Pure fail-closed health verdict used by runners and dashboard."""
+    now_ns = time.time_ns() if now_ns is None else now_ns
+    if not isinstance(record, dict) or record.get("schema") != _HEALTH_SCHEMA:
+        return {"ok": False, "status": "MISSING", "reason": "stream health is missing"}
+    status = record.get("status")
+    if status != "CONNECTED":
+        return {"ok": False, "status": status or "UNKNOWN",
+                "reason": record.get("reason") or "stream is not connected",
+                "next_retry_unix_nanos": record.get("next_retry_unix_nanos")}
+    last = record.get("last_message_unix_nanos")
+    if type(last) is not int or last <= 0 or last > now_ns:
+        return {"ok": False, "status": "INVALID_CLOCK", "reason": "stream message clock is invalid"}
+    age_s = (now_ns - last) / 1e9
+    if age_s > max_stale_s:
+        return {"ok": False, "status": "STALE", "reason": f"last stream message is {age_s:.1f}s old",
+                "age_s": age_s}
+    return {"ok": True, "status": "CONNECTED", "reason": "stream is fresh", "age_s": age_s,
+            "last_message_unix_nanos": last,
+            "last_trade_unix_nanos": record.get("last_trade_unix_nanos"),
+            "last_create_unix_nanos": record.get("last_create_unix_nanos")}
+
+
+def stream_health(*, path: pathlib.Path = STREAM_HEALTH_PATH, now_ns: int | None = None,
+                  max_stale_s: float = 30.0) -> dict:
+    try:
+        record = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        record = None
+    return assess_stream_health(record, now_ns=now_ns, max_stale_s=max_stale_s)
+
+
+def require_trade_stream_fresh(*, max_stale_s: float = 30.0) -> dict:
+    verdict = stream_health(max_stale_s=max_stale_s)
+    if not verdict["ok"]:
+        raise Refused(f"PumpPortal trade stream {verdict['status']}: {verdict['reason']}")
+    return verdict
+
+
+def _normalize_event(ev: dict, *, received_unix_nanos: int | None = None,
+                     source: str = "pumpportal") -> dict | None:
     """Keep only new-token CREATE events, stamped with a local receive time for the age filter."""
     if ev.get("txType") != "create" or not ev.get("mint"):
         return None
     return {
-        "source": "pumpportal",
+        "source": source,
         "mint": ev.get("mint"),
         "name": ev.get("name"),
         "symbol": ev.get("symbol"),
@@ -90,12 +160,13 @@ def _canonical(value: object) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
 
 
-def _trade_body(ev: dict, raw_text: str, received_unix_nanos: int) -> dict | None:
+def _trade_body(ev: dict, raw_text: str, received_unix_nanos: int,
+                source: str = "PUMPPORTAL_READ_ONLY_DATA_WS") -> dict | None:
     if ev.get("txType") not in {"buy", "sell", "migrate", "migration"} \
             or not isinstance(ev.get("mint"), str):
         return None
     return {
-        "schema": 2, "source": "PUMPPORTAL_READ_ONLY_DATA_WS", "mint": ev["mint"],
+        "schema": 2, "source": source, "mint": ev["mint"],
         "tx_type": ev["txType"], "trader": ev.get("traderPublicKey"),
         "signature": ev.get("signature"), "slot": ev.get("slot"),
         "token_amount": str(ev.get("tokenAmount")), "sol_amount": str(ev.get("solAmount")),
@@ -220,11 +291,23 @@ def run_listener(seconds: float | None = None, *, verbose: bool = True) -> dict:
     reconnects = 0
     samples: list[dict] = []
     trade_head = _trade_head()
-    subscribed = {row.get("mint") for row in read_buffer(max_age_minutes=30)
-                  if isinstance(row.get("mint"), str)}
+    health = {"status": "CONNECTING", "reason": "listener starting", "reconnects": 0,
+              "last_message_unix_nanos": None, "last_trade_unix_nanos": None,
+              "last_create_unix_nanos": None, "http_status": None,
+              "next_retry_unix_nanos": None}
+    _write_stream_health(health)
+    last_health_flush = 0.0
+    subscribed = {row["mint"]: time.monotonic() for row in read_buffer(
+        max_age_minutes=_TRADE_IDLE_UNSUBSCRIBE_S / 60.0) if isinstance(row.get("mint"), str)}
+    subscriptions_total = len(subscribed)
+    unsubscriptions_total = 0
+    trade_events = 0
     while True:
         try:
             ws = websocket.create_connection(endpoint, timeout=30)
+            health.update(status="CONNECTED", reason="websocket connected", http_status=None,
+                          next_retry_unix_nanos=None, reconnects=reconnects)
+            _write_stream_health(health)
             ws.send(json.dumps({"method": "subscribeNewToken"}))
             ws.send(json.dumps({"method": "subscribeMigration"}))
             if subscribed and trades_enabled:
@@ -247,6 +330,7 @@ def run_listener(seconds: float | None = None, *, verbose: bool = True) -> dict:
                     continue  # quiet stretch; keep the connection open
                 received += 1
                 received_ns = time.time_ns()
+                health["last_message_unix_nanos"] = received_ns
                 try:
                     ev = json.loads(msg)
                 except json.JSONDecodeError:
@@ -254,23 +338,84 @@ def run_listener(seconds: float | None = None, *, verbose: bool = True) -> dict:
                 rec = _normalize_event(ev, received_unix_nanos=received_ns)
                 if rec is not None:
                     creates += 1
+                    health["last_create_unix_nanos"] = received_ns
                     _append(rec)
                     mint = rec["mint"]
                     if mint not in subscribed:
-                        subscribed.add(mint)
-                        if trades_enabled:
+                        if trades_enabled and len(subscribed) < _MAX_ACTIVE_TRADE_SUBSCRIPTIONS:
+                            subscribed[mint] = time.monotonic()
+                            subscriptions_total += 1
                             ws.send(json.dumps({"method": "subscribeTokenTrade", "keys": [mint]}))
                     if len(samples) < 5:
                         samples.append(rec)
                     if creates % 200 == 0:
                         _trim_buffer()
                 trade = _trade_body(ev, msg, received_ns)
-                if trade is not None and trade["mint"] in subscribed:
+                # Migration is a free global subscription and must reach the migration arm even after the
+                # per-token paid trade lease expired. Buy/sell events are admitted only for active leases.
+                if trade is not None and (trade["tx_type"] in {"migrate", "migration"}
+                                          or trade["mint"] in subscribed):
                     trade_head = _append_trade(trade, trade_head)
+                    health["last_trade_unix_nanos"] = received_ns
+                    trade_events += 1
+                    if trade["mint"] in subscribed:
+                        subscribed[trade["mint"]] = time.monotonic()
+                now_monotonic = time.monotonic()
+                if trades_enabled:
+                    expired = [mint for mint, last in subscribed.items()
+                               if now_monotonic - last >= _TRADE_IDLE_UNSUBSCRIBE_S]
+                    if expired:
+                        for offset in range(0, len(expired), 5000):
+                            ws.send(json.dumps({"method": "unsubscribeTokenTrade",
+                                                "keys": expired[offset:offset + 5000]}))
+                        for mint in expired:
+                            subscribed.pop(mint, None)
+                        unsubscriptions_total += len(expired)
+                if time.monotonic() - last_health_flush >= _HEALTH_FLUSH_S:
+                    health["reconnects"] = reconnects
+                    health["active_trade_subscriptions"] = len(subscribed)
+                    health["subscriptions_total"] = subscriptions_total
+                    health["unsubscriptions_total"] = unsubscriptions_total
+                    health["trade_events"] = trade_events
+                    _write_stream_health(health)
+                    last_health_flush = time.monotonic()
         except Refused:
             raise
+        except websocket.WebSocketBadStatusException as exc:
+            reconnects += 1
+            status = getattr(exc, "status_code", None)
+            if status == 403:
+                retry_ns = time.time_ns() + int(_HTTP_403_COOLDOWN_S * 1e9)
+                health.update(status="HTTP_403_COOLDOWN",
+                              reason="provider refused the handshake; cooling down before one retry",
+                              reconnects=reconnects, http_status=403,
+                              next_retry_unix_nanos=retry_ns)
+                _write_stream_health(health)
+                if verbose:
+                    print(f"[{_now_iso()}] PumpPortal HTTP 403; cooling down for "
+                          f"{int(_HTTP_403_COOLDOWN_S)}s", flush=True)
+                if seconds is not None:
+                    return {"connected": received > 0, "seconds": round(time.time() - t0, 1),
+                            "messages_received": received, "create_events": creates,
+                            "reconnects": reconnects, "buffer_path": str(BUFFER_PATH),
+                            "trade_data_authorized": trades_enabled,
+                            "sample_mints": [s.get("mint") for s in samples[:5]],
+                            "status": "HTTP_403_COOLDOWN"}
+                time.sleep(_HTTP_403_COOLDOWN_S)
+                continue
+            delay = min(60.0, 2.0 ** min(reconnects, 6))
+            health.update(status="HTTP_ERROR", reason=f"websocket handshake HTTP {status}",
+                          reconnects=reconnects, http_status=status,
+                          next_retry_unix_nanos=time.time_ns() + int(delay * 1e9))
+            _write_stream_health(health)
+            time.sleep(delay)
         except Exception as exc:  # noqa: BLE001 -- transient socket drop; reconnect politely
             reconnects += 1
+            delay = min(60.0, 2.0 ** min(reconnects, 6))
+            health.update(status="DISCONNECTED", reason=type(exc).__name__, reconnects=reconnects,
+                          http_status=None,
+                          next_retry_unix_nanos=time.time_ns() + int(delay * 1e9))
+            _write_stream_health(health)
             if verbose:
                 print(f"[{_now_iso()}] stream dropped ({exc!r}); reconnecting", flush=True)
             if seconds is not None and time.time() - t0 >= seconds:
@@ -279,4 +424,4 @@ def run_listener(seconds: float | None = None, *, verbose: bool = True) -> dict:
                         "reconnects": reconnects, "buffer_path": str(BUFFER_PATH),
                         "trade_data_authorized": trades_enabled,
                         "sample_mints": [s.get("mint") for s in samples[:5]]}
-            time.sleep(min(5.0, 1.0 + reconnects))
+            time.sleep(delay)

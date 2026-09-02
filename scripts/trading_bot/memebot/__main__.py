@@ -50,7 +50,11 @@ def cmd_feed(spec, args) -> int:
 
 
 def cmd_listen(spec, args) -> int:
-    summary = ws_data.run_listener(seconds=args.seconds)
+    # PumpPortal IP-banned us (403 on the whole domain, 2026-09-02). The tape now comes from the pump.fun
+    # program's own on-chain anchor events via our FUNDED Helius logsSubscribe (helius_tape), written into
+    # the SAME hash-chained buffers so every downstream consumer is unchanged. See helius_tape.py.
+    from . import helius_tape
+    summary = helius_tape.run_listener(seconds=args.seconds)
     return _dump(summary)
 
 
