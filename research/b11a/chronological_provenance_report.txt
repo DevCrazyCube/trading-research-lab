@@ -1,0 +1,312 @@
+LEAK-FREE CHRONOLOGICAL CREATOR-PROVENANCE TEST (pump.fun, b11a 23.8h window).
+
+WHY THIS FILE EXISTS
+--------------------
+The LaunchLab creator-provenance result (stratified lift 5.15, best-rule lift 11.95, OOF lift 41.0)
+is UNUSABLE: LaunchLab PoolState carries no create timestamp, so "the creator's other launches"
+spanned the creator's FUTURE. The only chronologically ordered probe had n=77 and could not decide.
+
+This file replaces that n=77 probe. It runs on the b11a window, where EVERY create slot is known
+exactly (33,866 creates, 8,565 creators, on-chain `complete` flag read for 33,866/33,866).
+
+HOW FUTURE CONTAMINATION IS MADE IMPOSSIBLE BY CONSTRUCTION
+-----------------------------------------------------------
+Every feature is a pure function of the label vector through exactly two index arrays:
+
+    prior_n[i]     = block_start[i] - creator_start[i]
+    prior_grads[i] = C[block_start[i]] - C[creator_start[i]]     where C = exclusive prefix sum of labels
+
+Rows are sorted by (creator, create_slot, transaction_index, outer_idx, inner_idx), so each creator
+occupies one contiguous span beginning at creator_start[i]. block_start[i] is the position of the
+FIRST row of row i's own (creator, create_slot) group. Therefore the label window summed for row i is
+exactly [creator_start[i], block_start[i]) -- every row in it belongs to the same creator and has a
+STRICTLY SMALLER create_slot. Row i's own label, its same-slot siblings' labels, and every later
+label lie at positions >= block_start[i] and are arithmetically outside the sum.
+
+Note this is STRICTER than "strictly earlier in the (slot, tx, outer, inner) tuple": same-slot
+siblings are excluded entirely, because a trader cannot observe a transaction earlier in the same
+block in time to act on it. That costs cohort size (23,693 instead of 25,301) and is the honest rule.
+
+Enforcement is not a code-review claim: `positive_control()` flips later labels and proves earlier
+features are bit-identical, and flips earlier labels to prove the features DO move (so the control
+has teeth).
+
+SECOND-ORDER LEAK THAT THE BRIEF DID NOT NAME, AND THAT THIS FILE MEASURES
+--------------------------------------------------------------------------
+`complete` was read 36 days after the window: it is the EVENTUAL label. A prior launch created before
+row i may have graduated AFTER row i's create. Counting it leaks the future in TIME even though it is
+clean in ORDER. Measured create->complete latency on the 82 curves with a known complete_slot:
+44% same slot, but p75 = 956 slots and p90 = 9,662 slots. The leak is real and is quantified by
+`--gap-gate`, which re-runs the headline contrast requiring priors to be >= G slots old.
+
+PRE-REGISTRATION (printed before any result; nothing below is chosen after seeing an outcome)
+---------------------------------------------------------------------------------------------
+Population : all 33,866 creates in the b11a window with an `ok` on-chain label.
+Outcome    : complete == 1 (graduated), read from BondingCurve byte offset 48.
+Creator key: the CREATE-EVENT creator, fixed at t0. NOT BondingCurve.creator, which `set_creator` /
+             `admin_set_creator` / `migrate_bonding_curve_creator` can mutate after the fact and which
+             already disagrees on 1,882/33,866 rows -- the same contamination class that killed LaunchLab.
+Features (prior-only, all six pre-registered here):
+  F1 has_prior            prior_n >= 1                          vs prior_n == 0
+  F2 has_prior_grad       prior_grads >= 1                      vs prior_grads == 0   [within prior_n>=1]  <-- HEADLINE
+  F3 high_prior_rate      prior_grad_rate > 0.25                vs prior_grad_rate == 0 [within prior_n>=1]
+  F4 fast_relaunch        slots since creator's previous launch <= cohort median vs > median [within prior_n>=1]
+  F5 first_in_window      prior_n == 0                          vs prior_n >= 1       (mirror of F1)
+  F6 prior_n_ge_5         prior_n >= 5                          vs 1 <= prior_n <= 4  [within prior_n>=1]
+Test       : one-sided (greater) two-proportion z, p by label permutation, B=20000, seed 20260902.
+             The null is "graduation is iid Bernoulli across launches, independent of creator". Under
+             that null there is no clustering, so a GLOBAL label shuffle is the exact null; and because
+             prior_n is invariant under the shuffle while prior_grads is regenerated with the identical
+             combinatorics, the prior_n-vs-prior_grads confound is priced into the null automatically.
+FWER       : Holm-Bonferroni across the 6 features AND an exact max-|z| permutation FWER on the same draws.
+Effect CI  : creator-clustered bootstrap (resample the 8,565 creators with replacement), B=4000, seed 20260902.
+OOF        : folds = sha256(mint) % 5. The rule (prior_n threshold x prior_grads threshold) is selected
+             INSIDE the 4 training folds by training conditional rate subject to >= 200 training rows,
+             then applied once to the held-out fold. Reported with a one-sided 95% Clopper-Pearson lower
+             bound and a creator-clustered lower bound.
+DECISION RULE (fixed before results):
+  PASS   iff (a) F2 max-stat permutation FWER p < 0.05, AND
+              (b) the creator-clustered 95% one-sided lower bound on the F2 conditional rate implies a
+                  break-even premium m* >= 1.10 on pump.fun (X=14.6958, toll 2%), AND
+              (c) that m* is REACHABLE: the measured entry premium at the first slot a bot could act
+                  survives the comparison in the ECONOMICS section.
+  REFUSE otherwise, and REFUSE outright if the power statement shows the cohort cannot detect the
+  LaunchLab-scale lift it is meant to adjudicate.
+
+PAPER-ONLY. No RPC: every byte this file reads is already on disk.
+
+
+====================================================================================================
+0. POPULATION AND STRUCTURE (measured)
+====================================================================================================
+    creates with an ok on-chain label : 33,866
+    graduated (complete=1)            : 1,075  = 3.1743%  <- unconditional base rate
+    distinct creators                 : 8,565
+    window slots                      : 435,569,160 .. 435,772,743 (203,583 slots)
+    window wall-clock                 : 23.83 h
+    rows with >=1 STRICTLY-EARLIER-SLOT sibling by same creator : 23,693   <- the testable cohort
+    (for reference, the looser 'earlier in (slot,tx,outer,inner)' rule gives 25,301; the
+     1,608 extra rows have only SAME-SLOT priors and are excluded as unobservable.)
+
+====================================================================================================
+1. LEAK CONTROLS (run before any result is read)
+====================================================================================================
+    (a) 400 random label flips, 6,906,257 earlier-or-same-slot feature values re-checked: ALL BIT-IDENTICAL
+    (b) 500 same-slot-sibling flips: neither sibling's feature moved
+    (c) teeth check: flipped the immediately-earlier sibling for 400 rows -> 400/400 later features CHANGED (a control that never fires proves nothing)
+
+====================================================================================================
+2. POWER STATEMENT (computed before results are printed)
+====================================================================================================
+    Headline contrast F2 is evaluated within the prior_n>=1 cohort.
+    n(prior_grads>=1) = 6,130   n(prior_grads==0) = 17,563   reference rate in the no-prior-grad arm = 1.2754% (224 positives)
+    Smallest lift detectable at alpha=0.05 one-sided, power 0.80 (independent rows): 1.347x
+    MEASURED design effect from creator clustering (bootstrap var / binomial var) = 4.172
+    -> effective independent n = 8,118 of 33,866. Cluster-adjusted detectable lift: 1.758x
+    The contaminated LaunchLab census claimed 5.15x stratified / 11.95x best-rule. Both are
+    far above the cluster-adjusted floor, so this cohort CAN adjudicate the claim. Proceed.
+
+====================================================================================================
+3. PRE-REGISTERED FEATURES (all six, no selection)
+====================================================================================================
+    feature                n_pos  k_pos  rate_pos   n_neg  k_neg  rate_neg     lift       z
+    F1_has_prior          23,693    595   2.5113%  10,173    480   4.7184%   0.532x  -10.62
+    F2_has_prior_grad      6,130    371   6.0522%  17,563    224   1.2754%   4.745x   20.58
+    F3_high_prior_rate       514    145  28.2101%  17,563    224   1.2754%  22.118x   42.57
+    F4_fast_relaunch      11,855    173   1.4593%  11,838    422   3.5648%   0.409x  -10.36
+    F5_first_in_window    10,173    480   4.7184%  23,693    595   2.5113%   1.879x   10.62
+    F6_prior_n_ge_5       18,041    393   2.1784%   5,652    202   3.5740%   0.610x   -5.85
+
+    F4 median prior-launch gap used as the split point: 312 slots
+
+====================================================================================================
+4. PERMUTATION TEST (B=20000, seed=20260902) -- null: graduation iid across launches, creator-blind
+====================================================================================================
+    feature                  p_perm     p_holm   p_maxstat_FWER
+    F1_has_prior            1.00000    1.00000          1.00000
+    F2_has_prior_grad       0.00005    0.00030          0.00005
+    F3_high_prior_rate      0.00005    0.00030          0.00005
+    F4_fast_relaunch        1.00000    1.00000          1.00000
+    F5_first_in_window      0.00005    0.00030          0.00005
+    F6_prior_n_ge_5         1.00000    1.00000          1.00000
+    (p floor at this B is 0.00005; a value at the floor means 0 of 20,000 permutations reached the observed z.)
+
+====================================================================================================
+5. CONFOUND: prior_grads>=1 IS ENTANGLED WITH prior_n. STRATIFIED HEADLINE.
+====================================================================================================
+    (the permutation null already regenerates prior_grads with the same combinatorics, so the
+     p-values above are already confound-calibrated; this is the effect-size view)
+    prior_n        n_pos  k_pos  rate_pos   n_neg  k_neg  rate_neg     lift
+    1-1              109     35  32.1101%   2,060     50   2.4272%  13.229x
+    2-5              372     62  16.6667%   3,979     78   1.9603%   8.502x
+    6-20           1,141     80   7.0114%   5,532     59   1.0665%   6.574x
+    21-100         2,780    132   4.7482%   4,979     37   0.7431%   6.390x
+    101+           1,728     62   3.5880%   1,013      0   0.0000%     infx
+    Mantel-Haenszel-weighted stratified lift: 8.113x
+
+====================================================================================================
+6. CREATOR-CLUSTERED BOOTSTRAP (B=4000, resampling the 8565 creators)
+====================================================================================================
+    F1_has_prior         rate_pos 2.5113%  95% CI [2.0549%, 3.0227%]  one-sided 95% LOWER 2.1186%
+                         lift     0.532x   95% CI [0.431x, 0.652x]  one-sided 95% LOWER 0.444x
+    F2_has_prior_grad    rate_pos 6.0522%  95% CI [4.5142%, 8.0420%]  one-sided 95% LOWER 4.7264%
+                         lift     4.745x   95% CI [3.413x, 6.647x]  one-sided 95% LOWER 3.600x
+    F3_high_prior_rate   rate_pos 28.2101%  95% CI [21.3912%, 34.2699%]  one-sided 95% LOWER 22.4052%
+                         lift     22.118x   95% CI [16.088x, 28.821x]  one-sided 95% LOWER 17.005x
+
+====================================================================================================
+7. GRADUATION-TIME LEAK (the leak the brief did not name)
+====================================================================================================
+    `complete` is the EVENTUAL label, read 36 days after the window. A prior launch that is
+    earlier in SLOT may have graduated LATER in TIME than the row that counts it.
+    Measured create->complete slot latency on the 82 curves with a known complete_slot:
+      same slot 43.9% | <=70 51.2% | <=956 75.6% | <=9662 90.2% | max 686,257 slots
+    Gap-gated F2: a prior graduation is counted ONLY if the prior's create is >= G slots old,
+    so >= CDF(G) of counted prior graduations were genuinely already visible.
+      G slots  visible   n_pos  k_pos  rate_pos    n_neg  k_neg  rate_neg     lift
+            0    43.9%   6,130    371   6.0522%   17,563    224   1.2754%   4.745x
+           70    51.2%   6,125    371   6.0571%   16,775    224   1.3353%   4.536x
+          956    75.6%   5,925    364   6.1435%   15,192    202   1.3296%   4.620x
+        9,662    90.2%   4,627    278   6.0082%   11,806    154   1.3044%   4.606x
+       24,268    95.1%   3,579    214   5.9793%    8,695    127   1.4606%   4.094x
+
+====================================================================================================
+8. LEFT-CENSORING SENSITIVITY (the window is only 23.8h; first-in-window != first-ever)
+====================================================================================================
+    A creator's in-window history is truncated at the window start, so the prior_n==0 and the
+    prior_grads==0 arms both contain veterans whose record is outside the window. That
+    DILUTES every lift here (conservative for detection) but means a live bot with unbounded
+    history would see different absolute rates. Restricting to later creates deepens history:
+    window part              n_pos  k_pos  rate_pos    n_neg  k_neg  rate_neg     lift
+    all                      6,130    371   6.0522%   17,563    224   1.2754%   4.745x
+    last 75%                 4,877    304   6.2333%   11,800    162   1.3729%   4.540x
+    last 50%                 3,299    211   6.3959%    7,795    105   1.3470%   4.748x
+    last 25%                 2,196    101   4.5993%    4,450     56   1.2584%   3.655x
+
+====================================================================================================
+9. OUT-OF-FOLD (folds = sha256(mint)%%5; rule SELECTED INSIDE the training folds)
+====================================================================================================
+     fold selected rule                       train rate   test n  test k  test rate
+        0 prior_n>=1 and prior_grads>=2          7.5528%      626      41    6.5495%
+        1 prior_n>=1 and prior_grads>=3          7.3582%      493      37    7.5051%
+        2 prior_n>=1 and prior_grads>=2          7.3696%      681      50    7.3421%
+        3 prior_n>=1 and prior_grads>=3          7.5530%      517      35    6.7698%
+        4 prior_n>=1 and prior_grads>=2          7.2968%      682      52    7.6246%
+    POOLED OUT-OF-FOLD: 215/2,999 = 7.1691%   one-sided 95% Clopper-Pearson LOWER = 6.4088%
+    creator-clustered one-sided 95% LOWER on the same OOF selection = 4.7955%
+    OOF lift vs the 3.1743% unconditional base rate: 2.258x
+
+====================================================================================================
+10. ECONOMICS -- venues.py, pump.fun
+====================================================================================================
+    venue=pump.fun  X=14.6958  toll_round_trip=0.0200  (X provenance: derived from measured curve constants by X = (Q0+R)^2/Q0^2; reproduces...)
+    EV(m) = (1 + (X-1)p)/m - 1 - toll ;  m* = (1 + (X-1)p)/(1+toll)
+
+    cohort                                                p    (X-1)p   m* break-even
+    unconditional window                            3.1743%    0.4347         1.4066x
+    F2 prior_grads>=1 (point estimate)              6.0522%    0.8289         1.7930x
+    F2 prior_grads>=1 (clustered 95% LOWER)         4.7264%    0.6473         1.6150x
+    OOF selected rule (point estimate)              7.1691%    0.9819         1.9430x
+    OOF selected rule (clustered 95% LOWER)         4.7955%    0.6568         1.6243x
+
+====================================================================================================
+11. IS THAT PREMIUM REACHABLE? (measured entry premiums, b11a price paths)
+====================================================================================================
+    SUBSTRATE WARNING: price paths exist only for the 3,932-curve b11a subsample
+    (82 graduations), not the 33,866-row label set. Inside that subsample the
+    F2 cohort is 499 rows with 20 graduations (4.0080%), vs 82/3,932 = 2.0855% overall. Everything below inherits that n.
+
+    m = price(t)/floor price; floor = CreateEvent reserves. A bot cannot act inside the
+    create's own block, so the earliest actionable moment is create_slot + K (~0.4 s/slot).
+       K   ~sec |  complete before K  (of which grads) |  no quote  grads |  quotable  grads |   med m   p75 m   p90 m
+       1    0.4 |                 36                36 |       993      0 |     3,896     46 |  1.0080  1.4389  1.9398
+       2    0.8 |                 36                36 |     1,050      0 |     3,896     46 |  1.0067  1.4228  1.9385
+       5    2.0 |                 36                36 |     1,227      0 |     3,896     46 |  1.0046  1.3792  1.9399
+      25   10.0 |                 38                38 |     1,404      0 |     3,894     44 |  1.0000  1.1508  1.8642
+     150   60.0 |                 46                46 |     1,739      0 |     3,886     36 |  1.0000  1.0063  1.1784
+
+    Of the 82 graduated curves, 36 (43.9%) complete in the create's OWN slot and
+    2 share the create's transaction index. Those are unbuyable at ANY price.
+
+    WHERE THE GRADUATIONS GO (attrition ladder, K=1 -- the fastest a bot can possibly act):
+    cohort               stage                                        n  grads      rate
+    all subsample        0. in the price-path subsample           3,932     82   2.0855%
+    all subsample        1. still incomplete at create_slot+1     3,896     46   1.1807%
+    all subsample        2. AND quotable at m <= 1.615x           3,189     12   0.3763%
+    F2 prior_grads>=1    0. in the price-path subsample             499     20   4.0080%
+    F2 prior_grads>=1    1. still incomplete at create_slot+1       495     16   3.2323%
+    F2 prior_grads>=1    2. AND quotable at m <= 1.615x             247      1   0.4049%
+
+    THE BUYABLE TEST -- the one that decides this. Keep only curves that are (i) still
+    incomplete at create_slot+K and (ii) quotable at m <= m* = 1.6150x (the F2 clustered
+    95% LOWER bound; the point estimate would allow 1.7930x). 'first quote' is what a bot
+    actually gets; 'oracle best dip' is an UNATTAINABLE upper bound that lets it buy the
+    cheapest pre-completion tick it will ever see -- if even that fails, the door is shut.
+    EV is per coin, each at the price IT would be bought at: mean over the bought set of
+    (1+(X-1)*grad)/m_i - 1 - toll. Non-graduates exit at the hard floor. 95%LO = one-sided
+    creator-clustered bootstrap lower bound on that mean.
+       K entry            cohort                    n  grads     p_buy    lift   med m   mean EV   EV 95%LO
+       1 first quote      all                   3,189     12   0.3763%  0.180x  1.0000    -5.29%     -7.30%
+       1 first quote      F2 prior_grads>=1       247      1   0.4049%  0.194x  1.3617   -18.94%    -23.86%
+       1 oracle best dip  all                   3,871     22   0.5683%  0.273x  1.0000     4.29%      2.28%
+       1 oracle best dip  F2 prior_grads>=1       483      4   0.8282%  0.397x  1.0000     6.57%      0.51%
+       2 first quote      all                   3,199     11   0.3439%  0.165x  1.0000    -5.46%     -7.22%
+       2 first quote      F2 prior_grads>=1       251      1   0.3984%  0.191x  1.3563   -18.31%    -22.28%
+       2 oracle best dip  all                   3,870     21   0.5426%  0.260x  1.0000     4.06%      2.07%
+       2 oracle best dip  F2 prior_grads>=1       482      3   0.6224%  0.298x  1.0000     4.88%      0.09%
+       5 first quote      all                   3,243     11   0.3392%  0.163x  1.0000    -5.19%     -6.82%
+       5 first quote      F2 prior_grads>=1       284      1   0.3521%  0.169x  1.2579   -17.21%    -21.25%
+       5 oracle best dip  all                   3,869     20   0.5169%  0.248x  1.0000     3.78%      1.73%
+       5 oracle best dip  F2 prior_grads>=1       482      3   0.6224%  0.298x  1.0000     4.88%      0.09%
+      25 first quote      all                   3,417      9   0.2634%  0.126x  1.0000    -3.91%     -5.29%
+      25 first quote      F2 prior_grads>=1       359      1   0.2786%  0.134x  1.0534    -8.27%    -12.69%
+      25 oracle best dip  all                   3,863     14   0.3624%  0.174x  1.0000     2.31%      0.57%
+      25 oracle best dip  F2 prior_grads>=1       482      3   0.6224%  0.298x  1.0000     4.88%      0.09%
+     150 first quote      all                   3,629      6   0.1653%  0.079x  1.0000    -1.68%     -3.00%
+     150 first quote      F2 prior_grads>=1       442      1   0.2262%  0.108x  1.0000    -1.99%     -5.01%
+     150 oracle best dip  all                   3,860     11   0.2850%  0.137x  1.0000     1.42%     -0.18%
+     150 oracle best dip  F2 prior_grads>=1       481      2   0.4158%  0.199x  1.0000     2.39%     -2.04%
+
+====================================================================================================
+11b. WHY IT FAILS: THE LIFT IS ALREADY IN THE PRICE
+====================================================================================================
+    Entry premium at create_slot+1, TRADED coins only (like-for-like; untraded coins are
+    excluded here so the floor does not swamp the comparison):
+    cohort                      n    p25 m   median m    p75 m  frac <= m*
+    F2 prior_grads>=1         481   1.3765     1.6461   1.9600      48.44%
+    no prior graduation     2,422   1.0000     1.0822   1.4685      81.05%
+    Mann-Whitney z on the entry premium = 17.691 (positive = the provenance-positive
+    coins are ALREADY more expensive by the first slot a bot can act).
+    The F2 break-even is m* = 1.6150x (lower bound) / 1.7930x (point). The median
+    F2 coin already quotes at 1.6461x. The premium the edge earns and the premium the
+    market already charges are the SAME NUMBER: the lift is impounded before entry.
+
+====================================================================================================
+11c. THE STRATEGY, PRICED: buy EVERY cohort coin at the first actionable tick, no filter
+====================================================================================================
+    Unbuyable coins (already complete, or completing on that very tick) are SKIPPED, not
+    charged as losses -- this is generous to the strategy.
+       K cohort                      n  grads         p   median m   mean EV   EV 95%LO
+       1 all subsample           3,896     46   1.1807%     1.0080    -8.92%    -11.14%
+       1 F2 prior_grads>=1         495     16   3.2323%     1.6195   -15.18%    -22.48%
+       2 all subsample           3,896     46   1.1807%     1.0067    -8.93%    -11.08%
+       2 F2 prior_grads>=1         495     16   3.2323%     1.6019   -14.80%    -21.80%
+       5 all subsample           3,896     46   1.1807%     1.0046    -8.60%    -10.62%
+       5 F2 prior_grads>=1         495     16   3.2323%     1.5295   -14.91%    -21.39%
+      25 all subsample           3,894     44   1.1299%     1.0000    -6.97%     -8.65%
+      25 F2 prior_grads>=1         494     15   3.0364%     1.1503    -9.61%    -16.02%
+     150 all subsample           3,886     36   0.9264%     1.0000    -3.35%     -4.84%
+     150 F2 prior_grads>=1         488      9   1.8443%     1.0000    -2.24%     -7.40%
+
+====================================================================================================
+12. VERDICT
+====================================================================================================
+    (a) F2 max-stat permutation FWER p = 0.00005  -> PASS
+    (b) clustered 95% lower conditional rate 4.7264% -> m* = 1.6150x (>= 1.10 required) -> PASS
+    (c) leg (c) is judged ONLY on the ATTAINABLE entry ('first quote'); the oracle-dip
+        rows are a diagnostic upper bound and cannot carry a PASS.
+        best attainable F2 cell: K=150 [first quote], 1/442 = 0.2262% graduating, median m=1.0000x
+        mean per-coin EV = -1.99%  (clustered 95% lower -5.01%)  -> FAIL
+        even the UNATTAINABLE oracle bound tops out at +6.57% (95%LO +0.51%) at K=1.
+
+    VERDICT: REFUSE. Legs: (a) permutation PASS, (b) m* PASS, (c) reachability FAIL.
