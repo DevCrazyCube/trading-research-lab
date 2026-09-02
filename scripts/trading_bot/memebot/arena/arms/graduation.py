@@ -20,6 +20,10 @@ ATA_RENT_LAMPORTS = 2_039_280
 ATA_CLOSE_COST_LAMPORTS = 5_000
 POOL_CONFIRM_TIMEOUT_S = 120
 MIGRATION_CONFIRM_TIMEOUT_S = 60
+# A migration's signal->fill latency is bounded by migration + pool confirmation. Beyond that the earliest
+# observable reserves are far past the modeled +LATENCY_SLOTS entry, so a fill would be a backlog casualty
+# (lookahead-adjacent). Such entries are VOIDed, never filled late. Measurement parameter -> frozen in SPEC.
+MAX_ENTRY_LAG_S = MIGRATION_CONFIRM_TIMEOUT_S + POOL_CONFIRM_TIMEOUT_S
 UNAVAILABLE_POLLS = 12
 HORIZON_S = 90 * 60
 PREREG = pathlib.Path(__file__).with_name("GRADUATION_PREREGISTRATION.md")
@@ -29,6 +33,7 @@ SPEC = {"LATENCY_SLOTS": LATENCY_SLOTS, "SIZE_USD": SIZE_USD,
         "ATA_RENT_LAMPORTS": ATA_RENT_LAMPORTS, "ATA_CLOSE_COST_LAMPORTS": ATA_CLOSE_COST_LAMPORTS,
         "POOL_CONFIRM_TIMEOUT_S": POOL_CONFIRM_TIMEOUT_S,
         "MIGRATION_CONFIRM_TIMEOUT_S": MIGRATION_CONFIRM_TIMEOUT_S,
+        "MAX_ENTRY_LAG_S": MAX_ENTRY_LAG_S,
         "UNAVAILABLE_POLLS": UNAVAILABLE_POLLS, "HORIZON_S": HORIZON_S,
         "target_n": 100}
 

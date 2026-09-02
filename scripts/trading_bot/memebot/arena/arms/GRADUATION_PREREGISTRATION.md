@@ -26,6 +26,11 @@ fails closed without a dedicated `PUMPPORTAL_DATA_API_KEY`. Execution pricing re
 - Exit: -12% all-cost stop, widening 18/25/35% trail, 90-minute horizon. An exit lands only on a fresh
   reserve snapshot at least 15 slots after its decision. Twelve consecutive unavailable reads after an
   exit decision resolve as a full loss; every entered position reaches one terminal row.
+- Max entry-lag (frozen, `MAX_ENTRY_LAG_S = MIGRATION_CONFIRM_TIMEOUT_S + POOL_CONFIRM_TIMEOUT_S = 180s`):
+  a candidate whose migration-signal→fill latency exceeds this bound (a backlog casualty, whose earliest
+  observable reserves are far past the modeled +LATENCY_SLOTS entry) is VOIDed with reason
+  `ENTRY_LAG_EXCEEDED`, never filled late. The bound is a latency-based, outcome-independent, pre-declared
+  measurement parameter (frozen in SPEC) — it removes a late-fill distortion, it does not cherry-pick.
 
 ## Decision
 

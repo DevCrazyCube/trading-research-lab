@@ -24,7 +24,10 @@ from ...aftershock.pac_v2_pumpswap import (
 
 INSTRUMENT = G.ARM.instrument
 POLL_SECONDS = 5
-STATE_SCHEMA = 1
+STATE_SCHEMA = 2
+# Bound one cycle's tape work so open positions (serviced first each cycle) are never starved behind a
+# large backlog, and a cold-start backlog drains over a few bounded passes instead of one unbounded scan.
+MAX_TAPE_ROWS_PER_CYCLE = 20_000
 
 
 def _path() -> pathlib.Path:
@@ -37,7 +40,7 @@ def _new_state(authority: dict) -> dict:
             "tape_cursor": authority["tape_sequence"],
             "tape_head": authority["tape_head_sha256"], "tape_offset": authority["tape_offset"],
             "mints": {}, "candidates": {}, "open": {}, "sampled_mints": {},
-            "pending_ledger": [], "census": {}, "cycles": 0}
+            "pending_ledger": [], "census": {}, "cycles": 0, "created": {}}
 
 
 def _load() -> tuple[dict, bool]:
@@ -45,7 +48,7 @@ def _load() -> tuple[dict, bool]:
     path = _path(); fresh = not path.exists(); state = RT._load(path, _new_state(authority))
     required = {"schema", "instrument", "activation_unix_nanos", "tape_cursor", "tape_head",
                 "tape_offset", "mints", "candidates", "open", "sampled_mints",
-                "pending_ledger", "census", "cycles"}
+                "pending_ledger", "census", "cycles", "created"}
     if (not isinstance(state, dict) or set(state) != required or state["schema"] != STATE_SCHEMA
             or state["instrument"] != INSTRUMENT):
         raise RuntimeError("graduation state refuses")
@@ -77,7 +80,7 @@ def _drain(state: dict) -> None:
         state["pending_ledger"].pop(0); _save(state)
 
 
-def _rows(state: dict) -> list[tuple[dict, int]]:
+def _rows(state: dict, limit: int) -> list[tuple[dict, int]]:
     path = ws_data.TRADE_BUFFER_PATH
     if not path.exists():
         if state["tape_offset"]:
@@ -88,7 +91,7 @@ def _rows(state: dict) -> list[tuple[dict, int]]:
     output = []
     with path.open("rb") as handle:
         handle.seek(state["tape_offset"])
-        while True:
+        while len(output) < limit:
             start = handle.tell(); raw = handle.readline()
             if not raw:
                 break
@@ -98,10 +101,20 @@ def _rows(state: dict) -> list[tuple[dict, int]]:
     return output
 
 
-def _created(state: dict) -> set[str]:
-    return {row["mint"] for row in ws_data.read_buffer()
-            if isinstance(row.get("mint"), str) and type(row.get("received_unix_nanos")) is int
-            and row["received_unix_nanos"] > state["activation_unix_nanos"]}
+def _absorb_creates(state: dict) -> None:
+    """Fold newly-observed post-activation create mints into the persisted eligibility set.
+
+    Persisting the set is the incremental cursor AND a correctness fix: the create buffer is trimmed to a
+    fixed tail, so re-deriving eligibility from it each cycle would silently drop a mint (and its later
+    trades/migration -> a lost F1 sample) once its create line ages out. Once a mint is known created
+    after activation it stays eligible here for the life of the epoch (subject only to the rolling
+    24h working-set bound applied at end of cycle).
+    """
+    activation = state["activation_unix_nanos"]
+    for row in ws_data.read_buffer():
+        received = row.get("received_unix_nanos")
+        if isinstance(row.get("mint"), str) and type(received) is int and received > activation:
+            state["created"][row["mint"]] = received
 
 
 def _migration_slot(provider: PumpSwapProvider, candidate: dict) -> int | None:
@@ -130,6 +143,11 @@ def _void(state: dict, mint: str, reason: str, candidate: dict) -> None:
 
 def _open_candidate(state: dict, mint: str, candidate: dict, provider: PumpSwapProvider) -> None:
     now_ns = time.time_ns()
+    # (4) A late fill is lookahead-adjacent. If the migration signal -> fill latency has already blown the
+    # bounded confirmation window (a backlog casualty), VOID and log it before any RPC -- never fill late.
+    if now_ns - candidate["received_unix_nanos"] > G.MAX_ENTRY_LAG_S * 1e9:
+        _void(state, mint, "ENTRY_LAG_EXCEEDED", candidate)
+        return
     if candidate.get("migration_slot") is None:
         candidate["migration_slot"] = _migration_slot(provider, candidate)
         if candidate["migration_slot"] is None:
@@ -236,31 +254,52 @@ def _cycle_unlocked(provider: PumpSwapProvider) -> dict:
     if not ws_data.trade_data_authorized():
         raise RuntimeError("graduation arm refuses without PUMPPORTAL_DATA_API_KEY")
     state, fresh = _load(); RT._ledger(G.ARM).ensure_genesis(); _drain(state)
-    created = _created(state)
-    for row, end in _rows(state):
+    # (3) Mark and resolve OPEN positions before the entry backlog so they are never starved behind a
+    # large tape/entry batch.
+    for mint, raw in list(state["open"].items()):
+        _service_open(state, mint, raw, provider)
+    # (2) Fold new post-activation creates into the persisted eligibility set (bounded create buffer;
+    # persisting also stops a trimmed create line from silently dropping a still-eligible mint).
+    _absorb_creates(state)
+    # (2) O(n) incremental tape consumption from the persisted cursor: advance once through a bounded
+    # batch of new events and fsync ONLY on a real state transition (a new candidate) plus one checkpoint
+    # after the batch -- never per irrelevant trade row. Replay from the last saved cursor is idempotent:
+    # bucket appends and candidate creation are deterministic and guarded against duplication.
+    for row, end in _rows(state, MAX_TAPE_ROWS_PER_CYCLE):
         body = dict(row); observed = body.pop("record_sha256", None)
         if (row.get("sequence") != state["tape_cursor"] + 1
                 or row.get("previous_record_sha256") != state["tape_head"]
                 or observed != hashlib.sha256(ws_data._canonical(body)).hexdigest()):
             raise RuntimeError("graduation tape continuity refuses")
-        mint = row["mint"]
-        if mint in created:
+        mint = row["mint"]; transitioned = False
+        if (mint in state["created"] and mint not in state["sampled_mints"]
+                and mint not in state["candidates"]):
             bucket = state["mints"].setdefault(mint, [])
             if row.get("tx_type") in {"buy", "sell"} and len(bucket) < 2000:
                 bucket.append(row)
-            if (row.get("tx_type") in {"migrate", "migration"}
-                    and mint not in state["sampled_mints"] and mint not in state["candidates"]):
+            if row.get("tx_type") in {"migrate", "migration"}:
                 cohort = "PROXY_PASS" if BM.first_six_signal(bucket) else "CONTROL_PROXY_FAIL"
                 state["candidates"][mint] = {"received_unix_nanos": row["received_unix_nanos"],
                     "record_sha256": row["record_sha256"], "signature": row.get("signature"),
                     "cohort": cohort, "migration_slot": None}
+                state["mints"].pop(mint, None)   # first-six signal consumed; free the bucket
+                transitioned = True
         state["tape_cursor"], state["tape_head"], state["tape_offset"] = (
             row["sequence"], row["record_sha256"], end)
-        _save(state)
+        if transitioned:
+            _save(state)                          # persist the new candidate + cursor durably
+    _save(state)                                  # one durable checkpoint after the batch
+    # (4) Open new candidates; each is guarded by the entry-lag void so a backlog casualty is never
+    # filled late.
     for mint, candidate in list(state["candidates"].items()):
         _open_candidate(state, mint, candidate, provider)
-    for mint, raw in list(state["open"].items()):
-        _service_open(state, mint, raw, provider)
+    # Bound epoch state to a rolling 24h working set (strictly more inclusive than the old create-buffer
+    # window, so it never drops a mint the previous code would have sampled): keep recent un-sampled
+    # creates and any mint with a live candidate; drop sampled + stale eligibility and their buckets.
+    horizon = time.time_ns() - 24 * 3600 * 1_000_000_000
+    state["created"] = {m: t for m, t in state["created"].items()
+                        if (t >= horizon and m not in state["sampled_mints"]) or m in state["candidates"]}
+    state["mints"] = {m: b for m, b in state["mints"].items() if m in state["created"]}
     state["cycles"] += 1; _save(state)
     return {"fresh": fresh, "candidates": len(state["candidates"]), "open": len(state["open"]),
             "census": state["census"]}
