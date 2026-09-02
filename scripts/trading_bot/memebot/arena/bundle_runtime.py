@@ -21,9 +21,28 @@ from .. import ws_data
 from ...aftershock.execution import PriceUnavailable
 from ...aftershock.pac_v2_pumpswap import PumpSwapProvider, PumpSwapUnavailable, sell_quote
 
-POLL_SECONDS = 0.25
+MIN_POLL_SECONDS = 0.25       # base cadence while the tape is actively producing rows
+ACTIVE_POLL_SECONDS = 0.5     # positions open/pending, no new rows — still service wall-clock deadlines promptly
+MAX_POLL_SECONDS = 4.0        # idle ceiling: nothing open/pending and no rows arriving (exponential backoff)
+REVERIFY_INTERVAL_S = 60.0    # re-run the git-anchored activation + closure-drift check at least this often
 STATE_SCHEMA = 1
 INSTRUMENT = BM.ARM.instrument
+
+# The set-once, git-anchored activation authority is immutable within a run, so its expensive
+# verification (git ls-files/status/merge-base + closure hashing) is done once and reused. It is
+# re-verified every REVERIFY_INTERVAL_S so a genuine code/prereg/spec drift, a dirtied working tree,
+# or a rewound HEAD is still refused — just on a bounded 60s latency instead of every 0.25s cycle.
+_AUTHORITY: dict | None = None
+_AUTHORITY_VERIFIED_MONOTONIC = 0.0
+
+
+def _verified_authority() -> dict:
+    global _AUTHORITY, _AUTHORITY_VERIFIED_MONOTONIC
+    now = time.monotonic()
+    if _AUTHORITY is None or now - _AUTHORITY_VERIFIED_MONOTONIC >= REVERIFY_INTERVAL_S:
+        _AUTHORITY = MF.require_activation(BM.ARM)
+        _AUTHORITY_VERIFIED_MONOTONIC = now
+    return _AUTHORITY
 
 
 def _state_path() -> pathlib.Path:
@@ -31,7 +50,10 @@ def _state_path() -> pathlib.Path:
 
 
 def _ledger() -> ChainLedger:
-    return RT._ledger(BM.ARM)
+    authority = _verified_authority()
+    return ChainLedger(RT.DATA / INSTRUMENT / "ledger.jsonl", INSTRUMENT,
+                       authority["code_sha256"], authority["prereg_sha256"],
+                       authority["spec_sha256"], authority["activation_sha256"])
 
 
 def _new_state(authority: dict) -> dict:
@@ -44,7 +66,7 @@ def _new_state(authority: dict) -> dict:
 
 
 def _load_state() -> tuple[dict, bool]:
-    authority = MF.require_activation(BM.ARM)
+    authority = _verified_authority()
     path = _state_path(); fresh = not path.exists()
     state = RT._load(path, _new_state(authority))
     required = {"schema", "instrument", "activation_unix_nanos", "tape_cursor", "tape_head",
@@ -403,14 +425,23 @@ def cycle(provider: PumpSwapProvider | None = None) -> dict:
 def main(argv=None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     once = "--once" in argv
+    delay = MIN_POLL_SECONDS
     while True:
+        result = None
         try:
-            print(json.dumps({"instrument": INSTRUMENT, **cycle()}, sort_keys=True), flush=True)
+            result = cycle()
+            print(json.dumps({"instrument": INSTRUMENT, **result}, sort_keys=True), flush=True)
         except Exception as exc:
             print(json.dumps({"instrument": INSTRUMENT, "error": str(exc)[:240]}), flush=True)
         if once:
             return 0
-        time.sleep(POLL_SECONDS)
+        if result is not None and result.get("rows"):
+            delay = MIN_POLL_SECONDS                                        # tape is live — poll tight
+        elif result is not None and (result.get("open") or result.get("pending")):
+            delay = ACTIVE_POLL_SECONDS                                     # deadlines pending — stay responsive
+        else:
+            delay = min(max(delay, MIN_POLL_SECONDS) * 2, MAX_POLL_SECONDS)  # idle or error — exponential backoff
+        time.sleep(delay)
 
 
 if __name__ == "__main__":
