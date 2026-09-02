@@ -145,6 +145,30 @@ button.act{font-family:var(--mono);font-size:10px;text-transform:uppercase;lette
 background:transparent;color:var(--text2);border:1px solid var(--line2);padding:4px 9px;cursor:pointer}
 button.act:hover{color:var(--text);border-color:var(--text3)}
 button.act:disabled{opacity:.45;cursor:default}
+
+/* --- live activity: the only part of this page that is supposed to move --------------------- */
+.livegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+background:var(--panel2);border-bottom:1px solid var(--line)}
+.lcell{padding:9px 13px;border-right:1px solid var(--line)}
+.lcell:last-child{border-right:none}
+.lval{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:19px;line-height:1.1;margin-top:4px}
+.lval.hero{font-size:24px;color:var(--amber);font-weight:600}
+.livechart{width:100%;height:250px;display:block}
+.pulse{display:inline-block;width:6px;height:6px;background:var(--mint);margin-right:7px;
+vertical-align:middle}
+.pulse.on{animation:blink 2s steps(1,end) infinite}
+.pulse.stale{background:var(--amber);animation:none}
+.pulse.dead{background:var(--red);animation:none}
+@keyframes blink{0%,54%{opacity:1}55%,100%{opacity:.16}}
+@keyframes bump{0%{background:var(--amber-bg)}100%{background:transparent}}
+.bump{animation:bump 1.6s ease-out}
+.ratio{display:grid;grid-template-columns:1fr 1.35fr;border-top:1px solid var(--line)}
+.ratiocell{padding:10px 13px;border-right:1px solid var(--line)}
+.ratiocell:last-child{border-right:none}
+.pline{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:11.5px;
+display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+.warnbox{border-left:2px solid var(--amber);background:var(--amber-bg);padding:7px 10px;
+font-size:10.5px;color:var(--text2);line-height:1.55;margin-top:9px}
 </style></head><body>
 
 <header><div class="wrap"><div class="hdr-row">
@@ -162,7 +186,32 @@ button.act:disabled{opacity:.45;cursor:default}
 
   <div class="panel">
     <div class="phead">
-      <div class="ptitle">The EV curve &mdash; expected return vs entry premium</div>
+      <div class="ptitle"><span class="pulse" id="pulse"></span>Live activity &mdash; launches per minute, off the verified tape</div>
+      <div class="pnote"><span id="livechain">&mdash;</span> &middot; updated <span id="ago" class="warn">&mdash;</span> ago</div>
+    </div>
+    <div class="livegrid" id="livestrip"></div>
+    <div class="pbody" style="padding-bottom:4px"><svg class="livechart" id="livechart" preserveAspectRatio="none"></svg></div>
+    <div class="ratio">
+      <div class="ratiocell">
+        <div class="lbl">Observed flow ratio</div>
+        <div class="lval warn" id="flowval">&mdash;</div>
+        <div class="sub" id="flowlbl">&mdash;</div>
+        <div class="sub" id="lagline" style="margin-top:7px">&mdash;</div>
+      </div>
+      <div class="ratiocell">
+        <div class="lbl">Cohort graduation rate p &mdash; measured, not from this feed</div>
+        <div id="cohortp" style="margin-top:5px"></div>
+      </div>
+    </div>
+    <div class="pbody" style="padding-top:10px">
+      <div class="warnbox" id="flownote">&mdash;</div>
+      <div class="note" id="livefoot">&mdash;</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="phead">
+      <div class="ptitle">The EV curve &mdash; analytical, moves only when the census is re-measured</div>
       <div class="pnote" id="evnote">&mdash;</div>
     </div>
     <div class="pbody" style="padding-bottom:4px"><svg class="chart" id="chart" preserveAspectRatio="none"></svg></div>
@@ -358,9 +407,215 @@ document.getElementById("legend").addEventListener("click", e => {
   drawChart(LAST);
 });
 
+// ---- the LIVE series ------------------------------------------------------------------------------
+// The EV curve above is algebra and is supposed to sit still. THIS is the arrival process, bucketed by
+// each taped row's own observed timestamp, and it must visibly redraw as minutes land. The window ends
+// at the CURRENT minute, so if the collector dies the line walks down to zero instead of freezing —
+// a stall has to look like a stall.
+let LAST_POLL_MS = 0, LAST_GRADS = null;
+
+function drawLive(st){
+  const svg = document.getElementById("livechart");
+  const ls = st.live_series || {};
+  const B = ls.buckets || [];
+  const W = 1000, H = 250, L = 46, R = 62, T = 16, BM = 28, RAIL = 28;
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  if (!B.length){
+    svg.innerHTML = '<text x="' + (W / 2) + '" y="' + (H / 2) + '" text-anchor="middle" font-size="11" '
+      + 'font-family="var(--mono)" fill="var(--text3)">'
+      + esc(ls.empty_reason || "no rows on the tape — nothing drawn, and nothing invented")
+      + '</text>';
+    return;
+  }
+  const axisY = H - BM, railTop = axisY - RAIL, n = B.length;
+  const X = i => (n === 1) ? (L + (W - L - R) / 2) : L + i / (n - 1) * (W - L - R);
+  let peak = 0; B.forEach(b => { if (b.creates > peak) peak = b.creates; });
+  const hi = Math.max(peak * 1.15, 5);
+  const Y = v => railTop - (Math.max(0, v) / hi) * (railTop - T);
+
+  let g = "";
+  // horizontal gridlines + creates/min labels
+  for (let i = 0; i <= 4; i++){
+    const v = hi * i / 4, y = Y(v);
+    g += '<line x1="' + L + '" y1="' + y.toFixed(1) + '" x2="' + (W - R) + '" y2="' + y.toFixed(1)
+       + '" stroke="var(--line)" stroke-width="1"/>'
+       + '<text x="' + (L - 7) + '" y="' + (y + 3).toFixed(1) + '" text-anchor="end" font-size="9" '
+       + 'font-family="var(--mono)" fill="var(--text3)">' + Math.round(v) + '</text>';
+  }
+  // vertical gridlines + UTC minute labels
+  const step = Math.max(1, Math.ceil(n / 9));
+  for (let i = 0; i < n; i += step){
+    const x = X(i);
+    g += '<line x1="' + x.toFixed(1) + '" y1="' + T + '" x2="' + x.toFixed(1) + '" y2="' + axisY
+       + '" stroke="var(--line)" stroke-width="1"/>'
+       + '<text x="' + x.toFixed(1) + '" y="' + (axisY + 15) + '" text-anchor="middle" font-size="9" '
+       + 'font-family="var(--mono)" fill="var(--text3)">'
+       + esc(String(B[i].minute_utc).slice(11, 16)) + '</text>';
+  }
+  g += '<line x1="' + L + '" y1="' + axisY + '" x2="' + (W - R) + '" y2="' + axisY
+     + '" stroke="var(--line2)" stroke-width="1"/>';
+
+  // the session mean, so the eye can see whether the current minute is fast or slow
+  const mean = ls.creates_per_min_session;
+  if (mean !== null && mean !== undefined && isFinite(mean)){
+    const ym = Y(mean);
+    g += '<line x1="' + L + '" y1="' + ym.toFixed(1) + '" x2="' + (W - R) + '" y2="' + ym.toFixed(1)
+       + '" stroke="var(--text3)" stroke-width="1" stroke-dasharray="3 5" opacity=".8"/>'
+       + '<text x="' + (W - R + 5) + '" y="' + (ym + 3).toFixed(1) + '" font-size="9" '
+       + 'font-family="var(--mono)" fill="var(--text3)">mean ' + mean.toFixed(1) + '</text>';
+  }
+
+  // creates per minute: filled area + 2px line. The minute now in progress is INCOMPLETE, so it is
+  // drawn dashed and excluded from the fill — an unfinished minute is not a collapse in launches.
+  const pts = B.map((b, i) => [X(i), Y(b.creates)]);
+  const partial = !!B[n - 1].partial;
+  const solid = partial ? pts.slice(0, n - 1) : pts;
+  if (solid.length){
+    const d = "M" + solid.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" L");
+    g += '<path d="' + d + ' L' + solid[solid.length - 1][0].toFixed(1) + ',' + railTop
+       + ' L' + solid[0][0].toFixed(1) + ',' + railTop + ' Z" fill="var(--mint)" opacity=".09"/>';
+    g += '<path d="' + d + '" fill="none" stroke="var(--mint)" stroke-width="2" '
+       + 'stroke-linejoin="round" stroke-linecap="round"/>';
+  }
+  if (partial && solid.length){
+    const a = solid[solid.length - 1], b = pts[n - 1];
+    g += '<path d="M' + a[0].toFixed(1) + ',' + a[1].toFixed(1) + ' L' + b[0].toFixed(1) + ','
+       + b[1].toFixed(1) + '" fill="none" stroke="var(--mint)" stroke-width="2" '
+       + 'stroke-dasharray="3 3" opacity=".55"/>';
+  }
+
+  // GRADUATIONS get their own lane. They are rare and they are the point, so they are never averaged
+  // into the creates line — each one is a discrete amber mark on the minute it actually landed.
+  g += '<text x="' + (L - 7) + '" y="' + (axisY - 7) + '" text-anchor="end" font-size="9" '
+     + 'font-family="var(--mono)" fill="var(--amber)">grad</text>';
+  B.forEach((b, i) => {
+    if (!b.graduations) return;
+    const x = X(i), h = 7 + 5 * Math.min(b.graduations, 3), ty = axisY - h;
+    g += '<line x1="' + x.toFixed(1) + '" y1="' + axisY + '" x2="' + x.toFixed(1) + '" y2="'
+       + ty.toFixed(1) + '" stroke="var(--amber)" stroke-width="1.5" opacity=".85"/>'
+       + '<path d="M' + x.toFixed(1) + ',' + (ty - 4.6).toFixed(1) + ' L' + (x + 3.7).toFixed(1) + ','
+       + ty.toFixed(1) + ' L' + x.toFixed(1) + ',' + (ty + 4.6).toFixed(1) + ' L' + (x - 3.7).toFixed(1)
+       + ',' + ty.toFixed(1) + ' Z" fill="var(--amber)"/>';
+    if (b.graduations > 1){
+      g += '<text x="' + x.toFixed(1) + '" y="' + (ty - 8).toFixed(1) + '" text-anchor="middle" '
+         + 'font-size="8.5" font-family="var(--mono)" fill="var(--amber)">' + b.graduations + '</text>';
+    }
+  });
+
+  // the emphasised endpoint — the dot the eye tracks between polls
+  const e = pts[n - 1], last = B[n - 1];
+  g += '<circle cx="' + e[0].toFixed(1) + '" cy="' + e[1].toFixed(1)
+     + '" r="7" fill="var(--mint)" opacity=".18"/>'
+     + '<circle cx="' + e[0].toFixed(1) + '" cy="' + e[1].toFixed(1)
+     + '" r="3.6" fill="var(--mint)" stroke="var(--bg)" stroke-width="1.5"/>'
+     + '<text x="' + (W - R + 5) + '" y="' + (e[1] - 6).toFixed(1) + '" font-size="10" '
+     + 'font-family="var(--mono)" fill="var(--mint)">' + last.creates + '/min</text>'
+     + '<text x="' + (W - R + 5) + '" y="' + (e[1] + 7).toFixed(1) + '" font-size="8.5" '
+     + 'font-family="var(--mono)" fill="var(--text3)">' + (partial ? "partial" : "closed") + '</text>';
+
+  svg.innerHTML = g;
+}
+
+function renderLive(st){
+  const ls = st.live_series || {};
+  const secs = ls.seconds_since_last_row;
+  const pulse = document.getElementById("pulse");
+  pulse.className = "pulse " + (secs === null || secs === undefined ? "dead"
+    : (secs < 30 ? "on" : (secs < 180 ? "stale" : "dead")));
+
+  const chain = ls.chain_ok === true ? '<span class="badge b-mint">CHAIN VERIFIED</span>'
+    : (ls.chain_ok === false ? '<span class="badge b-red">CHAIN REFUSED</span>'
+                             : '<span class="badge b-dim">NO CHAIN</span>');
+  document.getElementById("livechain").innerHTML = chain
+    + ' <span class="mono">seq ' + int(ls.head_sequence) + ' &middot; '
+    + esc(String(ls.head_sha256 || "").slice(0, 10)) + ' &middot; last row '
+    + (secs === null || secs === undefined ? EM : secs.toFixed(1) + "s") + ' ago</span>';
+
+  const cells = [
+    ["Tape rows", int(ls.head_sequence), "hash-chained", "", ""],
+    ["Creates observed", int(ls.cumulative_creates), "this session", "", ""],
+    ["Graduations observed", int(ls.graduations_observed), "this session", "hero", "gradcell"],
+    ["Creates / min", nf(ls.creates_per_min_recent, 1),
+      "mean of last " + int(ls.recent_rate_window_minutes) + " closed min", "pos", ""],
+    ["Peak / min", int(ls.peak_creates_per_min), "best closed minute", "", ""],
+    // nf() already returns the em-dash for null/undefined/non-finite, and isFinite(null) is TRUE in
+    // JS, so the unit is appended off nf's result rather than off an isFinite guard that null passes.
+    ["Session span", nf(ls.session_span_minutes, 1) === EM ? EM : nf(ls.session_span_minutes, 1) + " min",
+      "first row to last", "", ""],
+    ["Window drawn", ls.buckets_available ? int(ls.buckets_available) + " min" : EM,
+      (ls.coverage && ls.coverage.truncated_tail) ? "bounded read — earlier omitted"
+                                                  : "of " + int(ls.window_minutes_requested) + " requested", "", ""],
+  ];
+  document.getElementById("livestrip").innerHTML = cells.map(c =>
+    '<div class="lcell"' + (c[4] ? ' id="' + c[4] + '"' : "") + '>'
+    + '<div class="lbl">' + esc(c[0]) + '</div>'
+    + '<div class="lval ' + c[3] + '">' + c[1] + '</div>'
+    + '<div class="sub">' + esc(c[2]) + '</div></div>').join("");
+
+  // flash the hero when a graduation actually lands
+  const gr = ls.graduations_observed;
+  if (LAST_GRADS !== null && isFinite(gr) && gr > LAST_GRADS){
+    const cell = document.getElementById("gradcell");
+    if (cell){ cell.classList.remove("bump"); void cell.offsetWidth; cell.classList.add("bump"); }
+  }
+  if (isFinite(gr)) LAST_GRADS = gr;
+
+  drawLive(st);
+
+  // the flow ratio, kept visually apart from p and labelled as what it is
+  const fr = ls.flow_ratio_graduations_per_1000_creates;
+  document.getElementById("flowval").textContent =
+    isFinite(fr) && fr !== null ? nf(fr, 1) + " / 1,000 creates" : EM;
+  document.getElementById("flowlbl").textContent = ls.flow_ratio_label || EM;
+
+  // The MEASURED create -> graduation lag. This is on screen because it is the evidence for the
+  // warning beside it: an earlier draft justified the refusal by asserting the graduating coins were
+  // "created hours or days ago", which this tape contradicts outright. Show the number, not the story.
+  const lg = ls.create_to_graduation_latency || {};
+  document.getElementById("lagline").innerHTML = (lg.matched_pairs
+    ? 'measured create&nbsp;&rarr;&nbsp;graduation lag: median <span class="mono warn">'
+      + nf(lg.median_seconds, 1) + 's</span> <span class="dim">(' + int(lg.median_slots)
+      + ' slots)</span>, ' + int(lg.same_transaction_as_the_create) + ' of '
+      + int(lg.matched_pairs) + ' in the <span class="warn">same transaction</span> as the create. '
+      + int(lg.graduations_with_no_taped_create) + ' graduations had no taped create.'
+    : 'create &rarr; graduation lag: no matched pairs on the tape yet');
+  document.getElementById("cohortp").innerHTML = (ls.cohort_p_reference || []).map(r =>
+    '<div class="pline"><span class="dim">' + esc(r.venue_id) + '</span>'
+    + '<span>' + pct(r.graduation_rate_p, 4) + ' <span class="dim">'
+    + int(r.p_grads) + ' / ' + int(r.p_n) + '</span></span></div>').join("")
+    + '<div class="sub" style="margin-top:6px">' + esc(ls.cohort_p_note || "") + '</div>';
+  document.getElementById("flownote").innerHTML = '<b class="warn">Read this before quoting the ratio.</b> '
+    + esc(ls.flow_ratio_note || "");
+
+  const cov = ls.coverage || {};
+  document.getElementById("livefoot").textContent =
+    "Buckets are cut on each taped row's own observed timestamp, from " + esc(cov.from_utc || EM)
+    + " to " + esc(cov.to_utc || EM) + " UTC. " + esc(cov.note || "")
+    + ". Session " + esc(ls.session_first_utc || EM) + " → " + esc(ls.session_last_utc || EM)
+    + ", " + int(ls.window_creates) + " creates and " + int(ls.window_graduations)
+    + " graduations inside the drawn window"
+    // guarded: an empty match map would otherwise leave a dangling ", ." in the sentence
+    + (Object.keys(ls.graduations_matched_to_a_taped_create || {}).length
+        ? ", " + Object.entries(ls.graduations_matched_to_a_taped_create)
+            .map(([v, m]) => v + " " + m + " matched to a create we also taped").join(", ")
+        : "")
+    + ". The window ends at the current UTC minute, so a dead collector walks the line to zero"
+    + " rather than freezing it.";
+}
+
+setInterval(() => {
+  const el = document.getElementById("ago");
+  if (!el || !LAST_POLL_MS) return;
+  const s = (Date.now() - LAST_POLL_MS) / 1000;
+  el.textContent = s.toFixed(0) + "s";
+  el.className = s > 12 ? "neg" : "warn";
+}, 1000);
+
 // ---- render ---------------------------------------------------------------------------------------
 function render(st){
   LAST = st;
+  LAST_POLL_MS = Date.now();
+  renderLive(st);
   // First paint only: hide the instant-liquidity configs. p > 0.5 is venues.py's own MAX_LOTTERY_P —
   // above it the config is not a graduation lottery at all, so its EV sits two orders of magnitude
   // above every real curve. Hidden by DEFAULT, never dropped: one click puts it back.
@@ -395,9 +650,11 @@ function render(st){
   const cv = st.ev_curves;
   drawChart(st);
   document.getElementById("evnote").textContent =
-    cv.series.length + " venues · m = entry price / floor price · " + cv.formula_breakeven;
+    "STATIC BY CONSTRUCTION · " + cv.series.length + " venues · m = entry price / floor price · "
+    + cv.formula_breakeven;
   document.getElementById("evfoot").innerHTML =
-    esc(cv.prize_term_band.note) + " Band: <span class=\"mono warn\">"
+    "<b>This chart does not move, and that is correct.</b> Every input is a constant: X is curve algebra, p is a census, the toll is a published fee. It redraws only when the census is re-measured. The moving picture is the live-activity panel above. "
+    + esc(cv.prize_term_band.note) + " Band: <span class=\"mono warn\">"
     + nf(cv.prize_term_band.min, 4) + " – " + nf(cv.prize_term_band.max, 4)
     + "</span>. " + esc(st.provenance.floor_result)
     + " Click a legend entry to toggle a series; ⚠ flags a rank the registry itself caveats, and the"

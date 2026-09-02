@@ -19,6 +19,11 @@ THE FIVE SECTIONS
 3. LAUNCHLAB CENSUS — the 1,292,348-curve status census read off the FREE public RPC, plus an optional,
    bounded `refresh_census()` that re-runs it. Refresh NEVER runs inside build_state().
 4. LIVE TAPE        — whatever the multi-venue collector has actually taped. Zero rows reports zero rows.
+4b. LIVE SERIES     — the same tape, bucketed by minute: the ONLY moving chart on the page. Creates per
+   minute, graduation events as discrete markers, and the running session counters. The graduations-
+   per-create ratio it carries is named a FLOW RATIO and is explicitly NOT the cohort graduation rate:
+   the numerator and denominator are not a matched cohort, and the create-to-graduation lag that
+   drives the mismatch is MEASURED off the tape here, never asserted.
 5. LABEL LEDGER     — the headline: 82 b11a labels vs 13,694 LaunchLab labels, and the floor-cohort
    positive count that the label wall was blocking.
 
@@ -42,6 +47,7 @@ import base64
 import datetime as _dt
 import json
 import pathlib
+import statistics
 import time
 import urllib.error
 import urllib.request
@@ -72,6 +78,15 @@ B11A_FLOOR_COHORT = 2975           # curves that were still AT the floor when a 
 B11A_FLOOR_COHORT_POSITIVES = 3    # ...of which THREE graduated. That is the wall.
 
 # EV curve sampling. m = entry price / floor price; 1.00 is the floor itself, 2.00 is "paid double".
+# The bounded tail read. live_series() compares it against the tape's real size to know whether its
+# window is fully covered, so the two must be the SAME number — a truncated read that silently reports
+# full coverage would draw a fake dip at the left edge of the live chart.
+# 8 MB holds roughly 6,500 rows, which at the observed ~30 creates/min is well over three hours —
+# enough that the 90-minute live window is normally covered end to end. It stays a BOUND, not a
+# promise: when the tape outgrows it, `coverage.truncated_tail` says so and the series starts later
+# rather than drawing a partial first minute as if it were a lull.
+TAIL_MAX_BYTES = 8_000_000
+
 EV_CURVE_M_MIN = 1.00
 EV_CURVE_M_MAX = 2.00
 EV_CURVE_STEPS = 100
@@ -392,7 +407,7 @@ def refresh_census(rpc_url: str = FREE_RPC, *, path: pathlib.Path = CENSUS_PATH,
 # ---------------------------------------------------------------------------------------------------
 # 4. LIVE TAPE
 # ---------------------------------------------------------------------------------------------------
-def _tail_rows(tape: MVT.MultiVenueTape, max_bytes: int = 2_000_000) -> list[dict]:
+def _tail_rows(tape: MVT.MultiVenueTape, max_bytes: int = TAIL_MAX_BYTES) -> list[dict]:
     """Parse the last `max_bytes` of the tape into rows, dropping a leading partial line.
 
     Bounded so a multi-hundred-megabyte tape cannot make a dashboard request hang. Read-only: it opens
@@ -481,6 +496,308 @@ def live_tape(*, recent: int = 40) -> dict:
 
 
 # ---------------------------------------------------------------------------------------------------
+# 4b. LIVE SERIES — the one part of this dashboard that is allowed to MOVE
+# ---------------------------------------------------------------------------------------------------
+# WHY THIS EXISTS, AND WHY IT IS SEPARATE FROM THE EV CURVE
+# --------------------------------------------------------
+# The EV curve is ANALYTICAL: EV(m) = (1 + (X-1)p)/m - 1 - toll, where X is curve algebra, p is a census
+# and the toll is a published fee. None of the three is a time series, so that chart correctly never
+# moves — it changes only when the census is re-measured. This function is the other thing: the actual
+# arrival process the collector is taping right now, bucketed by minute. It is the proof-of-life.
+#
+# THE ONE STATISTIC THIS MODULE REFUSES TO PRINT
+# ----------------------------------------------
+# `graduations observed / creates observed` is NOT a graduation rate and must never be labelled one.
+# The numerator and the denominator are not a matched cohort: graduations landing in the window can
+# belong to coins created before it, and the coins created late in the window are counted with their
+# outcome still pending. It is a window statistic that moves with collector uptime, not the fate of a
+# followed cohort. It is carried below under an explicit flow-ratio name, per 1,000 creates, with the
+# refusal spelled out in the payload so the UI cannot accidentally render it as p. The real cohort p
+# (survivorship-free, off the census) travels alongside it for contrast.
+#
+# The SIZE of that mismatch is measured, not assumed — see `_latency_stats`. On this tape the observed
+# create-to-graduation gap is a matter of seconds, so the flow ratio sits much closer to p than the
+# refusal alone would suggest. That does not make it p, and the refusal stands; it does mean the
+# reason printed on screen has to be the true one.
+LIVE_SERIES_MINUTES = 90
+_MIN_NS = 60_000_000_000
+
+FLOW_RATIO_NOTE = (
+    "OBSERVED FLOW, NOT A GRADUATION RATE. This is graduations observed per 1,000 creates observed "
+    "during this collector session. It is NOT the probability that a new coin graduates, because the "
+    "numerator and the denominator are not a matched cohort: some coins graduating inside the window "
+    "were created BEFORE it (their creates are not in the denominator), and the coins created late in "
+    "the window have not yet had their full chance to graduate (they are in the denominator with the "
+    "outcome still pending). It is a window statistic, and it moves with the window. The cohort rate p "
+    "carried beside it is the census number: measured over every curve ever opened, survivorship-free, "
+    "and not affected by how long this collector has been running."
+)
+
+# WHAT THIS NOTE DELIBERATELY DOES NOT SAY
+# ----------------------------------------
+# An earlier draft justified the refusal by asserting that "the coins graduating now were created hours
+# or days ago". That is FALSE on this venue's own taped data and has been removed. Measured over the
+# matched create/graduation pairs on the live tape, the median create-to-graduation gap is on the order
+# of SECONDS, not hours: roughly half of all observed graduations land in the very same slot as the
+# create, and a large share in the very same TRANSACTION — the bundled-sniper pattern, where the create
+# and a curve-exhausting buy are submitted atomically. `create_to_graduation_latency` below measures
+# this from the tape on every read rather than asserting it, so the claim can never drift from the data
+# again. The consequence worth being honest about: because the lag is short, the flow ratio is much
+# CLOSER to p than a naive different-cohorts argument implies, and it can land near it. Close is still
+# not equal, and a window statistic that depends on collector uptime is still not a survivorship-free
+# census, which is why the two are kept in separate fields and only p is ever called p.
+
+
+def _latency_stats(rows: list[dict]) -> dict:
+    """Measure the create -> graduation gap over pairs BOTH of whose rows are on the tape.
+
+    Honest about what it is: matched pairs only. Graduations whose create predates the read are
+    excluded (they have no measurable gap here), which biases the measurement DOWN — the long-lag
+    graduations are exactly the ones most likely to be unmatched. Reported with its own n and the
+    unmatched count so the censoring is visible instead of implied.
+    """
+    first_create: dict[str, dict] = {}
+    for r in rows:
+        if r.get("kind") != "create":
+            continue
+        key = r.get("mint") or r.get("pool_id")
+        if key and key not in first_create:
+            first_create[key] = r
+    gaps: list[float] = []
+    slot_gaps: list[int] = []
+    same_tx = 0
+    matched = 0
+    unmatched = 0
+    for r in rows:
+        if r.get("kind") != "graduation":
+            continue
+        key = r.get("mint") or r.get("pool_id")
+        c = first_create.get(key) if key else None
+        if c is None:
+            unmatched += 1
+            continue
+        matched += 1
+        gns, cns = r.get("received_unix_nanos"), c.get("received_unix_nanos")
+        if isinstance(gns, int) and isinstance(cns, int):
+            gaps.append((gns - cns) / 1e9)
+        gs, cs = r.get("slot"), c.get("slot")
+        if isinstance(gs, int) and isinstance(cs, int):
+            slot_gaps.append(gs - cs)
+        if r.get("signature") and r.get("signature") == c.get("signature"):
+            same_tx += 1
+    out = {
+        "matched_pairs": matched,
+        "graduations_with_no_taped_create": unmatched,
+        "same_transaction_as_the_create": same_tx,
+        "same_slot_as_the_create": sum(1 for d in slot_gaps if d == 0),
+        "median_seconds": None, "p25_seconds": None, "p75_seconds": None, "max_seconds": None,
+        "median_slots": None,
+        "note": ("measured over matched pairs on the bounded tail read only. Graduations whose create "
+                 "is older than the read are excluded, which biases this DOWN: long-lag graduations "
+                 "are the ones most likely to be unmatched."),
+    }
+    if gaps:
+        gaps.sort()
+        out.update({
+            "median_seconds": _round(statistics.median(gaps), 3),
+            "p25_seconds": _round(gaps[len(gaps) // 4], 3),
+            "p75_seconds": _round(gaps[(3 * len(gaps)) // 4], 3),
+            "max_seconds": _round(gaps[-1], 3),
+        })
+    if slot_gaps:
+        slot_gaps.sort()
+        out["median_slots"] = _round(statistics.median(slot_gaps), 1)
+    return out
+
+
+def _minute_ns(ns: int) -> int:
+    """Floor a nanosecond stamp to its UTC minute."""
+    return (int(ns) // _MIN_NS) * _MIN_NS
+
+
+def _minute_iso(minute_ns: int) -> str:
+    return _dt.datetime.fromtimestamp(minute_ns / 1e9, _dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
+
+
+def live_series(minutes: int = LIVE_SERIES_MINUTES, *, tape_state: dict | None = None,
+                recent_graduations: int = 40) -> dict:
+    """Per-minute arrival buckets off the verified tape, plus the running session counters.
+
+    Bucketed by each row's OWN `received_unix_nanos`, never by wall clock at read time. The window ends
+    at the current UTC minute, so a collector that dies makes the series fall to zero rather than
+    freezing at its last good value — a stall must LOOK like a stall.
+
+    An empty tape returns empty buckets and says why. Nothing here is interpolated or back-filled:
+    a minute with no rows is a real zero, and a minute the bounded tail read cannot see is not emitted
+    at all (see `coverage`).
+    """
+    minutes = max(1, int(minutes))
+    tape = MVT.MultiVenueTape()
+    state = tape_state if tape_state is not None else live_tape(recent=0)
+
+    per_venue = state.get("per_venue") or {}
+    cum_creates = sum(int((c or {}).get("create") or 0) for c in per_venue.values())
+    cum_grads = sum(int((c or {}).get("graduation") or 0) for c in per_venue.values())
+    first_ns, last_ns = state.get("first_unix_nanos"), state.get("last_unix_nanos")
+    now_ns = time.time_ns()
+
+    span_min = ((last_ns - first_ns) / _MIN_NS) if (first_ns and last_ns) else None
+    pump, bonk = V.VENUES["pump.fun"], V.VENUES["letsbonk"]
+
+    out: dict = {
+        "window_minutes_requested": minutes,
+        "generated_utc": _now_iso(),
+        "tape_path": str(tape.path),
+        # provenance the UI can show, so the series is visibly from the SAME verified chain the tape
+        # panel prints — a moving chart with no chain behind it is just an animation.
+        "chain_ok": state.get("chain_verified"),
+        "head_sequence": state.get("rows"),
+        "head_sha256": state.get("head_sha256"),
+        "refused": state.get("refused"),
+        "health": state.get("health"),
+        "per_venue_totals": per_venue,
+        "cumulative_creates": cum_creates,
+        "cumulative_graduations": cum_grads,
+        # the number that should visibly climb
+        "graduations_observed": cum_grads,
+        "graduations_matched_to_a_taped_create":
+            state.get("graduations_matched_to_a_taped_create") or {},
+        "session_first_utc": (_dt.datetime.fromtimestamp(first_ns / 1e9, _dt.timezone.utc)
+                              .strftime("%Y-%m-%dT%H:%M:%SZ")) if first_ns else None,
+        "session_last_utc": (_dt.datetime.fromtimestamp(last_ns / 1e9, _dt.timezone.utc)
+                             .strftime("%Y-%m-%dT%H:%M:%SZ")) if last_ns else None,
+        "session_span_minutes": round(span_min, 3) if span_min is not None else None,
+        "seconds_since_last_row": round((now_ns - last_ns) / 1e9, 1) if last_ns else None,
+        "creates_per_min_session": round(cum_creates / span_min, 3)
+                                   if (span_min and span_min > 0) else None,
+        # --- the flow ratio, under a name that cannot be mistaken for p -------------------------
+        "flow_ratio_graduations_per_1000_creates":
+            round(1000.0 * cum_grads / cum_creates, 3) if cum_creates else None,
+        "flow_ratio_label": "graduations observed per 1,000 creates observed "
+                            "(window statistic — NOT the cohort graduation rate)",
+        "flow_ratio_note": FLOW_RATIO_NOTE,
+        "cohort_p_reference": [
+            {"venue_id": vid, "graduation_rate_p": _round(v.graduation_rate_p, 8),
+             "p_n": v.p_n, "p_grads": v.p_grads, "p_basis": v.p_basis}
+            for vid, v in (("pump.fun", pump), ("letsbonk", bonk))
+            if v.graduation_rate_p is not None
+        ],
+        "cohort_p_note": "measured over every curve ever opened (permanent status byte / "
+                         "survivorship-free create window), which is why it is comparable across "
+                         "cohorts and the flow ratio above is not.",
+    }
+
+    # --- per-minute buckets ------------------------------------------------------------------------
+    if not state.get("rows"):
+        out.update({"buckets": [], "buckets_available": 0, "window_creates": 0,
+                    "window_graduations": 0, "recent_graduation_events": [],
+                    "creates_per_min_recent": None, "peak_creates_per_min": None,
+                    "create_to_graduation_latency": _latency_stats([]),
+                    "coverage": {"truncated_tail": False, "from_utc": None, "to_utc": None,
+                                 "minutes_covered": 0},
+                    "empty": True,
+                    "empty_reason": state.get("empty_reason") or state.get("refused")
+                                    or "no rows taped yet — no series to draw, and none invented"})
+        return out
+
+    size = tape.path.stat().st_size if tape.path.exists() else 0
+    truncated = size > TAIL_MAX_BYTES
+    rows = _tail_rows(tape, max_bytes=TAIL_MAX_BYTES)
+
+    end_min = _minute_ns(max(now_ns, last_ns or 0))
+    want_start = end_min - (minutes - 1) * _MIN_NS
+
+    tail_first = min((r["received_unix_nanos"] for r in rows
+                      if isinstance(r.get("received_unix_nanos"), int)), default=None)
+    if truncated and tail_first is not None:
+        # The bounded read began mid-file, so the first minute it can see is a PARTIAL minute and
+        # would draw a fake dip. Start one whole minute later and say so.
+        measurable_from = _minute_ns(tail_first) + _MIN_NS
+    elif first_ns:
+        measurable_from = _minute_ns(first_ns)         # before this, the collector did not exist
+    else:
+        measurable_from = end_min
+    cov_start = max(want_start, measurable_from)
+
+    acc: dict[int, dict] = {}
+    grad_events: list[dict] = []
+    for row in rows:
+        ns = row.get("received_unix_nanos")
+        if not isinstance(ns, int):
+            continue
+        m = _minute_ns(ns)
+        if m < cov_start or m > end_min:
+            continue
+        kind = row.get("kind")
+        if kind not in ("create", "graduation"):
+            continue
+        venue = row.get("venue") or "unknown"
+        slot = acc.setdefault(m, {"creates": 0, "graduations": 0, "by_venue": {}})
+        vslot = slot["by_venue"].setdefault(venue, {"create": 0, "graduation": 0})
+        vslot[kind] += 1
+        slot["graduations" if kind == "graduation" else "creates"] += 1
+        if kind == "graduation":
+            grad_events.append({
+                "minute_utc": _minute_iso(m),
+                "received_utc": _dt.datetime.fromtimestamp(ns / 1e9, _dt.timezone.utc)
+                                   .strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "venue": venue, "mint": row.get("mint") or row.get("base_mint"),
+                "pool_id": row.get("pool_id"), "symbol": row.get("symbol"),
+                "signature": row.get("signature"), "sequence": row.get("sequence"),
+            })
+
+    cur_min = _minute_ns(now_ns)
+    buckets = []
+    m = cov_start
+    while m <= end_min:
+        b = acc.get(m) or {"creates": 0, "graduations": 0, "by_venue": {}}
+        buckets.append({
+            "minute_utc": _minute_iso(m),
+            "minute_unix": m // 1_000_000_000,
+            "creates": b["creates"],
+            "graduations": b["graduations"],
+            "by_venue": b["by_venue"],
+            # the minute now in progress is INCOMPLETE — it is not a drop in arrivals
+            "partial": m == cur_min,
+        })
+        m += _MIN_NS
+
+    complete = [b for b in buckets if not b["partial"]]
+    recent = complete[-15:]
+    out.update({
+        "buckets": buckets,
+        "buckets_available": len(buckets),
+        "window_creates": sum(b["creates"] for b in buckets),
+        "window_graduations": sum(b["graduations"] for b in buckets),
+        "recent_graduation_events": grad_events[-recent_graduations:][::-1],
+        "creates_per_min_recent": round(sum(b["creates"] for b in recent) / len(recent), 3)
+                                  if recent else None,
+        "recent_rate_window_minutes": len(recent),
+        "peak_creates_per_min": max((b["creates"] for b in complete), default=None),
+        # Measured, never asserted: this is what makes the flow-ratio refusal say something TRUE about
+        # why the ratio is not p, instead of the plausible-sounding "created hours or days ago" that
+        # this tape flatly contradicts. Computed over the whole tail read, not just the drawn window,
+        # so a pair whose create sits just before the window still counts.
+        "create_to_graduation_latency": _latency_stats(rows),
+        "coverage": {
+            "truncated_tail": truncated,
+            "tail_max_bytes": TAIL_MAX_BYTES,
+            "tape_bytes": size,
+            "from_utc": _minute_iso(cov_start),
+            "to_utc": _minute_iso(end_min),
+            "minutes_covered": len(buckets),
+            "note": ("the bounded tail read cannot reach the start of the requested window, so the "
+                     "series begins where the read does — earlier minutes are omitted, not zeroed"
+                     if truncated and cov_start > want_start else
+                     "the series begins at the first minute the collector was running; minutes "
+                     "before that are omitted, not zeroed"),
+        },
+        "empty": False,
+    })
+    return out
+
+
+# ---------------------------------------------------------------------------------------------------
 # 5. LABEL LEDGER
 # ---------------------------------------------------------------------------------------------------
 def label_ledger(census: dict | None = None) -> dict:
@@ -545,12 +862,15 @@ def label_ledger(census: dict | None = None) -> dict:
 # ---------------------------------------------------------------------------------------------------
 # THE ASSEMBLER
 # ---------------------------------------------------------------------------------------------------
-def build_state(*, recent: int = 40) -> dict:
+def build_state(*, recent: int = 40, live_minutes: int = LIVE_SERIES_MINUTES) -> dict:
     """Everything the observatory renders, in one read-only pass. Never performs a network call."""
     census = read_census()
     econ = venue_economics()
     curves = ev_curves()
     tape = live_tape(recent=recent)
+    # Hand live_tape's already-verified summary to live_series so the whole chain is walked ONCE and
+    # the two panels can never disagree about how many rows exist.
+    series = live_series(live_minutes, tape_state=tape)
     ledger = label_ledger(census)
 
     tradeable = [r for r in econ if r["tradeable"]]
@@ -586,8 +906,15 @@ def build_state(*, recent: int = 40) -> dict:
             "prize_term_band": curves["prize_term_band"],
             "tape_rows": tape.get("rows"),
             "census_cost_usd": census.get("cost_usd") if census.get("available") else None,
+            # --- the live half of the strip: these are the numbers that move ---------------------
+            "creates_observed": series.get("cumulative_creates"),
+            "graduations_observed": series.get("graduations_observed"),
+            "creates_per_min": series.get("creates_per_min_recent"),
+            "session_span_minutes": series.get("session_span_minutes"),
+            "seconds_since_last_row": series.get("seconds_since_last_row"),
         },
         "venues": econ,
+        "live_series": series,
         "ev_curves": curves,
         "census": census,
         "tape": tape,
@@ -612,7 +939,8 @@ def build_state(*, recent: int = 40) -> dict:
         },
         "footer": (f"registry {V.registry_sha256()[:12]} · census "
                    f"{census.get('measured_utc') if census.get('available') else 'MISSING'} · "
-                   f"tape {tape.get('rows')} rows · read-only · $0 free-RPC"),
+                   f"tape {tape.get('rows')} rows · {series.get('cumulative_creates')} creates / "
+                   f"{series.get('graduations_observed')} graduations observed · read-only · $0 free-RPC"),
     }
 
 
@@ -635,6 +963,8 @@ def _main() -> None:
     if args.compact:
         for s in state["ev_curves"]["series"]:
             s["points"] = f"<{len(s['points'])} points elided>"
+        buckets = state["live_series"].get("buckets") or []
+        state["live_series"]["buckets"] = f"<{len(buckets)} minute buckets elided>"
     print(json.dumps(state, indent=2, default=str))
 
 
