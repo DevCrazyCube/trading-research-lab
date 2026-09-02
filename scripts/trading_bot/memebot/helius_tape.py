@@ -80,6 +80,7 @@ def run_listener(seconds: float | None = None, *, verbose: bool = True) -> dict:
     """
     if websocket is None:
         raise Refused("websocket-client is not installed; cannot open the Helius pump tape")
+    DEC.verify_pinned_idl()
     url = _ws_url()
 
     t0 = time.time()
