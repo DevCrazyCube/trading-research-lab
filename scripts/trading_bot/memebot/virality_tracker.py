@@ -133,6 +133,102 @@ def _shape(p: dict) -> dict:
     }
 
 
+# --- CLOSURE-SAFE mark fallback --------------------------------------------------------------------
+# The pinned DexScreener pairs endpoint goes dark for >=60-min-old boosted pump.fun bonding-curve coins
+# within a few cycles, which sent 100% of VIRALITY_ARRIVAL_V2_2's finalized positions to MEASUREMENT_VOID
+# (the coin was still ALIVE on-chain; only the free price feed abandoned it). When that happens we price
+# the open position from OUR OWN local trade tape instead of letting the mark go None. This module is in
+# NO arena arm's code_sha256() closure, so editing it drifts NO arm -> plain restart, no re-epoch.
+_PAIR_MINT: dict[str, str] = {}                 # pairAddress -> mint, learned from healthy observations
+_PAIR_MINT_LOADED = False
+_PAIR_MINT_PATH = ROOT / "research" / "data" / "memebot_cache" / "arena_pair_mint.json"
+_TAPE_MARK_MAX_AGE_S = 330.0                     # a tape trade must be this fresh to mark a position
+_TAPE_TAIL_BYTES = 4 * 1024 * 1024               # reverse-read only this much tail (bounds cost)
+
+
+def _load_pair_mint() -> None:
+    global _PAIR_MINT_LOADED
+    if _PAIR_MINT_LOADED:
+        return
+    _PAIR_MINT_LOADED = True
+    try:
+        stored = json.loads(_PAIR_MINT_PATH.read_text())
+    except (OSError, ValueError):
+        return
+    if isinstance(stored, dict):
+        _PAIR_MINT.update({k: v for k, v in stored.items() if isinstance(k, str) and isinstance(v, str)})
+
+
+def _remember(shape: dict | None) -> None:
+    """Learn a pairAddress->mint mapping from a HEALTHY DexScreener shape and persist it (survives restart)."""
+    if not shape:
+        return
+    pair, mint = shape.get("pair"), shape.get("mint")
+    if not (isinstance(pair, str) and isinstance(mint, str) and pair and mint):
+        return
+    _load_pair_mint()
+    if _PAIR_MINT.get(pair) == mint:
+        return
+    _PAIR_MINT[pair] = mint
+    try:
+        _PAIR_MINT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        tmp = _PAIR_MINT_PATH.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(_PAIR_MINT, separators=(",", ":")))
+        tmp.replace(_PAIR_MINT_PATH)
+    except OSError:
+        pass
+
+
+def _tape_mark(mint: str) -> float | None:
+    """Most-recent pump.fun bonding-curve trade for `mint` on our local tape -> USD price, or None.
+
+    Reverse-reads only the fresh tail of the tape and converts the on-chain reserves with a FRESH SOL/USD.
+    Fail-closed: any missing/stale/parse problem returns None so the next fallback (or unpriced) runs."""
+    try:
+        from . import ws_data
+        from ..aftershock import solusd_recorder
+    except Exception:  # noqa: BLE001 -- optional deps; degrade to no tape mark
+        return None
+    now_ns = time.time_ns()
+    floor_ns = now_ns - int(_TAPE_MARK_MAX_AGE_S * 1e9)
+    try:
+        with ws_data.TRADE_BUFFER_PATH.open("rb") as fh:
+            size = fh.seek(0, 2)
+            fh.seek(max(0, size - _TAPE_TAIL_BYTES))
+            tail = fh.read()
+    except OSError:
+        return None
+    best = None
+    for raw in reversed(tail.split(b"\n")):        # newest-first
+        if not raw.strip():
+            continue
+        try:
+            row = json.loads(raw)
+        except ValueError:
+            continue                                # a partial first line, or corruption — skip
+        rn = row.get("received_unix_nanos")
+        if type(rn) is not int:
+            continue
+        if rn < floor_ns:
+            break                                   # everything older is outside the freshness window
+        if (row.get("mint") == mint and row.get("pool") == "pump"
+                and row.get("tx_type") in ("buy", "sell")):
+            best = row
+            break                                   # first hit scanning backwards == most recent
+    if best is None:
+        return None
+    try:
+        v_sol = float(best["virtual_sol"]); v_tok = float(best["virtual_tokens"])
+        obs = solusd_recorder.latest_observation(
+            decision_unix_nanos=now_ns, max_local_age_nanos=120_000_000_000)
+        sol_usd = float(obs.value_str)
+    except Exception:  # noqa: BLE001
+        return None
+    if v_sol > 0 and v_tok > 0 and sol_usd > 0:
+        return (v_sol / v_tok) * sol_usd
+    return None
+
+
 def _deepest_pair(mint: str) -> dict | None:
     try:
         d = net.http_get_json("https://api.dexscreener.com/latest/dex/tokens/" + mint)
@@ -145,17 +241,38 @@ def _deepest_pair(mint: str) -> dict | None:
         liq = _f((p.get("liquidity") or {}).get("usd")) or 0
         if best is None or liq > best[0]:
             best = (liq, p)
-    return _shape(best[1]) if best else None
+    shape = _shape(best[1]) if best else None
+    _remember(shape)                                # pin the pair->mint mapping at first sight
+    return shape
 
 
 def _pinned_pair(pair_addr: str) -> dict | None:
-    """Re-fetch ONE specific pair by address — this is what pins market identity across observations."""
+    """Re-fetch ONE specific pair by address — this is what pins market identity across observations.
+
+    If the pinned pairs endpoint goes dark (the coin drops off DexScreener's pair index while still alive
+    on-chain), fall back to a mark from our own local trade tape so an OPEN position gets a real mark
+    instead of a MEASUREMENT_VOID. Market identity stays pinned (same pair_addr + learned mint)."""
+    shape = None
     try:
         d = net.http_get_json("https://api.dexscreener.com/latest/dex/pairs/solana/" + pair_addr)
     except Exception:  # noqa: BLE001
-        return None
-    pairs = d.get("pairs") or ([d["pair"]] if d.get("pair") else [])
-    return _shape(pairs[0]) if pairs else None
+        d = None
+    if d:
+        pairs = d.get("pairs") or ([d["pair"]] if d.get("pair") else [])
+        shape = _shape(pairs[0]) if pairs else None
+    if shape and shape.get("price"):
+        _remember(shape)
+        return shape
+    # pinned endpoint dark -> tape fallback for the still-alive coin (only the price is needed to mark/exit)
+    _load_pair_mint()
+    mint = _PAIR_MINT.get(pair_addr)
+    if mint:
+        price = _tape_mark(mint)
+        if price:
+            return {"mint": mint, "pair": pair_addr, "symbol": None, "price": price,
+                    "reserve_usd": None, "fdv_usd": None, "age_minutes": None,
+                    "m5_buys": 0, "m5_sells": 0, "buys": 0, "sells": 0, "dex": "pumpfun-tape"}
+    return shape
 
 
 def _screen_ok(c: dict) -> bool:
