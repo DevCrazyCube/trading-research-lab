@@ -193,7 +193,7 @@ def decode_trade(payload: bytes) -> dict | None:
     # garbage. Dropping it keeps the tape honest: better a missing trade than a wrong price.
     if (not curve_consistent(v_sol_sol, v_tok_tok) or r_sol_sol < 0 or r_sol_sol > v_sol_sol
             or abs((v_sol_sol - r_sol_sol) - 30.0) > 0.05
-            or abs((v_tok_tok - r_tok / TOKEN_DECIMALS) - 280_000_000.0) > 1.0):
+            or abs((v_tok_tok - r_tok / TOKEN_DECIMALS) - 279_900_000.0) > 1.0):
         return None
     return {
         "txType": "buy" if is_buy else "sell",
@@ -338,7 +338,7 @@ if __name__ == "__main__":
     m = bytes(range(32)); u = bytes(range(32, 64))
     t = decode_trade(_mk_trade(m, 5 * LAMPORTS, 1_000_000 * TOKEN_DECIMALS, True, u, 123,
                                31 * LAMPORTS, 1_050_000_000 * TOKEN_DECIMALS,
-                               1 * LAMPORTS, 770_000_000 * TOKEN_DECIMALS))
+                               1 * LAMPORTS, 770_100_000 * TOKEN_DECIMALS))
     assert t["txType"] == "buy" and t["mint"] == b58encode(m), t
     assert abs(t["solAmount"] - 5.0) < 1e-9 and abs(t["vSolInBondingCurve"] - 31.0) < 1e-9, t
     assert t["marketCapSol"] and t["marketCapSol"] > 0, t
@@ -350,7 +350,7 @@ if __name__ == "__main__":
     assert curve_consistent(31.0, 1.05e9) and not curve_consistent(5.0, 1.05e9)
     assert decode_trade(_mk_trade(m, 271 * LAMPORTS, TOKEN_DECIMALS, True, u, 1,
                                   271 * LAMPORTS, 1_050_000_000 * TOKEN_DECIMALS,
-                                  LAMPORTS, 770_000_000 * TOKEN_DECIMALS, mayhem=True)) is None
+                                  LAMPORTS, 770_100_000 * TOKEN_DECIMALS, mayhem=True)) is None
     # CompleteEvent (graduation) round-trip — the untested link that let a wrong DISC_COMPLETE silently
     # drop every migration and starve MIGRATION_ACCEPTANCE_V1. Layout: user, mint, bonding_curve, i64 ts,
     # quote_mint; exact 144 bytes; quote must be native/wrapped SOL.
