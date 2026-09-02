@@ -1,0 +1,282 @@
+{
+  "measured_at_utc": "2026-09-02T16:30Z",
+  "rpc": "HELIUS_RPC_URL (mainnet, solana-core 4.2.0-rc.1)",
+  "method_note": "All curve params read from live on-chain accounts and decoded against on-chain Anchor IDLs (fetched from each program's anchor:idl PDA). Meteora DBC X verified by integrating the on-chain liquidity curve: base and quote integrals reproduce swap_base_amount and migration_quote_threshold to ratio 1.0000.",
+  "venues": {
+    "pump.fun": {
+      "program_id": "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+      "verified_onchain": true,
+      "amm_after_graduation": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA",
+      "global_account": "4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf",
+      "initial_virtual_token_reserves": 1073000000000000,
+      "initial_virtual_sol_reserves_lamports": 30000000000,
+      "initial_real_token_reserves": 793100000000000,
+      "token_total_supply": 1000000000000000,
+      "fee_basis_points": 95,
+      "creator_fee_basis_points": 5,
+      "toll_per_side": 0.01,
+      "toll_round_trip": 0.02,
+      "pool_migration_fee_lamports": 15000001,
+      "graduation_quote_raise_sol": 85.0054,
+      "graduation_multiple_X": 14.6958,
+      "graduation_rate_p": 0.020855,
+      "p_n": 3932,
+      "p_grads": 82,
+      "p_basis": "research/b11a 23h window",
+      "event_discriminators": {
+        "CreateEvent": "1b72a94ddeeb6376",
+        "TradeEvent": "bddb7fd34ee661ee",
+        "CompleteEvent": "5f72619cd42e9808",
+        "CompletePumpAmmMigrationEvent": "bde95db95c94ea94"
+      },
+      "event_transport": "emit_cpi self-CPI inner instruction (anchor CPI prefix e445a52e51cb9a1d), NOT Program-data logs"
+    },
+    "raydium_launchlab": {
+      "program_id": "LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj",
+      "verified_onchain": true,
+      "global_config_default": "6s1xP3hpbAfFoNtUNF8mfHsjr2Bd97JxFJRWLbL6aHuX",
+      "global_trade_fee_rate_ppm": 2500,
+      "fee_denominator": 1000000,
+      "fee_model": "protocol trade_fee_rate + platform fee_rate + creator_fee_rate + share_fee, all on quote, additive",
+      "platform_config_count": 2129,
+      "pool_state_platform_config_offset": 173,
+      "pool_state_status_offset": 17,
+      "status_codes": {
+        "0": "funding",
+        "1": "funding ended awaiting migration",
+        "2": "migrated"
+      },
+      "sampled_pools": 80000,
+      "sampled_graduated": 871,
+      "sampled_rate": 0.01089,
+      "event_discriminators": {
+        "PoolCreateEvent": "97d7e20976a173ae",
+        "TradeEvent": "bddb7fd34ee661ee"
+      },
+      "event_transport": "Program data: log lines (verified)",
+      "platforms": {
+        "letsbonk.fun": {
+          "platform_config": "FfYek5vEz23cMkWsdJwG2oa6EphsvXSHrGpdALN4g6W1",
+          "platform_fee_rate_ppm": 12500,
+          "creator_fee_rate_ppm": 0,
+          "toll_per_side": 0.015,
+          "toll_round_trip": 0.03,
+          "toll_verified_from_tradeevent": true,
+          "pools_total": 1035966,
+          "pools_migrated": 10994,
+          "graduation_rate_p": 0.010612,
+          "dominant_curve": {
+            "supply": 1000000000000000,
+            "total_base_sell": 793100000000000,
+            "virtual_base": 1073025605596382,
+            "virtual_quote_lamports": 30000852951,
+            "total_quote_fund_raising_lamports": 85000000000,
+            "X": 14.6938
+          },
+          "other_curves_seen": [
+            {
+              "X": 14.6938,
+              "raise_sol": 12.5
+            },
+            {
+              "X": 14.6938,
+              "raise_sol": 50.0
+            },
+            {
+              "X": 7.5,
+              "raise_sol": 85.0
+            }
+          ]
+        },
+        "raydium_own": {
+          "platform_config": "4Bu96XjU84XjPDSpveTVf6LYGCkfW5FK7SNkREWcEfV4",
+          "platform_fee_rate_ppm": 7500,
+          "creator_fee_rate_ppm": 500,
+          "toll_per_side": 0.0105,
+          "toll_round_trip": 0.021,
+          "pools_total": 95816,
+          "pools_migrated": 540,
+          "graduation_rate_p": 0.005636,
+          "curves_seen": [
+            {
+              "X": 14.6938,
+              "n": 239
+            },
+            {
+              "X": 16.0,
+              "n": 120
+            },
+            {
+              "X": 7.5,
+              "n": 14
+            }
+          ]
+        },
+        "squatter_or_unused": {
+          "flap.sol": {
+            "platform_config": "2t5xeJtqNrQWaTJNfnY6gj5nBUuUwPG6qNuGD1w27Ce5",
+            "pools": 1
+          },
+          "ponsfamily.com": {
+            "platform_config": "5jXn5ko9AWLpaTPF5rD5kyxZXcapkfaRCrgRFrFQDgm5",
+            "pools": 1
+          },
+          "boop.fun": {
+            "platform_config": "3Srku5GEBe92Ef5SGYwcSiHry59Pc3NBpehXpuThUTof",
+            "pools": 2
+          },
+          "moonshot": {
+            "platform_config": "FRkPXj4mdwqD8iAeG2u8SWfSxvrKF9NYSn6AVPG9yjbu",
+            "pools": 3
+          }
+        }
+      }
+    },
+    "meteora_dbc": {
+      "program_id": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+      "verified_onchain": true,
+      "curve_type": "piecewise concentrated liquidity, up to 20 ranges; per-config, NOT one venue constant",
+      "X_formula": "(migration_sqrt_price / sqrt_start_price)^2  [both u128 Q64 in PoolConfig at offsets 280 and 392]",
+      "fee_denominator": 1000000000,
+      "distinct_configs_in_60k_pool_sample": 21182,
+      "event_discriminators": {
+        "EvtInitializePool": "e432f655cb428625",
+        "EvtCurveComplete": "e5e756549c864b18",
+        "EvtSwap": "1b3c15d58aaabb93",
+        "EvtSwap2": "bd4233a826507599"
+      },
+      "virtual_pool_offsets": {
+        "config": 72,
+        "base_mint": 136,
+        "base_reserve": 232,
+        "quote_reserve": 240,
+        "sqrt_price": 280,
+        "is_migrated": 305,
+        "finish_curve_timestamp": 344
+      },
+      "top_configs": [
+        {
+          "config": "FbKf76ucsQssF7XZBuzScdJfugtsSKwZFYztKsMEhWZM",
+          "identified_as": "Moonshot (mints end 'moon', cdn.moonshot.com metadata)",
+          "quote": "USDC",
+          "X": 200.0,
+          "migration_quote_threshold": 66040882531,
+          "fee_per_side": 0.005,
+          "pools_sampled": 6624,
+          "migrated": 3
+        },
+        {
+          "config": "7SXEnhGRXVkR5LEE4o6xXYwcX6QJbFemMS3mbmMRHSDn",
+          "X": 2.43,
+          "fee_cliff_per_side": 0.5,
+          "fee_mode": "exponential scheduler 150 periods",
+          "pools_sampled": 807,
+          "migrated": 4
+        },
+        {
+          "config": "BkoMF8PzYwoVQTKcQ6uNeQrHytw1jJN6ig4JzjcKS3iF",
+          "X": 11.0,
+          "fee_per_side": 0.015,
+          "migration_quote_threshold_sol": 66.0,
+          "pools_sampled": 465,
+          "migrated": 10
+        },
+        {
+          "config": "GybkUNYVNk1FZMt9myAfvpSVgoKBgaueMTvszwBN4qYx",
+          "X": 18.1745,
+          "fee_per_side": 0.02,
+          "migration_quote_threshold_sol": 98.377,
+          "pools_sampled": 274,
+          "migrated": 4
+        },
+        {
+          "config": "7UNpFBfTdWrcfS7aBQzEaPgZCfPJe8BDgHzwmWUZaMaF",
+          "X": 18.1745,
+          "fee_per_side": 0.01,
+          "migration_quote_threshold_sol": 85.017,
+          "pools_sampled": 259,
+          "migrated": 0
+        },
+        {
+          "config": "AxVRAxqnPLz9dv3DFnksAbFKdv7H5LBmznG7YiuZMCan",
+          "X": 12.629,
+          "fee_per_side": 0.0025,
+          "migration_quote_threshold_sol": 10.98,
+          "pools": 932,
+          "migrated": 931,
+          "note": "curve completes in 48-224s with 350-1000+ txs; unidentified venue"
+        },
+        {
+          "config": "GEi2PKrdDMGG2vmwcYLTrHfwnHszc8eLfPP2Q9j9JmLu",
+          "X": 1.1747,
+          "fee_per_side": 0.01,
+          "migration_quote_threshold_sol": 12.0,
+          "pools": 3642,
+          "migrated": 3634,
+          "note": "referenced by Bags update authority; near-instant-liquidity config"
+        }
+      ]
+    },
+    "boop": {
+      "program_id": "boop8hVGQGqehUK2iVEMEnMrL5RbjywRzHKBmBE7ry4",
+      "verified_onchain": true,
+      "config_account": "AbgFqRWjGWgUaVrZrLLWU5HDY5dktmAL6zT9aacQW7y1",
+      "virtual_sol_reserves_lamports": 29731395800,
+      "virtual_token_reserves": 1000000000000000000,
+      "graduation_target_lamports": 86000000000,
+      "graduation_fee_lamports": 6000000000,
+      "damping_term": 31,
+      "swap_fee_basis_points": 200,
+      "toll_per_side": 0.02,
+      "toll_round_trip": 0.04,
+      "token_amount_for_raydium_liquidity": 206900000000000000,
+      "graduation_multiple_X": "UNVERIFIED. damping_term=31 means the curve is not plain constant product: assuming plain CP from the 86 SOL target gives X=((29.7314+86)/29.7314)^2=15.15x, but assuming plain CP from the 793.1M tokens sold on curve gives a 113.97 SOL raise and X=23.36x. The two disagree, so the closed form needs the program source. Not derived.",
+      "event_discriminators": {
+        "TokenCreatedEvent": "607a718a32e39539",
+        "TokenGraduatedEvent": "49746f1a5cd9928d",
+        "TokenBoughtEvent": "4759de7cd7c0e68a",
+        "TokenSoldEvent": "ccefb64df1334d42"
+      }
+    },
+    "moonshot_legacy": {
+      "program_id": "MoonCVVNZFSYkqNXP6bxHLPL6QQJiMagDL3qcqUQTrG",
+      "verified_onchain": true,
+      "note": "still executable, last activity 2026-09-02; live Moonshot launches now run on Meteora DBC config FbKf76... (USDC, X=200)"
+    },
+    "heaven": {
+      "program_id": "HEAVENoP2qxoeuF8Dj2oT1GHEnu49U5mJYkdeC8BAX2o",
+      "verified_onchain": true,
+      "protocol_config_v3": "HtYH4a2q1PXPErgNxVPTmoTKbE2Y7cpSQVDAEbQqgKCm",
+      "bonding_curve": false,
+      "note": "no curve, no graduation; every token opens as an AMM pool seeded with virtual liquidity (~35 SOL per docs, NOT measured). No graduation prize => the pump.fun EV frame does not apply.",
+      "onchain_idl": "not present at anchor:idl PDA (not fetched)"
+    },
+    "not_on_solana": {
+      "pons": {
+        "chain": "Robinhood Chain (EVM, chainId 4663)",
+        "active_factory": "0xA5aAb3F0c6EeadF30Ef1D3Eb997108E976351feB",
+        "legacy_factory": "0x0c37a24F5D23A486FA692d1500881d698B1F77a4",
+        "v3_factory": "0x1f7d7550b1b028f7571e69a784071f0205fd2efa",
+        "locker": "0x736D76699C26D0d966744cAe304C000d471f7F35",
+        "events": [
+          "TokenLaunched"
+        ],
+        "state_fn": "graduationStatus()",
+        "verified_onchain": false,
+        "source": "docs.mobula.io/almanac/robinhood-launchpads/pons"
+      },
+      "flap": {
+        "chains": [
+          "BNB Chain (origin, Jan 2024)",
+          "X Layer",
+          "Monad",
+          "Morph",
+          "Robinhood Chain (Jul 2026)"
+        ],
+        "solana": "NO real deployment - the only Solana artefact is an unused Raydium LaunchLab platform config with 1 pool",
+        "bnb_graduation_threshold": "16 BNB -> PancakeSwap V3",
+        "verified_onchain": false
+      }
+    }
+  }
+}
