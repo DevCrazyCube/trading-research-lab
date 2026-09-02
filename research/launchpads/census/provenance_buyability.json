@@ -1,0 +1,31 @@
+{
+ "generated_utc": "2026-09-02T19:43:57Z",
+ "population_repeat": 1981,
+ "population_single": 2656,
+ "groups": {
+  "repeat_graduate_creator": {
+   "n": 13,
+   "truncated_gt1000tx": 5,
+   "median_tx_count": 180,
+   "min_tx": 2,
+   "max_tx": 949,
+   "median_lifetime_seconds": 2389425,
+   "p25_lifetime_seconds": 662667,
+   "median_slot_span": 6079043,
+   "share_completed_within_1_slot": 0.1538,
+   "share_lifetime_under_60s": 0.2308
+  },
+  "single_graduate_creator": {
+   "n": 8,
+   "truncated_gt1000tx": 10,
+   "median_tx_count": 250.0,
+   "min_tx": 73,
+   "max_tx": 688,
+   "median_lifetime_seconds": 8302803.0,
+   "p25_lifetime_seconds": 5279928,
+   "median_slot_span": 20980019.5,
+   "share_completed_within_1_slot": 0.0,
+   "share_lifetime_under_60s": 0.0
+  }
+ }
+}

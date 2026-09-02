@@ -1,0 +1,207 @@
+{
+ "B3": {
+  "pool_folds": {
+   "n": 92650,
+   "k": 1523,
+   "rate": 0.016438208310847274
+  },
+  "creator_folds": {
+   "n": 92868,
+   "k": 1528,
+   "rate": 0.01645346082611879,
+   "cp_lower": 0.015772639100376858,
+   "lift": 1.5527878560352717
+  },
+  "perm": {
+   "observed": 0.01645346082611879,
+   "p_perm_up": 0.029925187032418952,
+   "p_perm_down": 0.9675810473815462,
+   "p_perm_2sided": 0.059850374064837904,
+   "null_mean": 0.00978734142169156,
+   "null_sd": 0.003424293991646231,
+   "direction_tested": "up",
+   "nperm": 400
+  },
+  "concentration": {
+   "distinct_creators": 23787,
+   "top_creator_share_of_grads": 0.05824607329842932,
+   "top5_creator_share_of_grads": 0.09227748691099476
+  },
+  "economics": {
+   "n": 92868,
+   "positives": 1528,
+   "p_cond": 0.01645346082611879,
+   "mean_X_of_graduates": 13.828846117814862,
+   "prize_term_measured": 0.211078917043773,
+   "m_star_homogeneous_letsbonk": 1.189622178587608,
+   "ev_at_floor_homogeneous": 0.19531084394523626,
+   "m_star_heterogeneous": 1.175804773828906,
+   "ev_at_floor_heterogeneous": 0.18107891704377302,
+   "toll_used": 0.03
+  }
+ },
+ "B4": {
+  "pool_folds": {
+   "n": 136434,
+   "k": 732,
+   "rate": 0.005365231540525089
+  },
+  "creator_folds": {
+   "n": 123096,
+   "k": 627,
+   "rate": 0.005093585494248392,
+   "cp_lower": 0.004764441551455903,
+   "lift": 0.48070480628555007
+  },
+  "perm": {
+   "observed": 0.005093585494248392,
+   "p_perm_up": 0.9301745635910225,
+   "p_perm_down": 0.034912718204488775,
+   "p_perm_2sided": 0.06982543640897755,
+   "null_mean": 0.012197013188317932,
+   "null_sd": 0.004802180182978946,
+   "direction_tested": "up",
+   "nperm": 400
+  },
+  "concentration": {
+   "distinct_creators": 28438,
+   "top_creator_share_of_grads": 0.023923444976076555,
+   "top5_creator_share_of_grads": 0.05263157894736842
+  },
+  "economics": {
+   "n": 123096,
+   "positives": 627,
+   "p_cond": 0.005093585494248392,
+   "mean_X_of_graduates": 13.290585784408455,
+   "prize_term_measured": 0.0626031494672784,
+   "m_star_homogeneous_letsbonk": 1.0385928911646611,
+   "ev_at_floor_homogeneous": 0.0397506778996011,
+   "m_star_heterogeneous": 1.0316535431721148,
+   "ev_at_floor_heterogeneous": 0.0326031494672783,
+   "toll_used": 0.03
+  }
+ },
+ "C3": {
+  "pool_folds": {
+   "n": 58353,
+   "k": 1931,
+   "rate": 0.033091700512398674
+  },
+  "creator_folds": {
+   "n": 58941,
+   "k": 1704,
+   "rate": 0.028910266198401792,
+   "cp_lower": 0.027783758152426716,
+   "lift": 2.7283931777053843
+  },
+  "perm": {
+   "observed": 0.028910266198401792,
+   "p_perm_up": 0.004987531172069825,
+   "p_perm_down": 0.9950124688279302,
+   "p_perm_2sided": 0.00997506234413965,
+   "null_mean": 0.009993333318941327,
+   "null_sd": 0.00295058522380026,
+   "direction_tested": "up",
+   "nperm": 400
+  },
+  "concentration": {
+   "distinct_creators": 18503,
+   "top_creator_share_of_grads": 0.05985915492957746,
+   "top5_creator_share_of_grads": 0.15140845070422534
+  },
+  "economics": {
+   "n": 58941,
+   "positives": 1704,
+   "p_cond": 0.028910266198401792,
+   "mean_X_of_graduates": 11.642829267336726,
+   "prize_term_measured": 0.3076870272228463,
+   "m_star_homogeneous_letsbonk": 1.355235126263546,
+   "ev_at_floor_homogeneous": 0.3658921800514525,
+   "m_star_heterogeneous": 1.2695990555561614,
+   "ev_at_floor_heterogeneous": 0.2776870272228462,
+   "toll_used": 0.03
+  }
+ },
+ "C4": {
+  "pool_folds": {
+   "n": 1204000,
+   "k": 10738,
+   "rate": 0.00891860465116279
+  },
+  "creator_folds": {
+   "n": 1203178,
+   "k": 10728,
+   "rate": 0.008916386436587105,
+   "cp_lower": 0.008775879602527698,
+   "lift": 0.8414799004761132
+  },
+  "perm": {
+   "observed": 0.008916386436587105,
+   "p_perm_up": 0.8628428927680798,
+   "p_perm_down": 0.10723192019950124,
+   "p_perm_2sided": 0.2144638403990025,
+   "null_mean": 0.011586456325374712,
+   "null_sd": 0.005430789281674241,
+   "direction_tested": "up",
+   "nperm": 400
+  },
+  "concentration": {
+   "distinct_creators": 230304,
+   "top_creator_share_of_grads": 0.012956748695003729,
+   "top5_creator_share_of_grads": 0.03737882177479493
+  },
+  "economics": {
+   "n": 1203178,
+   "positives": 10728,
+   "p_cond": 0.008916386436587105,
+   "mean_X_of_graduates": 14.705637465985475,
+   "prize_term_measured": 0.12220476000649297,
+   "m_star_homogeneous_letsbonk": 1.089416943842546,
+   "ev_at_floor_homogeneous": 0.09209945215782248,
+   "m_star_heterogeneous": 1.0895191844723233,
+   "ev_at_floor_heterogeneous": 0.09220476000649305,
+   "toll_used": 0.03
+  }
+ },
+ "D1": {
+  "pool_folds": {
+   "n": 8474,
+   "k": 302,
+   "rate": 0.03563842341279207
+  },
+  "creator_folds": {
+   "n": 8574,
+   "k": 302,
+   "rate": 0.03522276650338232,
+   "cp_lower": 0.032007358777736764,
+   "lift": 3.324132512935862
+  },
+  "perm": {
+   "observed": 0.03522276650338232,
+   "p_perm_up": 0.00997506234413965,
+   "p_perm_down": 0.628428927680798,
+   "p_perm_2sided": 0.0199501246882793,
+   "null_mean": 0.008424932954216023,
+   "null_sd": 0.014308749480930581,
+   "direction_tested": "up",
+   "nperm": 400
+  },
+  "concentration": {
+   "distinct_creators": 3707,
+   "top_creator_share_of_grads": 0.016556291390728478,
+   "top5_creator_share_of_grads": 0.06291390728476821
+  },
+  "economics": {
+   "n": 8574,
+   "positives": 302,
+   "p_cond": 0.03522276650338232,
+   "mean_X_of_graduates": 10.843412276424193,
+   "prize_term_measured": 0.3467122122090163,
+   "m_star_homogeneous_letsbonk": 1.4391596760553589,
+   "ev_at_floor_homogeneous": 0.4523344663370197,
+   "m_star_heterogeneous": 1.3074875846689478,
+   "ev_at_floor_heterogeneous": 0.31671221220901624,
+   "toll_used": 0.03
+  }
+ }
+}

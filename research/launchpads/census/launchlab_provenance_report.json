@@ -1,0 +1,29 @@
+{
+  "rows": 1292365,
+  "creators": 252223,
+  "graduated": 13694,
+  "creator_launch_distribution": {
+    "1": {
+      "creators": 190467,
+      "launches": 190467,
+      "graduations": 4577
+    },
+    "2-5": {
+      "creators": 45590,
+      "launches": 123570,
+      "graduations": 2036
+    },
+    "6-20": {
+      "creators": 10771,
+      "launches": 104279,
+      "graduations": 1148
+    },
+    "21+": {
+      "creators": 5395,
+      "launches": 874049,
+      "graduations": 5933
+    }
+  },
+  "grads_from_repeat_creators": 9117,
+  "curves_from_repeat_creators": 1101898
+}

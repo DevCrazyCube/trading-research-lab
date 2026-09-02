@@ -1,0 +1,44 @@
+{
+ "generated_utc": "2026-09-02T19:39:53Z",
+ "rpc": "https://api.mainnet-beta.solana.com",
+ "calls": 121,
+ "per_platform": 40,
+ "platforms": {
+  "BuM6KDpWiTcxvrpXywWFiw45R2RNH8WURdvqoTDV1BW4": {
+   "sampled": 24,
+   "errors": 16,
+   "newest_utc": "2026-08-29T02:36:46Z",
+   "oldest_utc": "2025-07-30T16:31:56Z",
+   "median_utc": "2026-01-25T09:05:35Z",
+   "days_since_newest": 4.71,
+   "days_since_median": 220.44
+  },
+  "FfYek5vEz23cMkWsdJwG2oa6EphsvXSHrGpdALN4g6W1": {
+   "sampled": 40,
+   "errors": 0,
+   "newest_utc": "2026-08-28T15:28:58Z",
+   "oldest_utc": "2025-05-13T20:52:38Z",
+   "median_utc": "2026-02-03T19:36:41Z",
+   "days_since_newest": 5.17,
+   "days_since_median": 211.0
+  },
+  "Dt9xZGWUYyN44Vxfz9qLQGERhtR2taDnLG1B8XbDEWWN": {
+   "sampled": 1,
+   "errors": 0,
+   "newest_utc": "2026-01-28T14:11:49Z",
+   "oldest_utc": "2026-01-28T14:11:49Z",
+   "median_utc": "2026-01-28T14:11:49Z",
+   "days_since_newest": 217.23,
+   "days_since_median": 217.23
+  },
+  "46X3jvgtQdsynKd3bHQL7bLTnZZwpTFzPoyYQQUDJENG": {
+   "sampled": 40,
+   "errors": 0,
+   "newest_utc": "2026-06-09T05:04:11Z",
+   "oldest_utc": "2025-08-29T14:57:10Z",
+   "median_utc": "2025-12-14T11:19:26Z",
+   "days_since_newest": 85.61,
+   "days_since_median": 262.35
+  }
+ }
+}

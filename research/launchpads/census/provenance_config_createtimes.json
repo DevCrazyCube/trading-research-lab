@@ -1,0 +1,46 @@
+{
+ "generated_utc": "2026-09-02T20:04:40Z",
+ "note": "create time = pool's oldest signature; 12 random pools per curve config",
+ "configs": {
+  "Q0=17.648 R=50  p=23.4% lift 22.1 n=1535": {
+   "sampled": 11,
+   "age_days_min": 394.1,
+   "age_days_median": 406.0,
+   "age_days_max": 407.1,
+   "share_last_60d": 0.0,
+   "share_last_180d": 0.0
+  },
+  "Q0=10.000 R=30  p=5.09% lift 4.81 n=3023": {
+   "sampled": 12,
+   "age_days_min": 90.1,
+   "age_days_median": 278.9,
+   "age_days_max": 452.1,
+   "share_last_60d": 0.0,
+   "share_last_180d": 0.25
+  },
+  "Q0=10.589 R=30  p=3.08% lift 2.91 n=3600": {
+   "sampled": 12,
+   "age_days_min": 137.2,
+   "age_days_median": 296.3,
+   "age_days_max": 407.3,
+   "share_last_60d": 0.0,
+   "share_last_180d": 0.167
+  },
+  "Q0=28.333 R=85  p=2.00% lift 1.89 n=8003": {
+   "sampled": 11,
+   "age_days_min": 166.9,
+   "age_days_median": 350.0,
+   "age_days_max": 491.1,
+   "share_last_60d": 0.0,
+   "share_last_180d": 0.091
+  },
+  "Q0=30.001 R=85  p=0.97% lift 0.92 n=911456 (baseline)": {
+   "sampled": 11,
+   "age_days_min": 266.1,
+   "age_days_median": 410.7,
+   "age_days_max": 488.8,
+   "share_last_60d": 0.0,
+   "share_last_180d": 0.0
+  }
+ }
+}

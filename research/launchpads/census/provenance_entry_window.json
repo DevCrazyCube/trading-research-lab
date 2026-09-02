@@ -1,0 +1,27 @@
+{
+ "generated_utc": "2026-09-02T19:46:45Z",
+ "population_cohort": 1981,
+ "population_control": 2656,
+ "groups": {
+  "cohort_repeat_graduate_creator": {
+   "pools_with_complete_history": 13,
+   "median_total_tx": 533,
+   "seconds_create_to_10th_tx_median": 1,
+   "seconds_create_to_10th_tx_p25": 0,
+   "share_10th_tx_within_60s": 1.0,
+   "share_10th_tx_within_1s": 0.6154,
+   "seconds_create_to_50th_tx_median": 20,
+   "n_with_50_tx": 11
+  },
+  "control_single_graduate_creator": {
+   "pools_with_complete_history": 18,
+   "median_total_tx": 1173.0,
+   "seconds_create_to_10th_tx_median": 2.0,
+   "seconds_create_to_10th_tx_p25": 1,
+   "share_10th_tx_within_60s": 0.8889,
+   "share_10th_tx_within_1s": 0.4444,
+   "seconds_create_to_50th_tx_median": 16.5,
+   "n_with_50_tx": 18
+  }
+ }
+}

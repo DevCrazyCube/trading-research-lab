@@ -1,0 +1,126 @@
+{
+ "generated_utc": "2026-09-02T19:52:50Z",
+ "note": "m = ((Q0+quote_vault_SOL)/Q0)^2 on the dominant LetsBonk curve Q0=30.000853 SOL, R=85 SOL. Vault balance read from PoolState quote_vault@301 matched by accountIndex in postTokenBalances. The vault holds real_quote plus accrued fees, so m is a slight OVERestimate.",
+ "groups": {
+  "cohort_repeat_graduate_creator": {
+   "pools": 10,
+   "marks": {
+    "t+1s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 4.784,
+     "median_premium_m": 1.344,
+     "min_premium_m": 1.003,
+     "max_premium_m": 2.73,
+     "share_m_below_6.75": 1.0,
+     "share_m_below_3.40": 1.0,
+     "share_m_below_1.62": 0.8,
+     "share_m_below_1.11": 0.2
+    },
+    "t+5s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 6.777,
+     "median_premium_m": 1.504,
+     "min_premium_m": 1.013,
+     "max_premium_m": 10.322,
+     "share_m_below_6.75": 0.9,
+     "share_m_below_3.40": 0.8,
+     "share_m_below_1.62": 0.6,
+     "share_m_below_1.11": 0.1
+    },
+    "t+30s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 17.431,
+     "median_premium_m": 2.504,
+     "min_premium_m": 1.004,
+     "max_premium_m": 5.465,
+     "share_m_below_6.75": 1.0,
+     "share_m_below_3.40": 0.9,
+     "share_m_below_1.62": 0.3,
+     "share_m_below_1.11": 0.2
+    },
+    "t+60s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 22.547,
+     "median_premium_m": 3.076,
+     "min_premium_m": 1.004,
+     "max_premium_m": 6.508,
+     "share_m_below_6.75": 1.0,
+     "share_m_below_3.40": 0.6,
+     "share_m_below_1.62": 0.3,
+     "share_m_below_1.11": 0.2
+    },
+    "t+300s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 6.111,
+     "median_premium_m": 1.45,
+     "min_premium_m": 1.03,
+     "max_premium_m": 5.651,
+     "share_m_below_6.75": 1.0,
+     "share_m_below_3.40": 0.7,
+     "share_m_below_1.62": 0.6,
+     "share_m_below_1.11": 0.4
+    }
+   }
+  },
+  "control_single_graduate_creator": {
+   "pools": 10,
+   "marks": {
+    "t+1s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 6.953,
+     "median_premium_m": 1.518,
+     "min_premium_m": 1.096,
+     "max_premium_m": 4.755,
+     "share_m_below_6.75": 1.0,
+     "share_m_below_3.40": 0.9,
+     "share_m_below_1.62": 0.6,
+     "share_m_below_1.11": 0.1
+    },
+    "t+5s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 8.791,
+     "median_premium_m": 1.674,
+     "min_premium_m": 1.072,
+     "max_premium_m": 8.245,
+     "share_m_below_6.75": 0.9,
+     "share_m_below_3.40": 0.9,
+     "share_m_below_1.62": 0.5,
+     "share_m_below_1.11": 0.1
+    },
+    "t+30s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 9.89,
+     "median_premium_m": 1.768,
+     "min_premium_m": 1.002,
+     "max_premium_m": 14.973,
+     "share_m_below_6.75": 0.8,
+     "share_m_below_3.40": 0.7,
+     "share_m_below_1.62": 0.3,
+     "share_m_below_1.11": 0.1
+    },
+    "t+60s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 7.059,
+     "median_premium_m": 1.527,
+     "min_premium_m": 1.002,
+     "max_premium_m": 14.973,
+     "share_m_below_6.75": 0.9,
+     "share_m_below_3.40": 0.9,
+     "share_m_below_1.62": 0.6,
+     "share_m_below_1.11": 0.1
+    },
+    "t+300s": {
+     "n": 10,
+     "median_quote_in_vault_sol": 20.459,
+     "median_premium_m": 2.849,
+     "min_premium_m": 1.002,
+     "max_premium_m": 14.973,
+     "share_m_below_6.75": 0.9,
+     "share_m_below_3.40": 0.6,
+     "share_m_below_1.62": 0.3,
+     "share_m_below_1.11": 0.1
+    }
+   }
+  }
+ }
+}

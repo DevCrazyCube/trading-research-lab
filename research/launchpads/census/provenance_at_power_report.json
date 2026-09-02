@@ -1,0 +1,1479 @@
+{
+ "generated_utc": "2026-09-02T21:01:56Z",
+ "prereg": {
+  "seed": 20260902,
+  "nperm": 1000,
+  "folds": 5,
+  "alpha": 0.05,
+  "min_train_n": 200,
+  "features": [
+   [
+    "A1",
+    "creator",
+    "loo",
+    false,
+    "creator has >=1 OTHER graduated launch (leave-one-out)"
+   ],
+   [
+    "A2",
+    "creator",
+    "loo",
+    false,
+    "creator has >=2 OTHER graduated launches (leave-one-out)"
+   ],
+   [
+    "A3",
+    "creator",
+    "loo",
+    false,
+    "creator LOO graduation rate >= 5% among creators with >=5 other launches"
+   ],
+   [
+    "A4",
+    "creator",
+    "loo",
+    true,
+    "creator has 0 other launches (SOLO) -- uses the future, flagged"
+   ],
+   [
+    "A5",
+    "creator",
+    "loo",
+    true,
+    "creator has <=4 other launches -- uses the future, flagged"
+   ],
+   [
+    "A6",
+    "creator",
+    "loo",
+    true,
+    "creator has >=100 other launches (negative screen) -- uses the future, flagged"
+   ],
+   [
+    "A7",
+    "creator",
+    "omnibus",
+    false,
+    "same-creator both-graduate pair concordance vs p^2 (creator heterogeneity)"
+   ],
+   [
+    "B1",
+    "platform",
+    "static",
+    false,
+    "platform_config == LetsBonk FfYek5vE..."
+   ],
+   [
+    "B2",
+    "platform",
+    "static",
+    false,
+    "platform_config == Raydium-own 4Bu96XjU..."
+   ],
+   [
+    "B3",
+    "platform",
+    "select",
+    false,
+    "platform in the fold-selected UP set (train CP-lower > train base rate)"
+   ],
+   [
+    "B4",
+    "platform",
+    "select",
+    false,
+    "platform in the fold-selected DOWN set (train CP-upper < train base rate) -- deadness screen"
+   ],
+   [
+    "C1",
+    "curve",
+    "static",
+    false,
+    "migrate_type == 1"
+   ],
+   [
+    "C2",
+    "curve",
+    "static",
+    false,
+    "raise target R == 85 SOL (the dominant config)"
+   ],
+   [
+    "C3",
+    "curve",
+    "select",
+    false,
+    "curve tuple (Q0,R,migrate_type) in the fold-selected UP set"
+   ],
+   [
+    "C4",
+    "curve",
+    "select",
+    false,
+    "curve tuple in the fold-selected DOWN set -- deadness screen"
+   ],
+   [
+    "D1",
+    "joint",
+    "select",
+    false,
+    "platform UP set AND curve UP set (both selected inside the training folds)"
+   ]
+  ],
+  "loo_rule": "\nLEAVE-ONE-OUT, ENFORCED BY CONSTRUCTION (not by convention):\n  For creator c let N_c = that creator's total curves in the census and G_c = that creator's total\n  graduations.  When scoring curve i belonging to creator c the history handed to the feature is\n      n_loo(i) = N_c - 1                 g_loo(i) = G_c - y_i\n  computed as a vectorised array subtraction of the row's OWN label.  There is no code path in which a\n  curve's own y reaches its own feature: the subtraction is unconditional.  assert_loo_is_airtight()\n  proves it empirically by flipping every label to 1, recomputing, and checking that no row's own flip\n  changed its own feature value.\n  In the FOLD evaluation the history is stricter still: for a curve in test fold f the creator history is\n  built ONLY from that creator's curves in the four TRAINING folds, so neither the curve's own label nor\n  any other test-fold label can enter its feature.\n",
+  "decision_rule": "\nDECISION RULE (fixed before any result was computed).  A feature SURVIVES iff ALL THREE hold:\n  (1) STATISTICAL   out-of-fold conditional rate has a one-sided 95% Clopper-Pearson LOWER bound strictly\n                    above the corpus base rate p0.\n  (2) MULTIPLICITY  its permutation p-value (seed 20260902, 1000 replicates, the permutation re-runs the\n                    ENTIRE pipeline including any fold-internal selection) survives Holm-Bonferroni\n                    correction across the whole 16-feature family at family-wise alpha = 0.05.\n  (3) ECONOMIC      the cohort's measured prize term  E[(X_i - 1) * y_i]  must raise the break-even entry\n                    premium  m* = (1 + prize) / (1 + toll)  materially above the corpus m*.  A lift that\n                    does not widen the entry window is not an edge.\nA feature that passes (1) and (2) but fails (3) is reported as REAL BUT NOT TRADEABLE.\nA feature flagged future_contaminated cannot SURVIVE at all; it is reported as an OPTIMISTIC UPPER BOUND\non what the create-time-knowable version of the same idea could ever be worth.\n",
+  "honesty": "\nHONESTY DECLARATIONS -- read these before believing any number below.\n  (a) NOT A CLEAN PRE-REGISTRATION.  Before fixing this feature list I ran an exploratory pass over the\n      same census (creator launch-count buckets, platform rates, curve-tuple rates).  So the FAMILY was\n      chosen with knowledge of the pooled table.  The defence is that every \"select\" feature performs its\n      selection ALGORITHMICALLY INSIDE THE TRAINING FOLDS and is scored only out-of-fold, and that the\n      permutation null re-runs that selection -- so B3/B4/C3/C4/D1 are honest regardless of what I saw.\n      The \"static\" features B1/B2/C1/C2 were chosen after seeing pooled rates and their p-values should be\n      read as descriptive, not confirmatory.\n  (b) NO CREATE TIME EXISTS IN THIS TABLE.  PoolState carries no creation slot or timestamp and epoch@8 is\n      contaminated (61% of migrated AND 61% of funding curves both sit at epoch 920).  Therefore a\n      creator's \"other launches\" are their launches ACROSS ALL TIME, including launches that happened\n      AFTER the curve being scored.  Leave-one-out removes the curve's own outcome; it does NOT remove the\n      future.  Every creator feature is consequently an upper bound on a deployable version, and the\n      features explicitly marked future_contaminated (A4/A5/A6 -- anything keyed on the launch COUNT) are\n      not merely optimistic, they are unknowable at create time and are reported as bounds only.\n  (c) PLATFORM AND CURVE FEATURES ARE NOT TIME-CONTAMINATED.  platform_config and the curve constants are\n      written at create and never change (verified by launchlab_provenance.py leakdiff: 0 changes on\n      84,187 curves over a 130-139 minute window, positive control fired).  They are knowable in the\n      create transaction itself.  Their separate hazard is LIVENESS, not leakage: a snapshot cannot tell a\n      platform that is launching coins today from one that died in June.  The `freshness` subcommand\n      measures that on-chain; until it is run, treat any platform cohort as possibly historical.\n  (d) TOLL IS MEASURED FOR EXACTLY TWO PLATFORMS.  LetsBonk 3.0%/round-trip and Raydium-own 2.1% are read\n      off live TradeEvents.  Every other platform_config's fee rate is UNMEASURED, so any EV quoted for an\n      exotic platform uses the LetsBonk 3% as a stand-in and is wrong by an unknown amount.\n"
+ },
+ "census": {
+  "N": 1292365,
+  "K": 13694,
+  "p0": 0.010596077733457653,
+  "creators": 252223,
+  "platforms": 1831,
+  "curve_tuples": 2326
+ },
+ "loo_proof": {
+  "own_label_cannot_reach_own_feature": true,
+  "flipped_rows": 252223,
+  "rows_whose_feature_moved_because_a_SIBLING_flipped": 1040142,
+  "positive_control_fired": true
+ },
+ "power": [
+  {
+   "n": 1000,
+   "min_detectable_rate": 0.019612359805274544,
+   "min_detectable_lift": 1.8509075054581303
+  },
+  {
+   "n": 5000,
+   "min_detectable_rate": 0.014395602002917559,
+   "min_detectable_lift": 1.3585783688111985
+  },
+  {
+   "n": 20000,
+   "min_detectable_rate": 0.012446764474161424,
+   "min_detectable_lift": 1.1746577164925975
+  },
+  {
+   "n": 100000,
+   "min_detectable_rate": 0.011411338429843626,
+   "min_detectable_lift": 1.0769398561329675
+  },
+  {
+   "n": 200000,
+   "min_detectable_rate": 0.01117045727255097,
+   "min_detectable_lift": 1.0542068068526607
+  },
+  {
+   "n": 600000,
+   "min_detectable_rate": 0.010926455783256635,
+   "min_detectable_lift": 1.031179277663828
+  },
+  {
+   "n": 1000000,
+   "min_detectable_rate": 0.010851690916066411,
+   "min_detectable_lift": 1.024123377445755
+  }
+ ],
+ "economic_threshold": {
+  "X_letsbonk": 14.693826868786777,
+  "toll_round_trip": 0.03,
+  "p_breakeven_at_floor": 0.002190768167836336,
+  "corpus_m_star": 1.111748401912792,
+  "corpus_window_sol": 1.6318905048719161
+ },
+ "results": {
+  "A1": {
+   "feature": "A1",
+   "family": "creator",
+   "kind": "loo",
+   "future_contaminated": false,
+   "description": "creator has >=1 OTHER graduated launch (leave-one-out)",
+   "n": 599519,
+   "positives": 6233,
+   "conditional_rate": 0.010396667995509734,
+   "base_rate": 0.010596077733457653,
+   "lift": 0.98118079699262,
+   "cp_lower_95": 0.01018210546636843,
+   "cp_upper_95": 0.01061473805815738,
+   "min_detectable_rate_80pct_power": 0.010926588970544254,
+   "min_detectable_lift_80pct_power": 1.03119184715331,
+   "economics": {
+    "n": 599519,
+    "positives": 6233,
+    "p_cond": 0.010396667995509734,
+    "mean_X_of_graduates": 14.273353924066978,
+    "prize_term_measured": 0.13799865393542068,
+    "m_star_homogeneous_letsbonk": 1.1090972539250163,
+    "ev_at_floor_homogeneous": 0.11237017154276677,
+    "m_star_heterogeneous": 1.104853062073224,
+    "ev_at_floor_heterogeneous": 0.10799865393542077,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.010396667995509734,
+    "p_perm_up": 0.986013986013986,
+    "p_perm_down": 0.014985014985014986,
+    "p_perm_2sided": 0.029970029970029972,
+    "null_mean": 0.010597418767956711,
+    "null_sd": 8.623641994071716e-05,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 119983,
+     "positives": 1270,
+     "rate": 0.010584832851320603
+    },
+    {
+     "fold": 1,
+     "n": 119938,
+     "positives": 1248,
+     "rate": 0.01040537611099068
+    },
+    {
+     "fold": 2,
+     "n": 119493,
+     "positives": 1224,
+     "rate": 0.010243277848911651
+    },
+    {
+     "fold": 3,
+     "n": 120382,
+     "positives": 1256,
+     "rate": 0.010433453506338158
+    },
+    {
+     "fold": 4,
+     "n": 119723,
+     "positives": 1235,
+     "rate": 0.010315478228911738
+    }
+   ],
+   "seconds": 249.2,
+   "p_holm": 1.0,
+   "verdict_stage12": "dead"
+  },
+  "A2": {
+   "feature": "A2",
+   "family": "creator",
+   "kind": "loo",
+   "future_contaminated": false,
+   "description": "creator has >=2 OTHER graduated launches (leave-one-out)",
+   "n": 493885,
+   "positives": 5125,
+   "conditional_rate": 0.010376909604462577,
+   "base_rate": 0.010596077733457653,
+   "lift": 0.9793161078553585,
+   "cp_lower_95": 0.010140838989908401,
+   "cp_upper_95": 0.010617240257324537,
+   "min_detectable_rate_80pct_power": 0.010960413516366237,
+   "min_detectable_lift_80pct_power": 1.0343840232275925,
+   "economics": {
+    "n": 493885,
+    "positives": 5125,
+    "p_cond": 0.010376909604462577,
+    "mean_X_of_graduates": 14.332239675548104,
+    "prize_term_measured": 0.13834744593819215,
+    "m_star_homogeneous_letsbonk": 1.108834566559768,
+    "ev_at_floor_homogeneous": 0.11209960355656115,
+    "m_star_heterogeneous": 1.1051916950856233,
+    "ev_at_floor_heterogeneous": 0.10834744593819215,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.010376909604462577,
+    "p_perm_up": 0.99000999000999,
+    "p_perm_down": 0.01098901098901099,
+    "p_perm_2sided": 0.02197802197802198,
+    "null_mean": 0.010600174271086032,
+    "null_sd": 0.00010103313516158626,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 98792,
+     "positives": 1044,
+     "rate": 0.01056765730018625
+    },
+    {
+     "fold": 1,
+     "n": 98874,
+     "positives": 1014,
+     "rate": 0.0102554766672735
+    },
+    {
+     "fold": 2,
+     "n": 98547,
+     "positives": 1004,
+     "rate": 0.010188032106507554
+    },
+    {
+     "fold": 3,
+     "n": 99133,
+     "positives": 1028,
+     "rate": 0.010369907094509396
+    },
+    {
+     "fold": 4,
+     "n": 98539,
+     "positives": 1035,
+     "rate": 0.01050345548463045
+    }
+   ],
+   "seconds": 232.9,
+   "p_holm": 1.0,
+   "verdict_stage12": "dead"
+  },
+  "A3": {
+   "feature": "A3",
+   "family": "creator",
+   "kind": "loo",
+   "future_contaminated": false,
+   "description": "creator LOO graduation rate >= 5% among creators with >=5 other launches",
+   "n": 15245,
+   "positives": 1930,
+   "conditional_rate": 0.12659888488028861,
+   "base_rate": 0.010596077733457653,
+   "lift": 11.94771198030628,
+   "cp_lower_95": 0.12218918567202597,
+   "cp_upper_95": 0.13111424164476626,
+   "min_detectable_rate_80pct_power": 0.012724090989800426,
+   "min_detectable_lift_80pct_power": 1.2008302798330237,
+   "economics": {
+    "n": 15245,
+    "positives": 1930,
+    "p_cond": 0.12659888488028861,
+    "mean_X_of_graduates": 14.6716004057818,
+    "prize_term_measured": 1.7308093659008774,
+    "m_star_homogeneous_letsbonk": 2.6540031177981946,
+    "ev_at_floor_homogeneous": 1.7036232113321403,
+    "m_star_heterogeneous": 2.651271229029978,
+    "ev_at_floor_heterogeneous": 1.7008093659008774,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.12659888488028861,
+    "p_perm_up": 0.000999000999000999,
+    "p_perm_down": 1.0,
+    "p_perm_2sided": 0.001998001998001998,
+    "null_mean": 0.01044494764935417,
+    "null_sd": 0.0012322800528978956,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 3095,
+     "positives": 401,
+     "rate": 0.1295638126009693
+    },
+    {
+     "fold": 1,
+     "n": 3042,
+     "positives": 379,
+     "rate": 0.12458908612754767
+    },
+    {
+     "fold": 2,
+     "n": 3008,
+     "positives": 369,
+     "rate": 0.12267287234042554
+    },
+    {
+     "fold": 3,
+     "n": 3105,
+     "positives": 401,
+     "rate": 0.12914653784219002
+    },
+    {
+     "fold": 4,
+     "n": 2995,
+     "positives": 380,
+     "rate": 0.12687813021702837
+    }
+   ],
+   "seconds": 219.3,
+   "p_holm": 0.015984015984015984,
+   "verdict_stage12": "passes (1)+(2) -> economics decides"
+  },
+  "A4": {
+   "feature": "A4",
+   "family": "creator",
+   "kind": "loo",
+   "future_contaminated": true,
+   "description": "creator has 0 other launches (SOLO) -- uses the future, flagged",
+   "n": 190467,
+   "positives": 4577,
+   "conditional_rate": 0.024030409467256795,
+   "base_rate": 0.010596077733457653,
+   "lift": 2.267858925890998,
+   "cp_lower_95": 0.023455956474862975,
+   "cp_upper_95": 0.02461560452946899,
+   "min_detectable_rate_80pct_power": 0.011184784282350629,
+   "min_detectable_lift_80pct_power": 1.055558911863595,
+   "economics": {
+    "n": 190467,
+    "positives": 4577,
+    "p_cond": 0.024030409467256795,
+    "mean_X_of_graduates": 14.346183505611545,
+    "prize_term_measured": 0.32071425446499424,
+    "m_star_homogeneous_letsbonk": 1.2903575406123002,
+    "ev_at_floor_homogeneous": 0.2990682668306692,
+    "m_star_heterogeneous": 1.28224684899514,
+    "ev_at_floor_heterogeneous": 0.2907142544649941,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.024030409467256795,
+    "p_perm_up": 0.000999000999000999,
+    "p_perm_down": 1.0,
+    "p_perm_2sided": 0.001998001998001998,
+    "null_mean": 0.010592485837441658,
+    "null_sd": 0.0002199417307800762,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 37831,
+     "positives": 887,
+     "rate": 0.02344637995294864
+    },
+    {
+     "fold": 1,
+     "n": 38235,
+     "positives": 925,
+     "rate": 0.024192493788413757
+    },
+    {
+     "fold": 2,
+     "n": 37665,
+     "positives": 873,
+     "rate": 0.02317801672640382
+    },
+    {
+     "fold": 3,
+     "n": 38208,
+     "positives": 966,
+     "rate": 0.025282663316582913
+    },
+    {
+     "fold": 4,
+     "n": 38528,
+     "positives": 926,
+     "rate": 0.024034468438538206
+    }
+   ],
+   "seconds": 226.3,
+   "p_holm": 0.015984015984015984,
+   "verdict_stage12": "BOUND ONLY (unknowable at create time)"
+  },
+  "A5": {
+   "feature": "A5",
+   "family": "creator",
+   "kind": "loo",
+   "future_contaminated": true,
+   "description": "creator has <=4 other launches -- uses the future, flagged",
+   "n": 314037,
+   "positives": 6613,
+   "conditional_rate": 0.02105802819412999,
+   "base_rate": 0.010596077733457653,
+   "lift": 1.987341799847145,
+   "cp_lower_95": 0.020638275483240376,
+   "cp_upper_95": 0.02148433045231396,
+   "min_detectable_rate_80pct_power": 0.011053637258923648,
+   "min_detectable_lift_80pct_power": 1.0431819713837345,
+   "economics": {
+    "n": 314037,
+    "positives": 6613,
+    "p_cond": 0.02105802819412999,
+    "mean_X_of_graduates": 14.352575787015367,
+    "prize_term_measured": 0.281178917387227,
+    "m_star_homogeneous_letsbonk": 1.250839798338298,
+    "ev_at_floor_homogeneous": 0.2583649922884468,
+    "m_star_heterogeneous": 1.2438630265895407,
+    "ev_at_floor_heterogeneous": 0.251178917387227,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.02105802819412999,
+    "p_perm_up": 0.000999000999000999,
+    "p_perm_down": 1.0,
+    "p_perm_2sided": 0.001998001998001998,
+    "null_mean": 0.010593812194104517,
+    "null_sd": 0.00015571342575996293,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 62640,
+     "positives": 1306,
+     "rate": 0.020849297573435503
+    },
+    {
+     "fold": 1,
+     "n": 63085,
+     "positives": 1339,
+     "rate": 0.021225330902750257
+    },
+    {
+     "fold": 2,
+     "n": 62318,
+     "positives": 1288,
+     "rate": 0.020668185756924164
+    },
+    {
+     "fold": 3,
+     "n": 62736,
+     "positives": 1357,
+     "rate": 0.02163032389696506
+    },
+    {
+     "fold": 4,
+     "n": 63258,
+     "positives": 1323,
+     "rate": 0.020914350754054824
+    }
+   ],
+   "seconds": 212.8,
+   "p_holm": 0.015984015984015984,
+   "verdict_stage12": "BOUND ONLY (unknowable at create time)"
+  },
+  "A6": {
+   "feature": "A6",
+   "family": "creator",
+   "kind": "loo",
+   "future_contaminated": true,
+   "description": "creator has >=100 other launches (negative screen) -- uses the future, flagged",
+   "n": 691109,
+   "positives": 4483,
+   "conditional_rate": 0.0064866757631574755,
+   "base_rate": 0.010596077733457653,
+   "lift": 0.6121770646015051,
+   "cp_lower_95": 0.00632864568726259,
+   "cp_upper_95": 0.006647775471316468,
+   "min_detectable_rate_80pct_power": 0.010903801616497014,
+   "min_detectable_lift_80pct_power": 1.0290413010153472,
+   "economics": {
+    "n": 691109,
+    "positives": 4483,
+    "p_cond": 0.0064866757631574755,
+    "mean_X_of_graduates": 14.315408929108255,
+    "prize_term_measured": 0.08637274037697713,
+    "m_star_homogeneous_letsbonk": 1.0571139950044988,
+    "ev_at_floor_homogeneous": 0.05882741485463375,
+    "m_star_heterogeneous": 1.0547308158999777,
+    "ev_at_floor_heterogeneous": 0.056372740376977176,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.0064866757631574755,
+    "p_perm_up": 1.0,
+    "p_perm_down": 0.000999000999000999,
+    "p_perm_2sided": 0.001998001998001998,
+    "null_mean": 0.010599963247476158,
+    "null_sd": 8.15212970151387e-05,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 138222,
+     "positives": 922,
+     "rate": 0.0066704287305928145
+    },
+    {
+     "fold": 1,
+     "n": 138412,
+     "positives": 889,
+     "rate": 0.006422853509811288
+    },
+    {
+     "fold": 2,
+     "n": 137870,
+     "positives": 891,
+     "rate": 0.0064626097047943715
+    },
+    {
+     "fold": 3,
+     "n": 138525,
+     "positives": 882,
+     "rate": 0.006367081754195993
+    },
+    {
+     "fold": 4,
+     "n": 138080,
+     "positives": 899,
+     "rate": 0.00651071842410197
+    }
+   ],
+   "seconds": 222.9,
+   "p_holm": 1.0,
+   "verdict_stage12": "BOUND ONLY (unknowable at create time)"
+  },
+  "A7": {
+   "feature": "A7",
+   "family": "creator",
+   "kind": "omnibus",
+   "future_contaminated": false,
+   "description": "same-creator both-graduate pair concordance vs p^2 (creator heterogeneity)",
+   "same_creator_both_grad_pair_rate": 0.00010743668025888128,
+   "p0_squared": 0.00011227686333347708,
+   "concordance_lift": 0.9568906457582467,
+   "perm": {
+    "observed": 0.00010743668025888128,
+    "p_perm_up": 0.8651348651348651,
+    "p_perm_down": 0.13586413586413587,
+    "p_perm_2sided": 0.27172827172827174,
+    "null_mean": 0.00011219931896181506,
+    "null_sd": 4.451047877746036e-06,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "p_holm": 1.0,
+   "verdict_stage12": "omnibus: NO creator heterogeneity"
+  },
+  "B1": {
+   "feature": "B1",
+   "family": "platform",
+   "kind": "static",
+   "future_contaminated": false,
+   "description": "platform_config == LetsBonk FfYek5vE...",
+   "n": 1035976,
+   "positives": 10994,
+   "conditional_rate": 0.010612214954786597,
+   "base_rate": 0.010596077733457653,
+   "lift": 1.0015229428978225,
+   "cp_lower_95": 0.010447152047702406,
+   "cp_upper_95": 0.01077930433945496,
+   "min_detectable_rate_80pct_power": 0.01084719585225203,
+   "min_detectable_lift_80pct_power": 1.023699157849839,
+   "economics": {
+    "n": 1035976,
+    "positives": 10994,
+    "p_cond": 0.010612214954786597,
+    "mean_X_of_graduates": 14.52599066288735,
+    "prize_term_measured": 0.14354072039099702,
+    "m_star_homogeneous_letsbonk": 1.1119629459079587,
+    "ev_at_floor_homogeneous": 0.11532183428519763,
+    "m_star_heterogeneous": 1.1102337091174728,
+    "ev_at_floor_heterogeneous": 0.11354072039099708,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.010612214954786597,
+    "p_perm_up": 0.3626373626373626,
+    "p_perm_down": 0.6473526473526473,
+    "p_perm_2sided": 0.7252747252747253,
+    "null_mean": 0.010596875796350495,
+    "null_sd": 4.4013088492151324e-05,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 207083,
+     "positives": 2161,
+     "rate": 0.010435429272320761
+    },
+    {
+     "fold": 1,
+     "n": 207739,
+     "positives": 2236,
+     "rate": 0.010763506130288487
+    },
+    {
+     "fold": 2,
+     "n": 206452,
+     "positives": 2190,
+     "rate": 0.010607792610388855
+    },
+    {
+     "fold": 3,
+     "n": 207598,
+     "positives": 2231,
+     "rate": 0.010746731664081542
+    },
+    {
+     "fold": 4,
+     "n": 207104,
+     "positives": 2176,
+     "rate": 0.010506798516687269
+    }
+   ],
+   "seconds": 97.8,
+   "p_holm": 1.0,
+   "verdict_stage12": "dead"
+  },
+  "B2": {
+   "feature": "B2",
+   "family": "platform",
+   "kind": "static",
+   "future_contaminated": false,
+   "description": "platform_config == Raydium-own 4Bu96XjU...",
+   "n": 95820,
+   "positives": 540,
+   "conditional_rate": 0.005635566687539136,
+   "base_rate": 0.010596077733457653,
+   "lift": 0.5318540340398361,
+   "cp_lower_95": 0.00524368783119619,
+   "cp_upper_95": 0.006049861394430962,
+   "min_detectable_rate_80pct_power": 0.011429153589211347,
+   "min_detectable_lift_80pct_power": 1.0786211536673815,
+   "economics": {
+    "n": 95820,
+    "positives": 540,
+    "p_cond": 0.005635566687539136,
+    "mean_X_of_graduates": 13.626185551427577,
+    "prize_term_measured": 0.07115571068431321,
+    "m_star_homogeneous_letsbonk": 1.0457985189579253,
+    "ev_at_floor_homogeneous": 0.047172474526663094,
+    "m_star_heterogeneous": 1.0399570006643817,
+    "ev_at_floor_heterogeneous": 0.04115571068431326,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.005635566687539136,
+    "p_perm_up": 1.0,
+    "p_perm_down": 0.000999000999000999,
+    "p_perm_2sided": 0.001998001998001998,
+    "null_mean": 0.010583625547902317,
+    "null_sd": 0.0003228421589484462,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 19057,
+     "positives": 117,
+     "rate": 0.00613947630791835
+    },
+    {
+     "fold": 1,
+     "n": 19280,
+     "positives": 117,
+     "rate": 0.0060684647302904566
+    },
+    {
+     "fold": 2,
+     "n": 19144,
+     "positives": 112,
+     "rate": 0.0058503969912244045
+    },
+    {
+     "fold": 3,
+     "n": 18942,
+     "positives": 91,
+     "rate": 0.004804138950480414
+    },
+    {
+     "fold": 4,
+     "n": 19397,
+     "positives": 103,
+     "rate": 0.005310099499922669
+    }
+   ],
+   "seconds": 89.0,
+   "p_holm": 1.0,
+   "verdict_stage12": "dead"
+  },
+  "B3": {
+   "feature": "B3",
+   "family": "platform",
+   "kind": "select",
+   "future_contaminated": false,
+   "description": "platform in the fold-selected UP set (train CP-lower > train base rate)",
+   "n": 92650,
+   "positives": 1523,
+   "conditional_rate": 0.016438208310847274,
+   "base_rate": 0.010596077733457653,
+   "lift": 1.5513484068678354,
+   "cp_lower_95": 0.015756906741753465,
+   "cp_upper_95": 0.017142038265238878,
+   "min_detectable_rate_80pct_power": 0.011443467336500403,
+   "min_detectable_lift_80pct_power": 1.0799720070349308,
+   "economics": {
+    "n": 92650,
+    "positives": 1523,
+    "p_cond": 0.016438208310847274,
+    "mean_X_of_graduates": 13.822575864183502,
+    "prize_term_measured": 0.2107801731370909,
+    "m_star_homogeneous_letsbonk": 1.1894193967396063,
+    "ev_at_floor_homogeneous": 0.1951019786417945,
+    "m_star_heterogeneous": 1.175514731201059,
+    "ev_at_floor_heterogeneous": 0.18078017313709085,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.016438208310847274,
+    "p_perm_up": 0.022977022977022976,
+    "p_perm_down": 0.9760239760239761,
+    "p_perm_2sided": 0.04595404595404595,
+    "null_mean": 0.009892703069613904,
+    "null_sd": 0.0033429092869647816,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 18254,
+     "positives": 316,
+     "rate": 0.01731127424126219
+    },
+    {
+     "fold": 1,
+     "n": 18802,
+     "positives": 280,
+     "rate": 0.014892032762472078
+    },
+    {
+     "fold": 2,
+     "n": 18460,
+     "positives": 297,
+     "rate": 0.01608884073672806
+    },
+    {
+     "fold": 3,
+     "n": 18423,
+     "positives": 317,
+     "rate": 0.017206752429028933
+    },
+    {
+     "fold": 4,
+     "n": 18711,
+     "positives": 313,
+     "rate": 0.01672812783923895
+    }
+   ],
+   "seconds": 111.0,
+   "p_holm": 0.22977022977022976,
+   "verdict_stage12": "dead"
+  },
+  "B4": {
+   "feature": "B4",
+   "family": "platform",
+   "kind": "select",
+   "future_contaminated": false,
+   "description": "platform in the fold-selected DOWN set (train CP-upper < train base rate) -- deadness screen",
+   "n": 136434,
+   "positives": 732,
+   "conditional_rate": 0.005365231540525089,
+   "base_rate": 0.010596077733457653,
+   "lift": 0.5063412779224994,
+   "cp_lower_95": 0.005044063748671784,
+   "cp_upper_95": 0.005702114942007508,
+   "min_detectable_rate_80pct_power": 0.011292799409690035,
+   "min_detectable_lift_80pct_power": 1.0657527902076867,
+   "economics": {
+    "n": 136434,
+    "positives": 732,
+    "p_cond": 0.005365231540525089,
+    "mean_X_of_graduates": 12.676128329278844,
+    "prize_term_measured": 0.06264513198346537,
+    "m_star_homogeneous_letsbonk": 1.042204419249422,
+    "ev_at_floor_homogeneous": 0.04347055182690476,
+    "m_star_heterogeneous": 1.0316943028965682,
+    "ev_at_floor_heterogeneous": 0.03264513198346533,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.005365231540525089,
+    "p_perm_up": 0.951048951048951,
+    "p_perm_down": 0.03596403596403597,
+    "p_perm_2sided": 0.07192807192807193,
+    "null_mean": 0.012316881114314752,
+    "null_sd": 0.00478526522909038,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 29227,
+     "positives": 180,
+     "rate": 0.006158688883566565
+    },
+    {
+     "fold": 1,
+     "n": 29303,
+     "positives": 172,
+     "rate": 0.005869706173429342
+    },
+    {
+     "fold": 2,
+     "n": 24218,
+     "positives": 116,
+     "rate": 0.004789825749442564
+    },
+    {
+     "fold": 3,
+     "n": 28990,
+     "positives": 155,
+     "rate": 0.005346671265953777
+    },
+    {
+     "fold": 4,
+     "n": 24696,
+     "positives": 109,
+     "rate": 0.004413670229996761
+    }
+   ],
+   "seconds": 110.5,
+   "p_holm": 1.0,
+   "verdict_stage12": "dead"
+  },
+  "C1": {
+   "feature": "C1",
+   "family": "curve",
+   "kind": "static",
+   "future_contaminated": false,
+   "description": "migrate_type == 1",
+   "n": 1207690,
+   "positives": 13108,
+   "conditional_rate": 0.010853778701487965,
+   "base_rate": 0.010596077733457653,
+   "lift": 1.0243204112420399,
+   "cp_lower_95": 0.01069914662384364,
+   "cp_upper_95": 0.011010147730192713,
+   "min_detectable_rate_80pct_power": 0.010828591918701131,
+   "min_detectable_lift_80pct_power": 1.0219434201118875,
+   "economics": {
+    "n": 1207690,
+    "positives": 13108,
+    "p_cond": 0.010853778701487965,
+    "mean_X_of_graduates": 14.284506680272122,
+    "prize_term_measured": 0.14418709566611215,
+    "m_star_homogeneous_letsbonk": 1.1151745304954384,
+    "ev_at_floor_homogeneous": 0.11862976641030157,
+    "m_star_heterogeneous": 1.1108612579282642,
+    "ev_at_floor_heterogeneous": 0.11418709566611221,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.010853778701487965,
+    "p_perm_up": 0.000999000999000999,
+    "p_perm_down": 1.0,
+    "p_perm_2sided": 0.001998001998001998,
+    "null_mean": 0.010597078720532586,
+    "null_sd": 2.4507500100742357e-05,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 241507,
+     "positives": 2619,
+     "rate": 0.010844406166280894
+    },
+    {
+     "fold": 1,
+     "n": 242153,
+     "positives": 2635,
+     "rate": 0.01088155009436183
+    },
+    {
+     "fold": 2,
+     "n": 240598,
+     "positives": 2600,
+     "rate": 0.010806407368307302
+    },
+    {
+     "fold": 3,
+     "n": 241474,
+     "positives": 2661,
+     "rate": 0.011019819939206706
+    },
+    {
+     "fold": 4,
+     "n": 241958,
+     "positives": 2593,
+     "rate": 0.010716735962439763
+    }
+   ],
+   "seconds": 101.6,
+   "p_holm": 0.015984015984015984,
+   "verdict_stage12": "passes (1)+(2) -> economics decides"
+  },
+  "C2": {
+   "feature": "C2",
+   "family": "curve",
+   "kind": "static",
+   "future_contaminated": false,
+   "description": "raise target R == 85 SOL (the dominant config)",
+   "n": 1018885,
+   "positives": 9768,
+   "conditional_rate": 0.009586950440923166,
+   "base_rate": 0.010596077733457653,
+   "lift": 0.9047640723370577,
+   "cp_lower_95": 0.009428704089481984,
+   "cp_upper_95": 0.009747262036436648,
+   "min_detectable_rate_80pct_power": 0.010849301538918756,
+   "min_detectable_lift_80pct_power": 1.0238978810679669,
+   "economics": {
+    "n": 1018885,
+    "positives": 9768,
+    "p_cond": 0.009586950440923166,
+    "mean_X_of_graduates": 14.581022110471684,
+    "prize_term_measured": 0.13020058591017378,
+    "m_star_homogeneous_letsbonk": 1.0983320772210106,
+    "ev_at_floor_homogeneous": 0.10128203953764084,
+    "m_star_heterogeneous": 1.0972821222428872,
+    "ev_at_floor_heterogeneous": 0.1002005859101738,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.009586950440923166,
+    "p_perm_up": 1.0,
+    "p_perm_down": 0.000999000999000999,
+    "p_perm_2sided": 0.001998001998001998,
+    "null_mean": 0.010596676759398753,
+    "null_sd": 4.6708486763174114e-05,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 203502,
+     "positives": 1934,
+     "rate": 0.00950359210228892
+    },
+    {
+     "fold": 1,
+     "n": 204325,
+     "positives": 1954,
+     "rate": 0.009563195888902485
+    },
+    {
+     "fold": 2,
+     "n": 203027,
+     "positives": 1960,
+     "rate": 0.009653888399079925
+    },
+    {
+     "fold": 3,
+     "n": 203971,
+     "positives": 1991,
+     "rate": 0.009761191541934883
+    },
+    {
+     "fold": 4,
+     "n": 204060,
+     "positives": 1929,
+     "rate": 0.009453102028815054
+    }
+   ],
+   "seconds": 110.5,
+   "p_holm": 1.0,
+   "verdict_stage12": "dead"
+  },
+  "C3": {
+   "feature": "C3",
+   "family": "curve",
+   "kind": "select",
+   "future_contaminated": false,
+   "description": "curve tuple (Q0,R,migrate_type) in the fold-selected UP set",
+   "n": 58353,
+   "positives": 1931,
+   "conditional_rate": 0.033091700512398674,
+   "base_rate": 0.010596077733457653,
+   "lift": 3.123014132664387,
+   "cp_lower_95": 0.03188232670836655,
+   "cp_upper_95": 0.03433557632398365,
+   "min_detectable_rate_80pct_power": 0.011667405065435364,
+   "min_detectable_lift_80pct_power": 1.1011060279970333,
+   "economics": {
+    "n": 58353,
+    "positives": 1931,
+    "p_cond": 0.033091700512398674,
+    "mean_X_of_graduates": 12.024207291632784,
+    "prize_term_measured": 0.36480976608131377,
+    "m_star_homogeneous_letsbonk": 1.4108272015636214,
+    "ev_at_floor_homogeneous": 0.4231520176105301,
+    "m_star_heterogeneous": 1.3250580253216637,
+    "ev_at_floor_heterogeneous": 0.33480976608131363,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.033091700512398674,
+    "p_perm_up": 0.000999000999000999,
+    "p_perm_down": 0.995004995004995,
+    "p_perm_2sided": 0.001998001998001998,
+    "null_mean": 0.010014604872036391,
+    "null_sd": 0.0026337989008500574,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 11717,
+     "positives": 396,
+     "rate": 0.03379704702568917
+    },
+    {
+     "fold": 1,
+     "n": 11655,
+     "positives": 374,
+     "rate": 0.03208923208923209
+    },
+    {
+     "fold": 2,
+     "n": 11666,
+     "positives": 401,
+     "rate": 0.034373392765300874
+    },
+    {
+     "fold": 3,
+     "n": 11629,
+     "positives": 390,
+     "rate": 0.033536847536331585
+    },
+    {
+     "fold": 4,
+     "n": 11686,
+     "positives": 370,
+     "rate": 0.03166181755947287
+    }
+   ],
+   "seconds": 113.8,
+   "p_holm": 0.015984015984015984,
+   "verdict_stage12": "passes (1)+(2) -> economics decides"
+  },
+  "C4": {
+   "feature": "C4",
+   "family": "curve",
+   "kind": "select",
+   "future_contaminated": false,
+   "description": "curve tuple in the fold-selected DOWN set -- deadness screen",
+   "n": 1204000,
+   "positives": 10738,
+   "conditional_rate": 0.00891860465116279,
+   "base_rate": 0.010596077733457653,
+   "lift": 0.841689243464291,
+   "cp_lower_95": 0.008778128258139953,
+   "cp_upper_95": 0.009060830822133041,
+   "min_detectable_rate_80pct_power": 0.010828949244402551,
+   "min_detectable_lift_80pct_power": 1.021977142561874,
+   "economics": {
+    "n": 1204000,
+    "positives": 10738,
+    "p_cond": 0.00891860465116279,
+    "mean_X_of_graduates": 14.705748107372438,
+    "prize_term_measured": 0.12223614881807744,
+    "m_star_homogeneous_letsbonk": 1.0894464349555144,
+    "ev_at_floor_homogeneous": 0.09212982800417982,
+    "m_star_heterogeneous": 1.089549659046677,
+    "ev_at_floor_heterogeneous": 0.09223614881807743,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.00891860465116279,
+    "p_perm_up": 0.8841158841158842,
+    "p_perm_down": 0.10589410589410589,
+    "p_perm_2sided": 0.21178821178821178,
+    "null_mean": 0.011521244872363471,
+    "null_sd": 0.003462943389911382,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 240855,
+     "positives": 2143,
+     "rate": 0.008897469431815823
+    },
+    {
+     "fold": 1,
+     "n": 241489,
+     "positives": 2170,
+     "rate": 0.008985916542782487
+    },
+    {
+     "fold": 2,
+     "n": 239474,
+     "positives": 2106,
+     "rate": 0.008794274117440725
+    },
+    {
+     "fold": 3,
+     "n": 240883,
+     "positives": 2195,
+     "rate": 0.009112307634826866
+    },
+    {
+     "fold": 4,
+     "n": 241299,
+     "positives": 2124,
+     "rate": 0.008802357241430756
+    }
+   ],
+   "seconds": 112.3,
+   "p_holm": 1.0,
+   "verdict_stage12": "dead"
+  },
+  "D1": {
+   "feature": "D1",
+   "family": "joint",
+   "kind": "select",
+   "future_contaminated": false,
+   "description": "platform UP set AND curve UP set (both selected inside the training folds)",
+   "n": 8474,
+   "positives": 302,
+   "conditional_rate": 0.03563842341279207,
+   "base_rate": 0.010596077733457653,
+   "lift": 3.363359944053821,
+   "cp_lower_95": 0.03238568465883074,
+   "cp_upper_95": 0.039130597726409935,
+   "min_detectable_rate_80pct_power": 0.013479932127468931,
+   "min_detectable_lift_80pct_power": 1.2721624422313704,
+   "economics": {
+    "n": 8474,
+    "positives": 302,
+    "p_cond": 0.03563842341279207,
+    "mean_X_of_graduates": 10.761207552086754,
+    "prize_term_measured": 0.34787404776141134,
+    "m_star_homogeneous_letsbonk": 1.4446858253313513,
+    "ev_at_floor_homogeneous": 0.4580264000912917,
+    "m_star_heterogeneous": 1.3086155803508848,
+    "ev_at_floor_heterogeneous": 0.31787404776141126,
+    "toll_used": 0.03
+   },
+   "perm": {
+    "observed": 0.03563842341279207,
+    "p_perm_up": 0.011988011988011988,
+    "p_perm_down": 0.6553446553446554,
+    "p_perm_2sided": 0.023976023976023976,
+    "null_mean": 0.012006797573474275,
+    "null_sd": 0.056986692839429934,
+    "direction_tested": "up",
+    "nperm": 1000
+   },
+   "per_fold": [
+    {
+     "fold": 0,
+     "n": 1653,
+     "positives": 58,
+     "rate": 0.03508771929824561
+    },
+    {
+     "fold": 1,
+     "n": 1717,
+     "positives": 57,
+     "rate": 0.033197437390797904
+    },
+    {
+     "fold": 2,
+     "n": 1807,
+     "positives": 75,
+     "rate": 0.04150525733259546
+    },
+    {
+     "fold": 3,
+     "n": 1698,
+     "positives": 51,
+     "rate": 0.030035335689045935
+    },
+    {
+     "fold": 4,
+     "n": 1599,
+     "positives": 61,
+     "rate": 0.03814884302689181
+    }
+   ],
+   "seconds": 151.9,
+   "p_holm": 0.13186813186813187,
+   "verdict_stage12": "dead"
+  }
+ },
+ "holm": {
+  "A3": 0.015984015984015984,
+  "A4": 0.015984015984015984,
+  "A5": 0.015984015984015984,
+  "C1": 0.015984015984015984,
+  "C3": 0.015984015984015984,
+  "D1": 0.13186813186813187,
+  "B3": 0.22977022977022976,
+  "B1": 1.0,
+  "A7": 1.0,
+  "C4": 1.0,
+  "B4": 1.0,
+  "A1": 1.0,
+  "A2": 1.0,
+  "A6": 1.0,
+  "B2": 1.0,
+  "C2": 1.0
+ },
+ "economics_table": [
+  {
+   "feature": "A3",
+   "n": 15245,
+   "p_cond": 0.12659888488028861,
+   "prize": 1.7308093659008774,
+   "m_star": 2.651271229029978,
+   "window_sol": 18.8487099162623,
+   "widening_vs_corpus": 2.384776289732818,
+   "future_contaminated": false
+  },
+  {
+   "feature": "C3",
+   "n": 58353,
+   "p_cond": 0.033091700512398674,
+   "prize": 0.36480976608131377,
+   "m_star": 1.3250580253216637,
+   "window_sol": 4.533478319890077,
+   "widening_vs_corpus": 1.1918686125762512,
+   "future_contaminated": false
+  },
+  {
+   "feature": "D1",
+   "n": 8474,
+   "p_cond": 0.03563842341279207,
+   "prize": 0.34787404776141134,
+   "m_star": 1.3086155803508848,
+   "window_sol": 4.318543814763817,
+   "widening_vs_corpus": 1.1770788949184705,
+   "future_contaminated": false
+  },
+  {
+   "feature": "A4",
+   "n": 190467,
+   "p_cond": 0.024030409467256795,
+   "prize": 0.32071425446499424,
+   "m_star": 1.28224684899514,
+   "window_sol": 3.9710146257526624,
+   "widening_vs_corpus": 1.1533606405810892,
+   "future_contaminated": true
+  },
+  {
+   "feature": "A5",
+   "n": 314037,
+   "p_cond": 0.02105802819412999,
+   "prize": 0.281178917387227,
+   "m_star": 1.2438630265895407,
+   "window_sol": 3.4586805497568838,
+   "widening_vs_corpus": 1.1188350030001772,
+   "future_contaminated": true
+  },
+  {
+   "feature": "B3",
+   "n": 92650,
+   "p_cond": 0.016438208310847274,
+   "prize": 0.2107801731370909,
+   "m_star": 1.175514731201059,
+   "window_sol": 2.5264189654103837,
+   "widening_vs_corpus": 1.0573567986952404,
+   "future_contaminated": false
+  },
+  {
+   "feature": "C1",
+   "n": 1207690,
+   "p_cond": 0.010853778701487965,
+   "prize": 0.14418709566611215,
+   "m_star": 1.1108612579282642,
+   "window_sol": 1.6192669658641048,
+   "widening_vs_corpus": 0.9992020281000618,
+   "future_contaminated": false
+  },
+  {
+   "feature": "B1",
+   "n": 1035976,
+   "p_cond": 0.010612214954786597,
+   "prize": 0.14354072039099702,
+   "m_star": 1.1102337091174728,
+   "window_sol": 1.6103342698336132,
+   "widening_vs_corpus": 0.9986375579288326,
+   "future_contaminated": false
+  },
+  {
+   "feature": "A2",
+   "n": 493885,
+   "p_cond": 0.010376909604462577,
+   "prize": 0.13834744593819215,
+   "m_star": 1.1051916950856233,
+   "window_sol": 1.538473085597655,
+   "widening_vs_corpus": 0.994102346523829,
+   "future_contaminated": false
+  },
+  {
+   "feature": "A1",
+   "n": 599519,
+   "p_cond": 0.010396667995509734,
+   "prize": 0.13799865393542068,
+   "m_star": 1.104853062073224,
+   "window_sol": 1.5336408581791656,
+   "widening_vs_corpus": 0.9937977515167062,
+   "future_contaminated": false
+  },
+  {
+   "feature": "C2",
+   "n": 1018885,
+   "p_cond": 0.009586950440923166,
+   "prize": 0.13020058591017378,
+   "m_star": 1.0972821222428872,
+   "window_sol": 1.4254110091004117,
+   "widening_vs_corpus": 0.9869878115902707,
+   "future_contaminated": false
+  },
+  {
+   "feature": "C4",
+   "n": 1204000,
+   "p_cond": 0.00891860465116279,
+   "prize": 0.12223614881807744,
+   "m_star": 1.089549659046677,
+   "window_sol": 1.31448600426214,
+   "widening_vs_corpus": 0.9800325839660113,
+   "future_contaminated": false
+  },
+  {
+   "feature": "A6",
+   "n": 691109,
+   "p_cond": 0.0064866757631574755,
+   "prize": 0.08637274037697713,
+   "m_star": 1.0547308158999777,
+   "window_sol": 0.8100495528146632,
+   "widening_vs_corpus": 0.9487135885109311,
+   "future_contaminated": true
+  },
+  {
+   "feature": "B2",
+   "n": 95820,
+   "p_cond": 0.005635566687539136,
+   "prize": 0.07115571068431321,
+   "m_star": 1.0399570006643817,
+   "window_sol": 0.5935014840319458,
+   "widening_vs_corpus": 0.9354247767526437,
+   "future_contaminated": false
+  },
+  {
+   "feature": "B4",
+   "n": 136434,
+   "p_cond": 0.005365231540525089,
+   "prize": 0.06264513198346537,
+   "m_star": 1.0316943028965682,
+   "window_sol": 0.4717195107849805,
+   "widening_vs_corpus": 0.9279926115670699,
+   "future_contaminated": false
+  }
+ ],
+ "survivors_stage12": [
+  "A3",
+  "C1",
+  "C3"
+ ]
+}

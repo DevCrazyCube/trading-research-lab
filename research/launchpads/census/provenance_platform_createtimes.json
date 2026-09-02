@@ -1,0 +1,57 @@
+{
+ "FfYek5vEz23cMkWsdJwG2oa6EphsvXSHrGpdALN4g6W1": {
+  "label": "LetsBonk lift 1.002 n=1035976",
+  "sampled": 14,
+  "truncated_histories": 0,
+  "median_tx_per_pool": 25,
+  "age_days_min": 8.83,
+  "age_days_median": 408.12,
+  "age_days_max": 419.8,
+  "share_created_last_30d": 0.0714,
+  "share_created_last_90d": 0.0714
+ },
+ "BuM6KDpWiTcxvrpXywWFiw45R2RNH8WURdvqoTDV1BW4": {
+  "label": "lift 1.402 n=86296",
+  "sampled": 14,
+  "truncated_histories": 0,
+  "median_tx_per_pool": 6,
+  "age_days_min": 84.99,
+  "age_days_median": 235.97,
+  "age_days_max": 395.18,
+  "share_created_last_30d": 0.0,
+  "share_created_last_90d": 0.0714
+ },
+ "Dt9xZGWUYyN44Vxfz9qLQGERhtR2taDnLG1B8XbDEWWN": {
+  "label": "lift 6.679 n=1300",
+  "sampled": 14,
+  "truncated_histories": 0,
+  "median_tx_per_pool": 22,
+  "age_days_min": 188.06,
+  "age_days_median": 220.22,
+  "age_days_max": 223.23,
+  "share_created_last_30d": 0.0,
+  "share_created_last_90d": 0.0
+ },
+ "46X3jvgtQdsynKd3bHQL7bLTnZZwpTFzPoyYQQUDJENG": {
+  "label": "lift 2.655 n=1031",
+  "sampled": 14,
+  "truncated_histories": 0,
+  "median_tx_per_pool": 28,
+  "age_days_min": 4.16,
+  "age_days_median": 254.34,
+  "age_days_max": 321.33,
+  "share_created_last_30d": 0.0714,
+  "share_created_last_90d": 0.3571
+ },
+ "4Bu96XjU84XjPDSpveTVf6LYGCkfW5FK7SNkREWcEfV4": {
+  "label": "Raydium-own lift 0.532 n=95820",
+  "sampled": 14,
+  "truncated_histories": 0,
+  "median_tx_per_pool": 8,
+  "age_days_min": 217.97,
+  "age_days_median": 443.84,
+  "age_days_max": 494.87,
+  "share_created_last_30d": 0.0,
+  "share_created_last_90d": 0.0
+ }
+}
