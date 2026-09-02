@@ -100,6 +100,8 @@ HOLDER_PAGE_LIMIT = 1000
 HOLDER_MAX_PAGES = 4       # cap paging; beyond this the count is shown as "N+"
 RECENT_RESOLVED = 12       # most-recent resolved trades surfaced per arm
 STATE_TTL = 2.5            # server-side memo of the heavy /api/state build (rapid polls reuse it)
+DISCOVERY_START_USD = 100.0
+DISCOVERY_CLIP_USD = 10.0
 
 VCOL = {"PASS": "#1a9e5f", "PASS_TO_CONFIRMATION": "#1a9e5f", "PASS_PENDING_SENSITIVITY": "#c99a00",
         "COLLECTING": "#5b6bd6", "UNDECIDED_EXTEND": "#c99a00", "BLOCKED_DATA_AUTH": "#c99a00",
@@ -446,10 +448,31 @@ _ARM_THESIS = {
 }
 
 
+def _moneybook_path(nets: list[float]) -> tuple[list[float], float]:
+    """Frozen discovery portfolio: $100 start and one fixed $10 clip per primary resolution.
+
+    A net return of -0.20 therefore loses $2, not 20% of the entire bankroll. Once depleted the paper
+    portfolio remains bankrupt; later rows cannot manufacture a rebound from capital it could not deploy.
+    """
+    capital = DISCOVERY_START_USD
+    peak = capital
+    max_dd = 0.0
+    curve = [capital]
+    bankrupt = False
+    for net in nets:
+        if not bankrupt:
+            capital = max(0.0, capital + DISCOVERY_CLIP_USD * net)
+            bankrupt = capital <= 0.0
+        curve.append(round(capital, 4))
+        peak = max(peak, capital)
+        if peak > 0:
+            max_dd = max(max_dd, (peak - capital) / peak)
+    return curve, max_dd
+
+
 def _arm_stats(arm) -> dict:
-    """Aggregate KPIs computed from the arm's OWN resolved ledger (all cohorts): win rate, unexitable full
-    losses, a normalized compounding capital index, and its max drawdown. Numbers, not verdicts."""
-    resolved = _raw_resolved(arm)
+    """KPIs from the arm's PRIMARY outcomes only. Controls/voids never move the money-book."""
+    resolved = [row for row in _raw_resolved(arm) if arm.include_resolution(row)]
     nets = []
     for r in resolved:
         try:
@@ -459,18 +482,8 @@ def _arm_stats(arm) -> dict:
     wins = sum(1 for n in nets if n > 0)
     losses = sum(1 for n in nets if n <= 0)
     unexitable = sum(1 for n in nets if n <= -0.9)          # a near-total loss = couldn't exit / rug
-    # normalized paper index: 100 compounding by each resolved net-R, and its worst peak-to-trough
-    idx = 100.0
-    curve = [100.0]
-    peak = 100.0
-    max_dd = 0.0
-    for n in nets:
-        idx *= (1.0 + n)
-        idx = max(idx, 0.0)
-        curve.append(round(idx, 4))
-        peak = max(peak, idx)
-        if peak > 0:
-            max_dd = max(max_dd, (peak - idx) / peak)
+    curve, max_dd = _moneybook_path(nets)
+    idx = curve[-1]
     return {
         "n_resolved_all": len(nets),
         "wins": wins,
@@ -728,12 +741,12 @@ function cell(lbl,val,cls,sub){return '<div class="cell"><div class="lbl">'+lbl+
 function strip(a){
   var s=a.stats||{};
   return '<div class="strip">'
-    +cell("Capital index",s.capital_index==null?"—":s.capital_index.toFixed(2),
-        s.capital_index==null?"muted":(s.capital_index>=100?"pos":"neg"),"normalized paper index")
+    +cell("Discovery capital",s.capital_index==null?"—":s.capital_index.toFixed(2),
+        s.capital_index==null?"muted":(s.capital_index>=100?"pos":"neg"),"$100 start · fixed $10 primary clips")
     +cell("Mean all-cost R",s.mean_all==null?"—":((s.mean_all>=0?"+":"")+fmtN(s.mean_all,3)),sgn(s.mean_all),(s.n_resolved_all||0)+" fully reconciled")
     +cell("Win rate",s.win_rate==null?"—":fmtPctRaw(s.win_rate),"",(s.wins||0)+" wins · "+(s.losses||0)+" losses")
     +cell("Unexitable",s.unexitable==null?"—":s.unexitable,(s.unexitable>0?"neg":"muted"),"near-total losses")
-    +cell("Max drawdown",s.max_drawdown==null?"—":fmtPctRaw(s.max_drawdown),(s.max_drawdown>0?"warn":"muted"),"normalized 100-index")
+    +cell("Max drawdown",s.max_drawdown==null?"—":fmtPctRaw(s.max_drawdown),(s.max_drawdown>0?"warn":"muted"),"$100 / fixed-$10 money-book")
     +cell("Discovery",a.resolved+" / "+(a.target_n==null?"—":a.target_n),"","PRIMARY paper outcomes")
     +cell("Pending",a.pending==null?0:a.pending,(a.pending?"warn":""),a.pending?"awaiting causal fill":"no order waiting")
     +cell("Open",a.open,(a.open?"pos":""),"live filled positions")
