@@ -55,13 +55,29 @@ _TRADE_IDLE_UNSUBSCRIBE_S = 900.0
 _MAX_ACTIVE_TRADE_SUBSCRIPTIONS = 5000
 
 
-def trade_data_authorized() -> bool:
-    """PumpPortal trade streams require a dedicated paid data key as of 2026-05-01.
+def _feed_configured() -> bool:
+    """True if a trade-data feed is configured. Since PumpPortal IP-banned us (2026-09-02), the feed is the
+    pump.fun program's own on-chain anchor events via our FUNDED Helius logsSubscribe — so a Helius endpoint
+    (env or repo .env) authorizes trade data. A legacy PUMPPORTAL_DATA_API_KEY still counts."""
+    for key in ("HELIUS_RPC_URL", "HELIUS_API_KEY", "PUMPPORTAL_DATA_API_KEY"):
+        if os.environ.get(key, "").strip():
+            return True
+    try:
+        env = pathlib.Path(__file__).resolve().parents[3] / ".env"
+        for line in env.read_text().splitlines():
+            line = line.strip()
+            if "=" in line and not line.startswith("#") \
+                    and line.split("=", 1)[0].strip() in ("HELIUS_RPC_URL", "HELIUS_API_KEY",
+                                                          "PUMPPORTAL_DATA_API_KEY"):
+                return True
+    except OSError:
+        pass
+    return False
 
-    Source verified 2026-09-02: https://pumpportal.fun/data-api/real-time/ and /fees/.
-    Deliberately do not fall back to LIGHTNING_API: transaction credentials are outside this reader.
-    """
-    return bool(os.environ.get("PUMPPORTAL_DATA_API_KEY", "").strip())
+
+def trade_data_authorized() -> bool:
+    """Trade data is authorized when a trade feed is configured (now Helius; see _feed_configured)."""
+    return _feed_configured()
 
 
 def _data_ws_url() -> str:
