@@ -112,6 +112,11 @@ def entry_ok(c, e, now_ms, hist=None, mint=None):
         if not (e["min_age_h"] <= age_h <= e["max_age_h"]): return False
         if not (e["min_mcap"] <= mc <= e["max_mcap"]): return False
         if ath and e.get("max_pct_of_ath") and mc / ath > e["max_pct_of_ath"]: return False
+        if e.get("require_graduated") and not c.get("complete"): return False
+        if e.get("min_liq_sol") is not None:
+            try: rs = float(c.get("real_sol_reserves") or 0) / 1e9
+            except Exception: rs = 0.0
+            if not c.get("complete") and rs < e["min_liq_sol"]: return False
         lo, hi = e.get("mom5m_lo"), e.get("mom5m_hi")
         if lo is not None or hi is not None:
             r = mom_5m(hist or {}, mint, now_ms)

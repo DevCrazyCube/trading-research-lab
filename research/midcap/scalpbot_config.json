@@ -1,6 +1,6 @@
 {
   "mode": "paper",
-  "armed": true,
+  "armed": false,
   "bankroll_usd": 63.0,
   "position_usd": 5.0,
   "max_open": 5,
@@ -14,7 +14,9 @@
     "max_pct_of_ath": null,
     "min_gain_15m_pct": null,
     "mom5m_lo": 0.048,
-    "mom5m_hi": 0.095
+    "mom5m_hi": 0.095,
+    "require_graduated": true,
+    "min_liq_sol": null
   },
   "exit": {
     "stop_pct": -99.0,
@@ -23,5 +25,7 @@
   },
   "_note": "armed=false means observe-and-log only. A validated spec flips it, nothing else.",
   "_armed_note": "Armed 2026-09-03 on owner instruction. PAPER ONLY: no wallet, no keys, no tx code. Rules are UNVALIDATED - this generates a forward track record, it is not a validated edge.",
-  "_prereg": "Testing the ONE surviving cell: prior 5m return in [+4.8%,+9.5%], pure 15m hold, no stop. Measured on 93 survivorship-free graduates: median +6.70% STABLE across dropout charges -30/-50/-100%, mean +0.22..+2.33% with CI spanning zero at every charge. NOT fundable. 30m/60m holds looked Bonferroni-significant but that was dropout bias (resolution 93%/82%). This is an out-of-window forward test at $0."
+  "_prereg": "Testing the ONE surviving cell: prior 5m return in [+4.8%,+9.5%], pure 15m hold, no stop. Measured on 93 survivorship-free graduates: median +6.70% STABLE across dropout charges -30/-50/-100%, mean +0.22..+2.33% with CI spanning zero at every charge. NOT fundable. 30m/60m holds looked Bonferroni-significant but that was dropout bias (resolution 93%/82%). This is an out-of-window forward test at $0.",
+  "_universe_fix": "n=31 showed mean -7.91% vs a predicted +0.22..+2.33%. Cause: the bot had no complete=1 filter, so it traded pre-graduation bonding-curve coins too -- a broader, ruggier universe than the one the cell was measured on (3 of 31 went to -101%). Now restricted to graduates, matching the backtest. Trades before this point are a DIFFERENT universe and must not be pooled with what follows.",
+  "_disarm": "DISARMED 2026-09-04. The 87-agent fleet (248 hypotheses, 72 tested, 0 edges) killed this cell: the +6.70% median was an OVERLAP artifact. One-position-at-a-time it is median -2.01% / mean -1.08%, indistinguishable from its neighbours. Universe gross 15m drift is -1.8% BEFORE costs. Keeping it armed would be trading a measured-negative rule."
 }

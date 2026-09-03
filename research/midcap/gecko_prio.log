@@ -1,3 +1,6 @@
 PRIORITY: 82 join-eligible graduates, 72 to fetch
   0/72 ok=1
   15/72 ok=15
+  45/72 ok=39
+  60/72 ok=51
+PRIORITY DONE: 60 with bars

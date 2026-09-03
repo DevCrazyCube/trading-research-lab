@@ -139,3 +139,565 @@ scalpbot up. mode=paper armed=True pos=$5.0 max_open=5
 scalpbot up. mode=paper armed=True pos=$5.0 max_open=5
 [19:30:20] universe=802 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
 [19:31:05] universe=804 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:31:50] universe=791 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:32:34] universe=806 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:33:27] universe=809 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:34:06] universe=766 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:34:50] universe=775 cand=5 pending=5 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+  OPEN  $1 @ $14,953,715
+  OPEN  GOAF @ $8,893,297
+  OPEN  BEN @ $336,896
+  OPEN  biketyson @ $320,423
+[19:35:35] universe=788 cand=0 pending=0 OPEN=4 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:36:20] universe=806 cand=0 pending=0 OPEN=4 closed=7 realised=$-21.98 unreal=$+0.11 armed=True
+[19:37:05] universe=814 cand=0 pending=0 OPEN=4 closed=7 realised=$-21.98 unreal=$+0.09 armed=True
+[19:37:50] universe=822 cand=1 pending=1 OPEN=4 closed=7 realised=$-21.98 unreal=$+0.79 armed=True
+  OPEN  COIN @ $315,690
+[19:38:42] universe=820 cand=0 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+0.67 armed=True
+[19:39:20] universe=787 cand=1 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+0.73 armed=True
+[19:40:06] universe=772 cand=0 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+1.73 armed=True
+[19:41:00] universe=673 cand=0 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+1.75 armed=True
+[19:41:35] universe=800 cand=1 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+2.00 armed=True
+[19:42:21] universe=802 cand=1 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+6.85 armed=True
+[19:43:05] universe=796 cand=2 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+6.64 armed=True
+[19:43:51] universe=774 cand=4 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+6.99 armed=True
+[19:44:35] universe=785 cand=4 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+6.56 armed=True
+[19:45:20] universe=785 cand=1 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+5.70 armed=True
+[19:46:06] universe=780 cand=1 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+3.87 armed=True
+[19:46:50] universe=787 cand=1 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+4.23 armed=True
+[19:47:36] universe=801 cand=1 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+3.79 armed=True
+[19:48:21] universe=802 cand=0 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+3.73 armed=True
+[19:49:07] universe=792 cand=0 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+2.79 armed=True
+[19:49:51] universe=794 cand=0 pending=0 OPEN=5 closed=7 realised=$-21.98 unreal=$+2.66 armed=True
+  CLOSE $1 maxhold +19.0% ($+0.95)
+  CLOSE GOAF maxhold +14.5% ($+0.72)
+  CLOSE BEN maxhold +4.2% ($+0.21)
+  CLOSE biketyson maxhold +24.4% ($+1.22)
+[19:50:35] universe=802 cand=2 pending=2 OPEN=1 closed=11 realised=$-18.87 unreal=$-0.33 armed=True
+  OPEN  GOAF @ $10,295,653
+  OPEN  Pumpooor @ $887,151
+[19:51:27] universe=434 cand=2 pending=2 OPEN=3 closed=11 realised=$-18.87 unreal=$-0.30 armed=True
+  OPEN  BEN @ $365,520
+[19:52:06] universe=791 cand=1 pending=1 OPEN=4 closed=11 realised=$-18.87 unreal=$-0.81 armed=True
+  OPEN  SOLCAT @ $1,034,495
+[19:52:51] universe=789 cand=2 pending=0 OPEN=5 closed=11 realised=$-18.87 unreal=$-0.13 armed=True
+  CLOSE COIN maxhold -7.6% ($-0.38)
+[19:53:37] universe=795 cand=2 pending=1 OPEN=4 closed=12 realised=$-19.25 unreal=$+0.47 armed=True
+  OPEN  $1 @ $18,730,768
+[19:54:21] universe=804 cand=2 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+0.48 armed=True
+[19:55:06] universe=803 cand=0 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+1.17 armed=True
+[19:55:50] universe=801 cand=1 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+1.52 armed=True
+[19:56:33] universe=798 cand=1 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+1.42 armed=True
+[19:57:19] universe=793 cand=0 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+1.85 armed=True
+[19:58:05] universe=803 cand=0 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+2.26 armed=True
+[19:58:50] universe=805 cand=0 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+2.38 armed=True
+[19:59:34] universe=795 cand=0 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+2.67 armed=True
+[20:00:19] universe=800 cand=1 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+1.16 armed=True
+[20:01:07] universe=765 cand=1 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+0.81 armed=True
+[20:01:49] universe=781 cand=2 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+0.83 armed=True
+[20:02:34] universe=785 cand=2 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+0.55 armed=True
+[20:03:19] universe=789 cand=2 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+0.62 armed=True
+[20:04:05] universe=802 cand=2 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$+0.94 armed=True
+[20:04:50] universe=778 cand=4 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$-2.21 armed=True
+[20:05:34] universe=790 cand=1 pending=0 OPEN=5 closed=12 realised=$-19.25 unreal=$-2.73 armed=True
+  CLOSE GOAF maxhold +12.8% ($+0.64)
+  CLOSE Pumpooor maxhold -63.6% ($-3.18)
+[20:06:19] universe=798 cand=2 pending=2 OPEN=3 closed=14 realised=$-21.79 unreal=$+0.20 armed=True
+  CLOSE BEN maxhold +2.9% ($+0.15)
+  OPEN  Magatard @ $179,634
+[20:07:04] universe=782 cand=1 pending=1 OPEN=3 closed=15 realised=$-21.65 unreal=$-0.00 armed=True
+  CLOSE SOLCAT maxhold -7.9% ($-0.39)
+  OPEN  PUMPLESS @ $683,278
+[20:07:49] universe=769 cand=0 pending=0 OPEN=3 closed=16 realised=$-22.04 unreal=$+0.84 armed=True
+[20:08:34] universe=785 cand=0 pending=0 OPEN=3 closed=16 realised=$-22.04 unreal=$+1.92 armed=True
+  CLOSE $1 maxhold +8.0% ($+0.40)
+[20:09:19] universe=807 cand=1 pending=1 OPEN=2 closed=17 realised=$-21.64 unreal=$-0.16 armed=True
+  OPEN  HOOD @ $532,229
+[20:10:05] universe=785 cand=0 pending=0 OPEN=3 closed=17 realised=$-21.64 unreal=$+0.82 armed=True
+[20:10:50] universe=793 cand=1 pending=1 OPEN=3 closed=17 realised=$-21.64 unreal=$-0.15 armed=True
+  OPEN  RICHDEBT @ $690,487
+[20:11:34] universe=792 cand=0 pending=0 OPEN=4 closed=17 realised=$-21.64 unreal=$+0.22 armed=True
+[20:12:19] universe=789 cand=5 pending=1 OPEN=4 closed=17 realised=$-21.64 unreal=$+0.33 armed=True
+  OPEN  $1 @ $21,018,263
+[20:13:05] universe=801 cand=4 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$-3.05 armed=True
+[20:13:51] universe=802 cand=0 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$-2.83 armed=True
+[20:14:34] universe=766 cand=2 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$-2.80 armed=True
+[20:15:20] universe=804 cand=2 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$-2.58 armed=True
+[20:16:07] universe=763 cand=1 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$+0.37 armed=True
+[20:16:50] universe=795 cand=4 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$+0.19 armed=True
+[20:17:36] universe=775 cand=2 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$+0.24 armed=True
+[20:18:21] universe=791 cand=0 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$+0.38 armed=True
+[20:19:05] universe=803 cand=3 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$+0.29 armed=True
+[20:19:50] universe=803 cand=0 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$+0.31 armed=True
+[20:20:35] universe=790 cand=4 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$+0.35 armed=True
+[20:21:21] universe=784 cand=5 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$+0.50 armed=True
+[20:22:06] universe=792 cand=3 pending=0 OPEN=5 closed=17 realised=$-21.64 unreal=$+0.55 armed=True
+  CLOSE PUMPLESS maxhold +1.5% ($+0.08)
+[20:22:50] universe=766 cand=3 pending=1 OPEN=4 closed=18 realised=$-21.56 unreal=$+0.63 armed=True
+  OPEN  PAPU @ $3,998,598
+[20:23:35] universe=789 cand=1 pending=0 OPEN=5 closed=18 realised=$-21.56 unreal=$+0.75 armed=True
+[20:24:20] universe=796 cand=2 pending=0 OPEN=5 closed=18 realised=$-21.56 unreal=$+0.80 armed=True
+  CLOSE HOOD maxhold +8.3% ($+0.41)
+[20:25:05] universe=791 cand=5 pending=1 OPEN=4 closed=19 realised=$-21.15 unreal=$+0.47 armed=True
+  OPEN  KAT @ $528,203
+[20:25:50] universe=771 cand=3 pending=0 OPEN=5 closed=19 realised=$-21.15 unreal=$+0.65 armed=True
+  CLOSE RICHDEBT maxhold -5.2% ($-0.26)
+[20:26:35] universe=792 cand=3 pending=1 OPEN=4 closed=20 realised=$-21.40 unreal=$+0.98 armed=True
+  OPEN  GOAF @ $14,264,371
+[20:27:21] universe=770 cand=1 pending=0 OPEN=5 closed=20 realised=$-21.40 unreal=$+0.99 armed=True
+  CLOSE $1 maxhold +22.2% ($+1.11)
+[20:28:06] universe=805 cand=2 pending=1 OPEN=4 closed=21 realised=$-20.29 unreal=$+0.11 armed=True
+  CLOSE GOAF stop -101.1% ($-5.06)
+  OPEN  cat bull @ $433,871
+[20:28:51] universe=799 cand=3 pending=1 OPEN=4 closed=22 realised=$-25.35 unreal=$+0.16 armed=True
+  OPEN  RST @ $12,136,995
+[20:29:38] universe=800 cand=2 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$+0.76 armed=True
+[20:30:20] universe=785 cand=0 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$+1.00 armed=True
+[20:31:06] universe=791 cand=0 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$-0.18 armed=True
+[20:31:51] universe=785 cand=2 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$+0.36 armed=True
+[20:32:36] universe=798 cand=1 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$+0.12 armed=True
+[20:33:21] universe=814 cand=3 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$-1.26 armed=True
+[20:34:07] universe=818 cand=2 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$-0.63 armed=True
+[20:34:51] universe=804 cand=1 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$-0.21 armed=True
+[20:35:36] universe=796 cand=4 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$+0.25 armed=True
+[20:36:20] universe=785 cand=7 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$-0.55 armed=True
+[20:37:06] universe=800 cand=3 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$-0.50 armed=True
+[20:37:51] universe=808 cand=2 pending=0 OPEN=5 closed=22 realised=$-25.35 unreal=$+0.24 armed=True
+  CLOSE PAPU maxhold +27.0% ($+1.35)
+[20:38:37] universe=777 cand=4 pending=1 OPEN=4 closed=23 realised=$-24.00 unreal=$-1.34 armed=True
+  OPEN  PAPU @ $5,201,613
+[20:39:22] universe=794 cand=1 pending=0 OPEN=5 closed=23 realised=$-24.00 unreal=$-1.07 armed=True
+[20:40:06] universe=814 cand=2 pending=0 OPEN=5 closed=23 realised=$-24.00 unreal=$-0.92 armed=True
+  CLOSE KAT maxhold -14.1% ($-0.71)
+[20:40:51] universe=790 cand=3 pending=1 OPEN=4 closed=24 realised=$-24.71 unreal=$-0.51 armed=True
+  OPEN  AEON @ $7,519,195
+[20:41:37] universe=793 cand=3 pending=0 OPEN=5 closed=24 realised=$-24.71 unreal=$-0.20 armed=True
+[20:42:21] universe=805 cand=1 pending=0 OPEN=5 closed=24 realised=$-24.71 unreal=$+0.32 armed=True
+[20:43:07] universe=794 cand=4 pending=0 OPEN=5 closed=24 realised=$-24.71 unreal=$-0.71 armed=True
+  CLOSE cat bull maxhold -20.5% ($-1.03)
+[20:43:51] universe=813 cand=4 pending=1 OPEN=4 closed=25 realised=$-25.73 unreal=$+0.75 armed=True
+  CLOSE RST maxhold +5.2% ($+0.26)
+  OPEN  biketyson @ $374,405
+[20:44:36] universe=807 cand=3 pending=1 OPEN=4 closed=26 realised=$-25.48 unreal=$+0.48 armed=True
+  OPEN  PUMPLESS @ $720,967
+[20:45:22] universe=805 cand=0 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+0.52 armed=True
+[20:46:06] universe=821 cand=1 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+0.65 armed=True
+[20:46:51] universe=800 cand=1 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+0.94 armed=True
+[20:47:36] universe=817 cand=0 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+0.77 armed=True
+[20:48:21] universe=805 cand=0 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+0.24 armed=True
+[20:49:06] universe=811 cand=2 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+0.17 armed=True
+[20:49:52] universe=816 cand=3 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+1.08 armed=True
+[20:50:36] universe=813 cand=1 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+1.04 armed=True
+[20:51:21] universe=800 cand=3 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+1.09 armed=True
+[20:52:07] universe=812 cand=1 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+1.13 armed=True
+[20:52:51] universe=808 cand=2 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+1.29 armed=True
+[20:53:36] universe=796 cand=3 pending=0 OPEN=5 closed=26 realised=$-25.48 unreal=$+1.34 armed=True
+  CLOSE PAPU maxhold +23.5% ($+1.17)
+[20:54:22] universe=807 cand=2 pending=1 OPEN=4 closed=27 realised=$-24.30 unreal=$+1.14 armed=True
+  OPEN  PAPU @ $6,598,128
+[20:55:03] universe=807 cand=0 pending=0 OPEN=5 closed=27 realised=$-24.30 unreal=$+1.06 armed=True
+[20:55:49] universe=800 cand=0 pending=0 OPEN=5 closed=27 realised=$-24.30 unreal=$+1.26 armed=True
+  CLOSE AEON maxhold +12.7% ($+0.64)
+[20:56:34] universe=806 cand=0 pending=0 OPEN=4 closed=28 realised=$-23.67 unreal=$+0.79 armed=True
+[20:57:21] universe=802 cand=0 pending=0 OPEN=4 closed=28 realised=$-23.67 unreal=$+0.37 armed=True
+[20:58:05] universe=793 cand=1 pending=1 OPEN=4 closed=28 realised=$-23.67 unreal=$+0.56 armed=True
+  OPEN  IOAF @ $6,799,918
+[20:58:49] universe=786 cand=2 pending=0 OPEN=5 closed=28 realised=$-23.67 unreal=$+0.72 armed=True
+  CLOSE biketyson maxhold +8.7% ($+0.43)
+[20:59:34] universe=784 cand=2 pending=1 OPEN=4 closed=29 realised=$-23.23 unreal=$+0.31 armed=True
+  CLOSE PUMPLESS maxhold -1.1% ($-0.05)
+  OPEN  Shrek @ $875,395
+[21:00:19] universe=792 cand=3 pending=1 OPEN=4 closed=30 realised=$-23.29 unreal=$+0.38 armed=True
+  OPEN  PONS @ $8,747,072
+[21:01:04] universe=816 cand=3 pending=0 OPEN=5 closed=30 realised=$-23.29 unreal=$+0.48 armed=True
+[21:01:56] universe=772 cand=2 pending=0 OPEN=5 closed=30 realised=$-23.29 unreal=$-2.51 armed=True
+[21:02:35] universe=809 cand=2 pending=0 OPEN=5 closed=30 realised=$-23.29 unreal=$+0.35 armed=True
+  CLOSE PAPU stop -100.9% ($-5.04)
+[21:03:20] universe=818 cand=4 pending=1 OPEN=4 closed=31 realised=$-28.33 unreal=$+0.36 armed=True
+  OPEN  HOOD @ $976,089
+[21:04:04] universe=782 cand=1 pending=0 OPEN=5 closed=31 realised=$-28.33 unreal=$+0.41 armed=True
+  CLOSE PONS stop -101.1% ($-5.06)
+[21:04:49] universe=809 cand=1 pending=1 OPEN=4 closed=32 realised=$-33.39 unreal=$+0.33 armed=True
+  OPEN  SOLOTC @ $587,703
+[21:05:36] universe=776 cand=1 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+0.37 armed=True
+[21:06:19] universe=805 cand=0 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+0.48 armed=True
+[21:07:04] universe=816 cand=1 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+1.13 armed=True
+[21:07:50] universe=796 cand=3 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+1.66 armed=True
+[21:08:35] universe=810 cand=0 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+1.86 armed=True
+[21:09:20] universe=806 cand=1 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+1.54 armed=True
+[21:10:05] universe=800 cand=1 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+1.66 armed=True
+[21:10:49] universe=792 cand=3 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+1.79 armed=True
+[21:11:35] universe=797 cand=1 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+1.19 armed=True
+[21:12:24] universe=811 cand=1 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+1.20 armed=True
+[21:13:05] universe=793 cand=1 pending=0 OPEN=5 closed=32 realised=$-33.39 unreal=$+1.15 armed=True
+  CLOSE IOAF maxhold +5.4% ($+0.27)
+[21:13:49] universe=823 cand=1 pending=1 OPEN=4 closed=33 realised=$-33.12 unreal=$+0.89 armed=True
+  OPEN  Pumpooor @ $219,469
+[21:14:34] universe=797 cand=1 pending=0 OPEN=5 closed=33 realised=$-33.12 unreal=$+1.12 armed=True
+  CLOSE Shrek maxhold +3.9% ($+0.20)
+[21:15:20] universe=801 cand=3 pending=1 OPEN=4 closed=34 realised=$-32.92 unreal=$+0.66 armed=True
+  OPEN  PUMPLESS @ $555,461
+[21:16:05] universe=794 cand=0 pending=0 OPEN=5 closed=34 realised=$-32.92 unreal=$+0.75 armed=True
+[21:16:50] universe=804 cand=1 pending=0 OPEN=5 closed=34 realised=$-32.92 unreal=$+0.68 armed=True
+[21:17:35] universe=810 cand=3 pending=0 OPEN=5 closed=34 realised=$-32.92 unreal=$+0.68 armed=True
+[21:18:20] universe=786 cand=2 pending=0 OPEN=5 closed=34 realised=$-32.92 unreal=$+0.68 armed=True
+  CLOSE HOOD maxhold +4.6% ($+0.23)
+[21:19:05] universe=824 cand=1 pending=1 OPEN=4 closed=35 realised=$-32.69 unreal=$+0.30 armed=True
+  OPEN  SOLBEN @ $192,915
+[21:19:50] universe=786 cand=2 pending=0 OPEN=5 closed=35 realised=$-32.69 unreal=$+0.37 armed=True
+  CLOSE SOLOTC maxhold -0.5% ($-0.03)
+[21:20:37] universe=789 cand=1 pending=1 OPEN=4 closed=36 realised=$-32.71 unreal=$-0.40 armed=True
+  OPEN  AURA @ $514,561
+[21:21:20] universe=807 cand=2 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-1.13 armed=True
+[21:22:22] universe=725 cand=0 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-0.92 armed=True
+[21:22:50] universe=790 cand=1 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-1.07 armed=True
+[21:23:35] universe=795 cand=0 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-0.97 armed=True
+[21:24:20] universe=784 cand=0 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-1.73 armed=True
+[21:25:05] universe=790 cand=0 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-1.25 armed=True
+[21:26:05] universe=402 cand=2 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-0.07 armed=True
+[21:26:35] universe=787 cand=0 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-1.43 armed=True
+[21:27:20] universe=806 cand=0 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-1.51 armed=True
+[21:28:06] universe=775 cand=1 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-1.70 armed=True
+[21:28:50] universe=796 cand=0 pending=0 OPEN=5 closed=36 realised=$-32.71 unreal=$-1.91 armed=True
+  CLOSE Pumpooor maxhold -3.1% ($-0.15)
+[21:29:35] universe=791 cand=2 pending=1 OPEN=4 closed=37 realised=$-32.87 unreal=$-1.80 armed=True
+  OPEN  BEN @ $313,649
+[21:30:20] universe=790 cand=1 pending=0 OPEN=5 closed=37 realised=$-32.87 unreal=$-1.96 armed=True
+  CLOSE PUMPLESS maxhold -27.4% ($-1.37)
+[21:31:06] universe=809 cand=2 pending=1 OPEN=4 closed=38 realised=$-34.24 unreal=$-0.37 armed=True
+  OPEN  SOLOTC @ $629,292
+[21:31:50] universe=797 cand=1 pending=0 OPEN=5 closed=38 realised=$-34.24 unreal=$-0.39 armed=True
+[21:32:35] universe=820 cand=1 pending=0 OPEN=5 closed=38 realised=$-34.24 unreal=$-0.44 armed=True
+[21:33:20] universe=800 cand=2 pending=0 OPEN=5 closed=38 realised=$-34.24 unreal=$-0.82 armed=True
+[21:34:05] universe=793 cand=4 pending=0 OPEN=5 closed=38 realised=$-34.24 unreal=$-0.56 armed=True
+scalpbot up. mode=paper armed=True pos=$5.0 max_open=5
+[21:34:30] universe=795 cand=0 pending=0 OPEN=5 closed=38 realised=$-34.24 unreal=$-0.64 armed=True
+  CLOSE SOLBEN maxhold -12.7% ($-0.64)
+[21:35:14] universe=796 cand=0 pending=0 OPEN=4 closed=39 realised=$-34.88 unreal=$+0.10 armed=True
+[21:35:59] universe=792 cand=0 pending=0 OPEN=4 closed=39 realised=$-34.88 unreal=$+0.08 armed=True
+  CLOSE AURA maxhold -1.9% ($-0.10)
+[21:36:45] universe=798 cand=0 pending=0 OPEN=3 closed=40 realised=$-34.97 unreal=$+0.14 armed=True
+[21:37:29] universe=809 cand=0 pending=0 OPEN=3 closed=40 realised=$-34.97 unreal=$-0.34 armed=True
+[21:38:14] universe=787 cand=0 pending=0 OPEN=3 closed=40 realised=$-34.97 unreal=$+0.01 armed=True
+[21:38:59] universe=800 cand=1 pending=1 OPEN=3 closed=40 realised=$-34.97 unreal=$-0.66 armed=True
+  OPEN  Pumpooor @ $222,048
+[21:39:44] universe=791 cand=1 pending=1 OPEN=4 closed=40 realised=$-34.97 unreal=$-0.92 armed=True
+  OPEN  RICHDEBT @ $663,901
+[21:40:30] universe=807 cand=0 pending=0 OPEN=5 closed=40 realised=$-34.97 unreal=$-0.41 armed=True
+[21:41:15] universe=799 cand=2 pending=0 OPEN=5 closed=40 realised=$-34.97 unreal=$-1.09 armed=True
+[21:42:00] universe=795 cand=0 pending=0 OPEN=5 closed=40 realised=$-34.97 unreal=$-1.06 armed=True
+[21:42:55] universe=804 cand=0 pending=0 OPEN=5 closed=40 realised=$-34.97 unreal=$-2.09 armed=True
+[21:43:29] universe=799 cand=2 pending=0 OPEN=5 closed=40 realised=$-34.97 unreal=$-2.27 armed=True
+[21:44:15] universe=786 cand=3 pending=0 OPEN=5 closed=40 realised=$-34.97 unreal=$-1.92 armed=True
+[21:45:00] universe=790 cand=2 pending=0 OPEN=5 closed=40 realised=$-34.97 unreal=$-1.90 armed=True
+  CLOSE BEN maxhold -13.6% ($-0.68)
+[21:45:44] universe=795 cand=4 pending=1 OPEN=4 closed=41 realised=$-35.65 unreal=$-0.96 armed=True
+  OPEN  LQX @ $1,644,740
+[21:46:29] universe=792 cand=1 pending=0 OPEN=5 closed=41 realised=$-35.65 unreal=$-0.50 armed=True
+  CLOSE SOLOTC maxhold -24.4% ($-1.22)
+[21:47:14] universe=795 cand=3 pending=1 OPEN=4 closed=42 realised=$-36.88 unreal=$+0.63 armed=True
+  OPEN  SOLCAT @ $948,461
+[21:47:59] universe=814 cand=2 pending=0 OPEN=5 closed=42 realised=$-36.88 unreal=$+0.33 armed=True
+[21:48:45] universe=780 cand=0 pending=0 OPEN=5 closed=42 realised=$-36.88 unreal=$+0.29 armed=True
+[21:49:31] universe=752 cand=0 pending=0 OPEN=5 closed=42 realised=$-36.88 unreal=$+0.24 armed=True
+[21:50:15] universe=802 cand=2 pending=0 OPEN=5 closed=42 realised=$-36.88 unreal=$+0.28 armed=True
+[21:50:59] universe=797 cand=0 pending=0 OPEN=5 closed=42 realised=$-36.88 unreal=$-0.24 armed=True
+[21:51:45] universe=814 cand=1 pending=0 OPEN=5 closed=42 realised=$-36.88 unreal=$-0.23 armed=True
+[21:52:37] universe=805 cand=1 pending=0 OPEN=5 closed=42 realised=$-36.88 unreal=$-0.09 armed=True
+[21:53:15] universe=819 cand=3 pending=0 OPEN=5 closed=42 realised=$-36.88 unreal=$-0.07 armed=True
+[21:53:59] universe=807 cand=1 pending=0 OPEN=5 closed=42 realised=$-36.88 unreal=$+0.11 armed=True
+  CLOSE Pumpooor maxhold +4.5% ($+0.23)
+[21:54:44] universe=806 cand=2 pending=1 OPEN=4 closed=43 realised=$-36.65 unreal=$-0.14 armed=True
+  CLOSE RICHDEBT maxhold +0.7% ($+0.03)
+  OPEN  SOLOTC @ $532,646
+[21:55:30] universe=800 cand=1 pending=1 OPEN=4 closed=44 realised=$-36.62 unreal=$-0.23 armed=True
+  OPEN  CTO @ $12,694,565
+[21:56:15] universe=804 cand=3 pending=0 OPEN=5 closed=44 realised=$-36.62 unreal=$-0.49 armed=True
+[21:57:01] universe=807 cand=3 pending=0 OPEN=5 closed=44 realised=$-36.62 unreal=$-0.56 armed=True
+[21:57:54] universe=651 cand=0 pending=0 OPEN=5 closed=44 realised=$-36.62 unreal=$-0.72 armed=True
+[21:58:28] universe=790 cand=1 pending=0 OPEN=5 closed=44 realised=$-36.62 unreal=$-0.65 armed=True
+[21:59:13] universe=810 cand=3 pending=0 OPEN=5 closed=44 realised=$-36.62 unreal=$-0.64 armed=True
+[21:59:58] universe=818 cand=2 pending=0 OPEN=5 closed=44 realised=$-36.62 unreal=$-1.00 armed=True
+[22:00:43] universe=786 cand=1 pending=0 OPEN=5 closed=44 realised=$-36.62 unreal=$-0.91 armed=True
+  CLOSE LQX maxhold -0.7% ($-0.03)
+[22:01:28] universe=794 cand=5 pending=1 OPEN=4 closed=45 realised=$-36.65 unreal=$-0.88 armed=True
+  OPEN  USMS @ $2,418,459
+[22:02:12] universe=779 cand=1 pending=0 OPEN=5 closed=45 realised=$-36.65 unreal=$-0.55 armed=True
+  CLOSE SOLCAT maxhold -0.3% ($-0.02)
+[22:02:58] universe=804 cand=1 pending=1 OPEN=4 closed=46 realised=$-36.67 unreal=$-0.50 armed=True
+  OPEN  Shrek @ $689,422
+[22:03:43] universe=796 cand=1 pending=0 OPEN=5 closed=46 realised=$-36.67 unreal=$-0.26 armed=True
+[22:04:29] universe=799 cand=4 pending=0 OPEN=5 closed=46 realised=$-36.67 unreal=$+0.57 armed=True
+[22:05:13] universe=796 cand=2 pending=0 OPEN=5 closed=46 realised=$-36.67 unreal=$+0.73 armed=True
+[22:05:58] universe=796 cand=1 pending=0 OPEN=5 closed=46 realised=$-36.67 unreal=$-0.68 armed=True
+[22:06:45] universe=786 cand=1 pending=0 OPEN=5 closed=46 realised=$-36.67 unreal=$-0.70 armed=True
+[22:07:28] universe=786 cand=1 pending=0 OPEN=5 closed=46 realised=$-36.67 unreal=$-1.22 armed=True
+[22:08:13] universe=806 cand=2 pending=0 OPEN=5 closed=46 realised=$-36.67 unreal=$-1.17 armed=True
+[22:08:59] universe=794 cand=0 pending=0 OPEN=5 closed=46 realised=$-36.67 unreal=$-0.78 armed=True
+[22:09:49] universe=794 cand=4 pending=0 OPEN=5 closed=46 realised=$-36.67 unreal=$-1.03 armed=True
+  CLOSE SOLOTC maxhold -22.1% ($-1.10)
+[22:10:28] universe=785 cand=2 pending=1 OPEN=4 closed=47 realised=$-37.77 unreal=$+0.39 armed=True
+  CLOSE CTO maxhold +9.6% ($+0.48)
+  OPEN  WOFI @ $7,371,281
+[22:11:14] universe=790 cand=2 pending=1 OPEN=4 closed=48 realised=$-37.29 unreal=$-0.45 armed=True
+  OPEN  SOLBEN @ $118,976
+[22:11:58] universe=797 cand=0 pending=0 OPEN=5 closed=48 realised=$-37.29 unreal=$-0.57 armed=True
+[22:12:43] universe=788 cand=0 pending=0 OPEN=5 closed=48 realised=$-37.29 unreal=$-0.29 armed=True
+[22:13:35] universe=814 cand=2 pending=0 OPEN=5 closed=48 realised=$-37.29 unreal=$-0.16 armed=True
+[22:14:16] universe=744 cand=2 pending=0 OPEN=5 closed=48 realised=$-37.29 unreal=$+0.00 armed=True
+[22:14:59] universe=805 cand=0 pending=0 OPEN=5 closed=48 realised=$-37.29 unreal=$-0.05 armed=True
+[22:15:45] universe=776 cand=2 pending=0 OPEN=5 closed=48 realised=$-37.29 unreal=$+0.15 armed=True
+[22:16:31] universe=793 cand=2 pending=0 OPEN=5 closed=48 realised=$-37.29 unreal=$+0.08 armed=True
+  CLOSE USMS maxhold +15.5% ($+0.77)
+[22:17:14] universe=796 cand=3 pending=1 OPEN=4 closed=49 realised=$-36.52 unreal=$-0.50 armed=True
+[22:17:58] universe=799 cand=3 pending=1 OPEN=4 closed=49 realised=$-36.52 unreal=$-1.39 armed=True
+  CLOSE Shrek maxhold -17.2% ($-0.86)
+  OPEN  LIKESOL @ $758,145
+[22:18:45] universe=776 cand=1 pending=1 OPEN=4 closed=50 realised=$-37.37 unreal=$-0.60 armed=True
+[22:19:29] universe=799 cand=2 pending=1 OPEN=4 closed=50 realised=$-37.37 unreal=$-0.18 armed=True
+  OPEN  USMS @ $2,956,448
+[22:20:15] universe=785 cand=1 pending=0 OPEN=5 closed=50 realised=$-37.37 unreal=$-0.49 armed=True
+[22:20:59] universe=804 cand=0 pending=0 OPEN=5 closed=50 realised=$-37.37 unreal=$-0.30 armed=True
+[22:21:44] universe=777 cand=2 pending=0 OPEN=5 closed=50 realised=$-37.37 unreal=$-0.41 armed=True
+[22:22:29] universe=802 cand=4 pending=0 OPEN=5 closed=50 realised=$-37.37 unreal=$-1.96 armed=True
+[22:23:14] universe=789 cand=2 pending=0 OPEN=5 closed=50 realised=$-37.37 unreal=$-1.21 armed=True
+  CLOSE WOFI stop -101.1% ($-5.05)
+[22:24:00] universe=804 cand=1 pending=1 OPEN=4 closed=51 realised=$-42.43 unreal=$-0.62 armed=True
+  OPEN  RST @ $6,921,097
+[22:24:44] universe=807 cand=1 pending=0 OPEN=5 closed=51 realised=$-42.43 unreal=$-1.17 armed=True
+[22:25:30] universe=807 cand=0 pending=0 OPEN=5 closed=51 realised=$-42.43 unreal=$-1.17 armed=True
+[22:26:14] universe=799 cand=3 pending=0 OPEN=5 closed=51 realised=$-42.43 unreal=$-0.89 armed=True
+  CLOSE SOLBEN maxhold -11.3% ($-0.57)
+[22:27:01] universe=800 cand=1 pending=1 OPEN=4 closed=52 realised=$-42.99 unreal=$-0.30 armed=True
+  OPEN  COIN @ $161,468
+[22:27:44] universe=803 cand=1 pending=0 OPEN=5 closed=52 realised=$-42.99 unreal=$-0.87 armed=True
+[22:28:30] universe=812 cand=1 pending=0 OPEN=5 closed=52 realised=$-42.99 unreal=$-0.96 armed=True
+[22:29:14] universe=790 cand=2 pending=0 OPEN=5 closed=52 realised=$-42.99 unreal=$-0.98 armed=True
+[22:30:22] universe=793 cand=2 pending=0 OPEN=5 closed=52 realised=$-42.99 unreal=$-0.51 armed=True
+[22:30:46] universe=756 cand=0 pending=0 OPEN=5 closed=52 realised=$-42.99 unreal=$-1.72 armed=True
+[22:31:30] universe=810 cand=1 pending=0 OPEN=5 closed=52 realised=$-42.99 unreal=$-0.86 armed=True
+[22:32:15] universe=789 cand=1 pending=0 OPEN=5 closed=52 realised=$-42.99 unreal=$-0.80 armed=True
+[22:33:00] universe=797 cand=2 pending=0 OPEN=5 closed=52 realised=$-42.99 unreal=$-0.55 armed=True
+  CLOSE LIKESOL maxhold -22.2% ($-1.11)
+[22:33:45] universe=784 cand=4 pending=1 OPEN=4 closed=53 realised=$-44.11 unreal=$+0.91 armed=True
+  OPEN  RICHDEBT @ $635,182
+[22:34:29] universe=771 cand=1 pending=0 OPEN=5 closed=53 realised=$-44.11 unreal=$+0.97 armed=True
+  CLOSE USMS maxhold +11.9% ($+0.60)
+[22:35:15] universe=792 cand=2 pending=1 OPEN=4 closed=54 realised=$-43.51 unreal=$+0.30 armed=True
+  OPEN  Anthropic @ $956,307
+[22:35:59] universe=788 cand=4 pending=0 OPEN=5 closed=54 realised=$-43.51 unreal=$+0.15 armed=True
+[22:36:45] universe=775 cand=1 pending=0 OPEN=5 closed=54 realised=$-43.51 unreal=$+0.13 armed=True
+[22:37:29] universe=794 cand=5 pending=0 OPEN=5 closed=54 realised=$-43.51 unreal=$+1.06 armed=True
+[22:38:15] universe=772 cand=4 pending=0 OPEN=5 closed=54 realised=$-43.51 unreal=$+0.61 armed=True
+[22:39:00] universe=803 cand=2 pending=0 OPEN=5 closed=54 realised=$-43.51 unreal=$+1.22 armed=True
+  CLOSE RST maxhold +8.1% ($+0.41)
+[22:39:45] universe=784 cand=3 pending=1 OPEN=4 closed=55 realised=$-43.10 unreal=$+0.70 armed=True
+  OPEN  KAT @ $515,510
+[22:40:31] universe=780 cand=0 pending=0 OPEN=5 closed=55 realised=$-43.10 unreal=$+0.72 armed=True
+[22:41:20] universe=784 cand=1 pending=0 OPEN=5 closed=55 realised=$-43.10 unreal=$+0.57 armed=True
+[22:42:00] universe=793 cand=1 pending=0 OPEN=5 closed=55 realised=$-43.10 unreal=$+0.40 armed=True
+  CLOSE COIN maxhold -12.9% ($-0.65)
+[22:42:45] universe=780 cand=0 pending=0 OPEN=4 closed=56 realised=$-43.75 unreal=$+0.35 armed=True
+[22:43:30] universe=806 cand=2 pending=1 OPEN=4 closed=56 realised=$-43.75 unreal=$+0.34 armed=True
+  OPEN  AURA @ $524,984
+[22:44:26] universe=786 cand=2 pending=0 OPEN=5 closed=56 realised=$-43.75 unreal=$+0.32 armed=True
+[22:45:01] universe=801 cand=2 pending=0 OPEN=5 closed=56 realised=$-43.75 unreal=$+0.54 armed=True
+[22:45:45] universe=752 cand=1 pending=0 OPEN=5 closed=56 realised=$-43.75 unreal=$+0.27 armed=True
+[22:46:30] universe=811 cand=2 pending=0 OPEN=5 closed=56 realised=$-43.75 unreal=$+0.38 armed=True
+[22:47:15] universe=791 cand=3 pending=0 OPEN=5 closed=56 realised=$-43.75 unreal=$+0.35 armed=True
+[22:48:00] universe=795 cand=5 pending=0 OPEN=5 closed=56 realised=$-43.75 unreal=$+0.25 armed=True
+[22:48:46] universe=786 cand=0 pending=0 OPEN=5 closed=56 realised=$-43.75 unreal=$+0.59 armed=True
+  CLOSE RICHDEBT maxhold +5.4% ($+0.27)
+[22:49:30] universe=789 cand=0 pending=0 OPEN=4 closed=57 realised=$-43.48 unreal=$-0.09 armed=True
+[22:50:14] universe=812 cand=2 pending=1 OPEN=4 closed=57 realised=$-43.48 unreal=$-0.11 armed=True
+  CLOSE Anthropic maxhold +5.8% ($+0.29)
+  OPEN  Shrek @ $691,971
+[22:51:00] universe=814 cand=2 pending=1 OPEN=4 closed=58 realised=$-43.18 unreal=$-0.44 armed=True
+  OPEN  PUMPLESS @ $455,328
+[22:51:45] universe=793 cand=2 pending=0 OPEN=5 closed=58 realised=$-43.18 unreal=$-0.50 armed=True
+[22:52:31] universe=789 cand=2 pending=0 OPEN=5 closed=58 realised=$-43.18 unreal=$-0.33 armed=True
+[22:53:19] universe=758 cand=2 pending=0 OPEN=5 closed=58 realised=$-43.18 unreal=$-0.71 armed=True
+[22:54:00] universe=793 cand=4 pending=0 OPEN=5 closed=58 realised=$-43.18 unreal=$-0.84 armed=True
+[22:54:45] universe=783 cand=1 pending=0 OPEN=5 closed=58 realised=$-43.18 unreal=$-0.80 armed=True
+  CLOSE KAT maxhold -10.6% ($-0.53)
+[22:55:30] universe=796 cand=1 pending=1 OPEN=4 closed=59 realised=$-43.72 unreal=$-0.22 armed=True
+  OPEN  FOMO @ $1,512,820
+[22:56:15] universe=770 cand=0 pending=0 OPEN=5 closed=59 realised=$-43.72 unreal=$-0.18 armed=True
+[22:57:00] universe=802 cand=1 pending=0 OPEN=5 closed=59 realised=$-43.72 unreal=$+0.01 armed=True
+[22:57:46] universe=774 cand=1 pending=0 OPEN=5 closed=59 realised=$-43.72 unreal=$-0.11 armed=True
+[22:58:31] universe=787 cand=3 pending=0 OPEN=5 closed=59 realised=$-43.72 unreal=$+0.11 armed=True
+  CLOSE AURA maxhold -0.9% ($-0.04)
+[22:59:13] universe=796 cand=1 pending=1 OPEN=4 closed=60 realised=$-43.76 unreal=$+0.12 armed=True
+  OPEN  POGGERS @ $212,938
+[22:59:58] universe=823 cand=1 pending=0 OPEN=5 closed=60 realised=$-43.76 unreal=$+0.15 armed=True
+  CLOSE PUMPLESS stop -100.7% ($-5.03)
+[23:00:43] universe=798 cand=0 pending=0 OPEN=4 closed=61 realised=$-48.79 unreal=$-0.47 armed=True
+[23:01:27] universe=798 cand=1 pending=1 OPEN=4 closed=61 realised=$-48.79 unreal=$-0.86 armed=True
+  OPEN  biketyson @ $355,102
+[23:02:13] universe=793 cand=1 pending=0 OPEN=5 closed=61 realised=$-48.79 unreal=$-0.71 armed=True
+[23:02:58] universe=833 cand=3 pending=0 OPEN=5 closed=61 realised=$-48.79 unreal=$-0.28 armed=True
+[23:03:43] universe=806 cand=3 pending=0 OPEN=5 closed=61 realised=$-48.79 unreal=$-0.36 armed=True
+[23:04:28] universe=762 cand=0 pending=0 OPEN=5 closed=61 realised=$-48.79 unreal=$-0.19 armed=True
+[23:05:14] universe=789 cand=1 pending=0 OPEN=5 closed=61 realised=$-48.79 unreal=$-0.12 armed=True
+  CLOSE Shrek maxhold -11.2% ($-0.56)
+[23:05:58] universe=818 cand=1 pending=1 OPEN=4 closed=62 realised=$-49.35 unreal=$+0.36 armed=True
+[23:06:42] universe=777 cand=2 pending=1 OPEN=4 closed=62 realised=$-49.35 unreal=$+0.12 armed=True
+  OPEN  Shrek @ $650,336
+[23:07:28] universe=809 cand=3 pending=0 OPEN=5 closed=62 realised=$-49.35 unreal=$+0.07 armed=True
+[23:08:13] universe=787 cand=2 pending=0 OPEN=5 closed=62 realised=$-49.35 unreal=$+0.21 armed=True
+[23:08:59] universe=801 cand=1 pending=0 OPEN=5 closed=62 realised=$-49.35 unreal=$+0.04 armed=True
+[23:09:43] universe=799 cand=3 pending=0 OPEN=5 closed=62 realised=$-49.35 unreal=$+0.03 armed=True
+[23:10:28] universe=803 cand=1 pending=0 OPEN=5 closed=62 realised=$-49.35 unreal=$+0.05 armed=True
+  CLOSE FOMO maxhold +6.0% ($+0.30)
+[23:11:13] universe=813 cand=2 pending=1 OPEN=4 closed=63 realised=$-49.05 unreal=$-0.07 armed=True
+  OPEN  AURA @ $581,237
+[23:11:58] universe=801 cand=1 pending=0 OPEN=5 closed=63 realised=$-49.05 unreal=$+0.21 armed=True
+[23:12:43] universe=777 cand=1 pending=0 OPEN=5 closed=63 realised=$-49.05 unreal=$-0.04 armed=True
+[23:13:28] universe=793 cand=4 pending=0 OPEN=5 closed=63 realised=$-49.05 unreal=$+0.07 armed=True
+[23:14:13] universe=792 cand=2 pending=0 OPEN=5 closed=63 realised=$-49.05 unreal=$+0.93 armed=True
+[23:14:59] universe=800 cand=4 pending=0 OPEN=5 closed=63 realised=$-49.05 unreal=$+1.23 armed=True
+[23:15:43] universe=796 cand=1 pending=0 OPEN=5 closed=63 realised=$-49.05 unreal=$+2.17 armed=True
+[23:16:29] universe=807 cand=5 pending=0 OPEN=5 closed=63 realised=$-49.05 unreal=$+1.90 armed=True
+  CLOSE POGGERS maxhold -2.3% ($-0.12)
+  CLOSE biketyson maxhold +30.9% ($+1.54)
+[23:17:14] universe=829 cand=1 pending=1 OPEN=3 closed=65 realised=$-47.62 unreal=$+0.16 armed=True
+  OPEN  KAT @ $515,131
+[23:17:58] universe=811 cand=1 pending=1 OPEN=4 closed=65 realised=$-47.62 unreal=$-0.29 armed=True
+  OPEN  LIKESOL @ $419,745
+[23:18:44] universe=787 cand=0 pending=0 OPEN=5 closed=65 realised=$-47.62 unreal=$-0.28 armed=True
+[23:19:29] universe=797 cand=3 pending=0 OPEN=5 closed=65 realised=$-47.62 unreal=$-0.12 armed=True
+[23:20:13] universe=790 cand=3 pending=0 OPEN=5 closed=65 realised=$-47.62 unreal=$-0.27 armed=True
+[23:20:58] universe=786 cand=2 pending=0 OPEN=5 closed=65 realised=$-47.62 unreal=$-0.69 armed=True
+[23:21:44] universe=820 cand=3 pending=0 OPEN=5 closed=65 realised=$-47.62 unreal=$-0.36 armed=True
+  CLOSE Shrek maxhold -9.9% ($-0.49)
+[23:22:28] universe=790 cand=1 pending=1 OPEN=4 closed=66 realised=$-48.12 unreal=$+0.03 armed=True
+  OPEN  Coca Cola @ $538,949
+[23:23:15] universe=788 cand=1 pending=0 OPEN=5 closed=66 realised=$-48.12 unreal=$+0.15 armed=True
+[23:24:06] universe=770 cand=0 pending=0 OPEN=5 closed=66 realised=$-48.12 unreal=$+0.14 armed=True
+[23:24:45] universe=773 cand=0 pending=0 OPEN=5 closed=66 realised=$-48.12 unreal=$-0.19 armed=True
+[23:25:31] universe=780 cand=1 pending=0 OPEN=5 closed=66 realised=$-48.12 unreal=$-0.09 armed=True
+[23:26:14] universe=786 cand=1 pending=0 OPEN=5 closed=66 realised=$-48.12 unreal=$-0.46 armed=True
+  CLOSE AURA maxhold +4.7% ($+0.23)
+[23:26:59] universe=823 cand=0 pending=0 OPEN=4 closed=67 realised=$-47.89 unreal=$-0.89 armed=True
+[23:27:44] universe=808 cand=0 pending=0 OPEN=4 closed=67 realised=$-47.89 unreal=$-0.55 armed=True
+[23:28:29] universe=798 cand=0 pending=0 OPEN=4 closed=67 realised=$-47.89 unreal=$-0.40 armed=True
+[23:29:14] universe=791 cand=2 pending=1 OPEN=4 closed=67 realised=$-47.89 unreal=$-2.20 armed=True
+  OPEN  WOTF @ $5,364,858
+[23:29:59] universe=794 cand=3 pending=0 OPEN=5 closed=67 realised=$-47.89 unreal=$-2.10 armed=True
+[23:30:44] universe=810 cand=2 pending=0 OPEN=5 closed=67 realised=$-47.89 unreal=$+0.57 armed=True
+[23:31:29] universe=801 cand=2 pending=0 OPEN=5 closed=67 realised=$-47.89 unreal=$-2.88 armed=True
+[23:32:14] universe=801 cand=3 pending=0 OPEN=5 closed=67 realised=$-47.89 unreal=$+0.66 armed=True
+  CLOSE KAT maxhold -0.2% ($-0.01)
+[23:32:59] universe=799 cand=1 pending=1 OPEN=4 closed=68 realised=$-47.90 unreal=$-2.64 armed=True
+  OPEN  $1 @ $1,473,471
+[23:33:45] universe=806 cand=1 pending=0 OPEN=5 closed=68 realised=$-47.90 unreal=$+0.72 armed=True
+[23:34:29] universe=793 cand=2 pending=0 OPEN=5 closed=68 realised=$-47.90 unreal=$+0.81 armed=True
+[23:35:14] universe=805 cand=3 pending=0 OPEN=5 closed=68 realised=$-47.90 unreal=$+0.91 armed=True
+  CLOSE LIKESOL maxhold -67.2% ($-3.36)
+[23:35:59] universe=810 cand=4 pending=1 OPEN=4 closed=69 realised=$-51.25 unreal=$+1.07 armed=True
+  OPEN  SOLCAT @ $1,002,574
+[23:36:44] universe=807 cand=4 pending=0 OPEN=5 closed=69 realised=$-51.25 unreal=$+1.09 armed=True
+[23:37:29] universe=784 cand=2 pending=0 OPEN=5 closed=69 realised=$-51.25 unreal=$+1.20 armed=True
+  CLOSE Coca Cola maxhold +14.2% ($+0.71)
+[23:38:14] universe=810 cand=1 pending=1 OPEN=4 closed=70 realised=$-50.54 unreal=$+0.45 armed=True
+  OPEN  Shrek @ $727,210
+[23:38:59] universe=793 cand=2 pending=0 OPEN=5 closed=70 realised=$-50.54 unreal=$+0.52 armed=True
+[23:39:45] universe=782 cand=2 pending=0 OPEN=5 closed=70 realised=$-50.54 unreal=$+0.35 armed=True
+[23:40:29] universe=794 cand=3 pending=0 OPEN=5 closed=70 realised=$-50.54 unreal=$+0.40 armed=True
+[23:41:21] universe=808 cand=4 pending=0 OPEN=5 closed=70 realised=$-50.54 unreal=$+0.79 armed=True
+[23:41:59] universe=808 cand=2 pending=0 OPEN=5 closed=70 realised=$-50.54 unreal=$+0.76 armed=True
+[23:42:44] universe=781 cand=1 pending=0 OPEN=5 closed=70 realised=$-50.54 unreal=$+0.94 armed=True
+[23:43:29] universe=795 cand=3 pending=0 OPEN=5 closed=70 realised=$-50.54 unreal=$+0.89 armed=True
+[23:44:15] universe=797 cand=1 pending=0 OPEN=5 closed=70 realised=$-50.54 unreal=$+0.84 armed=True
+  CLOSE WOTF maxhold +10.9% ($+0.55)
+[23:44:59] universe=789 cand=3 pending=1 OPEN=4 closed=71 realised=$-50.00 unreal=$+0.18 armed=True
+  OPEN  Coca Cola @ $675,294
+[23:45:45] universe=810 cand=0 pending=0 OPEN=5 closed=71 realised=$-50.00 unreal=$+0.31 armed=True
+[23:46:30] universe=801 cand=3 pending=0 OPEN=5 closed=71 realised=$-50.00 unreal=$+0.30 armed=True
+[23:47:15] universe=804 cand=2 pending=0 OPEN=5 closed=71 realised=$-50.00 unreal=$+0.35 armed=True
+[23:47:59] universe=770 cand=0 pending=0 OPEN=5 closed=71 realised=$-50.00 unreal=$+0.21 armed=True
+  CLOSE $1 maxhold +1.2% ($+0.06)
+[23:48:44] universe=813 cand=4 pending=1 OPEN=4 closed=72 realised=$-49.93 unreal=$+0.23 armed=True
+  OPEN  AURA @ $641,407
+[23:49:29] universe=813 cand=4 pending=0 OPEN=5 closed=72 realised=$-49.93 unreal=$+0.24 armed=True
+[23:50:14] universe=805 cand=3 pending=0 OPEN=5 closed=72 realised=$-49.93 unreal=$+0.36 armed=True
+[23:50:59] universe=820 cand=3 pending=0 OPEN=5 closed=72 realised=$-49.93 unreal=$+0.13 armed=True
+  CLOSE SOLCAT maxhold +9.3% ($+0.47)
+[23:51:51] universe=776 cand=3 pending=1 OPEN=4 closed=73 realised=$-49.47 unreal=$-0.40 armed=True
+  OPEN  DICKBUTT @ $368,322
+[23:52:29] universe=809 cand=4 pending=0 OPEN=5 closed=73 realised=$-49.47 unreal=$-0.53 armed=True
+[23:53:15] universe=801 cand=2 pending=0 OPEN=5 closed=73 realised=$-49.47 unreal=$-0.66 armed=True
+  CLOSE Shrek maxhold -11.8% ($-0.59)
+[23:54:00] universe=795 cand=1 pending=1 OPEN=4 closed=74 realised=$-50.06 unreal=$-0.13 armed=True
+  OPEN  RICHDEBT @ $600,007
+[23:54:45] universe=803 cand=0 pending=0 OPEN=5 closed=74 realised=$-50.06 unreal=$-0.11 armed=True
+[23:55:30] universe=806 cand=2 pending=0 OPEN=5 closed=74 realised=$-50.06 unreal=$-0.11 armed=True
+[23:56:15] universe=814 cand=0 pending=0 OPEN=5 closed=74 realised=$-50.06 unreal=$-0.18 armed=True
+[23:57:00] universe=829 cand=1 pending=0 OPEN=5 closed=74 realised=$-50.06 unreal=$-0.18 armed=True
+[23:57:45] universe=808 cand=2 pending=0 OPEN=5 closed=74 realised=$-50.06 unreal=$-0.27 armed=True
+[23:58:30] universe=796 cand=1 pending=0 OPEN=5 closed=74 realised=$-50.06 unreal=$-0.27 armed=True
+[23:59:21] universe=798 cand=1 pending=0 OPEN=5 closed=74 realised=$-50.06 unreal=$-0.52 armed=True
+[00:00:00] universe=817 cand=1 pending=0 OPEN=5 closed=74 realised=$-50.06 unreal=$-0.51 armed=True
+  CLOSE Coca Cola maxhold +9.8% ($+0.49)
+[00:00:45] universe=793 cand=1 pending=1 OPEN=4 closed=75 realised=$-49.57 unreal=$-0.97 armed=True
+  OPEN  WOTF @ $4,225,826
+[00:01:30] universe=782 cand=1 pending=0 OPEN=5 closed=75 realised=$-49.57 unreal=$-0.96 armed=True
+[00:02:14] universe=798 cand=1 pending=0 OPEN=5 closed=75 realised=$-49.57 unreal=$-1.07 armed=True
+[00:02:59] universe=797 cand=3 pending=0 OPEN=5 closed=75 realised=$-49.57 unreal=$-1.15 armed=True
+[00:03:46] universe=792 cand=2 pending=0 OPEN=5 closed=75 realised=$-49.57 unreal=$-1.24 armed=True
+  CLOSE AURA maxhold -20.3% ($-1.02)
+[00:04:30] universe=810 cand=1 pending=1 OPEN=4 closed=76 realised=$-50.59 unreal=$-0.19 armed=True
+  OPEN  QCAT @ $110,538
+[00:05:15] universe=807 cand=2 pending=0 OPEN=5 closed=76 realised=$-50.59 unreal=$-0.30 armed=True
+[00:05:58] universe=808 cand=1 pending=0 OPEN=5 closed=76 realised=$-50.59 unreal=$-0.33 armed=True
+[00:06:43] universe=809 cand=1 pending=0 OPEN=5 closed=76 realised=$-50.59 unreal=$-0.07 armed=True
+  CLOSE DICKBUTT maxhold -7.7% ($-0.39)
+[00:07:28] universe=798 cand=2 pending=1 OPEN=4 closed=77 realised=$-50.97 unreal=$+0.06 armed=True
+  OPEN  pumpjeet @ $138,648
+[00:08:13] universe=805 cand=1 pending=0 OPEN=5 closed=77 realised=$-50.97 unreal=$+0.30 armed=True
+[00:08:58] universe=792 cand=1 pending=0 OPEN=5 closed=77 realised=$-50.97 unreal=$+0.45 armed=True
+  CLOSE RICHDEBT maxhold -0.4% ($-0.02)
+[00:09:45] universe=798 cand=2 pending=1 OPEN=4 closed=78 realised=$-50.99 unreal=$+0.87 armed=True
+  OPEN  AURA @ $551,689
+[00:10:28] universe=804 cand=2 pending=0 OPEN=5 closed=78 realised=$-50.99 unreal=$+0.64 armed=True
+[00:11:13] universe=806 cand=1 pending=0 OPEN=5 closed=78 realised=$-50.99 unreal=$+1.12 armed=True
+[00:12:00] universe=793 cand=2 pending=0 OPEN=5 closed=78 realised=$-50.99 unreal=$+0.71 armed=True
+[00:12:45] universe=802 cand=5 pending=0 OPEN=5 closed=78 realised=$-50.99 unreal=$+1.68 armed=True
+[00:13:29] universe=800 cand=2 pending=0 OPEN=5 closed=78 realised=$-50.99 unreal=$+0.82 armed=True
+[00:14:20] universe=804 cand=3 pending=0 OPEN=5 closed=78 realised=$-50.99 unreal=$+0.98 armed=True
+[00:14:59] universe=797 cand=4 pending=0 OPEN=5 closed=78 realised=$-50.99 unreal=$-3.98 armed=True
+[00:15:44] universe=791 cand=3 pending=0 OPEN=5 closed=78 realised=$-50.99 unreal=$-3.90 armed=True
+  CLOSE WOTF maxhold +21.1% ($+1.05)
+[00:16:28] universe=797 cand=3 pending=1 OPEN=4 closed=79 realised=$-49.94 unreal=$-4.91 armed=True
+  OPEN  WOTF @ $5,205,278
+[00:17:13] universe=813 cand=2 pending=0 OPEN=5 closed=79 realised=$-49.94 unreal=$-4.63 armed=True
+[00:17:58] universe=801 cand=0 pending=0 OPEN=5 closed=79 realised=$-49.94 unreal=$-4.54 armed=True
+  CLOSE WOTF stop -101.1% ($-5.06)
+[00:18:44] universe=802 cand=0 pending=0 OPEN=4 closed=80 realised=$-54.99 unreal=$-4.71 armed=True
+[00:19:29] universe=800 cand=0 pending=0 OPEN=4 closed=80 realised=$-54.99 unreal=$-4.72 armed=True
+[00:20:13] universe=802 cand=2 pending=1 OPEN=4 closed=80 realised=$-54.99 unreal=$+0.16 armed=True
+  OPEN  biketyson @ $405,458
+[00:20:59] universe=810 cand=0 pending=0 OPEN=5 closed=80 realised=$-54.99 unreal=$-4.43 armed=True
+[00:21:43] universe=799 cand=0 pending=0 OPEN=5 closed=80 realised=$-54.99 unreal=$-4.22 armed=True
+[00:22:28] universe=813 cand=1 pending=0 OPEN=5 closed=80 realised=$-54.99 unreal=$+1.01 armed=True
+  CLOSE QCAT maxhold -1.2% ($-0.06)
+[00:23:13] universe=801 cand=0 pending=0 OPEN=4 closed=81 realised=$-55.05 unreal=$+1.31 armed=True
+[00:23:58] universe=808 cand=1 pending=1 OPEN=4 closed=81 realised=$-55.05 unreal=$+1.14 armed=True
+  CLOSE pumpjeet maxhold -99.6% ($-4.98)
+  OPEN  RICHDEBT @ $636,687
+[00:24:44] universe=812 cand=1 pending=1 OPEN=4 closed=82 realised=$-60.03 unreal=$+1.06 armed=True
+  CLOSE AURA maxhold +5.0% ($+0.25)
+  OPEN  SOLCAT @ $734,563
+[00:25:29] universe=811 cand=1 pending=1 OPEN=4 closed=83 realised=$-59.78 unreal=$+0.97 armed=True
+  OPEN  SOLOTC @ $554,715
+[00:26:14] universe=800 cand=0 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+0.85 armed=True
+[00:26:58] universe=808 cand=0 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+1.13 armed=True
+[00:27:43] universe=800 cand=0 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+1.35 armed=True
+[00:28:29] universe=785 cand=3 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+3.04 armed=True
+[00:29:13] universe=790 cand=2 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+1.21 armed=True
+[00:29:58] universe=783 cand=3 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+1.94 armed=True
+[00:30:44] universe=789 cand=4 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+1.94 armed=True
+[00:31:29] universe=812 cand=2 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+1.71 armed=False
+[00:32:13] universe=801 cand=0 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+2.17 armed=False
+[00:32:58] universe=786 cand=1 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+1.26 armed=False
+[00:33:43] universe=773 cand=1 pending=0 OPEN=5 closed=83 realised=$-59.78 unreal=$+1.42 armed=False
