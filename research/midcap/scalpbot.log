@@ -1,0 +1,48 @@
+scalpbot up. mode=paper armed=False pos=$5.0 max_open=5
+[17:59:06] universe=813 candidates=2 pending=2 open=0 trades=0 realised=$+0.00 armed=False
+[17:59:50] universe=803 candidates=2 pending=2 open=0 trades=0 realised=$+0.00 armed=False
+[18:00:35] universe=780 candidates=2 pending=2 open=0 trades=0 realised=$+0.00 armed=False
+[18:01:20] universe=778 candidates=2 pending=2 open=0 trades=0 realised=$+0.00 armed=False
+  OPEN  HeeHaw @ $447,743
+  OPEN  KAT @ $365,417
+[18:02:06] universe=796 candidates=2 pending=2 open=0 trades=0 realised=$+0.00 armed=True
+[18:02:50] universe=810 candidates=0 pending=0 open=2 trades=0 realised=$+0.00 armed=True
+scalpbot up. mode=paper armed=True pos=$5.0 max_open=5
+[18:03:06] universe=803 cand=0 pending=0 OPEN=2 closed=0 realised=$+0.00 unreal=$-0.62 armed=True
+[18:03:52] universe=807 cand=0 pending=0 OPEN=2 closed=0 realised=$+0.00 unreal=$-0.22 armed=True
+[18:04:35] universe=802 cand=0 pending=0 OPEN=2 closed=0 realised=$+0.00 unreal=$-0.02 armed=True
+[18:05:19] universe=823 cand=0 pending=0 OPEN=2 closed=0 realised=$+0.00 unreal=$+0.21 armed=True
+[18:06:06] universe=796 cand=0 pending=0 OPEN=2 closed=0 realised=$+0.00 unreal=$+0.87 armed=True
+[18:06:49] universe=757 cand=0 pending=0 OPEN=2 closed=0 realised=$+0.00 unreal=$+0.14 armed=True
+  CLOSE HeeHaw stop -43.0% ($-2.15)
+[18:07:34] universe=799 cand=0 pending=0 OPEN=1 closed=1 realised=$-2.15 unreal=$+0.13 armed=True
+[18:08:20] universe=767 cand=1 pending=1 OPEN=1 closed=1 realised=$-2.15 unreal=$+0.09 armed=True
+  OPEN  HeeHaw @ $376,650
+[18:09:05] universe=775 cand=0 pending=0 OPEN=2 closed=1 realised=$-2.15 unreal=$+0.10 armed=True
+[18:09:49] universe=773 cand=1 pending=1 OPEN=2 closed=1 realised=$-2.15 unreal=$+0.81 armed=True
+  CLOSE HeeHaw stop -60.5% ($-3.03)
+  OPEN  ELON @ $334,304
+[18:10:35] universe=806 cand=0 pending=0 OPEN=2 closed=2 realised=$-5.18 unreal=$+0.12 armed=True
+[18:11:20] universe=802 cand=0 pending=0 OPEN=2 closed=2 realised=$-5.18 unreal=$-0.62 armed=True
+[18:12:05] universe=825 cand=0 pending=0 OPEN=2 closed=2 realised=$-5.18 unreal=$+0.10 armed=True
+[18:12:50] universe=809 cand=0 pending=0 OPEN=2 closed=2 realised=$-5.18 unreal=$+1.19 armed=True
+  CLOSE ELON stop -59.2% ($-2.96)
+[18:13:36] universe=803 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$+0.18 armed=True
+[18:14:20] universe=794 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$+0.18 armed=True
+[18:15:05] universe=810 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$+0.18 armed=True
+[18:15:50] universe=806 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.07 armed=True
+[18:16:35] universe=794 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.05 armed=True
+[18:17:27] universe=742 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.05 armed=True
+[18:18:06] universe=788 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.06 armed=True
+[18:18:50] universe=778 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.00 armed=True
+[18:19:35] universe=781 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.00 armed=True
+[18:20:21] universe=808 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.04 armed=True
+[18:21:05] universe=786 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.03 armed=True
+[18:21:50] universe=815 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.01 armed=True
+[18:22:36] universe=794 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.05 armed=True
+[18:23:20] universe=801 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.04 armed=True
+[18:24:05] universe=780 cand=0 pending=0 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.05 armed=True
+[18:24:50] universe=796 cand=1 pending=1 OPEN=1 closed=3 realised=$-8.14 unreal=$-0.09 armed=True
+  OPEN  10M @ $665,640
+[18:25:35] universe=783 cand=0 pending=0 OPEN=2 closed=3 realised=$-8.14 unreal=$-0.09 armed=True
+[18:26:20] universe=784 cand=0 pending=0 OPEN=2 closed=3 realised=$-8.14 unreal=$+0.64 armed=True

@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[3]
 LABELS = ROOT / "research" / "b11a" / "window_labels.sqlite"
 OUT = ROOT / "research" / "midcap" / "grad_ohlcv.sqlite"
 B = "https://api.geckoterminal.com/api/v2"
-PACE = 4.5
+PACE = 2.6
 
 def db():
     c = sqlite3.connect(OUT)

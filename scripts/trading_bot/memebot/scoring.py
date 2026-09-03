@@ -130,6 +130,29 @@ def score(spec: dict, resolved: list) -> dict:
     return report
 
 
+def honest_entry_gate(report: dict) -> dict:
+    """Turn the displayed honest kill decision into an executable paper-entry gate.
+
+    Tracking/resolution remains enabled so already-open paper positions finish normally. Only NEW
+    PASS/control entries stop. Keeping this pure makes the safety decision hermetically testable and
+    prevents the scanner from quietly treating a red dashboard badge as decoration.
+    """
+    verdict = str(
+        report.get("full_loss_stress", {})
+        .get("honest_kill_switch", {})
+        .get("verdict", "")
+    )
+    halted = verdict.startswith("HALTED")
+    return {
+        "allow_new_entries": not halted,
+        "reason": (
+            "HONEST_KILL_HALTED_NO_NEW_ENTRIES" if halted
+            else "HONEST_KILL_ALIVE_OR_NOT_YET_EVALUABLE"
+        ),
+        "verdict": verdict,
+    }
+
+
 def _reasons(resolved: list) -> dict:
     counts = {}
     for r in resolved:

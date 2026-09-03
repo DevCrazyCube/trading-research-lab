@@ -206,6 +206,10 @@ def run_selftest() -> int:
     rep2 = scoring.score(spec, big_neg)
     ok &= _check("clearly-negative stream past N_min -> HALTED",
                  rep2["kill_switch"]["verdict"].startswith("HALTED"))
+    ok &= _check("honest HALT is enforced as NO NEW ENTRIES (tracking can continue)",
+                 scoring.honest_entry_gate(rep2)["allow_new_entries"] is False)
+    ok &= _check("below-minimum honest score still permits forward accumulation",
+                 scoring.honest_entry_gate(rep)["allow_new_entries"] is True)
 
     print("\nSELFTEST:", "PASS" if ok else "FAIL")
     return 0 if ok else 1

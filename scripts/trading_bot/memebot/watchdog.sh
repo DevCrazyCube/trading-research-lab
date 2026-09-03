@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-# houdt de eval-na-elke-trade loop levend (herstart bij crash/reboot)
-cd /home/anont/meme || exit 1
-export PATH="/home/anont/.local/bin:/usr/local/bin:/usr/bin:/bin"
-if ! pgrep -f "live_loop.sh" >/dev/null 2>&1; then
-  setsid nohup bash scripts/trading_bot/memebot/live_loop.sh >> research/trading_bot/memebot/live_run.log 2>&1 < /dev/null &
-  echo "$(date -Is) watchdog: eval-loop herstart (pid $!)" >> research/trading_bot/memebot/watchdog.log
-fi
+# RETIRED 2026-08-28: the frozen MEMEBOT variants failed honest-stress or had an
+# unavailable exit oracle.  Preserve every ledger; never restart the evaluator.
+# The read-only memestream ingesters and dashboard are intentionally separate.
+pkill -TERM -f '^bash scripts/trading_bot/memebot/live_loop\.sh$' 2>/dev/null || true
+exit 0

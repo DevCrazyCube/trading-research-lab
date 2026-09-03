@@ -4,21 +4,22 @@
   "bankroll_usd": 63.0,
   "position_usd": 5.0,
   "max_open": 5,
-  "toll_pct": 3.0,
+  "toll_pct": 1.14,
   "poll_s": 45,
   "entry": {
     "min_age_h": 0.0,
-    "max_age_h": 6.0,
+    "max_age_h": 2.0,
     "min_mcap": 300000.0,
     "max_mcap": 10000000.0,
-    "max_pct_of_ath": 0.8,
+    "max_pct_of_ath": 0.95,
     "min_gain_15m_pct": null
   },
   "exit": {
-    "stop_pct": -20.0,
-    "target_pct": 30.0,
-    "max_hold_min": 30
+    "stop_pct": -99.0,
+    "target_pct": 999.0,
+    "max_hold_min": 15
   },
   "_note": "armed=false means observe-and-log only. A validated spec flips it, nothing else.",
-  "_armed_note": "Armed 2026-09-03 on owner instruction. PAPER ONLY: no wallet, no keys, no tx code. Rules are UNVALIDATED - this generates a forward track record, it is not a validated edge."
+  "_armed_note": "Armed 2026-09-03 on owner instruction. PAPER ONLY: no wallet, no keys, no tx code. Rules are UNVALIDATED - this generates a forward track record, it is not a validated edge.",
+  "_prereg": "AGE2H_SESSION_PREREGISTRATION.md - repurposed from unvalidated rules to the single untested cell. Stops REMOVED: 0/272 exit rules worked and 34-67% of stop fires are unexitable. Needs >=5 sessions on >=5 days, session as cluster unit."
 }

@@ -25,7 +25,7 @@ import json
 import pathlib
 
 from . import Refused
-from . import feed, screen as screen_mod, paper, ledger
+from . import feed, screen as screen_mod, paper, ledger, scoring
 from .frozen import CACHE
 
 # Where the FREE local price series live. The reactive TRACK pass resolves from these FIRST so it never
@@ -135,6 +135,26 @@ def scan_once(specs: list, *, pages: int = 1) -> dict:
         rejected_order = list(rejected)
         rng.shuffle(rejected_order)
 
+        # The full-loss-stress score is the declared DECIDER. A HALTED decider must stop being a
+        # dashboard-only label: resolve existing paper positions, but refuse every NEW PASS/control
+        # entry for this instrument. The ledger remains immutable and the same newly-seen universe is
+        # still recorded, so stopping cannot rewrite or cherry-pick prior outcomes.
+        gate_report = scoring.score(spec, ledger.resolved_r_stream(spec))
+        entry_gate = scoring.honest_entry_gate(gate_report)
+        if not entry_gate["allow_new_entries"]:
+            st = ledger.load_state(spec)
+            st["seen_pool_addresses"] = seen_bounded
+            ledger.save_state(spec, st)
+            variants[spec["instrument_id"]] = {
+                "screen_passed": len(passed),
+                "out_of_scope_not_traded_or_controlled": len(out_of_scope),
+                "paper_entries_opened": [],
+                "control_entries_opened": [],
+                "now_open_positions": len(ledger.open_positions(spec)),
+                "entry_gate": entry_gate,
+            }
+            continue
+
         n_open = len(ledger.open_positions(spec))
         room = max(0, spec["max_open_positions"] - n_open)
         opened, controls = [], []
@@ -161,6 +181,7 @@ def scan_once(specs: list, *, pages: int = 1) -> dict:
             "paper_entries_opened": opened,
             "control_entries_opened": controls,
             "now_open_positions": len(ledger.open_positions(spec)),
+            "entry_gate": entry_gate,
         }
 
     return {
