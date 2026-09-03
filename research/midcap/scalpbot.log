@@ -46,3 +46,96 @@ scalpbot up. mode=paper armed=True pos=$5.0 max_open=5
   OPEN  10M @ $665,640
 [18:25:35] universe=783 cand=0 pending=0 OPEN=2 closed=3 realised=$-8.14 unreal=$-0.09 armed=True
 [18:26:20] universe=784 cand=0 pending=0 OPEN=2 closed=3 realised=$-8.14 unreal=$+0.64 armed=True
+  CLOSE KAT maxhold -1.4% ($-0.07)
+[18:27:05] universe=817 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$-0.14 armed=True
+[18:27:50] universe=823 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$-1.54 armed=True
+[18:28:35] universe=799 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$-1.04 armed=True
+[18:29:20] universe=798 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$-0.57 armed=True
+[18:30:06] universe=789 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$+0.12 armed=True
+[18:30:50] universe=781 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$-1.56 armed=True
+[18:31:35] universe=779 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$-1.81 armed=True
+[18:32:20] universe=783 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$+0.00 armed=True
+[18:33:06] universe=802 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$+0.00 armed=True
+[18:33:51] universe=803 cand=0 pending=0 OPEN=1 closed=4 realised=$-8.21 unreal=$+0.00 armed=True
+  CLOSE 10M stop -100.9% ($-5.04)
+[18:34:36] universe=800 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:35:21] universe=791 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:36:05] universe=808 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:36:51] universe=801 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:37:37] universe=779 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:38:20] universe=786 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:39:05] universe=810 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:39:50] universe=787 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:40:37] universe=796 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:41:21] universe=790 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:42:06] universe=790 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:42:53] universe=792 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:43:36] universe=802 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:44:21] universe=793 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:45:06] universe=772 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:45:51] universe=784 cand=0 pending=0 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:46:36] universe=773 cand=1 pending=1 OPEN=0 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+  OPEN  HIERO @ $609,263
+[18:47:21] universe=780 cand=0 pending=0 OPEN=1 closed=5 realised=$-13.25 unreal=$+0.00 armed=True
+[18:48:06] universe=802 cand=1 pending=1 OPEN=1 closed=5 realised=$-13.25 unreal=$-0.47 armed=True
+  OPEN  potato @ $480,903
+[18:48:51] universe=788 cand=0 pending=0 OPEN=2 closed=5 realised=$-13.25 unreal=$+0.35 armed=True
+[18:49:36] universe=809 cand=0 pending=0 OPEN=2 closed=5 realised=$-13.25 unreal=$+3.45 armed=True
+[18:50:22] universe=805 cand=0 pending=0 OPEN=2 closed=5 realised=$-13.25 unreal=$+0.38 armed=True
+[18:51:06] universe=804 cand=0 pending=0 OPEN=2 closed=5 realised=$-13.25 unreal=$-4.17 armed=True
+[18:51:52] universe=781 cand=0 pending=0 OPEN=2 closed=5 realised=$-13.25 unreal=$-3.95 armed=True
+[18:52:36] universe=796 cand=0 pending=0 OPEN=2 closed=5 realised=$-13.25 unreal=$-4.76 armed=True
+  CLOSE potato stop -100.7% ($-5.04)
+[18:53:21] universe=776 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-2.85 armed=True
+[18:54:06] universe=816 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-2.67 armed=True
+[18:54:51] universe=797 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-3.01 armed=True
+[18:55:36] universe=815 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-2.65 armed=True
+[18:56:22] universe=807 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-3.65 armed=True
+[18:57:07] universe=774 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-3.45 armed=True
+[18:57:55] universe=811 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-3.23 armed=True
+[18:58:37] universe=809 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-2.79 armed=True
+[18:59:21] universe=804 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-2.55 armed=True
+[19:00:07] universe=795 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-3.27 armed=True
+[19:00:52] universe=785 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-3.82 armed=True
+[19:01:37] universe=785 cand=0 pending=0 OPEN=1 closed=6 realised=$-18.29 unreal=$-3.68 armed=True
+  CLOSE HIERO maxhold -73.7% ($-3.68)
+[19:02:19] universe=790 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:03:04] universe=787 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:03:49] universe=779 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:04:35] universe=794 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:05:26] universe=788 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:06:04] universe=776 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:06:56] universe=801 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:07:34] universe=777 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:08:19] universe=800 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:09:05] universe=791 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:09:49] universe=795 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:10:35] universe=785 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:11:19] universe=800 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:12:05] universe=802 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:12:50] universe=794 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:13:35] universe=790 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:14:20] universe=784 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:15:05] universe=767 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:15:51] universe=801 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:16:41] universe=741 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:17:20] universe=769 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:18:06] universe=765 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:18:50] universe=786 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:19:35] universe=811 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:20:20] universe=783 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:21:06] universe=794 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:21:50] universe=796 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:22:35] universe=818 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:23:20] universe=805 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:24:05] universe=794 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:24:50] universe=806 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:25:35] universe=802 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:26:21] universe=812 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:27:05] universe=790 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:27:50] universe=814 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:28:35] universe=777 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:29:20] universe=796 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+scalpbot up. mode=paper armed=True pos=$5.0 max_open=5
+[19:30:20] universe=802 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True
+[19:31:05] universe=804 cand=0 pending=0 OPEN=0 closed=7 realised=$-21.98 unreal=$+0.00 armed=True

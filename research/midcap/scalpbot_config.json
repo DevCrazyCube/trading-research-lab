@@ -8,11 +8,13 @@
   "poll_s": 45,
   "entry": {
     "min_age_h": 0.0,
-    "max_age_h": 2.0,
-    "min_mcap": 300000.0,
-    "max_mcap": 10000000.0,
-    "max_pct_of_ath": 0.95,
-    "min_gain_15m_pct": null
+    "max_age_h": 72.0,
+    "min_mcap": 100000.0,
+    "max_mcap": 50000000.0,
+    "max_pct_of_ath": null,
+    "min_gain_15m_pct": null,
+    "mom5m_lo": 0.048,
+    "mom5m_hi": 0.095
   },
   "exit": {
     "stop_pct": -99.0,
@@ -21,5 +23,5 @@
   },
   "_note": "armed=false means observe-and-log only. A validated spec flips it, nothing else.",
   "_armed_note": "Armed 2026-09-03 on owner instruction. PAPER ONLY: no wallet, no keys, no tx code. Rules are UNVALIDATED - this generates a forward track record, it is not a validated edge.",
-  "_prereg": "AGE2H_SESSION_PREREGISTRATION.md - repurposed from unvalidated rules to the single untested cell. Stops REMOVED: 0/272 exit rules worked and 34-67% of stop fires are unexitable. Needs >=5 sessions on >=5 days, session as cluster unit."
+  "_prereg": "Testing the ONE surviving cell: prior 5m return in [+4.8%,+9.5%], pure 15m hold, no stop. Measured on 93 survivorship-free graduates: median +6.70% STABLE across dropout charges -30/-50/-100%, mean +0.22..+2.33% with CI spanning zero at every charge. NOT fundable. 30m/60m holds looked Bonferroni-significant but that was dropout bias (resolution 93%/82%). This is an out-of-window forward test at $0."
 }

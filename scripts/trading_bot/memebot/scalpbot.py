@@ -91,7 +91,19 @@ def replay():
                 open_.pop(r["mint"], None); realised += r.get("pnl_usd", 0.0); ntr += 1
     return open_, realised, ntr
 
-def entry_ok(c, e, now_ms):
+def mom_5m(hist, mint, now_ms, lo_s=240, hi_s=420):
+    """5-minute return from the bot's own poll history. Returns None if no usable ref point."""
+    h = hist.get(mint) or []
+    ref = None
+    for ts, mc in reversed(h):
+        age = (now_ms - ts) / 1000.0
+        if lo_s <= age <= hi_s:
+            ref = mc; break
+    if not ref or ref <= 0 or not h: return None
+    return h[-1][1] / ref - 1
+
+
+def entry_ok(c, e, now_ms, hist=None, mint=None):
     try:
         mc = float(c.get("usd_market_cap") or 0); ath = float(c.get("ath_market_cap") or 0)
         ct = float(c.get("created_timestamp") or 0)
@@ -100,6 +112,12 @@ def entry_ok(c, e, now_ms):
         if not (e["min_age_h"] <= age_h <= e["max_age_h"]): return False
         if not (e["min_mcap"] <= mc <= e["max_mcap"]): return False
         if ath and e.get("max_pct_of_ath") and mc / ath > e["max_pct_of_ath"]: return False
+        lo, hi = e.get("mom5m_lo"), e.get("mom5m_hi")
+        if lo is not None or hi is not None:
+            r = mom_5m(hist or {}, mint, now_ms)
+            if r is None: return False
+            if lo is not None and r < lo: return False
+            if hi is not None and r >= hi: return False
         return True
     except Exception:
         return False
@@ -111,10 +129,17 @@ def main():
         print(f"scalpbot up. mode={c['mode']} armed={c['armed']} "
               f"pos=${c['position_usd']} max_open={c['max_open']}", flush=True)
         pending = {}
+        hist = {}
         while True:
             t0 = time.time(); now = int(t0 * 1000)
             try:
                 uni = universe()
+                for _m, _c in uni.items():
+                    try: _mc = float(_c.get("usd_market_cap") or 0)
+                    except Exception: continue
+                    if _mc > 0:
+                        hist.setdefault(_m, []).append((now, _mc))
+                        if len(hist[_m]) > 40: hist[_m] = hist[_m][-40:]
                 open_, realised, ntr = replay()
                 # --- exits first ---
                 for mint, pos in list(open_.items()):
@@ -148,7 +173,8 @@ def main():
                     pending.pop(mint, None)
                 open_, realised, ntr = replay()   # re-read AFTER fills so the display is not stale
                 cands = [m for m, x in uni.items()
-                         if entry_ok(x, c["entry"], now) and m not in open_ and m not in pending]
+                         if entry_ok(x, c["entry"], now, hist, m)
+                         and m not in open_ and m not in pending]
                 for m in cands[: max(0, c["max_open"] - len(open_))]:
                     pending[m] = {"ts": now}
                 unreal = 0.0
