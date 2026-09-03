@@ -1,0 +1,24 @@
+{
+  "mode": "paper",
+  "armed": true,
+  "bankroll_usd": 63.0,
+  "position_usd": 5.0,
+  "max_open": 5,
+  "toll_pct": 3.0,
+  "poll_s": 45,
+  "entry": {
+    "min_age_h": 0.0,
+    "max_age_h": 6.0,
+    "min_mcap": 300000.0,
+    "max_mcap": 10000000.0,
+    "max_pct_of_ath": 0.8,
+    "min_gain_15m_pct": null
+  },
+  "exit": {
+    "stop_pct": -20.0,
+    "target_pct": 30.0,
+    "max_hold_min": 30
+  },
+  "_note": "armed=false means observe-and-log only. A validated spec flips it, nothing else.",
+  "_armed_note": "Armed 2026-09-03 on owner instruction. PAPER ONLY: no wallet, no keys, no tx code. Rules are UNVALIDATED - this generates a forward track record, it is not a validated edge."
+}
