@@ -65,3 +65,37 @@ often and broke anyway.
 **Conclusion: the unlock-cliff short is dead, on a properly controlled, adequately powered test.** The
 family is now closed with a number rather than left as folklore, and the census + panel are reusable for any
 future event-study on this venue.
+
+
+---
+
+# CORRECTION (same day, after an adversarial audit of the control)
+
+A later audit of the six-study perp battery found that the control used above — the **same-day
+cross-sectional MEDIAN** return of the universe — **is not a holdable benchmark**. Over this panel the
+median-return series compounds to roughly **−100%**, while an equal-weighted basket of the same liquid
+universe returns about **+65%**. A median is not a portfolio; subtracting it credits every long with
+phantom alpha and taxes every short by the same amount.
+
+Re-run with an **equal-weighted MEAN of the liquid (quote-volume ≥ $1M) universe**, same 545 events,
+same 311 clusters, same seed:
+
+| control | mean | median | 95% CI | P(mean<0) |
+|---|---|---|---|---|
+| outright (what the account actually does) | **+4.85%** | **−9.99%** | [−4.96%, +19.05%] | 0.223 |
+| vs median of liquid universe *(broken)* | +6.66% | −4.58% | [−0.28%, +16.57%] | 0.034 |
+| **vs equal-weighted mean *(correct)*** | **−0.53%** | −9.69% | [−6.97%, +8.51%] | 0.585 |
+
+**What changes:** the headline "+6.61%, wrong sign" was inflated by roughly **7 pp of control artifact**.
+The true market-controlled effect is **−0.53%, statistically indistinguishable from zero.**
+
+**What does not change — the verdict, and the reason that actually matters:**
+- Short vs the correct control earns **+0.53%**, far below the pre-registered +1.5% gate → **KILL**.
+- Short **outright loses 4.85%** — this is what the account does, and no benchmark choice can rescue it.
+- **The short-gamma shape is robust under every control**: median **−9.99%** against a mean of **+4.85%**.
+  A short would win most trades and still lose money, because a minority of tokens rip violently against it.
+  That is the real cause of death, and it is control-independent.
+
+The published −8%/−15% unlock drop is still not reproducible as an unlock effect. But the honest statement
+is **"no measurable effect once benchmarked against a portfolio you could actually hold"**, not "the effect
+runs the other way".
