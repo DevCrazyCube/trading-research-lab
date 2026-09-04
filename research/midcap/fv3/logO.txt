@@ -1,0 +1,37 @@
+mints 214 bars 43986
+eligible 39278 train 16592 bars/91 mints  valid 22686 bars/119 mints
+
+H5/tpNone/slNone/f1.0 TRAIN  n=3702 k=91 mean=-0.0633 median=-0.0323
+   per-mint mean returns: top5 +0.35 +0.17 +0.03 +0.03 +0.01 ... bottom5 -0.28 -0.31 -0.31 -0.64 -0.99
+   pct of mints with positive mean: 0.099   mean excl. best mint: -0.0679   excl. best 3: -0.0718
+
+H5/tpNone/slNone/f1.0 VALID  n=4932 k=119 mean=-0.0688 median=-0.0356
+   per-mint mean returns: top5 +0.15 +0.10 +0.09 +0.08 +0.06 ... bottom5 -0.31 -0.33 -0.35 -0.35 -0.45
+   pct of mints with positive mean: 0.109   mean excl. best mint: -0.0706   excl. best 3: -0.0734
+
+H15/tpNone/slNone/f1.0 TRAIN  n=1873 k=91 mean=-0.0803 median=-0.0566
+   per-mint mean returns: top5 +0.78 +0.19 +0.09 +0.04 +0.04 ... bottom5 -0.33 -0.37 -0.49 -0.53 -0.69
+   pct of mints with positive mean: 0.143   mean excl. best mint: -0.0898   excl. best 3: -0.0949
+
+H15/tpNone/slNone/f1.0 VALID  n=2448 k=119 mean=-0.0971 median=-0.0549
+   per-mint mean returns: top5 +0.46 +0.19 +0.05 +0.04 +0.04 ... bottom5 -0.46 -0.47 -0.50 -0.51 -0.65
+   pct of mints with positive mean: 0.109   mean excl. best mint: -0.1018   excl. best 3: -0.1056
+
+H15/tp0.3/sl-0.25/f1.0 TRAIN  n=1873 k=91 mean=-0.0497 median=-0.0395
+   per-mint mean returns: top5 +0.07 +0.07 +0.06 +0.06 +0.06 ... bottom5 -0.17 -0.19 -0.31 -0.31 -0.31
+   pct of mints with positive mean: 0.198   mean excl. best mint: -0.0510   excl. best 3: -0.0537
+
+H15/tp0.3/sl-0.25/f1.0 VALID  n=2448 k=119 mean=-0.0548 median=-0.0357
+   per-mint mean returns: top5 +0.19 +0.10 +0.09 +0.08 +0.08 ... bottom5 -0.26 -0.28 -0.31 -0.31 -0.31
+   pct of mints with positive mean: 0.134   mean excl. best mint: -0.0569   excl. best 3: -0.0595
+
+=== gross vs net decomposition, unconditional ===
+H5/tpNone/slNone/f1.0    TRAIN  toll1.14/drop30 -0.0633 | toll2.50/drop30 -0.0762 | drop50 -0.0755 | drop100 -0.1060 | res 0.985
+H5/tpNone/slNone/f1.0    VALID  toll1.14/drop30 -0.0688 | toll2.50/drop30 -0.0816 | drop50 -0.0880 | drop100 -0.1361 | res 0.985
+H15/tpNone/slNone/f1.0   TRAIN  toll1.14/drop30 -0.0803 | toll2.50/drop30 -0.0929 | drop50 -0.0990 | drop100 -0.1460 | res 0.968
+H15/tpNone/slNone/f1.0   VALID  toll1.14/drop30 -0.0971 | toll2.50/drop30 -0.1095 | drop50 -0.1197 | drop100 -0.1762 | res 0.967
+H30/tpNone/slNone/f1.0   TRAIN  toll1.14/drop30 -0.1165 | toll2.50/drop30 -0.1287 | drop50 -0.1410 | drop100 -0.2021 | res 0.950
+H30/tpNone/slNone/f1.0   VALID  toll1.14/drop30 -0.1160 | toll2.50/drop30 -0.1282 | drop50 -0.1447 | drop100 -0.2165 | res 0.947
+H60/tpNone/slNone/f1.0   TRAIN  toll1.14/drop30 -0.1758 | toll2.50/drop30 -0.1871 | drop50 -0.2093 | drop100 -0.2931 | res 0.913
+H60/tpNone/slNone/f1.0   VALID  toll1.14/drop30 -0.1457 | toll2.50/drop30 -0.1575 | drop50 -0.1800 | drop100 -0.2658 | res 0.916
+OUT_DONE

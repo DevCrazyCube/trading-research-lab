@@ -1,0 +1,159 @@
+mints 185 bars 43263 load 0.4
+hash {1: 84, 2: 101}
+btime known 185
+eligible bars 38453 of 43263
+train bars 16234 mints 84
+valid bars 22219 mints 101
+
+feature train quantiles (10/25/50/75/90):
+  vrel5    0.09433 0.4579 0.9849 1.824 6.696
+  vrel20   0.06734 0.3672 0.948 1.691 5.24
+  vacc     0.1756 0.4895 0.961 1.375 3.188
+  rngrel   0.2375 0.6187 0.9819 1.46 3.18
+  dens10   0.2 0.6 1 1 1
+  dens30   0.1667 0.6 1 1 1
+  gap      1 1 1 1 5
+  eff5     0.04384 0.1454 0.338 0.5859 0.8434
+  vwdev    -0.08106 -0.02978 -0.001028 0.01879 0.0665
+  hlcc     1 1 1.235 2.561 6.188
+  vsol5    47.93 214.4 840.5 2351 1.71e+04
+  vshare   0.001133 0.008497 0.03342 0.05396 0.09664
+  age      66.82 164.2 571.5 979.5 1265
+  mcap     2547 5775 4.27e+04 1.479e+05 1.02e+07
+  dd       0.04794 0.1013 0.4849 0.843 1
+  ret5     -0.1511 -0.05244 -1.035e-05 0.03349 0.1106
+  struct H=5 0.8s
+  struct H=15 1.0s
+  struct H=30 1.3s
+  struct H=60 1.8s
+
+=== unconditional baselines (all eligible bars, no-overlap, mint-equal) ===
+BASE H5_tpNone_slNone_f1.0      tr n=  3624 k= 84 mean=-0.0500 med=-0.0288 res=0.986
+BASE H5_tpNone_slNone_f1.0      va n=  4813 k=101 mean=-0.0583 med=-0.0309 res=0.988
+BASE H5_tp0.15_slNone_f1.0      tr n=  3624 k= 84 mean=-0.0485 med=-0.0333 res=0.986
+BASE H5_tp0.15_slNone_f1.0      va n=  4813 k=101 mean=-0.0625 med=-0.0318 res=0.988
+BASE H5_tp0.3_slNone_f1.0       tr n=  3624 k= 84 mean=-0.0491 med=-0.0286 res=0.986
+BASE H5_tp0.3_slNone_f1.0       va n=  4813 k=101 mean=-0.0607 med=-0.0322 res=0.988
+BASE H5_tpNone_sl-0.25_f1.0     tr n=  3624 k= 84 mean=-0.0276 med=-0.0224 res=0.986
+BASE H5_tpNone_sl-0.25_f1.0     va n=  4813 k=101 mean=-0.0356 med=-0.0172 res=0.988
+BASE H5_tp0.15_sl-0.25_f1.0     tr n=  3624 k= 84 mean=-0.0314 med=-0.0255 res=0.986
+BASE H5_tp0.15_sl-0.25_f1.0     va n=  4813 k=101 mean=-0.0419 med=-0.0260 res=0.988
+BASE H5_tp0.3_sl-0.4_f1.0       tr n=  3624 k= 84 mean=-0.0387 med=-0.0251 res=0.986
+BASE H5_tp0.3_sl-0.4_f1.0       va n=  4813 k=101 mean=-0.0471 med=-0.0265 res=0.988
+BASE H5_tp0.15_sl-0.25_f0.5     tr n=  3624 k= 84 mean=-0.0295 med=-0.0242 res=0.986
+BASE H5_tp0.15_sl-0.25_f0.5     va n=  4813 k=101 mean=-0.0388 med=-0.0208 res=0.988
+BASE H5_tp0.3_sl-0.25_f0.5      tr n=  3624 k= 84 mean=-0.0287 med=-0.0226 res=0.986
+BASE H5_tp0.3_sl-0.25_f0.5      va n=  4813 k=101 mean=-0.0374 med=-0.0201 res=0.988
+BASE H15_tpNone_slNone_f1.0     tr n=  1840 k= 84 mean=-0.0791 med=-0.0497 res=0.970
+BASE H15_tpNone_slNone_f1.0     va n=  2372 k=101 mean=-0.0916 med=-0.0499 res=0.973
+BASE H15_tp0.15_slNone_f1.0     tr n=  1840 k= 84 mean=-0.0728 med=-0.0400 res=0.970
+BASE H15_tp0.15_slNone_f1.0     va n=  2372 k=101 mean=-0.0907 med=-0.0447 res=0.973
+BASE H15_tp0.3_slNone_f1.0      tr n=  1840 k= 84 mean=-0.0732 med=-0.0445 res=0.970
+BASE H15_tp0.3_slNone_f1.0      va n=  2372 k=101 mean=-0.0862 med=-0.0460 res=0.973
+BASE H15_tpNone_sl-0.25_f1.0    tr n=  1840 k= 84 mean=-0.0406 med=-0.0385 res=0.970
+BASE H15_tpNone_sl-0.25_f1.0    va n=  2372 k=101 mean=-0.0464 med=-0.0283 res=0.973
+BASE H15_tp0.15_sl-0.25_f1.0    tr n=  1840 k= 84 mean=-0.0459 med=-0.0328 res=0.970
+BASE H15_tp0.15_sl-0.25_f1.0    va n=  2372 k=101 mean=-0.0514 med=-0.0330 res=0.973
+BASE H15_tp0.3_sl-0.4_f1.0      tr n=  1840 k= 84 mean=-0.0529 med=-0.0363 res=0.970
+BASE H15_tp0.3_sl-0.4_f1.0      va n=  2372 k=101 mean=-0.0567 med=-0.0337 res=0.973
+BASE H15_tp0.15_sl-0.25_f0.5    tr n=  1840 k= 84 mean=-0.0433 med=-0.0359 res=0.970
+BASE H15_tp0.15_sl-0.25_f0.5    va n=  2372 k=101 mean=-0.0489 med=-0.0287 res=0.973
+BASE H15_tp0.3_sl-0.25_f0.5     tr n=  1840 k= 84 mean=-0.0419 med=-0.0370 res=0.970
+BASE H15_tp0.3_sl-0.25_f0.5     va n=  2372 k=101 mean=-0.0461 med=-0.0295 res=0.973
+BASE H30_tpNone_slNone_f1.0     tr n=  1196 k= 84 mean=-0.1002 med=-0.0696 res=0.954
+BASE H30_tpNone_slNone_f1.0     va n=  1498 k=101 mean=-0.1145 med=-0.0652 res=0.953
+BASE H30_tp0.15_slNone_f1.0     tr n=  1196 k= 84 mean=-0.0833 med=-0.0573 res=0.954
+BASE H30_tp0.15_slNone_f1.0     va n=  1498 k=101 mean=-0.1140 med=-0.0574 res=0.953
+BASE H30_tp0.3_slNone_f1.0      tr n=  1196 k= 84 mean=-0.0864 med=-0.0569 res=0.954
+BASE H30_tp0.3_slNone_f1.0      va n=  1498 k=101 mean=-0.1118 med=-0.0579 res=0.953
+BASE H30_tpNone_sl-0.25_f1.0    tr n=  1196 k= 84 mean=-0.0480 med=-0.0542 res=0.954
+BASE H30_tpNone_sl-0.25_f1.0    va n=  1498 k=101 mean=-0.0537 med=-0.0435 res=0.953
+BASE H30_tp0.15_sl-0.25_f1.0    tr n=  1196 k= 84 mean=-0.0513 med=-0.0430 res=0.954
+BASE H30_tp0.15_sl-0.25_f1.0    va n=  1498 k=101 mean=-0.0655 med=-0.0420 res=0.953
+BASE H30_tp0.3_sl-0.4_f1.0      tr n=  1196 k= 84 mean=-0.0607 med=-0.0467 res=0.954
+BASE H30_tp0.3_sl-0.4_f1.0      va n=  1498 k=101 mean=-0.0721 med=-0.0409 res=0.953
+BASE H30_tp0.15_sl-0.25_f0.5    tr n=  1196 k= 84 mean=-0.0497 med=-0.0420 res=0.954
+BASE H30_tp0.15_sl-0.25_f0.5    va n=  1498 k=101 mean=-0.0596 med=-0.0425 res=0.953
+BASE H30_tp0.3_sl-0.25_f0.5     tr n=  1196 k= 84 mean=-0.0471 med=-0.0447 res=0.954
+BASE H30_tp0.3_sl-0.25_f0.5     va n=  1498 k=101 mean=-0.0555 med=-0.0409 res=0.953
+BASE H60_tpNone_slNone_f1.0     tr n=   761 k= 84 mean=-0.1676 med=-0.1034 res=0.917
+BASE H60_tpNone_slNone_f1.0     va n=   927 k=101 mean=-0.1505 med=-0.0941 res=0.927
+BASE H60_tp0.15_slNone_f1.0     tr n=   761 k= 84 mean=-0.0924 med=-0.0628 res=0.917
+BASE H60_tp0.15_slNone_f1.0     va n=   927 k=101 mean=-0.1312 med=-0.0674 res=0.927
+BASE H60_tp0.3_slNone_f1.0      tr n=   761 k= 84 mean=-0.0977 med=-0.0676 res=0.917
+BASE H60_tp0.3_slNone_f1.0      va n=   927 k=101 mean=-0.1248 med=-0.0646 res=0.927
+BASE H60_tpNone_sl-0.25_f1.0    tr n=   761 k= 84 mean=-0.0817 med=-0.0798 res=0.917
+BASE H60_tpNone_sl-0.25_f1.0    va n=   927 k=101 mean=-0.0623 med=-0.0639 res=0.927
+BASE H60_tp0.15_sl-0.25_f1.0    tr n=   761 k= 84 mean=-0.0639 med=-0.0521 res=0.917
+BASE H60_tp0.15_sl-0.25_f1.0    va n=   927 k=101 mean=-0.0744 med=-0.0485 res=0.927
+BASE H60_tp0.3_sl-0.4_f1.0      tr n=   761 k= 84 mean=-0.0717 med=-0.0534 res=0.917
+BASE H60_tp0.3_sl-0.4_f1.0      va n=   927 k=101 mean=-0.0783 med=-0.0529 res=0.927
+BASE H60_tp0.15_sl-0.25_f0.5    tr n=   761 k= 84 mean=-0.0728 med=-0.0625 res=0.917
+BASE H60_tp0.15_sl-0.25_f0.5    va n=   927 k=101 mean=-0.0684 med=-0.0526 res=0.927
+BASE H60_tp0.3_sl-0.25_f0.5     tr n=   761 k= 84 mean=-0.0702 med=-0.0626 res=0.917
+BASE H60_tp0.3_sl-0.25_f0.5     va n=   927 k=101 mean=-0.0628 med=-0.0548 res=0.927
+baselines 2.1s
+
+entry conditions: 4416 (1w 96, 2w 4320) x 4 screen structures = 17664 evals
+STAGE A combos=17664 survivors=1440 7.5s
+  A dd:q00-10&ret5:q90-100                         H15_tpNone_slNone_f1.0     mean=+1.3953 med=-0.0071 n=29 k=17
+  A dd:q00-10&ret5:q90-100                         H30_tpNone_slNone_f1.0     mean=+1.3780 med=-0.0290 n=26 k=17
+  A age:q90-100&ret5:q00-10                        H30_tpNone_slNone_f1.0     mean=+1.2112 med=-0.0438 n=23 k=12
+  A age:q90-100&ret5:q00-10                        H5_tpNone_slNone_f1.0      mean=+1.1034 med=-0.0434 n=47 k=12
+  A rngrel:q50-75&dd:q00-10                        H15_tpNone_slNone_f1.0     mean=+1.0483 med=-0.0191 n=135 k=33
+  A vwdev:q00-10&age:q90-100                       H30_tpNone_slNone_f1.0     mean=+1.0217 med=-0.0278 n=26 k=14
+  A vsol5:q75-100&dd:q00-10                        H15_tpNone_slNone_f1.0     mean=+1.0163 med=-0.0806 n=41 k=27
+  A vwdev:q00-10&ret5:q90-100                      H15_tpNone_slNone_f1.0     mean=+0.9881 med=-0.2466 n=29 k=20
+  A vsol5:q75-100&dd:q00-10                        H5_tpNone_slNone_f1.0      mean=+0.9746 med=-0.0460 n=49 k=27
+  A vshare:q50-75&dd:q00-10                        H30_tpNone_slNone_f1.0     mean=+0.9626 med=-0.0290 n=69 k=24
+  A vshare:q50-75&dd:q00-10                        H15_tpNone_slNone_f1.0     mean=+0.9533 med=-0.0225 n=78 k=24
+  A vsol5:q50-75&age:q90-100                       H15_tpNone_slNone_f1.0     mean=+0.9457 med=-0.0188 n=61 k=13
+  A hlcc:q90-100&dd:q00-10                         H15_tpNone_slNone_f1.0     mean=+0.9051 med=-0.0143 n=26 k=19
+  A hlcc:q90-100&dd:q00-10                         H30_tpNone_slNone_f1.0     mean=+0.8986 med=-0.0220 n=24 k=19
+  A vrel20:q50-75&dd:q00-10                        H30_tpNone_slNone_f1.0     mean=+0.8964 med=-0.0390 n=88 k=24
+  A vrel20:q50-75&dd:q00-10                        H15_tpNone_slNone_f1.0     mean=+0.8754 med=-0.0330 n=107 k=24
+  A vwdev:q00-10&ret5:q90-100                      H30_tpNone_slNone_f1.0     mean=+0.8466 med=-0.2467 n=27 k=20
+  A hlcc:q75-100&dd:q00-10                         H15_tpNone_slNone_f1.0     mean=+0.8116 med=-0.0338 n=56 k=23
+  A vsol5:q75-100&dd:q00-10                        H30_tpNone_slNone_f1.0     mean=+0.8069 med=-0.0869 n=37 k=27
+  A mcap:q25-50&dd:q00-25                          H30_tpNone_slNone_f1.0     mean=+0.7972 med=-0.1749 n=68 k=14
+  A hlcc:q75-100&dd:q00-10                         H30_tpNone_slNone_f1.0     mean=+0.7935 med=-0.0564 n=49 k=23
+  A vwdev:q00-10&age:q90-100                       H5_tpNone_slNone_f1.0      mean=+0.7899 med=-0.0156 n=55 k=14
+  A vsol5:q75-100&mcap:q00-25                      H15_tpNone_slNone_f1.0     mean=+0.7864 med=-0.0821 n=48 k=35
+  A dd:q00-10&ret5:q25-50                          H15_tpNone_slNone_f1.0     mean=+0.7826 med=-0.0182 n=228 k=31
+  A dd:q00-10&ret5:q25-50                          H30_tpNone_slNone_f1.0     mean=+0.7798 med=-0.0276 n=182 k=31
+  A eff5:q00-10&dd:q00-10                          H15_tpNone_slNone_f1.0     mean=+0.7642 med=-0.0244 n=65 k=24
+  A vsol5:q75-100&mcap:q00-25                      H5_tpNone_slNone_f1.0      mean=+0.7550 med=-0.0254 n=53 k=35
+  A eff5:q00-10&dd:q00-10                          H30_tpNone_slNone_f1.0     mean=+0.7515 med=-0.0259 n=61 k=24
+  A dd:q00-25&ret5:q90-100                         H30_tpNone_slNone_f1.0     mean=+0.7475 med=-0.0161 n=79 k=31
+  A mcap:q25-50&dd:q00-25                          H15_tpNone_slNone_f1.0     mean=+0.7438 med=-0.0185 n=105 k=14
+  A dd:q00-25&ret5:q90-100                         H15_tpNone_slNone_f1.0     mean=+0.7401 med=-0.0399 n=91 k=31
+  A vrel5:q50-75&dd:q00-10                         H15_tpNone_slNone_f1.0     mean=+0.7297 med=-0.0211 n=125 k=29
+  A vrel20:q25-50&dd:q00-10                        H5_tpNone_slNone_f1.0      mean=+0.7284 med=-0.0120 n=155 k=31
+  A rngrel:q00-10&vsol5:q75-100                    H15_tpNone_slNone_f1.0     mean=+0.7148 med=-0.0197 n=62 k=34
+  A vrel20:q25-50&dd:q00-10                        H30_tpNone_slNone_f1.0     mean=+0.7134 med=-0.0251 n=111 k=31
+  A age:q90-100&ret5:q00-10                        H15_tpNone_slNone_f1.0     mean=+0.7066 med=-0.0297 n=29 k=12
+  A vwdev:q00-10&age:q90-100                       H15_tpNone_slNone_f1.0     mean=+0.6993 med=-0.0427 n=35 k=14
+  A age:q90-100&mcap:q00-25                        H15_tpNone_slNone_f1.0     mean=+0.6968 med=-0.0996 n=77 k=32
+  A vshare:q00-10&mcap:q25-50                      H5_tpNone_slNone_f1.0      mean=+0.6955 med=-0.0074 n=210 k=22
+  A dens30:q75-100&mcap:q00-25                     H15_tpNone_slNone_f1.0     mean=+0.6942 med=-0.1493 n=46 k=37
+  A dens30:q90-100&mcap:q00-25                     H15_tpNone_slNone_f1.0     mean=+0.6942 med=-0.1493 n=46 k=37
+  A age:q90-100&mcap:q00-25                        H5_tpNone_slNone_f1.0      mean=+0.6941 med=-0.0910 n=116 k=32
+  A vrel20:q25-50&dd:q00-10                        H15_tpNone_slNone_f1.0     mean=+0.6923 med=-0.0241 n=126 k=31
+  A dd:q00-10&ret5:q75-100                         H30_tpNone_slNone_f1.0     mean=+0.6887 med=-0.0478 n=71 k=27
+  A dd:q00-10&ret5:q75-100                         H15_tpNone_slNone_f1.0     mean=+0.6875 med=-0.0341 n=81 k=27
+  A rngrel:q50-75&dd:q00-10                        H30_tpNone_slNone_f1.0     mean=+0.6850 med=-0.0215 n=125 k=33
+  A vacc:q25-50&mcap:q25-50                        H5_tpNone_slNone_f1.0      mean=+0.6831 med=-0.0105 n=406 k=33
+  A age:q90-100&mcap:q00-25                        H30_tpNone_slNone_f1.0     mean=+0.6754 med=-0.1342 n=62 k=32
+  A vsol5:q25-50&dd:q00-10                         H15_tpNone_slNone_f1.0     mean=+0.6726 med=-0.0382 n=101 k=23
+  A vshare:q50-75&mcap:q25-50                      H15_tpNone_slNone_f1.0     mean=+0.6688 med=-0.0973 n=217 k=30
+  A vsol5:q75-100&dd:q00-25                        H5_tpNone_slNone_f1.0      mean=+0.6681 med=-0.0407 n=64 k=35
+  A dens30:q75-100&mcap:q00-25                     H5_tpNone_slNone_f1.0      mean=+0.6664 med=-0.0634 n=65 k=37
+  A dens30:q90-100&mcap:q00-25                     H5_tpNone_slNone_f1.0      mean=+0.6664 med=-0.0634 n=65 k=37
+  A eff5:q50-75&age:q90-100                        H30_tpNone_slNone_f1.0     mean=+0.6648 med=-0.0797 n=77 k=29
+  A rngrel:q00-10&dd:q00-10                        H15_tpNone_slNone_f1.0     mean=+0.6632 med=-0.0172 n=186 k=38
+  A vsol5:q50-75&dd:q00-25                         H15_tpNone_slNone_f1.0     mean=+0.6598 med=-0.0254 n=55 k=27
+  A vwdev:q00-25&ret5:q90-100                      H15_tpNone_slNone_f1.0     mean=+0.6533 med=-0.0862 n=67 k=31
+  A rngrel:q25-50&mcap:q25-50                      H5_tpNone_slNone_f1.0      mean=+0.6515 med=-0.0309 n=399 k=33
+  A vacc:q50-75&mcap:q25-50                        H15_tpNone_slNone_f1.0     mean=+0.6510 med=-0.0402 n=185 k=32
+  A vsol5:q25-50&dd:q00-10                         H30_tpNone_slNone_f1.0     mean=+0.6471 med=-0.0373 n=85 k=23
+STAGE_A_DONE 9.7s

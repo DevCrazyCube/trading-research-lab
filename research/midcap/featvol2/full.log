@@ -1,0 +1,50 @@
+bars=45998 mints=365 trainM=165 valM=200 reservedSkipped=207
+conditions=260
+stage1 exits built t=2.6
+singles combos=1760 rows=1680 t=7.8
+  pairs a=0/260 combos=2912 rows=2675 t=9.0
+  pairs a=40/260 combos=37488 rows=29117 t=47.1
+  pairs a=120/260 combos=78208 rows=62047 t=121.9
+  pairs a=160/260 combos=91400 rows=72005 t=136.9
+  pairs a=200/260 combos=101320 rows=79753 t=146.2
+  pairs a=240/260 combos=105720 rows=83145 t=150.4
+pairs combos=105952 rows=83329 t=150.7
+with 3-way combos=131632 rows=93311 t=165.8
+BASE H5           TR n= 4343 k=165 mean=-0.1415 med=-0.0744 hard=-0.2081 res=0.979
+BASE H5           VA n= 5725 k=200 mean=-0.1338 med=-0.0859 hard=-0.2012 res=0.980
+BASE H15          TR n= 2240 k=165 mean=-0.2245 med=-0.1458 hard=-0.3296 res=0.954
+BASE H15          VA n= 2882 k=200 mean=-0.1898 med=-0.1582 hard=-0.2799 res=0.960
+BASE H30          TR n= 1488 k=165 mean=-0.2720 med=-0.2524 hard=-0.3917 res=0.931
+BASE H30          VA n= 1858 k=200 mean=-0.2356 med=-0.2419 hard=-0.3477 res=0.936
+BASE H60          TR n=  984 k=165 mean=-0.2968 med=-0.3080 hard=-0.4443 res=0.892
+BASE H60          VA n= 1212 k=200 mean=-0.2942 med=-0.3080 hard=-0.4416 res=0.895
+BASE H120         TR n=  664 k=165 mean=-0.3573 med=-0.3080 hard=-0.5375 res=0.836
+BASE H120         VA n=  809 k=200 mean=-0.3537 med=-0.3218 hard=-0.5479 res=0.820
+BASE H15tp30      TR n= 2240 k=165 mean=-0.1158 med=-0.0541 hard=-0.2224 res=0.954
+BASE H15tp30      VA n= 2882 k=200 mean=-0.1185 med=-0.0483 hard=-0.2095 res=0.960
+BASE H60tp60sl30  TR n=  984 k=165 mean=-0.1258 med=-0.1591 hard=-0.2757 res=0.892
+BASE H60tp60sl30  VA n= 1212 k=200 mean=-0.1184 med=-0.1184 hard=-0.2682 res=0.895
+BASE H30sl35      TR n= 1488 k=165 mean=-0.1441 med=-0.1661 hard=-0.2655 res=0.931
+BASE H30sl35      VA n= 1858 k=200 mean=-0.1212 med=-0.1352 hard=-0.2349 res=0.936
+entry conditions with a positive stage-1 cell: 3246 ; carried: 500
+stage2 exit/position structures=131
+stage2 exits built t=211.2
+stage2 combos=65500 survivors(train mean>0 & med>0 & hard>0)=1612 t=248.6
+TOTAL COMBOS SWEPT = 197132
+  trainctrl 0/300 t=248.7
+  trainctrl 50/300 t=251.3
+  trainctrl 100/300 t=253.7
+  trainctrl 150/300 t=256.1
+  trainctrl 200/300 t=258.0
+  trainctrl 250/300 t=260.5
+survive TRAIN permutation control: 300
+  validate 75/300 t=266.1
+  validate 100/300 t=267.9
+  validate 125/300 t=269.9
+  validate 150/300 t=272.1
+  validate 175/300 t=274.4
+  validate 200/300 t=275.8
+  validate 250/300 t=279.3
+  validate 275/300 t=280.9
+=== VALIDATE SURVIVORS: 0 ===
+DONE t=282.7 TOTAL_COMBOS=197132

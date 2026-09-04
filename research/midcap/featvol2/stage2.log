@@ -1,0 +1,12 @@
+exit structures=70
+exits built t=21.3
+entry conditions carried to stage2: 600 (of 10851)
+Traceback (most recent call last):
+  File "/home/anont/meme/research/midcap/featvol2/stage2.py", line 128, in <module>
+    st=ev(mt,exn)
+  File "/home/anont/meme/research/midcap/featvol2/stage2.py", line 67, in ev
+    st=R.stats(js,e['nets'][(toll,drop)],e['k'])
+  File "/home/anont/meme/research/midcap/featvol2/core.py", line 130, in stats
+    pm=np.bincount(inv,weights=r)/np.bincount(inv)
+       ~~~~~~~~~~~^^^^^^^^^^^^^^^
+TypeError: Cannot cast array data from dtype('O') to dtype('float64') according to the rule 'safe'

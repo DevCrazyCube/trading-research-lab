@@ -1,0 +1,7 @@
+stageB combos=368675 train-positive=8
+stageC total combos=372355 train-positive=65
+validate survivors=0
+greedy combos=14369
+TOTAL_COMBOS_APPROX=386724
+
+done

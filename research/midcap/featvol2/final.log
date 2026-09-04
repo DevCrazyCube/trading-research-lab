@@ -1,0 +1,46 @@
+=== H5 / tp+60%% : full cost & dropout sensitivity ===
+  exact corner                                 TR n=101 k=36 mean=+0.0848 med=+0.0240 cilo=+0.0179 d50=+0.0848 d100=+0.0848 t250=+0.0699 hard=+0.0699 uncapped=+0.0848 res=1.00 fpos=0.61
+  exact corner                                 VA n= 74 k=26 mean=+0.0890 med=+0.0389 cilo=+0.0117 d50=+0.0890 d100=+0.0890 t250=+0.0740 hard=+0.0740 uncapped=+0.0890 res=1.00 fpos=0.65
+=== entry-delay (extra real bars of latency) ===
+  off=1                                        TR n=101 k=36 mean=+0.0848 med=+0.0240 cilo=+0.0179 d50=+0.0848 d100=+0.0848 t250=+0.0699 hard=+0.0699 uncapped=+0.0848 res=1.00 fpos=0.61
+  off=1                                        VA n= 74 k=26 mean=+0.0890 med=+0.0389 cilo=+0.0117 d50=+0.0890 d100=+0.0890 t250=+0.0740 hard=+0.0740 uncapped=+0.0890 res=1.00 fpos=0.65
+  off=2                                        TR n=101 k=36 mean=+0.0333 med=+0.0059 cilo=-0.0484 d50=+0.0333 d100=+0.0333 t250=+0.0191 hard=+0.0191 uncapped=+0.0333 res=1.00 fpos=0.50
+  off=2                                        VA n= 73 k=26 mean=+0.0463 med=+0.0157 cilo=-0.0370 d50=+0.0463 d100=+0.0463 t250=+0.0319 hard=+0.0319 uncapped=+0.0463 res=1.00 fpos=0.54
+  off=3                                        TR n= 99 k=36 mean=+0.0024 med=-0.0176 cilo=-0.0640 d50=+0.0024 d100=+0.0024 t250=-0.0114 hard=-0.0114 uncapped=+0.0024 res=1.00 fpos=0.42
+  off=3                                        VA n= 73 k=26 mean=-0.0779 med=-0.0327 cilo=-0.1911 d50=-0.0779 d100=-0.0779 t250=-0.0906 hard=-0.0906 uncapped=-0.0779 res=1.00 fpos=0.35
+=== threshold plateau AT H5/tp60 (validate is the row that matters) ===
+  vacc[q90,q99] vwap>q90 vrel5>q90             TR n=101 k=36 mean=+0.0848 med=+0.0240 cilo=+0.0179 d50=+0.0848 d100=+0.0848 t250=+0.0699 hard=+0.0699 uncapped=+0.0848 res=1.00 fpos=0.61
+  vacc[q90,q99] vwap>q90 vrel5>q90             VA n= 74 k=26 mean=+0.0890 med=+0.0389 cilo=+0.0117 d50=+0.0890 d100=+0.0890 t250=+0.0740 hard=+0.0740 uncapped=+0.0890 res=1.00 fpos=0.65
+  vacc[q88,q99] vwap>q88 vrel5>q88             TR n=136 k=41 mean=+0.0522 med=+0.0179 cilo=-0.0109 d50=+0.0522 d100=+0.0522 t250=+0.0377 hard=+0.0377 uncapped=+0.0522 res=1.00 fpos=0.61
+  vacc[q88,q99] vwap>q88 vrel5>q88             VA n=121 k=29 mean=+0.0852 med=+0.0383 cilo=+0.0179 d50=+0.0852 d100=+0.0852 t250=+0.0703 hard=+0.0703 uncapped=+0.0852 res=1.00 fpos=0.66
+  vacc[q92,q99] vwap>q92 vrel5>q92             TR n= 65 k=29 mean=+0.1217 med=+0.0115 cilo=+0.0165 d50=+0.1217 d100=+0.1217 t250=+0.1063 hard=+0.1063 uncapped=+0.1217 res=1.00 fpos=0.55
+  vacc[q92,q99] vwap>q92 vrel5>q92             VA n= 36 k=19 mean=+0.0669 med=-0.0137 cilo=-0.0471 d50=+0.0669 d100=+0.0669 t250=+0.0523 hard=+0.0523 uncapped=+0.0669 res=1.00 fpos=0.42
+  vacc[q90,q100] vwap>q90 vrel5>q90            TR n=117 k=39 mean=+0.0691 med=+0.0115 cilo=+0.0047 d50=+0.0674 d100=+0.0632 t250=+0.0544 hard=+0.0486 uncapped=+0.0691 res=0.99 fpos=0.56
+  vacc[q90,q100] vwap>q90 vrel5>q90            VA n= 81 k=30 mean=+0.0346 med=+0.0326 cilo=-0.0704 d50=+0.0346 d100=+0.0346 t250=+0.0204 hard=+0.0204 uncapped=+0.0346 res=1.00 fpos=0.60
+  vacc[q90,q98] vwap>q90 vrel5>q90             TR n= 86 k=34 mean=+0.1062 med=+0.0381 cilo=+0.0326 d50=+0.1062 d100=+0.1062 t250=+0.0909 hard=+0.0909 uncapped=+0.1062 res=1.00 fpos=0.68
+  vacc[q90,q98] vwap>q90 vrel5>q90             VA n= 71 k=26 mean=+0.0933 med=+0.0463 cilo=+0.0159 d50=+0.0933 d100=+0.0933 t250=+0.0783 hard=+0.0783 uncapped=+0.0933 res=1.00 fpos=0.65
+  vacc[q85,q99] vwap>q90 vrel5>q90             TR n=123 k=38 mean=+0.0581 med=+0.0126 cilo=+0.0038 d50=+0.0581 d100=+0.0581 t250=+0.0435 hard=+0.0435 uncapped=+0.0581 res=1.00 fpos=0.63
+  vacc[q85,q99] vwap>q90 vrel5>q90             VA n= 99 k=29 mean=+0.0667 med=+0.0361 cilo=-0.0083 d50=+0.0667 d100=+0.0667 t250=+0.0521 hard=+0.0521 uncapped=+0.0667 res=1.00 fpos=0.55
+  vacc[q90,q99] vwap>q85 vrel5>q90             TR n=134 k=40 mean=+0.0628 med=+0.0208 cilo=+0.0000 d50=+0.0628 d100=+0.0628 t250=+0.0482 hard=+0.0482 uncapped=+0.0628 res=1.00 fpos=0.57
+  vacc[q90,q99] vwap>q85 vrel5>q90             VA n=114 k=32 mean=+0.0648 med=+0.0107 cilo=+0.0046 d50=+0.0648 d100=+0.0648 t250=+0.0502 hard=+0.0502 uncapped=+0.0648 res=1.00 fpos=0.59
+  vacc[q90,q99] vwap>q90 vrel5>q85             TR n=107 k=36 mean=+0.0846 med=+0.0240 cilo=+0.0174 d50=+0.0846 d100=+0.0846 t250=+0.0697 hard=+0.0697 uncapped=+0.0846 res=1.00 fpos=0.61
+  vacc[q90,q99] vwap>q90 vrel5>q85             VA n=100 k=30 mean=+0.0772 med=+0.0207 cilo=+0.0090 d50=+0.0706 d100=+0.0541 t250=+0.0624 hard=+0.0396 uncapped=+0.0772 res=0.99 fpos=0.60
+  vacc[q95,q100] vwap>q95 vrel5>q95            TR n= 37 k= 9 mean=+0.1252 med=+0.1369 cilo=-0.0972 d50=+0.1143 d100=+0.0868 t250=+0.1098 hard=+0.0718 uncapped=+0.1252 res=0.97 fpos=0.56
+  vacc[q95,q100] vwap>q95 vrel5>q95            VA n=8 TOO SMALL
+=== TP sweep at H5 (is +60%% special?) ===
+  H5 tp=0.2                                    TR n=101 k=36 mean=+0.0326 med=+0.0134 cilo=-0.0048 d50=+0.0326 d100=+0.0326 t250=+0.0184 hard=+0.0184 uncapped=+0.0326 res=1.00 fpos=0.64
+  H5 tp=0.2                                    VA n= 74 k=26 mean=+0.0379 med=+0.0500 cilo=-0.0064 d50=+0.0379 d100=+0.0379 t250=+0.0236 hard=+0.0236 uncapped=+0.0379 res=1.00 fpos=0.73
+  H5 tp=0.4                                    TR n=101 k=36 mean=+0.0515 med=+0.0257 cilo=-0.0007 d50=+0.0515 d100=+0.0515 t250=+0.0370 hard=+0.0370 uncapped=+0.0515 res=1.00 fpos=0.61
+  H5 tp=0.4                                    VA n= 74 k=26 mean=+0.0567 med=+0.0389 cilo=-0.0028 d50=+0.0567 d100=+0.0567 t250=+0.0422 hard=+0.0422 uncapped=+0.0567 res=1.00 fpos=0.62
+  H5 tp=0.6                                    TR n=101 k=36 mean=+0.0848 med=+0.0240 cilo=+0.0179 d50=+0.0848 d100=+0.0848 t250=+0.0699 hard=+0.0699 uncapped=+0.0848 res=1.00 fpos=0.61
+  H5 tp=0.6                                    VA n= 74 k=26 mean=+0.0890 med=+0.0389 cilo=+0.0117 d50=+0.0890 d100=+0.0890 t250=+0.0740 hard=+0.0740 uncapped=+0.0890 res=1.00 fpos=0.65
+  H5 tp=0.8                                    TR n=101 k=36 mean=+0.1107 med=+0.0240 cilo=+0.0283 d50=+0.1107 d100=+0.1107 t250=+0.0954 hard=+0.0954 uncapped=+0.1107 res=1.00 fpos=0.61
+  H5 tp=0.8                                    VA n= 74 k=26 mean=+0.0345 med=+0.0199 cilo=-0.0806 d50=+0.0345 d100=+0.0345 t250=+0.0202 hard=+0.0202 uncapped=+0.0345 res=1.00 fpos=0.54
+  H5 tp=1.2                                    TR n=101 k=36 mean=+0.1463 med=+0.0240 cilo=+0.0416 d50=+0.1463 d100=+0.1463 t250=+0.1305 hard=+0.1305 uncapped=+0.1463 res=1.00 fpos=0.61
+  H5 tp=1.2                                    VA n= 74 k=26 mean=+0.0623 med=+0.0199 cilo=-0.0743 d50=+0.0623 d100=+0.0623 t250=+0.0476 hard=+0.0476 uncapped=+0.0623 res=1.00 fpos=0.54
+  H5 tp=None                                   TR n=101 k=36 mean=+0.2619 med=+0.0240 cilo=+0.0629 d50=+0.2619 d100=+0.2619 t250=+0.2445 hard=+0.2445 uncapped=+0.3856 res=1.00 fpos=0.61
+  H5 tp=None                                   VA n= 74 k=26 mean=+0.0548 med=+0.0199 cilo=-0.0823 d50=+0.0548 d100=+0.0548 t250=+0.0403 hard=+0.0403 uncapped=+0.0548 res=1.00 fpos=0.54
+=== permutation p-values (400 within-mint reshuffles) at H5/tp60 ===
+  TRAIN     mean=+0.0848 ctrl=-0.0248 p=0.000 | med=+0.0240 ctrl=-0.0213 p=0.000
+  VALIDATE  mean=+0.0890 ctrl=+0.0049 p=0.022 | med=+0.0389 ctrl=-0.0132 p=0.005
+FINAL DONE

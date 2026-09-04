@@ -21,3 +21,18 @@
 [23:43:55] 275/894  with-bars=230
 [00:04:35] 300/894  with-bars=250
 [00:23:19] 325/894  with-bars=274
+[00:45:12] 350/894  with-bars=297
+[01:09:11] 375/894  with-bars=320
+[01:30:42] 400/894  with-bars=345
+[01:44:44] 425/894  with-bars=369
+[02:04:56] 450/894  with-bars=393
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/anont/meme/scripts/trading_bot/memebot/gecko_history.py", line 73, in <module>
+    main()
+    ~~~~^^
+  File "/home/anont/meme/scripts/trading_bot/memebot/gecko_history.py", line 66, in main
+    c.commit()
+    ~~~~~~~~^^
+sqlite3.OperationalError: database is locked

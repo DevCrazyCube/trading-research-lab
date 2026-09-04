@@ -1,0 +1,56 @@
+validated candidates: 300
+passing each validate criterion individually (of 300): {'mean': 63, 'med': 38, 'hard': 20, 'cilo': 0, 'edgem': 68, 'edgemd': 74}
+train mean: median=+0.1214  validate mean: median=-0.0238  best=+0.1166
+train med : median=+0.0501  validate med : median=-0.0365  best=+0.2852
+validate edge-vs-permutation-control: median=-0.0346 best=+0.1385 frac>0=0.319
+corr(train mean, validate mean) = +0.053 ; corr(train med, validate med) = +0.445
+TOP 12 BY VALIDATE MEAN:
+  vshare>q90 & ret1>q98 & vrel5@q90-99 | H3 | tr(n=62 k=29 mean=+0.2801 med=+0.0369) va(n=69 k=30 mean=+0.1166 med=-0.0141 ci_lo=-0.0802 ctrl=+0.0363 edge=+0.0803 hard=+0.1013 lag2=+0.0855)
+  vrel5@q90-99 & ret1>q98 & vshare>q90 | H3 | tr(n=62 k=29 mean=+0.2801 med=+0.0369) va(n=69 k=30 mean=+0.1166 med=-0.0141 ci_lo=-0.0802 ctrl=+0.0363 edge=+0.0803 hard=+0.1013 lag2=+0.0855)
+  vshare@q90-99 & ret1>q98 &  | H5 | tr(n=62 k=31 mean=+0.1963 med=+0.0302) va(n=77 k=37 mean=+0.1022 med=-0.0073 ci_lo=-0.0672 ctrl=+0.0335 edge=+0.0687 hard=+0.0870 lag2=+0.0242)
+  vshare>q90 & ret1>q98 & vrel5@q90-99 | H5 | tr(n=61 k=29 mean=+0.3436 med=+0.0836) va(n=68 k=30 mean=+0.0807 med=-0.0269 ci_lo=-0.1229 ctrl=+0.0479 edge=+0.0327 hard=+0.0658 lag2=+0.0309)
+  vrel5@q90-99 & ret1>q98 & vshare>q90 | H5 | tr(n=61 k=29 mean=+0.3436 med=+0.0836) va(n=68 k=30 mean=+0.0807 med=-0.0269 ci_lo=-0.1229 ctrl=+0.0479 edge=+0.0327 hard=+0.0658 lag2=+0.0309)
+  vacc@q90-99 & vwapdev>q90 & vrel5>q90 | H10tp60 | tr(n=97 k=36 mean=+0.0780 med=+0.0313) va(n=73 k=26 mean=+0.0805 med=+0.0228 ci_lo=-0.0025 ctrl=+0.0233 edge=+0.0572 hard=+0.0657 lag2=+0.0254)
+  vrel5>q90 & vwapdev>q90 & vacc@q90-99 | H10tp60 | tr(n=97 k=36 mean=+0.0780 med=+0.0313) va(n=73 k=26 mean=+0.0805 med=+0.0228 ci_lo=-0.0025 ctrl=+0.0233 edge=+0.0572 hard=+0.0657 lag2=+0.0254)
+  vacc@q90-99 & vwapdev>q90 & vrel5@q90-99 | H10tp60 | tr(n=87 k=36 mean=+0.0774 med=+0.0313) va(n=72 k=26 mean=+0.0797 med=+0.0228 ci_lo=-0.0034 ctrl=+0.0082 edge=+0.0715 hard=+0.0649 lag2=+0.0243)
+  vrel5@q90-99 & vwapdev>q90 & vacc@q90-99 | H10tp60 | tr(n=87 k=36 mean=+0.0774 med=+0.0313) va(n=72 k=26 mean=+0.0797 med=+0.0228 ci_lo=-0.0034 ctrl=+0.0082 edge=+0.0715 hard=+0.0649 lag2=+0.0243)
+  rng>q90 & clspos@q80-95 &  | H10tp60 | tr(n=107 k=54 mean=+0.0404 med=+0.1562) va(n=100 k=64 mean=+0.0417 med=+0.1279 ci_lo=-0.0686 ctrl=-0.0474 edge=+0.0892 hard=+0.0167 lag2=-0.1154)
+  rng>q90 & clspos@q90-99 &  | H10tp60 | tr(n=107 k=54 mean=+0.0404 med=+0.1562) va(n=100 k=64 mean=+0.0417 med=+0.1279 ci_lo=-0.0686 ctrl=-0.0474 edge=+0.0892 hard=+0.0167 lag2=-0.1154)
+  rng@q90-99 & clspos@q80-95 &  | H10tp60 | tr(n=107 k=54 mean=+0.0404 med=+0.1562) va(n=100 k=64 mean=+0.0417 med=+0.1279 ci_lo=-0.0686 ctrl=-0.0474 edge=+0.0892 hard=+0.0167 lag2=-0.1154)
+
+UNBIASED CONSISTENCY TEST on 2760 entry cells x 6 exits (no pre-selection)
+  H5           cells=1139 | MEAN  rho=+0.542 slope=+0.555  trainTop10%->validate mean=-0.0357 (all cells validate mean=-0.0620)
+  H5                        | MEDIAN rho=+0.720 slope=+0.694  trainTop10%->validate med =-0.0168 (all cells validate med =-0.0373)
+  H15          cells=1125 | MEAN  rho=+0.660 slope=+0.766  trainTop10%->validate mean=-0.0469 (all cells validate mean=-0.1030)
+  H15                       | MEDIAN rho=+0.783 slope=+0.875  trainTop10%->validate med =-0.0248 (all cells validate med =-0.0717)
+  H30          cells=1113 | MEAN  rho=+0.772 slope=+0.939  trainTop10%->validate mean=-0.0426 (all cells validate mean=-0.1353)
+  H30                       | MEDIAN rho=+0.853 slope=+0.999  trainTop10%->validate med =-0.0285 (all cells validate med =-0.1098)
+  H60          cells=1071 | MEAN  rho=+0.836 slope=+0.880  trainTop10%->validate mean=-0.0479 (all cells validate mean=-0.1667)
+  H60                       | MEDIAN rho=+0.843 slope=+0.911  trainTop10%->validate med =-0.0394 (all cells validate med =-0.1485)
+  H15tp30      cells=1125 | MEAN  rho=+0.677 slope=+0.725  trainTop10%->validate mean=-0.0490 (all cells validate mean=-0.0914)
+  H15tp30                   | MEDIAN rho=+0.586 slope=+0.665  trainTop10%->validate med =-0.0020 (all cells validate med =-0.0383)
+  H30tp60sl40  cells=1113 | MEAN  rho=+0.506 slope=+0.494  trainTop10%->validate mean=-0.0479 (all cells validate mean=-0.0738)
+  H30tp60sl40               | MEDIAN rho=+0.659 slope=+0.659  trainTop10%->validate med =-0.0345 (all cells validate med =-0.0723)
+
+DECILE SURFACE (H15, capped net, mint-equal MEDIAN across mints; TRAIN | VALIDATE)
+  vrel5    T -0.07 -0.11 -0.12 -0.09 -0.04   na -0.10 -0.13 -0.09 -0.06   V -0.07 -0.06 -0.13 -0.12 -0.06   na -0.10 -0.09 -0.04 -0.05
+  vrel20   T -0.05 -0.07 -0.06 -0.07 -0.05 -0.03 -0.05 -0.05 -0.04 -0.04   V -0.04 -0.03 -0.05 -0.05 -0.03 -0.03 -0.04 -0.05 -0.03 -0.03
+  vacc     T -0.06 -0.06 -0.06 -0.08 -0.06 -0.09 -0.09 -0.07 -0.05 -0.05   V -0.04 -0.08 -0.05 -0.05 -0.07 -0.05 -0.05 -0.04 -0.06 -0.04
+  rng      T -0.03 -0.04 -0.05 -0.03 -0.04 -0.04 -0.07 -0.13 -0.17 -0.36   V -0.03 -0.03 -0.04 -0.04 -0.04 -0.04 -0.08 -0.13 -0.18 -0.31
+  rngrel   T -0.06 -0.07 -0.07 -0.07 -0.09 -0.03 -0.06 -0.06 -0.07 -0.09   V -0.04 -0.07 -0.04 -0.05 -0.06 -0.03 -0.06 -0.06 -0.05 -0.07
+  dens10   T -0.09 -0.03 -0.04 -0.03 -0.05   na   na   na   na -0.11   V -0.08 -0.03 -0.03 -0.03 -0.04   na   na   na   na -0.11
+  dens30   T -0.11 -0.02 -0.04 -0.05 -0.04   na   na   na   na -0.12   V -0.09 -0.02 -0.02 -0.02 -0.02   na   na   na   na -0.12
+  gap      T   na   na   na   na   na   na   na -0.20 -0.05 -0.08   V   na   na   na   na   na   na   na -0.17 -0.03 -0.07
+  chop     T   na   na   na -0.09 -0.11 -0.23 -0.16 -0.15 -0.21 -0.26   V   na   na   na -0.09 -0.13 -0.17 -0.23 -0.17 -0.15 -0.17
+  vwapdev  T -0.12 -0.06 -0.05 -0.04 -0.05 -0.04 -0.07 -0.07 -0.09 -0.05   V -0.15 -0.06 -0.04 -0.02 -0.02 -0.02 -0.03 -0.03 -0.07 -0.02
+  clspos   T   na   na -0.12 -0.31 -0.17 -0.16 -0.21 -0.22   na -0.07   V   na   na -0.08 -0.29 -0.17 -0.21 -0.14 -0.09   na -0.09
+  body     T -0.30 -0.27 -0.17 -0.20 -0.23 -0.13 -0.10   na   na -0.07   V -0.17 -0.20 -0.20 -0.26 -0.19 -0.13 -0.08   na   na -0.09
+  dvol     T -0.06 -0.04 -0.06 -0.10 -0.10 -0.13 -0.11 -0.18 -0.34 -0.31   V -0.05 -0.04 -0.03 -0.06 -0.09 -0.14 -0.07 -0.23 -0.36 -0.24
+  vshare   T -0.05 -0.05 -0.07 -0.08 -0.06 -0.06 -0.06 -0.08 -0.07 -0.06   V -0.06 -0.04 -0.03 -0.06 -0.06 -0.06 -0.06 -0.08 -0.05 -0.06
+  ret1     T -0.22 -0.12 -0.05 -0.04 -0.03 -0.04 -0.06 -0.04 -0.08 -0.17   V -0.26 -0.12 -0.06 -0.04 -0.02 -0.04 -0.04 -0.04 -0.08 -0.29
+  ret5     T -0.15 -0.08 -0.06 -0.04 -0.03 -0.04 -0.06 -0.05 -0.05 -0.12   V -0.17 -0.10 -0.06 -0.03 -0.03 -0.02 -0.02 -0.05 -0.06 -0.14
+  vzs      T -0.06 -0.04 -0.06 -0.06 -0.06 -0.05 -0.06 -0.06 -0.06 -0.05   V -0.04 -0.05 -0.02 -0.04 -0.03 -0.03 -0.04 -0.03 -0.03 -0.03
+  rngz     T -0.05 -0.06 -0.05 -0.05 -0.06 -0.05 -0.04 -0.04 -0.05 -0.06   V -0.04 -0.04 -0.04 -0.03 -0.04 -0.03 -0.04 -0.04 -0.03 -0.05
+  illiq    T -0.07 -0.09 -0.22 -0.14 -0.14 -0.11 -0.05 -0.05 -0.05 -0.06   V -0.12 -0.15 -0.27 -0.13 -0.12 -0.14 -0.06 -0.04 -0.04 -0.05
+  tickdir  T -0.05   na -0.07   na   na -0.08   na -0.11 -0.13 -0.05   V -0.05   na -0.08   na   na -0.11   na -0.11 -0.11 -0.07
+ANALYZE DONE

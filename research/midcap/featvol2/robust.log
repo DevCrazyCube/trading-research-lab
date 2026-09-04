@@ -1,0 +1,99 @@
+=== FAMILY A : volume-share + 1-min burst, short plain hold ===
+  H3 vshare>q90 & ret1>q98                       TR n=  90 k= 40 mean=+0.1241 med=+0.0093 cilo=-0.0255 hard=+0.1001 fracpos=0.53
+  H3 vshare>q90 & ret1>q98                       VA n=  95 k= 41 mean=+0.0800 med=-0.0130 cilo=-0.0762 hard=+0.0651 fracpos=0.46
+  H3 vshare>q85 & ret1>q95                       TR n= 268 k= 57 mean=+0.0064 med=-0.0123 cilo=-0.0794 hard=-0.0321 fracpos=0.39
+  H3 vshare>q85 & ret1>q95                       VA n= 326 k= 60 mean=+0.0071 med=-0.0078 cilo=-0.0718 hard=-0.0124 fracpos=0.47
+  H3 vshare>q95 & ret1>q99                       TR n=  26 k= 18 mean=+0.3399 med=+0.0023 cilo=-0.0425 hard=+0.3025 fracpos=0.50
+  H3 vshare>q95 & ret1>q99                       VA n=  28 k= 18 mean=+0.0532 med=-0.0668 cilo=-0.1968 hard=+0.0387 fracpos=0.39
+  H3 vshare>q80 & ret1>q90                       TR n= 622 k= 71 mean=-0.0146 med=-0.0140 cilo=-0.0880 hard=-0.0514 fracpos=0.35
+  H3 vshare>q80 & ret1>q90                       VA n= 726 k= 72 mean=-0.0004 med=-0.0021 cilo=-0.0714 hard=-0.0191 fracpos=0.50
+  H3 vshare>q90 & ret1>q95                       TR n= 216 k= 53 mean=+0.0779 med=-0.0070 cilo=-0.0351 hard=+0.0492 fracpos=0.45
+  H3 vshare>q90 & ret1>q95                       VA n= 265 k= 56 mean=+0.0587 med=+0.0041 cilo=-0.0528 hard=+0.0441 fracpos=0.54
+  H5 vshare>q90 & ret1>q98                       TR n=  87 k= 40 mean=+0.1899 med=+0.0151 cilo=-0.0018 hard=+0.1650 fracpos=0.57
+  H5 vshare>q90 & ret1>q98                       VA n=  94 k= 41 mean=+0.0700 med=-0.0209 cilo=-0.0921 hard=+0.0553 fracpos=0.44
+  H5 vshare>q85 & ret1>q95                       TR n= 253 k= 57 mean=+0.0432 med=-0.0132 cilo=-0.0685 hard=+0.0001 fracpos=0.40
+  H5 vshare>q85 & ret1>q95                       VA n= 310 k= 60 mean=+0.0126 med=-0.0266 cilo=-0.0959 hard=-0.0052 fracpos=0.35
+  H5 vshare>q95 & ret1>q99                       TR n=  26 k= 18 mean=+0.3580 med=+0.0612 cilo=-0.0553 hard=+0.3203 fracpos=0.56
+  H5 vshare>q95 & ret1>q99                       VA n=  28 k= 18 mean=-0.0602 med=-0.1514 cilo=-0.2925 hard=-0.0731 fracpos=0.33
+  H5 vshare>q80 & ret1>q90                       TR n= 574 k= 71 mean=+0.0235 med=-0.0176 cilo=-0.0734 hard=-0.0166 fracpos=0.38
+  H5 vshare>q80 & ret1>q90                       VA n= 675 k= 72 mean=+0.0094 med=-0.0243 cilo=-0.0986 hard=-0.0150 fracpos=0.33
+  H5 vshare>q90 & ret1>q95                       TR n= 208 k= 53 mean=+0.1100 med=-0.0122 cilo=-0.0343 hard=+0.0766 fracpos=0.47
+  H5 vshare>q90 & ret1>q95                       VA n= 262 k= 56 mean=+0.0273 med=-0.0253 cilo=-0.0880 hard=+0.0010 fracpos=0.34
+  H8 vshare>q90 & ret1>q98                       TR n=  82 k= 40 mean=+0.1412 med=+0.0014 cilo=-0.0353 hard=+0.1170 fracpos=0.50
+  H8 vshare>q90 & ret1>q98                       VA n=  93 k= 41 mean=-0.0540 med=-0.1122 cilo=-0.2059 hard=-0.0855 fracpos=0.27
+  H8 vshare>q85 & ret1>q95                       TR n= 243 k= 57 mean=-0.0281 med=-0.0553 cilo=-0.1392 hard=-0.0702 fracpos=0.30
+  H8 vshare>q85 & ret1>q95                       VA n= 301 k= 60 mean=-0.0994 med=-0.0807 cilo=-0.1861 hard=-0.1273 fracpos=0.28
+  H8 vshare>q95 & ret1>q99                       TR n=  26 k= 18 mean=+0.3096 med=-0.0244 cilo=-0.0590 hard=+0.2727 fracpos=0.39
+  H8 vshare>q95 & ret1>q99                       VA n=  27 k= 18 mean=-0.0465 med=-0.1414 cilo=-0.3758 hard=-0.0596 fracpos=0.33
+  H8 vshare>q80 & ret1>q90                       TR n= 530 k= 71 mean=-0.0361 med=-0.0297 cilo=-0.1329 hard=-0.0756 fracpos=0.35
+  H8 vshare>q80 & ret1>q90                       VA n= 621 k= 72 mean=-0.0796 med=-0.0371 cilo=-0.1656 hard=-0.1125 fracpos=0.33
+  H8 vshare>q90 & ret1>q95                       TR n= 199 k= 53 mean=+0.0704 med=-0.0255 cilo=-0.0640 hard=+0.0376 fracpos=0.38
+  H8 vshare>q90 & ret1>q95                       VA n= 256 k= 56 mean=-0.0577 med=-0.0544 cilo=-0.1692 hard=-0.0955 fracpos=0.25
+  H10 vshare>q90 & ret1>q98                      TR n=  79 k= 40 mean=+0.2065 med=-0.0068 cilo=-0.0011 hard=+0.1813 fracpos=0.47
+  H10 vshare>q90 & ret1>q98                      VA n=  89 k= 41 mean=-0.0538 med=-0.1222 cilo=-0.2139 hard=-0.0855 fracpos=0.34
+  H10 vshare>q85 & ret1>q95                      TR n= 237 k= 57 mean=-0.0234 med=-0.0793 cilo=-0.1296 hard=-0.0655 fracpos=0.32
+  H10 vshare>q85 & ret1>q95                      VA n= 289 k= 60 mean=-0.0907 med=-0.0692 cilo=-0.1875 hard=-0.1189 fracpos=0.27
+  H10 vshare>q95 & ret1>q99                      TR n=  25 k= 18 mean=+0.2860 med=-0.1392 cilo=-0.1043 hard=+0.2493 fracpos=0.39
+  H10 vshare>q95 & ret1>q99                      VA n=  27 k= 18 mean=-0.0550 med=-0.1484 cilo=-0.3752 hard=-0.0680 fracpos=0.22
+  H10 vshare>q80 & ret1>q90                      TR n= 501 k= 71 mean=-0.0405 med=-0.0275 cilo=-0.1325 hard=-0.0799 fracpos=0.32
+  H10 vshare>q80 & ret1>q90                      VA n= 590 k= 72 mean=-0.0689 med=-0.0397 cilo=-0.1638 hard=-0.0970 fracpos=0.35
+  H10 vshare>q90 & ret1>q95                      TR n= 193 k= 53 mean=+0.1008 med=-0.0150 cilo=-0.0416 hard=+0.0675 fracpos=0.43
+  H10 vshare>q90 & ret1>q95                      VA n= 250 k= 56 mean=-0.0545 med=-0.0638 cilo=-0.1677 hard=-0.0924 fracpos=0.27
+  H15 vshare>q90 & ret1>q98                      TR n=  76 k= 40 mean=+0.1348 med=-0.0263 cilo=-0.1034 hard=+0.1107 fracpos=0.42
+  H15 vshare>q90 & ret1>q98                      VA n=  85 k= 41 mean=-0.0876 med=-0.1753 cilo=-0.2520 hard=-0.1355 fracpos=0.24
+  H15 vshare>q85 & ret1>q95                      TR n= 224 k= 57 mean=-0.0407 med=-0.1068 cilo=-0.1645 hard=-0.0977 fracpos=0.26
+  H15 vshare>q85 & ret1>q95                      VA n= 271 k= 60 mean=-0.1153 med=-0.0661 cilo=-0.2108 hard=-0.1546 fracpos=0.30
+  H15 vshare>q95 & ret1>q99                      TR n=  25 k= 18 mean=+0.4114 med=+0.0675 cilo=-0.0421 hard=+0.3731 fracpos=0.50
+  H15 vshare>q95 & ret1>q99                      VA n=  26 k= 18 mean=-0.0478 med=-0.1466 cilo=-0.3816 hard=-0.0609 fracpos=0.28
+  H15 vshare>q80 & ret1>q90                      TR n= 452 k= 71 mean=-0.0554 med=-0.0624 cilo=-0.1574 hard=-0.1044 fracpos=0.27
+  H15 vshare>q80 & ret1>q90                      VA n= 526 k= 72 mean=-0.1314 med=-0.0640 cilo=-0.2131 hard=-0.1684 fracpos=0.31
+  H15 vshare>q90 & ret1>q95                      TR n= 186 k= 53 mean=+0.0274 med=-0.0877 cilo=-0.1278 hard=-0.0049 fracpos=0.34
+  H15 vshare>q90 & ret1>q95                      VA n= 236 k= 56 mean=-0.0767 med=-0.0716 cilo=-0.1908 hard=-0.1272 fracpos=0.27
+
+=== FAMILY B : vol-accel + above-VWAP + vol>median, 10m cap, +60%% TP ===
+mask bars: train=129 validate=90
+  H10 tp=0.6  EXACT                              TR n=  97 k= 36 mean=+0.0780 med=+0.0313 cilo=+0.0041 hard=+0.0632 fracpos=0.53
+  H10 tp=0.6  EXACT                              VA n=  73 k= 26 mean=+0.0805 med=+0.0228 cilo=-0.0027 hard=+0.0657 fracpos=0.65
+  H10 tp=None  EXACT                             TR n=  97 k= 36 mean=+0.2719 med=-0.0106 cilo=+0.0512 hard=+0.2545 fracpos=0.47
+  H10 tp=None  EXACT                             VA n=  73 k= 26 mean=+0.1100 med=+0.0064 cilo=-0.0859 hard=+0.0948 fracpos=0.54
+  H10 tp=0.3  EXACT                              TR n=  97 k= 36 mean=+0.0209 med=+0.0048 cilo=-0.0295 hard=+0.0068 fracpos=0.53
+  H10 tp=0.3  EXACT                              VA n=  73 k= 26 mean=+0.0371 med=+0.0337 cilo=-0.0183 hard=+0.0229 fracpos=0.69
+  H10 tp=1.0  EXACT                              TR n=  97 k= 36 mean=+0.1184 med=-0.0044 cilo=+0.0119 hard=+0.1031 fracpos=0.50
+  H10 tp=1.0  EXACT                              VA n=  73 k= 26 mean=+0.0451 med=+0.0064 cilo=-0.0864 hard=+0.0308 fracpos=0.54
+  H5 tp=0.6  EXACT                               TR n= 101 k= 36 mean=+0.0848 med=+0.0240 cilo=+0.0169 hard=+0.0699 fracpos=0.61
+  H5 tp=0.6  EXACT                               VA n=  74 k= 26 mean=+0.0890 med=+0.0389 cilo=+0.0139 hard=+0.0740 fracpos=0.65
+  H15 tp=0.6  EXACT                              TR n=  91 k= 36 mean=+0.0473 med=-0.0097 cilo=-0.0384 hard=+0.0329 fracpos=0.44
+  H15 tp=0.6  EXACT                              VA n=  72 k= 26 mean=+0.0343 med=+0.0146 cilo=-0.0509 hard=-0.0062 fracpos=0.54
+  H20 tp=0.6  EXACT                              TR n=  88 k= 36 mean=+0.0163 med=-0.0059 cilo=-0.0850 hard=+0.0014 fracpos=0.44
+  H20 tp=0.6  EXACT                              VA n=  69 k= 26 mean=-0.0352 med=-0.0229 cilo=-0.1482 hard=-0.0747 fracpos=0.46
+  H30 tp=0.6  EXACT                              TR n=  81 k= 36 mean=+0.0040 med=-0.0658 cilo=-0.0980 hard=-0.0110 fracpos=0.44
+  H30 tp=0.6  EXACT                              VA n=  62 k= 26 mean=-0.0209 med=-0.0105 cilo=-0.1476 hard=-0.0606 fracpos=0.50
+-- threshold plateau at H10/tp60 --
+  vacc>q90 vwapdev>q90 vrel5>q90                 TR n= 110 k= 39 mean=+0.0687 med=-0.0051 cilo=+0.0007 hard=+0.0481 fracpos=0.49
+  vacc>q90 vwapdev>q90 vrel5>q90                 VA n=  80 k= 30 mean=+0.0175 med=+0.0141 cilo=-0.0927 hard=+0.0035 fracpos=0.57
+  vacc>q85 vwapdev>q85 vrel5>q85                 TR n= 201 k= 51 mean=-0.0302 med=-0.0124 cilo=-0.1096 hard=-0.0494 fracpos=0.41
+  vacc>q85 vwapdev>q85 vrel5>q85                 VA n= 215 k= 46 mean=-0.0029 med=-0.0090 cilo=-0.0799 hard=-0.0323 fracpos=0.43
+  vacc>q80 vwapdev>q80 vrel5>q80                 TR n= 297 k= 57 mean=-0.0406 med=-0.0203 cilo=-0.1159 hard=-0.0584 fracpos=0.37
+  vacc>q80 vwapdev>q80 vrel5>q80                 VA n= 345 k= 57 mean=-0.0599 med=-0.0302 cilo=-0.1478 hard=-0.0914 fracpos=0.35
+  vacc>q95 vwapdev>q95 vrel5>q95                 TR n=  33 k=  9 mean=+0.0734 med=+0.1369 cilo=-0.2026 hard=+0.0207 fracpos=0.56
+  vacc>q95 vwapdev>q95 vrel5>q95                 VA n=8 TOO SMALL
+  vacc>q90 vwapdev>q80 vrel5>q90                 TR n= 165 k= 48 mean=+0.0240 med=-0.0120 cilo=-0.0344 hard=+0.0007 fracpos=0.42
+  vacc>q90 vwapdev>q80 vrel5>q90                 VA n= 161 k= 39 mean=-0.0036 med=-0.0330 cilo=-0.0860 hard=-0.0173 fracpos=0.41
+  vacc>q90 vwapdev>q90 vrel5>q80                 TR n= 126 k= 41 mean=+0.0578 med=+0.0033 cilo=-0.0102 hard=+0.0377 fracpos=0.51
+  vacc>q90 vwapdev>q90 vrel5>q80                 VA n= 119 k= 37 mean=-0.0319 med=-0.0168 cilo=-0.1439 hard=-0.0650 fracpos=0.46
+  vacc>q80 vwapdev>q90 vrel5>q90                 TR n= 146 k= 43 mean=+0.0426 med=+0.0074 cilo=-0.0115 hard=+0.0265 fracpos=0.51
+  vacc>q80 vwapdev>q90 vrel5>q90                 VA n= 116 k= 36 mean=-0.0208 med=-0.0083 cilo=-0.1285 hard=-0.0358 fracpos=0.44
+  vacc>q75 vwapdev>q75 vrel5>q75                 TR n= 391 k= 63 mean=-0.0953 med=-0.0392 cilo=-0.1741 hard=-0.1118 fracpos=0.33
+  vacc>q75 vwapdev>q75 vrel5>q75                 VA n= 452 k= 70 mean=-0.0627 med=-0.0219 cilo=-0.1485 hard=-0.1008 fracpos=0.39
+-- entry-delay robustness (off=1 modelled, 2 and 3 = extra real bars of latency) --
+  B exact off=1                                  TR n=  97 k= 36 mean=+0.0780 med=+0.0313 cilo=+0.0041 hard=+0.0632 fracpos=0.53
+  B exact off=1                                  VA n=  73 k= 26 mean=+0.0805 med=+0.0228 cilo=-0.0027 hard=+0.0657 fracpos=0.65
+  B exact off=2                                  TR n=  94 k= 36 mean=+0.0028 med=-0.0480 cilo=-0.0871 hard=-0.0110 fracpos=0.44
+  B exact off=2                                  VA n=  73 k= 26 mean=+0.0254 med=+0.0028 cilo=-0.0516 hard=+0.0113 fracpos=0.50
+  B exact off=3                                  TR n=  93 k= 36 mean=-0.0094 med=-0.0379 cilo=-0.0907 hard=-0.0230 fracpos=0.42
+  B exact off=3                                  VA n=  73 k= 26 mean=-0.0732 med=-0.0119 cilo=-0.1920 hard=-0.0859 fracpos=0.42
+-- permutation p-value on VALIDATE (200 within-mint reshuffles, same exit) --
+  observed validate mean=+0.0805  ctrl mean=+0.0055 sd=0.0447  p(one-sided)=0.040
+  observed validate med =+0.0228  ctrl med =-0.0133 sd=0.0196  p(one-sided)=0.030
+  observed TRAIN    mean=+0.0780  ctrl mean=-0.0367 sd=0.0380  p(one-sided)=0.000
+ROBUST DONE

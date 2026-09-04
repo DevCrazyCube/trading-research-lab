@@ -1,0 +1,118 @@
+VALIDATE BASELINES (all-bar non-overlap tiling, mint-equal)
+  H5    TR drop-0.30 n= 4343 k=165 mean=-0.0563 med=-0.0744 trim5=-0.1327 frac_pos_mint=0.188 res=0.979
+  H5    VA drop-0.30 n= 5725 k=200 mean=-0.1260 med=-0.0859 trim5=-0.1319 frac_pos_mint=0.170 res=0.980
+  H5    TR drop-1.00 n= 4343 k=165 mean=-0.1118 med=-0.1048 trim5=-0.1790 frac_pos_mint=0.133 res=0.979
+  H5    VA drop-1.00 n= 5725 k=200 mean=-0.1823 med=-0.1121 trim5=-0.1801 frac_pos_mint=0.135 res=0.980
+  H15   TR drop-0.30 n= 2240 k=165 mean=-0.2169 med=-0.1458 trim5=-0.2119 frac_pos_mint=0.121 res=0.954
+  H15   VA drop-0.30 n= 2882 k=200 mean=+0.2897 med=-0.1582 trim5=-0.1862 frac_pos_mint=0.165 res=0.960
+  H15   TR drop-1.00 n= 2240 k=165 mean=-0.3127 med=-0.2474 trim5=-0.3069 frac_pos_mint=0.085 res=0.954
+  H15   VA drop-1.00 n= 2882 k=200 mean=+0.2097 med=-0.2068 trim5=-0.2593 frac_pos_mint=0.130 res=0.960
+  H30   TR drop-0.30 n= 1488 k=165 mean=-0.2706 med=-0.2524 trim5=-0.2593 frac_pos_mint=0.109 res=0.931
+  H30   VA drop-0.30 n= 1858 k=200 mean=+0.1751 med=-0.2419 trim5=-0.2424 frac_pos_mint=0.160 res=0.936
+  H30   TR drop-1.00 n= 1488 k=165 mean=-0.3819 med=-0.3294 trim5=-0.3779 frac_pos_mint=0.085 res=0.931
+  H30   VA drop-1.00 n= 1858 k=200 mean=+0.0721 med=-0.3024 trim5=-0.3480 frac_pos_mint=0.135 res=0.936
+  H60   TR drop-0.30 n=  984 k=165 mean=-0.2895 med=-0.3080 trim5=-0.2958 frac_pos_mint=0.109 res=0.892
+  H60   VA drop-0.30 n= 1212 k=200 mean=-0.0181 med=-0.3080 trim5=-0.2908 frac_pos_mint=0.120 res=0.895
+  H60   TR drop-1.00 n=  984 k=165 mean=-0.4292 med=-0.4278 trim5=-0.4457 frac_pos_mint=0.067 res=0.892
+  H60   VA drop-1.00 n= 1212 k=200 mean=-0.1577 med=-0.4080 trim5=-0.4421 frac_pos_mint=0.095 res=0.895
+  H120  TR drop-0.30 n=  664 k=165 mean=-0.3237 med=-0.3080 trim5=-0.3622 frac_pos_mint=0.091 res=0.836
+  H120  VA drop-0.30 n=  809 k=200 mean=-0.0937 med=-0.3218 trim5=-0.3660 frac_pos_mint=0.105 res=0.820
+  H120  TR drop-1.00 n=  664 k=165 mean=-0.4974 med=-0.5066 trim5=-0.5499 frac_pos_mint=0.061 res=0.836
+  H120  VA drop-1.00 n=  809 k=200 mean=-0.2816 med=-0.5409 trim5=-0.5673 frac_pos_mint=0.080 res=0.820
+
+train rows: 61656
+TOP 25 TRAIN BY MEAN
+  vacc<q05                     dens10@q80-95                H15          n=  88 k= 32 mean=+1.0681 med=-0.0113
+  vacc<q05                     dens10@q90-99                H15          n=  88 k= 32 mean=+1.0681 med=-0.0113
+  vacc@q01-10                  dens10@q80-95                H15          n= 168 k= 58 mean=+0.8968 med=-0.0367
+  vacc@q01-10                  dens10@q90-99                H15          n= 168 k= 58 mean=+0.8968 med=-0.0367
+  vrel5<q02                    vacc<q05                     H15          n=  61 k= 36 mean=+0.8875 med=-0.0155
+  vacc<q10                     dens10@q80-95                H15          n= 175 k= 61 mean=+0.8517 med=-0.0344
+  vacc<q10                     dens10@q90-99                H15          n= 175 k= 61 mean=+0.8517 med=-0.0344
+  vacc<q10                     vwapdev<q02                  H15          n=  76 k= 51 mean=+0.7960 med=-0.0278
+  vacc@q01-10                  dens10@q35-65                H15          n= 206 k= 64 mean=+0.7517 med=-0.0378
+  vrel5<q02                    vacc@q01-10                  H15          n=  77 k= 42 mean=+0.7447 med=-0.0146
+  chop@q35-65                  ret5<q01                     H15          n=  70 k= 54 mean=+0.7423 med=-0.0781
+  body@q35-65                  ret5<q01                     H15          n=  70 k= 54 mean=+0.7423 med=-0.0781
+  vacc<q05                     dens10@q35-65                H15          n= 111 k= 44 mean=+0.7310 med=-0.0253
+  vacc<q05                     vwapdev<q02                  H15          n=  66 k= 47 mean=+0.7279 med=-0.0242
+  rngrel>q98                   ret5@q80-95                  H30          n=  66 k= 32 mean=+0.7207 med=-0.0510
+  vacc<q10                     dens10@q35-65                H15          n= 216 k= 70 mean=+0.6859 med=-0.0342
+  ret5<q01                                                  H15          n=  73 k= 55 mean=+0.6846 med=-0.1151
+  rngrel>q98                   ret5@q80-95                  H15          n=  69 k= 32 mean=+0.6786 med=-0.0635
+  vrel20<q05                   vwapdev<q05                  H15          n=  61 k= 31 mean=+0.6767 med=-0.0229
+  vrel5@q01-10                 ret1@q01-10                  H15          n=  72 k= 58 mean=+0.6645 med=-0.1066
+  vwapdev@q05-20               illiq>q95                    H15          n=  63 k= 41 mean=+0.6572 med=-0.0351
+  dens10@q35-65                illiq>q95                    H15          n=  61 k= 27 mean=+0.6530 med=-0.0115
+  dens10@q80-95                tickdir<q10                  H15          n= 138 k= 46 mean=+0.6418 med=-0.1171
+  dens10@q90-99                tickdir<q10                  H15          n= 138 k= 46 mean=+0.6418 med=-0.1171
+  vrel5@q01-10                 chop>q90                     H15          n=  71 k= 25 mean=+0.6412 med=-0.0270
+TOP 25 TRAIN BY MEDIAN
+  dvol>q90                     ret1>q98                     H15tp30      n=  61 k= 38 mean=+0.0883 med=+0.2852
+  rng>q95                      body@q05-20                  H15tp30      n=  68 k= 64 mean=+0.0016 med=+0.2852
+  rng>q95                      dvol@q35-65                  H15tp30      n=  75 k= 51 mean=-0.0093 med=+0.2852
+  body@q05-20                  ret1<q10                     H15tp30      n=  61 k= 53 mean=-0.0095 med=+0.2852
+  chop@q35-65                  ret1>q99                     H15tp30      n= 109 k= 67 mean=-0.0133 med=+0.2852
+  body@q35-65                  ret1>q99                     H15tp30      n= 109 k= 67 mean=-0.0133 med=+0.2852
+  chop@q80-95                  ret1<q10                     H15tp30      n=  63 k= 55 mean=-0.0181 med=+0.2852
+  clspos@q35-65                ret1>q98                     H15tp30      n=  93 k= 65 mean=-0.0206 med=+0.2852
+  rng>q90                      dvol@q35-65                  H15tp30      n=  88 k= 56 mean=-0.0294 med=+0.2852
+  rng>q98                      clspos@q35-65                H15tp30      n=  66 k= 57 mean=-0.0303 med=+0.2852
+  rng>q95                      ret1>q95                     H15tp30      n=  88 k= 62 mean=-0.0345 med=+0.2852
+  rng>q95                      ret1>q99                     H15tp30      n=  77 k= 53 mean=-0.0512 med=+0.2852
+  rng>q95                      ret1>q90                     H15tp30      n=  91 k= 64 mean=-0.0381 med=+0.2583
+  rng>q95                      ret1>q98                     H15tp30      n=  84 k= 58 mean=-0.0691 med=+0.2583
+  rng>q90                      clspos@q80-95                H15tp30      n=  95 k= 54 mean=-0.0332 med=+0.2261
+  rng>q90                      clspos@q90-99                H15tp30      n=  95 k= 54 mean=-0.0332 med=+0.2261
+  rng@q90-99                   clspos@q80-95                H15tp30      n=  95 k= 54 mean=-0.0332 med=+0.2261
+  rng@q90-99                   clspos@q90-99                H15tp30      n=  95 k= 54 mean=-0.0332 med=+0.2261
+  rng@q90-99                   dvol>q98                     H15tp30      n=  75 k= 59 mean=-0.0587 med=+0.2127
+  rng>q95                      body@q01-10                  H15tp30      n=  83 k= 56 mean=-0.0465 med=+0.1965
+  rng>q95                      body<q10                     H15tp30      n=  91 k= 58 mean=-0.0562 med=+0.1965
+  dvol@q90-99                  ret1@q05-20                  H15tp30      n=  79 k= 41 mean=+0.0432 med=+0.1818
+  dvol>q90                     ret1@q05-20                  H15tp30      n=  80 k= 41 mean=+0.0311 med=+0.1818
+  rng@q90-99                   dvol>q95                     H15tp30      n= 107 k= 70 mean=-0.0232 med=+0.1791
+  clspos@q35-65                dvol>q98                     H15tp30      n=  74 k= 41 mean=-0.0327 med=+0.1762
+
+CONDITION MARGINALS (mean of train MEDIAN across all rows containing it), top 20 / bottom 20
+  -0.0168 n= 202 rng<q01
+  -0.0173 n= 134 vshare<q02
+  -0.0207 n= 372 rng<q02
+  -0.0223 n= 333 rngrel<q02
+  -0.0236 n= 125 vrel5<q01
+  -0.0284 n= 476 rng<q05
+  -0.0331 n= 305 vacc<q02
+  -0.0366 n=  33 vacc>q99
+  -0.0404 n= 600 rng<q10
+  -0.0421 n= 200 vrel20<q02
+  -0.0430 n= 539 vrel20<q05
+  -0.0438 n= 585 rng@q01-10
+  -0.0444 n= 581 vshare<q05
+  -0.0449 n= 373 vrel5<q02
+  -0.0471 n= 215 dvol<q02
+  -0.0507 n= 828 dens30@q05-20
+  -0.0519 n= 542 vacc<q05
+  -0.0532 n= 662 vshare@q01-10
+  -0.0535 n= 544 rngrel<q05
+  -0.0548 n= 677 vshare<q10
+  ...
+  -0.2107 n= 778 dens30@q80-95
+  -0.2214 n=  78 rng>q99
+  -0.2243 n= 192 vwapdev>q95
+  -0.2314 n= 564 ret1<q05
+  -0.2350 n=  86 ret1<q01
+  -0.2366 n=  48 vwapdev>q98
+  -0.2367 n= 258 dvol@q90-99
+  -0.2425 n= 460 ret5>q95
+  -0.2572 n= 203 ret1>q98
+  -0.2625 n= 773 rng>q90
+  -0.2665 n= 310 dvol>q90
+  -0.2678 n= 120 dvol>q95
+  -0.2692 n= 215 ret1<q02
+  -0.2731 n= 705 rng@q90-99
+  -0.2883 n= 525 dvol@q80-95
+  -0.2928 n= 159 rng>q98
+  -0.2986 n= 389 rng>q95
+  -0.3088 n=  61 dvol>q98
+  -0.3355 n=  62 ret1>q99
+  -0.3444 n= 121 ret5>q98

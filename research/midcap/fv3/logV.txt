@@ -1,0 +1,8 @@
+HOLDOUT CHECK: loaded 214 mints; hash dist {1: 93, 2: 121} ; any h==0 loaded? False
+mints 214 bars 43986
+eligible 39278 train 16592 bars/91 mints  valid 22686 bars/119 mints
+
+=== the one replicated (negative) structure: absolute traded volume level ===
+H5/tpNone/slNone/f1.0    vsol1    TR low20%=-0.0583(k=86) high20%=-0.0194(k=62) | VA low20%=-0.0542(k=113) high20%=-0.1270(k=72)
+H5/tpNone/slNone/f1.0    vsol5    TR low20%=-0.0684(k=78) high20%=-0.1125(k=54) | VA low20%=-0.0608(k=97) high20%=-0.1009(k=69)
+H5/tpNone/slNone/f1.0    illiq    TR low20%=-0.0829(k=39) high20%=-0.0582(k=76) | VA low20%=-0.0870(k=50) high20%=-0.0577(k=97)

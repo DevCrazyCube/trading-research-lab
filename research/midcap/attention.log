@@ -36,3 +36,784 @@ attention collector up. 0 tokens already seen.
   EVENT PXPE token-profiles amt=None mcap=$2,341 ctrl=8kfWAnoq
 [00:32:12] new=35 tracking=28 seen=28
 [00:33:15] new=0 tracking=28 seen=28
+  EVENT FRAN token-boosts amt=10 mcap=$42,825 ctrl=EVgwa5CH
+[00:34:54] new=1 tracking=29 seen=29
+  EVENT SFAG token-profiles amt=None mcap=$4,616 ctrl=83mCRQJz
+  EVENT Onboarding token-profiles amt=None mcap=$13,002 ctrl=GGXuRN67
+  EVENT CrazyFrog token-profiles amt=None mcap=$10,311 ctrl=FUaCrrqg
+[00:36:35] new=3 tracking=32 seen=32
+[00:37:48] new=0 tracking=32 seen=32
+[00:39:19] new=0 tracking=32 seen=32
+  EVENT USDC token-profiles amt=None mcap=$26,932 ctrl=25iZ4jwm
+  EVENT DEBT token-profiles amt=None mcap=$38,480 ctrl=GtPuLjZU
+[00:40:58] new=2 tracking=34 seen=34
+[00:42:20] new=0 tracking=34 seen=34
+  EVENT 2MANY token-boosts amt=10 mcap=$11,855 ctrl=G3pi7rdW
+  EVENT mikebyson token-profiles amt=None mcap=$37,776 ctrl=GtPuLjZU
+[00:43:59] new=2 tracking=36 seen=36
+[00:45:22] new=0 tracking=36 seen=36
+[00:46:59] new=0 tracking=36 seen=36
+[00:48:22] new=0 tracking=36 seen=36
+  EVENT Muu token-profiles amt=None mcap=$14,698 ctrl=386DJnn7
+[00:50:01] new=1 tracking=37 seen=37
+[00:51:24] new=0 tracking=37 seen=37
+[00:52:53] new=0 tracking=37 seen=37
+  EVENT mikebyson token-profiles amt=None mcap=$14,269 ctrl=AGWi5TMt
+[00:54:32] new=1 tracking=38 seen=38
+[00:55:53] new=0 tracking=38 seen=38
+[00:57:24] new=0 tracking=38 seen=38
+  EVENT NEWYORK token-profiles amt=None mcap=$12,484 ctrl=7P9BbPLL
+[00:59:02] new=1 tracking=39 seen=39
+  EVENT NOVALUE token-boosts amt=50 mcap=$2,051,550 ctrl=3P6WB3hi
+[01:00:34] new=1 tracking=40 seen=40
+  EVENT MUSK token-profiles amt=None mcap=$5,165 ctrl=8eK6eVSD
+[01:02:03] new=1 tracking=41 seen=41
+[01:03:25] new=0 tracking=41 seen=41
+[01:04:57] new=0 tracking=41 seen=41
+[01:06:26] new=0 tracking=41 seen=41
+  EVENT IRONMIKE token-profiles amt=None mcap=$20,349 ctrl=AGWi5TMt
+[01:08:04] new=1 tracking=42 seen=42
+[01:09:27] new=0 tracking=42 seen=42
+  EVENT YUGE token-profiles amt=None mcap=$21,673 ctrl=HuLXApeY
+[01:11:05] new=1 tracking=43 seen=43
+  EVENT CLENIS token-profiles amt=None mcap=$24,208 ctrl=Gd8JxP9W
+[01:12:35] new=1 tracking=44 seen=44
+[01:13:59] new=0 tracking=44 seen=44
+  EVENT Magatard token-boosts amt=10 mcap=$185,960 ctrl=43uJZGxf
+[01:15:48] new=1 tracking=45 seen=45
+  EVENT benchcoin token-profiles amt=None mcap=$13,900 ctrl=97WVhLjE
+[01:17:08] new=1 tracking=46 seen=46
+  EVENT DOGGYCOIN token-profiles amt=None mcap=$40,479 ctrl=9dHSW5Jg
+[01:18:39] new=1 tracking=47 seen=47
+[01:20:01] new=0 tracking=47 seen=47
+[01:21:32] new=0 tracking=47 seen=47
+[01:23:01] new=0 tracking=47 seen=47
+[01:24:31] new=0 tracking=47 seen=47
+[01:26:08] new=0 tracking=47 seen=47
+[01:27:31] new=0 tracking=47 seen=47
+[01:29:12] new=0 tracking=47 seen=47
+[01:30:31] new=0 tracking=47 seen=47
+  EVENT miketansem token-profiles amt=None mcap=$37,580 ctrl=CvYw81yn
+[01:32:10] new=1 tracking=48 seen=48
+[01:33:32] new=0 tracking=48 seen=48
+[01:35:18] new=0 tracking=48 seen=48
+[01:36:32] new=0 tracking=48 seen=48
+  EVENT ALDN token-boosts amt=30 mcap=$152,430 ctrl=TcnKFgDZ
+[01:38:09] new=1 tracking=49 seen=49
+[01:39:33] new=0 tracking=49 seen=49
+  EVENT GPT token-profiles amt=None mcap=$4,936 ctrl=J2jomqj7
+  EVENT CEUTA token-profiles amt=None mcap=$32,108 ctrl=BREtU7wW
+[01:41:12] new=2 tracking=51 seen=51
+  EVENT breadpitt token-profiles amt=None mcap=$3,675 ctrl=EyvgX2j2
+[01:42:44] new=1 tracking=52 seen=52
+[01:44:05] new=0 tracking=52 seen=52
+[01:45:35] new=0 tracking=52 seen=52
+[01:47:06] new=0 tracking=52 seen=52
+[01:48:37] new=0 tracking=52 seen=52
+  EVENT CART token-profiles amt=None mcap=$5,059 ctrl=GbiraNu3
+[01:50:14] new=1 tracking=53 seen=53
+[01:51:37] new=0 tracking=53 seen=53
+[01:53:16] new=0 tracking=53 seen=53
+[01:54:36] new=0 tracking=53 seen=53
+[01:56:13] new=0 tracking=53 seen=53
+[01:57:37] new=0 tracking=53 seen=53
+  EVENT Gimmick token-profiles amt=None mcap=$8,109 ctrl=C3RVz4cx
+[01:59:21] new=1 tracking=54 seen=54
+  EVENT BTC token-profiles amt=None mcap=$11,358 ctrl=C3RVz4cx
+[02:00:45] new=1 tracking=55 seen=55
+[02:02:07] new=0 tracking=55 seen=55
+[02:03:38] new=0 tracking=55 seen=55
+[02:05:07] new=0 tracking=55 seen=55
+[02:06:37] new=0 tracking=55 seen=55
+  EVENT BURNIE token-boosts amt=10 mcap=$1,736,988 ctrl=76vtyUXA
+[02:08:17] new=1 tracking=56 seen=56
+[02:09:42] new=0 tracking=56 seen=56
+  EVENT MARSCOIN token-boosts amt=None mcap=$29,570 ctrl=228tbyCz
+  EVENT PTA token-profiles amt=None mcap=$42,055 ctrl=9F5AyxHH
+[02:11:38] new=2 tracking=58 seen=58
+[02:12:42] new=0 tracking=58 seen=58
+  EVENT pussycoin token-profiles amt=None mcap=$13,023 ctrl=EzX3CHD4
+[02:14:22] new=1 tracking=59 seen=59
+[02:15:46] new=0 tracking=59 seen=59
+[02:17:20] new=0 tracking=59 seen=59
+[02:19:37] new=0 tracking=59 seen=59
+[02:20:33] new=0 tracking=59 seen=59
+[02:22:03] new=0 tracking=59 seen=59
+[02:23:47] new=0 tracking=59 seen=59
+[02:25:02] new=0 tracking=59 seen=59
+[02:26:34] new=0 tracking=59 seen=59
+[02:28:12] new=0 tracking=59 seen=59
+  EVENT Apollo token-boosts amt=10 mcap=$9,605 ctrl=BxBZMvG5
+[02:29:41] new=1 tracking=60 seen=60
+[02:31:05] new=0 tracking=60 seen=60
+[02:32:34] new=0 tracking=60 seen=60
+[02:34:05] new=0 tracking=60 seen=60
+  EVENT wetcoin token-profiles amt=None mcap=$19,505 ctrl=EzX3CHD4
+[02:35:44] new=1 tracking=61 seen=61
+[02:37:04] new=0 tracking=61 seen=61
+  EVENT RUNNER token-profiles amt=None mcap=$47,197 ctrl=7oKWy6mJ
+[02:38:43] new=1 tracking=62 seen=62
+  EVENT CATEUS token-boosts amt=30 mcap=$164,078 ctrl=Hx7UP9AE
+  EVENT CATEUS token-profiles amt=None mcap=$164,078 ctrl=Hx7UP9AE
+[02:40:13] new=2 tracking=63 seen=63
+[02:41:43] new=0 tracking=63 seen=63
+[02:43:06] new=0 tracking=63 seen=63
+  EVENT DREAM token-profiles amt=None mcap=$27,189 ctrl=3oY5NnNA
+[02:44:44] new=1 tracking=64 seen=64
+[02:46:08] new=0 tracking=64 seen=64
+  EVENT ORGY token-profiles amt=None mcap=$9,434 ctrl=G7Zs7M4r
+[02:47:45] new=1 tracking=65 seen=65
+[02:49:10] new=0 tracking=65 seen=65
+[02:50:45] new=0 tracking=65 seen=65
+[02:52:09] new=0 tracking=65 seen=65
+[02:53:37] new=0 tracking=65 seen=65
+[02:55:08] new=0 tracking=65 seen=65
+[03:00:59] new=0 tracking=65 seen=65
+  EVENT Fredgazim token-profiles amt=None mcap=$32,428 ctrl=EzX3CHD4
+  EVENT CALLOUT token-profiles amt=None mcap=$14,714 ctrl=A93vhMSW
+  EVENT genny token-profiles amt=None mcap=$7,262 ctrl=36RximcS
+  EVENT MINI token-profiles amt=None mcap=$243,811 ctrl=5tPppAwc
+[03:12:39] new=4 tracking=69 seen=69
+  EVENT PMV token-boosts amt=10 mcap=$207,814 ctrl=8J69rbLT
+  EVENT Golbat token-profiles amt=None mcap=$19,490 ctrl=EzX3CHD4
+  EVENT reclaim token-profiles amt=None mcap=$13,301 ctrl=Af84iLpG
+  EVENT onlypump token-profiles amt=None mcap=$3,591 ctrl=DSZFGEuB
+[03:13:56] new=4 tracking=73 seen=73
+[03:15:22] new=0 tracking=73 seen=73
+[03:16:48] new=0 tracking=73 seen=73
+[03:18:17] new=0 tracking=73 seen=73
+  EVENT KIWI token-profiles amt=None mcap=$27,581 ctrl=EzX3CHD4
+  EVENT TIGR token-profiles amt=None mcap=$6,870 ctrl=CcLd8HTA
+[03:19:56] new=2 tracking=75 seen=75
+[03:21:18] new=0 tracking=75 seen=75
+[03:22:47] new=0 tracking=75 seen=75
+[03:24:25] new=0 tracking=75 seen=75
+[03:25:47] new=0 tracking=75 seen=75
+[03:27:18] new=0 tracking=75 seen=75
+[03:28:47] new=0 tracking=75 seen=75
+[03:30:17] new=0 tracking=75 seen=75
+  EVENT Motion token-profiles amt=None mcap=$9,447 ctrl=FNnsbAFv
+  EVENT horny token-profiles amt=None mcap=$25,483 ctrl=DDeTqx7x
+  EVENT ONBOARDING token-profiles amt=None mcap=$29,202 ctrl=4xGLW7Zz
+[03:31:59] new=3 tracking=78 seen=78
+[03:33:21] new=0 tracking=78 seen=78
+[03:34:50] new=0 tracking=78 seen=78
+[03:36:21] new=0 tracking=78 seen=78
+  EVENT OPENSLOP token-profiles amt=None mcap=$59,810 ctrl=845KfbyL
+[03:37:58] new=1 tracking=79 seen=79
+[03:39:21] new=0 tracking=79 seen=79
+[03:40:51] new=0 tracking=79 seen=79
+[03:42:24] new=0 tracking=79 seen=79
+  EVENT PORTAL token-profiles amt=None mcap=$7,906 ctrl=EAsSrMfP
+[03:43:59] new=1 tracking=80 seen=80
+[03:45:21] new=0 tracking=80 seen=80
+[03:46:58] new=0 tracking=80 seen=80
+[03:48:22] new=0 tracking=80 seen=80
+[03:49:58] new=0 tracking=80 seen=80
+[03:51:21] new=0 tracking=80 seen=80
+[03:52:55] new=0 tracking=80 seen=80
+[03:54:23] new=0 tracking=80 seen=80
+[03:55:51] new=0 tracking=80 seen=80
+[03:57:23] new=0 tracking=80 seen=80
+[03:58:50] new=0 tracking=80 seen=80
+[04:00:23] new=0 tracking=80 seen=80
+[04:01:51] new=0 tracking=80 seen=80
+[04:03:23] new=0 tracking=80 seen=80
+[04:04:52] new=0 tracking=80 seen=80
+[04:06:23] new=0 tracking=80 seen=80
+  EVENT ZDOG token-boosts amt=50 mcap=$28,723 ctrl=79a1tWbH
+  EVENT SOLANUTS token-profiles amt=None mcap=$8,803 ctrl=7ejDH2Jk
+  EVENT ZDOG token-profiles amt=None mcap=$28,723 ctrl=79a1tWbH
+[04:08:04] new=3 tracking=82 seen=82
+  EVENT uspc token-profiles amt=None mcap=$97,737 ctrl=2NnNvuEo
+[04:09:39] new=1 tracking=83 seen=83
+[04:10:54] new=0 tracking=83 seen=83
+  EVENT BIKEANSEM token-profiles amt=None mcap=$6,007 ctrl=3uovrMMY
+[04:12:33] new=1 tracking=84 seen=84
+  EVENT TPONS token-profiles amt=None mcap=$85,323 ctrl=228tbyCz
+  EVENT Jizz token-profiles amt=None mcap=$19,037 ctrl=9R62TzAe
+[04:14:05] new=2 tracking=86 seen=86
+[04:15:27] new=0 tracking=86 seen=86
+[04:16:57] new=0 tracking=86 seen=86
+[04:18:28] new=0 tracking=86 seen=86
+[04:20:00] new=0 tracking=86 seen=86
+[04:21:29] new=0 tracking=86 seen=86
+[04:22:58] new=0 tracking=86 seen=86
+  EVENT Canyon token-profiles amt=None mcap=$20,854 ctrl=CxcChWmW
+[04:24:49] new=1 tracking=87 seen=87
+[04:26:06] new=0 tracking=87 seen=87
+  EVENT AERO token-profiles amt=None mcap=$18,070 ctrl=61irTRha
+[04:27:47] new=1 tracking=88 seen=88
+[04:29:09] new=0 tracking=88 seen=88
+[04:30:54] new=0 tracking=88 seen=88
+[04:32:23] new=0 tracking=88 seen=88
+[04:33:45] new=0 tracking=88 seen=88
+[04:35:16] new=0 tracking=88 seen=88
+[04:36:44] new=0 tracking=88 seen=88
+[04:38:15] new=0 tracking=88 seen=88
+  EVENT LOONG token-profiles amt=None mcap=$7,175 ctrl=RUjjjYu4
+[04:39:53] new=1 tracking=89 seen=89
+[04:41:14] new=0 tracking=89 seen=89
+[04:43:00] new=0 tracking=89 seen=89
+[04:44:20] new=0 tracking=89 seen=89
+[04:45:52] new=0 tracking=89 seen=89
+[04:47:20] new=0 tracking=89 seen=89
+[04:48:49] new=0 tracking=89 seen=89
+[04:50:19] new=0 tracking=89 seen=89
+[04:51:52] new=0 tracking=89 seen=89
+[04:53:21] new=0 tracking=89 seen=89
+  EVENT hopium token-profiles amt=None mcap=$27,466 ctrl=61irTRha
+[04:54:59] new=1 tracking=90 seen=90
+[04:56:22] new=0 tracking=90 seen=90
+[04:57:53] new=0 tracking=90 seen=90
+[04:59:21] new=0 tracking=90 seen=90
+[05:00:52] new=0 tracking=90 seen=90
+[05:02:21] new=0 tracking=90 seen=90
+[05:03:54] new=0 tracking=90 seen=90
+[05:05:20] new=0 tracking=90 seen=90
+  EVENT MarsCoin token-boosts amt=50 mcap=$161,108 ctrl=CzMkHANv
+  EVENT MarsCoin token-profiles amt=None mcap=$161,108 ctrl=CzMkHANv
+[05:07:00] new=2 tracking=91 seen=91
+[05:08:23] new=0 tracking=91 seen=91
+[05:09:52] new=0 tracking=91 seen=91
+  EVENT biketrump token-profiles amt=None mcap=$92,179 ctrl=87Y8yTks
+[05:11:30] new=1 tracking=92 seen=92
+[05:12:53] new=0 tracking=92 seen=92
+[05:14:24] new=0 tracking=92 seen=92
+[05:15:55] new=0 tracking=92 seen=92
+[05:17:30] new=0 tracking=92 seen=92
+[05:18:55] new=0 tracking=92 seen=92
+[05:20:22] new=0 tracking=92 seen=92
+[05:22:09] new=0 tracking=92 seen=92
+[05:23:35] new=0 tracking=92 seen=92
+  EVENT Kimi token-profiles amt=None mcap=$62,912 ctrl=228tbyCz
+[05:25:11] new=1 tracking=93 seen=93
+[05:26:37] new=0 tracking=93 seen=93
+[05:28:05] new=0 tracking=93 seen=93
+[05:29:35] new=0 tracking=93 seen=93
+[05:31:06] new=0 tracking=93 seen=93
+[05:32:37] new=0 tracking=93 seen=93
+  EVENT KURO token-boosts amt=10 mcap=$271,927 ctrl=53YrmBC4
+[05:34:17] new=1 tracking=94 seen=94
+[05:35:42] new=0 tracking=94 seen=94
+[05:37:12] new=0 tracking=94 seen=94
+  EVENT Hope token-profiles amt=None mcap=$13,639 ctrl=C4SFCw2k
+[05:38:50] new=1 tracking=95 seen=95
+  EVENT SIDEEYE token-boosts amt=500 mcap=$41,398 ctrl=371qoeCm
+  EVENT pons token-profiles amt=None mcap=$82,542 ctrl=TcnKFgDZ
+  EVENT SIDEEYE token-profiles amt=None mcap=$41,398 ctrl=371qoeCm
+[05:40:35] new=3 tracking=97 seen=97
+[05:42:06] new=0 tracking=97 seen=97
+[05:43:37] new=0 tracking=97 seen=97
+[05:45:03] new=0 tracking=97 seen=97
+  EVENT MEME token-profiles amt=None mcap=$5,877 ctrl=AKyGbpeE
+[05:46:46] new=1 tracking=98 seen=98
+[05:48:16] new=0 tracking=98 seen=98
+[05:49:49] new=0 tracking=98 seen=98
+[05:51:17] new=0 tracking=98 seen=98
+[05:52:47] new=0 tracking=98 seen=98
+[05:54:23] new=0 tracking=98 seen=98
+[05:55:50] new=0 tracking=98 seen=98
+  EVENT POKEMON token-boosts amt=10 mcap=$75,598 ctrl=FcRvwYyH
+[05:57:35] new=1 tracking=99 seen=99
+[05:59:13] new=0 tracking=99 seen=99
+[06:00:45] new=0 tracking=99 seen=99
+  EVENT Trump token-boosts amt=30 mcap=$19,433 ctrl=JBrzNDUr
+  EVENT Trump token-profiles amt=None mcap=$19,433 ctrl=JBrzNDUr
+[06:02:24] new=2 tracking=100 seen=100
+[06:03:57] new=0 tracking=100 seen=100
+[06:05:26] new=0 tracking=100 seen=100
+[06:06:59] new=0 tracking=100 seen=100
+[06:08:37] new=0 tracking=100 seen=100
+[06:10:11] new=0 tracking=100 seen=100
+[06:11:45] new=0 tracking=100 seen=100
+[06:13:19] new=0 tracking=100 seen=100
+[06:14:52] new=0 tracking=100 seen=100
+  EVENT MPGA token-boosts amt=10 mcap=$12,774 ctrl=B6sDyhWx
+  EVENT MPGA token-profiles amt=None mcap=$12,774 ctrl=B6sDyhWx
+[06:16:35] new=2 tracking=101 seen=101
+[06:18:08] new=0 tracking=101 seen=101
+[06:19:45] new=0 tracking=101 seen=101
+[06:21:20] new=0 tracking=101 seen=101
+[06:22:53] new=0 tracking=101 seen=101
+[06:24:36] new=0 tracking=101 seen=101
+  EVENT fragile token-profiles amt=None mcap=$184,139 ctrl=2hfJc9i2
+[06:26:20] new=1 tracking=102 seen=102
+[06:27:58] new=0 tracking=102 seen=102
+[06:29:45] new=0 tracking=102 seen=102
+[06:31:21] new=0 tracking=102 seen=102
+[06:32:32] new=0 tracking=74 seen=102
+[06:34:04] new=0 tracking=74 seen=102
+[06:35:39] new=0 tracking=73 seen=102
+  EVENT Slopium token-profiles amt=None mcap=$14,068 ctrl=JBrzNDUr
+[06:37:14] new=1 tracking=71 seen=103
+[06:38:37] new=0 tracking=71 seen=103
+  EVENT ROBINAPE token-profiles amt=None mcap=$104,071 ctrl=2hfJc9i2
+[06:40:09] new=1 tracking=72 seen=104
+[06:41:34] new=0 tracking=70 seen=104
+[06:42:59] new=0 tracking=70 seen=104
+[06:44:27] new=0 tracking=68 seen=104
+[06:45:58] new=0 tracking=68 seen=104
+[06:47:26] new=0 tracking=68 seen=104
+[06:48:58] new=0 tracking=68 seen=104
+[06:50:27] new=0 tracking=67 seen=104
+[06:51:55] new=0 tracking=67 seen=104
+[06:53:25] new=0 tracking=67 seen=104
+  EVENT PATIENCE token-profiles amt=None mcap=$31,310 ctrl=9R62TzAe
+[06:55:05] new=1 tracking=67 seen=105
+[06:56:26] new=0 tracking=67 seen=105
+[06:57:58] new=0 tracking=67 seen=105
+[06:59:26] new=0 tracking=66 seen=105
+[07:00:54] new=0 tracking=65 seen=105
+[07:02:22] new=0 tracking=64 seen=105
+[07:04:07] new=0 tracking=64 seen=105
+[07:05:24] new=0 tracking=64 seen=105
+[07:06:53] new=0 tracking=64 seen=105
+[07:08:21] new=0 tracking=63 seen=105
+  EVENT ELONPONS token-profiles amt=None mcap=$141,160 ctrl=2hfJc9i2
+[07:10:01] new=1 tracking=64 seen=106
+[07:11:36] new=0 tracking=63 seen=106
+[07:12:51] new=0 tracking=62 seen=106
+[07:14:22] new=0 tracking=62 seen=106
+[07:15:57] new=0 tracking=61 seen=106
+[07:17:19] new=0 tracking=60 seen=106
+[07:18:49] new=0 tracking=59 seen=106
+[07:20:19] new=0 tracking=59 seen=106
+[07:21:49] new=0 tracking=59 seen=106
+[07:23:19] new=0 tracking=59 seen=106
+  EVENT FLOKI token-profiles amt=None mcap=$13,907 ctrl=CWZ48rZs
+  EVENT のび子 token-profiles amt=None mcap=$158,969 ctrl=75V8wnZL
+[07:24:58] new=2 tracking=61 seen=108
+[07:26:22] new=0 tracking=61 seen=108
+  EVENT STICK token-profiles amt=None mcap=$14,497 ctrl=CvYw81yn
+[07:28:01] new=1 tracking=62 seen=109
+[07:29:23] new=0 tracking=62 seen=109
+[07:30:52] new=0 tracking=62 seen=109
+  EVENT ovary token-profiles amt=None mcap=$10,778 ctrl=CWZ48rZs
+[07:32:29] new=1 tracking=62 seen=110
+[07:33:50] new=0 tracking=62 seen=110
+[07:35:30] new=0 tracking=62 seen=110
+[07:36:52] new=0 tracking=62 seen=110
+[07:38:27] new=0 tracking=61 seen=110
+  EVENT SDC token-profiles amt=None mcap=$4,328 ctrl=DtHxFeFj
+[07:40:01] new=1 tracking=62 seen=111
+[07:41:21] new=0 tracking=60 seen=111
+[07:42:56] new=0 tracking=59 seen=111
+[07:44:19] new=0 tracking=59 seen=111
+[07:45:47] new=0 tracking=59 seen=111
+[07:47:19] new=0 tracking=59 seen=111
+[07:48:48] new=0 tracking=59 seen=111
+[07:50:32] new=0 tracking=58 seen=111
+[07:51:49] new=0 tracking=58 seen=111
+[07:53:18] new=0 tracking=58 seen=111
+[07:54:50] new=0 tracking=58 seen=111
+  EVENT SOLBULL token-profiles amt=None mcap=$58,570 ctrl=7oMBpXVe
+[07:56:27] new=1 tracking=59 seen=112
+[07:57:49] new=0 tracking=59 seen=112
+[07:59:20] new=0 tracking=58 seen=112
+[08:00:46] new=0 tracking=57 seen=112
+  EVENT PIPA token-profiles amt=None mcap=$165,741 ctrl=TcnKFgDZ
+[08:02:25] new=1 tracking=58 seen=113
+[08:03:48] new=0 tracking=58 seen=113
+[08:05:18] new=0 tracking=58 seen=113
+[08:06:47] new=0 tracking=58 seen=113
+  EVENT SILVERBACK token-profiles amt=None mcap=$18,091 ctrl=8A5YBiCC
+[08:08:26] new=1 tracking=58 seen=114
+  EVENT STONKGUY token-profiles amt=None mcap=$8,250 ctrl=9fKnHiNu
+[08:09:57] new=1 tracking=59 seen=115
+[08:11:17] new=0 tracking=57 seen=115
+  EVENT MUSKR token-profiles amt=None mcap=$77,768 ctrl=F2bLKM4u
+[08:12:56] new=1 tracking=58 seen=116
+  EVENT hamster token-profiles amt=None mcap=$21,912 ctrl=JBrzNDUr
+  EVENT CUCK token-profiles amt=None mcap=$13,370 ctrl=JBrzNDUr
+[08:14:34] new=2 tracking=59 seen=118
+[08:15:48] new=0 tracking=59 seen=118
+[08:17:19] new=0 tracking=59 seen=118
+[08:18:48] new=0 tracking=59 seen=118
+[08:20:34] new=0 tracking=59 seen=118
+  EVENT MSGA token-profiles amt=None mcap=$6,000 ctrl=eD5wET6X
+  EVENT World token-profiles amt=None mcap=$14,259 ctrl=ETeif9Gj
+  EVENT worthless token-profiles amt=None mcap=$38,878 ctrl=JBrzNDUr
+[08:22:00] new=3 tracking=62 seen=121
+[08:23:22] new=0 tracking=62 seen=121
+[08:24:51] new=0 tracking=62 seen=121
+[08:26:22] new=0 tracking=62 seen=121
+[08:27:52] new=0 tracking=62 seen=121
+[08:29:22] new=0 tracking=62 seen=121
+[08:30:51] new=0 tracking=61 seen=121
+[08:32:27] new=0 tracking=61 seen=121
+[08:33:49] new=0 tracking=61 seen=121
+  EVENT call'd token-profiles amt=None mcap=$4,396 ctrl=aDXiWzvr
+[08:35:36] new=1 tracking=62 seen=122
+[08:36:51] new=0 tracking=61 seen=122
+[08:38:20] new=0 tracking=61 seen=122
+[08:39:50] new=0 tracking=60 seen=122
+[08:41:17] new=0 tracking=59 seen=122
+[08:42:47] new=0 tracking=59 seen=122
+[08:44:18] new=0 tracking=59 seen=122
+  EVENT AMC token-profiles amt=None mcap=$76,728 ctrl=J6pamyBy
+[08:45:56] new=1 tracking=59 seen=123
+[08:47:18] new=0 tracking=59 seen=123
+[08:48:48] new=0 tracking=58 seen=123
+[08:50:19] new=0 tracking=58 seen=123
+[08:51:47] new=0 tracking=58 seen=123
+[08:53:17] new=0 tracking=58 seen=123
+  EVENT BRAINROT token-profiles amt=None mcap=$10,836 ctrl=A4j77ZgC
+[08:54:57] new=1 tracking=59 seen=124
+  EVENT Gooncoin token-profiles amt=None mcap=$6,802 ctrl=9eGbZPdn
+[08:56:26] new=1 tracking=60 seen=125
+[08:57:49] new=0 tracking=60 seen=125
+  EVENT MEME token-profiles amt=None mcap=$143,966 ctrl=TcnKFgDZ
+[08:59:28] new=1 tracking=61 seen=126
+[09:00:51] new=0 tracking=61 seen=126
+[09:02:16] new=0 tracking=57 seen=126
+[09:03:46] new=0 tracking=57 seen=126
+[09:05:18] new=0 tracking=57 seen=126
+[09:06:46] new=0 tracking=57 seen=126
+[09:08:18] new=0 tracking=57 seen=126
+[09:09:47] new=0 tracking=57 seen=126
+[09:11:16] new=0 tracking=57 seen=126
+[09:12:46] new=0 tracking=57 seen=126
+[09:14:14] new=0 tracking=53 seen=126
+[09:15:43] new=0 tracking=53 seen=126
+[09:17:14] new=0 tracking=53 seen=126
+  EVENT PUSS token-boosts amt=10 mcap=$10,630 ctrl=9ZmpfSq4
+  EVENT MEME token-profiles amt=None mcap=$10,746 ctrl=8Fh9VHKi
+[09:18:54] new=2 tracking=55 seen=128
+[09:20:15] new=0 tracking=53 seen=128
+  EVENT BETANO token-profiles amt=None mcap=$21,874 ctrl=7957Mpnn
+[09:21:52] new=1 tracking=54 seen=129
+[09:23:15] new=0 tracking=54 seen=129
+  EVENT SOL token-profiles amt=None mcap=$4,455 ctrl=3nzqTrdk
+[09:24:53] new=1 tracking=55 seen=130
+[09:26:16] new=0 tracking=55 seen=130
+  EVENT imposter token-profiles amt=None mcap=$14,260 ctrl=A4j77ZgC
+[09:27:55] new=1 tracking=56 seen=131
+[09:29:16] new=0 tracking=56 seen=131
+[09:30:47] new=0 tracking=56 seen=131
+[09:32:13] new=0 tracking=53 seen=131
+  EVENT PINGUHOOD token-boosts amt=10 mcap=$3,700 ctrl=DgkEVFro
+[09:33:53] new=1 tracking=54 seen=132
+[09:35:16] new=0 tracking=54 seen=132
+[09:36:45] new=0 tracking=54 seen=132
+[09:38:13] new=0 tracking=53 seen=132
+[09:39:43] new=0 tracking=53 seen=132
+[09:41:20] new=0 tracking=53 seen=132
+[09:42:43] new=0 tracking=53 seen=132
+[09:44:13] new=0 tracking=52 seen=132
+  EVENT wifPONS token-profiles amt=None mcap=$478,104 ctrl=KMumQnwZ
+[09:45:52] new=1 tracking=53 seen=133
+[09:47:14] new=0 tracking=53 seen=133
+[09:48:43] new=0 tracking=53 seen=133
+[09:50:14] new=0 tracking=53 seen=133
+[09:51:43] new=0 tracking=53 seen=133
+[09:53:13] new=0 tracking=53 seen=133
+[09:54:43] new=0 tracking=53 seen=133
+[09:56:13] new=0 tracking=53 seen=133
+[09:57:43] new=0 tracking=53 seen=133
+  EVENT AMC token-profiles amt=None mcap=$6,788 ctrl=DTZz8iK4
+[09:59:21] new=1 tracking=54 seen=134
+  EVENT AMC token-boosts amt=50 mcap=$165,495 ctrl=4ztt6Ls4
+  EVENT AMC token-profiles amt=None mcap=$165,495 ctrl=4ztt6Ls4
+[10:00:53] new=2 tracking=55 seen=135
+[10:02:15] new=0 tracking=55 seen=135
+[10:03:45] new=0 tracking=55 seen=135
+  EVENT Last token-profiles amt=None mcap=$14,881 ctrl=BmK6Sb3k
+[10:05:25] new=1 tracking=56 seen=136
+[10:06:45] new=0 tracking=56 seen=136
+[10:08:15] new=0 tracking=54 seen=136
+[10:09:44] new=0 tracking=53 seen=136
+[10:11:14] new=0 tracking=53 seen=136
+[10:12:41] new=0 tracking=52 seen=136
+[10:14:10] new=0 tracking=50 seen=136
+[10:15:42] new=0 tracking=50 seen=136
+[10:17:11] new=0 tracking=50 seen=136
+[10:18:40] new=0 tracking=50 seen=136
+  EVENT GME token-profiles amt=None mcap=$187,290 ctrl=5rzG196f
+[10:20:18] new=1 tracking=51 seen=137
+[10:21:41] new=0 tracking=51 seen=137
+[10:23:11] new=0 tracking=51 seen=137
+[10:24:41] new=0 tracking=50 seen=137
+[10:26:12] new=0 tracking=50 seen=137
+  EVENT UNSTABLE token-boosts amt=30 mcap=$170,460 ctrl=8EykU3V5
+  EVENT UNSTABLE token-profiles amt=None mcap=$170,460 ctrl=8EykU3V5
+[10:27:50] new=2 tracking=50 seen=138
+[10:29:10] new=0 tracking=50 seen=138
+[10:30:41] new=0 tracking=50 seen=138
+[10:32:11] new=0 tracking=50 seen=138
+[10:33:40] new=0 tracking=50 seen=138
+[10:35:11] new=0 tracking=50 seen=138
+[10:36:41] new=0 tracking=50 seen=138
+  EVENT NFL token-profiles amt=None mcap=$6,511 ctrl=CxRnNobG
+  EVENT NOMEME token-profiles amt=None mcap=$173,348 ctrl=8EykU3V5
+[10:38:21] new=2 tracking=52 seen=140
+[10:39:47] new=0 tracking=51 seen=140
+  EVENT Kanoko token-profiles amt=None mcap=$6,821 ctrl=BZGLVRMZ
+[10:41:21] new=1 tracking=52 seen=141
+[10:42:43] new=0 tracking=52 seen=141
+[10:44:13] new=0 tracking=52 seen=141
+[10:45:42] new=0 tracking=52 seen=141
+[10:47:12] new=0 tracking=52 seen=141
+[10:48:50] new=0 tracking=52 seen=141
+  EVENT PORKCENA token-profiles amt=None mcap=$5,534 ctrl=DguVStv7
+[10:50:20] new=1 tracking=53 seen=142
+[10:51:44] new=0 tracking=53 seen=142
+[10:53:12] new=0 tracking=53 seen=142
+[10:54:43] new=0 tracking=52 seen=142
+[10:56:12] new=0 tracking=52 seen=142
+[10:57:42] new=0 tracking=52 seen=142
+[10:59:13] new=0 tracking=52 seen=142
+[11:00:41] new=0 tracking=52 seen=142
+[11:02:13] new=0 tracking=52 seen=142
+  EVENT PUMP token-profiles amt=None mcap=$17,267 ctrl=5NoKxn1M
+[11:03:51] new=1 tracking=53 seen=143
+[11:05:13] new=0 tracking=53 seen=143
+[11:06:41] new=0 tracking=52 seen=143
+[11:08:13] new=0 tracking=52 seen=143
+  EVENT MEMESZN token-profiles amt=None mcap=$173,032 ctrl=AbKaho5H
+[11:09:51] new=1 tracking=53 seen=144
+[11:11:14] new=0 tracking=52 seen=144
+[11:12:42] new=0 tracking=52 seen=144
+[11:14:25] new=0 tracking=52 seen=144
+[11:15:42] new=0 tracking=52 seen=144
+[11:17:12] new=0 tracking=52 seen=144
+  EVENT META token-profiles amt=None mcap=$142,706 ctrl=7Zddh63U
+  EVENT FAMI token-profiles amt=None mcap=$10,249 ctrl=3ByndFoL
+[11:18:53] new=2 tracking=54 seen=146
+[11:20:15] new=0 tracking=54 seen=146
+[11:21:44] new=0 tracking=54 seen=146
+[11:23:13] new=0 tracking=54 seen=146
+[11:24:44] new=0 tracking=53 seen=146
+[11:26:15] new=0 tracking=53 seen=146
+[11:27:44] new=0 tracking=53 seen=146
+[11:29:14] new=0 tracking=53 seen=146
+[11:30:43] new=0 tracking=53 seen=146
+[11:32:14] new=0 tracking=53 seen=146
+[11:33:43] new=0 tracking=52 seen=146
+[11:35:13] new=0 tracking=52 seen=146
+[11:36:43] new=0 tracking=52 seen=146
+  EVENT PONSLESS token-profiles amt=None mcap=$33,952 ctrl=4b6UqRfC
+[11:38:21] new=1 tracking=52 seen=147
+  EVENT ANSEMINU token-profiles amt=None mcap=$23,629 ctrl=4agzpSsA
+[11:39:49] new=1 tracking=51 seen=148
+[11:41:12] new=0 tracking=51 seen=148
+[11:42:42] new=0 tracking=51 seen=148
+  EVENT WORTHLESS token-profiles amt=None mcap=$207,121 ctrl=9c1WJc3U
+[11:44:20] new=1 tracking=52 seen=149
+[11:45:42] new=0 tracking=52 seen=149
+[11:47:11] new=0 tracking=51 seen=149
+  EVENT ALONROBIN token-profiles amt=None mcap=$98,454 ctrl=9LbscuZC
+[11:48:51] new=1 tracking=52 seen=150
+[11:50:13] new=0 tracking=52 seen=150
+[11:51:42] new=0 tracking=52 seen=150
+[11:53:11] new=0 tracking=52 seen=150
+[11:54:42] new=0 tracking=52 seen=150
+  EVENT Puggle token-profiles amt=None mcap=$25,090 ctrl=GjFeMzqr
+[11:56:21] new=1 tracking=53 seen=151
+  EVENT ANSEMINU token-profiles amt=None mcap=$85,202 ctrl=E8GYcLhf
+[11:57:52] new=1 tracking=53 seen=152
+[11:59:14] new=0 tracking=53 seen=152
+[12:00:42] new=0 tracking=53 seen=152
+[12:02:12] new=0 tracking=52 seen=152
+[12:03:43] new=0 tracking=52 seen=152
+[12:05:15] new=0 tracking=52 seen=152
+  EVENT BOLD token-profiles amt=None mcap=$277,204 ctrl=E8GYcLhf
+  EVENT crow token-profiles amt=None mcap=$10,384 ctrl=Bqra2pUy
+[12:06:57] new=2 tracking=54 seen=154
+  EVENT STEVE token-profiles amt=None mcap=$11,209 ctrl=GkJiayT8
+[12:08:25] new=1 tracking=55 seen=155
+[12:09:46] new=0 tracking=55 seen=155
+  EVENT Ultra token-profiles amt=None mcap=$14,054 ctrl=5znjMTjb
+[12:11:30] new=1 tracking=56 seen=156
+[12:13:10] new=0 tracking=56 seen=156
+[12:14:35] new=0 tracking=56 seen=156
+[12:15:46] new=0 tracking=56 seen=156
+  EVENT Cactuscoin token-profiles amt=None mcap=$17,608 ctrl=ZappYwAe
+[12:17:24] new=1 tracking=56 seen=157
+[12:18:49] new=0 tracking=56 seen=157
+[12:20:16] new=0 tracking=56 seen=157
+  EVENT KORI token-boosts amt=10 mcap=$3,970,116 ctrl=CB9dDufT
+[12:21:59] new=1 tracking=57 seen=158
+[12:23:22] new=0 tracking=57 seen=158
+  EVENT NYAN token-boosts amt=10 mcap=$1,269,198 ctrl=FrSFwE2B
+[12:25:07] new=1 tracking=58 seen=159
+[12:26:22] new=0 tracking=57 seen=159
+[12:27:51] new=0 tracking=57 seen=159
+[12:29:17] new=0 tracking=57 seen=159
+[12:30:50] new=0 tracking=57 seen=159
+[12:32:19] new=0 tracking=57 seen=159
+[12:33:48] new=0 tracking=57 seen=159
+[12:35:19] new=0 tracking=57 seen=159
+  EVENT TRENCHES token-profiles amt=None mcap=$18,449 ctrl=5aNbZ9iu
+[12:36:59] new=1 tracking=57 seen=160
+[12:38:19] new=0 tracking=57 seen=160
+[12:39:52] new=0 tracking=56 seen=160
+  EVENT Nepal token-profiles amt=None mcap=$7,296 ctrl=ADNhqAWL
+[12:41:24] new=1 tracking=57 seen=161
+[12:42:54] new=0 tracking=57 seen=161
+[12:44:18] new=0 tracking=57 seen=161
+[12:45:49] new=0 tracking=57 seen=161
+[12:47:19] new=0 tracking=57 seen=161
+[12:48:48] new=0 tracking=57 seen=161
+[12:50:17] new=0 tracking=57 seen=161
+[12:52:01] new=0 tracking=57 seen=161
+[12:53:16] new=0 tracking=57 seen=161
+  EVENT DUMBMONEY token-profiles amt=None mcap=$159,047 ctrl=4fGziB2h
+[12:54:55] new=1 tracking=57 seen=162
+[12:56:17] new=0 tracking=57 seen=162
+[12:57:46] new=0 tracking=57 seen=162
+[12:59:17] new=0 tracking=57 seen=162
+  EVENT USEFUL token-boosts amt=10 mcap=$241,331 ctrl=CJD1adkw
+  EVENT Gao token-profiles amt=None mcap=$105,028 ctrl=A8mtVXNa
+[13:00:56] new=2 tracking=59 seen=164
+[13:02:21] new=0 tracking=59 seen=164
+[13:03:50] new=0 tracking=59 seen=164
+[13:05:19] new=0 tracking=59 seen=164
+  EVENT Puggle token-profiles amt=None mcap=$10,745 ctrl=5aNbZ9iu
+[13:06:59] new=1 tracking=60 seen=165
+  EVENT ONLYMEME token-profiles amt=None mcap=$184,711 ctrl=9n718Tat
+[13:08:31] new=1 tracking=61 seen=166
+[13:09:51] new=0 tracking=60 seen=166
+[13:11:20] new=0 tracking=60 seen=166
+[13:12:52] new=0 tracking=60 seen=166
+[13:14:23] new=0 tracking=60 seen=166
+[13:15:50] new=0 tracking=60 seen=166
+[13:17:24] new=0 tracking=60 seen=166
+[13:18:51] new=0 tracking=60 seen=166
+[13:20:24] new=0 tracking=60 seen=166
+[13:21:55] new=0 tracking=60 seen=166
+  EVENT ETFONE token-profiles amt=None mcap=$7,818 ctrl=8yyU8D2m
+[13:23:30] new=1 tracking=61 seen=167
+[13:24:53] new=0 tracking=59 seen=167
+  EVENT CHUMP token-profiles amt=None mcap=$100,034 ctrl=9BwwsVvR
+[13:26:36] new=1 tracking=60 seen=168
+[13:27:54] new=0 tracking=59 seen=168
+[13:29:22] new=0 tracking=59 seen=168
+[13:31:02] new=0 tracking=59 seen=168
+[13:32:18] new=0 tracking=58 seen=168
+[13:33:50] new=0 tracking=58 seen=168
+  EVENT GTA token-boosts amt=10 mcap=$49,883 ctrl=7Jo6mxP9
+[13:35:37] new=1 tracking=59 seen=169
+  EVENT 🍿 token-profiles amt=None mcap=$18,080 ctrl=5PGJ1pQ3
+[13:37:00] new=1 tracking=60 seen=170
+[13:38:21] new=0 tracking=60 seen=170
+[13:39:50] new=0 tracking=59 seen=170
+  EVENT PlutoCoin token-profiles amt=None mcap=$150,810 ctrl=6TzpyzP3
+[13:41:38] new=1 tracking=60 seen=171
+  EVENT TROLLHOUSE token-boosts amt=50 mcap=$164,158 ctrl=BKbiYujn
+  EVENT TROLLHOUSE token-profiles amt=None mcap=$164,158 ctrl=BKbiYujn
+[13:43:00] new=2 tracking=61 seen=172
+[13:44:24] new=0 tracking=61 seen=172
+[13:45:55] new=0 tracking=61 seen=172
+[13:47:22] new=0 tracking=61 seen=172
+  EVENT Home token-profiles amt=None mcap=$10,299 ctrl=GoRb9VKR
+[13:49:00] new=1 tracking=62 seen=173
+[13:50:31] new=0 tracking=62 seen=173
+  EVENT COPEJAK token-profiles amt=None mcap=$13,172 ctrl=3i5z2q5W
+[13:52:02] new=1 tracking=63 seen=174
+[13:53:31] new=0 tracking=63 seen=174
+[13:54:54] new=0 tracking=63 seen=174
+  EVENT Dinger token-boosts amt=30 mcap=$44,955 ctrl=9nXkTPZE
+[13:56:44] new=1 tracking=63 seen=175
+[13:57:58] new=0 tracking=63 seen=175
+  EVENT TOEGAN token-profiles amt=None mcap=$15,848 ctrl=AJ3KX6LT
+[13:59:34] new=1 tracking=64 seen=176
+[14:00:57] new=0 tracking=64 seen=176
+[14:02:27] new=0 tracking=63 seen=176
+[14:03:59] new=0 tracking=63 seen=176
+[14:05:26] new=0 tracking=63 seen=176
+[14:06:56] new=0 tracking=63 seen=176
+[14:08:25] new=0 tracking=62 seen=176
+[14:09:55] new=0 tracking=61 seen=176
+[14:11:23] new=0 tracking=61 seen=176
+[14:12:52] new=0 tracking=60 seen=176
+[14:14:22] new=0 tracking=58 seen=176
+  EVENT PonsHouse token-profiles amt=None mcap=$160,811 ctrl=HVdWvRgf
+[14:16:16] new=1 tracking=59 seen=177
+[14:17:21] new=0 tracking=59 seen=177
+[14:18:53] new=0 tracking=59 seen=177
+[14:20:27] new=0 tracking=59 seen=177
+[14:21:48] new=0 tracking=56 seen=177
+[14:23:22] new=0 tracking=56 seen=177
+[14:24:52] new=0 tracking=56 seen=177
+[14:26:17] new=0 tracking=56 seen=177
+[14:27:49] new=0 tracking=56 seen=177
+[14:29:19] new=0 tracking=56 seen=177
+  EVENT QUEEN token-profiles amt=None mcap=$9,000 ctrl=5PGJ1pQ3
+[14:30:56] new=1 tracking=57 seen=178
+[14:32:20] new=0 tracking=57 seen=178
+[14:33:47] new=0 tracking=57 seen=178
+[14:35:17] new=0 tracking=56 seen=178
+[14:36:46] new=0 tracking=56 seen=178
+[14:38:18] new=0 tracking=56 seen=178
+  EVENT DANKFROGE token-profiles amt=None mcap=$13,238 ctrl=CrMAqvpn
+[14:39:58] new=1 tracking=57 seen=179
+  EVENT TROLLLESS token-profiles amt=None mcap=$165,308 ctrl=AdB4AX4m
+[14:41:27] new=1 tracking=58 seen=180
+[14:42:48] new=0 tracking=58 seen=180
+[14:44:20] new=0 tracking=58 seen=180
+[14:45:53] new=0 tracking=57 seen=180
+[14:47:19] new=0 tracking=57 seen=180
+  EVENT courage  token-boosts amt=10 mcap=$9,014 ctrl=62PLtrVV
+[14:48:58] new=1 tracking=58 seen=181
+[14:50:23] new=0 tracking=58 seen=181
+  EVENT RETURN token-profiles amt=None mcap=$22,043 ctrl=HEGtKanX
+[14:51:57] new=1 tracking=59 seen=182
+[14:53:21] new=0 tracking=59 seen=182
+[14:54:50] new=0 tracking=58 seen=182
+[14:56:18] new=0 tracking=57 seen=182
+  EVENT rubinhud token-profiles amt=None mcap=$42,708 ctrl=85cLXcSG
+[14:57:57] new=1 tracking=58 seen=183
+[14:59:17] new=0 tracking=57 seen=183
+  EVENT DOOH token-profiles amt=None mcap=$15,569 ctrl=8FDEQwxi
+[15:01:00] new=1 tracking=58 seen=184
+[15:02:19] new=0 tracking=58 seen=184
+  EVENT Alpaca token-boosts amt=10 mcap=$120,804 ctrl=69G8CpUV
+[15:04:05] new=1 tracking=59 seen=185
+[15:05:19] new=0 tracking=59 seen=185
+  EVENT PASSION token-profiles amt=None mcap=$18,712 ctrl=37GRmngs
+[15:06:59] new=1 tracking=60 seen=186
+  EVENT sapphy token-profiles amt=None mcap=$115,176 ctrl=9CzNGAEu
+[15:08:36] new=1 tracking=61 seen=187
+  EVENT WTT token-boosts amt=30 mcap=$178,009 ctrl=AxoA8Gmz
+  EVENT WTT token-profiles amt=None mcap=$178,009 ctrl=AxoA8Gmz
+[15:10:01] new=2 tracking=62 seen=188
+[15:11:22] new=0 tracking=62 seen=188
+  EVENT enjoyer token-profiles amt=None mcap=$13,933 ctrl=Caxjsq7T
+[15:13:02] new=1 tracking=63 seen=189
+[15:14:25] new=0 tracking=63 seen=189
+[15:15:54] new=0 tracking=63 seen=189
+[15:17:23] new=0 tracking=63 seen=189
+[15:18:52] new=0 tracking=61 seen=189
+[15:20:23] new=0 tracking=61 seen=189
+[15:21:53] new=0 tracking=60 seen=189
+[15:23:21] new=0 tracking=60 seen=189
+[15:24:50] new=0 tracking=59 seen=189
+[15:26:20] new=0 tracking=59 seen=189
+  EVENT AMC token-boosts amt=50 mcap=$26,638 ctrl=CvYw81yn
+  EVENT AMC token-profiles amt=None mcap=$26,638 ctrl=CvYw81yn
+[15:27:57] new=2 tracking=59 seen=190
+[15:29:19] new=0 tracking=59 seen=190
+[15:30:49] new=0 tracking=59 seen=190
+  EVENT SUNCOIN token-profiles amt=None mcap=$15,357 ctrl=DCL3NPcn
+  EVENT MEMETICS token-profiles amt=None mcap=$169,068 ctrl=9CzNGAEu
+[15:32:28] new=2 tracking=61 seen=192
+[15:33:51] new=0 tracking=60 seen=192
+[15:35:26] new=0 tracking=60 seen=192
+  EVENT ETWIFFONEHOME token-profiles amt=None mcap=$5,327 ctrl=HJeWv1GE
+[15:36:58] new=1 tracking=61 seen=193
+[15:38:28] new=0 tracking=61 seen=193
+[15:39:52] new=0 tracking=61 seen=193
+[15:41:23] new=0 tracking=61 seen=193
+  EVENT bullson token-profiles amt=None mcap=$30,877 ctrl=31Y5EFKj
+[15:43:00] new=1 tracking=62 seen=194
+[15:44:24] new=0 tracking=62 seen=194
+[15:45:51] new=0 tracking=61 seen=194
+[15:47:38] new=0 tracking=61 seen=194
+  EVENT ACTPONS token-profiles amt=None mcap=$143,160 ctrl=AxoA8Gmz
+  EVENT AWI token-profiles amt=None mcap=$100,317 ctrl=AxoA8Gmz
+  EVENT memestock token-profiles amt=None mcap=$490,557 ctrl=9CzNGAEu
+[15:49:21] new=3 tracking=64 seen=197
+  EVENT HotAir token-profiles amt=None mcap=$19,140 ctrl=AbpJywMW
+[15:50:38] new=1 tracking=65 seen=198
+  EVENT MEMES token-profiles amt=None mcap=$350,662 ctrl=CTEHTdke

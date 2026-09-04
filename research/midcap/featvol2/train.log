@@ -1,0 +1,27 @@
+bars=45998 mints=365 train_mints=165 val_mints=200 train_sig=19434 val_sig=26199 reserved_skipped=207
+conditions=260
+exit H15 built t=1.8
+exit H30 built t=1.8
+exit H60 built t=1.9
+exit H120 built t=1.9
+exit H15tp30 built t=2.0
+exit H60tp60sl30 built t=2.3
+singles: rows=1255 combos=1320 t=6.8
+  pair a=0/260 combos=2184 rows=1994 t=7.7
+  pair a=25/260 combos=18342 rows=14218 t=17.3
+  pair a=50/260 combos=33180 rows=25448 t=26.4
+  pair a=75/260 combos=43182 rows=33694 t=33.8
+  pair a=100/260 combos=51594 rows=40839 t=40.8
+  pair a=125/260 combos=60336 rows=47100 t=47.5
+  pair a=150/260 combos=65340 rows=51000 t=50.9
+  pair a=175/260 combos=71790 rows=55737 t=55.0
+  pair a=200/260 combos=75990 rows=59023 t=57.3
+  pair a=225/260 combos=78588 rows=61029 t=58.7
+PAIRS DONE combos=79464 rows=61656 t=59.7
+BASE H15 n=2240 k=165 mean=-0.2169 med=-0.1458 res=0.954
+BASE H30 n=1488 k=165 mean=-0.2706 med=-0.2524 res=0.931
+BASE H60 n=984 k=165 mean=-0.2895 med=-0.3080 res=0.892
+BASE H120 n=664 k=165 mean=-0.3237 med=-0.3080 res=0.836
+BASE H15tp30 n=2240 k=165 mean=-0.1158 med=-0.0541 res=0.954
+BASE H60tp60sl30 n=984 k=165 mean=-0.1258 med=-0.1591 res=0.892
+ALLDONE combos_swept=79464

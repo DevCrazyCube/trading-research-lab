@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/home/anont/meme/research/midcap/fv3/verify.py", line 21, in <module>
+    rows.append('%s low20%%=%+.4f(k=%d) high20%%=%+.4f(k=%d)'%(nm,lowr['mean'],lowr['clusters'],hir['mean'],hir['clusters']))
+                                                                  ~~~~^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+rc=1

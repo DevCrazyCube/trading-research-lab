@@ -1,0 +1,7 @@
+mints 214 bars 43986
+eligible 39278 train 16592 bars/91 mints  valid 22686 bars/119 mints
+noise conditions: 400
+1-way noise: combos=2000 train-positive=0  11.8s
+2-way noise (25000 pairs sampled): combos=127000 train-positive=3  164.1s
+NULL CALIBRATION: 3/127000 noise rules passed train; 0 passed train AND validate (of 127000 combos swept)
+NULL_DONE 164.1s

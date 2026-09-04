@@ -1,0 +1,49 @@
+mints 214 bars 43986
+eligible 39278 train 16592 bars/91 mints  valid 22686 bars/119 mints
+stageB: 8 train-positive rows, combos so far 368675
+
+STAGE C1: 8 unique train-positive entry conditions x 60 structures = 480 evals
+  C1 train-positive=27  combos=369155  3.8s
+
+STAGE C2: 8 top entries x 80 meta conds x 5 structures = 3200 evals
+  C2 train-positive=38  combos=372355  4.2s
+
+TOTAL train-positive rules: 65   TOTAL combos swept: 372355
+
+=== VALIDATE (mints with md5%%3==2, never used to pick) ===
+validated 65 train-positive rules; 0 passed validate
+
+train->validate carryover, top 30 by validate mean (diagnostic, NOT survivors):
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.9958) & mcap[5673,1.235e+05)   H5/tpNone/slNone/f1.0  tr=+0.1085 va=+0.0221 vamed=+0.0006 n=50 k=21
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,1) & mcap[5673,1.235e+05)        H5/tpNone/slNone/f1.0  tr=+0.1085 va=+0.0221 vamed=+0.0006 n=50 k=21
+  D vacc[0.6551,1.086) & dd[0.08208,0.1679)                                H5/tpNone/slNone/f1.0  tr=+0.3016 va=+0.0102 vamed=-0.0131 n=129 k=26
+  D vshare[0.04784,0.0605) & dens30[0.06667,1) & ret5[-0.05331,0.1152)     H15/tp0.3/sl-0.25/f1.0 tr=+0.0333 va=+0.0053 vamed=-0.0108 n=233 k=70
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.8957)                          H5/tp0.3/sl-0.25/f0.5  tr=+0.0685 va=+0.0029 vamed=+0.0060 n=71 k=31
+  D vshare[0.04784,0.0605) & dens30[0.06667,1)                             H30/tp0.3/sl-0.25/f1.0 tr=+0.0546 va=-0.0001 vamed=-0.0191 n=299 k=82
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,1) & mcap[4112,2.195e+05)        H5/tpNone/slNone/f1.0  tr=+0.1023 va=-0.0032 vamed=-0.0131 n=63 k=25
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.8957)                          H5/tp0.3/sl-0.25/f1.0  tr=+0.0580 va=-0.0051 vamed=-0.0049 n=71 k=31
+  D vshare[0.04784,0.0605) & dens30[0.06667,1)                             H15/tp0.3/sl-0.25/f1.0 tr=+0.0375 va=-0.0057 vamed=-0.0100 n=354 k=82
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.9958) & mcap[4112,2.195e+05)   H5/tpNone/slNone/f1.0  tr=+0.1033 va=-0.0058 vamed=-0.0131 n=63 k=25
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,1) & mcap[5673,1.025e+07)        H5/tpNone/slNone/f1.0  tr=+0.1063 va=-0.0062 vamed=+0.0131 n=64 k=25
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,1) & mcap>=5673                  H5/tpNone/slNone/f1.0  tr=+0.1063 va=-0.0062 vamed=+0.0131 n=64 k=25
+  D upfrac[0.2,0.3) & age[815.5,1070)                                      H15/tpNone/slNone/f1.0 tr=+0.1997 va=-0.0065 vamed=-0.0020 n=104 k=37
+  D upfrac[0.2,0.3) & age[815.5,1070) & dd<0.8464                          H15/tpNone/slNone/f1.0 tr=+0.2061 va=-0.0065 vamed=-0.0020 n=104 k=37
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.9958) & mcap[5673,1.025e+07)   H5/tpNone/slNone/f1.0  tr=+0.1063 va=-0.0087 vamed=+0.0131 n=64 k=25
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.9958) & mcap>=5673             H5/tpNone/slNone/f1.0  tr=+0.1063 va=-0.0087 vamed=+0.0131 n=64 k=25
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.9958) & mcap[4112,1.479e+05)   H5/tpNone/slNone/f1.0  tr=+0.1033 va=-0.0099 vamed=-0.0062 n=60 k=24
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,1) & mcap[4112,1.479e+05)        H5/tpNone/slNone/f1.0  tr=+0.1023 va=-0.0099 vamed=-0.0062 n=60 k=24
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.8957)                          H5/tpNone/slNone/f1.0  tr=+0.1118 va=-0.0106 vamed=-0.0049 n=71 k=31
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.8957) & dd<0.8464              H5/tpNone/slNone/f1.0  tr=+0.1118 va=-0.0106 vamed=-0.0049 n=71 k=31
+  D vshare[0.04784,0.0605) & dens30[0.06667,1)                             H10/tp0.3/sl-0.25/f1.0 tr=+0.0351 va=-0.0120 vamed=-0.0101 n=379 k=82
+  D upfrac[0.2,0.3) & age[815.5,1070)                                      H10/tp0.6/slNone/f1.0  tr=+0.0487 va=-0.0124 vamed=-0.0067 n=109 k=37
+  D upfrac[0.2,0.3) & age[815.5,1070)                                      H5/tp0.3/slNone/f1.0   tr=+0.0324 va=-0.0128 vamed=-0.0020 n=129 k=37
+  D upfrac[0.2,0.3) & age[815.5,1070)                                      H5/tp0.3/sl-0.25/f0.5  tr=+0.0983 va=-0.0134 vamed=-0.0095 n=129 k=37
+  D upfrac[0.2,0.3) & age[815.5,1070)                                      H5/tp0.3/sl-0.4/f1.0   tr=+0.0324 va=-0.0136 vamed=-0.0021 n=129 k=37
+  D upfrac[0.2,0.3) & age[815.5,1070)                                      H5/tp0.3/sl-0.25/f1.0  tr=+0.0323 va=-0.0139 vamed=-0.0020 n=129 k=37
+  D upfrac[0.2,0.3) & age[815.5,1070)                                      H10/tp0.3/sl-0.25/f1.0 tr=+0.0345 va=-0.0141 vamed=-0.0067 n=109 k=37
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,0.9958) & mcap[4112,1.235e+05)   H5/tpNone/slNone/f1.0  tr=+0.1033 va=-0.0145 vamed=-0.0141 n=59 k=24
+  D vwdev20[-0.5262,-0.2669) & clv[0.4798,1) & mcap[4112,1.235e+05)        H5/tpNone/slNone/f1.0  tr=+0.1023 va=-0.0145 vamed=-0.0141 n=59 k=24
+  D upfrac[0.2,0.3) & age[815.5,1070)                                      H10/tp0.3/sl-0.4/f1.0  tr=+0.0352 va=-0.0145 vamed=-0.0101 n=109 k=37
+
+carryover stats over 65 train-positive rules: mean(train)=+0.0927 mean(validate)=-0.0225  frac va>0 = 0.077  corr=0.075
+STAGE_C_DONE 4.3s

@@ -1,0 +1,20 @@
+O[t]==C[t-1] exactly: 45628/45633 = 0.9999  -> contract-A 'next real bar open' == signal-bar CLOSE
+15m gross quantiles: {0.001: -1.0, 0.01: -0.9999, 0.05: -0.7564, 0.25: -0.1026, 0.5: -0.0041, 0.75: 0.0615, 0.95: 0.3274, 0.99: 1.3946, 0.999: 24.3825, 0.9999: 691.3055}
+max=10385.7  #>10x=98  #>100x=32
+  mint=GaFQuLuV ts=1785246000 O_in=6.509e-10 O_out=6.761e-06 ret=10385.7  vol_in=3.47 vol_out=165.84
+  mint=msa449fA ts=1785177300 O_in=3.138e-05 O_out=2.309e-02 ret=734.9  vol_in=147452.37 vol_out=4558.87
+  mint=GaFQuLuV ts=1785246120 O_in=1.267e-08 O_out=9.259e-06 ret=729.8  vol_in=3.31 vol_out=29.54
+  mint=cjMRxiVw ts=1785197280 O_in=3.079e-05 O_out=2.225e-02 ret=721.6  vol_in=143810.39 vol_out=4964.02
+  mint=UfesqP5V ts=1785195300 O_in=3.086e-05 O_out=2.150e-02 ret=695.5  vol_in=143321.56 vol_out=6878.38
+  mint=zoSegmu8 ts=1785210360 O_in=3.048e-05 O_out=2.098e-02 ret=687.2  vol_in=144036.62 vol_out=4687.07
+  mint=krJSjx4R ts=1785172200 O_in=3.152e-05 O_out=2.136e-02 ret=676.6  vol_in=148000.59 vol_out=2931.42
+  mint=3aaMozqF ts=1785187320 O_in=3.151e-05 O_out=1.984e-02 ret=628.5  vol_in=143405.80 vol_out=1824.44
+  mint=Gg3FMrms ts=1785182280 O_in=3.156e-05 O_out=1.985e-02 ret=628.0  vol_in=145380.42 vol_out=1149.49
+  mint=J2H2gkSW ts=1785190800 O_in=3.132e-05 O_out=1.947e-02 ret=620.6  vol_in=143963.65 vol_out=8962.35
+  mint=BmPtJiQh ts=1785196140 O_in=3.075e-05 O_out=1.881e-02 ret=610.9  vol_in=134558.49 vol_out=1675.04
+  mint=DqLouq9H ts=1785169200 O_in=3.131e-05 O_out=1.855e-02 ret=591.4  vol_in=146362.00 vol_out=1022.86
+cap=None  mint-equal mean=+0.9488 median=-0.1584
+cap=50.0  mint-equal mean=-0.0926 median=-0.1584
+cap=10.0  mint-equal mean=-0.1696 median=-0.1584
+cap=3.0  mint-equal mean=-0.2038 median=-0.1660
+seconds to NEXT real bar (the modelled entry): median=60 p75=60 p90=300 p99=8441 frac<=60s=0.786
