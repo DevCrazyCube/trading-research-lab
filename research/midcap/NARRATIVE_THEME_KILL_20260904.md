@@ -28,14 +28,19 @@ charged -100%, toll 2.5%, cluster-bootstrapped by mint:
 | untagged | -6.86% (k=398) | -12.11% (k=385) | -38.04% (k=335) |
 | **MEMESTOCK** | **-14.14%** (k=30) | **-33.56%** (k=28) | **-96.42%, median -100%** (k=23) |
 | POLITICS | -6.49% (k=24) | -10.80% (k=23) | -52.21%, median -100% (k=20) |
-| ANIMAL | -9.61% (k=62) | -18.30% (k=62) | - |
-| GOVT | **-3.41%** (k=56) | **-6.39%** (k=55) | - |
-| AI | -6.23% (k=11) | -14.86% (k=11) | - |
+| ANIMAL | -9.61% (k=62) | -18.30% (k=62) | -39.09%, median -27.10% (k=59) |
+| GOVT | **-3.41%** (k=56) | **-6.39%** (k=55) | **-29.24%, median +0.56%** (k=53) |
+| AI | -6.23% (k=11) | -14.86% (k=11) | -72.19%, median -100% (k=11) |
 
 **Narrative coins pump hardest and die hardest.** MEMESTOCK loses 96.42% in six hours with a
 median of exactly -100%, versus -38% for coins with no theme at all. Monotonically worse with
 horizon. GOVT (the CURRENT meta at measurement time) is consistently least-bad but still negative
 at every horizon -- consistent with "the live meta decays slower than a spent one", not with an edge.
+
+**The one positive median in the whole table:** GOVT at +6h has median **+0.56%** against a mean of
+**-29.24%** (k=53). That is the rug signature in its purest form -- the typical live-meta coin is
+flat after six hours while the average one is down 29%, because a minority go to zero. It is the
+least-bad cell measured and it is still not tradeable: the mean is what a book earns.
 
 ## Why this matters more than another kill
 The 164x median-mcap gap is SELECTION, not prediction: themed coins are big BECAUSE the narrative
