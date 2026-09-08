@@ -1,0 +1,30 @@
+mints kept 369 bars 46056
+snapshot lines 24969 meta mints 0
+rows (41386, 25) mints used 352
+resolution rate 0.9499105977866912
+unconditional gross mean (trade-pooled) 0.0382528758318896
+ret1         valid=1.000 q=[-0.3546, -0.0147, -0.0, 0.0107, 0.3179]
+ret5         valid=1.000 q=[-0.7261, -0.0367, 0.0005, 0.0333, 0.7188]
+ret15        valid=1.000 q=[-0.9538, -0.0777, 0.0004, 0.0761, 1.5379]
+ret30        valid=0.933 q=[-0.9646, -0.1108, 0.0004, 0.1098, 1.8169]
+dd_max       valid=1.000 q=[-0.9994, -0.8985, -0.4914, -0.1425, 0.0]
+up_min       valid=1.000 q=[0.0, 0.1455, 0.7372, 2.8145, 2314.5261]
+tot_ret      valid=1.000 q=[-0.9862, -0.7704, -0.1161, 0.8139, 1826.093]
+rvol15       valid=0.909 q=[0.0006, 0.0073, 0.0299, 0.0655, 0.9761]
+barrange     valid=1.000 q=[0.0002, 0.0121, 0.0209, 0.06, 0.9377]
+bodypos      valid=1.000 q=[0.0, 0.0, 0.5298, 0.9966, 1.0]
+volratio     valid=1.000 q=[0.0016, 0.4486, 0.9551, 1.2184, 3.4234]
+logvol5      valid=1.000 q=[0.0482, 4.8619, 7.0563, 8.4073, 11.8095]
+density15    valid=1.000 q=[1.0, 10.0, 16.0, 16.0, 16.0]
+age_min      valid=1.000 q=[16.0, 95.0, 302.0, 677.0, 1321.0]
+cumvol       valid=1.000 q=[5.4976, 11.0579, 12.1389, 12.909, 15.9897]
+hour         valid=1.000 q=[0.0, 5.0, 11.0, 17.0, 23.0]
+accel        valid=1.000 q=[-0.9812, -0.0433, -0.0026, 0.0298, 0.8071]
+vwapdev      valid=1.000 q=[-0.9701, -0.0773, -0.001, 0.0456, 0.5156]
+m_gradspeed  valid=0.000 q=NA
+m_replies    valid=0.000 q=NA
+m_socials    valid=0.000 q=NA
+m_mcap       valid=0.000 q=NA
+m_rsol       valid=0.000 q=NA
+m_namelen    valid=0.000 q=NA
+m_symlen     valid=0.000 q=NA

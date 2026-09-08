@@ -1,0 +1,8 @@
+taped curves by complete: {('complete', 0): 2127, ('complete', 1): 60}
+all allowed by complete: {0: 21849, 1: 712}
+taped create_slot p0 435569242 p50 435662558 p100 435772666
+all   create_slot p0 435569160 p50 435658496 p100 435772743
+allowed created in taped window: 22530 ; taped 2187 ; frac 0.097
+complete among inwin: {0: 21819, 1: 711}
+complete=0 n=2127 median trades 11
+complete=1 n=60 median trades 87

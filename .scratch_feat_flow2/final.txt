@@ -1,0 +1,43 @@
+=== the survivor restated: it is an AGE filter, not a flow filter ===
+overlap: P(age<=120 | ubgrow_120>=p75) = 0.986
+overlap: P(ubgrow_120>=p75 | age<=120) = 0.550
+
+age<=60s  -> H180|flowrev.lag1|P2            train  mean=-0.0211 med=-0.0850 CI=[-0.0529, 0.0142] n=  913 k= 574
+age<=60s  -> H180|flowrev.lag1|P2            valid  mean= 0.0404 med=-0.0805 CI=[-0.0076, 0.0931] n=  878 k= 566
+age<=120s  -> H180|flowrev.lag1|P2           train  mean=-0.0269 med=-0.0679 CI=[-0.0528, 0.0015] n= 1334 k= 589
+age<=120s  -> H180|flowrev.lag1|P2           valid  mean= 0.0242 med=-0.0675 CI=[-0.0178, 0.0709] n= 1386 k= 574
+age<=180s  -> H180|flowrev.lag1|P2           train  mean=-0.0397 med=-0.0586 CI=[-0.0632,-0.0140] n= 1623 k= 599
+age<=180s  -> H180|flowrev.lag1|P2           valid  mean=-0.0050 med=-0.0568 CI=[-0.0418, 0.0375] n= 1731 k= 576
+age<=300s  -> H180|flowrev.lag1|P2           train  mean=-0.0513 med=-0.0530 CI=[-0.0696,-0.0300] n= 1997 k= 608
+age<=300s  -> H180|flowrev.lag1|P2           valid  mean=-0.0205 med=-0.0552 CI=[-0.0541, 0.0195] n= 2201 k= 584
+
+=== direct age entry under the mandated dropout charges (validate) ===
+  age<=120s  frozen=0   toll1.14    mean= 0.0242 med=-0.0675 CI=[-0.0168, 0.0705]
+  age<=120s  frozen=-30%% toll1.14  mean=-0.0601 med=-0.1674 CI=[-0.1031,-0.0111]
+  age<=120s  frozen=-50%% toll1.14  mean=-0.1163 med=-0.2358 CI=[-0.1640,-0.0661]
+  age<=120s  frozen=-100%% toll1.14 mean=-0.2568 med=-0.3836 CI=[-0.3094,-0.1988]
+  age<=120s  frozen=-100%% toll2.5  mean=-0.2670 med=-0.3920 CI=[-0.3183,-0.2124]
+
+=== concentration of the direct age rule (validate) ===
+  drop top- 0 mints: mean= 0.0242 med=-0.0675 k=574
+  drop top- 1 mints: mean= 0.0150 med=-0.0681 k=573
+  drop top- 3 mints: mean=-0.0003 med=-0.0682 k=571
+  drop top- 5 mints: mean=-0.0128 med=-0.0684 k=569
+  drop top-10 mints: mean=-0.0346 med=-0.0700 k=564
+  drop top-20 mints: mean=-0.0629 med=-0.0721 k=554
+  per-trade: frac>0=0.187  median=-0.0114  max=5.28
+
+=== is the flow-reversal exit doing anything beyond a very short hold? ===
+age<=120 -> H60|flowrev.lag1|P2              train  mean=-0.0464 med=-0.0574 CI=[-0.0656,-0.0247] n= 1468 k= 589
+age<=120 -> H60|flowrev.lag1|P2              valid  mean=-0.0123 med=-0.0617 CI=[-0.0425, 0.0245] n= 1545 k= 574
+age<=120 -> H180|flowrev.lag1|P2             train  mean=-0.0269 med=-0.0679 CI=[-0.0526, 0.0024] n= 1334 k= 589
+age<=120 -> H180|flowrev.lag1|P2             valid  mean= 0.0242 med=-0.0675 CI=[-0.0171, 0.0708] n= 1386 k= 574
+age<=120 -> H600|flowrev.lag1|P2             train  mean=-0.0298 med=-0.1139 CI=[-0.0684, 0.0156] n= 1061 k= 589
+age<=120 -> H600|flowrev.lag1|P2             valid  mean= 0.0030 med=-0.1099 CI=[-0.0446, 0.0540] n= 1078 k= 574
+
+=== RANDOM-ENTRY control with the identical structure, matched rate ===
+  random 0.5% of dp -> H180|flowrev.lag1|P2 : validate mean=-0.0730 (sd 0.0253, 8 reps)
+  random 1.0% of dp -> H180|flowrev.lag1|P2 : validate mean=-0.1042 (sd 0.0162, 8 reps)
+  random 2.0% of dp -> H180|flowrev.lag1|P2 : validate mean=-0.0988 (sd 0.0192, 8 reps)
+  selection rate of age<=120s: 0.4501
+  selection rate of ubgrow>=p75: 0.2514

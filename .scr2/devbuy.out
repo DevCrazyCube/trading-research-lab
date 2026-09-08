@@ -1,0 +1,7 @@
+creators of our mints: 281
+target curves: 463 rows: 82812 scan 7s
+lookups: 82349 14s
+curves with a creator buy: 449 of 463
+devsol quantiles: [0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
+our mints with >=1 b11a-covered PRIOR coin by same creator: 60 of 382
+our mints with own-curve b11a coverage: 48

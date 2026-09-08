@@ -1,0 +1,51 @@
+n TRAIN 37 VAL 33 placeboTRAIN 28 placeboVAL 21
+combos evaluated: 125440
+cells with train n>=6: 92672
+train-positive: 18750 (20.2%)
+train-positive AND validate-positive (n>=6): 6712
+  expected by chance if independent coin flips: ~ 9375
+  ... AND validate mean > placebo-validate mean: 5529
+  ... AND train mean > placebo-train mean: 3667
+  ... AND validate bootstrap 5% lower bound > 0: 147
+SURVIVORS (top 40):
+   S=  7.5 H=180.0 tp10           flat      rs_neg                           train=  +0.04%(n6) val= +25.44%(med+19.95%,n7,lo +4.99%) plc_v=  -2.19%(n6)
+   S=  7.5 H=180.0 tp10           half_out  rs_neg                           train=  +0.04%(n6) val= +25.44%(med+19.95%,n7,lo +4.99%) plc_v=  -2.19%(n6)
+   S= 30.0 H=180.0 tp50           dip_add   ctrl_alive                       train=  +0.94%(n13) val= +23.93%(med+14.54%,n10,lo +1.70%) plc_v= +13.59%(n6)
+   S= 90.0 H=120.0 hold           dip_add   ctrl_alive                       train=  +2.68%(n9) val= +21.36%(med +3.75%,n9,lo +1.01%) plc_v=  +1.76%(n3)
+   S= 90.0 H=120.0 sl50           dip_add   ctrl_alive                       train=  +2.68%(n9) val= +21.36%(med +3.75%,n9,lo +1.01%) plc_v=  +1.76%(n3)
+   S= 90.0 H=120.0 liqdrop50      dip_add   ctrl_alive                       train=  +2.68%(n9) val= +21.36%(med +3.75%,n9,lo +1.01%) plc_v=  +1.76%(n3)
+   S=  7.5 H=180.0 tp10           dip_add   rs_neg                           train=  +7.35%(n6) val= +20.68%(med +9.98%,n7,lo +3.89%) plc_v=  -1.09%(n6)
+   S=  7.5 H=180.0 tp100_trail25  dip_add   rs_neg                           train=  +0.68%(n6) val= +19.51%(med +0.80%,n7,lo +3.13%) plc_v=  -3.35%(n6)
+   S=  7.5 H= 60.0 tp25_sl50      dip_add   drift_gt0                        train= +11.30%(n11) val= +16.71%(med +5.88%,n11,lo +1.10%) plc_v= -11.57%(n7)
+   S=  7.5 H=120.0 tp25_sl50      flat      drift_gt0                        train= +14.58%(n8) val= +15.50%(med +8.51%,n8,lo +5.42%) plc_v= -17.68%(n5)
+   S=  7.5 H=120.0 tp25_sl50      half_out  drift_gt0                        train= +14.58%(n8) val= +15.50%(med +8.51%,n8,lo +5.42%) plc_v= -17.68%(n5)
+   S= 30.0 H=  7.5 tp50           flat      drift_gt0                        train=  +1.75%(n11) val= +13.13%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 tp50           half_out  drift_gt0                        train=  +1.75%(n11) val= +13.13%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S=  7.5 H=120.0 tp10           flat      drift_gt0                        train=  +9.42%(n8) val= +12.71%(med+11.94%,n8,lo +7.96%) plc_v= -21.19%(n5)
+   S=  7.5 H=120.0 tp10           half_out  drift_gt0                        train=  +9.42%(n8) val= +12.71%(med+11.94%,n8,lo +7.96%) plc_v= -21.19%(n5)
+   S= 30.0 H=  7.5 hold           half_out  drift_gt0                        train=  +1.75%(n11) val= +11.67%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 tp100          half_out  drift_gt0                        train=  +1.75%(n11) val= +11.67%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 sl50           half_out  drift_gt0                        train=  +1.75%(n11) val= +11.67%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 tp100_sl50     half_out  drift_gt0                        train=  +1.75%(n11) val= +11.67%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 trail25        half_out  drift_gt0                        train=  +1.75%(n11) val= +11.67%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 trail50        half_out  drift_gt0                        train=  +1.75%(n11) val= +11.67%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 tp100_trail25  half_out  drift_gt0                        train=  +1.75%(n11) val= +11.67%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 liqdrop50      half_out  drift_gt0                        train=  +1.75%(n11) val= +11.67%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 90.0 H=120.0 tp10           dip_add   mcap_ge20k                       train=  +2.76%(n7) val= +11.63%(med +6.83%,n9,lo +2.80%) plc_v= +10.25%(n5)
+   S=  3.0 H= 60.0 tp10           flat      paid                             train=  +2.64%(n9) val= +11.52%(med+11.39%,n7,lo +7.76%) plc_v= -54.13%(n4)
+   S=  3.0 H= 60.0 tp10           half_out  paid                             train=  +2.64%(n9) val= +11.52%(med+11.39%,n7,lo +7.76%) plc_v= -54.13%(n4)
+   S=  7.5 H= 60.0 tp10           flat      drift_gt0                        train= +20.48%(n11) val= +11.04%(med+11.76%,n11,lo +2.27%) plc_v= -21.51%(n7)
+   S=  7.5 H= 60.0 tp10           half_out  drift_gt0                        train= +20.48%(n11) val= +11.04%(med+11.76%,n11,lo +2.27%) plc_v= -21.51%(n7)
+   S= 90.0 H=120.0 tp10           brk_add   mcap_ge20k                       train=  +1.35%(n7) val= +10.65%(med +6.83%,n9,lo +1.65%) plc_v= +10.14%(n5)
+   S= 30.0 H=  7.5 hold           flat      drift_gt0                        train=  +1.75%(n11) val= +10.22%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 tp100          flat      drift_gt0                        train=  +1.75%(n11) val= +10.22%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 sl50           flat      drift_gt0                        train=  +1.75%(n11) val= +10.22%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 tp100_sl50     flat      drift_gt0                        train=  +1.75%(n11) val= +10.22%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 trail25        flat      drift_gt0                        train=  +1.75%(n11) val= +10.22%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 trail50        flat      drift_gt0                        train=  +1.75%(n11) val= +10.22%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 tp100_trail25  flat      drift_gt0                        train=  +1.75%(n11) val= +10.22%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 30.0 H=  7.5 liqdrop50      flat      drift_gt0                        train=  +1.75%(n11) val= +10.22%(med +1.76%,n9,lo +1.83%) plc_v=  -4.50%(n2)
+   S= 90.0 H=120.0 tp100          dip_add   ctrl_alive                       train=  +2.68%(n9) val=  +9.97%(med +3.75%,n9,lo +1.01%) plc_v=  +1.76%(n3)
+   S= 90.0 H=120.0 tp100_sl50     dip_add   ctrl_alive                       train=  +2.68%(n9) val=  +9.97%(med +3.75%,n9,lo +1.01%) plc_v=  +1.76%(n3)
+   S=  3.0 H= 60.0 tp10           dip_add   paid                             train=  +1.32%(n9) val=  +9.94%(med +5.70%,n7,lo +4.07%) plc_v= -33.68%(n4)
+done

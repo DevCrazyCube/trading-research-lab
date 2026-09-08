@@ -1,0 +1,11 @@
+WL h12 22561
+slot->time slope(sec/slot) 0.42123 inter 1601695283.5
+reserve_obs scanned 333888 curves with trades 2187 elapsed 27.1
+idl_name counts (h12 curves) [('buy', 82102), ('sell', 76241), ('sell_v2', 19520), ('buy_exact_quote_in_v2', 17135), ('buy_exact_sol_in', 13614), ('buy_v2', 5039), ('create_v2', 2670), ('create', 2)]
+launches with trade data 2187
+dev_buy_sol: frac>0 0.97
+dev_buy_sol pos: n 2122 median 1.0 p90 5.0
+dev_first frac 0.969
+dev_sell frac 0.839
+bars mints h12 387 total bars 46146
+done 29.1

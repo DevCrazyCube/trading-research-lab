@@ -1,0 +1,118 @@
+rows 44451 train 18883 valid 25568 feats 21
+BASELINE(all eligible bars, non-overlap) TRAIN mean -0.1786 median -0.1622 n 2190 clusters 151 res 0.8105 | d50 -0.2631 d100 -0.4743 | toll2.5 -0.1859 | uncapped -0.1618
+BASELINE(all eligible bars, non-overlap) VALID mean -0.202 median -0.196 n 2832 clusters 190 res 0.8287 | d50 -0.2843 d100 -0.4901 | toll2.5 -0.2091 | uncapped 0.2807
+BASELINE(all eligible bars, non-overlap) ALL mean -0.1917 median -0.1807 n 5022 clusters 341 res 0.8208 | d50 -0.2749 d100 -0.4831 | toll2.5 -0.1988 | uncapped 0.0848
+RANDOM-20% control TRAIN mean -0.1706 +- 0.0154 median -0.1458 n~ 1321 clusters~ 144
+RANDOM-20% control VALID mean -0.1814 +- 0.0083 median -0.1686 n~ 1760 clusters~ 181
+singles done 189 kept 177 t 2.9
+feature pairs 210
+COMBOS SWEPT 11319 cells meeting size floor 7219 t 45.8
+--- train mean distribution ---
+n cells 7219 frac train mean>0 0.0276 frac >0.02 0.0148 frac >0.05 0.0057 quantiles [-0.3301, -0.2152, -0.1775, -0.1363, -0.0883, -0.0458, 0.0305]
+--- top 40 on TRAIN ---
+  2|vol5 Q3 & age Q4                                   trmean  0.1437 trmed -0.0355 n   108 cl   17
+  2|dd Q1 & logpx Q2                                   trmean  0.1373 trmed -0.0223 n    89 cl   14
+  2|ret60 Q4 & logpx Q1                                trmean  0.1280 trmed -0.0747 n    73 cl   16
+  2|vwapdev D1 & retlife Q1                            trmean  0.1267 trmed -0.1156 n    65 cl   33
+  2|rvol Q1 & retlife Q2                               trmean  0.1221 trmed  0.1006 n   107 cl   15
+  2|ret60 D0 & upfrac Q2                               trmean  0.1217 trmed -0.0475 n    69 cl   34
+  2|vol5 D0 & logpx Q1                                 trmean  0.1121 trmed -0.0448 n   140 cl   18
+  2|age Q4 & logpx Q2                                  trmean  0.1103 trmed -0.0061 n   102 cl   15
+  2|vol5 Q3 & hilopos D0                               trmean  0.1097 trmed -0.0450 n    88 cl   41
+  2|dd Q2 & upfrac D0                                  trmean  0.1071 trmed -0.0396 n    61 cl   23
+  2|maxgap30 D0 & upfrac D0                            trmean  0.1038 trmed -0.0397 n    74 cl   54
+  2|maxgap30 Q2 & upfrac D0                            trmean  0.1038 trmed -0.0397 n    74 cl   54
+  2|ret5 Q3 & volaccel D0                              trmean  0.1008 trmed -0.0243 n    86 cl   48
+  2|age Q4 & retlife Q1                                trmean  0.1002 trmed -0.1099 n    81 cl   21
+  2|vwapdev D0 & upfrac D0                             trmean  0.0887 trmed -0.1037 n    94 cl   80
+  2|volaccel D0 & maxgap30 D0                          trmean  0.0814 trmed -0.0583 n    86 cl   42
+  2|volaccel D0 & maxgap30 Q2                          trmean  0.0814 trmed -0.0583 n    86 cl   42
+  2|upfrac D1 & retlife Q4                             trmean  0.0774 trmed  0.0071 n   114 cl   21
+  2|ret60 D0 & logpx Q2                                trmean  0.0771 trmed -0.0389 n    62 cl   20
+  2|hilopos D0 & upfrac Q2                             trmean  0.0745 trmed -0.0517 n    90 cl   36
+  2|rvol Q4 & upfrac D0                                trmean  0.0742 trmed -0.1188 n    83 cl   70
+  2|ret5 Q4 & upfrac Q0                                trmean  0.0734 trmed -0.0527 n    99 cl   43
+  2|hilopos Q1 & priorcr D1                            trmean  0.0730 trmed  0.0144 n   145 cl   14
+  2|ret15 D0 & body Q3                                 trmean  0.0719 trmed -0.0803 n   104 cl   47
+  2|age Q4 & logpx Q1                                  trmean  0.0712 trmed -0.0516 n    88 cl   16
+  2|ret5 Q3 & volaccel Q0                              trmean  0.0658 trmed -0.0445 n   194 cl   65
+  2|rvol Q4 & hilopos Q4                               trmean  0.0629 trmed -0.0490 n    66 cl   32
+  2|range15 Q3 & upfrac Q4                             trmean  0.0610 trmed -0.1064 n    79 cl   51
+  2|ret60 Q0 & age Q4                                  trmean  0.0596 trmed -0.0932 n    66 cl   19
+  2|rvol D1 & upfrac Q0                                trmean  0.0595 trmed -0.1328 n    69 cl   66
+  2|volaccel D0 & upfrac Q3                            trmean  0.0566 trmed -0.0524 n   105 cl   55
+  2|upfrac D0 & retlife D0                             trmean  0.0561 trmed -0.0230 n    92 cl   47
+  2|body Q3 & upfrac Q0                                trmean  0.0544 trmed -0.0171 n   122 cl   50
+  2|dd Q0 & vwapdev Q4                                 trmean  0.0543 trmed -0.0789 n    62 cl   35
+  2|vol5 Q3 & upfrac Q0                                trmean  0.0539 trmed -0.0927 n   112 cl   53
+  2|ret5 D1 & dd Q0                                    trmean  0.0537 trmed -0.1997 n    89 cl   57
+  2|vol5 D1 & volratio D1                              trmean  0.0536 trmed  0.0482 n    69 cl   69
+  2|vol5 D1 & bars30 Q0                                trmean  0.0536 trmed  0.0482 n    69 cl   69
+  2|vol5 Q3 & volaccel Q3                              trmean  0.0532 trmed -0.0171 n   205 cl   30
+  2|ret5 D0 & upfrac D0                                trmean  0.0513 trmed -0.0904 n    93 cl   68
+cells passing TRAIN filter (mean > 0.02, n>=60, clusters>=12): 107
+cells with enough VALIDATE support: 100
+validate mean of train-positive cells: frac>0 0.02 mean -0.0934 median -0.083
+--- top 60 by VALIDATE mean ---
+  2|body Q2 & hilopos D1                               tr  0.0404 | va mean  0.0610 med -0.0039 CI[-0.0062, 0.1556] n    70 cl   21 res 0.971 | d50  0.0595 d100  0.0557 toll2.5  0.0464 uncap   0.0610
+  2|rvol Q1 & retlife Q2                               tr  0.1221 | va mean  0.0213 med -0.0041 CI[-0.0145, 0.0571] n   229 cl   22 res 0.996 | d50  0.0211 d100  0.0205 toll2.5  0.0072 uncap   0.0213
+  2|vol5 Q1 & dd Q2                                    tr  0.0390 | va mean -0.0091 med -0.0552 CI[-0.2155, 0.2041] n   216 cl   25 res 0.995 | d50 -0.0093 d100 -0.0096 toll2.5 -0.0227 uncap   0.5919
+  2|rvol Q1 & dd Q2                                    tr  0.0267 | va mean -0.0195 med -0.0328 CI[-0.0473, 0.0069] n   173 cl   17 res 0.983 | d50 -0.0224 d100 -0.0298 toll2.5 -0.0328 uncap  -0.0195
+  2|rvol Q2 & hilopos Q4                               tr  0.0387 | va mean -0.0208 med -0.0055 CI[-0.0583, 0.0155] n   145 cl   34 res 0.979 | d50 -0.0384 d100 -0.0825 toll2.5 -0.0334 uncap  -0.0208
+  2|vol5 Q3 & age Q4                                   tr  0.1437 | va mean -0.0215 med -0.0124 CI[-0.0634, 0.0186] n   198 cl   18 res 0.955 | d50 -0.0419 d100 -0.0928 toll2.5 -0.0340 uncap  -0.0215
+  2|range15 Q1 & upfrac Q3                             tr  0.0301 | va mean -0.0236 med -0.0127 CI[-0.0546, 0.0045] n   199 cl   41 res 0.980 | d50 -0.0387 d100 -0.0765 toll2.5 -0.0363 uncap  -0.0236
+  2|volaccel D0 & maxgap30 D0                          tr  0.0814 | va mean -0.0293 med -0.0796 CI[-0.1240, 0.1140] n    62 cl   42 res 1.000 | d50 -0.0293 d100 -0.0293 toll2.5 -0.0427 uncap  -0.0235
+  2|volaccel D0 & maxgap30 Q2                          tr  0.0814 | va mean -0.0293 med -0.0796 CI[-0.1240, 0.1140] n    62 cl   42 res 1.000 | d50 -0.0293 d100 -0.0293 toll2.5 -0.0427 uncap  -0.0235
+  2|volratio D1 & bars30 Q1                            tr  0.0358 | va mean -0.0295 med -0.0860 CI[-0.1269, 0.0783] n   144 cl  142 res 0.903 | d50 -0.0492 d100 -0.0985 toll2.5 -0.0419 uncap  -0.0092
+  2|upfrac D1 & retlife Q4                             tr  0.0774 | va mean -0.0341 med -0.0244 CI[-0.2010, 0.1611] n   123 cl   32 res 0.911 | d50 -0.0633 d100 -0.1362 toll2.5 -0.0460 uncap   4.8598
+  2|volratio Q3 & rvol Q2                              tr  0.0336 | va mean -0.0350 med -0.0297 CI[-0.0628,-0.0107] n   260 cl   29 res 0.977 | d50 -0.0501 d100 -0.0877 toll2.5 -0.0476 uncap  -0.0350
+  2|ret5 Q3 & bars30 Q1                                tr  0.0481 | va mean -0.0360 med -0.0219 CI[-0.0897, 0.0189] n   237 cl   73 res 0.970 | d50 -0.0467 d100 -0.0735 toll2.5 -0.0487 uncap  -0.0360
+  2|maxgap30 Q2 & bars30 Q1                            tr  0.0324 | va mean -0.0424 med -0.1324 CI[-0.1441, 0.0758] n   121 cl  121 res 0.901 | d50 -0.0623 d100 -0.1118 toll2.5 -0.0546 uncap  -0.0346
+  2|maxgap30 D0 & bars30 Q1                            tr  0.0324 | va mean -0.0424 med -0.1324 CI[-0.1441, 0.0758] n   121 cl  121 res 0.901 | d50 -0.0623 d100 -0.1118 toll2.5 -0.0546 uncap  -0.0346
+  2|ret60 Q4 & retlife Q3                              tr  0.0313 | va mean -0.0448 med -0.0343 CI[-0.0956, 0.0012] n    83 cl   22 res 1.000 | d50 -0.0448 d100 -0.0448 toll2.5 -0.0579 uncap  -0.0448
+  2|rvol Q2 & age Q3                                   tr  0.0298 | va mean -0.0484 med -0.0117 CI[-0.0880,-0.0152] n   188 cl   26 res 0.979 | d50 -0.0792 d100 -0.1561 toll2.5 -0.0600 uncap  -0.0484
+  2|vol5 D1 & bars30 D0                                tr  0.0285 | va mean -0.0526 med  0.0758 CI[-0.1995, 0.1128] n    79 cl   79 res 0.962 | d50 -0.0602 d100 -0.0792 toll2.5 -0.0653 uncap   0.0541
+  2|volaccel D0 & rvol Q2                              tr  0.0238 | va mean -0.0530 med -0.0312 CI[-0.0836,-0.0246] n   117 cl   49 res 0.974 | d50 -0.0625 d100 -0.0863 toll2.5 -0.0655 uncap  -0.0530
+  2|ret5 Q3 & ret15 Q1                                 tr  0.0256 | va mean -0.0535 med -0.0329 CI[-0.1038,-0.0100] n   253 cl   40 res 0.976 | d50 -0.0601 d100 -0.0766 toll2.5 -0.0662 uncap  -0.0535
+  2|rvol Q2 & body D1                                  tr  0.0235 | va mean -0.0549 med -0.0271 CI[-0.0826,-0.0291] n   305 cl   50 res 0.974 | d50 -0.0758 d100 -0.1280 toll2.5 -0.0669 uncap  -0.0549
+  2|hilopos D0 & upfrac Q2                             tr  0.0745 | va mean -0.0549 med -0.0331 CI[-0.1200, 0.0125] n   103 cl   55 res 0.883 | d50 -0.0893 d100 -0.1753 toll2.5 -0.0662 uncap  -0.0549
+  2|volaccel D0 & upfrac Q3                            tr  0.0566 | va mean -0.0558 med -0.0264 CI[-0.1140, 0.0123] n   116 cl   50 res 0.922 | d50 -0.0881 d100 -0.1688 toll2.5 -0.0673 uncap  -0.0534
+  2|rvol Q2 & body Q4                                  tr  0.0264 | va mean -0.0570 med -0.0237 CI[-0.0856,-0.0299] n   410 cl   52 res 0.973 | d50 -0.0810 d100 -0.1412 toll2.5 -0.0688 uncap  -0.0570
+  2|ret5 D1 & maxgap30 Q3                              tr  0.0508 | va mean -0.0571 med -0.0784 CI[-0.1435, 0.0389] n   172 cl   57 res 0.959 | d50 -0.0782 d100 -0.1308 toll2.5 -0.0691 uncap  -0.0434
+  2|range15 Q1 & vwapdev Q2                            tr  0.0404 | va mean -0.0578 med -0.0247 CI[-0.0850,-0.0300] n   230 cl   46 res 0.943 | d50 -0.0860 d100 -0.1564 toll2.5 -0.0695 uncap  -0.0578
+  2|rvol Q2 & vwapdev60 Q2                             tr  0.0274 | va mean -0.0586 med -0.0139 CI[-0.1172,-0.0118] n   286 cl   37 res 0.979 | d50 -0.0754 d100 -0.1175 toll2.5 -0.0707 uncap  -0.0586
+  2|ret60 Q1 & upfrac Q3                               tr  0.0301 | va mean -0.0607 med -0.0155 CI[-0.1254,-0.0080] n   242 cl   31 res 0.992 | d50 -0.0674 d100 -0.0842 toll2.5 -0.0733 uncap  -0.0607
+  2|ret5 D1 & dd Q0                                    tr  0.0537 | va mean -0.0650 med -0.1605 CI[-0.1484, 0.0257] n    95 cl   56 res 0.747 | d50 -0.1368 d100 -0.3165 toll2.5 -0.0744 uncap  -0.0617
+  2|ret60 Q4 & age Q3                                  tr  0.0244 | va mean -0.0654 med -0.0392 CI[-0.1253,-0.0122] n    98 cl   20 res 1.000 | d50 -0.0654 d100 -0.0654 toll2.5 -0.0782 uncap  -0.0654
+  2|ret5 Q4 & upfrac Q0                                tr  0.0734 | va mean -0.0661 med -0.0747 CI[-0.1411, 0.0219] n   108 cl   47 res 0.926 | d50 -0.0964 d100 -0.1720 toll2.5 -0.0775 uncap  -0.0622
+  2|range15 V1 & hilopos V0                            tr  0.0379 | va mean -0.0673 med -0.2423 CI[-0.1680, 0.0467] n    90 cl   85 res 0.656 | d50 -0.1379 d100 -0.3144 toll2.5 -0.0767 uncap  -0.0421
+  2|maxgap30 Q3 & hilopos D1                           tr  0.0215 | va mean -0.0677 med -0.0145 CI[-0.1249,-0.0152] n   156 cl   46 res 0.987 | d50 -0.0725 d100 -0.0843 toll2.5 -0.0803 uncap  -0.0677
+  2|body Q3 & upfrac Q0                                tr  0.0544 | va mean -0.0677 med -0.0347 CI[-0.1305,-0.0087] n   119 cl   38 res 1.000 | d50 -0.0677 d100 -0.0677 toll2.5 -0.0806 uncap  -0.0677
+  2|volaccel V0 & gap V0                               tr  0.0493 | va mean -0.0679 med -0.0470 CI[-0.1011,-0.0338] n   143 cl   75 res 0.888 | d50 -0.1066 d100 -0.2032 toll2.5 -0.0789 uncap  -0.0679
+  2|upfrac V0 & priorcr V0                             tr  0.0238 | va mean -0.0692 med -0.0378 CI[-0.1188,-0.0151] n   180 cl   36 res 0.911 | d50 -0.1129 d100 -0.2223 toll2.5 -0.0799 uncap  -0.0692
+  2|ret5 Q4 & maxgap30 Q3                              tr  0.0318 | va mean -0.0698 med -0.0757 CI[-0.1447, 0.0128] n   258 cl   68 res 0.957 | d50 -0.0950 d100 -0.1580 toll2.5 -0.0814 uncap  -0.0523
+  2|dd D0 & upfrac Q3                                  tr  0.0304 | va mean -0.0699 med -0.1367 CI[-0.1826, 0.0721] n    91 cl   47 res 0.813 | d50 -0.1345 d100 -0.2958 toll2.5 -0.0796 uncap  -0.0567
+  2|ret60 D0 & upfrac Q2                               tr  0.1217 | va mean -0.0705 med -0.0528 CI[-0.1462, 0.0025] n    60 cl   37 res 0.917 | d50 -0.0935 d100 -0.1509 toll2.5 -0.0822 uncap  -0.0705
+  2|ret5 Q3 & maxgap30 Q3                              tr  0.0204 | va mean -0.0725 med -0.0358 CI[-0.1021,-0.0432] n   258 cl   60 res 0.965 | d50 -0.0961 d100 -0.1552 toll2.5 -0.0841 uncap  -0.0725
+  2|age Q0 & upfrac D0                                 tr  0.0439 | va mean -0.0726 med -0.1545 CI[-0.1463, 0.0129] n    96 cl   75 res 0.760 | d50 -0.1295 d100 -0.2717 toll2.5 -0.0826 uncap  -0.0726
+  2|ret15 D1 & retlife Q1                              tr  0.0283 | va mean -0.0737 med -0.0661 CI[-0.1372,-0.0044] n    83 cl   30 res 0.928 | d50 -0.0963 d100 -0.1530 toll2.5 -0.0853 uncap  -0.0737
+  2|vol5 Q0 & logpx Q1                                 tr  0.0241 | va mean -0.0753 med -0.0886 CI[-0.1226,-0.0250] n   275 cl   23 res 0.953 | d50 -0.0823 d100 -0.0997 toll2.5 -0.0877 uncap  -0.0753
+  2|vol5 Q3 & upfrac Q0                                tr  0.0539 | va mean -0.0760 med -0.0277 CI[-0.1424,-0.0022] n   153 cl   45 res 0.967 | d50 -0.0941 d100 -0.1395 toll2.5 -0.0878 uncap  -0.0760
+  2|volratio D0 & upfrac Q3                            tr  0.0211 | va mean -0.0764 med -0.0545 CI[-0.1326,-0.0172] n    85 cl   48 res 0.882 | d50 -0.1149 d100 -0.2113 toll2.5 -0.0872 uncap  -0.0764
+  2|ret5 Q3 & body D0                                  tr  0.0286 | va mean -0.0797 med -0.0618 CI[-0.1216,-0.0449] n   193 cl   49 res 0.959 | d50 -0.0957 d100 -0.1359 toll2.5 -0.0916 uncap  -0.0797
+  2|vol5 D0 & upfrac Q3                                tr  0.0353 | va mean -0.0801 med -0.0512 CI[-0.1296,-0.0279] n   120 cl   49 res 0.883 | d50 -0.1184 d100 -0.2142 toll2.5 -0.0910 uncap  -0.0565
+  2|ret60 Q0 & age Q4                                  tr  0.0596 | va mean -0.0817 med -0.0498 CI[-0.1373,-0.0289] n    61 cl   20 res 0.820 | d50 -0.1439 d100 -0.2996 toll2.5 -0.0913 uncap  -0.0817
+  2|rvol Q3 & upfrac D0                                tr  0.0462 | va mean -0.0817 med -0.0706 CI[-0.1312,-0.0320] n   100 cl   54 res 0.870 | d50 -0.1190 d100 -0.2124 toll2.5 -0.0925 uncap  -0.0817
+  2|ret60 Q4 & logpx Q1                                tr  0.1280 | va mean -0.0830 med -0.0262 CI[-0.1569,-0.0145] n    91 cl   16 res 1.000 | d50 -0.0830 d100 -0.0830 toll2.5 -0.0956 uncap  -0.0830
+  2|ret5 Q4 & volaccel D0                              tr  0.0213 | va mean -0.0831 med -0.1334 CI[-0.1592, 0.0003] n    68 cl   52 res 0.779 | d50 -0.1408 d100 -0.2850 toll2.5 -0.0929 uncap  -0.0795
+  2|ret5 Q0 & age D1                                   tr  0.0483 | va mean -0.0851 med -0.0536 CI[-0.1254,-0.0460] n    92 cl   22 res 0.859 | d50 -0.1306 d100 -0.2445 toll2.5 -0.0954 uncap  -0.0851
+  2|ret5 Q3 & volaccel D0                              tr  0.1008 | va mean -0.0857 med -0.0443 CI[-0.1218,-0.0504] n   129 cl   65 res 0.884 | d50 -0.1207 d100 -0.2082 toll2.5 -0.0966 uncap  -0.0857
+  2|vol5 D1 & bars30 Q0                                tr  0.0536 | va mean -0.0868 med  0.0208 CI[-0.2288, 0.0670] n    87 cl   87 res 0.966 | d50 -0.0937 d100 -0.1109 toll2.5 -0.0990 uncap   0.0101
+  2|bars30 Q1 & body Q3                                tr  0.0468 | va mean -0.0875 med -0.0337 CI[-0.1622,-0.0081] n   218 cl  105 res 0.963 | d50 -0.1000 d100 -0.1313 toll2.5 -0.0995 uncap  -0.0861
+  2|vol5 D1 & volratio D1                              tr  0.0536 | va mean -0.0892 med  0.0131 CI[-0.2315, 0.0662] n    88 cl   88 res 0.955 | d50 -0.0983 d100 -0.1210 toll2.5 -0.1013 uncap   0.0066
+  2|gap Q4 & body Q3                                   tr  0.0465 | va mean -0.0894 med -0.0471 CI[-0.1379,-0.0378] n   150 cl   63 res 0.847 | d50 -0.1410 d100 -0.2699 toll2.5 -0.0994 uncap  -0.0894
+  2|vol5 D0 & logpx Q1                                 tr  0.1121 | va mean -0.0895 med -0.0513 CI[-0.1439,-0.0446] n   137 cl   17 res 0.927 | d50 -0.1013 d100 -0.1307 toll2.5 -0.1014 uncap  -0.0895
+  2|volaccel Q0 & upfrac Q4                            tr  0.0220 | va mean -0.0921 med -0.0535 CI[-0.1392,-0.0435] n   102 cl   47 res 0.892 | d50 -0.1300 d100 -0.2246 toll2.5 -0.1028 uncap  -0.0921
+  2|ret5 Q3 & hilopos Q1                               tr  0.0315 | va mean -0.0942 med -0.0663 CI[-0.1581,-0.0249] n   207 cl   48 res 0.957 | d50 -0.1120 d100 -0.1565 toll2.5 -0.1058 uncap  -0.0942
+STRICT survivors (validate mean>0, bootstrap CI-lo>0, survives -100%% dropout AND 2.5%% toll): 0
+DONE t 46.9

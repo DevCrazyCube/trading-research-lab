@@ -33,6 +33,8 @@ REQUIRED PROPOSAL FIELDS
 
 from __future__ import annotations
 
+import json
+
 import datetime as dt
 
 from . import Refused
@@ -155,12 +157,45 @@ def freeze_setup(validated: dict, *, proposed_utc: str = None) -> dict:
     """
     body = dict(validated)
     body["proposed_utc"] = proposed_utc or _now_utc_iso()
+    # T56: the coverage of the tape this setup was reasoned over is part of the frozen commitment,
+    # not a footnote -- it goes INSIDE the hashed body.
+    body["tape_coverage"] = tape_coverage()
     body["setup_sha256"] = canonical_sha256(body)
     body["status"] = "OPEN"
     return body
 
 
+def tape_coverage() -> dict:
+    """The coverage receipt of the most recent `newsdesk read` -- see __main__._tape_receipt (T56).
+
+    A MISSING receipt is itself the disclosure: it means this proposal/abstention was made without a
+    preceding read of the tape, which the ledger should say out loud rather than leave inferable.
+    """
+    from .__main__ import RECEIPT_PATH
+    if not RECEIPT_PATH.exists():
+        return {"receipt": "MISSING", "note": "no `newsdesk read` receipt on disk; tape unread or pre-T56"}
+    try:
+        rec = json.loads(RECEIPT_PATH.read_text())
+    except (ValueError, OSError) as exc:
+        return {"receipt": "UNREADABLE", "note": str(exc)}
+    rec["receipt"] = "OK"
+    rec.pop("shown_counts", None)
+    rec.pop("feed_counts_raw_prededupe", None)
+    # A receipt from an old read is a STALE tape, which is a different (and worse) claim than a fresh
+    # one. State the age rather than leaving it inferable from pulled_utc -- same lesson as T52.
+    try:
+        pulled = dt.datetime.fromisoformat(rec["pulled_utc"])
+        age = (dt.datetime.now(dt.timezone.utc) - pulled).total_seconds() / 3600.0
+        rec["receipt_age_h"] = round(age, 2)
+        if age > 3.0:
+            rec["receipt"] = "STALE"
+    except (KeyError, ValueError, TypeError):
+        rec["receipt_age_h"] = None
+    return rec
+
+
 def no_trade_record(reason: str, *, event_stream_id: str = None) -> dict:
     """The disciplined abstention. Logged as an observation of behaviour (not trading is the skill)."""
     return {"kind": "no_trade", "proposed_utc": _now_utc_iso(),
-            "reason": reason, "event_stream_id": event_stream_id}
+            "reason": reason, "event_stream_id": event_stream_id,
+            "tape_coverage": tape_coverage()}

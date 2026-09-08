@@ -1,0 +1,14 @@
+total ohlcv rows 672
+h0 skipped (never parsed) 234
+allowed mints with >=2 bars 382
+train(h=1) 175 validate(h=2) 207
+ts range 1785168720 1785337260 span_days 1.9506944444444445
+bars per mint q 2 13 27 112 1000 total 46099
+gap secs q 60 60 60 300 78000
+frac gaps==60 0.7862720650961349
+wl tables ['window_label', 'metadata']
+wl cols ['bonding_curve', 'mint', 'creator', 'create_slot', 'block_time', 'complete', 'account_missing', 'status', 'creator_onchain', 'virtual_token_reserves', 'real_token_reserves', 'data_len', 'fetched_at_unix']
+wl rows 33866 allowed creates 22561
+create ts range 1785168436 1785254238
+snapshots 26014 ts range 1788448363 1788489193
+saved

@@ -1,0 +1,70 @@
+=== SURVIVOR: has_x=1 & mcap/ath in [0.95,0.995) & 0<=sec_since_last_trade<30 ; 60m hold ===
+TRAIN     toll0.0114 drop-0.30  mean=+0.0234 med=+0.0020 ctrl(same-mints-random-timing)=-0.0305 univ=-0.1092 n=28 k=12 res=1.00
+TRAIN     toll0.0114 drop-0.50  mean=+0.0234 med=+0.0020 ctrl(same-mints-random-timing)=-0.0680 univ=-0.1999 n=28 k=12 res=1.00
+TRAIN     toll0.0114 drop-1.00  mean=+0.0234 med=+0.0020 ctrl(same-mints-random-timing)=-0.1618 univ=-0.4265 n=28 k=12 res=1.00
+TRAIN     toll0.0250 drop-0.30  mean=+0.0098 med=-0.0116 ctrl(same-mints-random-timing)=-0.0441 univ=-0.1228 n=28 k=12 res=1.00
+TRAIN     toll0.0250 drop-0.50  mean=+0.0098 med=-0.0116 ctrl(same-mints-random-timing)=-0.0816 univ=-0.2135 n=28 k=12 res=1.00
+TRAIN     toll0.0250 drop-1.00  mean=+0.0098 med=-0.0116 ctrl(same-mints-random-timing)=-0.1754 univ=-0.4401 n=28 k=12 res=1.00
+VALID     toll0.0114 drop-0.30  mean=+0.1071 med=-0.0004 ctrl(same-mints-random-timing)=+0.0441 univ=-0.1238 n=21 k=9 res=1.00
+VALID     toll0.0114 drop-0.50  mean=+0.1071 med=-0.0004 ctrl(same-mints-random-timing)=+0.0008 univ=-0.2267 n=21 k=9 res=1.00
+VALID     toll0.0114 drop-1.00  mean=+0.1071 med=-0.0004 ctrl(same-mints-random-timing)=-0.1074 univ=-0.4838 n=21 k=9 res=1.00
+VALID     toll0.0250 drop-0.30  mean=+0.0935 med=-0.0140 ctrl(same-mints-random-timing)=+0.0305 univ=-0.1374 n=21 k=9 res=1.00
+VALID     toll0.0250 drop-0.50  mean=+0.0935 med=-0.0140 ctrl(same-mints-random-timing)=-0.0128 univ=-0.2403 n=21 k=9 res=1.00
+VALID     toll0.0250 drop-1.00  mean=+0.0935 med=-0.0140 ctrl(same-mints-random-timing)=-0.1210 univ=-0.4974 n=21 k=9 res=1.00
+BOTH(1+2) toll0.0114 drop-0.30  mean=+0.0593 med=+0.0011 ctrl(same-mints-random-timing)=+0.0015 univ=-0.1169 n=49 k=21 res=1.00
+BOTH(1+2) toll0.0114 drop-0.50  mean=+0.0593 med=+0.0011 ctrl(same-mints-random-timing)=-0.0385 univ=-0.2139 n=49 k=21 res=1.00
+BOTH(1+2) toll0.0114 drop-1.00  mean=+0.0593 med=+0.0011 ctrl(same-mints-random-timing)=-0.1385 univ=-0.4564 n=49 k=21 res=1.00
+BOTH(1+2) toll0.0250 drop-0.30  mean=+0.0457 med=-0.0125 ctrl(same-mints-random-timing)=-0.0121 univ=-0.1305 n=49 k=21 res=1.00
+BOTH(1+2) toll0.0250 drop-0.50  mean=+0.0457 med=-0.0125 ctrl(same-mints-random-timing)=-0.0521 univ=-0.2275 n=49 k=21 res=1.00
+BOTH(1+2) toll0.0250 drop-1.00  mean=+0.0457 med=-0.0125 ctrl(same-mints-random-timing)=-0.1521 univ=-0.4700 n=49 k=21 res=1.00
+
+--- per-mint contribution on VALIDATE (toll 1.14%, drop -30%) ---
+   mint 8nk9kDEQ3BboCxRd9NqBwSPfgTJmUzpA42AXrSrpump    permean=+0.4366 ref=-0.0280
+   mint TeBiPoNVt5TXX1z8uCS6yZse9vJiDUWfRpTkvdspump    permean=+0.3652 ref=+0.1518
+   mint niJS7rwoCj5wAGP9PfH6uNW8ssE98brK1Ape6uZpump    permean=+0.2154 ref=+0.0521
+   mint KLh7sQxoWY4GhRSqHToeCorCHLEWLS7PbRjWYTFpump    permean=+0.0082 ref=+0.1467
+   mint 14K9UDSCqDB3NTfiSc7qND5zdG5fQZgfHmrXVXespump   permean=-0.0004 ref=-0.0376
+   mint B3gVVvdJcYTqCQipE4jBrsuzYdjghtwiZug7ZRaLpump   permean=-0.0011 ref=-0.0417
+   mint MHYqD8fUJ63KNerxoKQbaztWQJtEozkrjCyWD1wpump    permean=-0.0038 ref=+0.1166
+   mint GiUHYs5Hsv94P8bR9m26DsXsX8E786rQsFsPK6spump    permean=-0.0266 ref=+0.0543
+   mint 77Fg8ESAMxE7jTN37sBEBpnjisu3xeFLpPci5Js2pump   permean=-0.0294 ref=-0.0172
+   mean without top mint: +0.0659
+   mean without top 2:    +0.0232
+
+--- horizon sensitivity of the same cell (VALIDATE, toll 1.14%, drop -30%) ---
+   6m   mean=-0.0050 med=-0.0074 univ=-0.0755 n=53 k=9
+   9m   mean=-0.0056 med=-0.0078 univ=-0.0787 n=44 k=9
+   15m  mean=+0.0061 med=-0.0030 univ=-0.0943 n=40 k=9
+   21m  mean=+0.0205 med=+0.0077 univ=-0.1014 n=33 k=9
+   30m  mean=+0.0359 med=-0.0065 univ=-0.0955 n=29 k=9
+   45m  mean=+0.0646 med=-0.0025 univ=-0.1133 n=25 k=9
+   60m  mean=+0.1071 med=-0.0004 univ=-0.1238 n=21 k=9
+   90m  mean=+0.0421 med=-0.0736 univ=-0.1370 n=17 k=9
+
+--- band-neighbour sensitivity (VALIDATE, 60m) : is the mar/stale cut a cliff? ---
+   mar0 stale0  mean=-0.1458 med=-0.3114 n=43 k=19
+   mar0 stale1  mean=-0.1736 med=-0.1553 n=21 k=5
+   mar0 stale2  (thin)
+   mar0 stale3  (thin)
+   mar1 stale0  mean=-0.0818 med=-0.3114 n=24 k=17
+   mar1 stale1  (thin)
+   mar1 stale2  (thin)
+   mar1 stale3  (thin)
+   mar2 stale0  mean=-0.1669 med=-0.3114 n=36 k=17
+   mar2 stale1  mean=-0.1294 med=-0.0406 n=20 k=6
+   mar2 stale2  mean=+0.0308 med=+0.0308 n=11 k=2
+   mar2 stale3  (thin)
+   mar3 stale0  mean=-0.0221 med=-0.0001 n=51 k=21
+   mar3 stale1  mean=+0.1071 med=-0.0004 n=21 k=9
+   mar3 stale2  mean=-0.1625 med=-0.1022 n=8 k=3
+   mar3 stale3  (thin)
+   mar4 stale0  mean=-0.1232 med=-0.0908 n=78 k=26
+   mar4 stale1  mean=-0.0068 med=-0.0464 n=55 k=15
+   mar4 stale2  (thin)
+   mar4 stale3  (thin)
+
+=== MULTIPLICITY NULL: max-statistic permutation ===
+shuffle the mint->(X,TG,WEB) label assignment 300x, re-run the SAME 3-way grid on VALIDATE,
+count how often SOME cell reaches the survivor mean with mean>0 & bootlo>0.
+null max-stat over 200 social-label permutations: hits>=0.1071 : 33/200  (p=0.165)
+null max distribution: med +0.0950 p90 +0.1252 p95 +0.1454 max +0.1922 (n_nonempty=145)

@@ -1,0 +1,39 @@
+total ohlcv rows 672
+holdout skipped: 234 usable: 369
+snapshot mints(h!=0): 221 overlap with ohlcv: 0
+window_label rows(h!=0): 22561 ohlcv mints with create_time: 369
+rows (44451, 21) mints 341
+resolved rate 0.9302827832894648
+train(h=1) rows 18883 mints 151
+valid(h=2) rows 25568 mints 190
+gross mean/median: 0.2962936010648384 -0.0018337683194491472
+gross quantiles: [-1.0, -0.9932, -0.5129, -0.0887, -0.0018, 0.066, 0.3188, 1.1725, 14.7433, 10385.7189]
+feat ret5 finite 43820 q: [-0.30243, -0.04081, 0.00052, 0.0363, 0.24108]
+feat ret15 finite 41350 q: [-0.45096, -0.07744, 0.00045, 0.07624, 0.37814]
+feat ret60 finite 34488 q: [-0.63614, -0.1416, -0.00044, 0.15584, 0.82106]
+feat vol5 finite 44451 q: [0.90775, 111.94122, 1034.29917, 4481.69191, 41202.62806]
+feat volratio finite 44451 q: [0.01623, 0.14135, 0.24241, 0.37985, 1.0]
+feat volaccel finite 44451 q: [0.02503, 0.38693, 0.88374, 1.46852, 9.54585]
+feat rvol finite 40539 q: [0.00181, 0.00756, 0.03109, 0.0755, 0.3351]
+feat dd finite 44451 q: [-0.98752, -0.89858, -0.48778, -0.13027, -5e-05]
+feat age finite 44451 q: [15.68333, 115.29167, 506.03333, 953.225, 1347.025]
+feat gap finite 44451 q: [60.0, 60.0, 60.0, 60.0, 900.0]
+feat maxgap30 finite 44451 q: [60.0, 60.0, 60.0, 240.0, 2040.0]
+feat bars30 finite 44451 q: [2.0, 13.0, 29.0, 30.0, 30.0]
+feat logpx finite 44451 q: [-13.55843, -12.09366, -9.61895, -7.61364, -3.70966]
+feat body finite 44451 q: [-1.0, -0.91783, 0.00204, 0.66462, 1.0]
+feat range15 finite 44451 q: [0.01318, 0.06166, 0.16786, 0.44019, 3.7014]
+feat vwapdev finite 44449 q: [-0.56079, -0.05459, -0.00082, 0.03773, 0.24153]
+feat vwapdev60 finite 44450 q: [-0.87684, -0.16463, -0.00935, 0.085, 0.54685]
+feat hilopos finite 44451 q: [0.0, 0.08592, 0.47262, 0.9185, 1.0]
+feat upfrac finite 40539 q: [0.15385, 0.375, 0.5, 0.66667, 1.0]
+feat retlife finite 44451 q: [-0.94866, -0.74634, -0.13297, 0.44367, 2.59895]
+feat priorcr finite 44451 q: [0.0, 0.0, 0.0, 3.0, 35.0]
+ALT shape (44451, 14)
+alt H 300 res rate 0.9484
+alt H 600 res rate 0.9387
+alt H 1800 res rate 0.9033
+alt H 3600 res rate 0.8528
+MFE q: [0.0, 0.0073, 0.0468, 0.1543, 0.6609]
+MAE q: [-0.7762, -0.1877, -0.0524, -0.0095, 0.0]
+SAVED

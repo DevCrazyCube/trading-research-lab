@@ -1,0 +1,322 @@
+{
+  "preregistration_sha256": "d88663008a813064816f53cb8ac19c051d057a115560ebc9f41114186037bd3e",
+  "scope": "DIAGNOSTIC ONLY -- cannot change the T12 verdict (primary = trial 4)",
+  "trial5_S2_H1": {
+    "cfg": {
+      "id": 5,
+      "family": "S2",
+      "L": null,
+      "H": 1
+    },
+    "adjusted_total_return": {
+      "n": 116,
+      "mean_bp": 12.929895761669744,
+      "sd_bp": 40.56776664241334,
+      "t": 3.432755873864852,
+      "sharpe_per_obs": 0.3187233814382974,
+      "ann_sharpe": 2.298346988930098,
+      "ann_return": 0.06904828004739327,
+      "max_drawdown": -0.029997755622295674,
+      "skew": -0.0979434363635302,
+      "kurtosis_non_excess": 3.492463589470075,
+      "gross": {
+        "n": 116,
+        "mean_bp": 16.547767339716383,
+        "sd_bp": 40.79989188723624,
+        "t": 4.368269139574273,
+        "sharpe_per_obs": 0.405583607560812,
+        "ann_sharpe": 2.9247049870963435,
+        "ann_return": 0.08931546900589349,
+        "max_drawdown": -0.024927229647123017,
+        "skew": -0.09980316254448075,
+        "kurtosis_non_excess": 3.5181705731922124
+      }
+    },
+    "raw_close_no_distributions": {
+      "n": 116,
+      "mean_bp": 17.15990174853313,
+      "sd_bp": 45.36919885007395,
+      "t": 4.073640325695804,
+      "sharpe_per_obs": 0.378228008945879,
+      "ann_sharpe": 2.727440960142038,
+      "ann_return": 0.09267191514977169,
+      "max_drawdown": -0.023667547426778568,
+      "skew": -0.16366147797700067,
+      "kurtosis_non_excess": 3.024034957499755,
+      "gross": {
+        "n": 116,
+        "mean_bp": 20.777773326579773,
+        "sd_bp": 45.52734350296486,
+        "t": 4.91536404629577,
+        "sharpe_per_obs": 0.4563800944201075,
+        "ann_sharpe": 3.291003663065589,
+        "ann_return": 0.11337950011307374,
+        "max_drawdown": -0.02145471348007333,
+        "skew": -0.1720985176527026,
+        "kurtosis_non_excess": 3.0365285124601025
+      }
+    },
+    "distribution_share_of_edge_bp": -4.230005986863386,
+    "nav_leg_gross": {
+      "n": 116,
+      "mean_bp": 7.871081036932495,
+      "sd_bp": 45.29516425170165,
+      "t": 1.8715935484260984,
+      "sharpe_per_obs": 0.17377309845248642,
+      "ann_sharpe": 1.2530956335333836,
+      "ann_return": 0.04121152901360681,
+      "max_drawdown": -0.03347345504698662,
+      "skew": -0.3388277044181046,
+      "kurtosis_non_excess": 3.3506942260534083
+    },
+    "dsr_trials6": {
+      "dsr": 0.9912204157837665,
+      "name": "deflated Sharpe",
+      "observed_sharpe_per_observation": 0.3187233814382974,
+      "benchmark_sharpe_per_observation": 0.08704451138391114,
+      "benchmark_basis": "expected-max Sharpe under the null",
+      "trials": 6,
+      "sharpe_variance": 0.0044823113197270574,
+      "n": 116,
+      "skew": -0.0979434363635302,
+      "kurtosis_non_excess": 3.492463589470075,
+      "z": 2.3747851321582845,
+      "passes_at_0p95": true
+    },
+    "permutation": {
+      "observed_mean_bp": 17.77481646273349,
+      "p_right_tail": 0.0004997501249375312,
+      "trials": 2000,
+      "seed": 20260817,
+      "real_dispersion_bp": 43.56046093187162,
+      "null_median_dispersion_bp": 22.708727388257653,
+      "dispersion_ratio": 1.918225543294693,
+      "note": "Decile-label permutation. Report the dispersion ratio beside the p-value: far from 1 means the p-value is about WHICH partition, not about the mean (T10 section 5)."
+    }
+  },
+  "trial6_S2_H4": {
+    "cfg": {
+      "id": 6,
+      "family": "S2",
+      "L": null,
+      "H": 4
+    },
+    "adjusted_total_return": {
+      "n": 116,
+      "mean_bp": 14.482016154669022,
+      "sd_bp": 40.70090166327284,
+      "t": 3.8322514020789287,
+      "sharpe_per_obs": 0.35581561004426393,
+      "ann_sharpe": 2.5658228532501863,
+      "ann_return": 0.07769678919269585,
+      "max_drawdown": -0.02255285284214925,
+      "skew": -0.06578860250618726,
+      "kurtosis_non_excess": 3.098902068946797,
+      "gross": {
+        "n": 116,
+        "mean_bp": 16.06146568752268,
+        "sd_bp": 40.59744005954157,
+        "t": 4.261039102199106,
+        "sharpe_per_obs": 0.3956275485342523,
+        "ann_sharpe": 2.8529108244527293,
+        "ann_return": 0.08657342396925372,
+        "max_drawdown": -0.021611208250044478,
+        "skew": -0.0428630860425598,
+        "kurtosis_non_excess": 3.244464645731713
+      }
+    },
+    "raw_close_no_distributions": {
+      "n": 116,
+      "mean_bp": 18.779701178629043,
+      "sd_bp": 46.0391845382957,
+      "t": 4.393291796536205,
+      "sharpe_per_obs": 0.4079069029341291,
+      "ann_sharpe": 2.9414585082894296,
+      "ann_return": 0.10188064385402651,
+      "max_drawdown": -0.020660471727200647,
+      "skew": -0.09165329331296214,
+      "kurtosis_non_excess": 2.7631965731719164,
+      "gross": {
+        "n": 116,
+        "mean_bp": 20.3591507114827,
+        "sd_bp": 45.922044727578154,
+        "t": 4.774934677452727,
+        "sharpe_per_obs": 0.4433415548514581,
+        "ann_sharpe": 3.1969814171217257,
+        "ann_return": 0.11095324624284153,
+        "max_drawdown": -0.019717787003750487,
+        "skew": -0.09366828136618496,
+        "kurtosis_non_excess": 2.835102529703592
+      }
+    },
+    "distribution_share_of_edge_bp": -4.297685023960021,
+    "nav_leg_gross": {
+      "n": 116,
+      "mean_bp": 9.44613433894339,
+      "sd_bp": 45.19613709028194,
+      "t": 2.2510326536946685,
+      "sharpe_per_obs": 0.209003134937709,
+      "ann_sharpe": 1.5071430395012577,
+      "ann_return": 0.04976979082014532,
+      "max_drawdown": -0.024707158605572932,
+      "skew": -0.17371273950043312,
+      "kurtosis_non_excess": 3.5279546041558607
+    },
+    "dsr_trials6": {
+      "dsr": 0.9971178372029122,
+      "name": "deflated Sharpe",
+      "observed_sharpe_per_observation": 0.35581561004426393,
+      "benchmark_sharpe_per_observation": 0.08704451138391114,
+      "benchmark_basis": "expected-max Sharpe under the null",
+      "trials": 6,
+      "sharpe_variance": 0.0044823113197270574,
+      "n": 116,
+      "skew": -0.06578860250618726,
+      "kurtosis_non_excess": 3.098902068946797,
+      "z": 2.760894713807675,
+      "passes_at_0p95": true
+    },
+    "permutation": {
+      "observed_mean_bp": 17.446120527912317,
+      "p_right_tail": 0.0004997501249375312,
+      "trials": 2000,
+      "seed": 20260817,
+      "real_dispersion_bp": 43.25091430686199,
+      "null_median_dispersion_bp": 22.681188413908195,
+      "dispersion_ratio": 1.9069068832539815,
+      "note": "Decile-label permutation. Report the dispersion ratio beside the p-value: far from 1 means the p-value is about WHICH partition, not about the mean (T10 section 5)."
+    }
+  },
+  "trial6_persistence_heldout": {
+    "long_leg_mean_discount_at_entry_pct": -19.063693989071037,
+    "long_leg_mean_discount_after_H_pct": -18.665967213114754,
+    "long_leg_mean_narrowing_pp": 0.3977267759562828,
+    "short_leg_mean_discount_at_entry_pct": 11.946495071193866,
+    "short_leg_mean_discount_after_H_pct": 11.214819277108433,
+    "short_leg_mean_narrowing_pp": -0.731675794085433,
+    "note": "A mean-reversion claim REQUIRES the long leg's discount to narrow (become less negative) and the short leg's premium to shrink. If both legs sit still the P&L is carry or beta, not reversion."
+  },
+  "trial6_composition_heldout": {
+    "long_leg_top_strategies": {
+      "Equity-U.S. Equity": 200,
+      "Equity-Asia Equity": 146,
+      "Equity-Global Equity": 100,
+      "Hybrid-U.S. Allocation": 86,
+      "Equity-Emerging Market Equity": 83,
+      "Hybrid-Global Allocation": 70,
+      "Fixed Income - Taxable-Senior Loans": 45,
+      "Equity-Single-Country Equity": 37
+    },
+    "short_leg_top_strategies": {
+      "Fixed Income - Taxable-Multi-Sector": 133,
+      "Equity-Sector Equity": 110,
+      "Fixed Income - Taxable-Investment Grade": 95,
+      "Equity-U.S. Equity": 71,
+      "Fixed Income - Taxable-Preferreds": 70,
+      "Fixed Income - Taxable-Convertibles": 62,
+      "Fixed Income - Municipal-Municipal - Single-State": 43,
+      "Fixed Income - Taxable-Senior Loans": 38
+    },
+    "long_leg_name_slots": 918,
+    "short_leg_name_slots": 918
+  },
+  "trial6_executability_live_flags": {
+    "long_leg_slots_tradable": 861,
+    "long_leg_slots": 918,
+    "short_leg_slots_shortable_at_alpaca": 525,
+    "short_leg_slots": 918,
+    "short_leg_shortable_share": 0.5719,
+    "note": "LIVE flags applied retrospectively -- NOT a backtest screen, and it is look-ahead by construction. It bounds what could be put on TODAY."
+  },
+  "survivorship_probe": {
+    "alpaca_inactive_us_equity": 19195,
+    "inactive_matching_cef_name_heuristic": 131,
+    "live_cef_universe": 360,
+    "implied_lower_bound_attrition_share": 0.2668,
+    "sample_of_matches": [
+      "055CNT018",
+      "092BAS0A1",
+      "092ONE085",
+      "092RGT118",
+      "231RGT140",
+      "339ESC014",
+      "429RGT053",
+      "67623C117",
+      "723ESC018",
+      "723ESC026",
+      "723ESC034",
+      "723ESC042",
+      "768BAS071",
+      "768RGT011",
+      "768RGT045",
+      "ABBAF",
+      "AGO.PRB",
+      "AGO.PRE",
+      "AGO.PRF",
+      "AGUNF",
+      "AWRRF",
+      "BAF",
+      "BBF",
+      "BBK",
+      "BFO"
+    ],
+    "HEURISTIC_WARNING": "A NAME MATCH IS NOT A CLASSIFICATION. This over-counts (open-end/ETF/BDC names collide) and under-counts (many CEF names carry none of these words), and Alpaca's inactive list is itself partial. It is reported as an ORDER OF MAGNITUDE for how much of the 2021 CEF population the survivor-only panel cannot see, not as a measurement of it."
+  },
+  "factor_regression_heldout": {
+    "4": {
+      "beta_eqmbond": 0.02915392310919005,
+      "alpha_bp": -1.2291923854802707,
+      "t_alpha": -0.3871079317726713,
+      "resid_annSR": -0.25918194653876653,
+      "beta_spy": 0.022568375828224567,
+      "alpha_spy_bp": -1.1868664574200916,
+      "t_alpha_spy": -0.37086033087009995
+    },
+    "6": {
+      "beta_eqmbond": 0.05663484356532859,
+      "alpha_bp": 12.620975795208912,
+      "t_alpha": 3.5145192870103625,
+      "resid_annSR": 2.353090379171845,
+      "beta_spy": 0.050567951845482295,
+      "alpha_spy_bp": 12.430288453567343,
+      "t_alpha_spy": 3.416387689882023
+    },
+    "5": {
+      "beta_eqmbond": 0.06423835418786072,
+      "alpha_bp": 10.8190014386193,
+      "t_alpha": 3.0716570324864407,
+      "resid_annSR": 2.05657901436865,
+      "beta_spy": 0.062151937118560846,
+      "alpha_spy_bp": 10.408163193719725,
+      "t_alpha_spy": 2.93070913784646
+    },
+    "note": "Weekly net series regressed on (SPY - AGG) and on SPY, both adjustment=all, same grid. Small betas: the equity-vs-bond composition tilt does NOT explain S2 at the index level."
+  },
+  "portfolio_persistence_heldout": {
+    "4": {
+      "mean_long_overlap": 0.505611559139785,
+      "mean_short_overlap": 0.39159226190476193,
+      "n_rebalances": 29,
+      "autocorr_1_2_4": [
+        -0.05149753559549432,
+        0.0015056498075007275,
+        -0.021340602024571404
+      ],
+      "pct_weeks_negative": 0.5172413793103449,
+      "n_weeks": 116
+    },
+    "6": {
+      "mean_long_overlap": 0.8143001152073733,
+      "mean_short_overlap": 0.7905385944700462,
+      "n_rebalances": 29,
+      "autocorr_1_2_4": [
+        -0.05683433562114294,
+        0.036939247994051676,
+        -0.05707801954927608
+      ],
+      "pct_weeks_negative": 0.33620689655172414,
+      "n_weeks": 116
+    },
+    "note": "Share of each decile carried over to the next rebalance. S2 is a NEAR-STATIC book (about 80 percent persistence); S1 genuinely rotates. A static book has far fewer independent bets than its weekly observation count suggests."
+  }
+}

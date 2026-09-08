@@ -96,8 +96,20 @@ def open_estimates() -> list:
     return [s for s in estimates if s["estimate_sha256"] not in resolved]
 
 
+def dedupe_keep_first(rows: list) -> list:
+    """KEEP-FIRST by (venue, market_id): the EARLIEST-frozen estimate is the one that counts (T43).
+
+    Duplicate freezes of one market (on file: 567621/703257/997488) would otherwise let a single
+    world outcome enter the Brier stream several times, inflating n. Pure function; selftested."""
+    best: dict = {}
+    for r in sorted(rows, key=lambda r: (r.get("proposed_utc") or "", r.get("resolved_utc") or "")):
+        best.setdefault((r.get("venue"), r.get("market_id")), r)
+    return list(best.values())
+
+
 def resolved_stream() -> list:
-    """Resolved estimates, de-duplicated by hash, oldest first (the Brier/P&L stream)."""
+    """Resolved estimates, de-duplicated by hash then keep-first by market, oldest first
+    (the Brier/P&L stream)."""
     out, seen = [], set()
     for r in read_resolutions():
         if r.get("status") != "RESOLVED" or r["estimate_sha256"] in seen:
@@ -106,5 +118,6 @@ def resolved_stream() -> list:
             continue
         seen.add(r["estimate_sha256"])
         out.append(r)
+    out = dedupe_keep_first(out)
     out.sort(key=lambda r: r.get("resolved_utc", ""))
     return out

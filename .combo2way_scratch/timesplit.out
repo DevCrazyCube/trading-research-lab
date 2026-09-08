@@ -1,0 +1,13 @@
+time cut 1785223560 early rows 20680 late rows 20706
+ALLBARS EARLY  mean=-0.1388 med=-0.1176 n=2121 k=290 posfrac=0.159
+ALLBARS LATE   mean=-0.1993 med=-0.3000 n=2175 k=281 posfrac=0.057
+ALLBARS ALL    mean=-0.1566 med=-0.1451 n=4067 k=349 posfrac=0.126
+
+fwd#1     R8[up_min=3 & density15=1]         EARLY  mean=-0.0389 med=-0.0762 n=  50 k= 32 posfrac=0.28 CI=[-0.1197,+0.0610] ctrl=-0.0585(hi+0.0394) fails
+fwd#1     R8[up_min=3 & density15=1]         LATE   mean=-0.0204 med=-0.0342 n=  40 k= 19 posfrac=0.42 CI=[-0.0798,+0.0391] ctrl=-0.0315(hi+0.0895) fails
+fwd#2     M10[ret1=3 & barrange=6]           EARLY  mean=-0.0596 med=-0.0448 n=  67 k= 28 posfrac=0.32 CI=[-0.1362,+0.0232] ctrl=-0.0606(hi+0.0240) fails
+fwd#2     M10[ret1=3 & barrange=6]           LATE   mean=+0.0188 med=-0.0077 n= 141 k= 23 posfrac=0.43 CI=[-0.0312,+0.0696] ctrl=-0.0510(hi+0.0272) fails
+rev#1     M10[cumvol=1]                      EARLY  mean=+0.0250 med=-0.0161 n= 349 k= 50 posfrac=0.40 CI=[-0.0506,+0.1426] ctrl=-0.0879(hi-0.0425) fails
+rev#1     M10[cumvol=1]                      LATE   mean=-0.1149 med=-0.0678 n= 344 k= 37 posfrac=0.11 CI=[-0.1847,-0.0381] ctrl=-0.0724(hi-0.0152) fails
+rev#2     M10[barrange=3 & cumvol=1]         EARLY  mean=+0.0309 med=+0.0046 n= 107 k= 37 posfrac=0.54 CI=[-0.0258,+0.0974] ctrl=-0.0697(hi+0.0048) fails
+rev#2     M10[barrange=3 & cumvol=1]         LATE   mean=-0.0513 med=-0.0235 n=  79 k= 21 posfrac=0.29 CI=[-0.1076,+0.0020] ctrl=-0.0429(hi+0.0372) fails

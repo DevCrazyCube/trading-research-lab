@@ -1,0 +1,178 @@
+{
+  "candidate_id": "gh:datastudy-nl",
+  "display_name": "Datastudy",
+  "github": "https://github.com/datastudy-nl",
+  "website": "https://datastudy.nl",
+  "public_email": "opensource@datastudy.nl",
+  "location_text": "Netherlands",
+  "review_flags": [
+    "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+    "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend"
+  ],
+  "score": 75,
+  "score_breakdown": {
+    "own_recent_repos": 30,
+    "recency": 15,
+    "language_breadth": 9,
+    "has_website": 8,
+    "website_reachable": 5,
+    "public_email": 5,
+    "org_older_than_1y": 3
+  },
+  "signals": {
+    "recent_repos_total": 10,
+    "recent_repos_own": 10,
+    "recent_repos_forks": 0,
+    "languages": [
+      "JavaScript",
+      "Python",
+      "TypeScript"
+    ],
+    "pushed_since_filter": "2026-02-01",
+    "latest_push": "2026-08-07T12:16:53Z",
+    "org_type": "Organization",
+    "enriched": true,
+    "peppol_match": null,
+    "website_reachable": true,
+    "website_title": "Datastudy, Data and AI, engineered for real business outcomes.",
+    "review_flags": [
+      "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+      "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend"
+    ]
+  },
+  "exclusions": [],
+  "evidence": [
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository datastudy-nl/llm-novel-idea-generator (taal: Python) had een commit op 2026-08-07. Omschrijving: “Break an LLM out of its own prior. Generate genuinely non-obvious concepts by deriving candidate ideas from embedding geometry over an external lexical database”.",
+      "url": "https://github.com/datastudy-nl/llm-novel-idea-generator",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "datastudy-nl/llm-novel-idea-generator",
+        "pushed_at": "2026-08-07T12:16:53Z",
+        "language": "Python",
+        "stargazers": 1,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository datastudy-nl/wielrenner-toto (taal: TypeScript) had een commit op 2026-08-07. Omschrijving: “Open Source Wielrenner Betting App”.",
+      "url": "https://github.com/datastudy-nl/wielrenner-toto",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "datastudy-nl/wielrenner-toto",
+        "pushed_at": "2026-08-07T12:16:50Z",
+        "language": "TypeScript",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository datastudy-nl/kraken-agent (taal: TypeScript) had een commit op 2026-08-07. Omschrijving: “A persistent AI agent that remembers you through a knowledge graph, learns workflows as reusable skills, and grows a deepening model of who you are across sessi”.",
+      "url": "https://github.com/datastudy-nl/kraken-agent",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "datastudy-nl/kraken-agent",
+        "pushed_at": "2026-08-07T12:16:42Z",
+        "language": "TypeScript",
+        "stargazers": 1,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository datastudy-nl/dochub-action (taal: onbekend) had een commit op 2026-08-07. Omschrijving: “Automatically trigger DocumentationHub to generate and PR documentation for your repository.”.",
+      "url": "https://github.com/datastudy-nl/dochub-action",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "datastudy-nl/dochub-action",
+        "pushed_at": "2026-08-07T12:16:36Z",
+        "language": null,
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository datastudy-nl/couriway-statistics-page (taal: JavaScript) had een commit op 2026-08-07.",
+      "url": "https://github.com/datastudy-nl/couriway-statistics-page",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "datastudy-nl/couriway-statistics-page",
+        "pushed_at": "2026-08-07T12:16:33Z",
+        "language": "JavaScript",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_location",
+      "claim_nl": "Het GitHub-profiel van datastudy-nl vermeldt als locatie “Netherlands”.",
+      "url": "https://github.com/datastudy-nl",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "location": "Netherlands"
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_website",
+      "claim_nl": "Het GitHub-profiel verwijst naar de website https://datastudy.nl.",
+      "url": "https://github.com/datastudy-nl",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "website": "https://datastudy.nl"
+      }
+    },
+    {
+      "source": "website",
+      "kind": "live_website",
+      "claim_nl": "De website https://datastudy.nl is bereikbaar en heeft als paginatitel “Datastudy, Data and AI, engineered for real business outcomes.”.",
+      "url": "https://datastudy.nl",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "http_status": 200,
+        "title": "Datastudy, Data and AI, engineered for real business outcomes."
+      }
+    }
+  ],
+  "owner_checklist": [
+    "Is dit een Nederlandse onderneming (geen buitenlands filiaal, geen publieke instelling)?",
+    "Klopt het e-mailadres, en is het een zakelijk (geen persoonlijk) adres?",
+    "Zijn de genoemde repositories echt van dit bedrijf en niet van een naamgenoot?",
+    "Staat dit bedrijf niet op de blokkeerlijst / heeft het niet eerder afgemeld?",
+    "Is de RVO-parameterbron nog geldig (bevriezingsdatum hieronder) en de kalender voor 2027 gecontroleerd?",
+    "Klopt de aanname over het aantal ontwikkelaars ruwweg, of moet die naar beneden?"
+  ],
+  "params_frozen_on": "2026-08-19",
+  "generated": "2026-08-19",
+  "sent": false,
+  "sendable": false,
+  "sendable_reason": "sender profile carries placeholders; owner has not registered KVK",
+  "lint_allowed_urls": [
+    "https://datastudy.nl",
+    "https://github.com/datastudy-nl",
+    "https://github.com/datastudy-nl/couriway-statistics-page",
+    "https://github.com/datastudy-nl/dochub-action",
+    "https://github.com/datastudy-nl/kraken-agent",
+    "https://github.com/datastudy-nl/llm-novel-idea-generator",
+    "https://github.com/datastudy-nl/wielrenner-toto",
+    "https://voorbeeld.nl",
+    "https://voorbeeld.nl/privacy"
+  ],
+  "lint": {
+    "ok": true,
+    "violations": [],
+    "missing": [],
+    "unsourced_urls": [],
+    "unlinked_claims": []
+  }
+}

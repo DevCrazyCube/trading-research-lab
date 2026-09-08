@@ -1,0 +1,20 @@
+ohlcv ok mints 594
+wl mints 33866
+ohlcv in wl 594
+snap mints 341
+ohlcv in snap 0
+wl in snap 0
+wl block_time 1785168436 1785254238
+ohlcv first_ts 1785168720 1785332820
+ohlcv last_ts 1785172740 1785337260
+ohlcv complete dist Counter({1: 594})
+creators 8565 multi-create creators 3012 max 587
+ohlcv mints whose creator has >1 create 365
+bodies size 15771230208
+bodies tables [('metadata',), ('raw_transaction',), ('raw_block_signatures',), ('transaction_coordinate',), ('raw_boundary_response',), ('program_version',), ('instruction',), ('reserve_observation',), ('classification_failure',), ('sqlite_sequence',)]
+instruction cols ['slot', 'transaction_index', 'outer_index', 'inner_index', 'signature', 'program_id', 'discriminator', 'idl_name', 'target', 'accounts_json', 'data_len']
+instruction row (435569222, 989, 0, -1, 'GYJCSS74x6EPkZqTXjpU25VJNvwMKQ9VkGcEHjkjdF2bu7K3Ma3SBbuDq36UFSmpm8q2LKpGhmhmmRGCyWkQPER', '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P', 'd6904cec5f8b31b4', 'create_v2', 1, '["8TPKwc8adA9uxVRSyW1FGXgacg184bnZKssDGbh9pump","TSLvdd1pWpHVjahSpsvCXUbgwsL3JAcvokwaKt1eokM","E33k9N3ZUrXE1iLBwvgacrxdmwTfbLALqQ56gJBzWrhP","4xdQ2maz3QEAZEtTK93FutyUqPnT2Lr2uptdi3PmNScY","4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf","AJNaSsbH1tB4aVM8NXtXZ6c5cCzVV2C3yJrDJBjfqvQ2","11111111111111111111111111111111","TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb","ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL","MAyhSmzXzV1pTf7LsNkrNwkWKTo4ougAJ1PPg47MD4e","13ec7XdrjF3h3YcqBTFDSReRcUFwbCnJaAQspM4j6DDJ","BwWK17cbHxwWBKZkUYvzxLcNQ1YVyaFezduWbtm2de6s","4FSkpU2ZJQdu8KuA3e1G4Lnfg3VaBPi5A3Bz9tjxtrZv","6D9
+instruction count (4461142,)
+reserve_observation cols ['slot', 'transaction_index', 'outer_index', 'inner_index', 'bonding_curve', 'virtual_quote_before', 'virtual_token_before', 'real_quote_before', 'real_token_before', 'virtual_quote_after', 'virtual_token_after', 'real_quote_after', 'real_token_after', 'evidence']
+reserve_observation row (435569222, 989, 0, -1, 'E33k9N3ZUrXE1iLBwvgacrxdmwTfbLALqQ56gJBzWrhP', None, None, None, None, 30000000000, 1073000000000000, 0, 793100000000000, '{"chain_check":"anchor","event_inner_index":14,"event_outer_index":0,"kind":"anchor_cpi:CreateEvent"}')
+reserve_observation count (333888,)

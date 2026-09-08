@@ -1,0 +1,83 @@
+PESSIMISTIC-FILL ENGINE. NS=210 NDP=203848 train=90650 validate=113198
+entry cells 280 STAGE-A combos 58800
+train controls 15s
+validate controls 22s
+STAGE-A(pess) rows=45921  530s
+train mean>0: 1537   strict(train>0,fz50>0,beats control): 179
+validated 179  2s
+BH(q=.10) passers 0 / 179
+=== STAGE-A/B SURVIVORS (pessimistic fills): 4 ===
+cell                       struct                           trmean    vmean     vmed    vCIlo    vCIhi      n     k     ctrl     edge    t2.5%     BH
+ubgrow_120>=p75            H180|flowrev|P2halfout25         0.0820   0.0975  -0.0305   0.0282   0.1735    647   142  -0.0613   0.1589   0.0824  False
+ubgrow_600>=p75            H180|flowrev|P2halfout25         0.0401   0.0620   0.0117   0.0003   0.1485   1223    50  -0.0613   0.1233   0.0474  False
+ub_120>=p75                H180|flowrev|P2halfout25         0.0258   0.0581   0.0158   0.0003   0.1285    681    44  -0.0613   0.1195   0.0436  False
+bvol_600>=p75              H180|flowrev|P2halfout25         0.0498   0.0575  -0.0029   0.0035   0.1219   1769    64  -0.0613   0.1189   0.0430  False
+
+--- pessimistic TRAIN surface by axis ---
+H     H60                  n= 9369 mean=-0.0402 med=-0.0240 frac>0=0.020
+H     H180                 n= 9327 mean=-0.0499 med=-0.0327 frac>0=0.023
+H     H600                 n= 9216 mean=-0.0624 med=-0.0434 frac>0=0.032
+H     H1800                n= 9057 mean=-0.0704 med=-0.0468 frac>0=0.044
+H     H5400                n= 8952 mean=-0.0711 med=-0.0479 frac>0=0.048
+exit  sl0.15               n= 3309 mean=-0.0431 med=-0.0270 frac>0=0.101
+exit  flowrev              n= 3306 mean=-0.0448 med=-0.0213 frac>0=0.069
+exit  sl0.3                n= 3288 mean=-0.0507 med=-0.0323 frac>0=0.084
+exit  tpsl(0.25, 0.3)      n= 3330 mean=-0.0528 med=-0.0366 frac>0=0.005
+exit  tpsl(0.5, 0.3)       n= 3315 mean=-0.0541 med=-0.0372 frac>0=0.008
+exit  trail0.2             n= 3303 mean=-0.0572 med=-0.0383 frac>0=0.015
+exit  sl0.5                n= 3264 mean=-0.0603 med=-0.0361 frac>0=0.078
+exit  tp0.1                n= 3330 mean=-0.0625 med=-0.0402 frac>0=0.002
+exit  trail0.4             n= 3264 mean=-0.0635 med=-0.0418 frac>0=0.025
+exit  tpsl(1.0, 0.5)       n= 3276 mean=-0.0643 med=-0.0433 frac>0=0.007
+exit  time                 n= 3171 mean=-0.0645 med=-0.0371 frac>0=0.067
+exit  tp0.25               n= 3297 mean=-0.0668 med=-0.0425 frac>0=0.002
+exit  tp0.5                n= 3255 mean=-0.0675 med=-0.0437 frac>0=0.004
+exit  tp1.0                n= 3213 mean=-0.0692 med=-0.0446 frac>0=0.003
+feat  topshr_30            n= 1680 mean=-0.0251 med=-0.0198 frac>0=0.101
+feat  ubgrow_120           n= 1176 mean=-0.0292 med=-0.0227 frac>0=0.136
+feat  topshr_120           n= 1680 mean=-0.0303 med=-0.0221 frac>0=0.044
+feat  topshr_600           n= 1680 mean=-0.0311 med=-0.0209 frac>0=0.006
+feat  bvol_120             n= 1050 mean=-0.0316 med=-0.0198 frac>0=0.034
+feat  ubgrow_600           n= 1041 mean=-0.0350 med=-0.0210 frac>0=0.021
+feat  bvol_600             n= 1041 mean=-0.0376 med=-0.0192 frac>0=0.033
+feat  newrate_30           n= 1194 mean=-0.0453 med=-0.0222 frac>0=0.112
+feat  bvol_30              n= 1281 mean=-0.0465 med=-0.0207 frac>0=0.129
+feat  newrate_120          n= 1050 mean=-0.0518 med=-0.0197 frac>0=0.031
+feat  newrate_600          n= 1035 mean=-0.0537 med=-0.0442 frac>0=0.034
+feat  rate_30              n= 1158 mean=-0.0554 med=-0.0212 frac>0=0.087
+feat  ub_30                n= 1113 mean=-0.0565 med=-0.0305 frac>0=0.061
+feat  vimb_600             n= 1680 mean=-0.0583 med=-0.0444 frac>0=0.000
+feat  vimb_30              n= 1680 mean=-0.0584 med=-0.0479 frac>0=0.050
+feat  repeat_30            n= 1680 mean=-0.0585 med=-0.0404 frac>0=0.064
+feat  repeat_600           n= 1680 mean=-0.0586 med=-0.0468 frac>0=0.030
+feat  vimb_120             n= 1680 mean=-0.0589 med=-0.0417 frac>0=0.000
+feat  repeat_120           n= 1680 mean=-0.0596 med=-0.0383 frac>0=0.013
+feat  prog                 n= 1197 mean=-0.0607 med=-0.0358 frac>0=0.003
+feat  solincurve           n= 1197 mean=-0.0607 med=-0.0358 frac>0=0.003
+feat  meansz_600           n= 1680 mean=-0.0610 med=-0.0408 frac>0=0.000
+feat  age                  n= 1680 mean=-0.0617 med=-0.0247 frac>0=0.017
+feat  ubtot                n=  840 mean=-0.0618 med=-0.0605 frac>0=0.015
+feat  rate_120             n= 1035 mean=-0.0626 med=-0.0550 frac>0=0.007
+feat  ubgrow_30            n= 1347 mean=-0.0650 med=-0.0600 frac>0=0.042
+feat  meansz_120           n= 1680 mean=-0.0660 med=-0.0433 frac>0=0.000
+feat  ub_120               n= 1035 mean=-0.0672 med=-0.0537 frac>0=0.007
+feat  ub_600               n= 1032 mean=-0.0679 med=-0.0669 frac>0=0.011
+feat  ntot                 n=  840 mean=-0.0693 med=-0.0664 frac>0=0.005
+feat  meansz_30            n= 1680 mean=-0.0706 med=-0.0498 frac>0=0.013
+feat  rate_600             n= 1014 mean=-0.0742 med=-0.0741 frac>0=0.004
+feat  ret_600              n= 1056 mean=-0.0834 med=-0.0427 frac>0=0.067
+feat  ret_120              n= 1089 mean=-0.1234 med=-0.0996 frac>0=0.000
+feat  ret_30               n= 1260 mean=-0.1427 med=-0.1307 frac>0=0.002
+pos   P1avgin              n=15307 mean=-0.0495 med=-0.0344 frac>0=0.042
+pos   P2halfout25          n=15307 mean=-0.0599 med=-0.0371 frac>0=0.022
+pos   P0                   n=15307 mean=-0.0665 med=-0.0410 frac>0=0.037
+
+STAGE-C base cells (top-26 marginals):
+ret_600<=p1, ubgrow_30>=p95, bvol_30>=p95, topshr_120>=p95, ubgrow_120<=p1, repeat_600>=p99, newrate_600<=p1, age>=p75, bvol_30<=p1, bvol_30<=p5, vimb_30<=p1, vimb_30<=p5, repeat_600>=p95, meansz_600<=p1, topshr_30<=p1, topshr_30<=p5, rate_30<=p5, rate_30<=p10, topshr_30>=p95, rate_30<=p1, age>=p95, newrate_120<=p10, ub_30<=p5, ub_30<=p1, topshr_600<=p5, repeat_30>=p90
+STAGE-C conjunction cells 312  x structures 45 = 14040 combos
+STAGE-C train rows 10259 31s
+STAGE-C strict train survivors 6
+=== STAGE-C SURVIVORS: 0 of 6 validated ===
+cell                       struct                           trmean    vmean     vmed    vCIlo    vCIhi      n     k     ctrl     edge    t2.5%     BH
+
+TOTAL COMBOS SWEPT (pessimistic): stageA=58800 stageC=14040  (plus optimistic-fill stageA=58800)

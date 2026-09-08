@@ -1,0 +1,133 @@
+{
+  "candidate_id": "gh:cre8-it-code",
+  "display_name": "Cre8-IT",
+  "github": "https://github.com/Cre8-IT-Code",
+  "website": "https://www.cre8-it.nl/",
+  "public_email": null,
+  "location_text": "Netherlands",
+  "review_flags": [
+    "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+    "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend",
+    "geen publiek e-mailadres; contactadres moet handmatig gezocht worden"
+  ],
+  "score": 49,
+  "score_breakdown": {
+    "own_recent_repos": 12,
+    "recency": 15,
+    "language_breadth": 6,
+    "has_website": 8,
+    "website_reachable": 5,
+    "org_older_than_1y": 3
+  },
+  "signals": {
+    "recent_repos_total": 2,
+    "recent_repos_own": 2,
+    "recent_repos_forks": 0,
+    "languages": [
+      "HTML",
+      "Shell"
+    ],
+    "pushed_since_filter": "2026-02-01",
+    "latest_push": "2026-08-03T13:59:31Z",
+    "org_type": "Organization",
+    "enriched": true,
+    "peppol_match": null,
+    "website_reachable": true,
+    "website_title": "Cre8-it | IT solutions for your business",
+    "review_flags": [
+      "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+      "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend",
+      "geen publiek e-mailadres; contactadres moet handmatig gezocht worden"
+    ]
+  },
+  "exclusions": [],
+  "evidence": [
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository Cre8-IT-Code/tapinto-cli (taal: Shell) had een commit op 2026-08-03. Omschrijving: “Homebrew tap for Tapinto CLI — auto-updated by goreleaser on release”.",
+      "url": "https://github.com/Cre8-IT-Code/tapinto-cli",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "Cre8-IT-Code/tapinto-cli",
+        "pushed_at": "2026-08-03T13:59:31Z",
+        "language": "Shell",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository Cre8-IT-Code/Site (taal: HTML) had een commit op 2026-06-01. Omschrijving: “Official website of Cre8-IT”.",
+      "url": "https://github.com/Cre8-IT-Code/Site",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "Cre8-IT-Code/Site",
+        "pushed_at": "2026-06-01T13:11:55Z",
+        "language": "HTML",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_location",
+      "claim_nl": "Het GitHub-profiel van Cre8-IT-Code vermeldt als locatie “Netherlands”.",
+      "url": "https://github.com/Cre8-IT-Code",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "location": "Netherlands"
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_website",
+      "claim_nl": "Het GitHub-profiel verwijst naar de website https://www.cre8-it.nl/.",
+      "url": "https://github.com/Cre8-IT-Code",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "website": "https://www.cre8-it.nl/"
+      }
+    },
+    {
+      "source": "website",
+      "kind": "live_website",
+      "claim_nl": "De website https://www.cre8-it.nl/ is bereikbaar en heeft als paginatitel “Cre8-it | IT solutions for your business”.",
+      "url": "https://www.cre8-it.nl/",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "http_status": 200,
+        "title": "Cre8-it | IT solutions for your business"
+      }
+    }
+  ],
+  "owner_checklist": [
+    "Is dit een Nederlandse onderneming (geen buitenlands filiaal, geen publieke instelling)?",
+    "Klopt het e-mailadres, en is het een zakelijk (geen persoonlijk) adres?",
+    "Zijn de genoemde repositories echt van dit bedrijf en niet van een naamgenoot?",
+    "Staat dit bedrijf niet op de blokkeerlijst / heeft het niet eerder afgemeld?",
+    "Is de RVO-parameterbron nog geldig (bevriezingsdatum hieronder) en de kalender voor 2027 gecontroleerd?",
+    "Klopt de aanname over het aantal ontwikkelaars ruwweg, of moet die naar beneden?"
+  ],
+  "params_frozen_on": "2026-08-19",
+  "generated": "2026-08-19",
+  "sent": false,
+  "sendable": false,
+  "sendable_reason": "sender profile carries placeholders; owner has not registered KVK",
+  "lint_allowed_urls": [
+    "https://github.com/Cre8-IT-Code",
+    "https://github.com/Cre8-IT-Code/Site",
+    "https://github.com/Cre8-IT-Code/tapinto-cli",
+    "https://voorbeeld.nl",
+    "https://voorbeeld.nl/privacy",
+    "https://www.cre8-it.nl/"
+  ],
+  "lint": {
+    "ok": true,
+    "violations": [],
+    "missing": [],
+    "unsourced_urls": [],
+    "unlinked_claims": []
+  }
+}

@@ -1,0 +1,8 @@
+curves used 1272, panel rows 94944, feats 30
+rows by h {2: 50056, 1: 44888}
+curves by h {1: 648, 2: 624}
+H=450 valid rows 94944 curves 1272 meanret -0.1802 medret -0.2542 gradfrac 0.0440
+H=900 valid rows 94943 curves 1272 meanret -0.2184 medret -0.3228 gradfrac 0.0551
+H=2250 valid rows 94943 curves 1272 meanret -0.2417 medret -0.3677 gradfrac 0.0664
+H=4500 valid rows 94943 curves 1272 meanret -0.2554 medret -0.3917 gradfrac 0.0700
+feature names: ['uniqbuy_150', 'buygrowth_150', 'imb_150', 'maxshare_150', 'repeat_150', 'newwal_150', 'meansz_150', 'rate_150', 'sellratio_150', 'netsol_150', 'uniqbuy_450', 'buygrowth_450', 'imb_450', 'maxshare_450', 'repeat_450', 'newwal_450', 'meansz_450', 'rate_450', 'sellratio_450', 'netsol_450', 'uniqbuy_900', 'buygrowth_900', 'imb_900', 'maxshare_900', 'repeat_900', 'newwal_900', 'meansz_900', 'rate_900', 'sellratio_900', 'netsol_900', 'age', 'prog', 'ddown', 'ntr', 'devsold', 'cprior', 'cpriorgrad', 'pxlevel']

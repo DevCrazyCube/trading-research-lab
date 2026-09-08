@@ -1,0 +1,1354 @@
+{
+ "theme": "calendar_session_structural_flow__batch2",
+ "n_formulas": 48,
+ "n_formulas_theme_total": 100,
+ "batch1_reference": "research/trading_bot/SWEEP_calendar_session.json",
+ "generated": "2026-08-20",
+ "design_windows": {
+  "etf_daily": "1993-01-29..2016-12-31 (6026 sessions)",
+  "stock_panel": "2016-01-04..2021-12-31 (1511 sessions)",
+  "crypto_perp_hourly": "2020-07-01..2023-12-31 (30696 hours)"
+ },
+ "holdout_windows": {
+  "etf_daily": "2017-01-01..2026-08-20 (2421 sessions)",
+  "stock_panel": "2022-01-01..2026-08-14 (1158 sessions)",
+  "crypto_perp_hourly": "2024-01-01..2026-08-17 (23040 hours)"
+ },
+ "costs_bp_per_side": {
+  "etf": 1.0,
+  "stock": 2.5,
+  "perp": 5.0
+ },
+ "null": {
+  "method": "circular rotation of every return array against a fixed calendar (inside each instrument's live span); whole family re-scored per replicate; per-formula studentised; max|z| across the family",
+  "replicates": 800,
+  "expected_max_abs_z": 2.479,
+  "max_abs_z_p50": 2.451,
+  "max_abs_z_p90": 3.013,
+  "max_abs_z_p95": 3.306,
+  "analytic_sqrt_2lnN_batch2": 2.783,
+  "analytic_sqrt_2lnN_theme_total": 3.035
+ },
+ "design_max_abs_z": 3.263,
+ "results": [
+  {
+   "name": "XE_MONTHSTART_CONT",
+   "desc": "first 2 sessions of the month: the same MTD sort in the CONTINUATION direction (long prior-month winners)",
+   "dataset": "daily",
+   "design_sharpe": 0.682,
+   "null_mean_sharpe": -0.18,
+   "null_sd_sharpe": 0.264,
+   "z_vs_own_null": 3.26,
+   "p_two_sided": 0.0,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_OPEXDAY_INTRADAY",
+   "desc": "long SPY open->close on the monthly OPEX session only (pin release inside the day)",
+   "dataset": "daily",
+   "design_sharpe": -0.695,
+   "null_mean_sharpe": -0.042,
+   "null_sd_sharpe": 0.21,
+   "z_vs_own_null": -3.11,
+   "p_two_sided": 0.0,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "TOM_DURATION_EXT",
+   "desc": "last 2 sessions of the month: long TLT / short IEF (bond indices extend duration at each month-end reconstitution)",
+   "dataset": "daily",
+   "design_sharpe": 0.693,
+   "null_mean_sharpe": -0.16,
+   "null_sd_sharpe": 0.299,
+   "z_vs_own_null": 2.86,
+   "p_two_sided": 0.0,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XE_MONTHEND_REV",
+   "desc": "last 2 sessions of the month, across a 24-ETF panel: long the worst month-to-date third, short the best (rebalance flow into the laggards)",
+   "dataset": "daily",
+   "design_sharpe": 0.592,
+   "null_mean_sharpe": -0.011,
+   "null_sd_sharpe": 0.277,
+   "z_vs_own_null": 2.18,
+   "p_two_sided": 0.025,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "TOM_CREDIT_FLOW",
+   "desc": "turn-of-month: long LQD / short IEF (credit index rebalance and coupon reinvestment)",
+   "dataset": "daily",
+   "design_sharpe": 0.309,
+   "null_mean_sharpe": -0.103,
+   "null_sd_sharpe": 0.212,
+   "z_vs_own_null": 1.94,
+   "p_two_sided": 0.0537,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "TOM_EM_MINUS_DM",
+   "desc": "turn-of-month: long EEM / short EFA",
+   "dataset": "daily",
+   "design_sharpe": 0.591,
+   "null_mean_sharpe": 0.039,
+   "null_sd_sharpe": 0.288,
+   "z_vs_own_null": 1.92,
+   "p_two_sided": 0.0612,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "VIXEXP_WEEK_SPY",
+   "desc": "long SPY through the week of VIX monthly expiry (the Wednesday 30 days before the next third Friday)",
+   "dataset": "daily",
+   "design_sharpe": 0.536,
+   "null_mean_sharpe": 0.216,
+   "null_sd_sharpe": 0.18,
+   "z_vs_own_null": 1.78,
+   "p_two_sided": 0.08,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XE_OPEXWEEK_LOWVOL",
+   "desc": "OPEX week: long the low-trailing-vol third of the ETF panel, short the high-vol third (dealer gamma suppresses movers)",
+   "dataset": "daily",
+   "design_sharpe": 0.164,
+   "null_mean_sharpe": -0.304,
+   "null_sd_sharpe": 0.277,
+   "z_vs_own_null": 1.69,
+   "p_two_sided": 0.0887,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "TOQ_SPY_MINUS_TLT_UNCOND",
+   "desc": "quarter ends only, last 2 sessions: short SPY / long TLT UNCONDITIONALLY (no month-to-date conditioner -- the pure quarter-end rebalance direction)",
+   "dataset": "daily",
+   "design_sharpe": 0.339,
+   "null_mean_sharpe": -0.093,
+   "null_sd_sharpe": 0.268,
+   "z_vs_own_null": 1.61,
+   "p_two_sided": 0.1,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XT_WEEKEND_CONT_US",
+   "desc": "Monday 13-21 UTC: take the SAME sign as the Sat+Sun BTC move (CME reopens and the weekend move continues into US hours)",
+   "dataset": "crypto",
+   "design_sharpe": 0.502,
+   "null_mean_sharpe": -0.319,
+   "null_sd_sharpe": 0.515,
+   "z_vs_own_null": 1.59,
+   "p_two_sided": 0.1212,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_TDOM1_GAP",
+   "desc": "long SPY over the open gap into the FIRST session of each month only (new-money inflow hits the open)",
+   "dataset": "daily",
+   "design_sharpe": 0.411,
+   "null_mean_sharpe": 0.111,
+   "null_sd_sharpe": 0.202,
+   "z_vs_own_null": 1.49,
+   "p_two_sided": 0.135,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XS_FRIDAY_REV",
+   "desc": "Fridays only: long the week's losers third, short the winners third (weekly reversal into the weekend)",
+   "dataset": "xs",
+   "design_sharpe": -0.945,
+   "null_mean_sharpe": -0.456,
+   "null_sd_sharpe": 0.351,
+   "z_vs_own_null": -1.4,
+   "p_two_sided": 0.1737,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XT_POST_US_CLOSE",
+   "desc": "long BTC perp only in the 21-24 UTC block (after the US equity close, before Asia)",
+   "dataset": "crypto",
+   "design_sharpe": -0.721,
+   "null_mean_sharpe": -1.568,
+   "null_sd_sharpe": 0.635,
+   "z_vs_own_null": 1.34,
+   "p_two_sided": 0.1775,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "TOM_SECTOR_DEFENSIVE",
+   "desc": "turn-of-month: long XLP+XLU / short XLK+XLY (defensive vs cyclical around the flow window)",
+   "dataset": "daily",
+   "design_sharpe": -0.436,
+   "null_mean_sharpe": -0.153,
+   "null_sd_sharpe": 0.217,
+   "z_vs_own_null": -1.3,
+   "p_two_sided": 0.2125,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XT_ALT_WEEKEND_SPREAD",
+   "desc": "long an ETH/SOL/BNB perp basket Fri-Sun UTC and SHORT it Mon-Thu (weekend alt bid as a self-financing spread)",
+   "dataset": "crypto",
+   "design_sharpe": 0.137,
+   "null_mean_sharpe": -0.275,
+   "null_sd_sharpe": 0.375,
+   "z_vs_own_null": 1.1,
+   "p_two_sided": 0.315,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "OPEX_PRE3_SPY",
+   "desc": "long SPY the 3 sessions BEFORE monthly OPEX (drift into the pin)",
+   "dataset": "daily",
+   "design_sharpe": 0.399,
+   "null_mean_sharpe": 0.206,
+   "null_sd_sharpe": 0.182,
+   "z_vs_own_null": 1.06,
+   "p_two_sided": 0.28,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "THANKSGIVING_SPY",
+   "desc": "long SPY the session before and the session after Thanksgiving",
+   "dataset": "daily",
+   "design_sharpe": 0.268,
+   "null_mean_sharpe": 0.049,
+   "null_sd_sharpe": 0.208,
+   "z_vs_own_null": 1.05,
+   "p_two_sided": 0.31,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_EOM_GAP",
+   "desc": "long SPY over the open gap into the LAST session of each month only",
+   "dataset": "daily",
+   "design_sharpe": 0.32,
+   "null_mean_sharpe": 0.119,
+   "null_sd_sharpe": 0.194,
+   "z_vs_own_null": 1.04,
+   "p_two_sided": 0.3088,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XT_DERIBIT_EXPIRY_BLOCK",
+   "desc": "long BTC perp in the 08-16 UTC block on Fridays (Deribit options settle 08:00 UTC Friday; gamma is released after)",
+   "dataset": "crypto",
+   "design_sharpe": 0.255,
+   "null_mean_sharpe": -0.288,
+   "null_sd_sharpe": 0.549,
+   "z_vs_own_null": 0.99,
+   "p_two_sided": 0.3312,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XS_OPEXWEEK_MOM",
+   "desc": "OPEX week: long the 21-day winners third of the stock panel, short the losers third (pin momentum)",
+   "dataset": "xs",
+   "design_sharpe": -0.309,
+   "null_mean_sharpe": -0.669,
+   "null_sd_sharpe": 0.372,
+   "z_vs_own_null": 0.97,
+   "p_two_sided": 0.3212,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_OPEXDAY_OVERNIGHT",
+   "desc": "long SPY over the gap INTO the OPEX session (overnight positioning ahead of expiry)",
+   "dataset": "daily",
+   "design_sharpe": 0.323,
+   "null_mean_sharpe": 0.128,
+   "null_sd_sharpe": 0.211,
+   "z_vs_own_null": 0.92,
+   "p_two_sided": 0.3638,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XT_ALT_SESSION_ROT",
+   "desc": "long ETH / short BTC perp in the Asia session (00-08 UTC), reversed in the US session (13-21 UTC)",
+   "dataset": "crypto",
+   "design_sharpe": -5.063,
+   "null_mean_sharpe": -4.225,
+   "null_sd_sharpe": 0.948,
+   "z_vs_own_null": -0.88,
+   "p_two_sided": 0.445,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_TOM_INTRADAY",
+   "desc": "long SPY open->close only on every turn-of-month session (the same window, the other half of the day)",
+   "dataset": "daily",
+   "design_sharpe": 0.064,
+   "null_mean_sharpe": -0.091,
+   "null_sd_sharpe": 0.181,
+   "z_vs_own_null": 0.85,
+   "p_two_sided": 0.405,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XT_SESSION_HANDOFF_EU",
+   "desc": "sign of the Asia-session (00-08 UTC) BTC move carried through the EU session (08-13 UTC) -- continuation, not reversal",
+   "dataset": "crypto",
+   "design_sharpe": -0.896,
+   "null_mean_sharpe": -1.356,
+   "null_sd_sharpe": 0.542,
+   "z_vs_own_null": 0.85,
+   "p_two_sided": 0.4313,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XS_TOM_LOWVOL",
+   "desc": "turn-of-month: long the LOW-vol third of the stock panel, short the high-vol third (the opposite tilt to batch 1's XS_TOM_HIVOL)",
+   "dataset": "xs",
+   "design_sharpe": 0.154,
+   "null_mean_sharpe": -0.198,
+   "null_sd_sharpe": 0.414,
+   "z_vs_own_null": 0.85,
+   "p_two_sided": 0.4275,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XT_WEEKEND_REV_ASIA",
+   "desc": "Monday 00-08 UTC: take the OPPOSITE sign of the Sat+Sun BTC move (weekend illiquidity overreaction unwinds when Asia returns)",
+   "dataset": "crypto",
+   "design_sharpe": -0.999,
+   "null_mean_sharpe": -0.521,
+   "null_sd_sharpe": 0.585,
+   "z_vs_own_null": -0.82,
+   "p_two_sided": 0.3912,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_TOM_OVERNIGHT",
+   "desc": "long SPY over the OPEN GAP only (prev close->open) on every turn-of-month session -- is the TOM effect an overnight effect?",
+   "dataset": "daily",
+   "design_sharpe": 0.352,
+   "null_mean_sharpe": 0.212,
+   "null_sd_sharpe": 0.179,
+   "z_vs_own_null": 0.78,
+   "p_two_sided": 0.4512,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_MOC_REVERSAL",
+   "desc": "first session of the month, open->close: take the OPPOSITE sign of the last session of the prior month's open->close move (month-end MOC imbalance reversal)",
+   "dataset": "daily",
+   "design_sharpe": 0.179,
+   "null_mean_sharpe": 0.025,
+   "null_sd_sharpe": 0.199,
+   "z_vs_own_null": 0.77,
+   "p_two_sided": 0.4475,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XE_MON_REV",
+   "desc": "Mondays only: long Friday's worst third of the ETF panel, short Friday's best (weekend overreaction reverses)",
+   "dataset": "daily",
+   "design_sharpe": 0.045,
+   "null_mean_sharpe": 0.234,
+   "null_sd_sharpe": 0.256,
+   "z_vs_own_null": -0.74,
+   "p_two_sided": 0.4525,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "POST_LABORDAY_SHORT",
+   "desc": "short SPY the 5 sessions after Labor Day (September re-risking weakness)",
+   "dataset": "daily",
+   "design_sharpe": -0.247,
+   "null_mean_sharpe": -0.114,
+   "null_sd_sharpe": 0.194,
+   "z_vs_own_null": -0.69,
+   "p_two_sided": 0.4925,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XT_FUNDING_MAG_8H",
+   "desc": "hold -sign(last settled funding) for the WHOLE 8h block, but only when |funding| is in the top third of its trailing 90-day distribution (magnitude conditioner, low turnover)",
+   "dataset": "crypto",
+   "design_sharpe": -0.386,
+   "null_mean_sharpe": -0.739,
+   "null_sd_sharpe": 0.524,
+   "z_vs_own_null": 0.67,
+   "p_two_sided": 0.4738,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "VIXEXP_DAY_SPY",
+   "desc": "long SPY on the VIX expiry session only",
+   "dataset": "daily",
+   "design_sharpe": -0.031,
+   "null_mean_sharpe": 0.087,
+   "null_sd_sharpe": 0.201,
+   "z_vs_own_null": -0.59,
+   "p_two_sided": 0.5425,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_POSTHOL_GAP",
+   "desc": "long SPY over the holiday gap itself (last close before the holiday -> first open after)",
+   "dataset": "daily",
+   "design_sharpe": -0.024,
+   "null_mean_sharpe": 0.092,
+   "null_sd_sharpe": 0.216,
+   "z_vs_own_null": -0.53,
+   "p_two_sided": 0.6188,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XMAS_WEEK_SPY",
+   "desc": "long SPY every session from Dec 24 to year end",
+   "dataset": "daily",
+   "design_sharpe": -0.008,
+   "null_mean_sharpe": 0.085,
+   "null_sd_sharpe": 0.19,
+   "z_vs_own_null": -0.49,
+   "p_two_sided": 0.5875,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "OPEX_SPY_MINUS_IWM",
+   "desc": "long SPY / short IWM through OPEX week (index-option gamma is concentrated in large caps)",
+   "dataset": "daily",
+   "design_sharpe": -0.135,
+   "null_mean_sharpe": -0.037,
+   "null_sd_sharpe": 0.219,
+   "z_vs_own_null": -0.45,
+   "p_two_sided": 0.6625,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "TOM_GOLD_2X2",
+   "desc": "long GLD the last 2 and first 2 sessions of each month",
+   "dataset": "daily",
+   "design_sharpe": 0.377,
+   "null_mean_sharpe": 0.279,
+   "null_sd_sharpe": 0.251,
+   "z_vs_own_null": 0.39,
+   "p_two_sided": 0.6663,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_PREHOL_OVERNIGHT",
+   "desc": "long SPY over the gap INTO the pre-holiday session (pre-holiday drift, overnight leg)",
+   "dataset": "daily",
+   "design_sharpe": 0.188,
+   "null_mean_sharpe": 0.108,
+   "null_sd_sharpe": 0.217,
+   "z_vs_own_null": 0.37,
+   "p_two_sided": 0.7312,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "PREHOL_SMALLCAP",
+   "desc": "long IWM / short SPY on the last session before every exchange holiday (thin-tape small-cap drift)",
+   "dataset": "daily",
+   "design_sharpe": -0.16,
+   "null_mean_sharpe": -0.072,
+   "null_sd_sharpe": 0.256,
+   "z_vs_own_null": -0.34,
+   "p_two_sided": 0.7425,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "QUADWITCH_DISPERSION",
+   "desc": "quad-witching session only: long XLK / short XLP (index-level unwind hits high-beta sectors)",
+   "dataset": "daily",
+   "design_sharpe": -0.093,
+   "null_mean_sharpe": -0.021,
+   "null_sd_sharpe": 0.229,
+   "z_vs_own_null": -0.31,
+   "p_two_sided": 0.75,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XE_JAN_REV",
+   "desc": "January only: long last calendar year's worst third of the ETF panel, short the best (January reversal at the asset-class level)",
+   "dataset": "daily",
+   "design_sharpe": 0.039,
+   "null_mean_sharpe": -0.035,
+   "null_sd_sharpe": 0.303,
+   "z_vs_own_null": 0.24,
+   "p_two_sided": 0.7875,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "TOM_USD",
+   "desc": "long UUP over the turn-of-month window (month-end FX fixing dollar demand)",
+   "dataset": "daily",
+   "design_sharpe": 0.094,
+   "null_mean_sharpe": 0.05,
+   "null_sd_sharpe": 0.243,
+   "z_vs_own_null": 0.18,
+   "p_two_sided": 0.8538,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_PREHOL_INTRADAY",
+   "desc": "long SPY open->close on the last session before every exchange holiday (pre-holiday drift, intraday leg)",
+   "dataset": "daily",
+   "design_sharpe": -0.013,
+   "null_mean_sharpe": -0.044,
+   "null_sd_sharpe": 0.2,
+   "z_vs_own_null": 0.16,
+   "p_two_sided": 0.8725,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XT_MONTHEND_DERISK",
+   "desc": "short BTC perp on the last UTC day of the month, long on the first (the opposite convention to a turn-of-month long)",
+   "dataset": "crypto",
+   "design_sharpe": -0.076,
+   "null_mean_sharpe": -0.16,
+   "null_sd_sharpe": 0.55,
+   "z_vs_own_null": 0.15,
+   "p_two_sided": 0.8912,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "XE_TOM_DISPERSION",
+   "desc": "turn-of-month: long the high-trailing-vol third of the ETF panel, short the low-vol third (flow hits the beta names)",
+   "dataset": "daily",
+   "design_sharpe": 0.196,
+   "null_mean_sharpe": 0.16,
+   "null_sd_sharpe": 0.255,
+   "z_vs_own_null": 0.14,
+   "p_two_sided": 0.9038,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "HALF_MONTH_SPLIT",
+   "desc": "long SPY on trading days 1-10 of the month, SHORT SPY on day 11 to month end (the half-month split as one always-on trade)",
+   "dataset": "daily",
+   "design_sharpe": -0.026,
+   "null_mean_sharpe": -0.051,
+   "null_sd_sharpe": 0.173,
+   "z_vs_own_null": 0.14,
+   "p_two_sided": 0.9213,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "JULY4_SPY",
+   "desc": "long SPY the session before and the session after July 4",
+   "dataset": "daily",
+   "design_sharpe": 0.025,
+   "null_mean_sharpe": 0.053,
+   "null_sd_sharpe": 0.199,
+   "z_vs_own_null": -0.14,
+   "p_two_sided": 0.9012,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "SESS_MON_GAP_VS_DAY",
+   "desc": "long SPY over the weekend gap and SHORT SPY Monday open->close (weekend news vs Monday session, as one trade)",
+   "dataset": "daily",
+   "design_sharpe": -0.063,
+   "null_mean_sharpe": -0.04,
+   "null_sd_sharpe": 0.196,
+   "z_vs_own_null": -0.12,
+   "p_two_sided": 0.9225,
+   "beats_batch2_bar": false
+  },
+  {
+   "name": "OPEX_MON_AFTER_SPY",
+   "desc": "long SPY only on the first Monday after monthly OPEX (dealers re-hedge into the new cycle)",
+   "dataset": "daily",
+   "design_sharpe": 0.115,
+   "null_mean_sharpe": 0.09,
+   "null_sd_sharpe": 0.207,
+   "z_vs_own_null": 0.12,
+   "p_two_sided": 0.9012,
+   "beats_batch2_bar": false
+  }
+ ],
+ "verdict": "THEME IS NOISE. Pooled over batch1+batch2 = 100 calendar formulas, the best design |z| is 3.403 against a pooled expected-max of 2.696 and p95 of 3.527 -> family-wise p = 0.065. Batch 2 max |z| = 3.263, below batch 2 own p95 of 3.306. Best batch-2 candidate SESS_OPEXDAY_INTRADAY (short SPY open->close on monthly OPEX session) is +0.526 design / +0.416 holdout after 1bp/side, survives every post-freeze control, but does not clear the bar and is intermittent: flat 2013-2016 and flat 2022-2026. NOT PROMOTED.",
+ "pooled_theme_null": {
+  "n_formulas_pooled": 100,
+  "replicates": 400,
+  "pooled_expected_max_abs_z": 2.696,
+  "pooled_max_abs_z_p50": 2.66,
+  "pooled_max_abs_z_p90": 3.223,
+  "pooled_max_abs_z_p95": 3.527,
+  "pooled_max_abs_z_p99": 3.889,
+  "analytic_sqrt_2lnN": 3.035,
+  "observed_design_max_abs_z": 3.403,
+  "family_wise_p_of_observed_max": 0.065,
+  "ranked": [
+   {
+    "batch": "b1",
+    "name": "REBAL_UNWIND_2D",
+    "design_sharpe": 0.717,
+    "z": 3.4,
+    "p": 0.0025
+   },
+   {
+    "batch": "b2",
+    "name": "XE_MONTHSTART_CONT",
+    "design_sharpe": 0.682,
+    "z": 3.18,
+    "p": 0.0
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_OPEXDAY_INTRADAY",
+    "design_sharpe": -0.695,
+    "z": -2.93,
+    "p": 0.0025
+   },
+   {
+    "batch": "b2",
+    "name": "TOM_DURATION_EXT",
+    "design_sharpe": 0.693,
+    "z": 2.78,
+    "p": 0.0
+   },
+   {
+    "batch": "b1",
+    "name": "XS_DEC_TAXLOSS",
+    "design_sharpe": -1.058,
+    "z": -2.44,
+    "p": 0.0075
+   },
+   {
+    "batch": "b1",
+    "name": "REBAL_FLOW_2D",
+    "design_sharpe": 0.55,
+    "z": 2.21,
+    "p": 0.0275
+   },
+   {
+    "batch": "b2",
+    "name": "XE_MONTHEND_REV",
+    "design_sharpe": 0.592,
+    "z": 2.12,
+    "p": 0.0325
+   },
+   {
+    "batch": "b1",
+    "name": "XT_WEEKEND_ALTS",
+    "design_sharpe": 1.33,
+    "z": 2.07,
+    "p": 0.0425
+   },
+   {
+    "batch": "b1",
+    "name": "XT_FUNDING_PRE",
+    "design_sharpe": -3.99,
+    "z": 1.98,
+    "p": 0.0325
+   },
+   {
+    "batch": "b2",
+    "name": "TOM_CREDIT_FLOW",
+    "design_sharpe": 0.309,
+    "z": 1.97,
+    "p": 0.05
+   },
+   {
+    "batch": "b2",
+    "name": "TOM_EM_MINUS_DM",
+    "design_sharpe": 0.591,
+    "z": 1.95,
+    "p": 0.06
+   },
+   {
+    "batch": "b2",
+    "name": "VIXEXP_WEEK_SPY",
+    "design_sharpe": 0.536,
+    "z": 1.8,
+    "p": 0.075
+   },
+   {
+    "batch": "b2",
+    "name": "XE_OPEXWEEK_LOWVOL",
+    "design_sharpe": 0.164,
+    "z": 1.75,
+    "p": 0.075
+   },
+   {
+    "batch": "b2",
+    "name": "TOQ_SPY_MINUS_TLT_UNCOND",
+    "design_sharpe": 0.339,
+    "z": 1.6,
+    "p": 0.1
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_TDOM1_GAP",
+    "design_sharpe": 0.411,
+    "z": 1.59,
+    "p": 0.105
+   },
+   {
+    "batch": "b1",
+    "name": "XT_TOM_BTC",
+    "design_sharpe": 0.825,
+    "z": 1.57,
+    "p": 0.1125
+   },
+   {
+    "batch": "b1",
+    "name": "OPEX_DAY_ONLY_SPY",
+    "design_sharpe": -0.253,
+    "z": -1.55,
+    "p": 0.1275
+   },
+   {
+    "batch": "b1",
+    "name": "XS_MONTHEND_DRESS",
+    "design_sharpe": -1.134,
+    "z": -1.52,
+    "p": 0.1125
+   },
+   {
+    "batch": "b2",
+    "name": "XT_WEEKEND_CONT_US",
+    "design_sharpe": 0.502,
+    "z": 1.5,
+    "p": 0.1325
+   },
+   {
+    "batch": "b2",
+    "name": "XT_POST_US_CLOSE",
+    "design_sharpe": -0.721,
+    "z": 1.46,
+    "p": 0.145
+   },
+   {
+    "batch": "b2",
+    "name": "XS_FRIDAY_REV",
+    "design_sharpe": -0.945,
+    "z": -1.44,
+    "p": 0.15
+   },
+   {
+    "batch": "b1",
+    "name": "XT_FUNDING_POST",
+    "design_sharpe": -4.05,
+    "z": 1.36,
+    "p": 0.2
+   },
+   {
+    "batch": "b2",
+    "name": "TOM_SECTOR_DEFENSIVE",
+    "design_sharpe": -0.436,
+    "z": -1.28,
+    "p": 0.215
+   },
+   {
+    "batch": "b1",
+    "name": "DEC_GLD",
+    "design_sharpe": -0.109,
+    "z": -1.13,
+    "p": 0.28
+   },
+   {
+    "batch": "b2",
+    "name": "XT_ALT_WEEKEND_SPREAD",
+    "design_sharpe": 0.137,
+    "z": 1.13,
+    "p": 0.3
+   },
+   {
+    "batch": "b2",
+    "name": "OPEX_PRE3_SPY",
+    "design_sharpe": 0.399,
+    "z": 1.11,
+    "p": 0.2625
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_EOM_GAP",
+    "design_sharpe": 0.32,
+    "z": 1.09,
+    "p": 0.2775
+   },
+   {
+    "batch": "b1",
+    "name": "TOM_TIGHT_SPY",
+    "design_sharpe": 0.357,
+    "z": 1.09,
+    "p": 0.31
+   },
+   {
+    "batch": "b1",
+    "name": "XT_USOPEN_BTC",
+    "design_sharpe": -1.337,
+    "z": 1.07,
+    "p": 0.2825
+   },
+   {
+    "batch": "b1",
+    "name": "SANTA_SPY",
+    "design_sharpe": 0.311,
+    "z": 1.07,
+    "p": 0.28
+   },
+   {
+    "batch": "b1",
+    "name": "DOW_MON_BASKET",
+    "design_sharpe": -0.077,
+    "z": -1.06,
+    "p": 0.3075
+   },
+   {
+    "batch": "b1",
+    "name": "XT_ASIA_BTC",
+    "design_sharpe": -1.05,
+    "z": -1.05,
+    "p": 0.3025
+   },
+   {
+    "batch": "b2",
+    "name": "THANKSGIVING_SPY",
+    "design_sharpe": 0.268,
+    "z": 1.04,
+    "p": 0.3225
+   },
+   {
+    "batch": "b1",
+    "name": "TOM_TLT",
+    "design_sharpe": -0.243,
+    "z": -1.04,
+    "p": 0.3025
+   },
+   {
+    "batch": "b1",
+    "name": "TOM_ARIEL_SPY",
+    "design_sharpe": 0.445,
+    "z": 1.02,
+    "p": 0.3025
+   },
+   {
+    "batch": "b1",
+    "name": "REBAL_FLOW_QTR",
+    "design_sharpe": 0.24,
+    "z": 1.0,
+    "p": 0.31
+   },
+   {
+    "batch": "b2",
+    "name": "XT_DERIBIT_EXPIRY_BLOCK",
+    "design_sharpe": 0.255,
+    "z": 0.97,
+    "p": 0.3375
+   },
+   {
+    "batch": "b1",
+    "name": "OPEX_QUAD_WEEK_SPY",
+    "design_sharpe": 0.331,
+    "z": 0.94,
+    "p": 0.3325
+   },
+   {
+    "batch": "b1",
+    "name": "DOW_THU_SPY",
+    "design_sharpe": 0.003,
+    "z": -0.93,
+    "p": 0.3625
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_OPEXDAY_OVERNIGHT",
+    "design_sharpe": 0.323,
+    "z": 0.93,
+    "p": 0.375
+   },
+   {
+    "batch": "b2",
+    "name": "XS_TOM_LOWVOL",
+    "design_sharpe": 0.154,
+    "z": 0.91,
+    "p": 0.385
+   },
+   {
+    "batch": "b1",
+    "name": "XT_HANDOFF_MOM",
+    "design_sharpe": -0.249,
+    "z": 0.91,
+    "p": 0.39
+   },
+   {
+    "batch": "b1",
+    "name": "XT_US_BTC",
+    "design_sharpe": -0.24,
+    "z": 0.91,
+    "p": 0.385
+   },
+   {
+    "batch": "b2",
+    "name": "XS_OPEXWEEK_MOM",
+    "design_sharpe": -0.309,
+    "z": 0.9,
+    "p": 0.34
+   },
+   {
+    "batch": "b1",
+    "name": "DOW_FRI_SPY",
+    "design_sharpe": 0.004,
+    "z": -0.9,
+    "p": 0.335
+   },
+   {
+    "batch": "b1",
+    "name": "TOM_EFA_MINUS_SPY",
+    "design_sharpe": 0.133,
+    "z": 0.89,
+    "p": 0.3725
+   },
+   {
+    "batch": "b1",
+    "name": "XS_TOM_HIVOL",
+    "design_sharpe": -0.427,
+    "z": -0.88,
+    "p": 0.4
+   },
+   {
+    "batch": "b1",
+    "name": "XS_DOW_MON",
+    "design_sharpe": -0.153,
+    "z": 0.88,
+    "p": 0.38
+   },
+   {
+    "batch": "b1",
+    "name": "XT_EU_BTC",
+    "design_sharpe": -0.644,
+    "z": 0.84,
+    "p": 0.4525
+   },
+   {
+    "batch": "b2",
+    "name": "XT_ALT_SESSION_ROT",
+    "design_sharpe": -5.063,
+    "z": -0.82,
+    "p": 0.4725
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_TOM_INTRADAY",
+    "design_sharpe": 0.064,
+    "z": 0.81,
+    "p": 0.455
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_TOM_OVERNIGHT",
+    "design_sharpe": 0.352,
+    "z": 0.81,
+    "p": 0.4525
+   },
+   {
+    "batch": "b1",
+    "name": "DOW_TUE_SPY",
+    "design_sharpe": 0.328,
+    "z": 0.8,
+    "p": 0.45
+   },
+   {
+    "batch": "b2",
+    "name": "XE_MON_REV",
+    "design_sharpe": 0.045,
+    "z": -0.79,
+    "p": 0.44
+   },
+   {
+    "batch": "b2",
+    "name": "XT_WEEKEND_REV_ASIA",
+    "design_sharpe": -0.999,
+    "z": -0.78,
+    "p": 0.4
+   },
+   {
+    "batch": "b2",
+    "name": "XT_SESSION_HANDOFF_EU",
+    "design_sharpe": -0.896,
+    "z": 0.75,
+    "p": 0.4875
+   },
+   {
+    "batch": "b1",
+    "name": "XS_TOM_LONGONLY",
+    "design_sharpe": 0.443,
+    "z": 0.73,
+    "p": 0.48
+   },
+   {
+    "batch": "b1",
+    "name": "TOQ_ARIEL_SPY",
+    "design_sharpe": 0.284,
+    "z": 0.72,
+    "p": 0.455
+   },
+   {
+    "batch": "b1",
+    "name": "HALLOWEEN_SPY",
+    "design_sharpe": 0.582,
+    "z": 0.71,
+    "p": 0.475
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_MOC_REVERSAL",
+    "design_sharpe": 0.179,
+    "z": 0.71,
+    "p": 0.495
+   },
+   {
+    "batch": "b2",
+    "name": "POST_LABORDAY_SHORT",
+    "design_sharpe": -0.247,
+    "z": -0.71,
+    "p": 0.445
+   },
+   {
+    "batch": "b1",
+    "name": "TOM_IWM_MINUS_SPY",
+    "design_sharpe": -0.197,
+    "z": -0.68,
+    "p": 0.46
+   },
+   {
+    "batch": "b2",
+    "name": "XT_FUNDING_MAG_8H",
+    "design_sharpe": -0.386,
+    "z": 0.65,
+    "p": 0.4775
+   },
+   {
+    "batch": "b1",
+    "name": "YEAREND_TLT",
+    "design_sharpe": 0.234,
+    "z": 0.65,
+    "p": 0.5025
+   },
+   {
+    "batch": "b1",
+    "name": "OPEX_WEEK_LONG_SPY",
+    "design_sharpe": 0.392,
+    "z": 0.61,
+    "p": 0.5375
+   },
+   {
+    "batch": "b1",
+    "name": "JAN_IWM_MINUS_SPY",
+    "design_sharpe": 0.089,
+    "z": 0.6,
+    "p": 0.5875
+   },
+   {
+    "batch": "b1",
+    "name": "XT_WEEKEND_BTC",
+    "design_sharpe": 0.506,
+    "z": 0.59,
+    "p": 0.5475
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_POSTHOL_GAP",
+    "design_sharpe": -0.024,
+    "z": -0.56,
+    "p": 0.6075
+   },
+   {
+    "batch": "b2",
+    "name": "XMAS_WEEK_SPY",
+    "design_sharpe": -0.008,
+    "z": -0.55,
+    "p": 0.565
+   },
+   {
+    "batch": "b1",
+    "name": "TOM_SPY_MINUS_TLT",
+    "design_sharpe": 0.258,
+    "z": 0.52,
+    "p": 0.6025
+   },
+   {
+    "batch": "b2",
+    "name": "VIXEXP_DAY_SPY",
+    "design_sharpe": -0.031,
+    "z": -0.52,
+    "p": 0.605
+   },
+   {
+    "batch": "b2",
+    "name": "OPEX_SPY_MINUS_IWM",
+    "design_sharpe": -0.135,
+    "z": -0.46,
+    "p": 0.655
+   },
+   {
+    "batch": "b1",
+    "name": "OPEX_POST_SHORT_SPY",
+    "design_sharpe": -0.214,
+    "z": 0.43,
+    "p": 0.6475
+   },
+   {
+    "batch": "b1",
+    "name": "XS_MONTHSTART_UNWIND",
+    "design_sharpe": -0.147,
+    "z": -0.4,
+    "p": 0.6725
+   },
+   {
+    "batch": "b1",
+    "name": "XT_MONDAY_BTC",
+    "design_sharpe": 0.226,
+    "z": 0.4,
+    "p": 0.6775
+   },
+   {
+    "batch": "b2",
+    "name": "TOM_GOLD_2X2",
+    "design_sharpe": 0.377,
+    "z": 0.4,
+    "p": 0.67
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_PREHOL_OVERNIGHT",
+    "design_sharpe": 0.188,
+    "z": 0.35,
+    "p": 0.75
+   },
+   {
+    "batch": "b1",
+    "name": "PREHOLIDAY_SPY",
+    "design_sharpe": 0.153,
+    "z": 0.33,
+    "p": 0.755
+   },
+   {
+    "batch": "b2",
+    "name": "PREHOL_SMALLCAP",
+    "design_sharpe": -0.16,
+    "z": -0.29,
+    "p": 0.7625
+   },
+   {
+    "batch": "b1",
+    "name": "DOW_MON_SPY",
+    "design_sharpe": 0.127,
+    "z": -0.27,
+    "p": 0.8025
+   },
+   {
+    "batch": "b2",
+    "name": "QUADWITCH_DISPERSION",
+    "design_sharpe": -0.093,
+    "z": -0.27,
+    "p": 0.7725
+   },
+   {
+    "batch": "b1",
+    "name": "DOW_MON_OVERNIGHT",
+    "design_sharpe": 0.158,
+    "z": -0.25,
+    "p": 0.8125
+   },
+   {
+    "batch": "b2",
+    "name": "XE_JAN_REV",
+    "design_sharpe": 0.039,
+    "z": 0.25,
+    "p": 0.7825
+   },
+   {
+    "batch": "b1",
+    "name": "MIDMONTH_SHORT_SPY",
+    "design_sharpe": -0.461,
+    "z": -0.22,
+    "p": 0.8275
+   },
+   {
+    "batch": "b1",
+    "name": "OPEX_WEEK_CONT",
+    "design_sharpe": -0.163,
+    "z": 0.22,
+    "p": 0.855
+   },
+   {
+    "batch": "b2",
+    "name": "TOM_USD",
+    "design_sharpe": 0.094,
+    "z": 0.19,
+    "p": 0.8575
+   },
+   {
+    "batch": "b1",
+    "name": "POSTHOLIDAY_SPY",
+    "design_sharpe": 0.129,
+    "z": 0.18,
+    "p": 0.83
+   },
+   {
+    "batch": "b2",
+    "name": "JULY4_SPY",
+    "design_sharpe": 0.025,
+    "z": -0.17,
+    "p": 0.885
+   },
+   {
+    "batch": "b2",
+    "name": "HALF_MONTH_SPLIT",
+    "design_sharpe": -0.026,
+    "z": 0.16,
+    "p": 0.915
+   },
+   {
+    "batch": "b1",
+    "name": "DOW_FRI_OVERNIGHT",
+    "design_sharpe": 0.263,
+    "z": 0.15,
+    "p": 0.885
+   },
+   {
+    "batch": "b2",
+    "name": "XT_MONTHEND_DERISK",
+    "design_sharpe": -0.076,
+    "z": 0.15,
+    "p": 0.885
+   },
+   {
+    "batch": "b2",
+    "name": "XE_TOM_DISPERSION",
+    "design_sharpe": 0.196,
+    "z": 0.14,
+    "p": 0.9075
+   },
+   {
+    "batch": "b2",
+    "name": "OPEX_MON_AFTER_SPY",
+    "design_sharpe": 0.115,
+    "z": 0.13,
+    "p": 0.895
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_PREHOL_INTRADAY",
+    "design_sharpe": -0.013,
+    "z": 0.12,
+    "p": 0.9125
+   },
+   {
+    "batch": "b1",
+    "name": "TOM_XSEC_BASKET",
+    "design_sharpe": 0.406,
+    "z": 0.1,
+    "p": 0.93
+   },
+   {
+    "batch": "b1",
+    "name": "OPEX_QQQ_MINUS_SPY",
+    "design_sharpe": 0.008,
+    "z": 0.08,
+    "p": 0.915
+   },
+   {
+    "batch": "b1",
+    "name": "XT_HANDOFF_REV",
+    "design_sharpe": -1.56,
+    "z": 0.07,
+    "p": 0.9575
+   },
+   {
+    "batch": "b2",
+    "name": "SESS_MON_GAP_VS_DAY",
+    "design_sharpe": -0.063,
+    "z": -0.06,
+    "p": 0.95
+   },
+   {
+    "batch": "b1",
+    "name": "DOW_MON_INTRADAY",
+    "design_sharpe": -0.089,
+    "z": -0.06,
+    "p": 0.96
+   },
+   {
+    "batch": "b1",
+    "name": "DOW_WED_SPY",
+    "design_sharpe": 0.17,
+    "z": -0.01,
+    "p": 0.9975
+   }
+  ]
+ },
+ "stability_audit": {
+  "formula": "SESS_OPEXDAY_INTRADAY (short SPY open->close on the monthly OPEX session)",
+  "lookahead_probe": {
+   "true intraday": {
+    "design": 0.526,
+    "holdout": 0.416
+   },
+   "shifted +1 session": {
+    "design": 0.025,
+    "holdout": -0.192
+   },
+   "shifted -1 session": {
+    "design": -0.036,
+    "holdout": -0.35
+   }
+  },
+  "reading": "Not a clean decay and not a clean constant: the effect is strong in four consecutive design blocks 1993-2012 (+11 to +17bp per OPEX session), FLAT in 2013-2016 (+1.1bp), strong again in the 2017-2021 holdout block (+19.1bp), and FLAT again in 2022-2026 (+1.5bp). It is intermittent, and it is dormant in the most recent 4.5 years. That pattern is compatible with a real but regime-dependent expiry effect AND with an unstable statistic; 116 held-out observations cannot separate the two.",
+  "per_block": [
+   {
+    "block": "1993-1997",
+    "window": "design",
+    "n": 59,
+    "mean_bp": 11.5,
+    "sum_pct": 6.8,
+    "sharpe": 0.709
+   },
+   {
+    "block": "1998-2002",
+    "window": "design",
+    "n": 60,
+    "mean_bp": 15.0,
+    "sum_pct": 8.99,
+    "sharpe": 0.501
+   },
+   {
+    "block": "2003-2007",
+    "window": "design",
+    "n": 60,
+    "mean_bp": 17.4,
+    "sum_pct": 10.46,
+    "sharpe": 0.903
+   },
+   {
+    "block": "2008-2012",
+    "window": "design",
+    "n": 60,
+    "mean_bp": 13.2,
+    "sum_pct": 7.94,
+    "sharpe": 0.468
+   },
+   {
+    "block": "2013-2016",
+    "window": "design",
+    "n": 48,
+    "mean_bp": 1.1,
+    "sum_pct": 0.53,
+    "sharpe": 0.07
+   },
+   {
+    "block": "2017-2021",
+    "window": "holdout",
+    "n": 60,
+    "mean_bp": 19.1,
+    "sum_pct": 11.49,
+    "sharpe": 0.694
+   },
+   {
+    "block": "2022-2026",
+    "window": "holdout",
+    "n": 56,
+    "mean_bp": 1.5,
+    "sum_pct": 0.86,
+    "sharpe": 0.066
+   }
+  ]
+ }
+}

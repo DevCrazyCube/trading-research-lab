@@ -1,0 +1,96 @@
+feature pool (1-way ranked): [('r5', 6.7), ('act15', 5.88), ('r15', 5.86), ('age', 5.84), ('rng15', 5.01), ('volr', 4.83), ('vlvl', 4.7), ('upfr', 4.09), ('gradlag', 3.55), ('gapm', 3.26), ('r60', 2.81), ('dd60', 2.71), ('pxr', 2.63), ('cprior', 1.82), ('hour', 1.42)]
+top9 into 2-way: ['r5', 'act15', 'r15', 'age', 'rng15', 'volr', 'vlvl', 'upfr', 'gradlag']
+
+=== 2-WAY (train) ===
+2-way cells passing size filter: 5926   combos so far 8589   t=12.8
+  age       x upfr      c19   (5, None, None, None, 'flat') wmean=-0.0124 med=-0.0153 k= 32 n= 216 base=-0.1102 t=25.03
+  r5        x r15       c15   (5, None, None, None, 'flat') wmean=-0.0168 med=-0.0150 k= 28 n= 195 base=-0.1102 t=18.58
+  r5        x rng15     c6    (15, None, None, None, 'flat') wmean=-0.0126 med=-0.0240 k= 31 n= 109 base=-0.1524 t=18.12
+  r5        x age       c15   (5, None, None, None, 'flat') wmean=-0.0189 med=-0.0136 k= 34 n= 188 base=-0.1102 t=17.78
+  r5        x rng15     c6    (30, None, None, None, 'flat') wmean=-0.0135 med=-0.0276 k= 31 n=  96 base=-0.1752 t=17.25
+  r15       x age       c15   (5, None, None, None, 'flat') wmean=-0.0145 med=-0.0174 k= 46 n= 261 base=-0.1102 t=16.56
+  age       x volr      c18   (5, None, None, None, 'flat') wmean=-0.0096 med=-0.0160 k= 41 n= 149 base=-0.1102 t=16.13
+  rng15     x volr      c2    (5, None, None, None, 'flat') wmean=-0.0113 med=-0.0061 k= 37 n= 136 base=-0.1102 t=15.58
+  r5        x act15     c8    (5, None, None, None, 'flat') wmean=-0.0153 med=-0.0133 k= 47 n= 202 base=-0.1102 t=15.34
+  age       x volr      c24   (5, None, None, None, 'flat') wmean=-0.0239 med=-0.0150 k= 37 n= 248 base=-0.1102 t=15.21
+  r5        x act15     c8    (30, None, None, None, 'flat') wmean=-0.0241 med=-0.0229 k= 47 n= 153 base=-0.1752 t=14.75
+  age       x volr      c24   (15, None, None, None, 'flat') wmean=-0.0211 med=-0.0163 k= 37 n= 181 base=-0.1524 t=14.23
+  act15     x rng15     c6    (15, None, None, None, 'flat') wmean=-0.0257 med=-0.0239 k= 34 n= 141 base=-0.1524 t=14.19
+  act15     x rng15     c6    (30, None, None, None, 'flat') wmean=-0.0350 med=-0.0317 k= 34 n= 103 base=-0.1752 t=14.03
+  rng15     x vlvl      c13   (15, None, None, None, 'flat') wmean=-0.0316 med=-0.0395 k= 44 n= 258 base=-0.1524 t=14.03
+features in t>=1.5 2-way cells: [('volr', 939), ('rng15', 865), ('r15', 824), ('r5', 820), ('age', 818), ('upfr', 804), ('vlvl', 556), ('act15', 539), ('gradlag', 101)]
+3-way feature set (8): ['volr', 'rng15', 'r15', 'r5', 'age', 'upfr', 'vlvl', 'act15']
+
+=== 3-WAY (train) ===
+  triples=8 combos=19866 kept=2798 t=18.6
+  triples=16 combos=30758 kept=5903 t=23.4
+  triples=24 combos=40383 kept=8259 t=28.3
+  triples=32 combos=50407 kept=10103 t=35.2
+  triples=40 combos=59668 kept=12195 t=42.0
+  triples=48 combos=69468 kept=14044 t=46.7
+  triples=56 combos=77721 kept=15909 t=51.6
+triples=56  3-way cells passing size filter=15909  TOTAL combos=77721
+--- top 30 3-way (train) ---
+  rng15/age/upfr                 c18     (15, None, None, None, 'flat') wmean=-0.0182 med=-0.0163 k= 36 n=  94 base=-0.1524 t=27.68 res=1.00
+  r15/age/vlvl                   c90     (5, None, None, None, 'flat') wmean=-0.0216 med=-0.0177 k= 31 n= 125 base=-0.1102 t=26.41 res=1.00
+  r5/upfr/vlvl                   c78     (15, None, None, None, 'flat') wmean=-0.0148 med=-0.0116 k= 27 n=  59 base=-0.1524 t=24.80 res=1.00
+  volr/r15/r5                    c14     (5, None, None, None, 'flat') wmean=-0.0154 med=-0.0141 k= 38 n= 114 base=-0.1102 t=24.31 res=1.00
+  rng15/age/upfr                 c18     (5, None, None, None, 'flat') wmean=-0.0178 med=-0.0151 k= 36 n= 117 base=-0.1102 t=24.30 res=1.00
+  r15/age/vlvl                   c90     (15, None, None, None, 'flat') wmean=-0.0255 med=-0.0215 k= 31 n=  90 base=-0.1524 t=23.00 res=1.00
+  rng15/r5/act15                 c13     (5, None, None, None, 'flat') wmean=-0.0149 med=-0.0143 k= 26 n= 107 base=-0.1102 t=22.55 res=0.99
+  r15/age/act15                  c60     (5, None, None, None, 'flat') wmean=-0.0192 med=-0.0179 k= 34 n= 115 base=-0.1102 t=22.12 res=1.00
+  r15/upfr/vlvl                  c78     (15, None, None, None, 'flat') wmean=-0.0151 med=-0.0127 k= 37 n= 103 base=-0.1524 t=21.72 res=1.00
+  volr/rng15/age                 c4      (5, None, None, None, 'flat') wmean=-0.0068 med=-0.0123 k= 25 n=  92 base=-0.1102 t=21.70 res=1.00
+  volr/r5/act15                  c8      (5, None, None, None, 'flat') wmean=-0.0080 med=-0.0119 k= 28 n=  54 base=-0.1102 t=21.65 res=1.00
+  volr/age/act15                 c12     (15, None, None, None, 'flat') wmean=-0.0159 med=-0.0198 k= 31 n=  71 base=-0.1524 t=21.07 res=1.00
+  r15/upfr/act15                 c52     (15, None, None, None, 'flat') wmean=-0.0144 med=-0.0161 k= 37 n=  89 base=-0.1524 t=20.65 res=1.00
+  volr/rng15/age                 c147    (5, None, None, None, 'flat') wmean=-0.0238 med=-0.0184 k= 42 n= 117 base=-0.1102 t=19.65 res=1.00
+  volr/r5/age                    c22     (15, None, None, None, 'flat') wmean=-0.0203 med=-0.0121 k= 36 n= 135 base=-0.1524 t=19.18 res=1.00
+  volr/age/vlvl                  c18     (15, None, None, None, 'flat') wmean=-0.0152 med=-0.0205 k= 29 n=  67 base=-0.1524 t=19.05 res=1.00
+  rng15/vlvl/act15               c1      (15, None, None, None, 'flat') wmean=-0.0300 med=-0.0223 k= 30 n= 121 base=-0.1524 t=18.76 res=0.98
+  volr/rng15/r5                  c2      (5, None, None, None, 'flat') wmean=-0.0158 med=-0.0139 k= 33 n=  91 base=-0.1102 t=18.58 res=1.00
+  rng15/r15/r5                   c50     (15, None, None, None, 'flat') wmean=-0.0043 med=-0.0143 k= 28 n=  77 base=-0.1524 t=18.41 res=0.99
+  rng15/r5/vlvl                  c6      (15, None, None, None, 'flat') wmean=-0.0120 med=-0.0226 k= 30 n=  87 base=-0.1524 t=18.17 res=0.99
+  r15/age/act15                  c60     (15, None, None, None, 'flat') wmean=-0.0290 med=-0.0214 k= 34 n=  89 base=-0.1524 t=18.03 res=1.00
+  volr/age/act15                 c16     (15, None, None, None, 'flat') wmean=-0.0147 med=-0.0120 k= 32 n= 105 base=-0.1524 t=17.72 res=1.00
+  volr/rng15/act15               c1      (5, None, None, None, 'flat') wmean=-0.0180 med=-0.0171 k= 29 n= 106 base=-0.1102 t=17.34 res=1.00
+  volr/age/vlvl                  c24     (15, None, None, None, 'flat') wmean=-0.0212 med=-0.0120 k= 33 n= 119 base=-0.1524 t=16.99 res=1.00
+  rng15/age/upfr                 c18     (30, None, None, None, 'flat') wmean=-0.0182 med=-0.0148 k= 36 n=  82 base=-0.1752 t=16.67 res=1.00
+  volr/r15/age                   c16     (15, None, None, None, 'flat') wmean=-0.0194 med=-0.0143 k= 27 n=  88 base=-0.1524 t=16.67 res=1.00
+  volr/age/act15                 c12     (5, None, None, None, 'flat') wmean=-0.0121 med=-0.0170 k= 31 n=  76 base=-0.1102 t=16.66 res=1.00
+  rng15/r15/age                  c15     (15, None, None, None, 'flat') wmean=-0.0301 med=-0.0194 k= 28 n=  80 base=-0.1524 t=16.47 res=1.00
+  volr/rng15/act15               c4      (15, None, None, None, 'flat') wmean=-0.0131 med=-0.0140 k= 41 n= 104 base=-0.1524 t=16.39 res=1.00
+  rng15/vlvl/act15               c1      (30, None, None, None, 'flat') wmean=-0.0428 med=-0.0340 k= 30 n=  87 base=-0.1752 t=16.13 res=0.97
+BH q=0.10 survivors among 15909 3-way train cells: 7871
+cells with t>0: 12956 ; t>2: 7262 ; t>3: 4944
+cells with wmean>0 (absolute profit): 1119
+
+--- top 25 PROFITABLE (train wmean>0) 3-way cells, ranked by t vs ZERO ---
+  r5/age/act15                   c98     (30, 0.3, -0.35, None, 'flat') wmean=+0.1180 med=+0.2625 k= 39 n=  41 ctrl=-0.1232 tz= 3.32 res=1.00
+  r5/age/act15                   c98     (15, 0.2, -0.25, None, 'flat') wmean=+0.0597 med=+0.1088 k= 39 n=  44 ctrl=-0.1003 tz= 2.56 res=1.00
+  volr/age/act15                 c51     (5, None, None, None, 'flat') wmean=+0.0938 med=+0.0401 k= 34 n=  67 ctrl=-0.1102 tz= 2.48 res=1.00
+  r15/age/vlvl                   c149    (30, 0.3, -0.35, None, 'flat') wmean=+0.1058 med=+0.2869 k= 38 n=  57 ctrl=-0.1232 tz= 2.47 res=1.00
+  r15/age/vlvl                   c149    (15, 0.2, -0.25, None, 'flat') wmean=+0.0656 med=+0.1667 k= 38 n=  68 ctrl=-0.1003 tz= 2.42 res=1.00
+  rng15/age/vlvl                 c149    (15, 0.2, -0.25, None, 'flat') wmean=+0.0544 med=+0.1129 k= 33 n=  96 ctrl=-0.1003 tz= 2.09 res=1.00
+  r15/age/act15                  c97     (30, 0.3, -0.35, None, 'flat') wmean=+0.0859 med=+0.2653 k= 38 n=  41 ctrl=-0.1232 tz= 2.03 res=0.98
+  volr/r15/act15                 c51     (5, None, None, None, 'flat') wmean=+0.1303 med=+0.0089 k= 32 n= 105 ctrl=-0.1102 tz= 1.98 res=0.98
+  volr/upfr/act15                c63     (5, None, None, None, 'flat') wmean=+0.1153 med=+0.0279 k= 26 n= 194 ctrl=-0.1102 tz= 1.96 res=1.00
+  r5/age/act15                   c98     (15, None, None, 0.3, 'flat') wmean=+0.1495 med=+0.0650 k= 39 n=  42 ctrl=-0.0654 tz= 1.82 res=1.00
+  r15/r5/age                     c168    (15, 0.2, -0.25, None, 'flat') wmean=+0.0472 med=+0.1158 k= 28 n=  43 ctrl=-0.1003 tz= 1.77 res=1.00
+  rng15/age/act15                c98     (30, 0.3, -0.35, None, 'flat') wmean=+0.0659 med=+0.2322 k= 44 n=  48 ctrl=-0.1232 tz= 1.75 res=1.00
+  volr/r5/age                    c0      (15, None, None, 0.3, 'flat') wmean=+0.1206 med=-0.0557 k= 74 n= 156 ctrl=-0.0654 tz= 1.70 res=0.99
+  age/upfr/vlvl                  c35     (30, 0.3, -0.35, None, 'flat') wmean=+0.0934 med=+0.2790 k= 25 n=  44 ctrl=-0.1232 tz= 1.69 res=0.93
+  rng15/r15/age                  c168    (15, 0.2, -0.25, None, 'flat') wmean=+0.0492 med=+0.1438 k= 37 n=  55 ctrl=-0.1003 tz= 1.67 res=0.98
+  r5/age/act15                   c98     (15, None, None, None, 'flat') wmean=+0.1823 med=+0.0580 k= 39 n=  41 ctrl=-0.1524 tz= 1.63 res=1.00
+  volr/rng15/r5                  c46     (30, 0.3, -0.35, None, 'flat') wmean=+0.0602 med=+0.0602 k= 29 n=  54 ctrl=-0.1232 tz= 1.61 res=0.96
+  r15/upfr/act15                 c89     (30, 0.3, -0.35, None, 'flat') wmean=+0.0512 med=+0.0004 k= 28 n=  45 ctrl=-0.1232 tz= 1.59 res=0.98
+  volr/r15/act15                 c51     (15, None, None, None, 'flat') wmean=+0.1508 med=+0.0180 k= 32 n=  78 ctrl=-0.1524 tz= 1.59 res=0.97
+  rng15/age/vlvl                 c149    (30, 0.3, -0.35, None, 'flat') wmean=+0.0724 med=+0.1792 k= 33 n=  63 ctrl=-0.1232 tz= 1.58 res=1.00
+  rng15/r15/age                  c168    (30, 0.3, -0.35, None, 'flat') wmean=+0.0730 med=+0.2869 k= 37 n=  46 ctrl=-0.1232 tz= 1.57 res=0.98
+  volr/r15/vlvl                  c173    (30, 0.3, -0.35, None, 'flat') wmean=+0.0792 med=+0.1720 k= 25 n=  60 ctrl=-0.1232 tz= 1.55 res=1.00
+  volr/r15/r5                    c0      (15, None, None, 0.3, 'flat') wmean=+0.0966 med=-0.0528 k= 85 n= 179 ctrl=-0.0654 tz= 1.55 res=0.99
+  rng15/r5/age                   c168    (30, 0.3, -0.35, None, 'flat') wmean=+0.0606 med=+0.2328 k= 46 n=  51 ctrl=-0.1232 tz= 1.55 res=1.00
+  r15/r5/vlvl                    c2      (15, None, None, 0.3, 'flat') wmean=+0.1193 med=-0.0180 k= 37 n=  67 ctrl=-0.0654 tz= 1.54 res=0.99
+profitable-on-train cells: 1119 ; of those tz>2: 7 ; tz>3: 1
+unique (triple,cell) for stage3: 50  (40 money-ranked + 10 edge-ranked)
+done t=51.8

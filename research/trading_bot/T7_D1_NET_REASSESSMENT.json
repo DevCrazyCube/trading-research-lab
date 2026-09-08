@@ -1,0 +1,200 @@
+{
+ "WHAT_THIS_IS": "RE-ASSESSMENT of the T7 D1 close-to-ex-open variant, run 2026-08-20 during the killed-edge revival review. Identical rule to T7_DIAGNOSTICS.json D1; what is ADDED is (a) the T7 primary cost rung (SEC31 + FINRA TAF + 33bp borrow on the SPY short) which the exploratory diagnostic never applied, (b) the T3-measured half-spread stress ladder, (c) a post-hoc deflated Sharpe, (d) a bootstrap. STILL EXPLORATORY: 2022-2026 was already looked at for this variant, so none of it is a frozen out-of-sample test. It is the input to specifying basket leg L4.",
+ "code": "scratchpad t7_d1_net.py (reproduced from scripts/t7_diagnostics.py d1_close_to_open)",
+ "cost_rung": "auction rail (M0-verified: open+close official prints exist on 99.96% of top-500 symbol-days)",
+ "heldout_2022_2026": {
+  "gross": {
+   "label": "gross",
+   "n": 1018,
+   "mean_bp": 3.715021162410248,
+   "t": 3.2883084961845617,
+   "sharpe_per_obs": 0.10306202362287106,
+   "ann_sharpe_221": 1.532127128415365,
+   "skew": 0.10436666701874846,
+   "kurtosis_non_excess": 14.774221239431121
+  },
+  "net_auction_rail": {
+   "label": "net primary rung",
+   "n": 1018,
+   "mean_bp": 3.347448000736936,
+   "t": 2.9630259641661927,
+   "sharpe_per_obs": 0.09286703247837144,
+   "ann_sharpe_221": 1.3805676891829304,
+   "skew": 0.10475415449914707,
+   "kurtosis_non_excess": 14.776418592705081
+  },
+  "control": {
+   "label": "control",
+   "n": 1018,
+   "mean_bp": 0.08442333926770917,
+   "t": 0.21664056648528401,
+   "sharpe_per_obs": 0.0067899393279812715,
+   "ann_sharpe_221": 0.1009397048398912,
+   "skew": 2.126251815531572,
+   "kurtosis_non_excess": 22.78812265685107
+  },
+  "net_minus_control": {
+   "label": "net - control",
+   "n": 1018,
+   "mean_bp": 3.2630246614692275,
+   "t": 2.858473283818741,
+   "sharpe_per_obs": 0.08959014686246701,
+   "ann_sharpe_221": 1.331853282339796,
+   "skew": -0.03536719449085407,
+   "kurtosis_non_excess": 13.12403269594913
+  },
+  "stress_ladder": {
+   "0.5h per leg": {
+    "label": "0.5h per leg",
+    "n": 1018,
+    "mean_bp": 1.9174480007369363,
+    "t": 1.6972476375648964,
+    "sharpe_per_obs": 0.053195062543413406,
+    "ann_sharpe_221": 0.7908014567882913,
+    "skew": 0.10475415449914705,
+    "kurtosis_non_excess": 14.776418592705081
+   },
+   "h per leg": {
+    "label": "h per leg",
+    "n": 1018,
+    "mean_bp": 0.48744800073693584,
+    "t": 0.43146931096359886,
+    "sharpe_per_obs": 0.013523092608455335,
+    "ann_sharpe_221": 0.20103522439365176,
+    "skew": 0.10475415449914663,
+    "kurtosis_non_excess": 14.776418592705083
+   },
+   "2h per leg": {
+    "label": "2h per leg",
+    "n": 1018,
+    "mean_bp": -2.3725519992630644,
+    "t": -2.1000873422389947,
+    "sharpe_per_obs": -0.06582084726146077,
+    "ann_sharpe_221": -0.9784972403956268,
+    "skew": 0.10475415449914711,
+    "kurtosis_non_excess": 14.77641859270508
+   }
+  },
+  "DSR_net_trials_8": {
+   "dsr": 0.8547578617299986,
+   "name": "deflated Sharpe",
+   "observed_sharpe_per_observation": 0.09286703247837144,
+   "benchmark_sharpe_per_observation": 0.05939101349138002,
+   "benchmark_basis": "expected-max Sharpe under the null",
+   "trials": 8,
+   "sharpe_variance": 0.001657,
+   "n": 1018,
+   "skew": 0.10475415449914707,
+   "kurtosis_non_excess": 14.776418592705081,
+   "z": 1.057059843517156,
+   "passes_at_0p95": false
+  },
+  "expected_max_sharpe_8": 0.05939101349138002,
+  "DSR_net_trials_9": {
+   "dsr": 0.8358812954324013,
+   "name": "deflated Sharpe",
+   "observed_sharpe_per_observation": 0.09286703247837144,
+   "benchmark_sharpe_per_observation": 0.06190519984549554,
+   "benchmark_basis": "expected-max Sharpe under the null",
+   "trials": 9,
+   "sharpe_variance": 0.001657,
+   "n": 1018,
+   "skew": 0.10475415449914707,
+   "kurtosis_non_excess": 14.776418592705081,
+   "z": 0.9776703129075854,
+   "passes_at_0p95": false
+  },
+  "expected_max_sharpe_9": 0.06190519984549554,
+  "DSR_net_trials_24": {
+   "dsr": 0.6508785857051931,
+   "name": "deflated Sharpe",
+   "observed_sharpe_per_observation": 0.09286703247837144,
+   "benchmark_sharpe_per_observation": 0.08058916877567301,
+   "benchmark_basis": "expected-max Sharpe under the null",
+   "trials": 24,
+   "sharpe_variance": 0.001657,
+   "n": 1018,
+   "skew": 0.10475415449914707,
+   "kurtosis_non_excess": 14.776418592705081,
+   "z": 0.3876935512954128,
+   "passes_at_0p95": false
+  },
+  "expected_max_sharpe_24": 0.08058916877567301,
+  "observed_sharpe_per_obs_net": 0.09286703247837144,
+  "bootstrap_frac_positive_net": 0.998
+ },
+ "design_2016_2021": {
+  "gross": {
+   "label": "gross",
+   "n": 1302,
+   "mean_bp": 2.6299443689058464,
+   "t": 3.4847565242065723,
+   "sharpe_per_obs": 0.09657549609624984,
+   "ann_sharpe_221": 1.4356979642732401,
+   "skew": 0.16348151001153383,
+   "kurtosis_non_excess": 61.4964517446703
+  },
+  "net_auction_rail": {
+   "label": "net primary rung",
+   "n": 1302,
+   "mean_bp": 2.2528220411253885,
+   "t": 2.9853090008415104,
+   "sharpe_per_obs": 0.08273395738100016,
+   "ann_sharpe_221": 1.2299286981636677,
+   "skew": 0.16162999950299284,
+   "kurtosis_non_excess": 61.49456932980164
+  },
+  "control": {
+   "label": "control",
+   "n": 1302,
+   "mean_bp": 0.7012450824413136,
+   "t": 2.6603123846357146,
+   "sharpe_per_obs": 0.0737270987320093,
+   "ann_sharpe_221": 1.0960321182903894,
+   "skew": 1.4254753378303873,
+   "kurtosis_non_excess": 18.611588828558443
+  },
+  "net_minus_control": {
+   "label": "net - control",
+   "n": 1302,
+   "mean_bp": 1.551576958684075,
+   "t": 2.002060124028748,
+   "sharpe_per_obs": 0.055484493206198596,
+   "ann_sharpe_221": 0.824836290413475,
+   "skew": -0.3695015600701321,
+   "kurtosis_non_excess": 49.48633610457535
+  },
+  "stress_ladder": {
+   "0.5h per leg": {
+    "label": "0.5h per leg",
+    "n": 1302,
+    "mean_bp": 0.8228220411253885,
+    "t": 1.0903560070973612,
+    "sharpe_per_obs": 0.03021779902712985,
+    "ann_sharpe_221": 0.44921987772996663,
+    "skew": 0.16162999950299387,
+    "kurtosis_non_excess": 61.494569329801614
+   },
+   "h per leg": {
+    "label": "h per leg",
+    "n": 1302,
+    "mean_bp": -0.6071779588746121,
+    "t": -0.8045969866467889,
+    "sharpe_per_obs": -0.022298359326740475,
+    "ann_sharpe_221": -0.3314889427037347,
+    "skew": 0.16162999950299412,
+    "kurtosis_non_excess": 61.494569329801614
+   },
+   "2h per leg": {
+    "label": "2h per leg",
+    "n": 1302,
+    "mean_bp": -3.467177958874612,
+    "t": -4.594502974135088,
+    "sharpe_per_obs": -0.1273306760344811,
+    "ann_sharpe_221": -1.8929065835711367,
+    "skew": 0.16162999950299378,
+    "kurtosis_non_excess": 61.494569329801614
+   }
+  }
+ }
+}

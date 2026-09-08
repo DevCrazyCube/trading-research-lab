@@ -1,0 +1,127 @@
+### burst300s>=2 | first/p_single/h2/m_tp200
+  TRAIN   mean=+0.0985 med=-0.5655 k=22 kc=12 n=22 res=1.000   (uncond +0.0701)
+  VALID   mean=+0.4601 med=+0.1801 k=26 kc=22 n=26 res=1.000   (uncond +0.1465 med +0.0170)
+  VALID   edge_vs_random_control=+0.3136  m50=+0.4601 m100=+0.4601 toll2.5=+0.4400 uncapped=+0.4601
+  VALID   creator-cluster bootstrap 95% CI = [+0.0380, +0.9195] median +0.4583
+  VALID   equal-size random-subset null p = 0.0280
+  POOLED(h1+h2) mean=+0.2944 k=48
+
+### burst300s>=2 | first/p_single/h15/m_tp200
+  TRAIN   mean=+0.0737 med=-0.6569 k=22 kc=12 n=22 res=1.000   (uncond -0.0409)
+  VALID   mean=+0.5519 med=+0.0577 k=26 kc=22 n=26 res=0.962   (uncond +0.0665 med -0.2208)
+  VALID   edge_vs_random_control=+0.4855  m50=+0.5442 m100=+0.5250 toll2.5=+0.5309 uncapped=+0.5519
+  VALID   creator-cluster bootstrap 95% CI = [-0.0131, +1.1585] median +0.5524
+  VALID   equal-size random-subset null p = 0.0100
+  POOLED(h1+h2) mean=+0.3327 k=48
+
+### burst300s>=2 | first/p_single/h60/m_tp200
+  TRAIN   mean=+0.1187 med=-0.8085 k=22 kc=12 n=22 res=1.000   (uncond -0.0100)
+  VALID   mean=+0.5549 med=+0.3872 k=26 kc=22 n=26 res=0.962   (uncond -0.0327 med -0.5894)
+  VALID   edge_vs_random_control=+0.5875  m50=+0.5472 m100=+0.5280 toll2.5=+0.5339 uncapped=+0.5549
+  VALID   creator-cluster bootstrap 95% CI = [-0.0102, +1.1524] median +0.5625
+  VALID   equal-size random-subset null p = 0.0047
+  POOLED(h1+h2) mean=+0.3549 k=48
+
+### burst300s>=2 | first/p_single/h480/m_tp200
+  TRAIN   mean=+0.0338 med=-0.8573 k=22 kc=12 n=22 res=1.000   (uncond -0.0474)
+  VALID   mean=+0.5676 med=-0.3000 k=26 kc=22 n=26 res=0.808   (uncond -0.0396 med -0.3957)
+  VALID   edge_vs_random_control=+0.6072  m50=+0.5292 m100=+0.4330 toll2.5=+0.5479 uncapped=+0.5676
+  VALID   creator-cluster bootstrap 95% CI = [+0.0102, +1.1469] median +0.5681
+  VALID   equal-size random-subset null p = 0.0037
+  POOLED(h1+h2) mean=+0.3230 k=48
+
+### burst300s>=2 | allbars/p_single/h15/m_tp200
+  TRAIN   mean=-0.0613 med=-0.0817 k=22 kc=12 n=319 res=0.931   (uncond -0.0623)
+  VALID   mean=+0.0415 med=-0.0225 k=26 kc=22 n=506 res=0.949   (uncond -0.0724 med -0.0740)
+  VALID   edge_vs_random_control=+0.1139  m50=+0.0056 m100=-0.0842 toll2.5=+0.0289 uncapped=+0.0415
+  VALID   creator-cluster bootstrap 95% CI = [-0.1193, +0.2224] median +0.0362
+  VALID   equal-size random-subset null p = 0.0338
+  POOLED(h1+h2) mean=-0.0056 k=48
+
+### burst600s>=2 | first/p_single/h60/m_tp200
+  TRAIN   mean=+0.2007 med=-0.6608 k=36 kc=21 n=36 res=0.944   (uncond -0.0100)
+  VALID   mean=+0.2623 med=-0.5594 k=41 kc=29 n=41 res=0.976   (uncond -0.0327 med -0.5894)
+  VALID   edge_vs_random_control=+0.2949  m50=+0.2574 m100=+0.2452 toll2.5=+0.2451 uncapped=+0.2623
+  VALID   creator-cluster bootstrap 95% CI = [-0.1691, +0.6890] median +0.2640
+  VALID   equal-size random-subset null p = 0.0372
+  POOLED(h1+h2) mean=+0.2335 k=77
+
+### burst1800s>=3 | first/p_single/h180/m_tp200
+  TRAIN   mean=+0.1843 med=-0.5292 k=44 kc=25 n=44 res=0.909   (uncond -0.0629)
+  VALID   mean=+0.2094 med=-0.6737 k=61 kc=41 n=61 res=0.951   (uncond -0.0877 med -0.7277)
+  VALID   edge_vs_random_control=+0.2971  m50=+0.1996 m100=+0.1750 toll2.5=+0.1932 uncapped=+0.2094
+  VALID   creator-cluster bootstrap 95% CI = [-0.1286, +0.5500] median +0.2107
+  VALID   equal-size random-subset null p = 0.0107
+  POOLED(h1+h2) mean=+0.1989 k=105
+
+### rate>=5/h | first/p_single/h480/m_tp200
+  TRAIN   mean=+0.2559 med=-0.3701 k=43 kc=26 n=43 res=0.884   (uncond -0.0474)
+  VALID   mean=+0.3628 med=-0.3000 k=50 kc=32 n=50 res=0.840   (uncond -0.0396 med -0.3957)
+  VALID   edge_vs_random_control=+0.4024  m50=+0.3308 m100=+0.2508 toll2.5=+0.3456 uncapped=+0.3628
+  VALID   creator-cluster bootstrap 95% CI = [+0.0030, +0.7187] median +0.3682
+  VALID   equal-size random-subset null p = 0.0035
+  POOLED(h1+h2) mean=+0.3134 k=93
+
+### rate>=5/h | first/p_single/h60/m_tp200
+  TRAIN   mean=+0.3035 med=-0.3701 k=43 kc=26 n=43 res=0.930   (uncond -0.0100)
+  VALID   mean=+0.2724 med=-0.5744 k=50 kc=32 n=50 res=0.980   (uncond -0.0327 med -0.5894)
+  VALID   edge_vs_random_control=+0.3050  m50=+0.2684 m100=+0.2584 toll2.5=+0.2551 uncapped=+0.2724
+  VALID   creator-cluster bootstrap 95% CI = [-0.0880, +0.6319] median +0.2749
+  VALID   equal-size random-subset null p = 0.0177
+  POOLED(h1+h2) mean=+0.2868 k=93
+
+### n>=3&gradrate>=0.05 | first/p_single/h15/m_tp200
+  TRAIN   mean=+0.1597 med=-0.5863 k=41 kc=19 n=41 res=0.951   (uncond -0.0409)
+  VALID   mean=+0.3758 med=-0.2563 k=42 kc=27 n=42 res=1.000   (uncond +0.0665 med -0.2208)
+  VALID   edge_vs_random_control=+0.3093  m50=+0.3758 m100=+0.3758 toll2.5=+0.3569 uncapped=+0.3758
+  VALID   creator-cluster bootstrap 95% CI = [-0.0031, +0.7620] median +0.3749
+  VALID   equal-size random-subset null p = 0.0180
+  POOLED(h1+h2) mean=+0.2691 k=83
+
+### nprior in[4,12] | first/p_single/h480/m_tp200
+  TRAIN   mean=+0.0412 med=-0.6624 k=30 kc=22 n=30 res=0.867   (uncond -0.0474)
+  VALID   mean=+0.2866 med=-0.3000 k=27 kc=21 n=27 res=0.852   (uncond -0.0396 med -0.3957)
+  VALID   edge_vs_random_control=+0.3261  m50=+0.2569 m100=+0.1828 toll2.5=+0.2703 uncapped=+0.2866
+  VALID   creator-cluster bootstrap 95% CI = [-0.1524, +0.7685] median +0.2765
+  VALID   equal-size random-subset null p = 0.0633
+  POOLED(h1+h2) mean=+0.1574 k=57
+
+### nprior==0 | allbars/p_single/h15/m_plain
+  TRAIN   mean=-0.1572 med=-0.0860 k=85 kc=85 n=1682 res=0.949   (uncond -0.1845)
+  VALID   mean=-0.1387 med=-0.0709 k=96 kc=96 n=2070 res=0.954   (uncond -0.1699 med -0.1631)
+  VALID   edge_vs_random_control=+0.0312  m50=-0.1682 m100=-0.2421 toll2.5=-0.1491 uncapped=-0.1125
+  VALID   creator-cluster bootstrap 95% CI = [-0.1710, -0.1079] median -0.1383
+  VALID   equal-size random-subset null p = 0.0077
+  POOLED(h1+h2) mean=-0.1474 k=181
+
+### nprior==0 | allbars/p_single/h15/m_tp50
+  TRAIN   mean=-0.1087 med=-0.0665 k=85 kc=85 n=1809 res=0.953   (uncond -0.0854)
+  VALID   mean=-0.1138 med=-0.0586 k=96 kc=96 n=2173 res=0.956   (uncond -0.1008 med -0.0589)
+  VALID   edge_vs_random_control=-0.0130  m50=-0.1422 m100=-0.2132 toll2.5=-0.1246 uncapped=-0.1138
+  VALID   creator-cluster bootstrap 95% CI = [-0.1470, -0.0843] median -0.1133
+  VALID   equal-size random-subset null p = 0.8297
+  POOLED(h1+h2) mean=-0.1114 k=181
+
+### priorgrad==0 | allbars/p_single/h15/m_tp50
+  TRAIN   mean=-0.0909 med=-0.0416 k=119 kc=119 n=2470 res=0.952   (uncond -0.0854)
+  VALID   mean=-0.1063 med=-0.0575 k=135 kc=135 n=3087 res=0.957   (uncond -0.1008 med -0.0589)
+  VALID   edge_vs_random_control=-0.0055  m50=-0.1341 m100=-0.2036 toll2.5=-0.1173 uncapped=-0.1063
+  VALID   creator-cluster bootstrap 95% CI = [-0.1362, -0.0778] median -0.1060
+  VALID   equal-size random-subset null p = 0.7220
+  POOLED(h1+h2) mean=-0.0991 k=254
+
+### rate<20/h&nprior>=2 | first/p_single/h60/m_tp200
+  TRAIN   mean=+0.0595 med=-0.6106 k=67 kc=44 n=67 res=0.925   (uncond -0.0100)
+  VALID   mean=+0.0791 med=-0.6961 k=83 kc=60 n=83 res=0.964   (uncond -0.0327 med -0.5894)
+  VALID   edge_vs_random_control=+0.1118  m50=+0.0719 m100=+0.0538 toll2.5=+0.0646 uncapped=+0.0791
+  VALID   creator-cluster bootstrap 95% CI = [-0.1760, +0.3308] median +0.0773
+  VALID   equal-size random-subset null p = 0.1293
+  POOLED(h1+h2) mean=+0.0704 k=150
+
+### burst1800s>=3 | allbars/p_single/h15/m_tp50
+  TRAIN   mean=-0.0736 med=-0.0385 k=44 kc=25 n=646 res=0.935   (uncond -0.0854)
+  VALID   mean=-0.0676 med=-0.0427 k=61 kc=41 n=1240 res=0.951   (uncond -0.1008 med -0.0589)
+  VALID   edge_vs_random_control=+0.0332  m50=-0.0932 m100=-0.1573 toll2.5=-0.0792 uncapped=-0.0676
+  VALID   creator-cluster bootstrap 95% CI = [-0.1184, -0.0210] median -0.0684
+  VALID   equal-size random-subset null p = 0.0432
+  POOLED(h1+h2) mean=-0.0701 k=105

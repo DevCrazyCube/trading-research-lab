@@ -1,0 +1,2 @@
+244:rows=[]; combos=0
+261 .scratch_att2/ogrid.py

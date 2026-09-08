@@ -1,0 +1,58 @@
+=== 1) EXTREME TAILS (beyond q90 / below q10), all 37 structures, both splits ===
+evaluated 40145 tail x structure combos; train>0 449 ; val>0 620 ; both>0 24
+--- positive on BOTH splits (24) ---
+  train +0.0046 val +0.0980 med -0.0250 ci[-0.0258,+0.2766] ctrlSAMEstruct -0.1116 randctrl -0.1773 n 516 k 165 | maxshare_900>=q97 H=450 ('sl', None, 2)
+  train +0.0042 val +0.0970 med -0.0250 ci[-0.0226,+0.2665] ctrlSAMEstruct -0.1161 randctrl -0.1958 n 516 k 165 | maxshare_900>=q97 H=450 ('hold', None, None)
+  train +0.0084 val +0.0849 med -0.0250 ci[-0.0314,+0.2322] ctrlSAMEstruct -0.0820 randctrl -0.1542 n 516 k 165 | maxshare_900>=q97 H=450 ('pyr', None, None)
+  train +0.0063 val +0.0808 med -0.0250 ci[-0.0367,+0.2453] ctrlSAMEstruct -0.0977 randctrl -0.1471 n 516 k 165 | maxshare_900>=q97 H=450 ('sl', None, 1)
+  train +0.0078 val +0.0601 med -0.0250 ci[-0.0456,+0.2214] ctrlSAMEstruct -0.0655 randctrl -0.1097 n 516 k 165 | maxshare_900>=q97 H=450 ('sl', None, 0)
+  train +0.0025 val +0.0432 med -0.0250 ci[-0.0414,+0.1585] ctrlSAMEstruct -0.0820 randctrl -0.1488 n 645 k 223 | maxshare_900>=q95 H=450 ('pyr', None, None)
+  train +0.0113 val +0.0414 med -0.0250 ci[-0.0431,+0.1727] ctrlSAMEstruct -0.1116 randctrl -0.1720 n 756 k 219 | maxshare_450>=q95 H=450 ('sl', None, 2)
+  train +0.0110 val +0.0414 med -0.0250 ci[-0.0453,+0.1632] ctrlSAMEstruct -0.1161 randctrl -0.1830 n 756 k 219 | maxshare_450>=q95 H=450 ('hold', None, None)
+  train +0.0164 val +0.0384 med -0.0250 ci[-0.0409,+0.1500] ctrlSAMEstruct -0.0820 randctrl -0.1478 n 756 k 219 | maxshare_450>=q95 H=450 ('pyr', None, None)
+  train +0.0534 val +0.0253 med -0.1401 ci[-0.1025,+0.2021] ctrlSAMEstruct -0.0740 randctrl -0.1015 n 198 k 174 | netsol_150<=q9 H=4500 ('sl', None, 0)
+  train +0.0000 val +0.0231 med -0.0340 ci[-0.0623,+0.1459] ctrlSAMEstruct -0.0794 randctrl -0.1643 n 583 k 236 | maxshare_150>=q95 H=2250 ('pyr', None, None)
+  train +0.0621 val +0.0205 med -0.1496 ci[-0.1193,+0.2304] ctrlSAMEstruct -0.0740 randctrl -0.1032 n 164 k 149 | netsol_150<=q7 H=4500 ('sl', None, 0)
+  train +0.0005 val +0.0184 med -0.0262 ci[-0.0486,+0.1107] ctrlSAMEstruct -0.0820 randctrl -0.1448 n 977 k 274 | maxshare_150>=q93 H=450 ('pyr', None, None)
+  train +0.0387 val +0.0172 med -0.1449 ci[-0.1194,+0.2284] ctrlSAMEstruct -0.0712 randctrl -0.1046 n 170 k 149 | netsol_150<=q7 H=2250 ('sl', None, 0)
+  train +0.0379 val +0.0143 med -0.1238 ci[-0.1106,+0.1942] ctrlSAMEstruct -0.0712 randctrl -0.0970 n 216 k 174 | netsol_150<=q9 H=2250 ('sl', None, 0)
+  train +0.0146 val +0.0130 med -0.0419 ci[-0.0502,+0.1028] ctrlSAMEstruct -0.0740 randctrl -0.1010 n 807 k 345 | imb_150<=q9 H=4500 ('sl', None, 0)
+  train +0.0170 val +0.0126 med -0.0413 ci[-0.0536,+0.1054] ctrlSAMEstruct -0.1016 randctrl -0.1365 n 807 k 345 | imb_150<=q9 H=4500 ('sl', None, 1)
+  train +0.0079 val +0.0124 med -0.0431 ci[-0.0722,+0.1191] ctrlSAMEstruct -0.0845 randctrl -0.1607 n 560 k 274 | maxshare_150>=q93 H=4500 ('pyr', None, None)
+  train +0.0129 val +0.0100 med -0.0419 ci[-0.0562,+0.0984] ctrlSAMEstruct -0.1101 randctrl -0.1629 n 807 k 345 | imb_150<=q9 H=4500 ('sl', None, 2)
+  train +0.0032 val +0.0093 med -0.1097 ci[-0.1172,+0.2159] ctrlSAMEstruct -0.0820 randctrl -0.1089 n 190 k 149 | netsol_150<=q7 H=900 ('sl', None, 0)
+  train +0.0103 val +0.0071 med -0.0419 ci[-0.0588,+0.0951] ctrlSAMEstruct -0.1168 randctrl -0.1794 n 807 k 345 | imb_150<=q9 H=4500 ('hold', None, None)
+  train +0.0035 val +0.0066 med -0.0366 ci[-0.0470,+0.0875] ctrlSAMEstruct -0.0845 randctrl -0.1490 n 807 k 345 | imb_150<=q9 H=4500 ('pyr', None, None)
+  train +0.0098 val +0.0061 med -0.0370 ci[-0.0518,+0.0990] ctrlSAMEstruct -0.0712 randctrl -0.0988 n 948 k 345 | imb_150<=q9 H=2250 ('sl', None, 0)
+  train +0.0031 val +0.0045 med -0.0394 ci[-0.0722,+0.1110] ctrlSAMEstruct -0.0794 randctrl -0.1546 n 650 k 274 | maxshare_150>=q93 H=2250 ('pyr', None, None)
+swept 93425
+
+=== 2) GRADUATION TARGETING: can flow predict completion? ===
+unconditional grad-within-30min rate: train 0.0526 val 0.0855
+top 12 flow conditions by TRAIN grad rate -> validate grad rate:
+   train 0.8797 -> val 0.8222 (lift 9.6x) n_tr 449 n_va 540  netsol_900>=q99
+   train 0.7639 -> val 0.8429 (lift 9.9x) n_tr 449 n_va 732  netsol_450>=q99
+   train 0.7060 -> val 0.7710 (lift 9.0x) n_tr 449 n_va 1026  netsol_150>=q99
+   train 0.6949 -> val 0.7962 (lift 9.3x) n_tr 898 n_va 1011  netsol_900>=q98
+   train 0.5724 -> val 0.7112 (lift 8.3x) n_tr 898 n_va 1361  netsol_450>=q98
+   train 0.5333 -> val 0.4106 (lift 4.8x) n_tr 450 n_va 1096  rate_450>=q99
+   train 0.5225 -> val 0.4761 (lift 5.6x) n_tr 488 n_va 439  uniqbuy_450>=q99
+   train 0.5223 -> val 0.6251 (lift 7.3x) n_tr 898 n_va 1955  netsol_150>=q98
+   train 0.5155 -> val 0.3554 (lift 4.2x) n_tr 452 n_va 605  buygrowth_450>=q99
+   train 0.5029 -> val 0.5950 (lift 7.0x) n_tr 2245 n_va 3346  netsol_900>=q95
+   train 0.4767 -> val 0.5080 (lift 5.9x) n_tr 902 n_va 1502  rate_150>=q98
+   train 0.4767 -> val 0.6758 (lift 7.9x) n_tr 451 n_va 364  buygrowth_900>=q99
+returns of the top-3 grad-targeting cells on VALIDATE (hold 30m):
+   netsol_900>=q99: val +0.0869 med +0.2277 ci[-0.0653,+0.2036] n 17 k 17 gradfrac 0.941 (ctrl -0.1168)
+      if every graduating exit actually paid +25% more: val +0.3222
+      if every graduating exit actually paid +50% more: val +0.5574
+      if every graduating exit actually paid +100% more: val +1.0280
+   netsol_450>=q99: val +0.0386 med +0.3055 ci[-0.1944,+0.2386] n 21 k 21 gradfrac 0.810 (ctrl -0.1168)
+      if every graduating exit actually paid +25% more: val +0.2409
+      if every graduating exit actually paid +50% more: val +0.4433
+      if every graduating exit actually paid +100% more: val +0.8481
+   netsol_150>=q99: val +0.0173 med -0.0250 ci[-0.2507,+0.3018] n 29 k 29 gradfrac 0.586 (ctrl -0.1168)
+      if every graduating exit actually paid +25% more: val +0.1639
+      if every graduating exit actually paid +50% more: val +0.3105
+      if every graduating exit actually paid +100% more: val +0.6036
+TOTAL SWEPT 93575

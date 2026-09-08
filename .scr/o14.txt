@@ -1,0 +1,21 @@
+HOLDOUT CHECK: any h==0 mint in the working set? False
+mints used: 380 train(h=1) 174 validate(h=2) 206
+
+GATED (fillable) candidates validated: 250
+  best validate mean = -0.89%  worst = -49.44%  median = -15.09%
+  count with validate mean > 0: 0
+
+UNGATED candidates validated: 400
+  count with validate mean>0 AND validate median>0: 0
+  best validate median = -1.14%
+
+COMBO ACCOUNTING
+  1-way screen (26 feat x 6 thr x 10 exits)      : 1560
+  3-way ungated  entry x exit                    : 41040
+  3-way ungated  full exit x position grid       : 41250
+  3-way ungated  validate pass                   : 400
+  3-way GATED    entry x exit                    : 82236
+  3-way GATED    validate pass                   : 250
+  structure-matched controls                     : ~374
+  TOTAL evaluations                              : 167110
+  (+ 4000 matched random-entry placebo draws, + 400x4000 cluster bootstrap resamples)

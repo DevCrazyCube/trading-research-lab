@@ -1,0 +1,33 @@
+TOP 15 returns:
+  72151.3% mint=GaFQuLuVt3y8 j=6 k=21 entry=1.267e-08 exit=9.259e-06
+  2233.5% mint=Fg9P4xK8pbYa j=842 k=857 entry=6.283e-06 exit=1.483e-04
+  1046.3% mint=37BQqh2pvVxX j=1 k=16 entry=4.624e-05 exit=5.362e-04
+  916.7% mint=AAiCr9pDUNYm j=20 k=22 entry=4.430e-09 exit=4.556e-08
+  901.3% mint=EDMyAVsR98N1 j=1 k=13 entry=6.866e-09 exit=6.955e-08
+  758.2% mint=3jRu3raCzB9u j=16 k=27 entry=1.166e-07 exit=1.012e-06
+  657.2% mint=FbVVRSqf5iSe j=1 k=16 entry=3.154e-05 exit=2.416e-04
+  628.7% mint=3jRu3raCzB9u j=1 k=15 entry=1.313e-08 exit=9.681e-08
+  575.9% mint=BHuccRJsW78q j=11 k=22 entry=2.038e-08 exit=1.394e-07
+  512.9% mint=A1KeY89ZeCCD j=1 k=16 entry=1.162e-08 exit=7.205e-08
+  463.2% mint=AXcDHZp3KrCn j=30 k=42 entry=2.451e-06 exit=1.396e-05
+  370.2% mint=3jRu3raCzB9u j=68 k=80 entry=2.033e-06 exit=9.671e-06
+  347.5% mint=Gy2WvZc7tJ9r j=1 k=16 entry=4.437e-05 exit=2.009e-04
+  314.9% mint=AAiCr9pDUNYm j=12 k=17 entry=3.840e-08 exit=1.612e-07
+  308.1% mint=7dYzXzHr5XTB j=1 k=16 entry=3.241e-05 exit=1.338e-04
+frac trades >100%%: 0.01038511466897447
+frac trades >1000%%: 0.0006490696668109044
+TOP 10 mint means:
+  8975.85% GaFQuLuVt3y8 ntr=8
+  119.00% EDMyAVsR98N1 ntr=7
+  109.71% AAiCr9pDUNYm ntr=11
+  69.92% A1KeY89ZeCCD ntr=7
+  60.81% 3jRu3raCzB9u ntr=25
+  36.92% BHuccRJsW78q ntr=9
+  31.01% Fg9P4xK8pbYa ntr=63
+  28.40% CvZmyFScCrXQ ntr=3
+  23.64% 6ixaEct565dg ntr=5
+  18.32% Gy2WvZc7tJ9r ntr=14
+mean of mint means 0.39093775667697506
+trimmed(drop top5 mints) mean -0.07537972223002065
+median mint mean -0.058832959012376396
+pooled trade mean 0.1367046320699386 median -0.017999331438008248

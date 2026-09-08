@@ -1,0 +1,8 @@
+OLD pool 9jDpceRLx7seEYSdbddz7o1KzKTwjBzx5kaXSgJgkC1H created 2025-09-27T16:07:56Z
+no before_timestamp        -> HTTP 429  bars=0  {"status":{"error_code":429,"error_message":"You've exceeded the Rate Limit. Please visit https://www.coingecko.com/en/api/pricing to subscribe to our API plans for higher rate limits and use the onch
+before=now                 -> HTTP 200  bars=2  2026-07-13 11:40 .. 2026-07-13 11:40
+before=now-7d              -> HTTP 429  bars=0  {"status":{"error_code":429,"error_message":"You've exceeded the Rate Limit. Please visit https://www.coingecko.com/en/api/pricing to subscribe to our API plans for higher rate limits and use the onch
+before=now-90d             -> HTTP 429  bars=0  {"status":{"error_code":429,"error_message":"You've exceeded the Rate Limit. Please visit https://www.coingecko.com/en/api/pricing to subscribe to our API plans for higher rate limits and use the onch
+before=migration+1000m     -> HTTP 429  bars=0  {"status":{"error_code":429,"error_message":"You've exceeded the Rate Limit. Please visit https://www.coingecko.com/en/api/pricing to subscribe to our API plans for higher rate limits and use the onch
+DAY before=migration+1000d -> HTTP 429  bars=0  {"status":{"error_code":429,"error_message":"You've exceeded the Rate Limit. Please visit https://www.coingecko.com/en/api/pricing to subscribe to our API plans for higher rate limits and use the onch
+AUTH401 DONE

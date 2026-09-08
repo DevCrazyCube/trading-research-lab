@@ -1,0 +1,67 @@
+rows 44451 train 18883 valid 25568 feats 21
+BASELINE all-bars TRAIN mean -0.1786 med -0.1622 n 2190 clusters 151 res 0.8105
+BASELINE all-bars VALID mean -0.202 med -0.196 n 2832 clusters 190 res 0.8287
+RANDOM-15% control TRAIN mean -0.1759 sd 0.014
+RANDOM-15% control VALID mean -0.1743 sd 0.0155
+COMBOS DEFINED 15519 (pairs 210)
+cells with size on BOTH splits 8779 t 30.9
+--- RESPONSE SURFACE ---
+train mean: frac>0 0.0271  q[.01,.1,.25,.5,.75,.9,.99] [-0.328, -0.2187, -0.1806, -0.1394, -0.0909, -0.0473, 0.0285]
+valid mean: frac>0 0.0116  q[.01,.1,.25,.5,.75,.9,.99] [-0.3502, -0.2316, -0.1914, -0.1441, -0.0925, -0.0553, 0.004]
+cells positive on TRAIN: 238 (0.027) | positive on VALID: 102 (0.012) | BOTH: 6 (0.0007); independence would predict 2.8
+corr(train mean, valid mean) = 0.5938
+--- per-feature: best validate mean over all cells containing that feature ---
+  ret5       cells   985  best_va  0.0817  median_va -0.1470  frac_va>0 0.010
+  ret15      cells   841  best_va  0.0365  median_va -0.1349  frac_va>0 0.007
+  ret60      cells   699  best_va  0.1148  median_va -0.1075  frac_va>0 0.029
+  vol5       cells   817  best_va  0.1788  median_va -0.1451  frac_va>0 0.031
+  volratio   cells   963  best_va  0.0446  median_va -0.1214  frac_va>0 0.008
+  volaccel   cells  1033  best_va  0.0766  median_va -0.1242  frac_va>0 0.009
+  rvol       cells   700  best_va  0.0714  median_va -0.1029  frac_va>0 0.016
+  dd         cells   757  best_va  0.2033  median_va -0.1724  frac_va>0 0.021
+  age        cells   785  best_va  0.2033  median_va -0.1386  frac_va>0 0.010
+  gap        cells   721  best_va -0.0043  median_va -0.1641  frac_va>0 0.000
+  maxgap30   cells   785  best_va  0.0134  median_va -0.1768  frac_va>0 0.010
+  bars30     cells   854  best_va  0.0722  median_va -0.1315  frac_va>0 0.019
+  logpx      cells   640  best_va  0.0254  median_va -0.1847  frac_va>0 0.005
+  body       cells  1066  best_va  0.0732  median_va -0.1457  frac_va>0 0.008
+  range15    cells   842  best_va  0.0211  median_va -0.1486  frac_va>0 0.002
+  vwapdev    cells   836  best_va  0.0254  median_va -0.1505  frac_va>0 0.005
+  vwapdev60  cells   791  best_va  0.0343  median_va -0.1552  frac_va>0 0.005
+  hilopos    cells  1045  best_va  0.0610  median_va -0.1422  frac_va>0 0.009
+  upfrac     cells   839  best_va  0.1148  median_va -0.1036  frac_va>0 0.023
+  retlife    cells   752  best_va  0.1788  median_va -0.1707  frac_va>0 0.020
+  priorcr    cells   630  best_va  0.0491  median_va -0.1865  frac_va>0 0.005
+CANDIDATES positive on train AND validate: 6
+--- CANDIDATE DETAIL (validate split) ---
+2|body Q2 & hilopos V1                             | tr  0.0364 | va mean  0.0610 med -0.0028 CI[-0.0120, 0.1607] n    64 cl   20
+     matched-random-control(same mints,same counts) -0.0229 (sd 0.0517, p95  0.0644) -> EDGE  0.0838
+     d50  0.0593 d100  0.0552 toll2.5  0.0465 uncap    0.0610 | H5m -0.0020 H10m  0.0256 H30m  0.0467 H60m  0.0383
+     tp/sl: tp5_sl10 -0.0197 tp10_sl15 -0.0089 tp20_sl20  0.0186 tp30_sl30  0.0247
+2|body Q2 & hilopos D1                             | tr  0.0404 | va mean  0.0610 med -0.0039 CI[-0.0066, 0.1555] n    70 cl   21
+     matched-random-control(same mints,same counts) -0.0262 (sd 0.0472, p95  0.0551) -> EDGE  0.0871
+     d50  0.0595 d100  0.0557 toll2.5  0.0464 uncap    0.0610 | H5m -0.0010 H10m  0.0244 H30m  0.0655 H60m -0.0165
+     tp/sl: tp5_sl10 -0.0174 tp10_sl15 -0.0065 tp20_sl20  0.0218 tp30_sl30  0.0261
+2|volratio V0 & hilopos Q1                         | tr  0.0137 | va mean  0.0226 med -0.0314 CI[-0.0571, 0.1248] n    92 cl   60
+     matched-random-control(same mints,same counts) -0.1591 (sd 0.0439, p95 -0.0884) -> EDGE  0.1817
+     d50 -0.0007 d100 -0.0590 toll2.5  0.0097 uncap    0.0281 | H5m -0.0289 H10m -0.0229 H30m -0.0263 H60m -0.0826
+     tp/sl: tp5_sl10 -0.0730 tp10_sl15 -0.0644 tp20_sl20 -0.0569 tp30_sl30 -0.0381
+2|rvol Q1 & retlife Q2                             | tr  0.1221 | va mean  0.0213 med -0.0041 CI[-0.0146, 0.0575] n   229 cl   22
+     matched-random-control(same mints,same counts) -0.0216 (sd 0.0429, p95  0.0426) -> EDGE  0.0429
+     d50  0.0211 d100  0.0205 toll2.5  0.0072 uncap    0.0213 | H5m -0.0257 H10m  0.0031 H30m  0.0679 H60m -0.0282
+     tp/sl: tp5_sl10 -0.0194 tp10_sl15 -0.0115 tp20_sl20  0.0092 tp30_sl30  0.0082
+2|vol5 Q3 & maxgap30 Q3                            | tr  0.0094 | va mean  0.0063 med -0.0197 CI[-0.0745, 0.0991] n   147 cl   32
+     matched-random-control(same mints,same counts) -0.0841 (sd 0.0632, p95  0.0279) -> EDGE  0.0904
+     d50 -0.0295 d100 -0.1192 toll2.5 -0.0058 uncap    0.0063 | H5m  0.0494 H10m  0.0791 H30m -0.0529 H60m -0.0859
+     tp/sl: tp5_sl10 -0.0813 tp10_sl15 -0.0730 tp20_sl20 -0.0624 tp30_sl30 -0.0377
+2|volratio V0 & maxgap30 Q3                        | tr  0.0204 | va mean  0.0033 med -0.0249 CI[-0.0454, 0.0592] n    94 cl   58
+     matched-random-control(same mints,same counts) -0.1335 (sd 0.0358, p95 -0.0757) -> EDGE  0.1368
+     d50 -0.0070 d100 -0.0329 toll2.5 -0.0100 uncap    0.0066 | H5m -0.0057 H10m  0.0100 H30m -0.0468 H60m -0.0847
+     tp/sl: tp5_sl10 -0.0479 tp10_sl15 -0.0446 tp20_sl20 -0.0228 tp30_sl30 -0.0121
+--- TP/SL truncation control: same structures on RANDOM entries (validate) ---
+  RANDOM tp5/sl10 mean -0.1295 median -0.1096
+  RANDOM tp10/sl15 mean -0.1330 median -0.1231
+  RANDOM tp20/sl20 mean -0.1328 median -0.1246
+  RANDOM tp30/sl30 mean -0.1446 median -0.1333
+  RANDOM plain-15m mean -0.1776 median -0.1542
+DONE t 33.6

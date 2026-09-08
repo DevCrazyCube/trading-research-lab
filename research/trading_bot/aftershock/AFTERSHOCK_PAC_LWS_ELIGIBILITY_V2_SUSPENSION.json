@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "instrument_id": "AFTERSHOCK_PAC_LWS_ELIGIBILITY_V2",
+  "status": "SUSPENDED_AUTHORITY_INCOMPLETE",
+  "suspended_utc": "2026-09-01T17:15:31Z",
+  "emitted_rows": 0,
+  "state_sha256": "de50910c565923bc6e8e80715db7cba2b427987ab8b64478d483c44eaec1103d",
+  "evidence_use": "ZERO_ROWS_NO_PROMOTION_EVIDENCE",
+  "reason": "A caller can rewrite activation, notional, input cursors and feed tail anchors together and recompute the local state self-hash. The service remains stopped until activation is externally anchored and cursor progress is checked against an independent append-only high-water; registry input also needs authenticated sequencing."
+}

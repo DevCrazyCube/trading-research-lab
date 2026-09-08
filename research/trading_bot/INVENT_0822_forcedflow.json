@@ -1,0 +1,2739 @@
+{
+ "theme": "LARGE-GROSS forced / mechanical flow (index reconstitution, index migration, IPO lockup expiry, secondary-offering pressure)",
+ "date": "2026-08-22",
+ "data": {
+  "index_change_events_scraped": 2974,
+  "index_events_in_bar_window": 2441,
+  "edgar_424_filings": 26881,
+  "ipo_lockup_events": 2470,
+  "secondary_offering_events": 16971,
+  "migrations_up": 184,
+  "migrations_down": 254,
+  "symbols_with_bars": 3426,
+  "sources": [
+   "Wikipedia: Historical components of the S&P 500 / List of S&P 400 / List of S&P 600 constituent-change tables",
+   "SEC EDGAR full-index form.idx (424B4, 424B5) + company_tickers.json",
+   "Alpaca SIP daily bars, adjustment=all, delisted symbols included"
+  ]
+ },
+ "bars": {
+  "n_formulas": 47,
+  "expected_max_t_null_one_sided": 2.77,
+  "expected_max_t_null_two_sided": 3.01,
+  "pooled_cross_round_bar": 3.28
+ },
+ "convention_check_volume_spike_at_R": {
+  "SP500_add": {
+   "n": 191,
+   "median_rel_dollar_volume_at_R": 29.7,
+   "median_dollar_traded_at_R_musd": 4301.0
+  },
+  "SP500_delete": {
+   "n": 174,
+   "median_rel_dollar_volume_at_R": 15.1,
+   "median_dollar_traded_at_R_musd": 1318.0
+  },
+  "SP400_add": {
+   "n": 472,
+   "median_rel_dollar_volume_at_R": 17.8,
+   "median_dollar_traded_at_R_musd": 1073.0
+  },
+  "SP400_delete": {
+   "n": 429,
+   "median_rel_dollar_volume_at_R": 16.5,
+   "median_dollar_traded_at_R_musd": 455.0
+  },
+  "SP600_add": {
+   "n": 460,
+   "median_rel_dollar_volume_at_R": 19.6,
+   "median_dollar_traded_at_R_musd": 466.0
+  },
+  "SP600_delete": {
+   "n": 409,
+   "median_rel_dollar_volume_at_R": 14.8,
+   "median_dollar_traded_at_R_musd": 82.0
+  }
+ },
+ "index_decomposition_design": {
+  "SP500add": {
+   "n": 124,
+   "R_minus5_to_R": {
+    "mean_pct": -0.06,
+    "t": 0.82
+   },
+   "announcement_close_to_R": {
+    "mean_pct": -0.45,
+    "t": -1.9
+   },
+   "on_the_R_flow_day": {
+    "mean_pct": -0.18,
+    "t": -1.33
+   },
+   "R_to_R_plus5": {
+    "mean_pct": 0.74,
+    "t": 0.13
+   }
+  },
+  "SP400add": {
+   "n": 280,
+   "R_minus5_to_R": {
+    "mean_pct": -0.25,
+    "t": 0.05
+   },
+   "announcement_close_to_R": {
+    "mean_pct": -1.05,
+    "t": -1.58
+   },
+   "on_the_R_flow_day": {
+    "mean_pct": -1.26,
+    "t": -2.38
+   },
+   "R_to_R_plus5": {
+    "mean_pct": 0.05,
+    "t": 0.04
+   }
+  },
+  "SP600add": {
+   "n": 107,
+   "R_minus5_to_R": {
+    "mean_pct": 10.09,
+    "t": 6.71
+   },
+   "announcement_close_to_R": {
+    "mean_pct": 0.41,
+    "t": 0.39
+   },
+   "on_the_R_flow_day": {
+    "mean_pct": -1.34,
+    "t": -1.29
+   },
+   "R_to_R_plus5": {
+    "mean_pct": -0.26,
+    "t": -0.63
+   }
+  },
+  "SP600del": {
+   "n": 68,
+   "R_minus5_to_R": {
+    "mean_pct": -10.77,
+    "t": -5.76
+   },
+   "announcement_close_to_R": {
+    "mean_pct": -4.11,
+    "t": -3.5
+   },
+   "on_the_R_flow_day": {
+    "mean_pct": -2.41,
+    "t": -3.34
+   },
+   "R_to_R_plus5": {
+    "mean_pct": 2.95,
+    "t": 1.99
+   }
+  }
+ },
+ "index_decomposition_heldout": {
+  "SP500add": {
+   "n": 73,
+   "R_minus5_to_R": {
+    "mean_pct": 2.64,
+    "t": 2.77
+   },
+   "announcement_close_to_R": {
+    "mean_pct": 0.41,
+    "t": 1.55
+   },
+   "on_the_R_flow_day": {
+    "mean_pct": 0.02,
+    "t": 0.49
+   },
+   "R_to_R_plus5": {
+    "mean_pct": -0.17,
+    "t": -0.27
+   }
+  },
+  "SP400add": {
+   "n": 196,
+   "R_minus5_to_R": {
+    "mean_pct": 0.7,
+    "t": 1.87
+   },
+   "announcement_close_to_R": {
+    "mean_pct": -0.35,
+    "t": -0.94
+   },
+   "on_the_R_flow_day": {
+    "mean_pct": -0.48,
+    "t": -2.69
+   },
+   "R_to_R_plus5": {
+    "mean_pct": -1.32,
+    "t": -1.79
+   }
+  },
+  "SP600add": {
+   "n": 359,
+   "R_minus5_to_R": {
+    "mean_pct": 2.26,
+    "t": 6.31
+   },
+   "announcement_close_to_R": {
+    "mean_pct": -0.28,
+    "t": -0.83
+   },
+   "on_the_R_flow_day": {
+    "mean_pct": -0.24,
+    "t": -1.81
+   },
+   "R_to_R_plus5": {
+    "mean_pct": -0.2,
+    "t": -0.2
+   }
+  },
+  "SP600del": {
+   "n": 270,
+   "R_minus5_to_R": {
+    "mean_pct": -2.49,
+    "t": -3.47
+   },
+   "announcement_close_to_R": {
+    "mean_pct": -0.79,
+    "t": -2.14
+   },
+   "on_the_R_flow_day": {
+    "mean_pct": -0.44,
+    "t": -2.01
+   },
+   "R_to_R_plus5": {
+    "mean_pct": 2.21,
+    "t": 1.48
+   }
+  }
+ },
+ "b5_windows_design": {
+  "entry_at_filing_close_F_to_F5": {
+   "n": 3348,
+   "mean_pct": -0.89,
+   "t": -6.12
+  },
+  "entry_one_day_later_F1_to_F6": {
+   "n": 3361,
+   "mean_pct": -0.07,
+   "t": -1.6
+  },
+  "entry_one_day_later_F1_to_F21": {
+   "n": 3361,
+   "mean_pct": -0.5,
+   "t": -1.96
+  },
+  "placebo_shift_plus60d": {
+   "n": 3404,
+   "mean_pct": -0.34,
+   "t": -2.88
+  },
+  "liquid_20M_F1_to_F6": {
+   "n": 1909,
+   "mean_pct": -0.15,
+   "t": -1.93
+  },
+  "liquid_100M_F1_to_F6": {
+   "n": 782,
+   "mean_pct": -0.23,
+   "t": -1.59
+  },
+  "micro_2_to_20M_F1_to_F6": {
+   "n": 1452,
+   "mean_pct": 0.03,
+   "t": -0.98
+  }
+ },
+ "b5_windows_heldout": {
+  "entry_at_filing_close_F_to_F5": {
+   "n": 2729,
+   "mean_pct": -1.41,
+   "t": -6.68
+  },
+  "entry_one_day_later_F1_to_F6": {
+   "n": 2747,
+   "mean_pct": -0.23,
+   "t": -0.8
+  },
+  "entry_one_day_later_F1_to_F21": {
+   "n": 2695,
+   "mean_pct": -1.7,
+   "t": -3.85
+  },
+  "placebo_shift_plus60d": {
+   "n": 2529,
+   "mean_pct": -0.31,
+   "t": -1.46
+  },
+  "liquid_20M_F1_to_F6": {
+   "n": 1681,
+   "mean_pct": 0.06,
+   "t": 0.31
+  },
+  "liquid_100M_F1_to_F6": {
+   "n": 827,
+   "mean_pct": -0.05,
+   "t": 0.4
+  },
+  "micro_2_to_20M_F1_to_F6": {
+   "n": 1066,
+   "mean_pct": -0.68,
+   "t": -1.44
+  }
+ },
+ "b5_day_profile_heldout_all": {
+  "n": 2698,
+  "per_day": {
+   "F-3": {
+    "mean_pct": 0.61,
+    "t": 3.41
+   },
+   "F-2": {
+    "mean_pct": 0.45,
+    "t": 1.94
+   },
+   "F-1": {
+    "mean_pct": -0.78,
+    "t": -3.19
+   },
+   "F+0": {
+    "mean_pct": -0.09,
+    "t": -0.63
+   },
+   "F+1": {
+    "mean_pct": -1.16,
+    "t": -7.12
+   },
+   "F+2": {
+    "mean_pct": -0.0,
+    "t": -1.14
+   },
+   "F+3": {
+    "mean_pct": 0.04,
+    "t": -0.25
+   },
+   "F+4": {
+    "mean_pct": -0.21,
+    "t": -2.91
+   },
+   "F+5": {
+    "mean_pct": -0.07,
+    "t": -1.05
+   },
+   "F+6": {
+    "mean_pct": -0.06,
+    "t": 0.32
+   }
+  }
+ },
+ "b5_day_profile_heldout_liquid20M": {
+  "n": 1650,
+  "per_day": {
+   "F-3": {
+    "mean_pct": 0.38,
+    "t": 2.69
+   },
+   "F-2": {
+    "mean_pct": 0.29,
+    "t": 1.34
+   },
+   "F-1": {
+    "mean_pct": -0.32,
+    "t": -0.81
+   },
+   "F+0": {
+    "mean_pct": -0.18,
+    "t": -1.16
+   },
+   "F+1": {
+    "mean_pct": -0.64,
+    "t": -4.33
+   },
+   "F+2": {
+    "mean_pct": 0.09,
+    "t": 0.39
+   },
+   "F+3": {
+    "mean_pct": 0.04,
+    "t": 0.33
+   },
+   "F+4": {
+    "mean_pct": -0.15,
+    "t": -0.97
+   },
+   "F+5": {
+    "mean_pct": 0.03,
+    "t": -0.1
+   },
+   "F+6": {
+    "mean_pct": 0.08,
+    "t": 1.38
+   }
+  }
+ },
+ "b5_day_profile_heldout_micro": {
+  "n": 1048,
+  "per_day": {
+   "F-3": {
+    "mean_pct": 0.98,
+    "t": 2.49
+   },
+   "F-2": {
+    "mean_pct": 0.7,
+    "t": 2.51
+   },
+   "F-1": {
+    "mean_pct": -1.5,
+    "t": -4.22
+   },
+   "F+0": {
+    "mean_pct": 0.04,
+    "t": 0.32
+   },
+   "F+1": {
+    "mean_pct": -1.98,
+    "t": -6.83
+   },
+   "F+2": {
+    "mean_pct": -0.15,
+    "t": -1.74
+   },
+   "F+3": {
+    "mean_pct": 0.04,
+    "t": -0.36
+   },
+   "F+4": {
+    "mean_pct": -0.29,
+    "t": -2.3
+   },
+   "F+5": {
+    "mean_pct": -0.22,
+    "t": -1.54
+   },
+   "F+6": {
+    "mean_pct": -0.28,
+    "t": -1.29
+   }
+  }
+ },
+ "design": {
+  "F01_SP500ADD_RUNUP5": {
+   "n_events": 123,
+   "n_dates": 89,
+   "mean_bp": 28.11,
+   "median_bp": -132.35,
+   "t_clustered": 1.134,
+   "hit_rate": 0.39,
+   "sd_bp": 608.0,
+   "sharpe_portfolio": 0.485,
+   "pct_days_invested": 0.273,
+   "net_bp": {
+    "c0.5": 25.11,
+    "c3.0": 20.11,
+    "c5.5": 15.11
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "S&P500 add: long from R-5 close to the rebalance close R",
+   "a": -5,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F02_SP500ADD_LAST1": {
+   "n_events": 123,
+   "n_dates": 89,
+   "mean_bp": -14.82,
+   "median_bp": -26.34,
+   "t_clustered": -1.145,
+   "hit_rate": 0.447,
+   "sd_bp": 204.6,
+   "sharpe_portfolio": -0.471,
+   "pct_days_invested": 0.06,
+   "net_bp": {
+    "c0.5": -17.82,
+    "c3.0": -22.82,
+    "c5.5": -27.82
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "S&P500 add: long R-1 close to R close (the flow day itself)",
+   "a": -1,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN-mild"
+  },
+  "F03_SP500ADD_REV5": {
+   "n_events": 122,
+   "n_dates": 88,
+   "mean_bp": -96.0,
+   "median_bp": -2.91,
+   "t_clustered": -0.325,
+   "hit_rate": 0.484,
+   "sd_bp": 2021.0,
+   "sharpe_portfolio": -0.224,
+   "pct_days_invested": 0.27,
+   "net_bp": {
+    "c0.5": -99.0,
+    "c3.0": -104.0,
+    "c5.5": -109.0
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "S&P500 add: SHORT R close to R+5 (give-back of the forced bid)",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F04_SP500ADD_REV20": {
+   "n_events": 122,
+   "n_dates": 88,
+   "mean_bp": -97.94,
+   "median_bp": -28.32,
+   "t_clustered": -0.538,
+   "hit_rate": 0.5,
+   "sd_bp": 1922.5,
+   "sharpe_portfolio": -0.373,
+   "pct_days_invested": 0.717,
+   "net_bp": {
+    "c0.5": -100.94,
+    "c3.0": -105.94,
+    "c5.5": -110.94
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "S&P500 add: SHORT R close to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F05_SP500ADD_REV60": {
+   "n_events": 122,
+   "n_dates": 88,
+   "mean_bp": 39.46,
+   "median_bp": 3.16,
+   "t_clustered": 0.5,
+   "hit_rate": 0.5,
+   "sd_bp": 2323.1,
+   "sharpe_portfolio": -0.146,
+   "pct_days_invested": 0.998,
+   "net_bp": {
+    "c0.5": 36.46,
+    "c3.0": 31.46,
+    "c5.5": 26.46
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "S&P500 add: SHORT R close to R+60",
+   "a": 0,
+   "b": 60,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F06_SP500DEL_DOWN5": {
+   "n_events": 107,
+   "n_dates": 79,
+   "mean_bp": 187.66,
+   "median_bp": 30.48,
+   "t_clustered": 1.361,
+   "hit_rate": 0.561,
+   "sd_bp": 1132.6,
+   "sharpe_portfolio": 0.591,
+   "pct_days_invested": 0.246,
+   "net_bp": {
+    "c0.5": 184.66,
+    "c3.0": 179.66,
+    "c5.5": 174.66
+   },
+   "first": 20160219,
+   "last": 20211217,
+   "desc": "S&P500 delete: SHORT R-5 to R (forced selling into the close)",
+   "a": -5,
+   "b": 0,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F07_SP500DEL_REB10": {
+   "n_events": 79,
+   "n_dates": 54,
+   "mean_bp": -339.32,
+   "median_bp": -163.27,
+   "t_clustered": -1.079,
+   "hit_rate": 0.418,
+   "sd_bp": 2122.1,
+   "sharpe_portfolio": -0.342,
+   "pct_days_invested": 0.318,
+   "net_bp": {
+    "c0.5": -342.32,
+    "c3.0": -347.32,
+    "c5.5": -352.32
+   },
+   "first": 20160303,
+   "last": 20211217,
+   "desc": "S&P500 delete: LONG R close to R+10 (post-deletion rebound)",
+   "a": 0,
+   "b": 10,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F08_SP500DEL_REB60": {
+   "n_events": 78,
+   "n_dates": 53,
+   "mean_bp": -167.56,
+   "median_bp": -249.01,
+   "t_clustered": -0.327,
+   "hit_rate": 0.372,
+   "sd_bp": 4061.7,
+   "sharpe_portfolio": -0.036,
+   "pct_days_invested": 0.926,
+   "net_bp": {
+    "c0.5": -170.56,
+    "c3.0": -175.56,
+    "c5.5": -180.56
+   },
+   "first": 20160303,
+   "last": 20211217,
+   "desc": "S&P500 delete: LONG R close to R+60",
+   "a": 0,
+   "b": 60,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F09_SP400ADD_RUNUP5": {
+   "n_events": 279,
+   "n_dates": 183,
+   "mean_bp": -37.99,
+   "median_bp": 1.89,
+   "t_clustered": -0.121,
+   "hit_rate": 0.502,
+   "sd_bp": 988.5,
+   "sharpe_portfolio": -0.458,
+   "pct_days_invested": 0.491,
+   "net_bp": {
+    "c0.5": -40.99,
+    "c3.0": -45.99,
+    "c5.5": -50.99
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "S&P400 add: long R-5 to R",
+   "a": -5,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F10_SP400ADD_REV20": {
+   "n_events": 279,
+   "n_dates": 183,
+   "mean_bp": -19.01,
+   "median_bp": -0.83,
+   "t_clustered": -0.102,
+   "hit_rate": 0.498,
+   "sd_bp": 1037.9,
+   "sharpe_portfolio": -0.073,
+   "pct_days_invested": 0.953,
+   "net_bp": {
+    "c0.5": -22.01,
+    "c3.0": -27.01,
+    "c5.5": -32.01
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "S&P400 add: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F11_SP400DEL_REB20": {
+   "n_events": 200,
+   "n_dates": 126,
+   "mean_bp": -64.04,
+   "median_bp": -2.55,
+   "t_clustered": -0.604,
+   "hit_rate": 0.5,
+   "sd_bp": 1394.3,
+   "sharpe_portfolio": 0.108,
+   "pct_days_invested": 0.874,
+   "net_bp": {
+    "c0.5": -67.04,
+    "c3.0": -72.04,
+    "c5.5": -77.04
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "S&P400 delete: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F12_SP600ADD_RUNUP5": {
+   "n_events": 105,
+   "n_dates": 65,
+   "mean_bp": 936.62,
+   "median_bp": 992.98,
+   "t_clustered": 7.446,
+   "hit_rate": 0.867,
+   "sd_bp": 1378.2,
+   "sharpe_portfolio": 3.987,
+   "pct_days_invested": 0.531,
+   "net_bp": {
+    "c0.5": 933.62,
+    "c3.0": 928.62,
+    "c5.5": 923.62
+   },
+   "first": 20191220,
+   "last": 20211217,
+   "desc": "S&P600 add: long R-5 to R",
+   "a": -5,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F13_SP600ADD_REV20": {
+   "n_events": 105,
+   "n_dates": 65,
+   "mean_bp": 141.08,
+   "median_bp": 255.79,
+   "t_clustered": 0.166,
+   "hit_rate": 0.61,
+   "sd_bp": 1440.9,
+   "sharpe_portfolio": 0.328,
+   "pct_days_invested": 0.941,
+   "net_bp": {
+    "c0.5": 138.08,
+    "c3.0": 133.08,
+    "c5.5": 128.08
+   },
+   "first": 20191220,
+   "last": 20211217,
+   "desc": "S&P600 add: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F14_SP600DEL_REB20": {
+   "n_events": 47,
+   "n_dates": 37,
+   "mean_bp": -106.7,
+   "median_bp": 40.48,
+   "t_clustered": 0.283,
+   "hit_rate": 0.553,
+   "sd_bp": 2197.6,
+   "sharpe_portfolio": -0.244,
+   "pct_days_invested": 0.822,
+   "net_bp": {
+    "c0.5": -109.7,
+    "c3.0": -114.7,
+    "c5.5": -119.7
+   },
+   "first": 20191220,
+   "last": 20211217,
+   "desc": "S&P600 delete: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F15_PROMOTE_RUNUP5": {
+   "n_events": 90,
+   "n_dates": 54,
+   "mean_bp": -376.52,
+   "median_bp": -310.56,
+   "t_clustered": -6.76,
+   "hit_rate": 0.156,
+   "sd_bp": 557.6,
+   "sharpe_portfolio": -2.265,
+   "pct_days_invested": 0.175,
+   "net_bp": {
+    "c0.5": -379.52,
+    "c3.0": -384.52,
+    "c5.5": -389.52
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "index MIGRATION UP (600->400, 400->500): long R-5 to R",
+   "a": -5,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F16_PROMOTE_REV20": {
+   "n_events": 89,
+   "n_dates": 53,
+   "mean_bp": -246.59,
+   "median_bp": -206.24,
+   "t_clustered": -2.014,
+   "hit_rate": 0.416,
+   "sd_bp": 1137.9,
+   "sharpe_portfolio": -0.912,
+   "pct_days_invested": 0.528,
+   "net_bp": {
+    "c0.5": -249.59,
+    "c3.0": -254.59,
+    "c5.5": -259.59
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "index MIGRATION UP: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F17_DEMOTE_REB20": {
+   "n_events": 93,
+   "n_dates": 54,
+   "mean_bp": -227.25,
+   "median_bp": -235.2,
+   "t_clustered": -0.85,
+   "hit_rate": 0.398,
+   "sd_bp": 1139.9,
+   "sharpe_portfolio": -0.354,
+   "pct_days_invested": 0.486,
+   "net_bp": {
+    "c0.5": -230.25,
+    "c3.0": -235.25,
+    "c5.5": -240.25
+   },
+   "first": 20160303,
+   "last": 20211217,
+   "desc": "index MIGRATION DOWN (500->400, 400->600): LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F18_ALLADD_REV20": {
+   "n_events": 506,
+   "n_dates": 243,
+   "mean_bp": -4.82,
+   "median_bp": 47.7,
+   "t_clustered": -0.161,
+   "hit_rate": 0.522,
+   "sd_bp": 1383.1,
+   "sharpe_portfolio": -0.267,
+   "pct_days_invested": 0.981,
+   "net_bp": {
+    "c0.5": -7.82,
+    "c3.0": -12.82,
+    "c5.5": -17.82
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "ALL S&P adds pooled: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F19_ALLDEL_REB20": {
+   "n_events": 325,
+   "n_dates": 167,
+   "mean_bp": -142.05,
+   "median_bp": -21.33,
+   "t_clustered": -1.003,
+   "hit_rate": 0.492,
+   "sd_bp": 1827.1,
+   "sharpe_portfolio": -0.231,
+   "pct_days_invested": 0.906,
+   "net_bp": {
+    "c0.5": -145.05,
+    "c3.0": -150.05,
+    "c5.5": -155.05
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "ALL S&P deletes pooled: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F20_ALLADD_LAST1": {
+   "n_events": 507,
+   "n_dates": 243,
+   "mean_bp": -104.81,
+   "median_bp": -61.13,
+   "t_clustered": -2.707,
+   "hit_rate": 0.404,
+   "sd_bp": 701.1,
+   "sharpe_portfolio": -1.101,
+   "pct_days_invested": 0.163,
+   "net_bp": {
+    "c0.5": -107.81,
+    "c3.0": -112.81,
+    "c5.5": -117.81
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "ALL S&P adds pooled: long R-1 to R",
+   "a": -1,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN-mild"
+  },
+  "F21_ALLADD_REV3": {
+   "n_events": 506,
+   "n_dates": 243,
+   "mean_bp": -43.41,
+   "median_bp": 7.25,
+   "t_clustered": -0.654,
+   "hit_rate": 0.508,
+   "sd_bp": 1146.8,
+   "sharpe_portfolio": -0.334,
+   "pct_days_invested": 0.422,
+   "net_bp": {
+    "c0.5": -46.41,
+    "c3.0": -51.41,
+    "c5.5": -56.41
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "ALL S&P adds pooled: SHORT R to R+3",
+   "a": 0,
+   "b": 3,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F22_ALLDEL_REB3": {
+   "n_events": 335,
+   "n_dates": 173,
+   "mean_bp": -42.76,
+   "median_bp": -10.84,
+   "t_clustered": -0.415,
+   "hit_rate": 0.475,
+   "sd_bp": 974.8,
+   "sharpe_portfolio": -0.097,
+   "pct_days_invested": 0.307,
+   "net_bp": {
+    "c0.5": -45.76,
+    "c3.0": -50.76,
+    "c5.5": -55.76
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "ALL S&P deletes pooled: LONG R to R+3",
+   "a": 0,
+   "b": 3,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F23_PAIR_REV20": {
+   "n_events": 831,
+   "n_dates": 255,
+   "mean_bp": -75.12,
+   "median_bp": -14.02,
+   "t_clustered": -0.726,
+   "hit_rate": 0.472,
+   "sd_bp": 1660.5,
+   "sharpe_portfolio": -0.328,
+   "pct_days_invested": 0.986,
+   "net_bp": {
+    "c0.5": -76.12,
+    "c3.0": -81.12,
+    "c5.5": -86.12
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "self-hedged flow pair: LONG deletes / SHORT adds, R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F24_LOCKUP_PRE": {
+   "n_events": 295,
+   "n_dates": 211,
+   "mean_bp": 78.54,
+   "median_bp": 97.67,
+   "t_clustered": 1.897,
+   "hit_rate": 0.586,
+   "sd_bp": 921.1,
+   "sharpe_portfolio": 0.996,
+   "pct_days_invested": 0.474,
+   "net_bp": {
+    "c0.5": 75.54,
+    "c3.0": 70.54,
+    "c5.5": 65.54
+   },
+   "first": 20161122,
+   "last": 20211228,
+   "desc": "IPO lockup expiry (424B4+180d): SHORT L-5 to L-1",
+   "a": -5,
+   "b": -1,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F25_LOCKUP_REB10": {
+   "n_events": 294,
+   "n_dates": 210,
+   "mean_bp": 45.63,
+   "median_bp": -10.01,
+   "t_clustered": 1.153,
+   "hit_rate": 0.493,
+   "sd_bp": 1404.5,
+   "sharpe_portfolio": 0.514,
+   "pct_days_invested": 0.733,
+   "net_bp": {
+    "c0.5": 42.63,
+    "c3.0": 37.63,
+    "c5.5": 32.63
+   },
+   "first": 20161122,
+   "last": 20211228,
+   "desc": "IPO lockup expiry: LONG L to L+10 (supply cleared)",
+   "a": 0,
+   "b": 10,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F26_LOCKUP_CROSS": {
+   "n_events": 291,
+   "n_dates": 209,
+   "mean_bp": 69.09,
+   "median_bp": 195.76,
+   "t_clustered": 0.745,
+   "hit_rate": 0.619,
+   "sd_bp": 1852.3,
+   "sharpe_portfolio": 0.523,
+   "pct_days_invested": 0.727,
+   "net_bp": {
+    "c0.5": 66.09,
+    "c3.0": 61.09,
+    "c5.5": 56.09
+   },
+   "first": 20161122,
+   "last": 20211228,
+   "desc": "IPO lockup expiry: SHORT L-10 to L (anticipation)",
+   "a": -10,
+   "b": 0,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F27_SEC424B5_REB5": {
+   "n_events": 3336,
+   "n_dates": 1167,
+   "mean_bp": -97.98,
+   "median_bp": -66.01,
+   "t_clustered": -5.859,
+   "hit_rate": 0.428,
+   "sd_bp": 1012.2,
+   "sharpe_portfolio": -1.789,
+   "pct_days_invested": 0.988,
+   "net_bp": {
+    "c0.5": -100.98,
+    "c3.0": -105.98,
+    "c5.5": -110.98
+   },
+   "first": 20160126,
+   "last": 20211222,
+   "desc": "424B5 shelf takedown: LONG F to F+5 (overhang cleared)",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F28_SEC424B5_REB20": {
+   "n_events": 3336,
+   "n_dates": 1167,
+   "mean_bp": -140.92,
+   "median_bp": -155.21,
+   "t_clustered": -4.345,
+   "hit_rate": 0.421,
+   "sd_bp": 1687.9,
+   "sharpe_portfolio": -1.651,
+   "pct_days_invested": 1.0,
+   "net_bp": {
+    "c0.5": -143.92,
+    "c3.0": -148.92,
+    "c5.5": -153.92
+   },
+   "first": 20160126,
+   "last": 20211222,
+   "desc": "424B5 shelf takedown: LONG F to F+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F29_SEC424B5_PRE": {
+   "n_events": 3295,
+   "n_dates": 1168,
+   "mean_bp": -193.66,
+   "median_bp": -29.0,
+   "t_clustered": -6.016,
+   "hit_rate": 0.468,
+   "sd_bp": 1444.7,
+   "sharpe_portfolio": -2.242,
+   "pct_days_invested": 0.978,
+   "net_bp": {
+    "c0.5": -196.66,
+    "c3.0": -201.66,
+    "c5.5": -206.66
+   },
+   "first": 20160126,
+   "last": 20211229,
+   "desc": "424B5: SHORT F-5 to F-1 (marketing-period pressure)",
+   "a": -5,
+   "b": -1,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "NOT-TRADABLE(filing date unknown ex-ante)"
+  },
+  "F30_ADD_REV20_BIGFLOW": {
+   "n_events": 167,
+   "n_dates": 110,
+   "mean_bp": -6.92,
+   "median_bp": 32.45,
+   "t_clustered": -0.203,
+   "hit_rate": 0.509,
+   "sd_bp": 1004.0,
+   "sharpe_portfolio": -0.076,
+   "pct_days_invested": 0.759,
+   "net_bp": {
+    "c0.5": -9.92,
+    "c3.0": -14.92,
+    "c5.5": -19.92
+   },
+   "first": 20160303,
+   "last": 20211217,
+   "desc": "adds whose rebalance-close $volume spike is in the top tercile: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F31_DEL_REB20_BIGFLOW": {
+   "n_events": 109,
+   "n_dates": 65,
+   "mean_bp": 89.83,
+   "median_bp": 145.91,
+   "t_clustered": 0.484,
+   "hit_rate": 0.578,
+   "sd_bp": 1019.5,
+   "sharpe_portfolio": 0.453,
+   "pct_days_invested": 0.573,
+   "net_bp": {
+    "c0.5": 86.83,
+    "c3.0": 81.83,
+    "c5.5": 76.83
+   },
+   "first": 20160304,
+   "last": 20211217,
+   "desc": "deletes with a top-tercile rebalance-close $volume spike: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F32_ADD_REV20_BIGRUNUP": {
+   "n_events": 167,
+   "n_dates": 110,
+   "mean_bp": 80.86,
+   "median_bp": 236.35,
+   "t_clustered": 0.434,
+   "hit_rate": 0.599,
+   "sd_bp": 1302.1,
+   "sharpe_portfolio": 0.086,
+   "pct_days_invested": 0.689,
+   "net_bp": {
+    "c0.5": 77.86,
+    "c3.0": 72.86,
+    "c5.5": 67.86
+   },
+   "first": 20160208,
+   "last": 20211217,
+   "desc": "adds with the largest hedged R-5->R run-up: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F33_DEL_REB20_BIGDROP": {
+   "n_events": 112,
+   "n_dates": 71,
+   "mean_bp": 134.45,
+   "median_bp": 134.25,
+   "t_clustered": 0.765,
+   "hit_rate": 0.562,
+   "sd_bp": 2152.8,
+   "sharpe_portfolio": 0.328,
+   "pct_days_invested": 0.659,
+   "net_bp": {
+    "c0.5": 131.45,
+    "c3.0": 126.45,
+    "c5.5": 121.45
+   },
+   "first": 20160208,
+   "last": 20211217,
+   "desc": "deletes with the largest hedged R-5->R DROP: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F34_PAIR_REV20_BIGFLOW": {
+   "n_events": 285,
+   "n_dates": 124,
+   "mean_bp": -4.96,
+   "median_bp": -22.38,
+   "t_clustered": -0.242,
+   "hit_rate": 0.484,
+   "sd_bp": 1064.0,
+   "sharpe_portfolio": -0.02,
+   "pct_days_invested": 0.814,
+   "net_bp": {
+    "c0.5": -5.96,
+    "c3.0": -10.96,
+    "c5.5": -15.96
+   },
+   "first": 20160303,
+   "last": 20211217,
+   "desc": "self-hedged flow pair restricted to top-tercile rebalance-close volume spikes",
+   "a": 0,
+   "b": 20,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F35_MIGPAIR_REB5": {
+   "n_events": 182,
+   "n_dates": 83,
+   "mean_bp": 171.9,
+   "median_bp": 135.58,
+   "t_clustered": 2.037,
+   "hit_rate": 0.604,
+   "sd_bp": 745.2,
+   "sharpe_portfolio": 0.607,
+   "pct_days_invested": 0.245,
+   "net_bp": {
+    "c0.5": 170.9,
+    "c3.0": 165.9,
+    "c5.5": 160.9
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "index MIGRATION pair, corrected sign: LONG promoted / SHORT demoted, R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F36_MIGPAIR_REB20": {
+   "n_events": 182,
+   "n_dates": 83,
+   "mean_bp": 216.33,
+   "median_bp": 240.43,
+   "t_clustered": 1.009,
+   "hit_rate": 0.56,
+   "sd_bp": 1270.6,
+   "sharpe_portfolio": 0.474,
+   "pct_days_invested": 0.623,
+   "net_bp": {
+    "c0.5": 215.33,
+    "c3.0": 210.33,
+    "c5.5": 205.33
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "index MIGRATION pair, corrected sign: R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F37_PROMOTE_REB5": {
+   "n_events": 89,
+   "n_dates": 53,
+   "mean_bp": 136.03,
+   "median_bp": 150.25,
+   "t_clustered": 3.086,
+   "hit_rate": 0.674,
+   "sd_bp": 384.7,
+   "sharpe_portfolio": 1.321,
+   "pct_days_invested": 0.172,
+   "net_bp": {
+    "c0.5": 133.03,
+    "c3.0": 128.03,
+    "c5.5": 123.03
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "promoted (600->400, 400->500) LONG R to R+5 -- rebound from net forced selling",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F38_DEMOTE_FADE5": {
+   "n_events": 93,
+   "n_dates": 54,
+   "mean_bp": 206.29,
+   "median_bp": 152.42,
+   "t_clustered": 1.694,
+   "hit_rate": 0.645,
+   "sd_bp": 825.0,
+   "sharpe_portfolio": 0.601,
+   "pct_days_invested": 0.169,
+   "net_bp": {
+    "c0.5": 203.29,
+    "c3.0": 198.29,
+    "c5.5": 193.29
+   },
+   "first": 20160303,
+   "last": 20211217,
+   "desc": "demoted (500->400, 400->600) SHORT R to R+5 -- fade of net forced buying",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F39_DELLIVE_REB5": {
+   "n_events": 283,
+   "n_dates": 137,
+   "mean_bp": -130.77,
+   "median_bp": -8.55,
+   "t_clustered": -1.384,
+   "hit_rate": 0.488,
+   "sd_bp": 1276.8,
+   "sharpe_portfolio": -0.379,
+   "pct_days_invested": 0.378,
+   "net_bp": {
+    "c0.5": -133.77,
+    "c3.0": -138.77,
+    "c5.5": -143.77
+   },
+   "first": 20160303,
+   "last": 20211217,
+   "desc": "deletes NOT caused by M&A (the stock keeps trading): LONG R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F40_DELLIVE_REB20": {
+   "n_events": 279,
+   "n_dates": 136,
+   "mean_bp": -185.33,
+   "median_bp": -42.55,
+   "t_clustered": -1.066,
+   "hit_rate": 0.487,
+   "sd_bp": 1865.7,
+   "sharpe_portfolio": -0.258,
+   "pct_days_invested": 0.851,
+   "net_bp": {
+    "c0.5": -188.33,
+    "c3.0": -193.33,
+    "c5.5": -198.33
+   },
+   "first": 20160303,
+   "last": 20211217,
+   "desc": "deletes NOT caused by M&A: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F41_ADDFRESH_REV5": {
+   "n_events": 324,
+   "n_dates": 234,
+   "mean_bp": -61.93,
+   "median_bp": 29.66,
+   "t_clustered": -0.032,
+   "hit_rate": 0.531,
+   "sd_bp": 1392.5,
+   "sharpe_portfolio": 0.059,
+   "pct_days_invested": 0.579,
+   "net_bp": {
+    "c0.5": -64.93,
+    "c3.0": -69.93,
+    "c5.5": -74.93
+   },
+   "first": 20160126,
+   "last": 20211227,
+   "desc": "adds that are NOT index migrations (brand-new index demand): SHORT R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F42_MIG_400to500_R5": {
+   "n_events": 62,
+   "n_dates": 42,
+   "mean_bp": -80.48,
+   "median_bp": -142.81,
+   "t_clustered": -2.616,
+   "hit_rate": 0.371,
+   "sd_bp": 330.3,
+   "sharpe_portfolio": -1.005,
+   "pct_days_invested": 0.135,
+   "net_bp": {
+    "c0.5": -83.48,
+    "c3.0": -88.48,
+    "c5.5": -93.48
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "migration SP400->SP500: mandated net BUY -> SHORT R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F43_MIG_500to400_R5": {
+   "n_events": 49,
+   "n_dates": 29,
+   "mean_bp": -269.17,
+   "median_bp": -233.6,
+   "t_clustered": -1.549,
+   "hit_rate": 0.306,
+   "sd_bp": 1013.8,
+   "sharpe_portfolio": -0.602,
+   "pct_days_invested": 0.094,
+   "net_bp": {
+    "c0.5": -272.17,
+    "c3.0": -277.17,
+    "c5.5": -282.17
+   },
+   "first": 20160303,
+   "last": 20211217,
+   "desc": "migration SP500->SP400: mandated net SELL -> LONG R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F44_MIG_600to400_R5": {
+   "n_events": 27,
+   "n_dates": 20,
+   "mean_bp": 263.59,
+   "median_bp": 201.52,
+   "t_clustered": 2.385,
+   "hit_rate": 0.778,
+   "sd_bp": 469.6,
+   "sharpe_portfolio": 1.889,
+   "pct_days_invested": 0.261,
+   "net_bp": {
+    "c0.5": 260.59,
+    "c3.0": 255.59,
+    "c5.5": 250.59
+   },
+   "first": 20200619,
+   "last": 20211217,
+   "desc": "migration SP600->SP400: mandated net SELL -> LONG R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F45_MIG_400to600_R5": {
+   "n_events": 42,
+   "n_dates": 29,
+   "mean_bp": 150.91,
+   "median_bp": 112.11,
+   "t_clustered": 1.218,
+   "hit_rate": 0.595,
+   "sd_bp": 554.1,
+   "sharpe_portfolio": 0.568,
+   "pct_days_invested": 0.342,
+   "net_bp": {
+    "c0.5": 147.91,
+    "c3.0": 142.91,
+    "c5.5": 137.91
+   },
+   "first": 20200619,
+   "last": 20211217,
+   "desc": "migration SP400->SP600: mandated net BUY -> SHORT R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F46_MIG_NETFLOW_R5": {
+   "n_events": 182,
+   "n_dates": 83,
+   "mean_bp": -58.14,
+   "median_bp": -23.19,
+   "t_clustered": -1.485,
+   "hit_rate": 0.489,
+   "sd_bp": 762.6,
+   "sharpe_portfolio": -0.651,
+   "pct_days_invested": 0.245,
+   "net_bp": {
+    "c0.5": -59.14,
+    "c3.0": -64.14,
+    "c5.5": -69.14
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "ALL migrations in one self-hedged book, each signed by the passive-ownership differential (fade the net buys, buy the net sells), R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F47_MIG_NETFLOW_R20": {
+   "n_events": 182,
+   "n_dates": 83,
+   "mean_bp": -3.12,
+   "median_bp": -42.6,
+   "t_clustered": 0.117,
+   "hit_rate": 0.478,
+   "sd_bp": 1288.9,
+   "sharpe_portfolio": -0.189,
+   "pct_days_invested": 0.623,
+   "net_bp": {
+    "c0.5": -4.12,
+    "c3.0": -9.12,
+    "c5.5": -14.12
+   },
+   "first": 20160129,
+   "last": 20211217,
+   "desc": "same book, R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  }
+ },
+ "heldout": {
+  "F01_SP500ADD_RUNUP5": {
+   "n_events": 70,
+   "n_dates": 44,
+   "mean_bp": 296.26,
+   "median_bp": 190.67,
+   "t_clustered": 3.379,
+   "hit_rate": 0.629,
+   "sd_bp": 666.2,
+   "sharpe_portfolio": 1.346,
+   "pct_days_invested": 0.186,
+   "net_bp": {
+    "c0.5": 293.26,
+    "c3.0": 288.26,
+    "c5.5": 283.26
+   },
+   "first": 20220107,
+   "last": 20260804,
+   "desc": "S&P500 add: long from R-5 close to the rebalance close R",
+   "a": -5,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F02_SP500ADD_LAST1": {
+   "n_events": 71,
+   "n_dates": 45,
+   "mean_bp": -3.05,
+   "median_bp": -26.26,
+   "t_clustered": 0.331,
+   "hit_rate": 0.423,
+   "sd_bp": 330.6,
+   "sharpe_portfolio": 0.157,
+   "pct_days_invested": 0.039,
+   "net_bp": {
+    "c0.5": -6.05,
+    "c3.0": -11.05,
+    "c5.5": -16.05
+   },
+   "first": 20220107,
+   "last": 20260804,
+   "desc": "S&P500 add: long R-1 close to R close (the flow day itself)",
+   "a": -1,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN-mild"
+  },
+  "F03_SP500ADD_REV5": {
+   "n_events": 71,
+   "n_dates": 45,
+   "mean_bp": 33.86,
+   "median_bp": 75.89,
+   "t_clustered": 0.528,
+   "hit_rate": 0.535,
+   "sd_bp": 499.8,
+   "sharpe_portfolio": 0.205,
+   "pct_days_invested": 0.19,
+   "net_bp": {
+    "c0.5": 30.86,
+    "c3.0": 25.86,
+    "c5.5": 20.86
+   },
+   "first": 20220107,
+   "last": 20260804,
+   "desc": "S&P500 add: SHORT R close to R+5 (give-back of the forced bid)",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F04_SP500ADD_REV20": {
+   "n_events": 70,
+   "n_dates": 44,
+   "mean_bp": 102.87,
+   "median_bp": -29.1,
+   "t_clustered": 0.847,
+   "hit_rate": 0.471,
+   "sd_bp": 1256.0,
+   "sharpe_portfolio": 0.396,
+   "pct_days_invested": 0.606,
+   "net_bp": {
+    "c0.5": 99.87,
+    "c3.0": 94.87,
+    "c5.5": 89.87
+   },
+   "first": 20220107,
+   "last": 20260618,
+   "desc": "S&P500 add: SHORT R close to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F05_SP500ADD_REV60": {
+   "n_events": 68,
+   "n_dates": 43,
+   "mean_bp": -458.33,
+   "median_bp": -133.2,
+   "t_clustered": -1.07,
+   "hit_rate": 0.471,
+   "sd_bp": 3361.4,
+   "sharpe_portfolio": -0.688,
+   "pct_days_invested": 0.995,
+   "net_bp": {
+    "c0.5": -461.33,
+    "c3.0": -466.33,
+    "c5.5": -471.33
+   },
+   "first": 20220107,
+   "last": 20260506,
+   "desc": "S&P500 add: SHORT R close to R+60",
+   "a": 0,
+   "b": 60,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F06_SP500DEL_DOWN5": {
+   "n_events": 68,
+   "n_dates": 43,
+   "mean_bp": 160.03,
+   "median_bp": 111.18,
+   "t_clustered": 2.13,
+   "hit_rate": 0.632,
+   "sd_bp": 632.2,
+   "sharpe_portfolio": 1.008,
+   "pct_days_invested": 0.185,
+   "net_bp": {
+    "c0.5": 157.03,
+    "c3.0": 152.03,
+    "c5.5": 147.03
+   },
+   "first": 20220202,
+   "last": 20260804,
+   "desc": "S&P500 delete: SHORT R-5 to R (forced selling into the close)",
+   "a": -5,
+   "b": 0,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F07_SP500DEL_REB10": {
+   "n_events": 52,
+   "n_dates": 28,
+   "mean_bp": -111.45,
+   "median_bp": -47.63,
+   "t_clustered": -1.338,
+   "hit_rate": 0.462,
+   "sd_bp": 649.4,
+   "sharpe_portfolio": -0.482,
+   "pct_days_invested": 0.231,
+   "net_bp": {
+    "c0.5": -114.45,
+    "c3.0": -119.45,
+    "c5.5": -124.45
+   },
+   "first": 20220202,
+   "last": 20260629,
+   "desc": "S&P500 delete: LONG R close to R+10 (post-deletion rebound)",
+   "a": 0,
+   "b": 10,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F08_SP500DEL_REB60": {
+   "n_events": 48,
+   "n_dates": 25,
+   "mean_bp": -267.69,
+   "median_bp": -461.6,
+   "t_clustered": -1.25,
+   "hit_rate": 0.333,
+   "sd_bp": 1853.7,
+   "sharpe_portfolio": -0.332,
+   "pct_days_invested": 0.903,
+   "net_bp": {
+    "c0.5": -270.69,
+    "c3.0": -275.69,
+    "c5.5": -280.69
+   },
+   "first": 20220202,
+   "last": 20260320,
+   "desc": "S&P500 delete: LONG R close to R+60",
+   "a": 0,
+   "b": 60,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F09_SP400ADD_RUNUP5": {
+   "n_events": 195,
+   "n_dates": 107,
+   "mean_bp": 24.95,
+   "median_bp": 16.62,
+   "t_clustered": 1.19,
+   "hit_rate": 0.503,
+   "sd_bp": 655.1,
+   "sharpe_portfolio": 0.504,
+   "pct_days_invested": 0.402,
+   "net_bp": {
+    "c0.5": 21.95,
+    "c3.0": 16.95,
+    "c5.5": 11.95
+   },
+   "first": 20220103,
+   "last": 20260723,
+   "desc": "S&P400 add: long R-5 to R",
+   "a": -5,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F10_SP400ADD_REV20": {
+   "n_events": 193,
+   "n_dates": 105,
+   "mean_bp": -27.98,
+   "median_bp": 28.44,
+   "t_clustered": -0.137,
+   "hit_rate": 0.513,
+   "sd_bp": 1260.9,
+   "sharpe_portfolio": -0.323,
+   "pct_days_invested": 0.919,
+   "net_bp": {
+    "c0.5": -30.98,
+    "c3.0": -35.98,
+    "c5.5": -40.98
+   },
+   "first": 20220103,
+   "last": 20260716,
+   "desc": "S&P400 add: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F11_SP400DEL_REB20": {
+   "n_events": 151,
+   "n_dates": 68,
+   "mean_bp": 126.54,
+   "median_bp": 49.24,
+   "t_clustered": 1.039,
+   "hit_rate": 0.51,
+   "sd_bp": 1403.4,
+   "sharpe_portfolio": 0.698,
+   "pct_days_invested": 0.728,
+   "net_bp": {
+    "c0.5": 123.54,
+    "c3.0": 118.54,
+    "c5.5": 113.54
+   },
+   "first": 20220131,
+   "last": 20260702,
+   "desc": "S&P400 delete: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F12_SP600ADD_RUNUP5": {
+   "n_events": 353,
+   "n_dates": 163,
+   "mean_bp": 260.52,
+   "median_bp": 197.13,
+   "t_clustered": 7.869,
+   "hit_rate": 0.674,
+   "sd_bp": 743.3,
+   "sharpe_portfolio": 2.516,
+   "pct_days_invested": 0.516,
+   "net_bp": {
+    "c0.5": 257.52,
+    "c3.0": 252.52,
+    "c5.5": 247.52
+   },
+   "first": 20220104,
+   "last": 20260731,
+   "desc": "S&P600 add: long R-5 to R",
+   "a": -5,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F13_SP600ADD_REV20": {
+   "n_events": 349,
+   "n_dates": 159,
+   "mean_bp": 69.25,
+   "median_bp": 72.58,
+   "t_clustered": 1.913,
+   "hit_rate": 0.524,
+   "sd_bp": 1279.7,
+   "sharpe_portfolio": 0.817,
+   "pct_days_invested": 0.947,
+   "net_bp": {
+    "c0.5": 66.25,
+    "c3.0": 61.25,
+    "c5.5": 56.25
+   },
+   "first": 20220104,
+   "last": 20260716,
+   "desc": "S&P600 add: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F14_SP600DEL_REB20": {
+   "n_events": 253,
+   "n_dates": 78,
+   "mean_bp": 153.79,
+   "median_bp": -48.58,
+   "t_clustered": 1.031,
+   "hit_rate": 0.486,
+   "sd_bp": 2445.5,
+   "sharpe_portfolio": 0.653,
+   "pct_days_invested": 0.812,
+   "net_bp": {
+    "c0.5": 150.79,
+    "c3.0": 145.79,
+    "c5.5": 140.79
+   },
+   "first": 20220131,
+   "last": 20260716,
+   "desc": "S&P600 delete: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F15_PROMOTE_RUNUP5": {
+   "n_events": 92,
+   "n_dates": 49,
+   "mean_bp": -147.79,
+   "median_bp": -184.11,
+   "t_clustered": -3.152,
+   "hit_rate": 0.359,
+   "sd_bp": 732.0,
+   "sharpe_portfolio": -1.204,
+   "pct_days_invested": 0.197,
+   "net_bp": {
+    "c0.5": -150.79,
+    "c3.0": -155.79,
+    "c5.5": -160.79
+   },
+   "first": 20220131,
+   "last": 20260723,
+   "desc": "index MIGRATION UP (600->400, 400->500): long R-5 to R",
+   "a": -5,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN"
+  },
+  "F16_PROMOTE_REV20": {
+   "n_events": 90,
+   "n_dates": 47,
+   "mean_bp": -185.28,
+   "median_bp": -156.62,
+   "t_clustered": -0.534,
+   "hit_rate": 0.433,
+   "sd_bp": 1570.0,
+   "sharpe_portfolio": -0.114,
+   "pct_days_invested": 0.595,
+   "net_bp": {
+    "c0.5": -188.28,
+    "c3.0": -193.28,
+    "c5.5": -198.28
+   },
+   "first": 20220131,
+   "last": 20260716,
+   "desc": "index MIGRATION UP: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F17_DEMOTE_REB20": {
+   "n_events": 158,
+   "n_dates": 58,
+   "mean_bp": -45.7,
+   "median_bp": -96.03,
+   "t_clustered": -0.653,
+   "hit_rate": 0.437,
+   "sd_bp": 1384.9,
+   "sharpe_portfolio": 0.057,
+   "pct_days_invested": 0.67,
+   "net_bp": {
+    "c0.5": -48.7,
+    "c3.0": -53.7,
+    "c5.5": -58.7
+   },
+   "first": 20220131,
+   "last": 20260702,
+   "desc": "index MIGRATION DOWN (500->400, 400->600): LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F18_ALLADD_REV20": {
+   "n_events": 612,
+   "n_dates": 201,
+   "mean_bp": 42.43,
+   "median_bp": 43.8,
+   "t_clustered": 1.835,
+   "hit_rate": 0.515,
+   "sd_bp": 1270.0,
+   "sharpe_portfolio": 0.325,
+   "pct_days_invested": 0.994,
+   "net_bp": {
+    "c0.5": 39.43,
+    "c3.0": 34.43,
+    "c5.5": 29.43
+   },
+   "first": 20220103,
+   "last": 20260716,
+   "desc": "ALL S&P adds pooled: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F19_ALLDEL_REB20": {
+   "n_events": 456,
+   "n_dates": 108,
+   "mean_bp": 99.07,
+   "median_bp": -37.35,
+   "t_clustered": 1.099,
+   "hit_rate": 0.489,
+   "sd_bp": 2038.2,
+   "sharpe_portfolio": 0.58,
+   "pct_days_invested": 0.893,
+   "net_bp": {
+    "c0.5": 96.07,
+    "c3.0": 91.07,
+    "c5.5": 86.07
+   },
+   "first": 20220131,
+   "last": 20260716,
+   "desc": "ALL S&P deletes pooled: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F20_ALLADD_LAST1": {
+   "n_events": 619,
+   "n_dates": 206,
+   "mean_bp": -19.38,
+   "median_bp": -6.39,
+   "t_clustered": -1.452,
+   "hit_rate": 0.483,
+   "sd_bp": 337.1,
+   "sharpe_portfolio": -0.678,
+   "pct_days_invested": 0.179,
+   "net_bp": {
+    "c0.5": -22.38,
+    "c3.0": -27.38,
+    "c5.5": -32.38
+   },
+   "first": 20220103,
+   "last": 20260804,
+   "desc": "ALL S&P adds pooled: long R-1 to R",
+   "a": -1,
+   "b": 0,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "ANN-mild"
+  },
+  "F21_ALLADD_REV3": {
+   "n_events": 619,
+   "n_dates": 206,
+   "mean_bp": 57.31,
+   "median_bp": 39.75,
+   "t_clustered": 2.362,
+   "hit_rate": 0.54,
+   "sd_bp": 500.5,
+   "sharpe_portfolio": 1.256,
+   "pct_days_invested": 0.448,
+   "net_bp": {
+    "c0.5": 54.31,
+    "c3.0": 49.31,
+    "c5.5": 44.31
+   },
+   "first": 20220103,
+   "last": 20260804,
+   "desc": "ALL S&P adds pooled: SHORT R to R+3",
+   "a": 0,
+   "b": 3,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F22_ALLDEL_REB3": {
+   "n_events": 462,
+   "n_dates": 113,
+   "mean_bp": 73.46,
+   "median_bp": 11.47,
+   "t_clustered": 1.514,
+   "hit_rate": 0.513,
+   "sd_bp": 1090.2,
+   "sharpe_portfolio": 0.842,
+   "pct_days_invested": 0.272,
+   "net_bp": {
+    "c0.5": 70.46,
+    "c3.0": 65.46,
+    "c5.5": 60.46
+   },
+   "first": 20220131,
+   "last": 20260803,
+   "desc": "ALL S&P deletes pooled: LONG R to R+3",
+   "a": 0,
+   "b": 3,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F23_PAIR_REV20": {
+   "n_events": 1068,
+   "n_dates": 210,
+   "mean_bp": 47.91,
+   "median_bp": 26.19,
+   "t_clustered": 1.23,
+   "hit_rate": 0.505,
+   "sd_bp": 1825.3,
+   "sharpe_portfolio": 0.648,
+   "pct_days_invested": 0.994,
+   "net_bp": {
+    "c0.5": 46.91,
+    "c3.0": 41.91,
+    "c5.5": 36.91
+   },
+   "first": 20220103,
+   "last": 20260716,
+   "desc": "self-hedged flow pair: LONG deletes / SHORT adds, R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F24_LOCKUP_PRE": {
+   "n_events": 161,
+   "n_dates": 132,
+   "mean_bp": 96.6,
+   "median_bp": 23.7,
+   "t_clustered": 0.874,
+   "hit_rate": 0.528,
+   "sd_bp": 937.0,
+   "sharpe_portfolio": 0.016,
+   "pct_days_invested": 0.364,
+   "net_bp": {
+    "c0.5": 93.6,
+    "c3.0": 88.6,
+    "c5.5": 83.6
+   },
+   "first": 20211231,
+   "last": 20260807,
+   "desc": "IPO lockup expiry (424B4+180d): SHORT L-5 to L-1",
+   "a": -5,
+   "b": -1,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F25_LOCKUP_REB10": {
+   "n_events": 160,
+   "n_dates": 130,
+   "mean_bp": -94.04,
+   "median_bp": 141.75,
+   "t_clustered": -0.907,
+   "hit_rate": 0.537,
+   "sd_bp": 1904.1,
+   "sharpe_portfolio": -0.313,
+   "pct_days_invested": 0.599,
+   "net_bp": {
+    "c0.5": -97.04,
+    "c3.0": -102.04,
+    "c5.5": -107.04
+   },
+   "first": 20211231,
+   "last": 20260731,
+   "desc": "IPO lockup expiry: LONG L to L+10 (supply cleared)",
+   "a": 0,
+   "b": 10,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F26_LOCKUP_CROSS": {
+   "n_events": 164,
+   "n_dates": 132,
+   "mean_bp": 167.32,
+   "median_bp": 241.26,
+   "t_clustered": 1.346,
+   "hit_rate": 0.561,
+   "sd_bp": 1482.3,
+   "sharpe_portfolio": -0.27,
+   "pct_days_invested": 0.619,
+   "net_bp": {
+    "c0.5": 164.32,
+    "c3.0": 159.32,
+    "c5.5": 154.32
+   },
+   "first": 20211231,
+   "last": 20260807,
+   "desc": "IPO lockup expiry: SHORT L-10 to L (anticipation)",
+   "a": -10,
+   "b": 0,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F27_SEC424B5_REB5": {
+   "n_events": 2728,
+   "n_dates": 937,
+   "mean_bp": -149.7,
+   "median_bp": -96.47,
+   "t_clustered": -5.481,
+   "hit_rate": 0.424,
+   "sd_bp": 1361.0,
+   "sharpe_portfolio": -1.471,
+   "pct_days_invested": 0.988,
+   "net_bp": {
+    "c0.5": -152.7,
+    "c3.0": -157.7,
+    "c5.5": -162.7
+   },
+   "first": 20211231,
+   "last": 20260807,
+   "desc": "424B5 shelf takedown: LONG F to F+5 (overhang cleared)",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F28_SEC424B5_REB20": {
+   "n_events": 2667,
+   "n_dates": 921,
+   "mean_bp": -247.71,
+   "median_bp": -173.1,
+   "t_clustered": -5.408,
+   "hit_rate": 0.427,
+   "sd_bp": 2038.8,
+   "sharpe_portfolio": -1.962,
+   "pct_days_invested": 1.0,
+   "net_bp": {
+    "c0.5": -250.71,
+    "c3.0": -255.71,
+    "c5.5": -260.71
+   },
+   "first": 20211231,
+   "last": 20260717,
+   "desc": "424B5 shelf takedown: LONG F to F+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F29_SEC424B5_PRE": {
+   "n_events": 2737,
+   "n_dates": 936,
+   "mean_bp": -184.08,
+   "median_bp": -8.22,
+   "t_clustered": -4.987,
+   "hit_rate": 0.493,
+   "sd_bp": 1803.8,
+   "sharpe_portfolio": -2.179,
+   "pct_days_invested": 0.979,
+   "net_bp": {
+    "c0.5": -187.08,
+    "c3.0": -192.08,
+    "c5.5": -197.08
+   },
+   "first": 20211231,
+   "last": 20260813,
+   "desc": "424B5: SHORT F-5 to F-1 (marketing-period pressure)",
+   "a": -5,
+   "b": -1,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "NOT-TRADABLE(filing date unknown ex-ante)"
+  },
+  "F30_ADD_REV20_BIGFLOW": {
+   "n_events": 206,
+   "n_dates": 95,
+   "mean_bp": 175.1,
+   "median_bp": 150.72,
+   "t_clustered": 3.171,
+   "hit_rate": 0.549,
+   "sd_bp": 930.0,
+   "sharpe_portfolio": 1.249,
+   "pct_days_invested": 0.798,
+   "net_bp": {
+    "c0.5": 172.1,
+    "c3.0": 167.1,
+    "c5.5": 162.1
+   },
+   "first": 20220103,
+   "last": 20260618,
+   "desc": "adds whose rebalance-close $volume spike is in the top tercile: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F31_DEL_REB20_BIGFLOW": {
+   "n_events": 151,
+   "n_dates": 56,
+   "mean_bp": 72.99,
+   "median_bp": 63.24,
+   "t_clustered": 1.444,
+   "hit_rate": 0.523,
+   "sd_bp": 1359.2,
+   "sharpe_portfolio": 0.632,
+   "pct_days_invested": 0.627,
+   "net_bp": {
+    "c0.5": 69.99,
+    "c3.0": 64.99,
+    "c5.5": 59.99
+   },
+   "first": 20220131,
+   "last": 20260707,
+   "desc": "deletes with a top-tercile rebalance-close $volume spike: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F32_ADD_REV20_BIGRUNUP": {
+   "n_events": 201,
+   "n_dates": 134,
+   "mean_bp": 160.83,
+   "median_bp": 175.62,
+   "t_clustered": 1.907,
+   "hit_rate": 0.557,
+   "sd_bp": 1272.2,
+   "sharpe_portfolio": 0.748,
+   "pct_days_invested": 0.939,
+   "net_bp": {
+    "c0.5": 157.83,
+    "c3.0": 152.83,
+    "c5.5": 147.83
+   },
+   "first": 20220103,
+   "last": 20260714,
+   "desc": "adds with the largest hedged R-5->R run-up: SHORT R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F33_DEL_REB20_BIGDROP": {
+   "n_events": 151,
+   "n_dates": 65,
+   "mean_bp": 151.35,
+   "median_bp": -7.08,
+   "t_clustered": 0.661,
+   "hit_rate": 0.497,
+   "sd_bp": 2862.9,
+   "sharpe_portfolio": 0.346,
+   "pct_days_invested": 0.73,
+   "net_bp": {
+    "c0.5": 148.35,
+    "c3.0": 143.35,
+    "c5.5": 138.35
+   },
+   "first": 20220131,
+   "last": 20260716,
+   "desc": "deletes with the largest hedged R-5->R DROP: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F34_PAIR_REV20_BIGFLOW": {
+   "n_events": 360,
+   "n_dates": 105,
+   "mean_bp": 127.4,
+   "median_bp": 90.83,
+   "t_clustered": 3.291,
+   "hit_rate": 0.533,
+   "sd_bp": 1342.9,
+   "sharpe_portfolio": 1.31,
+   "pct_days_invested": 0.844,
+   "net_bp": {
+    "c0.5": 126.4,
+    "c3.0": 121.4,
+    "c5.5": 116.4
+   },
+   "first": 20220103,
+   "last": 20260707,
+   "desc": "self-hedged flow pair restricted to top-tercile rebalance-close volume spikes",
+   "a": 0,
+   "b": 20,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F35_MIGPAIR_REB5": {
+   "n_events": 250,
+   "n_dates": 89,
+   "mean_bp": -10.43,
+   "median_bp": 23.36,
+   "t_clustered": -0.656,
+   "hit_rate": 0.504,
+   "sd_bp": 695.5,
+   "sharpe_portfolio": -0.302,
+   "pct_days_invested": 0.34,
+   "net_bp": {
+    "c0.5": -11.43,
+    "c3.0": -16.43,
+    "c5.5": -21.43
+   },
+   "first": 20220131,
+   "last": 20260723,
+   "desc": "index MIGRATION pair, corrected sign: LONG promoted / SHORT demoted, R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F36_MIGPAIR_REB20": {
+   "n_events": 248,
+   "n_dates": 87,
+   "mean_bp": 22.35,
+   "median_bp": -87.54,
+   "t_clustered": 0.025,
+   "hit_rate": 0.484,
+   "sd_bp": 1698.3,
+   "sharpe_portfolio": -0.116,
+   "pct_days_invested": 0.812,
+   "net_bp": {
+    "c0.5": 21.35,
+    "c3.0": 16.35,
+    "c5.5": 11.35
+   },
+   "first": 20220131,
+   "last": 20260716,
+   "desc": "index MIGRATION pair, corrected sign: R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F37_PROMOTE_REB5": {
+   "n_events": 92,
+   "n_dates": 49,
+   "mean_bp": -68.72,
+   "median_bp": -13.19,
+   "t_clustered": -1.12,
+   "hit_rate": 0.489,
+   "sd_bp": 563.0,
+   "sharpe_portfolio": -0.419,
+   "pct_days_invested": 0.197,
+   "net_bp": {
+    "c0.5": -71.72,
+    "c3.0": -76.72,
+    "c5.5": -81.72
+   },
+   "first": 20220131,
+   "last": 20260723,
+   "desc": "promoted (600->400, 400->500) LONG R to R+5 -- rebound from net forced selling",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F38_DEMOTE_FADE5": {
+   "n_events": 158,
+   "n_dates": 58,
+   "mean_bp": 34.55,
+   "median_bp": 56.85,
+   "t_clustered": 0.5,
+   "hit_rate": 0.538,
+   "sd_bp": 665.4,
+   "sharpe_portfolio": 0.106,
+   "pct_days_invested": 0.242,
+   "net_bp": {
+    "c0.5": 31.55,
+    "c3.0": 26.55,
+    "c5.5": 21.55
+   },
+   "first": 20220131,
+   "last": 20260702,
+   "desc": "demoted (500->400, 400->600) SHORT R to R+5 -- fade of net forced buying",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F39_DELLIVE_REB5": {
+   "n_events": 426,
+   "n_dates": 90,
+   "mean_bp": 49.36,
+   "median_bp": -23.16,
+   "t_clustered": 0.924,
+   "hit_rate": 0.474,
+   "sd_bp": 829.9,
+   "sharpe_portfolio": 0.364,
+   "pct_days_invested": 0.341,
+   "net_bp": {
+    "c0.5": 46.36,
+    "c3.0": 41.36,
+    "c5.5": 36.36
+   },
+   "first": 20220131,
+   "last": 20260803,
+   "desc": "deletes NOT caused by M&A (the stock keeps trading): LONG R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F40_DELLIVE_REB20": {
+   "n_events": 425,
+   "n_dates": 89,
+   "mean_bp": 93.91,
+   "median_bp": -39.89,
+   "t_clustered": 0.912,
+   "hit_rate": 0.487,
+   "sd_bp": 2088.6,
+   "sharpe_portfolio": 0.542,
+   "pct_days_invested": 0.815,
+   "net_bp": {
+    "c0.5": 90.91,
+    "c3.0": 85.91,
+    "c5.5": 80.91
+   },
+   "first": 20220131,
+   "last": 20260707,
+   "desc": "deletes NOT caused by M&A: LONG R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F41_ADDFRESH_REV5": {
+   "n_events": 369,
+   "n_dates": 195,
+   "mean_bp": 46.71,
+   "median_bp": 58.2,
+   "t_clustered": 0.805,
+   "hit_rate": 0.561,
+   "sd_bp": 618.9,
+   "sharpe_portfolio": 0.525,
+   "pct_days_invested": 0.601,
+   "net_bp": {
+    "c0.5": 43.71,
+    "c3.0": 38.71,
+    "c5.5": 33.71
+   },
+   "first": 20220103,
+   "last": 20260804,
+   "desc": "adds that are NOT index migrations (brand-new index demand): SHORT R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F42_MIG_400to500_R5": {
+   "n_events": 30,
+   "n_dates": 24,
+   "mean_bp": -6.81,
+   "median_bp": -126.52,
+   "t_clustered": -0.06,
+   "hit_rate": 0.467,
+   "sd_bp": 524.4,
+   "sharpe_portfolio": -0.1,
+   "pct_days_invested": 0.108,
+   "net_bp": {
+    "c0.5": -9.81,
+    "c3.0": -14.81,
+    "c5.5": -19.81
+   },
+   "first": 20220214,
+   "last": 20260618,
+   "desc": "migration SP400->SP500: mandated net BUY -> SHORT R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F43_MIG_500to400_R5": {
+   "n_events": 11,
+   "n_dates": 8,
+   "mean_bp": 5.93,
+   "median_bp": 6.3,
+   "t_clustered": 0.256,
+   "hit_rate": 0.636,
+   "sd_bp": 401.3,
+   "sharpe_portfolio": 0.129,
+   "pct_days_invested": 0.06,
+   "net_bp": {
+    "c0.5": 2.93,
+    "c3.0": -2.07,
+    "c5.5": -7.07
+   },
+   "first": 20220202,
+   "last": 20240920,
+   "desc": "migration SP500->SP400: mandated net SELL -> LONG R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F44_MIG_600to400_R5": {
+   "n_events": 61,
+   "n_dates": 42,
+   "mean_bp": -104.53,
+   "median_bp": -37.33,
+   "t_clustered": -0.992,
+   "hit_rate": 0.475,
+   "sd_bp": 586.1,
+   "sharpe_portfolio": -0.387,
+   "pct_days_invested": 0.17,
+   "net_bp": {
+    "c0.5": -107.53,
+    "c3.0": -112.53,
+    "c5.5": -117.53
+   },
+   "first": 20220131,
+   "last": 20260723,
+   "desc": "migration SP600->SP400: mandated net SELL -> LONG R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F45_MIG_400to600_R5": {
+   "n_events": 113,
+   "n_dates": 52,
+   "mean_bp": 30.47,
+   "median_bp": 62.89,
+   "t_clustered": 0.124,
+   "hit_rate": 0.558,
+   "sd_bp": 687.6,
+   "sharpe_portfolio": 0.003,
+   "pct_days_invested": 0.222,
+   "net_bp": {
+    "c0.5": 27.47,
+    "c3.0": 22.47,
+    "c5.5": 17.47
+   },
+   "first": 20220131,
+   "last": 20260702,
+   "desc": "migration SP400->SP600: mandated net BUY -> SHORT R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": -1,
+   "hedged": true,
+   "tradability": "CLEAN"
+  },
+  "F46_MIG_NETFLOW_R5": {
+   "n_events": 250,
+   "n_dates": 89,
+   "mean_bp": -18.7,
+   "median_bp": 23.36,
+   "t_clustered": -1.147,
+   "hit_rate": 0.512,
+   "sd_bp": 695.4,
+   "sharpe_portfolio": -0.393,
+   "pct_days_invested": 0.34,
+   "net_bp": {
+    "c0.5": -19.7,
+    "c3.0": -24.7,
+    "c5.5": -29.7
+   },
+   "first": 20220131,
+   "last": 20260723,
+   "desc": "ALL migrations in one self-hedged book, each signed by the passive-ownership differential (fade the net buys, buy the net sells), R to R+5",
+   "a": 0,
+   "b": 5,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  },
+  "F47_MIG_NETFLOW_R20": {
+   "n_events": 248,
+   "n_dates": 87,
+   "mean_bp": -103.42,
+   "median_bp": -160.54,
+   "t_clustered": -1.426,
+   "hit_rate": 0.46,
+   "sd_bp": 1695.3,
+   "sharpe_portfolio": -0.572,
+   "pct_days_invested": 0.812,
+   "net_bp": {
+    "c0.5": -104.42,
+    "c3.0": -109.42,
+    "c5.5": -114.42
+   },
+   "first": 20220131,
+   "last": 20260716,
+   "desc": "same book, R to R+20",
+   "a": 0,
+   "b": 20,
+   "sign": 0,
+   "hedged": false,
+   "tradability": "CLEAN"
+  }
+ },
+ "b5_20day_tradable_entry_by_liquidity": {
+  "definition": "424B5 shelf takedown, SHORT entered at the close of F+1 (the first session on which the filing is unambiguously public), held 20 sessions, IWM-hedged. Sign convention here is the RAW long return, so negative = the short makes money.",
+  "design": {
+   "all_above_2M_ADV": {
+    "n": 3361,
+    "mean_pct": -0.5,
+    "t": -1.96
+   },
+   "above_20M_ADV": {
+    "n": 1909,
+    "mean_pct": 0.09,
+    "t": -0.24
+   },
+   "above_100M_ADV": {
+    "n": 782,
+    "mean_pct": 0.6,
+    "t": 0.66
+   },
+   "micro_2_to_20M_ADV": {
+    "n": 1452,
+    "mean_pct": -1.28,
+    "t": -2.04
+   }
+  },
+  "heldout": {
+   "all_above_2M_ADV": {
+    "n": 2695,
+    "mean_pct": -1.7,
+    "t": -3.85
+   },
+   "above_20M_ADV": {
+    "n": 1638,
+    "mean_pct": -0.45,
+    "t": -0.62
+   },
+   "above_100M_ADV": {
+    "n": 803,
+    "mean_pct": -0.64,
+    "t": -0.3
+   },
+   "micro_2_to_20M_ADV": {
+    "n": 1057,
+    "mean_pct": -3.64,
+    "t": -4.22
+   }
+  },
+  "verdict": "NOT PROMOTABLE. Design t = -1.96 is below the 3.01 two-sided within-theme bar and far below the 3.28 pooled bar, so the held-out -3.85 is selection on the held-out. And the whole effect is confined to $2-20M ADV microcaps: it is exactly zero in every liquid bucket in BOTH windows. A microcap short is where borrow cost and borrow availability bind, and neither is in this data."
+ },
+ "verdict": {
+  "theme_is_noise": true,
+  "one_line": "The mandated flow is real and enormous -- a median $4.3bn print at 29.7x normal volume on an S&P 500 add's rebalance close -- and it is completely pre-priced: on the day it executes the price moves +0.02% (t=0.49). Every tradable formula died.",
+  "only_design_survivors_and_why_they_died": {
+   "F37_PROMOTE_REB5": "design t +3.09 (positive in all six design years) -> HELD-OUT t -1.12. Dead. Its own mechanism decomposition (block 4) had already contradicted it.",
+   "F27_SEC424B5_REB5": "design t -5.86 -> held-out t -5.48, confirmed. Then killed by the timing control: the entire effect is the F->F+1 day and the filing-day return is flat (-0.09%, t -0.63), i.e. the filing is disseminated after the close and entering at the F close is a LOOKAHEAD. Entering at the F+1 close earns -0.23% (t -0.80) held-out, and +0.06% (t +0.31) in liquid names.",
+   "F12_SP600ADD_RUNUP5": "design t +7.45 -> held-out t +7.87. Real, replicated, and untradable: 96% of the move is one announcement-day jump, and from the announcement close onward the return is -0.28% (t -0.83)."
+  }
+ }
+}

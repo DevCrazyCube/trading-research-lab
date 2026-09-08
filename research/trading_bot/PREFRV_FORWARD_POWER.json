@@ -1,0 +1,86 @@
+{
+ "assumption": "independent pair returns; same-issuer correlation makes sd larger, so power is an upper bound",
+ "derived": {
+  "annual_net_sharpe_check": 0.929,
+  "implied_heldout_cost_bp_per_week": 22.2,
+  "implied_heldout_gross_bp_per_week": 31.8,
+  "mean_active_pairs_per_week_full": 23.56,
+  "per_pair_active_fraction": 0.198,
+  "sd_book_week_bp_full_book": 74.5,
+  "weekly_net_sharpe": 0.1288
+ },
+ "inputs": {
+  "T_grid": 434,
+  "active_pairweeks_full": 10226,
+  "design_weeks": 302,
+  "gross_sr_held": 3.08,
+  "held_weeks": 132,
+  "median_active_weeks_full": 86,
+  "n_pairs": 113,
+  "net_mean_bp": 9.6,
+  "net_t": 1.48
+ },
+ "rows": [
+  {
+   "detectable_net_bp_at_156w": 51.2,
+   "detectable_net_bp_at_52w": 88.6,
+   "expected_t_at_156w_if_design_net_true": 0.47,
+   "expected_t_at_52w_if_design_net_true": 0.27,
+   "mean_active_pairs_per_week": 1.98,
+   "multiple_of_design_net_needed_for_alive_at_52w": 7.4,
+   "n_alive_pairs": 10,
+   "sd_book_week_bp": 257.0,
+   "weeks_to_detect_design_gross_80pct": 403,
+   "weeks_to_detect_design_net_80pct": 4430
+  },
+  {
+   "detectable_net_bp_at_156w": 36.2,
+   "detectable_net_bp_at_52w": 62.7,
+   "expected_t_at_156w_if_design_net_true": 0.66,
+   "expected_t_at_52w_if_design_net_true": 0.38,
+   "mean_active_pairs_per_week": 3.96,
+   "multiple_of_design_net_needed_for_alive_at_52w": 5.2,
+   "n_alive_pairs": 20,
+   "sd_book_week_bp": 181.7,
+   "weeks_to_detect_design_gross_80pct": 201,
+   "weeks_to_detect_design_net_80pct": 2215
+  },
+  {
+   "detectable_net_bp_at_156w": 29.5,
+   "detectable_net_bp_at_52w": 51.2,
+   "expected_t_at_156w_if_design_net_true": 0.81,
+   "expected_t_at_52w_if_design_net_true": 0.47,
+   "mean_active_pairs_per_week": 5.94,
+   "multiple_of_design_net_needed_for_alive_at_52w": 4.3,
+   "n_alive_pairs": 30,
+   "sd_book_week_bp": 148.4,
+   "weeks_to_detect_design_gross_80pct": 134,
+   "weeks_to_detect_design_net_80pct": 1477
+  },
+  {
+   "detectable_net_bp_at_156w": 20.9,
+   "detectable_net_bp_at_52w": 36.2,
+   "expected_t_at_156w_if_design_net_true": 1.14,
+   "expected_t_at_52w_if_design_net_true": 0.66,
+   "mean_active_pairs_per_week": 11.89,
+   "multiple_of_design_net_needed_for_alive_at_52w": 3.0,
+   "n_alive_pairs": 60,
+   "sd_book_week_bp": 104.9,
+   "weeks_to_detect_design_gross_80pct": 67,
+   "weeks_to_detect_design_net_80pct": 738
+  },
+  {
+   "detectable_net_bp_at_156w": 15.2,
+   "detectable_net_bp_at_52w": 26.4,
+   "expected_t_at_156w_if_design_net_true": 1.57,
+   "expected_t_at_52w_if_design_net_true": 0.91,
+   "mean_active_pairs_per_week": 22.39,
+   "multiple_of_design_net_needed_for_alive_at_52w": 2.2,
+   "n_alive_pairs": 113,
+   "sd_book_week_bp": 76.4,
+   "weeks_to_detect_design_gross_80pct": 36,
+   "weeks_to_detect_design_net_80pct": 392
+  }
+ ],
+ "written": "2026-08-30 15:00 CEST (T39)"
+}

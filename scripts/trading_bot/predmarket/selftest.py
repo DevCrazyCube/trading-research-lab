@@ -97,6 +97,64 @@ def run_selftest() -> int:
     assert not kB["verdict"].startswith("HALTED"), f"kill wrongly halted a winning agent: {kB['verdict']}"
     out["kill_halts_uncalibrated_spares_calibrated"] = True
 
+    # KEEP-FIRST dedupe by (venue, market_id) (T43): a market frozen twice counts ONCE, earliest freeze.
+    from . import ledger
+    dup = [{"venue": "polymarket", "market_id": "1", "proposed_utc": "2026-08-25", "q_agent": 0.7},
+           {"venue": "polymarket", "market_id": "1", "proposed_utc": "2026-08-24", "q_agent": 0.6},
+           {"venue": "kalshi", "market_id": "1", "proposed_utc": "2026-08-26", "q_agent": 0.5}]
+    kept = ledger.dedupe_keep_first(dup)
+    assert len(kept) == 2, f"expected 2 after dedupe, got {len(kept)}"
+    assert any(r["q_agent"] == 0.6 for r in kept), "dedupe must keep the EARLIEST freeze"
+    assert not any(r["q_agent"] == 0.7 for r in kept), "dedupe must drop the later duplicate freeze"
+    assert any(r["venue"] == "kalshi" for r in kept), "same id on another venue is a different market"
+    out["scoring_dedupes_keep_first_by_market_id"] = True
+
+    # ---------------------------------------------------------------- T48 DATA-PATH assertions.
+    # The 2026-09-03 fault: both venue feeds are PAGED and were read one page deep, so the proposer
+    # saw ~2% of the Kalshi book and could not tell.  Nothing above would have caught it -- every
+    # decision rule was correct on the rows it was handed.  These checks live on the INPUT surface:
+    # pagination must actually follow, and any residual truncation or unrepresented declared feed
+    # must surface as a warning rather than vanish.  Synthetic feeds only; no network.
+    from . import venues
+
+    def _fake_kalshi_feed(n_pages):
+        """A cursor-paged Kalshi stub: one political event with one live market per page."""
+        def _get(url, **kw):
+            page = 0
+            if "cursor=" in url:
+                page = int(url.rsplit("cursor=", 1)[1])
+            return {"cursor": str(page + 1) if page + 1 < n_pages else None,
+                    "events": [{"category": "Politics", "title": f"Event {page}",
+                                "markets": [{"status": "active", "ticker": f"T{page}",
+                                             "yes_bid_dollars": 0.40, "yes_ask_dollars": 0.42,
+                                             "close_time": future, "event_ticker": f"E{page}",
+                                             "rules_primary": "synthetic"}]}]}
+        return _get
+
+    real_get = venues.http_get_json
+    try:
+        venues.http_get_json = _fake_kalshi_feed(5)
+        rows, st = venues.pull_kalshi(max_pages=10)
+        assert st["pages"] == 5 and st["exhausted"] and len(rows) == 5, \
+            f"cursor pagination did not follow to exhaustion: {st}"
+        rows, st = venues.pull_kalshi(max_pages=2)
+        assert st["pages"] == 2 and not st["exhausted"] and len(rows) == 2, \
+            f"page cap must be reported as NOT exhausted: {st}"
+        warn = venues.data_path_warnings({"kalshi": st})
+        assert any("TRUNCATED" in w for w in warn), "a capped read must raise a TRUNCATED warning"
+        assert not venues.data_path_warnings(
+            {"kalshi": {"pages": 5, "events_scanned": 5, "markets": 5, "exhausted": True}}), \
+            "an exhausted, represented feed must be clean"
+        assert any("not represented" in w for w in venues.data_path_warnings(
+            {"polymarket": {"markets": 3, "exhausted": True, "empty_tags": ["policy"]}})), \
+            "a declared-but-empty tag must surface"
+        assert any("NOT REPRESENTED" in w for w in venues.data_path_warnings(
+            {"kalshi": {"markets": 0, "exhausted": True}})), \
+            "a feed contributing zero rows must surface"
+    finally:
+        venues.http_get_json = real_get
+    out["datapath_pagination_follows_and_truncation_is_reported"] = True
+
     out["ALL_PASSED"] = True
     json.dump(out, sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")

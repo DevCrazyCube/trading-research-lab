@@ -1,0 +1,17 @@
+{
+  "batched": true,
+  "benchmark_filesystem_parent": "research/midcap",
+  "benchmark_sha256": "5a3120dda55322075f064a4769f2ae9bd0626e653686c394960ddf65cb5d96cd",
+  "frames": 2000,
+  "frames_per_second": 865.9486723679768,
+  "profile": "         515446 function calls (515403 primitive calls) in 2.300 seconds\n\n   Ordered by: internal time\n   List reduced from 144 to 18 due to restriction <18>\n\n   ncalls  tottime  percall  cumtime  percall filename:lineno(function)\n      189    0.358    0.002    0.358    0.002 {method '__exit__' of 'sqlite3.Connection' objects}\n     1999    0.336    0.000    1.011    0.001 /home/anont/meme/scripts/birth_stream.py:47(decode_notification)\n     2000    0.246    0.000    0.246    0.000 {built-in method zlib.compress}\n    47618    0.171    0.000    0.171    0.000 {method 'fullmatch' of 're.Pattern' objects}\n    47618    0.126    0.000    0.464    0.000 /usr/lib/python3.14/re/__init__.py:169(fullmatch)\n    10192    0.123    0.000    0.123    0.000 {method 'execute' of 'sqlite3.Connection' objects}\n    47618    0.115    0.000    0.167    0.000 /usr/lib/python3.14/re/__init__.py:330(_compile)\n    88150    0.080    0.000    0.080    0.000 {built-in method builtins.isinstance}\n     4003    0.060    0.000    0.060    0.000 /usr/lib/python3.14/json/encoder.py:207(iterencode)\n    47618    0.053    0.000    0.053    0.000 {method 'lower' of 'str' objects}\n       63    0.051    0.001    0.606    0.010 /home/anont/meme/scripts/birth_stream_fast.py:39(append_batch)\n     2000    0.049    0.000    0.049    0.000 /usr/lib/python3.14/json/decoder.py:351(raw_decode)\n       63    0.040    0.001    2.253    0.036 /home/anont/meme/scripts/birth_stream_fast.py:69(consume)\n     4003    0.035    0.000    0.144    0.000 /usr/lib/python3.14/json/__init__.py:185(dumps)\n    28740    0.033    0.000    0.033    0.000 {method 'group' of 're.Match' objects}\n    25808    0.033    0.000    0.047    0.000 /home/anont/meme/scripts/birth_stream.py:60(<genexpr>)\n     2000    0.033    0.000    0.165    0.000 /home/anont/meme/scripts/birth_stream.py:212(materialize)\n     4003    0.029    0.000    0.103    0.000 /usr/lib/python3.14/json/encoder.py:185(encode)\n\n\n",
+  "purpose": "OFFLINE_ENGINEERING_BENCHMARK_NOT_LIVE_OR_STRATEGY_DATA",
+  "raw_prefix_sha256": "b79668429bbd35d1153b6631f8f2b9dd2734f9f7fcc43ee77beba9afce2e5c2e",
+  "recorder_sha256": "8befd9a54732c61bb3b860f559520bb9e7df94a3365e02b44dba72afc4843fd8",
+  "seconds": 2.3096057120001205,
+  "source": "research/midcap/birth_stream_pilot_network_20260908.sqlite",
+  "stages_seconds": {
+    "batched_raw_decode_derived_capacity": 2.308201955995173
+  },
+  "temporary_database": "ephemeral timing fixture removed; not a recorded live cohort"
+}

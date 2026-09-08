@@ -1,0 +1,102 @@
+=== 1. TRAILING FILL REALISM (validate, YOUNG30 vs ANY vs OLD30) ===
+T60_TR25 fill=trigger :: ANY mean 0.1100 med -0.0435 jack-3 0.0190 n2536 k207 | YOUNG30 mean 0.2180 med -0.0436 jack-3 0.1259 n1025 k207 | OLD30 mean -0.0295 med -0.0677 jack-3 -0.0828 n1616 k187
+T60_TR25 fill=slip5   :: ANY mean 0.0748 med -0.0738 jack-3 -0.0121 n2536 k207 | YOUNG30 mean 0.1721 med -0.0783 jack-3 0.0840 n1025 k207 | OLD30 mean -0.0417 med -0.0751 jack-3 -0.0946 n1616 k187
+T60_TR25 fill=slip15  :: ANY mean 0.0044 med -0.1296 jack-3 -0.0742 n2536 k207 | YOUNG30 mean 0.0804 med -0.1647 jack-3 0.0002 n1025 k207 | OLD30 mean -0.0662 med -0.1075 jack-3 -0.1187 n1616 k187
+T60_TR25 fill=low     :: ANY mean -0.2217 med -0.2310 jack-3 -0.2495 n2536 k207 | YOUNG30 mean -0.1974 med -0.2937 jack-3 -0.2345 n1025 k207 | OLD30 mean -0.1059 med -0.1191 jack-3 -0.1586 n1616 k187
+T120_TR35 fill=trigger :: ANY mean -0.0091 med -0.0915 jack-3 -0.0409 n1780 k207 | YOUNG30 mean 0.1165 med -0.1045 jack-3 0.0631 n832 k207 | OLD30 mean -0.0557 med -0.1181 jack-3 -0.1119 n1072 k187
+T120_TR35 fill=slip5   :: ANY mean -0.0378 med -0.1198 jack-3 -0.0688 n1780 k207 | YOUNG30 mean 0.0760 med -0.1360 jack-3 0.0222 n832 k207 | OLD30 mean -0.0672 med -0.1225 jack-3 -0.1228 n1072 k187
+T120_TR35 fill=slip15  :: ANY mean -0.0952 med -0.1718 jack-3 -0.1246 n1780 k207 | YOUNG30 mean -0.0049 med -0.2148 jack-3 -0.0595 n832 k207 | OLD30 mean -0.0903 med -0.1431 jack-3 -0.1445 n1072 k187
+T120_TR35 fill=low     :: ANY mean -0.2672 med -0.3004 jack-3 -0.2922 n1780 k207 | YOUNG30 mean -0.2507 med -0.3714 jack-3 -0.3088 n832 k207 | OLD30 mean -0.1405 med -0.1622 jack-3 -0.1940 n1072 k187
+
+=== 2. YOUNG30 minus ANY, paired cluster bootstrap over mints (validate, trigger fill) ===
+T60_TR25 paired delta mean 0.1080  boot5% 0.0806  boot95% 0.1374  p(delta>0) 1.000  k=207
+   delta median 0.0194 ; delta mean excl top3 0.0923
+T120_TR35 paired delta mean 0.1255  boot5% 0.0836  boot95% 0.1731  p(delta>0) 1.000  k=207
+   delta median 0.0101 ; delta mean excl top3 0.0925
+
+=== 3. REGIME MARGINAL VALUE: circular-rotation null ===
+Baseline = YOUNG30 x ALL x exit, validate. For each regime cell we rotate the
+per-minute regime series circularly (preserving its autocorrelation and cell size)
+and ask how often a rotated cell beats the observed cell mean.
+--- T60_TR25 baseline YOUNG30xALL validate mean 0.2180 n1025 k207
+  LAUNCH60_q3      obs 1.7613  n255 k84  rot-null median 0.1399  p_rot 0.036 (276 rots)
+  MEDRET60_q1      obs 0.4867  n354 k123  rot-null median 0.1432  p_rot 0.052 (400 rots)
+  HOUR_b4          obs 0.3889  n272 k53  rot-null median 0.1836  p_rot 0.056 (287 rots)
+  ACTCNT_q1        obs 0.2947  n358 k78  rot-null median 0.2134  p_rot 0.073 (396 rots)
+  LAUNCH60_q4      obs 0.4422  n248 k91  rot-null median 0.1448  p_rot 0.089 (281 rots)
+  MEDRET15_q2      obs 0.5922  n307 k148  rot-null median 0.1319  p_rot 0.092 (400 rots)
+  MEDRET15_q3      obs 0.3888  n321 k152  rot-null median 0.1369  p_rot 0.125 (400 rots)
+  NEWL60_q5        obs 0.3293  n356 k103  rot-null median 0.1481  p_rot 0.185 (195 rots)
+  YOUNGFRAC_q5     obs 0.2321  n508 k134  rot-null median 0.1574  p_rot 0.282 (280 rots)
+  COHVOL15_q5      obs 0.2394  n440 k132  rot-null median 0.1721  p_rot 0.292 (202 rots)
+  FRACUP_q5        obs 0.1923  n430 k143  rot-null median 0.1480  p_rot 0.305 (400 rots)
+  LAUNCH60_q5      obs 0.2258  n402 k79  rot-null median 0.1789  p_rot 0.331 (248 rots)
+  HOUR_b1          obs 0.2533  n156 k40  rot-null median 0.1909  p_rot 0.355 (276 rots)
+  ACTCNT_q4        obs 0.1942  n193 k75  rot-null median 0.1583  p_rot 0.360 (258 rots)
+  LAUNCH60_q1      obs 0.2133  n76 k31  rot-null median 0.1661  p_rot 0.371 (272 rots)
+  FRACUP_q4        obs 0.1444  n319 k138  rot-null median 0.1250  p_rot 0.432 (354 rots)
+  FRACUP_q3        obs 0.1354  n269 k127  rot-null median 0.1228  p_rot 0.440 (400 rots)
+  COHVOL15_q4      obs 0.1539  n417 k153  rot-null median 0.1394  p_rot 0.463 (298 rots)
+  ACTCNT_q5        obs 0.1748  n208 k59  rot-null median 0.1710  p_rot 0.480 (200 rots)
+  YOUNGFRAC_q4     obs 0.1418  n395 k124  rot-null median 0.1371  p_rot 0.488 (289 rots)
+  HOUR_b0          obs 0.1888  n239 k59  rot-null median 0.1899  p_rot 0.504 (276 rots)
+  NEWL60_q4        obs 0.1526  n506 k133  rot-null median 0.1537  p_rot 0.512 (213 rots)
+  MEDRET60_q3      obs 0.1090  n259 k123  rot-null median 0.1194  p_rot 0.547 (400 rots)
+  MEDRET60_q5      obs 0.1379  n268 k70  rot-null median 0.1571  p_rot 0.598 (400 rots)
+  NEWL60_q3        obs 0.1239  n222 k70  rot-null median 0.1570  p_rot 0.635 (307 rots)
+  MEDRET15_q1      obs 0.1157  n407 k144  rot-null median 0.1512  p_rot 0.665 (400 rots)
+  MEDRET60_q2      obs 0.0910  n267 k127  rot-null median 0.1225  p_rot 0.672 (400 rots)
+  MEDRET60_q4      obs 0.1048  n247 k104  rot-null median 0.1379  p_rot 0.690 (400 rots)
+  MEDRET15_q5      obs 0.1047  n228 k86  rot-null median 0.1474  p_rot 0.705 (400 rots)
+  YOUNGFRAC_q3     obs 0.0732  n188 k63  rot-null median 0.1420  p_rot 0.742 (387 rots)
+  FRACUP_q2        obs 0.0706  n223 k99  rot-null median 0.1309  p_rot 0.757 (370 rots)
+  COHVOL15_q3      obs 0.0791  n202 k87  rot-null median 0.1472  p_rot 0.774 (297 rots)
+  ACTCNT_q3        obs 0.0889  n199 k75  rot-null median 0.1621  p_rot 0.782 (257 rots)
+  FRACUP_q1        obs 0.1180  n158 k41  rot-null median 0.2096  p_rot 0.802 (400 rots)
+  COHVOL15_q2      obs 0.0622  n124 k45  rot-null median 0.1367  p_rot 0.840 (337 rots)
+  LAUNCH60_q2      obs 0.0099  n116 k45  rot-null median 0.1524  p_rot 0.883 (222 rots)
+  YOUNGFRAC_q2     obs 0.0406  n40 k16  rot-null median 0.1520  p_rot 0.900 (260 rots)
+  MEDRET15_q4      obs 0.0432  n239 k114  rot-null median 0.1358  p_rot 0.925 (400 rots)
+  HOUR_b5          obs 0.1018  n297 k61  rot-null median 0.2158  p_rot 0.951 (266 rots)
+  ACTCNT_q2        obs 0.0159  n233 k82  rot-null median 0.1583  p_rot 0.984 (310 rots)
+--- T120_TR35 baseline YOUNG30xALL validate mean 0.1165 n832 k207
+  LAUNCH60_q3      obs 1.5640  n217 k84  rot-null median 0.0969  p_rot 0.015 (267 rots)
+  MEDRET15_q2      obs 0.5135  n270 k148  rot-null median 0.0917  p_rot 0.043 (400 rots)
+  HOUR_b1          obs 0.2641  n130 k40  rot-null median 0.1361  p_rot 0.053 (282 rots)
+  MEDRET60_q1      obs 0.3001  n301 k123  rot-null median 0.0925  p_rot 0.060 (400 rots)
+  LAUNCH60_q1      obs 0.3010  n67 k31  rot-null median 0.1202  p_rot 0.068 (249 rots)
+  LAUNCH60_q4      obs 0.3178  n212 k91  rot-null median 0.1095  p_rot 0.070 (302 rots)
+  MEDRET15_q3      obs 0.2794  n290 k152  rot-null median 0.0906  p_rot 0.138 (400 rots)
+  MEDRET15_q1      obs 0.1886  n351 k144  rot-null median 0.0939  p_rot 0.155 (400 rots)
+  ACTCNT_q4        obs 0.2053  n163 k75  rot-null median 0.0947  p_rot 0.160 (257 rots)
+  NEWL60_q5        obs 0.1751  n298 k103  rot-null median 0.1051  p_rot 0.227 (185 rots)
+  HOUR_b0          obs 0.1837  n196 k59  rot-null median 0.1389  p_rot 0.243 (272 rots)
+  COHVOL15_q5      obs 0.1466  n358 k132  rot-null median 0.1118  p_rot 0.269 (208 rots)
+  YOUNGFRAC_q5     obs 0.1137  n426 k134  rot-null median 0.0979  p_rot 0.408 (260 rots)
+  FRACUP_q4        obs 0.1072  n281 k138  rot-null median 0.0954  p_rot 0.424 (363 rots)
+  MEDRET60_q3      obs 0.1098  n231 k123  rot-null median 0.0980  p_rot 0.440 (400 rots)
+  FRACUP_q5        obs 0.0996  n362 k143  rot-null median 0.0912  p_rot 0.463 (400 rots)
+  NEWL60_q3        obs 0.1111  n180 k70  rot-null median 0.1065  p_rot 0.468 (301 rots)
+  YOUNGFRAC_q4     obs 0.1227  n338 k124  rot-null median 0.1174  p_rot 0.481 (289 rots)
+  MEDRET60_q2      obs 0.0933  n235 k127  rot-null median 0.0920  p_rot 0.490 (400 rots)
+  FRACUP_q3        obs 0.0869  n246 k127  rot-null median 0.0864  p_rot 0.497 (400 rots)
+  HOUR_b4          obs 0.1454  n225 k53  rot-null median 0.1434  p_rot 0.498 (245 rots)
+  NEWL60_q4        obs 0.1089  n427 k133  rot-null median 0.1093  p_rot 0.504 (226 rots)
+  ACTCNT_q5        obs 0.1171  n176 k59  rot-null median 0.1245  p_rot 0.533 (184 rots)
+  YOUNGFRAC_q3     obs 0.0584  n159 k63  rot-null median 0.0803  p_rot 0.587 (383 rots)
+  ACTCNT_q1        obs 0.1079  n298 k78  rot-null median 0.1169  p_rot 0.603 (395 rots)
+  MEDRET60_q4      obs 0.0769  n214 k104  rot-null median 0.0896  p_rot 0.610 (400 rots)
+  MEDRET15_q5      obs 0.0794  n194 k86  rot-null median 0.0972  p_rot 0.623 (400 rots)
+  MEDRET60_q5      obs 0.0825  n223 k70  rot-null median 0.1022  p_rot 0.630 (400 rots)
+  COHVOL15_q3      obs 0.0537  n168 k87  rot-null median 0.0927  p_rot 0.689 (293 rots)
+  FRACUP_q2        obs 0.0511  n189 k99  rot-null median 0.0889  p_rot 0.708 (356 rots)
+  COHVOL15_q4      obs 0.0513  n370 k153  rot-null median 0.0883  p_rot 0.722 (299 rots)
+  LAUNCH60_q2      obs 0.0192  n92 k45  rot-null median 0.0792  p_rot 0.782 (229 rots)
+  YOUNGFRAC_q2     obs -0.0133  n30 k16  rot-null median 0.0994  p_rot 0.866 (261 rots)
+  ACTCNT_q3        obs 0.0282  n177 k75  rot-null median 0.1063  p_rot 0.883 (257 rots)
+  LAUNCH60_q5      obs -0.0007  n327 k79  rot-null median 0.1211  p_rot 0.906 (255 rots)
+  MEDRET15_q4      obs 0.0012  n212 k114  rot-null median 0.0968  p_rot 0.925 (400 rots)
+  COHVOL15_q2      obs -0.0217  n109 k45  rot-null median 0.0969  p_rot 0.942 (328 rots)
+  FRACUP_q1        obs 0.0044  n134 k41  rot-null median 0.1127  p_rot 0.948 (400 rots)
+  HOUR_b5          obs 0.0181  n240 k61  rot-null median 0.1449  p_rot 0.961 (279 rots)
+  ACTCNT_q2        obs -0.0474  n199 k82  rot-null median 0.1085  p_rot 0.985 (329 rots)

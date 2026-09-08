@@ -1,0 +1,61 @@
+=== P1 first-bar, v0=hi, prig=0, H=120 TP+100 SL-25 (first) ===
+  train    fill=base  mean=+0.1876 cilo=+0.0586 medmint=-0.2585 fracpos=0.40 ex-top1=+0.1724 n=  53 k= 53 res=1.00
+  train    fill=close mean=+0.0091 cilo=-0.1674 medmint=-0.2585 fracpos=0.40 ex-top1=-0.0096 n=  53 k= 53 res=1.00
+  train    fill=low   mean=-0.0342 cilo=-0.2131 medmint=-0.3479 fracpos=0.40 ex-top1=-0.0536 n=  53 k= 53 res=1.00
+  validate fill=base  mean=+0.1672 cilo=+0.0556 medmint=-0.2585 fracpos=0.39 ex-top1=+0.1547 n=  66 k= 66 res=0.98
+  validate fill=close mean=-0.0531 cilo=-0.2128 medmint=-0.2585 fracpos=0.39 ex-top1=-0.0689 n=  66 k= 66 res=0.98
+  validate fill=low   mean=-0.0915 cilo=-0.2529 medmint=-0.3664 fracpos=0.39 ex-top1=-0.1079 n=  66 k= 66 res=0.98
+  validate cap=+100% (pess.fill) mean=-0.0531 cilo=-0.2128
+  validate WORST(toll2.5%,drop-100%,entry+2%) mean=-0.1405 cilo=-0.2940
+=== P1b same, SL=None (no truncation on the downside) ===
+  train    fill=base  mean=-0.1076 cilo=-0.3088 medmint=-0.3779 fracpos=0.42 ex-top1=-0.1285 n=  53 k= 53 res=0.92
+  validate fill=base  mean=-0.0639 cilo=-0.2410 medmint=-0.3080 fracpos=0.45 ex-top1=-0.0799 n=  66 k= 66 res=0.92
+  validate cap=+100% (pess.fill) mean=-0.0639 cilo=-0.2410
+  validate WORST(toll2.5%,drop-100%,entry+2%) mean=-0.1913 cilo=-0.3644
+=== P1c same, no TP no SL (pure hold) ===
+  train    fill=base  mean=-0.3196 cilo=-0.5506 medmint=-0.7600 fracpos=0.19 ex-top1=-0.3792 n=  53 k= 53 res=0.92
+  validate fill=base  mean=-0.3968 cilo=-0.5861 medmint=-0.9290 fracpos=0.21 ex-top1=-0.4763 n=  66 k= 66 res=0.89
+  validate cap=+100% (pess.fill) mean=-0.4991 cilo=-0.6333
+  validate WORST(toll2.5%,drop-100%,entry+2%) mean=-0.4878 cilo=-0.6721
+=== P2 age6-10, v0=hi, prig=0, H=60 TP+100 SL-25 (all) ===
+  train    fill=base  mean=+0.1828 cilo=+0.0540 medmint=-0.2442 fracpos=0.47 ex-top1=+0.1639 n=  55 k= 43 res=0.95
+  train    fill=close mean=+0.0517 cilo=-0.1097 medmint=-0.2585 fracpos=0.47 ex-top1=+0.0297 n=  55 k= 43 res=0.95
+  train    fill=low   mean=+0.0273 cilo=-0.1352 medmint=-0.2654 fracpos=0.47 ex-top1=+0.0047 n=  55 k= 43 res=0.95
+  validate fill=base  mean=+0.1506 cilo=+0.0506 medmint=-0.0442 fracpos=0.45 ex-top1=+0.1360 n=  87 k= 58 res=0.99
+  validate fill=close mean=-0.0580 cilo=-0.2086 medmint=-0.0442 fracpos=0.45 ex-top1=-0.0762 n=  87 k= 58 res=0.99
+  validate fill=low   mean=-0.0686 cilo=-0.2199 medmint=-0.0442 fracpos=0.45 ex-top1=-0.0869 n=  87 k= 58 res=0.99
+  validate cap=+100% (pess.fill) mean=-0.0580 cilo=-0.2086
+  validate WORST(toll2.5%,drop-100%,entry+2%) mean=-0.0842 cilo=-0.2311
+=== P2c same, pure hold ===
+  train    fill=base  mean=-0.1286 cilo=-0.3120 medmint=-0.3080 fracpos=0.42 ex-top1=-0.1632 n=  43 k= 43 res=0.91
+  validate fill=base  mean=-0.1357 cilo=-0.3071 medmint=-0.3080 fracpos=0.38 ex-top1=-0.1701 n=  59 k= 58 res=0.90
+  validate cap=+100% (pess.fill) mean=-0.1747 cilo=-0.3318
+  validate WORST(toll2.5%,drop-100%,entry+2%) mean=-0.2277 cilo=-0.4037
+=== P3 age10-20 any coin, H=15 SL-25 (all) ===
+  train    fill=base  mean=+0.1750 cilo=+0.0296 medmint=-0.0911 fracpos=0.35 ex-top1=+0.1065 n= 295 k=121 res=0.98
+  train    fill=close mean=+0.0991 cilo=-0.0496 medmint=-0.1413 fracpos=0.33 ex-top1=+0.0300 n= 295 k=121 res=0.98
+  train    fill=low   mean=+0.0759 cilo=-0.0747 medmint=-0.1582 fracpos=0.32 ex-top1=+0.0067 n= 295 k=121 res=0.98
+  validate fill=base  mean=+0.2291 cilo=+0.0601 medmint=-0.0961 fracpos=0.34 ex-top1=+0.1714 n= 304 k=151 res=0.97
+  validate fill=close mean=+0.1423 cilo=-0.0303 medmint=-0.1062 fracpos=0.34 ex-top1=+0.0840 n= 304 k=151 res=0.97
+  validate fill=low   mean=+0.1281 cilo=-0.0454 medmint=-0.1062 fracpos=0.34 ex-top1=+0.0697 n= 304 k=151 res=0.97
+  validate cap=+100% (pess.fill) mean=-0.0838 cilo=-0.1399
+  validate WORST(toll2.5%,drop-100%,entry+2%) mean=+0.0842 cilo=-0.0879
+=== P3c same, pure hold ===
+  train    fill=base  mean=-0.0236 cilo=-0.1765 medmint=-0.1726 fracpos=0.33 ex-top1=-0.0937 n= 144 k=121 res=0.97
+  validate fill=base  mean=+0.0988 cilo=-0.0793 medmint=-0.0765 fracpos=0.34 ex-top1=+0.0402 n= 177 k=151 res=0.94
+  validate cap=+100% (pess.fill) mean=-0.1153 cilo=-0.1804
+  validate WORST(toll2.5%,drop-100%,entry+2%) mean=+0.0374 cilo=-0.1382
+=== P4 dd>=.9 & lvl>=3 & rv .02-.2, H=30 TP+40 SL-25 (all) ===
+  train    fill=base  mean=+0.1310 cilo=+0.0372 medmint=+0.1850 fracpos=0.69 ex-top1=+0.1141 n=  40 k= 16 res=1.00
+  train    fill=close mean=-0.0152 cilo=-0.2105 medmint=+0.1850 fracpos=0.69 ex-top1=-0.0418 n=  40 k= 16 res=1.00
+  train    fill=low   mean=-0.0206 cilo=-0.2162 medmint=+0.1850 fracpos=0.69 ex-top1=-0.0475 n=  40 k= 16 res=1.00
+  validate fill=base  mean=+0.1735 cilo=+0.0936 medmint=+0.2327 fracpos=0.78 ex-top1=+0.1639 n=  73 k= 23 res=0.97
+  validate fill=close mean=+0.0618 cilo=-0.0918 medmint=+0.2327 fracpos=0.65 ex-top1=+0.0472 n=  73 k= 23 res=0.97
+  validate fill=low   mean=+0.0574 cilo=-0.0976 medmint=+0.2327 fracpos=0.65 ex-top1=+0.0425 n=  73 k= 23 res=0.97
+  validate cap=+100% (pess.fill) mean=+0.0618 cilo=-0.0918
+  validate WORST(toll2.5%,drop-100%,entry+2%) mean=+0.0349 cilo=-0.1156
+=== P4c same, pure hold ===
+  train    fill=base  mean=-0.0462 cilo=-0.2577 medmint=+0.1396 fracpos=0.62 ex-top1=-0.0809 n=  37 k= 16 res=0.97
+  validate fill=base  mean=+0.0396 cilo=-0.1688 medmint=+0.2215 fracpos=0.65 ex-top1=+0.0017 n=  71 k= 23 res=0.97
+  validate cap=+100% (pess.fill) mean=+0.0396 cilo=-0.1688
+  validate WORST(toll2.5%,drop-100%,entry+2%) mean=+0.0030 cilo=-0.1985rc=0

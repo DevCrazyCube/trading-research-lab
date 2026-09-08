@@ -115,9 +115,12 @@ def build_book(window: tuple[str, str]):
     return p, w, hold, gross_h, syms, mask
 
 
-def run(window_name: str) -> dict:
+def run(window_name: str, depth_window_name: str | None = None) -> dict:
     window = DESIGN if window_name == "design" else HOLDOUT
     is_poc = window_name == "design"
+    dwn = depth_window_name or window_name          # depth may come from a different window (proxy)
+    depth_window = DESIGN if dwn == "design" else HOLDOUT
+    depth_is_proxy = dwn != window_name
     p, w, hold, gross_h, syms, mask = build_book(window)
     t = p.t
     S, T = w.shape
@@ -135,7 +138,7 @@ def run(window_name: str) -> dict:
     cum = np.cumsum(per_sym_turn[order]) / (total_turn or 1)
     keep = order[:int(np.searchsorted(cum, TURNOVER_COVER) + 1)]
     keep = [int(k) for k in keep if per_sym_turn[k] > 0]
-    band_med = _load_median_bands(syms, keep, window)          # (S,) scalar per symbol, NaN if none
+    band_med = _load_median_bands(syms, keep, depth_window)     # (S,) scalar per symbol, NaN if none
     covered = int(np.isfinite(band_med[keep]).sum())
 
     gross_d = _to_daily(gross_h[idx])                           # daily book gross return in-window
@@ -156,12 +159,22 @@ def run(window_name: str) -> dict:
                          "net_mean_R": round(mean, 5), "t": round(tstat, 2), "n_days": n})
 
     verdict, max_aum, note = M.verdict(capacity, corr_l5_l6=None, is_poc=is_poc)
+    # integrity guard: a proxy depth window that fails to cover the book cannot yield a real verdict —
+    # uncovered (new-listing) names get the 100 bp cap, which fabricates cost. Do NOT call that KILL.
+    cov_frac = _cov_frac(turn_in, b)
+    if depth_is_proxy and cov_frac < 0.90:
+        verdict = "PENDING_DATA"
+        max_aum = None
+        note = (f"depth is a design-era proxy covering only {cov_frac*100:.0f}% of holdout turnover "
+                "(2025-26 has new listings absent from 2023-24 depth; uncovered names hit the 100 bp "
+                "cap and fabricate cost). Download held-out bookDepth for the real verdict.")
     # representative slippage magnitude at the target AUM (turnover-weighted, excl. fee)
     slip_at_target = _tw_slip(turn_in, b, M.AUM_TARGET, total_turn)
 
     gmean, gt, gn = _mean_t(gross_d)
     result = {
-        "instrument": "X2_FLOWSTREAK", "window": window_name,
+        "instrument": "X2_FLOWSTREAK", "window": window_name, "depth_window": dwn,
+        "depth_is_proxy": depth_is_proxy,
         "generated_unix": int(time.time()), "verdict": verdict,
         "max_tradeable_aum_usd": max_aum, "note": note,
         "n_rebalances": int(mask.sum()), "n_days": gn,
@@ -174,8 +187,11 @@ def run(window_name: str) -> dict:
         "coverage": {"names_with_depth": covered, "names_active": len(keep),
                      "frac_rebalance_notional_covered": round(_cov_frac(turn_in, b), 4)},
         "caveats": ["half-spread/adverse-selection NOT in +-1% bookDepth -> reported 0 (LOWER BOUND); "
-                    "needs aggTrades/L2", "design-window PoC is a method check, not the frozen verdict"
-                    if is_poc else "held-out window"],
+                    "needs aggTrades/L2"]
+        + (["design-window PoC is a method check, not the frozen verdict"] if is_poc else [])
+        + (["depth is a DESIGN-era proxy (held-out bookDepth not yet downloaded); depth is stable for "
+            "the majors carrying most turnover, but the rigorous run uses held-out depth"]
+           if depth_is_proxy else []),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(result, indent=2))
@@ -222,10 +238,13 @@ def _cov_frac(turn, b):
 def main(argv=None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     window = "design"
+    depth = None
     if "--window" in argv:
         window = argv[argv.index("--window") + 1]
-    print(f"x2 slippage harness: window={window} …", flush=True)
-    r = run(window)
+    if "--depth" in argv:
+        depth = argv[argv.index("--depth") + 1]
+    print(f"x2 slippage harness: window={window} depth={depth or window} …", flush=True)
+    r = run(window, depth)
     print(json.dumps({k: r[k] for k in ("instrument", "window", "verdict", "max_tradeable_aum_usd",
                                         "n_rebalances", "coverage")}, indent=2), flush=True)
     for c in r["capacity_curve"]:

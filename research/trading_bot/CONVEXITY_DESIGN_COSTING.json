@@ -1,0 +1,71 @@
+{
+ "built": "2026-08-26",
+ "caveat": "weekly EOD panel with uncertain stamp; hold = two snapshots (~14d) of a ~28-DTE strangle, not to expiry; figures are design priors for N_min and carry, never a test result",
+ "cost_hold_28dte": {
+  "dte": 30.0,
+  "fee_frac": 0.00042918454935622315,
+  "n": 16701,
+  "prem_pct_spot": 0.014583800762844963,
+  "rel_half_spread": 0.09122203098106718,
+  "rel_half_spread_p75": 0.19130434782608713
+ },
+ "cost_near_14dte": {
+  "dte": 16.0,
+  "fee_frac": 0.0006134969325153375,
+  "n": 16807,
+  "prem_pct_spot": 0.010342851973585018,
+  "rel_half_spread": 0.08771929824561399,
+  "rel_half_spread_p75": 0.1685990121909367
+ },
+ "designs": {
+  "C0_unconditional": {
+   "cluster_t": -19.205121763744955,
+   "frac_of_eligible": 1.0,
+   "max_return": 8.22258064516129,
+   "mean_net_return_on_premium": -0.3176060441891471,
+   "n_clusters": 335,
+   "n_trades": 5707,
+   "p95_return": 0.9764777415852331,
+   "share_of_pnl_top_cluster": -0.00868792329211871,
+   "win_rate": 0.17715086735587873
+  },
+  "D1_iv_under_realised": {
+   "cluster_t": -9.889018542869973,
+   "frac_of_eligible": 0.2938890851289297,
+   "max_return": 7.731219512195122,
+   "mean_net_return_on_premium": -0.2620413608997716,
+   "n_clusters": 302,
+   "n_trades": 1664,
+   "p95_return": 1.3066074004852772,
+   "share_of_pnl_top_cluster": -0.021308916581168843,
+   "win_rate": 0.19771634615384615
+  },
+  "D2_aftershock": {
+   "cluster_t": -4.125155487927262,
+   "frac_of_eligible": 0.03342415985467757,
+   "max_return": 7.731219512195122,
+   "mean_net_return_on_premium": -0.2859035385608123,
+   "n_clusters": 110,
+   "n_trades": 184,
+   "p95_return": 1.3377527915632754,
+   "share_of_pnl_top_cluster": -0.14696389404760485,
+   "win_rate": 0.1956521739130435
+  },
+  "D3_iv_compression": {
+   "cluster_t": -8.200972901724104,
+   "frac_of_eligible": 0.2399561723886048,
+   "max_return": 8.22258064516129,
+   "mean_net_return_on_premium": -0.26392914130265743,
+   "n_clusters": 215,
+   "n_trades": 1314,
+   "p95_return": 1.1798380681818152,
+   "share_of_pnl_top_cluster": -0.03020103519882544,
+   "win_rate": 0.1887366818873668
+  }
+ },
+ "instrument": "~15-delta strangle, expiry nearest 28 DTE (21-35), buy at ask, mark at bid two snapshots (~14d) later; entry-cost stats also for the nearest ~14-DTE strangle",
+ "n_marked": 5707,
+ "n_snapshots": 345,
+ "n_strangles": 16701,
+ "panel": "research/data/doltopts_cache (weekly, 2020-01 -> 2026-08)"
+}

@@ -65,8 +65,12 @@ def scan_entries(spec: dict) -> dict:
 
         fired_pass = fired_control = 0
 
+        freeze_ts = frozen.freeze_epoch(spec)
+
         def _handle(fire) -> None:
             nonlocal fired_pass, fired_control
+            if float(fire.get("t_shock") or 0.0) < freeze_ts:
+                return   # no lookahead: the shock predates the freeze (Codex audit 2026-08-27)
             key = (fire["mint"], fire["t_shock"])
             if key in entered:
                 return

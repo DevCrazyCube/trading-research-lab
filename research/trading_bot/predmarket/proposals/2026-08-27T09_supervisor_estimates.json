@@ -1,0 +1,19 @@
+[
+ {
+  "venue": "polymarket",
+  "market_id": "635012",
+  "question": "Will Bernadette Wilson win the 2026 Alaska governor election?",
+  "category": "politics/elections/governor",
+  "p_market": 0.355,
+  "yes_bid": 0.35,
+  "yes_ask": 0.36,
+  "spread": 0.01,
+  "close_time": "2026-11-03T00:00:00Z",
+  "q_agent": 0.48,
+  "confidence": 0.40,
+  "thesis": "Fundamentals-vs-crowd test, not news. The event's price mass (Wilson R .355, Kreiss-Tomkins D .315, Begich D .18, Bronson R .078; everything else dust) says the Aug-18 top-4 primary sent two Republicans and two Democrats to the ranked-choice general, and the crowd implies P(Democrat wins) ~ .50. Alaska is Cook PVI R+8 and Trump +13 in 2024; the open seat and a Democratic-leaning midterm cut the R lean but do not erase it, and in 2018 -- a D+8 House year -- the open Alaska governorship still went R by 7. Under RCV the two-R / two-D field consolidates into a Wilson-vs-Kreiss-Tomkins final; Bronson is a damaged ex-mayor who lost re-election in 2024, so Wilson holds ~85% of the R mass. Agent: P(R) ~ .58 x .85 = ~.49, frozen at .48. Distance from crowd .125 on a 1c spread. Stated risk: the crowd may hold post-primary polling the agent cannot see; if public polls show Kreiss-Tomkins leading the final-round matchup by >5 the crowd is right and this estimate is wrong. Falsifier: a Wilson-vs-Kreiss-Tomkins poll with K-T ahead by >5, or Wilson failing to be the last Republican standing.",
+  "event_refs": [
+   "https://polymarket.com/event/alaska-governor-election-winner"
+  ]
+ }
+]

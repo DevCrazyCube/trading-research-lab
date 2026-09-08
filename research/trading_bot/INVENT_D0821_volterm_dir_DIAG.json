@@ -1,0 +1,95 @@
+{
+  "design_to_holdout": {
+    "spearman": 0.3521594684385382,
+    "pearson": 0.4021755716554574,
+    "mean_design": -0.001474720676487872,
+    "mean_holdout": 0.05920825965084097
+  },
+  "next_day_spy_regressions": {
+    "DESIGN": {
+      "s_near_9d_30d_slope": {
+        "n": 2263,
+        "beta_bp_per_sigma": -3.45959976676176,
+        "t": -1.8285724642873593
+      },
+      "s_main_30d_93d_slope": {
+        "n": 2263,
+        "beta_bp_per_sigma": -3.684706394029294,
+        "t": -1.9477460803604965
+      },
+      "neg_d1_s_near_flattening": {
+        "n": 2262,
+        "beta_bp_per_sigma": 3.7271140860886756,
+        "t": 1.9693359015675007
+      },
+      "log_vvix_over_vix": {
+        "n": 2263,
+        "beta_bp_per_sigma": -3.8082394447965,
+        "t": -2.0131610923945953
+      },
+      "rv21_minus_vix": {
+        "n": 2242,
+        "beta_bp_per_sigma": -2.249110777090924,
+        "t": -1.1802699393661595
+      }
+    },
+    "HOLDOUT": {
+      "s_near_9d_30d_slope": {
+        "n": 1667,
+        "beta_bp_per_sigma": -1.860789261017594,
+        "t": -0.5978935616271012
+      },
+      "s_main_30d_93d_slope": {
+        "n": 1667,
+        "beta_bp_per_sigma": -4.046909988023719,
+        "t": -1.3008406220043773
+      },
+      "neg_d1_s_near_flattening": {
+        "n": 1667,
+        "beta_bp_per_sigma": 0.9594655439671169,
+        "t": 0.30826333005041245
+      },
+      "log_vvix_over_vix": {
+        "n": 1667,
+        "beta_bp_per_sigma": -4.889983417903637,
+        "t": -1.5722059098651096
+      },
+      "rv21_minus_vix": {
+        "n": 1667,
+        "beta_bp_per_sigma": -1.4876190258332649,
+        "t": -0.4779710537860022
+      }
+    },
+    "FULL": {
+      "s_near_9d_30d_slope": {
+        "n": 3930,
+        "beta_bp_per_sigma": -2.651996818414581,
+        "t": -1.5495132082221763
+      },
+      "s_main_30d_93d_slope": {
+        "n": 3930,
+        "beta_bp_per_sigma": -3.8541882622563417,
+        "t": -2.252697281075774
+      },
+      "neg_d1_s_near_flattening": {
+        "n": 3929,
+        "beta_bp_per_sigma": 2.5520398612418265,
+        "t": 1.4906990520377679
+      },
+      "log_vvix_over_vix": {
+        "n": 3930,
+        "beta_bp_per_sigma": -4.269251361488257,
+        "t": -2.4956593506599227
+      },
+      "rv21_minus_vix": {
+        "n": 3909,
+        "beta_bp_per_sigma": -1.7839788300292734,
+        "t": -1.0376825386619124
+      }
+    }
+  },
+  "base_rates": {
+    "frac_front_inverted_design": 0.2910777385159011,
+    "frac_front_inverted_holdout": 0.23695260947810437
+  }
+}

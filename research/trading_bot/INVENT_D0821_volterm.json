@@ -1,0 +1,588 @@
+{
+  "key": "INVENT_D0821_volterm",
+  "created": "2026-08-21",
+  "theme": "TERM STRUCTURE OF VOLATILITY as a directional / timing signal for EQUITY (VIX / VIX9D / VIX3M / VIX6M / VVIX / VXN curve shape and dynamics, realised-vs-implied spread dynamics, vol-of-vol) -- NOT VRP harvesting, NOT vol-ETP carry, NOT a regime gate on an alive leg.",
+  "verdict": "NOISE. 0 of 43 formulas clears the multiple-testing bar on the design window. The best design Sharpe (0.88) is BELOW both the analytic sqrt(2 ln N) bar (0.92) and the circular-shift bootstrap E[max] (0.95); its bootstrap p-value is 0.63. The theme is reported as an honest zero.",
+  "theme_is_noise": true,
+  "n_formulas_tested": 43,
+  "n_benchmarks": 4,
+  "search_is_sign_agnostic": false,
+  "sign_discipline": "Every formula carries one of four named mechanisms and an A-PRIORI SIGN, and is scored exactly as written. A good Sharpe on the flipped sign is recorded as a FAILURE, not a result. Every top-10 formula's flipped sign is negative, which is arithmetic, not evidence.",
+  "windows": {
+    "panel": "20110103..20260820 (bounded by ^VIX9D's first print)",
+    "design": "20110103..20191231  (2263 days, 8.98y)",
+    "holdout": "20200101..20260820 (1667 days, 6.62y)",
+    "holdout_discipline": "the design pass was written to disk before any holdout number was computed; the holdout table below is a DIAGNOSTIC (nothing was promoted into it) and no formula is selected on it."
+  },
+  "bars": {
+    "analytic_expected_max_t_sqrt2lnN": 2.743,
+    "analytic_expected_max_sharpe": 0.915,
+    "bootstrap_expected_max_sharpe": 0.947,
+    "bootstrap_p95_max_sharpe": 1.231,
+    "bootstrap_p99_max_sharpe": 1.396,
+    "bootstrap_statistic": "max over all tested formulas of as-written net Sharpe",
+    "B": 2000,
+    "best_design_sharpe": 0.882,
+    "median_design_sharpe": -0.043,
+    "n_above_bootstrap_expected_max": 0,
+    "n_above_bootstrap_p95": 0,
+    "best_bootstrap_p_value": 0.628
+  },
+  "benchmarks_that_beat_every_formula": {
+    "Z0_SPY_LONG_design_sharpe": 0.937,
+    "note": "plain buy-and-hold SPY scores 0.94 on the design window, above all 43 formulas. The best alpha-t against it is +1.11 (H21_A4_INVERT_HOLD) against a 2.74 bar, so no formula adds anything to owning the index."
+  },
+  "top_formulas": [
+    {
+      "name": "H21_A4_INVERT_HOLD",
+      "group": "H",
+      "a_priori_sign": "long equity",
+      "why": "A4's inversion depth held 21 days. PANIC IMPULSE: forced hedgers buy near-dated vol on a risk-limit trigger, flattening or inverting the front of the curve; that demand is non-informational and unwinds, so equity is cheap while they pay up.",
+      "design_sharpe": 0.882,
+      "design_t": 2.64,
+      "design_alpha_t_vs_spy": 1.11,
+      "bootstrap_p": 0.628,
+      "lag1_sharpe": 0.893,
+      "flipped_sign_sharpe_would_be": -0.906,
+      "holdout_sharpe": 0.269,
+      "holdout_t": 0.69,
+      "cost_drag_annual": 0.00016,
+      "frac_days_live": 0.743
+    },
+    {
+      "name": "G3_FRESH_INVERSION_21D",
+      "group": "G",
+      "a_priori_sign": "long equity for 21 days after a fresh inversion",
+      "why": "The same trigger held a month: if the unwind is slow this is where it shows. PANIC IMPULSE: forced hedgers buy near-dated vol on a risk-limit trigger, flattening or inverting the front of the curve; that demand is non-informational and unwinds, so equity is cheap while they pay up.",
+      "design_sharpe": 0.829,
+      "design_t": 2.48,
+      "design_alpha_t_vs_spy": -0.78,
+      "bootstrap_p": 0.771,
+      "lag1_sharpe": 0.793,
+      "flipped_sign_sharpe_would_be": -0.856,
+      "holdout_sharpe": 0.785,
+      "holdout_t": 2.02,
+      "cost_drag_annual": 0.00061,
+      "frac_days_live": 0.818
+    },
+    {
+      "name": "A4_NEAR_INVERT_DEPTH",
+      "group": "A",
+      "a_priori_sign": "long equity in proportion to inversion depth",
+      "why": "Depth of front inversion in its own trailing sigma. PANIC IMPULSE: forced hedgers buy near-dated vol on a risk-limit trigger, flattening or inverting the front of the curve; that demand is non-informational and unwinds, so equity is cheap while they pay up.",
+      "design_sharpe": 0.705,
+      "design_t": 2.11,
+      "design_alpha_t_vs_spy": 0.87,
+      "bootstrap_p": 0.974,
+      "lag1_sharpe": 0.404,
+      "flipped_sign_sharpe_would_be": -0.776,
+      "holdout_sharpe": 0.117,
+      "holdout_t": 0.3,
+      "cost_drag_annual": 0.00152,
+      "frac_days_live": 0.232
+    },
+    {
+      "name": "H5_A4_INVERT_HOLD",
+      "group": "H",
+      "a_priori_sign": "long equity",
+      "why": "A4's inversion depth held 5 days. PANIC IMPULSE: forced hedgers buy near-dated vol on a risk-limit trigger, flattening or inverting the front of the curve; that demand is non-informational and unwinds, so equity is cheap while they pay up.",
+      "design_sharpe": 0.684,
+      "design_t": 2.05,
+      "design_alpha_t_vs_spy": 0.63,
+      "bootstrap_p": 0.982,
+      "lag1_sharpe": 0.65,
+      "flipped_sign_sharpe_would_be": -0.72,
+      "holdout_sharpe": 0.092,
+      "holdout_t": 0.24,
+      "cost_drag_annual": 0.00057,
+      "frac_days_live": 0.433
+    },
+    {
+      "name": "G5_BELLY_SHOCK_10D",
+      "group": "G",
+      "a_priori_sign": "long equity for 10 days after a belly collapse",
+      "why": "Enter long SPY for 10 sessions after a bottom-5% one-day collapse in the 30d->93d slope. PANIC IMPULSE: forced hedgers buy near-dated vol on a risk-limit trigger, flattening or inverting the front of the curve; that demand is non-informational and unwinds, so equity is cheap while they pay up.",
+      "design_sharpe": 0.684,
+      "design_t": 2.05,
+      "design_alpha_t_vs_spy": 0.34,
+      "bootstrap_p": 0.983,
+      "lag1_sharpe": 0.527,
+      "flipped_sign_sharpe_would_be": -0.724,
+      "holdout_sharpe": 0.138,
+      "holdout_t": 0.36,
+      "cost_drag_annual": 0.00129,
+      "frac_days_live": 0.372
+    },
+    {
+      "name": "A3_NEAR_INVERT_BINARY",
+      "group": "A",
+      "a_priori_sign": "long equity while the front is inverted",
+      "why": "Front inverted outright (VIX9D above VIX). PANIC IMPULSE: forced hedgers buy near-dated vol on a risk-limit trigger, flattening or inverting the front of the curve; that demand is non-informational and unwinds, so equity is cheap while they pay up.",
+      "design_sharpe": 0.61,
+      "design_t": 1.83,
+      "design_alpha_t_vs_spy": -0.39,
+      "bootstrap_p": 1.0,
+      "lag1_sharpe": 0.507,
+      "flipped_sign_sharpe_would_be": -0.695,
+      "holdout_sharpe": 0.24,
+      "holdout_t": 0.62,
+      "cost_drag_annual": 0.00412,
+      "frac_days_live": 0.291
+    },
+    {
+      "name": "G2_FRESH_INVERSION_5D",
+      "group": "G",
+      "a_priori_sign": "long equity for 5 days after a fresh inversion",
+      "why": "Enter long SPY for 5 sessions on the day the front first inverts. PANIC IMPULSE: forced hedgers buy near-dated vol on a risk-limit trigger, flattening or inverting the front of the curve; that demand is non-informational and unwinds, so equity is cheap while they pay up.",
+      "design_sharpe": 0.51,
+      "design_t": 1.53,
+      "design_alpha_t_vs_spy": -0.37,
+      "bootstrap_p": 1.0,
+      "lag1_sharpe": 0.581,
+      "flipped_sign_sharpe_would_be": -0.576,
+      "holdout_sharpe": 0.896,
+      "holdout_t": 2.3,
+      "cost_drag_annual": 0.00254,
+      "frac_days_live": 0.36
+    },
+    {
+      "name": "G4_UNINVERSION_10D",
+      "group": "G",
+      "a_priori_sign": "long equity for 10 days after the front un-inverts",
+      "why": "Enter long SPY for 10 sessions on the day the front RE-STEEPENS out of inversion: the all-clear, when dealers start selling the front again. CALM SUPPLY: a steep / steepening curve means the front is being sold and dealers accumulate long gamma, damping realised moves; a market whose realised vol is suppressed drifts up.",
+      "design_sharpe": 0.357,
+      "design_t": 1.07,
+      "design_alpha_t_vs_spy": -2.08,
+      "bootstrap_p": 1.0,
+      "lag1_sharpe": 0.27,
+      "flipped_sign_sharpe_would_be": -0.401,
+      "holdout_sharpe": 1.42,
+      "holdout_t": 3.65,
+      "cost_drag_annual": 0.00169,
+      "frac_days_live": 0.582
+    },
+    {
+      "name": "G1_FLATTEN_SHOCK_5D",
+      "group": "G",
+      "a_priori_sign": "long equity for 5 days after a flattening shock",
+      "why": "Enter long SPY for 5 sessions after a front-curve flattening in the worst 5% of its own trailing year. PANIC IMPULSE: forced hedgers buy near-dated vol on a risk-limit trigger, flattening or inverting the front of the curve; that demand is non-informational and unwinds, so equity is cheap while they pay up.",
+      "design_sharpe": 0.347,
+      "design_t": 1.04,
+      "design_alpha_t_vs_spy": -0.33,
+      "bootstrap_p": 1.0,
+      "lag1_sharpe": 0.318,
+      "flipped_sign_sharpe_would_be": -0.408,
+      "holdout_sharpe": 0.3,
+      "holdout_t": 0.77,
+      "cost_drag_annual": 0.00177,
+      "frac_days_live": 0.213
+    },
+    {
+      "name": "D3_NEAR_INVERT_ON",
+      "group": "D",
+      "a_priori_sign": "long the overnight session while the front is inverted",
+      "why": "A3's binary inversion state, overnight session only. PANIC IMPULSE: forced hedgers buy near-dated vol on a risk-limit trigger, flattening or inverting the front of the curve; that demand is non-informational and unwinds, so equity is cheap while they pay up.",
+      "design_sharpe": 0.245,
+      "design_t": 0.73,
+      "design_alpha_t_vs_spy": -0.61,
+      "bootstrap_p": 1.0,
+      "lag1_sharpe": 0.279,
+      "flipped_sign_sharpe_would_be": -0.938,
+      "holdout_sharpe": -0.02,
+      "holdout_t": -0.05,
+      "cost_drag_annual": 0.02202,
+      "frac_days_live": 0.291
+    }
+  ],
+  "all_design_sharpes_sorted": [
+    [
+      0.882,
+      "H21_A4_INVERT_HOLD"
+    ],
+    [
+      0.829,
+      "G3_FRESH_INVERSION_21D"
+    ],
+    [
+      0.705,
+      "A4_NEAR_INVERT_DEPTH"
+    ],
+    [
+      0.684,
+      "H5_A4_INVERT_HOLD"
+    ],
+    [
+      0.684,
+      "G5_BELLY_SHOCK_10D"
+    ],
+    [
+      0.61,
+      "A3_NEAR_INVERT_BINARY"
+    ],
+    [
+      0.51,
+      "G2_FRESH_INVERSION_5D"
+    ],
+    [
+      0.357,
+      "G4_UNINVERSION_10D"
+    ],
+    [
+      0.347,
+      "G1_FLATTEN_SHOCK_5D"
+    ],
+    [
+      0.245,
+      "D3_NEAR_INVERT_ON"
+    ],
+    [
+      0.244,
+      "A5_NEAR_SLOPE_TILT"
+    ],
+    [
+      0.235,
+      "H5_A5_SLOPE_HOLD"
+    ],
+    [
+      0.206,
+      "H5_A1_FLATTEN_HOLD"
+    ],
+    [
+      0.192,
+      "H21_A5_SLOPE_HOLD"
+    ],
+    [
+      0.125,
+      "V3_VVIX_RISKOFF_ROTATE"
+    ],
+    [
+      0.107,
+      "A1_NEAR_FLATTEN_REV"
+    ],
+    [
+      0.084,
+      "E1_CURVE_BETA_ROTATE"
+    ],
+    [
+      0.065,
+      "B5_RV_TERM_SLOPE"
+    ],
+    [
+      0.013,
+      "B2_RVIV_GAP_SHOCK"
+    ],
+    [
+      -0.004,
+      "A8_NEAR_SLOPE_ACCEL"
+    ],
+    [
+      -0.034,
+      "A10_MAIN_STEEPEN_5D"
+    ],
+    [
+      -0.043,
+      "C4_VOV_DRAIN_5D"
+    ],
+    [
+      -0.05,
+      "B4_IV_OVERSHOOT_RESID"
+    ],
+    [
+      -0.053,
+      "D2_NEAR_FLATTEN_REV_ID"
+    ],
+    [
+      -0.076,
+      "A7_CURVATURE_FLY"
+    ],
+    [
+      -0.078,
+      "H21_A1_FLATTEN_HOLD"
+    ],
+    [
+      -0.093,
+      "A9_TWIST_NEARFAR"
+    ],
+    [
+      -0.102,
+      "B3_RVIV_NEAR_GAP"
+    ],
+    [
+      -0.116,
+      "C1_VVIX_RICH_Z"
+    ],
+    [
+      -0.133,
+      "B1_RVIV_GAP_DIR"
+    ],
+    [
+      -0.138,
+      "B6_IMPL_VS_REAL_CURVE"
+    ],
+    [
+      -0.317,
+      "H21_A10_STEEPEN_HOLD"
+    ],
+    [
+      -0.341,
+      "H5_A10_STEEPEN_HOLD"
+    ],
+    [
+      -0.36,
+      "E4_VXN_RICH_MOM5"
+    ],
+    [
+      -0.459,
+      "C2_VVIX_SHOCK_REV"
+    ],
+    [
+      -0.465,
+      "V2_BELLY_RISKON_ROTATE"
+    ],
+    [
+      -0.478,
+      "A2_MAIN_FLATTEN_REV"
+    ],
+    [
+      -0.484,
+      "A6_BACK_SLOPE_TILT"
+    ],
+    [
+      -0.562,
+      "C3_REAL_VOV_GAP"
+    ],
+    [
+      -0.612,
+      "E2_CURVE_SIZE_ROTATE"
+    ],
+    [
+      -0.716,
+      "E3_VXN_RICH_ROTATE"
+    ],
+    [
+      -0.728,
+      "D1_NEAR_FLATTEN_REV_ON"
+    ],
+    [
+      -0.743,
+      "V1_CURVE_RISKOFF_ROTATE"
+    ]
+  ],
+  "holdout_diagnostic": {
+    "design_to_holdout_spearman": 0.352,
+    "design_to_holdout_pearson": 0.402,
+    "mean_design_sharpe": -0.001,
+    "mean_holdout_sharpe": 0.059,
+    "what_the_positive_rank_correlation_is": "beta, not skill. 19/43 formulas are long-biased in a window where SPY returned +0.94 Sharpe and a holdout where it returned +0.82; ranking long-biased books above short-biased ones in both windows produces rho=0.35 with no forecasting content whatsoever.",
+    "the_two_best_holdout_numbers_and_why_they_are_not_promotable": [
+      {
+        "name": "G4_UNINVERSION_10D",
+        "design_sharpe": 0.357,
+        "holdout_sharpe": 1.424,
+        "why_not": "design Sharpe 0.36 against a 0.95 bar and a design alpha-t of -2.08 against SPY. Promoting it would be selecting on the holdout, which is the one thing this programme does not do."
+      },
+      {
+        "name": "G2_FRESH_INVERSION_5D",
+        "design_sharpe": 0.51,
+        "holdout_sharpe": 0.897,
+        "why_not": "same: design p-value 1.00. Its holdout t of +2.30 is the largest of 43 draws in a window nobody used to choose it, i.e. exactly what the null predicts will happen to somebody."
+      }
+    ]
+  },
+  "mechanism_level_diagnostic": {
+    "what_it_is": "Before any book construction: univariate OLS of next-day SPY return on each standardised curve variable. This asks whether the EFFECT exists at all, independent of whether it is tradable.",
+    "units": "bp of next-day SPY return per 1 sigma of the signal, with its t-stat",
+    "regressions": {
+      "DESIGN": {
+        "s_near_9d_30d_slope": {
+          "n": 2263,
+          "beta_bp_per_sigma": -3.45959976676176,
+          "t": -1.8285724642873593
+        },
+        "s_main_30d_93d_slope": {
+          "n": 2263,
+          "beta_bp_per_sigma": -3.684706394029294,
+          "t": -1.9477460803604965
+        },
+        "neg_d1_s_near_flattening": {
+          "n": 2262,
+          "beta_bp_per_sigma": 3.7271140860886756,
+          "t": 1.9693359015675007
+        },
+        "log_vvix_over_vix": {
+          "n": 2263,
+          "beta_bp_per_sigma": -3.8082394447965,
+          "t": -2.0131610923945953
+        },
+        "rv21_minus_vix": {
+          "n": 2242,
+          "beta_bp_per_sigma": -2.249110777090924,
+          "t": -1.1802699393661595
+        }
+      },
+      "HOLDOUT": {
+        "s_near_9d_30d_slope": {
+          "n": 1667,
+          "beta_bp_per_sigma": -1.860789261017594,
+          "t": -0.5978935616271012
+        },
+        "s_main_30d_93d_slope": {
+          "n": 1667,
+          "beta_bp_per_sigma": -4.046909988023719,
+          "t": -1.3008406220043773
+        },
+        "neg_d1_s_near_flattening": {
+          "n": 1667,
+          "beta_bp_per_sigma": 0.9594655439671169,
+          "t": 0.30826333005041245
+        },
+        "log_vvix_over_vix": {
+          "n": 1667,
+          "beta_bp_per_sigma": -4.889983417903637,
+          "t": -1.5722059098651096
+        },
+        "rv21_minus_vix": {
+          "n": 1667,
+          "beta_bp_per_sigma": -1.4876190258332649,
+          "t": -0.4779710537860022
+        }
+      },
+      "FULL": {
+        "s_near_9d_30d_slope": {
+          "n": 3930,
+          "beta_bp_per_sigma": -2.651996818414581,
+          "t": -1.5495132082221763
+        },
+        "s_main_30d_93d_slope": {
+          "n": 3930,
+          "beta_bp_per_sigma": -3.8541882622563417,
+          "t": -2.252697281075774
+        },
+        "neg_d1_s_near_flattening": {
+          "n": 3929,
+          "beta_bp_per_sigma": 2.5520398612418265,
+          "t": 1.4906990520377679
+        },
+        "log_vvix_over_vix": {
+          "n": 3930,
+          "beta_bp_per_sigma": -4.269251361488257,
+          "t": -2.4956593506599227
+        },
+        "rv21_minus_vix": {
+          "n": 3909,
+          "beta_bp_per_sigma": -1.7839788300292734,
+          "t": -1.0376825386619124
+        }
+      }
+    },
+    "reading": "The largest raw effect in the whole theme is log(VVIX/VIX): -4.27 bp per sigma, t=-2.50 over the full 16 years. Three things kill it. (1) Its sign is the OPPOSITE of the a-priori M4 mechanism -- a rich convexity bid predicts equity DOWN, not a reversal up -- so by this programme's sign rule it is a failed prediction, not a finding. (2) t=-2.50 is one of five variables looked at inside a 43-formula search; it is not significant after any correction. (3) 4 bp per sigma on a book that must re-trade daily is a gross Sharpe near 0.2 against a 1 bp per side round trip. There is no executable object here even if the sign had been right.",
+    "base_rates": {
+      "frac_front_inverted_design": 0.2910777385159011,
+      "frac_front_inverted_holdout": 0.23695260947810437
+    }
+  },
+  "what_was_tested": {
+    "A_implied_curve_shape_and_dynamics_10": "1d and 5d slope changes on all three measured segments, slope levels, outright front inversion (binary and depth-scaled), 9d/30d/93d butterfly curvature, slope acceleration, near-vs-far twist",
+    "B_realised_vs_implied_dynamics_6": "rv21-VIX and rv10-VIX9D gaps and their 1d changes, PIT rolling-regression residual of the VIX move on the realised-vol move (pure implied overshoot), realised-vol term slope rv5/rv21, implied front curve minus realised front curve",
+    "C_vol_of_vol_4": "log(VVIX/VIX) level and 5d change, 1d VVIX shock, realised vol-of-VIX minus VVIX",
+    "D_session_decomposition_3": "the front-flattening impulse and the inversion state held overnight-only and intraday-only",
+    "E_curve_driven_rotation_4": "belly slope driving QQQ-vs-SPY and IWM-vs-SPY; VXN rich-to-VIX level and 5d change driving QQQ-vs-SPY",
+    "H_holding_horizon_8": "the four most promising batch-1 signals re-expressed as overlapping 5-day and 21-day books (the axis batch 1 does not sweep: a forced-hedger unwind may not be a one-day object)",
+    "G_event_triggers_5": "long SPY for 5/10/21 sessions after a bottom-5% one-day flattening, a fresh front inversion, a fresh un-inversion, a bottom-5% belly collapse",
+    "V_risk_off_rotation_3": "front slope, belly slope and VVIX/VIX driving TLT vs SPY"
+  },
+  "why_this_is_not_a_re-run_of_anything_dead": {
+    "vs_NEWTERR_volatility_etp_term_structure_2026_08_20": "all 39 of those formulas traded SVXY/VIXY/VIXM/UVXY -- the tradable leg WAS the vol curve and the mechanism was roll carry. Here the curve is only the SIGNAL, every tradable leg is plain equity or duration, and nothing in the sweep is short vol.",
+    "vs_VRP_harvesting": "no formula sells volatility. B1/B2/B3 use the realised-implied gap as a DIRECTIONAL equity predictor, not as a premium to collect.",
+    "vs_round_3_gating_meta_result": "no formula multiplies an alive basket leg by a vol-curve condition. All 43 are standalone books whose only input is the curve. Zero formulas were spent on conditioners, as instructed.",
+    "vs_the_dead_VIX9D_VIX3M_gamma_sign_proxy": "that used a curve sign as a dealer-gamma proxy for INTRADAY MOMENTUM. A3/D3 are close-to-close capitulation REVERSAL, opposite sign and opposite mechanism -- and they are dead too."
+  },
+  "harness_selftest": {
+    "session_reconstruction_max_abs_err": 2.220446049250313e-16,
+    "session_reconstruction_median_abs_err": 0.0,
+    "oracle_next_day_sign_sharpe": 14.81,
+    "oracle_at_lag1_sharpe": -0.05,
+    "cost_buyhold_annual": 1e-05,
+    "cost_dailyflip_annual": 0.05187,
+    "first_live_date_per_formula": {
+      "A1_NEAR_FLATTEN_REV": 20120103,
+      "A2_MAIN_FLATTEN_REV": 20120103,
+      "A3_NEAR_INVERT_BINARY": 20110118,
+      "A4_NEAR_INVERT_DEPTH": 20120215,
+      "A5_NEAR_SLOPE_TILT": 20111230,
+      "A6_BACK_SLOPE_TILT": 20111230,
+      "A7_CURVATURE_FLY": 20111230,
+      "A8_NEAR_SLOPE_ACCEL": 20120104,
+      "A9_TWIST_NEARFAR": 20120103,
+      "A10_MAIN_STEEPEN_5D": 20120109,
+      "B1_RVIV_GAP_DIR": 20120201,
+      "B2_RVIV_GAP_SHOCK": 20120202,
+      "B3_RVIV_NEAR_GAP": 20120117,
+      "B4_IV_OVERSHOOT_RESID": 20130103,
+      "B5_RV_TERM_SLOPE": 20120201,
+      "B6_IMPL_VS_REAL_CURVE": 20120201,
+      "C1_VVIX_RICH_Z": 20111230,
+      "C2_VVIX_SHOCK_REV": 20120103,
+      "C3_REAL_VOV_GAP": 20120201,
+      "C4_VOV_DRAIN_5D": 20120109,
+      "D1_NEAR_FLATTEN_REV_ON": 20120103,
+      "D2_NEAR_FLATTEN_REV_ID": 20120103,
+      "D3_NEAR_INVERT_ON": 20110118,
+      "E1_CURVE_BETA_ROTATE": 20111230,
+      "E2_CURVE_SIZE_ROTATE": 20111230,
+      "E3_VXN_RICH_ROTATE": 20111230,
+      "E4_VXN_RICH_MOM5": 20120109,
+      "H5_A1_FLATTEN_HOLD": 20120103,
+      "H5_A4_INVERT_HOLD": 20120215,
+      "H5_A5_SLOPE_HOLD": 20111230,
+      "H5_A10_STEEPEN_HOLD": 20120109,
+      "H21_A1_FLATTEN_HOLD": 20120103,
+      "H21_A4_INVERT_HOLD": 20120215,
+      "H21_A5_SLOPE_HOLD": 20111230,
+      "H21_A10_STEEPEN_HOLD": 20120109,
+      "G1_FLATTEN_SHOCK_5D": 20120117,
+      "G2_FRESH_INVERSION_5D": 20110118,
+      "G3_FRESH_INVERSION_21D": 20110118,
+      "G4_UNINVERSION_10D": 20110120,
+      "G5_BELLY_SHOCK_10D": 20120306,
+      "V1_CURVE_RISKOFF_ROTATE": 20111230,
+      "V2_BELLY_RISKON_ROTATE": 20111230,
+      "V3_VVIX_RISKOFF_ROTATE": 20111230
+    },
+    "max_abs_gross_exposure": 1.0000000000000002,
+    "frac_days_index_unchanged": {
+      "^VIX": 0.0048,
+      "^VIX9D": 0.0097,
+      "^VIX3M": 0.0153,
+      "^VIX6M": 0.013,
+      "^VVIX": 0.0066,
+      "^VXN": 0.0066
+    },
+    "design_days": 2263
+  },
+  "costs": {
+    "per_side_bp": {
+      "SPY": 1.0,
+      "QQQ": 1.0,
+      "IWM": 1.5,
+      "TLT": 2.0,
+      "SPY_open_MOO_add_on": 0.5
+    },
+    "charged": "on entry AND exit (the T6 correction); session legs round-trip every day and are charged on |W| daily, not on |dW|",
+    "borrow": "accrued daily on every negative weight",
+    "ladder": "every holdout row also carries a 2x-cost column; it changes no verdict because nothing survived at 1x"
+  },
+  "what_would_change_the_answer": [
+    "The real VX FUTURES settlement curve. Everything here is built on the CBOE constant-maturity INDICES (VIX9D/VIX/VIX3M/VIX6M), which are synthetic interpolations that smooth away exactly the roll-date and expiry-cycle structure a genuine curve signal would trade. VX settlements are not on any free keyless endpoint reachable from this host. This is the same wall the 2026-08-20 ETP sweep hit and it is a DATA wall, not a mechanism wall.",
+    "Intraday term structure. The curve is sampled once a day at the close; the forced-hedger impulse the M1 mechanism describes is an intraday object that may be over before the close prints. Free data gives no intraday VIX9D.",
+    "Nothing else. Adding more daily formulas to this theme only raises the bar."
+  ],
+  "files": {
+    "sweep": "scripts/trading_bot/invent_d0821_volterm_dir.py",
+    "fetcher": "scripts/trading_bot/volts_fetch.py",
+    "design": "research/trading_bot/INVENT_D0821_volterm_dir_DESIGN.json",
+    "holdout": "research/trading_bot/INVENT_D0821_volterm_dir_HOLDOUT.json",
+    "selftest": "research/trading_bot/INVENT_D0821_volterm_dir_SELFTEST.json",
+    "diagnostic": "research/trading_bot/INVENT_D0821_volterm_dir_DIAG.json"
+  }
+}

@@ -1,0 +1,18 @@
+
+=== R8[up_min=3 & density15=1]  (bin edges fit on h1 train, as in the forward sweep)
+  h1 (train)         mean=+0.0470 med=-0.0899 n=  42 k= 26 posfrac=0.23 res=0.98 CI=[-0.1385,+0.3375] ctrl=-0.0602
+  h2 (validate)      mean=+0.1347 med=+0.0457 n=  55 k= 18 posfrac=0.61 res=1.00 CI=[+0.0099,+0.2942] ctrl=-0.0474
+  h1+h2 pooled       mean=+0.0829 med=-0.0596 n=  97 k= 44 posfrac=0.39 res=0.99 CI=[-0.0486,+0.2604] ctrl=-0.0516
+  EARLY(all mints)   mean=+0.0939 med=-0.0720 n=  43 k= 27 posfrac=0.30 res=1.00 CI=[-0.0996,+0.3814] ctrl=-0.0629
+  LATE(all mints)    mean=+0.0567 med=-0.0091 n=  54 k= 19 posfrac=0.47 res=0.98 CI=[-0.0551,+0.1826] ctrl=-0.0431
+  h2 EARLY           mean=+0.1277 med=+0.0076 n=  26 k= 14 posfrac=0.50 res=1.00 CI=[-0.0215,+0.3385] ctrl=-0.0489
+  h2 LATE            mean=+0.1001 med=+0.1207 n=  29 k=  6 posfrac=0.67 res=1.00 CI=[-0.0332,+0.2192] ctrl=-0.0302
+
+=== M10[ret1=3 & barrange=6]  (bin edges fit on h1 train, as in the forward sweep)
+  h1 (train)         mean=+0.0189 med=-0.0222 n=  71 k= 16 posfrac=0.50 res=0.99 CI=[-0.1168,+0.1732] ctrl=-0.0690
+  h2 (validate)      mean=+0.0509 med=+0.0272 n= 124 k= 21 posfrac=0.67 res=1.00 CI=[+0.0028,+0.0982] ctrl=-0.0587
+  h1+h2 pooled       mean=+0.0371 med=+0.0139 n= 195 k= 37 posfrac=0.59 res=0.99 CI=[-0.0286,+0.1110] ctrl=-0.0632
+  EARLY(all mints)   mean=+0.1055 med=+0.0460 n=  60 k= 26 posfrac=0.65 res=1.00 CI=[+0.0018,+0.2169] ctrl=-0.0668
+  LATE(all mints)    mean=-0.0157 med=-0.0272 n= 135 k= 22 posfrac=0.45 res=0.99 CI=[-0.0654,+0.0358] ctrl=-0.0510
+  h2 EARLY           mean=+0.0956 med=+0.0494 n=  35 k= 15 posfrac=0.67 res=1.00 CI=[+0.0177,+0.2148] ctrl=-0.0527
+  h2 LATE            mean=+0.0339 med=+0.0108 n=  89 k= 12 posfrac=0.67 res=1.00 CI=[-0.0350,+0.1029] ctrl=-0.0400

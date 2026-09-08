@@ -1,0 +1,77 @@
+{
+  "coverage": "UNMEASURED_SINGLE_SOURCE",
+  "creates": 6,
+  "duplicate_create_observations": 0,
+  "event_accounting": {
+    "ClaimCashbackEvent": 10,
+    "CloseUserVolumeAccumulatorEvent": 23,
+    "CompleteEvent": 1,
+    "CompletePumpAmmMigrationEvent": 1,
+    "CreateEvent": 6,
+    "DistributeCreatorFeesEvent": 2,
+    "ExtendAccountEvent": 1,
+    "InitUserVolumeAccumulatorEvent": 2,
+    "MigrateBondingCurveCreatorEvent": 2,
+    "TradeEvent": 571,
+    "other_program_data": 106,
+    "subscription_ack": 1
+  },
+  "frames": 8502,
+  "issues": 0,
+  "observations_sha256": "5a51ca25095a492380e9d1c0359896040515363ee2d1ec6a4387cbbeb7a37eef",
+  "raw_replay": "EXACT",
+  "reconciliation": {
+    "completed": 0,
+    "failures": [
+      {
+        "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+        "frame_sequence": 877,
+        "signature": "65JQnvfwGKjDfiR61SAyBSiduDpZnxEekBTyug4tNEkFkcgipkmHFzBDRAzMQr7BysXH9ubYB478AuKw7qVJbXXd"
+      }
+    ],
+    "independent_provider": false,
+    "observations": 6,
+    "program_deployment_boundary": "NOT_ATTESTED; exact payload compatibility only",
+    "rows": [],
+    "status": "INCOMPLETE",
+    "unattempted_after_failure": 5,
+    "unobserved_creation_recall": "UNMEASURED"
+  },
+  "refused_frames": 0,
+  "replay_code_sha256": "933d306e4bbbfc5ac7aa2105412073bd34364e09c795c6b9a65b6bcaf8ff1a38",
+  "source": "research/midcap/birth_stream_pilot_network_20260908.sqlite",
+  "source_end": {
+    "bytes_before_checkpoint": 10472952,
+    "canonical_reconciliation": "PENDING",
+    "coverage": "UNMEASURED_SINGLE_SOURCE",
+    "create_observations": 6,
+    "create_transactions": 6,
+    "end_reason": "DURATION_COMPLETE",
+    "finished_unix_nanos": 1788889668699020251,
+    "frame_chain_tail": "2516d3166e031c980e55984d8d66c41c1e634089aa28c3e65f592e36cc18e4a6",
+    "frames": 8502,
+    "issues": 0,
+    "pending_raw_frames": 0,
+    "status": "OBSERVATION_ONLY_NO_TRADE",
+    "successful_create_observations": 5
+  },
+  "source_manifest": {
+    "borsh_decoder_sha256": "23745172aabd5739829e0ee8949f45a56760569a0055081f357164065a9b10cb",
+    "canonical_order": "requires independent reconciliation",
+    "capture": "all raw websocket data frames before decode",
+    "code_sha256": "5f9426b10851eee595e2c4ce392375cc77f48b234f7740b9e2378ed98c67db02",
+    "commitment": "finalized",
+    "coverage": "UNMEASURED_SINGLE_SOURCE",
+    "endpoint": "wss://api.mainnet.solana.com",
+    "fsync": "SQLite synchronous FULL; raw commit precedes decode commit",
+    "idl_sha256": "b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49",
+    "max_bytes": 134217728,
+    "schema": "birth-stream-v1",
+    "source": "SOLANA_PUBLIC_FINALIZED_LOGS",
+    "started_monotonic_nanos": 5691753069755,
+    "started_unix_nanos": 1788889621850994457,
+    "status": "OBSERVATION_ONLY_NO_TRADE"
+  },
+  "status": "NO_TRADE",
+  "tail": "2516d3166e031c980e55984d8d66c41c1e634089aa28c3e65f592e36cc18e4a6"
+}

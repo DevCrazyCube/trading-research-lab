@@ -1,0 +1,34 @@
+ 520745 python3 -m scripts.trading_bot.aftershock.pac_lws_dashboard
+ 535605 python3 -m scripts.trading_bot.aftershock.exitguard_bot
+ 562167 python3 -m scripts.trading_bot.x2_slippage_dashboard
+1310566 python3 -m scripts.trading_bot.memebot.arena.runtime
+1310580 python3 -m scripts.trading_bot.memebot.arena.bundle_v2_runtime
+1310595 python3 -m scripts.trading_bot.memebot.arena.migration_acceptance_runtime
+1316344 python3 -m scripts.trading_bot.memebot.arena.dashboard.server
+1513287 python3 -m scripts.trading_bot.memebot.multivenue_tape --programs pump.fun,raydium_launchlab
+1558249 python3 -m scripts.trading_bot.memebot.observatory_dashboard
+2054101 python3 -u -m scripts.trading_bot.memebot.midcap_dashboard
+2091082 zsh -c python3 -u -m scripts.trading_bot.memebot.fresh_scan 2>&1 | tee -a research/midcap/fresh_collector.log
+2091083 python3 -u -m scripts.trading_bot.memebot.fresh_scan
+2109636 python3 -u -m scripts.trading_bot.memebot.scalpbot_dashboard
+2200475 zsh -c python3 -u -m scripts.trading_bot.memebot.scalpbot 2>&1 | tee -a research/midcap/scalpbot.log
+2200477 python3 -u -m scripts.trading_bot.memebot.scalpbot
+2289083 zsh -c python3 -u -m scripts.trading_bot.memebot.attention_scan 2>&1 | tee -a research/midcap/attention.log
+2289085 python3 -u -m scripts.trading_bot.memebot.attention_scan
+2399243 bash chain.sh
+2400377 /usr/bin/zsh -c -l setopt NO_EXTENDED_GLOB NO_BARE_GLOB_QUAL 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'sleep 400 >/dev/null 2>&1; cd /home/anont/meme/_c3 && { date +%T; cat chain.log 2>&1; echo "=== surface tail ==="; tail -45 surface.log 2>&1; } > stS.txt 2>&1' < /dev/null && pwd -P >| /tmp/claude-ba82-cwd
+2400667 /usr/bin/zsh -c -l setopt NO_EXTENDED_GLOB NO_BARE_GLOB_QUAL 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'cd /home/anont/meme && python3 .tmp_combo3/stage2.py 2>&1|tail -2 && echo S2_OK && python3 .tmp_combo3/stage3.py 2>&1|tail -3 && echo S3_OK && python3 .tmp_combo3/stage4.py 2>&1|tail -3 && echo S4_OK' < /dev/null && pwd -P >| /tmp/claude-9649-cwd
+2401033 python3 .tmp_combo3/stage3.py
+2401348 /usr/bin/zsh -c -l setopt NO_EXTENDED_GLOB NO_BARE_GLOB_QUAL 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'nohup python3 .scr/step8_gated.py > .scr/o13.txt 2>&1 & until grep -qE "BH q=0.10|Traceback" /home/anont/meme/.scr/o13.txt 2>/dev/null; do sleep 10; done; sleep 15' < /dev/null && pwd -P >| /tmp/claude-e08a-cwd
+2401358 python3 .scr/step8_gated.py
+2401561 python3 validate.py
+2401647 bash chain3.sh
+2401649 python3 sweepC.py
+2401864 /usr/bin/zsh -c -l setopt NO_EXTENDED_GLOB NO_BARE_GLOB_QUAL 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'until grep -q "^V done" /home/anont/meme/_c3/chain.log 2>/dev/null; do sleep 30; done; cd /home/anont/meme/_c3 && { date +%T; cat chain.log; echo "=== C ==="; sed -n '"'"'/^C2 done/,$p'"'"' sweepC.log | head -60; } > stC.txt 2>&1' < /dev/null && pwd -P >| /tmp/claude-98a6-cwd
+2401899 /usr/bin/zsh -c -l setopt NO_EXTENDED_GLOB NO_BARE_GLOB_QUAL 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'sleep 300 >/dev/null 2>&1; cd /home/anont/meme/_c3 && { date +%T; cat chain.log; echo "--C tail--"; tail -3 sweepC.log; } > st15.txt 2>&1' < /dev/null && pwd -P >| /tmp/claude-0aec-cwd
+2402070 /usr/bin/zsh -c -l setopt NO_EXTENDED_GLOB NO_BARE_GLOB_QUAL 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'ps -eo pid,cmd > /home/anont/meme/_c3/ps.txt 2>&1; grep -E "python3|chain" /home/anont/meme/_c3/ps.txt > /home/anont/meme/_c3/st17.txt; date +%T >> /home/anont/meme/_c3/st17.txt; tail -2 /home/anont/meme/_c3/sweepC.log >> /home/anont/meme/_c3/st17.txt' < /dev/null && pwd -P >| /tmp/claude-d504-cwd
+2634965 python3 /usr/bin/wsdd --no-host --discovery --listen /run/user/1000/gvfsd/wsdd
+3942735 python3 -m scripts.trading_bot.memebot.dashboard.server
+04:38:45
+  C1 rvol10 x volaccel kept=7138 swept=35588 t=51.0
+  C1 rvol10 x age_min kept=7608 swept=39186 t=55.2

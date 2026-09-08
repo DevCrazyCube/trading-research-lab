@@ -1,0 +1,54 @@
+{
+ "WARNING": "DESIGN WINDOW ONLY (2024-10..2026-07), the months T21 already searched. Gate \u00a78 forbids reading any of this as evidence for the candidate. The held-out window 2023-06..2024-09 was NOT touched by this file.",
+ "gate_sha256": "3cc5759d8c3490871f093d66fbb756301601e9eccb30a486e4bfc99a3b5b5838",
+ "books": {
+  "3": {
+   "n_months": 22,
+   "mean_gross_differential_pp_yr": 11.009,
+   "mean_net_excess_over_tbill_pp_yr": 0.738,
+   "sd_annual_pct": 1.896,
+   "t_stat": 0.527,
+   "share_of_months_positive": 0.409,
+   "sign_hit_rate_of_selected_names": 0.788,
+   "worst_month_excess_pp_yr": -9.186,
+   "bar_pp": 1.0,
+   "clears_bar": false
+  },
+  "5": {
+   "n_months": 22,
+   "mean_gross_differential_pp_yr": 9.504,
+   "mean_net_excess_over_tbill_pp_yr": -0.015,
+   "sd_annual_pct": 1.282,
+   "t_stat": -0.016,
+   "share_of_months_positive": 0.318,
+   "sign_hit_rate_of_selected_names": 0.818,
+   "worst_month_excess_pp_yr": -5.191,
+   "bar_pp": 1.0,
+   "clears_bar": false
+  },
+  "10": {
+   "n_months": 21,
+   "mean_gross_differential_pp_yr": 8.224,
+   "mean_net_excess_over_tbill_pp_yr": -0.666,
+   "sd_annual_pct": 0.982,
+   "t_stat": -0.897,
+   "share_of_months_positive": 0.238,
+   "sign_hit_rate_of_selected_names": 0.838,
+   "worst_month_excess_pp_yr": -6.559,
+   "bar_pp": 1.0,
+   "clears_bar": false
+  },
+  "20": {
+   "n_months": 21,
+   "mean_gross_differential_pp_yr": 6.613,
+   "mean_net_excess_over_tbill_pp_yr": -1.472,
+   "sd_annual_pct": 0.8,
+   "t_stat": -2.434,
+   "share_of_months_positive": 0.19,
+   "sign_hit_rate_of_selected_names": 0.824,
+   "worst_month_excess_pp_yr": -5.956,
+   "bar_pp": 1.0,
+   "clears_bar": false
+  }
+ }
+}

@@ -1,0 +1,602 @@
+{
+ "generated_utc": "2026-08-19T05:22:07.709347+00:00",
+ "assets": {
+  "BTC": {
+   "panel_n": 1687,
+   "first": "2017-12-18",
+   "last": "2026-08-18",
+   "mean_annualised_basis_pct": 4.906588409058561,
+   "median_annualised_basis_pct": 6.008698263684101,
+   "sd_annualised_basis_pct": 27.74267773009261,
+   "share_positive": 0.7291049199762892,
+   "by_year": {
+    "2017": {
+     "n": 5,
+     "cme_basis_pct": 169.3884496562425,
+     "perp_funding_pct": null,
+     "tbill_pct": 1.3419999999999999,
+     "cme_excess_pp": 168.0464496562425,
+     "perp_excess_pp": null
+    },
+    "2018": {
+     "n": 193,
+     "cme_basis_pct": -14.433199139234818,
+     "perp_funding_pct": null,
+     "tbill_pct": 1.9330569948186525,
+     "cme_excess_pp": -16.36625613405347,
+     "perp_excess_pp": null
+    },
+    "2019": {
+     "n": 197,
+     "cme_basis_pct": 5.010498227126766,
+     "perp_funding_pct": 8.547869180327869,
+     "tbill_pct": 2.0629949238578678,
+     "cme_excess_pp": 2.9475033032688986,
+     "perp_excess_pp": 6.484874256470001
+    },
+    "2020": {
+     "n": 196,
+     "cme_basis_pct": 14.157010005628019,
+     "perp_funding_pct": 15.902461530612245,
+     "tbill_pct": 0.35591836734693877,
+     "cme_excess_pp": 13.801091638281079,
+     "perp_excess_pp": 15.546543163265305
+    },
+    "2021": {
+     "n": 193,
+     "cme_basis_pct": 7.697809568019068,
+     "perp_funding_pct": 34.65798305699482,
+     "tbill_pct": 0.04580310880829016,
+     "cme_excess_pp": 7.652006459210778,
+     "perp_excess_pp": 34.61217994818654
+    },
+    "2022": {
+     "n": 195,
+     "cme_basis_pct": -4.792779846614093,
+     "perp_funding_pct": 3.913486948717949,
+     "tbill_pct": 2.023897435897436,
+     "cme_excess_pp": -6.816677282511529,
+     "perp_excess_pp": 1.8895895128205127
+    },
+    "2023": {
+     "n": 193,
+     "cme_basis_pct": 11.646643381401502,
+     "perp_funding_pct": 7.441347668393783,
+     "tbill_pct": 5.06658031088083,
+     "cme_excess_pp": 6.580063070520673,
+     "perp_excess_pp": 2.3747673575129533
+    },
+    "2024": {
+     "n": 197,
+     "cme_basis_pct": 10.700578393447842,
+     "perp_funding_pct": 12.873711192893403,
+     "tbill_pct": 4.972893401015229,
+     "cme_excess_pp": 5.7276849924326125,
+     "perp_excess_pp": 7.900817791878173
+    },
+    "2025": {
+     "n": 195,
+     "cme_basis_pct": 5.925551694583913,
+     "perp_funding_pct": 5.237169743589744,
+     "tbill_pct": 4.067743589743589,
+     "cme_excess_pp": 1.8578081048403237,
+     "perp_excess_pp": 1.169426153846155
+    },
+    "2026": {
+     "n": 123,
+     "cme_basis_pct": 3.1858036319050966,
+     "perp_funding_pct": 2.2094933739837397,
+     "tbill_pct": 3.635121951219511,
+     "cme_excess_pp": -0.44931831931441446,
+     "perp_excess_pp": -1.4256285772357713
+    }
+   },
+   "power_census": {
+    "cycles": 105,
+    "mean_dte": 20.847619047619048,
+    "excess_leg_mean_pct": 0.11907452053726734,
+    "excess_leg_sd_pct": 0.9308469519007561,
+    "observed_annualised_excess_pp": 2.084756052805286,
+    "mde80_annualised_pp": 4.453260132608298,
+    "detectable": false,
+    "t": 1.3107963096770308,
+    "annualised_sharpe": 0.535252570308553,
+    "bootstrap_ci95_pp": [
+     -1.2052465352419355,
+     5.014235203907721
+    ],
+    "years_to_certify_2pp": 29.733705476162456
+   },
+   "convergence": {
+    "dte_1_1": {
+     "n": 97,
+     "mean_bp": -8.193827897905,
+     "median_bp": -0.2552139040523649,
+     "sd_bp": 54.90408812436603
+    },
+    "dte_1_3": {
+     "n": 302,
+     "mean_bp": -1.9992577054928036,
+     "median_bp": 0.4804463080043675,
+     "sd_bp": 59.04039303741748
+    }
+   },
+   "term_structure": {
+    "contracts": {
+     "BTCQ26.CME": {
+      "expiry": "2026-08-28",
+      "n_basis_obs": 119,
+      "mean_annualised_basis_pct": 4.691660702035836,
+      "median_volume_contracts_60d": 1079.5,
+      "median_volume_notional_usd_60d": 325964237.5
+     },
+     "BTCU26.CME": {
+      "expiry": "2026-09-25",
+      "n_basis_obs": 349,
+      "mean_annualised_basis_pct": 6.011612421837846,
+      "median_volume_contracts_60d": 22.5,
+      "median_volume_notional_usd_60d": 7327975.0
+     },
+     "BTCV26.CME": {
+      "expiry": "2026-10-30",
+      "n_basis_obs": 80,
+      "mean_annualised_basis_pct": 4.858055288071122,
+      "median_volume_contracts_60d": 0.0,
+      "median_volume_notional_usd_60d": 0.0
+     },
+     "BTCZ26.CME": {
+      "expiry": "2026-12-25",
+      "n_basis_obs": 411,
+      "mean_annualised_basis_pct": 6.607502178905183,
+      "median_volume_contracts_60d": 0.0,
+      "median_volume_notional_usd_60d": 0.0
+     }
+    },
+    "snapshot_date": "2026-08-18",
+    "snapshot_spot": 64643.26,
+    "snapshot": [
+     {
+      "contract": "BTCQ26.CME",
+      "expiry": "2026-08-28",
+      "dte": 10,
+      "F": 64715.0,
+      "raw_basis_pct": 0.11097831390309842,
+      "annualised_pct": 4.0507084574630925
+     },
+     {
+      "contract": "BTCU26.CME",
+      "expiry": "2026-09-25",
+      "dte": 38,
+      "F": 64970.0,
+      "raw_basis_pct": 0.5054509936534668,
+      "annualised_pct": 4.854989807460932
+     },
+     {
+      "contract": "BTCV26.CME",
+      "expiry": "2026-10-30",
+      "dte": 73,
+      "F": 65270.0,
+      "raw_basis_pct": 0.9695364992421407,
+      "annualised_pct": 4.8476824962107035
+     },
+     {
+      "contract": "BTCZ26.CME",
+      "expiry": "2026-12-25",
+      "dte": 129,
+      "F": 65845.0,
+      "raw_basis_pct": 1.8590337182871064,
+      "annualised_pct": 5.260056644765844
+     }
+    ]
+   }
+  },
+  "ETH": {
+   "panel_n": 1078,
+   "first": "2021-02-05",
+   "last": "2026-08-18",
+   "mean_annualised_basis_pct": 5.710843972622117,
+   "median_annualised_basis_pct": 6.225476424793669,
+   "sd_annualised_basis_pct": 17.396178199749862,
+   "share_positive": 0.7504638218923934,
+   "by_year": {
+    "2021": {
+     "n": 175,
+     "cme_basis_pct": 10.408966044040742,
+     "perp_funding_pct": 33.21871257142857,
+     "tbill_pct": 0.04228571428571429,
+     "cme_excess_pp": 10.366680329755027,
+     "perp_excess_pp": 33.17642685714285
+    },
+    "2022": {
+     "n": 195,
+     "cme_basis_pct": -5.818382138934899,
+     "perp_funding_pct": -0.7165436666666666,
+     "tbill_pct": 2.023897435897436,
+     "cme_excess_pp": -7.842279574832335,
+     "perp_excess_pp": -2.7404411025641027
+    },
+    "2023": {
+     "n": 193,
+     "cme_basis_pct": 7.9788971382128855,
+     "perp_funding_pct": 8.109382772020727,
+     "tbill_pct": 5.06658031088083,
+     "cme_excess_pp": 2.912316827332056,
+     "perp_excess_pp": 3.0428024611398965
+    },
+    "2024": {
+     "n": 197,
+     "cme_basis_pct": 11.492394285286082,
+     "perp_funding_pct": 13.874602335025385,
+     "tbill_pct": 4.972893401015229,
+     "cme_excess_pp": 6.519500884270851,
+     "perp_excess_pp": 8.901708934010156
+    },
+    "2025": {
+     "n": 195,
+     "cme_basis_pct": 6.915422007956396,
+     "perp_funding_pct": 4.962472615384615,
+     "tbill_pct": 4.067743589743589,
+     "cme_excess_pp": 2.8476784182128068,
+     "perp_excess_pp": 0.8947290256410265
+    },
+    "2026": {
+     "n": 123,
+     "cme_basis_pct": 2.576171938568087,
+     "perp_funding_pct": 1.2052745121951216,
+     "tbill_pct": 3.635121951219511,
+     "cme_excess_pp": -1.0589500126514242,
+     "perp_excess_pp": -2.4298474390243894
+    }
+   },
+   "power_census": {
+    "cycles": 67,
+    "mean_dte": 20.91044776119403,
+    "excess_leg_mean_pct": 0.11434447528694085,
+    "excess_leg_sd_pct": 0.6582532984534105,
+    "observed_annualised_excess_pp": 1.995927297032219,
+    "mde80_annualised_pp": 3.930458416298203,
+    "detectable": false,
+    "t": 1.4218688610255499,
+    "annualised_sharpe": 0.7257497716264729,
+    "bootstrap_ci95_pp": [
+     -0.8231365732087277,
+     4.635555668327232
+    ],
+    "years_to_certify_2pp": 14.824214527747516
+   },
+   "convergence": {
+    "dte_1_1": {
+     "n": 61,
+     "mean_bp": -4.968603954715532,
+     "median_bp": -0.32848633496840307,
+     "sd_bp": 53.46982134637295
+    },
+    "dte_1_3": {
+     "n": 192,
+     "mean_bp": 7.0878519035220275,
+     "median_bp": 3.678222783960461,
+     "sd_bp": 63.26863730458057
+    }
+   },
+   "term_structure": {
+    "contracts": {
+     "ETHQ26.CME": {
+      "expiry": "2026-08-28",
+      "n_basis_obs": 119,
+      "mean_annualised_basis_pct": 4.465583421709978,
+      "median_volume_contracts_60d": 253.0,
+      "median_volume_notional_usd_60d": 21285650.0
+     },
+     "ETHU26.CME": {
+      "expiry": "2026-09-25",
+      "n_basis_obs": 349,
+      "mean_annualised_basis_pct": 6.761327653428122,
+      "median_volume_contracts_60d": 4.5,
+      "median_volume_notional_usd_60d": 418850.0
+     },
+     "ETHV26.CME": {
+      "expiry": "2026-10-30",
+      "n_basis_obs": 80,
+      "mean_annualised_basis_pct": 4.740128576896989,
+      "median_volume_contracts_60d": 0.0,
+      "median_volume_notional_usd_60d": 0.0
+     },
+     "ETHX26.CME": {
+      "expiry": "2026-11-27",
+      "n_basis_obs": 56,
+      "mean_annualised_basis_pct": 4.766587670499812,
+      "median_volume_contracts_60d": 0.0,
+      "median_volume_notional_usd_60d": 0.0
+     },
+     "ETHZ26.CME": {
+      "expiry": "2026-12-25",
+      "n_basis_obs": 411,
+      "mean_annualised_basis_pct": 7.131188072155964,
+      "median_volume_contracts_60d": 0.0,
+      "median_volume_notional_usd_60d": 0.0
+     }
+    },
+    "snapshot_date": "2026-08-18",
+    "snapshot_spot": 1913.28,
+    "snapshot": [
+     {
+      "contract": "ETHQ26.CME",
+      "expiry": "2026-08-28",
+      "dte": 10,
+      "F": 1915.5,
+      "raw_basis_pct": 0.11603110888107615,
+      "annualised_pct": 4.2351354741592795
+     },
+     {
+      "contract": "ETHU26.CME",
+      "expiry": "2026-09-25",
+      "dte": 38,
+      "F": 1922.0,
+      "raw_basis_pct": 0.45576183308244644,
+      "annualised_pct": 4.377712344081393
+     },
+     {
+      "contract": "ETHV26.CME",
+      "expiry": "2026-10-30",
+      "dte": 73,
+      "F": 1930.0,
+      "raw_basis_pct": 0.8738919551764424,
+      "annualised_pct": 4.369459775882212
+     },
+     {
+      "contract": "ETHX26.CME",
+      "expiry": "2026-11-27",
+      "dte": 101,
+      "F": 1937.0,
+      "raw_basis_pct": 1.2397558120087027,
+      "annualised_pct": 4.480305657259173
+     },
+     {
+      "contract": "ETHZ26.CME",
+      "expiry": "2026-12-25",
+      "dte": 129,
+      "F": 1944.5,
+      "raw_basis_pct": 1.6317528014718086,
+      "annualised_pct": 4.616974980908606
+     }
+    ]
+   }
+  }
+ },
+ "verification": {
+  "alignment": {
+   "best": {
+    "hour_open_utc": 19,
+    "sd_bp": 51.71146103727479,
+    "mean_bp": 31.667900787226873,
+    "n": 799
+   },
+   "runner_up": {
+    "hour_open_utc": 20,
+    "sd_bp": 54.22413853334054,
+    "mean_bp": 30.200640927910474,
+    "n": 799
+   },
+   "worst": {
+    "hour_open_utc": 0,
+    "sd_bp": 262.92086911652484,
+    "mean_bp": 32.8947009337224,
+    "n": 800
+   }
+  },
+  "roll": {
+   "BTCQ26.CME": {
+    "overlap": 120,
+    "exact_equal_days": 12,
+    "equal_from": "2026-08-03",
+    "equal_to": "2026-08-18"
+   },
+   "BTCU26.CME": {
+    "overlap": 349,
+    "exact_equal_days": 0,
+    "equal_from": null,
+    "equal_to": null
+   },
+   "BTCV26.CME": {
+    "overlap": 80,
+    "exact_equal_days": 0,
+    "equal_from": null,
+    "equal_to": null
+   },
+   "BTCZ26.CME": {
+    "overlap": 411,
+    "exact_equal_days": 0,
+    "equal_from": null,
+    "equal_to": null
+   }
+  }
+ },
+ "etf_drag": {
+  "IBIT": {
+   "n_days": 651,
+   "first": "2024-01-11",
+   "last": "2026-08-18",
+   "drag_pp_per_year": 0.28237729744872775,
+   "t": -0.05069934631965155,
+   "tracking_error_pct_per_year": 8.951949867556905
+  },
+  "FBTC": {
+   "n_days": 651,
+   "first": "2024-01-11",
+   "last": "2026-08-18",
+   "drag_pp_per_year": 0.25142458515321275,
+   "t": -0.04514349167878276,
+   "tracking_error_pct_per_year": 8.951644344798925
+  },
+  "BITB": {
+   "n_days": 647,
+   "first": "2024-01-11",
+   "last": "2026-08-17",
+   "drag_pp_per_year": 0.30747360625958536,
+   "t": -0.05551419352641532,
+   "tracking_error_pct_per_year": 8.874740774997164
+  },
+  "GBTC": {
+   "n_days": 2175,
+   "first": "2017-12-18",
+   "last": "2026-08-18",
+   "drag_pp_per_year": 10.098705040736352,
+   "t": -0.8051165560366516,
+   "tracking_error_pct_per_year": 36.84989804157065
+  }
+ },
+ "variation_margin_tail": {
+  "1d": {
+   "worst_pct": 22.33457034073931,
+   "window": [
+    "2019-06-25",
+    "2019-06-26"
+   ],
+   "p99_pct": 9.880197046645705,
+   "p999_pct": 16.47136538892866
+  },
+  "3d": {
+   "worst_pct": 30.000535382062022,
+   "window": [
+    "2019-10-24",
+    "2019-10-27"
+   ],
+   "p99_pct": 16.410290494204798,
+   "p999_pct": 25.608973018291515
+  },
+  "5d": {
+   "worst_pct": 41.1563676660317,
+   "window": [
+    "2019-06-21",
+    "2019-06-26"
+   ],
+   "p99_pct": 21.140993523753075,
+   "p999_pct": 28.25945217429759
+  },
+  "10d": {
+   "worst_pct": 56.433773064601624,
+   "window": [
+    "2019-06-16",
+    "2019-06-26"
+   ],
+   "p99_pct": 31.522119683085275,
+   "p999_pct": 44.293233214235045
+  },
+  "21d": {
+   "worst_pct": 79.37389583774998,
+   "window": [
+    "2019-06-05",
+    "2019-06-26"
+   ],
+   "p99_pct": 50.43800750113838,
+   "p999_pct": 75.18264757351702
+  },
+  "63d": {
+   "worst_pct": 177.70583848692118,
+   "window": [
+    "2020-11-07",
+    "2021-01-09"
+   ],
+   "p99_pct": 123.4064708622657,
+   "p999_pct": 159.3927153695902
+  }
+ },
+ "net_model": {
+  "full_sample": {
+   "fcm_benchmark_minus_50bp": {
+    "mbt_notional_usd": 6472.5,
+    "cost_per_side_bp": 4.248744689069139,
+    "roll_pp": 1.0196987253765935,
+    "etf_drag_pp": 0.25,
+    "cash_drag_pp": 0.35,
+    "net_on_notional_pct": 3.2903012746234066,
+    "excess_on_notional_pp": 0.7403012746234068,
+    "capital_multiple": 1.7,
+    "excess_on_capital_pp": 0.4354713380137687
+   },
+   "fcm_zero": {
+    "mbt_notional_usd": 6472.5,
+    "cost_per_side_bp": 4.248744689069139,
+    "roll_pp": 1.0196987253765935,
+    "etf_drag_pp": 0.25,
+    "cash_drag_pp": 1.7849999999999997,
+    "net_on_notional_pct": 1.855301274623407,
+    "excess_on_notional_pp": -0.6946987253765928,
+    "capital_multiple": 1.7,
+    "excess_on_capital_pp": -0.4086463090450546
+   }
+  },
+  "y2025": {
+   "fcm_benchmark_minus_50bp": {
+    "mbt_notional_usd": 6472.5,
+    "cost_per_side_bp": 4.248744689069139,
+    "roll_pp": 1.0196987253765935,
+    "etf_drag_pp": 0.25,
+    "cash_drag_pp": 0.35,
+    "net_on_notional_pct": 4.310301274623407,
+    "excess_on_notional_pp": 0.24030127462340634,
+    "capital_multiple": 1.7,
+    "excess_on_capital_pp": 0.1413536909549449
+   },
+   "fcm_zero": {
+    "mbt_notional_usd": 6472.5,
+    "cost_per_side_bp": 4.248744689069139,
+    "roll_pp": 1.0196987253765935,
+    "etf_drag_pp": 0.25,
+    "cash_drag_pp": 2.849,
+    "net_on_notional_pct": 1.811301274623406,
+    "excess_on_notional_pp": -2.258698725376594,
+    "capital_multiple": 1.7,
+    "excess_on_capital_pp": -1.3286463090450555
+   }
+  },
+  "y2026ytd": {
+   "fcm_benchmark_minus_50bp": {
+    "mbt_notional_usd": 6472.5,
+    "cost_per_side_bp": 4.248744689069139,
+    "roll_pp": 1.0196987253765935,
+    "etf_drag_pp": 0.25,
+    "cash_drag_pp": 0.35,
+    "net_on_notional_pct": 1.5703012746234064,
+    "excess_on_notional_pp": -2.0696987253765937,
+    "capital_multiple": 1.7,
+    "excess_on_capital_pp": -1.2174698384568199
+   },
+   "fcm_zero": {
+    "mbt_notional_usd": 6472.5,
+    "cost_per_side_bp": 4.248744689069139,
+    "roll_pp": 1.0196987253765935,
+    "etf_drag_pp": 0.25,
+    "cash_drag_pp": 2.548,
+    "net_on_notional_pct": -0.6276987253765935,
+    "excess_on_notional_pp": -4.267698725376594,
+    "capital_multiple": 1.7,
+    "excess_on_capital_pp": -2.510411014927408
+   }
+  },
+  "front_today": {
+   "fcm_benchmark_minus_50bp": {
+    "mbt_notional_usd": 6472.5,
+    "cost_per_side_bp": 4.248744689069139,
+    "roll_pp": 1.0196987253765935,
+    "etf_drag_pp": 0.25,
+    "cash_drag_pp": 0.35,
+    "net_on_notional_pct": 2.4303012746234063,
+    "excess_on_notional_pp": -1.2796987253765937,
+    "capital_multiple": 1.7,
+    "excess_on_capital_pp": -0.7527639561038787
+   },
+   "fcm_zero": {
+    "mbt_notional_usd": 6472.5,
+    "cost_per_side_bp": 4.248744689069139,
+    "roll_pp": 1.0196987253765935,
+    "etf_drag_pp": 0.25,
+    "cash_drag_pp": 2.597,
+    "net_on_notional_pct": 0.1833012746234064,
+    "excess_on_notional_pp": -3.5266987253765936,
+    "capital_multiple": 1.7,
+    "excess_on_capital_pp": -2.0745286619862315
+   }
+  }
+ }
+}

@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "round": "INVENT_0825",
+  "date": "2026-08-25",
+  "mode": "lean daily",
+  "verdict": "HONEST ZERO",
+  "n_themes": 2,
+  "n_themes_noise": 2,
+  "total_formulas_tested": 54,
+  "distinct_formulas_after_dedupe": 52,
+  "dedupe_note": "In a dollar-neutral sweep, market-adjusted X == X (cross-sectional demeaning makes the subtraction a no-op). opendrive's 26 pre-registered books are 24 distinct books (PB_IDIOGAP_FADE==PB_GAPZ_FADE, PB_DRIVE_EXMKT_FADE==PB_DRIVEZ_FADE).",
+  "pooled_null": {
+    "analytic_expected_max_sharpe": 2.825,
+    "formula": "sqrt(2*ln(54))",
+    "units": "Sharpe, in each theme's own window units",
+    "rescale_rule": "theme placebo * sqrt(ln 54 / ln N_theme)",
+    "rescaled_placebo_bars": {
+      "fundwindow_calendar_placebo": 3.5,
+      "fundwindow_permutation_p95": 2.19,
+      "opendrive_block_bootstrap_p95": 1.59,
+      "opendrive_block_bootstrap_p99": 1.9
+    },
+    "placebo_over_analytic_ratio": {
+      "fundwindow": 1.24,
+      "opendrive": 1.12,
+      "note": "Both disjoint-book themes; extends the standing rule that the 2x understatement is a multi-day-overlap phenomenon. fundwindow's excess comes from the underlying generic effect existing at every anchor, not from overlap."
+    }
+  },
+  "themes": [
+    {
+      "name": "fundwindow",
+      "desc": "Perp funding-settlement-window micro-dynamics (Binance USD-M, 50 perps, 5m bars, 8h stamps 00/08/16 UTC)",
+      "n_formulas": 28,
+      "analytic_bar": 2.58,
+      "operative_bar": 3.2,
+      "operative_bar_source": "calendar placebo: identical 28 formulas re-anchored +1h..+7h after each stamp",
+      "permutation_p95": 2.0,
+      "rho1_gate": {"passes": true, "mean_open_to_open_rho1": -0.02, "median": -0.017, "worst_symbol": -0.103, "threshold": -0.35},
+      "best": {
+        "name": "E3_STAMPBAR_FADE_15",
+        "design_gross_sharpe": 5.54,
+        "heldout_gross_sharpe": 3.84,
+        "heldout_net_sharpe_at_5.5bp": -28.09,
+        "breakeven_bp_per_side": 0.66,
+        "kill": "calendar placebo OOS max 4.28 exceeds its own 3.84 -> generic 5m cross-sectional reversal in a calendar mask, not a funding effect"
+      },
+      "family_max_breakeven_bp_per_side": {"design": 3.48, "heldout": 1.67},
+      "fee_floor_bp_per_side": {"taker_vip0": 4.5, "maker_vip0": 2.0},
+      "mean_oos_gross_bp_per_round_trip": 0.93,
+      "round_trip_cost_bp": 11.0,
+      "design_to_heldout_rank_corr": 0.198,
+      "survivors": [],
+      "theme_is_noise": true
+    },
+    {
+      "name": "opendrive",
+      "desc": "Intraday equity open-drive / close-drive microstructure (opening auction print, gap-vs-auction, first-hour path efficiency, opening-print dislocation)",
+      "n_formulas": 26,
+      "analytic_bar": 1.28,
+      "operative_bar": 1.44,
+      "operative_bar_source": "stationary block bootstrap best-of-26 p95 (block 5 sessions, 2000 resamples, same day indices across configs)",
+      "bootstrap_p99": 1.72,
+      "best": {
+        "name": "PA_GAP_CD_FADE",
+        "design_gross_sharpe": 2.36,
+        "heldout_gross_sharpe": 2.09,
+        "heldout_net_sharpe_at_0.5bp": 0.59,
+        "heldout_net_sharpe_at_1.0bp": -0.57,
+        "breakeven_bp_per_turnover": 0.9,
+        "measured_half_spread_bp": 1.13,
+        "fraction_of_own_floor": 0.8,
+        "gates_passed": ["gross > best-of-26 p95 and p99 (family-wise p<0.01)", "one-bar-gap fill +2.46 >= primary", "ADV-decile permutation on gross p=0.0020"],
+        "gate_failed": "net at headline 1.0 bp",
+        "kill": "execution cost wall; plus survivorship-free breadth version -0.02 OOS and 10:00-slot mechanism control sign-flips (+1.47 design -> -0.47 held out)"
+      },
+      "empty_instruments": {"path_efficiency_best": 0.43, "opening_print_dislocation_best": 0.6, "vol_scaled_drive_best": 0.58},
+      "survivors": [],
+      "theme_is_noise": true
+    }
+  ],
+  "survivors": [],
+  "proposals": [],
+  "basket": {
+    "id": "BASKET1",
+    "action": "NONE",
+    "forward_clock": "LOCKED",
+    "legs_added": 0,
+    "refrozen": false,
+    "note": "Forward clock untouched. No candidate earned the diversification question."
+  },
+  "logged_only": [
+    {"name": "PA_GAP_CD_FADE", "status": "GROSS-REAL / NET-DEAD", "note": "18-20% short of its own execution floor; re-test only if the execution assumption changes (measured price improvement on mega-cap marketable orders, a midpoint rail, or paid data)"},
+    {"name": "C1_XS_PRE_MAG_30", "status": "EXECUTION-TIMING OVERLAY, not a strategy", "note": "held-out gross +3.04 with calendar placebo -0.14 (stamp-specific), but design +2.10 was under the 3.20 bar so it never earned the holdout; edge is the funding payment (mean |funding| 1.21 bp) against an 11 bp round trip -- uneconomic by ~9x"},
+    {"name": "settlement-instant reversal amplifier", "status": "observation", "note": "stamp-bar fade runs ~1.5 SR hotter at the stamp than at non-funding anchors in both windows; real, tiny, inside the generic 5m-reversal family"}
+  ],
+  "method_contributions": [
+    {"id": "CALENDAR_PLACEBO", "statement": "For any event-clocked theme, re-anchor the identical formula family at non-event times. Here it produced 3.20 vs analytic 2.58 and permutation 2.00, and it was the only null that killed the design winner. ADD TO THE STANDARD GAUNTLET."},
+    {"id": "DEDUPE_BEFORE_N", "statement": "In a dollar-neutral sweep, market-adjusted X and X are the same formula. Pre-registering both halves inflates apparent search breadth without inflating the bar. Dedupe before counting N."},
+    {"id": "WALL_SHARPENED", "statement": "Both deaths are the same execution wall from two sides: fundwindow needs ~10x the signal (hopeless), opendrive needs 1.25x (18-20% short, and it got STRONGER out of sample). The structure is real and the spread eats it."}
+  ],
+  "dead_ledger_additions": [
+    "perp funding window: pre-settlement positioning drift (A-family)",
+    "perp funding window: post-settlement funding-sign reaction (B-family)",
+    "perp funding window: cross-sectional funding-magnitude books around the stamp (C-family)",
+    "perp funding window: funding-sign-flip reactions (D-family)",
+    "perp funding window: settlement-bar cross-sectional reversal (E-family) = generic 5m reversal in a calendar mask",
+    "perp funding window: OI unwind/build around settlement (F-family)",
+    "perp funding window: pre-stamp taker-flow / run-up / volume-spike fades (G-family)",
+    "intraday equity: first-hour path efficiency / choppiness",
+    "intraday equity: opening-print dislocation",
+    "intraday equity: vol-scaled open drive",
+    "intraday equity: gap-vs-opening-auction (gross-real, net-dead)",
+    "the 'pre-settlement squeeze' narrative: no coherent drift profile exists (+/-3 bp oscillation, -90m..+90m, split by funding sign)",
+    "the 'mechanism-not-slot' defence of any single-slot intraday book: test it at another slot; it sign-flipped here"
+  ],
+  "recommendation": [
+    "Adopt the calendar placebo as a required null for event-clocked themes; adopt dedupe-before-counting-N for dollar-neutral sweeps.",
+    "Close free-bar intraday equity microstructure and close the perp funding window.",
+    "Next marginal effort belongs on the execution/data side, not on formula 55. PA_GAP_CD_FADE at 80% of its floor is the concrete test case."
+  ],
+  "files": {
+    "master_md": "research/trading_bot/INVENT_0825_MASTER.md",
+    "fundwindow": ["research/trading_bot/INVENT_0825_fundwindow.md", "research/trading_bot/INVENT_0825_fundwindow.json", "research/trading_bot/INVENT_0825_fundwindow_DESIGN.json", "research/trading_bot/INVENT_0825_fundwindow_DESIGN.sha256", "research/trading_bot/INVENT_0825_fundwindow_HOLDOUT.json"],
+    "opendrive": ["research/trading_bot/INVENT_0825_opendrive.md", "research/trading_bot/INVENT_0825_opendrive.json", "research/trading_bot/INVENT_0825_opendrive_PREREGISTRATION.md", "research/trading_bot/INVENT_0825_opendrive_SHORTLIST.md", "research/trading_bot/INVENT_0825_opendrive_design.json", "research/trading_bot/INVENT_0825_opendrive_null.json", "research/trading_bot/INVENT_0825_opendrive_heldout.json", "research/trading_bot/INVENT_0825_opendrive_presample.json", "research/trading_bot/INVENT_0825_opendrive_DIAG.json", "research/trading_bot/INVENT_0825_opendrive_AUCTIONRAIL.json", "research/trading_bot/INVENT_0825_opendrive_selftest.json"]
+  }
+}

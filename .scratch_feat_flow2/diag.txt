@@ -1,0 +1,45 @@
+totaal 22108
+drwxr-xr-x  2 anont anont     4096  4 sep 02:08 .
+drwxr-xr-x 42 anont anont    20480  3 sep 23:47 ..
+-rw-r--r--  1 anont anont     3245  3 sep 18:26 AGE2H_SESSION_PREREGISTRATION.md
+-rw-r--r--  1 anont anont   873855  4 sep 02:38 attention.jsonl
+-rw-r--r--  1 anont anont        0  4 sep 00:31 .attention.lock
+-rw-r--r--  1 anont anont     7628  4 sep 02:37 attention.log
+-rw-r--r--  1 anont anont    10690  4 sep 02:37 attention_seen.json
+-rw-r--r--  1 anont anont        0  3 sep 15:18 .collector.lock
+-rw-r--r--  1 anont anont      968  3 sep 17:08 collector.log
+-rw-r--r--  1 anont anont     4343  3 sep 18:26 EXIT_DISCIPLINE_KILL_20260903.md
+-rw-r--r--  1 anont anont     3337  4 sep 00:30 EXOGENOUS_ATTENTION_PREREGISTRATION.md
+-rw-r--r--  1 anont anont    11872  4 sep 02:37 fresh_collector.log
+-rw-r--r--  1 anont anont        0  3 sep 17:12 .fresh.lock
+-rw-r--r--  1 anont anont    14509  4 sep 02:37 fresh_seen.json
+-rw-r--r--  1 anont anont 12041023  4 sep 02:37 fresh_snapshots.jsonl
+-rw-r--r--  1 anont anont     1391  4 sep 02:08 gecko.log
+-rw-r--r--  1 anont anont      132  3 sep 20:23 gecko_prio.log
+-rw-r--r--  1 anont anont     2844  3 sep 17:24 GRAD_MOMENTUM_PREREGISTRATION.md
+-rw-r--r--  1 anont anont  8904704  4 sep 02:07 grad_ohlcv.sqlite
+-rw-r--r--  1 anont anont     5321  4 sep 00:33 MEMECOIN_CLOSURE_20260904.md
+-rw-r--r--  1 anont anont     3370  3 sep 15:14 MIDCAP_FLOW_PREREGISTRATION.md
+-rw-r--r--  1 anont anont      113  3 sep 15:14 PREREG_SHA256.txt
+-rw-r--r--  1 anont anont        0  4 sep 01:32 _ps3_engine.py
+-rw-r--r--  1 anont anont     2639  3 sep 18:40 reversion_harness.py
+-rw-r--r--  1 anont anont     1976  4 sep 00:30 scalpbot_config.json
+-rw-r--r--  1 anont anont    41734  4 sep 00:41 scalpbot_ledger.jsonl
+-rw-r--r--  1 anont anont        0  3 sep 21:34 .scalpbot.lock
+-rw-r--r--  1 anont anont    75010  4 sep 02:37 scalpbot.log
+-rw-r--r--  1 anont anont     2830  3 sep 17:08 seen_pairs.json
+-rw-r--r--  1 anont anont     4045  3 sep 19:31 SIX_HYPOTHESES_RESULT_20260903.md
+-rw-r--r--  1 anont anont   525111  3 sep 17:08 snapshots.jsonl
+--- b11a
+-rw-r--r-- 1 anont anont 15771230208 10 aug 01:36 /home/anont/meme/research/b11a/b11a_bodies.sqlite
+-rw-r--r-- 1 anont anont    10637312  8 aug 15:01 /home/anont/meme/research/b11a/b11a_cohort.sqlite
+-rw-r--r-- 1 anont anont    99516416  8 aug 15:01 /home/anont/meme/research/b11a/b11a_creates.sqlite
+-rw-r--r-- 1 anont anont     1249280 10 aug 11:27 /home/anont/meme/research/b11a/b11a_identity.sqlite
+-rw-r--r-- 1 anont anont    90386432 10 aug 11:08 /home/anont/meme/research/b11a/b11a_paths.sqlite
+-rw-r--r-- 1 anont anont  3469709312 10 aug 00:56 /home/anont/meme/research/b11a/b11a_signatures.sqlite
+-rw-r--r-- 1 anont anont     1576960  8 aug 15:02 /home/anont/meme/research/b11a/b11a_subsample.sqlite
+-rw-r--r-- 1 anont anont   148504576  3 sep 22:11 /home/anont/meme/research/b11a/b11a_trade_attribution.sqlite
+-rw-r--r-- 1 anont anont    12697600  2 sep 23:20 /home/anont/meme/research/b11a/window_labels.sqlite
+--- python
+/usr/bin/python3
+numpy 2.4.6

@@ -1,0 +1,5 @@
+04:34:31
+ls: kan geen toegang krijgen tot 'surface.log': Bestand of map bestaat niet
+-rw-r--r-- 1 anont anont  959 04:29:15 scores.json
+-rw-r--r-- 1 anont anont 6806 04:34:15 sweep.log
+cat: chain.log: Bestand of map bestaat niet

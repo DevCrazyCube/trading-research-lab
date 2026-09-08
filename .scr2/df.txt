@@ -1,0 +1,27 @@
+Bestandssysteem Grootte Gebruikt Besch Geb% Aangekoppeld op
+tmpfs              7,7G     6,2G  1,6G  80% /tmp
+/dev/nvme0n1p2     468G     402G   42G  91% /
+tmpfs              7,7G     337M  7,4G   5% /dev/shm
+---
+6,1G	/tmp/claude-1000
+---
+576K	/tmp/ea497.htm
+704K	/tmp/pm_mid.json
+752K	/tmp/pm_500.json
+756K	/tmp/pm_0.json
+1,4M	/tmp/tmpiad3rcz1
+1,6M	/tmp/pe.json
+1,8M	/tmp/em_aptos.json
+1,8M	/tmp/putnam497.htm
+2,4M	/tmp/pm_pull.json
+2,7M	/tmp/pm_pull_all.json
+2,7M	/tmp/pm_pull_h21.json
+3,8M	/tmp/pac_lws_live_3aa_4gcn
+4,4M	/tmp/vaneck497.htm
+4,9M	/tmp/pm_sel.json
+8,2M	/tmp/dip_state_a.json
+8,2M	/tmp/early_state_a.json
+11M	/tmp/node-compile-cache
+22M	/tmp/o
+32M	/tmp/tsx-1000
+6,1G	/tmp/claude-1000

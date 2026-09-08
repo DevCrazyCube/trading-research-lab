@@ -1,0 +1,20 @@
+{
+  "endpoint": "https://api.mainnet-beta.solana.com",
+  "finished_unix_nanos": 1788890238680282089,
+  "request": {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "getTransaction",
+    "params": [
+      "65JQnvfwGKjDfiR61SAyBSiduDpZnxEekBTyug4tNEkFkcgipkmHFzBDRAzMQr7BysXH9ubYB478AuKw7qVJbXXd",
+      {
+        "commitment": "finalized",
+        "encoding": "base64",
+        "maxSupportedTransactionVersion": 0
+      }
+    ]
+  },
+  "sent_monotonic_nanos": 6308562409535,
+  "sent_unix_nanos": 1788890238660337634,
+  "transport_error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>"
+}

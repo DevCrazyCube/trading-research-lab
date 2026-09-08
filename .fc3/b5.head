@@ -1,0 +1,49 @@
+stage1 combos=5052 kept=2689  time=11.8s
+--- top 40 by train mean (mint-equal, cap +900%, toll 1.14%, dropout -30%) ---
+age=480+     dd=<.1   lvl=<.3   rv=.7+    H=5   all   n=  30 k= 13 res=1.00 mean=+0.8897 med=-0.0369
+age=480+     dd=<.1   lvl=any   rv=.7+    H=5   all   n=  31 k= 13 res=1.00 mean=+0.8886 med=-0.0439
+age=480+     dd=any   lvl=<.3   rv=.7+    H=60  all   n=  31 k= 18 res=0.87 mean=+0.7313 med=-0.1779
+age=480+     dd=any   lvl=<.3   rv=.7+    H=5   all   n=  59 k= 18 res=1.00 mean=+0.6257 med=-0.0147
+age=480+     dd=any   lvl=<.3   rv=.7+    H=30  all   n=  35 k= 18 res=0.91 mean=+0.6243 med=-0.1491
+age=480+     dd=any   lvl=<.3   rv=.7+    H=15  all   n=  42 k= 18 res=0.98 mean=+0.5724 med=-0.0692
+age=480+     dd=any   lvl=<.3   rv=.7+    H=120 all   n=  26 k= 18 res=0.81 mean=+0.4575 med=-0.1842
+age=480+     dd=<.1   lvl=<.3   rv=.02-.2 H=5   first n=  48 k= 48 res=0.90 mean=+0.3675 med=-0.0376
+age=480+     dd=any   lvl=<.3   rv=.02-.2 H=5   first n=  50 k= 50 res=0.90 mean=+0.3622 med=-0.0326
+age=480+     dd=.1-.3 lvl=<.3   rv=any    H=60  all   n=  45 k= 12 res=0.91 mean=+0.3562 med=-0.0939
+age=480+     dd=<.1   lvl=<.3   rv=.02-.2 H=5   all   n= 356 k= 48 res=0.96 mean=+0.3212 med=-0.0281
+age=480+     dd=.1-.3 lvl=<.3   rv=any    H=5   all   n= 209 k= 12 res=0.99 mean=+0.3134 med=-0.0232
+age=480+     dd=any   lvl=<.3   rv=.02-.2 H=5   all   n= 465 k= 50 res=0.96 mean=+0.3092 med=-0.0274
+age=480+     dd=.3-.6 lvl=.3-1  rv=any    H=5   all   n= 215 k= 12 res=1.00 mean=+0.3016 med=-0.0132
+age=480+     dd=<.1   lvl=any   rv=.02-.2 H=5   first n=  50 k= 50 res=0.90 mean=+0.2874 med=-0.0451
+age=480+     dd=.1-.3 lvl=<.3   rv=any    H=30  all   n=  68 k= 12 res=0.94 mean=+0.2799 med=-0.0543
+age=480+     dd=<.1   lvl=any   rv=.02-.2 H=5   all   n= 410 k= 50 res=0.96 mean=+0.2763 med=-0.0269
+age=any      dd=.1-.3 lvl=.3-1  rv=.7+    H=5   all   n=  68 k= 34 res=0.97 mean=+0.2725 med=-0.0201
+age=any      dd=.1-.3 lvl=.3-1  rv=.7+    H=5   first n=  34 k= 34 res=0.94 mean=+0.2642 med=-0.0710
+age=any      dd=.1-.3 lvl=.3-1  rv=any    H=5   first n=  57 k= 57 res=0.96 mean=+0.2524 med=+0.0392
+age=10-30    dd=.9-1  lvl=1-3   rv=.2-.7  H=5   all   n=  25 k= 13 res=1.00 mean=+0.2331 med=+0.0334
+age=30-120   dd=any   lvl=<.3   rv=.2-.7  H=15  first n=  29 k= 29 res=0.97 mean=+0.2251 med=-0.3080
+age=480+     dd=.1-.3 lvl=<.3   rv=any    H=120 all   n=  32 k= 12 res=0.84 mean=+0.2249 med=-0.1672
+age=480+     dd=.3-.6 lvl=.3-1  rv=any    H=30  all   n=  54 k= 12 res=0.98 mean=+0.2159 med=+0.0021
+age=any      dd=<.1   lvl=<.3   rv=.7+    H=15  first n=  86 k= 86 res=0.88 mean=+0.2004 med=-0.1449
+age=480+     dd=any   lvl=.3-1  rv=.2-.7  H=15  all   n= 157 k= 18 res=0.99 mean=+0.1991 med=-0.0112
+age=10-30    dd=<.1   lvl=<.3   rv=any    H=5   all   n= 197 k= 80 res=0.94 mean=+0.1852 med=-0.0530
+age=any      dd=<.1   lvl=<.3   rv=.7+    H=15  all   n= 102 k= 86 res=0.86 mean=+0.1842 med=-0.1158
+age=any      dd=.1-.3 lvl=<.3   rv=<.02   H=5   first n=  27 k= 27 res=1.00 mean=+0.1841 med=-0.1087
+age=10-30    dd=any   lvl=<.3   rv=any    H=5   all   n= 232 k= 91 res=0.95 mean=+0.1767 med=-0.0759
+age=480+     dd=.3-.6 lvl=.3-1  rv=any    H=15  all   n=  88 k= 12 res=0.99 mean=+0.1759 med=-0.0253
+age=480+     dd=any   lvl=.3-1  rv=.02-.2 H=15  all   n= 164 k= 15 res=0.99 mean=+0.1720 med=-0.0091
+age=10-30    dd=.1-.3 lvl=.3-1  rv=any    H=5   all   n=  39 k= 20 res=1.00 mean=+0.1718 med=-0.0417
+age=480+     dd=<.1   lvl=<.3   rv=.02-.2 H=15  first n=  48 k= 48 res=0.83 mean=+0.1678 med=-0.0761
+age=480+     dd=any   lvl=.3-1  rv=any    H=15  first n=  25 k= 25 res=0.96 mean=+0.1661 med=-0.0989
+age=10-30    dd=any   lvl=<.3   rv=<.02   H=15  first n=  77 k= 77 res=0.94 mean=+0.1642 med=-0.1284
+age=30-120   dd=<.1   lvl=<.3   rv=.2-.7  H=15  all   n=  28 k= 22 res=0.93 mean=+0.1630 med=-0.1687
+age=480+     dd=.6-.9 lvl=1-3   rv=any    H=15  all   n= 182 k= 13 res=0.96 mean=+0.1608 med=-0.0127
+age=3-10     dd=any   lvl=<.3   rv=<.02   H=30  all   n=  48 k= 46 res=0.90 mean=+0.1595 med=-0.2821
+age=3-10     dd=<.1   lvl=<.3   rv=<.02   H=30  all   n=  48 k= 46 res=0.90 mean=+0.1595 med=-0.2821
+--- unconditional control on same split ---
+H=5   all: n= 6104 k=175 mean=-0.1125 med=-0.0167 | first: n= 175 k=175 mean=-0.1415 med=-0.1777
+H=15  all: n= 3035 k=175 mean=-0.1612 med=-0.0251 | first: n= 175 k=175 mean=-0.2360 med=-0.3759
+H=30  all: n= 2024 k=175 mean=-0.1915 med=-0.0333 | first: n= 175 k=175 mean=-0.2190 med=-0.4663
+H=60  all: n= 1371 k=175 mean=-0.2198 med=-0.0717 | first: n= 175 k=175 mean=-0.3474 med=-0.6149
+H=120 all: n=  961 k=175 mean=-0.2560 med=-0.2300 | first: n= 175 k=175 mean=-0.4821 med=-0.6963
+H=240 all: n=  671 k=175 mean=-0.3081 med=-0.3080 | first: n= 175 k=175 mean=-0.5195 med=-0.7287rc=0

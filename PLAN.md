@@ -402,6 +402,37 @@ Gate: statistically credible improvement over baselines under executable and str
 
 ### Phase 5 — shadow and paper execution
 
+- [~] **PAC V1 is killed; PAC V2 is active as an authenticated paper scenario.** V1's immutable
+  all-cost scenario book reached 525 resolved with 21.52% wins, mean −0.1255R and 28 full losses; its
+  later-trade fill boundary also wedges silent mints. V2 is a separately preregistered $10 challenger:
+  measured-p90 recovery dwell + ≥3 observed buyer addresses + 6× largest-shock cover, post-target account
+  snapshots for entry/exit, absolute 12-minute horizon and bounded outage fallback. Handoff-439's nine
+  calibration/liveness defects plus handoff-444's cutoff, live-account decoder, and collector-epoch
+  defects are repaired and covered by 36 PAC V2 controls: each of 100 landed
+  samples must now be a campaign-chained, memo-challenged transaction whose exact wire bytes, payer,
+  slot and successful result are independently re-read at finalized commitment; campaign → evidence →
+  activation git ancestry is rechecked at runtime. The first fill is committed before service, permanent
+  snapshot refusals are terminal, snapshots have a 30-second upper age and `minContextSlot`, feed rows
+  are fsynced/recoverable, and production clocks are internal. No default latency is permitted. Seal
+  `40c342dc…`, campaign `1839368c`, evidence `e960e91a`, and activation `ed4baa47` are git-anchored;
+  all 100 Memo landings were independently re-read and set p90 to 12.164662268 seconds. The supervisor,
+  feed, runner, SOL/USD recorder, and read-only dashboard are active. No resolved rows exist yet, so this
+  is liveness evidence, not performance/profit evidence and not authority for real-money execution.
+- [~] **PAC V2.2 low-lag successor is sealed and running feed-only.** V2.1's reconnect recovery caused
+  a materially lagged stream and invalid local dwell evidence; it had zero fills and is burned rather
+  than reinterpreted. V2.2 preserves the V2.1 strategy rule but replaces collection with one subscription,
+  pre-decode frame clocks, constant-time tail recovery, and independent processed-head freshness gates.
+  The watchdog and `#/pac` now expose live authenticated mint traffic and recover the feed after failure.
+  The owner-authorized campaign completed at 100 processed/11 failed attempts for 555,000 lamports;
+  all 100 were independently finalized-attested and activation anchors a 6.378252335-second processed
+  p90. Feed, runner, watchdog, and dashboard are active. Performance discovery remains open until 100
+  fully costed forward paper resolutions; early rows are liveness/evidence, not a profitability verdict.
+- [x] **PAC read-only performance page built at `#/pac`.** It polls the local API every two seconds and
+  displays a visible normalized 100-index curve, all-cost R/win/full-loss/drawdown metrics, formula,
+  discovery progress, open book, feed/seal/activation/runner gates, and scenario activity. Performance
+  fails closed on unanchored, gross-only, duplicate, malformed, pending, or state/ledger-inconsistent
+  rows; observed failed-attempt gas is also debited from the portfolio curve. Current truthful state is
+  `ACTIVE_CALIBRATED_SCANNING_NO_FILLS_YET` until a causal order resolves, not a flat-return claim.
 - [ ] Run continuously through multiple market conditions.
 - [ ] Preserve each feature vector, model version, decision, rejection reason, and intended order.
 - [ ] Compare intended, simulated, and observable fills.
@@ -474,3 +505,39 @@ Next concrete task:
 3. Use B6-lite results to choose the rolling-raw/permanent-decoded storage split, then select a Geyser provider by required capabilities.
 4. Re-run upgrade inventories against an archival RPC and compare available artifacts/IDLs at candidate boundaries.
 5. Specify the initial tradable regime and label definitions.
+
+## 2026-09-08 — Owner-requested new-information investigation
+
+The older current-status paragraphs above are historical; later dated retirement decisions in
+DECISIONS.md govern their respective bots. No profitable memecoin system is established.
+
+- [x] Audit the proposed data gaps without rerunning killed strategy families; preserve raw evidence.
+- [x] Build and adversarially test a NO_TRADE birth-origin observer using canonical creation events.
+  It produced 1,212 observations versus 1,319–1,417 across 20 text permutations; these are not returns
+  or profitable survivors. The source is already inspected development data, spanning 23.83 hours.
+- [x] Resolve the pair's evidentiary status: owner-reported chat anecdotes only; explicitly excluded
+  from validation, sizing conclusions and entry-screen gates. Drop the buyer-to-LP-withdrawal join.
+- [x] Build direct raw creation capture and verify a bounded live pilot: 8,502 frames replay exactly;
+  five successful creations and one failed attempt reconcile to transaction bodies/block order.
+- [ ] Supply full birth observations with real receipt clocks, exact pool/route evidence, and funding
+  dependency controls; then freeze a fresh chronological and whole-pipeline-placebo money test.
+- [ ] Demonstrate all-cost mean and median, missing-exit stresses, and repeated forward weekly results
+  under the existing promotion gates. Neither the observer nor the historical replay can trade.
+
+Evidence and limitations: `research/midcap/INFORMATION_AUDIT_20260908.md`.
+Owner-corrected contract: `research/midcap/BIRTH_STREAM_FORWARD_CONTRACT_20260908.md`.
+Capture/reconciliation is not full creation recall or a profitable bot; all promotion gates remain.
+
+2026-09-08 operational follow-up: the initial long capture failed after 225.66 seconds on a
+WebSocket protocol error. Owner-authorized v2 adds bounded reconnects, explicit unrepaired gaps,
+connection-aware replay and freshness status; 62 tests pass. Restart evidence and the explanation
+of the configurable eight-hour observation budget are in `research/midcap/BIRTH_STREAM_RECONNECT_20260908.md`.
+Reconnect liveness does not close the full-birth-coverage or profitability gates above.
+
+2026-09-08 backlog follow-up: v2's local receipts hid minutes of chain delay. A same-disk profile
+identified synchronous per-frame work; v3 batches preserve FULL raw-before-decode durability and
+individual clocks. Live head comparisons and a closed real replay validate improvement; 76 tests pass.
+V3 is running under the remaining time/storage budget and the old process is gracefully stopped with
+all evidence preserved. See `research/midcap/BIRTH_STREAM_BACKLOG_FIX_20260908.md`.
+New conceptual work is in `research/midcap/NEW_INFORMATION_CANDIDATES_20260908.md`; it proposes a
+source-authenticated address-resolution feasibility test, not a proven strategy or a relaxed gate.

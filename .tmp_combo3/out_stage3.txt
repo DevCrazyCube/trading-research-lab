@@ -1,0 +1,115 @@
+carry-in combos from stage1+2: 77721
+entry cells entering the structure sweep: 50
+structure grid: 1728 = H9 x TP4 x SL4 x TRAIL3 x POS4
+membership built t=1.0
+  grid 0/1728 evals=50 t=1.2
+  grid 200/1728 evals=10050 t=27.5
+  grid 400/1728 evals=20050 t=47.1
+  grid 600/1728 evals=30050 t=69.8
+  grid 800/1728 evals=40050 t=89.4
+  grid 1000/1728 evals=50050 t=114.1
+  grid 1200/1728 evals=60050 t=134.1
+  grid 1400/1728 evals=70050 t=156.5
+  grid 1600/1728 evals=80050 t=180.0
+structure-sweep evaluations 86400 ; TOTAL COMBOS SWEPT 165849 ; t=196.8
+
+=== UNCONDITIONAL STRUCTURE SURFACE (train, all bars = random entry control) ===
+  horizon   : 10=-0.046 15=-0.049 2=-0.036 20=-0.051 3=-0.038 30=-0.054 45=-0.057 5=-0.042 60=-0.059
+  takeprofit : 0.1=-0.046 0.2=-0.048 0.3=-0.048 None=-0.051
+  stoploss  : -0.15=-0.036 -0.25=-0.052 -0.35=-0.060 None=-0.044
+  trailing  : 0.2=-0.033 0.3=-0.043 None=-0.067
+  position  : dip3=-0.037 flat=-0.078 split3=-0.040 str3=-0.037
+  best unconditional structures: (2, 0.1, None, 0.2, 'split3') -0.0027 | (2, 0.1, None, 0.2, 'dip3') -0.0027 | (2, 0.1, None, 0.2, 'str3') -0.0027 | (2, 0.2, None, 0.2, 'split3') -0.0030 | (2, 0.2, None, 0.2, 'dip3') -0.0030
+  worst: (30, None, None, None, 'flat') -0.1752 | (45, None, None, None, 'flat') -0.1866 | (60, None, None, None, 'flat') -0.1973
+  unconditional structures with wmean>0: 0 of 1728
+
+=== TRAIN: top 30 joint (entry x position x exit) by t-vs-ZERO ===
+  volr/age/act15             c51     (5, 0.2, None, None, 'dip3')     wmean=+0.0648 med=+0.0351 k= 34 n=   89 ctrl=-0.0563 edge=+0.1211 tz= 4.31 t= 8.05 res=1.00
+  r5/age/act15               c98     (45, 0.3, -0.25, None, 'str3')   wmean=+0.0859 med=+0.1434 k= 39 n=   41 ctrl=-0.0579 edge=+0.1438 tz= 4.26 t= 7.13 res=1.00
+  volr/age/act15             c51     (5, 0.2, None, None, 'flat')     wmean=+0.0656 med=+0.0515 k= 34 n=   89 ctrl=-0.1091 edge=+0.1748 tz= 4.26 t=11.33 res=1.00
+  volr/age/act15             c51     (5, 0.2, None, None, 'split3')   wmean=+0.0642 med=+0.0360 k= 34 n=   89 ctrl=-0.0612 edge=+0.1254 tz= 4.20 t= 8.20 res=1.00
+  r5/age/act15               c98     (60, 0.3, -0.25, None, 'str3')   wmean=+0.0858 med=+0.1434 k= 39 n=   41 ctrl=-0.0599 edge=+0.1456 tz= 4.20 t= 7.12 res=1.00
+  r5/age/act15               c98     (30, 0.3, -0.25, None, 'str3')   wmean=+0.0815 med=+0.1434 k= 39 n=   41 ctrl=-0.0555 edge=+0.1371 tz= 4.18 t= 7.02 res=1.00
+  volr/age/act15             c51     (5, 0.2, None, None, 'str3')     wmean=+0.0328 med=+0.0255 k= 34 n=   89 ctrl=-0.0567 edge=+0.0895 tz= 4.17 t=11.38 res=1.00
+  volr/age/act15             c51     (5, 0.3, None, None, 'dip3')     wmean=+0.0658 med=+0.0408 k= 34 n=   80 ctrl=-0.0545 edge=+0.1203 tz= 4.16 t= 7.62 res=1.00
+  volr/age/act15             c51     (5, 0.3, None, None, 'split3')   wmean=+0.0678 med=+0.0484 k= 34 n=   80 ctrl=-0.0602 edge=+0.1281 tz= 4.10 t= 7.74 res=1.00
+  r5/age/act15               c98     (45, 0.3, -0.25, None, 'flat')   wmean=+0.1353 med=+0.2869 k= 39 n=   41 ctrl=-0.1105 edge=+0.2458 tz= 4.03 t= 7.32 res=1.00
+  volr/r15/vlvl              c173    (45, 0.1, -0.35, None, 'split3') wmean=+0.0519 med=+0.0647 k= 25 n=   88 ctrl=-0.0721 edge=+0.1240 tz= 3.96 t= 9.46 res=1.00
+  volr/r15/vlvl              c173    (60, 0.1, -0.35, None, 'split3') wmean=+0.0519 med=+0.0647 k= 25 n=   88 ctrl=-0.0742 edge=+0.1261 tz= 3.96 t= 9.62 res=1.00
+  r5/age/act15               c98     (60, 0.3, -0.25, None, 'flat')   wmean=+0.1352 med=+0.2869 k= 39 n=   41 ctrl=-0.1132 edge=+0.2484 tz= 3.95 t= 7.26 res=1.00
+  volr/age/act15             c51     (5, 0.3, None, None, 'str3')     wmean=+0.0401 med=+0.0306 k= 34 n=   80 ctrl=-0.0563 edge=+0.0963 tz= 3.95 t= 9.49 res=1.00
+  r5/age/act15               c98     (30, 0.3, -0.25, None, 'flat')   wmean=+0.1280 med=+0.2625 k= 39 n=   41 ctrl=-0.1057 edge=+0.2337 tz= 3.93 t= 7.18 res=1.00
+  volr/r15/vlvl              c173    (30, 0.1, -0.35, None, 'split3') wmean=+0.0512 med=+0.0629 k= 25 n=   88 ctrl=-0.0679 edge=+0.1191 tz= 3.92 t= 9.12 res=1.00
+  volr/age/act15             c51     (5, 0.3, None, None, 'flat')     wmean=+0.0780 med=+0.0527 k= 34 n=   80 ctrl=-0.1074 edge=+0.1854 tz= 3.91 t= 9.31 res=1.00
+  volr/r15/vlvl              c173    (20, 0.1, -0.35, None, 'split3') wmean=+0.0502 med=+0.0607 k= 25 n=   89 ctrl=-0.0645 edge=+0.1147 tz= 3.84 t= 8.78 res=1.00
+  r5/age/act15               c98     (20, 0.3, -0.25, None, 'str3')   wmean=+0.0643 med=+0.0774 k= 39 n=   41 ctrl=-0.0525 edge=+0.1168 tz= 3.83 t= 6.97 res=1.00
+  r5/age/act15               c98     (45, 0.3, -0.25, None, 'split3') wmean=+0.1123 med=+0.1434 k= 39 n=   41 ctrl=-0.0616 edge=+0.1740 tz= 3.81 t= 5.90 res=1.00
+  r5/age/act15               c98     (45, 0.3, -0.35, None, 'str3')   wmean=+0.0808 med=+0.1434 k= 39 n=   41 ctrl=-0.0684 edge=+0.1492 tz= 3.74 t= 6.91 res=1.00
+  r5/age/act15               c98     (30, 0.3, -0.25, None, 'split3') wmean=+0.1052 med=+0.1434 k= 39 n=   41 ctrl=-0.0576 edge=+0.1628 tz= 3.72 t= 5.76 res=1.00
+  r5/age/act15               c98     (60, 0.3, -0.25, None, 'split3') wmean=+0.1122 med=+0.1434 k= 39 n=   41 ctrl=-0.0644 edge=+0.1766 tz= 3.72 t= 5.85 res=1.00
+  volr/rng15/vlvl            c173    (45, 0.1, -0.15, None, 'split3') wmean=+0.0351 med=+0.0607 k= 27 n=  156 ctrl=-0.0451 edge=+0.0802 tz= 3.70 t= 8.46 res=1.00
+  volr/rng15/vlvl            c173    (60, 0.1, -0.15, None, 'split3') wmean=+0.0351 med=+0.0607 k= 27 n=  156 ctrl=-0.0459 edge=+0.0810 tz= 3.70 t= 8.55 res=1.00
+  r5/age/act15               c98     (60, 0.3, -0.35, None, 'str3')   wmean=+0.0806 med=+0.1434 k= 39 n=   41 ctrl=-0.0722 edge=+0.1529 tz= 3.69 t= 7.00 res=1.00
+  volr/rng15/vlvl            c173    (30, 0.1, -0.15, None, 'split3') wmean=+0.0345 med=+0.0607 k= 27 n=  156 ctrl=-0.0437 edge=+0.0781 tz= 3.67 t= 8.33 res=1.00
+  r5/age/act15               c98     (30, 0.3, -0.35, None, 'str3')   wmean=+0.0765 med=+0.1434 k= 39 n=   41 ctrl=-0.0650 edge=+0.1416 tz= 3.66 t= 6.77 res=1.00
+  volr/age/act15             c51     (5, 0.3, -0.35, None, 'flat')    wmean=+0.0707 med=+0.0414 k= 34 n=   88 ctrl=-0.1008 edge=+0.1715 tz= 3.66 t= 8.87 res=1.00
+  r5/age/act15               c98     (20, 0.3, -0.25, None, 'flat')   wmean=+0.1018 med=+0.1382 k= 39 n=   41 ctrl=-0.1012 edge=+0.2030 tz= 3.59 t= 7.15 res=1.00
+
+joint combos with train wmean>0: 43188 of 85604 evaluated-and-sized
+
+finalists carried to VALIDATE: 35
+
+=== VALIDATE (h==2, train-fitted bin edges + train-selected structures, identical harness) ===
+triple                   structure                          tr_w     va_w   va_med     k      n     ctrl     edge  p_boot
+volr/age/act15           (5, 0.2, None, None, 'dip3')    +0.0648  -0.0347  +0.0060    39     81  -0.0560  +0.0212  0.0335
+r5/age/act15             (45, 0.3, -0.25, None, 'str3')  +0.0859  -0.0123  -0.0165    45     45  -0.0550  +0.0427  0.6520
+volr/age/act15           (5, 0.2, None, None, 'flat')    +0.0656  -0.0567  +0.0118    39     81  -0.1094  +0.0527  0.0405
+volr/age/act15           (5, 0.2, None, None, 'split3')  +0.0642  -0.0419  +0.0013    39     81  -0.0591  +0.0172  0.0080
+r5/age/act15             (60, 0.3, -0.25, None, 'str3')  +0.0858  -0.0056  -0.0140    45     45  -0.0573  +0.0517  0.8565
+r5/age/act15             (30, 0.3, -0.25, None, 'str3')  +0.0815  -0.0119  -0.0140    45     45  -0.0525  +0.0406  0.6440
+volr/age/act15           (5, 0.2, None, None, 'str3')    +0.0328  -0.0315  +0.0047    39     81  -0.0554  +0.0240  0.0145
+volr/age/act15           (5, 0.3, None, None, 'dip3')    +0.0658  -0.0387  +0.0047    39     74  -0.0555  +0.0168  0.0475
+volr/age/act15           (5, 0.3, None, None, 'split3')  +0.0678  -0.0435  +0.0035    39     74  -0.0586  +0.0151  0.0310
+r5/age/act15             (45, 0.3, -0.25, None, 'flat')  +0.1353  -0.0195  -0.0310    45     45  -0.1065  +0.0870  0.6095
+volr/r15/vlvl            (45, 0.1, -0.35, None, 'split3')  +0.0519  +0.0176  +0.0616    43     81  -0.0736  +0.0912  0.3235
+volr/r15/vlvl            (60, 0.1, -0.35, None, 'split3')  +0.0519  +0.0172  +0.0616    43     80  -0.0773  +0.0945  0.3320
+r5/age/act15             (60, 0.3, -0.25, None, 'flat')  +0.1352  -0.0100  -0.0280    45     45  -0.1109  +0.1008  0.8075
+volr/age/act15           (5, 0.3, None, None, 'str3')    +0.0401  -0.0300  +0.0047    39     74  -0.0546  +0.0246  0.0480
+r5/age/act15             (30, 0.3, -0.25, None, 'flat')  +0.1280  -0.0203  -0.0257    45     45  -0.1016  +0.0813  0.5705
+volr/r15/vlvl            (30, 0.1, -0.35, None, 'split3')  +0.0512  +0.0178  +0.0616    43     80  -0.0691  +0.0868  0.3125
+volr/age/act15           (5, 0.3, None, None, 'flat')    +0.0780  -0.0553  +0.0094    39     74  -0.1077  +0.0524  0.0710
+volr/r15/vlvl            (20, 0.1, -0.35, None, 'split3')  +0.0502  +0.0149  +0.0602    43     87  -0.0657  +0.0806  0.3930
+r5/age/act15             (20, 0.3, -0.25, None, 'str3')  +0.0643  -0.0038  -0.0080    45     45  -0.0505  +0.0467  0.8925
+r5/age/act15             (45, 0.3, -0.25, None, 'split3')  +0.1123  -0.0201  -0.0433    45     45  -0.0621  +0.0420  0.5345
+r5/age/act15             (45, 0.3, -0.35, None, 'str3')  +0.0808  -0.0359  -0.0165    45     45  -0.0660  +0.0301  0.2200
+r5/age/act15             (30, 0.3, -0.25, None, 'split3')  +0.1052  -0.0210  -0.0369    45     45  -0.0580  +0.0370  0.4890
+r5/age/act15             (60, 0.3, -0.25, None, 'split3')  +0.1122  -0.0112  -0.0369    45     45  -0.0656  +0.0545  0.7430
+volr/rng15/vlvl          (45, 0.1, -0.15, None, 'split3')  +0.0351  +0.0271  +0.0623    46    220  -0.0450  +0.0720  0.0140
+volr/rng15/vlvl          (60, 0.1, -0.15, None, 'split3')  +0.0351  +0.0271  +0.0623    46    220  -0.0467  +0.0738  0.0140
+r15/age/vlvl             (10, None, None, None, 'str3')  -0.0121  -0.0258  -0.0127    48    154  -0.0646  +0.0388  0.0000
+volr/r15/r5              (3, 0.3, None, None, 'flat')    -0.0160  -0.0153  -0.0128    49    139  -0.0995  +0.0841  0.0030
+volr/r15/r5              (3, 0.3, None, None, 'split3')  -0.0080  -0.0077  -0.0064    49    139  -0.0497  +0.0421  0.0030
+volr/r15/r5              (3, 0.3, None, None, 'dip3')    -0.0080  -0.0077  -0.0064    49    139  -0.0497  +0.0421  0.0030
+volr/r15/r5              (3, 0.3, None, None, 'str3')    -0.0080  -0.0077  -0.0064    49    139  -0.0497  +0.0421  0.0030
+rng15/age/upfr           (10, None, None, None, 'str3')  -0.0093  -0.0192  -0.0084    50    140  -0.0646  +0.0454  0.0000
+r5/upfr/vlvl             (15, None, None, None, 'str3')  -0.0082  +0.0725  -0.0082    39     95  -0.0720  +0.1444  0.6345
+volr/r15/r5              (3, None, None, None, 'flat')   -0.0160  -0.0134  -0.0128    49    139  -0.0959  +0.0825  0.0560
+rng15/age/upfr           (15, None, None, None, 'str3')  -0.0087  -0.0133  -0.0080    50    129  -0.0720  +0.0587  0.0950
+rng15/age/upfr           (20, None, None, None, 'str3')  -0.0099  -0.0181  -0.0080    50    120  -0.0884  +0.0703  0.0020
+
+--- validate summary ---
+finalists with validate wmean>0            : 7 of 35
+finalists with validate wmean>0 AND >ctrl  : 7
+BH q=0.10 on validate p(mean>0) over 35 finalists: 13 survive
+BH q=0.10 on validate p(mean>random control): 21 survive
+SURVIVE BOTH + profitable: 2
+  VA-PROFITABLE volr/r15/vlvl (45, 0.1, -0.35, None, 'split3') vw=+0.0176 raw=+0.0176 med=+0.0616 k=43 n=81 ci95=[-0.018,+0.048] p0=0.3235 pctrl=0.0000 BH0=False BHc=True
+  VA-PROFITABLE volr/r15/vlvl (60, 0.1, -0.35, None, 'split3') vw=+0.0172 raw=+0.0172 med=+0.0616 k=43 n=80 ci95=[-0.018,+0.047] p0=0.3320 pctrl=0.0000 BH0=False BHc=True
+  VA-PROFITABLE volr/r15/vlvl (30, 0.1, -0.35, None, 'split3') vw=+0.0178 raw=+0.0178 med=+0.0616 k=43 n=80 ci95=[-0.018,+0.048] p0=0.3125 pctrl=0.0000 BH0=False BHc=True
+  VA-PROFITABLE volr/r15/vlvl (20, 0.1, -0.35, None, 'split3') vw=+0.0149 raw=+0.0149 med=+0.0602 k=43 n=87 ci95=[-0.020,+0.045] p0=0.3930 pctrl=0.0000 BH0=False BHc=True
+  VA-PROFITABLE volr/rng15/vlvl (45, 0.1, -0.15, None, 'split3') vw=+0.0271 raw=+0.0271 med=+0.0623 k=46 n=220 ci95=[+0.005,+0.046] p0=0.0140 pctrl=0.0000 BH0=True BHc=True
+  VA-PROFITABLE volr/rng15/vlvl (60, 0.1, -0.15, None, 'split3') vw=+0.0271 raw=+0.0271 med=+0.0623 k=46 n=220 ci95=[+0.005,+0.046] p0=0.0140 pctrl=0.0000 BH0=True BHc=True
+  VA-PROFITABLE r5/upfr/vlvl (15, None, None, None, 'str3') vw=+0.0725 raw=+0.2212 med=-0.0082 k=39 n=95 ci95=[-0.010,+0.231] p0=0.6345 pctrl=0.0000 BH0=False BHc=True
+
+TOTAL COMBOS SWEPT (all stages): 165849
+done t=200.0

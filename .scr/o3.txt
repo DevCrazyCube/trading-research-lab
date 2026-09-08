@@ -1,0 +1,38 @@
+has_x min 0.0 p25 0.0 med 0.0 p75 0.0 max 0.0
+has_tg min 0.0 p25 0.0 med 0.0 p75 0.0 max 0.0
+has_web min 0.0 p25 0.0 med 0.0 p75 0.0 max 0.0
+replies min 0.0 p25 0.0 med 0.0 p75 0.0 max 0.0
+pcreate min 0.0 p25 0.0 med 1.0 p75 8.0 max 204.0
+pgrad min 0.0 p25 0.0 med 0.0 p75 1.0 max 13.0
+age_at_first min -0.02 p25 -0.0 med 0.05 p75 0.15 max 22.82
+lmc0 min 0.0 p25 0.0 med 0.0 p75 0.0 max 0.0
+nsnap min 0.0 p25 0.0 med 0.0 p75 0.0 max 0.0
+symlen min 0.0 p25 0.0 med 0.0 p75 0.0 max 0.0
+['metadata', 'raw_transaction', 'raw_block_signatures', 'transaction_coordinate', 'raw_boundary_response', 'program_version', 'instruction', 'reserve_observation', 'classification_failure', 'sqlite_sequence']
+instruction CREATE TABLE instruction (
+            slot INTEGER NOT NULL,
+            transaction_index INTEGER NOT NULL,
+            outer_index INTEGER NOT NULL,
+            inner_index INTEGER NOT NULL,
+            signature TEXT NOT NULL,
+            program_id TEXT NOT NULL,
+            discriminator TEXT,
+            idl_name TEXT,
+            target INTEGER NOT NULL CHECK(target IN (0,1)),
+            accounts_json TEXT,
+            data_len INTEGER,
+            PRIMARY KEY(slot, transaction_index, outer_index, inner_index)
+        )
+reserve_observation CREATE TABLE reserve_observation (
+            slot INTEGER NOT NULL,
+            transaction_index INTEGER NOT NULL,
+            outer_index INTEGER NOT NULL,
+            inner_index INTEGER NOT NULL,
+            bonding_curve TEXT NOT NULL,
+            virtual_quote_before INTEGER, virtual_token_before INTEGER,
+            real_quote_before INTEGER,    real_token_before INTEGER,
+            virtual_quote_after INTEGER,  virtual_token_after INTEGER,
+            real_quote_after INTEGER,     real_token_after INTEGER,
+            evidence TEXT NOT NULL,
+            PRIMARY KEY(slot, transaction_index, outer_index, inner_index, bonding_curve)
+        )

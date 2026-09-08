@@ -1,0 +1,53 @@
+{
+  "boundary": "scenario only until owner-gated git anchor + Phase-2 latency calibration",
+  "execution_realism": {
+    "dependency_paths": [
+      "research/pump_amm_idl_9c82f61.json",
+      "research/pump_idl_9c82f61.json",
+      "scripts/b10a_simulator_kernel.py",
+      "scripts/b10b_position_path.py",
+      "scripts/b9d_transaction_bodies.py",
+      "scripts/b9i_quote_reproduction.py",
+      "scripts/rpc_http_identity.py",
+      "scripts/trading_bot/aftershock/__init__.py",
+      "scripts/trading_bot/aftershock/ecr.py",
+      "scripts/trading_bot/aftershock/execution.py",
+      "scripts/trading_bot/aftershock/feasibility.py",
+      "scripts/trading_bot/aftershock/frozen.py",
+      "scripts/trading_bot/aftershock/manifest.py",
+      "scripts/trading_bot/aftershock/secondary_sell_detector.py",
+      "scripts/trading_bot/memebot/__init__.py",
+      "scripts/trading_bot/memebot/frozen.py"
+    ],
+    "detector_callable_name": "detector",
+    "detector_module_path": "scripts/trading_bot/aftershock/secondary_sell_detector.py",
+    "experiment_dependency_paths": [
+      "scripts/trading_bot/aftershock/secondary_sell_detector.py"
+    ],
+    "warmup_min_events": 8,
+    "warmup_min_span_nanos": 600000000
+  },
+  "exit": {
+    "partial_exits": false,
+    "single_full_exit_only": true,
+    "trail_frac_den": 100,
+    "trail_frac_num": 12,
+    "trail_on": "executable_full_position_quote"
+  },
+  "family": "reserve-cycle resilience (two observed withdrawal+recovery cycles; no actor-independence claim)",
+  "frozen_utc": "2026-08-28T00:30:00+00:00",
+  "instrument_id": "AFTERSHOCK_SS",
+  "note": "PAPER scenario built on the handoff-424 execution engine. NO orders/wallet/SOL. Results are SIMULATED_OBSERVED_PATH + CALIBRATION_UNCALIBRATED scenarios, never executable evidence, until the seal/activation are git-anchored AND a Phase-2 latency calibration is authorized.",
+  "preregistration": "research/trading_bot/aftershock/AFTERSHOCK_SS_PREREGISTRATION.md",
+  "preregistration_sha256": "30ab2369abd13f41176f7b9e851afb5690f6df861b7064073df1bf6de67eb1ec",
+  "promotion_gate": "anchored + latency-calibrated; positive log-growth after ALL costs; positive per-UTC-day AND per-creator-cluster; drop-the-max robust; unexitable under B20B; fresh anchored confirmation slice",
+  "sizing": {
+    "add_requires_third_cycle": true,
+    "bankroll_usd": "100.00",
+    "max_probe_lamports": 50000000,
+    "max_position_usd": "20.00",
+    "refuse_if_target_usd_exceeds_probe_lamports": true,
+    "second_add_usd": "10.00",
+    "target_usd": "10.00"
+  }
+}

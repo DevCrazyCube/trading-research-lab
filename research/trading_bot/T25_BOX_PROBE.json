@@ -1,0 +1,60 @@
+{
+ "probe": "SPX box spread implied financing rate",
+ "taken_utc": "2026-08-19T05:55Z",
+ "market_open": false,
+ "market_clock_note": "US market CLOSED at capture (02:01 ET); overnight option quotes are wider than RTH, so the executable column is an UPPER BOUND on cost, not a session measurement",
+ "source": "Alpaca /v1beta1/options/snapshots/SPX latestQuote (OPRA)",
+ "tbill_3m_pct": 3.71,
+ "tbill_source": "research/data/t13_cache/cash.csv FRED_DTB3 2026-08-13",
+ "expiries": {
+  "2027-08-20": {
+   "years_to_expiry": 1.003,
+   "strikes_with_both_legs": 199,
+   "mid": {
+    "n_pairs": 5442,
+    "p25": 1.57,
+    "median": 4.083,
+    "p75": 7.019
+   },
+   "executable": {
+    "n_pairs": 5442,
+    "p25": -4.054,
+    "median": 0.06,
+    "p75": 2.882
+   }
+  },
+  "2027-12-17": {
+   "years_to_expiry": 1.329,
+   "strikes_with_both_legs": 145,
+   "mid": {
+    "n_pairs": 2166,
+    "p25": 1.622,
+    "median": 4.257,
+    "p75": 7.073
+   },
+   "executable": {
+    "n_pairs": 2168,
+    "p25": -4.54,
+    "median": 0.276,
+    "p75": 3.035
+   }
+  },
+  "2026-12-18": {
+   "years_to_expiry": 0.332,
+   "strikes_with_both_legs": 369,
+   "mid": {
+    "n_pairs": 23154,
+    "p25": -1.22,
+    "median": 3.766,
+    "p75": 8.717
+   },
+   "executable": {
+    "n_pairs": 23154,
+    "p25": -13.092,
+    "median": -4.625,
+    "p75": 0.541
+   }
+  }
+ },
+ "conclusion": "At mid the 1-year SPX box lends +0.37 pp over the 3-month T-bill; at the four-leg executable price it lends +0.06 %/yr, 3.65 pp BELOW T-bills. Cross-strike dispersion at mid (p25 1.57 % to p75 7.02 %) exceeds the pickup by ~15x, so this quote surface cannot resolve a 0.37 pp financing spread. SCOPING PROBE, NOT A FROZEN TEST."
+}

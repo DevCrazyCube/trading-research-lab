@@ -1,0 +1,17 @@
+toll=0.0250 drop=-0.30 maxway=3
+H=15m TRAIN univ mean=-0.0855 med=-0.0350 n=1274 k=84 res=0.934
+   combos=4727  train cells mean>0 & bootlo>0: 0  (5s)
+H=30m TRAIN univ mean=-0.0965 med=-0.0406 n=721 k=84 res=0.883
+   combos=4727  train cells mean>0 & bootlo>0: 2  (4s)
+     WEB0|age2|stale1                 mean=+0.0203(lo+0.0039) med=+0.0117 ctrl=-0.0166 exc=+0.0369 n=51 k=13 res=0.98
+     X0|age2|stale1                   mean=+0.0159(lo+0.0025) med=+0.0116 ctrl=-0.0152 exc=+0.0311 n=56 k=14 res=0.98
+H=60m TRAIN univ mean=-0.1228 med=-0.0587 n=402 k=84 res=0.791
+   combos=4727  train cells mean>0 & bootlo>0: 1  (5s)
+     X0|age2|stale1                   mean=+0.0438(lo+0.0149) med=+0.0448 ctrl=-0.0075 exc=+0.0514 n=34 k=14 res=0.94
+TOTAL COMBOS SWEPT (panelA): 14181
+
+=== VALIDATE h==2 ===
+H=15m VALID univ mean=-0.1079 med=-0.0421 n=1020 k=92 | testing 0
+H=30m VALID univ mean=-0.1091 med=-0.0536 n=605 k=92 | testing 2
+H=60m VALID univ mean=-0.1374 med=-0.0988 n=351 k=92 | testing 1
+TOTAL VALIDATE SURVIVORS: 0

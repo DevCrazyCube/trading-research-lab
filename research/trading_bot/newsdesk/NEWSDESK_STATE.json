@@ -1,0 +1,13 @@
+{
+  "created_utc": "2026-08-23T17:00:50.824944+00:00",
+  "freeze": {
+    "preregistration_sha256": "89a6b74df6f46b8e48ff92e0768696ba643f4e4ddedd8b8f628a45a43f43aa89",
+    "utc": "2026-08-23T00:00:00Z"
+  },
+  "instrument_id": "NEWSDESK1",
+  "resolved_setup_hashes": [
+    "52122d6df11e532e84ad94d25d4765ce966ca0548b363518d9e742e6934c2376",
+    "0361f3b74fe70fcfd7eaf529fee06056004db0fa8d26c92d76af0386e99ce2d8"
+  ],
+  "schema_version": 1
+}

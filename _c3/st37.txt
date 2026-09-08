@@ -1,0 +1,3 @@
+04:55:50
+placebo panel built: FEAT circular-shifted per mint, META reassigned across mints
+bar features: ['trailvol_log', 'rvol10', 'px_vs_start', 'volaccel', 'age_min', 'logpx', 'dd_ath', 'ret1', 'ret30m', 'rng']

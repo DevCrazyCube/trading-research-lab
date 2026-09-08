@@ -1,0 +1,554 @@
+{
+ "key": "INVENT_0822_vol",
+ "theme": "Volatility family from FREE proxies -- the vol-ETP complex as a MECHANICALLY TETHERED relative-value family (daily-reset prospectus identity r_A = k*r_B), the one corner of the volatility theme not already swept.",
+ "date": "2026-08-22",
+ "verdict": "NOISE. 0 of 38. Honest zero. The entire apparent alpha lives at lag0 (same-close fill) and is arithmetically equal to the bid-ask spread; one day of slack destroys 100% of it.",
+ "theme_is_noise": true,
+ "scope": "research only, no orders, no money, cached free data only, no network call",
+ "prior_work_that_made_the_brief's_named_subideas_off_limits": {
+  "VIX/VIX9D/VIX3M term structure as timing": {
+   "study": "INVENT_D0821_volterm",
+   "N": 43,
+   "verdict": "NOISE"
+  },
+  "realised-vs-implied on liquid ETFs": {
+   "study": "NEWTERR_optimp (ownvrp+reliv)",
+   "N": 28,
+   "verdict": "NOISE"
+  },
+  "VXX/SVXY roll dynamics as carry": {
+   "study": "NEWTERR_volatility_etp_term_structure",
+   "N": 39,
+   "verdict": "NOISE"
+  },
+  "cross-sectional VRP across sectors": {
+   "study": "NEWTERR_optimp (crosssec+dispersion)",
+   "N": 9,
+   "verdict": "NOISE"
+  },
+  "cumulative_formulas_in_the_volatility_family_before_today": 191,
+  "cumulative_including_this_round": 229
+ },
+ "mechanism": {
+  "one_sentence": "VIXY(+1x ETF), VXX(+1x ETN), UVXY(+1.5x ETF), SVXY(-0.5x ETF) all track ONE published index (SPVXSTR) and VIXM/VXZ both track SPVXMTR; each is a DAILY-RESET product so its NAV return over one session equals k*(index return) - fee/day exactly and path-independently, making e_t = r_A - k*r_B a pure wrapper-vs-wrapper price dislocation.",
+  "a_priori_sign": "FADE e_t -- short whichever wrapper outran its own contractual multiple. Fixed before any result was computed; the sweep is NOT sign-agnostic.",
+  "k_is_read_from_the_prospectus_never_fitted": true,
+  "leverage_change_handled": "ProShares 2018-02-28: UVXY 2x->1.5x, SVXY -1x->-0.5x; 6 transition sessions guarded out",
+  "tether_measured_not_assumed": {
+   "UVXY_VIXY_R2": 0.9923,
+   "VXX_VIXY_R2": 0.9645,
+   "UVXY_VXX_R2": 0.958
+  }
+ },
+ "data": {
+  "source": "Yahoo chart v8 adjusted closes, cached at research/data/volterm_cache/raw/",
+  "network_calls": 0,
+  "median_daily_dollar_volume_2024_2026_musd": {
+   "VXX": 217.7,
+   "UVXY": 267.6,
+   "SVXY": 72.7,
+   "VIXY": 64.4,
+   "VIXM": 2.0,
+   "VXZ": 0.5
+  }
+ },
+ "windows": {
+  "design": "20111004..20211231",
+  "holdout": "20220101..20260820",
+  "note": "VXX and VXZ list 2018-01-25, so pairs containing them have a 3.9y design window; VIXY/UVXY/SVXY pairs have 10.2y"
+ },
+ "N": {
+  "tested": 38,
+  "unevaluable_excluded": 4,
+  "unevaluable_names": [
+   "SVIX_VIXY",
+   "UVIX_VIXY",
+   "SVIX_SVXY",
+   "UVIX_UVXY"
+  ],
+  "unevaluable_reason": "SVIX and UVIX both list 2022-03-30, entirely inside the held-out window; no design window exists for them"
+ },
+ "bar": {
+  "analytic_t_sqrt_2lnN": 2.697,
+  "analytic_expected_max_sharpe": 1.364,
+  "bootstrap_expected_max_sharpe": 1.082,
+  "bootstrap_p95": 1.584,
+  "bootstrap_p99": 1.799,
+  "B": 3000
+ },
+ "headline": {
+  "lag_convention": "both prints are 16:00 closes, so lag0 (compute from close t, fill AT close t) is a zero-slack lookahead and is REFERENCE ONLY; lag1 (fill MOC t+1, earn t+1->t+2) is the HEADLINE; lag2 is the kill test",
+  "best_design_gross_sharpe_lag1": 0.543,
+  "best_design_gross_t_lag1": 1.073,
+  "best_design_net_sharpe_lag1": 0.171,
+  "n_design_net_positive": 1,
+  "n_holdout_net_positive": 0,
+  "mean_design_gross_sharpe_lag0": 1.402,
+  "mean_design_gross_sharpe_lag1": -0.059,
+  "mean_design_gross_sharpe_lag2": -0.306,
+  "mean_holdout_gross_sharpe_lag1": 0.08,
+  "mean_holdout_net_sharpe_lag1": -2.868
+ },
+ "the_decisive_diagnostic": {
+  "name": "bounce arithmetic",
+  "claim": "if the lag0 profit is the half-spread bouncing, gross profit per unit of turnover equals the round-trip half-spread",
+  "table": [
+   {
+    "pair": "VXX_VIXY",
+    "turnover_per_day": 0.39,
+    "lag0_gross_bp_per_unit_turnover": 7.66,
+    "modelled_roundtrip_cost_bp": 9.0,
+    "L0_gross_bp_per_day": 3.01,
+    "L0_sr": 2.91,
+    "L1_gross_bp_per_day": 0.12,
+    "L1_sr": 0.21,
+    "L2_gross_bp_per_day": -0.45,
+    "L2_sr": -1.01
+   },
+   {
+    "pair": "VXZ_VIXM",
+    "turnover_per_day": 0.41,
+    "lag0_gross_bp_per_unit_turnover": 8.33,
+    "modelled_roundtrip_cost_bp": 46.0,
+    "L0_gross_bp_per_day": 3.44,
+    "L0_sr": 3.29,
+    "L1_gross_bp_per_day": -0.95,
+    "L1_sr": -0.85,
+    "L2_gross_bp_per_day": 0.26,
+    "L2_sr": 0.33
+   },
+   {
+    "pair": "UVXY_VIXY",
+    "turnover_per_day": 0.42,
+    "lag0_gross_bp_per_unit_turnover": 3.6,
+    "modelled_roundtrip_cost_bp": 9.4,
+    "L0_gross_bp_per_day": 1.5,
+    "L0_sr": 1.11,
+    "L1_gross_bp_per_day": 0.11,
+    "L1_sr": 0.15,
+    "L2_gross_bp_per_day": -0.37,
+    "L2_sr": -0.54
+   },
+   {
+    "pair": "SVXY_VIXY",
+    "turnover_per_day": 0.39,
+    "lag0_gross_bp_per_unit_turnover": 6.92,
+    "modelled_roundtrip_cost_bp": 12.33,
+    "L0_gross_bp_per_day": 2.68,
+    "L0_sr": 0.5,
+    "L1_gross_bp_per_day": 1.63,
+    "L1_sr": 0.3,
+    "L2_gross_bp_per_day": -0.13,
+    "L2_sr": -0.15
+   },
+   {
+    "pair": "UVXY_VXX",
+    "turnover_per_day": 0.4,
+    "lag0_gross_bp_per_unit_turnover": 7.41,
+    "modelled_roundtrip_cost_bp": 7.0,
+    "L0_gross_bp_per_day": 2.96,
+    "L0_sr": 3.21,
+    "L1_gross_bp_per_day": 0.12,
+    "L1_sr": 0.21,
+    "L2_gross_bp_per_day": -0.36,
+    "L2_sr": -0.74
+   },
+   {
+    "pair": "SVXY_VXX",
+    "turnover_per_day": 0.38,
+    "lag0_gross_bp_per_unit_turnover": 5.78,
+    "modelled_roundtrip_cost_bp": 11.0,
+    "L0_gross_bp_per_day": 2.22,
+    "L0_sr": 3.74,
+    "L1_gross_bp_per_day": -0.13,
+    "L1_sr": -0.29,
+    "L2_gross_bp_per_day": -0.1,
+    "L2_sr": -0.26
+   }
+  ],
+  "reading": "lag0 gross bp per unit turnover is the same order as, and in 5 of 6 cases BELOW, the round-trip cost. The 'edge' is the spread you must pay.",
+  "rho2_to_rho5_of_residual": "all within +/-0.09 of zero for every pair -- no memory past one day"
+ },
+ "rho1_gate": {
+  "gate": "rho1(delta s) must be > ~-0.35 (with Hurst<0.5 and ADF) or the reversion is measurement bounce",
+  "rows": [
+   {
+    "pair": "VXX_VIXY",
+    "window": "design",
+    "n": 985,
+    "sd_e_bp": 69.64121518621977,
+    "rho1_de": -0.5526713404712538,
+    "hurst": 0.3722087534408767,
+    "adf_t": -4.854453903222415,
+    "adf_verdict": "reject@1%",
+    "tether_R2": 0.9813478739593028,
+    "gate_pass": false
+   },
+   {
+    "pair": "VXX_VIXY",
+    "window": "holdout",
+    "n": 1162,
+    "sd_e_bp": 99.11904074460298,
+    "rho1_de": -0.04445654045600571,
+    "hurst": 0.47604278049194604,
+    "adf_t": -3.467552704027824,
+    "adf_verdict": "reject@1%",
+    "tether_R2": 0.9430391662533122,
+    "gate_pass": true
+   },
+   {
+    "pair": "VXZ_VIXM",
+    "window": "design",
+    "n": 985,
+    "sd_e_bp": 141.81327522513425,
+    "rho1_de": -0.10004006306629337,
+    "hurst": 0.41188423629680754,
+    "adf_t": -8.116651720360641,
+    "adf_verdict": "reject@1%",
+    "tether_R2": 0.6565052279859847,
+    "gate_pass": true
+   },
+   {
+    "pair": "VXZ_VIXM",
+    "window": "holdout",
+    "n": 1161,
+    "sd_e_bp": 56.46650794053868,
+    "rho1_de": -0.5248676275559504,
+    "hurst": 0.4136270377246671,
+    "adf_t": -2.161400531838629,
+    "adf_verdict": "FAIL(unit root)",
+    "tether_R2": 0.9037714712217793,
+    "gate_pass": false
+   },
+   {
+    "pair": "UVXY_VIXY",
+    "window": "design",
+    "n": 2572,
+    "sd_e_bp": 72.4024077154412,
+    "rho1_de": -0.3428392842695852,
+    "hurst": 0.5247215309764681,
+    "adf_t": -1.8016115177534089,
+    "adf_verdict": "FAIL(unit root)",
+    "tether_R2": 0.9914225426673672,
+    "gate_pass": true
+   },
+   {
+    "pair": "UVXY_VIXY",
+    "window": "holdout",
+    "n": 1162,
+    "sd_e_bp": 43.85521980682231,
+    "rho1_de": -0.41211433029896455,
+    "hurst": 0.40205936004994725,
+    "adf_t": -0.29066655033497907,
+    "adf_verdict": "FAIL(unit root)",
+    "tether_R2": 0.9953078781185921,
+    "gate_pass": false
+   },
+   {
+    "pair": "SVXY_VIXY",
+    "window": "design",
+    "n": 2572,
+    "sd_e_bp": 172.7350217408583,
+    "rho1_de": -0.08098636362310202,
+    "hurst": 0.5626076410061034,
+    "adf_t": -0.9837661052249623,
+    "adf_verdict": "FAIL(unit root)",
+    "tether_R2": 0.8045389464604533,
+    "gate_pass": true
+   },
+   {
+    "pair": "SVXY_VIXY",
+    "window": "holdout",
+    "n": 1162,
+    "sd_e_bp": 15.10924214684541,
+    "rho1_de": -0.490854102368078,
+    "hurst": 0.45086594394542534,
+    "adf_t": 2.1092778890932586,
+    "adf_verdict": "FAIL(unit root)",
+    "tether_R2": 0.9951841343574022,
+    "gate_pass": false
+   },
+   {
+    "pair": "UVXY_VXX",
+    "window": "design",
+    "n": 985,
+    "sd_e_bp": 147.6787262448295,
+    "rho1_de": -0.45030492216356827,
+    "hurst": 0.4806231583642508,
+    "adf_t": -0.7186286158959289,
+    "adf_verdict": "FAIL(unit root)",
+    "tether_R2": 0.965516118656703,
+    "gate_pass": false
+   },
+   {
+    "pair": "UVXY_VXX",
+    "window": "holdout",
+    "n": 1162,
+    "sd_e_bp": 145.61693471324642,
+    "rho1_de": -0.030897475730552723,
+    "hurst": 0.4664448525670326,
+    "adf_t": -3.1756845251874073,
+    "adf_verdict": "reject@5%",
+    "tether_R2": 0.9482690480806889,
+    "gate_pass": true
+   },
+   {
+    "pair": "SVXY_VXX",
+    "window": "design",
+    "n": 985,
+    "sd_e_bp": 273.4191214333016,
+    "rho1_de": -0.07347306042486648,
+    "hurst": 0.5434400319310403,
+    "adf_t": -0.26348341029726574,
+    "adf_verdict": "FAIL(unit root)",
+    "tether_R2": 0.5104009900809787,
+    "gate_pass": true
+   },
+   {
+    "pair": "SVXY_VXX",
+    "window": "holdout",
+    "n": 1162,
+    "sd_e_bp": 50.04820990875425,
+    "rho1_de": -0.03191070151566324,
+    "hurst": 0.47949295723670027,
+    "adf_t": -1.7907608725275315,
+    "adf_verdict": "FAIL(unit root)",
+    "tether_R2": 0.947159600032802,
+    "gate_pass": true
+   }
+  ],
+  "confirmed_as_a_diagnostic": "the two pairs the gate flags as bounce on design (VXX/VIXY -0.553, UVXY/VXX -0.450) are exactly the two with the largest lag0 Sharpes (+2.91, +3.21) and a total lag1 collapse (+0.21, +0.21). The gate would have saved this sweep.",
+  "there_is_no_middle": "pairs that PASS pass by having rho1 ~ -0.08, i.e. almost no reversion to harvest at all. The complex offers bounce or nothing, never slow convergence.",
+  "NEW_CAVEAT_FOR_THE_PROGRAMME": "rho1 is REGIME-UNSTABLE here: 4 of 6 pairs flip the gate's verdict between design and holdout (VXX/VIXY -0.553->-0.044; VXZ/VIXM -0.100->-0.525; SVXY/VIXY -0.081->-0.491; UVXY/VXX -0.450->-0.031). Recommendation: keep rho1 as a KILL test but require it in BOTH windows; a single-window rho1 is not an ex-ante certificate."
+ },
+ "the_one_economically_legitimate_object_and_why_it_still_fails": {
+  "object": "the Barclays VXX issuance suspension of 2022-03-14 -- creations could not arbitrage the premium, so VXX detached from VIXY. Visible as VXX/VIXY residual sd of 202 bp/day in 2022 vs 18-48 bp in every other year.",
+  "result_over_20220314_20221031": {
+   "L0_gross_sr": -0.6225170367220302,
+   "L0_net_sr": -1.1072423398710833,
+   "L0_n": 161,
+   "L1_gross_sr": -0.17795379921784735,
+   "L1_net_sr": -0.7156115600100758,
+   "L1_n": 161,
+   "L2_gross_sr": -0.16802782687291853,
+   "L2_net_sr": -0.7645505382299905,
+   "L2_n": 161
+  },
+  "why_it_fails": "negative at EVERY lag. A premium that is wide can go wider for months; fading a WIDENING structural premium loses on the way out and only pays at the collapse, which is one observation. Structural legitimacy is not sufficient -- the premium must converge on a clock you can hold through."
+ },
+ "the_tether_is_decaying": {
+  "sd_of_residual_bp_per_day_by_year": {
+   "VXX_VIXY": {
+    "2018": 126,
+    "2019": 18,
+    "2020": 48,
+    "2021": 43,
+    "2022": 202,
+    "2023": 27,
+    "2024": 41,
+    "2025": 39,
+    "2026": 31
+   },
+   "UVXY_VIXY": {
+    "2011_2017": "24-83",
+    "2018": 196,
+    "2019": 25,
+    "2020": 51,
+    "2021": 47,
+    "2022": 33,
+    "2023": 39,
+    "2024": 56,
+    "2025": 45,
+    "2026": 42
+   },
+   "SVXY_VIXY": {
+    "2011_2017": "17-71",
+    "2018": 545,
+    "2019": 17,
+    "2020": 25,
+    "2021": 29,
+    "2022": 14,
+    "2023": 13,
+    "2024": 15,
+    "2025": 15,
+    "2026": 20
+   },
+   "VXZ_VIXM": {
+    "2018": 287,
+    "2019": 31,
+    "2020": 38,
+    "2021": 47,
+    "2022": 46,
+    "2023": 32,
+    "2024": 100,
+    "2025": 32,
+    "2026": 32
+   }
+  },
+  "reading": "the family's whole variance is two named events (Feb 2018, Mar-Aug 2022). Outside them the wrappers track to 15-50 bp/day; SVXY/VIXY now tracks to 15 bp/day, BELOW one round trip. There is no dislocation left to fade even before significance is considered."
+ },
+ "groups": {
+  "P_pairfade": {
+   "n": 12,
+   "what": "one-day replication-residual fade, 6 pairs x {linear 60d causal z (+/-3 sigma clip), |z|>=2.0 threshold}"
+  },
+  "L_premlevel": {
+   "n": 10,
+   "what": "cumulative wrapper premium M=sum(e), detrended by trailing 20d/60d mean, z over 120d, faded at |z|>=2, 5-day hold, 5 liquid pairs. A LEVEL object, so the one-day-bounce argument does not apply to it -- and it is dead anyway (best design lag1 gross +0.08)"
+  },
+  "X_crosswrap": {
+   "n": 6,
+   "what": "ORIGINAL CONSTRUCTION: convert all four SPVXSTR wrappers to implied index return i=r/k; the four must agree on one number; fade whichever disagreed. Linear / |z|>=2 / cross-sectional rank, plus accumulated-premium levels at 20/60/120d. Index-neutral by construction."
+  },
+  "H_horizon": {
+   "n": 6,
+   "what": "the three most liquid pairs' one-day fade held 3 and 5 days -- the axis that separates a slow premium from a bounce"
+  },
+  "S_spec": {
+   "n": 4,
+   "what": "specification controls COUNTED IN N. S_BETA: 120d fitted regression multiple instead of contractual k (scored +0.30/+0.16 vs contractual +0.30/+0.15 -- identical, so the fit does not beat the contract). S_LOG: log-return tether, deliberately the wrong algebra for a daily-reset product (scored -0.35/-0.51, worse than every correct-algebra formula)"
+  }
+ },
+ "controls_not_counted_in_N": {
+  "static_long_B_leg_design_sharpes": [
+   -0.7941200429246618,
+   -0.7941200429246618,
+   -0.2077898488788716
+  ],
+  "reading": "the theme is not a disguised long-vol beta and could not be, being spread-neutral"
+ },
+ "selftest": {
+  "oracle_visible_lag0_sharpe": 6.6801,
+  "oracle_delayed_2d_sharpe": -0.0808,
+  "cost_is_positive_bp_per_day": 2.2027,
+  "gross_exposure_max": 1.0
+ },
+ "costs": {
+  "half_spread_bp_per_side": {
+   "VXX": 3.0,
+   "UVXY": 3.0,
+   "VIXY": 5.0,
+   "SVXY": 6.0,
+   "VIXM": 15.0,
+   "VXZ": 30.0
+  },
+  "fee_bp_per_side": 0.5,
+  "borrow_ann": {
+   "long_vol_legs": 0.05,
+   "SVXY": 0.02
+  },
+  "but": "per the EXECUTION-COST WALL lesson, cost is NOT what killed this. The GROSS lag1 numbers are already at zero. Charging zero basis points changes no verdict."
+ },
+ "top8_design_lag1": [
+  {
+   "name": "X_DISAGREE_RANK",
+   "group": "X_crosswrap",
+   "yrs": 3.9,
+   "gross_L0": 2.107,
+   "gross_L1": 0.543,
+   "t_L1": 1.073,
+   "net_L1": -2.275,
+   "holdout_gross_L1": 0.698,
+   "holdout_net_L1": -3.667
+  },
+  {
+   "name": "X_DISAGREE_LIN",
+   "group": "X_crosswrap",
+   "yrs": 3.9,
+   "gross_L0": 5.958,
+   "gross_L1": 0.404,
+   "t_L1": 0.799,
+   "net_L1": -7.555,
+   "holdout_gross_L1": 0.682,
+   "holdout_net_L1": -2.981
+  },
+  {
+   "name": "H3_UVXY_VIXY",
+   "group": "H_horizon",
+   "yrs": 10.2,
+   "gross_L0": 0.706,
+   "gross_L1": 0.334,
+   "t_L1": 1.067,
+   "net_L1": -1.392,
+   "holdout_gross_L1": 0.357,
+   "holdout_net_L1": -4.537
+  },
+  {
+   "name": "P_SVXY_VIXY_LIN",
+   "group": "P_pairfade",
+   "yrs": 10.2,
+   "gross_L0": 0.497,
+   "gross_L1": 0.303,
+   "t_L1": 0.968,
+   "net_L1": -0.139,
+   "holdout_gross_L1": 0.255,
+   "holdout_net_L1": -9.836
+  },
+  {
+   "name": "S_BETA_SVXY_VIXY",
+   "group": "S_spec",
+   "yrs": 10.2,
+   "gross_L0": 0.486,
+   "gross_L1": 0.3,
+   "t_L1": 0.957,
+   "net_L1": -0.113,
+   "holdout_gross_L1": 0.293,
+   "holdout_net_L1": -9.677
+  },
+  {
+   "name": "P_SVXY_VIXY_TH2",
+   "group": "P_pairfade",
+   "yrs": 10.2,
+   "gross_L0": 0.369,
+   "gross_L1": 0.286,
+   "t_L1": 0.913,
+   "net_L1": 0.171,
+   "holdout_gross_L1": 0.655,
+   "holdout_net_L1": -3.511
+  },
+  {
+   "name": "H3_SVXY_VIXY",
+   "group": "H_horizon",
+   "yrs": 10.2,
+   "gross_L0": 0.417,
+   "gross_L1": 0.263,
+   "t_L1": 0.839,
+   "net_L1": -0.453,
+   "holdout_gross_L1": 0.06,
+   "holdout_net_L1": -7.97
+  },
+  {
+   "name": "P_UVXY_VXX_LIN",
+   "group": "P_pairfade",
+   "yrs": 3.9,
+   "gross_L0": 3.211,
+   "gross_L1": 0.214,
+   "t_L1": 0.422,
+   "net_L1": -2.354,
+   "holdout_gross_L1": 0.118,
+   "holdout_net_L1": -0.973
+  }
+ ],
+ "dead_ledger_additions": [
+  "The volatility-ETP complex as a mechanically-tethered RV family: the daily-replication residual r_A - k*r_B for VXX/VIXY, VXZ/VIXM, UVXY/VIXY, SVXY/VIXY, UVXY/VXX, SVXY/VXX, faded as a 60d causal z (linear and |z|>=2), held 1/3/5 days.",
+  "The cumulative wrapper premium sum(e) detrended at 20d/60d and faded at |z|>=2.",
+  "The four-wrapper implied-index-return disagreement cross-section (linear, threshold, rank) and its accumulated-premium levels at 20/60/120d.",
+  "The fitted-beta and log-return tether specifications.",
+  "DEAD AS AN IDEA, not just as a number: 'the ETN creation halt is a free, mechanical, structurally-anchored dislocation'. It is all three of those things, it is clearly visible in the data, and fading it lost money at every lag."
+ ],
+ "what_would_change_the_answer": [
+  "Intraday quotes for the vol ETPs. All numbers are close-to-close and the theme's alpha sits at lag0, i.e. inside the last minutes of the session. A 15:45->16:00 rail (this programme's L2 shape) is the only place it could live. Free data gives no intraday history for VXX/VIXY/UVXY/SVXY. Caveat: this would be a rescue attempt on a signal whose gross alpha is already zero at the only lag measurable honestly -- the EXECUTION-COST WALL says the prior on that is poor.",
+  "Real VX futures settlements -- the standing data wall from both prior vol sweeps. Not on any free keyless endpoint from this host. It would not help THIS family, whose tether never needed the curve.",
+  "Nothing else. Adding formulas to the volatility family only raises a bar that 229 formulas have already failed."
+ ],
+ "artifacts": {
+  "md": "research/trading_bot/INVENT_0822_vol.md",
+  "raw": "research/trading_bot/INVENT_0822_vol_RAW.json",
+  "stats": "research/trading_bot/INVENT_0822_vol_STATS.json",
+  "scripts": [
+   "scripts/trading_bot/invent0822_volrv_panel.py",
+   "scripts/trading_bot/invent0822_volrv_sweep.py",
+   "scripts/trading_bot/invent0822_volrv_stats.py"
+  ]
+ }
+}

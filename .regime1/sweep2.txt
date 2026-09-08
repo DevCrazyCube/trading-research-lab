@@ -1,0 +1,67 @@
+exits ['T5', 'T10', 'T15', 'T30', 'T60', 'T120', 'T60_TR25_slip15', 'T120_TR35_slip15']
+cells stage1 92 paircells 252
+=== CONTROLS (ANY x ALL, P1) ===
+ T5                 train mean -0.0780 med -0.0903 n4359 | val mean -0.1211 med -0.0934 n5733
+ T10                train mean -0.2131 med -0.1833 n2879 | val mean -0.1061 med -0.1623 n3723
+ T15                train mean -0.2308 med -0.2071 n2253 | val mean 0.2720 med -0.1757 n2890
+ T30                train mean -0.2785 med -0.2810 n1501 | val mean 0.1600 med -0.2583 n1866
+ T60                train mean -0.2968 med -0.3114 n996 | val mean -0.0288 med -0.3114 n1220
+ T120               train mean -0.3269 med -0.3114 n676 | val mean -0.1027 med -0.3145 n817
+ T60_TR25_slip15    train mean -0.0824 med -0.1445 n2544 | val mean 0.0044 med -0.1296 n2536
+ T120_TR35_slip15   train mean -0.1037 med -0.1786 n1880 | val mean -0.0952 med -0.1718 n1780
+stage A done combos 24288 trainpos 2996  65s
+stage B done combos 40920 trainpos 4812  104s
+validate survivors (mean>0, >ctrl, jackknife>0): 147
+SURV2 A ALL | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0430/-0.1267 n911 k175 || VA 0.0604/-0.1175 n1025 k207 || ctrl -0.0008 jack 0.0330 bootlo 0.0040 p 0.962
+SURV2 A NEWL60_d9 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.1293/-0.1206 n156 k35 || VA 0.1157/-0.1175 n133 k43 || ctrl -0.0008 jack 0.0716 bootlo -0.0012 p 0.949
+SURV2 A ALL | YOUNG30 | T60_TR25_slip15 | P2 || TR 0.0309/-0.1492 n911 k175 || VA 0.0567/-0.1370 n1025 k207 || ctrl -0.0049 jack 0.0292 bootlo -0.0047 p 0.951
+SURV2 A ALL | YOUNG30 | T60_TR25_slip15 | P1 || TR 0.0254/-0.1870 n911 k175 || VA 0.0804/-0.1647 n1025 k207 || ctrl 0.0044 jack 0.0312 bootlo -0.0105 p 0.898
+SURV2 A FRACUP_d10 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0501/-0.1298 n192 k62 || VA 0.1010/-0.1080 n286 k79 || ctrl -0.0008 jack 0.0290 bootlo -0.0106 p 0.919
+SURV2 A LAUNCH60_d6 | YOUNG30 | T120_TR35_slip15 | P3 || TR 0.1426/-0.1726 n142 k67 || VA 0.7864/-0.1755 n160 k74 || ctrl -0.0619 jack 0.0542 bootlo -0.0119 p 0.996
+SURV2 A MEDRET60_d2 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0212/-0.1549 n198 k90 || VA 0.3132/-0.1432 n203 k106 || ctrl -0.0008 jack 0.1186 bootlo -0.0123 p 0.934
+SURV2 A YOUNGFRAC_d4 | NEARHI | T10 | P3 || TR 0.0039/-0.0105 n46 k15 || VA 0.0459/-0.0002 n72 k21 || ctrl -0.0582 jack 0.0135 bootlo -0.0136 p 1.000
+SURV2 A MEDRET15_d10 | R15DN10 | T5 | P3 || TR 0.0372/-0.0262 n101 k51 || VA 0.0520/-0.0086 n119 k44 || ctrl -0.0714 jack 0.0130 bootlo -0.0150 p 1.000
+SURV2 A YOUNGFRAC_d10 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0047/-0.1434 n230 k73 || VA 0.0864/-0.1205 n322 k88 || ctrl -0.0008 jack 0.0217 bootlo -0.0152 p 0.905
+SURV2 A MEDRET15_d10 | R15DN10 | T5 | P1 || TR 0.0799/-0.0285 n101 k51 || VA 0.0841/-0.0090 n119 k44 || ctrl -0.1211 jack 0.0297 bootlo -0.0153 p 1.000
+SURV2 A YOUNGFRAC_d4 | ABOVEOPEN | T5 | P3 || TR 0.0356/-0.0094 n210 k18 || VA 0.0504/-0.0046 n287 k28 || ctrl -0.0714 jack 0.0158 bootlo -0.0158 p 1.000
+SURV2 A LAUNCH60_d7 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0569/-0.1107 n180 k71 || VA 0.1822/-0.1311 n156 k76 || ctrl -0.0008 jack 0.0768 bootlo -0.0160 p 0.922
+SURV2 A NEWL60_d8 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0072/-0.1283 n202 k73 || VA 0.1098/-0.1148 n240 k80 || ctrl -0.0008 jack 0.0389 bootlo -0.0162 p 0.920
+SURV2 A NEWL60_d5 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0388/-0.1529 n111 k35 || VA 0.0604/-0.0946 n151 k55 || ctrl -0.0008 jack 0.0430 bootlo -0.0175 p 0.903
+SURV2 A LAUNCH60_d6 | NEARHI | T120_TR35_slip15 | P2 || TR 0.0665/-0.0928 n43 k33 || VA 0.1399/-0.1853 n58 k45 || ctrl -0.0665 jack 0.0814 bootlo -0.0177 p 0.987
+SURV2 A COHVOL15_d10 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.1068/-0.1224 n194 k65 || VA 0.1151/-0.0956 n266 k87 || ctrl -0.0008 jack 0.0272 bootlo -0.0177 p 0.899
+SURV2 A LAUNCH60_d6 | NEARHI | T120_TR35_slip15 | P3 || TR 0.0656/-0.0928 n43 k33 || VA 0.1303/-0.1668 n58 k45 || ctrl -0.0619 jack 0.0716 bootlo -0.0198 p 0.987
+SURV2 A NEWL60_d9 | ANY | T60_TR25_slip15 | P3 || TR 0.0218/-0.0698 n325 k80 || VA 0.0329/-0.0374 n283 k104 || ctrl -0.0008 jack 0.0141 bootlo -0.0205 p 0.829
+SURV2 A FRACUP_d10 | YOUNG30 | T60_TR25_slip15 | P1 || TR 0.0370/-0.1814 n192 k62 || VA 0.1625/-0.1592 n286 k79 || ctrl 0.0044 jack 0.0338 bootlo -0.0214 p 0.890
+SURV2 A LAUNCH60_d5 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0087/-0.1244 n151 k62 || VA 0.0494/-0.0955 n116 k56 || ctrl -0.0008 jack 0.0257 bootlo -0.0216 p 0.864
+SURV2 A YOUNGFRAC_d10 | NEARHI | T60_TR25_slip15 | P2 || TR 0.1216/-0.0871 n54 k31 || VA 0.0570/-0.0875 n79 k46 || ctrl -0.0049 jack 0.0374 bootlo -0.0225 p 0.891
+SURV2 A MEDRET15_d10 | R15DN10 | T5 | P2 || TR 0.0450/-0.0209 n101 k51 || VA 0.0481/-0.0095 n119 k44 || ctrl -0.0814 jack 0.0091 bootlo -0.0226 p 1.000
+SURV2 B ACTCNT_t3__MEDRET15_t2 | R15DN10 | T5 | P1 || TR 0.5939/-0.0295 n240 k55 || VA 0.2095/-0.0225 n232 k54 || ctrl -0.1211 jack 0.0498 bootlo -0.0227 p 1.000
+SURV2 A COHVOL15_d10 | YOUNG30 | T120_TR35_slip15 | P3 || TR 0.0499/-0.1609 n164 k65 || VA 0.0832/-0.1440 n221 k87 || ctrl -0.0619 jack 0.0281 bootlo -0.0227 p 0.995
+SURV2 A FRACUP_d10 | YOUNG30 | T60_TR25_slip15 | P2 || TR 0.0274/-0.1468 n192 k62 || VA 0.0932/-0.1226 n286 k79 || ctrl -0.0049 jack 0.0211 bootlo -0.0228 p 0.901
+SURV2 A MEDRET60_d6 | YOUNG30 | T5 | P2 || TR 0.0432/-0.0783 n105 k67 || VA 0.0411/-0.0124 n166 k94 || ctrl -0.0814 jack 0.0214 bootlo -0.0237 p 1.000
+SURV2 A COHVOL15_d9 | YOUNG30 | T120_TR35_slip15 | P3 || TR 0.1068/-0.1833 n164 k90 || VA 0.0938/-0.1545 n218 k122 || ctrl -0.0619 jack 0.0405 bootlo -0.0238 p 0.994
+SURV2 A COHVOL15_d9 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0017/-0.1554 n194 k90 || VA 0.0362/-0.1359 n247 k122 || ctrl -0.0008 jack 0.0174 bootlo -0.0246 p 0.834
+SURV2 A YOUNGFRAC_d10 | NEARHI | T60_TR25_slip15 | P3 || TR 0.1274/-0.0674 n54 k31 || VA 0.0536/-0.0654 n79 k46 || ctrl -0.0008 jack 0.0339 bootlo -0.0252 p 0.875
+SURV2 A YOUNGFRAC_d4 | NEARHI | T5 | P2 || TR 0.0938/-0.0017 n55 k15 || VA 0.0335/-0.0087 n96 k21 || ctrl -0.0814 jack 0.0044 bootlo -0.0255 p 1.000
+SURV2 A ACTCNT_d8 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0070/-0.1478 n140 k53 || VA 0.0700/-0.1429 n116 k62 || ctrl -0.0008 jack 0.0290 bootlo -0.0259 p 0.882
+SURV2 A COHVOL15_d10 | YOUNG30 | T60_TR25_slip15 | P2 || TR 0.0888/-0.1451 n194 k65 || VA 0.1034/-0.1112 n266 k87 || ctrl -0.0049 jack 0.0153 bootlo -0.0264 p 0.886
+SURV2 A LAUNCH60_d6 | ANY | T120_TR35_slip15 | P3 || TR 0.1626/-0.1162 n296 k102 || VA 0.5333/-0.0883 n324 k130 || ctrl -0.0619 jack 0.1170 bootlo -0.0266 p 0.994
+SURV2 A NEWL60_d9 | YOUNG30 | T60_TR25_slip15 | P2 || TR 0.1211/-0.1224 n156 k35 || VA 0.1008/-0.1304 n133 k43 || ctrl -0.0049 jack 0.0563 bootlo -0.0267 p 0.907
+SURV2 A NEWL60_d9 | YOUNG30 | T120_TR35_slip15 | P3 || TR 0.0648/-0.1435 n125 k35 || VA 0.1622/-0.1388 n114 k43 || ctrl -0.0619 jack 0.0512 bootlo -0.0271 p 0.985
+SURV2 A NEWL60_d9 | YOUNG30 | T120_TR35_slip15 | P2 || TR 0.0643/-0.1501 n125 k35 || VA 0.1526/-0.1583 n114 k43 || ctrl -0.0665 jack 0.0414 bootlo -0.0286 p 0.985
+SURV2 A LAUNCH60_d6 | YOUNG30 | T120_TR35_slip15 | P2 || TR 0.1116/-0.2167 n142 k67 || VA 0.7697/-0.2135 n160 k74 || ctrl -0.0665 jack 0.0373 bootlo -0.0313 p 0.983
+SURV2 A LAUNCH60_d2 | YOUNG30 | T120_TR35_slip15 | P3 || TR 0.1040/-0.1047 n54 k20 || VA 0.1969/-0.1498 n58 k28 || ctrl -0.0619 jack 0.0566 bootlo -0.0314 p 0.979
+SURV2 A NEWL60_d7 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0428/-0.1219 n241 k90 || VA 0.0367/-0.1129 n273 k104 || ctrl -0.0008 jack 0.0150 bootlo -0.0323 p 0.798
+SURV2 A LAUNCH60_d6 | NEARHI | T60_TR25_slip15 | P3 || TR 0.0095/-0.0642 n58 k33 || VA 0.0973/-0.1257 n69 k45 || ctrl -0.0008 jack 0.0248 bootlo -0.0327 p 0.870
+SURV2 A LAUNCH60_d7 | YOUNG30 | T120_TR35_slip15 | P2 || TR 0.0623/-0.1208 n159 k71 || VA 0.2779/-0.2076 n139 k76 || ctrl -0.0665 jack 0.0561 bootlo -0.0328 p 0.979
+SURV2 A LAUNCH60_d7 | R5DN | T10 | P2 || TR 0.0388/-0.0394 n203 k76 || VA 0.0979/-0.0241 n267 k95 || ctrl -0.0839 jack 0.0094 bootlo -0.0333 p 0.999
+SURV2 A LAUNCH60_d7 | YOUNG30 | T120_TR35_slip15 | P3 || TR 0.0492/-0.1175 n159 k71 || VA 0.1406/-0.1665 n139 k76 || ctrl -0.0619 jack 0.0347 bootlo -0.0341 p 0.982
+SURV2 A HOUR2_8 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.1244/-0.0782 n59 k19 || VA 0.1038/-0.1093 n71 k21 || ctrl -0.0008 jack 0.0584 bootlo -0.0343 p 0.874
+SURV2 A LAUNCH60_d6 | YOUNG30 | T60_TR25_slip15 | P3 || TR 0.0087/-0.1515 n172 k67 || VA 0.8571/-0.1555 n181 k74 || ctrl -0.0008 jack 0.0095 bootlo -0.0346 p 0.845
+SURV2 B LAUNCH60_t1__MEDRET60_t3 | BELOWOPEN | T5 | P1 || TR 0.5146/-0.0304 n280 k66 || VA 0.0528/-0.0131 n350 k61 || ctrl -0.1211 jack 0.0051 bootlo -0.0349 p 1.000
+SURV2 A MEDRET60_d2 | YOUNG30 | T60_TR25_slip15 | P1 || TR 0.0088/-0.2180 n198 k90 || VA 0.5630/-0.2108 n203 k106 || ctrl 0.0044 jack 0.1886 bootlo -0.0349 p 0.905
+SURV2 A NEWL60_d9 | ANY | T60_TR25_slip15 | P2 || TR 0.0067/-0.0885 n325 k80 || VA 0.0202/-0.0533 n283 k104 || ctrl -0.0049 jack 0.0013 bootlo -0.0351 p 0.739
+SURV2 B COHVOL15_t1__NEWL60_t3 | R5DN | T5 | P1 || TR 0.0131/-0.0189 n47 k25 || VA 0.0327/-0.0201 n100 k42 || ctrl -0.1211 jack 0.0019 bootlo -0.0359 p 1.000
+HARD2: 1
+HARD2 A ALL | YOUNG30 | T60_TR25_slip15 | P3 va 0.0604 bootlo 0.0040 ctrl -0.0008
+TOTAL COMBOS SWEEP2 40920

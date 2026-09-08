@@ -148,3 +148,96 @@ nothing here crawls.
 free/keyless data only, on a fixed host allowlist. The agent is never backtested. Every proposal is a
 falsifiable forward commitment; the realised R-multiple is the only evidence, and it is not yet
 evidence of anything.*
+
+---
+
+## FEED HEALTH — DEGRADED for live-session coverage (T41 verdict, 2026-09-01 00:00 CEST)
+
+Measured 2026-08-31 ~22:00 UTC (after the close of a full Monday US session), via
+`newsdesk read` per-source enumeration:
+
+| source | last item in pull | live-session items |
+|---|---|---|
+| SEC_8K | **none in pull** (0 items) | 0 |
+| YAHOO_RSS | 2026-08-30 22:25 UTC | 0 |
+| GOOGLE_NEWS | 2026-08-30 23:00 UTC | 0 |
+
+Zero items dated either of the two most recent trading days (Fri 2026-08-28 and Mon
+2026-08-31); 33 items dated the intervening weekend (listicles/opinion). The feed
+delivers stale weekend content and misses trading-day news entirely.
+
+**Consequence (binding on CHUNK C ticks until repaired):** an abstention from this feed
+is a PROCESS record, not evidence of "no asymmetric setup today". A propose tick must
+first check the pull contains items dated the live session; if not, log the abstention
+as **FEED BLIND**, not as a judged no-news day. Repair task: `T42_newsdesk_feed_repair`
+in `scripts/agent_graph/agenda.json`.
+
+**Addendum (2026-09-01 06:00 CEST tick, measured 04:05 UTC):** the blindness is
+narrower than the T41 table suggested. This overnight pull contained **39/60 items
+stamped within the previous ~4 hours** (Mon 31 Aug evening ET, post-close: the AMZN FTC
+suit, the Apple CEO handoff, TSLA HK, AVGO earnings previews) — so an early-UTC read
+DOES see fresh post-close/overnight news and can render a JUDGED abstention/proposal.
+What remains broken: **SEC_8K = 0 items in every pull so far**, and **zero items
+timestamped during the intraday session itself** (the T41 gap — RSS publish times
+cluster in the evening). Scope T42 to (a) the dead SEC 8-K feed and (b) intraday-hour
+coverage, not to a wholesale rebuild; and time propose ticks that want freshness to
+early-UTC hours, where the feed is demonstrably live.
+
+## FAULT + FIX 2026-09-02 (CHUNK C tick, 18:00 CEST) — the eyes were reading the wrong day
+
+`world_reader.read_world()` ordered the merged event stream with
+`events.sort(key=lambda e: e["ts"], reverse=True)` — a **raw string sort over two incompatible
+timestamp formats**. The RSS feeds (Yahoo, Google News) emit RFC-822 (`"Wed, 02 Sep 2026 15:33:00
++0000"`); SEC EDGAR emits ISO-8601 (`"2026-09-02T15:02:44-04:00"`). Two consequences, both silent:
+
+1. **Ordered by weekday name, not by time.** Reverse-lexicographic on `"Wed" > "Tue" > "Thu" > ...`
+   put a 2026-07-29 item at the *top* of the 2026-09-02 stream. The first ~60 rows the proposer brain
+   ever saw were up to five weeks stale.
+2. **The SEC 8-K feed was invisible.** ISO strings start with a digit, which sorts below every
+   letter-prefixed RFC-822 string, so all 40 8-Ks — the only hard, non-commentary feed — landed at the
+   very bottom, past the default `--limit 60`. Every newsdesk tick since the 2026-08-23 freeze
+   proposed without ever seeing a single material-event filing.
+
+**Fix (this tick):** added `_ts_utc()` (ISO via `fromisoformat`, RFC-822 via
+`email.utils.parsedate_to_datetime`, naive→UTC, unparseable→sorts last, never dropped), added a
+normalized `ts_utc` field to every event, and sort on the parsed datetimes. Verified: post-fix the
+top-120 window is entirely within the last hour and the 8-K feed is present. `newsdesk selftest`
+→ `ALL_PASSED: true`.
+
+**Scope:** this touches the READING surface only. Event `id` is `sha256(source|headline|link)` and
+does not include the timestamp, so ids are stable and the existing ledger references still resolve.
+No frozen rule, no proposal, no resolution and no scoring path was modified.
+
+**Scoring caveat — a regime break, not a retraction.** Every proposal frozen *before*
+2026-09-02T16:00Z was generated from the stale-ordered stream; post-fix proposals come from a
+materially different input distribution. Those are two regimes and **must not be pooled naively**.
+The pre-fix rows stay in the ledger (they were honestly forward-frozen and the freeze-before-outcome
+property is intact) — but the running expectancy (−0.474R over 2 resolved of 30) is now a number
+about a *broken* reader, and the forward clock on the hypothesis-as-intended effectively starts here.
+
+**Second, unfixed caveat — `tickers` is feed attribution, not subject attribution.** Yahoo's
+per-ticker RSS returns generic syndicated content, so items are tagged with the feed they came from,
+not what they are about: on 2026-09-02 a Fulton Financial dividend screen was tagged `META`, a
+Netcompany shareholder notice `NVDA`, a FORVIA buyback `AMZN`. The proposer must read the headline,
+never the tag. Left as-is rather than guessed at; recorded so it is not mistaken for signal.
+
+## FAULT + FIX 2026-09-03 — false ticker attribution (second data-path fault)
+
+`world_reader.read_yahoo_headlines()` pulls Yahoo's **per-ticker** headline RSS across the 18-name
+frozen watchlist and tagged every returned item with the ticker whose feed it came from. That feed
+returns general market news, so the tag was *subscription provenance*, not attribution. Measured on
+the live 2026-09-03 00:00 pull: **10 of 19 ticker tags were false (53%)** — e.g. "Why Goldgroup
+Mining Stock Soared" tagged NVDA, "Broadcom's Outlook Weighs on Stock" tagged GOOGL while AVGO went
+untagged.
+
+`tickers` is the join key between a headline and the tradable universe — what the proposing agent
+reads to decide which instrument a story is about — so a false tag invites a frozen proposal on a
+name that had no news. Nothing outside `world_reader` consumes the field, so the blast radius is the
+agent's discretionary read (which is the entire instrument).
+
+**Fix, reading surface only:** subscription provenance moves to a new `feed_ticker` field; `tickers`
+now means *mentioned* and survives only on a word-boundary symbol match or a company-name alias
+(`_TICKER_ALIASES`). Event ids `sha256(source|headline|link)` are unchanged, so all ledger references
+still resolve; no frozen rule, proposal, resolution or scoring path was touched. `selftest` gains
+`ticker_attribution_verified` → ALL_PASSED. This lands inside the not-yet-scored 09-02 regime, so no
+additional regime break is stamped; the 09-02 pre/post pooling ban still stands.

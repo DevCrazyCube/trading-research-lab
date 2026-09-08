@@ -1,0 +1,19 @@
+{
+ "empirical_null": {
+  "reps": 40,
+  "k": 60,
+  "nominal_bar": 2.8615885665909766,
+  "empirical_mean_max_abs_t": 2.6602257838719923,
+  "empirical_p90_max_abs_t": 3.222502516270583,
+  "t_sampling_sd": 1.0592255991932586,
+  "inflation_vs_nominal": 0.9296325177316218
+ },
+ "effective_n": {
+  "n_formulas": 60,
+  "mean_abs_pairwise_corr": 0.15435940945074347,
+  "effective_independent_bets": 15.15890466071711,
+  "bar_at_effective_N": 2.3317753432405706,
+  "n_eigen_above_1": 17,
+  "top_eigen_share": 0.19738048446026477
+ }
+}

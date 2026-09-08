@@ -1,0 +1,8 @@
+creates kept (h in 1,2) 22561
+mints with prior 22561
+tape mints with prior info 2314
+prior_creates dist [  3.    16.    39.    63.35 223.61] frac>0 0.6694036300777874
+snapshot lines 23004 tape mints with snapshot 0
+full-history fraction 0.2631800927878532
+tape mints in grad_ohlcv 77 with bars 61
+saved meta for 2371

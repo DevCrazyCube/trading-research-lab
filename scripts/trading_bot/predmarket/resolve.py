@@ -44,18 +44,38 @@ def fee_only(venue: str, p: float, spec: dict) -> float:
 
 
 def fetch_settlement(venue: str, market_id: str) -> dict:
-    """Return {'resolved': bool, 'yes_outcome': 0|1|None, 'raw_status': str, 'settled_utc': str|None}."""
+    """Return {'resolved': bool, 'yes_outcome': 0|1|None, 'raw_status': str, 'settled_utc': str|None}.
+
+    Two failure shapes are reported as flags instead of raised, so the pass can log them (T43,
+    "never silently dropped"): `vanished` (the venue read API 404s the id) and `ambiguous_close`
+    (the venue says closed/settled but the outcome cannot be read as a definite YES/NO)."""
     if venue == "kalshi":
-        data = http_get_json(KALSHI_MARKET.format(ticker=market_id))
+        try:
+            data = http_get_json(KALSHI_MARKET.format(ticker=market_id))
+        except Refused as exc:
+            if "HTTP 404" in str(exc):
+                return {"resolved": False, "yes_outcome": None, "vanished": True,
+                        "raw_status": "HTTP 404 -- market vanished from the venue read API",
+                        "settled_utc": None}
+            raise
         m = data.get("market", {})
         status = m.get("status")
         result = (m.get("result") or "").lower()
         resolved = status in ("settled", "finalized", "closed") and result in ("yes", "no")
         yes_outcome = (1 if result == "yes" else 0) if result in ("yes", "no") else None
+        ambiguous = status in ("settled", "finalized") and result not in ("yes", "no")
         return {"resolved": bool(resolved), "yes_outcome": yes_outcome, "raw_status": status,
+                "ambiguous_close": ambiguous,
                 "settled_utc": m.get("expiration_time") or m.get("close_time")}
     if venue == "polymarket":
-        m = http_get_json(POLY_MARKET.format(id=market_id))
+        try:
+            m = http_get_json(POLY_MARKET.format(id=market_id))
+        except Refused as exc:
+            if "HTTP 404" in str(exc):
+                return {"resolved": False, "yes_outcome": None, "vanished": True,
+                        "raw_status": "HTTP 404 -- market vanished from the venue read API",
+                        "settled_utc": None}
+            raise
         closed = bool(m.get("closed"))
         import json as _json
         try:
@@ -73,7 +93,10 @@ def fetch_settlement(venue: str, market_id: str) -> dict:
             except (TypeError, ValueError):
                 yes_outcome = None
         resolved = closed and yes_outcome is not None
+        uma = (m.get("umaResolutionStatus") or "").lower()
+        ambiguous = closed and yes_outcome is None and uma in ("resolved", "settled")
         return {"resolved": bool(resolved), "yes_outcome": yes_outcome,
+                "ambiguous_close": ambiguous,
                 "raw_status": m.get("umaResolutionStatus") or ("closed" if closed else "open"),
                 "settled_utc": m.get("closedTime") or m.get("endDate")}
     raise Refused(f"unknown venue {venue!r} for settlement")
@@ -95,15 +118,20 @@ def _hypothetical_pnl(estimate: dict, outcome: int, spec: dict):
     return round(gross - fee, 4), round(fee, 4)
 
 
-def resolve_estimate(estimate: dict, spec: dict, *, now_utc: str = None) -> dict:
-    """Resolve one OPEN estimate against the venue's official settlement. Returns a resolution record."""
+def resolve_estimate(estimate: dict, spec: dict, *, now_utc: str = None, settlement: dict = None) -> dict:
+    """Resolve one OPEN estimate against the venue's official settlement. Returns a resolution record.
+
+    `settlement` lets `resolve_pass` share one fetch across duplicate freezes of the same market."""
     now = now_utc or dt.datetime.now(dt.timezone.utc).isoformat()
-    settle = fetch_settlement(estimate["venue"], estimate["market_id"])
+    settle = settlement if settlement is not None \
+        else fetch_settlement(estimate["venue"], estimate["market_id"])
 
     if not settle["resolved"]:
         return {"kind": "resolution", "status": "PENDING",
                 "estimate_sha256": estimate["estimate_sha256"], "venue": estimate["venue"],
                 "market_id": estimate["market_id"], "raw_status": settle["raw_status"],
+                "vanished": bool(settle.get("vanished")),
+                "ambiguous_close": bool(settle.get("ambiguous_close")),
                 "note": "market not yet officially resolved; leaving OPEN"}
 
     outcome = int(settle["yes_outcome"])
@@ -128,3 +156,58 @@ def resolve_estimate(estimate: dict, spec: dict, *, now_utc: str = None) -> dict
                              "calibration-competitive but not decisively better, expectancy near zero "
                              "by fees"),
     }
+
+
+def resolve_pass(spec: dict) -> dict:
+    """The mechanical settlement-harvesting pass (T43). Runs from `resolve` AND, first, from `pull`,
+    so every tick that looks at markets settles the open book before proposing anything -- resolution
+    no longer depends on an agent choosing to run it.
+
+    One settlement fetch per unique (venue, market_id); duplicate freezes share it. A market that
+    VANISHED from the venue read API (HTTP 404) or closed with an unreadable outcome gets ONE dated
+    UNRESOLVABLE_NOTE in the resolution log -- never silently dropped -- and stays OPEN for retry."""
+    from . import ledger
+    ledger.verify_preregistration_hashes(ledger.read_preregistrations())
+    state = ledger.load_state(spec)
+    open_es = ledger.open_estimates()
+    noted = {r["estimate_sha256"] for r in ledger.read_resolutions()
+             if r.get("status") == "UNRESOLVABLE_NOTE"}
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
+    cache: dict = {}
+    results, n_new = [], 0
+    for est in open_es:
+        key = (est["venue"], est["market_id"])
+        if key not in cache:
+            try:
+                cache[key] = fetch_settlement(est["venue"], est["market_id"])
+            except Refused as exc:
+                cache[key] = exc
+        settle = cache[key]
+        if isinstance(settle, Refused):
+            rec = {"kind": "resolution", "status": "ERROR", "estimate_sha256": est["estimate_sha256"],
+                   "venue": est["venue"], "market_id": est["market_id"], "refused": str(settle)}
+        else:
+            rec = resolve_estimate(est, spec, settlement=settle)
+        if rec.get("status") == "RESOLVED":
+            ledger.append_resolution(rec)
+            n_new += 1
+            if est["estimate_sha256"] not in state["resolved_estimate_hashes"]:
+                state["resolved_estimate_hashes"].append(est["estimate_sha256"])
+        elif rec.get("status") == "PENDING" and (rec.get("vanished") or rec.get("ambiguous_close")) \
+                and est["estimate_sha256"] not in noted:
+            note = {"kind": "resolution", "status": "UNRESOLVABLE_NOTE", "noted_utc": now,
+                    "estimate_sha256": est["estimate_sha256"], "venue": est["venue"],
+                    "market_id": est["market_id"], "raw_status": rec["raw_status"],
+                    "note": ("market vanished from the venue read API" if rec.get("vanished") else
+                             "venue reports the market closed/settled but the outcome is unreadable"),
+                    "consequence": "estimate stays OPEN and is retried every pass; not silently dropped"}
+            ledger.append_resolution(note)
+            noted.add(est["estimate_sha256"])
+        results.append({"market_id": rec["market_id"], "status": rec["status"],
+                        "yes_outcome": rec.get("yes_outcome"),
+                        "brier_agent": rec.get("brier_agent"), "brier_market": rec.get("brier_market"),
+                        "note": rec.get("note") or rec.get("refused")})
+    ledger.save_state(state)
+    return {"n_open_before": len(open_es), "n_newly_resolved": n_new,
+            "n_unique_markets_checked": len(cache),
+            "n_unresolvable_noted": len(noted), "results": results}

@@ -1,0 +1,70 @@
+{
+  "benchmark_entered": true,
+  "created_utc": "2026-08-17T11:21:39.224707+00:00",
+  "cum_cost_fraction": 5.206645094331302e-07,
+  "curves": {
+    "benchmark": 1.0035700730805053,
+    "model_excash": 1.00299997585501,
+    "model_withcash": 1.0034725117769985
+  },
+  "inception_date": "2026-08-17",
+  "last_settled_date": "2026-09-04",
+  "maxdd": {
+    "benchmark": 0.0120866294903385,
+    "model_excash": 0.008734522538923727,
+    "model_withcash": 0.008592327845941416
+  },
+  "peaks": {
+    "benchmark": 1.0074530614571133,
+    "model_excash": 1.0060181440714386,
+    "model_withcash": 1.0064691164705495
+  },
+  "pending_order": null,
+  "pending_weights": {
+    "2026-09-04": {
+      "reference_close_date": "2026-09-03",
+      "weight": 0.7705201363969301
+    },
+    "2026-09-07": {
+      "reference_close_date": "2026-09-04",
+      "weight": 0.7964492755998395
+    },
+    "2026-09-08": {
+      "reference_close_date": "2026-09-04",
+      "weight": 0.7964492755998395
+    }
+  },
+  "prev_weight": 0.778379832754843,
+  "rule": {
+    "L": 60,
+    "heldout_window": [
+      "1990-01-02",
+      "2026-08-14"
+    ],
+    "rule_id": "T13-VOL-L60-T0.1-WMAX1.0",
+    "status": "DEAD ON T13's FROZEN GATE. Positive-signed in every decade and configuration, p = 0.233 on the drawdown gate, DSR = 0.355. Run forward because it cannot honestly be re-run backward, not because it was certified.",
+    "t13_frozen_config_sha256": "42ef30e1c30c5407159d1c553e5e47d6c581acf8678f853f89fc23d885c072a0",
+    "t13_preregistration_sha256": "0eda5f7aa65b91cc5532b5ba734d5168746a9fb5b65548a3457b2b7e407745da",
+    "target": 0.1,
+    "timing_convention": "T13-L1: exposure for day t uses closes through t-2",
+    "wmax": 1.0
+  },
+  "schema_version": 1,
+  "sessions_settled": 13,
+  "symbol": "SPY",
+  "weight_changes": {
+    "2026-08-19": 0.7287301117074827,
+    "2026-08-20": 0.7243843297450895,
+    "2026-08-21": 0.7250870307762838,
+    "2026-08-24": 0.7218579293097207,
+    "2026-08-25": 0.7207972991521254,
+    "2026-08-26": 0.7220551458186673,
+    "2026-08-27": 0.7217721549189725,
+    "2026-08-28": 0.7222465365290234,
+    "2026-08-31": 0.7192520745299694,
+    "2026-09-01": 0.7230079528480879,
+    "2026-09-02": 0.7230556602123794,
+    "2026-09-03": 0.7795547868012842,
+    "2026-09-04": 0.778379832754843
+  }
+}

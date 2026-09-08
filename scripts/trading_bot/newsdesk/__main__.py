@@ -16,20 +16,89 @@ Placing NO orders, holding NO position, touching NO account or real money. Free 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 
 from . import Refused
-from .frozen import frozen_spec, FRAMING
+from .frozen import frozen_spec, FRAMING, CACHE
+
+RECEIPT_PATH = CACHE / "last_read_receipt.json"
 from . import world_reader, proposer, ledger, resolve as resolver, scoring, prices
+
+
+def _stratified(events: list, limit: int) -> list:
+    """Take `limit` events with EVERY feed represented, newest-first within each feed.
+
+    A plain events[:limit] on a globally recency-sorted stream is a data-path fault, not a display
+    choice: the highest-volume feed crowds the window and a whole low-volume feed can end up 0%
+    visible to the agent that proposes off it (measured 2026-09-03: SEC_8K 7/40 shown, GOOGLE_NEWS
+    0/15). Round-robin across feeds so representation is structural, not luck-of-the-timestamp.
+    """
+    by = {}
+    for e in events:
+        by.setdefault(e["source"], []).append(e)
+    order, out, idx = sorted(by), [], 0
+    while len(out) < limit and any(idx < len(by[s]) for s in order):
+        for s in order:
+            if idx < len(by[s]) and len(out) < limit:
+                out.append(by[s][idx])
+        idx += 1
+    return out
+
+
+_COMPACT_FIELDS = ("id", "source", "ts_utc", "headline", "tickers", "assets")
+
+
+def _tape_receipt(stream: dict, shown: list, shown_counts: dict) -> dict:
+    """The coverage receipt for ONE read -- what fraction of the tape the agent's eyes actually saw.
+
+    T56 (filed 2026-09-05, discharged 2026-09-06): every discretionary read to date reasoned over a
+    ~16% display slice of the stream and NO prereg record said so -- a green decision path over a
+    quietly clipped input surface, the T52 failure shape on a live instrument. The receipt is written
+    on every read and stapled INTO the hashed body of every subsequent proposal, so the coverage claim
+    is part of the tamper-evident forward commitment and can never be implicit again.
+
+    tape_sha256 fingerprints the exact deduped tape that was read (sorted event ids), so a later
+    reader can prove which stream a setup was reasoned over.
+    """
+    n_events = stream["n_events"]
+    ids = sorted(e["id"] for e in stream["events"])
+    return {
+        "pulled_utc": stream["pulled_utc"],
+        "n_raw_prededupe": stream.get("n_raw"),
+        "n_events": n_events,
+        "n_shown": len(shown),
+        "coverage_pct": round(100.0 * len(shown) / n_events, 2) if n_events else None,
+        "feed_counts_raw_prededupe": stream["feed_counts"],
+        "shown_counts": shown_counts,
+        "feed_errors": stream["feed_errors"],
+        "tape_sha256": hashlib.sha256("\n".join(ids).encode()).hexdigest(),
+    }
 
 
 def cmd_read(spec, args) -> int:
     stream = world_reader.read_world(spec)
-    # Print a compact digest (full event bodies are large); cache nothing to the ledger (eyes only).
-    digest = {"pulled_utc": stream["pulled_utc"], "feed_counts": stream["feed_counts"],
-              "feed_errors": stream["feed_errors"], "n_events": stream["n_events"],
-              "events": stream["events"][:args.limit]}
+    shown = _stratified(stream["events"], args.limit)
+    shown_counts = {}
+    for e in shown:
+        shown_counts[e["source"]] = shown_counts.get(e["source"], 0) + 1
+    receipt = _tape_receipt(stream, shown, shown_counts)
+    # Persist the receipt so `propose` can staple it to the record. Eyes-only stream, but the
+    # COVERAGE of those eyes is evidence and is kept.
+    RECEIPT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RECEIPT_PATH.write_text(json.dumps(receipt, sort_keys=True, indent=2, default=str) + "\n")
+
+    body = shown if args.full else [{k: e.get(k) for k in _COMPACT_FIELDS} for e in shown]
+    digest = dict(receipt)
+    digest["mode"] = "full" if args.full else "compact"
+    if receipt["n_shown"] < receipt["n_events"]:
+        digest["COVERAGE_WARNING"] = (
+            f"TRUNCATED TAPE: you are seeing {receipt['n_shown']} of {receipt['n_events']} events "
+            f"({receipt['coverage_pct']}%). Any abstention or setup you propose off this read is "
+            f"reasoned over a partial input surface. Re-run with --limit {receipt['n_events']} for "
+            f"the whole tape.")
+    digest["events"] = body
     json.dump(digest, sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")
     return 0
@@ -134,7 +203,11 @@ def main(argv=None) -> int:
                                 description=__doc__.split("\n\n")[0])
     sub = p.add_subparsers(dest="command", required=True)
     r = sub.add_parser("read", help="pull today's free event stream")
-    r.add_argument("--limit", type=int, default=60)
+    # Default is the WHOLE deduped tape, compactly: T56 showed a 60-event default made every past
+    # read a ~16% slice. --full restores snippet/link bodies (~3.5x the bytes) for a narrow --limit.
+    r.add_argument("--limit", type=int, default=1000)
+    r.add_argument("--full", action="store_true",
+                   help="include snippet+link bodies (large); default is a compact field set")
     sp = sub.add_parser("spot", help="current free prices for sizing")
     sp.add_argument("symbols", nargs="+")
     pr = sub.add_parser("propose", help="validate+freeze+log agent proposals (or an abstention)")

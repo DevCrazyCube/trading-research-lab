@@ -1,0 +1,121 @@
+n exits 140 n core 14 n prims 236
+controls done 2.5129716396331787
+
+=== STAGE 1 ===
+stage1 evals 32900 kept 32617 t 63.35941505432129
+--- top 40 by train dmed ---
+age_min<=5               H= 60 tp=1 sl=-1 pa=0 | med=  18.63 dmed= 29.12 mean=  -17.00 dmean=   -0.75 trim= -14.66 dtrim=  0.11 fpos= 58.5 k=130 n=130 res=95.4
+age_min<=5               H= 30 tp=1 sl=-1 pa=0 | med=  18.63 dmed= 26.61 mean=  -16.62 dmean=   -1.33 trim= -14.25 dtrim= -0.82 fpos= 58.5 k=130 n=130 res=96.2
+age_min<=5               H= 60 tp=1 sl=2 pa=0 | med=  12.23 dmed= 23.18 mean=  -10.75 dmean=    2.81 trim= -10.22 dtrim=  2.94 fpos= 54.6 k=130 n=130 res=99.2
+rvol20<=0.02             H=120 tp=-1 sl=-1 pa=0 | med=  -5.95 dmed= 20.26 mean=  -20.35 dmean=    2.56 trim= -20.62 dtrim=  5.50 fpos= 24.5 k=53 n=155 res=91.6
+rvol20<=0.01             H= 90 tp=-1 sl=-1 pa=0 | med=  -4.26 dmed= 19.48 mean=  -26.63 dmean=   -2.93 trim= -26.19 dtrim= -2.76 fpos= 25.8 k=31 n=76 res=93.4
+age_min<=5               H= 60 tp=0 sl=-1 pa=0 | med=   8.75 dmed= 19.37 mean=  -13.13 dmean=    2.96 trim=  -9.97 dtrim=  4.49 fpos= 70.0 k=130 n=130 res=95.4
+rvol20<=0.01             H=120 tp=-1 sl=-1 pa=0 | med=  -7.63 dmed= 18.57 mean=  -28.21 dmean=   -5.30 trim= -28.42 dtrim= -2.30 fpos= 22.6 k=31 n=66 res=92.4
+rvol20<=0.02             H= 90 tp=-1 sl=-1 pa=0 | med=  -5.22 dmed= 18.52 mean=  -18.32 dmean=    5.38 trim= -17.35 dtrim=  6.08 fpos= 26.4 k=53 n=190 res=92.6
+range_now<=0.005         H=120 tp=-1 sl=-1 pa=0 | med=  -7.71 dmed= 18.49 mean=   -9.69 dmean=   13.22 trim=  -9.87 dtrim= 16.25 fpos= 18.1 k=94 n=323 res=88.5
+rvol20<=0.05             H=120 tp=-1 sl=-1 pa=0 | med=  -7.85 dmed= 18.35 mean=  -19.92 dmean=    2.99 trim= -20.10 dtrim=  6.02 fpos= 16.9 k=77 n=340 res=89.1
+age_min<=5               H= 30 tp=0 sl=-1 pa=0 | med=   8.75 dmed= 18.27 mean=  -12.93 dmean=    2.20 trim=  -9.75 dtrim=  3.48 fpos= 69.2 k=130 n=130 res=96.2
+age_min<=5               H= 15 tp=0 sl=-1 pa=0 | med=   8.75 dmed= 17.45 mean=  -12.42 dmean=    1.16 trim=  -9.21 dtrim=  2.71 fpos= 66.9 k=130 n=130 res=96.2
+range_now<=0.005         H= 90 tp=-1 sl=-1 pa=0 | med=  -6.48 dmed= 17.26 mean=   -8.76 dmean=   14.94 trim=  -9.16 dtrim= 14.26 fpos= 14.9 k=94 n=382 res=90.3
+age_min<=5               H= 10 tp=0 sl=-1 pa=0 | med=   8.75 dmed= 16.63 mean=  -12.79 dmean=    0.48 trim=  -9.58 dtrim=  1.95 fpos= 66.2 k=130 n=130 res=97.7
+rvol20<=0.05             H= 90 tp=-1 sl=-1 pa=0 | med=  -7.75 dmed= 15.99 mean=  -18.24 dmean=    5.45 trim= -17.19 dtrim=  6.24 fpos= 15.6 k=77 n=412 res=90.8
+gap_prev>5               H=120 tp=-1 sl=-1 pa=0 | med= -11.00 dmed= 15.21 mean=  -12.47 dmean=   10.44 trim= -15.55 dtrim= 10.57 fpos= 10.3 k=145 n=489 res=81.4
+age_min<=5               H= 30 tp=1 sl=2 pa=0 | med=   5.88 dmed= 15.08 mean=  -10.53 dmean=    1.92 trim=  -9.98 dtrim=  1.97 fpos= 54.6 k=130 n=130 res=99.2
+rvol20<=0.1              H=120 tp=-1 sl=-1 pa=0 | med= -11.41 dmed= 14.80 mean=  -23.79 dmean=   -0.88 trim= -23.98 dtrim=  2.14 fpos= 12.9 k=85 n=419 res=88.1
+maxgap20>5               H=120 tp=-1 sl=-1 pa=0 | med= -11.51 dmed= 14.70 mean=  -12.81 dmean=   10.10 trim= -15.60 dtrim= 10.52 fpos= 10.3 k=146 n=493 res=81.1
+age_min<=5               H= 60 tp=2 sl=-1 pa=0 | med=   2.77 dmed= 14.66 mean=  -14.68 dmean=    2.52 trim= -12.84 dtrim=  2.73 fpos= 52.3 k=130 n=130 res=94.6
+rvol20<=0.01             H= 60 tp=-1 sl=-1 pa=0 | med=  -3.01 dmed= 14.53 mean=  -27.59 dmean=   -8.02 trim= -26.78 dtrim= -6.57 fpos= 22.6 k=31 n=98 res=96.9
+age_min>240              H=120 tp=-1 sl=-1 pa=0 | med= -11.79 dmed= 14.41 mean=   -8.71 dmean=   14.19 trim= -15.23 dtrim= 10.89 fpos=  8.0 k=113 n=405 res=79.3
+notional20<=5            H=120 tp=-1 sl=-1 pa=0 | med= -11.79 dmed= 14.41 mean=  -11.73 dmean=   11.18 trim= -15.38 dtrim= 10.74 fpos= 10.9 k=101 n=300 res=82.7
+vol_now<=10              H=120 tp=-1 sl=-1 pa=0 | med= -11.96 dmed= 14.24 mean=  -13.78 dmean=    9.13 trim= -16.02 dtrim= 10.11 fpos= 14.1 k=156 n=534 res=83.5
+rvol20<=0.01             H= 60 tp=-1 sl=3 pa=0 | med=  -3.01 dmed= 14.20 mean=  -21.36 dmean=   -3.10 trim= -21.03 dtrim= -0.99 fpos= 29.0 k=31 n=139 res=98.6
+volrel20>16              H=120 tp=-1 sl=-1 pa=0 | med= -12.03 dmed= 14.17 mean=  -15.47 dmean=    7.43 trim= -16.13 dtrim= 10.00 fpos= 12.5 k=72 n=173 res=85.0
+gap_prev>3               H=120 tp=-1 sl=-1 pa=0 | med= -12.13 dmed= 14.07 mean=  -13.41 dmean=    9.49 trim= -15.96 dtrim= 10.16 fpos= 10.1 k=149 n=512 res=80.9
+vol_now<=1               H=120 tp=-1 sl=-1 pa=0 | med= -12.20 dmed= 14.00 mean=  -11.71 dmean=   11.20 trim= -14.82 dtrim= 11.30 fpos= 12.5 k=152 n=456 res=81.8
+notional20<=0.5          H=120 tp=-1 sl=-1 pa=0 | med= -12.39 dmed= 13.82 mean=   -9.88 dmean=   13.03 trim= -12.86 dtrim= 13.26 fpos= 20.7 k=29 n=56 res=71.4
+rvol20<=0.02             H= 60 tp=-1 sl=2 pa=0 | med=  -2.62 dmed= 13.78 mean=   -7.72 dmean=    7.17 trim=  -7.77 dtrim=  9.01 fpos= 34.0 k=53 n=374 res=96.5
+rvol20<=0.01             H= 60 tp=-1 sl=2 pa=0 | med=  -2.72 dmed= 13.68 mean=  -12.70 dmean=    2.19 trim= -12.77 dtrim=  4.01 fpos= 32.3 k=31 n=235 res=99.1
+gap_prev>30              H=120 tp=-1 sl=-1 pa=0 | med= -12.58 dmed= 13.62 mean=  -10.01 dmean=   12.89 trim= -15.54 dtrim= 10.58 fpos=  7.0 k=128 n=330 res=75.2
+density20<=0.25          H=120 tp=-1 sl=-1 pa=0 | med= -12.61 dmed= 13.60 mean=  -13.98 dmean=    8.93 trim= -15.68 dtrim= 10.44 fpos=  8.6 k=139 n=456 res=80.0
+rangerel20>8             H=120 tp=-1 sl=-1 pa=0 | med= -12.65 dmed= 13.55 mean=   -2.41 dmean=   20.50 trim= -17.22 dtrim=  8.90 fpos= 21.6 k=102 n=199 res=85.9
+rvol20<=0.1              H= 90 tp=-1 sl=-1 pa=0 | med= -10.36 dmed= 13.38 mean=  -21.27 dmean=    2.43 trim= -20.25 dtrim=  3.17 fpos= 11.8 k=85 n=511 res=90.2
+age_min<=5               H= 15 tp=1 sl=-1 pa=0 | med=   5.04 dmed= 13.33 mean=  -16.18 dmean=   -2.56 trim= -13.80 dtrim= -1.87 fpos= 54.6 k=130 n=130 res=96.2
+notional20<=5            H= 90 tp=-1 sl=-1 pa=0 | med= -10.54 dmed= 13.20 mean=  -15.08 dmean=    8.62 trim= -15.36 dtrim=  8.07 fpos= 10.9 k=101 n=333 res=84.4
+rvol20<=0.02             H= 45 tp=-1 sl=-1 pa=0 | med=  -3.29 dmed= 13.19 mean=  -12.58 dmean=    6.29 trim= -10.30 dtrim=  8.78 fpos= 26.4 k=53 n=279 res=94.6
+range_now<=0.02          H=120 tp=-1 sl=-1 pa=0 | med= -13.11 dmed= 13.09 mean=  -19.56 dmean=    3.34 trim= -19.66 dtrim=  6.46 fpos= 13.5 k=126 n=489 res=86.7
+gap_prev>5               H= 90 tp=-1 sl=-1 pa=0 | med= -10.65 dmed= 13.09 mean=  -15.71 dmean=    7.99 trim= -15.25 dtrim=  8.18 fpos=  9.0 k=145 n=555 res=83.4
+
+--- primitives ranked by MEAN dmed across all exits ---
+rvol20<=0.02               meandmed=   6.64 maxdmed=  20.26 nex=140
+rvol20<=0.01               meandmed=   6.24 maxdmed=  19.48 nex=140
+range_now<=0.005           meandmed=   5.65 maxdmed=  18.49 nex=140
+rvol20<=0.05               meandmed=   5.52 maxdmed=  18.35 nex=140
+volshare20>0.6             meandmed=   5.01 maxdmed=   9.33 nex=138
+rvol20<=0.1                meandmed=   4.44 maxdmed=  14.80 nex=140
+volaccel>4                 meandmed=   4.34 maxdmed=   9.00 nex=140
+volrel20>8                 meandmed=   4.31 maxdmed=  12.97 nex=140
+volrel5>16                 meandmed=   4.30 maxdmed=  12.20 nex=140
+rangerel20>8               meandmed=   4.02 maxdmed=  13.55 nex=140
+volrel5>8                  meandmed=   4.02 maxdmed=  11.47 nex=140
+range_now<=0.02            meandmed=   3.92 maxdmed=  13.09 nex=140
+volrel20>4                 meandmed=   3.91 maxdmed=  10.78 nex=140
+volshare20>0.35            meandmed=   3.88 maxdmed=  12.99 nex=140
+ret15>-0.25                meandmed=   3.77 maxdmed=  10.71 nex=140
+ret15>-0.5                 meandmed=   3.71 maxdmed=  11.01 nex=140
+volrel20>16                meandmed=   3.48 maxdmed=  14.17 nex=140
+volrel20>2.5               meandmed=   3.40 maxdmed=  10.05 nex=140
+ret15<=0.25                meandmed=   3.36 maxdmed=  10.89 nex=140
+eff20>0.9                  meandmed=   3.32 maxdmed=   7.95 nex=140
+volaccel>2                 meandmed=   3.20 maxdmed=   8.36 nex=140
+volrel5>4                  meandmed=   3.18 maxdmed=   9.64 nex=140
+ret15>-0.1                 meandmed=   3.18 maxdmed=   7.78 nex=140
+ret15<=0.5                 meandmed=   3.14 maxdmed=  10.82 nex=140
+range_now<=0.05            meandmed=   2.96 maxdmed=   9.31 nex=140
+ret15<=0.1                 meandmed=   2.89 maxdmed=  10.19 nex=140
+volrel5>2.5                meandmed=   2.88 maxdmed=   7.11 nex=140
+volaccel>8                 meandmed=   2.70 maxdmed=  12.04 nex=140
+vol_now<=10                meandmed=   2.64 maxdmed=  14.24 nex=140
+age_min>240                meandmed=   2.63 maxdmed=  14.41 nex=140
+volrel20>1.5               meandmed=   2.50 maxdmed=   5.20 nex=140
+upvolfrac10>0.8            meandmed=   2.46 maxdmed=   4.76 nex=140
+ret15<=0                   meandmed=   2.39 maxdmed=   9.89 nex=140
+rangerel20>4               meandmed=   2.29 maxdmed=   6.47 nex=140
+volrel20>1                 meandmed=   2.28 maxdmed=   4.35 nex=140
+notional20<=5              meandmed=   2.24 maxdmed=  14.41 nex=140
+ret5>-0.08                 meandmed=   2.17 maxdmed=   4.52 nex=140
+volaccel>1                 meandmed=   2.11 maxdmed=   3.72 nex=140
+ret15<=-0.1                meandmed=   2.10 maxdmed=   7.98 nex=140
+ret15>0                    meandmed=   2.08 maxdmed=   4.80 nex=140
+eff20<=0.3                 meandmed=   2.08 maxdmed=   4.45 nex=140
+notional20<=50             meandmed=   2.08 maxdmed=  12.49 nex=140
+ret5>-0.2                  meandmed=   2.07 maxdmed=   5.69 nex=140
+vol_now<=100               meandmed=   2.01 maxdmed=  10.69 nex=140
+eff20>0.7                  meandmed=   1.99 maxdmed=   3.86 nex=140
+eff20<=0.15                meandmed=   1.99 maxdmed=   4.51 nex=140
+vwapdev20>-0.15            meandmed=   1.99 maxdmed=   4.00 nex=140
+maxgap20>1                 meandmed=   1.95 maxdmed=  11.45 nex=140
+gap_prev>1                 meandmed=   1.95 maxdmed=  11.71 nex=140
+upvolfrac10>0.65           meandmed=   1.95 maxdmed=   5.01 nex=140
+
+--- worst 20 (dead regions) ---
+age_min<=60                meandmed=  -3.50 maxdmed=   0.68 nex=140
+maxgap20<=5                meandmed=  -3.61 maxdmed=   1.52 nex=140
+gap_prev>120               meandmed=  -3.82 maxdmed=   7.00 nex=140
+range_now>0.15             meandmed=  -3.84 maxdmed=  -0.74 nex=140
+vwapdev20<=-0.3            meandmed=  -3.93 maxdmed=  -1.51 nex=140
+ret5<=-0.2                 meandmed=  -4.11 maxdmed=  -0.72 nex=140
+range_now>0.4              meandmed=  -4.17 maxdmed=   0.51 nex=140
+age_min<=15                meandmed=  -4.25 maxdmed=   1.61 nex=140
+rvol20>0.1                 meandmed=  -4.31 maxdmed=  -0.99 nex=140
+notional20<=0.5            meandmed=  -4.36 maxdmed=  13.82 nex=140
+maxgap20<=1                meandmed=  -4.48 maxdmed=   3.27 nex=140
+ret15>0.5                  meandmed=  -4.55 maxdmed=   3.67 nex=140
+notional20>500             meandmed=  -4.72 maxdmed=   4.95 nex=140
+maxgap20<=2                meandmed=  -5.06 maxdmed=   1.11 nex=140
+vwapdev20>0.15             meandmed=  -5.16 maxdmed=   2.49 nex=140
+ret1<=-0.2                 meandmed=  -5.52 maxdmed=   0.26 nex=140
+ret5<=-0.4                 meandmed=  -5.81 maxdmed=  -1.07 nex=140
+ret5>0.4                   meandmed=  -6.41 maxdmed=   3.42 nex=140
+age_min<=5                 meandmed=  -7.09 maxdmed=  29.12 nex=140
+vwapdev20>0.3              meandmed= -12.83 maxdmed=  -0.29 nex=140
+COMBOS 32900 t 63.62342643737793

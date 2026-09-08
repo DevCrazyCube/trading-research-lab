@@ -1,0 +1,26 @@
+=== RESERVED HOLDOUT (md5(mint)%%3==0) ===
+mints with >=25 bars: 101  total bars: 19194
+raw signal bars: 2249
+
+--- RULE #3 on reserved holdout ---
+RULE toll1.14 drop-30: n=694 k=96 res=94.67% mean=-6.0633% mintMed=-3.4885% tradeMed=-3.7601% CI95=[-7.807%,-4.433%] CI99.17=[-8.481%,-3.937%] bootP(mean<=0)=1.0000
+RULE toll1.14 drop-50: n=694 k=96 res=94.67% mean=-8.9195% mintMed=-3.7551% tradeMed=-3.7601% CI95=[-11.689%,-6.395%] CI99.17=[-12.756%,-5.694%] bootP(mean<=0)=1.0000
+RULE toll1.14 drop-100: n=694 k=96 res=94.67% mean=-16.0600% mintMed=-4.4699% tradeMed=-3.7601% CI95=[-21.533%,-11.179%] CI99.17=[-23.547%,-9.940%] bootP(mean<=0)=1.0000
+RULE toll2.50 drop-30: n=694 k=96 res=94.67% mean=-7.3556% mintMed=-4.8162% tradeMed=-5.0840% CI95=[-9.075%,-5.748%] CI99.17=[-9.740%,-5.258%] bootP(mean<=0)=1.0000
+RULE toll2.50 drop-50: n=694 k=96 res=94.67% mean=-10.1725% mintMed=-5.0791% tradeMed=-5.0840% CI95=[-12.904%,-7.683%] CI99.17=[-13.957%,-6.992%] bootP(mean<=0)=1.0000
+RULE toll2.50 drop-100: n=694 k=96 res=94.67% mean=-17.2147% mintMed=-5.7841% tradeMed=-5.0840% CI95=[-22.613%,-12.401%] CI99.17=[-24.599%,-11.179%] bootP(mean<=0)=1.0000
+
+--- MATCHED RANDOM-ENTRY CONTROL (same reserved mints, same structure, same #trades/mint) ---
+CONTROL toll1.14 drop-30: reps=400 avg_n=677 avg_res=99.07% mean=-0.5544% [p5=-1.574%, p95=0.558%] mintMed=-2.1037%
+   -> RULE minus CONTROL = -5.5089 pp ; P(control >= rule) = 1.0000
+CONTROL toll1.14 drop-100: reps=400 avg_n=677 avg_res=99.07% mean=-1.6584% [p5=-3.114%, p95=-0.275%] mintMed=-2.2243%
+CONTROL toll2.50 drop-30: reps=400 avg_n=677 avg_res=99.07% mean=-1.9225% [p5=-2.928%, p95=-0.825%] mintMed=-3.4504%
+CONTROL toll2.50 drop-100: reps=400 avg_n=677 avg_res=99.07% mean=-3.0113% [p5=-4.447%, p95=-1.647%] mintMed=-3.5694%
+
+--- UNCONDITIONAL: same structure on EVERY bar, all reserved mints ---
+UNCOND-ALLBARS toll1.14 drop-30: n=1532 k=101 res=96.08% mean=-4.0090% mintMed=-3.3859% tradeMed=-4.4173% CI95=[-5.076%,-2.964%] CI99.17=[-5.428%,-2.592%] bootP(mean<=0)=1.0000
+
+--- robustness: alternative readings of rvol20/notional20 (holdout) ---
+ALT B incl-i toll1.14 drop-30: n=678 k=96 res=94.54% mean=-5.9025% mintMed=-3.8404% tradeMed=-4.0644% CI95=[-7.732%,-4.173%] CI99.17=[-8.442%,-3.596%] bootP(mean<=0)=1.0000
+ALT C v/sum20 toll1.14 drop-30: n=1207 k=99 res=95.69% mean=-2.9779% mintMed=-2.4378% tradeMed=-4.0845% CI95=[-4.485%,-1.294%] CI99.17=[-4.964%,-0.587%] bootP(mean<=0)=0.9996
+ALT D v/median20 toll1.14 drop-30: n=532 k=94 res=94.17% mean=-6.2269% mintMed=-3.8028% tradeMed=-4.1483% CI95=[-8.239%,-4.325%] CI99.17=[-9.040%,-3.701%] bootP(mean<=0)=1.0000

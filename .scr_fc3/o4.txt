@@ -1,0 +1,9 @@
+h12 curves 22561 0.380448579788208
+reserve_observation rows 333888 1.0869662761688232
+rows on h12 curves 216323 curves touched 2672 6.2424256801605225
+trades per curve: n=2672 min=1 med=6 max=11831
+Traceback (most recent call last):
+  File "/home/anont/meme/.scr_fc3/s4.py", line 43, in <module>
+    print(bc[:8], r[0], ins[0], 'naccts', len(acc), 'dq', r[6] - r[5])
+                                                          ~~~~~^~~~~~
+TypeError: unsupported operand type(s) for -: 'int' and 'NoneType'

@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# durable_tick.sh -- the OS-crontab entrypoint for the durable, self-restarting
+# trading-research supervisor. Called every 3 hours by cronie (see
+# install_durable_cron.sh). Survives Claude-session death, crashes and reboots
+# because the schedule lives in the on-disk user crontab, not in a live session.
+#
+# HARD RULES baked in here: research/paper only. No real money, no orders, no
+# broker auth, no git commit. This script NEVER touches the t4 real-money path.
+#
+# What one tick does:
+#   1. Take an flock so overlapping ticks can't stack.
+#   2. cd into the repo, source .env defensively (guards the line-5 bare-key bug).
+#   3. Run the cheap, self-guarded PURE-PYTHON engines (they refuse on their own
+#      if not due / already ran / market closed) -- no LLM, basically free.
+#   4. Invoke ONE headless Claude for the bounded THINKING chunk, under a hard
+#      timeout so a hang can't wedge the tick. The prompt rotates by hour-of-day.
+#   5. Append a heartbeat line.
+
+set -u
+
+# --- fixed paths (cron has a minimal environment; be explicit) -----------------
+REPO="/home/anont/meme"
+AG="${REPO}/scripts/agent_graph"
+LOGS="${AG}/logs"
+CLAUDE_BIN="/home/anont/.local/bin/claude"
+LOCKFILE="${LOGS}/durable_tick.lock"
+HEARTBEAT="${LOGS}/durable_heartbeat.log"
+PROMPT_FILE="${AG}/supervisor_prompt.txt"
+
+# cron's PATH is minimal -- make python and claude findable.
+export PATH="/home/anont/.local/bin:/usr/local/bin:/usr/bin:/bin"
+export HOME="/home/anont"
+
+mkdir -p "${LOGS}"
+
+# --- single-flight lock --------------------------------------------------------
+# Non-blocking: if a previous tick is still running, log and exit rather than stack.
+exec 9>"${LOCKFILE}"
+if ! flock -n 9; then
+    echo "$(date -Is) SKIP tick=$(date +%H) reason=previous-tick-still-running" >> "${HEARTBEAT}"
+    exit 0
+fi
+
+cd "${REPO}" || { echo "$(date -Is) FATAL cannot cd ${REPO}" >> "${HEARTBEAT}"; exit 1; }
+
+TICK_HOUR="$(date +%H)"
+STAMP="$(date +%Y%m%d)"
+TICK_LOG="${LOGS}/tick_${STAMP}.log"
+
+log() { echo "$(date -Is) $*" | tee -a "${TICK_LOG}"; }
+
+log "==== DURABLE TICK START hour=${TICK_HOUR} pid=$$ ===="
+
+# --- .env handling: SECRETS STAY OUT OF THE HEADLESS-CLAUDE ENVIRONMENT ---------
+# SECURITY (deliberate): we do NOT export .env at the top level. If we did, the
+# headless Claude below would inherit ALPACA / TELEGRAM / SOLANA keys, and a
+# prompt-injection hidden in the untrusted web content the agents read could
+# exfiltrate them. Instead .env is sourced ONLY inside each pure-python engine's
+# own subshell (see run_py). The thinking agent never sees the secrets and does
+# not need them. (.env line-5 bare-key bug is still handled by the KEY=VALUE grep.)
+if [ -f "${REPO}/.env" ]; then
+    log "env will be sourced per-engine only (secrets kept OUT of the claude env)"
+else
+    log "no .env present"
+fi
+
+# --- pure-python engines: cheap, free, self-guarded ----------------------------
+# Each of these refuses on its own if it isn't due / already ran / market closed.
+# `|| true` so a single engine's guard-exit never aborts the tick.
+PY_RAN=""
+run_py() {
+    local label="$1"; shift
+    log "python: ${label} :: $*"
+    # .env is sourced HERE, inside this subshell only -- never at top level -- so the
+    # engine gets its keys but the headless claude call never inherits them.
+    if ( set -a
+         source <(grep -E '^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*=' "${REPO}/.env" 2>/dev/null) 2>/dev/null
+         set +a
+         timeout 600 python -m "$@" ) >>"${TICK_LOG}" 2>&1; then
+        log "python: ${label} OK"
+    else
+        log "python: ${label} exited nonzero (guarded/not-due/closed -- expected, continuing)"
+    fi
+    PY_RAN="${PY_RAN} ${label}"
+    return 0
+}
+
+run_py basket_forward   scripts.trading_bot.basket_forward session --refresh-cash || true
+run_py newsdesk_resolve scripts.trading_bot.newsdesk resolve                       || true
+run_py predmarket_resolve scripts.trading_bot.predmarket resolve                   || true
+
+# --- headless Claude: the bounded THINKING chunk -------------------------------
+# ONE non-interactive turn. --permission-mode bypassPermissions lets it use
+# bash/write/edit without an interactive prompt (there is no human to answer one).
+# Hard timeout so a hang can't wedge the tick. All output captured to a dated log.
+CLAUDE_LOG="${LOGS}/claude_${STAMP}_h${TICK_HOUR}.log"
+CLAUDE_STATUS="skipped-missing-prompt"
+if [ -x "${CLAUDE_BIN}" ] && [ -f "${PROMPT_FILE}" ]; then
+    log "headless claude: START (timeout 3600s) -> ${CLAUDE_LOG}"
+    if timeout 3600 "${CLAUDE_BIN}" -p "$(cat "${PROMPT_FILE}")" \
+            --permission-mode bypassPermissions \
+            >>"${CLAUDE_LOG}" 2>&1; then
+        CLAUDE_STATUS="ok"
+    else
+        rc=$?
+        if [ "${rc}" = "124" ]; then CLAUDE_STATUS="timeout-3600s"; else CLAUDE_STATUS="exit-${rc}"; fi
+    fi
+    log "headless claude: DONE status=${CLAUDE_STATUS}"
+else
+    log "headless claude: SKIPPED (missing ${CLAUDE_BIN} or ${PROMPT_FILE})"
+fi
+
+log "==== DURABLE TICK END hour=${TICK_HOUR} ===="
+
+# --- heartbeat -----------------------------------------------------------------
+echo "$(date -Is) TICK hour=${TICK_HOUR} python={${PY_RAN# }} claude=${CLAUDE_STATUS}" >> "${HEARTBEAT}"
+
+exit 0

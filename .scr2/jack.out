@@ -1,0 +1,23 @@
+=== rate>=5/h | first/p_single/h30/m_tp200 ===
+  TRAIN k=43 creators=26  mean=+0.3182  median=-0.3701  frac_mint_positive=0.44
+     leave-one-creator-out: worst=+0.2379 (drop FrW85H7T, 2 coins)  best=+0.4115  all-LOO-positive=True
+     per-mint net returns sorted: +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +0.68 +0.60 +0.54 +0.22 -0.30 -0.30 -0.37 -0.45 -0.53 -0.59 -0.65 -0.70 -0.72 -0.72 -0.75 -0.76 -0.78 -0.86 -0.86 -0.87 -0.90 -0.90 -0.91 -0.98 -0.98 -0.98 -1.00 -1.00
+  VALID k=50 creators=32  mean=+0.2822  median=-0.5500  frac_mint_positive=0.38
+     leave-one-creator-out: worst=+0.1943 (drop EHcPsqg2, 4 coins)  best=+0.3811  all-LOO-positive=True
+     per-mint net returns sorted: +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 -0.06 -0.29 -0.30 -0.31 -0.48 -0.54 -0.56 -0.59 -0.61 -0.61 -0.73 -0.78 -0.83 -0.84 -0.84 -0.85 -0.87 -0.88 -0.92 -0.92 -0.92 -0.93 -0.93 -0.94 -0.94 -0.94 -0.95 -0.95 -0.96 -0.96 -1.00
+
+=== rate>=5/h | first/p_single/h180/m_tp200 ===
+  TRAIN k=43 creators=26  mean=+0.2412  median=-0.6928  frac_mint_positive=0.37
+     leave-one-creator-out: worst=+0.1571 (drop FrW85H7T, 2 coins)  best=+0.3517  all-LOO-positive=True
+     per-mint net returns sorted: +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 -0.30 -0.30 -0.30 -0.37 -0.40 -0.69 -0.73 -0.74 -0.77 -0.78 -0.85 -0.87 -0.87 -0.87 -0.88 -0.90 -0.90 -0.91 -0.91 -0.93 -0.94 -0.95 -0.95 -0.98 -0.99 -1.00 -1.00
+  VALID k=50 creators=32  mean=+0.2984  median=-0.4614  frac_mint_positive=0.40
+     leave-one-creator-out: worst=+0.2120 (drop EHcPsqg2, 4 coins)  best=+0.4017  all-LOO-positive=True
+     per-mint net returns sorted: +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +0.29 -0.06 -0.30 -0.30 -0.30 -0.31 -0.61 -0.61 -0.65 -0.67 -0.73 -0.74 -0.83 -0.83 -0.85 -0.86 -0.87 -0.87 -0.91 -0.92 -0.92 -0.93 -0.93 -0.94 -0.95 -0.95 -0.96 -0.96 -0.96 -0.97 -1.00
+
+=== rate>=5/h | first/p_single/h480/m_tp200 ===
+  TRAIN k=43 creators=26  mean=+0.2559  median=-0.3701  frac_mint_positive=0.37
+     leave-one-creator-out: worst=+0.1725 (drop FrW85H7T, 2 coins)  best=+0.3801  all-LOO-positive=True
+     per-mint net returns sorted: +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 -0.30 -0.30 -0.30 -0.30 -0.30 -0.37 -0.71 -0.75 -0.76 -0.77 -0.78 -0.80 -0.82 -0.87 -0.89 -0.91 -0.91 -0.91 -0.92 -0.94 -0.95 -0.95 -0.97 -0.99 -0.99 -1.00 -1.00
+  VALID k=50 creators=32  mean=+0.3628  median=-0.3000  frac_mint_positive=0.42
+     leave-one-creator-out: worst=+0.2820 (drop EHcPsqg2, 4 coins)  best=+0.4727  all-LOO-positive=True
+     per-mint net returns sorted: +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +1.97 +0.43 +0.41 -0.30 -0.30 -0.30 -0.30 -0.30 -0.30 -0.30 -0.30 -0.31 -0.61 -0.65 -0.67 -0.73 -0.85 -0.85 -0.86 -0.87 -0.88 -0.91 -0.91 -0.93 -0.93 -0.93 -0.95 -0.95 -0.95 -0.96 -0.96 -0.98

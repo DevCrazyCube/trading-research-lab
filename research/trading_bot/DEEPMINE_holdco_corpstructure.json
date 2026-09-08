@@ -1,0 +1,3442 @@
+{
+ "document": "DEEPMINE_holdco_corpstructure",
+ "created": "2026-08-20",
+ "family": "Holdco / corporate-structure relative value",
+ "question": "Inside a family that has already produced real edges (identical-claim RV: ETF-sibling, dual-class, T12 CEF discount), does the HOLDCO / CORPORATE-STRUCTURE branch contain one too?",
+ "sub_groups": {
+  "P": "paired-entity / dual-listed-company / holdco-of-one-asset -- two listed lines that are the SAME claim with a stated (usually 1:1) exchange right. BIPC/BIP, BEPC/BEP, BAMR/BAM, BBL/BHP, RDS.A/RDS.B, UN/UL, PAGP/PAA.",
+  "H": "holdco or tracking stock whose dominant asset is a LISTED stake. Ratio drifts, so estimated not asserted. Liberty complex, DVMT/VMW, DELL/VMW, IAC/MTCH, IAC/ANGI, L/CNA, IEP/CVI, FMX/KOF, HRG/SPB, BN/BAM, NVST/DHR.",
+  "S": "post-spinoff parent/child PAIR-RV (the drift is already known dead). 40 pairs.",
+  "M": "stock-for-stock merger deal-ratio spread -- target contractually convertible into a FIXED number of acquirer shares. 34 deals."
+ },
+ "windows": {
+  "design": [
+   "2016-01-04",
+   "2021-12-31"
+  ],
+  "heldout": [
+   "2022-01-03",
+   "2026-08-18"
+  ],
+  "heldout_never_inspected_before_design_selection": true,
+  "group_M_split_key": "deal ANNOUNCEMENT date (design: announced before 2022-01-01)"
+ },
+ "method": {
+  "signal_prices": "RAW closes (levels point-in-time)",
+  "pnl_prices": "ADJUSTED closes (total return)",
+  "fill": "NEXT session's close after the signal close -- no same-bar fill",
+  "spread_measures": [
+   "z of log price ratio",
+   "z of cumulative return spread (no level anchor)",
+   "z of rolling-OLS log-price residual (estimated hedge ratio)",
+   "level vs the CONTRACTUAL ratio (group P/M only)"
+  ],
+  "z_windows": [
+   60,
+   125,
+   250
+  ],
+  "entries": [
+   1.5,
+   2.0,
+   2.5
+  ],
+  "exits": [
+   0.0,
+   0.5
+  ],
+  "max_holds": [
+   5,
+   20,
+   60,
+   250
+  ],
+  "hedges": [
+   "dollar-neutral",
+   "rolling-beta-neutral"
+  ],
+  "conditioners": [
+   "none",
+   "low spread-vol regime",
+   "high spread-vol regime",
+   "dollar-volume>$10M"
+  ],
+  "corporate_action_guard": "|dlog(ratio)| > 0.15 in one session = corporate action: re-anchor the contractual ratio, abandon any open position (not booked as P&L)",
+  "costs": "2 crossings per leg x Corwin-Schultz half-spread measured per symbol per window + SEC s31 0.278bp on each sale + borrow on the short leg pro-rata (T6/T7/M0 conventions)",
+  "borrow": {
+   "etb_general_collateral_pct_yr": 0.33,
+   "htb_median_pct_yr": 10.28,
+   "source": "B22G_BORROW_COST"
+  }
+ },
+ "n_formulas": 130,
+ "expected_max_t_under_null_SE": 3.12,
+ "expected_max_t_translated_to_annualised_sharpe": {
+  "design_span_years": 6.0,
+  "se_of_annualised_sharpe_approx": 0.408,
+  "sharpe_bar": 1.27
+ },
+ "result_distribution": {
+  "design": {
+   "n_configs_with_trades": 130,
+   "t_dist": {
+    "min": -2.75,
+    "p10": -1.28,
+    "p25": -0.6,
+    "median": 0.12,
+    "p75": 0.99,
+    "p90": 2.01,
+    "max": 2.35
+   },
+   "n_t_gt_0": 68,
+   "n_t_gt_2": 13,
+   "n_t_gt_bar": 0,
+   "per_group_best": {
+    "P": 2.35,
+    "H": 1.43,
+    "S": 2.1,
+    "M": 2.17
+   },
+   "pairs": {
+    "P": [
+     "BAMR/BAM",
+     "BBL/BHP",
+     "BEPC/BEP",
+     "BIPC/BIP",
+     "PAGP/PAA",
+     "RDS.A/RDS.B",
+     "UN/UL"
+    ],
+    "H": [
+     "DELL/VMW",
+     "DVMT/VMW",
+     "FMX/KOF",
+     "HRG/SPB",
+     "IAC/ANGI",
+     "IAC/MTCH",
+     "IEP/CVI",
+     "L/CNA",
+     "LBRDA/CHTR",
+     "LBRDK/CHTR",
+     "LSXMA/SIRI",
+     "LSXMK/SIRI",
+     "LTRPA/TRIP",
+     "NVST/DHR"
+    ],
+    "S": [
+     "AA/HWM",
+     "APTV/DLPH",
+     "ASH/VVV",
+     "CAG/LW",
+     "CARR/OTIS",
+     "DD/CC",
+     "DD/CTVA",
+     "DD/DOW",
+     "DHR/VNT",
+     "DOW/CTVA",
+     "EBAY/PYPL",
+     "HLT/HGV",
+     "HLT/PK",
+     "HON/GTX",
+     "HON/REZI",
+     "HPE/DXC",
+     "HPQ/HPE",
+     "IP/SLVM",
+     "MET/BHF",
+     "MRK/OGN",
+     "PFE/VTRS",
+     "RTX/CARR",
+     "RTX/OTIS",
+     "TNL/WH",
+     "XPO/GXO",
+     "XRX/CNDT"
+    ],
+    "M": [
+     "XLNX/AMD",
+     "CXO/COP",
+     "PE/PXD",
+     "WPX/DVN",
+     "NBL/CVX",
+     "MXIM/ADI",
+     "RTN/UTX",
+     "AMTD/SCHW",
+     "RSPP/CXO",
+     "ANDV/MPC",
+     "XEC/COG",
+     "CELG/BMY",
+     "LLL/HRS",
+     "TSS/GPN",
+     "WCG/CNC",
+     "ESRX/CI",
+     "AET/CVS",
+     "VIAB/CBS",
+     "ATH/APO",
+     "ETFC/MS",
+     "TCF/HBAN",
+     "PBCT/MTB",
+     "CIT/FCNCA",
+     "UMPQ/COLB"
+    ]
+   },
+   "all": [
+    {
+     "g": "P",
+     "f": "ret/L60/K2.5/E0.5/MH20/dollar",
+     "n": 71,
+     "net": 80.43,
+     "t": 2.35,
+     "sr": 0.96,
+     "gross": 94.7,
+     "cost": 14.27
+    },
+    {
+     "g": "M",
+     "f": "deal/K0.5%/E0.0%/MH250",
+     "n": 49,
+     "net": 190.46,
+     "t": 2.17,
+     "sr": 0.95,
+     "gross": 227.69,
+     "cost": 37.24
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/lowvol",
+     "n": 74,
+     "net": 52.96,
+     "t": 2.12,
+     "sr": 0.86,
+     "gross": 68.2,
+     "cost": 15.24
+    },
+    {
+     "g": "M",
+     "f": "deal/K2.0%/E0.2%/MH250",
+     "n": 25,
+     "net": 350.88,
+     "t": 2.11,
+     "sr": 0.92,
+     "gross": 389.36,
+     "cost": 38.48
+    },
+    {
+     "g": "S",
+     "f": "ret/L250/K2.0/E0.5/MH20/dollar",
+     "n": 177,
+     "net": 168.41,
+     "t": 2.1,
+     "sr": 0.86,
+     "gross": 209.61,
+     "cost": 41.21
+    },
+    {
+     "g": "M",
+     "f": "deal/K1.0%/E0.0%/MH250",
+     "n": 38,
+     "net": 235.61,
+     "t": 2.1,
+     "sr": 0.92,
+     "gross": 278.0,
+     "cost": 42.39
+    },
+    {
+     "g": "P",
+     "f": "ret/L60/K2.0/E0.5/MH20/dollar",
+     "n": 143,
+     "net": 45.14,
+     "t": 2.08,
+     "sr": 0.85,
+     "gross": 60.15,
+     "cost": 15.01
+    },
+    {
+     "g": "M",
+     "f": "deal/K2.0%/E0.0%/MH250",
+     "n": 24,
+     "net": 360.77,
+     "t": 2.08,
+     "sr": 0.91,
+     "gross": 401.34,
+     "cost": 40.57
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.5/E0.5/MH20/dollar",
+     "n": 123,
+     "net": 185.76,
+     "t": 2.07,
+     "sr": 0.84,
+     "gross": 224.9,
+     "cost": 39.14
+    },
+    {
+     "g": "S",
+     "f": "ret/L125/K2.5/E0.5/MH20/dollar",
+     "n": 128,
+     "net": 175.56,
+     "t": 2.07,
+     "sr": 0.85,
+     "gross": 214.96,
+     "cost": 39.4
+    },
+    {
+     "g": "M",
+     "f": "deal/K1.0%/E0.2%/MH250",
+     "n": 50,
+     "net": 177.26,
+     "t": 2.05,
+     "sr": 0.9,
+     "gross": 217.38,
+     "cost": 40.12
+    },
+    {
+     "g": "P",
+     "f": "z/L60/K2.5/E0.5/MH20/dollar",
+     "n": 73,
+     "net": 67.3,
+     "t": 2.02,
+     "sr": 0.82,
+     "gross": 81.73,
+     "cost": 14.43
+    },
+    {
+     "g": "M",
+     "f": "deal/K4.0%/E0.0%/MH250",
+     "n": 15,
+     "net": 542.15,
+     "t": 2.01,
+     "sr": 0.88,
+     "gross": 591.61,
+     "cost": 49.45
+    },
+    {
+     "g": "M",
+     "f": "deal/K0.5%/E0.2%/MH250",
+     "n": 73,
+     "net": 119.91,
+     "t": 2.0,
+     "sr": 0.87,
+     "gross": 154.3,
+     "cost": 34.39
+    },
+    {
+     "g": "M",
+     "f": "deal/K4.0%/E0.2%/MH250",
+     "n": 15,
+     "net": 537.38,
+     "t": 1.99,
+     "sr": 0.87,
+     "gross": 584.63,
+     "cost": 47.25
+    },
+    {
+     "g": "S",
+     "f": "z/L60/K2.0/E0.5/MH20/dollar",
+     "n": 398,
+     "net": 83.52,
+     "t": 1.98,
+     "sr": 0.81,
+     "gross": 124.52,
+     "cost": 41.0
+    },
+    {
+     "g": "S",
+     "f": "z/L250/K2.0/E0.5/MH20/dollar",
+     "n": 174,
+     "net": 154.15,
+     "t": 1.96,
+     "sr": 0.8,
+     "gross": 194.7,
+     "cost": 40.55
+    },
+    {
+     "g": "S",
+     "f": "ret/L60/K2.0/E0.5/MH20/dollar",
+     "n": 399,
+     "net": 80.31,
+     "t": 1.89,
+     "sr": 0.77,
+     "gross": 121.31,
+     "cost": 41.0
+    },
+    {
+     "g": "P",
+     "f": "z/L60/K2.0/E0.5/MH20/dollar",
+     "n": 136,
+     "net": 42.43,
+     "t": 1.86,
+     "sr": 0.76,
+     "gross": 57.13,
+     "cost": 14.7
+    },
+    {
+     "g": "P",
+     "f": "z/L250/K1.5/E0.5/MH20/dollar",
+     "n": 133,
+     "net": 28.51,
+     "t": 1.65,
+     "sr": 0.67,
+     "gross": 42.54,
+     "cost": 14.03
+    },
+    {
+     "g": "S",
+     "f": "ret/L250/K2.5/E0.5/MH20/dollar",
+     "n": 86,
+     "net": 159.08,
+     "t": 1.62,
+     "sr": 0.66,
+     "gross": 198.91,
+     "cost": 39.83
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH60/dollar",
+     "n": 170,
+     "net": 109.91,
+     "t": 1.43,
+     "sr": 0.59,
+     "gross": 182.94,
+     "cost": 73.03
+    },
+    {
+     "g": "S",
+     "f": "z/L250/K2.5/E0.5/MH20/dollar",
+     "n": 87,
+     "net": 126.19,
+     "t": 1.27,
+     "sr": 0.52,
+     "gross": 165.45,
+     "cost": 39.26
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/highvol",
+     "n": 144,
+     "net": 70.16,
+     "t": 1.22,
+     "sr": 0.5,
+     "gross": 141.58,
+     "cost": 71.42
+    },
+    {
+     "g": "P",
+     "f": "z/L60/K1.5/E0.5/MH20/dollar",
+     "n": 248,
+     "net": 17.43,
+     "t": 1.2,
+     "sr": 0.49,
+     "gross": 32.08,
+     "cost": 14.65
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar",
+     "n": 98,
+     "net": 26.93,
+     "t": 1.18,
+     "sr": 0.48,
+     "gross": 40.4,
+     "cost": 13.47
+    },
+    {
+     "g": "S",
+     "f": "ret/L60/K2.5/E0.5/MH20/dollar",
+     "n": 223,
+     "net": 70.98,
+     "t": 1.17,
+     "sr": 0.48,
+     "gross": 112.21,
+     "cost": 41.23
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/beta",
+     "n": 98,
+     "net": 26.67,
+     "t": 1.15,
+     "sr": 0.47,
+     "gross": 39.9,
+     "cost": 13.23
+    },
+    {
+     "g": "P",
+     "f": "ret/L250/K1.5/E0.5/MH20/dollar",
+     "n": 133,
+     "net": 20.76,
+     "t": 1.1,
+     "sr": 0.45,
+     "gross": 34.71,
+     "cost": 13.95
+    },
+    {
+     "g": "P",
+     "f": "ret/L60/K1.5/E0.5/MH20/dollar",
+     "n": 254,
+     "net": 14.79,
+     "t": 1.09,
+     "sr": 0.45,
+     "gross": 29.83,
+     "cost": 15.05
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.0/MH20/dollar",
+     "n": 98,
+     "net": 24.78,
+     "t": 1.08,
+     "sr": 0.44,
+     "gross": 38.68,
+     "cost": 13.9
+    },
+    {
+     "g": "P",
+     "f": "ret/L125/K2.0/E0.5/MH20/dollar",
+     "n": 93,
+     "net": 23.56,
+     "t": 0.99,
+     "sr": 0.4,
+     "gross": 37.18,
+     "cost": 13.62
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH60/dollar",
+     "n": 69,
+     "net": 25.02,
+     "t": 0.99,
+     "sr": 0.4,
+     "gross": 40.5,
+     "cost": 15.48
+    },
+    {
+     "g": "S",
+     "f": "z/L60/K2.5/E0.5/MH20/dollar",
+     "n": 224,
+     "net": 56.84,
+     "t": 0.96,
+     "sr": 0.39,
+     "gross": 98.48,
+     "cost": 41.64
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.5/E0.5/MH20/dollar",
+     "n": 46,
+     "net": 35.77,
+     "t": 0.91,
+     "sr": 0.37,
+     "gross": 47.48,
+     "cost": 11.72
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.5/E0.5/MH20/dollar",
+     "n": 114,
+     "net": 63.73,
+     "t": 0.88,
+     "sr": 0.36,
+     "gross": 138.41,
+     "cost": 74.68
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH60/dollar",
+     "n": 171,
+     "net": 105.49,
+     "t": 0.85,
+     "sr": 0.35,
+     "gross": 149.88,
+     "cost": 44.39
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/highvol",
+     "n": 141,
+     "net": 71.92,
+     "t": 0.82,
+     "sr": 0.33,
+     "gross": 113.13,
+     "cost": 41.2
+    },
+    {
+     "g": "P",
+     "f": "ret/L125/K2.5/E0.5/MH20/dollar",
+     "n": 45,
+     "net": 32.15,
+     "t": 0.81,
+     "sr": 0.33,
+     "gross": 44.13,
+     "cost": 11.97
+    },
+    {
+     "g": "P",
+     "f": "beta/L125/K2.5/E0.5/MH20/dollar",
+     "n": 36,
+     "net": 27.06,
+     "t": 0.74,
+     "sr": 0.3,
+     "gross": 38.78,
+     "cost": 11.72
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K1.5/E0.5/MH20/dollar",
+     "n": 189,
+     "net": 10.94,
+     "t": 0.7,
+     "sr": 0.29,
+     "gross": 24.46,
+     "cost": 13.52
+    },
+    {
+     "g": "H",
+     "f": "ret/L125/K2.5/E0.5/MH20/dollar",
+     "n": 125,
+     "net": 45.0,
+     "t": 0.68,
+     "sr": 0.28,
+     "gross": 117.32,
+     "cost": 72.32
+    },
+    {
+     "g": "P",
+     "f": "ret/L125/K1.5/E0.5/MH20/dollar",
+     "n": 191,
+     "net": 8.93,
+     "t": 0.6,
+     "sr": 0.24,
+     "gross": 22.67,
+     "cost": 13.73
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/bigdv",
+     "n": 222,
+     "net": 25.46,
+     "t": 0.6,
+     "sr": 0.24,
+     "gross": 99.0,
+     "cost": 73.53
+    },
+    {
+     "g": "S",
+     "f": "ret/L125/K1.5/E0.5/MH20/dollar",
+     "n": 471,
+     "net": 22.44,
+     "t": 0.55,
+     "sr": 0.22,
+     "gross": 63.82,
+     "cost": 41.39
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH5/dollar",
+     "n": 230,
+     "net": 4.4,
+     "t": 0.49,
+     "sr": 0.2,
+     "gross": 14.68,
+     "cost": 10.28
+    },
+    {
+     "g": "M",
+     "f": "deal/K0.5%/E0.0%/MH60",
+     "n": 90,
+     "net": 70.63,
+     "t": 0.46,
+     "sr": 0.2,
+     "gross": 102.5,
+     "cost": 31.87
+    },
+    {
+     "g": "P",
+     "f": "level/K10%/E0%/MH60",
+     "n": 61,
+     "net": 31.29,
+     "t": 0.45,
+     "sr": 0.18,
+     "gross": 59.09,
+     "cost": 27.79
+    },
+    {
+     "g": "P",
+     "f": "level/K10%/E1%/MH60",
+     "n": 61,
+     "net": 31.29,
+     "t": 0.45,
+     "sr": 0.18,
+     "gross": 59.09,
+     "cost": 27.79
+    },
+    {
+     "g": "M",
+     "f": "deal/K1.0%/E0.0%/MH60",
+     "n": 75,
+     "net": 79.83,
+     "t": 0.44,
+     "sr": 0.19,
+     "gross": 113.89,
+     "cost": 34.05
+    },
+    {
+     "g": "M",
+     "f": "deal/K1.0%/E0.2%/MH60",
+     "n": 83,
+     "net": 71.88,
+     "t": 0.44,
+     "sr": 0.19,
+     "gross": 106.3,
+     "cost": 34.43
+    },
+    {
+     "g": "M",
+     "f": "deal/K0.5%/E0.2%/MH60",
+     "n": 108,
+     "net": 54.22,
+     "t": 0.43,
+     "sr": 0.19,
+     "gross": 86.08,
+     "cost": 31.87
+    },
+    {
+     "g": "M",
+     "f": "deal/K2.0%/E0.0%/MH60",
+     "n": 54,
+     "net": 108.79,
+     "t": 0.43,
+     "sr": 0.19,
+     "gross": 140.86,
+     "cost": 32.07
+    },
+    {
+     "g": "M",
+     "f": "deal/K2.0%/E0.2%/MH60",
+     "n": 54,
+     "net": 109.0,
+     "t": 0.43,
+     "sr": 0.19,
+     "gross": 140.56,
+     "cost": 31.56
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.0/MH20/dollar",
+     "n": 261,
+     "net": 24.01,
+     "t": 0.39,
+     "sr": 0.16,
+     "gross": 65.85,
+     "cost": 41.84
+    },
+    {
+     "g": "M",
+     "f": "deal/K4.0%/E0.0%/MH60",
+     "n": 35,
+     "net": 153.93,
+     "t": 0.39,
+     "sr": 0.17,
+     "gross": 188.12,
+     "cost": 34.19
+    },
+    {
+     "g": "M",
+     "f": "deal/K4.0%/E0.2%/MH60",
+     "n": 35,
+     "net": 153.45,
+     "t": 0.39,
+     "sr": 0.17,
+     "gross": 187.57,
+     "cost": 34.12
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar",
+     "n": 264,
+     "net": 22.28,
+     "t": 0.38,
+     "sr": 0.16,
+     "gross": 63.88,
+     "cost": 41.61
+    },
+    {
+     "g": "S",
+     "f": "ret/L125/K2.0/E0.5/MH20/dollar",
+     "n": 269,
+     "net": 20.8,
+     "t": 0.36,
+     "sr": 0.15,
+     "gross": 62.08,
+     "cost": 41.29
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/bigdv",
+     "n": 97,
+     "net": 7.09,
+     "t": 0.34,
+     "sr": 0.14,
+     "gross": 20.32,
+     "cost": 13.23
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K1.5/E0.5/MH20/dollar",
+     "n": 473,
+     "net": 13.97,
+     "t": 0.34,
+     "sr": 0.14,
+     "gross": 55.4,
+     "cost": 41.43
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/beta",
+     "n": 256,
+     "net": 6.56,
+     "t": 0.2,
+     "sr": 0.08,
+     "gross": 68.21,
+     "cost": 61.65
+    },
+    {
+     "g": "P",
+     "f": "z/L250/K2.0/E0.5/MH20/dollar",
+     "n": 64,
+     "net": 3.41,
+     "t": 0.16,
+     "sr": 0.07,
+     "gross": 14.9,
+     "cost": 11.49
+    },
+    {
+     "g": "H",
+     "f": "beta/L125/K2.5/E0.5/MH20/dollar",
+     "n": 92,
+     "net": 9.37,
+     "t": 0.15,
+     "sr": 0.06,
+     "gross": 83.75,
+     "cost": 74.38
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/bigdv",
+     "n": 260,
+     "net": 6.77,
+     "t": 0.12,
+     "sr": 0.05,
+     "gross": 47.84,
+     "cost": 41.06
+    },
+    {
+     "g": "P",
+     "f": "ret/L250/K2.5/E0.5/MH20/dollar",
+     "n": 35,
+     "net": 2.3,
+     "t": 0.09,
+     "sr": 0.04,
+     "gross": 10.24,
+     "cost": 7.94
+    },
+    {
+     "g": "H",
+     "f": "beta/L250/K2.0/E0.5/MH20/dollar",
+     "n": 113,
+     "net": 3.69,
+     "t": 0.05,
+     "sr": 0.02,
+     "gross": 76.81,
+     "cost": 73.12
+    },
+    {
+     "g": "P",
+     "f": "level/K5%/E1%/MH60",
+     "n": 79,
+     "net": 1.87,
+     "t": 0.03,
+     "sr": 0.01,
+     "gross": 26.26,
+     "cost": 24.39
+    },
+    {
+     "g": "P",
+     "f": "ret/L250/K2.0/E0.5/MH20/dollar",
+     "n": 63,
+     "net": -0.5,
+     "t": -0.02,
+     "sr": -0.01,
+     "gross": 10.71,
+     "cost": 11.21
+    },
+    {
+     "g": "P",
+     "f": "z/L250/K2.5/E0.5/MH20/dollar",
+     "n": 33,
+     "net": -0.95,
+     "t": -0.03,
+     "sr": -0.01,
+     "gross": 8.36,
+     "cost": 9.31
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar",
+     "n": 256,
+     "net": -1.75,
+     "t": -0.05,
+     "sr": -0.02,
+     "gross": 70.01,
+     "cost": 71.76
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/beta",
+     "n": 264,
+     "net": -3.14,
+     "t": -0.07,
+     "sr": -0.03,
+     "gross": 22.72,
+     "cost": 25.86
+    },
+    {
+     "g": "P",
+     "f": "beta/L60/K2.0/E0.5/MH20/dollar",
+     "n": 98,
+     "net": -2.11,
+     "t": -0.11,
+     "sr": -0.05,
+     "gross": 11.52,
+     "cost": 13.63
+    },
+    {
+     "g": "S",
+     "f": "z/L250/K1.5/E0.5/MH20/dollar",
+     "n": 327,
+     "net": -5.91,
+     "t": -0.11,
+     "sr": -0.04,
+     "gross": 36.19,
+     "cost": 42.09
+    },
+    {
+     "g": "H",
+     "f": "z/L250/K1.5/E0.5/MH20/dollar",
+     "n": 316,
+     "net": -4.41,
+     "t": -0.13,
+     "sr": -0.05,
+     "gross": 65.33,
+     "cost": 69.74
+    },
+    {
+     "g": "H",
+     "f": "beta/L60/K2.5/E0.5/MH20/dollar",
+     "n": 153,
+     "net": -8.03,
+     "t": -0.13,
+     "sr": -0.05,
+     "gross": 65.01,
+     "cost": 73.04
+    },
+    {
+     "g": "P",
+     "f": "level/K5%/E0%/MH60",
+     "n": 78,
+     "net": -8.23,
+     "t": -0.14,
+     "sr": -0.06,
+     "gross": 16.23,
+     "cost": 24.46
+    },
+    {
+     "g": "H",
+     "f": "beta/L60/K1.5/E0.5/MH20/dollar",
+     "n": 411,
+     "net": -5.21,
+     "t": -0.14,
+     "sr": -0.06,
+     "gross": 67.14,
+     "cost": 72.35
+    },
+    {
+     "g": "S",
+     "f": "beta/L250/K2.0/E0.5/MH20/dollar",
+     "n": 103,
+     "net": -18.56,
+     "t": -0.18,
+     "sr": -0.07,
+     "gross": 23.35,
+     "cost": 41.91
+    },
+    {
+     "g": "P",
+     "f": "level/K2%/E1%/MH60",
+     "n": 103,
+     "net": -8.97,
+     "t": -0.2,
+     "sr": -0.08,
+     "gross": 11.38,
+     "cost": 20.34
+    },
+    {
+     "g": "P",
+     "f": "beta/L250/K2.5/E0.5/MH20/dollar",
+     "n": 26,
+     "net": -7.05,
+     "t": -0.21,
+     "sr": -0.09,
+     "gross": 2.66,
+     "cost": 9.71
+    },
+    {
+     "g": "S",
+     "f": "ret/L250/K1.5/E0.5/MH20/dollar",
+     "n": 331,
+     "net": -13.97,
+     "t": -0.25,
+     "sr": -0.1,
+     "gross": 28.2,
+     "cost": 42.17
+    },
+    {
+     "g": "H",
+     "f": "z/L250/K2.0/E0.5/MH20/dollar",
+     "n": 176,
+     "net": -12.46,
+     "t": -0.26,
+     "sr": -0.11,
+     "gross": 58.21,
+     "cost": 70.68
+    },
+    {
+     "g": "H",
+     "f": "z/L250/K2.5/E0.5/MH20/dollar",
+     "n": 79,
+     "net": -17.38,
+     "t": -0.26,
+     "sr": -0.1,
+     "gross": 54.23,
+     "cost": 71.6
+    },
+    {
+     "g": "P",
+     "f": "level/K2%/E0%/MH60",
+     "n": 103,
+     "net": -12.44,
+     "t": -0.27,
+     "sr": -0.11,
+     "gross": 8.31,
+     "cost": 20.75
+    },
+    {
+     "g": "H",
+     "f": "beta/L60/K2.0/E0.5/MH20/dollar",
+     "n": 253,
+     "net": -12.23,
+     "t": -0.29,
+     "sr": -0.12,
+     "gross": 59.79,
+     "cost": 72.03
+    },
+    {
+     "g": "P",
+     "f": "level/K5%/E1%/MH20",
+     "n": 218,
+     "net": -7.3,
+     "t": -0.31,
+     "sr": -0.13,
+     "gross": 12.62,
+     "cost": 19.92
+    },
+    {
+     "g": "P",
+     "f": "level/K10%/E0%/MH20",
+     "n": 172,
+     "net": -8.69,
+     "t": -0.31,
+     "sr": -0.13,
+     "gross": 14.03,
+     "cost": 22.72
+    },
+    {
+     "g": "P",
+     "f": "level/K10%/E1%/MH20",
+     "n": 172,
+     "net": -8.69,
+     "t": -0.31,
+     "sr": -0.13,
+     "gross": 14.03,
+     "cost": 22.72
+    },
+    {
+     "g": "P",
+     "f": "level/K5%/E0%/MH20",
+     "n": 218,
+     "net": -7.48,
+     "t": -0.32,
+     "sr": -0.13,
+     "gross": 12.45,
+     "cost": 19.93
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/lowvol",
+     "n": 134,
+     "net": -28.17,
+     "t": -0.37,
+     "sr": -0.15,
+     "gross": 12.8,
+     "cost": 40.97
+    },
+    {
+     "g": "H",
+     "f": "beta/L250/K2.5/E0.5/MH20/dollar",
+     "n": 55,
+     "net": -42.36,
+     "t": -0.41,
+     "sr": -0.17,
+     "gross": 30.23,
+     "cost": 72.59
+    },
+    {
+     "g": "H",
+     "f": "ret/L125/K2.0/E0.5/MH20/dollar",
+     "n": 269,
+     "net": -16.32,
+     "t": -0.46,
+     "sr": -0.19,
+     "gross": 54.74,
+     "cost": 71.06
+    },
+    {
+     "g": "S",
+     "f": "beta/L60/K1.5/E0.5/MH20/dollar",
+     "n": 480,
+     "net": -18.65,
+     "t": -0.46,
+     "sr": -0.19,
+     "gross": 21.67,
+     "cost": 40.33
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.0/MH20/dollar",
+     "n": 248,
+     "net": -20.08,
+     "t": -0.5,
+     "sr": -0.2,
+     "gross": 51.95,
+     "cost": 72.03
+    },
+    {
+     "g": "P",
+     "f": "level/K2%/E0%/MH20",
+     "n": 284,
+     "net": -9.97,
+     "t": -0.51,
+     "sr": -0.21,
+     "gross": 6.49,
+     "cost": 16.46
+    },
+    {
+     "g": "P",
+     "f": "level/K2%/E1%/MH20",
+     "n": 284,
+     "net": -10.89,
+     "t": -0.55,
+     "sr": -0.23,
+     "gross": 5.56,
+     "cost": 16.45
+    },
+    {
+     "g": "H",
+     "f": "beta/L125/K1.5/E0.5/MH20/dollar",
+     "n": 304,
+     "net": -23.31,
+     "t": -0.6,
+     "sr": -0.25,
+     "gross": 48.6,
+     "cost": 71.91
+    },
+    {
+     "g": "P",
+     "f": "beta/L250/K1.5/E0.5/MH20/dollar",
+     "n": 83,
+     "net": -9.3,
+     "t": -0.61,
+     "sr": -0.25,
+     "gross": 1.25,
+     "cost": 10.55
+    },
+    {
+     "g": "P",
+     "f": "beta/L60/K1.5/E0.5/MH20/dollar",
+     "n": 167,
+     "net": -9.63,
+     "t": -0.64,
+     "sr": -0.26,
+     "gross": 4.0,
+     "cost": 13.63
+    },
+    {
+     "g": "H",
+     "f": "z/L60/K2.5/E0.5/MH20/dollar",
+     "n": 189,
+     "net": -37.9,
+     "t": -0.7,
+     "sr": -0.29,
+     "gross": 33.35,
+     "cost": 71.24
+    },
+    {
+     "g": "H",
+     "f": "beta/L125/K2.0/E0.5/MH20/dollar",
+     "n": 180,
+     "net": -35.71,
+     "t": -0.74,
+     "sr": -0.3,
+     "gross": 37.67,
+     "cost": 73.38
+    },
+    {
+     "g": "H",
+     "f": "ret/L250/K1.5/E0.5/MH20/dollar",
+     "n": 327,
+     "net": -27.8,
+     "t": -0.79,
+     "sr": -0.32,
+     "gross": 41.91,
+     "cost": 69.71
+    },
+    {
+     "g": "P",
+     "f": "beta/L60/K2.5/E0.5/MH20/dollar",
+     "n": 58,
+     "net": -19.45,
+     "t": -0.84,
+     "sr": -0.34,
+     "gross": -7.65,
+     "cost": 11.8
+    },
+    {
+     "g": "S",
+     "f": "ret/L60/K1.5/E0.5/MH20/dollar",
+     "n": 643,
+     "net": -28.02,
+     "t": -0.85,
+     "sr": -0.35,
+     "gross": 12.77,
+     "cost": 40.79
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH5/dollar",
+     "n": 646,
+     "net": -19.22,
+     "t": -0.88,
+     "sr": -0.36,
+     "gross": 20.41,
+     "cost": 39.63
+    },
+    {
+     "g": "S",
+     "f": "beta/L60/K2.5/E0.5/MH20/dollar",
+     "n": 158,
+     "net": -63.0,
+     "t": -0.9,
+     "sr": -0.37,
+     "gross": -22.0,
+     "cost": 41.0
+    },
+    {
+     "g": "P",
+     "f": "beta/L250/K2.0/E0.5/MH20/dollar",
+     "n": 43,
+     "net": -17.97,
+     "t": -0.91,
+     "sr": -0.37,
+     "gross": -9.3,
+     "cost": 8.67
+    },
+    {
+     "g": "S",
+     "f": "beta/L250/K1.5/E0.5/MH20/dollar",
+     "n": 181,
+     "net": -71.87,
+     "t": -1.05,
+     "sr": -0.43,
+     "gross": -30.64,
+     "cost": 41.23
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K1.5/E0.5/MH20/dollar",
+     "n": 436,
+     "net": -35.58,
+     "t": -1.12,
+     "sr": -0.46,
+     "gross": 34.72,
+     "cost": 70.3
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/highvol",
+     "n": 32,
+     "net": -43.15,
+     "t": -1.17,
+     "sr": -0.48,
+     "gross": -34.96,
+     "cost": 8.19
+    },
+    {
+     "g": "H",
+     "f": "ret/L250/K2.0/E0.5/MH20/dollar",
+     "n": 175,
+     "net": -51.25,
+     "t": -1.17,
+     "sr": -0.48,
+     "gross": 19.8,
+     "cost": 71.05
+    },
+    {
+     "g": "H",
+     "f": "z/L60/K1.5/E0.5/MH20/dollar",
+     "n": 565,
+     "net": -28.24,
+     "t": -1.18,
+     "sr": -0.48,
+     "gross": 42.85,
+     "cost": 71.09
+    },
+    {
+     "g": "H",
+     "f": "ret/L60/K2.5/E0.5/MH20/dollar",
+     "n": 197,
+     "net": -60.28,
+     "t": -1.18,
+     "sr": -0.48,
+     "gross": 10.27,
+     "cost": 70.55
+    },
+    {
+     "g": "H",
+     "f": "beta/L250/K1.5/E0.5/MH20/dollar",
+     "n": 204,
+     "net": -73.27,
+     "t": -1.19,
+     "sr": -0.49,
+     "gross": -0.2,
+     "cost": 73.07
+    },
+    {
+     "g": "S",
+     "f": "z/L60/K1.5/E0.5/MH20/dollar",
+     "n": 640,
+     "net": -40.55,
+     "t": -1.23,
+     "sr": -0.5,
+     "gross": 0.38,
+     "cost": 40.93
+    },
+    {
+     "g": "S",
+     "f": "beta/L60/K2.0/E0.5/MH20/dollar",
+     "n": 273,
+     "net": -68.56,
+     "t": -1.28,
+     "sr": -0.52,
+     "gross": -27.95,
+     "cost": 40.61
+    },
+    {
+     "g": "H",
+     "f": "ret/L250/K2.5/E0.5/MH20/dollar",
+     "n": 82,
+     "net": -96.48,
+     "t": -1.41,
+     "sr": -0.58,
+     "gross": -24.31,
+     "cost": 72.17
+    },
+    {
+     "g": "P",
+     "f": "beta/L125/K2.0/E0.5/MH20/dollar",
+     "n": 70,
+     "net": -28.05,
+     "t": -1.49,
+     "sr": -0.61,
+     "gross": -13.62,
+     "cost": 14.43
+    },
+    {
+     "g": "S",
+     "f": "beta/L250/K2.5/E0.5/MH20/dollar",
+     "n": 52,
+     "net": -142.11,
+     "t": -1.52,
+     "sr": -0.62,
+     "gross": -101.47,
+     "cost": 40.64
+    },
+    {
+     "g": "H",
+     "f": "z/L60/K2.0/E0.5/MH20/dollar",
+     "n": 339,
+     "net": -51.76,
+     "t": -1.53,
+     "sr": -0.63,
+     "gross": 19.06,
+     "cost": 70.82
+    },
+    {
+     "g": "H",
+     "f": "ret/L60/K1.5/E0.5/MH20/dollar",
+     "n": 580,
+     "net": -36.09,
+     "t": -1.53,
+     "sr": -0.63,
+     "gross": 34.62,
+     "cost": 70.71
+    },
+    {
+     "g": "P",
+     "f": "beta/L125/K1.5/E0.5/MH20/dollar",
+     "n": 113,
+     "net": -34.74,
+     "t": -1.56,
+     "sr": -0.64,
+     "gross": -21.36,
+     "cost": 13.38
+    },
+    {
+     "g": "S",
+     "f": "beta/L125/K2.0/E0.5/MH20/dollar",
+     "n": 176,
+     "net": -107.08,
+     "t": -1.67,
+     "sr": -0.68,
+     "gross": -67.38,
+     "cost": 39.7
+    },
+    {
+     "g": "H",
+     "f": "ret/L60/K2.0/E0.5/MH20/dollar",
+     "n": 346,
+     "net": -55.72,
+     "t": -1.7,
+     "sr": -0.69,
+     "gross": 14.47,
+     "cost": 70.2
+    },
+    {
+     "g": "S",
+     "f": "beta/L125/K2.5/E0.5/MH20/dollar",
+     "n": 91,
+     "net": -176.46,
+     "t": -1.75,
+     "sr": -0.72,
+     "gross": -138.21,
+     "cost": 38.24
+    },
+    {
+     "g": "H",
+     "f": "ret/L125/K1.5/E0.5/MH20/dollar",
+     "n": 443,
+     "net": -58.26,
+     "t": -1.82,
+     "sr": -0.74,
+     "gross": 12.12,
+     "cost": 70.38
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/lowvol",
+     "n": 128,
+     "net": -98.18,
+     "t": -2.24,
+     "sr": -0.91,
+     "gross": -27.65,
+     "cost": 70.53
+    },
+    {
+     "g": "S",
+     "f": "beta/L125/K1.5/E0.5/MH20/dollar",
+     "n": 336,
+     "net": -129.98,
+     "t": -2.57,
+     "sr": -1.05,
+     "gross": -89.77,
+     "cost": 40.21
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH5/dollar",
+     "n": 577,
+     "net": -51.01,
+     "t": -2.75,
+     "sr": -1.12,
+     "gross": 19.47,
+     "cost": 70.48
+    }
+   ]
+  },
+  "holdout": {
+   "n_configs_with_trades": 130,
+   "t_dist": {
+    "min": -2.89,
+    "p10": -1.85,
+    "p25": -1.2,
+    "median": -0.17,
+    "p75": 1.06,
+    "p90": 1.37,
+    "max": 3.21
+   },
+   "n_t_gt_0": 58,
+   "n_t_gt_2": 4,
+   "n_t_gt_bar": 1,
+   "per_group_best": {
+    "P": 1.83,
+    "H": 3.21,
+    "S": 0.39,
+    "M": -1.15
+   },
+   "pairs": {
+    "P": [
+     "BAMR/BAM",
+     "BEPC/BEP",
+     "BIPC/BIP",
+     "PAGP/PAA"
+    ],
+    "H": [
+     "BN/BAM",
+     "DELL/VMW",
+     "FMX/KOF",
+     "IAC/ANGI",
+     "IAC/MTCH",
+     "IEP/CVI",
+     "L/CNA",
+     "LBRDA/CHTR",
+     "LBRDK/CHTR",
+     "LSXMA/SIRI",
+     "LSXMK/SIRI",
+     "LTRPA/TRIP",
+     "NVST/DHR"
+    ],
+    "S": [
+     "AA/HWM",
+     "ASH/VVV",
+     "BDX/EMBC",
+     "BWA/PHIN",
+     "CAG/LW",
+     "CARR/OTIS",
+     "CMI/ATMU",
+     "DD/CC",
+     "DD/CTVA",
+     "DD/DOW",
+     "DHR/VLTO",
+     "DHR/VNT",
+     "DOW/CTVA",
+     "EBAY/PYPL",
+     "ENOV/ESAB",
+     "GE/GEHC",
+     "GE/GEV",
+     "GEHC/GEV",
+     "HLT/HGV",
+     "HLT/PK",
+     "HON/GTX",
+     "HON/REZI",
+     "HPE/DXC",
+     "HPQ/HPE",
+     "IBM/KD",
+     "IP/SLVM",
+     "JNJ/KVUE",
+     "MET/BHF",
+     "MMM/SOLV",
+     "MRK/OGN",
+     "PFE/VTRS",
+     "RTX/CARR",
+     "RTX/OTIS",
+     "T/WBD",
+     "TNL/WH",
+     "WDC/SNDK",
+     "XPO/GXO",
+     "XPO/RXO",
+     "XRX/CNDT"
+    ],
+    "M": [
+     "PXD/XOM",
+     "HES/CVX",
+     "PDCE/CVX",
+     "MRO/COP",
+     "SWN/CHK",
+     "VMW/AVGO",
+     "PACW/BANC",
+     "CPE/APA",
+     "ANSS/SNPS"
+    ]
+   },
+   "all": [
+    {
+     "g": "H",
+     "f": "ret/L60/K2.5/E0.5/MH20/dollar",
+     "n": 147,
+     "net": 191.57,
+     "t": 3.21,
+     "sr": 1.5,
+     "gross": 243.22,
+     "cost": 51.65
+    },
+    {
+     "g": "H",
+     "f": "z/L60/K2.5/E0.5/MH20/dollar",
+     "n": 141,
+     "net": 188.22,
+     "t": 3.11,
+     "sr": 1.45,
+     "gross": 239.82,
+     "cost": 51.6
+    },
+    {
+     "g": "H",
+     "f": "beta/L125/K2.0/E0.5/MH20/dollar",
+     "n": 122,
+     "net": 182.97,
+     "t": 2.31,
+     "sr": 1.08,
+     "gross": 237.36,
+     "cost": 54.39
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/beta",
+     "n": 190,
+     "net": 101.69,
+     "t": 2.15,
+     "sr": 1.0,
+     "gross": 143.3,
+     "cost": 41.61
+    },
+    {
+     "g": "H",
+     "f": "z/L60/K2.0/E0.5/MH20/dollar",
+     "n": 246,
+     "net": 89.29,
+     "t": 1.99,
+     "sr": 0.93,
+     "gross": 141.19,
+     "cost": 51.9
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/lowvol",
+     "n": 46,
+     "net": 83.38,
+     "t": 1.83,
+     "sr": 0.85,
+     "gross": 134.54,
+     "cost": 51.16
+    },
+    {
+     "g": "H",
+     "f": "beta/L125/K1.5/E0.5/MH20/dollar",
+     "n": 231,
+     "net": 99.36,
+     "t": 1.74,
+     "sr": 0.81,
+     "gross": 153.04,
+     "cost": 53.67
+    },
+    {
+     "g": "H",
+     "f": "ret/L60/K2.0/E0.5/MH20/dollar",
+     "n": 243,
+     "net": 77.73,
+     "t": 1.7,
+     "sr": 0.79,
+     "gross": 130.23,
+     "cost": 52.5
+    },
+    {
+     "g": "H",
+     "f": "z/L60/K1.5/E0.5/MH20/dollar",
+     "n": 404,
+     "net": 60.82,
+     "t": 1.68,
+     "sr": 0.78,
+     "gross": 113.12,
+     "cost": 52.29
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.5/E0.5/MH20/dollar",
+     "n": 33,
+     "net": 85.48,
+     "t": 1.61,
+     "sr": 0.75,
+     "gross": 139.55,
+     "cost": 54.07
+    },
+    {
+     "g": "P",
+     "f": "z/L60/K1.5/E0.5/MH20/dollar",
+     "n": 148,
+     "net": 30.8,
+     "t": 1.39,
+     "sr": 0.65,
+     "gross": 79.17,
+     "cost": 48.37
+    },
+    {
+     "g": "H",
+     "f": "z/L250/K2.0/E0.5/MH20/dollar",
+     "n": 151,
+     "net": 98.27,
+     "t": 1.38,
+     "sr": 0.65,
+     "gross": 152.25,
+     "cost": 53.97
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/highvol",
+     "n": 113,
+     "net": 98.5,
+     "t": 1.37,
+     "sr": 0.64,
+     "gross": 149.61,
+     "cost": 51.11
+    },
+    {
+     "g": "P",
+     "f": "ret/L60/K1.5/E0.5/MH20/dollar",
+     "n": 149,
+     "net": 29.79,
+     "t": 1.35,
+     "sr": 0.63,
+     "gross": 77.89,
+     "cost": 48.09
+    },
+    {
+     "g": "H",
+     "f": "ret/L125/K2.0/E0.5/MH20/dollar",
+     "n": 194,
+     "net": 87.91,
+     "t": 1.35,
+     "sr": 0.63,
+     "gross": 140.51,
+     "cost": 52.6
+    },
+    {
+     "g": "P",
+     "f": "ret/L125/K1.5/E0.5/MH20/dollar",
+     "n": 112,
+     "net": 39.0,
+     "t": 1.32,
+     "sr": 0.61,
+     "gross": 88.64,
+     "cost": 49.64
+    },
+    {
+     "g": "P",
+     "f": "ret/L250/K2.5/E0.5/MH20/dollar",
+     "n": 34,
+     "net": 78.94,
+     "t": 1.32,
+     "sr": 0.62,
+     "gross": 131.42,
+     "cost": 52.49
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH60/dollar",
+     "n": 124,
+     "net": 151.94,
+     "t": 1.29,
+     "sr": 0.6,
+     "gross": 206.21,
+     "cost": 54.27
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.0/MH20/dollar",
+     "n": 189,
+     "net": 87.88,
+     "t": 1.28,
+     "sr": 0.6,
+     "gross": 140.26,
+     "cost": 52.38
+    },
+    {
+     "g": "H",
+     "f": "ret/L60/K1.5/E0.5/MH20/dollar",
+     "n": 407,
+     "net": 44.41,
+     "t": 1.26,
+     "sr": 0.59,
+     "gross": 96.55,
+     "cost": 52.14
+    },
+    {
+     "g": "P",
+     "f": "ret/L60/K2.0/E0.5/MH20/dollar",
+     "n": 95,
+     "net": 32.48,
+     "t": 1.23,
+     "sr": 0.57,
+     "gross": 78.7,
+     "cost": 46.22
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar",
+     "n": 190,
+     "net": 80.26,
+     "t": 1.23,
+     "sr": 0.57,
+     "gross": 132.23,
+     "cost": 51.97
+    },
+    {
+     "g": "H",
+     "f": "z/L250/K2.5/E0.5/MH20/dollar",
+     "n": 73,
+     "net": 129.02,
+     "t": 1.17,
+     "sr": 0.55,
+     "gross": 180.99,
+     "cost": 51.97
+    },
+    {
+     "g": "P",
+     "f": "ret/L125/K2.0/E0.5/MH20/dollar",
+     "n": 57,
+     "net": 56.27,
+     "t": 1.15,
+     "sr": 0.54,
+     "gross": 108.09,
+     "cost": 51.82
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/bigdv",
+     "n": 60,
+     "net": 55.29,
+     "t": 1.15,
+     "sr": 0.54,
+     "gross": 106.44,
+     "cost": 51.15
+    },
+    {
+     "g": "H",
+     "f": "beta/L125/K2.5/E0.5/MH20/dollar",
+     "n": 51,
+     "net": 139.86,
+     "t": 1.15,
+     "sr": 0.53,
+     "gross": 190.73,
+     "cost": 50.87
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar",
+     "n": 61,
+     "net": 52.1,
+     "t": 1.11,
+     "sr": 0.52,
+     "gross": 103.37,
+     "cost": 51.27
+    },
+    {
+     "g": "H",
+     "f": "z/L250/K1.5/E0.5/MH20/dollar",
+     "n": 277,
+     "net": 59.61,
+     "t": 1.11,
+     "sr": 0.52,
+     "gross": 113.04,
+     "cost": 53.43
+    },
+    {
+     "g": "P",
+     "f": "beta/L125/K2.0/E0.5/MH20/dollar",
+     "n": 49,
+     "net": 55.05,
+     "t": 1.1,
+     "sr": 0.51,
+     "gross": 106.56,
+     "cost": 51.51
+    },
+    {
+     "g": "P",
+     "f": "z/L60/K2.0/E0.5/MH20/dollar",
+     "n": 96,
+     "net": 29.42,
+     "t": 1.08,
+     "sr": 0.5,
+     "gross": 76.52,
+     "cost": 47.11
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/beta",
+     "n": 61,
+     "net": 51.5,
+     "t": 1.08,
+     "sr": 0.51,
+     "gross": 100.25,
+     "cost": 48.75
+    },
+    {
+     "g": "P",
+     "f": "z/L250/K2.5/E0.5/MH20/dollar",
+     "n": 31,
+     "net": 70.46,
+     "t": 1.07,
+     "sr": 0.5,
+     "gross": 124.25,
+     "cost": 53.8
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/bigdv",
+     "n": 172,
+     "net": 73.97,
+     "t": 1.06,
+     "sr": 0.49,
+     "gross": 124.8,
+     "cost": 50.84
+    },
+    {
+     "g": "H",
+     "f": "ret/L250/K1.5/E0.5/MH20/dollar",
+     "n": 262,
+     "net": 58.79,
+     "t": 1.03,
+     "sr": 0.48,
+     "gross": 112.2,
+     "cost": 53.41
+    },
+    {
+     "g": "H",
+     "f": "ret/L125/K2.5/E0.5/MH20/dollar",
+     "n": 98,
+     "net": 69.8,
+     "t": 0.86,
+     "sr": 0.4,
+     "gross": 121.47,
+     "cost": 51.67
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K1.5/E0.5/MH20/dollar",
+     "n": 330,
+     "net": 36.36,
+     "t": 0.84,
+     "sr": 0.39,
+     "gross": 88.6,
+     "cost": 52.23
+    },
+    {
+     "g": "H",
+     "f": "beta/L60/K2.5/E0.5/MH20/dollar",
+     "n": 112,
+     "net": 62.08,
+     "t": 0.8,
+     "sr": 0.37,
+     "gross": 115.72,
+     "cost": 53.64
+    },
+    {
+     "g": "H",
+     "f": "ret/L250/K2.5/E0.5/MH20/dollar",
+     "n": 79,
+     "net": 71.74,
+     "t": 0.7,
+     "sr": 0.33,
+     "gross": 121.91,
+     "cost": 50.17
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K1.5/E0.5/MH20/dollar",
+     "n": 114,
+     "net": 19.74,
+     "t": 0.67,
+     "sr": 0.31,
+     "gross": 69.09,
+     "cost": 49.36
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/lowvol",
+     "n": 87,
+     "net": 71.35,
+     "t": 0.64,
+     "sr": 0.3,
+     "gross": 123.94,
+     "cost": 52.59
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH60/dollar",
+     "n": 45,
+     "net": 49.38,
+     "t": 0.62,
+     "sr": 0.29,
+     "gross": 100.7,
+     "cost": 51.33
+    },
+    {
+     "g": "P",
+     "f": "z/L250/K1.5/E0.5/MH20/dollar",
+     "n": 97,
+     "net": 17.22,
+     "t": 0.52,
+     "sr": 0.24,
+     "gross": 68.45,
+     "cost": 51.23
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH5/dollar",
+     "n": 118,
+     "net": 9.45,
+     "t": 0.49,
+     "sr": 0.23,
+     "gross": 58.6,
+     "cost": 49.15
+    },
+    {
+     "g": "P",
+     "f": "ret/L125/K2.5/E0.5/MH20/dollar",
+     "n": 35,
+     "net": 31.32,
+     "t": 0.46,
+     "sr": 0.21,
+     "gross": 85.86,
+     "cost": 54.54
+    },
+    {
+     "g": "P",
+     "f": "beta/L250/K2.5/E0.5/MH20/dollar",
+     "n": 20,
+     "net": 24.21,
+     "t": 0.46,
+     "sr": 0.21,
+     "gross": 77.45,
+     "cost": 53.23
+    },
+    {
+     "g": "S",
+     "f": "z/L250/K2.5/E0.5/MH20/dollar",
+     "n": 239,
+     "net": 26.97,
+     "t": 0.39,
+     "sr": 0.18,
+     "gross": 73.47,
+     "cost": 46.5
+    },
+    {
+     "g": "H",
+     "f": "ret/L125/K1.5/E0.5/MH20/dollar",
+     "n": 330,
+     "net": 16.06,
+     "t": 0.38,
+     "sr": 0.18,
+     "gross": 68.64,
+     "cost": 52.58
+    },
+    {
+     "g": "P",
+     "f": "z/L60/K2.5/E0.5/MH20/dollar",
+     "n": 47,
+     "net": 18.04,
+     "t": 0.36,
+     "sr": 0.17,
+     "gross": 67.34,
+     "cost": 49.3
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.5/E0.5/MH20/dollar",
+     "n": 96,
+     "net": 26.58,
+     "t": 0.33,
+     "sr": 0.16,
+     "gross": 78.55,
+     "cost": 51.97
+    },
+    {
+     "g": "P",
+     "f": "beta/L125/K1.5/E0.5/MH20/dollar",
+     "n": 74,
+     "net": 12.01,
+     "t": 0.3,
+     "sr": 0.14,
+     "gross": 64.07,
+     "cost": 52.06
+    },
+    {
+     "g": "P",
+     "f": "ret/L60/K2.5/E0.5/MH20/dollar",
+     "n": 46,
+     "net": 13.23,
+     "t": 0.26,
+     "sr": 0.12,
+     "gross": 63.03,
+     "cost": 49.8
+    },
+    {
+     "g": "P",
+     "f": "level/K10%/E0%/MH60",
+     "n": 32,
+     "net": 31.53,
+     "t": 0.26,
+     "sr": 0.12,
+     "gross": 100.55,
+     "cost": 69.01
+    },
+    {
+     "g": "P",
+     "f": "level/K10%/E1%/MH60",
+     "n": 32,
+     "net": 31.53,
+     "t": 0.26,
+     "sr": 0.12,
+     "gross": 100.55,
+     "cost": 69.01
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.0/MH20/dollar",
+     "n": 57,
+     "net": 11.81,
+     "t": 0.24,
+     "sr": 0.11,
+     "gross": 63.02,
+     "cost": 51.21
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH60/dollar",
+     "n": 392,
+     "net": 14.71,
+     "t": 0.17,
+     "sr": 0.08,
+     "gross": 64.23,
+     "cost": 49.53
+    },
+    {
+     "g": "P",
+     "f": "ret/L250/K1.5/E0.5/MH20/dollar",
+     "n": 95,
+     "net": 4.61,
+     "t": 0.13,
+     "sr": 0.06,
+     "gross": 56.24,
+     "cost": 51.63
+    },
+    {
+     "g": "P",
+     "f": "beta/L250/K2.0/E0.5/MH20/dollar",
+     "n": 31,
+     "net": 6.16,
+     "t": 0.12,
+     "sr": 0.06,
+     "gross": 59.46,
+     "cost": 53.3
+    },
+    {
+     "g": "H",
+     "f": "ret/L250/K2.0/E0.5/MH20/dollar",
+     "n": 145,
+     "net": 3.22,
+     "t": 0.05,
+     "sr": 0.02,
+     "gross": 57.57,
+     "cost": 54.36
+    },
+    {
+     "g": "H",
+     "f": "beta/L250/K2.5/E0.5/MH20/dollar",
+     "n": 43,
+     "net": 0.16,
+     "t": 0.0,
+     "sr": 0.0,
+     "gross": 49.73,
+     "cost": 49.57
+    },
+    {
+     "g": "S",
+     "f": "ret/L250/K2.5/E0.5/MH20/dollar",
+     "n": 243,
+     "net": -1.01,
+     "t": -0.02,
+     "sr": -0.01,
+     "gross": 46.64,
+     "cost": 47.65
+    },
+    {
+     "g": "P",
+     "f": "level/K5%/E1%/MH60",
+     "n": 57,
+     "net": -5.47,
+     "t": -0.08,
+     "sr": -0.04,
+     "gross": 49.61,
+     "cost": 55.08
+    },
+    {
+     "g": "P",
+     "f": "level/K5%/E0%/MH60",
+     "n": 57,
+     "net": -7.92,
+     "t": -0.11,
+     "sr": -0.05,
+     "gross": 47.34,
+     "cost": 55.26
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/highvol",
+     "n": 413,
+     "net": -5.47,
+     "t": -0.11,
+     "sr": -0.05,
+     "gross": 39.55,
+     "cost": 45.02
+    },
+    {
+     "g": "H",
+     "f": "z/L125/K2.0/E0.5/MH5/dollar",
+     "n": 447,
+     "net": -2.7,
+     "t": -0.12,
+     "sr": -0.06,
+     "gross": 47.83,
+     "cost": 50.53
+    },
+    {
+     "g": "H",
+     "f": "beta/L60/K1.5/E0.5/MH20/dollar",
+     "n": 304,
+     "net": -8.04,
+     "t": -0.17,
+     "sr": -0.08,
+     "gross": 43.92,
+     "cost": 51.96
+    },
+    {
+     "g": "S",
+     "f": "ret/L60/K2.5/E0.5/MH20/dollar",
+     "n": 497,
+     "net": -6.88,
+     "t": -0.17,
+     "sr": -0.08,
+     "gross": 39.71,
+     "cost": 46.59
+    },
+    {
+     "g": "P",
+     "f": "beta/L125/K2.5/E0.5/MH20/dollar",
+     "n": 21,
+     "net": -13.15,
+     "t": -0.18,
+     "sr": -0.08,
+     "gross": 41.68,
+     "cost": 54.82
+    },
+    {
+     "g": "P",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/highvol",
+     "n": 17,
+     "net": -20.44,
+     "t": -0.18,
+     "sr": -0.08,
+     "gross": 31.92,
+     "cost": 52.36
+    },
+    {
+     "g": "S",
+     "f": "ret/L250/K2.0/E0.5/MH20/dollar",
+     "n": 521,
+     "net": -8.3,
+     "t": -0.19,
+     "sr": -0.09,
+     "gross": 38.61,
+     "cost": 46.91
+    },
+    {
+     "g": "P",
+     "f": "z/L250/K2.0/E0.5/MH20/dollar",
+     "n": 48,
+     "net": -10.43,
+     "t": -0.21,
+     "sr": -0.1,
+     "gross": 42.42,
+     "cost": 52.85
+    },
+    {
+     "g": "S",
+     "f": "beta/L60/K1.5/E0.5/MH20/dollar",
+     "n": 1031,
+     "net": -7.22,
+     "t": -0.23,
+     "sr": -0.11,
+     "gross": 39.86,
+     "cost": 47.07
+    },
+    {
+     "g": "H",
+     "f": "beta/L60/K2.0/E0.5/MH20/dollar",
+     "n": 179,
+     "net": -14.79,
+     "t": -0.25,
+     "sr": -0.12,
+     "gross": 38.21,
+     "cost": 53.0
+    },
+    {
+     "g": "P",
+     "f": "level/K2%/E1%/MH60",
+     "n": 61,
+     "net": -18.11,
+     "t": -0.26,
+     "sr": -0.12,
+     "gross": 36.29,
+     "cost": 54.41
+    },
+    {
+     "g": "P",
+     "f": "beta/L250/K1.5/E0.5/MH20/dollar",
+     "n": 63,
+     "net": -10.6,
+     "t": -0.28,
+     "sr": -0.13,
+     "gross": 39.66,
+     "cost": 50.26
+    },
+    {
+     "g": "P",
+     "f": "ret/L250/K2.0/E0.5/MH20/dollar",
+     "n": 49,
+     "net": -19.96,
+     "t": -0.37,
+     "sr": -0.17,
+     "gross": 33.18,
+     "cost": 53.14
+    },
+    {
+     "g": "P",
+     "f": "level/K2%/E0%/MH60",
+     "n": 60,
+     "net": -32.72,
+     "t": -0.46,
+     "sr": -0.22,
+     "gross": 22.27,
+     "cost": 54.99
+    },
+    {
+     "g": "S",
+     "f": "ret/L60/K1.5/E0.5/MH20/dollar",
+     "n": 1364,
+     "net": -11.82,
+     "t": -0.49,
+     "sr": -0.23,
+     "gross": 34.33,
+     "cost": 46.15
+    },
+    {
+     "g": "S",
+     "f": "beta/L250/K2.5/E0.5/MH20/dollar",
+     "n": 151,
+     "net": -43.55,
+     "t": -0.54,
+     "sr": -0.25,
+     "gross": 1.65,
+     "cost": 45.2
+    },
+    {
+     "g": "S",
+     "f": "z/L60/K1.5/E0.5/MH20/dollar",
+     "n": 1351,
+     "net": -14.22,
+     "t": -0.59,
+     "sr": -0.28,
+     "gross": 32.0,
+     "cost": 46.22
+    },
+    {
+     "g": "P",
+     "f": "level/K10%/E0%/MH20",
+     "n": 88,
+     "net": -26.98,
+     "t": -0.61,
+     "sr": -0.29,
+     "gross": 36.98,
+     "cost": 63.97
+    },
+    {
+     "g": "P",
+     "f": "level/K10%/E1%/MH20",
+     "n": 88,
+     "net": -26.98,
+     "t": -0.61,
+     "sr": -0.29,
+     "gross": 36.98,
+     "cost": 63.97
+    },
+    {
+     "g": "H",
+     "f": "beta/L250/K2.0/E0.5/MH20/dollar",
+     "n": 96,
+     "net": -56.94,
+     "t": -0.64,
+     "sr": -0.3,
+     "gross": -4.84,
+     "cost": 52.1
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.0/MH20/dollar",
+     "n": 611,
+     "net": -32.47,
+     "t": -0.73,
+     "sr": -0.34,
+     "gross": 13.62,
+     "cost": 46.09
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar",
+     "n": 620,
+     "net": -33.55,
+     "t": -0.81,
+     "sr": -0.38,
+     "gross": 12.49,
+     "cost": 46.04
+    },
+    {
+     "g": "S",
+     "f": "z/L250/K2.0/E0.5/MH20/dollar",
+     "n": 518,
+     "net": -35.73,
+     "t": -0.84,
+     "sr": -0.39,
+     "gross": 10.58,
+     "cost": 46.31
+    },
+    {
+     "g": "P",
+     "f": "beta/L60/K2.0/E0.5/MH20/dollar",
+     "n": 60,
+     "net": -42.33,
+     "t": -0.97,
+     "sr": -0.45,
+     "gross": 5.43,
+     "cost": 47.77
+    },
+    {
+     "g": "S",
+     "f": "z/L60/K2.5/E0.5/MH20/dollar",
+     "n": 494,
+     "net": -40.07,
+     "t": -0.97,
+     "sr": -0.45,
+     "gross": 6.25,
+     "cost": 46.32
+    },
+    {
+     "g": "P",
+     "f": "beta/L60/K1.5/E0.5/MH20/dollar",
+     "n": 93,
+     "net": -30.78,
+     "t": -0.99,
+     "sr": -0.46,
+     "gross": 17.57,
+     "cost": 48.35
+    },
+    {
+     "g": "S",
+     "f": "ret/L125/K2.0/E0.5/MH20/dollar",
+     "n": 618,
+     "net": -42.66,
+     "t": -1.06,
+     "sr": -0.49,
+     "gross": 3.79,
+     "cost": 46.45
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/bigdv",
+     "n": 595,
+     "net": -44.02,
+     "t": -1.07,
+     "sr": -0.5,
+     "gross": -0.18,
+     "cost": 43.85
+    },
+    {
+     "g": "P",
+     "f": "level/K5%/E0%/MH20",
+     "n": 157,
+     "net": -29.64,
+     "t": -1.08,
+     "sr": -0.5,
+     "gross": 22.18,
+     "cost": 51.82
+    },
+    {
+     "g": "P",
+     "f": "level/K5%/E1%/MH20",
+     "n": 157,
+     "net": -29.96,
+     "t": -1.1,
+     "sr": -0.51,
+     "gross": 21.85,
+     "cost": 51.81
+    },
+    {
+     "g": "S",
+     "f": "beta/L250/K2.0/E0.5/MH20/dollar",
+     "n": 323,
+     "net": -64.59,
+     "t": -1.12,
+     "sr": -0.52,
+     "gross": -19.67,
+     "cost": 44.92
+    },
+    {
+     "g": "S",
+     "f": "ret/L125/K2.5/E0.5/MH20/dollar",
+     "n": 312,
+     "net": -64.66,
+     "t": -1.15,
+     "sr": -0.53,
+     "gross": -17.66,
+     "cost": 47.0
+    },
+    {
+     "g": "M",
+     "f": "deal/K2.0%/E0.2%/MH250",
+     "n": 13,
+     "net": -496.22,
+     "t": -1.15,
+     "sr": -0.65,
+     "gross": -448.32,
+     "cost": 47.9
+    },
+    {
+     "g": "M",
+     "f": "deal/K4.0%/E0.2%/MH250",
+     "n": 10,
+     "net": -655.09,
+     "t": -1.15,
+     "sr": -0.65,
+     "gross": -608.02,
+     "cost": 47.08
+    },
+    {
+     "g": "M",
+     "f": "deal/K0.5%/E0.2%/MH250",
+     "n": 13,
+     "net": -516.78,
+     "t": -1.2,
+     "sr": -0.68,
+     "gross": -468.75,
+     "cost": 48.02
+    },
+    {
+     "g": "M",
+     "f": "deal/K1.0%/E0.2%/MH250",
+     "n": 13,
+     "net": -516.78,
+     "t": -1.2,
+     "sr": -0.68,
+     "gross": -468.75,
+     "cost": 48.02
+    },
+    {
+     "g": "P",
+     "f": "beta/L60/K2.5/E0.5/MH20/dollar",
+     "n": 41,
+     "net": -71.6,
+     "t": -1.25,
+     "sr": -0.58,
+     "gross": -23.17,
+     "cost": 48.43
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.5/E0.5/MH20/dollar",
+     "n": 309,
+     "net": -72.37,
+     "t": -1.26,
+     "sr": -0.59,
+     "gross": -26.55,
+     "cost": 45.82
+    },
+    {
+     "g": "M",
+     "f": "deal/K2.0%/E0.0%/MH250",
+     "n": 13,
+     "net": -538.38,
+     "t": -1.27,
+     "sr": -0.72,
+     "gross": -490.27,
+     "cost": 48.11
+    },
+    {
+     "g": "M",
+     "f": "deal/K4.0%/E0.0%/MH250",
+     "n": 10,
+     "net": -710.9,
+     "t": -1.28,
+     "sr": -0.73,
+     "gross": -663.82,
+     "cost": 47.08
+    },
+    {
+     "g": "S",
+     "f": "ret/L60/K2.0/E0.5/MH20/dollar",
+     "n": 827,
+     "net": -41.92,
+     "t": -1.3,
+     "sr": -0.6,
+     "gross": 4.41,
+     "cost": 46.33
+    },
+    {
+     "g": "M",
+     "f": "deal/K0.5%/E0.0%/MH250",
+     "n": 13,
+     "net": -558.94,
+     "t": -1.33,
+     "sr": -0.75,
+     "gross": -510.71,
+     "cost": 48.23
+    },
+    {
+     "g": "M",
+     "f": "deal/K1.0%/E0.0%/MH250",
+     "n": 13,
+     "net": -558.94,
+     "t": -1.33,
+     "sr": -0.75,
+     "gross": -510.71,
+     "cost": 48.23
+    },
+    {
+     "g": "S",
+     "f": "beta/L60/K2.0/E0.5/MH20/dollar",
+     "n": 608,
+     "net": -57.48,
+     "t": -1.41,
+     "sr": -0.66,
+     "gross": -10.85,
+     "cost": 46.63
+    },
+    {
+     "g": "S",
+     "f": "z/L60/K2.0/E0.5/MH20/dollar",
+     "n": 830,
+     "net": -48.55,
+     "t": -1.51,
+     "sr": -0.7,
+     "gross": -2.31,
+     "cost": 46.24
+    },
+    {
+     "g": "S",
+     "f": "ret/L250/K1.5/E0.5/MH20/dollar",
+     "n": 898,
+     "net": -51.83,
+     "t": -1.55,
+     "sr": -0.72,
+     "gross": -5.17,
+     "cost": 46.65
+    },
+    {
+     "g": "P",
+     "f": "level/K2%/E1%/MH20",
+     "n": 176,
+     "net": -38.51,
+     "t": -1.6,
+     "sr": -0.75,
+     "gross": 11.7,
+     "cost": 50.22
+    },
+    {
+     "g": "P",
+     "f": "level/K2%/E0%/MH20",
+     "n": 175,
+     "net": -39.55,
+     "t": -1.63,
+     "sr": -0.76,
+     "gross": 10.83,
+     "cost": 50.37
+    },
+    {
+     "g": "M",
+     "f": "deal/K2.0%/E0.2%/MH60",
+     "n": 34,
+     "net": -198.82,
+     "t": -1.68,
+     "sr": -0.95,
+     "gross": -164.63,
+     "cost": 34.19
+    },
+    {
+     "g": "M",
+     "f": "deal/K0.5%/E0.2%/MH60",
+     "n": 35,
+     "net": -199.19,
+     "t": -1.73,
+     "sr": -0.98,
+     "gross": -165.12,
+     "cost": 34.07
+    },
+    {
+     "g": "M",
+     "f": "deal/K1.0%/E0.2%/MH60",
+     "n": 35,
+     "net": -199.19,
+     "t": -1.73,
+     "sr": -0.98,
+     "gross": -165.12,
+     "cost": 34.07
+    },
+    {
+     "g": "M",
+     "f": "deal/K4.0%/E0.2%/MH60",
+     "n": 26,
+     "net": -267.87,
+     "t": -1.75,
+     "sr": -0.99,
+     "gross": -235.4,
+     "cost": 32.46
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/dollar/lowvol",
+     "n": 267,
+     "net": -115.76,
+     "t": -1.78,
+     "sr": -0.83,
+     "gross": -68.77,
+     "cost": 47.0
+    },
+    {
+     "g": "S",
+     "f": "beta/L125/K2.5/E0.5/MH20/dollar",
+     "n": 229,
+     "net": -130.1,
+     "t": -1.8,
+     "sr": -0.84,
+     "gross": -84.21,
+     "cost": 45.89
+    },
+    {
+     "g": "M",
+     "f": "deal/K2.0%/E0.0%/MH60",
+     "n": 34,
+     "net": -215.0,
+     "t": -1.85,
+     "sr": -1.05,
+     "gross": -180.73,
+     "cost": 34.27
+    },
+    {
+     "g": "M",
+     "f": "deal/K0.5%/E0.0%/MH60",
+     "n": 35,
+     "net": -214.92,
+     "t": -1.91,
+     "sr": -1.08,
+     "gross": -180.77,
+     "cost": 34.15
+    },
+    {
+     "g": "M",
+     "f": "deal/K1.0%/E0.0%/MH60",
+     "n": 35,
+     "net": -214.92,
+     "t": -1.91,
+     "sr": -1.08,
+     "gross": -180.77,
+     "cost": 34.15
+    },
+    {
+     "g": "H",
+     "f": "beta/L250/K1.5/E0.5/MH20/dollar",
+     "n": 181,
+     "net": -109.55,
+     "t": -1.92,
+     "sr": -0.89,
+     "gross": -57.39,
+     "cost": 52.16
+    },
+    {
+     "g": "M",
+     "f": "deal/K4.0%/E0.0%/MH60",
+     "n": 26,
+     "net": -289.42,
+     "t": -1.94,
+     "sr": -1.1,
+     "gross": -256.95,
+     "cost": 32.47
+    },
+    {
+     "g": "S",
+     "f": "z/L250/K1.5/E0.5/MH20/dollar",
+     "n": 925,
+     "net": -67.94,
+     "t": -2.05,
+     "sr": -0.96,
+     "gross": -21.98,
+     "cost": 45.96
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH20/beta",
+     "n": 620,
+     "net": -65.16,
+     "t": -2.12,
+     "sr": -0.99,
+     "gross": -35.74,
+     "cost": 29.42
+    },
+    {
+     "g": "S",
+     "f": "beta/L250/K1.5/E0.5/MH20/dollar",
+     "n": 592,
+     "net": -92.75,
+     "t": -2.17,
+     "sr": -1.01,
+     "gross": -47.04,
+     "cost": 45.71
+    },
+    {
+     "g": "S",
+     "f": "ret/L125/K1.5/E0.5/MH20/dollar",
+     "n": 1071,
+     "net": -64.09,
+     "t": -2.18,
+     "sr": -1.01,
+     "gross": -17.4,
+     "cost": 46.69
+    },
+    {
+     "g": "S",
+     "f": "beta/L125/K1.5/E0.5/MH20/dollar",
+     "n": 823,
+     "net": -84.34,
+     "t": -2.41,
+     "sr": -1.13,
+     "gross": -37.9,
+     "cost": 46.44
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K1.5/E0.5/MH20/dollar",
+     "n": 1077,
+     "net": -71.62,
+     "t": -2.46,
+     "sr": -1.14,
+     "gross": -25.12,
+     "cost": 46.51
+    },
+    {
+     "g": "S",
+     "f": "beta/L60/K2.5/E0.5/MH20/dollar",
+     "n": 363,
+     "net": -141.72,
+     "t": -2.57,
+     "sr": -1.2,
+     "gross": -95.04,
+     "cost": 46.68
+    },
+    {
+     "g": "S",
+     "f": "z/L125/K2.0/E0.5/MH5/dollar",
+     "n": 1551,
+     "net": -37.28,
+     "t": -2.64,
+     "sr": -1.23,
+     "gross": 7.01,
+     "cost": 44.29
+    },
+    {
+     "g": "S",
+     "f": "beta/L125/K2.0/E0.5/MH20/dollar",
+     "n": 464,
+     "net": -146.37,
+     "t": -2.89,
+     "sr": -1.35,
+     "gross": -100.05,
+     "cost": 46.32
+    }
+   ]
+  }
+ },
+ "design_to_heldout_bridge": {
+  "P": {
+   "formula": "ret/L60/K2.5/E0.5/MH20/dollar",
+   "design": {
+    "n": 71,
+    "gross_bp": 94.7,
+    "cost_bp": 14.27,
+    "net_bp": 80.43,
+    "sd_bp": 288.2,
+    "t": 2.35,
+    "hit": 0.69,
+    "trades_per_yr": 11.8,
+    "sharpe": 0.96,
+    "mean_hold": 13.6,
+    "formula": "ret/L60/K2.5/E0.5/MH20/dollar",
+    "id": 11,
+    "n_pairs": 6
+   },
+   "heldout": {
+    "n": 46,
+    "gross_bp": 63.03,
+    "cost_bp": 49.8,
+    "net_bp": 13.23,
+    "sd_bp": 347.7,
+    "t": 0.26,
+    "hit": 0.674,
+    "trades_per_yr": 10.0,
+    "sharpe": 0.12,
+    "mean_hold": 13.3,
+    "formula": "ret/L60/K2.5/E0.5/MH20/dollar",
+    "id": 11,
+    "n_pairs": 4
+   },
+   "design_htb": {
+    "n": 71,
+    "gross_bp": 94.7,
+    "cost_bp": 67.93,
+    "net_bp": 26.77,
+    "sd_bp": 297.8,
+    "t": 0.76,
+    "hit": 0.479,
+    "trades_per_yr": 11.8,
+    "sharpe": 0.31,
+    "mean_hold": 13.6,
+    "formula": "ret/L60/K2.5/E0.5/MH20/dollar",
+    "id": 11,
+    "n_pairs": 6
+   },
+   "heldout_htb": {
+    "n": 46,
+    "gross_bp": 63.03,
+    "cost_bp": 102.33,
+    "net_bp": -39.3,
+    "sd_bp": 360.3,
+    "t": -0.74,
+    "hit": 0.522,
+    "trades_per_yr": 10.0,
+    "sharpe": -0.34,
+    "mean_hold": 13.3,
+    "formula": "ret/L60/K2.5/E0.5/MH20/dollar",
+    "id": 11,
+    "n_pairs": 4
+   },
+   "pnl_share_top": [
+    [
+     "PAGP/PAA",
+     0.423,
+     16
+    ],
+    [
+     "BEPC/BEP",
+     0.354,
+     3
+    ],
+    [
+     "UN/UL",
+     0.098,
+     12
+    ],
+    [
+     "RDS.A/RDS.B",
+     0.069,
+     20
+    ],
+    [
+     "BBL/BHP",
+     0.034,
+     13
+    ]
+   ]
+  },
+  "H": {
+   "formula": "z/L125/K2.0/E0.5/MH60/dollar",
+   "design": {
+    "n": 170,
+    "gross_bp": 182.94,
+    "cost_bp": 73.03,
+    "net_bp": 109.91,
+    "sd_bp": 1000.2,
+    "t": 1.43,
+    "hit": 0.641,
+    "trades_per_yr": 28.4,
+    "sharpe": 0.59,
+    "mean_hold": 32.7,
+    "formula": "z/L125/K2.0/E0.5/MH60/dollar",
+    "id": 28,
+    "n_pairs": 13
+   },
+   "heldout": {
+    "n": 124,
+    "gross_bp": 206.21,
+    "cost_bp": 54.27,
+    "net_bp": 151.94,
+    "sd_bp": 1314.4,
+    "t": 1.29,
+    "hit": 0.669,
+    "trades_per_yr": 26.9,
+    "sharpe": 0.6,
+    "mean_hold": 37.6,
+    "formula": "z/L125/K2.0/E0.5/MH60/dollar",
+    "id": 28,
+    "n_pairs": 13
+   },
+   "design_htb": {
+    "n": 170,
+    "gross_bp": 182.94,
+    "cost_bp": 201.96,
+    "net_bp": -19.02,
+    "sd_bp": 1033.5,
+    "t": -0.24,
+    "hit": 0.541,
+    "trades_per_yr": 28.4,
+    "sharpe": -0.1,
+    "mean_hold": 32.7,
+    "formula": "z/L125/K2.0/E0.5/MH60/dollar",
+    "id": 28,
+    "n_pairs": 13
+   },
+   "heldout_htb": {
+    "n": 124,
+    "gross_bp": 206.21,
+    "cost_bp": 202.81,
+    "net_bp": 3.39,
+    "sd_bp": 1355.8,
+    "t": 0.03,
+    "hit": 0.589,
+    "trades_per_yr": 26.9,
+    "sharpe": 0.01,
+    "mean_hold": 37.6,
+    "formula": "z/L125/K2.0/E0.5/MH60/dollar",
+    "id": 28,
+    "n_pairs": 13
+   },
+   "pnl_share_top": [
+    [
+     "IEP/CVI",
+     0.415,
+     11
+    ],
+    [
+     "LTRPA/TRIP",
+     0.3,
+     20
+    ],
+    [
+     "LSXMK/SIRI",
+     0.173,
+     16
+    ],
+    [
+     "LSXMA/SIRI",
+     0.165,
+     16
+    ],
+    [
+     "DVMT/VMW",
+     0.117,
+     4
+    ]
+   ]
+  },
+  "S": {
+   "formula": "ret/L250/K2.0/E0.5/MH20/dollar",
+   "design": {
+    "n": 177,
+    "gross_bp": 209.61,
+    "cost_bp": 41.21,
+    "net_bp": 168.41,
+    "sd_bp": 1066.7,
+    "t": 2.1,
+    "hit": 0.548,
+    "trades_per_yr": 29.5,
+    "sharpe": 0.86,
+    "mean_hold": 18.9,
+    "formula": "ret/L250/K2.0/E0.5/MH20/dollar",
+    "id": 16,
+    "n_pairs": 20
+   },
+   "heldout": {
+    "n": 521,
+    "gross_bp": 38.61,
+    "cost_bp": 46.91,
+    "net_bp": -8.3,
+    "sd_bp": 1023.2,
+    "t": -0.19,
+    "hit": 0.486,
+    "trades_per_yr": 113.2,
+    "sharpe": -0.09,
+    "mean_hold": 19.4,
+    "formula": "ret/L250/K2.0/E0.5/MH20/dollar",
+    "id": 16,
+    "n_pairs": 39
+   },
+   "design_htb": {
+    "n": 177,
+    "gross_bp": 209.61,
+    "cost_bp": 116.03,
+    "net_bp": 93.59,
+    "sd_bp": 1069.4,
+    "t": 1.16,
+    "hit": 0.525,
+    "trades_per_yr": 29.5,
+    "sharpe": 0.48,
+    "mean_hold": 18.9,
+    "formula": "ret/L250/K2.0/E0.5/MH20/dollar",
+    "id": 16,
+    "n_pairs": 20
+   },
+   "heldout_htb": {
+    "n": 521,
+    "gross_bp": 38.61,
+    "cost_bp": 123.34,
+    "net_bp": -84.72,
+    "sd_bp": 1026.2,
+    "t": -1.88,
+    "hit": 0.457,
+    "trades_per_yr": 113.2,
+    "sharpe": -0.88,
+    "mean_hold": 19.4,
+    "formula": "ret/L250/K2.0/E0.5/MH20/dollar",
+    "id": 16,
+    "n_pairs": 39
+   },
+   "pnl_share_top": [
+    [
+     "HLT/PK",
+     0.256,
+     15
+    ],
+    [
+     "HON/REZI",
+     0.201,
+     3
+    ],
+    [
+     "MET/BHF",
+     0.175,
+     11
+    ],
+    [
+     "CAG/LW",
+     0.147,
+     13
+    ],
+    [
+     "HPQ/HPE",
+     0.105,
+     15
+    ]
+   ]
+  },
+  "M": {
+   "formula": "deal/K0.5%/E0.0%/MH250",
+   "design": {
+    "n": 49,
+    "gross_bp": 227.69,
+    "cost_bp": 37.24,
+    "net_bp": 190.46,
+    "sd_bp": 614.2,
+    "t": 2.17,
+    "hit": 0.735,
+    "trades_per_yr": 9.4,
+    "sharpe": 0.95,
+    "mean_hold": 75.2,
+    "formula": "deal/K0.5%/E0.0%/MH250",
+    "id": 2001,
+    "n_deals": 24
+   },
+   "heldout": {
+    "n": 13,
+    "gross_bp": -510.71,
+    "cost_bp": 48.23,
+    "net_bp": -558.94,
+    "sd_bp": 1516.8,
+    "t": -1.33,
+    "hit": 0.538,
+    "trades_per_yr": 4.2,
+    "sharpe": -0.75,
+    "mean_hold": 137.0,
+    "formula": "deal/K0.5%/E0.0%/MH250",
+    "id": 2001,
+    "n_deals": 9
+   },
+   "design_htb": {
+    "n": 49,
+    "gross_bp": 227.69,
+    "cost_bp": 350.45,
+    "net_bp": -122.76,
+    "sd_bp": 722.4,
+    "t": -1.19,
+    "hit": 0.408,
+    "trades_per_yr": 9.4,
+    "sharpe": -0.52,
+    "mean_hold": 75.2,
+    "formula": "deal/K0.5%/E0.0%/MH250",
+    "id": 2001,
+    "n_deals": 24
+   },
+   "heldout_htb": {
+    "n": 13,
+    "gross_bp": -510.71,
+    "cost_bp": 578.63,
+    "net_bp": -1089.34,
+    "sd_bp": 1748.2,
+    "t": -2.25,
+    "hit": 0.0,
+    "trades_per_yr": 4.2,
+    "sharpe": -1.27,
+    "mean_hold": 137.0,
+    "formula": "deal/K0.5%/E0.0%/MH250",
+    "id": 2001,
+    "n_deals": 9
+   },
+   "pnl_share_top": [
+    [
+     "AET/CVS",
+     0.156,
+     1
+    ],
+    [
+     "RTN/UTX",
+     0.14,
+     1
+    ],
+    [
+     "CELG/BMY",
+     0.132,
+     1
+    ],
+    [
+     "ESRX/CI",
+     0.126,
+     1
+    ],
+    [
+     "WCG/CNC",
+     0.113,
+     1
+    ]
+   ]
+  }
+ },
+ "family_best": {
+  "group": "P",
+  "formula": "ret/L60/K2.5/E0.5/MH20/dollar",
+  "design": {
+   "n": 71,
+   "gross_bp": 94.7,
+   "cost_bp": 14.27,
+   "net_bp": 80.43,
+   "sd_bp": 288.2,
+   "t": 2.35,
+   "hit": 0.69,
+   "trades_per_yr": 11.8,
+   "sharpe": 0.96,
+   "mean_hold": 13.6,
+   "formula": "ret/L60/K2.5/E0.5/MH20/dollar",
+   "id": 11,
+   "n_pairs": 6
+  },
+  "heldout": {
+   "n": 46,
+   "gross_bp": 63.03,
+   "cost_bp": 49.8,
+   "net_bp": 13.23,
+   "sd_bp": 347.7,
+   "t": 0.26,
+   "hit": 0.674,
+   "trades_per_yr": 10.0,
+   "sharpe": 0.12,
+   "mean_hold": 13.3,
+   "formula": "ret/L60/K2.5/E0.5/MH20/dollar",
+   "id": 11,
+   "n_pairs": 4
+  }
+ },
+ "robustness": {
+  "shortability_screen": {
+   "source": "Alpaca GET /v2/assets, 2026-08-20",
+   "unshortable_names_in_this_universe": [
+    "AMTD",
+    "BIP",
+    "IEP",
+    "LTRPA",
+    "UN"
+   ],
+   "group_H_design": {
+    "unscreened": {
+     "n": 170,
+     "net_bp": 109.91,
+     "t": 1.43,
+     "sharpe": 0.59
+    },
+    "screened": {
+     "n": 160,
+     "net_bp": 36.84,
+     "t": 0.5,
+     "sharpe": 0.2
+    },
+    "note": "10 of 170 trades (6%) require shorting IEP or LTRPA and carry 68% of the design P&L. Neither is shortable at the broker."
+   },
+   "group_H_heldout": {
+    "unscreened": {
+     "n": 124,
+     "net_bp": 151.94,
+     "t": 1.29,
+     "sharpe": 0.6
+    },
+    "screened": {
+     "n": 121,
+     "net_bp": 113.05,
+     "t": 0.96,
+     "sharpe": 0.45
+    }
+   },
+   "group_P_design": {
+    "unscreened": {
+     "n": 71,
+     "net_bp": 80.43,
+     "t": 2.35,
+     "sharpe": 0.96
+    },
+    "screened": {
+     "n": 62,
+     "net_bp": 88.94,
+     "t": 2.39,
+     "sharpe": 0.98
+    }
+   },
+   "group_P_heldout": {
+    "unscreened": {
+     "n": 46,
+     "net_bp": 13.23,
+     "t": 0.26,
+     "sharpe": 0.12
+    },
+    "screened": {
+     "n": 40,
+     "net_bp": 51.94,
+     "t": 1.03,
+     "sharpe": 0.48
+    }
+   },
+   "group_S": "unaffected -- no unshortable leg in the spinoff universe"
+  },
+  "borrow_sensitivity_htb_10_28pct": {
+   "P": {
+    "design_net_bp": 26.77,
+    "design_t": 0.76,
+    "heldout_net_bp": -39.3,
+    "heldout_t": -0.74
+   },
+   "H": {
+    "design_net_bp": -19.02,
+    "design_t": -0.24,
+    "heldout_net_bp": 3.39,
+    "heldout_t": 0.03
+   },
+   "S": {
+    "design_net_bp": 93.59,
+    "design_t": 1.16,
+    "heldout_net_bp": -84.72,
+    "heldout_t": -1.88
+   },
+   "M": {
+    "design_net_bp": -122.76,
+    "design_t": -1.19,
+    "heldout_net_bp": -1089.34,
+    "heldout_t": -2.25
+   }
+  },
+  "concentration": "every group's design P&L is carried by 3-4 pairs: P 42% PAGP/PAA + 35% from THREE BEPC/BEP trades; H 41% IEP/CVI + 30% LTRPA/TRIP; S 26% HLT/PK + 20% from THREE HON/REZI trades; M the four largest cash-and-stock deals are 56%."
+ },
+ "data_constraint": {
+  "what_free_data_DOES_give": "Alpaca SIP free tier serves daily bars for DELISTED tickers back to 2016-01-04, which is what made groups P/H/M testable at all: DVMT, VMW, XLNX, BBL, RDS.A/B, UN, BAMR, CXO, RTN, UTX, CELG, ETFC, MXIM, PXD, HES, PACW, CIT, UMPQ all resolve.",
+  "what_it_does_NOT_give": [
+   "Point-in-time HOLDCO CONSTITUENT RATIOS. Liberty Broadband's CHTR-per-share, Liberty SiriusXM's SIRI-per-share, Loews' CNA stake, IEP's CVI stake all drift with buybacks and issuance and there is no free point-in-time series. Group H therefore uses an ESTIMATED ratio (rolling z / rolling OLS), which downgrades it from an identical-claim trade to an ordinary statistical pair. This is the single biggest binding constraint in this sub-family.",
+   "Point-in-time NAV / sum-of-parts for holdcos with UNLISTED parts (FWONA, BATRA, GLIBA, QRTEA) -- excluded entirely.",
+   "A survivorship-free MERGER DEAL LIST. Group M's 34 deals come from recall, and recall is overwhelmingly of deals that CLOSED. There is no free machine-readable universe of announced US stock-for-stock deals with exchange ratios. The design-window group-M number is therefore an UPPER BOUND, not an estimate.",
+   "Historical BORROW RATES. B22G could only obtain a same-day IBKR snapshot; the 0.33%/10.28% pair is applied as a constant across ten years.",
+   "ADR<->ordinary mappings and non-US ordinaries (Prosus/Tencent, SoftBank/Alibaba, Exor/Ferrari) -- not on the free US tape at all; that whole international holdco branch is untested."
+  ],
+  "data_hygiene_traps_found": {
+   "ticker_recycling_and_stitching": "Alpaca serves a series BY TICKER and silently stitches successive occupants. Verified by price level: BBT is Beacon Financial (not BB&T), STI is Solidion Technology (not SunTrust) -- the STI/BBT all-stock deal had to be DROPPED. DOW carries Dow Chemical's last price FLAT from 2017-08 to 2019-04-01 then becomes Dow Inc -- the DD/DOW 1.282 deal had to be DROPPED. LLL is L3 stitched to L3Harris; AMTD is TD Ameritrade stitched to AMTD IDEA; UN is Unilever NV then a leveraged UNH ETF.",
+   "guards_applied": [
+    "per-symbol validity windows established by price-level verification",
+    "gap segmentation (>20 calendar-day hole = different listing)",
+    "stale-price drop (>=5 identical consecutive raw closes)"
+   ],
+   "hygiene_counters": {
+    "excluded": [
+     "BBT",
+     "STI"
+    ],
+    "validity_clipped": {
+     "UN": [
+      1267,
+      1236
+     ],
+     "DOW": [
+      2671,
+      1855
+     ],
+     "AMTD": [
+      2671,
+      1198
+     ],
+     "LLL": [
+      1704,
+      878
+     ]
+    },
+    "gap_segments": {},
+    "stale_days_dropped": {
+     "LTRPA": 346,
+     "DOW": 393,
+     "AMTD": 333,
+     "LLL": 574
+    }
+   }
+  }
+ },
+ "verdict": {
+  "family_is_noise": true,
+  "why": [
+   "N=130 formula configurations were evaluated on the design window. The expected maximum |t| under the null for 130 tries is sqrt(2 ln 130) = 3.12 SE. The BEST design t across all 130 was 2.35. Nothing cleared the bar -- not one configuration, in any of the four groups.",
+   "The design t distribution is centred on zero (median 0.12, p25 -0.60, p75 0.99, 68/130 positive). That is what a null looks like.",
+   "The design-selected formula in every group collapses out of sample: P +80bp -> +13bp (t 0.26); S +168bp -> -8bp; M +190bp -> -559bp. Only H rose (+110 -> +152bp) and H had the LOWEST design t of the four (1.43) and dies on the shortability screen (design t 1.43 -> 0.50).",
+   "The one holdout configuration above 3.12 (H ret/L60/K2.5, t=3.21) is holdout mining, not confirmation: on the design window that same group produced the four WORST t-stats in the entire sweep (-2.75, -2.24, -1.82, ...).",
+   "At the measured HTB borrow rate (10.28%/yr, B22G) three of four groups are negative on both windows.",
+   "Every group's design P&L is carried by 3-4 pairs, several by literally three trades."
+  ],
+  "what_would_change_the_answer": [
+   "A point-in-time holdco constituent-ratio series (would turn group H from a statistical pair back into a true identical-claim trade). Not free.",
+   "A survivorship-free announced-deal universe with exchange ratios (would let group M be measured rather than bounded). Not free.",
+   "A borrow-rate history (would let the P/H shorts be costed instead of assumed). Not free.",
+   "None of these is a parameter-tuning problem, so no further sweep of this family on free data is worth running."
+  ]
+ }
+}

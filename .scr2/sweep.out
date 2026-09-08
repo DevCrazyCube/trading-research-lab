@@ -1,0 +1,9 @@
+{
+ "ncomb": 262080,
+ "n_struct": 3120,
+ "n_filters": 84,
+ "kept": 13926,
+ "elapsed": 367.78915905952454,
+ "ntrain": 175,
+ "nvalid": 207
+}

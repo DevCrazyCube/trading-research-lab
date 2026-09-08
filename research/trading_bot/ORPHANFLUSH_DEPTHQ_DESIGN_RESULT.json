@@ -1,0 +1,54 @@
+{
+ "harness": "orphanflush_depthq.py (DEPTH-Q; gate-0 logic + real depth denominator)",
+ "frozen_spec": "ORIGINAL_STRATEGY_SHORTLIST.md 5.3-5.9",
+ "window": "design",
+ "window_dates": [
+  "2023-01-01",
+  "2024-12-31"
+ ],
+ "entry_offset_bars": 1,
+ "q_denominator": "REAL: |dOI| / trailing-24h median +-1% book notional (bookDepth)",
+ "coverage": {
+  "symbols_present": 252,
+  "symbols_with_bookdepth": 252,
+  "symbols_planned": 252
+ },
+ "n_flush_events_raw": 669,
+ "n_flush_events_scored": 669,
+ "n_clusters": 521,
+ "mean_gross_bp_per_cluster": -10.98695373886768,
+ "sd_bp": 472.3704060658584,
+ "se_bp": 20.694923229147644,
+ "t_gross": -0.5309009179310783,
+ "net_bp_per_cluster": {
+  "20bp": -30.98695373886768,
+  "25bp": -35.98695373886768,
+  "35bp": -45.98695373886768,
+  "50bp": -60.98695373886768
+ },
+ "t_net": {
+  "20bp": -1.4973215119360426,
+  "25bp": -1.738926660437284,
+  "35bp": -2.222136957439766,
+  "50bp": -2.9469524029434893
+ },
+ "friction_curve_bp": [
+  20.0,
+  25.0,
+  35.0,
+  50.0
+ ],
+ "lookahead_audit": {
+  "entry_offset": 1,
+  "checked_events": 200,
+  "entry_is_next_bar_open": true,
+  "q_denom_causal": true,
+  "fwd_uses_only_future": true,
+  "max_z_drift_rel": 0.0,
+  "violations": [],
+  "note": "depth-q denominator is a causal trailing-24h median ending AT bar t; q's trailing-30d p90 window ends at t-1 (strictly prior). Entry at open of t+off."
+ },
+ "bookticker_refinement": "NOT wired (bookTicker not fetched); Gate A defined on the charged-friction curve, so the gate is fully implemented",
+ "gate0_gross_bar_bp": 35.0,
+ "design_verdict": "SIGNAL_WEAKENS_UNDER_DEPTH_Q"
+}

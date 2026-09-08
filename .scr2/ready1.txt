@@ -1,0 +1,4 @@
+combos swept: 262080 structures: 3120 filters: 84 train mints: 175 valid mints: 207 elapsed 368s
+rows passing TRAIN gate: 13926
+
+=== UNCONDITIONAL SURFACE (no creator filter), validate-split mint-equa

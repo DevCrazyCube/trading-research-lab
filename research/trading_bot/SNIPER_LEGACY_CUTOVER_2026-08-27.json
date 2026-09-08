@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "cutover_verified_utc": "2026-08-27T10:10:40Z",
+  "scope": "legacy PAPER sniper core arms retired before clean V2 start",
+  "live_orders_or_wallets": false,
+  "reason": "legacy resolution-only ledgers mixed cost regimes and silently dropped open positions on restart",
+  "observation_limit": "n_open is the last published in-process scorecard count, approximately 11 seconds before termination; position identities and exact sizes were never persisted and cannot be reconstructed",
+  "stress_policy": "all 70 observed-open legacy positions are cutover dropouts and count as full notional loss for system-level stress; exact R is unknowable because their entry sizes/cost commitments were not retained",
+  "minimum_full_loss_stress_R_ignoring_costs": -116.666667,
+  "arms": {
+    "core_bal": {
+      "scorecard_generated_utc": "2026-08-27T10:10:29.257430+00:00",
+      "n_resolved": 4390,
+      "n_open_cutover_dropout": 24,
+      "source": "research/data/sniper_cache/live_scorecard_core_bal.json",
+      "source_sha256": "72e98f763a43ba0951f9a0440ad7213a5e70be893980cd17f38e31489d725793"
+    },
+    "core_confirm": {
+      "scorecard_generated_utc": "2026-08-27T10:10:29.310829+00:00",
+      "n_resolved": 2773,
+      "n_open_cutover_dropout": 22,
+      "source": "research/data/sniper_cache/live_scorecard_core_confirm.json",
+      "source_sha256": "72848969f1a95b59e4a01d2ec20a76ca8cdc0f9dd522988a6813fb7501b2cf39"
+    },
+    "core_ratchet": {
+      "scorecard_generated_utc": "2026-08-27T10:10:29.360996+00:00",
+      "n_resolved": 2894,
+      "n_open_cutover_dropout": 24,
+      "source": "research/data/sniper_cache/live_scorecard_core_ratchet.json",
+      "source_sha256": "acb60f4ed4ee0f09645c3b56ac7d510265e1ea42f0d91539760c22b1d230b8d3"
+    }
+  },
+  "totals": {
+    "n_resolved_last_scorecards": 10057,
+    "n_open_cutover_dropouts": 70
+  }
+}

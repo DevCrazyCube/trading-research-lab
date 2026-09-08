@@ -1,0 +1,4 @@
+probing GeckoTerminal free-tier minute-OHLCV lookback horizon
+  before=now-   1d  minute -> HTTP 200 bars=2
+  before=now-   1d  hour   -> HTTP 200 bars=1
+  before=now-   1d  day    -> HTTP 200 bars=70

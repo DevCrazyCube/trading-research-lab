@@ -1,0 +1,240 @@
+stage3 combos 291048 train-positive rules 2185 floor 300.0
+unique rule x exit 2185
+validated 2166 t 15.5
+
+=== VALIDATE survivors (mean>0, trim>0, med>-2%) === 279
+rvol20<=0.02                                               H= 30 tp=1 sl=0 pa=1 | TR mean=   4.82 trim=  4.97 k= 21 || VA mean=   7.16 trim=  7.29 med=   7.34 CI=[2.8,11.3] k= 35 n= 165 res=99 dmean= 11.74
+rvol20<=0.02                                               H= 30 tp=0 sl=0 pa=1 | TR mean=   4.67 trim=  5.06 k= 21 || VA mean=   6.28 trim=  6.24 med=   5.35 CI=[3.4,9.2] k= 35 n= 165 res=99 dmean= 11.46
+rvol20<=0.02                                               H= 30 tp=3 sl=0 pa=0 | TR mean=   5.78 trim=  5.80 k= 21 || VA mean=   6.22 trim=  6.14 med=   7.63 CI=[1.2,11.1] k= 35 n= 165 res=99 dmean= 10.57
+rvol20<=0.02                                               H= 30 tp=2 sl=0 pa=0 | TR mean=   5.56 trim=  5.56 k= 21 || VA mean=   6.23 trim=  6.07 med=   7.63 CI=[1.3,11.1] k= 35 n= 174 res=99 dmean= 10.85
+rvol20<=0.02                                               H= 30 tp=3 sl=0 pa=1 | TR mean=   5.78 trim=  5.80 k= 21 || VA mean=   6.12 trim=  6.04 med=   7.63 CI=[1.1,10.9] k= 35 n= 165 res=99 dmean= 10.45
+rvol20<=0.02                                               H= 30 tp=-1 sl=0 pa=0 | TR mean=   5.78 trim=  5.80 k= 21 || VA mean=   6.03 trim=  5.93 med=   7.63 CI=[1.0,10.8] k= 35 n= 165 res=99 dmean= 12.29
+rvol20<=0.02                                               H= 30 tp=2 sl=0 pa=1 | TR mean=   5.51 trim=  5.50 k= 21 || VA mean=   5.83 trim=  5.72 med=   7.63 CI=[0.9,10.7] k= 35 n= 165 res=99 dmean= 10.70
+rvol20<=0.02                                               H= 60 tp=2 sl=0 pa=0 | TR mean=  10.59 trim= 10.78 k= 21 || VA mean=   5.18 trim=  4.96 med=   9.77 CI=[-0.5,10.6] k= 35 n= 126 res=98 dmean=  9.83
+rvol20<=0.02                                               H= 60 tp=1 sl=0 pa=0 | TR mean=   3.51 trim=  3.73 k= 21 || VA mean=   4.47 trim=  4.67 med=   9.54 CI=[1.0,7.9] k= 35 n= 160 res=99 dmean=  8.65
+rvol20<=0.02                                               H= 30 tp=1 sl=0 pa=0 | TR mean=   3.27 trim=  3.48 k= 21 || VA mean=   4.09 trim=  4.26 med=   4.44 CI=[0.7,7.4] k= 35 n= 196 res=99 dmean=  8.44
+rvol20<=0.05                                               H= 60 tp=1 sl=0 pa=1 | TR mean=   6.25 trim=  5.64 k= 29 || VA mean=   4.76 trim=  4.14 med=   1.33 CI=[0.5,9.0] k= 48 n= 234 res=98 dmean=  9.62
+rvol20<=0.02                                               H= 15 tp=0 sl=0 pa=1 | TR mean=   1.86 trim=  2.37 k= 21 || VA mean=   3.82 trim=  3.84 med=   4.73 CI=[2.0,5.6] k= 35 n= 285 res=99 dmean=  8.34
+rvol20<=0.02                                               H= 15 tp=1 sl=0 pa=1 | TR mean=   1.28 trim=  1.59 k= 21 || VA mean=   3.06 trim=  3.26 med=   1.84 CI=[0.3,5.7] k= 35 n= 285 res=99 dmean=  7.28
+rvol20<=0.02                                               H= 15 tp=1 sl=0 pa=0 | TR mean=   1.18 trim=  1.48 k= 21 || VA mean=   2.94 trim=  3.13 med=   1.58 CI=[0.2,5.6] k= 35 n= 288 res=99 dmean=  7.39
+rvol20<=0.05                                               H= 60 tp=3 sl=0 pa=1 | TR mean=   8.49 trim=  7.31 k= 29 || VA mean=   4.11 trim=  2.97 med=  -1.51 CI=[-1.6,10.0] k= 48 n= 234 res=98 dmean=  8.60
+rvol20<=0.02                                               H= 60 tp=0 sl=0 pa=0 | TR mean=   1.69 trim=  2.25 k= 21 || VA mean=   2.72 trim=  2.97 med=   4.14 CI=[1.1,4.2] k= 35 n= 246 res=99 dmean=  7.64
+rvol20<=0.02                                               H= 30 tp=0 sl=1 pa=1 | TR mean=   0.33 trim=  1.04 k= 21 || VA mean=   3.07 trim=  2.95 med=   3.73 CI=[-0.5,6.6] k= 35 n= 165 res=99 dmean= 12.27
+rvol20<=0.02                                               H= 15 tp=2 sl=0 pa=0 | TR mean=   1.48 trim=  1.80 k= 21 || VA mean=   2.77 trim=  2.95 med=   1.84 CI=[-0.2,5.7] k= 35 n= 285 res=99 dmean=  7.74
+rvol20<=0.02                                               H= 15 tp=2 sl=0 pa=1 | TR mean=   1.45 trim=  1.77 k= 21 || VA mean=   2.77 trim=  2.95 med=   1.84 CI=[-0.2,5.7] k= 35 n= 285 res=99 dmean=  7.41
+rvol20<=0.02                                               H= 15 tp=-1 sl=0 pa=0 | TR mean=   1.43 trim=  1.75 k= 21 || VA mean=   2.77 trim=  2.95 med=   1.84 CI=[-0.2,5.7] k= 35 n= 285 res=99 dmean=  7.98
+rvol20<=0.02                                               H= 15 tp=3 sl=0 pa=0 | TR mean=   1.43 trim=  1.75 k= 21 || VA mean=   2.77 trim=  2.95 med=   1.84 CI=[-0.2,5.7] k= 35 n= 285 res=99 dmean=  7.44
+rvol20<=0.02                                               H= 15 tp=3 sl=0 pa=1 | TR mean=   1.43 trim=  1.75 k= 21 || VA mean=   2.77 trim=  2.95 med=   1.84 CI=[-0.2,5.7] k= 35 n= 285 res=99 dmean=  7.08
+rvol20<=0.02                                               H= 30 tp=0 sl=0 pa=0 | TR mean=   1.73 trim=  2.29 k= 21 || VA mean=   2.71 trim=  2.85 med=   3.80 CI=[1.3,4.1] k= 35 n= 273 res=99 dmean=  7.71
+rvol20<=0.05                                               H= 30 tp=1 sl=0 pa=1 | TR mean=   4.42 trim=  4.49 k= 29 || VA mean=   2.87 trim=  2.75 med=   1.33 CI=[-0.5,6.3] k= 48 n= 359 res=99 dmean=  7.45
+rvol20<=0.05                                               H= 60 tp=2 sl=0 pa=1 | TR mean=   7.23 trim=  6.42 k= 29 || VA mean=   3.45 trim=  2.62 med=   2.18 CI=[-1.2,8.3] k= 48 n= 234 res=98 dmean=  8.77
+eff20>0.9                                                  H= 60 tp=1 sl=0 pa=1 | TR mean=   3.37 trim=  2.72 k= 36 || VA mean=   3.23 trim=  2.39 med=   1.33 CI=[-1.5,8.1] k= 43 n=  81 res=99 dmean=  8.10
+density20<=0.95 & upvolfrac10>0.65 & clsloc>0.75           H= 15 tp=2 sl=1 pa=0 | TR mean=   3.52 trim=  3.77 k= 40 || VA mean=   2.20 trim=  2.29 med=  11.95 CI=[-3.4,7.7] k= 61 n=  84 res=96 dmean= 10.91
+age_min<=15 & upvolfrac10>0.65 & clsloc>0.75               H= 10 tp=0 sl=0 pa=0 | TR mean=   0.79 trim=  1.29 k= 34 || VA mean=   1.76 trim=  2.22 med=   7.99 CI=[-1.0,4.3] k= 51 n=  89 res=99 dmean=  6.46
+rvol20<=0.02                                               H= 15 tp=0 sl=0 pa=0 | TR mean=   1.39 trim=  1.92 k= 21 || VA mean=   2.16 trim=  2.17 med=   1.58 CI=[0.9,3.4] k= 35 n= 346 res=99 dmean=  7.06
+volaccel<=1 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 | TR mean=   1.56 trim=  2.11 k= 21 || VA mean=   2.14 trim=  2.16 med=   1.90 CI=[0.7,3.5] k= 35 n= 359 res=99 dmean=  6.83
+rvol20<=0.02 & age_min<=240                                H= 10 tp=0 sl=0 pa=0 | TR mean=   1.16 trim=  1.76 k= 20 || VA mean=   2.09 trim=  2.14 med=   2.12 CI=[0.8,3.3] k= 31 n= 254 res=100 dmean=  6.78
+rvol20<=0.05                                               H= 60 tp=3 sl=0 pa=0 | TR mean=   5.00 trim=  4.49 k= 29 || VA mean=   3.26 trim=  2.05 med=  -1.53 CI=[-2.2,8.9] k= 48 n= 250 res=98 dmean=  7.64
+eff20>0.9                                                  H= 30 tp=1 sl=0 pa=1 | TR mean=   4.05 trim=  3.41 k= 36 || VA mean=   2.25 trim=  2.05 med=   1.33 CI=[-1.9,6.4] k= 43 n= 107 res=99 dmean=  6.83
+eff20>0.5 & rvol20<=0.02                                   H= 10 tp=0 sl=0 pa=0 | TR mean=   1.64 trim=  2.29 k= 20 || VA mean=   2.00 trim=  2.05 med=   2.12 CI=[0.8,3.2] k= 33 n= 302 res=100 dmean=  6.69
+density20<=0.75 & vwapdev20>0 & clsloc>0.75                H= 15 tp=2 sl=1 pa=0 | TR mean=   0.77 trim=  0.71 k= 47 || VA mean=   1.95 trim=  2.00 med=   7.54 CI=[-3.6,7.5] k= 70 n=  93 res=99 dmean= 10.66
+rvol20<=0.02                                               H= 10 tp=2 sl=0 pa=0 | TR mean=   0.35 trim=  0.66 k= 21 || VA mean=   1.62 trim=  1.93 med=   0.72 CI=[-0.2,3.3] k= 35 n= 403 res=100 dmean=  6.14
+rvol20<=0.02                                               H= 10 tp=2 sl=0 pa=1 | TR mean=   0.25 trim=  0.55 k= 21 || VA mean=   1.62 trim=  1.93 med=   0.72 CI=[-0.2,3.3] k= 35 n= 403 res=100 dmean=  5.30
+rvol20<=0.02                                               H= 10 tp=1 sl=0 pa=0 | TR mean=   0.15 trim=  0.53 k= 21 || VA mean=   1.62 trim=  1.93 med=   0.72 CI=[-0.2,3.3] k= 35 n= 403 res=100 dmean=  5.89
+rvol20<=0.02                                               H= 10 tp=1 sl=0 pa=1 | TR mean=   0.14 trim=  0.49 k= 21 || VA mean=   1.62 trim=  1.93 med=   0.72 CI=[-0.2,3.3] k= 35 n= 403 res=100 dmean=  5.13
+rvol20<=0.02                                               H= 10 tp=-1 sl=0 pa=0 | TR mean=   0.16 trim=  0.44 k= 21 || VA mean=   1.62 trim=  1.93 med=   0.72 CI=[-0.2,3.3] k= 35 n= 403 res=100 dmean=  5.12
+
+=== plus bootstrap CI-low>0 === 79
+rvol20<=0.02                                               H= 30 tp=1 sl=0 pa=1 VA mean=   7.16 CIlo=  2.84 trim=  7.29 med=  7.34 k=35 n=165
+rvol20<=0.02                                               H= 30 tp=0 sl=0 pa=1 VA mean=   6.28 CIlo=  3.42 trim=  6.24 med=  5.35 k=35 n=165
+rvol20<=0.02                                               H= 30 tp=3 sl=0 pa=0 VA mean=   6.22 CIlo=  1.18 trim=  6.14 med=  7.63 k=35 n=165
+rvol20<=0.02                                               H= 30 tp=2 sl=0 pa=0 VA mean=   6.23 CIlo=  1.27 trim=  6.07 med=  7.63 k=35 n=174
+rvol20<=0.02                                               H= 30 tp=3 sl=0 pa=1 VA mean=   6.12 CIlo=  1.11 trim=  6.04 med=  7.63 k=35 n=165
+rvol20<=0.02                                               H= 30 tp=-1 sl=0 pa=0 VA mean=   6.03 CIlo=  1.03 trim=  5.93 med=  7.63 k=35 n=165
+rvol20<=0.02                                               H= 30 tp=2 sl=0 pa=1 VA mean=   5.83 CIlo=  0.94 trim=  5.72 med=  7.63 k=35 n=165
+rvol20<=0.02                                               H= 60 tp=1 sl=0 pa=0 VA mean=   4.47 CIlo=  0.95 trim=  4.67 med=  9.54 k=35 n=160
+rvol20<=0.02                                               H= 30 tp=1 sl=0 pa=0 VA mean=   4.09 CIlo=  0.66 trim=  4.26 med=  4.44 k=35 n=196
+rvol20<=0.05                                               H= 60 tp=1 sl=0 pa=1 VA mean=   4.76 CIlo=  0.54 trim=  4.14 med=  1.33 k=48 n=234
+rvol20<=0.02                                               H= 15 tp=0 sl=0 pa=1 VA mean=   3.82 CIlo=  2.02 trim=  3.84 med=  4.73 k=35 n=285
+rvol20<=0.02                                               H= 15 tp=1 sl=0 pa=1 VA mean=   3.06 CIlo=  0.33 trim=  3.26 med=  1.84 k=35 n=285
+rvol20<=0.02                                               H= 15 tp=1 sl=0 pa=0 VA mean=   2.94 CIlo=  0.23 trim=  3.13 med=  1.58 k=35 n=288
+rvol20<=0.02                                               H= 60 tp=0 sl=0 pa=0 VA mean=   2.72 CIlo=  1.14 trim=  2.97 med=  4.14 k=35 n=246
+rvol20<=0.02                                               H= 30 tp=0 sl=0 pa=0 VA mean=   2.71 CIlo=  1.30 trim=  2.85 med=  3.80 k=35 n=273
+rvol20<=0.02                                               H= 15 tp=0 sl=0 pa=0 VA mean=   2.16 CIlo=  0.89 trim=  2.17 med=  1.58 k=35 n=346
+volaccel<=1 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   2.14 CIlo=  0.67 trim=  2.16 med=  1.90 k=35 n=359
+rvol20<=0.02 & age_min<=240                                H= 10 tp=0 sl=0 pa=0 VA mean=   2.09 CIlo=  0.85 trim=  2.14 med=  2.12 k=31 n=254
+eff20>0.5 & rvol20<=0.02                                   H= 10 tp=0 sl=0 pa=0 VA mean=   2.00 CIlo=  0.81 trim=  2.05 med=  2.12 k=33 n=302
+rangerel20<=2 & rvol20<=0.02                               H= 10 tp=0 sl=0 pa=0 VA mean=   1.87 CIlo=  0.56 trim=  1.90 med=  1.64 k=35 n=427
+volrel20<=1.5 & rvol20<=0.02                               H= 10 tp=0 sl=0 pa=0 VA mean=   1.86 CIlo=  0.55 trim=  1.89 med=  1.64 k=35 n=425
+eff20>0.3 & rvol20<=0.02                                   H= 10 tp=0 sl=0 pa=0 VA mean=   1.78 CIlo=  0.51 trim=  1.89 med=  1.88 k=34 n=359
+volrel5<=1.5 & rvol20<=0.02                                H= 10 tp=0 sl=0 pa=0 VA mean=   1.84 CIlo=  0.51 trim=  1.86 med=  1.64 k=35 n=426
+rvol20<=0.02                                               H= 10 tp=0 sl=0 pa=1 VA mean=   1.82 CIlo=  0.48 trim=  1.86 med=  1.18 k=35 n=403
+rvol20<=0.02 & range_now<=0.05                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.77 CIlo=  0.49 trim=  1.83 med=  1.64 k=35 n=425
+volrel20>1 & rvol20<=0.02                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.85 CIlo=  0.46 trim=  1.82 med=  0.93 k=33 n=378
+rvol20<=0.02 & volrel20>1 & clsloc>0.25                    H= 10 tp=0 sl=0 pa=0 VA mean=   1.83 CIlo=  0.45 trim=  1.80 med=  0.67 k=33 n=370
+rvol20<=0.02 & vwapdev20<=0.15                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.79 CIlo=  0.50 trim=  1.80 med=  1.69 k=33 n=407
+rvol20<=0.02 & maxgap20<=1                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.73 CIlo=  0.48 trim=  1.79 med=  1.90 k=34 n=419
+rvol20<=0.02 & upvolfrac10>0.2                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.73 CIlo=  0.50 trim=  1.77 med=  1.64 k=35 n=426
+rvol20<=0.02 & range_now<=0.15                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.70 CIlo=  0.44 trim=  1.76 med=  1.64 k=35 n=428
+rangerel20<=4 & rvol20<=0.02                               H= 10 tp=0 sl=0 pa=0 VA mean=   1.70 CIlo=  0.44 trim=  1.76 med=  1.64 k=35 n=428
+volrel20<=8 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.75 med=  1.64 k=35 n=429
+volrel5<=4 & rvol20<=0.02                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.75 med=  1.64 k=35 n=429
+volrel5<=8 & rvol20<=0.02                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.75 med=  1.64 k=35 n=429
+rvol20<=0.02 & volshare20<=0.2                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.75 med=  1.64 k=35 n=429
+rvol20<=0.02 & volshare20<=0.35                            H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.75 med=  1.64 k=35 n=429
+volrel20<=4 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.74 med=  1.64 k=35 n=428
+volrel5<=2.5 & rvol20<=0.02                                H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.74 med=  1.64 k=35 n=429
+rvol20<=0.02 & volshare20<=0.1                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.74 med=  1.64 k=35 n=428
+volaccel<=4 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.74 med=  1.64 k=35 n=429
+volrel20<=2.5 & rvol20<=0.02                               H= 10 tp=0 sl=0 pa=0 VA mean=   1.69 CIlo=  0.43 trim=  1.74 med=  1.64 k=35 n=428
+rvol20<=0.02 & maxgap20<=5                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.68 CIlo=  0.44 trim=  1.73 med=  1.66 k=34 n=424
+rvol20<=0.02 & maxgap20<=2                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.68 CIlo=  0.44 trim=  1.73 med=  1.66 k=34 n=423
+volrel20>0.3 & rvol20<=0.02                                H= 10 tp=0 sl=0 pa=0 VA mean=   1.72 CIlo=  0.42 trim=  1.72 med=  1.96 k=35 n=427
+volaccel<=2 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.66 CIlo=  0.40 trim=  1.71 med=  1.64 k=35 n=429
+rangerel20>0.25 & rvol20<=0.02                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.65 CIlo=  0.38 trim=  1.70 med=  1.64 k=35 n=429
+rvol20<=0.02 & range_now>0.005                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.65 CIlo=  0.38 trim=  1.70 med=  1.64 k=35 n=429
+gap_prev<=1 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.38 trim=  1.69 med=  1.64 k=35 n=428
+gap_prev<=2 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.38 trim=  1.69 med=  1.64 k=35 n=428
+gap_prev<=3 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.38 trim=  1.69 med=  1.64 k=35 n=428
+density20>0.25 & rvol20<=0.02                              H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=429
+eff20>0.05 & rvol20<=0.02                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=428
+rvol20<=0.02                                               H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=430
+rvol20<=0.02 & vwapdev20>-0.15                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=430
+rvol20<=0.02 & ret5>-0.2                                   H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=430
+rvol20<=0.02 & ret5<=0.2                                   H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=430
+rvol20<=0.02 & age_min<=1440                               H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=430
+rvol20<=0.02 & ret1>-0.05                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=430
+rvol20<=0.02 & ret1<=0.05                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=430
+rvol20<=0.02 & ret5>-0.08                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.37 trim=  1.69 med=  1.64 k=35 n=430
+rangerel20>0.5 & rvol20<=0.02                              H= 10 tp=0 sl=0 pa=0 VA mean=   1.62 CIlo=  0.36 trim=  1.67 med=  1.64 k=35 n=429
+gap_prev<=5 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.61 CIlo=  0.35 trim=  1.66 med=  1.64 k=35 n=428
+rvol20<=0.02 & ret5>0                                      H= 10 tp=0 sl=0 pa=0 VA mean=   1.64 CIlo=  0.39 trim=  1.66 med=  1.37 k=34 n=396
+rangerel20<=1 & rvol20<=0.02                               H= 10 tp=0 sl=0 pa=0 VA mean=   1.63 CIlo=  0.32 trim=  1.65 med=  1.69 k=35 n=392
+eff20>0.15 & rvol20<=0.02                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.53 CIlo=  0.22 trim=  1.62 med=  1.19 k=34 n=404
+volrel5<=1 & rvol20<=0.02                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.57 CIlo=  0.20 trim=  1.59 med=  0.97 k=35 n=394
+rvol20<=0.02 & upvolfrac10>0.35                            H= 10 tp=0 sl=0 pa=0 VA mean=   1.45 CIlo=  0.15 trim=  1.55 med=  1.46 k=35 n=419
+rvol20<=0.02 & clsloc>0.25                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.45 CIlo=  0.15 trim=  1.54 med=  1.64 k=35 n=422
+rvol20<=0.02 & ret5>-0.08 & clsloc>0.25                    H= 10 tp=0 sl=0 pa=0 VA mean=   1.45 CIlo=  0.15 trim=  1.54 med=  1.64 k=35 n=422
+rvol20<=0.02 & ret1>0                                      H= 10 tp=0 sl=0 pa=0 VA mean=   1.44 CIlo=  0.15 trim=  1.53 med=  1.46 k=35 n=405
+rvol20<=0.02 & clsloc>0.1                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.43 CIlo=  0.12 trim=  1.52 med=  1.64 k=35 n=424
+volrel20>0.6 & rvol20<=0.02                                H= 10 tp=0 sl=0 pa=0 VA mean=   1.48 CIlo=  0.20 trim=  1.49 med=  0.73 k=33 n=420
+rvol20<=0.02 & vwapdev20>-0.05 & clsloc>0.25               H= 10 tp=0 sl=0 pa=0 VA mean=   1.40 CIlo=  0.08 trim=  1.49 med=  1.32 k=35 n=420
+rvol20<=0.02 & vwapdev20>-0.05                             H= 10 tp=0 sl=0 pa=0 VA mean=   1.36 CIlo=  0.00 trim=  1.44 med=  1.64 k=35 n=428
+rvol20<=0.02 & vwapdev20>-0.05 & ret5>-0.08                H= 10 tp=0 sl=0 pa=0 VA mean=   1.36 CIlo=  0.00 trim=  1.44 med=  1.64 k=35 n=428
+volrel5>0.3 & rvol20<=0.02                                 H= 10 tp=0 sl=0 pa=0 VA mean=   1.35 CIlo=  0.02 trim=  1.44 med=  1.64 k=35 n=428
+rvol20<=0.02 & clsloc>0.5                                  H= 10 tp=0 sl=0 pa=0 VA mean=   1.34 CIlo=  0.01 trim=  1.42 med=  0.73 k=35 n=410
+rvol20<=0.02 & clsloc>0.5 & ret5>-0.08                     H= 10 tp=0 sl=0 pa=0 VA mean=   1.34 CIlo=  0.01 trim=  1.42 med=  0.73 k=35 n=410
+
+=== C2 MATCHED-RANDOM DEEP DIVE (validate, feasible universe) ===
+
+rvol20<=0.02 | H=30 tp=1 sl=0 pa=1
+  VA mean=7.16 trim=7.29 med=7.34 fpos=77% k=35 n=165 res=98.8 CI=[2.8, 11.3]
+  top5 mint means [np.float64(20.5), np.float64(20.8), np.float64(23.9), np.float64(24.9), np.float64(26.1)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    2.73 -> edge    4.43 pct=100% | trim    2.51 -> edge   4.78 pct=100% | med   1.77 -> edge   5.56 pct=100%
+  C2(train) mean edge   -0.52 pct=42%
+  robustness: drop-50%=7.08 drop-100%=6.88 toll2.5%=5.69 toll2.5%+drop100=5.41
+  capacity: notional20 median $826/min
+
+rvol20<=0.02 | H=30 tp=0 sl=0 pa=1
+  VA mean=6.28 trim=6.24 med=5.35 fpos=69% k=35 n=165 res=98.8 CI=[3.4, 9.2]
+  top5 mint means [np.float64(15.9), np.float64(19.0), np.float64(19.1), np.float64(20.0), np.float64(21.2)] bot3 [np.float64(-7.4), np.float64(-3.6), np.float64(-3.6)]
+  C2(val)  mean    2.31 -> edge    3.96 pct=100% | trim    2.21 -> edge   4.03 pct=100% | med   0.74 -> edge   4.61 pct=99%
+  C2(train) mean edge    0.54 pct=62%
+  robustness: drop-50%=6.20 drop-100%=5.99 toll2.5%=4.82 toll2.5%+drop100=4.53
+  capacity: notional20 median $826/min
+
+rvol20<=0.02 | H=30 tp=3 sl=0 pa=0
+  VA mean=6.22 trim=6.14 med=7.63 fpos=69% k=35 n=165 res=98.8 CI=[1.2, 11.1]
+  top5 mint means [np.float64(22.3), np.float64(23.0), np.float64(24.0), np.float64(29.4), np.float64(31.2)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    2.80 -> edge    3.42 pct=93% | trim    2.19 -> edge   3.95 pct=96% | med   0.61 -> edge   7.02 pct=99%
+  C2(train) mean edge   -0.68 pct=42%
+  robustness: drop-50%=6.14 drop-100%=5.94 toll2.5%=4.76 toll2.5%+drop100=4.48
+  capacity: notional20 median $826/min
+
+rvol20<=0.02 | H=30 tp=2 sl=0 pa=0
+  VA mean=6.23 trim=6.07 med=7.63 fpos=69% k=35 n=174 res=98.9 CI=[1.3, 11.1]
+  top5 mint means [np.float64(21.1), np.float64(21.8), np.float64(23.6), np.float64(31.2), np.float64(33.5)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    1.84 -> edge    4.39 pct=99% | trim    1.61 -> edge   4.47 pct=99% | med   1.67 -> edge   5.96 pct=99%
+  C2(train) mean edge    0.07 pct=51%
+  robustness: drop-50%=6.15 drop-100%=5.94 toll2.5%=4.77 toll2.5%+drop100=4.48
+  capacity: notional20 median $864/min
+
+rvol20<=0.02 | H=30 tp=3 sl=0 pa=1
+  VA mean=6.12 trim=6.04 med=7.63 fpos=69% k=35 n=165 res=98.8 CI=[1.1, 10.9]
+  top5 mint means [np.float64(21.3), np.float64(22.3), np.float64(23.0), np.float64(29.4), np.float64(31.2)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    2.79 -> edge    3.34 pct=94% | trim    2.17 -> edge   3.87 pct=96% | med   0.57 -> edge   7.07 pct=99%
+  C2(train) mean edge   -0.78 pct=42%
+  robustness: drop-50%=6.04 drop-100%=5.84 toll2.5%=4.67 toll2.5%+drop100=4.38
+  capacity: notional20 median $826/min
+
+rvol20<=0.02 | H=30 tp=-1 sl=0 pa=0
+  VA mean=6.03 trim=5.93 med=7.63 fpos=69% k=35 n=165 res=98.8 CI=[1.0, 10.8]
+  top5 mint means [np.float64(21.3), np.float64(22.3), np.float64(23.0), np.float64(29.4), np.float64(31.2)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    2.76 -> edge    3.27 pct=93% | trim    2.11 -> edge   3.82 pct=96% | med   0.46 -> edge   7.17 pct=99%
+  C2(train) mean edge   -0.85 pct=43%
+  robustness: drop-50%=5.95 drop-100%=5.74 toll2.5%=4.57 toll2.5%+drop100=4.29
+  capacity: notional20 median $826/min
+
+rvol20<=0.02 | H=30 tp=2 sl=0 pa=1
+  VA mean=5.83 trim=5.72 med=7.63 fpos=69% k=35 n=165 res=98.8 CI=[0.9, 10.7]
+  top5 mint means [np.float64(22.1), np.float64(25.3), np.float64(25.4), np.float64(26.7), np.float64(31.2)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    2.53 -> edge    3.30 pct=95% | trim    2.09 -> edge   3.63 pct=96% | med   1.09 -> edge   6.55 pct=99%
+  C2(train) mean edge   -0.81 pct=39%
+  robustness: drop-50%=5.74 drop-100%=5.54 toll2.5%=4.37 toll2.5%+drop100=4.09
+  capacity: notional20 median $826/min
+
+rvol20<=0.02 | H=60 tp=1 sl=0 pa=0
+  VA mean=4.47 trim=4.67 med=9.54 fpos=80% k=35 n=160 res=98.8 CI=[1.0, 7.9]
+  top5 mint means [np.float64(13.7), np.float64(14.3), np.float64(16.5), np.float64(18.6), np.float64(18.6)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    2.50 -> edge    1.98 pct=88% | trim    2.73 -> edge   1.94 pct=87% | med   3.88 -> edge   5.66 pct=99%
+  C2(train) mean edge   -0.67 pct=37%
+  robustness: drop-50%=4.37 drop-100%=4.11 toll2.5%=3.04 toll2.5%+drop100=2.67
+  capacity: notional20 median $1432/min
+
+rvol20<=0.02 | H=30 tp=1 sl=0 pa=0
+  VA mean=4.09 trim=4.26 med=4.44 fpos=77% k=35 n=196 res=99.0 CI=[0.7, 7.4]
+  top5 mint means [np.float64(13.7), np.float64(14.3), np.float64(16.5), np.float64(18.6), np.float64(18.6)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    2.37 -> edge    1.73 pct=83% | trim    2.57 -> edge   1.69 pct=82% | med   3.58 -> edge   0.85 pct=60%
+  C2(train) mean edge   -0.51 pct=38%
+  robustness: drop-50%=4.01 drop-100%=3.81 toll2.5%=2.66 toll2.5%+drop100=2.38
+  capacity: notional20 median $1305/min
+
+rvol20<=0.05 | H=60 tp=1 sl=0 pa=1
+  VA mean=4.76 trim=4.14 med=1.33 fpos=69% k=48 n=234 res=98.1 CI=[0.5, 9.0]
+  top5 mint means [np.float64(28.0), np.float64(28.9), np.float64(31.2), np.float64(32.9), np.float64(45.0)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    0.48 -> edge    4.28 pct=98% | trim   -0.92 -> edge   5.06 pct=100% | med  -0.56 -> edge   1.90 pct=92%
+  C2(train) mean edge    4.54 pct=98%
+  robustness: drop-50%=4.66 drop-100%=4.43 toll2.5%=3.32 toll2.5%+drop100=2.99
+  capacity: notional20 median $656/min
+
+rvol20<=0.02 | H=15 tp=0 sl=0 pa=1
+  VA mean=3.82 trim=3.84 med=4.73 fpos=71% k=35 n=285 res=99.3 CI=[2.0, 5.6]
+  top5 mint means [np.float64(10.8), np.float64(11.1), np.float64(11.3), np.float64(11.6), np.float64(12.2)] bot3 [np.float64(-5.0), np.float64(-3.6), np.float64(-3.6)]
+  C2(val)  mean    1.57 -> edge    2.25 pct=97% | trim    1.79 -> edge   2.05 pct=96% | med   2.19 -> edge   2.54 pct=97%
+  C2(train) mean edge    0.55 pct=67%
+  robustness: drop-50%=3.77 drop-100%=3.63 toll2.5%=2.40 toll2.5%+drop100=2.20
+  capacity: notional20 median $912/min
+
+rvol20<=0.02 | H=15 tp=1 sl=0 pa=1
+  VA mean=3.06 trim=3.26 med=1.84 fpos=69% k=35 n=285 res=99.3 CI=[0.3, 5.7]
+  top5 mint means [np.float64(11.4), np.float64(11.7), np.float64(12.9), np.float64(13.3), np.float64(15.6)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    1.71 -> edge    1.35 pct=84% | trim    1.81 -> edge   1.45 pct=86% | med   2.22 -> edge  -0.38 pct=44%
+  C2(train) mean edge   -0.53 pct=37%
+  robustness: drop-50%=3.01 drop-100%=2.86 toll2.5%=1.65 toll2.5%+drop100=1.45
+  capacity: notional20 median $912/min
+
+rvol20<=0.02 | H=15 tp=1 sl=0 pa=0
+  VA mean=2.94 trim=3.13 med=1.58 fpos=69% k=35 n=288 res=99.3 CI=[0.2, 5.6]
+  top5 mint means [np.float64(11.5), np.float64(11.6), np.float64(11.9), np.float64(13.2), np.float64(15.6)] bot3 [np.float64(-16.0), np.float64(-16.0), np.float64(-16.0)]
+  C2(val)  mean    1.85 -> edge    1.10 pct=78% | trim    2.03 -> edge   1.10 pct=78% | med   2.66 -> edge  -1.08 pct=33%
+  C2(train) mean edge   -0.53 pct=36%
+  robustness: drop-50%=2.89 drop-100%=2.75 toll2.5%=1.53 toll2.5%+drop100=1.33
+  capacity: notional20 median $952/min
+
+rvol20<=0.02 | H=60 tp=0 sl=0 pa=0
+  VA mean=2.72 trim=2.97 med=4.14 fpos=80% k=35 n=246 res=99.2 CI=[1.1, 4.2]
+  top5 mint means [np.float64(7.0), np.float64(7.0), np.float64(7.7), np.float64(8.7), np.float64(8.7)] bot3 [np.float64(-11.5), np.float64(-4.4), np.float64(-3.6)]
+  C2(val)  mean    1.45 -> edge    1.27 pct=91% | trim    1.82 -> edge   1.15 pct=87% | med   3.39 -> edge   0.74 pct=82%
+  C2(train) mean edge    0.37 pct=60%
+  robustness: drop-50%=2.61 drop-100%=2.35 toll2.5%=1.31 toll2.5%+drop100=0.94
+  capacity: notional20 median $1880/min

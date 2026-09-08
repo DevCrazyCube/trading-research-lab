@@ -1,0 +1,201 @@
+{
+ "frozen": "2026-08-26 before any held-out number",
+ "bar_t": 2.229,
+ "N_formulas": 12,
+ "prereg_sha256": "f2072b41699ca49f9f31036d1fbb293270411790df5f8ecda863968f07020d21",
+ "gates": {
+  "D_NAV_k1": {
+   "design_t_gap1": 0.965,
+   "design_t_lag0": 3.693,
+   "ratio": 0.261,
+   "rho1": 0.123,
+   "placebo_pct": 22.0,
+   "net_t_median": -2.82,
+   "gates": {
+    "bar": false,
+    "rho1": true,
+    "gap1": false,
+    "placebo": false
+   },
+   "pass_all": false
+  },
+  "D_NAV_k5": {
+   "design_t_gap1": 0.054,
+   "design_t_lag0": 0.596,
+   "ratio": 0.09,
+   "rho1": 0.128,
+   "placebo_pct": 2.666666666666667,
+   "net_t_median": -2.317,
+   "gates": {
+    "bar": false,
+    "rho1": true,
+    "gap1": false,
+    "placebo": false
+   },
+   "pass_all": false
+  },
+  "D_NAV_k10": {
+   "design_t_gap1": 0.411,
+   "design_t_lag0": 0.814,
+   "ratio": 0.505,
+   "rho1": 0.05,
+   "placebo_pct": 6.0,
+   "net_t_median": -1.061,
+   "gates": {
+    "bar": false,
+    "rho1": true,
+    "gap1": true,
+    "placebo": false
+   },
+   "pass_all": false
+  },
+  "D_PRC_k1": {
+   "design_t_gap1": 1.48,
+   "design_t_lag0": 1.051,
+   "ratio": 1.408,
+   "rho1": 0.01,
+   "placebo_pct": 53.333333333333336,
+   "net_t_median": -2.933,
+   "gates": {
+    "bar": false,
+    "rho1": true,
+    "gap1": true,
+    "placebo": false
+   },
+   "pass_all": false
+  },
+  "D_PRC_k5": {
+   "design_t_gap1": 1.131,
+   "design_t_lag0": 1.128,
+   "ratio": 1.002,
+   "rho1": 0.019,
+   "placebo_pct": 41.0,
+   "net_t_median": -1.333,
+   "gates": {
+    "bar": false,
+    "rho1": true,
+    "gap1": true,
+    "placebo": false
+   },
+   "pass_all": false
+  },
+  "D_PRC_k10": {
+   "design_t_gap1": 0.573,
+   "design_t_lag0": 0.471,
+   "ratio": 1.217,
+   "rho1": -0.044,
+   "placebo_pct": 11.0,
+   "net_t_median": -0.842,
+   "gates": {
+    "bar": false,
+    "rho1": true,
+    "gap1": true,
+    "placebo": false
+   },
+   "pass_all": false
+  },
+  "D_TOT_k1": {
+   "design_t_gap1": 2.923,
+   "design_t_lag0": 6.759,
+   "ratio": 0.432,
+   "rho1": -0.033,
+   "placebo_pct": 98.66666666666667,
+   "net_t_median": -4.563,
+   "gates": {
+    "bar": true,
+    "rho1": true,
+    "gap1": false,
+    "placebo": true
+   },
+   "pass_all": false
+  },
+  "D_TOT_k5": {
+   "design_t_gap1": 2.526,
+   "design_t_lag0": 4.089,
+   "ratio": 0.618,
+   "rho1": 0.022,
+   "placebo_pct": 96.33333333333334,
+   "net_t_median": -2.847,
+   "gates": {
+    "bar": true,
+    "rho1": true,
+    "gap1": true,
+    "placebo": true
+   },
+   "pass_all": true
+  },
+  "D_TOT_k10": {
+   "design_t_gap1": 2.239,
+   "design_t_lag0": 3.188,
+   "ratio": 0.702,
+   "rho1": 0.049,
+   "placebo_pct": 93.0,
+   "net_t_median": -1.081,
+   "gates": {
+    "bar": true,
+    "rho1": true,
+    "gap1": true,
+    "placebo": false
+   },
+   "pass_all": false
+  },
+  "W_NAV_1w": {
+   "design_t_gap1": 0.742,
+   "design_t_lag0": 2.969,
+   "ratio": 0.25,
+   "rho1": -0.163,
+   "placebo_pct": 90.33333333333333,
+   "net_t_median": -4.278,
+   "gates": {
+    "bar": false,
+    "rho1": true,
+    "gap1": false,
+    "placebo": false
+   },
+   "pass_all": false
+  },
+  "W_PRC_1w": {
+   "design_t_gap1": 3.803,
+   "design_t_lag0": 2.451,
+   "ratio": 1.551,
+   "rho1": 0.022,
+   "placebo_pct": 100.0,
+   "net_t_median": -3.454,
+   "gates": {
+    "bar": true,
+    "rho1": true,
+    "gap1": true,
+    "placebo": true
+   },
+   "pass_all": true
+  },
+  "W_TOT_1w": {
+   "design_t_gap1": 6.332,
+   "design_t_lag0": 9.34,
+   "ratio": 0.678,
+   "rho1": 0.07,
+   "placebo_pct": 100.0,
+   "net_t_median": -3.549,
+   "gates": {
+    "bar": true,
+    "rho1": true,
+    "gap1": true,
+    "placebo": true
+   },
+   "pass_all": true
+  }
+ },
+ "decomposition_clause_tNAV_minus_tPRC": {
+  "D_k1": -0.515,
+  "D_k5": -1.077,
+  "D_k10": -0.162,
+  "W_1w": -3.061
+ },
+ "decomposition_clause_met": false,
+ "shortlist": [
+  "D_TOT_k5",
+  "W_PRC_1w",
+  "W_TOT_1w"
+ ],
+ "note": "All shortlist items are OU/price-reversal baselines or the PRC control; none is the NAV-driven object. All have negative net at median half-spread on design. Held-out is read for completeness of the ledger only."
+}

@@ -1,0 +1,7 @@
+# T63 -- ADDITIVE cluster diagnostic for the frozen T35 convexity reading.
+# Pinned 2026-09-07 12:00 CEST (CHUNK A STRATEGIST), BLIND: 107 days before the first reading
+# (2026-12-23), with ZERO rows read from either forward panel.
+# It changes NOTHING in CONVEXITY_PREREGISTRATION.md; convexity_evaluate.py (pinned
+# ba6bb2683436dac889eaf55af4543fd024e570e026dcfdc05b04bf1904b12504) runs unchanged and
+# writes the authoritative verdict. This script only re-reads a PASS.
+a109d84d688dea3c37b34b00e87c241c5bfdb7a805fb5e969b52960f98577ea4  scripts/trading_bot/convexity_cluster_diagnostic.py

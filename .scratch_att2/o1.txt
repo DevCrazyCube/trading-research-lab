@@ -1,0 +1,14 @@
+h12 ohlcv mints with bars: 387
+status Counter({'ok': 387})
+n_bars min/p25/med/p75/max [2, 12, 26, 112, 1000] sum 46146
+first_ts range 1785168720 1785332820
+last_ts range 1785172740 1785337260
+sample bars type <class 'list'> len 833
+first 3 rows (as stored, newest first): [[1785254880, 4.133607223078428e-05, 4.133607223078428e-05, 4.053905783665077e-05, 4.053905783665077e-05, 30.046807746282756], [1785254820, 4.2165263787091813e-05, 4.2165263787091813e-05, 4.0948165175457305e-05, 4.133607223078428e-05, 71.29701472770459], [1785254760, 4.108185336295965e-05, 4.3688800228519434e-05, 4.083237707472122e-05, 4.2165263787091813e-05, 391.81260097164056]]
+last 3: [[1785195540, 3.850410438945056e-05, 4.2013990637406056e-05, 3.3538082594668155e-05, 3.726081160729067e-05, 4149.266428773373], [1785195480, 3.962415724934373e-05, 4.058120528295269e-05, 3.586167793685283e-05, 3.850410438945056e-05, 2097.974918200001], [1785195420, 3.063061574522486e-05, 4.150505021443054e-05, 2.6301719669209518e-05, 3.962415724934373e-05, 7924.970473040858]]
+window_label cols ['bonding_curve', 'mint', 'creator', 'create_slot', 'block_time', 'complete', 'account_missing', 'status', 'creator_onchain', 'virtual_token_reserves', 'real_token_reserves', 'data_len', 'fetched_at_unix']
+window_label rows 33866 unique creators 8565
+h12 ohlcv mints found in window_labels: 387 of 387
+h12 mints in fresh_snapshots: 233
+h12 ohlcv mints WITH snapshots: 0
+snapshot keys ['ath', 'ath_ts', 'complete', 'created_ms', 'creator', 'has_tg', 'has_web', 'has_x', 'last_trade_ms', 'live', 'mcap', 'mint', 'name', 'pool', 'replies', 'rsol', 'rtok', 'sym', 'ts_ms', 'vsol', 'vtok']

@@ -1,0 +1,253 @@
+{
+  "code_sha256": "38f499ec2bd31b3aa9ee8228ef5be24142f61d598996b8e5c60ccd8195049335",
+  "counts": {
+    "births": 33866,
+    "duplicate_origin_suppressed": 545,
+    "missing_actor": 0,
+    "observations": 1212,
+    "scope_excluded": 7473,
+    "warmup_births": 8743,
+    "word_crossings": 1757
+  },
+  "launch_span_seconds": 85802,
+  "observations_sha256": "1bfa6ad0709b89f30d1d36cb73ef230c7568bfa56b245203a610d664d8ff4337",
+  "performance_evaluated": false,
+  "placebo_scope": "within-actor text timing only; NOT a profitability test",
+  "placebos": [
+    {
+      "births": 33866,
+      "changed_text_rows": 18673,
+      "duplicate_origin_suppressed": 455,
+      "missing_actor": 0,
+      "observations": 1342,
+      "scope_excluded": 7473,
+      "seed": 20260908,
+      "warmup_births": 8743,
+      "word_crossings": 1797
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18707,
+      "duplicate_origin_suppressed": 457,
+      "missing_actor": 0,
+      "observations": 1400,
+      "scope_excluded": 7473,
+      "seed": 20260909,
+      "warmup_births": 8743,
+      "word_crossings": 1857
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18665,
+      "duplicate_origin_suppressed": 465,
+      "missing_actor": 0,
+      "observations": 1362,
+      "scope_excluded": 7473,
+      "seed": 20260910,
+      "warmup_births": 8743,
+      "word_crossings": 1827
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18686,
+      "duplicate_origin_suppressed": 448,
+      "missing_actor": 0,
+      "observations": 1394,
+      "scope_excluded": 7473,
+      "seed": 20260911,
+      "warmup_births": 8743,
+      "word_crossings": 1842
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18601,
+      "duplicate_origin_suppressed": 427,
+      "missing_actor": 0,
+      "observations": 1361,
+      "scope_excluded": 7473,
+      "seed": 20260912,
+      "warmup_births": 8743,
+      "word_crossings": 1788
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18671,
+      "duplicate_origin_suppressed": 459,
+      "missing_actor": 0,
+      "observations": 1338,
+      "scope_excluded": 7473,
+      "seed": 20260913,
+      "warmup_births": 8743,
+      "word_crossings": 1797
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18564,
+      "duplicate_origin_suppressed": 433,
+      "missing_actor": 0,
+      "observations": 1398,
+      "scope_excluded": 7473,
+      "seed": 20260914,
+      "warmup_births": 8743,
+      "word_crossings": 1831
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18676,
+      "duplicate_origin_suppressed": 435,
+      "missing_actor": 0,
+      "observations": 1356,
+      "scope_excluded": 7473,
+      "seed": 20260915,
+      "warmup_births": 8743,
+      "word_crossings": 1791
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18576,
+      "duplicate_origin_suppressed": 512,
+      "missing_actor": 0,
+      "observations": 1366,
+      "scope_excluded": 7473,
+      "seed": 20260916,
+      "warmup_births": 8743,
+      "word_crossings": 1878
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18678,
+      "duplicate_origin_suppressed": 471,
+      "missing_actor": 0,
+      "observations": 1338,
+      "scope_excluded": 7473,
+      "seed": 20260917,
+      "warmup_births": 8743,
+      "word_crossings": 1809
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18615,
+      "duplicate_origin_suppressed": 470,
+      "missing_actor": 0,
+      "observations": 1378,
+      "scope_excluded": 7473,
+      "seed": 20260918,
+      "warmup_births": 8743,
+      "word_crossings": 1848
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18599,
+      "duplicate_origin_suppressed": 475,
+      "missing_actor": 0,
+      "observations": 1390,
+      "scope_excluded": 7473,
+      "seed": 20260919,
+      "warmup_births": 8743,
+      "word_crossings": 1865
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18574,
+      "duplicate_origin_suppressed": 421,
+      "missing_actor": 0,
+      "observations": 1319,
+      "scope_excluded": 7473,
+      "seed": 20260920,
+      "warmup_births": 8743,
+      "word_crossings": 1740
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18556,
+      "duplicate_origin_suppressed": 460,
+      "missing_actor": 0,
+      "observations": 1347,
+      "scope_excluded": 7473,
+      "seed": 20260921,
+      "warmup_births": 8743,
+      "word_crossings": 1807
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18625,
+      "duplicate_origin_suppressed": 475,
+      "missing_actor": 0,
+      "observations": 1347,
+      "scope_excluded": 7473,
+      "seed": 20260922,
+      "warmup_births": 8743,
+      "word_crossings": 1822
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18564,
+      "duplicate_origin_suppressed": 479,
+      "missing_actor": 0,
+      "observations": 1368,
+      "scope_excluded": 7473,
+      "seed": 20260923,
+      "warmup_births": 8743,
+      "word_crossings": 1847
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18674,
+      "duplicate_origin_suppressed": 450,
+      "missing_actor": 0,
+      "observations": 1400,
+      "scope_excluded": 7473,
+      "seed": 20260924,
+      "warmup_births": 8743,
+      "word_crossings": 1850
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18652,
+      "duplicate_origin_suppressed": 469,
+      "missing_actor": 0,
+      "observations": 1380,
+      "scope_excluded": 7473,
+      "seed": 20260925,
+      "warmup_births": 8743,
+      "word_crossings": 1849
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18601,
+      "duplicate_origin_suppressed": 472,
+      "missing_actor": 0,
+      "observations": 1417,
+      "scope_excluded": 7473,
+      "seed": 20260926,
+      "warmup_births": 8743,
+      "word_crossings": 1889
+    },
+    {
+      "births": 33866,
+      "changed_text_rows": 18678,
+      "duplicate_origin_suppressed": 466,
+      "missing_actor": 0,
+      "observations": 1356,
+      "scope_excluded": 7473,
+      "seed": 20260927,
+      "warmup_births": 8743,
+      "word_crossings": 1822
+    }
+  ],
+  "profitability_survivors_noise": null,
+  "profitability_survivors_real": null,
+  "required_pair_check": "UNAVAILABLE_IDENTIFIERS_AND_ENTRY_TIMES",
+  "source": {
+    "create_count": 33866,
+    "create_rows_sha256": "789c1411a89f085e447dbb0849980a6638bc2da91c48fa16082bf94fae9cb3c2",
+    "end_slot_exclusive": 435772751,
+    "history_start": 1785168432,
+    "idl_sha256": "b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49",
+    "source": "research/b11a/b11a_creates.sqlite",
+    "start_slot": 435569150
+  },
+  "spec_sha256": "7c7a27ba8d27f877b96b75f415fcece5dc56851bc8aaf20efdca9ab5a3118f0a",
+  "status": "NO_TRADE_DEVELOPMENT_ONLY",
+  "three_disjoint_days_available": false
+}

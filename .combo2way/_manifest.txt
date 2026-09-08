@@ -1,0 +1,26 @@
+totaal 12948
+drwxr-xr-x  2 anont anont    4096  4 sep 04:13 .
+drwxr-xr-x 25 anont anont    4096  4 sep 04:13 ..
+-rw-r--r--  1 anont anont   10304  4 sep 04:10 analyze2.log
+-rw-r--r--  1 anont anont    4628  4 sep 04:10 analyze2.py
+-rw-r--r--  1 anont anont  109221  4 sep 04:11 analyze3.log
+-rw-r--r--  1 anont anont    4958  4 sep 04:11 analyze3.py
+-rw-r--r--  1 anont anont    3494  4 sep 04:09 analyze.log
+-rw-r--r--  1 anont anont    4757  4 sep 04:09 analyze.py
+-rw-r--r--  1 anont anont     861  4 sep 04:03 bench.log
+-rw-r--r--  1 anont anont    1182  4 sep 04:03 bench.py
+-rw-r--r--  1 anont anont    1299  4 sep 04:02 build.log
+-rw-r--r--  1 anont anont    6107  4 sep 04:02 build.py
+-rw-r--r--  1 anont anont 5375735  4 sep 04:02 ds.npz
+-rw-r--r--  1 anont anont    2505  4 sep 04:03 engine.py
+-rw-r--r--  1 anont anont    1004  4 sep 04:12 final.log
+-rw-r--r--  1 anont anont    2023  4 sep 04:12 final.py
+-rw-r--r--  1 anont anont       0  4 sep 04:13 _manifest.txt
+-rw-r--r--  1 anont anont  439037  4 sep 04:09 survivors.json
+-rw-r--r--  1 anont anont     545  4 sep 04:08 sweep2.log
+-rw-r--r--  1 anont anont    5277  4 sep 04:05 sweep2.py
+-rw-r--r--  1 anont anont 6120275  4 sep 04:08 sweep_all.json
+-rw-r--r--  1 anont anont     428  4 sep 04:04 sweep.log
+-rw-r--r--  1 anont anont    3813  4 sep 04:04 sweep.py
+-rw-r--r--  1 anont anont    2692  4 sep 04:12 tail.txt
+-rw-r--r--  1 anont anont 1095439  4 sep 04:04 train_sweep.json

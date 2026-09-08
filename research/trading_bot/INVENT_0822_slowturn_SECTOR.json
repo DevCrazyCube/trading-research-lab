@@ -1,0 +1,118 @@
+{
+ "design": [
+  "2016-01-04",
+  "2021-12-31"
+ ],
+ "holdout": [
+  "2022-01-03",
+  "2026-08-14"
+ ],
+ "k": 3,
+ "hold": 21,
+ "rows": [
+  {
+   "name": "SEC_DIVY",
+   "mechanism": "Sector cash-payout-to-price: the slowest, most structural cross-sector value proxy available without fundamentals.",
+   "window": "design",
+   "gross_sharpe": -0.47313129264977355,
+   "gross_t": -1.1585469408175775,
+   "net_sharpe": -0.4762910803801667,
+   "net_t": -1.1662842485491751,
+   "net_sharpe_5bp": -0.48008272007907754,
+   "turnover_per_day": 0.0038448205225174105,
+   "breakeven_cost_bps": -374.4653912388841,
+   "n": 1511
+  },
+  {
+   "name": "SEC_DIVY",
+   "mechanism": "Sector cash-payout-to-price: the slowest, most structural cross-sector value proxy available without fundamentals.",
+   "window": "holdout",
+   "gross_sharpe": -0.024408981018689112,
+   "gross_t": -0.05232432794680237,
+   "net_sharpe": -0.025739374593939195,
+   "net_t": -0.055176226994796414,
+   "net_sharpe_5bp": -0.027335847858450446,
+   "turnover_per_day": 0.0021794555473311937,
+   "breakeven_cost_bps": -45.868712712875045,
+   "n": 1158
+  },
+  {
+   "name": "SEC_LOWVOL",
+   "mechanism": "Leverage-constrained allocators overpay for high-vol sectors.",
+   "window": "design",
+   "gross_sharpe": 0.10613759032547708,
+   "gross_t": 0.2598969514120757,
+   "net_sharpe": 0.10213287099117903,
+   "net_t": 0.25009067690505754,
+   "net_sharpe_5bp": 0.09732698121428829,
+   "turnover_per_day": 0.004968852751777965,
+   "breakeven_cost_bps": 66.22676976246844,
+   "n": 1511
+  },
+  {
+   "name": "SEC_LOWVOL",
+   "mechanism": "Leverage-constrained allocators overpay for high-vol sectors.",
+   "window": "holdout",
+   "gross_sharpe": -0.6882984874040635,
+   "gross_t": -1.4754714976689518,
+   "net_sharpe": -0.6924324822800779,
+   "net_t": -1.4843333384585102,
+   "net_sharpe_5bp": -0.6973930631365781,
+   "turnover_per_day": 0.005277298023412011,
+   "breakeven_cost_bps": -415.7919254371743,
+   "n": 1158
+  },
+  {
+   "name": "SEC_RESID_LTREV",
+   "mechanism": "Multi-year over-extrapolation of a sector narrative corrects slowly; residualised so it is not a market-beta bet.",
+   "window": "design",
+   "gross_sharpe": -0.0407758794086221,
+   "gross_t": -0.09984706376835376,
+   "net_sharpe": -0.05056250601626435,
+   "net_t": -0.12381137662051754,
+   "net_sharpe_5bp": -0.06230701252418693,
+   "turnover_per_day": 0.010042755244608318,
+   "breakeven_cost_bps": -10.417500025101951,
+   "n": 1511
+  },
+  {
+   "name": "SEC_RESID_LTREV",
+   "mechanism": "Multi-year over-extrapolation of a sector narrative corrects slowly; residualised so it is not a market-beta bet.",
+   "window": "holdout",
+   "gross_sharpe": 1.0443185053621329,
+   "gross_t": 2.2386540394146017,
+   "net_sharpe": 1.0232435016684645,
+   "net_t": 2.1934765941167726,
+   "net_sharpe_5bp": 0.9979525589520869,
+   "turnover_per_day": 0.024261863640101976,
+   "breakeven_cost_bps": 123.86839855284663,
+   "n": 1158
+  },
+  {
+   "name": "SEC_FLOW_DECAY",
+   "mechanism": "Merton investor recognition at the sector level: sectors whose traded interest is shrinking must offer more to be held.",
+   "window": "design",
+   "gross_sharpe": -0.07358208156951289,
+   "gross_t": -0.18017894150250602,
+   "net_sharpe": -0.09143166769896525,
+   "net_t": -0.22388685878973683,
+   "net_sharpe_5bp": -0.11285174127981294,
+   "turnover_per_day": 0.014812013488386745,
+   "breakeven_cost_bps": -10.306750415855825,
+   "n": 1511
+  },
+  {
+   "name": "SEC_FLOW_DECAY",
+   "mechanism": "Merton investor recognition at the sector level: sectors whose traded interest is shrinking must offer more to be held.",
+   "window": "holdout",
+   "gross_sharpe": 0.4807161859798366,
+   "gross_t": 1.0304875629706178,
+   "net_sharpe": 0.4573821924288522,
+   "net_t": 0.9804676326041902,
+   "net_sharpe_5bp": 0.4293826992550925,
+   "turnover_per_day": 0.023178989500233015,
+   "breakeven_cost_bps": 51.533660706301205,
+   "n": 1158
+  }
+ ]
+}

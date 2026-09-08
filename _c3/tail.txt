@@ -1,0 +1,3 @@
+  done t60tr35_pyr pyr t=106.8
+  done t60tr35_avg avg t=112.8
+written 22903747 t=1exit-exit-times written t=175.6

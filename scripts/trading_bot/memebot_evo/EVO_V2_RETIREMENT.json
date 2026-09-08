@@ -1,0 +1,7 @@
+{
+  "instrument_id": "MEMEBOT_EVO_V2",
+  "retired_utc": "2026-08-27T23:57:03Z",
+  "reason": "The forward book reached zero confirmed edge and its sub-minute family produced 1851/1851 terminal outcomes without executable tick data. Entry-data validity and provider reconnect behavior were repaired after outcomes existed, so continuing under the V2 freeze would mix measurement regimes. Historical ledgers remain immutable; future work requires a separately frozen V3.",
+  "paper_only": true,
+  "preserve_ledgers": true
+}

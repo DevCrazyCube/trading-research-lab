@@ -1,0 +1,136 @@
+CONTROLS (all-bars, FULL, drop -50%, toll 1.14%)
+   ('T', "('H', 5)") -9.56%
+   ('V', "('H', 5)") -14.60%
+   ('T', "('H', 15)") -26.01%
+   ('V', "('H', 15)") +24.83%
+   ('T', "('H', 60)") -33.47%
+   ('V', "('H', 60)") -6.95%
+   ('T', "('H', 240)") -48.39%
+   ('V', "('H', 240)") -44.81%
+   ('T', "('TP', 0.25, 15)") -14.30%
+   ('V', "('TP', 0.25, 15)") -15.61%
+   ('T', "('TP', 0.5, 60)") -17.25%
+   ('V', "('TP', 0.5, 60)") -22.26%
+   ('T', "('TP', 1.0, 240)") -22.63%
+   ('V', "('TP', 1.0, 240)") -27.11%
+   ('T', "('BR', 0.5, 0.35, 60)") -13.83%
+   ('V', "('BR', 0.5, 0.35, 60)") -12.84%
+   ('T', "('BR', 1.0, 0.6, 240)") -22.65%
+   ('V', "('BR', 1.0, 0.6, 240)") -20.82%
+   ('T', "('TR', 0.35, 60)") -3.52%
+   ('V', "('TR', 0.35, 60)") -3.52%
+
+swept 1560 kept 1171
+
+TOP 45 by TRAIN excess vs structure-matched control
+lmcap        le q0.01 thr=+0.4805 ('H', 15)              exc=+114.92pp mean=  +88.91% med= -29.23% n=   81 k= 35
+r5           le q0.01 thr=-0.9543 ('H', 15)              exc= +94.01pp mean=  +68.00% med= -10.46% n=   60 k= 59
+r60          le q0.01 thr=-0.9919 ('H', 5)               exc= +87.15pp mean=  +77.59% med=  -5.99% n=   71 k= 35
+r5           le q0.01 thr=-0.9543 ('H', 5)               exc= +78.59pp mean=  +69.03% med=  -4.64% n=   65 k= 59
+r5           le q0.01 thr=-0.9543 ('TR', 0.35, 60)       exc= +73.31pp mean=  +69.78% med=  -4.54% n=   91 k= 59
+r15          le q0.01 thr=-0.9782 ('TR', 0.35, 60)       exc= +56.14pp mean=  +52.62% med= -10.46% n=   71 k= 47
+r60          le q0.01 thr=-0.9919 ('TR', 0.35, 60)       exc= +47.98pp mean=  +44.45% med= -10.46% n=   60 k= 35
+hi60         le q0.05 thr=-0.9555 ('H', 15)              exc= +46.43pp mean=  +20.42% med= -22.88% n=  210 k=113
+r60          le q0.05 thr=-0.9001 ('H', 15)              exc= +45.66pp mean=  +19.65% med=  -9.36% n=  204 k=109
+r15          le q0.01 thr=-0.9782 ('H', 5)               exc= +43.81pp mean=  +34.25% med=  -5.99% n=   67 k= 47
+r5           ge q0.99 thr=+1.012 ('TR', 0.35, 60)       exc= +40.79pp mean=  +37.27% med= -26.28% n=  108 k= 45
+dd           le q0.10 thr=-0.9655 ('H', 15)              exc= +39.99pp mean=  +13.97% med= -20.77% n=  531 k=119
+lret15       le q0.01 thr=-0.9463 ('H', 5)               exc= +37.15pp mean=  +27.58% med= -14.12% n=   83 k= 26
+pxrel        le q0.10 thr=-0.9194 ('H', 15)              exc= +36.84pp mean=  +10.83% med= -12.17% n=  574 k=112
+dd           le q0.10 thr=-0.9655 ('H', 60)              exc= +36.56pp mean=   +3.09% med= -28.25% n=  350 k=119
+r60          le q0.05 thr=-0.9001 ('H', 5)               exc= +35.86pp mean=  +26.30% med=  -4.17% n=  306 k=109
+pxrel        le q0.10 thr=-0.9194 ('H', 60)              exc= +35.62pp mean=   +2.15% med= -15.77% n=  380 k=112
+rng          le q0.01 thr=+0.0003255 ('H', 240)             exc= +35.28pp mean=  -13.11% med=  -4.81% n=   80 k= 49
+dd           le q0.05 thr=-0.9903 ('H', 15)              exc= +35.26pp mean=   +9.25% med= -16.36% n=  264 k= 75
+hi60         le q0.05 thr=-0.9555 ('TR', 0.35, 60)       exc= +34.58pp mean=  +31.06% med= -10.85% n=  302 k=113
+r60          le q0.10 thr=-0.7386 ('H', 15)              exc= +34.45pp mean=   +8.44% med= -15.46% n=  331 k=149
+hi60         le q0.01 thr=-0.9977 ('H', 5)               exc= +31.82pp mean=  +22.26% med= -16.50% n=   67 k= 33
+r60          le q0.05 thr=-0.9001 ('H', 60)              exc= +31.79pp mean=   -1.68% med= -20.29% n=  114 k=109
+hi60         le q0.05 thr=-0.9555 ('H', 60)              exc= +31.69pp mean=   -1.78% med= -46.88% n=  118 k=113
+rng          ge q0.99 thr=+4.622 ('TR', 0.35, 60)       exc= +31.34pp mean=  +27.82% med= -20.96% n=  191 k=122
+wickup       ge q0.99 thr=+4.321 ('TR', 0.35, 60)       exc= +31.34pp mean=  +27.82% med= -20.96% n=  191 k=122
+r60          le q0.05 thr=-0.9001 ('TR', 0.35, 60)       exc= +31.32pp mean=  +27.80% med=  -8.66% n=  235 k=109
+rng          le q0.05 thr=+0.001807 ('H', 240)             exc= +29.81pp mean=  -18.59% med= -13.40% n=  169 k= 83
+r1           le q0.01 thr=-0.6143 ('TR', 0.35, 60)       exc= +29.73pp mean=  +26.21% med= -10.94% n=  197 k=115
+r15          le q0.05 thr=-0.7363 ('H', 15)              exc= +29.12pp mean=   +3.10% med= -25.85% n=  167 k=140
+dd           le q0.05 thr=-0.9903 ('H', 240)             exc= +28.71pp mean=  -19.69% med= -45.98% n=  125 k= 75
+volz         le q0.05 thr=-2.529 ('H', 240)             exc= +28.32pp mean=  -20.07% med= -15.87% n=  202 k= 97
+r15          le q0.05 thr=-0.7363 ('TR', 0.35, 60)       exc= +28.29pp mean=  +24.77% med= -11.13% n=  322 k=140
+vol15        le q0.01 thr=+0.07318 ('H', 240)             exc= +27.48pp mean=  -20.91% med= -22.44% n=  103 k= 79
+r15          le q0.05 thr=-0.7363 ('H', 5)               exc= +26.39pp mean=  +16.83% med=  -8.93% n=  293 k=140
+r60          le q0.10 thr=-0.7386 ('TR', 0.35, 60)       exc= +26.35pp mean=  +22.82% med= -13.95% n=  390 k=149
+hi60         le q0.05 thr=-0.9555 ('H', 5)               exc= +25.69pp mean=  +16.13% med= -14.53% n=  309 k=113
+rng          le q0.10 thr=+0.005439 ('H', 240)             exc= +25.33pp mean=  -23.06% med= -20.54% n=  234 k= 97
+body         le q0.01 thr=-0.6774 ('TR', 0.35, 60)       exc= +25.22pp mean=  +21.69% med= -18.24% n=  197 k=124
+rv15         ge q0.95 thr=+0.3807 ('TR', 0.35, 60)       exc= +24.90pp mean=  +21.38% med=  -8.85% n=  443 k= 83
+volz         le q0.10 thr=-1.796 ('H', 240)             exc= +24.55pp mean=  -23.84% med= -25.63% n=  288 k=126
+r60          le q0.05 thr=-0.9001 ('H', 240)             exc= +24.43pp mean=  -23.97% med= -47.63% n=  109 k=109
+r60          le q0.10 thr=-0.7386 ('H', 5)               exc= +24.40pp mean=  +14.84% med=  -7.17% n=  553 k=149
+dd           le q0.10 thr=-0.9655 ('TR', 0.35, 60)       exc= +24.22pp mean=  +20.70% med= -14.42% n=  515 k=119
+hi60         le q0.10 thr=-0.8869 ('H', 15)              exc= +24.22pp mean=   -1.79% med= -24.45% n=  334 k=150
+
+BOTTOM 15
+pxrel        ge q0.90 ('H', 15)              exc= -17.27pp n=  177 k= 36
+lret15       le q0.05 ('TR', 0.35, 60)       exc= -17.43pp n=  224 k= 56
+wickup       ge q0.95 ('H', 60)              exc= -17.49pp n=  258 k=170
+r1           ge q0.99 ('H', 60)              exc= -17.57pp n=   96 k= 79
+r60          ge q0.95 ('H', 5)               exc= -17.77pp n=  240 k= 50
+wickdn       ge q0.99 ('H', 5)               exc= -18.96pp n=  106 k= 68
+r60          ge q0.90 ('H', 5)               exc= -19.10pp n=  433 k= 72
+pxrel        ge q0.90 ('H', 60)              exc= -19.86pp n=   75 k= 36
+nb15         ge q0.90 ('TP', 1.0, 240)       exc= -20.66pp n=  121 k= 73
+nb15         ge q0.95 ('TP', 1.0, 240)       exc= -20.66pp n=  121 k= 73
+nb15         ge q0.99 ('TP', 1.0, 240)       exc= -20.66pp n=  121 k= 73
+gap          ge q0.99 ('TR', 0.35, 60)       exc= -21.10pp n=  101 k= 78
+lret15       le q0.01 ('TR', 0.35, 60)       exc= -21.72pp n=   68 k= 26
+age          ge q0.95 ('TR', 0.35, 60)       exc= -22.70pp n=  136 k= 56
+pxrel        ge q0.90 ('H', 5)               exc= -23.48pp n=  382 k= 36
+
+PER-FEATURE summary (max excess, mean excess over all cells)
+  lmcap        le  max=+114.92pp  mean=  +4.32pp  cells=28
+  r5           le  max= +94.01pp  mean= +10.99pp  cells=28
+  r60          le  max= +87.15pp  mean= +18.98pp  cells=24
+  r15          le  max= +56.14pp  mean=  +9.85pp  cells=25
+  hi60         le  max= +46.43pp  mean= +10.96pp  cells=25
+  r5           ge  max= +40.79pp  mean=  -1.49pp  cells=28
+  dd           le  max= +39.99pp  mean= +15.07pp  cells=20
+  lret15       le  max= +37.15pp  mean=  +0.63pp  cells=26
+  pxrel        le  max= +36.84pp  mean=  +6.91pp  cells=20
+  rng          le  max= +35.28pp  mean= +12.82pp  cells=30
+  rng          ge  max= +31.34pp  mean=  +0.81pp  cells=30
+  wickup       ge  max= +31.34pp  mean=  +0.69pp  cells=30
+  r1           le  max= +29.73pp  mean=  +3.09pp  cells=30
+  volz         le  max= +28.32pp  mean=  +5.18pp  cells=27
+  vol15        le  max= +27.48pp  mean=  +4.02pp  cells=30
+  body         le  max= +25.22pp  mean=  +0.53pp  cells=30
+  rv15         ge  max= +24.90pp  mean=  +2.76pp  cells=20
+  lvol         le  max= +21.64pp  mean=  +4.94pp  cells=20
+  gap          ge  max= +21.57pp  mean=  +0.19pp  cells=30
+  age          le  max= +20.38pp  mean=  -1.02pp  cells=30
+  wickdn       ge  max= +19.60pp  mean=  +0.50pp  cells=30
+  dd           ge  max= +18.66pp  mean=  +6.95pp  cells=28
+  body         ge  max= +18.27pp  mean=  +1.38pp  cells=30
+  vol15        ge  max= +16.69pp  mean=  +4.99pp  cells=15
+  hi60         ge  max= +14.70pp  mean=  +4.47pp  cells=30
+  lvol         ge  max= +14.67pp  mean=  +1.72pp  cells=27
+  volz         ge  max= +13.72pp  mean=  +2.79pp  cells=18
+  lvol15       le  max= +13.40pp  mean=  -0.95pp  cells=20
+  upfrac       ge  max= +13.20pp  mean=  +1.78pp  cells=30
+  age          ge  max= +11.52pp  mean=  -4.72pp  cells=20
+  wickdn       le  max= +10.78pp  mean=  +2.26pp  cells=30
+  r1           ge  max= +10.20pp  mean=  -1.63pp  cells=30
+  pgrad        ge  max=  +9.60pp  mean=  -2.42pp  cells=10
+  nb15         le  max=  +9.51pp  mean=  +1.13pp  cells=30
+  nb15         ge  max=  +8.95pp  mean=  -2.62pp  cells=30
+  lmc0         le  max=  +8.77pp  mean=  -3.83pp  cells=20
+  upfrac       le  max=  +8.57pp  mean=  +3.13pp  cells=30
+  rv15         le  max=  +7.91pp  mean=  +0.90pp  cells=30
+  wickup       le  max=  +7.29pp  mean=  +0.64pp  cells=30
+  pcreate      le  max=  +5.23pp  mean=  +1.05pp  cells=30
+  pgrad        le  max=  +3.57pp  mean=  +0.88pp  cells=30
+  r15          ge  max=  +1.62pp  mean=  -5.05pp  cells=25
+  gap          le  max=  +1.57pp  mean=  -6.74pp  cells=30
+  r60          ge  max=  +0.61pp  mean=  -9.20pp  cells=19
+  age_at_first le  max=  +0.17pp  mean=  -7.68pp  cells=10
+  pxrel        ge  max=  -1.03pp  mean= -13.51pp  cells=8
+EXIT=0

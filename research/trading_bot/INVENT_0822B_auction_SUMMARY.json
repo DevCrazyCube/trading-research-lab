@@ -1,0 +1,76 @@
+{
+ "theme": "auction imbalance as a signal source (INVENT_0822B)",
+ "verdict": "THEME_IS_NOISE",
+ "n_formulas": 54,
+ "prereg_sha256": "1377e0f207ca1c5fd0c4bb33feae10b498e0ac15075e35bee082181c8e36d4e3",
+ "design_window": [
+  "2016-01-04",
+  "2021-12-31"
+ ],
+ "held_window": [
+  "2022-01-01",
+  "2026-08-14"
+ ],
+ "panel": {
+  "days": 2669,
+  "symbols": 1611,
+  "usable_symbol_days": 1222188
+ },
+ "nulls": {
+  "n_draws": 300,
+  "median_max_abs_t": 2.2619106346994737,
+  "p95_max_abs_t": 3.3107647967708727,
+  "p99_max_abs_t": 3.621544731066331,
+  "mean_max_abs_t": 2.288448585738713,
+  "analytic_bar_one_sided": 2.8245297118509036,
+  "analytic_bar_two_sided": 3.0601082422438
+ },
+ "rho1_gate": "FAIL for the whole family: rho1(Delta) ~ -0.50 on every dislocation series; ptc rho1(level) -0.494",
+ "rho1": {
+  "d_close_dislocation": -0.4982067467796754,
+  "d49": -0.5170347631334171,
+  "e_imbalance_window": -0.5162949126612687,
+  "f_pre_publication": -0.5033392107916668,
+  "q_open_gap": -0.5176802647475106,
+  "x_print_day": -0.5160129980443044,
+  "u_offhours": -0.5170789336945107,
+  "ptc_print_vs_cont": -0.6662645135334077
+ },
+ "sign_consistency_design_to_held": "17/54 (coin=27)",
+ "best_design_cell": {
+  "name": "S12_x|DAY_t1",
+  "design_t": -4.04,
+  "design_sharpe_as_traded": 1.67,
+  "beats_analytic_bar_3.060": true,
+  "beats_placebo_p95_3.311": true,
+  "placebo_draws_above": "0/300",
+  "held_gross_t": -0.23,
+  "held_net0.5_sharpe": -0.3,
+  "verdict": "DEAD out of sample"
+ },
+ "survivors": [],
+ "characterised_object": {
+  "name": "AUCTION_TICK_PERSISTENCE (post-hoc, no promotion claim)",
+  "signal": "mean20 of d_t = ln(C/P59) -> d_{t+1}",
+  "held_gross_bp": 1.231,
+  "held_t": 26.59,
+  "breakeven_half_spread_bp": 0.616,
+  "measured_half_spread_bp": 1.43,
+  "held_net_bp": -1.629,
+  "held_net_t": -35.18,
+  "why": "~half of var(d) is a permanent per-symbol tick-side offset; median |d| = 2.00 half-ticks = one penny"
+ },
+ "rig_validation": {
+  "control": "M01_f|ON_t = T3 pre-cutoff auction-to-auction variant",
+  "this_rig_held_t": 1.28,
+  "t3_published_held_t": 1.38
+ },
+ "artifacts": [
+  "research/trading_bot/INVENT_0822B_auction.md",
+  "research/trading_bot/INVENT_0822B_auction.json",
+  "research/trading_bot/INVENT_0822B_auction_DIAG.json",
+  "research/trading_bot/INVENT_0822B_auction_RHO.json",
+  "research/trading_bot/INVENT_0822B_auction_TICK.json",
+  "research/trading_bot/INVENT_0822B_auction_PREREGISTRATION.md"
+ ]
+}

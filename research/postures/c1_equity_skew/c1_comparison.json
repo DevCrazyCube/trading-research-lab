@@ -1,0 +1,394 @@
+{
+  "side_by_side": [
+    {
+      "market": "CRYPTO perps (Binance USD-M, incl. delisted)",
+      "screen": "quote vol >= $1M/day",
+      "days": 2221,
+      "avg_names": 259.9,
+      "EW_bp_day": 12.67,
+      "MEDIAN_bp_day": -44.41,
+      "GAP_bp_day": 57.07,
+      "GAP_ci95_bp": [
+        54.41,
+        59.72
+      ],
+      "compound_EW_pct": 64.93,
+      "compound_median_pct": -99.9994,
+      "per_name_buyhold_median_pct": -79.12,
+      "share_names_negative": 0.8766,
+      "top1pct_share_of_total": 0.2801,
+      "top5pct_share_of_total": 0.7787,
+      "round_trip_bp": 24.1
+    },
+    {
+      "market": "US EQUITY (point-in-time NMS, incl. delisted)",
+      "screen": "screenA_$1M_allNMS",
+      "days": 1998,
+      "avg_names": 5482.5,
+      "EW_bp_day": 2.4,
+      "MEDIAN_bp_day": 0.48,
+      "GAP_bp_day": 1.92,
+      "GAP_ci95_bp": [
+        0.34,
+        3.47
+      ],
+      "compound_EW_pct": 34.81,
+      "compound_median_pct": -3.2561,
+      "per_name_buyhold_median_pct": 2.0,
+      "per_name_buyhold_median_pct_delist_shock": -10.47,
+      "share_names_negative": 0.4702,
+      "top1pct_share_of_total": 0.2649,
+      "top5pct_share_of_total": 0.8826,
+      "round_trip_bp": 3.904,
+      "gap_over_roundtrip_per_day": 0.492,
+      "MDE_bp_day": 12.85,
+      "h21": {
+        "n_windows": 95,
+        "independent": true,
+        "EW_basket_mean_window_ret_pct": 0.518,
+        "median_NAME_window_ret_mean_pct": 0.339,
+        "median_NAME_window_ret_median_pct": 0.652,
+        "share_windows_median_name_negative": 0.421,
+        "gap_pp_per_day_implied": 0.0085
+      },
+      "h252": {
+        "n_windows": 7,
+        "independent": true,
+        "EW_basket_mean_window_ret_pct": 4.835,
+        "median_NAME_window_ret_mean_pct": 4.201,
+        "median_NAME_window_ret_median_pct": 2.287,
+        "share_windows_median_name_negative": 0.286,
+        "gap_pp_per_day_implied": 0.0025
+      },
+      "h252_overlap": {
+        "n_windows": 84,
+        "independent": false,
+        "EW_basket_mean_window_ret_pct": 6.928,
+        "median_NAME_window_ret_mean_pct": 6.12,
+        "median_NAME_window_ret_median_pct": 5.975,
+        "share_windows_median_name_negative": 0.31,
+        "gap_pp_per_day_implied": 0.0032
+      }
+    },
+    {
+      "market": "US EQUITY (point-in-time NMS, incl. delisted)",
+      "screen": "screenB_top500_allNMS",
+      "days": 1998,
+      "avg_names": 500.0,
+      "EW_bp_day": 5.19,
+      "MEDIAN_bp_day": 3.57,
+      "GAP_bp_day": 1.62,
+      "GAP_ci95_bp": [
+        0.26,
+        2.96
+      ],
+      "compound_EW_pct": 139.52,
+      "compound_median_pct": 78.2298,
+      "per_name_buyhold_median_pct": 11.87,
+      "per_name_buyhold_median_pct_delist_shock": 6.45,
+      "share_names_negative": 0.4029,
+      "top1pct_share_of_total": 0.1462,
+      "top5pct_share_of_total": 0.4846,
+      "round_trip_bp": 3.904,
+      "gap_over_roundtrip_per_day": 0.415,
+      "MDE_bp_day": 9.41,
+      "h21": {
+        "n_windows": 95,
+        "independent": true,
+        "EW_basket_mean_window_ret_pct": 1.079,
+        "median_NAME_window_ret_mean_pct": 0.735,
+        "median_NAME_window_ret_median_pct": 1.343,
+        "share_windows_median_name_negative": 0.379,
+        "gap_pp_per_day_implied": 0.0164
+      },
+      "h252": {
+        "n_windows": 7,
+        "independent": true,
+        "EW_basket_mean_window_ret_pct": 12.111,
+        "median_NAME_window_ret_mean_pct": 7.625,
+        "median_NAME_window_ret_median_pct": 10.486,
+        "share_windows_median_name_negative": 0.286,
+        "gap_pp_per_day_implied": 0.0178
+      },
+      "h252_overlap": {
+        "n_windows": 84,
+        "independent": false,
+        "EW_basket_mean_window_ret_pct": 13.834,
+        "median_NAME_window_ret_mean_pct": 9.633,
+        "median_NAME_window_ret_median_pct": 10.474,
+        "share_windows_median_name_negative": 0.238,
+        "gap_pp_per_day_implied": 0.0167
+      }
+    },
+    {
+      "market": "US EQUITY (point-in-time NMS, incl. delisted)",
+      "screen": "screenC_top500_commonstock",
+      "days": 1998,
+      "avg_names": 500.0,
+      "EW_bp_day": 5.28,
+      "MEDIAN_bp_day": 3.84,
+      "GAP_bp_day": 1.44,
+      "GAP_ci95_bp": [
+        -0.05,
+        2.91
+      ],
+      "compound_EW_pct": 136.83,
+      "compound_median_pct": 85.0394,
+      "per_name_buyhold_median_pct": 10.43,
+      "per_name_buyhold_median_pct_delist_shock": 3.58,
+      "share_names_negative": 0.4241,
+      "top1pct_share_of_total": 0.1399,
+      "top5pct_share_of_total": 0.4762,
+      "round_trip_bp": 3.904,
+      "gap_over_roundtrip_per_day": 0.369,
+      "MDE_bp_day": 9.68,
+      "h21": {
+        "n_windows": 95,
+        "independent": true,
+        "EW_basket_mean_window_ret_pct": 1.1,
+        "median_NAME_window_ret_mean_pct": 0.71,
+        "median_NAME_window_ret_median_pct": 1.163,
+        "share_windows_median_name_negative": 0.411,
+        "gap_pp_per_day_implied": 0.0186
+      },
+      "h252": {
+        "n_windows": 7,
+        "independent": true,
+        "EW_basket_mean_window_ret_pct": 12.105,
+        "median_NAME_window_ret_mean_pct": 7.951,
+        "median_NAME_window_ret_median_pct": 10.543,
+        "share_windows_median_name_negative": 0.286,
+        "gap_pp_per_day_implied": 0.0165
+      },
+      "h252_overlap": {
+        "n_windows": 84,
+        "independent": false,
+        "EW_basket_mean_window_ret_pct": 13.971,
+        "median_NAME_window_ret_mean_pct": 9.405,
+        "median_NAME_window_ret_median_pct": 10.221,
+        "share_windows_median_name_negative": 0.238,
+        "gap_pp_per_day_implied": 0.0181
+      }
+    }
+  ],
+  "verdicts": {
+    "screenA_$1M_allNMS": {
+      "verdict_vs_prereg": "VIABLE_less_tail_dominated",
+      "gap_bp_day": 1.92,
+      "crypto_gap_bp_day": 57.07,
+      "ratio_equity_over_crypto": 0.0336,
+      "prereg_viable_threshold_bp_day": 14.268,
+      "prereg_dead_threshold_bp_day": 28.535,
+      "also_required_252d_median_name_positive": true
+    },
+    "screenB_top500_allNMS": {
+      "verdict_vs_prereg": "VIABLE_less_tail_dominated",
+      "gap_bp_day": 1.62,
+      "crypto_gap_bp_day": 57.07,
+      "ratio_equity_over_crypto": 0.0284,
+      "prereg_viable_threshold_bp_day": 14.268,
+      "prereg_dead_threshold_bp_day": 28.535,
+      "also_required_252d_median_name_positive": true
+    },
+    "screenC_top500_commonstock": {
+      "verdict_vs_prereg": "VIABLE_less_tail_dominated",
+      "gap_bp_day": 1.44,
+      "crypto_gap_bp_day": 57.07,
+      "ratio_equity_over_crypto": 0.0252,
+      "prereg_viable_threshold_bp_day": 14.268,
+      "prereg_dead_threshold_bp_day": 28.535,
+      "also_required_252d_median_name_positive": true
+    }
+  },
+  "survivorship_bias_contrast": {
+    "panel": "research/data/xll_cache/eq_daily_panel.npz (SURVIVORSHIP-BIASED: Stooq snapshot of tickers still listed Aug-2026)",
+    "symbols": 3812,
+    "dates": [
+      "2016-01-04",
+      "2026-08-14"
+    ],
+    "sessions": 2669,
+    "top500": {
+      "days": 2647,
+      "avg_names": 500.0,
+      "EW_mean_pp_per_day": 0.0542,
+      "MEDIAN_pp_per_day": 0.0394,
+      "GAP_pp_per_day": 0.0148,
+      "GAP_ci95_pp": [
+        0.0046,
+        0.0249
+      ],
+      "xsec_log_dispersion_pct_per_day": 2.439,
+      "MECHANICAL_gap_if_lognormal_pp_per_day": 0.0414,
+      "EXCESS_SKEW_RATIO_gap_over_mechanical": 0.357,
+      "compound_EW_pct": 252.6,
+      "compound_daily_median_pct": 144.9
+    },
+    "top1000": {
+      "days": 2647,
+      "avg_names": 1000.0,
+      "EW_mean_pp_per_day": 0.0549,
+      "MEDIAN_pp_per_day": 0.0396,
+      "GAP_pp_per_day": 0.0153,
+      "GAP_ci95_pp": [
+        0.0064,
+        0.0241
+      ],
+      "xsec_log_dispersion_pct_per_day": 2.47,
+      "MECHANICAL_gap_if_lognormal_pp_per_day": 0.0386,
+      "EXCESS_SKEW_RATIO_gap_over_mechanical": 0.397,
+      "compound_EW_pct": 258.4,
+      "compound_daily_median_pct": 145.8
+    }
+  },
+  "cost": {
+    "method": "historical NBBO from Alpaca SIP; first quote at each of 5 RTH instants per sampled session; 60 random names from that session's top-500 by trailing-21d dollar volume (point-in-time, delisted names included)",
+    "n_quote_observations": 8661,
+    "n_sample_sessions": 32,
+    "relative_quoted_spread_bp": {
+      "median": 3.904,
+      "mean": 6.069,
+      "p25": 2.049,
+      "p75": 7.641,
+      "p90": 13.25
+    },
+    "round_trip_bp_median": 3.904,
+    "round_trip_bp_mean": 6.069,
+    "by_year_median_bp": {
+      "2018": 4.407,
+      "2019": 3.343,
+      "2020": 4.13,
+      "2021": 3.93,
+      "2022": 3.161,
+      "2023": 3.428,
+      "2024": 3.896,
+      "2025": 5.674,
+      "2026": 4.362
+    },
+    "note": "commissions at US retail brokers are $0; this is the spread component only"
+  },
+  "gate1": {
+    "universe_symbols_regsho_pointintime": 23488,
+    "symbols_with_price_history": 15935,
+    "sessions_in_grid": 2020,
+    "date_range": [
+      "2018-08-01",
+      "2026-08-14"
+    ],
+    "symbols_ceasing_before_2026-06-01": 5398,
+    "delisted_share_of_panel": 0.3388,
+    "screenA_$1M_names_per_day_mean": 5482.5,
+    "screenA_days_usable": 1998,
+    "screenB_top500_days_with_ge_400": 1998,
+    "n_common_stocks_in_panel": 11701,
+    "n_etf_etn_in_panel": 4239,
+    "screenB_share_days_ge_400": 0.9891,
+    "PASS_g1a_survivorship>=20pct": true,
+    "PASS_g1b_span>=1500": true,
+    "PASS_g1c_breadth": true
+  },
+  "gate2": {
+    "screenA_$1M_allNMS": {
+      "T_date_clusters": 1998,
+      "avg_names_per_date": 5482.5,
+      "n_name_days": 10954011,
+      "SD_name_day_return_pp": 4.2174,
+      "SD_daily_gap_pp": 0.3479,
+      "DEFF_icc0.3": 1645.4,
+      "n_eff_name_days": 6657,
+      "MDE_a_name_day_pp_per_day": 0.1285,
+      "MDE_b_date_cluster_gap_pp_per_day": 0.0194,
+      "MDE_governing_pp_per_day": 0.1285
+    },
+    "screenB_top500_allNMS": {
+      "T_date_clusters": 1998,
+      "avg_names_per_date": 500.0,
+      "n_name_days": 999024,
+      "SD_name_day_return_pp": 3.0819,
+      "SD_daily_gap_pp": 0.309,
+      "DEFF_icc0.3": 150.7,
+      "n_eff_name_days": 6629,
+      "MDE_a_name_day_pp_per_day": 0.0941,
+      "MDE_b_date_cluster_gap_pp_per_day": 0.0172,
+      "MDE_governing_pp_per_day": 0.0941
+    },
+    "screenC_top500_commonstock": {
+      "T_date_clusters": 1998,
+      "avg_names_per_date": 500.0,
+      "n_name_days": 999023,
+      "SD_name_day_return_pp": 3.1684,
+      "SD_daily_gap_pp": 0.3369,
+      "DEFF_icc0.3": 150.7,
+      "n_eff_name_days": 6629,
+      "MDE_a_name_day_pp_per_day": 0.0968,
+      "MDE_b_date_cluster_gap_pp_per_day": 0.0187,
+      "MDE_governing_pp_per_day": 0.0968
+    }
+  },
+  "hurdle_by_holding_period": {
+    "hold_1d": {
+      "equity_skew_hurdle_bp_day": 1.44,
+      "equity_toll_bp_day": 3.904,
+      "equity_total_hurdle_bp_day": 5.344,
+      "crypto_skew_hurdle_bp_day": 57.07,
+      "crypto_toll_bp_day": 24.1,
+      "crypto_total_hurdle_bp_day": 81.17,
+      "crypto_over_equity": 15.2,
+      "equity_EW_basket_bp_day": 5.28,
+      "equity_hurdle_as_share_of_basket_return": 1.012
+    },
+    "hold_21d": {
+      "equity_skew_hurdle_bp_day": 1.86,
+      "equity_toll_bp_day": 0.186,
+      "equity_total_hurdle_bp_day": 2.046,
+      "crypto_skew_hurdle_bp_day": 57.07,
+      "crypto_toll_bp_day": 1.148,
+      "crypto_total_hurdle_bp_day": 58.218,
+      "crypto_over_equity": 28.5,
+      "equity_EW_basket_bp_day": 5.28,
+      "equity_hurdle_as_share_of_basket_return": 0.387
+    },
+    "hold_252d": {
+      "equity_skew_hurdle_bp_day": 1.65,
+      "equity_toll_bp_day": 0.015,
+      "equity_total_hurdle_bp_day": 1.665,
+      "crypto_skew_hurdle_bp_day": 57.07,
+      "crypto_toll_bp_day": 0.096,
+      "crypto_total_hurdle_bp_day": 57.166,
+      "crypto_over_equity": 34.3,
+      "equity_EW_basket_bp_day": 5.28,
+      "equity_hurdle_as_share_of_basket_return": 0.315
+    }
+  },
+  "excess_skew_ratio": {
+    "crypto_qv1M_std": 4.144,
+    "crypto_qv1M_robust": 14.528,
+    "equity_top500_common_std": 0.353,
+    "equity_top500_common_robust": 0.956,
+    "meaning": "gap divided by the exp(sigma^2/2)-1 a log-normal cross-section of the same dispersion produces mechanically; validated on synthetic IID data (sigma=2%/day -> 1.9bp/day)."
+  },
+  "sources": {
+    "equity_prices": "Alpaca SIP daily bars, adjustment=all, incl. delisted tickers",
+    "equity_universe": "local FINRA RegSHO daily short-volume archive 2018-08-01..2026-08-14, 2020 sessions -- point-in-time NMS symbol list",
+    "equity_round_trip": "MEASURED: 8,661 NBBO quote observations, 32 sample sessions, median 3.904bp",
+    "sec_anchor": "SEC Office of Analytics & Research, 'Empirical Analysis of Liquidity Demographics and Market Quality For Less Liquid NMS Stocks', 10 Apr 2018, Q4-2017 (61 sessions): relative quoted spread 0.19% for common stocks with >100K shares ADV, 1.56% for <=50K",
+    "bessembinder": "Bessembinder (2018) JFE 129:440-457 -- 25,967 US stocks 1926-2016; 57.4% have lifetime buy-and-hold below 1-month T-bills; 4.3% (1,092 firms) account for all net wealth creation. LIFETIME, all-cap. Our result is 1d/21d/252d in a liquid tier."
+  },
+  "VERDICT": {
+    "answer": "VIABLE -- the US equity cross-section is materially LESS tail-dominated than crypto at tradeable horizons. All three pre-registered screens clear the VIABLE kill line.",
+    "headline_gap_bp_per_day": {
+      "crypto_perps": 57.07,
+      "equity_top500_common": 1.44,
+      "ratio": 0.025
+    },
+    "hurdle_vs_basket_return": {
+      "crypto_1d": 6.41,
+      "crypto_21d": 4.59,
+      "equity_1d": 1.01,
+      "equity_21d": 0.39,
+      "meaning": "cost of picking names instead of holding the basket, as a multiple of the basket's own return. >1 means name-selection cannot pay even with perfect skill."
+    },
+    "scope_limit": "holds for the LARGE-CAP tier (top-500 by dollar volume). On the broad >=$1M/day tier (5,482 names/day) the daily cross-sectional median still compounds to -3.3% against an EW basket at +34.8%, and a -30% delisting shock puts the median name at -10.5% with 55.0% of names negative -- Bessembinder's skew is alive down there.",
+    "day_trading_note": "at 1-day holding the total hurdle (5.34bp/day) already exceeds the entire EW basket return (5.28bp/day). Even in equities, daily-turnover name-picking is arithmetically dead. Only holds of ~21 sessions or longer leave room."
+  }
+}

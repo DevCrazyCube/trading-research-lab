@@ -1,0 +1,3 @@
+phase B: validated 10266 | BH 7979 | BH&va>0 243 | BH&va>0&tr>0 66 | +both medians>0 8
+phase C: validated 22687 | BH 17679 | BH&va>0 760 | BH&va>0&tr>0 123 | +both medians>0 24
+phase ALL: validated 32953 | BH 25655 | BH&va>0 1003 | BH&va>0&tr>0 189 | +both medians>0 32

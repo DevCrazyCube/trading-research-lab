@@ -1,0 +1,129 @@
+{
+ "generated": "2026-08-24T04:50:08.437161+00:00",
+ "objects": {
+  "cross_venue_coinbase_premium": {
+   "kind": "PRICE SPREAD (published anchor: Coinbase Premium Index)",
+   "per_name": {
+    "BTC": {
+     "rho1_dspread": -0.4611660091145044,
+     "n": 2591,
+     "sd_bp": 4.333415761904343,
+     "mean_bp": -0.49718482277508164
+    },
+    "ETH": {
+     "rho1_dspread": -0.48054215050937404,
+     "n": 2591,
+     "sd_bp": 3.960942125873855,
+     "mean_bp": -0.5613608159117184
+    },
+    "SOL": {
+     "rho1_dspread": -0.46214691501910493,
+     "n": 1870,
+     "sd_bp": 4.90333050988575,
+     "mean_bp": 0.04963345201758549
+    },
+    "XRP": {
+     "rho1_dspread": -0.4283071238008705,
+     "n": 1686,
+     "sd_bp": 12.200108489171596,
+     "mean_bp": 0.8771784019819224
+    },
+    "DOGE": {
+     "rho1_dspread": -0.5009346132371976,
+     "n": 1884,
+     "sd_bp": 10.260177165086883,
+     "mean_bp": 0.6018319481812257
+    },
+    "ADA": {
+     "rho1_dspread": -0.518943773159806,
+     "n": 1961,
+     "sd_bp": 9.013795732884947,
+     "mean_bp": 0.8131815225204183
+    },
+    "LINK": {
+     "rho1_dspread": -0.4767452463670048,
+     "n": 2591,
+     "sd_bp": 18.151810055302295,
+     "mean_bp": 1.281254633248309
+    },
+    "LTC": {
+     "rho1_dspread": -0.48611792428250894,
+     "n": 2591,
+     "sd_bp": 12.112773336630624,
+     "mean_bp": 0.1945651731297361
+    },
+    "AVAX": {
+     "rho1_dspread": -0.4340513629272768,
+     "n": 1765,
+     "sd_bp": 8.835192799558452,
+     "mean_bp": 1.0288087948982365
+    },
+    "DOT": {
+     "rho1_dspread": -0.5089223375399072,
+     "n": 1871,
+     "sd_bp": 13.882518375245922,
+     "mean_bp": 0.296472245790095
+    }
+   },
+   "median_rho1": -0.47864369843818944,
+   "median_sd_bp": 9.636986448985915
+  },
+  "wrapped_vs_underlying": {
+   "kind": "PRICE SPREAD (structural tether: unwrap/redeem)",
+   "per_pair": {
+    "WBTCUSDT/BTCUSDT": {
+     "rho1_dspread": -0.4484866789495691,
+     "n": 1190,
+     "sd_bp": 14.147938909937572,
+     "mean_bp": -7.806987687317714
+    },
+    "WBETHUSDT/ETHUSDT": {
+     "rho1_dspread": -0.48938977609626866,
+     "n": 1108,
+     "sd_bp": 251.4121262763098,
+     "mean_bp": 562.0904644904408
+    },
+    "BETHUSDT/ETHUSDT": {
+     "rho1_dspread": -0.289478097695964,
+     "n": 222,
+     "sd_bp": 54.936217095469424,
+     "mean_bp": -37.616567970115945
+    },
+    "BNSOLUSDT/SOLUSDT": {
+     "rho1_dspread": -0.34846472505369513,
+     "n": 652,
+     "sd_bp": 310.2312653138603,
+     "mean_bp": 664.855182626948
+    }
+   }
+  },
+  "alt_ew_over_btc_log_ratio": {
+   "kind": "PRICE RATIO, NO TETHER (rotation book object)",
+   "rho1_dspread": 0.2031471035309353,
+   "n": 3306
+  },
+  "stablecoin_volume_share": {
+   "kind": "VOLUME/FLOW SERIES (not a price spread)",
+   "rho1_dchange": -0.18023912740463857,
+   "n": 3270
+  },
+  "btc_volume_dominance": {
+   "kind": "VOLUME/FLOW SERIES (not a price spread)",
+   "rho1_dchange": -0.20524562495182838,
+   "n": 3270
+  },
+  "alt_aggregate_taker_imbalance": {
+   "kind": "VOLUME/FLOW SERIES (not a price spread)",
+   "rho1_dchange": -0.4128525050437652,
+   "n": 2940
+  },
+  "coinbase_aggregate_volume_share": {
+   "kind": "VOLUME/FLOW SERIES (not a price spread)",
+   "rho1_dchange": -0.20887260185465517,
+   "n": 2590,
+   "first_day": "2019-06-27",
+   "n_days": 2591
+  }
+ },
+ "gate_rule": "a PRICE-SPREAD object is admitted only if rho1(delta s) > -0.35; flow/volume series are exempt (they are not bid-ask objects) but are reported for contrast"
+}

@@ -1,0 +1,119 @@
+{
+  "round": "INVENT_R3",
+  "date": "2026-08-21",
+  "total_formulas_tested": 265,
+  "themes": 6,
+  "themes_declared_noise": 5,
+  "new_signal_survivors": 0,
+  "pooled_bar": {
+    "analytic_sqrt_2lnN": 3.341,
+    "N": 265,
+    "sign_agnostic_2N": 3.542,
+    "declared_trials_472": 3.509,
+    "programme_cumulative_863": 3.677,
+    "sharpe_units": {
+      "daily_equities_design_6.0y": 1.364,
+      "intraday_flow_panel_3.48y": 1.791,
+      "perp_daily_3.0y": 1.929,
+      "weekly_ens3_design_71wk": 2.859,
+      "weekly_ens_holdout_188wk": 1.758
+    }
+  },
+  "cleared_pooled_design_bar": [
+    {
+      "name": "INTERACT T3 VIX_LEVEL x RATE_CHG",
+      "theme": "condition_combine",
+      "design_t": 4.47,
+      "holdout_t": -0.62,
+      "holdout_dsharpe": -0.91,
+      "verdict": "DEAD - sign flips"
+    },
+    {
+      "name": "GATE T3 RATE_CHG",
+      "theme": "condition_combine",
+      "design_t": 3.58,
+      "holdout_t": 0.52,
+      "holdout_dsharpe": 0.11,
+      "verdict": "DEAD - indistinguishable from zero"
+    },
+    {
+      "name": "R3B_TT_CONC",
+      "theme": "perpstructure",
+      "design_sharpe": 3.79,
+      "holdout_net": [0.46, 0.67],
+      "verdict": "DEAD - collapse not decay"
+    }
+  ],
+  "note_on_exceedance_count": "3 of 265 exceeded the pooled bar; E[max] at N=265 is 3.34, so 1-2 exceedances are the null expectation. All three died out of sample. This is precisely a pure null.",
+  "theme_table": [
+    {"theme": "condition_combine", "n": 107, "own_bar": 3.391, "noise": false, "note": "conditioning half is noise (0/107 survive); non-noise output is a zero-parameter sizing rule, not a signal"},
+    {"theme": "event_calendar", "n": 36, "own_bar": 2.884, "noise": true},
+    {"theme": "dealer_positioning", "n": 35, "own_bar": 2.67, "noise": true},
+    {"theme": "perpstructure", "n": 32, "own_bar": 2.63, "noise": true},
+    {"theme": "flow", "n": 28, "own_bar": 1.384, "noise": true},
+    {"theme": "exotic", "n": 27, "own_bar": 1.58, "noise": true}
+  ],
+  "basket_proposals": [
+    {
+      "name": "ENS_EQRISK_ALL3",
+      "theme": "condition_combine",
+      "kind": "sizing_rule_not_a_leg",
+      "design_sharpe": 2.703,
+      "design_t": 3.158,
+      "clears_pooled_bar": false,
+      "held_out": "+2.93 headline / +1.75 stressed over 188 weeks (2023-01-03..2026-08-14); worst third +2.19 / +1.21; split-insensitive 2.97/2.63/2.79 at splits 2022-12-30/2023-12-29/2024-02-29",
+      "diversifying": false,
+      "recommend_freeze": true,
+      "guard": "Size on the STRESSED rung (1.75, worst third 1.21), never the 2.93 headline. Stressed lift over holding CEF alone is only +0.17, so under realistic costs the basket is mostly the CEF leg plus a diversification kicker; CEF carries the v4/v5 caveats (edge concentrated in one half-sample, 37% of stressed mean in 5 of 114 weeks, capacity capped low-single-digit $M). Does NOT clear the pooled 3.341 bar (t=3.16, bar 2.86 in Sharpe units on 71 weeks) - the case rests on ZERO fitted parameters plus a positive stressed holdout, and on the NEGATIVE result that the fitted v5 budgets cost -0.48 Sharpe. Do not present 2.93 as a discovery: predicted 2.61 from the legs' own priors, +0.32 excess is realised correlation and is not significant."
+    },
+    {
+      "name": "ENS_EQRISK_T3_T7",
+      "theme": "condition_combine",
+      "kind": "fallback_book",
+      "design_sharpe": 1.828,
+      "design_t": 4.816,
+      "clears_pooled_bar": true,
+      "held_out": "+2.21 headline vs legs 1.24 (T3) and 1.70 (T7D1); +1.05 stressed; 361 design / 188 holdout weeks, design corr -0.06, holdout corr -0.10",
+      "diversifying": false,
+      "recommend_freeze": false,
+      "guard": "Subsumed by ENS_EQRISK_ALL3 - do not run as an additional leg. Keep as the fallback book if CEF capacity binds (a live risk at low single-digit $M). Its design t reflects the legs' own frozen edge, not the value of combining, so the pooled-bar pass is not evidence of a discovery."
+    },
+    {
+      "name": "DIAG_T3_SHORT_HALF_DECAY",
+      "theme": "condition_combine",
+      "kind": "diagnostic",
+      "clears_pooled_bar": false,
+      "held_out": "T3 long half +9.51bp t=5.48 design -> +11.28bp t=3.85 holdout; SHORT half +7.58bp t=4.75 -> +3.87bp t=1.36",
+      "diversifying": false,
+      "recommend_freeze": false,
+      "guard": "Add a per-half diagnostic to the forward log; DO NOT change the frozen L1 rule. t=1.36 is not yet evidence of death, and a long-tilted version harvests overnight equity beta (dead ledger). This is also the real reason SIDE_LONGONLY_HI looked good."
+    },
+    {
+      "name": "XS_GLSR_Z_DEMOTION_ESCALATION",
+      "theme": "perpstructure",
+      "kind": "escalation",
+      "clears_pooled_bar": false,
+      "held_out": "+3.00 net (design 2023-01..2024-06) -> +0.30 (2024-06..2025-01) -> -1.21 (2025-01..2026-08). Gross already -0.60 on the last window; OI-orthogonalised version decays identically.",
+      "diversifying": false,
+      "recommend_freeze": false,
+      "guard": "Keep logging-only under the v4 freeze; DO NOT re-size. Last window is a thin ~20-name alphabetically-biased A-B-ticker cross-section at min 8 names - one window, small universe, NOT proof of death. Continue the Binance metrics backfill past BNXUSDT and re-run on a full 2025-2026 cross-section before this leg is ever sized again."
+    }
+  ],
+  "rejected_near_misses": [
+    "C6_V1D_SPIKE_CONTINUE", "C2_AUCT_RESID_ON", "F01_REBAL_CLV_FADE_POOLED",
+    "A6_LETF_ASYM_XS", "D1_DISP_TS", "B3_WKND_FUND_CARRY", "E04_EARN_GAP_OC_CONT",
+    "B11_GSIGN_CONTANGO_LASTHR", "A05_ITEM_701_REGFD_5", "A13_AMC_VS_BMO_5",
+    "GATE T3 CTRL_PREV", "R3A_NETCARRY_MOM", "R3B_OIWAP_GAP", "R3B_LIQ_ASYM",
+    "R3B_LIQ_DIST_25X", "SIDE_LONGONLY_HI", "R3B_COVER_SHARE"
+  ],
+  "ledger_corrections": [
+    "GEX IS computable on free data (Alpaca expired OPRA daily bars from 2024-02-01); the NEWTERR_optimp entry 'no free historical dealer-gamma series exists' is wrong. It just does not predict SPY.",
+    "The textbook GEX sign-flip is STRUCTURALLY DEGENERATE on SPY at 0-5DTE: gamma-weighted near-money option volume is put-dominated on 97% of days (358/369), so dealers are always net short gamma near the money and there is no zero crossing to trade."
+  ],
+  "top_follow_ups": [
+    "Backfill Binance metrics past BNXUSDT, re-run XS_GLSR_Z on a full 2025-2026 cross-section (decides whether a basket leg is dead)",
+    "One Yahoo OI-vs-volume check to validate or retire the 17MB gex_cache",
+    "Extend the close-location study to the 1990s on an MOC-legal rail (~0.5bp/side); 5 years cannot exclude a true Sharpe-0.6 rebalance edge",
+    "Spend nothing further on dealer positioning from free data, on conditioners of any kind, or on the crypto 2025-2026 holdout (already used 3 times)"
+  ]
+}

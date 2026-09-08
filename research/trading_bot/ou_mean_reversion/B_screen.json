@@ -1,0 +1,223 @@
+{
+ "leg": "PARTB_daily_sibling_screen",
+ "design": [
+  "2021-01-04",
+  "2023-12-31"
+ ],
+ "heldout": [
+  "2024-01-02",
+  "2026-08-15"
+ ],
+ "n_candidates": 9,
+ "multiple_testing_bar_t": 2.096,
+ "discriminator": "rho1(delta-spread) near -0.5 => measurement-error bounce, untradable",
+ "rows": [
+  {
+   "pair": "HYG/JNK",
+   "half_life_days": 124.6,
+   "theta": 0.0056,
+   "sigma_eq_pct": 0.46,
+   "hurst": 0.519,
+   "adf_t": -1.19,
+   "adf": "FAIL(unit root)",
+   "rho1_dspread": -0.254,
+   "meas_err_flag": false,
+   "design": {
+    "n": 18,
+    "net_bp": -8.4,
+    "t": -2.32,
+    "per_trade_sharpe": -0.547
+   },
+   "heldout": {
+    "n": 16,
+    "net_bp": -5.6,
+    "t": -2.06,
+    "per_trade_sharpe": -0.516
+   }
+  },
+  {
+   "pair": "LQD/VCIT",
+   "half_life_days": 107.9,
+   "theta": 0.0064,
+   "sigma_eq_pct": 1.765,
+   "hurst": 0.55,
+   "adf_t": -1.68,
+   "adf": "FAIL(unit root)",
+   "rho1_dspread": -0.076,
+   "meas_err_flag": false,
+   "design": {
+    "n": 17,
+    "net_bp": -4.6,
+    "t": -0.25,
+    "per_trade_sharpe": -0.061
+   },
+   "heldout": {
+    "n": 15,
+    "net_bp": 17.6,
+    "t": 1.91,
+    "per_trade_sharpe": 0.492
+   }
+  },
+  {
+   "pair": "TLT/VGLT",
+   "half_life_days": 206.7,
+   "theta": 0.0034,
+   "sigma_eq_pct": 1.247,
+   "hurst": 0.517,
+   "adf_t": -0.8,
+   "adf": "FAIL(unit root)",
+   "rho1_dspread": -0.187,
+   "meas_err_flag": false,
+   "design": {
+    "n": 21,
+    "net_bp": -5.7,
+    "t": -0.84,
+    "per_trade_sharpe": -0.184
+   },
+   "heldout": {
+    "n": 18,
+    "net_bp": 3.4,
+    "t": 0.71,
+    "per_trade_sharpe": 0.167
+   }
+  },
+  {
+   "pair": "AGG/BND",
+   "half_life_days": 8.0,
+   "theta": 0.0863,
+   "sigma_eq_pct": 0.08,
+   "hurst": 0.456,
+   "adf_t": -4.19,
+   "adf": "reject@1%",
+   "rho1_dspread": -0.326,
+   "meas_err_flag": false,
+   "design": {
+    "n": 23,
+    "net_bp": -0.3,
+    "t": -0.26,
+    "per_trade_sharpe": -0.054
+   },
+   "heldout": {
+    "n": 20,
+    "net_bp": 0.0,
+    "t": 0.05,
+    "per_trade_sharpe": 0.012
+   }
+  },
+  {
+   "pair": "EEM/VWO",
+   "half_life_days": 186.9,
+   "theta": 0.0037,
+   "sigma_eq_pct": 1.761,
+   "hurst": 0.476,
+   "adf_t": -1.97,
+   "adf": "FAIL(unit root)",
+   "rho1_dspread": -0.091,
+   "meas_err_flag": false,
+   "design": {
+    "n": 20,
+    "net_bp": -8.6,
+    "t": -0.72,
+    "per_trade_sharpe": -0.16
+   },
+   "heldout": {
+    "n": 15,
+    "net_bp": -73.2,
+    "t": -1.4,
+    "per_trade_sharpe": -0.362
+   }
+  },
+  {
+   "pair": "GLD/IAU",
+   "half_life_days": 23.0,
+   "theta": 0.0301,
+   "sigma_eq_pct": 0.132,
+   "hurst": 0.309,
+   "adf_t": -0.71,
+   "adf": "FAIL(unit root)",
+   "rho1_dspread": -0.502,
+   "meas_err_flag": true,
+   "design": {
+    "n": 45,
+    "net_bp": -0.4,
+    "t": -0.86,
+    "per_trade_sharpe": -0.128
+   },
+   "heldout": {
+    "n": 33,
+    "net_bp": -1.5,
+    "t": -1.75,
+    "per_trade_sharpe": -0.305
+   }
+  },
+  {
+   "pair": "SLV/SIVR",
+   "half_life_days": 10.5,
+   "theta": 0.0663,
+   "sigma_eq_pct": 0.175,
+   "hurst": 0.281,
+   "adf_t": -1.55,
+   "adf": "FAIL(unit root)",
+   "rho1_dspread": -0.52,
+   "meas_err_flag": true,
+   "design": {
+    "n": 36,
+    "net_bp": 0.2,
+    "t": 0.21,
+    "per_trade_sharpe": 0.035
+   },
+   "heldout": {
+    "n": 32,
+    "net_bp": 0.3,
+    "t": 0.25,
+    "per_trade_sharpe": 0.043
+   }
+  },
+  {
+   "pair": "GDX/GDXJ",
+   "half_life_days": 75.9,
+   "theta": 0.0091,
+   "sigma_eq_pct": 4.597,
+   "hurst": 0.523,
+   "adf_t": -2.61,
+   "adf": "reject@10%",
+   "rho1_dspread": -0.061,
+   "meas_err_flag": false,
+   "design": {
+    "n": 18,
+    "net_bp": 85.6,
+    "t": 1.84,
+    "per_trade_sharpe": 0.434
+   },
+   "heldout": {
+    "n": 17,
+    "net_bp": 109.8,
+    "t": 2.5,
+    "per_trade_sharpe": 0.606
+   }
+  },
+  {
+   "pair": "GLD/GDX",
+   "half_life_days": 57.0,
+   "theta": 0.0122,
+   "sigma_eq_pct": 9.446,
+   "hurst": 0.546,
+   "adf_t": -2.22,
+   "adf": "FAIL(unit root)",
+   "rho1_dspread": -0.028,
+   "meas_err_flag": false,
+   "design": {
+    "n": 20,
+    "net_bp": 151.7,
+    "t": 1.47,
+    "per_trade_sharpe": 0.329
+   },
+   "heldout": {
+    "n": 16,
+    "net_bp": 196.4,
+    "t": 1.47,
+    "per_trade_sharpe": 0.368
+   }
+  }
+ ]
+}

@@ -1,0 +1,18 @@
+h12 window_label rows 22561 creators 6556
+mints with usable bars 382 bars 46136
+global last ts 1785337260.0
+devbuy coverage 2672 nonzero 2121
+mints with features 382
+elapsed 10.904610633850098
+wrote /home/anont/meme/.scr_fc3/cache.pkl 2349035
+train(h1) 175 validate(h2) 207
+first_bar - create (min): p10 -0.8 med 2.7 p90 163.0
+n_prior nonzero 192 med 1.0 max 204
+np_2h nonzero 103 med 0.0 max 161
+ng_2h nonzero 58 med 0.0 max 12
+burst_60 nonzero 162 med 0.0 max 42
+n_prior_out nonzero 50 med 0.0 max 9
+n_prior_db nonzero 53 med 0.0 max 27
+frac_grad n>=2: 80 med 0.04 frac with >0: 54
+dlen dist [(151, 279), (115, 103)]
+conchain_match Counter({1: 357, 0: 25})

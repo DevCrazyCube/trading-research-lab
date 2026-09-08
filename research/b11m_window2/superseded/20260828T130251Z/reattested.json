@@ -1,0 +1,19 @@
+{
+  "archived_at": "20260828T130251Z",
+  "manifest_after": "33da3a7ea16fa20ade57a8ebbeba61e4ce310adf53c7a0406ce08d5327c5e99f",
+  "manifest_before": "b901e2ade981123def610fa245c07829dfc202ae9afe6fbef6806d4b8cb7a107",
+  "manifest_files": 15,
+  "quarantine_cleared": {
+    "exit_code": 1,
+    "reason_code": "Q07_stage_failed",
+    "stage": "transaction_bodies"
+  },
+  "reason": "T34 s6 hand-back (durable supervisor CHUNK B 2026-08-28 15:00 CEST). Q07_stage_failed at transaction_bodies on 2026-08-16 (Chainstack ConnectionResetError, supervisor pid 2160263 dead). The stage was re-collected OUT OF BAND by research/b11m_window2/run_free_decode.sh on the FREE public RPC (https://api.mainnet-beta.solana.com, read-only getBlock/getTransaction) from a fresh b11a_bodies.sqlite (Chainstack partial set aside as .chainstack-partial.sqlite, never resumed); attempt 10 exited rc=0 at 2026-08-28T02:37:41Z under b9d's own set-equality exhaustiveness assertion. Manifest changed because b9d_transaction_bodies.py carries the disclosed OSError-retry patch (T34_RESTART_2026-08-25.md s2). Completed stages (prefix through signature_inventory) are untouched and valid. Next: the supervisor re-runs transaction_bodies with SOLANA_RPC_URL=free endpoint (b9d resumes on done-sets, ~0 calls) and proceeds to decode_and_reserves and the three gates. results_unlocked stays false; no bodies number has been read.",
+  "stages_preserved": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory"
+  ]
+}

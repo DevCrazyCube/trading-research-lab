@@ -1,0 +1,20 @@
+{
+  "benchmark_filesystem_parent": "research/midcap",
+  "benchmark_sha256": "1e20d7eaa21af144cce52ff6ae7d30d489655ae8686ec7650303224ca3a097c8",
+  "frames": 2000,
+  "frames_per_second": 159.40266640947542,
+  "profile": "         805567 function calls (805524 primitive calls) in 12.238 seconds\n\n   Ordered by: internal time\n   List reduced from 140 to 18 due to restriction <18>\n\n   ncalls  tottime  percall  cumtime  percall filename:lineno(function)\n     3999    3.659    0.001    3.659    0.001 {method '__exit__' of 'sqlite3.Connection' objects}\n     2002    1.911    0.001    1.911    0.001 {method 'commit' of 'sqlite3.Connection' objects}\n    10003    0.765    0.000    0.765    0.000 {method 'execute' of 'sqlite3.Connection' objects}\n     1999    0.673    0.000    2.485    0.001 /home/anont/meme/scripts/birth_stream.py:46(decode_notification)\n     2000    0.565    0.000    0.565    0.000 {built-in method zlib.compress}\n     2002    0.364    0.000    0.564    0.000 /home/anont/meme/scripts/b9d_transaction_bodies.py:1724(event_entries)\n    47618    0.314    0.000    0.314    0.000 {method 'fullmatch' of 're.Pattern' objects}\n    12000    0.307    0.000    0.744    0.000 {built-in method posix.stat}\n    47618    0.223    0.000    0.843    0.000 /usr/lib/python3.14/re/__init__.py:169(fullmatch)\n    47618    0.208    0.000    0.306    0.000 /usr/lib/python3.14/re/__init__.py:330(_compile)\n     4003    0.199    0.000    0.199    0.000 /usr/lib/python3.14/json/encoder.py:207(iterencode)\n    99772    0.175    0.000    0.175    0.000 {built-in method builtins.isinstance}\n     2000    0.150    0.000    3.279    0.002 /home/anont/meme/scripts/birth_stream.py:192(append)\n     2000    0.140    0.000    0.140    0.000 /usr/lib/python3.14/json/decoder.py:351(raw_decode)\n    18000    0.140    0.000    0.393    0.000 /usr/lib/python3.14/pathlib/__init__.py:251(__str__)\n     4003    0.113    0.000    0.441    0.000 /usr/lib/python3.14/json/__init__.py:185(dumps)\n    68223    0.105    0.000    0.105    0.000 {method 'get' of 'dict' objects}\n     2000    0.102    0.000    1.185    0.001 /home/anont/meme/scripts/birth_stream.py:244(bytes_on_disk)\n\n\n",
+  "purpose": "OFFLINE_ENGINEERING_BENCHMARK_NOT_LIVE_OR_STRATEGY_DATA",
+  "raw_prefix_sha256": "b79668429bbd35d1153b6631f8f2b9dd2734f9f7fcc43ee77beba9afce2e5c2e",
+  "recorder_sha256": "b08d7a0dbbd3a63040d8df75875941a24e29455382b4e75ac6ee75839670e675",
+  "seconds": 12.546841561999827,
+  "source": "research/midcap/birth_stream_pilot_network_20260908.sqlite",
+  "stages_seconds": {
+    "capacity_checks": 1.5103716169614927,
+    "decode": 2.934546498956479,
+    "derived_commit": 2.5545825280041754,
+    "notification_commit": 2.1415022540513746,
+    "raw_commit": 3.3331571109720244
+  },
+  "temporary_database": "ephemeral timing fixture removed; not a recorded live cohort"
+}

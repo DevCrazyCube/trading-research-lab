@@ -1,0 +1,96 @@
+
+############ CAP TAG '_c1'  ref structure H120|TP-|SL-|TR0.30|PC
+--- np==0 vs np>=1 across ENTRY-AGE bands (validate h==2, then all h12) ---
+  all          np0 mean=-0.0831 med=-0.0994 k=102 | np1+ mean=-0.1040 med=-0.0975 k=107 | np0_all mean=-0.0849 med=-0.0943 k=195 | np1+_all mean=-0.1036 med=-0.0986 k=192 |
+  age<20       np0 mean=+0.0801 med=-0.0771 k=77 | np1+ mean=-0.0810 med=-0.0893 k=95 | np0_all mean=+0.0474 med=-0.0775 k=150 | np1+_all mean=-0.0797 med=-0.0897 k=170 |
+  age<60       np0 mean=+0.0603 med=-0.0779 k=84 | np1+ mean=-0.0932 med=-0.0945 k=96 | np0_all mean=+0.0307 med=-0.0804 k=161 | np1+_all mean=-0.0908 med=-0.0941 k=176 |
+  age20_120    np0 mean=-0.0043 med=-0.0686 k=73 | np1+ mean=-0.0988 med=-0.1046 k=87 | np0_all mean=-0.0121 med=-0.0853 k=137 | np1+_all mean=-0.1031 med=-0.1104 k=154 |
+  age60_240    np0 mean=-0.0861 med=-0.0884 k=77 | np1+ mean=-0.1005 med=-0.0818 k=71 | np0_all mean=-0.0792 med=-0.0856 k=133 | np1+_all mean=-0.1015 med=-0.0943 k=136 |
+  age120_480   np0 mean=-0.1060 med=-0.1046 k=76 | np1+ mean=-0.1168 med=-0.0996 k=69 | np0_all mean=-0.1002 med=-0.0924 k=131 | np1+_all mean=-0.1137 med=-0.0977 k=130 |
+  age>=240     np0 mean=-0.1364 med=-0.1160 k=70 | np1+ mean=-0.1668 med=-0.1303 k=77 | np0_all mean=-0.1280 med=-0.1093 k=131 | np1+_all mean=-0.1649 med=-0.1367 k=138 |
+  sib60>=1     np0 mean=-0.0779 med=-0.0375 k=11 | np1+ mean=-0.0941 med=-0.0948 k=92 | np0_all mean=-0.0577 med=-0.0563 k=22 | np1+_all mean=-0.0917 med=-0.0936 k=167 |
+  sib60==0     np0 mean=-0.0853 med=-0.1000 k=102 | np1+ mean=-0.1373 med=-0.1160 k=93 | np0_all mean=-0.0857 med=-0.0956 k=195 | np1+_all mean=-0.1381 med=-0.1169 k=166 |
+  sib15>=1     np0 mean=-0.1306 med=-0.0398 k=5 | np1+ mean=-0.0871 med=-0.0943 k=74 | np0_all mean=-0.0605 med=-0.0398 k=13 | np1+_all mean=-0.0850 med=-0.0921 k=136 |
+  sib60>=3     np0 mean=-0.0300 med=-0.0256 k=3 | np1+ mean=-0.0956 med=-0.0910 k=69 | np0_all mean=-0.0966 med=-0.0739 k=6 | np1+_all mean=-0.0968 med=-0.0909 k=130 |
+--- tail decomposition, np==0 age<20 VALIDATE (k=77) ---
+   top5 per-mint means: ['+0.98', '+0.98', '+0.98', '+0.98', '+0.98']
+   drop top 0 -> mean=+0.0801  median=-0.0771  k=77
+   drop top 1 -> mean=+0.0683  median=-0.0775  k=76
+   drop top 2 -> mean=+0.0562  median=-0.0780  k=75
+   drop top 3 -> mean=+0.0437  median=-0.0782  k=74
+   drop top 5 -> mean=+0.0178  median=-0.0804  k=72
+   drop top 8 -> mean=-0.0172  median=-0.0851  k=69
+   frac of mints with positive mean: 0.286
+   bootLO(creator clusters)=0.017092305327831903 nc=77
+
+############ CAP TAG '_c3'  ref structure H120|TP-|SL-|TR0.30|PC
+--- np==0 vs np>=1 across ENTRY-AGE bands (validate h==2, then all h12) ---
+  all          np0 mean=-0.0763 med=-0.0994 k=102 | np1+ mean=-0.1036 med=-0.0975 k=107 | np0_all mean=-0.0781 med=-0.0943 k=195 | np1+_all mean=-0.1027 med=-0.0986 k=192 |
+  age<20       np0 mean=+0.1323 med=-0.0771 k=77 | np1+ mean=-0.0810 med=-0.0893 k=95 | np0_all mean=+0.1004 med=-0.0775 k=150 | np1+_all mean=-0.0797 med=-0.0897 k=170 |
+  age<60       np0 mean=+0.1082 med=-0.0779 k=84 | np1+ mean=-0.0932 med=-0.0945 k=96 | np0_all mean=+0.0804 med=-0.0804 k=161 | np1+_all mean=-0.0908 med=-0.0941 k=176 |
+  age20_120    np0 mean=+0.0230 med=-0.0686 k=73 | np1+ mean=-0.0971 med=-0.1046 k=87 | np0_all mean=+0.0195 med=-0.0853 k=137 | np1+_all mean=-0.1021 med=-0.1104 k=154 |
+  age60_240    np0 mean=-0.0841 med=-0.0884 k=77 | np1+ mean=-0.1003 med=-0.0818 k=71 | np0_all mean=-0.0762 med=-0.0856 k=133 | np1+_all mean=-0.1014 med=-0.0943 k=136 |
+  age120_480   np0 mean=-0.1036 med=-0.1046 k=76 | np1+ mean=-0.1168 med=-0.0996 k=69 | np0_all mean=-0.0988 med=-0.0924 k=131 | np1+_all mean=-0.1137 med=-0.0977 k=130 |
+  age>=240     np0 mean=-0.1356 med=-0.1160 k=70 | np1+ mean=-0.1664 med=-0.1303 k=77 | np0_all mean=-0.1275 med=-0.1093 k=131 | np1+_all mean=-0.1635 med=-0.1367 k=138 |
+  sib60>=1     np0 mean=-0.0779 med=-0.0375 k=11 | np1+ mean=-0.0941 med=-0.0948 k=92 | np0_all mean=-0.0550 med=-0.0563 k=22 | np1+_all mean=-0.0916 med=-0.0936 k=167 |
+  sib60==0     np0 mean=-0.0785 med=-0.1000 k=102 | np1+ mean=-0.1368 med=-0.1160 k=93 | np0_all mean=-0.0789 med=-0.0956 k=195 | np1+_all mean=-0.1370 med=-0.1169 k=166 |
+  sib15>=1     np0 mean=-0.1306 med=-0.0398 k=5 | np1+ mean=-0.0871 med=-0.0943 k=74 | np0_all mean=-0.0605 med=-0.0398 k=13 | np1+_all mean=-0.0850 med=-0.0921 k=136 |
+  sib60>=3     np0 mean=-0.0300 med=-0.0256 k=3 | np1+ mean=-0.0956 med=-0.0910 k=69 | np0_all mean=-0.0966 med=-0.0739 k=6 | np1+_all mean=-0.0968 med=-0.0909 k=130 |
+--- tail decomposition, np==0 age<20 VALIDATE (k=77) ---
+   top5 per-mint means: ['+2.95', '+2.10', '+1.38', '+1.35', '+1.12']
+   drop top 0 -> mean=+0.1323  median=-0.0771  k=77
+   drop top 1 -> mean=+0.0952  median=-0.0775  k=76
+   drop top 2 -> mean=+0.0685  median=-0.0780  k=75
+   drop top 3 -> mean=+0.0507  median=-0.0782  k=74
+   drop top 5 -> mean=+0.0178  median=-0.0804  k=72
+   drop top 8 -> mean=-0.0172  median=-0.0851  k=69
+   frac of mints with positive mean: 0.286
+   bootLO(creator clusters)=0.03748866678441016 nc=77
+
+############ CAP TAG '_c10'  ref structure H120|TP-|SL-|TR0.30|PC
+--- np==0 vs np>=1 across ENTRY-AGE bands (validate h==2, then all h12) ---
+  all          np0 mean=-0.0746 med=-0.0994 k=102 | np1+ mean=-0.1036 med=-0.0975 k=107 | np0_all mean=-0.0772 med=-0.0943 k=195 | np1+_all mean=-0.1027 med=-0.0986 k=192 |
+  age<20       np0 mean=+0.1484 med=-0.0771 k=77 | np1+ mean=-0.0810 med=-0.0893 k=95 | np0_all mean=+0.1087 med=-0.0775 k=150 | np1+_all mean=-0.0797 med=-0.0897 k=170 |
+  age<60       np0 mean=+0.1229 med=-0.0779 k=84 | np1+ mean=-0.0932 med=-0.0945 k=96 | np0_all mean=+0.0881 med=-0.0804 k=161 | np1+_all mean=-0.0908 med=-0.0941 k=176 |
+  age20_120    np0 mean=+0.0230 med=-0.0686 k=73 | np1+ mean=-0.0971 med=-0.1046 k=87 | np0_all mean=+0.0195 med=-0.0853 k=137 | np1+_all mean=-0.1021 med=-0.1104 k=154 |
+  age60_240    np0 mean=-0.0841 med=-0.0884 k=77 | np1+ mean=-0.1003 med=-0.0818 k=71 | np0_all mean=-0.0762 med=-0.0856 k=133 | np1+_all mean=-0.1014 med=-0.0943 k=136 |
+  age120_480   np0 mean=-0.1036 med=-0.1046 k=76 | np1+ mean=-0.1168 med=-0.0996 k=69 | np0_all mean=-0.0988 med=-0.0924 k=131 | np1+_all mean=-0.1137 med=-0.0977 k=130 |
+  age>=240     np0 mean=-0.1356 med=-0.1160 k=70 | np1+ mean=-0.1664 med=-0.1303 k=77 | np0_all mean=-0.1275 med=-0.1093 k=131 | np1+_all mean=-0.1635 med=-0.1367 k=138 |
+  sib60>=1     np0 mean=-0.0779 med=-0.0375 k=11 | np1+ mean=-0.0941 med=-0.0948 k=92 | np0_all mean=-0.0550 med=-0.0563 k=22 | np1+_all mean=-0.0916 med=-0.0936 k=167 |
+  sib60==0     np0 mean=-0.0767 med=-0.1000 k=102 | np1+ mean=-0.1368 med=-0.1160 k=93 | np0_all mean=-0.0780 med=-0.0956 k=195 | np1+_all mean=-0.1370 med=-0.1169 k=166 |
+  sib15>=1     np0 mean=-0.1306 med=-0.0398 k=5 | np1+ mean=-0.0871 med=-0.0943 k=74 | np0_all mean=-0.0605 med=-0.0398 k=13 | np1+_all mean=-0.0850 med=-0.0921 k=136 |
+  sib60>=3     np0 mean=-0.0300 med=-0.0256 k=3 | np1+ mean=-0.0956 med=-0.0910 k=69 | np0_all mean=-0.0966 med=-0.0739 k=6 | np1+_all mean=-0.0968 med=-0.0909 k=130 |
+--- tail decomposition, np==0 age<20 VALIDATE (k=77) ---
+   top5 per-mint means: ['+4.19', '+2.10', '+1.38', '+1.35', '+1.12']
+   drop top 0 -> mean=+0.1484  median=-0.0771  k=77
+   drop top 1 -> mean=+0.0952  median=-0.0775  k=76
+   drop top 2 -> mean=+0.0685  median=-0.0780  k=75
+   drop top 3 -> mean=+0.0507  median=-0.0782  k=74
+   drop top 5 -> mean=+0.0178  median=-0.0804  k=72
+   drop top 8 -> mean=-0.0172  median=-0.0851  k=69
+   frac of mints with positive mean: 0.286
+   bootLO(creator clusters)=0.04422887263414545 nc=77
+
+############ CAP TAG 'uncapped'  ref structure H120|TP-|SL-|TR0.30|PC
+--- np==0 vs np>=1 across ENTRY-AGE bands (validate h==2, then all h12) ---
+  all          np0 mean=-0.0746 med=-0.0994 k=102 | np1+ mean=-0.1036 med=-0.0975 k=107 | np0_all mean=-0.0772 med=-0.0943 k=195 | np1+_all mean=-0.1027 med=-0.0986 k=192 |
+  age<20       np0 mean=+0.1484 med=-0.0771 k=77 | np1+ mean=-0.0810 med=-0.0893 k=95 | np0_all mean=+0.1087 med=-0.0775 k=150 | np1+_all mean=-0.0797 med=-0.0897 k=170 |
+  age<60       np0 mean=+0.1229 med=-0.0779 k=84 | np1+ mean=-0.0932 med=-0.0945 k=96 | np0_all mean=+0.0881 med=-0.0804 k=161 | np1+_all mean=-0.0908 med=-0.0941 k=176 |
+  age20_120    np0 mean=+0.0230 med=-0.0686 k=73 | np1+ mean=-0.0971 med=-0.1046 k=87 | np0_all mean=+0.0195 med=-0.0853 k=137 | np1+_all mean=-0.1021 med=-0.1104 k=154 |
+  age60_240    np0 mean=-0.0841 med=-0.0884 k=77 | np1+ mean=-0.1003 med=-0.0818 k=71 | np0_all mean=-0.0762 med=-0.0856 k=133 | np1+_all mean=-0.1014 med=-0.0943 k=136 |
+  age120_480   np0 mean=-0.1036 med=-0.1046 k=76 | np1+ mean=-0.1168 med=-0.0996 k=69 | np0_all mean=-0.0988 med=-0.0924 k=131 | np1+_all mean=-0.1137 med=-0.0977 k=130 |
+  age>=240     np0 mean=-0.1356 med=-0.1160 k=70 | np1+ mean=-0.1664 med=-0.1303 k=77 | np0_all mean=-0.1275 med=-0.1093 k=131 | np1+_all mean=-0.1635 med=-0.1367 k=138 |
+  sib60>=1     np0 mean=-0.0779 med=-0.0375 k=11 | np1+ mean=-0.0941 med=-0.0948 k=92 | np0_all mean=-0.0550 med=-0.0563 k=22 | np1+_all mean=-0.0916 med=-0.0936 k=167 |
+  sib60==0     np0 mean=-0.0767 med=-0.1000 k=102 | np1+ mean=-0.1368 med=-0.1160 k=93 | np0_all mean=-0.0780 med=-0.0956 k=195 | np1+_all mean=-0.1370 med=-0.1169 k=166 |
+  sib15>=1     np0 mean=-0.1306 med=-0.0398 k=5 | np1+ mean=-0.0871 med=-0.0943 k=74 | np0_all mean=-0.0605 med=-0.0398 k=13 | np1+_all mean=-0.0850 med=-0.0921 k=136 |
+  sib60>=3     np0 mean=-0.0300 med=-0.0256 k=3 | np1+ mean=-0.0956 med=-0.0910 k=69 | np0_all mean=-0.0966 med=-0.0739 k=6 | np1+_all mean=-0.0968 med=-0.0909 k=130 |
+--- tail decomposition, np==0 age<20 VALIDATE (k=77) ---
+   top5 per-mint means: ['+4.19', '+2.10', '+1.38', '+1.35', '+1.12']
+   drop top 0 -> mean=+0.1484  median=-0.0771  k=77
+   drop top 1 -> mean=+0.0952  median=-0.0775  k=76
+   drop top 2 -> mean=+0.0685  median=-0.0780  k=75
+   drop top 3 -> mean=+0.0507  median=-0.0782  k=74
+   drop top 5 -> mean=+0.0178  median=-0.0804  k=72
+   drop top 8 -> mean=-0.0172  median=-0.0851  k=69
+   frac of mints with positive mean: 0.286
+   bootLO(creator clusters)=0.03549010005707747 nc=77

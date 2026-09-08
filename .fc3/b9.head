@@ -1,0 +1,41 @@
+gridB: tested 448 train-survivors on validate; 81 pass (v_mean>0, v_cilo>0, > matched random)
+age=30-60  pri=0    prig=any  v0=hi   dd=any   H=30  tp=None  sl=-0.25 all   | TR m=+0.1668 n= 61 k= 29 | VA m=+0.2363 med=-0.0170 lo=+0.0537 n= 63 k= 40 res=0.92 | ctrl=-0.0120
+age=30-60  pri=0    prig=0    v0=hi   dd=any   H=30  tp=None  sl=-0.25 all   | TR m=+0.1668 n= 61 k= 29 | VA m=+0.2363 med=-0.0170 lo=+0.0537 n= 63 k= 40 res=0.92 | ctrl=-0.0120
+age=6-10   pri=any  prig=0    v0=hi   dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.1828 n= 55 k= 43 | VA m=+0.1506 med=-0.2585 lo=+0.0537 n= 87 k= 58 res=0.99 | ctrl=-0.0137
+age=any    pri=any  prig=0    v0=hi   dd=any   H=120 tp=1.0   sl=-0.25 first | TR m=+0.1876 n= 53 k= 53 | VA m=+0.1672 med=-0.2585 lo=+0.0536 n= 66 k= 66 res=0.98 | ctrl=+0.1672
+age=10-20  pri=any  prig=any  v0=any  dd=any   H=15  tp=None  sl=-0.25 all   | TR m=+0.1750 n=295 k=121 | VA m=+0.2291 med=-0.2585 lo=+0.0535 n=304 k=151 res=0.97 | ctrl=-0.0381
+age=30-60  pri=0    prig=any  v0=hi   dd=any   H=30  tp=1.0   sl=-0.25 all   | TR m=+0.1104 n= 67 k= 29 | VA m=+0.1150 med=-0.0170 lo=+0.0485 n= 71 k= 40 res=0.93 | ctrl=-0.0104
+age=30-60  pri=0    prig=0    v0=hi   dd=any   H=30  tp=1.0   sl=-0.25 all   | TR m=+0.1104 n= 67 k= 29 | VA m=+0.1150 med=-0.0170 lo=+0.0485 n= 71 k= 40 res=0.93 | ctrl=-0.0104
+age=3-6    pri=any  prig=any  v0=hi   dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.1586 n= 64 k= 44 | VA m=+0.1351 med=-0.2585 lo=+0.0411 n=104 k= 70 res=0.97 | ctrl=-0.0312
+age=1-3    pri=any  prig=0    v0=hi   dd=any   H=60  tp=0.15  sl=-0.25 all   | TR m=+0.0567 n= 51 k= 37 | VA m=+0.0687 med=+0.1369 lo=+0.0362 n= 68 k= 53 res=1.00 | ctrl=-0.0249
+age=1-3    pri=any  prig=0    v0=hi   dd=any   H=120 tp=0.15  sl=-0.25 all   | TR m=+0.0567 n= 51 k= 37 | VA m=+0.0688 med=+0.1369 lo=+0.0362 n= 68 k= 53 res=1.00 | ctrl=-0.0338
+age=1-3    pri=any  prig=0    v0=hi   dd=any   H=240 tp=0.15  sl=-0.25 all   | TR m=+0.0567 n= 51 k= 37 | VA m=+0.0687 med=+0.1369 lo=+0.0362 n= 68 k= 53 res=1.00 | ctrl=-0.0375
+age=10-20  pri=0    prig=any  v0=hi   dd=any   H=120 tp=1.0   sl=-0.25 all   | TR m=+0.1584 n= 55 k= 31 | VA m=+0.1502 med=-0.2585 lo=+0.0354 n= 84 k= 48 res=0.94 | ctrl=-0.0233
+age=10-20  pri=0    prig=0    v0=hi   dd=any   H=120 tp=1.0   sl=-0.25 all   | TR m=+0.1584 n= 55 k= 31 | VA m=+0.1502 med=-0.2585 lo=+0.0354 n= 84 k= 48 res=0.94 | ctrl=-0.0233
+age=1-3    pri=any  prig=0    v0=hi   dd=any   H=30  tp=0.15  sl=-0.25 all   | TR m=+0.0542 n= 51 k= 37 | VA m=+0.0668 med=+0.1369 lo=+0.0346 n= 68 k= 53 res=1.00 | ctrl=-0.0267
+age=10-20  pri=0    prig=any  v0=any  dd=any   H=120 tp=1.0   sl=-0.25 all   | TR m=+0.1056 n=146 k= 59 | VA m=+0.1203 med=-0.2585 lo=+0.0336 n=137 k= 68 res=0.94 | ctrl=-0.0404
+age=10-20  pri=0    prig=0    v0=any  dd=any   H=120 tp=1.0   sl=-0.25 all   | TR m=+0.1056 n=146 k= 59 | VA m=+0.1203 med=-0.2585 lo=+0.0336 n=137 k= 68 res=0.94 | ctrl=-0.0404
+age=10-20  pri=0    prig=any  v0=any  dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.1253 n=147 k= 59 | VA m=+0.1105 med=-0.2585 lo=+0.0329 n=138 k= 68 res=0.95 | ctrl=-0.0363
+age=10-20  pri=0    prig=0    v0=any  dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.1253 n=147 k= 59 | VA m=+0.1105 med=-0.2585 lo=+0.0329 n=138 k= 68 res=0.95 | ctrl=-0.0363
+age=3-6    pri=any  prig=0    v0=hi   dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.1589 n= 58 k= 41 | VA m=+0.1388 med=-0.2585 lo=+0.0325 n= 80 k= 56 res=1.00 | ctrl=-0.0153
+age=1-3    pri=any  prig=0    v0=hi   dd=any   H=15  tp=0.15  sl=-0.25 all   | TR m=+0.0513 n= 51 k= 37 | VA m=+0.0637 med=+0.1369 lo=+0.0324 n= 68 k= 53 res=1.00 | ctrl=-0.0234
+age=6-10   pri=any  prig=0    v0=hi   dd=any   H=60  tp=1.0   sl=-0.25 first | TR m=+0.1944 n= 43 k= 43 | VA m=+0.1369 med=-0.2459 lo=+0.0320 n= 58 k= 58 res=1.00 | ctrl=+0.0380
+age=20-30  pri=0    prig=any  v0=hi   dd=any   H=30  tp=1.0   sl=-0.25 all   | TR m=+0.1088 n= 40 k= 29 | VA m=+0.0961 med=-0.0081 lo=+0.0309 n= 57 k= 40 res=0.98 | ctrl=+0.0083
+age=20-30  pri=0    prig=0    v0=hi   dd=any   H=30  tp=1.0   sl=-0.25 all   | TR m=+0.1088 n= 40 k= 29 | VA m=+0.0961 med=-0.0081 lo=+0.0309 n= 57 k= 40 res=0.98 | ctrl=+0.0083
+age=6-10   pri=any  prig=any  v0=hi   dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.1765 n= 66 k= 48 | VA m=+0.1089 med=-0.2585 lo=+0.0234 n=123 k= 72 res=0.99 | ctrl=-0.0379
+age=10-20  pri=0    prig=any  v0=hi   dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.1873 n= 56 k= 31 | VA m=+0.1260 med=-0.2585 lo=+0.0230 n= 85 k= 48 res=0.95 | ctrl=-0.0142
+age=10-20  pri=0    prig=0    v0=hi   dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.1873 n= 56 k= 31 | VA m=+0.1260 med=-0.2585 lo=+0.0230 n= 85 k= 48 res=0.95 | ctrl=-0.0142
+age=any    pri=any  prig=any  v0=hi   dd=.9-1  H=120 tp=0.15  sl=-0.25 first | TR m=+0.0404 n= 41 k= 41 | VA m=+0.0548 med=+0.1369 lo=+0.0224 n= 64 k= 64 res=0.97 | ctrl=+0.0468
+age=any    pri=any  prig=any  v0=hi   dd=.9-1  H=240 tp=0.15  sl=-0.25 first | TR m=+0.0404 n= 41 k= 41 | VA m=+0.0548 med=+0.1369 lo=+0.0223 n= 64 k= 64 res=0.97 | ctrl=+0.0460
+age=any    pri=any  prig=any  v0=hi   dd=.9-1  H=60  tp=0.15  sl=-0.25 first | TR m=+0.0404 n= 41 k= 41 | VA m=+0.0548 med=+0.1369 lo=+0.0223 n= 64 k= 64 res=0.97 | ctrl=+0.0482
+age=any    pri=any  prig=any  v0=hi   dd=any   H=120 tp=1.0   sl=-0.25 first | TR m=+0.1534 n= 59 k= 59 | VA m=+0.1188 med=-0.2585 lo=+0.0215 n= 81 k= 81 res=0.99 | ctrl=+0.1188
+age=10-20  pri=any  prig=0    v0=hi   dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.1111 n=104 k= 44 | VA m=+0.1147 med=-0.2585 lo=+0.0215 n=127 k= 57 res=0.96 | ctrl=-0.0080
+age=1-3    pri=any  prig=0    v0=hi   dd=any   H=60  tp=1.0   sl=-0.25 all   | TR m=+0.2492 n= 44 k= 37 | VA m=+0.1326 med=-0.2585 lo=+0.0207 n= 62 k= 53 res=1.00 | ctrl=-0.0199
+age=6-10   pri=any  prig=0    v0=hi   dd=any   H=120 tp=1.0   sl=-0.25 first | TR m=+0.1366 n= 43 k= 43 | VA m=+0.1331 med=-0.2585 lo=+0.0207 n= 58 k= 58 res=0.98 | ctrl=+0.0213
+age=6-10   pri=0    prig=any  v0=hi   dd=any   H=15  tp=0.15  sl=-0.25 all   | TR m=+0.0538 n= 52 k= 31 | VA m=+0.0486 med=+0.1256 lo=+0.0198 n= 75 k= 49 res=1.00 | ctrl=-0.0177
+age=6-10   pri=0    prig=0    v0=hi   dd=any   H=15  tp=0.15  sl=-0.25 all   | TR m=+0.0538 n= 52 k= 31 | VA m=+0.0486 med=+0.1256 lo=+0.0198 n= 75 k= 49 res=1.00 | ctrl=-0.0177
+age=20-30  pri=0    prig=any  v0=hi   dd=any   H=60  tp=0.4   sl=-0.25 all   | TR m=+0.0958 n= 43 k= 29 | VA m=+0.0887 med=-0.0096 lo=+0.0191 n= 58 k= 40 res=0.98 | ctrl=+0.0074
+age=20-30  pri=0    prig=0    v0=hi   dd=any   H=60  tp=0.4   sl=-0.25 all   | TR m=+0.0958 n= 43 k= 29 | VA m=+0.0887 med=-0.0096 lo=+0.0191 n= 58 k= 40 res=0.98 | ctrl=+0.0074
+age=6-10   pri=any  prig=any  v0=hi   dd=any   H=120 tp=1.0   sl=-0.25 all   | TR m=+0.1226 n= 66 k= 48 | VA m=+0.1056 med=-0.2585 lo=+0.0183 n=123 k= 72 res=0.98 | ctrl=-0.0554
+age=20-30  pri=0    prig=any  v0=hi   dd=any   H=30  tp=0.4   sl=-0.25 all   | TR m=+0.1088 n= 43 k= 29 | VA m=+0.0775 med=-0.0065 lo=+0.0181 n= 60 k= 40 res=0.98 | ctrl=+0.0127
+age=20-30  pri=0    prig=0    v0=hi   dd=any   H=30  tp=0.4   sl=-0.25 all   | TR m=+0.1088 n= 43 k= 29 | VA m=+0.0775 med=-0.0065 lo=+0.0181 n= 60 k= 40 res=0.98 | ctrl=+0.0127rc=0

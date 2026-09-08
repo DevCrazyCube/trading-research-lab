@@ -1,0 +1,27 @@
+top 15 per-mint means:
+  933.064 GaFQuLuVt3y818JcotLy3nxEVebGfMcAdMXmCaXupump ntr=10 nd=1 maxret=10385.72 minret=-0.95 nbars=62
+  10.807 H7T46YSSWLxkgGF3EwzKYB7pMUUfko8t4z3U9frzpump ntr=2 nd=1 maxret=34.12 minret=-1.00 nbars=24
+  2.572 FxfSbGfC83vmfEGAhB1bVDLhVDsVMC8dpspb5bZ7pump ntr=5 nd=1 maxret=17.71 minret=-0.93 nbars=17
+  1.614 AAiCr9pDUNYmD6rqfHfZE5gYE6M2nTaFiYCmiZb5pump ntr=15 nd=1 maxret=27.54 minret=-0.65 nbars=37
+  0.674 6TGBTExB4EaeRQWttStrswFfXFwXX7nJX9LxkTwpump ntr=2 nd=1 maxret=2.40 minret=-0.03 nbars=32
+  0.666 3jRu3raCzB9ujKyRt1cbkgZgcbgyYcMC4ALrW9zLpump ntr=32 nd=1 maxret=10.56 minret=-0.96 nbars=189
+  0.579 EDMyAVsR98N1ZTVAXAu3Gy4UTfugnixsdePpRmQgpump ntr=11 nd=1 maxret=9.13 minret=-0.84 nbars=32
+  0.441 A1KeY89ZeCCDzYvfjtjtFag1Hen6d32432Duxz9Xpump ntr=9 nd=1 maxret=5.20 minret=-0.73 nbars=68
+  0.380 Fg9P4xK8pbYaumHhz7QEt2Uma3kNr4PSpEQtUVCgpump ntr=67 nd=1 maxret=23.61 minret=-0.96 nbars=1000
+  0.375 BHuccRJsW78qN9azAS6AAVyGg5bdxvJ7kNDCfgK4pump ntr=12 nd=1 maxret=7.60 minret=-0.89 nbars=46
+  0.286 6ixaEct565dgKCaaQxrQKKhedUp9zWWXG9adkdVDpump ntr=4 nd=1 maxret=1.95 minret=-0.13 nbars=75
+  0.144 5NgkZ4YCcYasc5bMbsdfgjYwoDuLNSjxEjaAJY2bpump ntr=12 nd=1 maxret=5.74 minret=-0.82 nbars=62
+  0.118 37BQqh2pvVxXkHdzk7RW49J8dWx78JuZDJJgKtvspump ntr=88 nd=1 maxret=10.59 minret=-0.44 nbars=779
+  0.096 FTsYkiPz5k4shFrecNZjAWBBnKzQLeKsQHSCL76Xpump ntr=15 nd=1 maxret=1.78 minret=-0.99 nbars=121
+  0.077 7dYzXzHr5XTBg172M3WKvj827xAWVrk4jYQWEa8Mpump ntr=10 nd=1 maxret=3.13 minret=-0.96 nbars=80
+bottom 5:
+  -0.641 CXGKTrEW4TBqjDqYho1h1VANZyKZb8GsdvkNDZqnpump
+  -0.650 6sjFBLF2QkLZpMmXim7nqUcYoyfqoJbCyuiPAtKaPump
+  -0.650 9ecXsd2PPYWQb5G5Z5WfoKDzFNb1d1pn6PiZuXotPump
+  -0.650 TsEKz33ik7hoEUVby2CJAHRnzkLDLZ6xsQrMeXCpump
+  -0.721 2SWXwRz2d6xQQ2UEYJyYLGNtbGLHo19vd4TDYQ3bpump
+quantiles: [-0.4855, -0.4131, -0.3479, -0.3119, -0.3, -0.2803, -0.2483, -0.2167, -0.188, -0.1667, -0.1197, -0.0835, -0.0701, -0.055, -0.0381, -0.0252, -0.01, 0.0091, 0.0461]
+mint GaFQuLuVt3y818JcotLy3nxEVebGfMcAdMXmCaXupump first 5 bars [[1785210480, 9.424313648911512e-09, 2.479895410492515e-08, 2.243461695456621e-09, 2.243461695456621e-09, 20.63065125518097], [1785210540, 2.243461695456621e-09, 2.6877360117564985e-09, 2.243461695456621e-09, 2.6877360117564985e-09, 0.054216917758546625], [1785210780, 2.6877360117564985e-09, 2.6877360117564985e-09, 1.1254259256576876e-09, 1.1254259256576876e-09, 0.9670884817862111], [1785210840, 1.1254259256576876e-09, 1.1254259256576876e-09, 7.296251983623816e-10, 7.296251983623816e-10, 0.3581997725306652], [1785211020, 7.296251983623816e-10, 7.296251983623816e-10, 6.509486010779384e-10, 6.509486010779384e-10, 0.423664990422051]]
+trade-level gross: n=6373 mean=1.6131 median=-0.0097 p99=1.062 max=10385.7 min=-1.000
+count gross>5: 13  >20: 4 >100: 1
+huge trades: [10385.718874485154]

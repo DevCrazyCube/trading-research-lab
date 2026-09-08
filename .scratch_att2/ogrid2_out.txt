@@ -1,0 +1,20 @@
+h12 mints loaded 382 bars 46136
+mints with metadata 382
+features+triggers built  t=46s
+n conditions 52
+signals precomputed t=47s
+signal counts: {'all': 45754, 'r5<=-50': 1791, 'r5<=-30': 2885, 'r5>=+50': 957, 'r5>=+100': 439, 'r15<=-60': 1936}
+=== FULL PASS: train(h=1) / validate(h=2) / random-entry control ===
+random-entry control built t=55s
+RANDOM-BAR 5m hold flat: train mean=-13.65% med=-11.07% k=175 n=5430 res=95.7% | val mean=3.96% med=-11.01% k=207 n=7033 res=96.2%
+RANDOM-BAR 15m hold flat: train mean=-18.51% med=-18.40% k=175 n=3066 res=88.0% | val mean=540.40% med=-16.83% k=207 n=3819 res=89.0%
+RANDOM-BAR 60m hold flat: train mean=-24.84% med=-28.90% k=175 n=1759 res=62.8% | val mean=252.07% med=-27.38% k=207 n=2311 res=57.2%
+RANDOM-BAR 15m tp10 flat (truncation control): val mean=-13.57% med=-13.04%
+RANDOM-BAR 15m tp25 flat (truncation control): val mean=-14.33% med=-14.06%
+combos: 17472
+gate1 train mean>0 & k>=8            : 1171
+gate2 + validate mean>0 & k>=8       : 353
+gate3 + beats random control BOTH    : 286
+gate4 + validate bootstrap lo>0      : 0
+--- survivors (0) ---
+done t=127s

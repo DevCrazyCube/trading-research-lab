@@ -1,0 +1,22 @@
+174:            L=pe*1.25; hit,f=firsthit(PHf>=L[:,None])
+                px=np.where(hit,PC[np.arange(len(be)),f],endclose)
+                px=np.where(np.isnan(px),endclose,px)
+                off=np.where(hit,(f+1)*r,endoff)
+            exits_data.append((px,off))
+
+        # entry price for P1 (average in over entry + first path bucket close)
+        p1entry=np.where(np.isnan(PC[:,0]),pe,PC[:,0])
+        for ei,(px,off) in enumerate(exits_data):
+            g0=px/pe-1.0
+            g0=np.where(frozen,0.0,g0)
+            # P0
+            RET[sidx[(hi_,ei,0)],lo_i:hi_i]=g0
+            EOFF[sidx[(hi_,ei,0)],lo_i:hi_i]=off
+            # P1 average-in: half at pe, half at p1entry
+            g1=0.5*g0+0.5*(px/p1entry-1.0)
+            g1=np.where(frozen,0.0,g1)
+            RET[sidx[(hi_,ei,1)],lo_i:hi_i]=g1
+            EOFF[sidx[(hi_,ei,1)],lo_i:hi_i]=off
+            # P2 half out at +25% if touched, rest at structure exit
+            L=pe*1.25; hit,f=firsthit(PHf>=L[:,None])
+            gh=np.where(hit,0.25,g0)

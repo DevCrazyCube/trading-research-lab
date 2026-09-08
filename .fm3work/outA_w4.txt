@@ -1,0 +1,46 @@
+toll=0.0114 drop=-0.30 maxway=4
+H=15m TRAIN univ mean=-0.0719 med=-0.0214 n=1274 k=84 res=0.934
+   combos=26643  train cells mean>0 & bootlo>0: 0  (18s)
+H=30m TRAIN univ mean=-0.0829 med=-0.0270 n=721 k=84 res=0.883
+   combos=26643  train cells mean>0 & bootlo>0: 15  (25s)
+     WEB0|cmp1|age2|stale1            mean=+0.0339(lo+0.0185) med=+0.0253 ctrl=-0.0030 exc=+0.0369 n=51 k=13 res=0.98
+     TG0|WEB0|age2|stale1             mean=+0.0339(lo+0.0179) med=+0.0253 ctrl=-0.0030 exc=+0.0369 n=51 k=13 res=0.98
+     WEB0|age2|stale1                 mean=+0.0339(lo+0.0176) med=+0.0253 ctrl=-0.0030 exc=+0.0369 n=51 k=13 res=0.98
+     X0|WEB0|age2|stale1              mean=+0.0325(lo+0.0167) med=+0.0253 ctrl=-0.0008 exc=+0.0333 n=45 k=11 res=0.98
+     X0|TG0|age2|stale1               mean=+0.0295(lo+0.0165) med=+0.0252 ctrl=-0.0016 exc=+0.0311 n=56 k=14 res=0.98
+     X0|cmp1|age2|stale1              mean=+0.0295(lo+0.0161) med=+0.0252 ctrl=-0.0016 exc=+0.0311 n=56 k=14 res=0.98
+     X0|age2|stale1                   mean=+0.0295(lo+0.0158) med=+0.0252 ctrl=-0.0016 exc=+0.0311 n=56 k=14 res=0.98
+     WEB0|age2|tath0|stale1           mean=+0.0303(lo+0.0144) med=+0.0252 ctrl=-0.0029 exc=+0.0332 n=40 k=12 res=0.97
+     WEB0|age2|mar4|stale1            mean=+0.0303(lo+0.0141) med=+0.0252 ctrl=-0.0029 exc=+0.0332 n=46 k=12 res=0.98
+     X0|age2|tath0|stale1             mean=+0.0263(lo+0.0130) med=+0.0251 ctrl=-0.0014 exc=+0.0277 n=45 k=13 res=0.98
+     X0|age2|mar4|stale1              mean=+0.0251(lo+0.0125) med=+0.0251 ctrl=-0.0014 exc=+0.0265 n=50 k=13 res=0.98
+     TG0|tath3|stale1                 mean=+0.0321(lo+0.0050) med=-0.0014 ctrl=-0.0021 exc=+0.0342 n=28 k=9 res=1.00
+     WEB0|age2|mar4|stale0            mean=+0.0192(lo+0.0039) med=+0.0155 ctrl=-0.0029 exc=+0.0221 n=48 k=12 res=0.96
+     X0|mcap2|tath0|stale1            mean=+0.1124(lo+0.0011) med=-0.0047 ctrl=-0.0014 exc=+0.1137 n=43 k=9 res=0.98
+     TG0|WEB1|mar3|stale1             mean=+0.0106(lo+0.0008) med=-0.0023 ctrl=-0.0131 exc=+0.0238 n=46 k=14 res=0.98
+H=60m TRAIN univ mean=-0.1092 med=-0.0451 n=402 k=84 res=0.791
+   combos=26643  train cells mean>0 & bootlo>0: 16  (33s)
+     X0|TG0|age2|stale1               mean=+0.0574(lo+0.0288) med=+0.0584 ctrl=+0.0061 exc=+0.0514 n=34 k=14 res=0.94
+     X0|cmp1|age2|stale1              mean=+0.0574(lo+0.0280) med=+0.0584 ctrl=+0.0061 exc=+0.0514 n=34 k=14 res=0.94
+     X0|age2|stale1                   mean=+0.0574(lo+0.0277) med=+0.0584 ctrl=+0.0061 exc=+0.0514 n=34 k=14 res=0.94
+     X0|WEB0|age2|stale1              mean=+0.0600(lo+0.0226) med=+0.0607 ctrl=+0.0078 exc=+0.0523 n=27 k=11 res=0.93
+     X0|age2|tath0|stale1             mean=+0.0541(lo+0.0213) med=+0.0592 ctrl=+0.0067 exc=+0.0475 n=29 k=13 res=0.93
+     X0|age2|mar4|stale1              mean=+0.0531(lo+0.0192) med=+0.0562 ctrl=+0.0067 exc=+0.0464 n=31 k=13 res=0.94
+     X0|WEB0|age2|stale0              mean=+0.0507(lo+0.0128) med=+0.0568 ctrl=+0.0204 exc=+0.0303 n=28 k=12 res=0.93
+     X0|WEB0|cmp1|age2                mean=+0.0515(lo+0.0101) med=+0.0575 ctrl=+0.0204 exc=+0.0311 n=29 k=12 res=0.93
+     X0|TG0|WEB0|age2                 mean=+0.0515(lo+0.0099) med=+0.0575 ctrl=+0.0204 exc=+0.0311 n=29 k=12 res=0.93
+     X0|WEB0|age2                     mean=+0.0515(lo+0.0086) med=+0.0575 ctrl=+0.0204 exc=+0.0311 n=29 k=12 res=0.93
+     TG0|WEB1|mar3|stale1             mean=+0.0342(lo+0.0077) med=+0.0023 ctrl=-0.0185 exc=+0.0527 n=34 k=14 res=0.97
+     WEB1|mar3|stale1                 mean=+0.0296(lo+0.0065) med=+0.0023 ctrl=-0.0206 exc=+0.0502 n=40 k=16 res=0.97
+     WEB1|cmp1|mar3|stale1            mean=+0.0276(lo+0.0029) med=+0.0016 ctrl=-0.0259 exc=+0.0535 n=35 k=15 res=1.00
+     TG0|mar3|tath2|stale1            mean=+0.0364(lo+0.0018) med=-0.0001 ctrl=-0.0203 exc=+0.0567 n=31 k=16 res=1.00
+     X1|cmp1|mar3|stale1              mean=+0.0234(lo+0.0005) med=+0.0020 ctrl=-0.0305 exc=+0.0539 n=28 k=12 res=1.00
+TOTAL COMBOS SWEPT (panelA): 79929
+
+=== VALIDATE h==2 ===
+H=15m VALID univ mean=-0.0943 med=-0.0285 n=1020 k=92 | testing 0
+H=30m VALID univ mean=-0.0955 med=-0.0400 n=605 k=92 | testing 15
+H=60m VALID univ mean=-0.1238 med=-0.0852 n=351 k=92 | testing 16
+  SURVIVOR X1|cmp1|mar3|stale1            tr_mean=+0.0234 | VAL mean=+0.1071(lo+0.0149) med=-0.0004 ctrl=+0.0441 exc=+0.0630 n=21 k=9 res=1.00
+  SURVIVOR X1|mar3|stale1                 tr_mean=+0.0234 | VAL mean=+0.1071(lo+0.0149) med=-0.0004 ctrl=+0.0441 exc=+0.0630 n=21 k=9 res=1.00
+TOTAL VALIDATE SURVIVORS: 2

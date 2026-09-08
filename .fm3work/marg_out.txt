@@ -1,0 +1,103 @@
+PANEL A (fresh_snapshots metadata, 186 non-holdout mints, 178 x 3-min cycles, 8.85h window)
+15m hold, enter at NEXT snapshot, non-overlap, mint-equal, toll 1.14%%, dropouts charged -30%%
+
+================ HORIZON 15m ================
+UNIVERSE   train mean=-0.0719 med=-0.0214 n=1274 k=84 res=0.934 | valid mean=-0.0943 med=-0.0285 n=1020 k=92 res=0.911
+  -- X
+     no_twitter         TR mean=-0.0539 med=-0.0197 d=+0.0179 n= 765 k= 46 | VA mean=-0.0771 med=-0.0260 d=+0.0171 n= 633 k= 51
+     has_twitter        TR mean=-0.0935 med=-0.0394 d=-0.0217 n= 509 k= 38 | VA mean=-0.1156 med=-0.0347 d=-0.0213 n= 387 k= 41
+  -- TG
+     no_tg              TR mean=-0.0703 med=-0.0214 d=+0.0015 n=1210 k= 80 | VA mean=-0.0858 med=-0.0260 d=+0.0084 n= 983 k= 87
+     has_tg             TR mean=-0.1024 med=-0.0400 d=-0.0305 n=  64 k=  4 | VA mean=-0.2410 med=-0.3114 d=-0.1467 n=  37 k=  5
+  -- WEB
+     no_web             TR mean=-0.0735 med=-0.0214 d=-0.0016 n= 607 k= 43 | VA mean=-0.0665 med=-0.0213 d=+0.0278 n= 762 k= 54
+     has_web            TR mean=-0.0702 med=-0.0211 d=+0.0017 n= 667 k= 41 | VA mean=-0.1337 med=-0.0555 d=-0.0395 n= 258 k= 38
+  -- nsoc
+     0 socials          TR mean=-0.0614 med=-0.0208 d=+0.0104 n= 496 k= 32 | VA mean=-0.0688 med=-0.0216 d=+0.0255 n= 532 k= 41
+     1 social           TR mean=-0.0583 med=-0.0205 d=+0.0136 n= 379 k= 24 | VA mean=-0.0737 med=-0.0291 d=+0.0205 n= 300 k= 21
+     2 socials          TR mean=-0.1030 med=-0.0386 d=-0.0311 n= 336 k= 25 | VA mean=-0.1270 med=-0.0409 d=-0.0328 n= 182 k= 27
+     3 socials          TR mean=-0.0327 med=-0.0194 d=+0.0391 n=  63 k=  3 | VA      thin      
+  -- cmp
+     on_curve           TR mean=-0.0548 med=-0.0228 d=+0.0171 n= 114 k=  6 | VA mean=-0.1009 med=-0.0314 d=-0.0066 n=  91 k=  7
+     graduated          TR mean=-0.0732 med=-0.0208 d=-0.0013 n=1160 k= 78 | VA mean=-0.0937 med=-0.0279 d=+0.0005 n= 929 k= 85
+  -- age
+     <1h                TR mean=-0.0786 med=-0.0110 d=-0.0068 n= 115 k= 43 | VA mean=-0.1040 med=-0.0294 d=-0.0097 n= 143 k= 50
+     1-3h               TR mean=-0.0385 med=-0.0083 d=+0.0333 n= 147 k= 30 | VA mean=-0.0392 med=-0.0121 d=+0.0551 n= 145 k= 31
+     3-6h               TR mean=-0.0853 med=-0.0103 d=-0.0134 n= 165 k= 27 | VA mean=-0.0637 med=-0.0364 d=+0.0305 n= 114 k= 24
+     6-12h              TR mean=-0.0273 med=-0.0120 d=+0.0446 n= 323 k= 27 | VA mean=-0.0451 med=-0.0116 d=+0.0492 n= 191 k= 16
+     12-24h             TR mean=-0.0378 med=-0.0229 d=+0.0341 n= 302 k= 18 | VA mean=-0.0575 med=-0.0205 d=+0.0368 n= 229 k= 16
+     >24h               TR mean=-0.0328 med=-0.0204 d=+0.0390 n= 249 k= 12 | VA mean=-0.0713 med=-0.0347 d=+0.0230 n= 263 k= 19
+  -- mcap
+     <300k              TR mean=-0.1671 med=-0.1965 d=-0.0952 n= 132 k= 23 | VA mean=-0.1484 med=-0.1760 d=-0.0542 n= 110 k= 33
+     300k-1M            TR mean=-0.1165 med=-0.0738 d=-0.0446 n= 144 k= 18 | VA mean=-0.1486 med=-0.0828 d=-0.0543 n= 131 k= 21
+     1-3M               TR mean=-0.0509 med=-0.0199 d=+0.0210 n= 335 k= 21 | VA mean=-0.0318 med=-0.0197 d=+0.0625 n= 337 k= 18
+     3-10M              TR mean=-0.0279 med=-0.0196 d=+0.0439 n= 360 k= 24 | VA mean=-0.0845 med=-0.0191 d=+0.0097 n= 183 k= 20
+     10-30M             TR mean=-0.0483 med=-0.0208 d=+0.0235 n= 157 k= 12 | VA mean=-0.0556 med=-0.0237 d=+0.0387 n= 187 k= 19
+     >30M               TR mean=-0.0317 med=-0.0120 d=+0.0401 n= 173 k= 12 | VA mean=-0.1372 med=-0.0462 d=-0.0430 n= 112 k= 16
+  -- mar
+     mcap/ath<0.5       TR mean=-0.2007 med=-0.3114 d=-0.1289 n= 162 k= 17 | VA mean=-0.1341 med=-0.2692 d=-0.0399 n= 116 k= 28
+     0.5-0.8            TR mean=-0.0679 med=-0.1681 d=+0.0039 n=  45 k= 15 | VA mean=-0.0215 med=-0.0550 d=+0.0727 n=  60 k= 21
+     0.8-0.95           TR mean=-0.1204 med=-0.0723 d=-0.0486 n=  55 k= 12 | VA mean=-0.1255 med=-0.0487 d=-0.0312 n=  96 k= 20
+     0.95-0.995         TR mean=-0.0388 med=-0.0061 d=+0.0331 n= 261 k= 48 | VA mean=-0.0434 med=-0.0089 d=+0.0509 n= 258 k= 52
+     >=0.995 (at ATH)   TR mean=-0.0438 med=-0.0197 d=+0.0281 n= 964 k= 67 | VA mean=-0.0666 med=-0.0210 d=+0.0277 n= 758 k= 68
+  -- tath
+     ath<2m ago         TR mean=-0.0605 med=-0.0178 d=+0.0114 n= 793 k= 76 | VA mean=-0.0909 med=-0.0249 d=+0.0033 n= 627 k= 75
+     2-10m              TR mean=-0.0602 med=-0.0102 d=+0.0117 n= 431 k= 56 | VA mean=-0.0474 med=-0.0100 d=+0.0468 n= 348 k= 59
+     10-60m             TR mean=-0.0636 med=-0.0105 d=+0.0083 n= 287 k= 41 | VA mean=-0.0442 med=-0.0098 d=+0.0501 n= 284 k= 49
+     1-5h               TR mean=-0.0356 med=-0.0090 d=+0.0363 n= 106 k= 17 | VA mean=-0.0955 med=-0.0341 d=-0.0012 n=  90 k= 21
+     >5h                TR mean=-0.0748 med=-0.0422 d=-0.0029 n= 173 k= 10 | VA mean=-0.0868 med=-0.0347 d=+0.0075 n= 118 k= 13
+  -- stale
+     trade<0s(skew)     TR mean=-0.0732 med=-0.0208 d=-0.0014 n=1060 k= 83 | VA mean=-0.0958 med=-0.0262 d=-0.0016 n= 886 k= 90
+     0-30s              TR mean=-0.0487 med=-0.0164 d=+0.0231 n= 737 k= 65 | VA mean=-0.0344 med=-0.0095 d=+0.0598 n= 614 k= 64
+     30-120s            TR mean=-0.0258 med=-0.0110 d=+0.0461 n=  88 k= 14 | VA mean=-0.0066 med=-0.0088 d=+0.0877 n=  77 k= 12
+     >120s              TR mean=-0.0430 med=-0.0232 d=+0.0289 n=  97 k=  6 | VA mean=-0.0148 med=-0.0173 d=+0.0795 n=  56 k=  8
+================ HORIZON 60m ================
+UNIVERSE   train mean=-0.1092 med=-0.0451 n=402 k=84 res=0.791 | valid mean=-0.1238 med=-0.0852 n=351 k=92 res=0.741
+  -- X
+     no_twitter         TR mean=-0.0745 med=-0.0398 d=+0.0347 n= 241 k= 46 | VA mean=-0.1116 med=-0.0464 d=+0.0123 n= 204 k= 51
+     has_twitter        TR mean=-0.1512 med=-0.0945 d=-0.0420 n= 161 k= 38 | VA mean=-0.1391 med=-0.1373 d=-0.0153 n= 147 k= 41
+  -- TG
+     no_tg              TR mean=-0.1060 med=-0.0451 d=+0.0032 n= 382 k= 80 | VA mean=-0.1162 med=-0.0707 d=+0.0076 n= 338 k= 87
+     has_tg             TR mean=-0.1736 med=-0.1753 d=-0.0644 n=  20 k=  4 | VA mean=-0.2568 med=-0.3114 d=-0.1330 n=  13 k=  5
+  -- WEB
+     no_web             TR mean=-0.1031 med=-0.0439 d=+0.0061 n= 191 k= 43 | VA mean=-0.0910 med=-0.0418 d=+0.0328 n= 239 k= 54
+     has_web            TR mean=-0.1156 med=-0.0463 d=-0.0064 n= 211 k= 41 | VA mean=-0.1705 med=-0.3000 d=-0.0466 n= 112 k= 38
+  -- nsoc
+     0 socials          TR mean=-0.0712 med=-0.0398 d=+0.0380 n= 155 k= 32 | VA mean=-0.1044 med=-0.0424 d=+0.0194 n= 168 k= 41
+     1 social           TR mean=-0.1247 med=-0.0907 d=-0.0155 n= 121 k= 24 | VA mean=-0.0805 med=-0.0628 d=+0.0433 n=  97 k= 21
+     2 socials          TR mean=-0.1407 med=-0.0788 d=-0.0315 n= 107 k= 25 | VA mean=-0.1662 med=-0.3114 d=-0.0423 n=  83 k= 27
+     3 socials          TR mean=-0.1276 med=-0.0391 d=-0.0184 n=  19 k=  3 | VA      thin      
+  -- cmp
+     on_curve           TR mean=-0.1180 med=-0.0497 d=-0.0088 n=  34 k=  6 | VA mean=-0.1184 med=-0.0707 d=+0.0055 n=  29 k=  7
+     graduated          TR mean=-0.1085 med=-0.0426 d=+0.0007 n= 368 k= 78 | VA mean=-0.1243 med=-0.0920 d=-0.0005 n= 322 k= 85
+  -- age
+     <1h                TR mean=-0.0888 med=-0.0113 d=+0.0204 n=  43 k= 43 | VA mean=-0.0676 med=-0.3114 d=+0.0563 n=  50 k= 50
+     1-3h               TR mean=-0.0448 med=+0.0006 d=+0.0644 n=  48 k= 30 | VA mean=-0.0120 med=-0.0753 d=+0.1118 n=  53 k= 31
+     3-6h               TR mean=-0.0536 med=-0.0046 d=+0.0557 n=  57 k= 27 | VA mean=-0.1259 med=-0.0990 d=-0.0020 n=  42 k= 24
+     6-12h              TR mean=-0.0342 med=-0.0072 d=+0.0750 n= 103 k= 27 | VA mean=-0.0740 med=-0.0133 d=+0.0499 n=  62 k= 16
+     12-24h             TR mean=-0.0854 med=-0.0544 d=+0.0239 n=  94 k= 18 | VA mean=-0.0644 med=-0.0404 d=+0.0595 n=  74 k= 16
+     >24h               TR mean=-0.0617 med=-0.0451 d=+0.0475 n=  79 k= 12 | VA mean=-0.1122 med=-0.0855 d=+0.0117 n=  97 k= 19
+  -- mcap
+     <300k              TR mean=-0.2256 med=-0.3114 d=-0.1164 n=  52 k= 23 | VA mean=-0.1601 med=-0.3114 d=-0.0363 n=  67 k= 33
+     300k-1M            TR mean=-0.1291 med=-0.3114 d=-0.0199 n=  52 k= 18 | VA mean=-0.1267 med=-0.2189 d=-0.0029 n=  50 k= 21
+     1-3M               TR mean=-0.1035 med=-0.0414 d=+0.0057 n= 104 k= 21 | VA mean=-0.0908 med=-0.0425 d=+0.0331 n= 105 k= 18
+     3-10M              TR mean=-0.0915 med=-0.0403 d=+0.0177 n= 112 k= 24 | VA mean=-0.0823 med=-0.0395 d=+0.0415 n=  61 k= 20
+     10-30M             TR mean=-0.1024 med=-0.0385 d=+0.0069 n=  50 k= 12 | VA mean=-0.1021 med=-0.0920 d=+0.0217 n=  61 k= 19
+     >30M               TR mean=-0.0108 med=-0.0080 d=+0.0984 n=  55 k= 12 | VA mean=-0.1821 med=-0.1086 d=-0.0583 n=  38 k= 16
+  -- mar
+     mcap/ath<0.5       TR mean=-0.2177 med=-0.3114 d=-0.1085 n=  55 k= 17 | VA mean=-0.1521 med=-0.3114 d=-0.0283 n=  64 k= 28
+     0.5-0.8            TR mean=-0.2780 med=-0.3114 d=-0.1688 n=  22 k= 15 | VA mean=-0.1101 med=-0.3114 d=+0.0137 n=  29 k= 21
+     0.8-0.95           TR mean=-0.2240 med=-0.3114 d=-0.1148 n=  23 k= 12 | VA mean=-0.1563 med=-0.3114 d=-0.0324 n=  42 k= 20
+     0.95-0.995         TR mean=-0.0778 med=-0.0059 d=+0.0314 n= 129 k= 48 | VA mean=-0.0498 med=-0.0061 d=+0.0740 n= 133 k= 52
+     >=0.995 (at ATH)   TR mean=-0.0880 med=-0.0418 d=+0.0213 n= 312 k= 67 | VA mean=-0.1059 med=-0.0423 d=+0.0180 n= 255 k= 68
+  -- tath
+     ath<2m ago         TR mean=-0.1061 med=-0.0447 d=+0.0031 n= 288 k= 76 | VA mean=-0.1219 med=-0.0852 d=+0.0019 n= 241 k= 75
+     2-10m              TR mean=-0.1077 med=-0.0434 d=+0.0016 n= 191 k= 56 | VA mean=-0.1040 med=-0.0478 d=+0.0198 n= 169 k= 59
+     10-60m             TR mean=-0.0588 med=-0.0370 d=+0.0504 n= 141 k= 41 | VA mean=-0.0701 med=-0.0411 d=+0.0537 n= 144 k= 49
+     1-5h               TR mean=-0.0867 med=-0.1057 d=+0.0226 n=  41 k= 17 | VA mean=-0.1084 med=-0.0625 d=+0.0155 n=  42 k= 21
+     >5h                TR mean=-0.0760 med=-0.0733 d=+0.0332 n=  55 k= 10 | VA mean=-0.0012 med=-0.0628 d=+0.1227 n=  52 k= 13
+  -- stale
+     trade<0s(skew)     TR mean=-0.1070 med=-0.0398 d=+0.0022 n= 369 k= 83 | VA mean=-0.1274 med=-0.1038 d=-0.0035 n= 329 k= 90
+     0-30s              TR mean=-0.0578 med=-0.0465 d=+0.0514 n= 290 k= 65 | VA mean=-0.0724 med=-0.0499 d=+0.0514 n= 251 k= 64
+     30-120s            TR mean=-0.0477 med=-0.0106 d=+0.0616 n=  43 k= 14 | VA mean=-0.1281 med=-0.0390 d=-0.0043 n=  34 k= 12
+     >120s              TR mean=-0.0811 med=-0.0451 d=+0.0281 n=  32 k=  6 | VA mean=-0.0065 med=-0.0691 d=+0.1174 n=  24 k=  8

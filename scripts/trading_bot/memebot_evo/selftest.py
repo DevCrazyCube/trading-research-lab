@@ -178,6 +178,12 @@ def _unit_checks() -> None:
         assert not evo_paper.momentum_entry_qualifies(sell_bars, eep, msp)[0], "sell-dominated must NOT qualify"
         assert not evo_paper.momentum_entry_qualifies(None, eep, msp)[0], "no tick data -> no entry"
 
+        # The ACTUAL scan admission primitive fails closed on missing/stale/future-only tick data.
+        assert not evo_paper.tick_entry_data_ready(None, eep)[0]
+        assert not evo_paper.tick_entry_data_ready([{"t": eep + 1}], eep)[0]
+        assert not evo_paper.tick_entry_data_ready([{"t": eep - 11}], eep)[0]
+        assert evo_paper.tick_entry_data_ready([{"t": eep - 10}], eep)[0]
+
         # PESSIMISTIC stop fill: a bar gaps THROUGH the stop and CLOSES far below it -> fill at the
         # close (the unexitable dump), NOT the intended stop. sl=150bps -> stop at 0.985; bar closes 0.90.
         e, sp = _mkentry(G._momo_tp15_sl15_60s, "MINT_GAP")
@@ -195,7 +201,7 @@ def _unit_checks() -> None:
             "a +150bps win is < the 300bps round-trip toll -> NET NEGATIVE even on a win"
     finally:
         evo_paper.BITQUERY_CANDLE_DIR = orig_dir
-    _ok("sub-minute entries resolve on real 1s tick bars; UNPRICED excluded from R; open stays open")
+    _ok("sub-minute entries require a causal <=10s tick and resolve on real 1s bars; stale/missing refuses")
     _ok("momentum-entry gate qualifies only genuine surges; stop fills pessimistically on gap-through; "
         "a sub-toll TP nets negative even on a win")
 

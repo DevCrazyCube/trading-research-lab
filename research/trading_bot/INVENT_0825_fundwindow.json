@@ -1,0 +1,98 @@
+{
+ "theme": "perp funding-settlement-window micro-dynamics (5m, Binance USD-M, 8h stamps)",
+ "date": "2026-08-25",
+ "verdict": "NOISE / honest zero -- nothing clears the pre-committed bar out of sample, and the whole family's best OOS breakeven (1.67 bp/side) is below Binance USD-M VIP0's 2.0 bp MAKER fee",
+ "n_formulas_tested": 28,
+ "design_window": [
+  "2023-01-01",
+  "2025-01-01"
+ ],
+ "holdout_window": [
+  "2025-01-01",
+  "2026-07-31"
+ ],
+ "freeze_ok": true,
+ "design_sha256": "92a8e442e8d673098dbf29cbef9b1f1516995d0a2777217698c0f78089212a19",
+ "universe_n": 50,
+ "n_events": 184377,
+ "n_stamps": 3922,
+ "cost_bp_side": 5.5,
+ "rho1_gate": {
+  "gate_threshold": -0.35,
+  "n_symbols": 48,
+  "passes": true,
+  "rho1_5m_open_ret_max": 0.023238487345124986,
+  "rho1_5m_open_ret_mean": -0.01969044312356109,
+  "rho1_5m_open_ret_median": -0.017240604789496242,
+  "rho1_5m_open_ret_min": -0.10270201724349742
+ },
+ "nulls": {
+  "analytic_sqrt2lnN": 2.5815516691227405,
+  "permutation_family_maxabs_p95": 1.9960723975572154,
+  "permutation_family_maxabs_mean": 1.5723856348290375,
+  "calendar_placebo_family_maxabs_mean": 3.2044406830618226,
+  "calendar_placebo_per_shift": [
+   3.0705030955350616,
+   3.9101537649841904,
+   2.772098584215264,
+   4.582441592178534,
+   2.2857702539093356,
+   3.1649449121405713,
+   2.6451725784698032
+  ],
+  "gross_bar": 3.2044406830618226
+ },
+ "best": {
+  "name": "E3_STAMPBAR_FADE_15",
+  "desc": "cross-sectional fade of the settlement bar's own body (close(B)/open(B)-1), entry at open of bar B+1, 15-minute hold, dollar-neutral rank book on 50 Binance USD-M perps",
+  "design_gross": 5.5388786185583,
+  "holdout_gross": 3.8448913713035493,
+  "holdout_net_5p5bp": -28.08744759930941,
+  "holdout_breakeven_bp_side": 0.6622409514577313,
+  "holdout_perm_p95": 1.4889293291443417,
+  "holdout_calendar_placebo_max": 4.280124958413774,
+  "beats_both_nulls": false,
+  "kill": "beats the permutation null OOS but NOT its own calendar placebo (OOS placebo max 4.28 > stamp 3.84) -- it is generic 5m cross-sectional reversal, not a funding effect; and net is -28.09"
+ },
+ "logged_only": {
+  "name": "C1_XS_PRE_MAG_30",
+  "desc": "cross-sectional 30-minute funding snipe: rank-weighted long the most-negative funding names from open of bar B-6 to the stamp, collecting the full 8h funding in a 30-minute hold",
+  "design_gross": 2.1004538094621803,
+  "design_gross_price_only": -0.4507224480849887,
+  "holdout_gross": 3.0363708633200805,
+  "holdout_net_5p5bp": -28.99481586473403,
+  "holdout_breakeven_bp_side": 0.5213681244483497,
+  "holdout_calendar_placebo_mean": -0.14085366758537196,
+  "status": "OBSERVATION not a finding -- design gross +2.10 was below the 3.20 bar, so it never earned the holdout; stamp-specific but sub-breakeven",
+  "mechanism": "edge is the funding payment itself, not price: design price-only SR -0.45 vs gross +2.10"
+ },
+ "economics": {
+  "mean_abs_funding_bp": 1.21,
+  "median_abs_funding_bp": 1.0,
+  "p90_abs_funding_bp": 1.97,
+  "p99_abs_funding_bp": 6.98,
+  "round_trip_cost_bp": 11.0,
+  "binance_usdm_vip0_taker_bp": 4.5,
+  "binance_usdm_vip0_maker_bp": 2.0,
+  "max_breakeven_bp_side_design": 3.48,
+  "max_breakeven_bp_side_holdout": 1.67,
+  "mean_oos_gross_bp_per_round_trip": 0.93,
+  "max_oos_gross_bp_per_round_trip": 3.35
+ },
+ "theme_rank_corr_design_vs_holdout": 0.19759168035030103,
+ "survivors": [],
+ "dead_ledger_additions": [
+  "pre-settlement positioning drift (A-family)",
+  "post-settlement funding-sign reaction (B-family)",
+  "cross-sectional funding-magnitude books around the stamp (C-family)",
+  "funding-sign-flip reactions (D-family)",
+  "settlement-bar cross-sectional reversal (E-family) -- generic 5m reversal in a calendar mask",
+  "OI unwind/build around settlement (F-family)",
+  "pre-stamp taker-flow / run-up / volume-spike fades (G-family)"
+ ],
+ "keepers": [
+  "the settlement instant is a mild cross-sectional reversal amplifier (~+1.5 SR over non-funding anchors, both windows) -- real, tiny, inside the generic 5m reversal family",
+  "full 8h funding is collectable in a 30-minute hold and the cross-sectional version is stamp-specific OOS; at 1.2 bp paid vs 11 bp cost it is an execution-timing overlay for a position you already hold, not a strategy"
+ ],
+ "basket_status": "NOT proposed for the basket; forward clock untouched"
+}

@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "scripts/b9e_reserve_coverage.py",
+    "/home/anont/meme/research/b11m_window2/b11a_bodies.sqlite",
+    "--b9a",
+    "/home/anont/meme/research/b11m_window2/b11a_subsample.sqlite"
+  ],
+  "completed": true,
+  "endpoint": "https://api.mainnet-beta.solana.com",
+  "exit_code": 0,
+  "finished_at": 1787967741,
+  "manifest_sha256": "33da3a7ea16fa20ade57a8ebbeba61e4ce310adf53c7a0406ce08d5327c5e99f",
+  "schema_version": "1.0.0",
+  "stage": "reserve_coverage_gate",
+  "started_at": 1787967740,
+  "stderr_log": "/home/anont/meme/research/b11m_window2/logs/reserve_coverage_gate.stderr.log",
+  "stdout_log": "/home/anont/meme/research/b11m_window2/logs/reserve_coverage_gate.stdout.log"
+}

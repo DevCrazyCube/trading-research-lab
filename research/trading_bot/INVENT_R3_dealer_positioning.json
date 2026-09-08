@@ -1,0 +1,1139 @@
+{
+ "theme": "dealer positioning / options flow",
+ "n_formulas": 36,
+ "sqrt_2lnN": 2.677,
+ "track_a": {
+  "status": "ok",
+  "days": 640
+ },
+ "formulas": [
+  {
+   "name": "B1_PIN_MONTHLY_1D",
+   "mechanism": "dealers long gamma at the heavy $1.0 strike pin spot to it into the close mark",
+   "sign": "position points TOWARD the nearest strike; fixed before any fit",
+   "design": {
+    "sharpe": 1.175,
+    "t": 0.6,
+    "n": 65,
+    "mean_bp": 4.159,
+    "rungs": {
+     "0.5": 1.401,
+     "1.0": 1.289,
+     "1.5": 1.175,
+     "3.0": 0.833
+    },
+    "gross_sharpe": 1.514
+   },
+   "holdout": {
+    "sharpe": 1.395,
+    "t": 0.63,
+    "n": 52,
+    "mean_bp": 3.599,
+    "rungs": {
+     "0.5": 1.779,
+     "1.0": 1.587,
+     "1.5": 1.395,
+     "3.0": 0.821
+    },
+    "gross_sharpe": 1.971
+   }
+  },
+  {
+   "name": "B2_PIN_FRIDAY_1D",
+   "mechanism": "dealers long gamma at the heavy $1.0 strike pin spot to it into the close mark",
+   "sign": "position points TOWARD the nearest strike; fixed before any fit",
+   "design": {
+    "sharpe": -0.775,
+    "t": -0.82,
+    "n": 279,
+    "mean_bp": -2.588,
+    "rungs": {
+     "0.5": -0.49,
+     "1.0": -0.633,
+     "1.5": -0.775,
+     "3.0": -1.2
+    },
+    "gross_sharpe": -0.348
+   },
+   "holdout": {
+    "sharpe": -0.398,
+    "t": -0.38,
+    "n": 233,
+    "mean_bp": -1.095,
+    "rungs": {
+     "0.5": -0.032,
+     "1.0": -0.215,
+     "1.5": -0.398,
+     "3.0": -0.945
+    },
+    "gross_sharpe": 0.152
+   }
+  },
+  {
+   "name": "B3_PIN_ALLDAY_1D",
+   "mechanism": "dealers long gamma at the heavy $1.0 strike pin spot to it into the close mark",
+   "sign": "position points TOWARD the nearest strike; fixed before any fit",
+   "design": {
+    "sharpe": 0.003,
+    "t": 0.01,
+    "n": 1382,
+    "mean_bp": 0.011,
+    "rungs": {
+     "0.5": 0.296,
+     "1.0": 0.15,
+     "1.5": 0.003,
+     "3.0": -0.435
+    },
+    "gross_sharpe": 0.442
+   },
+   "holdout": {
+    "sharpe": -0.041,
+    "t": -0.09,
+    "n": 1158,
+    "mean_bp": -0.119,
+    "rungs": {
+     "0.5": 0.299,
+     "1.0": 0.129,
+     "1.5": -0.041,
+     "3.0": -0.549
+    },
+    "gross_sharpe": 0.469
+   }
+  },
+  {
+   "name": "B4_PIN_FRIDAY_5D",
+   "mechanism": "dealers long gamma at the heavy $5.0 strike pin spot to it into the close mark",
+   "sign": "position points TOWARD the nearest strike; fixed before any fit",
+   "design": {
+    "sharpe": -0.8,
+    "t": -0.41,
+    "n": 65,
+    "mean_bp": -2.324,
+    "rungs": {
+     "0.5": -0.486,
+     "1.0": -0.643,
+     "1.5": -0.8,
+     "3.0": -1.275
+    },
+    "gross_sharpe": -0.329
+   },
+   "holdout": {
+    "sharpe": -1.668,
+    "t": -1.05,
+    "n": 99,
+    "mean_bp": -3.951,
+    "rungs": {
+     "0.5": -1.367,
+     "1.0": -1.518,
+     "1.5": -1.668,
+     "3.0": -2.116
+    },
+    "gross_sharpe": -1.216
+   }
+  },
+  {
+   "name": "B5_PIN_MONTHLY_5D",
+   "mechanism": "dealers long gamma at the heavy $5.0 strike pin spot to it into the close mark",
+   "sign": "position points TOWARD the nearest strike; fixed before any fit",
+   "design": {
+    "sharpe": -3.286,
+    "t": -1.01,
+    "n": 24,
+    "mean_bp": -7.574,
+    "rungs": {
+     "0.5": -2.869,
+     "1.0": -3.077,
+     "1.5": -3.286,
+     "3.0": -3.906
+    },
+    "gross_sharpe": -2.66
+   },
+   "holdout": {
+    "sharpe": 1.574,
+    "t": 0.57,
+    "n": 33,
+    "mean_bp": 4.086,
+    "rungs": {
+     "0.5": 1.914,
+     "1.0": 1.744,
+     "1.5": 1.574,
+     "3.0": 1.064
+    },
+    "gross_sharpe": 2.083
+   }
+  },
+  {
+   "name": "B6_POSTOPEX_ROLLOFF",
+   "mechanism": "monthly expiry retires the dealer long-gamma book; the clamp on downside is released the next session",
+   "sign": "SHORT the session after monthly expiry; sign from the mechanism",
+   "design": {
+    "sharpe": 0.576,
+    "t": 0.31,
+    "n": 71,
+    "mean_bp": 3.823,
+    "rungs": {
+     "0.5": 0.578,
+     "1.0": 0.577,
+     "1.5": 0.576,
+     "3.0": 0.573
+    },
+    "gross_sharpe": 0.579
+   },
+   "holdout": {
+    "sharpe": -4.167,
+    "t": -1.89,
+    "n": 52,
+    "mean_bp": -24.297,
+    "rungs": {
+     "0.5": -4.164,
+     "1.0": -4.165,
+     "1.5": -4.167,
+     "3.0": -4.171
+    },
+    "gross_sharpe": -4.162
+   }
+  },
+  {
+   "name": "B7_OPEXWEEK_REV",
+   "mechanism": "peak dealer long gamma during expiry week clamps and reverses the prior session's move",
+   "sign": "FADE the prior session; sign fixed by mechanism",
+   "design": {
+    "sharpe": 0.007,
+    "t": 0.01,
+    "n": 354,
+    "mean_bp": 0.032,
+    "rungs": {
+     "0.5": 0.217,
+     "1.0": 0.112,
+     "1.5": 0.007,
+     "3.0": -0.309
+    },
+    "gross_sharpe": 0.322
+   },
+   "holdout": {
+    "sharpe": -1.178,
+    "t": -1.21,
+    "n": 265,
+    "mean_bp": -5.947,
+    "rungs": {
+     "0.5": -0.984,
+     "1.0": -1.081,
+     "1.5": -1.178,
+     "3.0": -1.467
+    },
+    "gross_sharpe": -0.888
+   }
+  },
+  {
+   "name": "B8_NONOPEX_REV",
+   "mechanism": "peak dealer long gamma during expiry week clamps and reverses the prior session's move",
+   "sign": "FADE the prior session; sign fixed by mechanism",
+   "design": {
+    "sharpe": 0.255,
+    "t": 0.55,
+    "n": 1156,
+    "mean_bp": 1.272,
+    "rungs": {
+     "0.5": 0.462,
+     "1.0": 0.358,
+     "1.5": 0.255,
+     "3.0": -0.056
+    },
+    "gross_sharpe": 0.566
+   },
+   "holdout": {
+    "sharpe": 0.244,
+    "t": 0.46,
+    "n": 893,
+    "mean_bp": 1.444,
+    "rungs": {
+     "0.5": 0.417,
+     "1.0": 0.33,
+     "1.5": 0.244,
+     "3.0": -0.016
+    },
+    "gross_sharpe": 0.504
+   }
+  },
+  {
+   "name": "B9_GSIGN_CONTANGO_FADE",
+   "mechanism": "VIX9D/VIX3M is the sign of the dealer gamma book: deep contango = long gamma = intraday moves get absorbed; backwardation = short gamma = they get amplified",
+   "sign": "FADE the morning move; fixed by sign of gamma",
+   "design": {
+    "sharpe": -1.119,
+    "t": -1.93,
+    "n": 751,
+    "mean_bp": -2.987,
+    "rungs": {
+     "0.5": -0.746,
+     "1.0": -0.933,
+     "1.5": -1.119,
+     "3.0": -1.675
+    },
+    "gross_sharpe": -0.559
+   },
+   "holdout": {
+    "sharpe": -0.645,
+    "t": -0.78,
+    "n": 366,
+    "mean_bp": -2.196,
+    "rungs": {
+     "0.5": -0.382,
+     "1.0": -0.514,
+     "1.5": -0.645,
+     "3.0": -1.038
+    },
+    "gross_sharpe": -0.25
+   }
+  },
+  {
+   "name": "B10_GSIGN_BACKWARD_RIDE",
+   "mechanism": "VIX9D/VIX3M is the sign of the dealer gamma book: deep contango = long gamma = intraday moves get absorbed; backwardation = short gamma = they get amplified",
+   "sign": "FOLLOW the morning move; fixed by sign of gamma",
+   "design": {
+    "sharpe": -1.148,
+    "t": -1.29,
+    "n": 317,
+    "mean_bp": -9.453,
+    "rungs": {
+     "0.5": -1.013,
+     "1.0": -1.08,
+     "1.5": -1.148,
+     "3.0": -1.349
+    },
+    "gross_sharpe": -0.946
+   },
+   "holdout": {
+    "sharpe": 0.565,
+    "t": 0.62,
+    "n": 302,
+    "mean_bp": 4.437,
+    "rungs": {
+     "0.5": 0.706,
+     "1.0": 0.636,
+     "1.5": 0.565,
+     "3.0": 0.355
+    },
+    "gross_sharpe": 0.776
+   }
+  },
+  {
+   "name": "B11_GSIGN_CONTANGO_LASTHR",
+   "mechanism": "VIX9D/VIX3M is the sign of the dealer gamma book: deep contango = long gamma = intraday moves get absorbed; backwardation = short gamma = they get amplified",
+   "sign": "FADE the morning move; fixed by sign of gamma",
+   "design": {
+    "sharpe": -1.395,
+    "t": -2.41,
+    "n": 753,
+    "mean_bp": -1.782,
+    "rungs": {
+     "0.5": -0.605,
+     "1.0": -1.001,
+     "1.5": -1.395,
+     "3.0": -2.559
+    },
+    "gross_sharpe": -0.209
+   },
+   "holdout": {
+    "sharpe": -1.979,
+    "t": -2.38,
+    "n": 366,
+    "mean_bp": -2.802,
+    "rungs": {
+     "0.5": -1.242,
+     "1.0": -1.611,
+     "1.5": -1.979,
+     "3.0": -3.068
+    },
+    "gross_sharpe": -0.872
+   }
+  },
+  {
+   "name": "B12_GSIGN_BACKWARD_LASTHR",
+   "mechanism": "VIX9D/VIX3M is the sign of the dealer gamma book: deep contango = long gamma = intraday moves get absorbed; backwardation = short gamma = they get amplified",
+   "sign": "FOLLOW the morning move; fixed by sign of gamma",
+   "design": {
+    "sharpe": -1.131,
+    "t": -1.27,
+    "n": 318,
+    "mean_bp": -5.154,
+    "rungs": {
+     "0.5": -0.922,
+     "1.0": -1.027,
+     "1.5": -1.131,
+     "3.0": -1.445
+    },
+    "gross_sharpe": -0.817
+   },
+   "holdout": {
+    "sharpe": 0.355,
+    "t": 0.39,
+    "n": 303,
+    "mean_bp": 1.219,
+    "rungs": {
+     "0.5": 0.655,
+     "1.0": 0.505,
+     "1.5": 0.355,
+     "3.0": -0.093
+    },
+    "gross_sharpe": 0.804
+   }
+  },
+  {
+   "name": "B13_VANNA_SKEWxDVOL",
+   "mechanism": "dealers short a rich put wing carry positive vanna: a vol DROP mechanically raises their delta and forces spot buying, scaled by how rich the wing is",
+   "sign": "LONG when skew is rich AND vol fell; product sign fixed by the vanna identity",
+   "design": {
+    "sharpe": -0.491,
+    "t": -1.1,
+    "n": 1256,
+    "mean_bp": -1.645,
+    "rungs": {
+     "0.5": -0.409,
+     "1.0": -0.45,
+     "1.5": -0.491,
+     "3.0": -0.614
+    },
+    "gross_sharpe": -0.368
+   },
+   "holdout": {
+    "sharpe": 0.198,
+    "t": 0.42,
+    "n": 1157,
+    "mean_bp": 0.274,
+    "rungs": {
+     "0.5": 0.36,
+     "1.0": 0.279,
+     "1.5": 0.198,
+     "3.0": -0.045
+    },
+    "gross_sharpe": 0.44
+   }
+  },
+  {
+   "name": "B14_CHARM_EXPIRY_DRIFT",
+   "mechanism": "charm: as monthly expiry approaches, the delta of a dealer's short OTM put decays toward zero, forcing him to buy back the spot he sold as a hedge",
+   "sign": "LONG the run-in to monthly expiry when the put wing is rich; fixed by charm sign",
+   "design": {
+    "sharpe": 1.415,
+    "t": 1.1,
+    "n": 151,
+    "mean_bp": 7.165,
+    "rungs": {
+     "0.5": 1.416,
+     "1.0": 1.415,
+     "1.5": 1.415,
+     "3.0": 1.413
+    },
+    "gross_sharpe": 1.417
+   },
+   "holdout": {
+    "sharpe": -0.541,
+    "t": -0.43,
+    "n": 159,
+    "mean_bp": -2.858,
+    "rungs": {
+     "0.5": -0.54,
+     "1.0": -0.541,
+     "1.5": -0.541,
+     "3.0": -0.543
+    },
+    "gross_sharpe": -0.54
+   }
+  },
+  {
+   "name": "B15_CONTROL_UNCOND_FADE",
+   "mechanism": "CONTROL -- unconditional intraday fade, contains no options or dealer information whatsoever",
+   "sign": "FADE always. Any dealer formula must beat THIS, not zero.",
+   "design": {
+    "sharpe": -0.489,
+    "t": -1.2,
+    "n": 1510,
+    "mean_bp": -2.335,
+    "rungs": {
+     "0.5": -0.272,
+     "1.0": -0.381,
+     "1.5": -0.489,
+     "3.0": -0.813
+    },
+    "gross_sharpe": -0.164
+   },
+   "holdout": {
+    "sharpe": -0.432,
+    "t": -0.93,
+    "n": 1158,
+    "mean_bp": -2.296,
+    "rungs": {
+     "0.5": -0.239,
+     "1.0": -0.336,
+     "1.5": -0.432,
+     "3.0": -0.721
+    },
+    "gross_sharpe": -0.142
+   }
+  },
+  {
+   "name": "B16_OVERNIGHT_REV_LONGGAMMA",
+   "mechanism": "a long-gamma dealer book has to buy the close down / sell it up, and the flow unwinds against him overnight -- the reversal T3 trades should be LARGER here",
+   "sign": "sign set by the gamma regime, not by fitting; interaction test against the basket's T3 overnight reversal",
+   "design": {
+    "sharpe": -0.888,
+    "t": -1.54,
+    "n": 756,
+    "mean_bp": -1.997,
+    "rungs": {
+     "0.5": -0.439,
+     "1.0": -0.664,
+     "1.5": -0.888,
+     "3.0": -1.558
+    },
+    "gross_sharpe": -0.215
+   },
+   "holdout": {
+    "sharpe": -0.555,
+    "t": -0.67,
+    "n": 365,
+    "mean_bp": -1.517,
+    "rungs": {
+     "0.5": -0.151,
+     "1.0": -0.353,
+     "1.5": -0.555,
+     "3.0": -1.16
+    },
+    "gross_sharpe": 0.051
+   }
+  },
+  {
+   "name": "B17_OVERNIGHT_REV_SHORTGAMMA",
+   "mechanism": "a short-gamma book chases the close, so the overnight session should CONTINUE, not revert",
+   "sign": "sign set by the gamma regime, not by fitting; interaction test against the basket's T3 overnight reversal",
+   "design": {
+    "sharpe": -1.476,
+    "t": -1.66,
+    "n": 318,
+    "mean_bp": -13.517,
+    "rungs": {
+     "0.5": -1.367,
+     "1.0": -1.421,
+     "1.5": -1.476,
+     "3.0": -1.64
+    },
+    "gross_sharpe": -1.312
+   },
+   "holdout": {
+    "sharpe": 0.296,
+    "t": 0.33,
+    "n": 303,
+    "mean_bp": 1.776,
+    "rungs": {
+     "0.5": 0.454,
+     "1.0": 0.375,
+     "1.5": 0.296,
+     "3.0": 0.059
+    },
+    "gross_sharpe": 0.533
+   }
+  },
+  {
+   "name": "B18_OPEX_AM_SETTLE_GAP",
+   "mechanism": "SPX AM-settled monthly options print off the opening auction, so the unwind of the hedge against them lands in the overnight gap",
+   "sign": "LONG the expiry-morning gap; sign fixed by the direction of the unwind",
+   "design": {
+    "sharpe": 1.259,
+    "t": 0.67,
+    "n": 71,
+    "mean_bp": 4.668,
+    "rungs": {
+     "0.5": 1.264,
+     "1.0": 1.261,
+     "1.5": 1.259,
+     "3.0": 1.251
+    },
+    "gross_sharpe": 1.267
+   },
+   "holdout": {
+    "sharpe": -1.439,
+    "t": -0.65,
+    "n": 52,
+    "mean_bp": -4.604,
+    "rungs": {
+     "0.5": -1.433,
+     "1.0": -1.436,
+     "1.5": -1.439,
+     "3.0": -1.447
+    },
+    "gross_sharpe": -1.43
+   }
+  },
+  {
+   "name": "C1_V1D_RICH_MOMENTUM",
+   "mechanism": "VIX1D rich to VIX = the day's flow is concentrated in 0DTE, where dealers are net SHORT gamma, so an intraday move gets chased not absorbed",
+   "sign": "FOLLOW the morning move on heavy-0DTE days; sign fixed by short-gamma",
+   "design": {
+    "sharpe": -0.751,
+    "t": -0.38,
+    "n": 65,
+    "mean_bp": -3.571,
+    "rungs": {
+     "0.5": -0.546,
+     "1.0": -0.649,
+     "1.5": -0.751,
+     "3.0": -1.06
+    },
+    "gross_sharpe": -0.444
+   },
+   "holdout": {
+    "sharpe": 0.737,
+    "t": 0.4,
+    "n": 75,
+    "mean_bp": 6.951,
+    "rungs": {
+     "0.5": 0.872,
+     "1.0": 0.804,
+     "1.5": 0.737,
+     "3.0": 0.535
+    },
+    "gross_sharpe": 0.939
+   }
+  },
+  {
+   "name": "C2_V1D_CHEAP_FADE",
+   "mechanism": "VIX1D cheap to VIX = little 0DTE demand, dealers keep the longer-dated long-gamma book, so intraday moves are absorbed",
+   "sign": "FADE the morning move on light-0DTE days; sign fixed by long-gamma",
+   "design": {
+    "sharpe": -2.767,
+    "t": -2.52,
+    "n": 209,
+    "mean_bp": -8.006,
+    "rungs": {
+     "0.5": -2.415,
+     "1.0": -2.591,
+     "1.5": -2.767,
+     "3.0": -3.291
+    },
+    "gross_sharpe": -2.237
+   },
+   "holdout": {
+    "sharpe": -1.676,
+    "t": -1.44,
+    "n": 186,
+    "mean_bp": -5.523,
+    "rungs": {
+     "0.5": -1.317,
+     "1.0": -1.497,
+     "1.5": -1.676,
+     "3.0": -2.215
+    },
+    "gross_sharpe": -1.138
+   }
+  },
+  {
+   "name": "C3_V1D_RICH_LASTHOUR",
+   "mechanism": "0DTE gamma goes hyperbolic in the final hour; a short-gamma dealer's hedge is self-reinforcing right into settlement",
+   "sign": "FOLLOW the 13:00-15:00 move into the close on heavy-0DTE days",
+   "design": {
+    "sharpe": -3.056,
+    "t": -1.56,
+    "n": 66,
+    "mean_bp": -6.433,
+    "rungs": {
+     "0.5": -2.565,
+     "1.0": -2.81,
+     "1.5": -3.056,
+     "3.0": -3.791
+    },
+    "gross_sharpe": -2.321
+   },
+   "holdout": {
+    "sharpe": 2.308,
+    "t": 1.26,
+    "n": 75,
+    "mean_bp": 6.743,
+    "rungs": {
+     "0.5": 2.687,
+     "1.0": 2.498,
+     "1.5": 2.308,
+     "3.0": 1.738
+    },
+    "gross_sharpe": 2.876
+   }
+  },
+  {
+   "name": "C4_V1DSLOPE_RICH_MOM",
+   "mechanism": "VIX1D - VIX9D is the pure 0DTE kink in the term structure, cleaner than the VIX1D/VIX ratio which carries the whole level",
+   "sign": "FOLLOW the morning move when the 0DTE kink is steep",
+   "design": {
+    "sharpe": -1.022,
+    "t": -0.53,
+    "n": 69,
+    "mean_bp": -4.038,
+    "rungs": {
+     "0.5": -0.775,
+     "1.0": -0.899,
+     "1.5": -1.022,
+     "3.0": -1.394
+    },
+    "gross_sharpe": -0.652
+   },
+   "holdout": {
+    "sharpe": 0.355,
+    "t": 0.2,
+    "n": 80,
+    "mean_bp": 3.071,
+    "rungs": {
+     "0.5": 0.498,
+     "1.0": 0.426,
+     "1.5": 0.355,
+     "3.0": 0.14
+    },
+    "gross_sharpe": 0.569
+   }
+  },
+  {
+   "name": "C5_V1D_VRP_SIGNFLIP",
+   "mechanism": "a fat 0DTE variance premium means the vol sellers are solvent and supplying gamma (dealers long) -> next-day reversal; a negative one means they have been run over (dealers short) -> next-day continuation",
+   "sign": "REVERSE when 0DTE VRP is fat, CONTINUE when thin; both signs fixed in advance",
+   "design": {
+    "sharpe": -0.077,
+    "t": -0.1,
+    "n": 411,
+    "mean_bp": -0.376,
+    "rungs": {
+     "0.5": 0.147,
+     "1.0": 0.035,
+     "1.5": -0.077,
+     "3.0": -0.414
+    },
+    "gross_sharpe": 0.258
+   },
+   "holdout": {
+    "sharpe": 0.405,
+    "t": 0.51,
+    "n": 405,
+    "mean_bp": 2.722,
+    "rungs": {
+     "0.5": 0.542,
+     "1.0": 0.474,
+     "1.5": 0.405,
+     "3.0": 0.199
+    },
+    "gross_sharpe": 0.611
+   }
+  },
+  {
+   "name": "C6_V1D_SPIKE_CONTINUE",
+   "mechanism": "a VIX1D spike is a rush into same-day protection; the dealer selling it is short gamma at the money and must sell into weakness",
+   "sign": "CONTINUE the day's move after a 0DTE-vol spike; fixed by short-gamma",
+   "design": {
+    "sharpe": 3.266,
+    "t": 1.59,
+    "n": 60,
+    "mean_bp": 19.864,
+    "rungs": {
+     "0.5": 3.411,
+     "1.0": 3.339,
+     "1.5": 3.266,
+     "3.0": 3.048
+    },
+    "gross_sharpe": 3.483
+   },
+   "holdout": {
+    "sharpe": -6.623,
+    "t": -3.12,
+    "n": 56,
+    "mean_bp": -44.496,
+    "rungs": {
+     "0.5": -6.526,
+     "1.0": -6.574,
+     "1.5": -6.623,
+     "3.0": -6.769
+    },
+    "gross_sharpe": -6.477
+   }
+  },
+  {
+   "name": "A1_GEX_SIGN_AUTOCORR",
+   "mechanism": "net dealer gamma built from real per-strike SPY option volume across every expiry inside 5 sessions: positive net gamma makes hedging counter-trend (reversal), negative makes it pro-trend (momentum)",
+   "sign": "REVERSE when net gamma > 0, CONTINUE when < 0; both fixed by the hedging identity",
+   "design": {
+    "sharpe": -0.425,
+    "t": -0.53,
+    "n": 395,
+    "mean_bp": -2.857,
+    "rungs": {
+     "0.5": -0.281,
+     "1.0": -0.353,
+     "1.5": -0.425,
+     "3.0": -0.64
+    },
+    "gross_sharpe": -0.209
+   },
+   "holdout": {
+    "sharpe": 0.22,
+    "t": 0.21,
+    "n": 240,
+    "mean_bp": 1.132,
+    "rungs": {
+     "0.5": 0.395,
+     "1.0": 0.308,
+     "1.5": 0.22,
+     "3.0": -0.044
+    },
+    "gross_sharpe": 0.483
+   }
+  },
+  {
+   "name": "A1b_GEX_SIGN_LAGSAFE",
+   "mechanism": "A1's mechanism, entered at the next cash open so no position is ever taken on an option bar that has not printed",
+   "sign": "REVERSE when net gamma > 0, CONTINUE when < 0; lag-safe entry",
+   "design": {
+    "sharpe": -0.56,
+    "t": -0.7,
+    "n": 395,
+    "mean_bp": -3.199,
+    "rungs": {
+     "0.5": -0.39,
+     "1.0": -0.475,
+     "1.5": -0.56,
+     "3.0": -0.814
+    },
+    "gross_sharpe": -0.306
+   },
+   "holdout": {
+    "sharpe": 0.675,
+    "t": 0.66,
+    "n": 240,
+    "mean_bp": 2.808,
+    "rungs": {
+     "0.5": 0.892,
+     "1.0": 0.784,
+     "1.5": 0.675,
+     "3.0": 0.349
+    },
+    "gross_sharpe": 1.001
+   }
+  },
+  {
+   "name": "A2_GAMMA_CofM_PIN",
+   "mechanism": "the gamma-weighted centre of mass of the near-dated strike ladder is where a long-gamma dealer book has the least to hedge; spot is drawn to it",
+   "sign": "LONG when the centre of mass sits above spot; fixed by the pin mechanism",
+   "design": {
+    "sharpe": 0.808,
+    "t": 1.01,
+    "n": 395,
+    "mean_bp": 5.367,
+    "rungs": {
+     "0.5": 0.817,
+     "1.0": 0.813,
+     "1.5": 0.808,
+     "3.0": 0.794
+    },
+    "gross_sharpe": 0.822
+   },
+   "holdout": {
+    "sharpe": -0.393,
+    "t": -0.38,
+    "n": 240,
+    "mean_bp": -1.757,
+    "rungs": {
+     "0.5": -0.325,
+     "1.0": -0.359,
+     "1.5": -0.393,
+     "3.0": -0.497
+    },
+    "gross_sharpe": -0.29
+   }
+  },
+  {
+   "name": "A3_GAMMA_CofM_INTRADAY",
+   "mechanism": "as A2 but the pull is claimed to act during the cash session when the hedging actually happens, not across the overnight gap",
+   "sign": "LONG when the centre of mass sits above spot; open-to-close",
+   "design": {
+    "sharpe": -0.156,
+    "t": -0.2,
+    "n": 395,
+    "mean_bp": -0.883,
+    "rungs": {
+     "0.5": -0.145,
+     "1.0": -0.151,
+     "1.5": -0.156,
+     "3.0": -0.172
+    },
+    "gross_sharpe": -0.14
+   },
+   "holdout": {
+    "sharpe": -1.522,
+    "t": -1.49,
+    "n": 240,
+    "mean_bp": -5.545,
+    "rungs": {
+     "0.5": -1.437,
+     "1.0": -1.479,
+     "1.5": -1.522,
+     "3.0": -1.649
+    },
+    "gross_sharpe": -1.395
+   }
+  },
+  {
+   "name": "A4_GAMMA_FLIP_LEVEL",
+   "mechanism": "the strike at which the running net gamma profile crosses zero: above it dealers are long gamma and damp, below it short and amplify",
+   "sign": "REVERSE above the flip, CONTINUE below; fixed by the profile's sign",
+   "design": {
+    "sharpe": 0.948,
+    "t": 0.33,
+    "n": 30,
+    "mean_bp": 6.834,
+    "rungs": {
+     "0.5": 1.101,
+     "1.0": 1.025,
+     "1.5": 0.948,
+     "3.0": 0.72
+    },
+    "gross_sharpe": 1.177
+   },
+   "holdout": {
+    "sharpe": -0.845,
+    "t": -0.45,
+    "n": 70,
+    "mean_bp": -4.711,
+    "rungs": {
+     "0.5": -0.674,
+     "1.0": -0.76,
+     "1.5": -0.845,
+     "3.0": -1.102
+    },
+    "gross_sharpe": -0.588
+   }
+  },
+  {
+   "name": "A4b_GAMMA_FLIP_LAGSAFE",
+   "mechanism": "A4's mechanism entered at the next cash open",
+   "sign": "REVERSE above the flip, CONTINUE below; lag-safe entry",
+   "design": {
+    "sharpe": -3.891,
+    "t": -1.34,
+    "n": 30,
+    "mean_bp": -24.531,
+    "rungs": {
+     "0.5": -3.721,
+     "1.0": -3.806,
+     "1.5": -3.891,
+     "3.0": -4.146
+    },
+    "gross_sharpe": -3.635
+   },
+   "holdout": {
+    "sharpe": -1.569,
+    "t": -0.83,
+    "n": 70,
+    "mean_bp": -7.25,
+    "rungs": {
+     "0.5": -1.365,
+     "1.0": -1.467,
+     "1.5": -1.569,
+     "3.0": -1.874
+    },
+    "gross_sharpe": -1.262
+   }
+  },
+  {
+   "name": "A5_PUTGAMMA_SURGE",
+   "mechanism": "a day-on-day collapse in the call/put gamma balance is a hedging rush: the dealer taking the other side is newly short downside gamma and will have to sell spot into any further weakness",
+   "sign": "SHORT when the balance swings to puts; fixed by the short-gamma channel",
+   "design": {
+    "sharpe": 0.912,
+    "t": 0.7,
+    "n": 148,
+    "mean_bp": 5.586,
+    "rungs": {
+     "0.5": 1.051,
+     "1.0": 0.981,
+     "1.5": 0.912,
+     "3.0": 0.703
+    },
+    "gross_sharpe": 1.121
+   },
+   "holdout": {
+    "sharpe": -0.31,
+    "t": -0.3,
+    "n": 240,
+    "mean_bp": -0.922,
+    "rungs": {
+     "0.5": -0.067,
+     "1.0": -0.188,
+     "1.5": -0.31,
+     "3.0": -0.674
+    },
+    "gross_sharpe": 0.055
+   }
+  },
+  {
+   "name": "A9_RELGAMMA_AUTOCORR",
+   "mechanism": "the call/put gamma balance relative to its own expanding history: an unusually call-heavy book is the long-gamma regime (damping), an unusually put-heavy one is the short-gamma regime (amplifying)",
+   "sign": "REVERSE in the relatively-long-gamma regime, CONTINUE in the short one; both fixed by the hedging identity",
+   "design": {
+    "sharpe": 1.849,
+    "t": 1.42,
+    "n": 149,
+    "mean_bp": 16.067,
+    "rungs": {
+     "0.5": 1.962,
+     "1.0": 1.905,
+     "1.5": 1.849,
+     "3.0": 1.679
+    },
+    "gross_sharpe": 2.018
+   },
+   "holdout": {
+    "sharpe": -0.693,
+    "t": -0.68,
+    "n": 240,
+    "mean_bp": -3.575,
+    "rungs": {
+     "0.5": -0.51,
+     "1.0": -0.601,
+     "1.5": -0.693,
+     "3.0": -0.966
+    },
+    "gross_sharpe": -0.419
+   }
+  },
+  {
+   "name": "A9b_RELGAMMA_LAGSAFE",
+   "mechanism": "the call/put gamma balance relative to its own expanding history: an unusually call-heavy book is the long-gamma regime (damping), an unusually put-heavy one is the short-gamma regime (amplifying)",
+   "sign": "REVERSE in the relatively-long-gamma regime, CONTINUE in the short one; both fixed by the hedging identity",
+   "design": {
+    "sharpe": 1.315,
+    "t": 1.01,
+    "n": 149,
+    "mean_bp": 10.259,
+    "rungs": {
+     "0.5": 1.44,
+     "1.0": 1.378,
+     "1.5": 1.315,
+     "3.0": 1.127
+    },
+    "gross_sharpe": 1.503
+   },
+   "holdout": {
+    "sharpe": -0.455,
+    "t": -0.44,
+    "n": 240,
+    "mean_bp": -1.9,
+    "rungs": {
+     "0.5": -0.229,
+     "1.0": -0.342,
+     "1.5": -0.455,
+     "3.0": -0.794
+    },
+    "gross_sharpe": -0.115
+   }
+  },
+  {
+   "name": "A6_CALL_WALL_RESIST",
+   "mechanism": "the strike carrying the most call gamma above spot is where dealer supply is thickest; spot stalls there",
+   "sign": "sign fixed by which wall spot is against",
+   "design": {
+    "sharpe": 0.0,
+    "t": 0.0,
+    "n": 0,
+    "mean_bp": 0.0,
+    "rungs": {
+     "0.5": 0.0,
+     "1.0": 0.0,
+     "1.5": 0.0,
+     "3.0": 0.0
+    },
+    "gross_sharpe": 0.0
+   },
+   "holdout": {
+    "sharpe": 0.0,
+    "t": 0.0,
+    "n": 1,
+    "mean_bp": 76.867,
+    "rungs": {
+     "0.5": 0.0,
+     "1.0": 0.0,
+     "1.5": 0.0,
+     "3.0": 0.0
+    },
+    "gross_sharpe": 0.0
+   }
+  },
+  {
+   "name": "A7_PUT_WALL_SUPPORT",
+   "mechanism": "the strike carrying the most put gamma below spot is where dealer demand is thickest; spot bounces there",
+   "sign": "sign fixed by which wall spot is against",
+   "design": {
+    "sharpe": 0.085,
+    "t": 0.1,
+    "n": 366,
+    "mean_bp": 0.47,
+    "rungs": {
+     "0.5": 0.085,
+     "1.0": 0.085,
+     "1.5": 0.085,
+     "3.0": 0.084
+    },
+    "gross_sharpe": 0.086
+   },
+   "holdout": {
+    "sharpe": 0.188,
+    "t": 0.18,
+    "n": 237,
+    "mean_bp": 0.784,
+    "rungs": {
+     "0.5": 0.189,
+     "1.0": 0.188,
+     "1.5": 0.188,
+     "3.0": 0.186
+    },
+    "gross_sharpe": 0.189
+   }
+  },
+  {
+   "name": "A8_BIG_GAMMA_CLAMP",
+   "mechanism": "when the absolute size of the near-dated gamma book is large, hedging volume dominates the tape and the morning move gets absorbed",
+   "sign": "FADE the morning move on big-gamma days; fixed by the long-gamma clamp",
+   "design": {
+    "sharpe": -0.821,
+    "t": -0.55,
+    "n": 112,
+    "mean_bp": -2.909,
+    "rungs": {
+     "0.5": -0.535,
+     "1.0": -0.678,
+     "1.5": -0.821,
+     "3.0": -1.251
+    },
+    "gross_sharpe": -0.393
+   },
+   "holdout": {
+    "sharpe": -0.85,
+    "t": -0.76,
+    "n": 199,
+    "mean_bp": -2.985,
+    "rungs": {
+     "0.5": -0.554,
+     "1.0": -0.702,
+     "1.5": -0.85,
+     "3.0": -1.293
+    },
+    "gross_sharpe": -0.406
+   }
+  }
+ ],
+ "n_formulas_live": 35,
+ "n_degenerate": 1,
+ "degenerate": [
+  "A6_CALL_WALL_RESIST"
+ ],
+ "sqrt_2lnN_live": 2.667,
+ "null_bars_sharpe": {
+  "A_design_1.58y": 2.12,
+  "B_design_6.0y": 1.09,
+  "C_design_2.64y": 1.64
+ },
+ "verdict": "THEME IS NOISE -- zero survivors; max design |t| = 2.52 vs a max-of-35 null of 2.67, and in the wrong sign"
+}

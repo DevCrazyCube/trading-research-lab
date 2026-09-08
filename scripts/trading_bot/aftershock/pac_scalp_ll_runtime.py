@@ -19,6 +19,9 @@ from . import pac_scalp_ll_route as routes
 
 SCHEMA = 1
 COST_NAMES = ("entry", "exit", "ata_close")
+MIN_BASE_FEE_LAMPORTS = 5_000
+MIN_PRIORITY_FEE_LAMPORTS = 500
+MIN_TIP_LAMPORTS = 5_000
 
 
 def _sha(value: object) -> str:
@@ -35,11 +38,24 @@ def _cost(value: object) -> routes.AttemptCost:
         raise RefusedExecution("PAC_SCALP_LL runtime cost is invalid") from exc
 
 
-def build(*, campaign: campaigns.Campaign, route_by_arm: dict[str, routes.Route],
-          costs_by_arm: dict[str, dict[str, routes.AttemptCost]]) -> dict:
+def build(*, campaign: campaigns.Campaign, attestation: dict,
+          route_by_arm: dict[str, routes.Route],
+          costs_by_arm: dict[str, dict[str, routes.AttemptCost]],
+          provider_cost_receipt_sha256_by_arm: dict[str, str]) -> dict:
     if not isinstance(campaign, campaigns.Campaign) or set(route_by_arm) != routes.ARMS \
-            or set(costs_by_arm) != routes.ARMS:
+            or set(costs_by_arm) != routes.ARMS \
+            or set(provider_cost_receipt_sha256_by_arm) != routes.ARMS:
         raise RefusedExecution("PAC_SCALP_LL runtime contract arms are incomplete")
+    if (not isinstance(attestation, dict)
+            or attestation.get("campaign_sha256") != campaign.campaign_sha256
+            or attestation.get("evidence_status") != "FINALIZED_ATTESTED_COMPLETE"
+            or not isinstance(attestation.get("attestation_sha256"), str)
+            or _sha({k: v for k, v in attestation.items() if k != "attestation_sha256"})
+            != attestation["attestation_sha256"]):
+        raise RefusedExecution("PAC_SCALP_LL runtime lacks finalized fee authority")
+    fees = attestation.get("meta_fee_lamports_by_arm")
+    if not isinstance(fees, dict) or set(fees) != routes.ARMS:
+        raise RefusedExecution("PAC_SCALP_LL runtime attested fee arms are incomplete")
     arms = {}
     for arm in sorted(routes.ARMS):
         route = route_by_arm[arm]
@@ -57,25 +73,55 @@ def build(*, campaign: campaigns.Campaign, route_by_arm: dict[str, routes.Route]
             raise RefusedExecution("PAC_SCALP_LL runtime submit route differs from calibration")
         if any(not isinstance(costs[name], routes.AttemptCost) for name in COST_NAMES):
             raise RefusedExecution("PAC_SCALP_LL runtime lacks typed all-cost profiles")
+        receipt = provider_cost_receipt_sha256_by_arm[arm]
+        if (not isinstance(receipt, str) or len(receipt) != 64
+                or any(char not in "0123456789abcdef" for char in receipt)):
+            raise RefusedExecution("PAC_SCALP_LL runtime provider-cost receipt is invalid")
+        if type(fees[arm]) is not int or fees[arm] <= 0 \
+                or fees[arm] % campaign.samples_per_arm:
+            raise RefusedExecution("PAC_SCALP_LL runtime attested fee aggregate is unusable")
+        measured_fee = fees[arm] // campaign.samples_per_arm
+        for name in COST_NAMES:
+            cost = costs[name]
+            if (cost.base_fee_lamports < MIN_BASE_FEE_LAMPORTS
+                    or cost.priority_fee_lamports < MIN_PRIORITY_FEE_LAMPORTS
+                    or cost.jito_tip_lamports < MIN_TIP_LAMPORTS
+                    or cost.base_fee_lamports + cost.priority_fee_lamports < measured_fee):
+                raise RefusedExecution("PAC_SCALP_LL runtime cost is below attested/frozen floor")
+        if (arm == routes.LOW_LATENCY_INTERVENTION
+                and costs["entry"].infra_subscription_num_lamports <= 0):
+            raise RefusedExecution("PAC_SCALP_LL paid arm cannot erase subscription cost")
         arms[arm] = {
             "provider_id": route.provider_id, "region": route.region,
             "submit_endpoint_identity": route.submit_endpoint_identity,
             "observe_endpoint_identity": route.observe_endpoint_identity,
             "config_fingerprint_sha256": route.config_fingerprint_sha256,
+            "provider_cost_receipt_sha256": receipt,
             "costs": {name: asdict(costs[name]) for name in COST_NAMES},
         }
     body = {"schema": SCHEMA, "instrument_id": campaigns.INSTRUMENT,
             "campaign_sha256": campaign.campaign_sha256, "arms": arms,
+            "attestation_sha256": attestation["attestation_sha256"],
             "boundary": "PAPER_SCENARIO_ONLY_NO_SIGNER_NO_LIVE_ORDERS"}
     return {**body, "runtime_profile_sha256": _sha(body)}
 
 
 def load(path: pathlib.Path, *, expected_file_sha256: str,
-         campaign: campaigns.Campaign) -> dict:
+         campaign: campaigns.Campaign, attestation: dict) -> dict:
     try:
         payload = pathlib.Path(path).read_bytes(); row = json.loads(payload)
     except (OSError, json.JSONDecodeError) as exc:
         raise RefusedExecution("PAC_SCALP_LL runtime profile is unreadable") from exc
+    if (not isinstance(attestation, dict)
+            or attestation.get("campaign_sha256") != campaign.campaign_sha256
+            or attestation.get("evidence_status") != "FINALIZED_ATTESTED_COMPLETE"
+            or not isinstance(attestation.get("attestation_sha256"), str)
+            or _sha({k: v for k, v in attestation.items() if k != "attestation_sha256"})
+            != attestation["attestation_sha256"]):
+        raise RefusedExecution("PAC_SCALP_LL runtime load lacks finalized fee authority")
+    fees = attestation.get("meta_fee_lamports_by_arm")
+    if not isinstance(fees, dict) or set(fees) != routes.ARMS:
+        raise RefusedExecution("PAC_SCALP_LL runtime load fee arms are incomplete")
     if (not isinstance(expected_file_sha256, str)
             or hashlib.sha256(payload).hexdigest() != expected_file_sha256
             or not isinstance(row, dict)):
@@ -84,20 +130,39 @@ def load(path: pathlib.Path, *, expected_file_sha256: str,
     if (observed != _sha(body) or row.get("schema") != SCHEMA
             or row.get("instrument_id") != campaigns.INSTRUMENT
             or row.get("campaign_sha256") != campaign.campaign_sha256
+            or row.get("attestation_sha256") != attestation["attestation_sha256"]
             or row.get("boundary") != "PAPER_SCENARIO_ONLY_NO_SIGNER_NO_LIVE_ORDERS"
             or set(row.get("arms", {})) != routes.ARMS):
         raise RefusedExecution("PAC_SCALP_LL runtime profile identity refuses")
     for arm, value in row["arms"].items():
         if (not isinstance(value, dict) or set(value) != {
                 "provider_id", "region", "submit_endpoint_identity",
-                "observe_endpoint_identity", "config_fingerprint_sha256", "costs"}
+                "observe_endpoint_identity", "config_fingerprint_sha256",
+                "provider_cost_receipt_sha256", "costs"}
                 or not all(isinstance(value[name], str) and value[name] for name in (
                     "provider_id", "region", "submit_endpoint_identity",
                     "observe_endpoint_identity", "config_fingerprint_sha256"))
+                or not isinstance(value["provider_cost_receipt_sha256"], str)
+                or len(value["provider_cost_receipt_sha256"]) != 64
                 or set(value["costs"]) != set(COST_NAMES)):
             raise RefusedExecution("PAC_SCALP_LL runtime arm schema refuses")
         for name in COST_NAMES:
-            _cost(value["costs"][name])
+            cost = _cost(value["costs"][name])
+            if (type(fees[arm]) is not int or fees[arm] <= 0
+                    or fees[arm] % campaign.samples_per_arm):
+                raise RefusedExecution("PAC_SCALP_LL runtime attested fee aggregate is unusable")
+            measured_fee = fees[arm] // campaign.samples_per_arm
+            if (cost.base_fee_lamports < MIN_BASE_FEE_LAMPORTS
+                    or cost.priority_fee_lamports < MIN_PRIORITY_FEE_LAMPORTS
+                    or cost.jito_tip_lamports < MIN_TIP_LAMPORTS
+                    or cost.base_fee_lamports + cost.priority_fee_lamports < measured_fee):
+                raise RefusedExecution("PAC_SCALP_LL persisted cost falls below frozen floor")
+        receipt = value["provider_cost_receipt_sha256"]
+        if (len(receipt) != 64 or any(char not in "0123456789abcdef" for char in receipt)):
+            raise RefusedExecution("PAC_SCALP_LL persisted provider-cost receipt is invalid")
+        if (arm == routes.LOW_LATENCY_INTERVENTION
+                and _cost(value["costs"]["entry"]).infra_subscription_num_lamports <= 0):
+            raise RefusedExecution("PAC_SCALP_LL paid runtime cannot erase subscription cost")
     return row
 
 

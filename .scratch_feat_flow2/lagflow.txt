@@ -1,0 +1,36 @@
+built 45 structures 16s
+controls: same-bucket(lag0) vs lagged random-entry means, H180|P2halfout25 @rate .25:
+  lag0 train_ctrl=-0.0948  validate_ctrl=-0.0574
+  lag1 train_ctrl=-0.0987  validate_ctrl=-0.0578
+  lag2 train_ctrl=-0.1019  validate_ctrl=-0.0634
+
+cell                       struct                           trmean    vmean     vmed    vCIlo    vCIhi      n     k     ctrl     edge
+combos swept (lag family): 12600 ; train-positive+beat-control that reached validate: 698
+SURVIVORS: 13
+ubgrow_120>=p75            H180|flowrev.lag1|P2halfout25    0.0831   0.1025  -0.0369   0.0313   0.1838    466   142  -0.0578   0.1602
+ubgrow_120>=p75            H180|flowrev.lag0|P0             0.0760   0.1002  -0.0710   0.0024   0.2255    647   142  -0.0751   0.1753
+ubgrow_120>=p75            H180|flowrev.lag0|P2halfout25    0.0820   0.0975  -0.0305   0.0308   0.1747    647   142  -0.0574   0.1549
+ubgrow_120>=p75            H180|flowrev.lag2|P2halfout25    0.0832   0.0969  -0.0450   0.0241   0.1785    386   142  -0.0634   0.1603
+ubgrow_120>=p75            H60|flowrev.lag1|P0              0.0017   0.0950  -0.0764   0.0018   0.2039    498   142  -0.0787   0.1737
+ubgrow_120>=p75            H60|flowrev.lag1|P2halfout25     0.0234   0.0725  -0.0511   0.0067   0.1440    498   142  -0.0738   0.1463
+ubgrow_120>=p75            H60|flowrev.lag0|P2halfout25     0.0218   0.0697  -0.0346   0.0092   0.1399    674   142  -0.0717   0.1414
+ubgrow_120>=p75            H60|flowrev.lag2|P2halfout25     0.0154   0.0668  -0.0527   0.0007   0.1413    425   142  -0.0841   0.1510
+ubgrow_600>=p75            H180|flowrev.lag0|P2halfout25    0.0401   0.0620   0.0117   0.0009   0.1463   1223    50  -0.0574   0.1194
+ub_600>=p75                H180|flowrev.lag1|P2halfout25    0.0312   0.0613   0.0011   0.0044   0.1265    857    38  -0.0578   0.1191
+bvol_600>=p75              H180|flowrev.lag0|P2halfout25    0.0498   0.0575  -0.0029   0.0073   0.1186   1769    64  -0.0574   0.1149
+ub_600>=p75                H180|flowrev.lag0|P2halfout25    0.0247   0.0567   0.0088   0.0013   0.1223   1354    38  -0.0574   0.1141
+bvol_600>=p75              H180|flowrev.lag1|P2halfout25    0.0409   0.0565  -0.0038   0.0047   0.1152   1157    64  -0.0578   0.1143
+
+--- the 4 stage-A/B survivors, re-run at each lag (H180, P2halfout25) ---
+ub_120>=p75          lag0  train= 0.0258  validate= 0.0581 med= 0.0158 CI=[-0.0012,0.1264] n= 681 k= 44 ctrl=-0.0574
+ub_120>=p75          lag1  train= 0.0197  validate= 0.0503 med= 0.0235 CI=[-0.0134,0.1272] n= 410 k= 44 ctrl=-0.0578
+ub_120>=p75          lag2  train= 0.0181  validate= 0.0481 med= 0.0006 CI=[-0.0328,0.1477] n= 309 k= 44 ctrl=-0.0634
+ubgrow_120>=p75      lag0  train= 0.0820  validate= 0.0975 med=-0.0305 CI=[0.0267,0.1769] n= 647 k=142 ctrl=-0.0574
+ubgrow_120>=p75      lag1  train= 0.0831  validate= 0.1025 med=-0.0369 CI=[0.0303,0.1823] n= 466 k=142 ctrl=-0.0578
+ubgrow_120>=p75      lag2  train= 0.0832  validate= 0.0969 med=-0.0450 CI=[0.0235,0.1749] n= 386 k=142 ctrl=-0.0634
+ubgrow_600>=p75      lag0  train= 0.0401  validate= 0.0620 med= 0.0117 CI=[-0.0007,0.1471] n=1223 k= 50 ctrl=-0.0574
+ubgrow_600>=p75      lag1  train= 0.0283  validate= 0.0630 med= 0.0117 CI=[-0.0026,0.1533] n= 774 k= 50 ctrl=-0.0578
+ubgrow_600>=p75      lag2  train= 0.0217  validate= 0.0546 med=-0.0022 CI=[-0.0160,0.1469] n= 598 k= 50 ctrl=-0.0634
+bvol_600>=p75        lag0  train= 0.0498  validate= 0.0575 med=-0.0029 CI=[0.0057,0.1197] n=1769 k= 64 ctrl=-0.0574
+bvol_600>=p75        lag1  train= 0.0409  validate= 0.0565 med=-0.0038 CI=[0.0061,0.1144] n=1157 k= 64 ctrl=-0.0578
+bvol_600>=p75        lag2  train= 0.0275  validate= 0.0547 med=-0.0153 CI=[-0.0044,0.1219] n= 897 k= 64 ctrl=-0.0634

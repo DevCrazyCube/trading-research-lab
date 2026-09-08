@@ -1,0 +1,252 @@
+{
+ "gate_file": "research/trading_bot/T25_POWER_GATE.md",
+ "gate_sha256": "3cc5759d8c3490871f093d66fbb756301601e9eccb30a486e4bfc99a3b5b5838",
+ "generated_utc": "2026-08-19T07:08:03.478746+00:00",
+ "z": 2.8,
+ "E_claim_pp": 1.07,
+ "E_max_pp": 11.55,
+ "bar_pp": 1.0,
+ "download_universe_n": 106,
+ "hl_coins_with_history": 106,
+ "survivorship_note": {
+  "selectable_coin_months": 1927,
+  "dropped_because_a_venue_stopped_publishing_next_month": 39,
+  "share": 0.0202,
+  "consequence": "the census drops these; a TEST must charge a delisting tail (T23 \u00a75)"
+ },
+ "G0": {
+  "coin_months_binance_present": 3497,
+  "coin_months_hl_present": 3068,
+  "coin_months_both": 2892,
+  "share_hl_of_binance": 0.8773,
+  "threshold": 0.95,
+  "pass": false
+ },
+ "G0b": {
+  "hl_delisted_in_download_universe": 41,
+  "hl_delisted_returning_history": 41,
+  "examples": [
+   "AI",
+   "AI16Z",
+   "ARK",
+   "BADGER",
+   "BLZ",
+   "BNT",
+   "CATI",
+   "CHILLGUY",
+   "CYBER",
+   "DOOD",
+   "FTM",
+   "FTT"
+  ],
+  "threshold": 5,
+  "pass": true
+ },
+ "G3": {
+  "months_with_ge20_eligible": {
+   "DESIGN": 21,
+   "HELDOUT": 14,
+   "FULL": 35
+  },
+  "eligible_names_by_month": {
+   "2023-06": 0,
+   "2023-07": 0,
+   "2023-08": 27,
+   "2023-09": 31,
+   "2023-10": 35,
+   "2023-11": 40,
+   "2023-12": 52,
+   "2024-01": 58,
+   "2024-02": 60,
+   "2024-03": 63,
+   "2024-04": 74,
+   "2024-05": 66,
+   "2024-06": 66,
+   "2024-07": 59,
+   "2024-08": 58,
+   "2024-09": 57,
+   "2024-10": 58,
+   "2024-11": 61,
+   "2024-12": 71,
+   "2025-01": 75,
+   "2025-02": 64,
+   "2025-03": 64,
+   "2025-04": 58,
+   "2025-05": 56,
+   "2025-06": 61,
+   "2025-07": 50,
+   "2025-08": 63,
+   "2025-09": 60,
+   "2025-10": 48,
+   "2025-11": 54,
+   "2025-12": 48,
+   "2026-01": 40,
+   "2026-02": 42,
+   "2026-03": 45,
+   "2026-04": 36,
+   "2026-05": 41,
+   "2026-06": 42,
+   "2026-07": 5
+  },
+  "threshold": {
+   "DESIGN": 18,
+   "HELDOUT": 12
+  },
+  "pass": true
+ },
+ "dispersion": {
+  "DESIGN": {
+   "3": {
+    "n_months_used": 22,
+    "sd_annual_pct": 1.8957,
+    "years": 1.8316,
+    "MDE_annual_pp": 3.9219
+   },
+   "5": {
+    "n_months_used": 22,
+    "sd_annual_pct": 1.2824,
+    "years": 1.8316,
+    "MDE_annual_pp": 2.6532
+   },
+   "10": {
+    "n_months_used": 21,
+    "sd_annual_pct": 0.9825,
+    "years": 1.8316,
+    "MDE_annual_pp": 2.0326
+   },
+   "20": {
+    "n_months_used": 21,
+    "sd_annual_pct": 0.7999,
+    "years": 1.8316,
+    "MDE_annual_pp": 1.655
+   }
+  },
+  "HELDOUT": {
+   "3": {
+    "n_months_used": 14,
+    "sd_annual_pct": 4.0143,
+    "years": 1.3361,
+    "MDE_annual_pp": 9.7242
+   },
+   "5": {
+    "n_months_used": 14,
+    "sd_annual_pct": 3.8614,
+    "years": 1.3361,
+    "MDE_annual_pp": 9.3539
+   },
+   "10": {
+    "n_months_used": 14,
+    "sd_annual_pct": 3.0249,
+    "years": 1.3361,
+    "MDE_annual_pp": 7.3276
+   },
+   "20": {
+    "n_months_used": 14,
+    "sd_annual_pct": 2.6001,
+    "years": 1.3361,
+    "MDE_annual_pp": 6.2985
+   }
+  },
+  "FULL": {
+   "3": {
+    "n_months_used": 36,
+    "sd_annual_pct": 2.9059,
+    "years": 3.1677,
+    "MDE_annual_pp": 4.5716
+   },
+   "5": {
+    "n_months_used": 36,
+    "sd_annual_pct": 2.662,
+    "years": 3.1677,
+    "MDE_annual_pp": 4.1878
+   },
+   "10": {
+    "n_months_used": 35,
+    "sd_annual_pct": 2.1526,
+    "years": 3.1677,
+    "MDE_annual_pp": 3.3865
+   },
+   "20": {
+    "n_months_used": 35,
+    "sd_annual_pct": 1.8114,
+    "years": 3.1677,
+    "MDE_annual_pp": 2.8498
+   }
+  }
+ },
+ "G1": {
+  "window": "HELDOUT",
+  "topN_chosen_most_favourable": 20,
+  "sd_annual_pct": 2.6001,
+  "years": 1.3361,
+  "MDE_annual_pp": 6.2985,
+  "threshold_pp": 1.07,
+  "ratio_MDE_over_threshold": 5.886,
+  "blocking": true,
+  "pass": false
+ },
+ "G1b": {
+  "window": "FULL",
+  "topN_chosen_most_favourable": 20,
+  "sd_annual_pct": 1.8114,
+  "years": 3.1677,
+  "MDE_annual_pp": 2.8498,
+  "threshold_pp": 1.07,
+  "ratio_MDE_over_threshold": 2.663,
+  "blocking": true,
+  "pass": false
+ },
+ "G1max": {
+  "window": "FULL",
+  "topN_chosen_most_favourable": 20,
+  "sd_annual_pct": 1.8114,
+  "years": 3.1677,
+  "MDE_annual_pp": 2.8498,
+  "threshold_pp": 11.55,
+  "ratio_MDE_over_threshold": 0.247,
+  "blocking": false,
+  "pass": true
+ },
+ "G2": {
+  "window": "FULL",
+  "topN_chosen_most_favourable": 20,
+  "sd_annual_pct": 1.8114,
+  "years": 3.1677,
+  "MDE_annual_pp": 2.8498,
+  "threshold_pp": 0.07,
+  "ratio_MDE_over_threshold": 40.711,
+  "blocking": false,
+  "pass": false
+ },
+ "G4": {
+  "hl_top20_depth_thinner_side_usd_median": 33309,
+  "hl_top20_depth_p25": 20988,
+  "per_name_notional_at_10pct_of_depth_usd": 3331,
+  "implied_book_usd": {
+   "3": 9993,
+   "5": 16654,
+   "10": 33309,
+   "20": 66617
+  },
+  "note": "one leg only; the Binance leg is deeper, the Hyperliquid leg binds"
+ },
+ "diagnostic_persistence_DESIGN_ONLY": {
+  "n_coin_months": 1142,
+  "spearman_trailing_vs_next_month_differential": 0.3911,
+  "label": "DESIGN WINDOW ONLY. Gate \u00a78 forbids reading this as evidence for the candidate."
+ },
+ "diagnostic_realised_differential_DESIGN_ONLY": {
+  "abs_differential_pp_per_yr": {
+   "p50": 5.043,
+   "p75": 8.663,
+   "p90": 16.16
+  },
+  "T21_snapshot_for_comparison": {
+   "p50": 2.06,
+   "p75": 11.41,
+   "p90": 32.37
+  }
+ },
+ "gates_not_run_reason": "G0 failed: the test is not run",
+ "VERDICT": "TEST NOT RUN \u2014 G0 failed: the test is not run"
+}

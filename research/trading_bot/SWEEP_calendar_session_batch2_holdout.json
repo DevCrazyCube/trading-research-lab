@@ -1,0 +1,200 @@
+[
+ {
+  "name": "XE_MONTHSTART_CONT",
+  "desc": "first 2 sessions of the month: the same MTD sort in the CONTINUATION direction (long prior-month winners)",
+  "dataset": "daily",
+  "design": {
+   "name": "XE_MONTHSTART_CONT",
+   "desc": "first 2 sessions of the month: the same MTD sort in the CONTINUATION direction (long prior-month winners)",
+   "dataset": "daily",
+   "window": "design",
+   "sharpe": 0.682,
+   "n_periods": 3050,
+   "n_active_periods": 435,
+   "years": 12.1,
+   "ann_return_pct": 1.804,
+   "ann_vol_pct": 2.646,
+   "total_return_pct": 21.83,
+   "max_drawdown_pct": -3.41
+  },
+  "holdout": {
+   "name": "XE_MONTHSTART_CONT",
+   "desc": "first 2 sessions of the month: the same MTD sort in the CONTINUATION direction (long prior-month winners)",
+   "dataset": "daily",
+   "window": "holdout",
+   "sharpe": 0.412,
+   "n_periods": 2421,
+   "n_active_periods": 348,
+   "years": 9.61,
+   "ann_return_pct": 0.83,
+   "ann_vol_pct": 2.013,
+   "total_return_pct": 7.97,
+   "max_drawdown_pct": -5.64
+  }
+ },
+ {
+  "name": "SESS_OPEXDAY_INTRADAY",
+  "desc": "long SPY open->close on the monthly OPEX session only (pin release inside the day)",
+  "dataset": "daily",
+  "design": {
+   "name": "SESS_OPEXDAY_INTRADAY",
+   "desc": "long SPY open->close on the monthly OPEX session only (pin release inside the day)",
+   "dataset": "daily",
+   "window": "design",
+   "sharpe": -0.695,
+   "n_periods": 6025,
+   "n_active_periods": 287,
+   "years": 23.91,
+   "ann_return_pct": -1.932,
+   "ann_vol_pct": 2.782,
+   "total_return_pct": -46.2,
+   "max_drawdown_pct": -46.54
+  },
+  "holdout": {
+   "name": "SESS_OPEXDAY_INTRADAY",
+   "desc": "long SPY open->close on the monthly OPEX session only (pin release inside the day)",
+   "dataset": "daily",
+   "window": "holdout",
+   "sharpe": -0.569,
+   "n_periods": 2421,
+   "n_active_periods": 116,
+   "years": 9.61,
+   "ann_return_pct": -1.768,
+   "ann_vol_pct": 3.11,
+   "total_return_pct": -16.99,
+   "max_drawdown_pct": -19.88
+  }
+ },
+ {
+  "name": "TOM_DURATION_EXT",
+  "desc": "last 2 sessions of the month: long TLT / short IEF (bond indices extend duration at each month-end reconstitution)",
+  "dataset": "daily",
+  "design": {
+   "name": "TOM_DURATION_EXT",
+   "desc": "last 2 sessions of the month: long TLT / short IEF (bond indices extend duration at each month-end reconstitution)",
+   "dataset": "daily",
+   "window": "design",
+   "sharpe": 0.693,
+   "n_periods": 3632,
+   "n_active_periods": 520,
+   "years": 14.41,
+   "ann_return_pct": 0.824,
+   "ann_vol_pct": 1.189,
+   "total_return_pct": 11.88,
+   "max_drawdown_pct": -2.45
+  },
+  "holdout": {
+   "name": "TOM_DURATION_EXT",
+   "desc": "last 2 sessions of the month: long TLT / short IEF (bond indices extend duration at each month-end reconstitution)",
+   "dataset": "daily",
+   "window": "holdout",
+   "sharpe": 0.051,
+   "n_periods": 2421,
+   "n_active_periods": 348,
+   "years": 9.61,
+   "ann_return_pct": 0.059,
+   "ann_vol_pct": 1.164,
+   "total_return_pct": 0.57,
+   "max_drawdown_pct": -3.14
+  }
+ },
+ {
+  "name": "XE_MONTHEND_REV",
+  "desc": "last 2 sessions of the month, across a 24-ETF panel: long the worst month-to-date third, short the best (rebalance flow into the laggards)",
+  "dataset": "daily",
+  "design": {
+   "name": "XE_MONTHEND_REV",
+   "desc": "last 2 sessions of the month, across a 24-ETF panel: long the worst month-to-date third, short the best (rebalance flow into the laggards)",
+   "dataset": "daily",
+   "window": "design",
+   "sharpe": 0.592,
+   "n_periods": 3050,
+   "n_active_periods": 437,
+   "years": 12.1,
+   "ann_return_pct": 1.427,
+   "ann_vol_pct": 2.412,
+   "total_return_pct": 17.27,
+   "max_drawdown_pct": -2.9
+  },
+  "holdout": {
+   "name": "XE_MONTHEND_REV",
+   "desc": "last 2 sessions of the month, across a 24-ETF panel: long the worst month-to-date third, short the best (rebalance flow into the laggards)",
+   "dataset": "daily",
+   "window": "holdout",
+   "sharpe": 0.929,
+   "n_periods": 2421,
+   "n_active_periods": 348,
+   "years": 9.61,
+   "ann_return_pct": 1.637,
+   "ann_vol_pct": 1.761,
+   "total_return_pct": 15.72,
+   "max_drawdown_pct": -3.12
+  }
+ },
+ {
+  "name": "TOM_CREDIT_FLOW",
+  "desc": "turn-of-month: long LQD / short IEF (credit index rebalance and coupon reinvestment)",
+  "dataset": "daily",
+  "design": {
+   "name": "TOM_CREDIT_FLOW",
+   "desc": "turn-of-month: long LQD / short IEF (credit index rebalance and coupon reinvestment)",
+   "dataset": "daily",
+   "window": "design",
+   "sharpe": 0.309,
+   "n_periods": 3632,
+   "n_active_periods": 865,
+   "years": 14.41,
+   "ann_return_pct": 0.568,
+   "ann_vol_pct": 1.838,
+   "total_return_pct": 8.18,
+   "max_drawdown_pct": -2.37
+  },
+  "holdout": {
+   "name": "TOM_CREDIT_FLOW",
+   "desc": "turn-of-month: long LQD / short IEF (credit index rebalance and coupon reinvestment)",
+   "dataset": "daily",
+   "window": "holdout",
+   "sharpe": -0.03,
+   "n_periods": 2421,
+   "n_active_periods": 580,
+   "years": 9.61,
+   "ann_return_pct": -0.028,
+   "ann_vol_pct": 0.917,
+   "total_return_pct": -0.27,
+   "max_drawdown_pct": -3.03
+  }
+ },
+ {
+  "name": "TOM_EM_MINUS_DM",
+  "desc": "turn-of-month: long EEM / short EFA",
+  "dataset": "daily",
+  "design": {
+   "name": "TOM_EM_MINUS_DM",
+   "desc": "turn-of-month: long EEM / short EFA",
+   "dataset": "daily",
+   "window": "design",
+   "sharpe": 0.591,
+   "n_periods": 3454,
+   "n_active_periods": 821,
+   "years": 13.71,
+   "ann_return_pct": 1.91,
+   "ann_vol_pct": 3.233,
+   "total_return_pct": 26.17,
+   "max_drawdown_pct": -13.54
+  },
+  "holdout": {
+   "name": "TOM_EM_MINUS_DM",
+   "desc": "turn-of-month: long EEM / short EFA",
+   "dataset": "daily",
+   "window": "holdout",
+   "sharpe": 0.601,
+   "n_periods": 2421,
+   "n_active_periods": 580,
+   "years": 9.61,
+   "ann_return_pct": 1.672,
+   "ann_vol_pct": 2.78,
+   "total_return_pct": 16.06,
+   "max_drawdown_pct": -3.4
+  }
+ }
+]

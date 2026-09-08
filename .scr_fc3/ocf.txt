@@ -1,0 +1,35 @@
+create window hours 23.589166666666667
+corr(n_prior>0, hours_into_window) = 0.124
+  hours  0- 6 : n=162  frac np0=0.586
+  hours  6-12 : n=157  frac np0=0.414
+  hours 12-18 : n= 49  frac np0=0.449
+  hours 18-24 : n= 14  frac np0=0.571
+
+--- H=15 time flat, mints=176 ---
+  by creation hour:
+    hours  0- 6 n= 83 mean=-0.1008  frac np0=0.747
+    hours  6-12 n= 61 mean=-0.1440  frac np0=0.557
+    hours 12-18 n= 20 mean=-0.1910  frac np0=0.600
+    hours 18-24 n= 12 mean=-0.0641  frac np0=0.583
+  np0 minus np1p, stratified by creation hour (validate mints only):
+    hours  0- 4  k0=26 k1=10  np0=-0.0710 np1p=-0.2023  delta=+0.1313
+    hours  4- 8  k0=12 k1=11  np0=-0.0565 np1p=-0.2121  delta=+0.1556
+    hours  8-12  k0=12 k1= 9  np0=-0.1211 np1p=-0.1883  delta=+0.0672
+    stratified weighted delta (VALIDATE) = +0.1210
+    stratified weighted delta (TRAIN)    = +0.0884
+  TRAIN np0 k= 54 res=0.928 mean=-0.0998 | np1p k= 25 res=0.908 mean=-0.1845
+  VALID np0 k= 61 res=0.913 mean=-0.0791 | np1p k= 36 res=0.903 mean=-0.1921
+
+--- H=60 time flat, mints=130 ---
+  by creation hour:
+    hours  0- 6 n= 69 mean=-0.1390  frac np0=0.725
+    hours  6-12 n= 44 mean=-0.1078  frac np0=0.614
+    hours 12-18 n= 11 mean=-0.0495  frac np0=0.455
+  np0 minus np1p, stratified by creation hour (validate mints only):
+    hours  0- 4  k0=22 k1= 9  np0=-0.1020 np1p=-0.3257  delta=+0.2237
+    hours  4- 8  k0= 9 k1= 8  np0=-0.0312 np1p=-0.2328  delta=+0.2016
+    hours  8-12  k0= 7 k1= 4  np0=+0.0150 np1p=-0.1459  delta=+0.1609
+    stratified weighted delta (VALIDATE) = +0.2033
+    stratified weighted delta (TRAIN)    = +0.1712
+  TRAIN np0 k= 41 res=0.857 mean=-0.0473 | np1p k= 22 res=0.801 mean=-0.2825
+  VALID np0 k= 43 res=0.829 mean=-0.0456 | np1p k= 24 res=0.881 mean=-0.2568

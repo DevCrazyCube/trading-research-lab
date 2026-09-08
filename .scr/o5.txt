@@ -1,0 +1,5 @@
+done 380
+EXIT=0
+zWsbpwY3sAK35xwquyqP9Y71cAnhvxZWchxsdW8pump 1000
+za6vWQEuPE7CVkGLaBSvy7rajMgft3uzL6z4p3Lpump 229
+zoSegmu8SdJQL1oD1DmLc3UdQVDW5csq93MeTQfpump 238

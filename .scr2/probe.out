@@ -1,0 +1,52 @@
+python 3.14.5
+numpy 2.4.6
+== /home/anont/meme/research/midcap/grad_ohlcv.sqlite True 8904704
+TABLE ohlcv
+    CREATE TABLE ohlcv(         mint text primary key, pool text, n_bars int, first_ts int, last_ts int,         bars_json text, fetched_at int, status text)
+    rows= 672
+== /home/anont/meme/research/b11a/window_labels.sqlite True 12697600
+TABLE window_label
+    CREATE TABLE window_label (             bonding_curve TEXT PRIMARY KEY,             mint TEXT NOT NULL,             creator TEXT,             create_slot INTEGER NOT NULL,             block_time INTEGER,             complete INTEGER,             account_missing INTEGER NOT NULL,             status TEXT NOT NULL,             creator_onchain TEXT,             virtual_token_reserves INTEGER,             real_token_reserves INTEGER,             data_len INTEGER,             fetched_at_unix REAL NOT NULL         )
+    rows= 33866
+TABLE metadata
+    CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)
+    rows= 7
+== /home/anont/meme/research/b11a/b11a_bodies.sqlite True 15771230208
+TABLE metadata
+    CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)
+    rows= 36
+TABLE raw_transaction
+    CREATE TABLE raw_transaction (             signature TEXT PRIMARY KEY,             method TEXT NOT NULL,             params_json TEXT NOT NULL,             received_at_unix REAL NOT NULL,             response_sha256 TEXT NOT NULL,             raw_zlib BLOB NOT NULL         )
+    rows= 326509
+TABLE raw_block_signatures
+    CREATE TABLE raw_block_signatures (             slot INTEGER PRIMARY KEY,             method TEXT NOT NULL,             params_json TEXT NOT NULL,             received_at_unix REAL NOT NULL,             response_sha256 TEXT NOT NULL,             raw_zlib BLOB NOT NULL         )
+    rows= 113804
+TABLE transaction_coordinate
+    CREATE TABLE transaction_coordinate (             signature TEXT PRIMARY KEY,             slot INTEGER NOT NULL,             transaction_index INTEGER NOT NULL,             UNIQUE(slot, transaction_index),             FOREIGN KEY(slot) REFERENCES raw_block_signatures(slot)         )
+    rows= 326509
+TABLE raw_boundary_response
+    CREATE TABLE raw_boundary_response (             request_key TEXT PRIMARY KEY,             program_id TEXT NOT NULL,             method TEXT NOT NULL,             params_json TEXT NOT NULL,             received_at_unix REAL NOT NULL,             response_sha256 TEXT NOT NULL,             raw_zlib BLOB NOT NULL         )
+    rows= 4
+TABLE program_version
+    CREATE TABLE program_version (             program_id TEXT NOT NULL,             from_slot INTEGER NOT NULL,          -- inclusive             to_slot INTEGER NOT NULL,            -- inclusive             idl_path TEXT,                       -- NULL only for a KNOWN-UNCOVERED interval             idl_sha256 TEXT,             deploy_slot INTEGER,                 -- the deployment that opened this interval             evidence_key TEXT,                   -- -> raw_boundary_response.request_key             coverage TEXT NOT NULL CHECK(coverage IN ('covered','uncovered')),             PRIMARY KEY(
+    rows= 2
+TABLE instruction
+    CREATE TABLE instruction (             slot INTEGER NOT NULL,             transaction_index INTEGER NOT NULL,             outer_index INTEGER NOT NULL,             inner_index INTEGER NOT NULL,             signature TEXT NOT NULL,             program_id TEXT NOT NULL,             discriminator TEXT,             idl_name TEXT,             target INTEGER NOT NULL CHECK(target IN (0,1)),             accounts_json TEXT,             data_len INTEGER,             PRIMARY KEY(slot, transaction_index, outer_index, inner_index)         )
+    rows= 4461142
+TABLE reserve_observation
+    CREATE TABLE reserve_observation (             slot INTEGER NOT NULL,             transaction_index INTEGER NOT NULL,             outer_index INTEGER NOT NULL,             inner_index INTEGER NOT NULL,             bonding_curve TEXT NOT NULL,             virtual_quote_before INTEGER, virtual_token_before INTEGER,             real_quote_before INTEGER,    real_token_before INTEGER,             virtual_quote_after INTEGER,  virtual_token_after INTEGER,             real_quote_after INTEGER,     real_token_after INTEGER,             evidence TEXT NOT NULL,             PRIMARY KEY(slot, transaction
+    rows= 333888
+TABLE classification_failure
+    CREATE TABLE classification_failure (             id INTEGER PRIMARY KEY AUTOINCREMENT,             signature TEXT,             slot INTEGER,             transaction_index INTEGER,             outer_index INTEGER,             inner_index INTEGER,             program_id TEXT,             discriminator TEXT,             reason TEXT NOT NULL,             context_json TEXT,             -- Machine-readable failure class. Written explicitly at every insert site so the             -- downstream coverage gate does not have to infer a class from prose. NULL means a row             -- written before thi
+    rows= 0
+TABLE sqlite_sequence
+    CREATE TABLE sqlite_sequence(name,seq)
+    rows= 0
+SAMPLE ('AkhMGmhkHzdcwvxam1XoXGeaTeXRc1VZ4TUFVdRupump', 'DVicWWswLzfa1FbeRaD1sYYERnxFFsCYnqoCctPEX7LL', 71, 1785169680, 1785241440, 'ok', '[[1785241440, 1.3986623349909798e-06, 1.3986623349909798e-06, 1.3984662865604283e-06, 1.3984662865604283e-06, 0.07989572166203146], [1785233580, 1.3980139774053158e-06, 1.3986623349909798e-06, 1.3980139774053158e-06, 1.3986623349909798e-06, 0.05919672013435349], [1785218640, 1.3979977800086922e-06, ')
+SAMPLE ('7AhXcxhEeR7HuqG5XxN4PescwsBiD3rGbKUgnxeApump', '2fPnsWr39z3ya2rdxARbdt5DS3HqguSxBw7afM6E5R4J', 833, 1785195420, 1785254880, 'ok', '[[1785254880, 4.133607223078428e-05, 4.133607223078428e-05, 4.053905783665077e-05, 4.053905783665077e-05, 30.046807746282756], [1785254820, 4.2165263787091813e-05, 4.2165263787091813e-05, 4.0948165175457305e-05, 4.133607223078428e-05, 71.29701472770459], [1785254760, 4.108185336295965e-05, 4.3688800')
+SAMPLE ('9Uh4Mfn57L6JSg4H3ZzmZsi6wbz6ugeaNZmA1Duepump', '3oQzFc6uwGT6NgkkZTWEXmA3pdkmA3NJVYMWEd4hAdrJ', 0, None, None, 'nobars:200', None)
+status counts: [('nobars:200', 20, 0), ('nobars:429', 28, 0), ('nopool:429', 30, 0), ('ok', 594, 66688)]
+wl sample [('DjSqk3XLJb4Wboo67WsYkW4BFrzmTNKqQDpRaasbhWdV', 'B6VzvpYJa9nRTX6VNJxwmTAJ1MRnU3Jmyk6VWUxkpump', 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 435569160, 1785168436, 0, 0, 'ok', 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 1073000000000000, 793100000000000, 151, 1788383767.6913838), ('8eVedziyhkPjoUw7qnHbWjQGV3KCq3gbvCJ7Svg8iJBv', 'DnQu4Mg8Y4qV41SwgjthSVHn1UzqVUU8QdpF3tK4pump', 'DwyEawtMyDDVFxgLvaLrDkbQYi8hTb6YWgrpJCKB6UVC', 435569191, 1785168449, 0, 0, 'ok', 'DwyEawtMyDDVFxgLvaLrDkbQYi8hTb6YWgrpJCKB6UVC', 1073000000000000, 793100000000000, 151, 1788383767.6913838), ('6Eht2ZDu4JCKS3nVyuwGkEuTxbL9QDFeebqUAwXRahz2', '6e9dumX8UkKnY6UBXr4LGB9irHwSZWC3WLRgY7jHpump', '9Di6TDgz85Wr6TbeqayLmbZMhGtn4qeNvJQj1G2gQEv8', 435569199, 1785168452, 0, 0, 'ok', '9Di6TDgz85Wr6TbeqayLmbZMhGtn4qeNvJQj1G2gQEv8', 1073000000000000, 793100000000000, 115, 1788383767.6913838)]
+wl count (33866, 1075)
+wl block_time range (1785168436, 1785254238, 435569160, 435772743)
+distinct creators (8565,)

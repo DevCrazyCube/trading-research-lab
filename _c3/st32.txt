@@ -1,0 +1,49 @@
+  rvol10=q1|cumvol_log=q2 | t15_pyr
+     TR +0.0328 (med -0.0033 n  282 k 22)  VA +0.0333 (med +0.0058 n  188 k 20) base -0.0950  boot95 [+0.0038,+0.0654] res 0.979
+     liq>=$600  TR +0.0281 VA +0.0635 (n72 k15, control -0.2612)
+     liq>=$2000 TR +0.0724 VA +0.0808 (n21 k10, control -0.2827)
+     uncapped VA   +0.0333 (control   +2.1905) | cap+100% VA +0.0333 (control -0.1011)
+
+  cumvol_log=q1|m_creator_prior=0 | t30sl30
+   rvol10=q1|cumvol_log=q2 | t15_pyr  TR +0.0328 VA +0.0333 liq600 TR +0.0281 VA +0.0635
+=== cells positive on BOTH splits and BH-clean: 189 ===
+
+  dd_ath=q3|ret30m=q2|m_hour=2 | t5
+     TR +0.1045 (med +0.0509 n  228 k 16)  VA +0.1036 (med +0.0573 n  482 k 19) base -0.1197  boot95 [-0.0854,+0.3059] res 0.998
+     liq>=$600  TR +0.1051 VA +0.0224 (n216 k17, control -0.3023)
+     liq>=$2000 TR +0.0648 VA -0.0434 (n74 k15, control -0.3313)
+     uncapped VA   +0.1036 (control   -0.0836) | cap+100% VA +0.0873 (control -0.1347)
+
+  dd_ath=q1|ret1=q1|m_hour=3 | t15
+     TR +0.1265 (med -0.0560 n  191 k 24)  VA +0.1011 (med -0.0918 n  165 k 25) base -0.1711  boot95 [-0.1989,+0.4881] res 0.988
+     liq>=$600  TR +0.0108 VA -0.1058 (n35 k13, control -0.4336)
+     liq>=$2000 TR +0.2485 VA -0.0814 (n10 k5, control -0.4728)
+     uncapped VA   +0.6933 (control   +4.4068) | cap+100% VA -0.0589 (control -0.1810)
+
+  ret1=q2|m_creator_prior=2|m_cohort10=1 | t30tp50
+     TR +0.0923 (med +0.0943 n  124 k 25)  VA +0.1550 (med +0.2665 n   64 k 14) base -0.1224  boot95 [-0.0639,+0.3494] res 0.953
+     liq>=$600  TR +0.1818 VA +0.4367 (n27 k9, control -0.2625)
+     liq>=$2000 TR +0.2474 VA +0.4207 (n11 k6, control -0.3213)
+     uncapped VA   +0.1550 (control   -0.1224) | cap+100% VA +0.1550 (control -0.1224)
+
+  age_min=q0|m_px0=1|m_v0=2 | t30sl30
+     TR +0.1047 (med -0.0512 n  103 k 24)  VA +0.0771 (med +0.0753 n  117 k 29) base -0.1324  boot95 [-0.0253,+0.1790] res 0.983
+     liq>=$600  TR +0.0748 VA +0.0463 (n87 k27, control -0.1826)
+     liq>=$2000 TR +0.0442 VA +0.0075 (n73 k25, control -0.1911)
+     uncapped VA   +0.0771 (control   +2.7782) | cap+100% VA +0.0771 (control -0.1460)
+
+  trailvol_log=q1|dd_ath=q0|m_cohort10=0 | t5
+     TR +0.0769 (med -0.0627 n  169 k 42)  VA +0.1271 (med -0.0748 n  160 k 41) base -0.1197  boot95 [-0.1097,+0.4195] res 0.950
+     liq>=$600  TR -0.1062 VA -0.0023 (n5 k1, control -0.3023)
+     liq>=$2000 TR +0.7931 VA +0.0397 (n1 k1, control -0.3313)
+     uncapped VA   +0.2434 (control   -0.0836) | cap+100% VA -0.0284 (control -0.1347)
+
+  volaccel=q2|dd_ath=q0|m_ttg=1 | t30sl30
+     TR +0.0746 (med -0.0306 n  132 k 29)  VA +0.1086 (med -0.0489 n  120 k 32) base -0.1324  boot95 [-0.0980,+0.4024] res 0.992
+     liq>=$600  TR -0.1308 VA -0.3114 (n3 k2, control -0.1826)
+     liq>=$2000 TR -0.3114 VA -0.3114 (n2 k1, control -0.1911)
+     uncapped VA   +0.1365 (control   +2.7782) | cap+100% VA -0.0164 (control -0.1460)
+
+  volaccel=q3|age_min=q0|m_v0=2 | t30sl30
+     TR +0.0782 (med -0.1610 n  129 k 47)  VA +0.0718 (med -0.1074 n  177 k 63) base -0.1324  boot95 [-0.0265,+0.1873] res 0.972
+     liq>=$600  TR +0.0559 VA +0.0490 (n136 k60, control -0.1826)

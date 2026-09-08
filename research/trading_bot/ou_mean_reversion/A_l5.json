@@ -1,0 +1,80 @@
+{
+ "leg": "L5_T12CEF",
+ "design_split": "2024-03-01",
+ "n_cefs_fit": 331,
+ "half_life_weeks": {
+  "median": 6.75,
+  "p25": 4.01,
+  "p75": 10.95,
+  "mean": 8.7
+ },
+ "half_life_days_median": 47.3,
+ "hurst": {
+  "median": 0.441,
+  "frac_below_0.5": 0.764,
+  "p25": 0.39,
+  "p75": 0.496
+ },
+ "adf": {
+  "median_t": -2.44,
+  "frac_reject_5pct": 0.311,
+  "n": 331
+ },
+ "examples": {
+  "ACP": {
+   "half_life_wk": 3.55,
+   "hurst": 0.473,
+   "adf_t": -2.57,
+   "adf_verdict": "reject@10%",
+   "mean_disc_pct": 0.93,
+   "sd_disc_pct": 5.31,
+   "n_wk": 125
+  },
+  "ACV": {
+   "half_life_wk": 2.66,
+   "hurst": 0.61,
+   "adf_t": -3.79,
+   "adf_verdict": "reject@1%",
+   "mean_disc_pct": -2.98,
+   "sd_disc_pct": 4.82,
+   "n_wk": 125
+  },
+  "ADX": {
+   "half_life_wk": 3.89,
+   "hurst": 0.411,
+   "adf_t": -2.41,
+   "adf_verdict": "FAIL(unit root)",
+   "mean_disc_pct": -14.69,
+   "sd_disc_pct": 0.82,
+   "n_wk": 125
+  },
+  "AEF": {
+   "half_life_wk": 4.47,
+   "hurst": 0.415,
+   "adf_t": -2.25,
+   "adf_verdict": "FAIL(unit root)",
+   "mean_disc_pct": -12.48,
+   "sd_disc_pct": 2.27,
+   "n_wk": 125
+  },
+  "AFB": {
+   "half_life_wk": 11.92,
+   "hurst": 0.315,
+   "adf_t": -1.86,
+   "adf_verdict": "FAIL(unit root)",
+   "mean_disc_pct": -10.79,
+   "sd_disc_pct": 4.27,
+   "n_wk": 125
+  },
+  "AGD": {
+   "half_life_wk": 8.92,
+   "hurst": 0.454,
+   "adf_t": -2.4,
+   "adf_verdict": "FAIL(unit root)",
+   "mean_disc_pct": -11.7,
+   "sd_disc_pct": 2.85,
+   "n_wk": 125
+  }
+ },
+ "note": "L5 uses a widest/narrowest DECILE tilt on the discount LEVEL, not a |z|>=K band; the Bertram optimal-threshold comparison (A2) does not apply. The OU fit characterises the discount-convergence CLOCK and confirms mean reversion."
+}

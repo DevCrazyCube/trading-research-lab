@@ -1,0 +1,10 @@
+[('ohlcv', 'CREATE TABLE ohlcv(\n        mint text primary key, pool text, n_bars int, first_ts int, last_ts int,\n        bars_json text, fetched_at int, status text)')]
+rows (672,)
+('AkhMGmhkHzdcwvxam1XoXGeaTeXRc1VZ4TUFVdRupump', 'DVicWWswLzfa1FbeRaD1sYYERnxFFsCYnqoCctPEX7LL', 71, 1785169680, 1785241440, 'ok') 9013
+('7AhXcxhEeR7HuqG5XxN4PescwsBiD3rGbKUgnxeApump', '2fPnsWr39z3ya2rdxARbdt5DS3HqguSxBw7afM6E5R4J', 833, 1785195420, 1785254880, 'ok') 105274
+('9Uh4Mfn57L6JSg4H3ZzmZsi6wbz6ugeaNZmA1Duepump', '3oQzFc6uwGT6NgkkZTWEXmA3pdkmA3NJVYMWEd4hAdrJ', 0, None, None, 'nobars:200') None
+sample bars [[1785241440, 1.3986623349909798e-06, 1.3986623349909798e-06, 1.3984662865604283e-06, 1.3984662865604283e-06, 0.07989572166203146], [1785233580, 1.3980139774053158e-06, 1.3986623349909798e-06, 1.3980139774053158e-06, 1.3986623349909798e-06, 0.05919672013435349], [1785218640, 1.3979977800086922e-06, 1.3980139774053158e-06, 1.3979977800086922e-06, 1.3980139774053158e-06, 0.11707826621698787]] ... [[1785169800, 3.7358719092305785e-05, 4.867792718364347e-05, 3.7358719092305785e-05, 4.8241695479543755e-05, 3160.794782193243], [1785169740, 3.489245964868015e-05, 3.888529113474664e-05, 2.586691634065977e-05, 3.7358719092305785e-05, 3359.061627536353], [1785169680, 3.4080800510263104e-05, 3.778180059729692e-05, 3.184032630870542e-05, 3.489245964868015e-05, 1937.8570660167813]]
+nbars 71
+total mints 672 h12 438
+[('window_label', 'CREATE TABLE window_label (\n            bonding_curve TEXT PRIMARY KEY,\n            mint TEXT NOT NULL,\n            creator TEXT,\n            create_slot INTEGER NOT NULL,\n            block_time INTEGER,\n            complete INTEGER,\n            account_missing INTEGER NOT NULL,\n            status TEXT NOT NULL,\n            creator_onchain TEXT,\n            virtual_token_reserves INTEGER,\n            real_token_reserves INTEGER,\n            data_len INTEGER,\n            fetched_at_unix REAL NOT NULL\n        )'), ('metadata', 'CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)')]
+wl rows (33866, 1075)

@@ -1,0 +1,23 @@
+{
+  "schema": "wbso-sender/1",
+  "_readme": [
+    "This file is a TEMPLATE. Every value starting with '<<INVULLEN' is a placeholder.",
+    "The briefing generator refuses to mark a briefing as sendable while any placeholder remains,",
+    "and the dry-run stamps every generated file CONCEPT - NIET VERZENDEN.",
+    "Filling this in requires a KVK registration and a mailbox, which are OWNER actions (see README).",
+    "Copy to params/sender_profile.json (git-ignored by intent) once those exist."
+  ],
+  "afzender_naam": "<<INVULLEN: naam van de ondernemer>>",
+  "handelsnaam": "<<INVULLEN: handelsnaam zoals ingeschreven bij KVK>>",
+  "kvk_nummer": "<<INVULLEN: KVK-nummer>>",
+  "btw_id": "<<INVULLEN: btw-identificatienummer>>",
+  "adres": "<<INVULLEN: straat en huisnummer>>",
+  "postcode_plaats": "<<INVULLEN: postcode en plaats>>",
+  "land": "Nederland",
+  "email": "<<INVULLEN: zakelijk e-mailadres>>",
+  "telefoon": "<<INVULLEN: telefoonnummer>>",
+  "website": "<<INVULLEN: https://voorbeeld.nl>>",
+  "privacyverklaring_url": "<<INVULLEN: https://voorbeeld.nl/privacy>>",
+  "afmelden_instructie": "Antwoord op deze e-mail met het woord AFMELDEN, of mail <<INVULLEN: afmeld-adres>>. Wij verwijderen u dan binnen 5 werkdagen en nemen u op in onze blokkeerlijst, zodat u ook later geen bericht meer krijgt.",
+  "tarief_regel": "<<INVULLEN OF VERWIJDEREN: bijvoorbeeld 'no cure no pay, 15% van het gerealiseerde voordeel, met een maximum van EUR X'. De prijs is een beslissing van de eigenaar; laat deze regel leeg tot die is genomen.>>"
+}

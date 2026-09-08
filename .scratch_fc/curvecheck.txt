@@ -1,0 +1,6 @@
+b11a-covered h12 launches: 2187 complete flag dist {0: 2127, 1: 60}
+base rate of complete among ALL h12 launches: 0.0316
+covered launches that are also in grad_ohlcv: 49
+n_trades per covered launch p10/p50/p90/max 2 11 167 11830
+covered launches with >=10 trades 1157
+covered & graduated 60 rate 0.0274

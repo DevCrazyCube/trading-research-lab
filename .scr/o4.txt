@@ -1,0 +1,23 @@
+transaction_coordinate CREATE TABLE transaction_coordinate (
+            signature TEXT PRIMARY KEY,
+            slot INTEGER NOT NULL,
+            transaction_index INTEGER NOT NULL,
+            UNIQUE(slot, transaction_index),
+            FOREIGN KEY(slot) REFERENCES raw_block_signatures(slot)
+        )
+
+raw_transaction CREATE TABLE raw_transaction (
+            signature TEXT PRIMARY KEY,
+            method TEXT NOT NULL,
+            params_json TEXT NOT NULL,
+            received_at_unix REAL NOT NULL,
+            response_sha256 TEXT NOT NULL,
+            raw_zlib BLOB NOT NULL
+        )
+
+ro count (333888,)
+tc count (326509,)
+bc map 380 / 380
+ro rows for our mints (31070, 48)
+instr sample [(435569222, 'create_v2', 'd6904cec5f8b31b4'), (435569222, None, None), (435569222, None, None), (435569222, None, None), (435569222, None, None)]
+idl names [(None, 3754954), ('event:TradeEvent', 330370), ('buy', 125370), ('sell', 118923), ('sell_v2', 30463), ('buy_exact_quote_in_v2', 27218), ('buy_exact_sol_in', 21490), ('event:CloseUserVolumeAccumulatorEvent', 9320), ('close_user_volume_accumulator', 9320), ('buy_v2', 7532), ('event:CreateEvent', 3932), ('create_v2', 3930), ('event:ClaimCashbackEvent', 3436), ('claim_cashback', 3423), ('init_user_volume_accumulator', 2363)]

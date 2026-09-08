@@ -1,0 +1,15 @@
+total window_label rows 33866
+h12 rows 22561
+distinct creators (h12) 6556
+creates-per-creator dist (capped 20): [(1, 4403), (2, 850), (3, 336), (4, 219), (5, 88), (6, 98), (7, 63), (8, 51), (9, 43), (10, 39), (11, 37), (12, 32), (13, 21), (14, 26), (15, 17), (16, 6), (17, 14), (18, 6), (19, 8), (20, 199)]
+graduated h12 712
+block_time range 1785168436 1785254238
+ohlcv rows 672 h12 ok 387
+bars in h12 46146
+h1 178 h2 209
+global last_ts 1785337260 global first_ts 1785168720
+ohlcv h12 matched to window_label: 387
+n_prior dist for tradeable mints: [(0, 195), (1, 29), (2, 22), (3, 13), (4, 13), (5, 9), (6, 5), (7, 5), (8, 5), (9, 4), (10, 87)]
+snapshot lines 23701 distinct h12 mints in snapshots 207
+tradeable mints with >=1 snapshot: 0
+snapshot keys ['ath', 'ath_ts', 'complete', 'created_ms', 'creator', 'has_tg', 'has_web', 'has_x', 'last_trade_ms', 'live', 'mcap', 'mint', 'name', 'pool', 'replies', 'rsol', 'rtok', 'sym', 'ts_ms', 'vsol', 'vtok']

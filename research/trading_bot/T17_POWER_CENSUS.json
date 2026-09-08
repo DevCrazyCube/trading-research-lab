@@ -1,0 +1,118 @@
+{
+ "document": "T17_POWER_CENSUS",
+ "judged_against": {
+  "file": "research/trading_bot/T17_POWER_GATE.md",
+  "sha256": "03d257ce8ff6c92c09b0be4c896dacc6a424c8925d96a805e2fc25a80fec6465",
+  "expected_sha256": "03d257ce8ff6c92c09b0be4c896dacc6a424c8925d96a805e2fc25a80fec6465",
+  "matches": true
+ },
+ "windows": {
+  "design": {
+   "dates": [
+    "2016-01-26",
+    "2021-12-31"
+   ],
+   "sessions": 1496,
+   "sessions_with_full_top20": 1486,
+   "selected_stock_days": 29720
+  },
+  "heldout": {
+   "dates": [
+    "2022-01-03",
+    "2026-08-14"
+   ],
+   "sessions": 1158,
+   "sessions_with_full_top20": 1158,
+   "selected_stock_days": 23160
+  },
+  "postpaper": {
+   "dates": [
+    "2024-01-02",
+    "2026-08-14"
+   ],
+   "sessions": 657,
+   "sessions_with_full_top20": 657,
+   "selected_stock_days": 13140
+  }
+ },
+ "G0_data_census": {
+  "pass": true,
+  "heldout_sessions_with_full_top20": 1158,
+  "threshold_sessions": 900,
+  "path_files_present": 1158,
+  "path_files_missing": 0,
+  "selected_stock_days_served": 23149,
+  "selected_stock_days_missing": 11,
+  "served_fraction": 0.9995250431778929,
+  "threshold_served": 0.98
+ },
+ "G1_portfolio_power": {
+  "pass": true,
+  "heldout_sessions": 1158,
+  "heldout_years": 4.595238095238095,
+  "mde_annualised_sharpe": 1.3061829847449802,
+  "threshold": 1.405,
+  "z": 2.8,
+  "years_needed_for_claimed_sharpe_2p81": 0.992895226757513,
+  "note": "The claimed Sharpe needs under a year to certify. What this window has to be able to see is a HALVED version of it, which is the threshold."
+ },
+ "G2_trade_count": {
+  "pass": true,
+  "design_trades": 24227,
+  "heldout_estimated_trades": 18753,
+  "threshold_trades": 2000,
+  "heldout_sessions": 1158,
+  "threshold_sessions": 500
+ },
+ "G3_per_trade_mde": {
+  "pass": false,
+  "design_trades": 24227,
+  "mean_net_r_design": 0.103689826812214,
+  "sd_net_r_design": 4.7949876991319025,
+  "mde_r_design": 0.08625727005025603,
+  "threshold_r": 0.08,
+  "trades_per_session_design": 16.314478114478113,
+  "same_day_cluster_inflation_factor": 4.039118482352073,
+  "mde_r_design_cluster_adjusted": 0.3484033336972231,
+  "mde_r_heldout_projected": 0.09804154621891893,
+  "caveat": "Same-session trades share a market factor, so the unadjusted per-trade MDE overstates the evidence. Both are given. G1, on the daily portfolio series, is the binding gate."
+ },
+ "G4_cost_resolution": {
+  "pass": true,
+  "stock_days_measured": 429,
+  "threshold": 100,
+  "r_as_bp_of_notional_median": 51.425925925925924,
+  "r_as_bp_of_notional_mean": 59.60020974868243,
+  "t6_round_trip_bp_of_notional": 5.5904,
+  "t6_round_trip_in_R_at_median": 0.10870781418797264,
+  "t6_round_trip_in_R_at_mean": 0.09379832761618068,
+  "paper_edge_at_its_own_filter_R": 0.08,
+  "paper_edge_best_bucket_R": 0.38,
+  "cost_as_multiple_of_paper_headline_edge": 1.3588476773496578,
+  "r_on_T17_own_selection": {
+   "n": 52880,
+   "r_bp_p10": 15.926573426573427,
+   "r_bp_p50": 32.273058901733165,
+   "r_bp_p90": 77.83806455942555,
+   "r_bp_mean": 45.702080740336
+  },
+  "t6_round_trip_in_R_on_T17_own_selection_median": 0.17322188197350508
+ },
+ "design_census": {
+  "sessions": 1485,
+  "no_path_file": 0,
+  "no_path_symbol": 78,
+  "stock_days": 29642
+ },
+ "verdict": "POWER-BLOCKED",
+ "gates_failed": [
+  "G3"
+ ],
+ "verdict_note_appended_after_the_census_ran": {
+  "what": "The `verdict` field above is the STRICT reading: the census script requires all five gates and G3 failed at MDE 0.0863 R against a 0.080 R threshold, a 7.8 % miss.",
+  "what_the_frozen_gate_document_actually_says": "T17_POWER_GATE.md sha256 03d257ce... assigns a blocking CONSEQUENCE to exactly two gates. G1: 'Fail => POWER-BLOCKED and the window is not spent'. G4: 'Fail => the test is not run'. G0, G2 and G3 carry no stated consequence, and the same document says in two places that the per-trade statistic is the DIAGNOSTIC and the daily portfolio series is 'the binding one' (SS0 table and SS2 G1). G1 passes at MDE 1.306 against 1.405 and G4 passes on 429 measured stock-days.",
+  "both_readings_are_recorded_because": "Choosing the convenient one silently is what AGENTS.md forbids. The strict reading is left in `verdict` unchanged; this note states the document's own designation and the decision taken. The held-out window WAS spent, on the frozen document's binding gate.",
+  "why_G3_missing_matters_less_than_it_looks": "G3's threshold is the paper's own 0.08 R per-trade edge. The design window's OBSERVED net per-trade mean is +0.1037 R, which is LARGER than the MDE of 0.0863 R -- so the per-trade effect that is actually present is resolvable even though the paper's smaller quoted one would not be. And the honest cluster-adjusted per-trade MDE is 0.348 R, which fails by 4.3x -- which is precisely why the gate named the daily portfolio series binding and the per-trade one a diagnostic.",
+  "the_number_that_matters_most_in_this_census": "R is 32.3 bp of notional at the median on T17's OWN selected stock-days -- much tighter than the 51.4 bp of B22B's 2025 most-actives pool. The T6 round trip of 5.59 bp is therefore 0.173 R, which is 2.16x the paper's own reported 0.08 R per-trade edge at the filter it uses."
+ }
+}

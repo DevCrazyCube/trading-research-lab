@@ -1,0 +1,17 @@
+import sqlite3,json,collections,hashlib
+o=open('/home/anont/meme/.ff3/step2.txt','w')
+allowed=json.load(open('/home/anont/meme/.ff3/allowed.json'))
+con=sqlite3.connect('file::memory:',uri=True)
+con.execute("ATTACH DATABASE 'file:/home/anont/meme/research/b11a/b11a_bodies.sqlite?mode=ro' AS b")
+con.execute("CREATE TABLE al(bc TEXT PRIMARY KEY)")
+con.executemany("INSERT INTO al VALUES(?)",[(k,) for k in allowed])
+o.write("allowed loaded %d\n"%len(allowed))
+r=con.execute("select count(*) from b.reserve_observation").fetchone()
+o.write("reserve_observation total %s\n"%(r,))
+r=con.execute("select count(*), count(distinct bonding_curve) from b.reserve_observation ro join al on al.bc=ro.bonding_curve").fetchone()
+o.write("allowed reserve rows %s curves %s\n"%r)
+o.write("instruction total %s\n"%(con.execute("select count(*) from b.instruction").fetchone(),))
+o.write("idl_name dist (instruction, sample):\n")
+for row in con.execute("select idl_name,count(*) from b.instruction group by 1 order by 2 desc limit 30"):
+    o.write("  %s %s\n"%row)
+o.close()

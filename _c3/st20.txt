@@ -1,0 +1,13 @@
+04:39:17
+A done 04:34:48
+surface done 04:35:09
+B done 04:37:13
+C done 04:37:36
+--C--
+  C1 px_vs_start x age_min kept=13087 swept=61908 t=80.9
+  C1 px_vs_start x logpx kept=13310 swept=63798 t=84.4
+  C1 px_vs_start x dd_ath kept=13580 swept=66066 t=87.2
+--V--
+noC [Errno 2] No such file or directory: '/home/anont/meme/_c3/phaseC.json'
+total train-kept cells: 22079
+carried to validate (train edge>0 and train p<0.05): 11186

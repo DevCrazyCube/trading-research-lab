@@ -1,0 +1,35 @@
+numpy 2.4.6
+python 3.14.5
+tables [('ohlcv',)]
+cols ['mint', 'pool', 'n_bars', 'first_ts', 'last_ts', 'bars_json', 'fetched_at', 'status']
+count,bars (672, 66688)
+status [('nobars:200', 20), ('nobars:429', 28), ('nopool:429', 30), ('ok', 594)]
+sample mint 7AhXcxhEeR7HuqG5XxN4PescwsBiD3rGbKUgnxeApump n_bars 833 first_ts 1785195420 last_ts 1785254880 status ok
+len(bars) 833
+bars[0] [1785254880, 4.133607223078428e-05, 4.133607223078428e-05, 4.053905783665077e-05, 4.053905783665077e-05, 30.046807746282756]
+bars[1] [1785254820, 4.2165263787091813e-05, 4.2165263787091813e-05, 4.0948165175457305e-05, 4.133607223078428e-05, 71.29701472770459]
+bars[-1] [1785195420, 3.063061574522486e-05, 4.150505021443054e-05, 2.6301719669209518e-05, 3.962415724934373e-05, 7924.970473040858]
+asc first3 [[1785195420, 3.063061574522486e-05, 4.150505021443054e-05, 2.6301719669209518e-05, 3.962415724934373e-05, 7924.970473040858], [1785195480, 3.962415724934373e-05, 4.058120528295269e-05, 3.586167793685283e-05, 3.850410438945056e-05, 2097.974918200001], [1785195540, 3.850410438945056e-05, 4.2013990637406056e-05, 3.3538082594668155e-05, 3.726081160729067e-05, 4149.266428773373]]
+asc last3 [[1785254760, 4.108185336295965e-05, 4.3688800228519434e-05, 4.083237707472122e-05, 4.2165263787091813e-05, 391.81260097164056], [1785254820, 4.2165263787091813e-05, 4.2165263787091813e-05, 4.0948165175457305e-05, 4.133607223078428e-05, 71.29701472770459], [1785254880, 4.133607223078428e-05, 4.133607223078428e-05, 4.053905783665077e-05, 4.053905783665077e-05, 30.046807746282756]]
+ts deltas top [(60, 735), (120, 68), (180, 14), (300, 8), (240, 5), (420, 1), (660, 1)]
+span_min 59460
+zero-vol bars 0 of 833
+close range 2.266579729763885e-05 8.111396506830817e-05
+vol range 0.14490391058655513 11783.013568852237
+h counts (aggregate only) {0: 234, 1: 204, 2: 234} {0: 20542, 1: 19682, 2: 26464}
+wl tables [('window_label',), ('metadata',)]
+wl cols ['bonding_curve', 'mint', 'creator', 'create_slot', 'block_time', 'complete', 'account_missing', 'status', 'creator_onchain', 'virtual_token_reserves', 'real_token_reserves', 'data_len', 'fetched_at_unix']
+wl rows [('DjSqk3XLJb4Wboo67WsYkW4BFrzmTNKqQDpRaasbhWdV', 'B6VzvpYJa9nRTX6VNJxwmTAJ1MRnU3Jmyk6VWUxkpump', 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 435569160, 1785168436, 0, 0, 'ok', 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 1073000000000000, 793100000000000, 151, 1788383767.6913838), ('8eVedziyhkPjoUw7qnHbWjQGV3KCq3gbvCJ7Svg8iJBv', 'DnQu4Mg8Y4qV41SwgjthSVHn1UzqVUU8QdpF3tK4pump', 'DwyEawtMyDDVFxgLvaLrDkbQYi8hTb6YWgrpJCKB6UVC', 435569191, 1785168449, 0, 0, 'ok', 'DwyEawtMyDDVFxgLvaLrDkbQYi8hTb6YWgrpJCKB6UVC', 1073000000000000, 793100000000000, 151, 1788383767.6913838)]
+wl count (33866, 1075)
+wl block_time range (1785168436, 1785254238)
+snap size 14118662
+snapline {"ts_ms":1788448363901,"mint":"iG8wRS2S8LRVQQnUhYTDmbv5i9VF9tGQzbTo65Ppump","sym":"PONS","name":"Pons","mcap":901055203.0917726,"ath":906563344.416743,"ath_ts":1788447994000,"created_ms":1788413869000,"last_trade_ms":1788448375000,"complete":true,"live":false,"replies":0,"creator":"7272sSKFvgkwXM4gPABXeccjJY8nyiceHQPqPb6uWoUd","vsol":30000000000.0,"rsol":0.0,"vtok":1073000000000000.0,"rtok":0.0,"has_x":true,"has_tg":false,"has_web":true,"pool":"FW8tRvXq3orFWhYxaDV99ipuujYonVbncihiVtTtfv5p"}
+
+snapline {"ts_ms":1788448363901,"mint":"X11cVAmmfAt1Rbu8jQ8VWhojZCxgHxEK92Ydru2pump","sym":"WOTF","name":"World Oil Trust Fund","mcap":583564317.8733908,"ath":585007623.7872436,"ath_ts":1788448173000,"created_ms":1788448083000,"last_trade_ms":1788448363000,"complete":true,"live":false,"replies":0,"creator":"CQTzxyB9fDEguqNYfQH3eJcnGSoTRVpBJuCNy4SxVsPe","vsol":30000000000.0,"rsol":0.0,"vtok":1073000000000000.0,"rtok":0.0,"has_x":false,"has_tg":false,"has_web":true,"pool":"FvFWzMGmrnJExvNPA327oN1cMvK1NAte8C44m2RoKxdT"}
+
+snap lines 25667
+attention lines 8554
+att {"ev":"EVENT","ts_ms":1788474682134,"mint":"AK53BkSHcBMUmCzw6AVpmrjhFCuPfwbesmNahxSXpump","feed":"token-boosts/latest/v1","amount":30,"total":30,"sym":"SHITLESS","px":0.0002487,"liq":41745.15,"mcap":248757,"created_ms":1788472151000,"age_h":0.7030927777777778,"control":"FCtBQkhEotgvzHXABha2sdmgkv7C2YLkvmyMQK2Ypump","control_px":0.0002065,"control_mcap":203256}
+
+att {"ev":"EVENT","ts_ms":1788474682134,"mint":"TArDeiqsERbbBB87hmJ2uv7RCNu9oBv4dG2qW9apump","feed":"token-boosts/latest/v1","amount":10,"total":10,"sym":"KONY\u0410NI","px":2.046e-06,"liq":2071.1,"mcap":2045,"created_ms":1788472241000,"age_h":0.6780927777777778,"control":"44eq7gAmYwBHstf2fKArEh2ZLRkprp42xBWmrjg7pump","control_px":null,"control_mcap":null}
+

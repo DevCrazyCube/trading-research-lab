@@ -1,0 +1,24 @@
+{
+  "NOT_PREREGISTERED": "exploratory; the verdict is in T10_HELDOUT_RESULT.json",
+  "dispersion_ratio_real_over_null": 3.8778859894224302,
+  "gross_autocorr_lag1": -0.04018595102594253,
+  "long_block_mean_bp": 3.9558195483060845,
+  "long_block_t": 0.5811323603251211,
+  "market_beta_of_long_short_book": -0.03614385806350695,
+  "moments_gross": {
+    "degenerate": false,
+    "kurtosis": 17.533929460267082,
+    "mean": 0.00022631336440358623,
+    "n": 1140,
+    "sd": 0.010549472426229277,
+    "skew": -1.5620232980207536
+  },
+  "n_sessions": 1140,
+  "per_day_sd_bp_random_partition_null": 27.204184070920835,
+  "per_day_sd_bp_real_book": 105.49472426229276,
+  "residual_ann_sharpe_after_market": 0.3735532409012047,
+  "short_block_mean_bp": -0.5704477397656418,
+  "short_block_t": -0.10308350948053467,
+  "standard_error_of_mean_bp_null": 0.8057183952380866,
+  "standard_error_of_mean_bp_real": 3.1244840763137
+}

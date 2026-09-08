@@ -1,0 +1,9 @@
+window_label rows 33866
+allowed curves 22561 (h0 excluded 11305)
+complete=1 in allowed 712
+block_time range 1785168436..1785254238
+slot range 435569160..435772743
+ohlcv rows 672
+Counter({'ok': 594, 'nopool:429': 30, 'nobars:429': 28, 'nobars:200': 20})
+ohlcv by h Counter({0: 234, 2: 234, 1: 204})
+ohlcv mints in allowed-curve set: 438

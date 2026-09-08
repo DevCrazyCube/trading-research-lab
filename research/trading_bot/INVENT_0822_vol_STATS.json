@@ -1,0 +1,295 @@
+{
+ "rho1_gate": [
+  {
+   "pair": "VXX_VIXY",
+   "window": "design",
+   "n": 985,
+   "sd_e_bp": 69.64121518621977,
+   "rho1_de": -0.5526713404712538,
+   "hurst": 0.3722087534408767,
+   "adf_t": -4.854453903222415,
+   "adf_verdict": "reject@1%",
+   "tether_R2": 0.9813478739593028,
+   "gate_pass": false
+  },
+  {
+   "pair": "VXX_VIXY",
+   "window": "holdout",
+   "n": 1162,
+   "sd_e_bp": 99.11904074460298,
+   "rho1_de": -0.04445654045600571,
+   "hurst": 0.47604278049194604,
+   "adf_t": -3.467552704027824,
+   "adf_verdict": "reject@1%",
+   "tether_R2": 0.9430391662533122,
+   "gate_pass": true
+  },
+  {
+   "pair": "VXZ_VIXM",
+   "window": "design",
+   "n": 985,
+   "sd_e_bp": 141.81327522513425,
+   "rho1_de": -0.10004006306629337,
+   "hurst": 0.41188423629680754,
+   "adf_t": -8.116651720360641,
+   "adf_verdict": "reject@1%",
+   "tether_R2": 0.6565052279859847,
+   "gate_pass": true
+  },
+  {
+   "pair": "VXZ_VIXM",
+   "window": "holdout",
+   "n": 1161,
+   "sd_e_bp": 56.46650794053868,
+   "rho1_de": -0.5248676275559504,
+   "hurst": 0.4136270377246671,
+   "adf_t": -2.161400531838629,
+   "adf_verdict": "FAIL(unit root)",
+   "tether_R2": 0.9037714712217793,
+   "gate_pass": false
+  },
+  {
+   "pair": "UVXY_VIXY",
+   "window": "design",
+   "n": 2572,
+   "sd_e_bp": 72.4024077154412,
+   "rho1_de": -0.3428392842695852,
+   "hurst": 0.5247215309764681,
+   "adf_t": -1.8016115177534089,
+   "adf_verdict": "FAIL(unit root)",
+   "tether_R2": 0.9914225426673672,
+   "gate_pass": true
+  },
+  {
+   "pair": "UVXY_VIXY",
+   "window": "holdout",
+   "n": 1162,
+   "sd_e_bp": 43.85521980682231,
+   "rho1_de": -0.41211433029896455,
+   "hurst": 0.40205936004994725,
+   "adf_t": -0.29066655033497907,
+   "adf_verdict": "FAIL(unit root)",
+   "tether_R2": 0.9953078781185921,
+   "gate_pass": false
+  },
+  {
+   "pair": "SVXY_VIXY",
+   "window": "design",
+   "n": 2572,
+   "sd_e_bp": 172.7350217408583,
+   "rho1_de": -0.08098636362310202,
+   "hurst": 0.5626076410061034,
+   "adf_t": -0.9837661052249623,
+   "adf_verdict": "FAIL(unit root)",
+   "tether_R2": 0.8045389464604533,
+   "gate_pass": true
+  },
+  {
+   "pair": "SVXY_VIXY",
+   "window": "holdout",
+   "n": 1162,
+   "sd_e_bp": 15.10924214684541,
+   "rho1_de": -0.490854102368078,
+   "hurst": 0.45086594394542534,
+   "adf_t": 2.1092778890932586,
+   "adf_verdict": "FAIL(unit root)",
+   "tether_R2": 0.9951841343574022,
+   "gate_pass": false
+  },
+  {
+   "pair": "UVXY_VXX",
+   "window": "design",
+   "n": 985,
+   "sd_e_bp": 147.6787262448295,
+   "rho1_de": -0.45030492216356827,
+   "hurst": 0.4806231583642508,
+   "adf_t": -0.7186286158959289,
+   "adf_verdict": "FAIL(unit root)",
+   "tether_R2": 0.965516118656703,
+   "gate_pass": false
+  },
+  {
+   "pair": "UVXY_VXX",
+   "window": "holdout",
+   "n": 1162,
+   "sd_e_bp": 145.61693471324642,
+   "rho1_de": -0.030897475730552723,
+   "hurst": 0.4664448525670326,
+   "adf_t": -3.1756845251874073,
+   "adf_verdict": "reject@5%",
+   "tether_R2": 0.9482690480806889,
+   "gate_pass": true
+  },
+  {
+   "pair": "SVXY_VXX",
+   "window": "design",
+   "n": 985,
+   "sd_e_bp": 273.4191214333016,
+   "rho1_de": -0.07347306042486648,
+   "hurst": 0.5434400319310403,
+   "adf_t": -0.26348341029726574,
+   "adf_verdict": "FAIL(unit root)",
+   "tether_R2": 0.5104009900809787,
+   "gate_pass": true
+  },
+  {
+   "pair": "SVXY_VXX",
+   "window": "holdout",
+   "n": 1162,
+   "sd_e_bp": 50.04820990875425,
+   "rho1_de": -0.03191070151566324,
+   "hurst": 0.47949295723670027,
+   "adf_t": -1.7907608725275315,
+   "adf_verdict": "FAIL(unit root)",
+   "tether_R2": 0.947159600032802,
+   "gate_pass": true
+  }
+ ],
+ "bounce_arithmetic": [
+  {
+   "pair": "VXX_VIXY",
+   "turnover_per_day": 0.3925190594687461,
+   "lag0_gross_bp_per_unit_turnover": 7.66186854261965,
+   "modelled_roundtrip_cost_bp": 9.0,
+   "L0_gross_bp_per_day": 3.0074294341222374,
+   "L0_sr": 2.9139831224227652,
+   "L1_gross_bp_per_day": 0.1227544649082483,
+   "L1_sr": 0.21105631141915757,
+   "L2_gross_bp_per_day": -0.4496973595775909,
+   "L2_sr": -1.0105251764649068
+  },
+  {
+   "pair": "VXZ_VIXM",
+   "turnover_per_day": 0.4135549181917436,
+   "lag0_gross_bp_per_unit_turnover": 8.327015408635683,
+   "modelled_roundtrip_cost_bp": 46.0,
+   "L0_gross_bp_per_day": 3.443678176099718,
+   "L0_sr": 3.2861320113022545,
+   "L1_gross_bp_per_day": -0.9474276952697824,
+   "L1_sr": -0.851387077742479,
+   "L2_gross_bp_per_day": 0.25920189323505854,
+   "L2_sr": 0.32688855829103913
+  },
+  {
+   "pair": "UVXY_VIXY",
+   "turnover_per_day": 0.4172843892139129,
+   "lag0_gross_bp_per_unit_turnover": 3.595992069161843,
+   "modelled_roundtrip_cost_bp": 9.4,
+   "L0_gross_bp_per_day": 1.5005513541982747,
+   "L0_sr": 1.1056237433822667,
+   "L1_gross_bp_per_day": 0.11371447495904807,
+   "L1_sr": 0.1468117134618496,
+   "L2_gross_bp_per_day": -0.36889505203228723,
+   "L2_sr": -0.5427158685895939
+  },
+  {
+   "pair": "SVXY_VIXY",
+   "turnover_per_day": 0.3863712027594466,
+   "lag0_gross_bp_per_unit_turnover": 6.924164294603282,
+   "modelled_roundtrip_cost_bp": 12.333333333333332,
+   "L0_gross_bp_per_day": 2.6752976866098854,
+   "L0_sr": 0.49723102886203563,
+   "L1_gross_bp_per_day": 1.6286089971335844,
+   "L1_sr": 0.30294633359091877,
+   "L2_gross_bp_per_day": -0.12942284466034956,
+   "L2_sr": -0.1453616721720128
+  },
+  {
+   "pair": "UVXY_VXX",
+   "turnover_per_day": 0.39897811891860263,
+   "lag0_gross_bp_per_unit_turnover": 7.414445069810327,
+   "modelled_roundtrip_cost_bp": 7.0,
+   "L0_gross_bp_per_day": 2.9582013467782318,
+   "L0_sr": 3.21116727100339,
+   "L1_gross_bp_per_day": 0.11663119851085876,
+   "L1_sr": 0.21352055531970143,
+   "L2_gross_bp_per_day": -0.35728143968201836,
+   "L2_sr": -0.741028294236592
+  },
+  {
+   "pair": "SVXY_VXX",
+   "turnover_per_day": 0.3834774315563169,
+   "lag0_gross_bp_per_unit_turnover": 5.7849923593217065,
+   "modelled_roundtrip_cost_bp": 11.0,
+   "L0_gross_bp_per_day": 2.218414011525606,
+   "L0_sr": 3.7443750166980396,
+   "L1_gross_bp_per_day": -0.1309285881759858,
+   "L1_sr": -0.29038072306334434,
+   "L2_gross_bp_per_day": -0.10281823545659526,
+   "L2_sr": -0.2555500151312818
+  }
+ ],
+ "null": {
+  "N_formulas": 38,
+  "analytic_t_bar_sqrt_2lnN": 2.697252735553858,
+  "median_design_years": 3.9087301587301586,
+  "analytic_expected_max_sharpe": 1.3642808947942529,
+  "bootstrap_expected_max_sharpe": 1.0823996656704946,
+  "bootstrap_p95": 1.584495813754407,
+  "bootstrap_p99": 1.799123865229956,
+  "B": 3000
+ },
+ "selftest": {
+  "oracle_visible_lag0_sharpe": 6.680088065555932,
+  "oracle_delayed_2d_sharpe": -0.080764876813603,
+  "cost_is_positive_bp_per_day": 2.2026571607846193,
+  "gross_exposure_max": 1.0,
+  "tether_identity_check": {
+   "VXX_VIXY": {
+    "R2": 0.9645332366354382,
+    "sd_e_bp": 86.8465485051534
+   },
+   "VXZ_VIXM": {
+    "R2": 0.7556129224156631,
+    "sd_e_bp": 104.6700044331504
+   },
+   "UVXY_VIXY": {
+    "R2": 0.9923265085667362,
+    "sd_e_bp": 64.88285477050958
+   },
+   "SVXY_VIXY": {
+    "R2": 0.8279412974587679,
+    "sd_e_bp": 143.63524391321255
+   },
+   "UVXY_VXX": {
+    "R2": 0.958046344285713,
+    "sd_e_bp": 146.56774568101483
+   },
+   "SVXY_VXX": {
+    "R2": 0.6275162900018527,
+    "sd_e_bp": 188.86786282988922
+   }
+  }
+ },
+ "named_events": {
+  "vxx_issuance_halt_2022": {
+   "L0_gross_sr": -0.6225170367220302,
+   "L0_net_sr": -1.1072423398710833,
+   "L0_n": 161,
+   "L1_gross_sr": -0.17795379921784735,
+   "L1_net_sr": -0.7156115600100758,
+   "L1_n": 161,
+   "L2_gross_sr": -0.16802782687291853,
+   "L2_net_sr": -0.7645505382299905,
+   "L2_n": 161
+  },
+  "feb2018_leverage_event": {
+   "L0_gross_sr": NaN,
+   "L0_net_sr": NaN,
+   "L0_n": 32,
+   "L1_gross_sr": NaN,
+   "L1_net_sr": NaN,
+   "L1_n": 32,
+   "L2_gross_sr": NaN,
+   "L2_net_sr": NaN,
+   "L2_n": 32
+  }
+ },
+ "controls": {
+  "static_long_B_leg_design_sharpes": [
+   -0.7941200429246618,
+   -0.7941200429246618,
+   -0.2077898488788716
+  ]
+ }
+}

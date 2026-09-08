@@ -1,0 +1,113 @@
+prims for pairing 152
+pairs 10968
+0 0.12871813774108887 combos 14 hits 0
+2000 33.40259027481079 combos 28014 hits 71
+4000 70.7739417552948 combos 56014 hits 131
+6000 107.64244818687439 combos 84014 hits 240
+8000 145.77352952957153 combos 112014 hits 303
+10000 183.32547688484192 combos 140014 hits 376
+PAIR STAGE combos 153552 t 198.00925755500793
+train-positive-expectancy pairs: 403
+rangerel20>8 & notional20<=5                         H= 10 tp=-1 sl=-1 pa=0 | mean=   95.11 trim=  45.07 med=  -3.50 dmean=  97.32 dtrim=  57.66 k=35 n=98 res=98.0
+volshare20>0.2 & vol_now<=100                        H=  3 tp=-1 sl=-1 pa=0 | mean=  103.00 trim=  42.84 med=  -2.47 dmean= 103.62 dtrim=  51.13 k=29 n=68 res=100.0
+rangerel20>8 & notional20<=5                         H=  5 tp=-1 sl=-1 pa=0 | mean=   93.14 trim=  42.65 med=  -3.30 dmean=  91.63 dtrim=  52.79 k=35 n=112 res=99.1
+volrel20<=1.5 & rangerel20>8                         H= 15 tp=-1 sl=-1 pa=0 | mean=   90.34 trim=  42.50 med=  -3.42 dmean= 100.81 dtrim=  55.98 k=36 n=52 res=90.4
+rangerel20>8 & notional20<=5                         H= 15 tp=-1 sl=-1 pa=0 | mean=   91.53 trim=  41.44 med=  -2.14 dmean= 102.00 dtrim=  54.92 k=35 n=95 res=96.8
+volrel20<=1.5 & rangerel20>8                         H= 10 tp=-1 sl=-1 pa=0 | mean=   88.42 trim=  40.46 med=  -3.89 dmean=  90.64 dtrim=  53.05 k=36 n=52 res=90.4
+rangerel20>8 & notional20<=5                         H=  3 tp=-1 sl=-1 pa=0 | mean=   86.46 trim=  35.75 med=  -3.30 dmean=  87.09 dtrim=  44.04 k=35 n=122 res=100.0
+rangerel20>8 & notional20<=5                         H= 15 tp=-1 sl=1 pa=0 | mean=   86.32 trim=  35.08 med=  -3.78 dmean=  89.16 dtrim=  44.34 k=35 n=120 res=97.5
+notional20<=5 & volshare20>0.2                       H=  3 tp=-1 sl=-1 pa=0 | mean=   81.52 trim=  27.22 med=  -2.36 dmean=  82.14 dtrim=  35.51 k=33 n=127 res=100.0
+rangerel20>8 & notional20<=5                         H= 30 tp=-1 sl=-1 pa=0 | mean=   49.95 trim=  27.16 med=  -4.46 dmean=  66.53 dtrim=  44.20 k=35 n=88 res=96.6
+clsloc>0.9 & range_now>0.4                           H=  3 tp=-1 sl=-1 pa=0 | mean=   37.54 trim=  26.12 med= -11.10 dmean=  38.16 dtrim=  34.41 k=35 n=170 res=97.1
+volshare20>0.2 & vol_now<=100                        H= 10 tp=-1 sl=-1 pa=0 | mean=   82.10 trim=  21.67 med=  -2.07 dmean=  84.31 dtrim=  34.26 k=29 n=63 res=100.0
+rangerel20>8 & notional20<=5                         H= 15 tp=3 sl=-1 pa=1 | mean=   46.32 trim=  21.31 med=  -2.14 dmean=  56.56 dtrim=  31.87 k=35 n=95 res=97.4
+volrel20<=1.5 & rangerel20>8                         H= 15 tp=3 sl=-1 pa=1 | mean=   44.49 trim=  20.96 med=  -2.36 dmean=  54.73 dtrim=  31.52 k=36 n=52 res=91.3
+volrel20<=1.5 & rangerel20>8                         H= 15 tp=-1 sl=1 pa=0 | mean=   68.86 trim=  18.11 med=  -4.60 dmean=  71.71 dtrim=  27.36 k=36 n=57 res=94.7
+volshare20>0.2 & vol_now<=100                        H= 15 tp=-1 sl=-1 pa=0 | mean=   77.95 trim=  17.19 med=  -2.36 dmean=  88.43 dtrim=  30.68 k=29 n=57 res=98.2
+ret5>0.4 & ret15<=0                                  H=  3 tp=-1 sl=-1 pa=0 | mean=   30.86 trim=  16.47 med=  -1.76 dmean=  31.48 dtrim=  24.76 k=32 n=59 res=98.3
+gap_prev>2 & ret5>0.4                                H=  3 tp=-1 sl=-1 pa=0 | mean=   39.86 trim=  16.11 med=  -5.28 dmean=  40.48 dtrim=  24.41 k=29 n=51 res=96.1
+rangerel20>8 & notional20<=5                         H= 10 tp=1 sl=1 pa=1 | mean=   41.07 trim=  15.51 med=  -3.78 dmean=  47.53 dtrim=  23.95 k=35 n=124 res=98.4
+notional20<=5 & range_now>0.4                        H=  3 tp=-1 sl=-1 pa=0 | mean=   30.11 trim=  14.95 med= -13.89 dmean=  30.74 dtrim=  23.24 k=35 n=168 res=96.4
+ret5>0.4 & ret15<=0.1                                H=  3 tp=-1 sl=-1 pa=0 | mean=   26.30 trim=  14.38 med=  -1.91 dmean=  26.92 dtrim=  22.67 k=39 n=80 res=98.8
+notional20<=5 & volshare20>0.2                       H=  5 tp=-1 sl=-1 pa=0 | mean=   69.61 trim=  13.97 med=  -2.13 dmean=  68.10 dtrim=  24.11 k=33 n=122 res=99.2
+density20>0.5 & notional20<=5                        H= 15 tp=-1 sl=-1 pa=0 | mean=   19.23 trim=  13.13 med=  -1.58 dmean=  29.70 dtrim=  26.61 k=27 n=90 res=98.9
+density20>0.5 & notional20<=5                        H= 10 tp=-1 sl=-1 pa=0 | mean=   26.08 trim=  13.09 med=  -1.59 dmean=  28.30 dtrim=  25.68 k=27 n=116 res=99.1
+ret5>0.4 & ret15<=0                                  H=  5 tp=-1 sl=-1 pa=0 | mean=   31.82 trim=  12.99 med=  -4.16 dmean=  30.31 dtrim=  23.13 k=32 n=55 res=98.2
+gap_prev>1 & ret5>0.4                                H=  3 tp=-1 sl=-1 pa=0 | mean=   32.72 trim=  12.86 med=  -2.92 dmean=  33.34 dtrim=  21.15 k=35 n=62 res=96.8
+gap_prev>1 & ret5>0.4                                H=  5 tp=-1 sl=-1 pa=0 | mean=   51.61 trim=  12.84 med=  -5.28 dmean=  50.10 dtrim=  22.98 k=35 n=58 res=96.6
+volshare20>0.2 & vol_now<=100                        H=  5 tp=-1 sl=-1 pa=0 | mean=   74.36 trim=  12.69 med=  -2.36 dmean=  72.85 dtrim=  22.83 k=29 n=65 res=100.0
+volrel20>4 & ret5>0.4                                H=  5 tp=-1 sl=-1 pa=0 | mean=   26.20 trim=  12.59 med=  -0.43 dmean=  24.69 dtrim=  22.73 k=31 n=64 res=98.4
+volaccel<=1 & rangerel20>8                           H= 30 tp=-1 sl=-1 pa=0 | mean=   37.18 trim=  11.90 med=  -1.83 dmean=  53.76 dtrim=  28.94 k=32 n=50 res=96.0
+ret5>0.4 & ret15<=0.1                                H=  5 tp=-1 sl=-1 pa=0 | mean=   26.89 trim=  11.35 med=  -1.71 dmean=  25.38 dtrim=  21.49 k=39 n=75 res=98.7
+volshare20>0.2 & vol_now<=100                        H= 15 tp=3 sl=-1 pa=1 | mean=   41.70 trim=  11.08 med=  -2.36 dmean=  51.93 dtrim=  21.64 k=29 n=57 res=98.2
+rangerel20>8 & vol_now<=100                          H= 15 tp=-1 sl=-1 pa=0 | mean=   69.74 trim=  11.02 med=  -1.56 dmean=  80.22 dtrim=  24.50 k=45 n=77 res=93.5
+notional20<=5 & volshare20>0.2                       H= 15 tp=-1 sl=-1 pa=0 | mean=   66.16 trim=  10.29 med=  -2.36 dmean=  76.63 dtrim=  23.77 k=33 n=108 res=98.1
+rangerel20>8 & vol_now<=100                          H= 10 tp=-1 sl=-1 pa=0 | mean=   69.08 trim=  10.16 med=  -1.87 dmean=  71.30 dtrim=  22.75 k=45 n=80 res=95.0
+notional20<=5 & volshare20>0.2                       H= 15 tp=-1 sl=1 pa=0 | mean=   65.95 trim=  10.09 med=  -2.36 dmean=  68.79 dtrim=  19.35 k=33 n=125 res=99.2
+rangerel20>8 & notional20<=5                         H= 60 tp=-1 sl=-1 pa=0 | mean=   32.99 trim=   9.77 med=  -6.18 dmean=  52.57 dtrim=  29.98 k=35 n=74 res=93.2
+gap_prev>2 & range_now>0.4                           H=  3 tp=-1 sl=-1 pa=0 | mean=   33.76 trim=   9.68 med=  -8.19 dmean=  34.38 dtrim=  17.97 k=50 n=79 res=91.1
+notional20<=5 & volshare20>0.2                       H= 30 tp=-1 sl=-1 pa=0 | mean=   20.60 trim=   8.92 med=  -4.12 dmean=  37.18 dtrim=  25.96 k=33 n=96 res=96.9
+rangerel20>8 & vol_now<=100                          H= 15 tp=3 sl=-1 pa=1 | mean=   37.87 trim=   8.90 med=  -1.37 dmean=  48.10 dtrim=  19.45 k=45 n=77 res=95.5
+volaccel<=1 & rangerel20>8                           H= 15 tp=-1 sl=-1 pa=0 | mean=   34.27 trim=   8.76 med=  -1.44 dmean=  44.74 dtrim=  22.24 k=32 n=56 res=96.4
+eff20>0.5 & notional20>5000                          H= 15 tp=-1 sl=-1 pa=0 | mean=   22.39 trim=   8.68 med=  -1.66 dmean=  32.86 dtrim=  22.16 k=26 n=78 res=100.0
+notional20<=5 & volshare20>0.2                       H= 10 tp=-1 sl=-1 pa=0 | mean=   64.48 trim=   8.50 med=  -2.14 dmean=  66.69 dtrim=  21.08 k=33 n=116 res=99.1
+volrel20<=1.5 & rangerel20>8                         H=  5 tp=-1 sl=-1 pa=0 | mean=   57.34 trim=   7.89 med=  -3.86 dmean=  55.82 dtrim=  18.03 k=36 n=54 res=92.6
+notional20>5000 & age_min<=15                        H= 60 tp=3 sl=2 pa=0 | mean=    7.48 trim=   7.85 med=  14.09 dmean=  20.17 dtrim=  20.60 k=43 n=72 res=98.6
+volrel20>4 & ret15<=-0.25                            H=  5 tp=-1 sl=-1 pa=0 | mean=   34.40 trim=   7.48 med=  -1.58 dmean=  32.89 dtrim=  17.62 k=48 n=114 res=95.6
+volaccel<=1 & rangerel20>8                           H= 15 tp=3 sl=-1 pa=1 | mean=   19.36 trim=   7.17 med=  -0.34 dmean=  29.60 dtrim=  17.73 k=32 n=56 res=98.2
+notional20<=5 & range_now>0.4                        H= 10 tp=-1 sl=-1 pa=0 | mean=   22.82 trim=   6.98 med= -15.82 dmean=  25.03 dtrim=  19.56 k=35 n=103 res=94.2
+volrel20<=1.5 & rangerel20>8                         H= 10 tp=1 sl=1 pa=1 | mean=   32.17 trim=   6.84 med=  -3.89 dmean=  38.63 dtrim=  15.28 k=36 n=57 res=94.7
+volaccel>2 & ret5>0.4                                H=  5 tp=-1 sl=-1 pa=0 | mean=   18.91 trim=   6.58 med=  -1.18 dmean=  17.40 dtrim=  16.72 k=41 n=87 res=97.7
+density20>0.5 & notional20<=5                        H= 15 tp=3 sl=-1 pa=1 | mean=    9.24 trim=   6.55 med=  -1.58 dmean=  19.47 dtrim=  17.10 k=27 n=90 res=98.9
+density20>0.5 & notional20<=5                        H=  5 tp=-1 sl=-1 pa=0 | mean=    9.59 trim=   6.45 med=  -0.56 dmean=   8.08 dtrim=  16.59 k=27 n=184 res=99.5
+volshare20>0.2 & vol_now<=100                        H= 30 tp=-1 sl=-1 pa=0 | mean=   17.53 trim=   6.41 med=  -3.70 dmean=  34.10 dtrim=  23.44 k=29 n=53 res=94.3
+clsloc>0.9 & range_now>0.4                           H=  5 tp=-1 sl=-1 pa=0 | mean=   22.72 trim=   6.21 med= -17.17 dmean=  21.20 dtrim=  16.35 k=35 n=135 res=96.3
+rangerel20>8 & ret15<=-0.25                          H= 15 tp=-1 sl=1 pa=0 | mean=   34.96 trim=   6.19 med=  -2.24 dmean=  37.80 dtrim=  15.44 k=48 n=88 res=96.6
+volshare20>0.35 & vol_now<=1000                      H= 10 tp=-1 sl=-1 pa=0 | mean=   13.13 trim=   6.15 med=  -4.60 dmean=  15.35 dtrim=  18.74 k=37 n=98 res=98.0
+rangerel20>8 & notional20<=50                        H=  5 tp=-1 sl=-1 pa=0 | mean=   52.71 trim=   6.03 med=  -2.30 dmean=  51.20 dtrim=  16.17 k=57 n=220 res=96.8
+clsloc>0.75 & range_now>0.4                          H=  3 tp=-1 sl=-1 pa=0 | mean=   20.71 trim=   5.98 med=   0.66 dmean=  21.33 dtrim=  14.27 k=47 n=196 res=96.9
+eff20>0.9 & maxgap20<=1                              H= 30 tp=3 sl=1 pa=1 | mean=   13.36 trim=   5.94 med=   1.81 dmean=  21.42 dtrim=  15.38 k=56 n=155 res=98.7
+eff20>0.9 & age_min<=15                              H= 30 tp=3 sl=1 pa=1 | mean=   13.10 trim=   5.93 med=  -0.67 dmean=  21.15 dtrim=  15.37 k=58 n=70 res=97.9
+
+--- top 40 pairs by dtrim (regardless of sign) ---
+rangerel20>8 & notional20<=5                         H= 10 tp=-1 sl=-1 pa=0 | mean=   95.11 trim=  45.07 med=  -3.50 dtrim= 57.66 k=35 n=98
+volrel20<=1.5 & rangerel20>8                         H= 15 tp=-1 sl=-1 pa=0 | mean=   90.34 trim=  42.50 med=  -3.42 dtrim= 55.98 k=36 n=52
+rangerel20>8 & notional20<=5                         H= 15 tp=-1 sl=-1 pa=0 | mean=   91.53 trim=  41.44 med=  -2.14 dtrim= 54.92 k=35 n=95
+volrel20<=1.5 & rangerel20>8                         H= 10 tp=-1 sl=-1 pa=0 | mean=   88.42 trim=  40.46 med=  -3.89 dtrim= 53.05 k=36 n=52
+rangerel20>8 & notional20<=5                         H=  5 tp=-1 sl=-1 pa=0 | mean=   93.14 trim=  42.65 med=  -3.30 dtrim= 52.79 k=35 n=112
+volshare20>0.2 & vol_now<=100                        H=  3 tp=-1 sl=-1 pa=0 | mean=  103.00 trim=  42.84 med=  -2.47 dtrim= 51.13 k=29 n=68
+rangerel20>8 & notional20<=5                         H= 15 tp=-1 sl=1 pa=0 | mean=   86.32 trim=  35.08 med=  -3.78 dtrim= 44.34 k=35 n=120
+rangerel20>8 & notional20<=5                         H= 30 tp=-1 sl=-1 pa=0 | mean=   49.95 trim=  27.16 med=  -4.46 dtrim= 44.20 k=35 n=88
+rangerel20>8 & notional20<=5                         H=  3 tp=-1 sl=-1 pa=0 | mean=   86.46 trim=  35.75 med=  -3.30 dtrim= 44.04 k=35 n=122
+notional20<=5 & volshare20>0.2                       H=  3 tp=-1 sl=-1 pa=0 | mean=   81.52 trim=  27.22 med=  -2.36 dtrim= 35.51 k=33 n=127
+clsloc>0.9 & range_now>0.4                           H=  3 tp=-1 sl=-1 pa=0 | mean=   37.54 trim=  26.12 med= -11.10 dtrim= 34.41 k=35 n=170
+volshare20>0.2 & vol_now<=100                        H= 10 tp=-1 sl=-1 pa=0 | mean=   82.10 trim=  21.67 med=  -2.07 dtrim= 34.26 k=29 n=63
+rangerel20>8 & notional20<=5                         H= 15 tp=3 sl=-1 pa=1 | mean=   46.32 trim=  21.31 med=  -2.14 dtrim= 31.87 k=35 n=95
+volrel20<=1.5 & rangerel20>8                         H= 15 tp=3 sl=-1 pa=1 | mean=   44.49 trim=  20.96 med=  -2.36 dtrim= 31.52 k=36 n=52
+volshare20>0.2 & vol_now<=100                        H= 15 tp=-1 sl=-1 pa=0 | mean=   77.95 trim=  17.19 med=  -2.36 dtrim= 30.68 k=29 n=57
+rangerel20>8 & notional20<=5                         H= 60 tp=-1 sl=-1 pa=0 | mean=   32.99 trim=   9.77 med=  -6.18 dtrim= 29.98 k=35 n=74
+volaccel<=1 & rangerel20>8                           H= 30 tp=-1 sl=-1 pa=0 | mean=   37.18 trim=  11.90 med=  -1.83 dtrim= 28.94 k=32 n=50
+volrel20<=1.5 & rangerel20>8                         H= 15 tp=-1 sl=1 pa=0 | mean=   68.86 trim=  18.11 med=  -4.60 dtrim= 27.36 k=36 n=57
+density20>0.5 & notional20<=5                        H= 15 tp=-1 sl=-1 pa=0 | mean=   19.23 trim=  13.13 med=  -1.58 dtrim= 26.61 k=27 n=90
+notional20<=5 & volshare20>0.2                       H= 30 tp=-1 sl=-1 pa=0 | mean=   20.60 trim=   8.92 med=  -4.12 dtrim= 25.96 k=33 n=96
+density20>0.5 & notional20<=5                        H= 10 tp=-1 sl=-1 pa=0 | mean=   26.08 trim=  13.09 med=  -1.59 dtrim= 25.68 k=27 n=116
+ret5>0.4 & ret15<=0                                  H=  3 tp=-1 sl=-1 pa=0 | mean=   30.86 trim=  16.47 med=  -1.76 dtrim= 24.76 k=32 n=59
+rangerel20>8 & vol_now<=100                          H= 15 tp=-1 sl=-1 pa=0 | mean=   69.74 trim=  11.02 med=  -1.56 dtrim= 24.50 k=45 n=77
+gap_prev>2 & ret5>0.4                                H=  3 tp=-1 sl=-1 pa=0 | mean=   39.86 trim=  16.11 med=  -5.28 dtrim= 24.41 k=29 n=51
+notional20<=5 & volshare20>0.2                       H=  5 tp=-1 sl=-1 pa=0 | mean=   69.61 trim=  13.97 med=  -2.13 dtrim= 24.11 k=33 n=122
+rangerel20>8 & notional20<=5                         H= 10 tp=1 sl=1 pa=1 | mean=   41.07 trim=  15.51 med=  -3.78 dtrim= 23.95 k=35 n=124
+notional20<=5 & volshare20>0.2                       H= 15 tp=-1 sl=-1 pa=0 | mean=   66.16 trim=  10.29 med=  -2.36 dtrim= 23.77 k=33 n=108
+volshare20>0.2 & vol_now<=100                        H= 30 tp=-1 sl=-1 pa=0 | mean=   17.53 trim=   6.41 med=  -3.70 dtrim= 23.44 k=29 n=53
+notional20<=5 & range_now>0.4                        H=  3 tp=-1 sl=-1 pa=0 | mean=   30.11 trim=  14.95 med= -13.89 dtrim= 23.24 k=35 n=168
+ret5>0.4 & ret15<=0                                  H=  5 tp=-1 sl=-1 pa=0 | mean=   31.82 trim=  12.99 med=  -4.16 dtrim= 23.13 k=32 n=55
+gap_prev>1 & ret5>0.4                                H=  5 tp=-1 sl=-1 pa=0 | mean=   51.61 trim=  12.84 med=  -5.28 dtrim= 22.98 k=35 n=58
+volshare20>0.2 & vol_now<=100                        H=  5 tp=-1 sl=-1 pa=0 | mean=   74.36 trim=  12.69 med=  -2.36 dtrim= 22.83 k=29 n=65
+rangerel20>8 & vol_now<=100                          H= 10 tp=-1 sl=-1 pa=0 | mean=   69.08 trim=  10.16 med=  -1.87 dtrim= 22.75 k=45 n=80
+volrel20>4 & ret5>0.4                                H=  5 tp=-1 sl=-1 pa=0 | mean=   26.20 trim=  12.59 med=  -0.43 dtrim= 22.73 k=31 n=64
+ret5>0.4 & ret15<=0.1                                H=  3 tp=-1 sl=-1 pa=0 | mean=   26.30 trim=  14.38 med=  -1.91 dtrim= 22.67 k=39 n=80
+volaccel<=1 & rangerel20>8                           H= 15 tp=-1 sl=-1 pa=0 | mean=   34.27 trim=   8.76 med=  -1.44 dtrim= 22.24 k=32 n=56
+eff20>0.5 & notional20>5000                          H= 15 tp=-1 sl=-1 pa=0 | mean=   22.39 trim=   8.68 med=  -1.66 dtrim= 22.16 k=26 n=78
+volshare20>0.2 & vol_now<=100                        H= 15 tp=3 sl=-1 pa=1 | mean=   41.70 trim=  11.08 med=  -2.36 dtrim= 21.64 k=29 n=57
+ret5>0.4 & ret15<=0.1                                H=  5 tp=-1 sl=-1 pa=0 | mean=   26.89 trim=  11.35 med=  -1.71 dtrim= 21.49 k=39 n=75
+gap_prev>1 & ret5>0.4                                H=  3 tp=-1 sl=-1 pa=0 | mean=   32.72 trim=  12.86 med=  -2.92 dtrim= 21.15 k=35 n=62
+COMBOS 153552

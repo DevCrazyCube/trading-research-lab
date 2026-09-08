@@ -1,0 +1,41 @@
+{
+  "WARNING": "EXPLORATORY, NOT PRE-REGISTERED. No verdict follows from this file. D2 in particular is a different rule and needs its own freeze before any number of its is believed.",
+  "results": {
+    "design 2016-2021": {
+      "D1_close_auction_entry_10min_signal": {
+        "variant": "D1",
+        "n_nights": 1468,
+        "mean_per_night_bp": 8.15053627346984,
+        "t_stat": 6.384215390046716,
+        "annualised_sharpe": 2.6451163097641053,
+        "annualised_return_pct": 20.539351409143997
+      },
+      "D2_auction_to_auction_1529_1549_signal": {
+        "variant": "D2",
+        "n_nights": 1468,
+        "mean_per_night_bp": 2.2576766402356876,
+        "t_stat": 1.630605667495444,
+        "annualised_sharpe": 0.6755946318180883,
+        "annualised_return_pct": 5.6893451333939336
+      }
+    },
+    "HELD-OUT 2022-2026": {
+      "D1_close_auction_entry_10min_signal": {
+        "variant": "D1",
+        "n_nights": 1139,
+        "mean_per_night_bp": 6.074586884176245,
+        "t_stat": 3.101681447960855,
+        "annualised_sharpe": 1.458933849715243,
+        "annualised_return_pct": 15.307958948124137
+      },
+      "D2_auction_to_auction_1529_1549_signal": {
+        "variant": "D2",
+        "n_nights": 1139,
+        "mean_per_night_bp": 2.975157081352467,
+        "t_stat": 1.383907010373116,
+        "annualised_sharpe": 0.6509465321201624,
+        "annualised_return_pct": 7.497395845008216
+      }
+    }
+  }
+}

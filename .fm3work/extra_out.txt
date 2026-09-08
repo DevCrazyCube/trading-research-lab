@@ -1,0 +1,36 @@
+=== curve-reserve field liveness (non-holdout rows=14417) ===
+  rsol  complete=False distinct=54   top: 0 x635(52%), 2.001e+08 x127(10%), 1.167e+05 x95(8%)
+  rsol  complete=True  distinct=10   top: 0 x12475(94%), 1.8e+10 x183(1%), 7.098e+10 x183(1%)
+  rtok  complete=False distinct=54   top: 7.931e+14 x635(52%), 5.495e+14 x127(10%), 5.519e+14 x95(8%)
+  rtok  complete=True  distinct=11   top: 0 x12430(94%), 3.907e+14 x183(1%), 3.887e+13 x183(1%)
+  vsol  complete=False distinct=52   top: 4.292e+09 x425(35%), 3e+10 x210(17%), 1.931e+12 x127(10%)
+  vsol  complete=True  distinct=45   top: 3e+10 x7844(59%), 4.292e+09 x2436(18%), 3e+10 x183(1%)
+  vtok  complete=False distinct=54   top: 1.073e+15 x635(52%), 8.294e+14 x127(10%), 8.318e+14 x95(8%)
+  vtok  complete=True  distinct=42   top: 1.073e+15 x10646(81%), 6.706e+14 x183(1%), 2.8e+14 x183(1%)
+
+=== deployer history join ===
+  panel-A non-holdout mints=186, creators found in window_labels=10 (5.4%)
+  -> window_labels covers an EARLIER chain window; deployer-history features are
+     unavailable for the snapshot cohort, so that axis is untestable on panel A.
+
+=== hand composite of sign-consistent marginals ===
+  NOTE: components were picked BY LOOKING AT BOTH SPLITS, so these numbers are
+  in-sample twice over and are reported for shape only, NOT as validated candidates.
+  15m  mcap>=1M                           | TR mean=-0.0475 med=-0.0199 (univ -0.0719) n=849 k=49 | VA mean=-0.0521 med=-0.0198 (univ -0.0943) n=705 k=47
+  15m  mcap>=1M & mcap/ath>=0.95          | TR mean=-0.0471 med=-0.0199 (univ -0.0719) n=828 k=48 | VA mean=-0.0406 med=-0.0196 (univ -0.0943) n=639 k=43
+  15m  mcap>=1M & mar>=0.95 & traded_last_2min | TR mean=-0.0460 med=-0.0168 (univ -0.0719) n=537 k=43 | VA mean=-0.0136 med=-0.0070 (univ -0.0943) n=406 k=37
+  15m  FULL (+ age>=1h)                   | TR mean=-0.0433 med=-0.0143 (univ -0.0719) n=506 k=40 | VA mean=-0.0135 med=-0.0090 (univ -0.0943) n=376 k=32
+  15m  FULL + zero socials                | TR mean=-0.0718 med=-0.0188 (univ -0.0719) n=184 k=15 | VA mean=-0.0097 med=-0.0077 (univ -0.0943) n=241 k=20
+  15m  INVERSE screen (what to AVOID)     | TR mean=-0.1100 med=-0.0438 (univ -0.0719) n=452 k=45 | VA mean=-0.1274 med=-0.0624 (univ -0.0943) n=379 k=58
+  30m  mcap>=1M                           | TR mean=-0.0625 med=-0.0256 (univ -0.0829) n=484 k=49 | VA mean=-0.0625 med=-0.0258 (univ -0.0955) n=402 k=47
+  30m  mcap>=1M & mcap/ath>=0.95          | TR mean=-0.0617 med=-0.0256 (univ -0.0829) n=471 k=48 | VA mean=-0.0518 med=-0.0254 (univ -0.0955) n=363 k=43
+  30m  mcap>=1M & mar>=0.95 & traded_last_2min | TR mean=-0.0490 med=-0.0274 (univ -0.0829) n=350 k=43 | VA mean=-0.0347 med=-0.0121 (univ -0.0955) n=264 k=37
+  30m  FULL (+ age>=1h)                   | TR mean=-0.0399 med=-0.0194 (univ -0.0829) n=331 k=40 | VA mean=-0.0348 med=-0.0137 (univ -0.0955) n=242 k=32
+  30m  FULL + zero socials                | TR mean=-0.0558 med=-0.0085 (univ -0.0829) n=110 k=15 | VA mean=-0.0293 med=-0.0083 (univ -0.0955) n=153 k=20
+  30m  INVERSE screen (what to AVOID)     | TR mean=-0.1142 med=-0.0816 (univ -0.0829) n=258 k=45 | VA mean=-0.1175 med=-0.0783 (univ -0.0955) n=241 k=58
+  60m  mcap>=1M                           | TR mean=-0.0985 med=-0.0399 (univ -0.1092) n=262 k=49 | VA mean=-0.0794 med=-0.0404 (univ -0.1238) n=223 k=47
+  60m  mcap>=1M & mcap/ath>=0.95          | TR mean=-0.0950 med=-0.0403 (univ -0.1092) n=256 k=48 | VA mean=-0.0676 med=-0.0386 (univ -0.1238) n=201 k=43
+  60m  mcap>=1M & mar>=0.95 & traded_last_2min | TR mean=-0.0579 med=-0.0473 (univ -0.1092) n=207 k=43 | VA mean=-0.0359 med=-0.0431 (univ -0.1238) n=160 k=37
+  60m  FULL (+ age>=1h)                   | TR mean=-0.0780 med=-0.0485 (univ -0.1092) n=195 k=40 | VA mean=-0.0581 med=-0.0447 (univ -0.1238) n=148 k=32
+  60m  FULL + zero socials                | TR mean=-0.0542 med=-0.0485 (univ -0.1092) n=66 k=15 | VA mean=-0.0352 med=-0.0191 (univ -0.1238) n=94 k=20
+  60m  INVERSE screen (what to AVOID)     | TR mean=-0.1276 med=-0.1350 (univ -0.1092) n=153 k=45 | VA mean=-0.1492 med=-0.3114 (univ -0.1238) n=153 k=58

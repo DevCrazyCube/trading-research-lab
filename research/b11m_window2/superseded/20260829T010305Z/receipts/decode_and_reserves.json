@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "scripts/b9d_transaction_bodies.py",
+    "decode",
+    "/home/anont/meme/research/b11m_window2/b11a_bodies.sqlite",
+    "--b9c",
+    "/home/anont/meme/research/b11m_window2/b11a_signatures.sqlite",
+    "--b9a",
+    "/home/anont/meme/research/b11m_window2/b11a_subsample.sqlite"
+  ],
+  "completed": false,
+  "endpoint": "https://api.mainnet-beta.solana.com",
+  "exit_code": 1,
+  "finished_at": 1787923425,
+  "manifest_sha256": "33da3a7ea16fa20ade57a8ebbeba61e4ce310adf53c7a0406ce08d5327c5e99f",
+  "schema_version": "1.0.0",
+  "stage": "decode_and_reserves",
+  "started_at": 1787922422,
+  "stderr_log": "/home/anont/meme/research/b11m_window2/logs/decode_and_reserves.stderr.log",
+  "stdout_log": "/home/anont/meme/research/b11m_window2/logs/decode_and_reserves.stdout.log"
+}

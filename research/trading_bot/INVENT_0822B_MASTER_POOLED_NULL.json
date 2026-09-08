@@ -1,0 +1,103 @@
+{
+  "round": "INVENT_0822B",
+  "date": "2026-08-22",
+  "n_formulas_total": 177,
+  "method": "per-theme size-matched placebo max-statistics converted to |t| units (Sharpe x sqrt(design years)), Gumbel fitted per theme, pooled CDF = product of the three theme CDFs. No single cross-theme placebo is constructible: the three panels share no instrument, calendar or clock. Assembled pooled null, labelled as such.",
+  "themes": {
+    "auction": {
+      "N": 54,
+      "unit": "t",
+      "scale": 1.0,
+      "p50": 2.262,
+      "p95": 3.311,
+      "p99": 3.622,
+      "best_design_abs_t": 4.04,
+      "best_holdout_t": -0.23,
+      "p50_t": 2.262,
+      "p95_t": 3.311,
+      "p99_t": 3.622
+    },
+    "cryptoXS": {
+      "N": 81,
+      "unit": "sharpe",
+      "scale": 2.0,
+      "p50": 1.2990374706,
+      "p95": 1.7490880855,
+      "p99": 1.9739478586,
+      "best_design_abs_t": 4.04,
+      "best_holdout_t": 5.39,
+      "p50_t": 2.5980749412,
+      "p95_t": 3.498176171,
+      "p99_t": 3.9478957172
+    },
+    "futroll": {
+      "N": 42,
+      "unit": "sharpe",
+      "scale": 3.4641016151377544,
+      "p50": 0.608484501,
+      "p95": 0.849271905,
+      "p99": 0.974817007,
+      "best_design_abs_t": 3.75,
+      "best_holdout_t": 1.3,
+      "p50_t": 2.1078521427003905,
+      "p95_t": 2.941964177801618,
+      "p99_t": 3.3768651684124515
+    }
+  },
+  "analytic_pooled_bar_t_sqrt_2ln2N": 3.426,
+  "analytic_pooled_bar_t_sqrt_2lnN": 3.217,
+  "pooled_placebo_fit_p50_p95": {
+    "p50": 2.776,
+    "p95": 3.712,
+    "p99": 4.305,
+    "gumbel_fits": [
+      [
+        2.1143,
+        0.4029
+      ],
+      [
+        2.4714,
+        0.3457
+      ],
+      [
+        1.9904,
+        0.3204
+      ]
+    ]
+  },
+  "pooled_placebo_fit_p50_p99": {
+    "p50": 2.736,
+    "p95": 3.562,
+    "p99": 4.079,
+    "gumbel_fits": [
+      [
+        2.1443,
+        0.3212
+      ],
+      [
+        2.4812,
+        0.3188
+      ],
+      [
+        1.998,
+        0.2997
+      ]
+    ]
+  },
+  "headline_pooled_p95_range": [
+    3.562,
+    3.712
+  ],
+  "headline_pooled_p99_range": [
+    4.079,
+    4.305
+  ],
+  "reading": "The three themes best DESIGN statistics (4.04, 4.04, 3.75) all sit above the pooled p95 and at or below the pooled p99 - indistinguishable on design. Held-out separates them completely: -0.23, +5.39, +1.30.",
+  "survivor": {
+    "name": "S1_VOL30|H20",
+    "design_t": 4.04,
+    "holdout_net_t": 5.39,
+    "verdict": "clears pooled p95 on design (marginal at pooled p99); held-out t 5.39 carries it",
+    "promotion": "spec-freeze + forward-log, UNSIZED, borrow-gated"
+  }
+}

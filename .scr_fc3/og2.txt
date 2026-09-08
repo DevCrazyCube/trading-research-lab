@@ -1,0 +1,48 @@
+H=5 combos=20124 eligible=6735 hits=65 t=19.7
+H=15 combos=40248 eligible=13353 hits=88 t=32.9
+H=30 combos=60372 eligible=19749 hits=106 t=43.8
+H=60 combos=80496 eligible=25920 hits=116 t=53.2
+H=120 combos=100620 eligible=31851 hits=124 t=62.3
+H=240 combos=120744 eligible=37419 hits=132 t=71.4
+TOTAL COMBOS 120744 ELIGIBLE 37419 TRAIN POSITIVE 132
+  +0.0698 med+0.0699 n=  43 k= 15 res=0.930 H= 30 tp50       add_dn25  ath_ge60     b60_3p
+  +0.0649 med-0.3399 n=  65 k= 16 res=0.985 H= 60 sl30       flat      age_lt60     pdb_pos
+  +0.0629 med-0.0031 n= 400 k= 15 res=0.990 H=  5 tp50       add_dn25  mc_5k_50k    b60_3p
+  +0.0609 med+0.0533 n=  48 k= 15 res=0.938 H= 30 tp25       add_dn25  ath_ge90     b60_3p
+  +0.0553 med+0.0394 n= 131 k= 15 res=0.954 H= 30 tp50       add_dn25  mc_5k_50k    b60_3p
+  +0.0534 med+0.0201 n=  96 k= 15 res=0.979 H=  5 tp50       add_dn25  ath_ge60     b60_3p
+  +0.0532 med+0.0681 n=  59 k= 15 res=0.949 H= 30 tp25       add_dn25  ath_ge60     b60_3p
+  +0.0508 med-0.2711 n=  65 k= 16 res=0.985 H= 60 sl30       add_up25  age_lt60     pdb_pos
+  +0.0478 med-0.2694 n=  65 k= 16 res=0.985 H= 60 sl30       add_dn25  age_lt60     pdb_pos
+  +0.0476 med-0.0337 n= 229 k= 16 res=0.961 H=  5 tp100      add_dn25  ath_lt20     np5p
+  +0.0476 med-0.0337 n= 229 k= 16 res=0.961 H=  5 tp100      add_dn25  ath_lt20     b360_5p
+  +0.0458 med-0.0256 n= 260 k= 18 res=0.962 H=  5 tp100      add_dn25  ath_lt20     b60_1p
+  +0.0456 med-0.0057 n=  42 k= 17 res=0.786 H=240 tp100      add_dn25  ath_20_60    rec_lt30
+  +0.0448 med+0.0549 n=  56 k= 15 res=0.946 H= 60 tp25       add_dn25  ath_ge60     b60_3p
+  +0.0443 med-0.0512 n= 150 k= 18 res=0.933 H= 15 tp100      add_dn25  ath_lt20     b60_1p
+  +0.0421 med-0.0296 n= 238 k= 18 res=0.958 H=  5 tp100      add_dn25  ath_lt20     np3p
+  +0.0414 med+0.0129 n=  54 k= 15 res=0.963 H=  5 tp50       add_dn25  ath_ge90     b60_3p
+  +0.0384 med+0.0668 n=  48 k= 15 res=0.938 H= 60 tp25       add_dn25  ath_ge90     b60_3p
+  +0.0382 med-0.0443 n= 233 k= 16 res=0.961 H=  5 tp100_sl40 add_dn25  ath_lt20     np5p
+  +0.0382 med-0.0443 n= 233 k= 16 res=0.961 H=  5 tp100_sl40 add_dn25  ath_lt20     b360_5p
+  +0.0382 med-0.0782 n= 114 k= 18 res=0.912 H= 30 tp100      add_dn25  ath_lt20     b60_1p
+  +0.0376 med-0.0277 n= 264 k= 18 res=0.962 H=  5 tp100_sl40 add_dn25  ath_lt20     b60_1p
+  +0.0370 med-0.0296 n= 273 k= 20 res=0.963 H=  5 tp100      add_dn25  ath_lt20     rec_lt120
+  +0.0357 med+0.0006 n= 199 k= 15 res=0.975 H= 15 tp50       add_dn25  mc_5k_50k    b60_3p
+  +0.0340 med-0.0057 n=  52 k= 17 res=0.808 H=120 tp100      add_dn25  ath_20_60    rec_lt30
+  +0.0338 med+0.0376 n=  42 k= 17 res=0.786 H=240 tp100      flat      ath_20_60    rec_lt30
+  +0.0337 med-0.0371 n= 242 k= 18 res=0.959 H=  5 tp100_sl40 add_dn25  ath_lt20     np3p
+  +0.0315 med-0.0704 n= 157 k= 20 res=0.936 H= 15 tp100      add_dn25  ath_lt20     rec_lt120
+  +0.0311 med-0.0704 n= 134 k= 16 res=0.933 H= 15 tp100      add_dn25  ath_lt20     np5p
+  +0.0311 med-0.0704 n= 134 k= 16 res=0.933 H= 15 tp100      add_dn25  ath_lt20     b360_5p
+  +0.0301 med-0.0144 n= 407 k= 17 res=0.988 H=  5 tp50       add_dn25  mc_5k_50k    rec_lt30
+  +0.0299 med-0.0296 n= 337 k= 22 res=0.967 H=  5 tp100      add_dn25  ath_lt20     np2p
+  +0.0295 med-0.0361 n= 278 k= 20 res=0.964 H=  5 tp100_sl40 add_dn25  ath_lt20     rec_lt120
+  +0.0286 med-0.0172 n= 259 k= 18 res=0.961 H=  5 half_tp50  add_dn25  ath_lt20     b60_1p
+  +0.0277 med-0.0203 n= 259 k= 18 res=0.961 H=  5 half_tp50  add_up25  ath_lt20     b60_1p
+  +0.0275 med-0.0024 n=  89 k= 15 res=0.910 H= 60 tp50       add_dn25  mc_5k_50k    b60_3p
+  +0.0269 med-0.0219 n= 617 k= 44 res=0.964 H=  5 time       add_dn25  ath_lt20     dlen151
+  +0.0267 med-0.0175 n= 617 k= 44 res=0.964 H=  5 half_tp50  add_up25  ath_lt20     dlen151
+  +0.0265 med-0.0268 n= 229 k= 16 res=0.961 H=  5 tp100      add_up25  ath_lt20     np5p
+  +0.0265 med-0.0268 n= 229 k= 16 res=0.961 H=  5 tp100      add_up25  ath_lt20     b360_5p
+elapsed 71.44084405899048

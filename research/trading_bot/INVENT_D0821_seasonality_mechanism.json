@@ -1,0 +1,4049 @@
+{
+ "document": "INVENT_D0821_seasonality_mechanism",
+ "created": "2026-08-21",
+ "theme": "seasonality with a structural mechanism (mechanical flow, not a bare calendar date)",
+ "verdict": "five of six mechanisms are noise; one (balanced-mandate month-end rebalancing) is marginal and forward-log only; nothing promoted",
+ "families": {
+  "P": "balanced-mandate / target-date / pension month-end rebalancing (7)",
+  "T": "payroll-deferral turn-of-month contribution inflow, cap-weight tilt (6)",
+  "D": "ETF distribution ex-date and coupon-DRIP plumbing (4)",
+  "R": "bond-index month-end duration extension (5)",
+  "W": "quarter-end and month-end window dressing (7)",
+  "L": "tax-loss harvesting and the wash-sale clock (9)",
+  "X": "single-name ex-dividend capture and DRIP pay-date (6, incl. 3 superseded buggy builds)",
+  "C": "CONTROLS, excluded from the multiple-testing count and from every verdict (4)"
+ },
+ "splits": {
+  "etf": {
+   "design": [
+    "2003-05-01",
+    "2013-12-31"
+   ],
+   "held_out": [
+    "2014-01-01",
+    "2026-08-20"
+   ],
+   "design_years": 10.663
+  },
+  "stock": {
+   "design": [
+    "2016-01-04",
+    "2021-12-31"
+   ],
+   "held_out": [
+    "2022-01-01",
+    "2026-08-13"
+   ],
+   "design_years": 5.996
+  }
+ },
+ "cost_model": {
+  "mega_etf_bp_per_side": 1.0,
+  "second_tier_etf_bp_per_side": 2.0,
+  "stock_bp_per_side": 3.0,
+  "stress_multiplier": 2.0,
+  "provenance": "M0_AUCTION_FILLS.json tier A_rank_1_50 closing half-spread median 0.90 bp / mean 1.34 bp for the mega-cap tier; 3 bp/side for single equities is the kill bar this programme has used throughout"
+ },
+ "bar": {
+  "n_formulas": 41,
+  "analytic_bar_t_sign_agnostic": 2.9687435885452462,
+  "analytic_bar_sharpe": {
+   "etf": 0.9091575009868963,
+   "stock": 1.2123854822860443
+  },
+  "joint_null": {
+   "etf": {
+    "n": 22,
+    "design_years": 10.662698412698411,
+    "E_max_t": 2.06728864952858,
+    "p95_t": 2.8910170347763464,
+    "p99_t": 3.328251057094218,
+    "E_max_sharpe": 0.6330930666009367,
+    "p95_sharpe": 0.885354273366459,
+    "observed_max_t": 3.0777450408426357,
+    "joint_p": 0.02555
+   },
+   "stock": {
+    "n": 19,
+    "design_years": 5.996031746031746,
+    "E_max_t": 2.485525363543265,
+    "p95_t": 3.7648001080979676,
+    "p99_t": 4.1361823303819705,
+    "E_max_sharpe": 1.015047199845993,
+    "p95_sharpe": 1.5374817186564649,
+    "observed_max_t": 3.2113497924966863,
+    "joint_p": 0.18935
+   }
+  }
+ },
+ "theme_wide_carryover": {
+  "n": 41,
+  "held_net_sharpe_positive": 22,
+  "median_held_net_sharpe": 0.064,
+  "mean_held_net_sharpe": 0.018,
+  "mean_design_net_sharpe": 0.205,
+  "shrinkage_pct": 91,
+  "corr_design_vs_heldout_net_sharpe": 0.335,
+  "reading": "the design-selected sign carries into held-out at a coin flip; the theme as a whole retains essentially nothing"
+ },
+ "sign_cost_correction": "a large negative NET t on a weak GROSS series is cost drag, not a reversed edge: reversing a book flips gross but not cost, so the best achievable net is sign*gross - cost. Ranking on net first produced four false hits (T01, R01, R03, D04); all four have |gross t| < 1.5.",
+ "known_bug_fixed": {
+  "formula": "X01_EXDIV_CAPTURE_PRERUN",
+  "before_t": -13.97,
+  "after_t": -0.19,
+  "causes": [
+   "inv3 stock panel carries RAW dividend-unadjusted prices, so the return realised ON an ex-date contains a mechanical drop equal to the dividend and any yield-correlated sort harvests a spurious spread",
+   "a position decided at close of t earns the t->t+1 return, so an offset of 1 session before the ex-date was in fact holding ACROSS the drop"
+  ]
+ },
+ "best": {
+  "name": "P02_PENSION_MEQ_MAG",
+  "mechanism": "a fixed-weight balanced mandate is obliged to sell whatever outperformed inside the period before the period boundary; the signal is minus the month-to-date equity-vs-bond divergence, held only over the last 4 sessions of the month",
+  "design_gross_sharpe": 0.94,
+  "design_gross_t": 3.08,
+  "design_net_sharpe": 0.87,
+  "held_gross_sharpe": 0.46,
+  "held_net_sharpe": 0.37,
+  "held_net_sharpe_2x_cost": 0.29,
+  "analytic_bar_sharpe": 0.909,
+  "joint_null_p": 0.026,
+  "programme_cumulative_bar_t": 3.61,
+  "clears": false,
+  "diagnostics": {
+   "design_excl_2008_09": {
+    "n": 2182,
+    "sharpe": 0.7956935006414355,
+    "t": 2.3413854403855976
+   },
+   "fair_placebo_fixed15_lookback": {
+    "fixed15_last4_of_month": {
+     "design_net_sharpe": 0.7523180718932514,
+     "held_net_sharpe": 0.48526202346449093
+    },
+    "fixed15_sessions_1to4": {
+     "design_net_sharpe": -0.3127382431317693,
+     "held_net_sharpe": 0.4947510221211729
+    },
+    "fixed15_sessions_5to8": {
+     "design_net_sharpe": -0.025422868035661197,
+     "held_net_sharpe": -0.20353883632400097
+    },
+    "fixed15_sessions_9to12": {
+     "design_net_sharpe": 0.16196385663040835,
+     "held_net_sharpe": 0.0800871425861889
+    },
+    "fixed15_sessions_13to16": {
+     "design_net_sharpe": 0.0864810710759235,
+     "held_net_sharpe": -0.12273041885821466
+    },
+    "fixed15_every_session": {
+     "design_net_sharpe": 0.22913824460071444,
+     "held_net_sharpe": 0.23068037598975302
+    }
+   },
+   "bare_calendar_control": {
+    "bare_calendar_uncond_short_spy": {
+     "design": -0.33234080948638056,
+     "held": -0.34488088556292973
+    },
+    "bare_calendar_uncond_long_spy": {
+     "design": 0.25685951442107485,
+     "held": 0.2609911637375032
+    }
+   },
+   "leg_attribution": {
+    "spy_only": {
+     "design": 1.1088102864386706,
+     "held": 0.69156749190717
+    },
+    "ief_only": {
+     "design": 0.3395476695382282,
+     "held": -0.15597575956292592
+    }
+   },
+   "spy_only_long_history": {
+    "design_1993_2013": {
+     "n": 5269,
+     "n_active": 1233,
+     "sharpe": 0.5992952167964425,
+     "t": 2.7403412007860806,
+     "years": 20.908730158730158,
+     "mean_bp": 0.9086989016140039,
+     "mean_active_bp": 3.883158566588959,
+     "hit": 0.43390105433901055,
+     "total": 0.4787934512604186
+    },
+    "held_2014_2026": {
+     "n": 3177,
+     "n_active": 760,
+     "sharpe": 0.6915674919071662,
+     "t": 2.455516786889976,
+     "years": 12.607142857142858,
+     "mean_bp": 1.0340222503929202,
+     "mean_active_bp": 4.322485117760931,
+     "hit": 0.4236842105263158,
+     "total": 0.3285088689498307
+    },
+    "pre2003": {
+     "n": 2582,
+     "n_active": 593,
+     "sharpe": 0.21686095725413615,
+     "t": 0.6941594159714147,
+     "years": 10.246031746031745,
+     "mean_bp": 0.37607803505584825,
+     "mean_active_bp": 1.6374932318957847,
+     "hit": 0.4266441821247892,
+     "total": 0.09710334865142001
+    },
+    "gross_design": {
+     "n": 5269,
+     "n_active": 970,
+     "sharpe": 0.6382107881558192,
+     "t": 2.918286795143215,
+     "years": 20.908730158730158,
+     "mean_bp": 0.9680454273493959,
+     "mean_active_bp": 5.258382841962852,
+     "hit": 0.554639175257732,
+     "total": 0.5100631356703967
+    }
+   },
+   "family_composite": {
+    "design_gross": {
+     "n": 2687,
+     "n_active": 503,
+     "sharpe": 0.8948498406881428,
+     "t": 2.9220236585739268,
+     "years": 10.662698412698413,
+     "mean_bp": 1.8754026908886434,
+     "mean_active_bp": 10.018304235423033,
+     "hit": 0.5606361829025845,
+     "total": 0.5039207030417785
+    },
+    "design_net": {
+     "n": 2687,
+     "n_active": 628,
+     "sharpe": 0.7494449241004274,
+     "t": 2.4472215330960463,
+     "years": 10.662698412698413,
+     "mean_bp": 1.5685327348558076,
+     "mean_active_bp": 6.711222067766807,
+     "hit": 0.4426751592356688,
+     "total": 0.4214647458557555
+    },
+    "held_gross": {
+     "n": 3177,
+     "n_active": 608,
+     "sharpe": 0.6290895803819996,
+     "t": 2.2336793489606825,
+     "years": 12.607142857142858,
+     "mean_bp": 1.2450964681516328,
+     "mean_active_bp": 6.50603861729891,
+     "hit": 0.5674342105263158,
+     "total": 0.3955671479317737
+    },
+    "held_net": {
+     "n": 3177,
+     "n_active": 760,
+     "sharpe": 0.4212330162814078,
+     "t": 1.495652636619511,
+     "years": 12.607142857142858,
+     "mean_bp": 0.8333142537614942,
+     "mean_active_bp": 3.4834728739477185,
+     "hit": 0.4342105263157895,
+     "total": 0.2647439384200267
+    },
+    "held_stress": {
+     "n": 3177,
+     "n_active": 760,
+     "sharpe": 0.21293825745631229,
+     "t": 0.756070046486892,
+     "years": 12.607142857142858,
+     "mean_bp": 0.4215320393713556,
+     "mean_active_bp": 1.7621148540563099,
+     "hit": 0.42236842105263156,
+     "total": 0.13392072890827966
+    },
+    "design_stress": {
+     "n": 2687,
+     "n_active": 628,
+     "sharpe": 0.603300178521869,
+     "t": 1.970003585749237,
+     "years": 10.662698412698413,
+     "mean_bp": 1.2616627788229717,
+     "mean_active_bp": 5.398229118944784,
+     "hit": 0.43789808917197454,
+     "total": 0.3390087886697325
+    }
+   },
+   "by_year_net_bp": {
+    "2003": {
+     "total_bp": -328.4682291860993,
+     "sharpe": -0.9503151146715603
+    },
+    "2004": {
+     "total_bp": 769.0141057788231,
+     "sharpe": 1.8309973796915207
+    },
+    "2005": {
+     "total_bp": -144.76050262975826,
+     "sharpe": -0.33242313104612436
+    },
+    "2006": {
+     "total_bp": 454.9783316678497,
+     "sharpe": 1.098620377629114
+    },
+    "2007": {
+     "total_bp": 841.9170273206674,
+     "sharpe": 1.0933948393828126
+    },
+    "2008": {
+     "total_bp": 983.6225161733291,
+     "sharpe": 0.9946415180620193
+    },
+    "2009": {
+     "total_bp": 689.2137732697013,
+     "sharpe": 1.9536526023045848
+    },
+    "2010": {
+     "total_bp": 670.2081180304323,
+     "sharpe": 1.0616342976905289
+    },
+    "2011": {
+     "total_bp": 878.77633829438,
+     "sharpe": 1.495243141823089
+    },
+    "2012": {
+     "total_bp": 383.4833639013378,
+     "sharpe": 1.1130107538664173
+    },
+    "2013": {
+     "total_bp": 4.059249787393008,
+     "sharpe": 0.012855392526476567
+    },
+    "2014": {
+     "total_bp": 394.69606916425687,
+     "sharpe": 1.5049106910591548
+    },
+    "2015": {
+     "total_bp": 711.9368104060633,
+     "sharpe": 0.8313930059328477
+    },
+    "2016": {
+     "total_bp": 773.0799409667125,
+     "sharpe": 1.300751538470402
+    },
+    "2017": {
+     "total_bp": 31.63283514399595,
+     "sharpe": 0.1479834221481204
+    },
+    "2018": {
+     "total_bp": 659.8107459671962,
+     "sharpe": 0.676604434356503
+    },
+    "2019": {
+     "total_bp": -486.23188007977683,
+     "sharpe": -0.7861877429116789
+    },
+    "2020": {
+     "total_bp": -712.4233070781804,
+     "sharpe": -1.0816761987968224
+    },
+    "2021": {
+     "total_bp": 110.25710707954767,
+     "sharpe": 0.2544112066545247
+    },
+    "2022": {
+     "total_bp": 636.0655378017924,
+     "sharpe": 1.593128991842726
+    },
+    "2023": {
+     "total_bp": 56.643004675651085,
+     "sharpe": 0.1962883947333658
+    },
+    "2024": {
+     "total_bp": 631.0745412922869,
+     "sharpe": 1.6116037757794632
+    },
+    "2025": {
+     "total_bp": -141.71688613517594,
+     "sharpe": -0.46609440133749175
+    },
+    "2026": {
+     "total_bp": -66.38325691147058,
+     "sharpe": -0.20573668922135552
+    }
+   }
+  }
+ },
+ "disposition": "forward-log only at zero size; design and held-out are both spent, the only uncontaminated evidence left is forward",
+ "untested_declared": [
+  "ETF creation/redemption seasonality (no share-count feed cached)",
+  "index add/delete reconstitution proper (no point-in-time membership data)"
+ ],
+ "rows": [
+  {
+   "name": "L02_TLS_JAN_BOUNCE",
+   "family": "L",
+   "desc": "post-harvest bounce: long the prior year's decile losers / short its winners through January",
+   "panel": "stock",
+   "active": 0.07605844885724991,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 102,
+    "sharpe": -1.3114618190630392,
+    "t": -3.2113497924966863,
+    "years": 5.996031746031746,
+    "mean_bp": -1.111078381745907,
+    "mean_active_bp": -16.459210145275144,
+    "hit": 0.3431372549019608,
+    "total": -0.16788394348180652
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 101,
+    "sharpe": -0.18982113982952484,
+    "t": -0.40691020915912457,
+    "years": 4.595238095238095,
+    "mean_bp": -0.3266845952967425,
+    "mean_active_bp": -3.7455520926101764,
+    "hit": 0.39603960396039606,
+    "total": -0.03783007613536278
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 107,
+    "sharpe": 1.2839475970721836,
+    "t": 3.143976278608064,
+    "years": 5.996031746031746,
+    "mean_bp": 1.0881303957175184,
+    "mean_active_bp": 15.366028298403457,
+    "hit": 0.6261682242990654,
+    "total": 0.16441650279291703
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 106,
+    "sharpe": 0.17242863789407584,
+    "t": 0.36962676113689724,
+    "years": 4.595238095238095,
+    "mean_bp": 0.2967020249599297,
+    "mean_active_bp": 3.2413296689018716,
+    "hit": 0.5754716981132075,
+    "total": 0.034358094490359856
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 107,
+    "sharpe": 1.2560405622107282,
+    "t": 3.075640891859588,
+    "years": 5.996031746031746,
+    "mean_bp": 1.06518240968913,
+    "mean_active_bp": 15.041968420937152,
+    "hit": 0.6261682242990654,
+    "total": 0.16094906210402754
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 106,
+    "sharpe": 0.15501424992963997,
+    "t": 0.33229639711447784,
+    "years": 4.595238095238095,
+    "mean_bp": 0.26671945462311636,
+    "mean_active_bp": 2.9137842306940454,
+    "hit": 0.5754716981132075,
+    "total": 0.030886112845356875
+   },
+   "cost_bp_per_active_day": 0.3792034062236301,
+   "design_cluster_t": 1.663283440927575,
+   "design_clusters": 5,
+   "held_cluster_t": 0.24141754086364686,
+   "held_clusters": 5
+  },
+  {
+   "name": "P02_PENSION_MEQ_MAG",
+   "family": "P",
+   "desc": "same as P01 but sized by the magnitude of the MTD divergence (a bigger drift obliges a bigger rebalance trade)",
+   "panel": "etf",
+   "active": 0.1892905866302865,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 502,
+    "sharpe": 0.9425384532378779,
+    "t": 3.0777450408426357,
+    "years": 10.662698412698413,
+    "mean_bp": 2.1058596852057088,
+    "mean_active_bp": 11.271802737346096,
+    "hit": 0.5737051792828686,
+    "total": 0.5658444974147739
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": 0.4614278735698832,
+    "t": 1.6383706619366227,
+    "years": 12.607142857142858,
+    "mean_bp": 1.0068348635521438,
+    "mean_active_bp": 5.2610433577387505,
+    "hit": 0.5723684210526315,
+    "total": 0.31987143615051605
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 627,
+    "sharpe": 0.8680987912691399,
+    "t": 2.8346713501308747,
+    "years": 10.662698412698413,
+    "mean_bp": 1.936004500337945,
+    "mean_active_bp": 8.296721040523215,
+    "hit": 0.4513556618819777,
+    "total": 0.5202044092408058
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.37490184143767996,
+    "t": 1.3311466716682552,
+    "years": 12.607142857142858,
+    "mean_bp": 0.8178914895476549,
+    "mean_active_bp": 3.419001660911709,
+    "hit": 0.4473684210526316,
+    "total": 0.25984412622928993
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 627,
+    "sharpe": 0.7932209363551925,
+    "t": 2.590166793485297,
+    "years": 10.662698412698413,
+    "mean_bp": 1.7661493154701797,
+    "mean_active_bp": 7.568808948434407,
+    "hit": 0.44019138755980863,
+    "total": 0.4745643210668373
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.2882631029158766,
+    "t": 1.0235225000222326,
+    "years": 12.607142857142858,
+    "mean_bp": 0.6289481155431655,
+    "mean_active_bp": 2.6291686356324173,
+    "hit": 0.4394736842105263,
+    "total": 0.1998168163080637
+   },
+   "cost_bp_per_active_day": 0.7618413705493474
+  },
+  {
+   "name": "D02_ETF_EXDIST_PRERUN",
+   "family": "D",
+   "desc": "dividend-capture demand into a known ex-date: long the ETF vs SPY over ex-5..ex-2 (position closed before the drop), price return",
+   "panel": "etf",
+   "active": 0.4319577080491132,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 1171,
+    "sharpe": 0.8571125659234771,
+    "t": 2.7987971632910305,
+    "years": 10.662698412698413,
+    "mean_bp": 3.159701162584041,
+    "mean_active_bp": 7.250313427722732,
+    "hit": 0.53800170794193,
+    "total": 0.8490117023863318
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 1361,
+    "sharpe": 0.38835208786367814,
+    "t": 1.3789038411033954,
+    "years": 12.607142857142858,
+    "mean_bp": 1.2847629084519705,
+    "mean_active_bp": 2.999038765725136,
+    "hit": 0.49889786921381335,
+    "total": 0.40816917601519104
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 1406,
+    "sharpe": 0.6861463153452423,
+    "t": 2.2405276008545982,
+    "years": 10.662698412698413,
+    "mean_bp": 2.530346754293359,
+    "mean_active_bp": 4.835733804257649,
+    "hit": 0.44310099573257467,
+    "total": 0.6799041728786256
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 1624,
+    "sharpe": 0.15891334634703994,
+    "t": 0.5642462871409788,
+    "years": 12.607142857142858,
+    "mean_bp": 0.5259583298185975,
+    "mean_active_bp": 1.0289221760059637,
+    "hit": 0.41133004926108374,
+    "total": 0.16709696138336844
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 1406,
+    "sharpe": 0.5150633224160467,
+    "t": 1.6818768304255465,
+    "years": 10.662698412698413,
+    "mean_bp": 1.9009923460026763,
+    "mean_active_bp": 3.632977548868557,
+    "hit": 0.4395448079658606,
+    "total": 0.5107966433709191
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 1624,
+    "sharpe": -0.07026279800600709,
+    "t": -0.24947887518803447,
+    "years": 12.607142857142858,
+    "mean_bp": -0.23284624881477556,
+    "mean_active_bp": -0.45551264315550605,
+    "hit": 0.4039408866995074,
+    "total": -0.07397525324845419
+   },
+   "cost_bp_per_active_day": 1.3537285285132974
+  },
+  {
+   "name": "L03_TLS_WASHSALE_31D",
+   "family": "L",
+   "desc": "the rule-dated repurchase: the wash-sale clock on mid-December selling expires 12-23 January. Long losers / short winners in exactly that window",
+   "panel": "stock",
+   "active": 0.028100412139378046,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 37,
+    "sharpe": -0.9893180899145552,
+    "t": -2.4225230171246115,
+    "years": 5.996031746031746,
+    "mean_bp": -0.498288821553337,
+    "mean_active_bp": -20.34903809100249,
+    "hit": 0.32432432432432434,
+    "total": -0.07529144093670921
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 38,
+    "sharpe": -0.5545616144076954,
+    "t": -1.1887863633782605,
+    "years": 4.595238095238095,
+    "mean_bp": -0.5207583915499581,
+    "mean_active_bp": -15.869426774075034,
+    "hit": 0.34210526315789475,
+    "total": -0.06030382174148514
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 42,
+    "sharpe": 0.9498063075801848,
+    "t": 2.3257713220647376,
+    "years": 5.996031746031746,
+    "mean_bp": 0.477406236224562,
+    "mean_active_bp": 17.17525768893602,
+    "hit": 0.5714285714285714,
+    "total": 0.07213608229353131
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 43,
+    "sharpe": 0.5270282889059673,
+    "t": 1.1297645323597756,
+    "years": 4.595238095238095,
+    "mean_bp": 0.4937090968360348,
+    "mean_active_bp": 13.29570079386345,
+    "hit": 0.5813953488372093,
+    "total": 0.05717151341361283
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 42,
+    "sharpe": 0.9092862580614018,
+    "t": 2.226550703726748,
+    "years": 5.996031746031746,
+    "mean_bp": 0.456523650895787,
+    "mean_active_bp": 16.42398182151272,
+    "hit": 0.5714285714285714,
+    "total": 0.06898072365035342
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 43,
+    "sharpe": 0.49918946135214537,
+    "t": 1.0700878116697412,
+    "years": 4.595238095238095,
+    "mean_bp": 0.4666598021221117,
+    "mean_active_bp": 12.567256996683843,
+    "hit": 0.5813953488372093,
+    "total": 0.05403920508574053
+   },
+   "cost_bp_per_active_day": 0.8613242426096166,
+   "design_cluster_t": 2.356662908394424,
+   "design_clusters": 5,
+   "held_cluster_t": 1.171188286418902,
+   "held_clusters": 5
+  },
+  {
+   "name": "X01b_EXDIV_PRERUN_VS_PAYERS",
+   "family": "X",
+   "desc": "capture demand ahead of a scheduled ex-date, hedged against OTHER DIVIDEND PAYERS so the value/low-beta style tilt cancels: long names 1-3 sessions before their ex-date, short the rest of the payer universe",
+   "panel": "stock",
+   "active": 0.821656050955414,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 1043,
+    "sharpe": 0.9004288027670059,
+    "t": 2.2048616337071354,
+    "years": 5.996031746031746,
+    "mean_bp": 0.9725728542134601,
+    "mean_active_bp": 1.4089717955096244,
+    "hit": 0.5282837967401726,
+    "total": 0.1469557582716538
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 1150,
+    "sharpe": -0.4024704276010057,
+    "t": -0.8627559924177359,
+    "years": 4.595238095238095,
+    "mean_bp": -0.5217313576111801,
+    "mean_active_bp": -0.5253607931423884,
+    "hit": 0.5043478260869565,
+    "total": -0.06041649121137465
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 1071,
+    "sharpe": -0.0787791950249085,
+    "t": -0.1929050071599037,
+    "years": 5.996031746031746,
+    "mean_bp": -0.0849338058429666,
+    "mean_active_bp": -0.11982724615193521,
+    "hit": 0.4780578898225957,
+    "total": -0.012833498062872255
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -1.5215520268213172,
+    "t": -3.26167598633317,
+    "years": 4.595238095238095,
+    "mean_bp": -1.9731558515630572,
+    "mean_active_bp": -1.9731558515630572,
+    "hit": 0.4585492227979275,
+    "total": -0.22849144761100204
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 1071,
+    "sharpe": -1.0587632546306633,
+    "t": -2.5925719747529024,
+    "years": 5.996031746031746,
+    "mean_bp": -1.1424404658993934,
+    "mean_active_bp": -1.6117904238786025,
+    "hit": 0.4444444444444444,
+    "total": -0.17262275439739833
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -2.6372974225529813,
+    "t": -5.653444325482534,
+    "years": 4.595238095238095,
+    "mean_bp": -3.424580345514934,
+    "mean_active_bp": -3.424580345514934,
+    "hit": 0.4067357512953368,
+    "total": -0.39656640401062937
+   },
+   "cost_bp_per_active_day": 1.471562893779863
+  },
+  {
+   "name": "P05_PENSION_LASTDAY",
+   "family": "P",
+   "desc": "the single session the rebalance actually prints: -sign(MTD SPY-IEF) held over the final session of the month only",
+   "panel": "etf",
+   "active": 0.04740791268758526,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 126,
+    "sharpe": 0.6629376888792138,
+    "t": 2.1647426450629212,
+    "years": 10.662698412698413,
+    "mean_bp": 1.4425916307216091,
+    "mean_active_bp": 30.763838982134637,
+    "hit": 0.626984126984127,
+    "total": 0.38762437117489634
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 152,
+    "sharpe": 0.33588638960604467,
+    "t": 1.1926163068928992,
+    "years": 12.607142857142858,
+    "mean_bp": 0.6816356378138205,
+    "mean_active_bp": 14.247081719305978,
+    "hit": 0.5460526315789473,
+    "total": 0.2165556421334508
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 251,
+    "sharpe": 0.5036611966313334,
+    "t": 1.6446445711278892,
+    "years": 10.662698412698413,
+    "mean_bp": 1.0918279649597067,
+    "mean_active_bp": 11.688214110943157,
+    "hit": 0.30278884462151395,
+    "total": 0.29337417418467315
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 304,
+    "sharpe": 0.13919504774183256,
+    "t": 0.49423343402020853,
+    "years": 12.607142857142858,
+    "mean_bp": 0.2820285958514112,
+    "mean_active_bp": 2.9473843717760944,
+    "hit": 0.26644736842105265,
+    "total": 0.08960048490199334
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 251,
+    "sharpe": 0.34278690116618304,
+    "t": 1.1193290645127354,
+    "years": 10.662698412698413,
+    "mean_bp": 0.7410642991978044,
+    "mean_active_bp": 7.933226183045817,
+    "hit": 0.2868525896414343,
+    "total": 0.19912397719445002
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 304,
+    "sharpe": -0.05803178429107269,
+    "t": -0.20605077908872485,
+    "years": 12.607142857142858,
+    "mean_bp": -0.11757844611099871,
+    "mean_active_bp": -1.2287721161008,
+    "hit": 0.2532894736842105,
+    "total": -0.037354672329464295
+   },
+   "cost_bp_per_active_day": 3.9856820580483014
+  },
+  {
+   "name": "P01_PENSION_MEQ_SIGN",
+   "family": "P",
+   "desc": "sell-the-outperformer 60/40 rebalance: -sign(MTD SPY-IEF), SPY vs IEF, held over the last 4 sessions of the month",
+   "panel": "etf",
+   "active": 0.1894611186903138,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": 0.6481173321049124,
+    "t": 2.1163485669126554,
+    "years": 10.662698412698413,
+    "mean_bp": 3.0847559190021183,
+    "mean_active_bp": 16.47860666870515,
+    "hit": 0.5725646123260437,
+    "total": 0.8288739154358692
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": 0.6862116221046933,
+    "t": 2.436499947084362,
+    "years": 12.607142857142858,
+    "mean_bp": 2.90648351820667,
+    "mean_active_bp": 15.187332462734526,
+    "hit": 0.5723684210526315,
+    "total": 0.9233898137342591
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 628,
+    "sharpe": 0.5541991830348902,
+    "t": 1.8096702382435246,
+    "years": 10.662698412698413,
+    "mean_bp": 2.6357006293930407,
+    "mean_active_bp": 11.277273234361623,
+    "hit": 0.4554140127388535,
+    "total": 0.70821275911791
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.567467013279706,
+    "t": 2.014878943010936,
+    "years": 12.607142857142858,
+    "mean_bp": 2.4007229976673172,
+    "mean_active_bp": 10.035653899459295,
+    "hit": 0.45263157894736844,
+    "total": 0.7627096963589066
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 628,
+    "sharpe": 0.45997182559762406,
+    "t": 1.5019822271411698,
+    "years": 10.662698412698413,
+    "mean_bp": 2.1866453397839622,
+    "mean_active_bp": 9.35591724203743,
+    "hit": 0.45222929936305734,
+    "total": 0.5875516027999507
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.4482016115016551,
+    "t": 1.5914087834267232,
+    "years": 12.607142857142858,
+    "mean_bp": 1.8949624771279638,
+    "mean_active_bp": 7.921441828730976,
+    "hit": 0.4486842105263158,
+    "total": 0.6020295789835541
+   },
+   "cost_bp_per_active_day": 2.0269544214215536
+  },
+  {
+   "name": "P07_PENSION_CREDIT",
+   "family": "P",
+   "desc": "credit-sleeve rebalance: -sign(MTD HYG-IEF), last 4 sessions of the month",
+   "panel": "etf",
+   "active": 0.15893587994542974,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 323,
+    "sharpe": 0.605057749267136,
+    "t": 1.9757427199209971,
+    "years": 10.662698412698413,
+    "mean_bp": 2.1651943105962075,
+    "mean_active_bp": 18.012003444495384,
+    "hit": 0.5325077399380805,
+    "total": 0.581787711257201
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 607,
+    "sharpe": 0.33606816718166405,
+    "t": 1.193261736144038,
+    "years": 12.607142857142858,
+    "mean_bp": 1.2290077616633512,
+    "mean_active_bp": 6.432549685015597,
+    "hit": 0.5420098846787479,
+    "total": 0.39045576588044667
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 403,
+    "sharpe": 0.5156475814954984,
+    "t": 1.6837846576109228,
+    "years": 10.662698412698413,
+    "mean_bp": 1.8417808191601386,
+    "mean_active_bp": 12.280062186310898,
+    "hit": 0.4218362282878412,
+    "total": 0.49488650610832924
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.1492328070380117,
+    "t": 0.5298740428443108,
+    "years": 12.607142857142858,
+    "mean_bp": 0.5463493814589402,
+    "mean_active_bp": 2.283884190651386,
+    "hit": 0.4263157894736842,
+    "total": 0.1735751984895053
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 403,
+    "sharpe": 0.42567727319533527,
+    "t": 1.3899975243192644,
+    "years": 10.662698412698413,
+    "mean_bp": 1.518367327724069,
+    "mean_active_bp": 10.123704738448074,
+    "hit": 0.41935483870967744,
+    "total": 0.4079853009594574
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": -0.03714191727012087,
+    "t": -0.13187809204644232,
+    "years": 12.607142857142858,
+    "mean_bp": -0.13630899874547048,
+    "mean_active_bp": -0.5698074855452108,
+    "hit": 0.42236842105263156,
+    "total": -0.043305368901435964
+   },
+   "cost_bp_per_active_day": 2.702684809073071
+  },
+  {
+   "name": "L08_TLS_EMBEDDED_JAN",
+   "family": "L",
+   "desc": "January bounce scored on embedded loss instead of YTD return",
+   "panel": "stock",
+   "active": 0.06856500562008243,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 82,
+    "sharpe": -0.7964285058340984,
+    "t": -1.9501982290083268,
+    "years": 5.996031746031746,
+    "mean_bp": -0.7479409676243364,
+    "mean_active_bp": -13.782180513175273,
+    "hit": 0.4146341463414634,
+    "total": -0.11301388020803724
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 101,
+    "sharpe": -0.31855875805794376,
+    "t": -0.6828786877333194,
+    "years": 4.595238095238095,
+    "mean_bp": -0.5473658130188175,
+    "mean_active_bp": -6.275738727483075,
+    "hit": 0.39603960396039606,
+    "total": -0.06338496114757906
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 86,
+    "sharpe": 0.777905323499988,
+    "t": 1.90484089044126,
+    "years": 5.996031746031746,
+    "mean_bp": 0.7300295478347861,
+    "mean_active_bp": 12.826449381143744,
+    "hit": 0.5581395348837209,
+    "total": 0.11030746467783618
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 106,
+    "sharpe": 0.3010635047788584,
+    "t": 0.6453749767268534,
+    "years": 4.595238095238095,
+    "mean_bp": 0.516990034539171,
+    "mean_active_bp": 5.647872264116604,
+    "hit": 0.5754716981132075,
+    "total": 0.059867445999636
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 86,
+    "sharpe": 0.7591936595561039,
+    "t": 1.8590220208028052,
+    "years": 5.996031746031746,
+    "mean_bp": 0.7121181280452358,
+    "mean_active_bp": 12.511749900887807,
+    "hit": 0.5581395348837209,
+    "total": 0.10760104914763513
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 106,
+    "sharpe": 0.28351757209681927,
+    "t": 0.6077626267854694,
+    "years": 4.595238095238095,
+    "mean_bp": 0.48661425605952474,
+    "mean_active_bp": 5.316031212423864,
+    "hit": 0.5660377358490566,
+    "total": 0.056349930851692966
+   },
+   "cost_bp_per_active_day": 0.3795079681795175,
+   "design_cluster_t": 1.0964840246649536,
+   "design_clusters": 4,
+   "held_cluster_t": 0.44576384603365526,
+   "held_clusters": 5
+  },
+  {
+   "name": "W06_WD_CLOSE_TO_OPEN",
+   "family": "W",
+   "desc": "the mechanical signature: a close-print mark-up must unwind in the next OPENING auction. Short the quarter's decile winners / long its losers from the quarter-end close to the next open",
+   "panel": "stock",
+   "active": 0.015736230798051705,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 23,
+    "sharpe": 0.7160548932827926,
+    "t": 1.753389004189836,
+    "years": 5.996031746031746,
+    "mean_bp": 0.14242844687587167,
+    "mean_active_bp": 9.356929705627918,
+    "hit": 0.6521739130434783,
+    "total": 0.02152093832294421
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 19,
+    "sharpe": -0.4599767312874748,
+    "t": -0.9860294175064501,
+    "years": 4.595238095238095,
+    "mean_bp": -0.20878574387818216,
+    "mean_active_bp": -12.724941653207102,
+    "hit": 0.47368421052631576,
+    "total": -0.02417738914109349
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 45,
+    "sharpe": 0.2748406354413983,
+    "t": 0.6729966551561245,
+    "years": 5.996031746031746,
+    "mean_bp": 0.05308364290962032,
+    "mean_active_bp": 1.782430765254141,
+    "hit": 0.26666666666666666,
+    "total": 0.00802093844364363
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 38,
+    "sharpe": -0.6673010198681186,
+    "t": -1.4304602628057719,
+    "years": 4.595238095238095,
+    "mean_bp": -0.30723133937842956,
+    "mean_active_bp": -9.362470815795296,
+    "hit": 0.23684210526315788,
+    "total": -0.035577389100022144
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 45,
+    "sharpe": -0.18823339353740823,
+    "t": -0.46092326935539,
+    "years": 5.996031746031746,
+    "mean_bp": -0.03626116105663102,
+    "mean_active_bp": -1.217569207923766,
+    "hit": 0.2,
+    "total": -0.005479061435656947
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 38,
+    "sharpe": -0.8645290325602188,
+    "t": -1.8532482197670241,
+    "years": 4.595238095238095,
+    "mean_bp": -0.40567693487867695,
+    "mean_active_bp": -12.36247080498705,
+    "hit": 0.23684210526315788,
+    "total": -0.04697738905895079
+   },
+   "cost_bp_per_active_day": 2.9999999805095463,
+   "design_cluster_t": 1.840940648212005,
+   "design_clusters": 23,
+   "held_cluster_t": -0.9852827809884109,
+   "held_clusters": 19
+  },
+  {
+   "name": "T03_TOM_SIZE",
+   "family": "T",
+   "desc": "the marginal contribution dollar is S&P-heavy: long SPY / short IWM over the TOM window",
+   "panel": "etf",
+   "active": 0.23669849931787176,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 627,
+    "sharpe": 0.5085117689456355,
+    "t": 1.6604835269119291,
+    "years": 10.662698412698413,
+    "mean_bp": 0.7378987212963594,
+    "mean_active_bp": 3.1622549667038555,
+    "hit": 0.5007974481658692,
+    "total": 0.19827338641233175
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.5162338180146451,
+    "t": 1.8329676003125772,
+    "years": 12.607142857142858,
+    "mean_bp": 1.0087303244245114,
+    "mean_active_bp": 4.216758211442991,
+    "hit": 0.5381578947368421,
+    "total": 0.3204736240696673
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 752,
+    "sharpe": 0.374740235085308,
+    "t": 1.2236688022392297,
+    "years": 10.662698412698413,
+    "mean_bp": 0.5440162029699017,
+    "mean_active_bp": 1.9438451294948484,
+    "hit": 0.4109042553191489,
+    "total": 0.14617715373801257
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": 0.4068252791878958,
+    "t": 1.4444957492466657,
+    "years": 12.607142857142858,
+    "mean_bp": 0.7955099093067067,
+    "mean_active_bp": 2.771200638012508,
+    "hit": 0.44298245614035087,
+    "total": 0.25273349818674073
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 752,
+    "sharpe": 0.24090737800007145,
+    "t": 0.7866538340107325,
+    "years": 10.662698412698413,
+    "mean_bp": 0.35013368464344413,
+    "mean_active_bp": 1.251076077974647,
+    "hit": 0.40691489361702127,
+    "total": 0.09408092106369344
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": 0.2974308080876903,
+    "t": 1.0560738478083551,
+    "years": 12.607142857142858,
+    "mean_bp": 0.5822894941889023,
+    "mean_active_bp": 2.028436099822524,
+    "hit": 0.44298245614035087,
+    "total": 0.18499337230381424
+   },
+   "cost_bp_per_active_day": 0.7201704240219093
+  },
+  {
+   "name": "X02_EXDIV_CAPTURE_UNWIND",
+   "family": "X",
+   "desc": "the capture trade unwinds: short names 1-5 sessions AFTER their ex-date, long the universe",
+   "panel": "stock",
+   "active": 0.9763956538029225,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 1447,
+    "sharpe": 0.6286391030143735,
+    "t": 1.5393357425096894,
+    "years": 5.996031746031746,
+    "mean_bp": 1.553691526692006,
+    "mean_active_bp": 1.6224104331939324,
+    "hit": 0.5314443676572218,
+    "total": 0.23476278968316208
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": 0.09037412718626159,
+    "t": 0.193730556190745,
+    "years": 4.595238095238095,
+    "mean_bp": 0.26480436645755295,
+    "mean_active_bp": 0.26480436645755295,
+    "hit": 0.5051813471502591,
+    "total": 0.03066434563578463
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 1450,
+    "sharpe": -0.01479810046109221,
+    "t": -0.03623580660474364,
+    "years": 5.996031746031746,
+    "mean_bp": -0.036608477404824126,
+    "mean_active_bp": -0.038148558178406095,
+    "hit": 0.5096551724137931,
+    "total": -0.0055315409358689255
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -0.47069013215249544,
+    "t": -1.0089952061994598,
+    "years": 4.595238095238095,
+    "mean_bp": -1.3797755044806241,
+    "mean_active_bp": -1.3797755044806241,
+    "hit": 0.48272884283246975,
+    "total": -0.15977800341885628
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 1450,
+    "sharpe": -0.6566071696264367,
+    "t": -1.6078205764603646,
+    "years": 5.996031746031746,
+    "mean_bp": -1.6269084815016537,
+    "mean_active_bp": -1.6953508383096543,
+    "hit": 0.4786206896551724,
+    "total": -0.24582587155489988
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -1.0308446406575598,
+    "t": -2.2097707806266533,
+    "years": 4.595238095238095,
+    "mean_bp": -3.0243553754188017,
+    "mean_active_bp": -3.0243553754188017,
+    "hit": 0.46632124352331605,
+    "total": -0.35022035247349725
+   },
+   "cost_bp_per_active_day": 1.6522312223769542
+  },
+  {
+   "name": "W01_WD_QTR_MARKUP",
+   "family": "W",
+   "desc": "window dressing into the reporting date: long top-decile QTD return / short bottom decile, held over the last 4 sessions of the quarter",
+   "panel": "stock",
+   "active": 0.06294492319220682,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 92,
+    "sharpe": -0.6268820459073764,
+    "t": -1.5350332726291775,
+    "years": 5.996031746031746,
+    "mean_bp": -0.8093279649373804,
+    "mean_active_bp": -13.292332119786757,
+    "hit": 0.5,
+    "total": -0.12228945550203817
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 76,
+    "sharpe": 0.12177776716080538,
+    "t": 0.2610489893319409,
+    "years": 4.595238095238095,
+    "mean_bp": 0.2092331385788726,
+    "mean_active_bp": 3.1880522957149253,
+    "hit": 0.5394736842105263,
+    "total": 0.024229197447433445
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 114,
+    "sharpe": 0.5439448202999837,
+    "t": 1.3319465808375435,
+    "years": 5.996031746031746,
+    "mean_bp": 0.7008568161414692,
+    "mean_active_bp": 9.289426747278597,
+    "hit": 0.40350877192982454,
+    "total": 0.105899464918976
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 95,
+    "sharpe": -0.18931818384804816,
+    "t": -0.40583204724415395,
+    "years": 4.595238095238095,
+    "mean_bp": -0.32583480568039164,
+    "mean_active_bp": -3.971754789240982,
+    "hit": 0.3684210526315789,
+    "total": -0.037731670497789346
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 114,
+    "sharpe": 0.46038520151018236,
+    "t": 1.1273358475617221,
+    "years": 5.996031746031746,
+    "mean_bp": 0.5923856673455583,
+    "mean_active_bp": 7.851708275080164,
+    "hit": 0.40350877192982454,
+    "total": 0.08950947433591386
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 95,
+    "sharpe": -0.25652982131474067,
+    "t": -0.5499103173676021,
+    "years": 4.595238095238095,
+    "mean_bp": -0.44243647278191056,
+    "mean_active_bp": -5.393067741910024,
+    "hit": 0.3684210526315789,
+    "total": -0.05123414354814525
+   },
+   "cost_bp_per_active_day": 1.430261417866892,
+   "design_cluster_t": 1.9226957856933953,
+   "design_clusters": 23,
+   "held_cluster_t": -0.2648004568444078,
+   "held_clusters": 19
+  },
+  {
+   "name": "T01_TOM_CAPWEIGHT",
+   "family": "T",
+   "desc": "cap-weight tilt of turn-of-month contribution flow: long SPY / short RSP (equal-weight sibling) over the -2..+2 session TOM window",
+   "panel": "etf",
+   "active": 0.23669849931787176,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 626,
+    "sharpe": -0.4468872463325302,
+    "t": -1.4592561199926357,
+    "years": 10.662698412698413,
+    "mean_bp": -0.3650649696044452,
+    "mean_active_bp": -1.566980149084895,
+    "hit": 0.48722044728434505,
+    "total": -0.09809295733271442
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": -0.001382328170761686,
+    "t": -0.004908168859897593,
+    "years": 12.607142857142858,
+    "mean_bp": -0.0018689827800641152,
+    "mean_active_bp": -0.007812839858242068,
+    "hit": 0.49473684210526314,
+    "total": -0.0005937758292263694
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 752,
+    "sharpe": 0.05174261756496565,
+    "t": 0.16895924411754307,
+    "years": 10.662698412698413,
+    "mean_bp": 0.042290202559844434,
+    "mean_active_bp": 0.15110874239135944,
+    "hit": 0.4242021276595745,
+    "total": 0.0113633774278302
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": -0.2745228811999727,
+    "t": -0.97473572870372,
+    "years": 12.607142857142858,
+    "mean_bp": -0.37068810895204923,
+    "mean_active_bp": -1.2913115374349344,
+    "hit": 0.41228070175438597,
+    "total": -0.11776761221406605
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 752,
+    "sharpe": -0.34078843958981997,
+    "t": -1.1128033305388731,
+    "years": 10.662698412698413,
+    "mean_bp": -0.28048456448475617,
+    "mean_active_bp": -1.0022101393225267,
+    "hit": 0.4122340425531915,
+    "total": -0.07536620247705399
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": -0.5494342302341334,
+    "t": -1.9508507722236772,
+    "years": 12.607142857142858,
+    "mean_bp": -0.7432452006841627,
+    "mean_active_bp": -2.589133774751738,
+    "hit": 0.3958333333333333,
+    "total": -0.2361290002573585
+   },
+   "cost_bp_per_active_day": 1.2325178362270228
+  },
+  {
+   "name": "X02b_EXDIV_UNWIND_VS_PAYERS",
+   "family": "X",
+   "desc": "the capture position unwinding: short names 1-5 sessions after their ex-date, long the rest of the payer universe",
+   "panel": "stock",
+   "active": 0.8490071187710753,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 1107,
+    "sharpe": 0.5497653803846033,
+    "t": 1.3461992675328465,
+    "years": 5.996031746031746,
+    "mean_bp": 0.4803862498598093,
+    "mean_active_bp": 0.6557033636297847,
+    "hit": 0.5239385727190605,
+    "total": 0.07258636235381719
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": 0.2036416351624902,
+    "t": 0.43653652291780387,
+    "years": 4.595238095238095,
+    "mean_bp": 0.2002131216227782,
+    "mean_active_bp": 0.2002131216227782,
+    "hit": 0.5008635578583766,
+    "total": 0.023184679483917718
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 1110,
+    "sharpe": -0.23287513602313453,
+    "t": -0.5702365931475001,
+    "years": 5.996031746031746,
+    "mean_bp": -0.2035865051421305,
+    "mean_active_bp": -0.277134422765549,
+    "hit": 0.4918918918918919,
+    "total": -0.030761920926975918
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -0.7685388173141928,
+    "t": -1.6474787327748566,
+    "years": 4.595238095238095,
+    "mean_bp": -0.7559492324487294,
+    "mean_active_bp": -0.7559492324487294,
+    "hit": 0.46718480138169255,
+    "total": -0.08753892111756285
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 1110,
+    "sharpe": -1.012784372151062,
+    "t": -2.4799844235456647,
+    "years": 5.996031746031746,
+    "mean_bp": -0.8875592601440704,
+    "mean_active_bp": -1.208200037907829,
+    "hit": 0.47477477477477475,
+    "total": -0.13411020420776903
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -1.7376883045683442,
+    "t": -3.724996657908012,
+    "years": 4.595238095238095,
+    "mean_bp": -1.7121115865202372,
+    "mean_active_bp": -1.7121115865202372,
+    "hit": 0.4274611398963731,
+    "total": -0.19826252171904346
+   },
+   "cost_bp_per_active_day": 0.944295914787268
+  },
+  {
+   "name": "R05_TSY_EXT_TLT_SHY",
+   "family": "R",
+   "desc": "full-curve version of R01: long TLT / short SHY over the last 3 sessions of the month",
+   "panel": "etf",
+   "active": 0.1422237380627558,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 378,
+    "sharpe": 0.4004695037511277,
+    "t": 1.3076846095187113,
+    "years": 10.662698412698413,
+    "mean_bp": 0.7507842337441261,
+    "mean_active_bp": 5.336923904948323,
+    "hit": 0.5317460317460317,
+    "total": 0.20173572360704667
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 456,
+    "sharpe": 0.3400204957267384,
+    "t": 1.207295086761735,
+    "years": 12.607142857142858,
+    "mean_bp": 0.681965371086286,
+    "mean_active_bp": 4.751324526186689,
+    "hit": 0.5460526315789473,
+    "total": 0.21666039839411305
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": 0.13161077680491556,
+    "t": 0.42975903448954106,
+    "years": 10.662698412698413,
+    "mean_bp": 0.248266588964655,
+    "mean_active_bp": 1.326227285383754,
+    "hit": 0.38966202783300197,
+    "total": 0.0667092324548028
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": 0.08727510248370844,
+    "t": 0.30988367980584147,
+    "years": 12.607142857142858,
+    "mean_bp": 0.17477114983067557,
+    "mean_active_bp": 0.9132367483750922,
+    "hit": 0.3996710526315789,
+    "total": 0.05552479430120563
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": -0.1336026344325365,
+    "t": -0.43626320406948255,
+    "years": 10.662698412698413,
+    "mean_bp": -0.2542510558148163,
+    "mean_active_bp": -1.3581959979610565,
+    "hit": 0.3817097415506958,
+    "total": -0.06831725869744112
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": -0.16586213076957826,
+    "t": -0.5889190153962752,
+    "years": 12.607142857142858,
+    "mean_bp": -0.33242307142493477,
+    "mean_active_bp": -1.7370198978898321,
+    "hit": 0.39144736842105265,
+    "total": -0.10561080979170179
+   },
+   "cost_bp_per_active_day": 2.665725429749336
+  },
+  {
+   "name": "P06_PENSION_GLOBAL",
+   "family": "P",
+   "desc": "regional-weight rebalance inside global balanced mandates: -sign(MTD SPY-EFA), last 4 sessions of the month",
+   "panel": "etf",
+   "active": 0.1894611186903138,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": 0.3920277472039516,
+    "t": 1.2801190770358528,
+    "years": 10.662698412698413,
+    "mean_bp": 0.5786119089175749,
+    "mean_active_bp": 3.0909149090686356,
+    "hit": 0.510934393638171,
+    "total": 0.15547301992615237
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": 0.21486100924686774,
+    "t": 0.7628970725602423,
+    "years": 12.607142857142858,
+    "mean_bp": 0.4015205595221779,
+    "mean_active_bp": 2.0980770026348026,
+    "hit": 0.49835526315789475,
+    "total": 0.12756308176019593
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 628,
+    "sharpe": 0.22855660208039855,
+    "t": 0.7463238727165822,
+    "years": 10.662698412698413,
+    "mean_bp": 0.3373497604282085,
+    "mean_active_bp": 1.4434057424691018,
+    "hit": 0.4028662420382166,
+    "total": 0.09064588062705962
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.0639916712930121,
+    "t": 0.22721227489713988,
+    "years": 12.607142857142858,
+    "mean_bp": 0.11957880428214755,
+    "mean_active_bp": 0.4998708700057659,
+    "hit": 0.39210526315789473,
+    "total": 0.03799018612043828
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 628,
+    "sharpe": 0.0650268794170201,
+    "t": 0.21233739054325382,
+    "years": 10.662698412698413,
+    "mean_bp": 0.09608761193884212,
+    "mean_active_bp": 0.41112645426698863,
+    "hit": 0.39171974522292996,
+    "total": 0.02581874132796688
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": -0.08680956003838618,
+    "t": -0.30823069972381634,
+    "years": 12.607142857142858,
+    "mean_bp": -0.1623629509578832,
+    "mean_active_bp": -0.6787198620963094,
+    "hit": 0.3881578947368421,
+    "total": -0.05158270951931949
+   },
+   "cost_bp_per_active_day": 1.1123921825565595
+  },
+  {
+   "name": "W03_WD_MONTH_MARKUP",
+   "family": "W",
+   "desc": "monthly-reporting version: long top-decile MTD / short bottom decile over the last 4 sessions of every month",
+   "panel": "stock",
+   "active": 0.18733608092918697,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 276,
+    "sharpe": -0.5157586534013819,
+    "t": -1.2629276891661336,
+    "years": 5.996031746031746,
+    "mean_bp": -1.1340269183337424,
+    "mean_active_bp": -6.208386498559003,
+    "hit": 0.4855072463768116,
+    "total": -0.17135146736022847
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 224,
+    "sharpe": -0.3746004584173301,
+    "t": -0.8030125149527255,
+    "years": 4.595238095238095,
+    "mean_bp": -1.299993238793857,
+    "mean_active_bp": -6.720500761264674,
+    "hit": 0.48660714285714285,
+    "total": -0.15053921705232864
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 344,
+    "sharpe": 0.3418606702834761,
+    "t": 0.8371072467530589,
+    "years": 5.996031746031746,
+    "mean_bp": 0.7514009962242278,
+    "mean_active_bp": 3.3004851898104888,
+    "hit": 0.4069767441860465,
+    "total": 0.11353669052948082
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 280,
+    "sharpe": 0.25895436949792777,
+    "t": 0.555107701648526,
+    "years": 4.595238095238095,
+    "mean_bp": 0.8998209984952115,
+    "mean_active_bp": 3.721402558062337,
+    "hit": 0.40714285714285714,
+    "total": 0.10419927162574548
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 344,
+    "sharpe": 0.1677335398826529,
+    "t": 0.4107256960646601,
+    "years": 5.996031746031746,
+    "mean_bp": 0.36877507411471305,
+    "mean_active_bp": 1.619823072637592,
+    "hit": 0.4011627906976744,
+    "total": 0.05572191369873314
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 280,
+    "sharpe": 0.14356851877870283,
+    "t": 0.3077607481304413,
+    "years": 4.595238095238095,
+    "mean_bp": 0.49964875819656496,
+    "mean_active_bp": 2.066404507112936,
+    "hit": 0.4,
+    "total": 0.057859326199162224
+   },
+   "cost_bp_per_active_day": 1.6691461900213282,
+   "design_cluster_t": 1.6478239659369258,
+   "design_clusters": 23,
+   "held_cluster_t": 1.2663767357911733,
+   "held_clusters": 19
+  },
+  {
+   "name": "R04_CORP_INDEX_EXTENSION",
+   "family": "R",
+   "desc": "same rulebook, credit sleeve: long LQD / short SHY over the last 3 sessions of the month",
+   "panel": "etf",
+   "active": 0.1422237380627558,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 377,
+    "sharpe": 0.37953281021766144,
+    "t": 1.2393183752574923,
+    "years": 10.662698412698413,
+    "mean_bp": 0.9235230503177684,
+    "mean_active_bp": 6.582245188869612,
+    "hit": 0.5384615384615384,
+    "total": 0.24815064362038436
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 456,
+    "sharpe": 0.550139498225345,
+    "t": 1.953354934741352,
+    "years": 12.607142857142858,
+    "mean_bp": 1.1091454106408605,
+    "mean_active_bp": 7.727532828083363,
+    "hit": 0.5635964912280702,
+    "total": 0.3523754969606014
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": 0.11779279424314001,
+    "t": 0.38463808779727765,
+    "years": 10.662698412698413,
+    "mean_bp": 0.28775033315083254,
+    "mean_active_bp": 1.537147405917072,
+    "hit": 0.3996023856858847,
+    "total": 0.0773185145176287
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": 0.22689292059711436,
+    "t": 0.8056182250791762,
+    "years": 12.607142857142858,
+    "mean_bp": 0.4564414173423526,
+    "mean_active_bp": 2.3850565508168655,
+    "hit": 0.42269736842105265,
+    "total": 0.14501143828966542
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": -0.14154376036658148,
+    "t": -0.46219398798418976,
+    "years": 10.662698412698413,
+    "mean_bp": -0.34802238401610325,
+    "mean_active_bp": -1.859117586185427,
+    "hit": 0.39165009940357853,
+    "total": -0.09351361458512694
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": -0.09738512830357292,
+    "t": -0.3457808820414561,
+    "years": 12.607142857142858,
+    "mean_bp": -0.1962625759561556,
+    "mean_active_bp": -1.0255365194287938,
+    "hit": 0.41118421052631576,
+    "total": -0.062352620381270624
+   },
+   "cost_bp_per_active_day": 3.6225688484070075
+  },
+  {
+   "name": "W02_WD_QTR_GIVEBACK",
+   "family": "W",
+   "desc": "the mark-up has no information: short the same top-decile QTD winners / long the losers over the first 3 sessions of the new quarter",
+   "panel": "stock",
+   "active": 0.04758336455601349,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 69,
+    "sharpe": -0.4816724653200058,
+    "t": -1.1794615360299832,
+    "years": 5.996031746031746,
+    "mean_bp": -0.5739276102571179,
+    "mean_active_bp": -12.568182885485577,
+    "hit": 0.4057971014492754,
+    "total": -0.08672046190985051
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 57,
+    "sharpe": 0.15087139119429602,
+    "t": 0.323415555307135,
+    "years": 4.595238095238095,
+    "mean_bp": 0.2995154640083171,
+    "mean_active_bp": 6.0848931109058055,
+    "hit": 0.45614035087719296,
+    "total": 0.03468389073216312
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 92,
+    "sharpe": 0.4044215532378405,
+    "t": 0.9902988041233239,
+    "years": 5.996031746031746,
+    "mean_bp": 0.4812288935062973,
+    "mean_active_bp": 7.903661500956685,
+    "hit": 0.42391304347826086,
+    "total": 0.07271368580880151
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 76,
+    "sharpe": -0.20091195594704753,
+    "t": -0.430685044302247,
+    "years": 4.595238095238095,
+    "mean_bp": -0.3996094134665939,
+    "mean_active_bp": -6.088785536767315,
+    "hit": 0.40789473684210525,
+    "total": -0.04627477007943158
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 92,
+    "sharpe": 0.32671784560552297,
+    "t": 0.8000273209934963,
+    "years": 5.996031746031746,
+    "mean_bp": 0.3885301767554764,
+    "mean_active_bp": 6.381185837799182,
+    "hit": 0.42391304347826086,
+    "total": 0.05870690970775248
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 76,
+    "sharpe": -0.2506939663475039,
+    "t": -0.5374002830928459,
+    "years": 4.595238095238095,
+    "mean_bp": -0.4997033629248709,
+    "mean_active_bp": -7.613901240355271,
+    "hit": 0.39473684210526316,
+    "total": -0.05786564942670005
+   },
+   "cost_bp_per_active_day": 1.6304239139055718,
+   "design_cluster_t": 1.331927037057269,
+   "design_clusters": 23,
+   "held_cluster_t": -0.3743913182002679,
+   "held_clusters": 19
+  },
+  {
+   "name": "R02_TSY_EXT_UNWIND",
+   "family": "R",
+   "desc": "the extension's give-back: short TLT / long IEF over the first 2 sessions of the new month",
+   "panel": "etf",
+   "active": 0.09464529331514325,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 250,
+    "sharpe": 0.34464189271208506,
+    "t": 1.125386314497171,
+    "years": 10.662698412698413,
+    "mean_bp": 0.2524178517671698,
+    "mean_active_bp": 2.7129870707935413,
+    "hit": 0.54,
+    "total": 0.06782467676983853
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 304,
+    "sharpe": 0.30737023818162346,
+    "t": 1.0913653236706249,
+    "years": 12.607142857142858,
+    "mean_bp": 0.2596834020353054,
+    "mean_active_bp": 2.7138623956123857,
+    "hit": 0.5296052631578947,
+    "total": 0.08250141682661652
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 375,
+    "sharpe": -0.15729873969795483,
+    "t": -0.5136399627761324,
+    "years": 10.662698412698413,
+    "mean_bp": -0.1160501943540244,
+    "mean_active_bp": -0.8315383259447027,
+    "hit": 0.33866666666666667,
+    "total": -0.031182687222926355
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 456,
+    "sharpe": -0.16884567556115693,
+    "t": -0.5995125502368964,
+    "years": 12.607142857142858,
+    "mean_bp": -0.1430060799206017,
+    "mean_active_bp": -0.9963384120784032,
+    "hit": 0.3399122807017544,
+    "total": -0.04543303159077516
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 375,
+    "sharpe": -0.6453923192930268,
+    "t": -2.1074503679699994,
+    "years": 10.662698412698413,
+    "mean_bp": -0.4845182404752185,
+    "mean_active_bp": -3.4717346990850997,
+    "hit": 0.32266666666666666,
+    "total": -0.13019005121569122
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 456,
+    "sharpe": -0.6369877716017132,
+    "t": -2.261723092128236,
+    "years": 12.607142857142858,
+    "mean_bp": -0.5456955618765088,
+    "mean_active_bp": -3.8019184212317296,
+    "hit": 0.32894736842105265,
+    "total": -0.17336748000816685
+   },
+   "cost_bp_per_active_day": 2.7309484044543506
+  },
+  {
+   "name": "L04_TLS_JAN_FIRSTWEEK",
+   "family": "L",
+   "desc": "the naive-January control against L03: same book held only 2-8 January, before any wash-sale clock can have expired",
+   "panel": "stock",
+   "active": 0.01798426376920195,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 24,
+    "sharpe": -0.4532107736200137,
+    "t": -1.1097679724002205,
+    "years": 5.996031746031746,
+    "mean_bp": -0.25239423623551605,
+    "mean_active_bp": -15.890320456327697,
+    "hit": 0.375,
+    "total": -0.03813676909518647
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 24,
+    "sharpe": -0.41307275621390316,
+    "t": -0.8854836810056476,
+    "years": 4.595238095238095,
+    "mean_bp": -0.26637253157689256,
+    "mean_active_bp": -12.852474648585067,
+    "hit": 0.4166666666666667,
+    "total": -0.030845939156604156
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 29,
+    "sharpe": 0.41595686896833733,
+    "t": 1.0185450963440006,
+    "years": 5.996031746031746,
+    "mean_bp": 0.2319054828760248,
+    "mean_active_bp": 12.083075331919776,
+    "hit": 0.5172413793103449,
+    "total": 0.03504091846256735
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 29,
+    "sharpe": 0.3726208794978714,
+    "t": 0.7987689893217693,
+    "years": 4.595238095238095,
+    "mean_bp": 0.23988470620606941,
+    "mean_active_bp": 9.57884447540098,
+    "hit": 0.4827586206896552,
+    "total": 0.02777864897866284
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 29,
+    "sharpe": 0.37850079749482013,
+    "t": 0.9268271785168871,
+    "years": 5.996031746031746,
+    "mean_bp": 0.21141672951653362,
+    "mean_active_bp": 11.015540631016632,
+    "hit": 0.5172413793103449,
+    "total": 0.03194506782994823
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 29,
+    "sharpe": 0.3317883301622242,
+    "t": 0.7112382685306589,
+    "years": 4.595238095238095,
+    "mean_bp": 0.2133968808352462,
+    "mean_active_bp": 8.52115820714535,
+    "hit": 0.4827586206896552,
+    "total": 0.02471135880072151
+   },
+   "cost_bp_per_active_day": 1.257783838889886,
+   "design_cluster_t": 1.0626010678790392,
+   "design_clusters": 5,
+   "held_cluster_t": 1.4291569697076079,
+   "held_clusters": 5
+  },
+  {
+   "name": "W05_WD_LASTSESSION",
+   "family": "W",
+   "desc": "leaning for the tape: long top-decile QTD / short bottom decile held over the final session of the quarter only",
+   "panel": "stock",
+   "active": 0.015736230798051705,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 23,
+    "sharpe": -0.43916014449981305,
+    "t": -1.0753624836137905,
+    "years": 5.996031746031746,
+    "mean_bp": -0.18200014824092337,
+    "mean_active_bp": -11.956618434436313,
+    "hit": 0.43478260869565216,
+    "total": -0.027500222399203522
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 19,
+    "sharpe": 0.08215427068374022,
+    "t": 0.176110055483064,
+    "years": 4.595238095238095,
+    "mean_bp": 0.06364755571633518,
+    "mean_active_bp": 3.879151027342955,
+    "hit": 0.47368421052631576,
+    "total": 0.007370386951951614
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 45,
+    "sharpe": 0.22566941346181213,
+    "t": 0.5525920873633946,
+    "years": 5.996031746031746,
+    "mean_bp": 0.09265534427467202,
+    "mean_active_bp": 3.111160559978432,
+    "hit": 0.28888888888888886,
+    "total": 0.014000222519902943
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 38,
+    "sharpe": -0.20877281515697527,
+    "t": -0.44753598023148433,
+    "years": 4.595238095238095,
+    "mean_bp": -0.16209315121658258,
+    "mean_active_bp": -4.939575502863227,
+    "hit": 0.2631578947368421,
+    "total": -0.01877038691088026
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 45,
+    "sharpe": 0.008089740071307512,
+    "t": 0.019809181420093445,
+    "years": 5.996031746031746,
+    "mean_bp": 0.003310540308420689,
+    "mean_active_bp": 0.11116058680052657,
+    "hit": 0.28888888888888886,
+    "total": 0.0005002226406023661
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 38,
+    "sharpe": -0.3342213609032255,
+    "t": -0.7164538364521271,
+    "years": 4.595238095238095,
+    "mean_bp": -0.26053874671682997,
+    "mean_active_bp": -7.939575492054977,
+    "hit": 0.2631578947368421,
+    "total": -0.030170386869808913
+   },
+   "cost_bp_per_active_day": 2.9999999805095454,
+   "design_cluster_t": 1.079146714126291,
+   "design_clusters": 23,
+   "held_cluster_t": -0.17162495398454194,
+   "held_clusters": 19
+  },
+  {
+   "name": "P03_PENSION_QTR",
+   "family": "P",
+   "desc": "quarter-end version: -sign(QTD SPY-IEF) over the last 4 sessions of the quarter, when quarterly-mandate rebalancers join the monthly ones",
+   "panel": "etf",
+   "active": 0.06343792633015007,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 168,
+    "sharpe": 0.32920009279802803,
+    "t": 1.0749629891209926,
+    "years": 10.662698412698413,
+    "mean_bp": 0.8224536477515014,
+    "mean_active_bp": 13.15436280659693,
+    "hit": 0.5297619047619048,
+    "total": 0.22099329515082844
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 204,
+    "sharpe": 0.03532390609288139,
+    "t": 0.12542296363640942,
+    "years": 12.607142857142858,
+    "mean_bp": 0.08613014459139526,
+    "mean_active_bp": 1.3413503400336395,
+    "hit": 0.4803921568627451,
+    "total": 0.027363546936686273
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 209,
+    "sharpe": 0.27934501014442276,
+    "t": 0.9121672614020645,
+    "years": 10.662698412698413,
+    "mean_bp": 0.696981399145222,
+    "mean_active_bp": 8.960713011977088,
+    "hit": 0.4258373205741627,
+    "total": 0.18727890195032115
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 255,
+    "sharpe": -0.025994443297173167,
+    "t": -0.09229727051808365,
+    "years": 12.607142857142858,
+    "mean_bp": -0.06330563354347597,
+    "mean_active_bp": -0.7887137167357762,
+    "hit": 0.3764705882352941,
+    "total": -0.02011219977676232
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 209,
+    "sharpe": 0.22928003865190058,
+    "t": 0.7486861671276545,
+    "years": 10.662698412698413,
+    "mean_bp": 0.5715091505389426,
+    "mean_active_bp": 7.347584150708793,
+    "hit": 0.4258373205741627,
+    "total": 0.1535645087498139
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 255,
+    "sharpe": -0.08742051575822064,
+    "t": -0.3103999920107669,
+    "years": 12.607142857142858,
+    "mean_bp": -0.21274141167834723,
+    "mean_active_bp": -2.6505077054984683,
+    "hit": 0.37254901960784315,
+    "total": -0.06758794649021091
+   },
+   "cost_bp_per_active_day": 1.7497874981456019
+  },
+  {
+   "name": "X03b_DRIP_PAYDATE_VS_PAYERS",
+   "family": "X",
+   "desc": "DRIP reinvestment prints on the PAY date: long names on pay..pay+2 versus the rest of the payer universe (pay dates exist in the feed only from 2020, so the design window carries ~2 years of it)",
+   "panel": "stock",
+   "active": 0.13713001124016486,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 168,
+    "sharpe": -0.4042872209254991,
+    "t": -0.9899698673314993,
+    "years": 5.996031746031746,
+    "mean_bp": -0.5713627114263328,
+    "mean_active_bp": -5.138863434316599,
+    "hit": 0.48214285714285715,
+    "total": -0.08633290569651889
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 198,
+    "sharpe": -0.27913161875261133,
+    "t": -0.598360675062618,
+    "years": 4.595238095238095,
+    "mean_bp": -0.2823032193836877,
+    "mean_active_bp": -1.6510461012439923,
+    "hit": 0.41919191919191917,
+    "total": -0.03269071280463104
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 210,
+    "sharpe": 0.23004039534093182,
+    "t": 0.5632952214893626,
+    "years": 5.996031746031746,
+    "mean_bp": 0.32413157050542285,
+    "mean_active_bp": 2.3322038239699716,
+    "hit": 0.38571428571428573,
+    "total": 0.048976280303369396
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 241,
+    "sharpe": -0.08767442915182648,
+    "t": -0.18794334675324484,
+    "years": 4.595238095238095,
+    "mean_bp": -0.0885630385133119,
+    "mean_active_bp": -0.42554356264902593,
+    "hit": 0.44398340248962653,
+    "total": -0.010255599859841518
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 210,
+    "sharpe": 0.05467863925706528,
+    "t": 0.1338904680866942,
+    "years": 5.996031746031746,
+    "mean_bp": 0.0769004295845132,
+    "mean_active_bp": 0.5533169004866647,
+    "hit": 0.3761904761904762,
+    "total": 0.011619654910219943
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 241,
+    "sharpe": -0.4539855627957243,
+    "t": -0.9731864452944238,
+    "years": 4.595238095238095,
+    "mean_bp": -0.4594292964103115,
+    "mean_active_bp": -2.2075482375234063,
+    "hit": 0.4107883817427386,
+    "total": -0.05320191252431407
+   },
+   "cost_bp_per_active_day": 1.780552950279867
+  },
+  {
+   "name": "X03_DRIP_PAYDATE",
+   "family": "X",
+   "desc": "DRIP reinvestment prints on the PAY date: long names on pay..pay+2, short the universe (pay dates only exist in this feed from 2020, so this book is almost entirely out of the design window and is reported as underpowered)",
+   "panel": "stock",
+   "active": 0.13787935556388162,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 169,
+    "sharpe": -0.3755258438980287,
+    "t": -0.9195424703562112,
+    "years": 5.996031746031746,
+    "mean_bp": -1.0377455536064346,
+    "mean_active_bp": -9.278304920114337,
+    "hit": 0.48520710059171596,
+    "total": -0.1568033531499323
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 199,
+    "sharpe": -0.17291742833520962,
+    "t": -0.3706745570821505,
+    "years": 4.595238095238095,
+    "mean_bp": -0.3849252906384903,
+    "mean_active_bp": -2.2399170178862886,
+    "hit": 0.4824120603015075,
+    "total": -0.04457434865593718
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 212,
+    "sharpe": 0.19983412868955797,
+    "t": 0.489329752778812,
+    "years": 5.996031746031746,
+    "mean_bp": 0.5502882506035747,
+    "mean_active_bp": 3.922101635198121,
+    "hit": 0.38207547169811323,
+    "total": 0.08314855466620014
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 242,
+    "sharpe": -0.14763587958105226,
+    "t": -0.31647974874489343,
+    "years": 4.595238095238095,
+    "mean_bp": -0.3287025972111405,
+    "mean_active_bp": -1.5728826759111592,
+    "hit": 0.4132231404958678,
+    "total": -0.03806376075705007
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 212,
+    "sharpe": 0.022870922737002475,
+    "t": 0.05600356176450016,
+    "years": 5.996031746031746,
+    "mean_bp": 0.06283094760071534,
+    "mean_active_bp": 0.44781868785226964,
+    "hit": 0.3584905660377358,
+    "total": 0.009493756182468088
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 242,
+    "sharpe": -0.4669885915673795,
+    "t": -1.001060396330268,
+    "years": 4.595238095238095,
+    "mean_bp": -1.0423304850607704,
+    "mean_active_bp": -4.98768058553873,
+    "hit": 0.4049586776859504,
+    "total": -0.12070187017003722
+   },
+   "cost_bp_per_active_day": 3.44257506380439
+  },
+  {
+   "name": "W04_WD_MONTH_GIVEBACK",
+   "family": "W",
+   "desc": "monthly give-back: short the month's decile winners / long its losers over the first 3 sessions of the new month",
+   "panel": "stock",
+   "active": 0.1408767328587486,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 207,
+    "sharpe": -0.3433875220567231,
+    "t": -0.8408460175307649,
+    "years": 5.996031746031746,
+    "mean_bp": -0.6463040558280155,
+    "mean_active_bp": -4.717707383362954,
+    "hit": 0.4975845410628019,
+    "total": -0.09765654283561315
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 168,
+    "sharpe": -0.4205841476788384,
+    "t": -0.9015854801773195,
+    "years": 4.595238095238095,
+    "mean_bp": -1.2727176067628927,
+    "mean_active_bp": -8.772660646615655,
+    "hit": 0.4523809523809524,
+    "total": -0.14738069886314298
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 276,
+    "sharpe": 0.19590198000104458,
+    "t": 0.4797011805311311,
+    "years": 5.996031746031746,
+    "mean_bp": 0.36818812197456136,
+    "mean_active_bp": 2.015696566317254,
+    "hit": 0.37681159420289856,
+    "total": 0.055633225230356215
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 224,
+    "sharpe": 0.3231060251138538,
+    "t": 0.6926264396985878,
+    "years": 4.595238095238095,
+    "mean_bp": 0.977438348031044,
+    "mean_active_bp": 5.053007174196203,
+    "hit": 0.40625,
+    "total": 0.1131873607019949
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 276,
+    "sharpe": 0.04795330604413671,
+    "t": 0.11742228189638688,
+    "years": 5.996031746031746,
+    "mean_bp": 0.09007218812110676,
+    "mean_active_bp": 0.49311259511229133,
+    "hit": 0.37681159420289856,
+    "total": 0.013609907625099234
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 224,
+    "sharpe": 0.22549064368215055,
+    "t": 0.48337316416144493,
+    "years": 4.595238095238095,
+    "mean_bp": 0.6821590892991956,
+    "mean_active_bp": 3.526518863430666,
+    "hit": 0.4017857142857143,
+    "total": 0.07899402254084685
+   },
+   "cost_bp_per_active_day": 1.6568838210088046,
+   "design_cluster_t": 0.8458137205966992,
+   "design_clusters": 23,
+   "held_cluster_t": 0.8390438072332043,
+   "held_clusters": 19
+  },
+  {
+   "name": "P04_PENSION_UNWIND",
+   "family": "P",
+   "desc": "the price-impact give-back: +sign(prior-month SPY-IEF divergence) held over the first 3 sessions of the new month",
+   "panel": "etf",
+   "active": 0.14188267394270124,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 375,
+    "sharpe": 0.24285618883553023,
+    "t": 0.7930174395100827,
+    "years": 10.662698412698413,
+    "mean_bp": 1.0189108299279936,
+    "mean_active_bp": 7.30083573337738,
+    "hit": 0.5066666666666667,
+    "total": 0.2737813400016519
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 456,
+    "sharpe": -0.3711319138522423,
+    "t": -1.3177609637225665,
+    "years": 12.607142857142858,
+    "mean_bp": -1.6859459402165653,
+    "mean_active_bp": -11.746162833482519,
+    "hit": 0.48903508771929827,
+    "total": -0.5356250252068028
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 500,
+    "sharpe": 0.1223712062418393,
+    "t": 0.3995883370688315,
+    "years": 10.662698412698413,
+    "mean_bp": 0.5130999506528504,
+    "mean_active_bp": 2.757399134808422,
+    "hit": 0.378,
+    "total": 0.1378699567404209
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": -0.4997450643180161,
+    "t": -1.7744217432982314,
+    "years": 12.607142857142858,
+    "mean_bp": -2.2710031249936176,
+    "mean_active_bp": -11.866738368593293,
+    "hit": 0.36019736842105265,
+    "total": -0.7214976928104723
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 500,
+    "sharpe": 0.0017384968421399107,
+    "t": 0.005676850653716825,
+    "years": 10.662698412698413,
+    "mean_bp": 0.007289071377707423,
+    "mean_active_bp": 0.03917146958380302,
+    "hit": 0.37,
+    "total": 0.0019585734791899845
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": -0.627900694048201,
+    "t": -2.229458025106527,
+    "years": 12.607142857142858,
+    "mean_bp": -2.856060309770669,
+    "mean_active_bp": -14.923854612074697,
+    "hit": 0.3569078947368421,
+    "total": -0.9073703604141415
+   },
+   "cost_bp_per_active_day": 2.904188184701266
+  },
+  {
+   "name": "L05_TLS_OCT_FUNDYEAR",
+   "family": "L",
+   "desc": "US mutual funds close their tax year on 31 October: short the decile losers / long the winners through October",
+   "panel": "stock",
+   "active": 0.08280254777070063,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 132,
+    "sharpe": -0.31655672418939734,
+    "t": -0.7751459903463551,
+    "years": 5.996031746031746,
+    "mean_bp": -0.3797187320637309,
+    "mean_active_bp": -4.346628819305284,
+    "hit": 0.5,
+    "total": -0.05737550041482974
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 89,
+    "sharpe": 0.24185307232938594,
+    "t": 0.518448494913211,
+    "years": 4.595238095238095,
+    "mean_bp": 0.4169789554356013,
+    "mean_active_bp": 5.425411577465463,
+    "hit": 0.550561797752809,
+    "total": 0.04828616303944263
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 138,
+    "sharpe": 0.2933900055063969,
+    "t": 0.7184181190853874,
+    "years": 5.996031746031746,
+    "mean_bp": 0.35171261238117935,
+    "mean_active_bp": 3.8509982413620447,
+    "hit": 0.4782608695652174,
+    "total": 0.053143775730796206
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 93,
+    "sharpe": -0.2563141056462854,
+    "t": -0.5494478983354074,
+    "years": 4.595238095238095,
+    "mean_bp": -0.44155164609491504,
+    "mean_active_bp": -5.498030173956038,
+    "hit": 0.43010752688172044,
+    "total": -0.051131680617791164
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 138,
+    "sharpe": 0.27014171460660025,
+    "t": 0.6614905036018475,
+    "years": 5.996031746031746,
+    "mean_bp": 0.3237064926986278,
+    "mean_active_bp": 3.5443515251277296,
+    "hit": 0.47101449275362317,
+    "total": 0.04891205104676266
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 93,
+    "sharpe": -0.27077643055744305,
+    "t": -0.580450070484471,
+    "years": 4.595238095238095,
+    "mean_bp": -0.46612433675422843,
+    "mean_active_bp": -5.803999806036524,
+    "hit": 0.43010752688172044,
+    "total": -0.05397719819613965
+   },
+   "cost_bp_per_active_day": 0.3610837888970442,
+   "design_cluster_t": 1.0051165198357899,
+   "design_clusters": 6,
+   "held_cluster_t": -1.43198579845787,
+   "held_clusters": 4
+  },
+  {
+   "name": "D04_BONDETF_COUPON_DRIP",
+   "family": "D",
+   "desc": "monthly-pay bond ETFs go ex on the first business day and PAY around the 7th; reinvested coupon buys the fund back. Long the monthly-pay basket vs SHY on sessions 4-8 of the month",
+   "panel": "etf",
+   "active": 0.2361869031377899,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 625,
+    "sharpe": -0.22626814213261548,
+    "t": -0.7388511842217408,
+    "years": 10.662698412698413,
+    "mean_bp": -0.5218115282024063,
+    "mean_active_bp": -2.2433721220477842,
+    "hit": 0.504,
+    "total": -0.14021075762798657
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": -0.5781712928791358,
+    "t": -2.05288613472476,
+    "years": 12.607142857142858,
+    "mean_bp": -1.322257736680682,
+    "mean_active_bp": -5.527385301887536,
+    "hit": 0.49605263157894736,
+    "total": -0.4200812829434527
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 750,
+    "sharpe": -0.10964755278951217,
+    "t": -0.3580407894013871,
+    "years": 10.662698412698413,
+    "mean_bp": -0.2536748742639568,
+    "mean_active_bp": -0.9088325161963369,
+    "hit": 0.4066666666666667,
+    "total": -0.06816243871472519
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": 0.05920504618446558,
+    "t": 0.21021662596319202,
+    "years": 12.607142857142858,
+    "mean_bp": 0.13619414464439278,
+    "mean_active_bp": 0.47443947098161765,
+    "hit": 0.4057017543859649,
+    "total": 0.04326887975352359
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 750,
+    "sharpe": -0.44096244659089495,
+    "t": -1.4399094047894934,
+    "years": 10.662698412698413,
+    "mean_bp": -1.0291612767303198,
+    "mean_active_bp": -3.687141800765827,
+    "hit": 0.4,
+    "total": -0.27653563505743695
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": -0.44938332727251845,
+    "t": -1.595604647093891,
+    "years": 12.607142857142858,
+    "mean_bp": -1.0498694473918968,
+    "mean_active_bp": -3.6572754762763773,
+    "hit": 0.3892543859649123,
+    "total": -0.3335435234364056
+   },
+   "cost_bp_per_active_day": 3.52097231969098
+  },
+  {
+   "name": "D01_ETF_EXDIST_RECOVERY",
+   "family": "D",
+   "desc": "DRIP reinvestment lands a few sessions after the ETF's ex-distribution date: long the ex-ing ETF vs SPY from the ex close to ex+5, price return",
+   "panel": "etf",
+   "active": 0.5168826739427013,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 1405,
+    "sharpe": 0.2243071789983893,
+    "t": 0.7324478968641728,
+    "years": 10.662698412698413,
+    "mean_bp": 0.9821793771963871,
+    "mean_active_bp": 1.8783743676346558,
+    "hit": 0.4925266903914591,
+    "total": 0.2639115986526692
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 1626,
+    "sharpe": -0.6142179694866565,
+    "t": -2.1808754062812707,
+    "years": 12.607142857142858,
+    "mean_bp": -2.4589331794875458,
+    "mean_active_bp": -4.804446931876958,
+    "hit": 0.46863468634686345,
+    "total": -0.7812030711231932
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 1614,
+    "sharpe": 0.08565321925104216,
+    "t": 0.2796902024278153,
+    "years": 10.662698412698413,
+    "mean_bp": 0.3751086172721206,
+    "mean_active_bp": 0.624483800873722,
+    "hit": 0.42131350681536556,
+    "total": 0.1007916854610188
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 1873,
+    "sharpe": -0.7995154066134093,
+    "t": -2.8388024672795473,
+    "years": 12.607142857142858,
+    "mean_bp": -3.2014939187976235,
+    "mean_active_bp": -5.4304037266524565,
+    "hit": 0.397757608115323,
+    "total": -1.017114618002005
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 1614,
+    "sharpe": -0.05294192518313775,
+    "t": -0.17287543773446537,
+    "years": 10.662698412698413,
+    "mean_bp": -0.2319621426521464,
+    "mean_active_bp": -0.3861724146879281,
+    "hit": 0.4157372986369269,
+    "total": -0.062328227730631736
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 1873,
+    "sharpe": -0.984185987002347,
+    "t": -3.49450377697995,
+    "years": 12.607142857142858,
+    "mean_bp": -3.944054658107701,
+    "mean_active_bp": -6.689942150992081,
+    "hit": 0.39081687132941806,
+    "total": -1.2530261648808168
+   },
+   "cost_bp_per_active_day": 1.1443402927171271
+  },
+  {
+   "name": "L07_TLS_EMBEDDED_LOSS",
+   "family": "L",
+   "desc": "score the AMOUNT of unrealised loss, not the YTD return: depth below the trailing 250-session mean log price, short the deepest through 1-24 December",
+   "panel": "stock",
+   "active": 0.056575496440614464,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 83,
+    "sharpe": 0.29386183710234154,
+    "t": 0.719573483485407,
+    "years": 5.996031746031746,
+    "mean_bp": 0.3127364195725881,
+    "mean_active_bp": 5.693309999688924,
+    "hit": 0.5542168674698795,
+    "total": 0.04725447299741806
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 68,
+    "sharpe": 0.9233135143592961,
+    "t": 1.9792616121934705,
+    "years": 4.595238095238095,
+    "mean_bp": 1.0651688053490636,
+    "mean_active_bp": 18.13919818520905,
+    "hit": 0.6029411764705882,
+    "total": 0.12334654765942155
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 88,
+    "sharpe": 0.27252566050258686,
+    "t": 0.6673280232666361,
+    "years": 5.996031746031746,
+    "mean_bp": 0.290136229939685,
+    "mean_active_bp": 4.9817709481689105,
+    "hit": 0.5227272727272727,
+    "total": 0.043839584343886406
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 72,
+    "sharpe": 0.902671661093231,
+    "t": 1.9350126900899058,
+    "years": 4.595238095238095,
+    "mean_bp": 1.041439512123103,
+    "mean_active_bp": 16.749818819979904,
+    "hit": 0.5694444444444444,
+    "total": 0.12059869550385532
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 88,
+    "sharpe": 0.25115306158782713,
+    "t": 0.6149933764684059,
+    "years": 5.996031746031746,
+    "mean_bp": 0.26753604030678185,
+    "mean_active_bp": 4.593715419358493,
+    "hit": 0.5227272727272727,
+    "total": 0.04042469569035474
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 72,
+    "sharpe": 0.8818704488698245,
+    "t": 1.8904221580543734,
+    "years": 4.595238095238095,
+    "mean_bp": 1.0177102188971425,
+    "mean_active_bp": 16.36817268726238,
+    "hit": 0.5694444444444444,
+    "total": 0.1178508433482891
+   },
+   "cost_bp_per_active_day": 0.44657542094912167,
+   "design_cluster_t": 0.598853712739087,
+   "design_clusters": 5,
+   "held_cluster_t": 2.5959300671341254,
+   "held_clusters": 4
+  },
+  {
+   "name": "T06_TOM_SETTLE12",
+   "family": "T",
+   "desc": "settlement timing: the cap tilt only on the two sessions the T+1/T+2 money actually buys (first and second session of the new month)",
+   "panel": "etf",
+   "active": 0.09464529331514325,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 250,
+    "sharpe": 0.2032791064552924,
+    "t": 0.6637832755262655,
+    "years": 10.662698412698413,
+    "mean_bp": 0.10256348970527075,
+    "mean_active_bp": 1.1023523873522498,
+    "hit": 0.512,
+    "total": 0.02755880968380625
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 304,
+    "sharpe": 0.39668070011270157,
+    "t": 1.4084758603615242,
+    "years": 12.607142857142858,
+    "mean_bp": 0.34021994002005446,
+    "mean_active_bp": 3.5555222021174773,
+    "hit": 0.5427631578947368,
+    "total": 0.1080878749443713
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 375,
+    "sharpe": -0.4191299994662214,
+    "t": -1.3686181957819554,
+    "years": 10.662698412698413,
+    "mean_bp": -0.2123496241900371,
+    "mean_active_bp": -1.5215558405296792,
+    "hit": 0.31733333333333336,
+    "total": -0.05705834401986297
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 456,
+    "sharpe": -0.0289282484891825,
+    "t": -0.10271419725733374,
+    "years": 12.607142857142858,
+    "mean_bp": -0.02467754980434285,
+    "mean_active_bp": -0.17193108712367838,
+    "hit": 0.34649122807017546,
+    "total": -0.007840057572839723
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 375,
+    "sharpe": -1.0193910413369434,
+    "t": -3.3286978492774173,
+    "years": 10.662698412698413,
+    "mean_bp": -0.5272627380853451,
+    "mean_active_bp": -3.778013272627526,
+    "hit": 0.29333333333333333,
+    "total": -0.14167549772353222
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 456,
+    "sharpe": -0.4555827134322822,
+    "t": -1.617616521512298,
+    "years": 12.607142857142858,
+    "mean_bp": -0.3895750396287403,
+    "mean_active_bp": -2.7142103089923415,
+    "hit": 0.3267543859649123,
+    "total": -0.1237679900900508
+   },
+   "cost_bp_per_active_day": 2.41329826980602
+  },
+  {
+   "name": "T02_TOM_MEGACAP",
+   "family": "T",
+   "desc": "sharper cap tilt: long OEF (S&P100) / short SPY over the TOM window",
+   "panel": "etf",
+   "active": 0.23669849931787176,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 627,
+    "sharpe": -0.17972994516113786,
+    "t": -0.5868863445415352,
+    "years": 10.662698412698413,
+    "mean_bp": -0.1488165188391847,
+    "mean_active_bp": -0.6377511740365065,
+    "hit": 0.4800637958532695,
+    "total": -0.03998699861208893
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.09754152275881649,
+    "t": 0.34633618461816923,
+    "years": 12.607142857142858,
+    "mean_bp": 0.05470680287739293,
+    "mean_active_bp": 0.22868883255457545,
+    "hit": 0.5118421052631579,
+    "total": 0.017380351274147735
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 752,
+    "sharpe": -0.2464673313160075,
+    "t": -0.8048091874466098,
+    "years": 10.662698412698413,
+    "mean_bp": -0.20369638858278705,
+    "mean_active_bp": -0.7278353671834428,
+    "hit": 0.4148936170212766,
+    "total": -0.05473321961219488
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": -0.7596389875844569,
+    "t": -2.6972151059988416,
+    "years": 12.607142857142858,
+    "mean_bp": -0.4267614113417681,
+    "mean_active_bp": -1.486645837535962,
+    "hit": 0.3881578947368421,
+    "total": -0.13558210038327972
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 752,
+    "sharpe": -0.6691703158130897,
+    "t": -2.185094532639775,
+    "years": 10.662698412698413,
+    "mean_bp": -0.5562092960047589,
+    "mean_active_bp": -1.9874127371872166,
+    "hit": 0.4015957446808511,
+    "total": -0.14945343783647871
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": -1.3944548588666947,
+    "t": -4.951226531866976,
+    "years": 12.607142857142858,
+    "mean_bp": -0.7988160198061431,
+    "mean_active_bp": -2.782717647943111,
+    "hit": 0.37280701754385964,
+    "total": -0.2537838494924117
+   },
+   "cost_bp_per_active_day": 1.27957913060947
+  },
+  {
+   "name": "R03_TSY_EXT_REFUNDING",
+   "family": "R",
+   "desc": "the extension is larger in quarterly-refunding settlement months: R01 sized 1.0 in Feb/May/Aug/Nov and 0.4 elsewhere",
+   "panel": "etf",
+   "active": 0.1422237380627558,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 378,
+    "sharpe": -0.16696966280419454,
+    "t": -0.5452191896271432,
+    "years": 10.662698412698413,
+    "mean_bp": -0.08637278971126419,
+    "mean_active_bp": -0.6139780051697536,
+    "hit": 0.47354497354497355,
+    "total": -0.023208368595416688
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 456,
+    "sharpe": -0.4873161933835695,
+    "t": -1.7302911246980743,
+    "years": 12.607142857142858,
+    "mean_bp": -0.3424536337348993,
+    "mean_active_bp": -2.3859105139819627,
+    "hit": 0.43859649122807015,
+    "total": -0.10879751943757751
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": -0.2626200667246389,
+    "t": -0.8575539864828478,
+    "years": 10.662698412698413,
+    "mean_bp": -0.13654380454794043,
+    "mean_active_bp": -0.7294099459648432,
+    "hit": 0.37773359840954274,
+    "total": -0.03668932028203159
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": 0.1422406517109308,
+    "t": 0.5050473195192444,
+    "years": 12.607142857142858,
+    "mean_bp": 0.09970467246710596,
+    "mean_active_bp": 0.520989711230256,
+    "hit": 0.41118421052631576,
+    "total": 0.03167617444279956
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": -0.6815300476241078,
+    "t": -2.2254537383112547,
+    "years": 10.662698412698413,
+    "mean_bp": -0.35946039880714503,
+    "mean_active_bp": -1.920218869969779,
+    "hit": 0.3658051689860835,
+    "total": -0.09658700915947988
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": -0.20338052199055506,
+    "t": -0.7221338361307653,
+    "years": 12.607142857142858,
+    "mean_bp": -0.14304428880068737,
+    "mean_active_bp": -0.74745346302596,
+    "hit": 0.40131578947368424,
+    "total": -0.04544517055197838
+   },
+   "cost_bp_per_active_day": 1.2332946343134674
+  },
+  {
+   "name": "R01_TSY_INDEX_EXTENSION",
+   "family": "R",
+   "desc": "month-end index duration extension: long TLT / short IEF over the last 3 sessions of the month",
+   "panel": "etf",
+   "active": 0.1422237380627558,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 378,
+    "sharpe": -0.14432753071195847,
+    "t": -0.4712840525283962,
+    "years": 10.662698412698413,
+    "mean_bp": -0.11921191019219178,
+    "mean_active_bp": -0.8474137637206857,
+    "hit": 0.47354497354497355,
+    "total": -0.03203224026864193
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 456,
+    "sharpe": -0.7724202202689139,
+    "t": -2.742596839207961,
+    "years": 12.607142857142858,
+    "mean_bp": -0.7759766401058841,
+    "mean_active_bp": -5.4063109333692845,
+    "hit": 0.43859649122807015,
+    "total": -0.24652777856163938
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": -0.30446507951121293,
+    "t": -0.9941938022330189,
+    "years": 10.662698412698413,
+    "mean_bp": -0.25149717710087105,
+    "mean_active_bp": -1.3434849202187689,
+    "hit": 0.37773359840954274,
+    "total": -0.06757729148700405
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": 0.3705027445454058,
+    "t": 1.3155270012925622,
+    "years": 12.607142857142858,
+    "mean_bp": 0.3716488114799014,
+    "mean_active_bp": 1.9419872928809978,
+    "hit": 0.41118421052631576,
+    "total": 0.11807282740716468
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 503,
+    "sharpe": -0.7469961033116148,
+    "t": -2.4392252057177957,
+    "years": 10.662698412698413,
+    "mean_bp": -0.622206264393934,
+    "mean_active_bp": -3.323793702637178,
+    "hit": 0.3658051689860835,
+    "total": -0.16718682324265005
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 608,
+    "sharpe": -0.03241877464210392,
+    "t": -0.11510784742724021,
+    "years": 12.607142857142858,
+    "mean_bp": -0.03267901714608112,
+    "mean_active_bp": -0.17075861426496675,
+    "hit": 0.40131578947368424,
+    "total": -0.010382123747309971
+   },
+   "cost_bp_per_active_day": 2.0527856247535614
+  },
+  {
+   "name": "W07_WD_MONTHEND_CLOSE_TO_OPEN",
+   "family": "W",
+   "desc": "same overnight signature at every month end",
+   "panel": "stock",
+   "active": 0.04683402023229674,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 69,
+    "sharpe": -0.18728978656890558,
+    "t": -0.45861267822841056,
+    "years": 5.996031746031746,
+    "mean_bp": -0.11369808530699752,
+    "mean_active_bp": -2.4898232883894678,
+    "hit": 0.4782608695652174,
+    "total": -0.017179780689887323
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 56,
+    "sharpe": 0.17520970106191644,
+    "t": 0.3755883889952436,
+    "years": 4.595238095238095,
+    "mean_bp": 0.17578606924988593,
+    "mean_active_bp": 3.635004789131569,
+    "hit": 0.39285714285714285,
+    "total": 0.02035602681913679
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 137,
+    "sharpe": -0.26060160585569386,
+    "t": -0.6381298339946248,
+    "years": 5.996031746031746,
+    "mean_bp": -0.15830720656870284,
+    "mean_active_bp": -1.7460013804767154,
+    "hit": 0.23357664233576642,
+    "total": -0.023920218912531
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 112,
+    "sharpe": -0.4628286494572509,
+    "t": -0.9921429337355198,
+    "years": 4.595238095238095,
+    "mean_bp": -0.4659415085448758,
+    "mean_active_bp": -4.81750238299077,
+    "hit": 0.29464285714285715,
+    "total": -0.05395602668949662
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 137,
+    "sharpe": -0.7023285564630959,
+    "t": -1.7197776033416088,
+    "years": 5.996031746031746,
+    "mean_bp": -0.43031249844440317,
+    "mean_active_bp": -4.746001351456155,
+    "hit": 0.2116788321167883,
+    "total": -0.06502021851494932
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 112,
+    "sharpe": -0.7462193026542732,
+    "t": -1.5996334907393568,
+    "years": 4.595238095238095,
+    "mean_bp": -0.7560969478398656,
+    "mean_active_bp": -7.817502371415752,
+    "hit": 0.2767857142857143,
+    "total": -0.08755602655985643
+   },
+   "cost_bp_per_active_day": 2.9999999788264313,
+   "design_cluster_t": 0.580443005122539,
+   "design_clusters": 23,
+   "held_cluster_t": -0.4016744851710164,
+   "held_clusters": 19
+  },
+  {
+   "name": "C02_CTRL_R20REV_EVERYDAY",
+   "family": "C",
+   "desc": "CONTROL: 20-session reversal decile book, every session -- the alive mechanism the seasonal books risk merely re-expressing",
+   "panel": "stock",
+   "active": 0.9775196702884975,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 1450,
+    "sharpe": 0.16328562653613568,
+    "t": 0.3998341814244655,
+    "years": 5.996031746031746,
+    "mean_bp": 1.0510821138608146,
+    "mean_active_bp": 1.0953000510646147,
+    "hit": 0.4903448275862069,
+    "total": 0.1588185074043691
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -0.162385030137375,
+    "t": -0.3480967748737146,
+    "years": 4.595238095238095,
+    "mean_bp": -1.2131737690505604,
+    "mean_active_bp": -1.2131737690505604,
+    "hit": 0.49740932642487046,
+    "total": -0.1404855224560549
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 1450,
+    "sharpe": -0.0063613878241209005,
+    "t": -0.015577000544001076,
+    "years": 5.996031746031746,
+    "mean_bp": -0.04095304751331799,
+    "mean_active_bp": -0.04267589985698171,
+    "hit": 0.4827586206896552,
+    "total": -0.0061880054792623485
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -0.3115255363399476,
+    "t": -0.6678019174489216,
+    "years": 4.595238095238095,
+    "mean_bp": -2.3277753107254355,
+    "mean_active_bp": -2.3277753107254355,
+    "hit": 0.48791018998272884,
+    "total": -0.2695563809820054
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 1450,
+    "sharpe": -0.17597060473030135,
+    "t": -0.43089562865802833,
+    "years": 5.996031746031746,
+    "mean_bp": -1.1329882088874512,
+    "mean_active_bp": -1.1806518507785786,
+    "hit": 0.47517241379310343,
+    "total": -0.17119451836289387
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -0.4606150027293773,
+    "t": -0.9873976484956755,
+    "years": 4.595238095238095,
+    "mean_bp": -3.44237685240031,
+    "mean_active_bp": -3.44237685240031,
+    "hit": 0.4844559585492228,
+    "total": -0.3986272395079559
+   },
+   "cost_bp_per_active_day": 1.127597283012201
+  },
+  {
+   "name": "X01_EXDIV_CAPTURE_PRERUN",
+   "family": "X",
+   "desc": "dividend-capture demand ahead of a scheduled ex-date: long names whose ex date is 1-3 sessions away, short the eligible universe (position closed before the ex drop)",
+   "panel": "stock",
+   "active": 0.9348070438366429,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 1344,
+    "sharpe": 0.15625091429288798,
+    "t": 0.38260842511631216,
+    "years": 5.996031746031746,
+    "mean_bp": 0.35554663357547334,
+    "mean_active_bp": 0.3997254191462353,
+    "hit": 0.49776785714285715,
+    "total": 0.05372309633325402
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 1151,
+    "sharpe": -0.7163684215062684,
+    "t": -1.5356436300608916,
+    "years": 4.595238095238095,
+    "mean_bp": -1.8941613601415925,
+    "mean_active_bp": -1.9056810208896298,
+    "hit": 0.4787141615986099,
+    "total": -0.2193438855043964
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 1386,
+    "sharpe": -0.9622066965770076,
+    "t": -2.3561359015385612,
+    "years": 5.996031746031746,
+    "mean_bp": -2.190742521772934,
+    "mean_active_bp": -2.388320310533119,
+    "hit": 0.4393939393939394,
+    "total": -0.33102119503989036
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -1.713978453238463,
+    "t": -3.674171019770773,
+    "years": 4.595238095238095,
+    "mean_bp": -4.53617149008153,
+    "mean_active_bp": -4.53617149008153,
+    "hit": 0.44473229706390327,
+    "total": -0.5252886585514412
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 1386,
+    "sharpe": -2.0757650860941794,
+    "t": -5.082883604848575,
+    "years": 5.996031746031746,
+    "mean_bp": -4.737031677121342,
+    "mean_active_bp": -5.164253148723194,
+    "hit": 0.398989898989899,
+    "total": -0.7157654864130347
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -2.70772514498383,
+    "t": -5.804416758219343,
+    "years": 4.595238095238095,
+    "mean_bp": -7.178181620021469,
+    "mean_active_bp": -7.178181620021469,
+    "hit": 0.41450777202072536,
+    "total": -0.8312334315984861
+   },
+   "cost_bp_per_active_day": 2.714972737500744
+  },
+  {
+   "name": "D03_ETF_EXDIST_CROSS",
+   "family": "D",
+   "desc": "hold across the ex-date and collect: total return over ex-1 -> ex, long the ETF vs SPY",
+   "panel": "etf",
+   "active": 0.13369713506139155,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 366,
+    "sharpe": -0.10965978168272589,
+    "t": -0.35808072136948266,
+    "years": 10.662698412698413,
+    "mean_bp": -0.2354907266060274,
+    "mean_active_bp": -1.7288622469682937,
+    "hit": 0.5163934426229508,
+    "total": -0.06327635823903957
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 418,
+    "sharpe": -0.1554972239033402,
+    "t": -0.552116818788666,
+    "years": 12.607142857142858,
+    "mean_bp": -0.32447795350911723,
+    "mean_active_bp": -2.4661876992786254,
+    "hit": 0.5,
+    "total": -0.10308664582984654
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 653,
+    "sharpe": -0.20887177334315077,
+    "t": -0.6820454511648935,
+    "years": 10.662698412698413,
+    "mean_bp": -0.44839313754323495,
+    "mean_active_bp": -1.8450725276855624,
+    "hit": 0.26033690658499237,
+    "total": -0.12048323605786723
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 769,
+    "sharpe": -0.2520490455671648,
+    "t": -0.8949389173903656,
+    "years": 12.607142857142858,
+    "mean_bp": -0.5257683674979827,
+    "mean_active_bp": -2.1721275728752807,
+    "hit": 0.25487646293888166,
+    "total": -0.1670366103541091
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 653,
+    "sharpe": -0.5268025036631809,
+    "t": -1.7202097034694028,
+    "years": 10.662698412698413,
+    "mean_bp": -1.132277001692497,
+    "mean_active_bp": -4.659155135601438,
+    "hit": 0.24655436447166923,
+    "total": -0.30424283035477395
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 769,
+    "sharpe": -0.6582800329907552,
+    "t": -2.3373245422881586,
+    "years": 12.607142857142858,
+    "mean_bp": -1.3760146885050828,
+    "mean_active_bp": -5.684783700104874,
+    "hit": 0.247074122236671,
+    "total": -0.43715986653806477
+   },
+   "cost_bp_per_active_day": 3.1918625209624643
+  },
+  {
+   "name": "C01_CTRL_MTDMOM_EVERYDAY",
+   "family": "C",
+   "desc": "CONTROL, not a candidate: the same MTD-decile long-short book held on EVERY session. If W03's number is not clearly bigger than this, the month-end window bought nothing",
+   "panel": "stock",
+   "active": 0.9775196702884975,
+   "sign": -1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 1450,
+    "sharpe": -0.13463116199926628,
+    "t": -0.3296685788830803,
+    "years": 5.996031746031746,
+    "mean_bp": -0.8385840028294895,
+    "mean_active_bp": -0.8738623643278342,
+    "hit": 0.5131034482758621,
+    "total": -0.12671004282753587
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": 0.1609204866945247,
+    "t": 0.3449573053752802,
+    "years": 4.595238095238095,
+    "mean_bp": 1.2339031751023253,
+    "mean_active_bp": 1.2339031751023253,
+    "hit": 0.5164075993091537,
+    "total": 0.1428859876768493
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 1450,
+    "sharpe": -0.07458314787291212,
+    "t": -0.1826302321302372,
+    "years": 5.996031746031746,
+    "mean_bp": -0.46466002473726814,
+    "mean_active_bp": -0.484207791295181,
+    "hit": 0.4772413793103448,
+    "total": -0.07021012973780122
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -0.3354905013011323,
+    "t": -0.7191744300868947,
+    "years": 4.595238095238095,
+    "mean_bp": -2.574019528318061,
+    "mean_active_bp": -2.574019528318061,
+    "hit": 0.4792746113989637,
+    "total": -0.29807146137923146
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 1450,
+    "sharpe": -0.2836789042763532,
+    "t": -0.6946387436840544,
+    "years": 5.996031746031746,
+    "mean_bp": -1.7679040523040264,
+    "mean_active_bp": -1.8422779469181958,
+    "hit": 0.4675862068965517,
+    "total": -0.2671303023031384
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 1158,
+    "sharpe": -0.5098159140576365,
+    "t": -1.0928672138843432,
+    "years": 4.595238095238095,
+    "mean_bp": -3.9141358815337957,
+    "mean_active_bp": -3.9141358815337957,
+    "hit": 0.47150259067357514,
+    "total": -0.4532569350816136
+   },
+   "cost_bp_per_active_day": 1.3500983369161017
+  },
+  {
+   "name": "L09_TLS_RETAIL_COHORT",
+   "family": "L",
+   "desc": "harvesting is a TAXABLE-holder flow: L01 restricted to the retail-heavy sub-$15 price cohort",
+   "panel": "stock",
+   "active": 0.028100412139378046,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 48,
+    "sharpe": 0.12880698080407016,
+    "t": 0.3154070252482069,
+    "years": 5.996031746031746,
+    "mean_bp": 0.1824276477897798,
+    "mean_active_bp": 5.74267032938244,
+    "hit": 0.5208333333333334,
+    "total": 0.027564817581035725
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 27,
+    "sharpe": 1.6403957673247622,
+    "t": 3.5164354475235293,
+    "years": 4.595238095238095,
+    "mean_bp": 3.8622582324159858,
+    "mean_active_bp": 165.64796419028562,
+    "hit": 0.7777777777777778,
+    "total": 0.4472495033137711
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 56,
+    "sharpe": 0.09673685666967902,
+    "t": 0.23687756675592767,
+    "years": 5.996031746031746,
+    "mean_bp": 0.13728015719764758,
+    "mean_active_bp": 3.704112812957955,
+    "hit": 0.42857142857142855,
+    "total": 0.020743031752564547
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 29,
+    "sharpe": 1.6338176952201573,
+    "t": 3.5023343590022376,
+    "years": 4.595238095238095,
+    "mean_bp": 3.8355742942138327,
+    "mean_active_bp": 153.15844940343507,
+    "hit": 0.7241379310344828,
+    "total": 0.4441595032699618
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 56,
+    "sharpe": 0.06478094655363446,
+    "t": 0.15862778179953496,
+    "years": 5.996031746031746,
+    "mean_bp": 0.09213266660551518,
+    "mean_active_bp": 2.4859367721595254,
+    "hit": 0.42857142857142855,
+    "total": 0.013921245924093342
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 29,
+    "sharpe": 1.6271550357999491,
+    "t": 3.488051944827148,
+    "years": 4.595238095238095,
+    "mean_bp": 3.8088903560116782,
+    "mean_active_bp": 152.09293214694907,
+    "hit": 0.7241379310344828,
+    "total": 0.44106950322615235
+   },
+   "cost_bp_per_active_day": 1.5248901341970154,
+   "design_cluster_t": 0.1934910757997202,
+   "design_clusters": 4,
+   "held_cluster_t": NaN,
+   "held_clusters": 2
+  },
+  {
+   "name": "L01_TLS_DEC_PRESSURE",
+   "family": "L",
+   "desc": "harvesting pressure: short the bottom-decile YTD losers / long the top decile through 1-24 December",
+   "panel": "stock",
+   "active": 0.06294492319220682,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 100,
+    "sharpe": 0.12669911223699173,
+    "t": 0.31024553050462855,
+    "years": 5.996031746031746,
+    "mean_bp": 0.13925094305886063,
+    "mean_active_bp": 2.104081749619385,
+    "hit": 0.53,
+    "total": 0.02104081749619384
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 68,
+    "sharpe": 0.8286955146251832,
+    "t": 1.7764336758708723,
+    "years": 4.595238095238095,
+    "mean_bp": 0.9302984388907328,
+    "mean_active_bp": 15.842435179933366,
+    "hit": 0.5882352941176471,
+    "total": 0.10772855922354686
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 106,
+    "sharpe": 0.10238361096843317,
+    "t": 0.25070465877034814,
+    "years": 5.996031746031746,
+    "mean_bp": 0.11263694772215929,
+    "mean_active_bp": 1.6056078113979513,
+    "hit": 0.5,
+    "total": 0.01701944280081827
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 72,
+    "sharpe": 0.807521971260472,
+    "t": 1.7310449959434835,
+    "years": 4.595238095238095,
+    "mean_bp": 0.9068043791713365,
+    "mean_active_bp": 14.584437098338995,
+    "hit": 0.5416666666666666,
+    "total": 0.10500794710804076
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 106,
+    "sharpe": 0.07809766099450481,
+    "t": 0.19123614868815653,
+    "years": 5.996031746031746,
+    "mean_bp": 0.08602295238545805,
+    "mean_active_bp": 1.2262328401361045,
+    "hit": 0.5,
+    "total": 0.01299806810544271
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 72,
+    "sharpe": 0.7862083843207522,
+    "t": 1.6853561115159568,
+    "years": 4.595238095238095,
+    "mean_bp": 0.8833103194519403,
+    "mean_active_bp": 14.206574304518707,
+    "hit": 0.5277777777777778,
+    "total": 0.10228733499253469
+   },
+   "cost_bp_per_active_day": 0.4494657873921101,
+   "design_cluster_t": 0.3774129010288398,
+   "design_clusters": 6,
+   "held_cluster_t": 1.958972037930412,
+   "held_clusters": 4
+  },
+  {
+   "name": "L06_TLS_NOV_BOUNCE",
+   "family": "L",
+   "desc": "the fund-year bounce: long October's decile losers / short its winners over 1-10 November",
+   "panel": "stock",
+   "active": 0.026976395653802922,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 44,
+    "sharpe": 0.1242375630424213,
+    "t": 0.30421798522629806,
+    "years": 5.996031746031746,
+    "mean_bp": 0.24720707613747908,
+    "mean_active_bp": 8.489315728266611,
+    "hit": 0.4772727272727273,
+    "total": 0.03735298920437309
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 28,
+    "sharpe": 0.18153811574525852,
+    "t": 0.3891542992239834,
+    "years": 4.595238095238095,
+    "mean_bp": 0.35241081331046287,
+    "mean_active_bp": 14.574704350482712,
+    "hit": 0.35714285714285715,
+    "total": 0.0408091721813516
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 50,
+    "sharpe": 0.11158457263332869,
+    "t": 0.2732348658292484,
+    "years": 5.996031746031746,
+    "mean_bp": 0.22207199240940312,
+    "mean_active_bp": 6.711015610612161,
+    "hit": 0.42,
+    "total": 0.03355507805306081
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 32,
+    "sharpe": 0.17050171284073934,
+    "t": 0.36549610700010676,
+    "years": 4.595238095238095,
+    "mean_bp": 0.33057883612932637,
+    "mean_active_bp": 11.962821632429993,
+    "hit": 0.3125,
+    "total": 0.03828102922377599
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 50,
+    "sharpe": 0.09892930919084252,
+    "t": 0.24224618050171512,
+    "years": 5.996031746031746,
+    "mean_bp": 0.19693690868132707,
+    "mean_active_bp": 5.951433380349701,
+    "hit": 0.42,
+    "total": 0.02975716690174852
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 32,
+    "sharpe": 0.15942787539275238,
+    "t": 0.34175766819291525,
+    "years": 4.595238095238095,
+    "mean_bp": 0.30874685894818976,
+    "mean_active_bp": 11.172776958187617,
+    "hit": 0.3125,
+    "total": 0.03575288626620038
+   },
+   "cost_bp_per_active_day": 0.8548721768767438,
+   "design_cluster_t": 0.6503673240681335,
+   "design_clusters": 6,
+   "held_cluster_t": 0.5909707984743517,
+   "held_clusters": 4
+  },
+  {
+   "name": "C03_CTRL_YTDMOM_MIDYEAR",
+   "family": "C",
+   "desc": "CONTROL: the L-family book (YTD-return deciles) held through JUNE, a month with no tax deadline attached to it",
+   "panel": "stock",
+   "active": 0.08654926938928438,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 129,
+    "sharpe": 0.11962032012692306,
+    "t": 0.29291183672615684,
+    "years": 5.996031746031746,
+    "mean_bp": 0.23908110042641537,
+    "mean_active_bp": 2.800399556157469,
+    "hit": 0.5581395348837209,
+    "total": 0.03612515427443136
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 102,
+    "sharpe": -0.23836376518444183,
+    "t": -0.510968639395302,
+    "years": 4.595238095238095,
+    "mean_bp": -0.7595034130461114,
+    "mean_active_bp": -8.62259757164115,
+    "hit": 0.45098039215686275,
+    "total": -0.0879504952307397
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 135,
+    "sharpe": 0.10557332645501169,
+    "t": 0.25851524998776204,
+    "years": 5.996031746031746,
+    "mean_bp": 0.21098820010451225,
+    "mean_active_bp": 2.361504965614206,
+    "hit": 0.5333333333333333,
+    "total": 0.0318803170357918
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 107,
+    "sharpe": -0.247942675495594,
+    "t": -0.5315024766787992,
+    "years": 4.595238095238095,
+    "mean_bp": -0.7902926947509553,
+    "mean_active_bp": -8.552887294594454,
+    "hit": 0.42990654205607476,
+    "total": -0.09151589405216062
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 135,
+    "sharpe": 0.09151751666022549,
+    "t": 0.22409707538919993,
+    "years": 5.996031746031746,
+    "mean_bp": 0.18289529978260863,
+    "mean_active_bp": 2.047072577566827,
+    "hit": 0.5333333333333333,
+    "total": 0.027635479797152165
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 107,
+    "sharpe": -0.2575073654394823,
+    "t": -0.5520058304628144,
+    "years": 4.595238095238095,
+    "mean_bp": -0.8210819764557995,
+    "mean_active_bp": -8.886102137717906,
+    "hit": 0.42990654205607476,
+    "total": -0.09508129287358158
+   },
+   "cost_bp_per_active_day": 0.37015336777538077
+  },
+  {
+   "name": "T05_TOM_EQBOND",
+   "family": "T",
+   "desc": "contribution money is ~70/30 equity-tilted: long SPY / short IEF over the TOM window",
+   "panel": "etf",
+   "active": 0.23669849931787176,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 627,
+    "sharpe": 0.07791941334127797,
+    "t": 0.25443639691585185,
+    "years": 10.662698412698413,
+    "mean_bp": 0.42089854531752274,
+    "mean_active_bp": 1.8037550099970998,
+    "hit": 0.529505582137161,
+    "total": 0.11309543912681835
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.003576968815331867,
+    "t": 0.01270057814315019,
+    "years": 12.607142857142858,
+    "mean_bp": 0.019294814755694965,
+    "mean_active_bp": 0.08065740326163395,
+    "hit": 0.5171052631578947,
+    "total": 0.006129962647884291
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 752,
+    "sharpe": 0.011155951287769878,
+    "t": 0.036428406325349404,
+    "years": 10.662698412698413,
+    "mean_bp": 0.060303456463277554,
+    "mean_active_bp": 0.2154725897830147,
+    "hit": 0.4401595744680851,
+    "total": 0.016203538751682678
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": -0.07209288147914862,
+    "t": -0.2559768681421512,
+    "years": 12.607142857142858,
+    "mean_bp": -0.3889057329726613,
+    "mean_active_bp": -1.3547735895330535,
+    "hit": 0.4298245614035088,
+    "total": -0.12355535136541448
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 752,
+    "sharpe": -0.05550433419960367,
+    "t": -0.18124267369809777,
+    "years": 10.662698412698413,
+    "mean_bp": -0.300291632390967,
+    "mean_active_bp": -1.0729835322267676,
+    "hit": 0.4375,
+    "total": -0.08068836162345283
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 912,
+    "sharpe": -0.14772086510595586,
+    "t": -0.5245056603821341,
+    "years": 12.607142857142858,
+    "mean_bp": -0.7971062807010175,
+    "mean_active_bp": -2.7767616817841363,
+    "hit": 0.4298245614035088,
+    "total": -0.25324066537871326
+   },
+   "cost_bp_per_active_day": 1.3616419133920337
+  },
+  {
+   "name": "T04_MIDMONTH_CAPWEIGHT",
+   "family": "T",
+   "desc": "the SECOND payroll date: same SPY-vs-RSP cap tilt around the first session on/after the 15th (-2..+2). If the mechanism is payroll, this must fire too",
+   "panel": "etf",
+   "active": 0.2361869031377899,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 2687,
+    "n_active": 623,
+    "sharpe": 0.0016138571053646218,
+    "t": 0.005269854705239313,
+    "years": 10.662698412698413,
+    "mean_bp": 0.0014267283228540228,
+    "mean_active_bp": 0.006153481546562905,
+    "hit": 0.5040128410914928,
+    "total": 0.0003833619003508759
+   },
+   "held_gross": {
+    "n": 3177,
+    "n_active": 760,
+    "sharpe": 0.06562077385880773,
+    "t": 0.23299665421613436,
+    "years": 12.607142857142858,
+    "mean_bp": 0.07935005927370199,
+    "mean_active_bp": 0.3317041293586196,
+    "hit": 0.5039473684210526,
+    "total": 0.025209513831255123
+   },
+   "design_net": {
+    "n": 2687,
+    "n_active": 750,
+    "sharpe": -0.35910781932854324,
+    "t": -1.1726230439399337,
+    "years": 10.662698412698413,
+    "mean_bp": -0.3173343468252638,
+    "mean_active_bp": -1.136903186559312,
+    "hit": 0.4026666666666667,
+    "total": -0.08526773899194838
+   },
+   "held_net": {
+    "n": 3177,
+    "n_active": 911,
+    "sharpe": -0.24066979220747756,
+    "t": -0.8545351274870412,
+    "years": 12.607142857142858,
+    "mean_bp": -0.29135535934558915,
+    "mean_active_bp": -1.016065836049327,
+    "hit": 0.4094401756311745,
+    "total": -0.09256359766409367
+   },
+   "design_net_stress": {
+    "n": 2687,
+    "n_active": 750,
+    "sharpe": -0.7161978245144841,
+    "t": -2.338657160447355,
+    "years": 10.662698412698413,
+    "mean_bp": -0.6360954219733815,
+    "mean_active_bp": -2.278917865123302,
+    "hit": 0.396,
+    "total": -0.1709188398842476
+   },
+   "held_net_stress": {
+    "n": 3177,
+    "n_active": 911,
+    "sharpe": -0.5441417869699652,
+    "t": -1.9320591381013312,
+    "years": 12.607142857142858,
+    "mean_bp": -0.6620607779648802,
+    "mean_active_bp": -2.308855204823737,
+    "hit": 0.40285400658616904,
+    "total": -0.21033670915944241
+   },
+   "cost_bp_per_active_day": 1.224709285897941
+  },
+  {
+   "name": "C04_CTRL_QTDMOM_MIDQTR",
+   "family": "C",
+   "desc": "CONTROL: the W-family book (QTD deciles) held over the MIDDLE 4 sessions of each quarter instead of the last 4",
+   "panel": "stock",
+   "active": 0.0,
+   "sign": 1.0,
+   "design_gross": {
+    "n": 1511,
+    "n_active": 0,
+    "sharpe": 0.0,
+    "t": 0.0,
+    "years": 5.996031746031746,
+    "mean_bp": 0.0,
+    "mean_active_bp": NaN,
+    "hit": NaN,
+    "total": 0.0
+   },
+   "held_gross": {
+    "n": 1158,
+    "n_active": 0,
+    "sharpe": 0.0,
+    "t": 0.0,
+    "years": 4.595238095238095,
+    "mean_bp": 0.0,
+    "mean_active_bp": NaN,
+    "hit": NaN,
+    "total": 0.0
+   },
+   "design_net": {
+    "n": 1511,
+    "n_active": 0,
+    "sharpe": 0.0,
+    "t": 0.0,
+    "years": 5.996031746031746,
+    "mean_bp": 0.0,
+    "mean_active_bp": NaN,
+    "hit": NaN,
+    "total": 0.0
+   },
+   "held_net": {
+    "n": 1158,
+    "n_active": 0,
+    "sharpe": 0.0,
+    "t": 0.0,
+    "years": 4.595238095238095,
+    "mean_bp": 0.0,
+    "mean_active_bp": NaN,
+    "hit": NaN,
+    "total": 0.0
+   },
+   "design_net_stress": {
+    "n": 1511,
+    "n_active": 0,
+    "sharpe": 0.0,
+    "t": 0.0,
+    "years": 5.996031746031746,
+    "mean_bp": 0.0,
+    "mean_active_bp": NaN,
+    "hit": NaN,
+    "total": 0.0
+   },
+   "held_net_stress": {
+    "n": 1158,
+    "n_active": 0,
+    "sharpe": 0.0,
+    "t": 0.0,
+    "years": 4.595238095238095,
+    "mean_bp": 0.0,
+    "mean_active_bp": NaN,
+    "hit": NaN,
+    "total": 0.0
+   },
+   "cost_bp_per_active_day": 0.0
+  }
+ ]
+}

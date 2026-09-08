@@ -1,0 +1,24 @@
+04:53:08
+validated cells: 32953
+  of which BH-pass                       : 25655
+  of which BH-pass AND va_mean>0         : 1003
+  of which BH-pass AND va>0 AND tr>0     : 189
+  of which BH-pass AND va>0 AND tr>0 AND both medians>0 : 32
+
+=== cells positive on BOTH splits and BH-clean: 189 ===
+
+--- gate summary ---
+369:=== cells clearing EVERY gate (both splits >0, BH, bootstrap CI-lo>0, tradable at $600 on both splits): 1 ===
+     liq>=$600  TR -0.0584 VA +0.1959 (n15 k11, control -0.1826)
+     liq>=$2000 TR -0.1317 VA +0.0237 (n5 k4, control -0.1911)
+     uncapped VA   +0.0641 (control   +2.7782) | cap+100% VA -0.0386 (control -0.1460)
+
+  px_vs_start=q0|volaccel=q2|m_hour=3 | t30_avg
+     TR +0.0462 (med -0.0161 n  100 k 36)  VA +0.0263 (med -0.0353 n  137 k 45) base -0.1052  boot95 [-0.0776,+0.1859] res 0.964
+     liq>=$600  TR -0.1382 VA +0.1841 (n6 k6, control -0.2932)
+     liq>=$2000 TR   n/a VA -0.4565 (n2 k2, control -0.3051)
+     uncapped VA   +0.0610 (control   +2.5731) | cap+100% VA -0.0182 (control -0.1162)
+
+=== cells clearing EVERY gate (both splits >0, BH, bootstrap CI-lo>0, tradable at $600 on both splits): 1 ===
+   rvol10=q1|cumvol_log=q2 | t15_pyr  TR +0.0328 VA +0.0333 liq600 TR +0.0281 VA +0.0635
+--err--

@@ -1,0 +1,3 @@
+first sim: mints=382 trades=382 drops=19
+sims=24 elapsed=0.34 -> per sim 0.014s -> full 3120 sims 0.7 min
+UNCOND allbars/single/15m/plain: k=382 n=6755 res=0.943 mean30=2.3090 mean50=2.2716 mean100=2.1780 median30=-0.1667

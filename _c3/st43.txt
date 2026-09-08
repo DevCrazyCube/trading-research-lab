@@ -1,0 +1,3 @@
+placebo seed 2024: both-splits-positive BH survivors = 109
+placebo seed 2024: cells clearing the FULL gate = 0
+05:09:43

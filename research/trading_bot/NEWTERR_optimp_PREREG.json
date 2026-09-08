@@ -1,0 +1,33 @@
+{
+ "key": "optimp",
+ "territory": "Options-IMPLIED surface (free Cboe implied-vol/skew indices) used as a SIGNAL to trade the UNDERLYING cash ETF. No options are bought or sold.",
+ "written_before_any_result_existed": true,
+ "date": "2026-08-20",
+ "data": {
+  "signal": "21 Cboe daily implied-vol / skew indices from cdn.cboe.com (VIX, VIX9D, VIX3M, VIX6M, VVIX, SKEW, VXN, RVX, VXD, OVX, GVZ, VXEEM, VXEWZ, VXSLV, VXTLT, VXAPL, VXXLE, VXFXI, VXGDX, VXEFA)",
+  "underlying": "Yahoo daily adjusted closes for the 15 ETFs/stocks those chains are written on",
+  "unavailable": "Cboe daily put/call-ratio archive returns HTTP 403 (paywalled); no free GEX/dealer-positioning history exists; Deribit free-sample pipeline has 6 point snapshots only -- all three declared UNTESTABLE, not silently dropped"
+ },
+ "lag_convention": {
+  "why": "Cboe indices print at 16:15 ET, AFTER the 16:00 cash close. An L=1 backtest (signal close t -> earn ret t+1) is therefore NOT TRADABLE; it reads a print that does not exist yet.",
+  "L1": "diagnostic only -- measures the 15-minute print-gap artefact",
+  "L2": "HEADLINE. signal from close t, position established at close t+1, earns ret t+2",
+  "L3": "LAG-KILL test -- one further day of slack"
+ },
+ "selection_rule_fixed_in_advance": [
+  "a. mechanism stated in one sentence AND the position sign pre-specified from that mechanism, never read off the data",
+  "b. design-window L2 t-stat, in the PRE-SPECIFIED sign, >= bar = sqrt(2 ln N)",
+  "c. LAG-KILL: design L3 Sharpe >= 0.5 * design L2 Sharpe AND design L3 t > 0",
+  "d. STALENESS: design L1 Sharpe <= 2.0 * design L2 Sharpe (if L1 >> L2 the edge lives in the print gap)",
+  "e. only formulas passing a-d have their holdout read; a survivor requires holdout L2 net Sharpe > 0"
+ ],
+ "windows": {"design": ["2012-06-01", "2019-12-31"], "holdout": ["2020-01-01", "2026-08-19"]},
+ "costs": {
+  "per_side_bp": {"SPY": 1.5, "QQQ": 1.5, "IWM": 2.0, "DIA": 2.0, "EEM": 2.5, "EWZ": 4.0, "GLD": 2.0, "USO": 4.0, "SLV": 3.0, "TLT": 2.0, "FXI": 3.5, "GDX": 3.0, "XLE": 2.5, "EFA": 2.5, "AAPL": 2.0},
+  "anchor": "M0_AUCTION_FILLS tier-A close-print half-spread mean 1.34bp, plus slippage pad, widened for thinner underlyings",
+  "charged_on": "|change in weight| every day, i.e. BOTH legs of every round trip",
+  "borrow_annual_pct": {"SPY": 0.3, "QQQ": 0.3, "IWM": 0.5, "DIA": 0.5, "GLD": 0.4, "TLT": 0.5, "EEM": 0.6, "EFA": 0.6, "XLE": 0.75, "SLV": 1.0, "GDX": 1.0, "FXI": 1.5, "EWZ": 1.5, "USO": 2.0, "AAPL": 0.3},
+  "borrow_charged": "on every day of negative weight, easy-to-borrow indicative ETF rates"
+ },
+ "control_formula": "E4_CONTROL_uncond_reversal carries NO options information. If the gamma-sign formulas do not beat it, the option surface added nothing and they are killed regardless of t-stat."
+}

@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/usr/bin/python",
+    "scripts/b9d_transaction_bodies.py",
+    "run",
+    "/home/anont/meme/research/b11m_window2/b11a_bodies.sqlite",
+    "--rpc-env",
+    "SOLANA_RPC_URL",
+    "--b9c",
+    "/home/anont/meme/research/b11m_window2/b11a_signatures.sqlite",
+    "--b9a",
+    "/home/anont/meme/research/b11m_window2/b11a_subsample.sqlite",
+    "--cutoff-slot",
+    "438854169",
+    "--workers",
+    "4",
+    "--calls-per-second",
+    "14"
+  ],
+  "completed": false,
+  "endpoint": "https://solana-mainnet.core.chainstack.com",
+  "exit_code": 1,
+  "finished_at": 1786903024,
+  "manifest_sha256": "b901e2ade981123def610fa245c07829dfc202ae9afe6fbef6806d4b8cb7a107",
+  "schema_version": "1.0.0",
+  "stage": "transaction_bodies",
+  "started_at": 1786900580,
+  "stderr_log": "/home/anont/meme/research/b11m_window2/logs/transaction_bodies.stderr.log",
+  "stdout_log": "/home/anont/meme/research/b11m_window2/logs/transaction_bodies.stdout.log"
+}

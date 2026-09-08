@@ -1,0 +1,89 @@
+{
+  "generated_utc": "2026-08-17T12:42:38.447204+00:00",
+  "gate_file": "research/trading_bot/T15_POWER_GATE.md",
+  "gate_sha256": "76f712f7d03af75b65f193bb74f5c6f312a30c03be03d520ab09ecbf90de2b89",
+  "gate_threshold_MDE": 0.009,
+  "gate_threshold_source": "Martineau (2021) Critical Finance Review Table 4 Panel B, all-but-microcap, random-walk surprise decile rank, BHAR[2,60], pooled 1973-2019: beta 0.001 x 9 ranks",
+  "held_out": {
+    "window": [
+      "2022-01-03",
+      "2026-08-14"
+    ],
+    "years": 4.62,
+    "events": 5991,
+    "seasons": 18,
+    "decile_pairs": 591,
+    "per_event_abnormal_return_sd": 0.18763675882704767
+  },
+  "MDE": {
+    "primary_decile_book_persistent_placebo_block1": 0.04439019462488476,
+    "naive_every_event_independent": 0.030580551165989064,
+    "season_clustering_variance_inflation": 2.1070919168331375,
+    "most_powerful_framing_rank_regression": 0.033279053944243485,
+    "by_horizon": {
+      "5": 0.01289136065050932,
+      "21": 0.023034946083422873,
+      "60": 0.04439019462488476
+    }
+  },
+  "GATE": {
+    "threshold": 0.009,
+    "observed": 0.04439019462488476,
+    "fails_by_factor": 4.932243847209419,
+    "passes": false
+  },
+  "what_would_be_needed": {
+    "variance_scale": 24.327029368335168,
+    "decile_pairs_required": 14377.274356686085,
+    "events_required": 145743.23294569599,
+    "events_per_year_observed": 1296.7532467532467,
+    "years_of_collection_at_this_universe_width": 112.39087568170848,
+    "universe_width_required_names": 12163.514684167583
+  },
+  "detectability_of_the_literature": {
+    "detectable_at_80pct_power": 0.04439019462488476,
+    "Foster_Olsen_Shevlin_1984_classic_60d_decile_spread": 0.05,
+    "Martineau_1973_1990_all_but_microcap_random_walk": 0.027,
+    "Martineau_pooled_1973_2019_all_but_microcap_random_walk": 0.009,
+    "Chordia_2009_most_liquid_quintile_three_months": 0.0012
+  },
+  "friction_per_event_bp": {
+    "auction_rail_M0": 4.227476712328768,
+    "plus_one_measured_half_spread_per_leg": 7.087476712328767,
+    "per_event_dispersion_bp": 1876.3675882704767,
+    "dispersion_over_friction_rail": 443.85048480535613
+  },
+  "point_in_time_sue_availability": {
+    "events_matched_to_a_quarter": 10481,
+    "events_with_no_matching_quarter": 3469,
+    "xbrl_filed_minus_8k_filed_days": {
+      "n": 10481,
+      "min": -5,
+      "p05": 0,
+      "p25": 0,
+      "median": 1,
+      "p75": 10,
+      "p95": 29,
+      "max": 658,
+      "mean": 15.02766911554241,
+      "share_le_0": 0.34729510542887126,
+      "share_le_1": 0.5155996565213243,
+      "share_le_5": 0.6099608815952676
+    },
+    "first_form_carrying_the_fact": {
+      "10-Q": 9147,
+      "10-K": 1324,
+      "10-K/A": 4,
+      "8-K": 3,
+      "10-Q/A": 1,
+      "10-KT": 1,
+      "10-QT": 1
+    },
+    "match_failure_reasons": {
+      "no_quarterly_fact_within_60d_of_the_8K": 3469
+    },
+    "announced_quarter_eps_public_by_entry_day": 4957,
+    "full_point_in_time_SUE_by_entry_day": 4723
+  },
+  "verdict": "DEAD-BY-INSUFFICIENT-POWER"
+}

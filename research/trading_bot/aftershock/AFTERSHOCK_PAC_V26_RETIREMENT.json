@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "instrument_id": "AFTERSHOCK_PAC_V26",
+  "status": "RETIRED_FALSIFIED_EARLY_SAFETY_STOP",
+  "retired_utc": "2026-08-31T01:09:18Z",
+  "reason": "ZERO_WINS_IN_EIGHT_AND_CALIBRATED_LANDING_BREACHED_THE_INTENDED_RISK_BUDGET",
+  "paper_scenario_only": true,
+  "ledger": {
+    "path": "research/trading_bot/aftershock/AFTERSHOCK_PAC_V26_SCENARIO_LEDGER.jsonl",
+    "sha256": "0d064245a4abf89b99279dc5cc14c6114292bc0365ab2f42b0f812ff84d62819",
+    "bytes": 76189,
+    "rows": 38,
+    "resolved": 8,
+    "wins": 0,
+    "losses": 8,
+    "full_losses": 0,
+    "mean_return": "-0.08473247596375062",
+    "median_return": "-0.07971009051904720",
+    "sum_return": "-0.6778598077100050",
+    "normalized_capital_index": "93.22140192289996"
+  },
+  "state": {
+    "path": "research/trading_bot/aftershock/AFTERSHOCK_PAC_V26_RUNNER_STATE.json",
+    "sha256": "1107f280fc54f6c0338db0e9875f27b840c11310bbaffced56a5feea70057faa",
+    "bytes": 5411551,
+    "right_censored_open_mint": "9996SzTaUP2NnRkvjn6rE5GZizSSkLLAyMmmcq6pump"
+  },
+  "decision": "DO_NOT_RESTART_DO_NOT_TUNE_FROM_THIS_BOOK"
+}

@@ -1,0 +1,244 @@
+train mints 178 validate mints 209
+mint filters 83
+sizes(train,val):
+   ALL                178 209
+   np==0               93 102
+   np>=1               85 107
+   np>=2               76  87
+   np>=3               68  73
+   np>=4               60  68
+   np>=5               53  62
+   np>=6               47  59
+   np>=7               45  56
+   np>=8               42  54
+   np>=10              39  48
+   np>=12              36  38
+   np>=15              35  34
+   np>=20              27  29
+   np>=30              18  20
+   np>=50              13  13
+   np1_2               17  34
+   np2_4               23  25
+   np3_6               23  17
+   np4_8               20  17
+   np5_10              16  19
+   np6_12              11  22
+   np8_16               9  23
+   np10_20             13  19
+   np12_25             15  16
+   np16_40             18  18
+   np>=41              16  14
+   gradn>=1            50  62
+   gradn>=2            35  31
+   gradn>=3            26  20
+   gradn>=5            14  13
+   gradn==0&np>=1      35  45
+   gradn==0&np>=3      22  23
+   gf==0&np>=1         35  45
+   gf>0                50  62
+   gf>=0.10            29  34
+   gf>=0.15            26  30
+   gf>=0.20            26  29
+   gf>=0.25            25  26
+   gf>=0.30            24  24
+   gf>=0.35            21  23
+   gf>=0.40            21  22
+   gf>=0.50            20  22
+   gf>=0.67             8   9
+   gf0.00_0.25         25  36
+   gf0.10_0.40          8  12
+   gf0.20_0.60         11  16
+   gf0.05_0.35         20  24
+   gap<5               36  38
+   gap<10              50  59
+   gap5_20             23  33
+   gap10_40            20  28
+   gap20_60            13  19
+   gap30_120           11  20
+   gap>=60             13  17
+   gap>=120             8   7
+   p1h==0&np>=1        13  17
+   p1h>=1              72  90
+   p1h>=2              59  71
+   p1h>=3              48  54
+   p1h>=5              29  37
+   p1h>=8              18  23
+   p1h1_3              33  45
+   p1h2_6              38  43
+   cov                 21  28
+   devbuy>=1           14  13
+   devbuy>=2           14  12
+   devbuy>=3           12  11
+   devbuy>=5            6   8
+   devbuy0_1            7  15
+   devbuy1_3            2   2
+   pdevbuy>=2          16  30
+   pdevbuy0_2           2   5
+   np>=3&gf>=0.25      21  14
+   np>=3&gf==0         22  23
+   np>=5&gradn>=2      28  27
+   np>=2&gap<20        54  65
+   np>=8&gf>=0.20       9   9
+   np>=2&gf>=0.34      19  17
+   np2_8&gf>0          18  16
+   np>=4&p1h>=2        48  56
+   np>=4&p1h==0         7   6
+   np>=6&gap>=60        6   4
+combos swept 361548 evaluated 261360 train-positive(with n gates) 974 elapsed 21.1
+TOP 60 TRAIN:
+  gap10_40             age<20       H30|TP0.40|SL-|TR-|PC      trmean=+0.1975 trmed=+0.0374 k=16 n=40 res=0.950 ctrlALL=-0.0622 edge=+0.2597
+  gap5_20              age<20       H120|TP0.80|SL-|TR-|PA     trmean=+0.1764 trmed=+0.2877 k=19 n=53 res=0.906 ctrlALL=-0.1028 edge=+0.2792
+  np2_4                age<20       H30|TP0.80|SL-|TR-|PC      trmean=+0.1705 trmed=+0.0445 k=19 n=51 res=0.922 ctrlALL=-0.0240 edge=+0.1945
+  np2_4                age<20       H30|TP0.40|SL-|TR-|PC      trmean=+0.1700 trmed=+0.0218 k=19 n=65 res=0.938 ctrlALL=-0.0622 edge=+0.2321
+  gap10_40             age<60       H30|TP0.80|SL-|TR-|PC      trmean=+0.1634 trmed=+0.0732 k=19 n=66 res=0.955 ctrlALL=-0.0524 edge=+0.2158
+  gap5_20              age<20       H30|TP0.80|SL-|TR-|PA      trmean=+0.1576 trmed=+0.2238 k=19 n=57 res=0.930 ctrlALL=-0.0727 edge=+0.2303
+  gap5_20              age<20       H60|TP0.80|SL-|TR-|PA      trmean=+0.1576 trmed=+0.2238 k=19 n=55 res=0.927 ctrlALL=-0.0789 edge=+0.2365
+  gap5_20              age<20       H240|TP0.80|SL-|TR-|PA     trmean=+0.1522 trmed=+0.2420 k=19 n=52 res=0.904 ctrlALL=-0.1186 edge=+0.2708
+  gap5_20              age<20       H15|TP0.80|SL-|TR-|PA      trmean=+0.1481 trmed=+0.1995 k=19 n=64 res=0.938 ctrlALL=-0.0453 edge=+0.1934
+  p1h2_6               age<20       H30|TP0.80|SL-|TR-|PC      trmean=+0.1456 trmed=+0.0380 k=31 n=64 res=0.938 ctrlALL=-0.0240 edge=+0.1696
+  np2_4                age<20       H120|TP0.40|SL-|TR-|PC     trmean=+0.1413 trmed=+0.0012 k=19 n=64 res=0.938 ctrlALL=-0.0923 edge=+0.2336
+  np2_4                age<20       H30|TP0.80|SL-|TR-|PA      trmean=+0.1389 trmed=+0.2251 k=19 n=51 res=0.922 ctrlALL=-0.0727 edge=+0.2116
+  np2_4                age<20       H240|TP0.40|SL-|TR-|PC     trmean=+0.1292 trmed=-0.0338 k=19 n=63 res=0.937 ctrlALL=-0.1115 edge=+0.2407
+  np2_4                age<20       H120|TP0.80|SL-|TR-|PC     trmean=+0.1285 trmed=+0.0445 k=19 n=50 res=0.920 ctrlALL=-0.0875 edge=+0.2160
+  np2_4                age<20       H60|TP0.40|SL-|TR-|PC      trmean=+0.1262 trmed=-0.0210 k=19 n=64 res=0.938 ctrlALL=-0.0834 edge=+0.2096
+  np2_4                age<20       H15|TP0.80|SL-|TR-|PA      trmean=+0.1213 trmed=+0.1777 k=19 n=57 res=0.930 ctrlALL=-0.0453 edge=+0.1666
+  np2_4                age<20       H60|TP0.80|SL-|TR-|PC      trmean=+0.1160 trmed=+0.0380 k=19 n=50 res=0.920 ctrlALL=-0.0564 edge=+0.1724
+  np2_4                age<20       H240|TP0.80|SL-|TR-|PC     trmean=+0.1158 trmed=+0.0612 k=19 n=49 res=0.918 ctrlALL=-0.1085 edge=+0.2243
+  np2_4                age<20       H120|TP0.80|SL-|TR-|PA     trmean=+0.1139 trmed=+0.2358 k=19 n=50 res=0.920 ctrlALL=-0.1028 edge=+0.2168
+  gap5_20              age<20       H5|TP0.80|SL-|TR-|PA       trmean=+0.1124 trmed=+0.1105 k=19 n=83 res=0.952 ctrlALL=-0.0042 edge=+0.1166
+  np2_4                age<20       H240|TP0.80|SL-|TR-|PA     trmean=+0.1122 trmed=+0.2358 k=19 n=49 res=0.918 ctrlALL=-0.1186 edge=+0.2308
+  gap5_20              sib60>=1     H60|TP0.80|SL-|TR-|PA      trmean=+0.1084 trmed=+0.1115 k=22 n=79 res=0.924 ctrlALL=-0.0099 edge=+0.1183
+  gf0.05_0.35          sib15>=1     H5|TP0.80|SL-|TR-|PA       trmean=+0.1064 trmed=+0.0735 k=18 n=89 res=0.989 ctrlALL=+0.0421 edge=+0.0643
+  gap5_20              sib60>=1     H120|TP0.80|SL-|TR-|PA     trmean=+0.1053 trmed=+0.1277 k=22 n=73 res=0.918 ctrlALL=-0.0382 edge=+0.1435
+  np2_4                age<20       H60|TP0.80|SL-|TR-|PA      trmean=+0.1038 trmed=+0.2204 k=19 n=50 res=0.920 ctrlALL=-0.0789 edge=+0.1827
+  np2_4                age<20       H5|TP0.80|SL-|TR-|PA       trmean=+0.1035 trmed=+0.0875 k=19 n=88 res=0.955 ctrlALL=-0.0042 edge=+0.1077
+  gf0.00_0.25          sib15>=1     H5|TP0.80|SL-|TR-|PA       trmean=+0.1004 trmed=+0.0573 k=20 n=250 res=0.992 ctrlALL=+0.0421 edge=+0.0582
+  gap5_20              sib60>=1     H30|TP0.80|SL-|TR-|PA      trmean=+0.0968 trmed=+0.1356 k=22 n=94 res=0.936 ctrlALL=-0.0112 edge=+0.1080
+  np2_4                age<60       H30|TP0.80|SL-|TR-|PC      trmean=+0.0925 trmed=+0.0413 k=22 n=82 res=0.951 ctrlALL=-0.0524 edge=+0.1449
+  gap10_40             age<60       H30|TP0.40|SL-|TR-|PC      trmean=+0.0922 trmed=+0.0163 k=19 n=77 res=0.961 ctrlALL=-0.0661 edge=+0.1583
+  p1h>=2               age<20       H30|TP0.80|SL-|TR-|PC      trmean=+0.0913 trmed=+0.0388 k=50 n=108 res=0.954 ctrlALL=-0.0240 edge=+0.1153
+  np12_25              age<60       H30|TP0.80|SL-|TR-|PA      trmean=+0.0895 trmed=+0.1962 k=15 n=49 res=0.959 ctrlALL=-0.0718 edge=+0.1613
+  gap5_20              age<60       H30|TP0.80|SL-|TR-|PA      trmean=+0.0884 trmed=+0.1298 k=22 n=83 res=0.940 ctrlALL=-0.0718 edge=+0.1602
+  np2_4                age<60       H15|TP0.80|SL-|TR-|PA      trmean=+0.0883 trmed=+0.1155 k=22 n=107 res=0.963 ctrlALL=-0.0507 edge=+0.1390
+  np16_40              all          H120|TP0.80|SL-|TR-|PA     trmean=+0.0860 trmed=+0.0134 k=18 n=139 res=0.871 ctrlALL=-0.1059 edge=+0.1918
+  np>=15               sib15>=1     H5|TP0.80|SL-|TR-|PA       trmean=+0.0851 trmed=+0.0198 k=28 n=345 res=0.991 ctrlALL=+0.0421 edge=+0.0430
+  np2_4                age<20       H30|TP0.40|SL-|TR-|PA      trmean=+0.0841 trmed=+0.1305 k=19 n=65 res=0.938 ctrlALL=-0.1132 edge=+0.1973
+  np16_40              all          H240|TP0.80|SL-|TR-|PA     trmean=+0.0821 trmed=+0.0489 k=18 n=98 res=0.816 ctrlALL=-0.1140 edge=+0.1961
+  p1h2_6               age<20       H30|TP0.40|SL-|TR-|PC      trmean=+0.0820 trmed=-0.0459 k=31 n=79 res=0.937 ctrlALL=-0.0622 edge=+0.1442
+  gap5_20              sib60>=1     H240|TP0.80|SL-|TR-|PA     trmean=+0.0813 trmed=+0.2048 k=22 n=64 res=0.875 ctrlALL=-0.0612 edge=+0.1425
+  np16_40              sib60>=1     H120|TP0.80|SL-|TR-|PA     trmean=+0.0794 trmed=+0.0202 k=16 n=61 res=0.934 ctrlALL=-0.0382 edge=+0.1176
+  np4_8                age<20       H15|TP0.80|SL-|TR-|PA      trmean=+0.0764 trmed=+0.1039 k=18 n=52 res=0.981 ctrlALL=-0.0453 edge=+0.1217
+  np16_40              age<20       H5|TP0.80|SL-|TR-|PA       trmean=+0.0753 trmed=+0.1491 k=17 n=65 res=0.985 ctrlALL=-0.0042 edge=+0.0795
+  gap5_20              age<60       H30|TP0.80|SL-|TR-|PC      trmean=+0.0752 trmed=+0.0773 k=22 n=83 res=0.940 ctrlALL=-0.0524 edge=+0.1276
+  np2_4                sib60>=1     H60|TP0.80|SL-|TR-|PA      trmean=+0.0748 trmed=+0.0970 k=21 n=77 res=0.935 ctrlALL=-0.0099 edge=+0.0847
+  np16_40              sib60>=1     H60|TP0.80|SL-|TR-|PA      trmean=+0.0741 trmed=-0.0064 k=16 n=79 res=0.949 ctrlALL=-0.0099 edge=+0.0840
+  np16_40              age<60       H5|TP0.80|SL-|TR-|PA       trmean=+0.0738 trmed=+0.0542 k=18 n=143 res=0.986 ctrlALL=-0.0241 edge=+0.0978
+  np>=20               sib15>=1     H5|TP0.80|SL-|TR-|PA       trmean=+0.0738 trmed=+0.0448 k=22 n=302 res=0.990 ctrlALL=+0.0421 edge=+0.0316
+  np2_4                sib60>=1     H15|TP0.80|SL-|TR-|PA      trmean=+0.0734 trmed=+0.1004 k=21 n=121 res=0.959 ctrlALL=+0.0006 edge=+0.0727
+  np16_40              age<60       H30|TP0.80|SL-|TR-|PA      trmean=+0.0732 trmed=+0.1141 k=18 n=62 res=0.952 ctrlALL=-0.0718 edge=+0.1450
+  np12_25              age<60       H30|TP0.80|SL-|TR-|PC      trmean=+0.0729 trmed=+0.0815 k=15 n=49 res=0.959 ctrlALL=-0.0524 edge=+0.1254
+  np==0                age<20       H60|TP0.80|SL0.25|TR-|PA   trmean=+0.0724 trmed=-0.1432 k=73 n=301 res=0.957 ctrlALL=-0.0037 edge=+0.0761
+  np2_4                age<60       H30|TP0.80|SL-|TR-|PA      trmean=+0.0721 trmed=+0.1182 k=22 n=82 res=0.951 ctrlALL=-0.0718 edge=+0.1440
+  gap5_20              sib15>=1     H30|TP0.80|SL-|TR-|PA      trmean=+0.0720 trmed=+0.0699 k=19 n=55 res=0.927 ctrlALL=-0.0105 edge=+0.0825
+  gap10_40             age<60       H60|TP0.80|SL-|TR-|PC      trmean=+0.0713 trmed=+0.0306 k=19 n=54 res=0.944 ctrlALL=-0.0857 edge=+0.1569
+  p1h2_6               age<20       H120|TP0.80|SL-|TR-|PC     trmean=+0.0713 trmed=+0.0256 k=31 n=61 res=0.918 ctrlALL=-0.0875 edge=+0.1588
+  np2_4                age<60       H5|TP0.80|SL-|TR-|PA       trmean=+0.0702 trmed=+0.0567 k=22 n=176 res=0.977 ctrlALL=-0.0241 edge=+0.0943
+  p1h2_6               age<20       H60|TP0.80|SL-|TR-|PC      trmean=+0.0699 trmed=-0.0128 k=31 n=62 res=0.919 ctrlALL=-0.0564 edge=+0.1263
+  np2_4                sib15>=1     H15|TP0.80|SL-|TR-|PA      trmean=+0.0695 trmed=+0.0244 k=16 n=55 res=0.927 ctrlALL=+0.0154 edge=+0.0541
+  gap5_20              age<60       H15|TP0.80|SL-|TR-|PA      trmean=+0.0690 trmed=+0.1215 k=22 n=98 res=0.959 ctrlALL=-0.0507 edge=+0.1197
+SURFACE by HOLD
+   5                      n= 43560 meanTrainMean=-0.1107 fracPos=0.012 best=+0.3909
+   15                     n= 43560 meanTrainMean=-0.1212 fracPos=0.009 best=+0.3124
+   30                     n= 43560 meanTrainMean=-0.1301 fracPos=0.011 best=+0.3585
+   60                     n= 43560 meanTrainMean=-0.1433 fracPos=0.010 best=+0.2503
+   120                    n= 43560 meanTrainMean=-0.1623 fracPos=0.004 best=+0.2234
+   240                    n= 43560 meanTrainMean=-0.1814 fracPos=0.003 best=+0.2234
+SURFACE by TP
+   TP0.80                 n= 71280 meanTrainMean=-0.1323 fracPos=0.016 best=+0.3909
+   TP0.40                 n= 71280 meanTrainMean=-0.1396 fracPos=0.007 best=+0.3906
+   TP0.20                 n= 71280 meanTrainMean=-0.1420 fracPos=0.003 best=+0.3723
+   TPnone                 n= 47520 meanTrainMean=-0.1576 fracPos=0.004 best=+0.3909
+SURFACE by SL
+   SL0.25                 n= 87120 meanTrainMean=-0.1238 fracPos=0.005 best=+0.3909
+   SLnone                 n= 87120 meanTrainMean=-0.1389 fracPos=0.016 best=+0.3609
+   SL0.45                 n= 87120 meanTrainMean=-0.1618 fracPos=0.003 best=+0.3784
+SURFACE by TRAIL
+   TR0.30                 n=130680 meanTrainMean=-0.1408 fracPos=0.002 best=+0.1094
+   TRnone                 n=130680 meanTrainMean=-0.1422 fracPos=0.014 best=+0.3909
+SURFACE by POSITION
+   POSC                   n= 95040 meanTrainMean=-0.1075 fracPos=0.008 best=+0.3705
+   POSA                   n= 95040 meanTrainMean=-0.1557 fracPos=0.010 best=+0.3909
+   POSB                   n= 71280 meanTrainMean=-0.1679 fracPos=0.005 best=+0.3909
+SURFACE by BARFILTER
+   age60_240              n= 23760 meanTrainMean=-0.1092 fracPos=0.000 best=+0.0344
+   age120_480             n= 23760 meanTrainMean=-0.1229 fracPos=0.000 best=-0.0110
+   age20_120              n= 23760 meanTrainMean=-0.1340 fracPos=0.002 best=+0.0540
+   sib60>=1               n= 23760 meanTrainMean=-0.1365 fracPos=0.012 best=+0.1084
+   sib15>=1               n= 23760 meanTrainMean=-0.1380 fracPos=0.036 best=+0.3909
+   sib60>=3               n= 23760 meanTrainMean=-0.1431 fracPos=0.015 best=+0.1743
+   all                    n= 23760 meanTrainMean=-0.1471 fracPos=0.001 best=+0.0860
+   age<60                 n= 23760 meanTrainMean=-0.1506 fracPos=0.008 best=+0.1634
+   age<20                 n= 23760 meanTrainMean=-0.1507 fracPos=0.014 best=+0.2341
+   sib60==0               n= 23760 meanTrainMean=-0.1578 fracPos=0.000 best=-0.0155
+   age>=240               n= 23760 meanTrainMean=-0.1667 fracPos=0.000 best=-0.0195
+SURFACE by MINTFILTER
+   pdevbuy>=2             n=  4356 meanTrainMean=-0.0663 fracPos=0.094 best=+0.1521
+   np==0                  n=  4356 meanTrainMean=-0.0839 fracPos=0.082 best=+0.3909
+   cov                    n=  4356 meanTrainMean=-0.0984 fracPos=0.065 best=+0.3585
+   np16_40                n=  4356 meanTrainMean=-0.1185 fracPos=0.018 best=+0.1657
+   p1h>=8                 n=  4356 meanTrainMean=-0.1188 fracPos=0.013 best=+0.0636
+   ALL                    n=  4356 meanTrainMean=-0.1228 fracPos=0.001 best=+0.0421
+   gradn==0&np>=3         n=  4356 meanTrainMean=-0.1245 fracPos=0.003 best=+0.0418
+   np>=3&gf==0            n=  4356 meanTrainMean=-0.1245 fracPos=0.003 best=+0.0418
+   np12_25                n=  4356 meanTrainMean=-0.1257 fracPos=0.015 best=+0.1736
+   np>=15                 n=  4356 meanTrainMean=-0.1261 fracPos=0.008 best=+0.0851
+   gf0.00_0.25            n=  4356 meanTrainMean=-0.1275 fracPos=0.012 best=+0.1004
+   gradn==0&np>=1         n=  4356 meanTrainMean=-0.1288 fracPos=0.003 best=+0.0440
+   gf==0&np>=1            n=  4356 meanTrainMean=-0.1288 fracPos=0.003 best=+0.0440
+   p1h>=5                 n=  4356 meanTrainMean=-0.1288 fracPos=0.008 best=+0.0451
+   np>=12                 n=  4356 meanTrainMean=-0.1296 fracPos=0.004 best=+0.0684
+   gap10_40               n=  4356 meanTrainMean=-0.1296 fracPos=0.010 best=+0.2341
+   np>=30                 n=  4356 meanTrainMean=-0.1306 fracPos=0.008 best=+0.0406
+   np>=8                  n=  4356 meanTrainMean=-0.1321 fracPos=0.002 best=+0.0490
+   np>=20                 n=  4356 meanTrainMean=-0.1330 fracPos=0.005 best=+0.0738
+   np>=7                  n=  4356 meanTrainMean=-0.1332 fracPos=0.003 best=+0.0584
+   np>=10                 n=  4356 meanTrainMean=-0.1336 fracPos=0.002 best=+0.0527
+   np>=6                  n=  4356 meanTrainMean=-0.1339 fracPos=0.002 best=+0.0423
+   np2_4                  n=  4356 meanTrainMean=-0.1362 fracPos=0.015 best=+0.1705
+   np>=2                  n=  4356 meanTrainMean=-0.1368 fracPos=0.003 best=+0.0479
+   np>=41                 n=  4356 meanTrainMean=-0.1371 fracPos=0.009 best=+0.0540
+   np>=5                  n=  4356 meanTrainMean=-0.1371 fracPos=0.001 best=+0.0117
+   np>=1                  n=  4356 meanTrainMean=-0.1398 fracPos=0.002 best=+0.0259
+   gf0.05_0.35            n=  4356 meanTrainMean=-0.1400 fracPos=0.009 best=+0.1064
+   np>=3                  n=  4356 meanTrainMean=-0.1401 fracPos=0.003 best=+0.0278
+   gap<5                  n=  4356 meanTrainMean=-0.1401 fracPos=0.001 best=+0.0167
+   np1_2                  n=  4356 meanTrainMean=-0.1408 fracPos=0.005 best=+0.0883
+   np>=4                  n=  4356 meanTrainMean=-0.1413 fracPos=0.002 best=+0.0314
+   p1h>=2                 n=  4356 meanTrainMean=-0.1418 fracPos=0.005 best=+0.0913
+   np>=2&gap<20           n=  4356 meanTrainMean=-0.1422 fracPos=0.004 best=+0.0632
+   p1h>=1                 n=  4356 meanTrainMean=-0.1434 fracPos=0.003 best=+0.0524
+   np>=4&p1h>=2           n=  4356 meanTrainMean=-0.1448 fracPos=0.004 best=+0.0438
+   np5_10                 n=  4356 meanTrainMean=-0.1468 fracPos=0.001 best=+0.0344
+   gradn>=1               n=  4356 meanTrainMean=-0.1473 fracPos=0.002 best=+0.0281
+   gf>0                   n=  4356 meanTrainMean=-0.1473 fracPos=0.002 best=+0.0281
+   p1h>=3                 n=  4356 meanTrainMean=-0.1486 fracPos=0.002 best=+0.0262
+   p1h1_3                 n=  4356 meanTrainMean=-0.1507 fracPos=0.003 best=+0.0584
+   gap<10                 n=  4356 meanTrainMean=-0.1509 fracPos=0.001 best=+0.0423
+   np3_6                  n=  4356 meanTrainMean=-0.1527 fracPos=0.004 best=+0.0534
+   gradn>=2               n=  4356 meanTrainMean=-0.1545 fracPos=0.001 best=+0.0092
+   p1h2_6                 n=  4356 meanTrainMean=-0.1551 fracPos=0.004 best=+0.1456
+   np>=5&gradn>=2         n=  4356 meanTrainMean=-0.1578 fracPos=0.000 best=+0.0069
+   gradn>=3               n=  4356 meanTrainMean=-0.1580 fracPos=0.001 best=+0.0247
+   gap5_20                n=  4356 meanTrainMean=-0.1591 fracPos=0.014 best=+0.1764
+   np4_8                  n=  4356 meanTrainMean=-0.1626 fracPos=0.003 best=+0.0764
+   gf>=0.10               n=  4356 meanTrainMean=-0.1661 fracPos=0.000 best=+0.0064
+   gf>=0.35               n=  4356 meanTrainMean=-0.1668 fracPos=0.001 best=+0.0228
+   gf>=0.40               n=  4356 meanTrainMean=-0.1668 fracPos=0.001 best=+0.0228
+   gf>=0.50               n=  4356 meanTrainMean=-0.1672 fracPos=0.000 best=-0.0048
+   np>=2&gf>=0.34         n=  4356 meanTrainMean=-0.1684 fracPos=0.001 best=+0.0464
+   gf>=0.30               n=  4356 meanTrainMean=-0.1693 fracPos=0.001 best=+0.0219
+   gf>=0.25               n=  4356 meanTrainMean=-0.1695 fracPos=0.001 best=+0.0254
+   np2_8&gf>0             n=  4356 meanTrainMean=-0.1703 fracPos=0.003 best=+0.0665
+   gf>=0.15               n=  4356 meanTrainMean=-0.1706 fracPos=0.000 best=+0.0140
+   gf>=0.20               n=  4356 meanTrainMean=-0.1706 fracPos=0.000 best=+0.0140
+   np>=3&gf>=0.25         n=  4356 meanTrainMean=-0.1728 fracPos=0.003 best=+0.0433

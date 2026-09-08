@@ -1,0 +1,101 @@
+ubgrow_120 p75 threshold fit on TRAIN = 45.0000
+
+=== BASELINE (H180 | flowrev.lag1 | P2halfout25) ===
+ubgrow_120>=p75  [baseline]                    train  mean= 0.0831 med=-0.0490 CI=[ 0.0171, 0.1564] n=  349 k= 112
+ubgrow_120>=p75  [baseline]                    valid  mean= 0.1025 med=-0.0369 CI=[ 0.0322, 0.1814] n=  466 k= 142
+RANDOM 25% entries [control]                   train  mean=-0.0921 med=-0.0531 CI=[-0.1127,-0.0686] n= 3568 k= 576
+RANDOM 25% entries [control]                   valid  mean=-0.0582 med=-0.0572 CI=[-0.0931,-0.0184] n= 3741 k= 557
+
+=== T1 LEFT-TRUNCATION: is the signal just "our data starts here"? ===
+ubgrow>=p75 & FULL-HISTORY mints only          train  mean= 0.1077 med= 0.0272 CI=[-0.1220, 0.4179] n=    9 k=   4
+ubgrow>=p75 & FULL-HISTORY mints only          valid  mean= 0.0424 med= 0.0001 CI=[-0.0230, 0.1290] n=   18 k=   7
+ubgrow>=p75 & TRUNCATED-history mints          train  mean= 0.0822 med=-0.0528 CI=[ 0.0155, 0.1594] n=  340 k= 108
+ubgrow>=p75 & TRUNCATED-history mints          valid  mean= 0.1056 med=-0.0448 CI=[ 0.0291, 0.1890] n=  448 k= 135
+
+=== T2 AGE: a genuine previous 120s window must exist ===
+ubgrow>=p75 & age>=0s                          train  mean= 0.0831 med=-0.0490 CI=[ 0.0163, 0.1573] n=  349 k= 112
+ubgrow>=p75 & age>=0s                          valid  mean= 0.1025 med=-0.0369 CI=[ 0.0312, 0.1828] n=  466 k= 142
+ubgrow>=p75 & age>=120s                        train  mean=-0.0120 med=-0.0114 CI=[-0.0696, 0.0431] n=   16 k=  11
+ubgrow>=p75 & age>=120s                        valid  mean=-0.0966 med=-0.1176 CI=[-0.2466, 0.0689] n=   11 k=  10
+ubgrow>=p75 & age>=240s                        train  mean=-0.0189 med=-0.0114 CI=[-0.0415, 0.0026] n=   10 k=   5
+ubgrow>=p75 & age>=240s                        valid  mean=-0.0738 med=-0.0584 CI=[-0.1920, 0.0289] n=    4 k=   3
+ubgrow>=p75 & age>=600s                        train  mean=-0.0189 med=-0.0114 CI=[-0.0409, 0.0026] n=   10 k=   5
+ubgrow>=p75 & age>=600s                        valid  mean=-0.0738 med=-0.0584 CI=[-0.1920, 0.0289] n=    4 k=   3
+ubgrow>=p75 & age>=1800s                       train  mean=-0.0181 med=-0.0114 CI=[-0.0606, 0.0178] n=    6 k=   3
+ubgrow>=p75 & age>=1800s                       valid  mean=-0.1252 med=-0.1252 CI=[-0.1920,-0.0584] n=    2 k=   2
+
+=== T3 THRESHOLD SENSITIVITY (train-fit percentiles) ===
+ubgrow_120>=p25 (=1.11)                        train  mean=-0.0594 med=-0.0454 CI=[-0.0756,-0.0402] n= 4975 k= 640
+ubgrow_120>=p25 (=1.11)                        valid  mean=-0.0259 med=-0.0453 CI=[-0.0576, 0.0133] n= 5095 k= 609
+ubgrow_120>=p50 (=5.45)                        train  mean=-0.0344 med=-0.0611 CI=[-0.0608,-0.0057] n= 1577 k= 544
+ubgrow_120>=p50 (=5.45)                        valid  mean= 0.0122 med=-0.0561 CI=[-0.0289, 0.0577] n= 1695 k= 538
+ubgrow_120>=p60 (=15.00)                       train  mean=-0.0167 med=-0.0745 CI=[-0.0561, 0.0266] n=  811 k= 284
+ubgrow_120>=p60 (=15.00)                       valid  mean= 0.0659 med=-0.0677 CI=[ 0.0022, 0.1396] n=  955 k= 314
+ubgrow_120>=p75 (=45.00)                       train  mean= 0.0831 med=-0.0490 CI=[ 0.0154, 0.1569] n=  349 k= 112
+ubgrow_120>=p75 (=45.00)                       valid  mean= 0.1025 med=-0.0369 CI=[ 0.0328, 0.1841] n=  466 k= 142
+ubgrow_120>=p90 (=122.00)                      train  mean= 0.1131 med=-0.0364 CI=[ 0.0168, 0.2209] n=  113 k=  41
+ubgrow_120>=p90 (=122.00)                      valid  mean= 0.0748 med= 0.0321 CI=[-0.0246, 0.1774] n=  118 k=  40
+ubgrow_120>=p95 (=185.00)                      train  mean= 0.0535 med=-0.0078 CI=[-0.0869, 0.2035] n=   44 k=  18
+ubgrow_120>=p95 (=185.00)                      valid  mean= 0.1533 med= 0.0974 CI=[ 0.0015, 0.3127] n=   64 k=  23
+ubgrow_120>=p99 (=306.00)                      train  mean= 0.2105 med= 0.1963 CI=[ 0.0002, 0.4207] n=    8 k=   5
+ubgrow_120>=p99 (=306.00)                      valid  mean=-0.1208 med=-0.1094 CI=[-0.2583, 0.0130] n=   12 k=   6
+
+=== T4 EXIT STRUCTURE: is the flow-reversal exit load-bearing? ===
+ubgrow>=p75 -> H180|time|P0                    train  mean=-0.0194 med=-0.2736 CI=[-0.1469, 0.1161] n=  123 k= 112
+ubgrow>=p75 -> H180|time|P0                    valid  mean=-0.0735 med=-0.3109 CI=[-0.2074, 0.0735] n=  162 k= 142
+ubgrow>=p75 -> H180|time|P2halfout25           train  mean=-0.0091 med=-0.0973 CI=[-0.0966, 0.0880] n=  123 k= 112
+ubgrow>=p75 -> H180|time|P2halfout25           valid  mean=-0.0381 med=-0.1200 CI=[-0.1301, 0.0558] n=  162 k= 142
+ubgrow>=p75 -> H600|time|P0                    train  mean=-0.2238 med=-0.4908 CI=[-0.3630,-0.0651] n=  116 k= 112
+ubgrow>=p75 -> H600|time|P0                    valid  mean=-0.1645 med=-0.5069 CI=[-0.3135, 0.0062] n=  148 k= 142
+ubgrow>=p75 -> H1800|time|P0                   train  mean=-0.2656 med=-0.5264 CI=[-0.4069,-0.1064] n=  115 k= 112
+ubgrow>=p75 -> H1800|time|P0                   valid  mean=-0.2227 med=-0.5381 CI=[-0.3753,-0.0509] n=  146 k= 142
+
+=== T5 HORIZON of the flow-reversal cap ===
+ubgrow>=p75 -> H60|flowrev.lag1|P0             train  mean= 0.0017 med=-0.0788 CI=[-0.0476, 0.0602] n=  381 k= 112
+ubgrow>=p75 -> H60|flowrev.lag1|P0             valid  mean= 0.0950 med=-0.0764 CI=[ 0.0028, 0.2062] n=  498 k= 142
+ubgrow>=p75 -> H60|flowrev.lag1|P2halfout25    train  mean= 0.0234 med=-0.0481 CI=[-0.0218, 0.0715] n=  381 k= 112
+ubgrow>=p75 -> H60|flowrev.lag1|P2halfout25    valid  mean= 0.0725 med=-0.0511 CI=[ 0.0066, 0.1492] n=  498 k= 142
+ubgrow>=p75 -> H180|flowrev.lag1|P0            train  mean= 0.0733 med=-0.1009 CI=[-0.0159, 0.1779] n=  349 k= 112
+ubgrow>=p75 -> H180|flowrev.lag1|P0            valid  mean= 0.1041 med=-0.0840 CI=[-0.0001, 0.2272] n=  466 k= 142
+ubgrow>=p75 -> H180|flowrev.lag1|P2halfout25   train  mean= 0.0831 med=-0.0490 CI=[ 0.0186, 0.1597] n=  349 k= 112
+ubgrow>=p75 -> H180|flowrev.lag1|P2halfout25   valid  mean= 0.1025 med=-0.0369 CI=[ 0.0322, 0.1841] n=  466 k= 142
+ubgrow>=p75 -> H600|flowrev.lag1|P0            train  mean= 0.0749 med=-0.1588 CI=[-0.0366, 0.2047] n=  232 k= 112
+ubgrow>=p75 -> H600|flowrev.lag1|P0            valid  mean= 0.0549 med=-0.1243 CI=[-0.0607, 0.1827] n=  299 k= 142
+ubgrow>=p75 -> H600|flowrev.lag1|P2halfout25   train  mean= 0.0592 med=-0.1186 CI=[-0.0290, 0.1553] n=  232 k= 112
+ubgrow>=p75 -> H600|flowrev.lag1|P2halfout25   valid  mean= 0.0845 med=-0.0736 CI=[-0.0062, 0.1893] n=  299 k= 142
+
+=== T6 COST + DROPOUT STRESS (validate) ===
+toll 1.14%%, frozen=0                          valid  mean= 0.1025 med=-0.0369 CI=[ 0.0322, 0.1822]
+toll 2.5%%, frozen=0                           valid  mean= 0.0873 med=-0.0501 CI=[ 0.0151, 0.1659]
+toll 1.14%%, frozen=-30%%                      valid  mean= 0.0792 med=-0.0612 CI=[ 0.0037, 0.1624]
+toll 1.14%%, frozen=-50%%                      valid  mean= 0.0637 med=-0.0612 CI=[-0.0123, 0.1480]
+toll 1.14%%, frozen=-100%%                     valid  mean= 0.0249 med=-0.0612 CI=[-0.0572, 0.1198]
+toll 2.5%%, frozen=-100%%                      valid  mean= 0.0108 med=-0.0741 CI=[-0.0735, 0.1018]
+
+=== T7 CONCENTRATION: drop the top-contributing mints (validate) ===
+drop top- 0 mints: mean= 0.1025  med=-0.0369  k=142
+drop top- 1 mints: mean= 0.0840  med=-0.0393  k=141
+drop top- 2 mints: mean= 0.0669  med=-0.0408  k=140
+drop top- 3 mints: mean= 0.0555  med=-0.0423  k=139
+drop top- 5 mints: mean= 0.0341  med=-0.0448  k=137
+drop top-10 mints: mean= 0.0005  med=-0.0505  k=132
+drop top-20 mints: mean=-0.0499  med=-0.0673  k=122
+per-trade net: best=2.700  p99=1.608  p50=-0.011  frac>0=0.320
+
+=== T8 TIME STABILITY: split the 8-day window in half (validate) ===
+window midpoint ts=1785515146
+ubgrow>=p75 first half of window               train  mean= 0.0831 med=-0.0490 CI=[ 0.0169, 0.1575] n=  349 k= 112
+ubgrow>=p75 first half of window               valid  mean= 0.1020 med=-0.0369 CI=[ 0.0289, 0.1825] n=  465 k= 142
+ubgrow>=p75 second half of window              train  n/a
+ubgrow>=p75 second half of window              valid  n/a
+
+=== T9 what does the rule actually select? (validate, selected trades) ===
+  age          p10=       12 p50=       74 p90=      112
+  ntot         p10=       63 p50=      144 p90=      434
+  ub_120       p10=       44 p50=       59 p90=      178
+  ubgrow_120   p10=       45 p50=       60 p90=      179
+  prog         p10=  0.00521 p50=    0.128 p90=    0.552
+  rate_120     p10=     31.5 p50=     71.5 p90=      216
+  vimb_120     p10=   0.0026 p50=   0.0509 p90=     0.48
+  solincurve   p10=    0.287 p50=     7.02 p90=     30.3
+  trades per selected mint: median=3.0

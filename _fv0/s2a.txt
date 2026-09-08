@@ -1,0 +1,22 @@
+prims for pairing 152
+pairs 10968
+0 0.12871813774108887 combos 14 hits 0
+2000 33.40259027481079 combos 28014 hits 71
+4000 70.7739417552948 combos 56014 hits 131
+6000 107.64244818687439 combos 84014 hits 240
+8000 145.77352952957153 combos 112014 hits 303
+10000 183.32547688484192 combos 140014 hits 376
+PAIR STAGE combos 153552 t 198.00925755500793
+train-positive-expectancy pairs: 403
+rangerel20>8 & notional20<=5                         H= 10 tp=-1 sl=-1 pa=0 | mean=   95.11 trim=  45.07 med=  -3.50 dmean=  97.32 dtrim=  57.66 k=35 n=98 res=98.0
+volshare20>0.2 & vol_now<=100                        H=  3 tp=-1 sl=-1 pa=0 | mean=  103.00 trim=  42.84 med=  -2.47 dmean= 103.62 dtrim=  51.13 k=29 n=68 res=100.0
+rangerel20>8 & notional20<=5                         H=  5 tp=-1 sl=-1 pa=0 | mean=   93.14 trim=  42.65 med=  -3.30 dmean=  91.63 dtrim=  52.79 k=35 n=112 res=99.1
+volrel20<=1.5 & rangerel20>8                         H= 15 tp=-1 sl=-1 pa=0 | mean=   90.34 trim=  42.50 med=  -3.42 dmean= 100.81 dtrim=  55.98 k=36 n=52 res=90.4
+rangerel20>8 & notional20<=5                         H= 15 tp=-1 sl=-1 pa=0 | mean=   91.53 trim=  41.44 med=  -2.14 dmean= 102.00 dtrim=  54.92 k=35 n=95 res=96.8
+volrel20<=1.5 & rangerel20>8                         H= 10 tp=-1 sl=-1 pa=0 | mean=   88.42 trim=  40.46 med=  -3.89 dmean=  90.64 dtrim=  53.05 k=36 n=52 res=90.4
+rangerel20>8 & notional20<=5                         H=  3 tp=-1 sl=-1 pa=0 | mean=   86.46 trim=  35.75 med=  -3.30 dmean=  87.09 dtrim=  44.04 k=35 n=122 res=100.0
+rangerel20>8 & notional20<=5                         H= 15 tp=-1 sl=1 pa=0 | mean=   86.32 trim=  35.08 med=  -3.78 dmean=  89.16 dtrim=  44.34 k=35 n=120 res=97.5
+notional20<=5 & volshare20>0.2                       H=  3 tp=-1 sl=-1 pa=0 | mean=   81.52 trim=  27.22 med=  -2.36 dmean=  82.14 dtrim=  35.51 k=33 n=127 res=100.0
+rangerel20>8 & notional20<=5                         H= 30 tp=-1 sl=-1 pa=0 | mean=   49.95 trim=  27.16 med=  -4.46 dmean=  66.53 dtrim=  44.20 k=35 n=88 res=96.6
+9:PAIR STAGE combos 153552 t 198.00925755500793
+10:train-positive-expectancy pairs: 403

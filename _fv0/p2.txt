@@ -1,0 +1,4 @@
+Bestandssysteem Grootte Gebruikt Besch Geb% Aangekoppeld op
+/dev/nvme0n1p2     468G     401G   43G  91% /
+tmpfs              7,7G     6,2G  1,6G  80% /tmp
+120G	/home/anont/meme

@@ -1,0 +1,130 @@
+{
+ "diff": {
+  "label": "coil-mode=diff",
+  "n_trades": 3185,
+  "n_wins": 1303,
+  "n_losses": 1882,
+  "n_stopped_out": 2912,
+  "hit_rate": 0.40910518053375194,
+  "mean_R_bp": 126.54387659015177,
+  "friction_R_units": 0.09482876867179756,
+  "no_slippage": {
+   "W": 1.0885813279455436,
+   "L": 0.5660577728645919,
+   "p_star_base": 0.34210346690552745,
+   "p_star_friction": 0.057310847196447856,
+   "p_star": 0.3994143141019753,
+   "hit_minus_pstar": 0.009690866431776635
+  },
+  "with_b22b_slippage": {
+   "W": 1.0883369817258581,
+   "L": 0.5687656670011294,
+   "p_star_base": 0.34322898912633093,
+   "p_star_friction": 0.057225645462969064,
+   "p_star": 0.4004546345893,
+   "hit_minus_pstar": 0.00865054594445197,
+   "margin_required": 0.03
+  },
+  "gate0_rule": "DEAD if hit_rate < p*(with B22B slippage) + 0.03",
+  "verdict": "DEAD",
+  "mean_R_realized_gross": 0.11086365519054359,
+  "mean_R_realized_with_slip": 0.10656219423831477,
+  "harness": "coiled_gate0.py",
+  "frozen_spec": "ORIGINAL_STRATEGY_SHORTLIST.md 6.1-6.9 gate 0",
+  "coil_mode": "diff",
+  "entry_offset_bars": 1,
+  "design_window_frozen": [
+   "2020-09-01",
+   "2023-12-31"
+  ],
+  "covered_design_months": [
+   "2023-01",
+   "2023-02",
+   "2023-03",
+   "2023-04",
+   "2023-05",
+   "2023-06",
+   "2023-07",
+   "2023-08",
+   "2023-09",
+   "2023-10",
+   "2023-11",
+   "2023-12"
+  ],
+  "n_symbols_with_trades": 166,
+  "atr_tier_min_bp": 45.0,
+  "friction_bp": 12.0,
+  "lookahead_audit": {
+   "checked": 150,
+   "entry_next_bar": true,
+   "signal_causal": true,
+   "fwd_future_only": true,
+   "violations": [],
+   "note": "signal (D,C,deciles,breakout) uses bars <= t; entry at open of t+offset; ATR from the prior completed 1h bar; sim uses only bars >= entry."
+  }
+ },
+ "ratio": {
+  "label": "coil-mode=ratio",
+  "n_trades": 6410,
+  "n_wins": 2444,
+  "n_losses": 3966,
+  "n_stopped_out": 5902,
+  "hit_rate": 0.3812792511700468,
+  "mean_R_bp": 130.3047109992303,
+  "friction_R_units": 0.09209183542159793,
+  "no_slippage": {
+   "W": 1.0815030284415936,
+   "L": 0.5766689752788495,
+   "p_star_base": 0.3477739184987905,
+   "p_star_friction": 0.05553816806397126,
+   "p_star": 0.4033120865627618,
+   "hit_minus_pstar": -0.022032835392715
+  },
+  "with_b22b_slippage": {
+   "W": 1.0818102538346326,
+   "L": 0.5798378721763118,
+   "p_star_base": 0.348953465598223,
+   "p_star_friction": 0.05542198374013114,
+   "p_star": 0.4043754493383541,
+   "hit_minus_pstar": -0.023096198168307325,
+   "margin_required": 0.03
+  },
+  "gate0_rule": "DEAD if hit_rate < p*(with B22B slippage) + 0.03",
+  "verdict": "DEAD",
+  "mean_R_realized_gross": 0.05555760461081698,
+  "mean_R_realized_with_slip": 0.05164026120319847,
+  "harness": "coiled_gate0.py",
+  "frozen_spec": "ORIGINAL_STRATEGY_SHORTLIST.md 6.1-6.9 gate 0",
+  "coil_mode": "ratio",
+  "entry_offset_bars": 1,
+  "design_window_frozen": [
+   "2020-09-01",
+   "2023-12-31"
+  ],
+  "covered_design_months": [
+   "2023-01",
+   "2023-02",
+   "2023-03",
+   "2023-04",
+   "2023-05",
+   "2023-06",
+   "2023-07",
+   "2023-08",
+   "2023-09",
+   "2023-10",
+   "2023-11",
+   "2023-12"
+  ],
+  "n_symbols_with_trades": 167,
+  "atr_tier_min_bp": 45.0,
+  "friction_bp": 12.0,
+  "lookahead_audit": {
+   "checked": 150,
+   "entry_next_bar": true,
+   "signal_causal": true,
+   "fwd_future_only": true,
+   "violations": [],
+   "note": "signal (D,C,deciles,breakout) uses bars <= t; entry at open of t+offset; ATR from the prior completed 1h bar; sim uses only bars >= entry."
+  }
+ }
+}

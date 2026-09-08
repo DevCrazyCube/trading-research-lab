@@ -1,0 +1,10 @@
+REAL cell (fill=close): train mean=+0.1108 n=61 k=29 | validate mean=+0.1858 cilo=-0.0114 n=63 k=40
+NULL N2 (permuted mint attrs + random 30-min age window + random H/SL): usable draws=28
+  draws meeting my selection rule (train>0, val>0, val CI-lo>0): 0 (0.0%)
+  draws as good as the real cell (train>=+11%, val>=+18%): 0 (0.0%)
+  null train mean dist: p10=-0.225 p50=-0.123 p90=-0.028 max=-0.001
+  null valid mean dist: p10=-0.192 p50=-0.040 p90=+0.059 max=+0.184
+NULL N1 (attrs permuted, same window/H/SL): draws=120
+  P(train>=real)=0.008  P(val>=real)=0.058  P(both)=0.000
+  null train p50=-0.087 p90=+0.027 | null val p50=-0.046 p90=+0.139
+elapsed 30src=0

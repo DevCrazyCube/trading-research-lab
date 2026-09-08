@@ -1,0 +1,6 @@
+mints h12 201
+corr(log median price, log median volume) = 0.8172791992323888
+median price range 8.56719217416519e-09 0.06395327075306113
+median vol range 0.5227271683317782 14111.14560417908
+median sum(vol) per mint 148699.664859832
+median sum(px*vol) per mint 7.538882228674365

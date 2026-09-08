@@ -1,0 +1,77 @@
+{
+ "prereg_sha256": "f87fe7f6528d51a295a9987ba96ea9420120905b27ff1230cbb8fc49200a43bf",
+ "sessions": 654,
+ "first_session": "2024-01-11",
+ "last_session": "2026-08-20",
+ "design": {
+  "D1_prem": {
+   "n": 390,
+   "sd_bp": 16.9,
+   "mean_abs_bp": 10.6,
+   "rho1": 0.155,
+   "frac_abs_gt_10bp": 0.39
+  },
+  "D0_ownprint_F1": {
+   "n": 390,
+   "mean_bp": 7.13,
+   "sd_bp": 20.5,
+   "t": 6.86,
+   "nw5_t": 6.12,
+   "signflip_p": 0.0
+  },
+  "F1": {
+   "stats": {
+    "n": 390,
+    "mean_bp": 1.54,
+    "sd_bp": 16.0,
+    "t": 1.91,
+    "nw5_t": 2.16,
+    "signflip_p": 0.026
+   },
+   "shifted5": {
+    "n": 385,
+    "mean_bp": 0.51,
+    "sd_bp": 16.1,
+    "t": 0.62,
+    "nw5_t": 0.72,
+    "signflip_p": 0.2565
+   },
+   "gates": {
+    "G1_floor": false,
+    "G2_t": false,
+    "G3_placebo": false,
+    "G4_shift_not_pass": true,
+    "PASS": false
+   }
+  },
+  "F2": {
+   "stats": {
+    "n": 152,
+    "mean_bp": 3.83,
+    "sd_bp": 21.5,
+    "t": 2.19,
+    "nw5_t": 2.59,
+    "signflip_p": 0.0065
+   },
+   "shifted5": {
+    "n": 152,
+    "mean_bp": 0.19,
+    "sd_bp": 11.3,
+    "t": 0.21,
+    "nw5_t": 0.18,
+    "signflip_p": 0.411
+   },
+   "gates": {
+    "G1_floor": false,
+    "G2_t": false,
+    "G3_placebo": true,
+    "G4_shift_not_pass": true,
+    "PASS": false
+   }
+  }
+ },
+ "held_out": {
+  "F1": "SEALED (design gate failed; never computed)",
+  "F2": "SEALED (design gate failed; never computed)"
+ }
+}

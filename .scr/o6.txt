@@ -1,0 +1,40 @@
+=== BASELINE: all bars, non-overlap, mint-equal, FULL, toll 1.14% ===
+ALL(h12)   H=   5 n= 10095 k= 380 res=97.8% med=-11.99% -0.30->-10.28% -0.50->-12.29% -1.00->-17.34%
+ALL(h12)   H=  15 n=  5142 k= 380 res=95.5% med=-24.93% -0.30->+4.57% -0.50->+1.55% -1.00->-6.02%
+ALL(h12)   H=  60 n=  2214 k= 380 res=88.9% med=-44.28% -0.30->-14.56% -0.50->-19.09% -1.00->-30.41%
+ALL(h12)   H= 240 n=   989 k= 379 res=73.6% med=-75.02% -0.30->-39.41% -0.50->-46.45% -1.00->-64.04%
+TRAIN(h1)  H=   5 n=  4360 k= 174 res=97.8% med=-13.29% -0.30->-7.46% -0.50->-9.56% -1.00->-14.83%
+TRAIN(h1)  H=  15 n=  2252 k= 174 res=95.2% med=-25.92% -0.30->-22.75% -0.50->-26.01% -1.00->-34.16%
+TRAIN(h1)  H=  60 n=   994 k= 174 res=88.8% med=-44.78% -0.30->-28.96% -0.50->-33.47% -1.00->-44.75%
+TRAIN(h1)  H= 240 n=   440 k= 173 res=73.6% med=-76.66% -0.30->-41.37% -0.50->-48.39% -1.00->-65.96%
+VAL(h2)    H=   5 n=  5735 k= 206 res=97.9% med=-11.54% -0.30->-12.66% -0.50->-14.60% -1.00->-19.46%
+VAL(h2)    H=  15 n=  2890 k= 206 res=95.8% med=-21.62% -0.30->+27.65% -0.50->+24.83% -1.00->+17.76%
+VAL(h2)    H=  60 n=  1220 k= 206 res=89.0% med=-43.02% -0.30->-2.41% -0.50->-6.95% -1.00->-18.31%
+VAL(h2)    H= 240 n=   549 k= 206 res=73.6% med=-73.11% -0.30->-37.76% -0.50->-44.81% -1.00->-62.43%
+
+=== BASELINE at toll 2.5% ===
+H=   5 mean=-13.65% med=-11.47% n=10095
+H=  15 mean=+0.19% med=-19.41% n=5142
+H=  60 mean=-20.45% med=-39.04% n=2214
+H= 240 mean=-47.81% med=-52.50% n=989
+
+=== TRUNCATION CONTROL: random(all) bars with take-profit structures ===
+('H', 15)                  mean=+1.55% med=-18.05% n=5142 k=380 res=96%
+('TP', 0.1, 15)            mean=-14.62% med=-8.51% n=7266 k=380 res=97%
+('TP', 0.25, 15)           mean=-15.01% med=-7.79% n=6047 k=380 res=96%
+('TP', 0.5, 15)            mean=-14.84% med=-7.69% n=5624 k=380 res=96%
+('H', 60)                  mean=-19.09% med=-37.68% n=2214 k=380 res=89%
+('TP', 0.25, 60)           mean=-18.06% med=-11.97% n=3165 k=380 res=92%
+('BR', 0.5, 0.35, 60)      mean=-13.29% med=-11.03% n=4667 k=380 res=95%
+('TR', 0.35, 60)           mean=-3.52% med=-9.56% n=4269 k=380 res=94%
+Traceback (most recent call last):
+  File "/home/anont/meme/.scr/step1_baseline.py", line 24, in <module>
+    r=run(allmask,MINTS,ex,('FULL',),drop=-0.50)
+  File "/home/anont/meme/.scr/sim.py", line 144, in run
+    r,res,ei=trade_ret(m,a,ex,pos,toll,drop)
+             ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anont/meme/.scr/sim.py", line 116, in trade_ret
+    L=d['lastidx'][hk][a]; t=d['TP'][a][TPI[tp]]
+                                        ~~~^^^^
+KeyError: 0.3
+EXIT=1

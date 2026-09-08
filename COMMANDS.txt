@@ -1,0 +1,95 @@
+==============================================================================
+ COMMANDS.txt  --  het autonome trading-research systeem aansturen
+==============================================================================
+ Alle shell-commando's op een rij. Draai ze vanuit een terminal.
+ (In de Claude-prompt kun je een commando ook draaien met  ! <commando>)
+==============================================================================
+
+
+------------------------------------------------------------------------------
+ 1. HET AUTONOME SYSTEEM AAN / UIT  (de duurzame launcher)
+------------------------------------------------------------------------------
+ Zet het hele systeem 1x aan -- draait daarna VOOR ALTIJD door via je OS-cron,
+ ook als deze Claude-sessie sluit, crasht of de laptop reboot (zolang 'ie aan is).
+ Elke 3 uur: strateeg -> uitvinder -> Newsdesk -> prediction, + de metingen.
+
+   AAN:
+     bash /home/anont/meme/scripts/agent_graph/install_durable_cron.sh
+
+   UIT:
+     bash /home/anont/meme/scripts/agent_graph/uninstall_durable_cron.sh
+
+   CHECK of 'ie geinstalleerd staat:
+     crontab -l | grep durable_tick
+
+
+------------------------------------------------------------------------------
+ 2. MEEKIJKEN  (wat doet het systeem?)
+------------------------------------------------------------------------------
+   Hartslag (elke tick 1 regel: wat er draaide):
+     tail -f /home/anont/meme/scripts/agent_graph/logs/durable_heartbeat.log
+
+   Wat de denk-agent deed, laatste tick:
+     ls -t /home/anont/meme/scripts/agent_graph/logs/claude_*.log | head -1 | xargs tail -40
+
+   Cron-log (ruwe output van de crontab):
+     tail -f /home/anont/meme/scripts/agent_graph/logs/cron.log
+
+
+------------------------------------------------------------------------------
+ 3. DE MAND  (de 13 getoetste strategieen, papertrading, geen echt geld)
+------------------------------------------------------------------------------
+   Vandaag loggen (mark-to-market, geen orders):
+     cd /home/anont/meme && python -m scripts.trading_bot.basket_forward session --refresh-cash
+
+   Stand / expectancy / kill-switch:
+     cd /home/anont/meme && python -m scripts.trading_bot.basket_eval report
+
+
+------------------------------------------------------------------------------
+ 4. NEWSDESK  (leest de wereld, stelt trades voor, forward-only, geen geld)
+------------------------------------------------------------------------------
+   Nieuws-stroom ophalen:
+     cd /home/anont/meme && python -m scripts.trading_bot.newsdesk read
+
+   Open trades afwikkelen (dagelijks):
+     cd /home/anont/meme && python -m scripts.trading_bot.newsdesk resolve
+
+   Eerlijke expectancy + kill-switch:
+     cd /home/anont/meme && python -m scripts.trading_bot.newsdesk score
+
+
+------------------------------------------------------------------------------
+ 5. PREDICTION MARKETS  (agent-kalibratie vs de menigte, geen weddenschappen)
+------------------------------------------------------------------------------
+   Open politiek/nieuws-markten ophalen:
+     cd /home/anont/meme && python3 -m scripts.trading_bot.predmarket pull --min-volume 20000 --limit 40
+
+   Afgelopen markten afwikkelen:
+     cd /home/anont/meme && python3 -m scripts.trading_bot.predmarket resolve
+
+   Brier-score agent vs markt + kill-switch:
+     cd /home/anont/meme && python3 -m scripts.trading_bot.predmarket score
+
+
+------------------------------------------------------------------------------
+ 6. RAPPORTEN & LEDGERS  (wat is er gevonden / getest?)
+------------------------------------------------------------------------------
+   De grote conclusies:            /home/anont/meme/research/FINDINGS.md
+   Wat leeft / dood is (mand):     /home/anont/meme/research/trading_bot/THOROUGH_REEXAM.md
+   Uitvinder-rondes:               /home/anont/meme/research/trading_bot/INVENT_*_MASTER.md
+   Newsdesk-uitleg:                /home/anont/meme/research/trading_bot/newsdesk/README.md
+   Prediction-uitleg:              /home/anont/meme/research/trading_bot/predmarket/README.md
+   Duurzame launcher-uitleg:       /home/anont/meme/scripts/agent_graph/README_DURABLE.md
+
+
+==============================================================================
+ EERLIJKE STAND (23 aug 2026)
+==============================================================================
+ - Uitgegeven: 0 euro. Geen orders, geen echt geld, alles papertrading.
+ - 1 edge haalde de strenge toets: CEF-fondsdiskorting (Sharpe ~2,35).
+ - De rest is eerlijke verkenning -- verwachting bescheiden, mogelijk nul.
+ - Het antwoord komt van de FORWARD-test (weken tijd), niet van een backtest.
+ - Volledig-autonome modus: het denk-deel draait met volledige toegang zonder
+   goedkeuring (jij koos dit). Je API-keys zijn wel geisoleerd van dat deel.
+==============================================================================

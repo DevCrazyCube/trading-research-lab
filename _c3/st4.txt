@@ -1,0 +1,6 @@
+sweepC.py:0
+sweepBC.py:0
+04:33:45
+cat: chain.log: Bestand of map bestaat niet
+  done t60tr35_avg avg t=154.1
+written 22903747 t=154.2

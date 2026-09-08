@@ -1,0 +1,1535 @@
+{
+ "theme": "overnight-equity signals (T3 family)",
+ "windows": {
+  "design": "2016-01-04..2021-12-31 (1466 nights)",
+  "held_out": "2022-01-03..2026-08-14 (1139 nights)",
+  "note": "same split T3 froze; the held-out window was already spent by T3 for its own 8 configs, so A01 is a replication there, not a virgin test. The other 43 configs are fresh on it."
+ },
+ "universe": "point-in-time top-500 dollar-ADV, prior-month screen, price>$5, ADV>$20M; 1,179,206 valid symbol-nights",
+ "data": "research/data/t3_cache (official SIP open/close auction prints + 15:29/15:49/15:59 last trades + monthly ADV + corporate actions). No network.",
+ "rails": {
+  "A": "signal may use 15:59; marketable entry at 15:59 paying one measured half-spread; exit next opening auction",
+  "B": "MOC-legal: signal uses <=15:49 only; entry via MOC in the official closing auction; exit next opening auction"
+ },
+ "costs": {
+  "rail_A_entry_half_spread_bp": {
+   "design": 1.13,
+   "held_out": 1.43,
+   "source": "T3 SIP-quote median in the final second before the close, top-500-ADV"
+  },
+  "auction_leg_bp": 0.5,
+  "auction_leg_source": "M0_AUCTION_FILLS: official print vs mid, signed mean +0.18 bp, abs median 1.61 bp, close half-spread median 0.90 bp on rank 1-50",
+  "borrow_annual_bp": 30.0,
+  "borrow_basis": "50% short notional, calendar days held"
+ },
+ "n_formulas_tested": 51,
+ "noise_bar": {
+  "analytic_expected_max_sharpe_in_SE_units": 2.804,
+  "design_sharpe_SE_full_config": 0.415,
+  "analytic_expected_max_annualised_sharpe": 1.163,
+  "empirical_joint_shuffle_null": {
+   "method": "400 replicates; within each trading day the overnight returns are permuted among the valid names, one permutation shared by all 51 configs so the joint correlation structure is preserved; the max Sharpe and max t across all 51 are recorded per replicate",
+   "max_sharpe": {
+    "mean": 1.0844678534912169,
+    "p50": 0.9576146708650981,
+    "p90": 1.7478660481402868,
+    "p95": 2.0202702131206394,
+    "p99": 2.3201135716391983,
+    "max": 2.7263276947113733
+   },
+   "max_t": {
+    "mean": 1.99490908670921,
+    "p50": 1.9655364691793207,
+    "p90": 2.7467986957317563,
+    "p95": 2.9541494141197995,
+    "p99": 3.5313366754509845,
+    "max": 4.080756682639998
+   }
+  }
+ },
+ "design_distribution": {
+  "n_configs": 51,
+  "net_sharpe": {
+   "min": -2.53,
+   "p10": -0.68,
+   "p25": -0.1,
+   "p50": 1.65,
+   "p75": 2.08,
+   "p90": 2.42,
+   "max": 3.65,
+   "mean": 1.02,
+   "sd": 1.49,
+   "n_positive": 35
+  },
+  "n_above_null_max_t_p95_2p95": 27,
+  "n_below_minus_2p95": 5
+ },
+ "results_design": [
+  {
+   "name": "A40_p10_tom",
+   "rail": "A",
+   "formula": "T3 p10 traded only on turn-of-month nights (first 3 / last 1 session of a month)",
+   "n_nights": 278,
+   "design_net_mean_bp": 8.9,
+   "design_net_sharpe": 3.655,
+   "design_net_t": 3.84,
+   "design_gross_sharpe": 4.351,
+   "mean_cost_bp": 1.69,
+   "years_positive": "6/6",
+   "per_year_sharpe": {
+    "2016": 1.13,
+    "2017": 2.01,
+    "2018": 3.35,
+    "2019": 2.2,
+    "2020": 4.62,
+    "2021": 7.75
+   },
+   "d_sharpe_vs_T3": 0.0,
+   "d_sharpe_vs_T3_ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "A36_p10_hivolregime",
+   "rail": "A",
+   "formula": "T3 p10 traded only on nights in the top tercile of SPY 21d realised vol",
+   "n_nights": 427,
+   "design_net_mean_bp": 13.36,
+   "design_net_sharpe": 2.95,
+   "design_net_t": 3.84,
+   "design_gross_sharpe": 3.323,
+   "mean_cost_bp": 1.69,
+   "years_positive": "4/5",
+   "per_year_sharpe": {
+    "2016": -0.49,
+    "2018": 2.03,
+    "2019": 4.68,
+    "2020": 3.3,
+    "2021": 9.7
+   },
+   "d_sharpe_vs_T3": 0.0,
+   "d_sharpe_vs_T3_ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "A38_p10_downmkt",
+   "rail": "A",
+   "formula": "T3 p10 traded only after a down session in SPY",
+   "n_nights": 657,
+   "design_net_mean_bp": 7.66,
+   "design_net_sharpe": 2.776,
+   "design_net_t": 4.48,
+   "design_gross_sharpe": 3.388,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.76,
+    "2017": 7.29,
+    "2018": 2.06,
+    "2019": 1.37,
+    "2020": 3.53,
+    "2021": 5.62
+   },
+   "d_sharpe_vs_T3": 0.0,
+   "d_sharpe_vs_T3_ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "A08_p10_resid_day",
+   "rail": "A",
+   "formula": "fade the CROSS-SECTIONAL RESIDUAL of p10 on the same-session open->15:59 move",
+   "n_nights": 1466,
+   "design_net_mean_bp": 7.05,
+   "design_net_sharpe": 2.673,
+   "design_net_t": 6.45,
+   "design_gross_sharpe": 3.313,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.06,
+    "2017": 4.32,
+    "2018": 2.51,
+    "2019": 2.09,
+    "2020": 3.68,
+    "2021": 5.09
+   },
+   "d_sharpe_vs_T3": 0.389,
+   "d_sharpe_vs_T3_ci95": [
+    0.08,
+    0.735
+   ]
+  },
+  {
+   "name": "A09_p10_over_vol",
+   "rail": "A",
+   "formula": "fade p10 divided by trailing 21d close-to-close vol (risk-normalised pressure)",
+   "n_nights": 1466,
+   "design_net_mean_bp": 4.83,
+   "design_net_sharpe": 2.635,
+   "design_net_t": 6.35,
+   "design_gross_sharpe": 3.555,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.13,
+    "2017": 4.34,
+    "2018": 1.71,
+    "2019": 2.54,
+    "2020": 4.42,
+    "2021": 2.88
+   },
+   "d_sharpe_vs_T3": 0.351,
+   "d_sharpe_vs_T3_ci95": [
+    -0.172,
+    0.855
+   ]
+  },
+  {
+   "name": "A43_p10_friday",
+   "rail": "A",
+   "formula": "T3 p10 on Friday nights only (weekend gap)",
+   "n_nights": 291,
+   "design_net_mean_bp": 9.15,
+   "design_net_sharpe": 2.417,
+   "design_net_t": 2.6,
+   "design_gross_sharpe": 2.882,
+   "mean_cost_bp": 1.76,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -4.55,
+    "2017": 2.61,
+    "2018": 3.76,
+    "2019": 3.55,
+    "2020": 3.65,
+    "2021": 7.19
+   },
+   "d_sharpe_vs_T3": 0.0,
+   "d_sharpe_vs_T3_ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "A19_p10_lovol",
+   "rail": "A",
+   "formula": "fade p10 inside the bottom trailing-vol tercile only",
+   "n_nights": 1466,
+   "design_net_mean_bp": 3.47,
+   "design_net_sharpe": 2.353,
+   "design_net_t": 5.68,
+   "design_gross_sharpe": 3.499,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.03,
+    "2017": 2.37,
+    "2018": 2.26,
+    "2019": 1.97,
+    "2020": 4.83,
+    "2021": 1.02
+   },
+   "d_sharpe_vs_T3": 0.069,
+   "d_sharpe_vs_T3_ci95": [
+    -0.715,
+    0.835
+   ]
+  },
+  {
+   "name": "A21_p10_loadv",
+   "rail": "A",
+   "formula": "fade p10 inside the bottom dollar-ADV tercile only",
+   "n_nights": 1466,
+   "design_net_mean_bp": 6.61,
+   "design_net_sharpe": 2.35,
+   "design_net_t": 5.67,
+   "design_gross_sharpe": 2.951,
+   "mean_cost_bp": 1.69,
+   "years_positive": "6/6",
+   "per_year_sharpe": {
+    "2016": 0.65,
+    "2017": 3.35,
+    "2018": 2.46,
+    "2019": 0.92,
+    "2020": 3.36,
+    "2021": 3.43
+   },
+   "d_sharpe_vs_T3": 0.066,
+   "d_sharpe_vs_T3_ci95": [
+    -0.497,
+    0.631
+   ]
+  },
+  {
+   "name": "A01_T3_p10_c10",
+   "rail": "A",
+   "formula": "T3 baseline: cross-sectional decile fade of the 15:49->15:59 last-trade move (cut 10%)",
+   "n_nights": 1466,
+   "design_net_mean_bp": 6.61,
+   "design_net_sharpe": 2.284,
+   "design_net_t": 5.51,
+   "design_gross_sharpe": 2.868,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.21,
+    "2017": 4.01,
+    "2018": 2.06,
+    "2019": 1.93,
+    "2020": 2.91,
+    "2021": 4.95
+   },
+   "d_sharpe_vs_T3": 0.0,
+   "d_sharpe_vs_T3_ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "A42_p10_no_friday",
+   "rail": "A",
+   "formula": "T3 p10 excluding Friday nights",
+   "n_nights": 1175,
+   "design_net_mean_bp": 5.98,
+   "design_net_sharpe": 2.276,
+   "design_net_t": 4.92,
+   "design_gross_sharpe": 2.913,
+   "mean_cost_bp": 1.67,
+   "years_positive": "6/6",
+   "per_year_sharpe": {
+    "2016": 0.46,
+    "2017": 4.34,
+    "2018": 1.78,
+    "2019": 1.4,
+    "2020": 2.74,
+    "2021": 4.43
+   },
+   "d_sharpe_vs_T3": 0.0,
+   "d_sharpe_vs_T3_ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "A23_p10_volneutral",
+   "rail": "A",
+   "formula": "fade p10 ranked WITHIN vol terciles, pooled (vol-neutral book)",
+   "n_nights": 1466,
+   "design_net_mean_bp": 5.7,
+   "design_net_sharpe": 2.268,
+   "design_net_t": 5.47,
+   "design_gross_sharpe": 2.941,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.23,
+    "2017": 4.29,
+    "2018": 2.17,
+    "2019": 1.76,
+    "2020": 3.13,
+    "2021": 4.4
+   },
+   "d_sharpe_vs_T3": -0.016,
+   "d_sharpe_vs_T3_ci95": [
+    -0.246,
+    0.227
+   ]
+  },
+  {
+   "name": "A24_p10_advneutral",
+   "rail": "A",
+   "formula": "fade p10 ranked WITHIN ADV terciles, pooled (liquidity-neutral book)",
+   "n_nights": 1466,
+   "design_net_mean_bp": 6.38,
+   "design_net_sharpe": 2.201,
+   "design_net_t": 5.31,
+   "design_gross_sharpe": 2.783,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.38,
+    "2017": 3.95,
+    "2018": 2.2,
+    "2019": 1.55,
+    "2020": 2.89,
+    "2021": 4.74
+   },
+   "d_sharpe_vs_T3": -0.083,
+   "d_sharpe_vs_T3_ci95": [
+    -0.19,
+    0.023
+   ]
+  },
+  {
+   "name": "A03_T3_p10_c20",
+   "rail": "A",
+   "formula": "T3 p10 at a 20% cut",
+   "n_nights": 1466,
+   "design_net_mean_bp": 4.08,
+   "design_net_sharpe": 2.123,
+   "design_net_t": 5.12,
+   "design_gross_sharpe": 3.001,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.41,
+    "2017": 3.66,
+    "2018": 2.01,
+    "2019": 1.87,
+    "2020": 2.92,
+    "2021": 4.0
+   },
+   "d_sharpe_vs_T3": -0.161,
+   "d_sharpe_vs_T3_ci95": [
+    -0.39,
+    0.063
+   ]
+  },
+  {
+   "name": "A41_p10_nontom",
+   "rail": "A",
+   "formula": "T3 p10 on non-turn-of-month nights",
+   "n_nights": 1188,
+   "design_net_mean_bp": 6.07,
+   "design_net_sharpe": 2.031,
+   "design_net_t": 4.41,
+   "design_gross_sharpe": 2.595,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.46,
+    "2017": 4.71,
+    "2018": 1.74,
+    "2019": 1.86,
+    "2020": 2.67,
+    "2021": 4.25
+   },
+   "d_sharpe_vs_T3": 0.0,
+   "d_sharpe_vs_T3_ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "A15_p10_top20",
+   "rail": "A",
+   "formula": "fade p10, fixed 20 names per side",
+   "n_nights": 1466,
+   "design_net_mean_bp": 9.65,
+   "design_net_sharpe": 2.03,
+   "design_net_t": 4.9,
+   "design_gross_sharpe": 2.386,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.16,
+    "2017": 4.09,
+    "2018": 2.08,
+    "2019": 1.07,
+    "2020": 2.56,
+    "2021": 4.62
+   },
+   "d_sharpe_vs_T3": -0.254,
+   "d_sharpe_vs_T3_ci95": [
+    -0.521,
+    0.0
+   ]
+  },
+  {
+   "name": "A14_p10_z_cont",
+   "rail": "A",
+   "formula": "continuous dollar-neutral book, weight proportional to -z(p10) clipped at 3 sd",
+   "n_nights": 1466,
+   "design_net_mean_bp": 4.54,
+   "design_net_sharpe": 2.015,
+   "design_net_t": 4.86,
+   "design_gross_sharpe": 2.764,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.62,
+    "2017": 3.98,
+    "2018": 1.81,
+    "2019": 1.35,
+    "2020": 2.78,
+    "2021": 4.3
+   },
+   "d_sharpe_vs_T3": -0.269,
+   "d_sharpe_vs_T3_ci95": [
+    -0.461,
+    -0.092
+   ]
+  },
+  {
+   "name": "A34_p10_long_leg",
+   "rail": "A",
+   "formula": "long leg only of the p10 fade, measured against the equal-weighted cross-section",
+   "n_nights": 1466,
+   "design_net_mean_bp": 6.65,
+   "design_net_sharpe": 2.006,
+   "design_net_t": 4.84,
+   "design_gross_sharpe": 2.91,
+   "mean_cost_bp": 3.0,
+   "years_positive": "6/6",
+   "per_year_sharpe": {
+    "2016": 0.8,
+    "2017": 2.76,
+    "2018": 1.92,
+    "2019": 1.47,
+    "2020": 2.96,
+    "2021": 2.62
+   },
+   "d_sharpe_vs_T3": -0.278,
+   "d_sharpe_vs_T3_ci95": [
+    -0.653,
+    0.1
+   ]
+  },
+  {
+   "name": "A39_p10_upmkt",
+   "rail": "A",
+   "formula": "T3 p10 traded only after an up session in SPY",
+   "n_nights": 803,
+   "design_net_mean_bp": 5.98,
+   "design_net_sharpe": 1.991,
+   "design_net_t": 3.55,
+   "design_gross_sharpe": 2.553,
+   "mean_cost_bp": 1.69,
+   "years_positive": "6/6",
+   "per_year_sharpe": {
+    "2016": 0.16,
+    "2017": 1.77,
+    "2018": 2.3,
+    "2019": 2.62,
+    "2020": 2.5,
+    "2021": 4.39
+   },
+   "d_sharpe_vs_T3": 0.0,
+   "d_sharpe_vs_T3_ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "A17_p10_c30",
+   "rail": "A",
+   "formula": "fade p10 at a 30% cut",
+   "n_nights": 1466,
+   "design_net_mean_bp": 2.87,
+   "design_net_sharpe": 1.963,
+   "design_net_t": 4.74,
+   "design_gross_sharpe": 3.117,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.5,
+    "2017": 3.46,
+    "2018": 1.67,
+    "2019": 1.19,
+    "2020": 3.0,
+    "2021": 3.48
+   },
+   "d_sharpe_vs_T3": -0.321,
+   "d_sharpe_vs_T3_ci95": [
+    -0.607,
+    -0.051
+   ]
+  },
+  {
+   "name": "A13_p10_rank_cont",
+   "rail": "A",
+   "formula": "continuous dollar-neutral book, weight proportional to centred cross-sectional rank of -p10",
+   "n_nights": 1466,
+   "design_net_mean_bp": 2.87,
+   "design_net_sharpe": 1.927,
+   "design_net_t": 4.65,
+   "design_gross_sharpe": 3.063,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.61,
+    "2017": 3.47,
+    "2018": 1.64,
+    "2019": 1.3,
+    "2020": 2.85,
+    "2021": 3.78
+   },
+   "d_sharpe_vs_T3": -0.357,
+   "d_sharpe_vs_T3_ci95": [
+    -0.577,
+    -0.152
+   ]
+  },
+  {
+   "name": "A10_p10_x_vol",
+   "rail": "A",
+   "formula": "fade p10 multiplied by trailing vol (vol-amplified pressure)",
+   "n_nights": 1466,
+   "design_net_mean_bp": 5.89,
+   "design_net_sharpe": 1.842,
+   "design_net_t": 4.44,
+   "design_gross_sharpe": 2.37,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.53,
+    "2017": 3.49,
+    "2018": 2.0,
+    "2019": 1.12,
+    "2020": 2.43,
+    "2021": 4.04
+   },
+   "d_sharpe_vs_T3": -0.442,
+   "d_sharpe_vs_T3_ci95": [
+    -0.675,
+    -0.221
+   ]
+  },
+  {
+   "name": "A22_p10_bigmove",
+   "rail": "A",
+   "formula": "fade p10 inside the top |session move| tercile only",
+   "n_nights": 1466,
+   "design_net_mean_bp": 9.17,
+   "design_net_sharpe": 1.831,
+   "design_net_t": 4.42,
+   "design_gross_sharpe": 2.168,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.46,
+    "2017": 3.68,
+    "2018": 2.04,
+    "2019": 1.67,
+    "2020": 2.09,
+    "2021": 3.66
+   },
+   "d_sharpe_vs_T3": -0.453,
+   "d_sharpe_vs_T3_ci95": [
+    -0.873,
+    -0.073
+   ]
+  },
+  {
+   "name": "A16_p10_c02",
+   "rail": "A",
+   "formula": "fade p10 at a 2% tail cut",
+   "n_nights": 1466,
+   "design_net_mean_bp": 14.17,
+   "design_net_sharpe": 1.824,
+   "design_net_t": 4.4,
+   "design_gross_sharpe": 2.041,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.41,
+    "2017": 4.24,
+    "2018": 1.47,
+    "2019": 0.59,
+    "2020": 2.39,
+    "2021": 4.07
+   },
+   "d_sharpe_vs_T3": -0.46,
+   "d_sharpe_vs_T3_ci95": [
+    -0.88,
+    -0.06
+   ]
+  },
+  {
+   "name": "A37_p10_lovolregime",
+   "rail": "A",
+   "formula": "T3 p10 traded only on bottom-tercile SPY-vol nights",
+   "n_nights": 654,
+   "design_net_mean_bp": 3.19,
+   "design_net_sharpe": 1.818,
+   "design_net_t": 2.93,
+   "design_gross_sharpe": 2.781,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -1.37,
+    "2017": 4.01,
+    "2018": 4.58,
+    "2019": 1.45,
+    "2020": 2.29,
+    "2021": 1.18
+   },
+   "d_sharpe_vs_T3": 0.0,
+   "d_sharpe_vs_T3_ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "A18_p10_hivol",
+   "rail": "A",
+   "formula": "fade p10 inside the top trailing-vol tercile only",
+   "n_nights": 1466,
+   "design_net_mean_bp": 9.89,
+   "design_net_sharpe": 1.706,
+   "design_net_t": 4.12,
+   "design_gross_sharpe": 1.998,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.4,
+    "2017": 3.79,
+    "2018": 1.9,
+    "2019": 0.79,
+    "2020": 1.89,
+    "2021": 4.8
+   },
+   "d_sharpe_vs_T3": -0.578,
+   "d_sharpe_vs_T3_ci95": [
+    -0.893,
+    -0.276
+   ]
+  },
+  {
+   "name": "A06_accel_fade",
+   "rail": "A",
+   "formula": "fade late-session acceleration, p10 - p30/3",
+   "n_nights": 1466,
+   "design_net_mean_bp": 4.5,
+   "design_net_sharpe": 1.653,
+   "design_net_t": 3.99,
+   "design_gross_sharpe": 2.274,
+   "mean_cost_bp": 1.69,
+   "years_positive": "6/6",
+   "per_year_sharpe": {
+    "2016": 0.08,
+    "2017": 3.4,
+    "2018": 2.4,
+    "2019": 0.24,
+    "2020": 1.73,
+    "2021": 3.58
+   },
+   "d_sharpe_vs_T3": -0.631,
+   "d_sharpe_vs_T3_ci95": [
+    -1.185,
+    -0.072
+   ]
+  },
+  {
+   "name": "A20_p10_hiadv",
+   "rail": "A",
+   "formula": "fade p10 inside the top dollar-ADV tercile only",
+   "n_nights": 1466,
+   "design_net_mean_bp": 6.09,
+   "design_net_sharpe": 1.651,
+   "design_net_t": 3.98,
+   "design_gross_sharpe": 2.109,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -1.22,
+    "2017": 2.93,
+    "2018": 1.95,
+    "2019": 1.07,
+    "2020": 2.17,
+    "2021": 3.4
+   },
+   "d_sharpe_vs_T3": -0.633,
+   "d_sharpe_vs_T3_ci95": [
+    -1.06,
+    -0.211
+   ]
+  },
+  {
+   "name": "A02_T3_p30_c10",
+   "rail": "A",
+   "formula": "T3 window 30: fade the 15:29->15:59 move",
+   "n_nights": 1466,
+   "design_net_mean_bp": 4.93,
+   "design_net_sharpe": 1.532,
+   "design_net_t": 3.7,
+   "design_gross_sharpe": 2.057,
+   "mean_cost_bp": 1.69,
+   "years_positive": "4/6",
+   "per_year_sharpe": {
+    "2016": -0.3,
+    "2017": 1.91,
+    "2018": -0.38,
+    "2019": 3.08,
+    "2020": 2.62,
+    "2021": 2.8
+   },
+   "d_sharpe_vs_T3": -0.752,
+   "d_sharpe_vs_T3_ci95": [
+    -1.414,
+    -0.123
+   ]
+  },
+  {
+   "name": "A35_p10_short_leg",
+   "rail": "A",
+   "formula": "short leg only of the p10 fade, against the cross-section",
+   "n_nights": 1466,
+   "design_net_mean_bp": 3.96,
+   "design_net_sharpe": 1.247,
+   "design_net_t": 3.01,
+   "design_gross_sharpe": 2.192,
+   "mean_cost_bp": 3.0,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -2.25,
+    "2017": 2.61,
+    "2018": 0.46,
+    "2019": 0.54,
+    "2020": 2.11,
+    "2021": 3.14
+   },
+   "d_sharpe_vs_T3": -1.037,
+   "d_sharpe_vs_T3_ci95": [
+    -1.516,
+    -0.635
+   ]
+  },
+  {
+   "name": "A05_daycont",
+   "rail": "A",
+   "formula": "ride the full session move overnight",
+   "n_nights": 1466,
+   "design_net_mean_bp": 3.65,
+   "design_net_sharpe": 1.04,
+   "design_net_t": 2.51,
+   "design_gross_sharpe": 1.52,
+   "mean_cost_bp": 1.69,
+   "years_positive": "4/6",
+   "per_year_sharpe": {
+    "2016": -0.06,
+    "2017": 0.19,
+    "2018": 0.18,
+    "2019": -0.12,
+    "2020": 2.89,
+    "2021": 0.82
+   },
+   "d_sharpe_vs_T3": -1.244,
+   "d_sharpe_vs_T3_ci95": [
+    -2.494,
+    0.007
+   ]
+  },
+  {
+   "name": "A12_p10_minus_gap",
+   "rail": "A",
+   "formula": "fade z(p10)+z(last night's realised gap)",
+   "n_nights": 1466,
+   "design_net_mean_bp": 3.48,
+   "design_net_sharpe": 0.949,
+   "design_net_t": 2.29,
+   "design_gross_sharpe": 1.409,
+   "mean_cost_bp": 1.69,
+   "years_positive": "5/6",
+   "per_year_sharpe": {
+    "2016": -0.49,
+    "2017": 2.22,
+    "2018": 2.14,
+    "2019": 0.95,
+    "2020": 0.79,
+    "2021": 2.25
+   },
+   "d_sharpe_vs_T3": -1.335,
+   "d_sharpe_vs_T3_ci95": [
+    -2.045,
+    -0.693
+   ]
+  },
+  {
+   "name": "A07_late_vs_early",
+   "rail": "A",
+   "formula": "fade p10 minus the 15:29->15:49 move (last 10 vs previous 20 minutes)",
+   "n_nights": 1466,
+   "design_net_mean_bp": 1.54,
+   "design_net_sharpe": 0.549,
+   "design_net_t": 1.32,
+   "design_gross_sharpe": 1.15,
+   "mean_cost_bp": 1.69,
+   "years_positive": "4/6",
+   "per_year_sharpe": {
+    "2016": -0.65,
+    "2017": 1.65,
+    "2018": 1.77,
+    "2019": -0.93,
+    "2020": 0.3,
+    "2021": 2.08
+   },
+   "d_sharpe_vs_T3": -1.735,
+   "d_sharpe_vs_T3_ci95": [
+    -2.603,
+    -0.907
+   ]
+  },
+  {
+   "name": "B01_T3pre_p20early",
+   "rail": "B",
+   "formula": "MOC-legal: fade the 15:29->15:49 move, enter in the closing auction",
+   "n_nights": 1466,
+   "design_net_mean_bp": 1.19,
+   "design_net_sharpe": 0.371,
+   "design_net_t": 0.89,
+   "design_gross_sharpe": 0.7,
+   "mean_cost_bp": 1.06,
+   "years_positive": "4/6",
+   "per_year_sharpe": {
+    "2016": -0.15,
+    "2017": 0.26,
+    "2018": -1.55,
+    "2019": 1.32,
+    "2020": 1.28,
+    "2021": 0.02
+   },
+   "d_sharpe_vs_T3": -1.913,
+   "d_sharpe_vs_T3_ci95": [
+    -2.943,
+    -0.934
+   ]
+  },
+  {
+   "name": "B05_mom5_rev",
+   "rail": "B",
+   "formula": "MOC-legal: fade the trailing 5-day return",
+   "n_nights": 1466,
+   "design_net_mean_bp": 0.98,
+   "design_net_sharpe": 0.248,
+   "design_net_t": 0.6,
+   "design_gross_sharpe": 0.515,
+   "mean_cost_bp": 1.06,
+   "years_positive": "4/6",
+   "per_year_sharpe": {
+    "2016": 1.71,
+    "2017": -1.61,
+    "2018": 0.33,
+    "2019": -0.33,
+    "2020": 0.29,
+    "2021": 0.49
+   },
+   "d_sharpe_vs_T3": -2.036,
+   "d_sharpe_vs_T3_ci95": [
+    -3.122,
+    -0.896
+   ]
+  },
+  {
+   "name": "A29_mom5_rev",
+   "rail": "A",
+   "formula": "short-term reversal, fade the trailing 5-day close-to-close sum",
+   "n_nights": 1466,
+   "design_net_mean_bp": 0.42,
+   "design_net_sharpe": 0.105,
+   "design_net_t": 0.25,
+   "design_gross_sharpe": 0.532,
+   "mean_cost_bp": 1.69,
+   "years_positive": "4/6",
+   "per_year_sharpe": {
+    "2016": 1.48,
+    "2017": -1.88,
+    "2018": 0.13,
+    "2019": -0.61,
+    "2020": 0.22,
+    "2021": 0.33
+   },
+   "d_sharpe_vs_T3": -2.179,
+   "d_sharpe_vs_T3_ci95": [
+    -3.306,
+    -1.004
+   ]
+  },
+  {
+   "name": "B07_ovn5_rev",
+   "rail": "B",
+   "formula": "MOC-legal: fade the last 5 overnight returns",
+   "n_nights": 1466,
+   "design_net_mean_bp": -0.02,
+   "design_net_sharpe": -0.006,
+   "design_net_t": -0.01,
+   "design_gross_sharpe": 0.26,
+   "mean_cost_bp": 1.06,
+   "years_positive": "2/6",
+   "per_year_sharpe": {
+    "2016": 1.57,
+    "2017": -1.31,
+    "2018": 0.13,
+    "2019": -0.86,
+    "2020": -0.0,
+    "2021": -0.25
+   },
+   "d_sharpe_vs_T3": -2.29,
+   "d_sharpe_vs_T3_ci95": [
+    -3.431,
+    -1.244
+   ]
+  },
+  {
+   "name": "A11_p10_z_plus_day_z",
+   "rail": "A",
+   "formula": "fade z(p10)+z(day move), equal-weight composite",
+   "n_nights": 1466,
+   "design_net_mean_bp": -0.25,
+   "design_net_sharpe": -0.074,
+   "design_net_t": -0.18,
+   "design_gross_sharpe": 0.434,
+   "mean_cost_bp": 1.69,
+   "years_positive": "2/6",
+   "per_year_sharpe": {
+    "2016": -0.68,
+    "2017": 1.37,
+    "2018": -0.16,
+    "2019": -0.08,
+    "2020": -0.76,
+    "2021": 1.07
+   },
+   "d_sharpe_vs_T3": -2.358,
+   "d_sharpe_vs_T3_ci95": [
+    -3.011,
+    -1.763
+   ]
+  },
+  {
+   "name": "A26_gapcont",
+   "rail": "A",
+   "formula": "ride this morning's realised overnight gap",
+   "n_nights": 1466,
+   "design_net_mean_bp": -0.34,
+   "design_net_sharpe": -0.075,
+   "design_net_t": -0.18,
+   "design_gross_sharpe": 0.302,
+   "mean_cost_bp": 1.69,
+   "years_positive": "1/6",
+   "per_year_sharpe": {
+    "2016": -0.4,
+    "2017": -0.3,
+    "2018": -1.83,
+    "2019": -0.1,
+    "2020": 0.59,
+    "2021": -0.05
+   },
+   "d_sharpe_vs_T3": -2.359,
+   "d_sharpe_vs_T3_ci95": [
+    -3.554,
+    -1.146
+   ]
+  },
+  {
+   "name": "A30_mom21_cont",
+   "rail": "A",
+   "formula": "ride the trailing 21d-minus-5d momentum",
+   "n_nights": 1466,
+   "design_net_mean_bp": -0.45,
+   "design_net_sharpe": -0.119,
+   "design_net_t": -0.29,
+   "design_gross_sharpe": 0.323,
+   "mean_cost_bp": 1.69,
+   "years_positive": "2/6",
+   "per_year_sharpe": {
+    "2016": -1.33,
+    "2017": -1.84,
+    "2018": -1.15,
+    "2019": -1.66,
+    "2020": 0.77,
+    "2021": 0.9
+   },
+   "d_sharpe_vs_T3": -2.403,
+   "d_sharpe_vs_T3_ci95": [
+    -3.509,
+    -1.399
+   ]
+  },
+  {
+   "name": "A28_aucdev_lag_cont",
+   "rail": "A",
+   "formula": "ride yesterday's closing-auction deviation",
+   "n_nights": 1466,
+   "design_net_mean_bp": -0.21,
+   "design_net_sharpe": -0.159,
+   "design_net_t": -0.38,
+   "design_gross_sharpe": 1.114,
+   "mean_cost_bp": 1.69,
+   "years_positive": "3/6",
+   "per_year_sharpe": {
+    "2016": 0.41,
+    "2017": -1.72,
+    "2018": -0.41,
+    "2019": 0.21,
+    "2020": 1.81,
+    "2021": -2.41
+   },
+   "d_sharpe_vs_T3": -2.443,
+   "d_sharpe_vs_T3_ci95": [
+    -3.543,
+    -1.311
+   ]
+  },
+  {
+   "name": "A31_ovn5_rev",
+   "rail": "A",
+   "formula": "fade the sum of the last 5 overnight returns",
+   "n_nights": 1466,
+   "design_net_mean_bp": -0.66,
+   "design_net_sharpe": -0.166,
+   "design_net_t": -0.4,
+   "design_gross_sharpe": 0.257,
+   "mean_cost_bp": 1.69,
+   "years_positive": "1/6",
+   "per_year_sharpe": {
+    "2016": 1.34,
+    "2017": -1.68,
+    "2018": -0.16,
+    "2019": -1.08,
+    "2020": -0.08,
+    "2021": -0.44
+   },
+   "d_sharpe_vs_T3": -2.45,
+   "d_sharpe_vs_T3_ci95": [
+    -3.569,
+    -1.373
+   ]
+  },
+  {
+   "name": "B08_prevday_fade",
+   "rail": "B",
+   "formula": "MOC-legal: fade yesterday's intraday move",
+   "n_nights": 1466,
+   "design_net_mean_bp": -1.2,
+   "design_net_sharpe": -0.371,
+   "design_net_t": -0.89,
+   "design_gross_sharpe": -0.043,
+   "mean_cost_bp": 1.06,
+   "years_positive": "3/6",
+   "per_year_sharpe": {
+    "2016": 0.29,
+    "2017": -1.55,
+    "2018": 1.08,
+    "2019": 0.9,
+    "2020": -1.08,
+    "2021": -1.07
+   },
+   "d_sharpe_vs_T3": -2.655,
+   "d_sharpe_vs_T3_ci95": [
+    -3.781,
+    -1.509
+   ]
+  },
+  {
+   "name": "A33_prevday_fade",
+   "rail": "A",
+   "formula": "fade yesterday's intraday move",
+   "n_nights": 1466,
+   "design_net_mean_bp": -1.7,
+   "design_net_sharpe": -0.525,
+   "design_net_t": -1.27,
+   "design_gross_sharpe": -0.003,
+   "mean_cost_bp": 1.69,
+   "years_positive": "3/6",
+   "per_year_sharpe": {
+    "2016": 0.12,
+    "2017": -1.81,
+    "2018": 0.88,
+    "2019": 0.63,
+    "2020": -1.18,
+    "2021": -1.22
+   },
+   "d_sharpe_vs_T3": -2.809,
+   "d_sharpe_vs_T3_ci95": [
+    -3.946,
+    -1.713
+   ]
+  },
+  {
+   "name": "B03_gapfade",
+   "rail": "B",
+   "formula": "MOC-legal: fade this morning's gap",
+   "n_nights": 1466,
+   "design_net_mean_bp": -2.51,
+   "design_net_sharpe": -0.561,
+   "design_net_t": -1.35,
+   "design_gross_sharpe": -0.325,
+   "mean_cost_bp": 1.06,
+   "years_positive": "1/6",
+   "per_year_sharpe": {
+    "2016": -0.32,
+    "2017": -1.28,
+    "2018": 0.72,
+    "2019": -1.08,
+    "2020": -0.92,
+    "2021": -0.67
+   },
+   "d_sharpe_vs_T3": -2.845,
+   "d_sharpe_vs_T3_ci95": [
+    -3.944,
+    -1.853
+   ]
+  },
+  {
+   "name": "A32_ovn5_cont",
+   "rail": "A",
+   "formula": "ride the sum of the last 5 overnight returns",
+   "n_nights": 1466,
+   "design_net_mean_bp": -2.71,
+   "design_net_sharpe": -0.679,
+   "design_net_t": -1.64,
+   "design_gross_sharpe": -0.257,
+   "mean_cost_bp": 1.69,
+   "years_positive": "0/6",
+   "per_year_sharpe": {
+    "2016": -2.33,
+    "2017": -0.19,
+    "2018": -1.42,
+    "2019": -0.25,
+    "2020": -0.36,
+    "2021": -0.62
+   },
+   "d_sharpe_vs_T3": -2.963,
+   "d_sharpe_vs_T3_ci95": [
+    -4.069,
+    -1.92
+   ]
+  },
+  {
+   "name": "A25_gapfade",
+   "rail": "A",
+   "formula": "fade this morning's realised overnight gap",
+   "n_nights": 1466,
+   "design_net_mean_bp": -3.05,
+   "design_net_sharpe": -0.68,
+   "design_net_t": -1.64,
+   "design_gross_sharpe": -0.303,
+   "mean_cost_bp": 1.69,
+   "years_positive": "1/6",
+   "per_year_sharpe": {
+    "2016": -0.47,
+    "2017": -1.59,
+    "2018": 0.51,
+    "2019": -1.24,
+    "2020": -0.99,
+    "2021": -0.81
+   },
+   "d_sharpe_vs_T3": -2.964,
+   "d_sharpe_vs_T3_ci95": [
+    -3.995,
+    -2.014
+   ]
+  },
+  {
+   "name": "B06_combo_pre",
+   "rail": "B",
+   "formula": "MOC-legal: fade z(15:29->15:49) + z(open->15:49)",
+   "n_nights": 1466,
+   "design_net_mean_bp": -3.91,
+   "design_net_sharpe": -1.284,
+   "design_net_t": -3.1,
+   "design_gross_sharpe": -0.937,
+   "mean_cost_bp": 1.06,
+   "years_positive": "0/6",
+   "per_year_sharpe": {
+    "2016": -0.67,
+    "2017": -1.48,
+    "2018": -1.86,
+    "2019": -0.79,
+    "2020": -2.18,
+    "2021": -0.77
+   },
+   "d_sharpe_vs_T3": -3.568,
+   "d_sharpe_vs_T3_ci95": [
+    -4.512,
+    -2.633
+   ]
+  },
+  {
+   "name": "B04_aucdev_lag_fade",
+   "rail": "B",
+   "formula": "MOC-legal: fade yesterday's closing-auction deviation",
+   "n_nights": 1466,
+   "design_net_mean_bp": -2.14,
+   "design_net_sharpe": -1.613,
+   "design_net_t": -3.89,
+   "design_gross_sharpe": -0.815,
+   "mean_cost_bp": 1.06,
+   "years_positive": "1/6",
+   "per_year_sharpe": {
+    "2016": -2.39,
+    "2017": -1.09,
+    "2018": -2.63,
+    "2019": -2.55,
+    "2020": -3.0,
+    "2021": 1.01
+   },
+   "d_sharpe_vs_T3": -3.897,
+   "d_sharpe_vs_T3_ci95": [
+    -4.994,
+    -2.851
+   ]
+  },
+  {
+   "name": "A04_dayfade",
+   "rail": "A",
+   "formula": "fade the full session move, open auction -> 15:59",
+   "n_nights": 1466,
+   "design_net_mean_bp": -7.03,
+   "design_net_sharpe": -2.001,
+   "design_net_t": -4.83,
+   "design_gross_sharpe": -1.52,
+   "mean_cost_bp": 1.69,
+   "years_positive": "0/6",
+   "per_year_sharpe": {
+    "2016": -1.27,
+    "2017": -2.43,
+    "2018": -1.64,
+    "2019": -1.52,
+    "2020": -3.44,
+    "2021": -1.66
+   },
+   "d_sharpe_vs_T3": -4.285,
+   "d_sharpe_vs_T3_ci95": [
+    -5.233,
+    -3.376
+   ]
+  },
+  {
+   "name": "A27_aucdev_lag_fade",
+   "rail": "A",
+   "formula": "fade yesterday's closing-auction print vs its 15:59 last trade (MOC-imbalance proxy)",
+   "n_nights": 1466,
+   "design_net_mean_bp": -3.17,
+   "design_net_sharpe": -2.388,
+   "design_net_t": -5.76,
+   "design_gross_sharpe": -1.115,
+   "mean_cost_bp": 1.69,
+   "years_positive": "1/6",
+   "per_year_sharpe": {
+    "2016": -3.4,
+    "2017": -2.3,
+    "2018": -3.7,
+    "2019": -3.52,
+    "2020": -3.47,
+    "2021": 0.28
+   },
+   "d_sharpe_vs_T3": -4.672,
+   "d_sharpe_vs_T3_ci95": [
+    -5.742,
+    -3.6
+   ]
+  },
+  {
+   "name": "B02_day49_fade",
+   "rail": "B",
+   "formula": "MOC-legal: fade the open-auction->15:49 session move",
+   "n_nights": 1466,
+   "design_net_mean_bp": -8.65,
+   "design_net_sharpe": -2.528,
+   "design_net_t": -6.1,
+   "design_gross_sharpe": -2.219,
+   "mean_cost_bp": 1.06,
+   "years_positive": "0/6",
+   "per_year_sharpe": {
+    "2016": -1.47,
+    "2017": -2.94,
+    "2018": -2.0,
+    "2019": -2.1,
+    "2020": -4.58,
+    "2021": -1.87
+   },
+   "d_sharpe_vs_T3": -4.812,
+   "d_sharpe_vs_T3_ci95": [
+    -5.757,
+    -3.897
+   ]
+  }
+ ],
+ "conditioner_tests": {
+  "A36_p10_hivolregime vs A37_p10_lovolregime": {
+   "mean_on_bp": 13.36,
+   "mean_off_bp": 3.19,
+   "n_on": 427,
+   "n_off": 654,
+   "welch_t": 2.79
+  },
+  "A38_p10_downmkt vs A39_p10_upmkt": {
+   "mean_on_bp": 7.66,
+   "mean_off_bp": 5.98,
+   "n_on": 657,
+   "n_off": 803,
+   "welch_t": 0.7
+  },
+  "A40_p10_tom vs A41_p10_nontom": {
+   "mean_on_bp": 8.9,
+   "mean_off_bp": 6.07,
+   "n_on": 278,
+   "n_off": 1188,
+   "welch_t": 1.05
+  },
+  "A43_p10_friday vs A42_p10_no_friday": {
+   "mean_on_bp": 9.15,
+   "mean_off_bp": 5.98,
+   "n_on": 291,
+   "n_off": 1175,
+   "welch_t": 0.85
+  }
+ },
+ "held_out": {
+  "A01_T3_p10_c10": {
+   "rail": "A",
+   "net": {
+    "n": 1139,
+    "mean_bp": 4.674999681413516,
+    "sd_bp": 66.4690425841531,
+    "sharpe": 1.1165095258292668,
+    "t": 2.3736901322922446,
+    "hit": 0.5355575065847235
+   },
+   "gross": {
+    "n": 1139,
+    "mean_bp": 6.664311769361264,
+    "sd_bp": 66.46764348629945,
+    "sharpe": 1.5916416478431472,
+    "t": 3.383817142826935,
+    "hit": 0.559262510974539
+   },
+   "net_2x_cost": {
+    "n": 1139,
+    "mean_bp": 2.744999681413519,
+    "sd_bp": 66.4690425841531,
+    "sharpe": 0.655576150065069,
+    "t": 1.3937495403093882,
+    "hit": 0.5127304653204565
+   },
+   "mean_cost_bp": 1.9893120879477475
+  },
+  "A08_p10_resid_day": {
+   "rail": "A",
+   "net": {
+    "n": 1139,
+    "mean_bp": 4.987310242707188,
+    "sd_bp": 56.53596979463094,
+    "sharpe": 1.4003668101486972,
+    "t": 2.977168400216436,
+    "hit": 0.5390693590869183
+   },
+   "gross": {
+    "n": 1139,
+    "mean_bp": 6.976622330654936,
+    "sd_bp": 56.535092140130615,
+    "sharpe": 1.958968171384339,
+    "t": 4.164750331562014,
+    "hit": 0.5654082528533801
+   },
+   "net_2x_cost": {
+    "n": 1139,
+    "mean_bp": 3.057310242707189,
+    "sd_bp": 56.53596979463094,
+    "sharpe": 0.8584498625236558,
+    "t": 1.8250573959291354,
+    "hit": 0.5162423178226514
+   },
+   "mean_cost_bp": 1.9893120879477475
+  },
+  "A09_p10_over_vol": {
+   "rail": "A",
+   "net": {
+    "n": 1139,
+    "mean_bp": 2.9050933052351717,
+    "sd_bp": 40.47522790123327,
+    "sharpe": 1.1393864572938046,
+    "t": 2.42232630172767,
+    "hit": 0.5232660228270413
+   },
+   "gross": {
+    "n": 1139,
+    "mean_bp": 4.89440539318292,
+    "sd_bp": 40.474396680694745,
+    "sharpe": 1.9196401500020635,
+    "t": 4.081139279333554,
+    "hit": 0.5610184372256365
+   },
+   "net_2x_cost": {
+    "n": 1139,
+    "mean_bp": 0.9750933052351727,
+    "sd_bp": 40.47522790123327,
+    "sharpe": 0.38243456916881097,
+    "t": 0.8130527703372745,
+    "hit": 0.4881474978050922
+   },
+   "mean_cost_bp": 1.9893120879477475
+  },
+  "A36_p10_hivolregime": {
+   "rail": "A",
+   "net": {
+    "n": 445,
+    "mean_bp": 4.8360742450846015,
+    "sd_bp": 82.97850426771764,
+    "sharpe": 0.9251829654381563,
+    "t": 1.229440068373395,
+    "hit": 0.5303370786516854
+   },
+   "gross": {
+    "n": 445,
+    "mean_bp": 6.825507140823245,
+    "sd_bp": 82.97809092487807,
+    "sharpe": 1.305785245133876,
+    "t": 1.7352078032457838,
+    "hit": 0.5438202247191011
+   },
+   "net_2x_cost": {
+    "n": 445,
+    "mean_bp": 2.9060742450846027,
+    "sd_bp": 82.97850426771764,
+    "sharpe": 0.5559572189330169,
+    "t": 0.7387901710165894,
+    "hit": 0.5123595505617977
+   },
+   "mean_cost_bp": 1.9894328957386425
+  }
+ },
+ "deflated_sharpe_held_out": {
+  "trials": 51,
+  "with_observed_trial_dispersion": {
+   "A01_T3_p10_c10": {
+    "dsr": 0.0,
+    "benchmark_sharpe_per_obs": 0.21397,
+    "observed_sharpe_per_obs": 0.07033,
+    "passes_at_0p95": false
+   },
+   "A08_p10_resid_day": {
+    "dsr": 0.0,
+    "benchmark_sharpe_per_obs": 0.21397,
+    "observed_sharpe_per_obs": 0.08821,
+    "passes_at_0p95": false
+   },
+   "A09_p10_over_vol": {
+    "dsr": 0.0,
+    "benchmark_sharpe_per_obs": 0.21397,
+    "observed_sharpe_per_obs": 0.07177,
+    "passes_at_0p95": false
+   },
+   "A36_p10_hivolregime": {
+    "dsr": 0.0006,
+    "benchmark_sharpe_per_obs": 0.21397,
+    "observed_sharpe_per_obs": 0.05828,
+    "passes_at_0p95": false
+   }
+  },
+  "with_sampling_noise_dispersion": {
+   "A01_T3_p10_c10": 0.6384,
+   "A08_p10_resid_day": 0.8297,
+   "A09_p10_over_vol": 0.6582,
+   "A36_p10_hivolregime": 0.4887,
+   "expected_max_annualised_sharpe_bar": 0.947
+  },
+  "note": "two deflation inputs. The first uses the empirical dispersion of the 51 trial Sharpes (Lopez de Prado's own recipe) and is punishing because the sweep deliberately includes sign-flipped pairs and dead families. The second uses the sampling-noise dispersion 1/n, which is the null the shuffle actually measures. NEITHER candidate passes 0.95 under either input."
+ },
+ "paired_held_out_A08_minus_A01": {
+  "mean_bp": 0.3123105612936713,
+  "t": 0.42900239556400277,
+  "n": 1139
+ },
+ "verdict": {
+  "theme_has_signal": true,
+  "any_formula_beats_T3_out_of_sample": false,
+  "any_formula_promotable": false,
+  "summary": "The theme is not noise -- 27 of 51 configs clear the empirical joint-shuffle max-t bar on design and 5 clear it with the opposite sign -- but it contains exactly ONE signal, the last-10-minute pressure reversal T3 already found. 50 structurally different formulations produced no out-of-sample improvement on it, and the widened search moves the deflation bar past every candidate."
+ }
+}

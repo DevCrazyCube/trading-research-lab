@@ -1,0 +1,14 @@
+04:39:38
+A done 04:34:48
+surface done 04:35:09
+B done 04:37:13
+C done 04:37:36
+--C--
+  C1 volaccel x age_min kept=16561 swept=80150 t=104.3
+  C1 volaccel x logpx kept=17077 swept=83286 t=107.6
+--V--
+noC [Errno 2] No such file or directory: '/home/anont/meme/_c3/phaseC.json'
+total train-kept cells: 22079
+carried to validate (train edge>0 and train p<0.05): 11186
+--LIQ--
+tail: kan 'sweepCliq.log' niet openen om te lezen: Bestand of map bestaat niet

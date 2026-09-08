@@ -1,0 +1,188 @@
+{
+ "XE_MONTHSTART_CONT": {
+  "desc": "first 2 sessions of the month: long prior-month winner third of a 24-ETF panel, short the loser third",
+  "placebo_windows": {
+   "tdom 1-2": {
+    "design": 0.682,
+    "holdout": 0.412
+   },
+   "tdom 3-4": {
+    "design": 0.485,
+    "holdout": 0.193
+   },
+   "tdom 5-6": {
+    "design": 0.057,
+    "holdout": 0.145
+   },
+   "tdom 7-8": {
+    "design": -0.009,
+    "holdout": -0.8
+   },
+   "tdom 9-10": {
+    "design": -0.001,
+    "holdout": 0.142
+   }
+  },
+  "always_on_same_sort": {
+   "design": 0.277,
+   "holdout": 0.205
+  }
+ },
+ "SESS_OPEXDAY_INTRADAY": {
+  "desc": "short SPY open->close on the monthly OPEX session (the design leader has Sharpe -0.695 long, so short is the tradable side)",
+  "placebo_windows": {
+   "OPEX session (the formula, short)": {
+    "design": 0.526,
+    "holdout": 0.416
+   },
+   "OPEX week, 1 session(s) before": {
+    "design": 0.025,
+    "holdout": -0.192
+   },
+   "OPEX week, 2 session(s) before": {
+    "design": -0.172,
+    "holdout": 0.259
+   },
+   "OPEX week, 3 session(s) before": {
+    "design": -0.509,
+    "holdout": -0.238
+   },
+   "OPEX week, 4 session(s) before": {
+    "design": -0.454,
+    "holdout": -0.466
+   },
+   "1st Friday of the month instead of the 3rd": {
+    "design": -0.331,
+    "holdout": -0.494
+   },
+   "2nd Friday of the month instead of the 3rd": {
+    "design": -0.271,
+    "holdout": -0.317
+   },
+   "4th Friday of the month instead of the 3rd": {
+    "design": 0.061,
+    "holdout": -0.23
+   },
+   "every non-OPEX Friday": {
+    "design": -0.227,
+    "holdout": -0.602
+   },
+   "every session (always on, short)": {
+    "design": -0.364,
+    "holdout": -0.724
+   }
+  }
+ },
+ "TOM_DURATION_EXT": {
+  "desc": "last 2 sessions of the month: long TLT / short IEF (bond index duration extension)",
+  "placebo_windows": {
+   "rtdom 1-2": {
+    "design": 0.693,
+    "holdout": 0.051
+   },
+   "rtdom 3-4": {
+    "design": -0.269,
+    "holdout": -0.092
+   },
+   "rtdom 5-6": {
+    "design": 0.313,
+    "holdout": 0.025
+   },
+   "rtdom 7-8": {
+    "design": -0.01,
+    "holdout": 0.142
+   },
+   "rtdom 9-10": {
+    "design": 0.506,
+    "holdout": -0.488
+   },
+   "every session (always on)": {
+    "design": 0.263,
+    "holdout": -0.132
+   }
+  }
+ },
+ "XE_MONTHEND_REV_proxy": {
+  "desc": "month-end reversal window sweep, using the prior-month sort reversed (a stationary proxy for the MTD sort so the windows are comparable)",
+  "placebo_windows": {
+   "rtdom 1-2": {
+    "design": 0.06,
+    "holdout": 0.051
+   },
+   "rtdom 3-4": {
+    "design": 0.089,
+    "holdout": -0.057
+   },
+   "rtdom 5-6": {
+    "design": 0.19,
+    "holdout": 0.175
+   },
+   "rtdom 7-8": {
+    "design": -0.004,
+    "holdout": -0.409
+   },
+   "rtdom 9-10": {
+    "design": -0.335,
+    "holdout": -0.252
+   }
+  }
+ },
+ "cost_sensitivity_design_and_holdout": {
+  "1.0bp": {
+   "XE_MONTHSTART_CONT": {
+    "design": 0.682,
+    "holdout": 0.412
+   },
+   "SESS_OPEXDAY_INTRADAY": {
+    "design": 0.526,
+    "holdout": 0.416
+   },
+   "TOM_DURATION_EXT": {
+    "design": 0.693,
+    "holdout": 0.051
+   }
+  },
+  "2.0bp": {
+   "XE_MONTHSTART_CONT": {
+    "design": 0.592,
+    "holdout": 0.292
+   },
+   "SESS_OPEXDAY_INTRADAY": {
+    "design": 0.441,
+    "holdout": 0.338
+   },
+   "TOM_DURATION_EXT": {
+    "design": 0.491,
+    "holdout": -0.157
+   }
+  },
+  "3.0bp": {
+   "XE_MONTHSTART_CONT": {
+    "design": 0.502,
+    "holdout": 0.172
+   },
+   "SESS_OPEXDAY_INTRADAY": {
+    "design": 0.355,
+    "holdout": 0.261
+   },
+   "TOM_DURATION_EXT": {
+    "design": 0.288,
+    "holdout": -0.363
+   }
+  },
+  "5.0bp": {
+   "XE_MONTHSTART_CONT": {
+    "design": 0.321,
+    "holdout": -0.068
+   },
+   "SESS_OPEXDAY_INTRADAY": {
+    "design": 0.18,
+    "holdout": 0.104
+   },
+   "TOM_DURATION_EXT": {
+    "design": -0.113,
+    "holdout": -0.771
+   }
+  }
+ }
+}

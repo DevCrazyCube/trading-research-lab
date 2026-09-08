@@ -34,6 +34,8 @@ IDLE_PRUNE_S = 600.0
 V3_PREREG = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..",
                                         "research", "trading_bot", "SNIPER_V3_PREREGISTRATION.md"))
 V3_PREREG_SHA256 = "ea486d591f426bfaec0c8d12a2d7e3b2a711405659b78d9e441582d76191e5e9"
+V3_GATE_N = 100
+V3_INITIAL_EQUITY_USD = 1000.0
 # (ledger-name, exit-preset, entry-surge-config). The 903-trade eval showed exits are near-optimal
 # (convex_core best; flow-exit +0.215R is the winner, trail is a loss-limiter) and the LEAK is on the
 # ENTRY: 539 trail-exits are FADING surges that didn't sustain. So hold the winning exit fixed and
@@ -67,6 +69,43 @@ VARIANT_SPECS = [
     # fader filter; forward data adjudicates whether it lifts win rate + expectancy.
     ("v3_core_ratchet",   "convex_ratchet", "BALANCED"),
 ]
+
+
+def v3_entry_gate(ledger: dict) -> dict:
+    """Executable administrative gate from the frozen V3 adjudication.
+
+    V3 declared fewer than 100 terminal entries as behaviour and allowed further review only when
+    stress mean > 0, stress equity > initial equity, and accounting is clean. Once N=100 is reached,
+    failure is terminal for NEW paper entries. Existing positions still resolve normally.
+    """
+    terminal = int(ledger.get("terminal") or 0)
+    stress = [float(r) for r in ledger.get("stress_r", []) if r is not None]
+    mean_r = st.fmean(stress) if stress else None
+    equity = ledger.get("adjudication_equity_usd")
+    clean = not (
+        int(ledger.get("commitment_failures") or 0)
+        or int(ledger.get("duplicate_terminal") or 0)
+    )
+    reached = terminal >= V3_GATE_N
+    passed = bool(
+        reached and mean_r is not None and mean_r > 0
+        and equity is not None and float(equity) > V3_INITIAL_EQUITY_USD
+        and clean
+    )
+    halted = reached and not passed
+    return {
+        "allow_new_entries": not halted,
+        "gate_n": V3_GATE_N,
+        "terminal": terminal,
+        "stress_mean_R": mean_r,
+        "stress_equity_usd": equity,
+        "accounting_clean": clean,
+        "passed": passed,
+        "reason": (
+            "V3_FROZEN_GATE_FAILED_NO_NEW_ENTRIES" if halted
+            else ("V3_FROZEN_GATE_PASSED" if passed else "V3_BELOW_FROZEN_MINIMUM")
+        ),
+    }
 
 
 def _log(msg: str) -> None:
@@ -177,6 +216,7 @@ class _Variant:
             else:
                 failed.append(str(rec["entry"].get("frozen_sha256")))
         self.restart_invalidations = paper_ledger.invalidate_unresolved(self.events_path, only=set(failed))
+        self.entry_gate = v3_entry_gate(paper_ledger.ledger_summary(self.events_path))
 
     def step(self, mint: str, bar: Bar) -> None:
         # 1) exits on the open book
@@ -186,6 +226,8 @@ class _Variant:
             if pos is not None and not pos.is_open:
                 self.open_mints.discard(mint); self._write_resolution(pos)
         # 2) this variant's OWN entry signal
+        if not self.entry_gate["allow_new_entries"]:
+            return
         sig = self.det.update(bar, mint=mint)
         if sig is not None and mint not in self.open_mints:
             # 2a) RUG-RISK filter (this variant only): decline concentrated / bundled launches. One
@@ -243,6 +285,7 @@ class _Variant:
         event = paper_ledger.make_resolution_event(
             variant=self.name, preset=self.preset, position=pos, entry_event=entry)
         paper_ledger.append_event(self.events_path, event)
+        self.entry_gate = v3_entry_gate(paper_ledger.ledger_summary(self.events_path))
 
     def scorecard(self) -> dict:
         led = paper_ledger.ledger_summary(self.events_path)
@@ -259,6 +302,7 @@ class _Variant:
               "commitment_failures": led["commitment_failures"],
               "adjudication_equity_usd": led["adjudication_equity_usd"],
               "stress_realized_pnl_usd": led["stress_realized_pnl_usd"],
+              "entry_gate": self.entry_gate,
               "framing": ("LIVE PAPER V2 — dry-run, no orders/wallet. Primary adjudication is the "
                           "full-loss stress stream; <30 terminal entries = behaviour.")}
         if self.rug is not None:
@@ -325,7 +369,8 @@ def _build_runtime(variants_spec=None):
     variants = [_Variant(s[0], s[1], s[2], ex, rug=(rug if (len(s) > 3 and s[3]) else None))
                 for s in spec]
     _log(f"paper runtime initialized: variants={[v.name for v in variants]} "
-         f"restart_invalidations={sum(len(v.restart_invalidations) for v in variants)}")
+         f"restart_invalidations={sum(len(v.restart_invalidations) for v in variants)} "
+         f"entry_halted={[v.name for v in variants if not v.entry_gate['allow_new_entries']]}")
     return {"agg": agg, "rug": rug, "variants": variants}
 
 

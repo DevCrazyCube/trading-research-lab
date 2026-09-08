@@ -1,0 +1,439 @@
+{
+  "checkpoints": [
+    {
+      "after": [
+        {
+          "receipt_unix_nanos": 1788894186270228135,
+          "sampled_unix_nanos": 1788894186275571982,
+          "sequence": 367674,
+          "slot": 445412264,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894186238185591,
+          "sampled_unix_nanos": 1788894186276494343,
+          "sequence": 17376,
+          "slot": 445413032,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "before": [
+        {
+          "receipt_unix_nanos": 1788894186137305023,
+          "sampled_unix_nanos": 1788894186141901461,
+          "sequence": 367638,
+          "slot": 445412264,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894185801239114,
+          "sampled_unix_nanos": 1788894186142614363,
+          "sequence": 17344,
+          "slot": 445413031,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "comparison": "before/after bracket around public RPC; not independent-provider consensus",
+      "finalized_head_slot": 445413031,
+      "index": 0,
+      "slot_lag_brackets": [
+        {
+          "head_minus_feed_after": 767,
+          "head_minus_feed_before": 767,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite"
+        },
+        {
+          "head_minus_feed_after": -1,
+          "head_minus_feed_before": 0,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite"
+        }
+      ],
+      "started_unix_nanos": 1788894186141051450
+    },
+    {
+      "after": [
+        {
+          "receipt_unix_nanos": 1788894216404742521,
+          "sampled_unix_nanos": 1788894216411086429,
+          "sequence": 373533,
+          "slot": 445412284,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894216373945185,
+          "sampled_unix_nanos": 1788894216411918302,
+          "sequence": 29317,
+          "slot": 445413104,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "before": [
+        {
+          "receipt_unix_nanos": 1788894216271930609,
+          "sampled_unix_nanos": 1788894216279296081,
+          "sequence": 373503,
+          "slot": 445412284,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894216230584245,
+          "sampled_unix_nanos": 1788894216281029078,
+          "sequence": 29253,
+          "slot": 445413103,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "comparison": "before/after bracket around public RPC; not independent-provider consensus",
+      "finalized_head_slot": 445413125,
+      "index": 1,
+      "slot_lag_brackets": [
+        {
+          "head_minus_feed_after": 841,
+          "head_minus_feed_before": 841,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite"
+        },
+        {
+          "head_minus_feed_after": 21,
+          "head_minus_feed_before": 22,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite"
+        }
+      ],
+      "started_unix_nanos": 1788894216277482925
+    },
+    {
+      "after": [
+        {
+          "receipt_unix_nanos": 1788894246544770894,
+          "sampled_unix_nanos": 1788894246579789852,
+          "sequence": 379156,
+          "slot": 445412310,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894246516294759,
+          "sampled_unix_nanos": 1788894246581653352,
+          "sequence": 45186,
+          "slot": 445413198,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "before": [
+        {
+          "receipt_unix_nanos": 1788894246408203770,
+          "sampled_unix_nanos": 1788894246415275321,
+          "sequence": 379143,
+          "slot": 445412309,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894246325711112,
+          "sampled_unix_nanos": 1788894246418326037,
+          "sequence": 45134,
+          "slot": 445413197,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "comparison": "before/after bracket around public RPC; not independent-provider consensus",
+      "finalized_head_slot": 445413219,
+      "index": 2,
+      "slot_lag_brackets": [
+        {
+          "head_minus_feed_after": 909,
+          "head_minus_feed_before": 910,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite"
+        },
+        {
+          "head_minus_feed_after": 21,
+          "head_minus_feed_before": 22,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite"
+        }
+      ],
+      "started_unix_nanos": 1788894246412771830
+    },
+    {
+      "after": [
+        {
+          "receipt_unix_nanos": 1788894277050031771,
+          "sampled_unix_nanos": 1788894277054295086,
+          "sequence": 382743,
+          "slot": 445412324,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894276960781550,
+          "sampled_unix_nanos": 1788894277055204828,
+          "sequence": 52066,
+          "slot": 445413314,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "before": [
+        {
+          "receipt_unix_nanos": 1788894276581156831,
+          "sampled_unix_nanos": 1788894276584591916,
+          "sequence": 382636,
+          "slot": 445412324,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894276570499876,
+          "sampled_unix_nanos": 1788894276585588423,
+          "sequence": 51817,
+          "slot": 445413312,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "comparison": "before/after bracket around public RPC; not independent-provider consensus",
+      "finalized_head_slot": 445413314,
+      "index": 3,
+      "slot_lag_brackets": [
+        {
+          "head_minus_feed_after": 990,
+          "head_minus_feed_before": 990,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite"
+        },
+        {
+          "head_minus_feed_after": 0,
+          "head_minus_feed_before": 2,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite"
+        }
+      ],
+      "started_unix_nanos": 1788894276583449529
+    },
+    {
+      "after": [
+        {
+          "receipt_unix_nanos": 1788894307180416745,
+          "sampled_unix_nanos": 1788894307187866577,
+          "sequence": 388579,
+          "slot": 445413386,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894307138322526,
+          "sampled_unix_nanos": 1788894307189487323,
+          "sequence": 66961,
+          "slot": 445413400,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "before": [
+        {
+          "receipt_unix_nanos": 1788894307051052946,
+          "sampled_unix_nanos": 1788894307057525069,
+          "sequence": 388548,
+          "slot": 445413386,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894307013968031,
+          "sampled_unix_nanos": 1788894307058411073,
+          "sequence": 66865,
+          "slot": 445413400,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "comparison": "before/after bracket around public RPC; not independent-provider consensus",
+      "finalized_head_slot": 445413408,
+      "index": 4,
+      "slot_lag_brackets": [
+        {
+          "head_minus_feed_after": 22,
+          "head_minus_feed_before": 22,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite"
+        },
+        {
+          "head_minus_feed_after": 8,
+          "head_minus_feed_before": 8,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite"
+        }
+      ],
+      "started_unix_nanos": 1788894307056371086
+    },
+    {
+      "after": [
+        {
+          "receipt_unix_nanos": 1788894337297106943,
+          "sampled_unix_nanos": 1788894337302387221,
+          "sequence": 394669,
+          "slot": 445413401,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894336996505698,
+          "sampled_unix_nanos": 1788894337303124206,
+          "sequence": 79634,
+          "slot": 445413503,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "before": [
+        {
+          "receipt_unix_nanos": 1788894337188098153,
+          "sampled_unix_nanos": 1788894337191549340,
+          "sequence": 394636,
+          "slot": 445413401,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894336996505698,
+          "sampled_unix_nanos": 1788894337192204054,
+          "sequence": 79634,
+          "slot": 445413503,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "comparison": "before/after bracket around public RPC; not independent-provider consensus",
+      "finalized_head_slot": 445413504,
+      "index": 5,
+      "slot_lag_brackets": [
+        {
+          "head_minus_feed_after": 103,
+          "head_minus_feed_before": 103,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite"
+        },
+        {
+          "head_minus_feed_after": 1,
+          "head_minus_feed_before": 1,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite"
+        }
+      ],
+      "started_unix_nanos": 1788894337190775260
+    },
+    {
+      "after": [
+        {
+          "receipt_unix_nanos": 1788894367452794854,
+          "sampled_unix_nanos": 1788894367461566706,
+          "sequence": 400630,
+          "slot": 445413437,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894367367224191,
+          "sampled_unix_nanos": 1788894367464285027,
+          "sequence": 85086,
+          "slot": 445413598,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "before": [
+        {
+          "receipt_unix_nanos": 1788894367296439027,
+          "sampled_unix_nanos": 1788894367307208672,
+          "sequence": 400606,
+          "slot": 445413436,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894367258266195,
+          "sampled_unix_nanos": 1788894367310020550,
+          "sequence": 85022,
+          "slot": 445413598,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "comparison": "before/after bracket around public RPC; not independent-provider consensus",
+      "finalized_head_slot": 445413598,
+      "index": 6,
+      "slot_lag_brackets": [
+        {
+          "head_minus_feed_after": 161,
+          "head_minus_feed_before": 162,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite"
+        },
+        {
+          "head_minus_feed_after": 0,
+          "head_minus_feed_before": 0,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite"
+        }
+      ],
+      "started_unix_nanos": 1788894367304072289
+    },
+    {
+      "after": [
+        {
+          "receipt_unix_nanos": 1788894397594780079,
+          "sampled_unix_nanos": 1788894397599425301,
+          "sequence": 407135,
+          "slot": 445413514,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894397572624046,
+          "sampled_unix_nanos": 1788894397600292693,
+          "sequence": 97532,
+          "slot": 445413692,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "before": [
+        {
+          "receipt_unix_nanos": 1788894397460054522,
+          "sampled_unix_nanos": 1788894397468047573,
+          "sequence": 407106,
+          "slot": 445413513,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        },
+        {
+          "receipt_unix_nanos": 1788894397285795826,
+          "sampled_unix_nanos": 1788894397468899848,
+          "sequence": 97500,
+          "slot": 445413691,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+          "status": "OBSERVED_NOT_CENSUS"
+        }
+      ],
+      "comparison": "before/after bracket around public RPC; not independent-provider consensus",
+      "finalized_head_slot": 445413692,
+      "index": 7,
+      "slot_lag_brackets": [
+        {
+          "head_minus_feed_after": 178,
+          "head_minus_feed_before": 179,
+          "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite"
+        },
+        {
+          "head_minus_feed_after": 0,
+          "head_minus_feed_before": 1,
+          "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite"
+        }
+      ],
+      "started_unix_nanos": 1788894397466940245
+    }
+  ],
+  "creation_recall": "UNMEASURED",
+  "missing_history": "NOT_REPAIRED",
+  "status": "READ_ONLY_ENGINEERING_NO_TRADE"
+}

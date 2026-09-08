@@ -1,0 +1,15 @@
+rows (331135,)
+distinct mint (3511,)
+nulls mint (396,)
+nulls trader (396,)
+nulls blocktime (0,)
+bt range (1785168470, 1785861735)
+slot range (435569242, 437210794)
+is_buy dist [(None, 396), (0, 148923), (1, 181816)]
+idl_name dist [('buy', 125370), ('sell', 118923), ('sell_v2', 30463), ('buy_exact_quote_in_v2', 27218), ('buy_exact_sol_in', 21490), ('buy_v2', 7532), ('buy_exact_quote_in', 139)]
+sample [('4H5jrbq9fcPCwuoFGF3RjT2Smtx2NiPQutaoFhg8ncQz8ULBVx5Mu5aUg29QK9TSFLYcMV94p819XGbTfQAoDmHP', 435569242, 433, 4, -1, 'buy_v2', '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P', 1785168470, 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 1, 'EgsusojhCYw71VZpJPKGcYHTviiptNmJp1Lo7hAZpump', 59259258, 2115327702796, 30059259258, 1070884672297204, 13), ('54Zw1fEPrGiqxwLuzEhTuczgxzJrCkw8kkJTkdkxvh9bVsSis41rFqpHQeXk86DNnDgP29XB7LFPHLgRtgT95dQe', 435569298, 20, 3, 0, 'buy', '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P', 1785168493, '4W1B5wM4zmhG6QpojxevQk93HxfZbtGdcCCdib6PjiVo', '4W1B5wM4zmhG6QpojxevQk93HxfZbtGdcCCdib6PjiVo', 1, 'EgsusojhCYw71VZpJPKGcYHTviiptNmJp1Lo7hAZpump', 493827159, 17308625653051, 30553086417, 1053576046644153, 6), ('3gFvSo87hznBudDvPxU9MCy5GiPWf8WtK4HVeoTsG4agSNDQySjGy7AErbt7Dru71idcC3RMGnxr9RKhx9jTB5Vs', 435569303, 820, 3, -1, 'buy', '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P', 1785168495, '2sKKQFZjuU617j13GKVey798BAmzRXGpudo7oArdQJu4', '2sKKQFZjuU617j13GKVey798BAmzRXGpudo7oArdQJu4', 1, 'GKnceiRKz15eAVP9KSoNvouTa8v3ijqjQaePGPAvNS9p', 493827159, 17376518166910, 30493827159, 1055623481833090, 6)]
+cols ['signature', 'slot', 'txi', 'oi', 'ii', 'idl_name', 'program_id', 'blocktime', 'payer', 'trader', 'is_buy', 'mint', 'sol_amount', 'token_amount', 'virtual_sol', 'virtual_token', 'user_acct_index']
+sol_amount stats (0, 85005359057, 505299695.81673163)
+grad rows 672
+status Counter({'ok': 594, 'nopool:429': 30, 'nobars:429': 28, 'nobars:200': 20})
+with bars 594

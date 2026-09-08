@@ -1,0 +1,111 @@
+{
+ "pairs": {
+  "RY.TO/RY": {
+   "tsx_exchange": "TOR",
+   "nyse_exchange": "NYQ",
+   "sessions": 4,
+   "matched_minutes": 1463,
+   "n_dS": 1372,
+   "sd_dS_bp": 3.65,
+   "rho1_dS": -0.471,
+   "sd_noise_bp": 2.5,
+   "sigma_persistent_per_min_bp": 0.88,
+   "p95_abs_dev_from_session_median_bp": 4.79,
+   "median_abs_dev_bp": 1.42,
+   "mean_basis_bp_by_session": {
+    "2026-08-24": -0.8,
+    "2026-08-25": -0.5,
+    "2026-08-26": 0.1,
+    "2026-08-27": 0.9
+   }
+  },
+  "TD.TO/TD": {
+   "tsx_exchange": "TOR",
+   "nyse_exchange": "NYQ",
+   "sessions": 4,
+   "matched_minutes": 1531,
+   "n_dS": 1500,
+   "sd_dS_bp": 3.11,
+   "rho1_dS": -0.531,
+   "sd_noise_bp": 2.26,
+   "sigma_persistent_per_min_bp": 0.0,
+   "p95_abs_dev_from_session_median_bp": 4.56,
+   "median_abs_dev_bp": 1.17,
+   "mean_basis_bp_by_session": {
+    "2026-08-24": -0.4,
+    "2026-08-25": 0.3,
+    "2026-08-26": 0.1,
+    "2026-08-27": 0.8
+   }
+  },
+  "ENB.TO/ENB": {
+   "tsx_exchange": "TOR",
+   "nyse_exchange": "NYQ",
+   "sessions": 4,
+   "matched_minutes": 1557,
+   "n_dS": 1549,
+   "sd_dS_bp": 2.11,
+   "rho1_dS": -0.466,
+   "sd_noise_bp": 1.44,
+   "sigma_persistent_per_min_bp": 0.55,
+   "p95_abs_dev_from_session_median_bp": 3.14,
+   "median_abs_dev_bp": 0.98,
+   "mean_basis_bp_by_session": {
+    "2026-08-24": 0.7,
+    "2026-08-25": 0.8,
+    "2026-08-26": 0.6,
+    "2026-08-27": 0.9
+   }
+  },
+  "CNQ.TO/CNQ": {
+   "tsx_exchange": "TOR",
+   "nyse_exchange": "NYQ",
+   "sessions": 4,
+   "matched_minutes": 1555,
+   "n_dS": 1545,
+   "sd_dS_bp": 2.31,
+   "rho1_dS": -0.478,
+   "sd_noise_bp": 1.6,
+   "sigma_persistent_per_min_bp": 0.49,
+   "p95_abs_dev_from_session_median_bp": 3.44,
+   "median_abs_dev_bp": 1.08,
+   "mean_basis_bp_by_session": {
+    "2026-08-24": 0.6,
+    "2026-08-25": 0.8,
+    "2026-08-26": 0.8,
+    "2026-08-27": 0.5
+   }
+  },
+  "SHOP.TO/SHOP": {
+   "tsx_exchange": "TOR",
+   "nyse_exchange": "NMS",
+   "sessions": 4,
+   "matched_minutes": 1470,
+   "n_dS": 1385,
+   "sd_dS_bp": 9.61,
+   "rho1_dS": -0.504,
+   "sd_noise_bp": 6.83,
+   "sigma_persistent_per_min_bp": 0.0,
+   "p95_abs_dev_from_session_median_bp": 7.17,
+   "median_abs_dev_bp": 1.91,
+   "mean_basis_bp_by_session": {
+    "2026-08-24": -0.1,
+    "2026-08-25": -0.3,
+    "2026-08-26": 0.3,
+    "2026-08-27": 0.8
+   }
+  }
+ },
+ "fx_bars": 5878,
+ "fx_exchange": "CCY",
+ "floor_bp": 8.0,
+ "generated_utc": "2026-08-28T01:03:27Z",
+ "median_rho1": -0.478,
+ "median_p95_dev_bp": 4.56,
+ "verdict": {
+  "K1_feed_measures_own_error": true,
+  "K2_below_friction_floor": true,
+  "PASS": false,
+  "conclusion": "DEAD"
+ }
+}

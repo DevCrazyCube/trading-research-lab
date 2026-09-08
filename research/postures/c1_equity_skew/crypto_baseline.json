@@ -1,0 +1,76 @@
+{
+  "panel": {
+    "symbols": 919,
+    "days_total": 2404,
+    "days_used": 2221,
+    "avg_liquid_names_per_day": 259.9
+  },
+  "pp_per_day": {
+    "EW_mean_simple_liquid": 0.1267,
+    "MEDIAN_simple_liquid": -0.4441,
+    "MEDIAN_log_liquid": -0.5439,
+    "EW_mean_log_liquid": -0.1151
+  },
+  "gap_pp_per_day": {
+    "as_reported_mean_simple_minus_median_LOG": 0.6706,
+    "like_for_like_both_SIMPLE": 0.5707,
+    "jensen_share_of_reported_gap": 0.1489,
+    "ci95_like_for_like": [
+      0.5441,
+      0.5972
+    ]
+  },
+  "compounded_over_sample_pct": {
+    "EW_liquid_basket": 64.93,
+    "daily_cross_sectional_MEDIAN_simple": -99.9994,
+    "daily_cross_sectional_MEDIAN_log": -99.9994
+  },
+  "per_name_buyhold_while_liquid": {
+    "n_names": 794,
+    "median_pct": -79.12,
+    "mean_pct": -33.95,
+    "share_negative": 0.8766
+  },
+  "top_share_of_total_EW_return": {
+    "top_1pct": {
+      "k_names": 9,
+      "share": 0.2801
+    },
+    "top_5pct": {
+      "k_names": 46,
+      "share": 0.7787
+    },
+    "total_arith_sum": 3.4479
+  },
+  "screen_robustness_gap_pp_per_day": {
+    "qv>=$1M (primary)": 0.5707,
+    "qv>=$10M": 0.7453,
+    "qv>=$50M": 1.2591,
+    "top100_by_qv": 1.0214,
+    "top200_by_qv": 0.726,
+    "note": "tightening the liquidity screen makes the crypto gap WORSE, not better -- the skew is not an artefact of including illiquid names"
+  },
+  "excess_skew_normalisation": {
+    "qv>=$1M": {
+      "xsec_log_dispersion_pct_day": 4.736,
+      "gap_pp_day": 0.5707,
+      "mechanical_gap_pp_day": 0.1377,
+      "EXCESS_SKEW_RATIO": 4.144
+    },
+    "qv>=$10M": {
+      "xsec_log_dispersion_pct_day": 5.621,
+      "gap_pp_day": 0.7453,
+      "mechanical_gap_pp_day": 0.2042,
+      "EXCESS_SKEW_RATIO": 3.65
+    },
+    "qv>=$1M_full": {
+      "xsec_log_dispersion_pct_day": 4.736,
+      "xsec_log_dispersion_robust_pct_day": 2.575,
+      "gap_pp_day": 0.5707,
+      "mechanical_gap_pp_day": 0.1377,
+      "mechanical_gap_robust_pp_day": 0.0393,
+      "EXCESS_SKEW_RATIO": 4.144,
+      "EXCESS_SKEW_RATIO_robust": 14.528
+    }
+  }
+}

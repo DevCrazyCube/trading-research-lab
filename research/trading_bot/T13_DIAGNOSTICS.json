@@ -1,0 +1,34 @@
+{
+  "probes": [
+    {
+      "probe_bar": "1999-02-16",
+      "sma_identical": true,
+      "vol_identical": true,
+      "sma_first_diff": null,
+      "vol_first_diff": null
+    },
+    {
+      "probe_bar": "2008-04-17",
+      "sma_identical": true,
+      "vol_identical": true,
+      "sma_first_diff": null,
+      "vol_first_diff": null
+    },
+    {
+      "probe_bar": "2017-06-13",
+      "sma_identical": true,
+      "vol_identical": true,
+      "sma_first_diff": null,
+      "vol_first_diff": null
+    },
+    {
+      "probe_bar": "2022-12-08",
+      "sma_identical": true,
+      "vol_identical": true,
+      "sma_first_diff": null,
+      "vol_first_diff": null
+    }
+  ],
+  "negative_control_caught": true,
+  "verdict": "no decision in either frozen rule depends on the future of the series"
+}

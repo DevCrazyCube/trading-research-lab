@@ -1,0 +1,29 @@
+{
+  "archived_at": "20260828T130536Z",
+  "moved": [
+    {
+      "from": "research/b11m_window2/receipts/transaction_bodies.json",
+      "stage": "transaction_bodies",
+      "to": "research/b11m_window2/superseded/20260828T130536Z/receipts/transaction_bodies.json"
+    }
+  ],
+  "quarantine_cleared": null,
+  "reason": "T34 s6 hand-back, step 2 (durable supervisor CHUNK B 2026-08-28 15:00 CEST). The receipt being retired is the FAILED 2026-08-16 Chainstack attempt (completed:false, exit_code 1, Q07_stage_failed); it blocked the resumed supervisor with Q12_duplicate_stage at 13:04Z after the re-attestation (superseded/20260828T130251Z) had been accepted and the maturity poll had passed. The stage's ARTIFACT (b11a_bodies.sqlite) is NOT moved: it is the out-of-band free-RPC re-collection (run_free_decode.sh attempt 10 rc=0 at 2026-08-28T02:37:41Z under b9d's own exhaustiveness assertion, endpoint_reference https://api.mainnet-beta.solana.com stamped in its metadata). The supervisor's re-run of transaction_bodies is expected to resume on done-sets, make ~0 calls and write a completed:true receipt; if it does not, that refusal is the record. Same shape as the generation-1 restart (agent_discussion 2026-08-07: supersede stage 4's failed receipt). No result number read.",
+  "stages_completed_after": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory"
+  ],
+  "stages_completed_before": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory"
+  ],
+  "superseded_stages": [
+    "transaction_bodies"
+  ]
+}

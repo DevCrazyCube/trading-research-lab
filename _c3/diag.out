@@ -1,0 +1,30 @@
+next_open            trades n=44739  trade-mean   +0.2623  trade-med  -0.0039 | mint-mean   +0.3922 mint-med  -0.1456  k=363
+     quantiles [-1.00000e+00 -9.99900e-01 -7.10700e-01 -1.00100e-01 -3.90000e-03
+  6.13000e-02  3.19600e-01  1.27060e+00  1.58199e+01] max 10385.72
+     mint-mean top5 [  1.851   1.88    2.254   4.418 197.826]
+last_close           trades n=45759  trade-mean   +0.3111  trade-med  -0.0047 | mint-mean   +0.5038 mint-med  -0.1401  k=387
+     quantiles [-1.00000e+00 -9.99900e-01 -7.54200e-01 -1.04800e-01 -4.70000e-03
+  6.26000e-02  3.30500e-01  1.40420e+00  1.62059e+01] max 12691.91
+     mint-mean top5 [  2.49    2.516   4.857   6.07  232.316]
+next_open_grace30    trades n=42326  trade-mean   +0.2889  trade-med  -0.0022 | mint-mean   +0.5646 mint-med  -0.1279  k=335
+     quantiles [-1.00000e+00 -9.94100e-01 -6.00000e-01 -9.41000e-02 -2.20000e-03
+  6.69000e-02  3.31100e-01  1.32540e+00  1.56854e+01] max 10385.72
+     mint-mean top5 [  1.89    1.921   2.06    2.254 237.456]
+
+top single-bar close-to-close jumps:
+    98.8 CnfxBDGFPbj4qq21JrMVio9xt2EN3BQ8NG99c33Gpump nbars 26 pxmin 1.17e-09 pxmax 3.57e-05
+    23.9 Fg9P4xK8pbYaumHhz7QEt2Uma3kNr4PSpEQtUVCgpump nbars 1000 pxmin 5.3e-06 pxmax 0.00022
+    19.9 JD9XjfgmzbUJDqoZSzgcfDou5MLLKi4ZcRZqUqujpump nbars 17 pxmin 8.91e-10 pxmax 1.86e-08
+    19.2 FyeW1xj2MS1JBod4LdJvWcbaha919wTn4SWxHgXpump nbars 14 pxmin 2.01e-10 pxmax 2.65e-08
+    18.5 GaFQuLuVt3y818JcotLy3nxEVebGfMcAdMXmCaXupump nbars 62 pxmin 6.51e-10 pxmax 9.8e-06
+    17.7 FxfSbGfC83vmfEGAhB1bVDLhVDsVMC8dpspb5bZ7pump nbars 17 pxmin 8.95e-09 pxmax 1.98e-07
+    15.9 DvsiNvQmioLQZv9J5YWTFSZivZYMeXNETic8bmTPpump nbars 8 pxmin 3.24e-08 pxmax 1.74e-06
+    9.6 AAiCr9pDUNYmD6rqfHfZE5gYE6M2nTaFiYCmiZb5pump nbars 37 pxmin 4.43e-09 pxmax 4.06e-07
+    6.9 EG47BwGb6PbmEBXC14ytAbn7ntdzy6C1Dx2nsVc3pump nbars 12 pxmin 9.53e-09 pxmax 1.3e-06
+    6.8 FrNYeeUdCWCr5YMy3SEu62VKpqC6VrNHgy8FAzrjpump nbars 11 pxmin 9.3e-10 pxmax 2.38e-06
+    6.3 CvZmyFScCrXQL9qD7Hg2EaukpxBgurxq8FJEt7eCpump nbars 29 pxmin 4.1e-09 pxmax 1.35e-05
+    6.1 9PU3Wazvs3HVAzodXYmGdQ6XpEwBTxwhoGtLhDdJpump nbars 6 pxmin 5.09e-08 pxmax 5.61e-07
+cap=None  mint-mean  +0.5038  mint-med  -0.1401
+cap=3.0  mint-mean  -0.1577  mint-med  -0.1441
+cap=1.0  mint-mean  -0.1935  mint-med  -0.1462
+cap=0.5  mint-mean  -0.2142  mint-med  -0.1612

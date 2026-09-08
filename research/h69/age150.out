@@ -1,0 +1,13 @@
+.. 0
+.. 25
+.. 50
+.. 75
+.. 100
+.. 125
+resolved 150 of 150
+LAST-ACTIVITY age days (UPPER bound is migration<=this): p10=10 p25=166 MED=213 p75=213 p90=423 max=423
+  share with last activity within  14d: 10.0% (n=15)
+  share with last activity within  30d: 10.7% (n=16)
+  share with last activity within  60d: 14.0% (n=21)
+  share with last activity within  90d: 15.3% (n=23)
+  share with last activity within 180d: 25.3% (n=38)

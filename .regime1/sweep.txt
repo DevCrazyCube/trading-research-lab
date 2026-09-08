@@ -1,0 +1,87 @@
+rows 46099 mints 382 valid signals 45717
+position arrays built
+regime cells 47
+entries 11
+controls done
+CTRL T5 P1 train mean -0.0780 med -0.0903 n 4359 k 175 | val mean -0.1211 med -0.0934 n 5733 k 207
+CTRL T10 P1 train mean -0.2131 med -0.1833 n 2879 k 175 | val mean -0.1061 med -0.1623 n 3723 k 207
+CTRL T15 P1 train mean -0.2308 med -0.2071 n 2253 k 175 | val mean 0.2720 med -0.1757 n 2890 k 207
+CTRL T30 P1 train mean -0.2785 med -0.2810 n 1501 k 175 | val mean 0.1600 med -0.2583 n 1866 k 207
+CTRL T60 P1 train mean -0.2968 med -0.3114 n 996 k 175 | val mean -0.0288 med -0.3114 n 1220 k 207
+CTRL T120 P1 train mean -0.3269 med -0.3114 n 676 k 175 | val mean -0.1027 med -0.3145 n 817 k 207
+CTRL T15_TP15 P1 train mean -0.1256 med -0.0715 n 2938 k 175 | val mean -0.1315 med -0.0713 n 3701 k 207
+CTRL T15_TP30 P1 train mean -0.1171 med -0.0657 n 2602 k 175 | val mean -0.1288 med -0.0598 n 3294 k 207
+CTRL T60_TP30 P1 train mean -0.1316 med -0.0938 n 1351 k 175 | val mean -0.1662 med -0.1010 n 1661 k 207
+CTRL T60_TP50 P1 train mean -0.1355 med -0.0809 n 1223 k 175 | val mean -0.1853 med -0.1233 n 1490 k 207
+CTRL T60_TP30_SL20 P1 train mean -0.0808 med -0.0753 n 3087 k 175 | val mean -0.0681 med -0.0614 n 3208 k 207
+CTRL T60_TP50_SL30 P1 train mean -0.1108 med -0.0975 n 2421 k 175 | val mean -0.0939 med -0.0865 n 2473 k 207
+CTRL T60_TP20_SL15 P1 train mean -0.0625 med -0.0570 n 3830 k 175 | val mean -0.0544 med -0.0510 n 4034 k 207
+CTRL T15_TP20_SL15 P1 train mean -0.0615 med -0.0513 n 4679 k 175 | val mean -0.0512 med -0.0434 n 5216 k 207
+CTRL T60_TR25 P1 train mean 0.0148 med -0.0608 n 2544 k 175 | val mean 0.1100 med -0.0435 n 2536 k 207
+CTRL T120_TR35 P1 train mean -0.0102 med -0.1102 n 1880 k 175 | val mean -0.0091 med -0.0915 n 1780 k 207
+cell 0 ALL elapsed 7.0 hits 37
+cell 10 COHVOL15_q5 elapsed 25.6 hits 738
+cell 20 FRACUP_q5 elapsed 51.7 hits 1262
+cell 30 MEDRET60_q5 elapsed 75.0 hits 1807
+cell 40 NEWL60_q5 elapsed 93.5 hits 2294
+SWEEP DONE combos 24816 train positives 2574 elapsed 101.9
+TRAINPOS HOUR_b1 | R15DN10 | T5 | P1 | mean 1.2295 med -0.0381 n 303 k 57 ctrl -0.0780
+TRAINPOS HOUR_b0 | R15UP10 | T120_TR35 | P2 | mean 1.0822 med -0.0978 n 82 k 41 ctrl 0.0072
+TRAINPOS ACTCNT_q5 | R15DN10 | T5 | P1 | mean 0.9998 med -0.0445 n 290 k 68 ctrl -0.0780
+TRAINPOS HOUR_b0 | R15UP10 | T120_TR35 | P1 | mean 0.9826 med -0.0980 n 82 k 41 ctrl -0.0102
+TRAINPOS HOUR_b1 | R15DN10 | T10 | P1 | mean 0.9711 med -0.0656 n 216 k 57 ctrl -0.2131
+TRAINPOS LAUNCH60_q2 | R15DN10 | T5 | P1 | mean 0.9448 med -0.0394 n 210 k 54 ctrl -0.0780
+TRAINPOS LAUNCH60_q2 | BELOWOPEN | T5 | P1 | mean 0.8911 med -0.0294 n 524 k 88 ctrl -0.0780
+TRAINPOS HOUR_b1 | R15DN10 | T60_TR25 | P1 | mean 0.8436 med -0.0904 n 225 k 57 ctrl 0.0148
+TRAINPOS ACTCNT_q5 | R15DN10 | T10 | P1 | mean 0.7768 med -0.0747 n 214 k 68 ctrl -0.2131
+TRAINPOS HOUR_b1 | R15DN10 | T10 | P3 | mean 0.7742 med -0.0399 n 216 k 57 ctrl -0.1332
+TRAINPOS HOUR_b1 | R15DN10 | T10 | P2 | mean 0.7683 med -0.0444 n 216 k 57 ctrl -0.1719
+TRAINPOS LAUNCH60_q1 | YOUNG30 | T10 | P1 | mean 0.7676 med -0.0153 n 42 k 22 ctrl -0.2131
+TRAINPOS LAUNCH60_q1 | R15DN10 | T10 | P1 | mean 0.7508 med -0.0734 n 144 k 57 ctrl -0.2131
+TRAINPOS LAUNCH60_q1 | YOUNG30 | T10 | P3 | mean 0.7483 med -0.0147 n 42 k 22 ctrl -0.1332
+TRAINPOS HOUR_b1 | BELOWOPEN | T5 | P1 | mean 0.7478 med -0.0284 n 673 k 94 ctrl -0.0780
+TRAINPOS LAUNCH60_q1 | YOUNG30 | T10 | P2 | mean 0.7438 med 0.0085 n 42 k 22 ctrl -0.1719
+TRAINPOS HOUR_b1 | R15DN10 | T5 | P2 | mean 0.7393 med -0.0247 n 303 k 57 ctrl -0.0687
+TRAINPOS HOUR_b0 | R5UP | T120_TR35 | P2 | mean 0.7088 med -0.1094 n 166 k 68 ctrl 0.0072
+TRAINPOS HOUR_b1 | R15DN10 | T5 | P3 | mean 0.7065 med -0.0203 n 303 k 57 ctrl -0.0498
+TRAINPOS ACTCNT_q5 | R15DN10 | T60_TR25 | P1 | mean 0.6933 med -0.0961 n 242 k 68 ctrl 0.0148
+TRAINPOS HOUR_b1 | R15DN10 | T120_TR35 | P1 | mean 0.6807 med -0.1093 n 175 k 57 ctrl -0.0102
+TRAINPOS LAUNCH60_q1 | R15DN10 | T10 | P2 | mean 0.6666 med -0.0466 n 144 k 57 ctrl -0.1719
+TRAINPOS LAUNCH60_q2 | R15DN10 | T5 | P2 | mean 0.6641 med -0.0270 n 210 k 54 ctrl -0.0687
+TRAINPOS LAUNCH60_q1 | R15DN10 | T10 | P3 | mean 0.6540 med -0.0452 n 144 k 57 ctrl -0.1332
+TRAINPOS YOUNGFRAC_q3 | BELOWOPEN | T5 | P1 | mean 0.6289 med -0.0343 n 670 k 101 ctrl -0.0780
+TRAINPOS HOUR_b0 | R5UP | T120_TR35 | P1 | mean 0.6286 med -0.0874 n 166 k 68 ctrl -0.0102
+TRAINPOS ACTCNT_q5 | R15DN10 | T10 | P3 | mean 0.6196 med -0.0514 n 214 k 68 ctrl -0.1332
+TRAINPOS ACTCNT_q5 | R15DN10 | T10 | P2 | mean 0.6146 med -0.0593 n 214 k 68 ctrl -0.1719
+TRAINPOS MEDRET60_q4 | R5DN | T5 | P1 | mean 0.6117 med -0.0348 n 897 k 106 ctrl -0.0780
+TRAINPOS LAUNCH60_q2 | R15DN10 | T5 | P3 | mean 0.5992 med -0.0213 n 210 k 54 ctrl -0.0498
+TRAINPOS MEDRET15_q3 | R15DN10 | T5 | P1 | mean 0.5976 med -0.0342 n 374 k 97 ctrl -0.0780
+TRAINPOS ACTCNT_q5 | R15DN10 | T5 | P2 | mean 0.5968 med -0.0371 n 290 k 68 ctrl -0.0687
+TRAINPOS ACTCNT_q5 | OLD30 | T5 | P1 | mean 0.5909 med -0.0310 n 743 k 109 ctrl -0.0780
+TRAINPOS ACTCNT_q5 | R5DN | T5 | P1 | mean 0.5870 med -0.0355 n 598 k 108 ctrl -0.0780
+TRAINPOS MEDRET60_q4 | R15UP10 | T120_TR35 | P2 | mean 0.5860 med -0.1195 n 153 k 64 ctrl 0.0072
+TRAINPOS ACTCNT_q5 | R15DN10 | T5 | P3 | mean 0.5691 med -0.0293 n 290 k 68 ctrl -0.0498
+TRAINPOS FRACUP_q4 | R15UP10 | T120_TR35 | P2 | mean 0.5654 med -0.1323 n 174 k 69 ctrl 0.0072
+TRAINPOS LAUNCH60_q2 | BELOWOPEN | T5 | P2 | mean 0.5609 med -0.0293 n 524 k 88 ctrl -0.0687
+TRAINPOS LAUNCH60_q2 | BELOWOPEN | T60_TR25 | P1 | mean 0.5592 med -0.0503 n 328 k 88 ctrl 0.0148
+TRAINPOS COHVOL15_q5 | R5UP | T120_TR35 | P2 | mean 0.5528 med -0.0846 n 222 k 83 ctrl 0.0072
+TRAINPOS ACTCNT_q5 | R15DN10 | T120_TR35 | P1 | mean 0.5391 med -0.1807 n 194 k 68 ctrl -0.0102
+TRAINPOS HOUR_b0 | R15UP10 | T120_TR35 | P3 | mean 0.5357 med -0.0624 n 82 k 41 ctrl -0.0052
+TRAINPOS LAUNCH60_q2 | BELOWOPEN | T5 | P3 | mean 0.5278 med -0.0282 n 524 k 88 ctrl -0.0498
+TRAINPOS ACTCNT_q3 | YOUNG30 | T120_TR35 | P1 | mean 0.5250 med -0.0963 n 154 k 62 ctrl -0.0102
+TRAINPOS HOUR_b1 | BELOWOPEN | T60_TR25 | P1 | mean 0.5109 med -0.0310 n 393 k 94 ctrl 0.0148
+TRAINPOS YOUNGFRAC_q3 | BELOWOPEN | T60_TR25 | P1 | mean 0.5092 med -0.0604 n 409 k 101 ctrl 0.0148
+TRAINPOS YOUNGFRAC_q3 | R15DN10 | T5 | P1 | mean 0.5035 med -0.0366 n 272 k 63 ctrl -0.0780
+TRAINPOS MEDRET60_q4 | R5DN | T60_TR25 | P1 | mean 0.5005 med -0.0871 n 587 k 106 ctrl 0.0148
+TRAINPOS FRACUP_q4 | R15UP10 | T120_TR35 | P1 | mean 0.4999 med -0.1478 n 174 k 69 ctrl -0.0102
+TRAINPOS MEDRET60_q4 | R15UP10 | T120_TR35 | P1 | mean 0.4995 med -0.1374 n 153 k 64 ctrl -0.0102
+TRAINPOS COHVOL15_q5 | R5UP | T120_TR35 | P1 | mean 0.4950 med -0.0984 n 222 k 83 ctrl -0.0102
+TRAINPOS HOUR_b1 | R15DN10 | T60_TR25 | P3 | mean 0.4741 med -0.0624 n 225 k 57 ctrl 0.0152
+TRAINPOS ACTCNT_q3 | YOUNG30 | T120_TR35 | P3 | mean 0.4730 med -0.0835 n 154 k 62 ctrl -0.0052
+TRAINPOS HOUR_b0 | BELOWOPEN | T120_TR35 | P2 | mean 0.4683 med -0.0768 n 311 k 95 ctrl 0.0072
+TRAINPOS HOUR_b0 | OLD30 | T120_TR35 | P2 | mean 0.4680 med -0.0783 n 194 k 83 ctrl 0.0072
+TRAINPOS ACTCNT_q3 | YOUNG30 | T120_TR35 | P2 | mean 0.4640 med -0.0835 n 154 k 62 ctrl 0.0072
+TRAINPOS HOUR_b1 | R15DN10 | T60_TR25 | P2 | mean 0.4627 med -0.0693 n 225 k 57 ctrl 0.0157
+TRAINPOS HOUR_b0 | ANY | T120_TR35 | P2 | mean 0.4491 med -0.0555 n 390 k 102 ctrl 0.0072
+TRAINPOS LAUNCH60_q2 | R15DN10 | T60_TR25 | P1 | mean 0.4471 med -0.1072 n 164 k 54 ctrl 0.0148
+TRAINPOS HOUR_b1 | BELOWOPEN | T5 | P2 | mean 0.4446 med -0.0182 n 673 k 94 ctrl -0.0687

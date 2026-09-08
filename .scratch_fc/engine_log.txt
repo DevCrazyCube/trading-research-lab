@@ -1,0 +1,23 @@
+entry bars 45759 elapsed 78.5
+bar filters [('all', 45759), ('age<20', 3933), ('age<60', 8488), ('age20_120', 8584), ('age60_240', 8640), ('age120_480', 10189), ('age>=240', 28631), ('sib60>=1', 5613), ('sib60==0', 40146), ('sib15>=1', 2678), ('sib60>=3', 3595)]
+bf sizes [45759, 3933, 8488, 8584, 8640, 10189, 28631, 5613, 40146, 2678, 3595] total walk iters/struct 166256
+structs 396 x barfilters 11 = 4356
+struct 0 79.4
+struct 25 84.5
+struct 50 88.9
+struct 75 94.2
+struct 100 98.4
+struct 125 102.6
+struct 150 106.0
+struct 175 108.6
+struct 200 113.0
+struct 225 115.2
+struct 250 118.6
+struct 275 123.5
+struct 300 127.8
+struct 325 130.0
+struct 350 132.8
+struct 375 135.7
+done 138.9
+saved 139.7
+.5

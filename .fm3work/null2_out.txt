@@ -1,0 +1,5 @@
+observed VALIDATE cell mean = +0.1071  (n=21 k=9)
+NULL1 shuffle has_x across mints, n_sims=3000: p(>=obs)=0.0230  null med=+0.0165 p95=+0.0898
+NULL2 same 9 mints, same trade counts, random entry cycles, n_sims=3000:
+   p(>=obs)=0.1837  null mean=+0.0446 med=+0.0474 p95=+0.1551
+   => edge over matched random control = +0.0625

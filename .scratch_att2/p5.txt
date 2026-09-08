@@ -1,0 +1,9 @@
+n series 70
+fraction of consecutive ticks with UNCHANGED px: min/p25/med/p75/max [0.0, 0.125, 0.571, 0.85, 1.0]
+series with px NEVER changing (fully dead/stale): 1
+series with liq varying 46 liq constant 24
+H=5: EVENT n=70 mean=-5.45% med=0.00% | CTRL n=70 mean=-14.85% med=-1.04%
+H=15: EVENT n=70 mean=-17.43% med=-4.50% | CTRL n=70 mean=-25.27% med=-7.01%
+H=30: EVENT n=69 mean=-24.63% med=-12.99% | CTRL n=69 mean=-23.92% med=-13.40%
+H=60: EVENT n=61 mean=-21.01% med=-13.85% | CTRL n=61 mean=-28.99% med=-19.58%
+H=120: EVENT n=48 mean=-23.63% med=-5.68% | CTRL n=48 mean=-24.17% med=-13.40%

@@ -1,0 +1,116 @@
+{
+  "schema": "wbso-params/1",
+  "scheme_year": 2026,
+  "frozen_on": "2026-08-19",
+  "frozen_by": "T27_wbso_scanner_build",
+  "provenance": "Every number below was read directly off an RVO page on the access date recorded in `sources`. Nothing here is inferred, rounded, or carried over from a previous year. If a value cannot be traced to a quote in `sources`, it does not belong in this file.",
+  "rates": {
+    "tarief_eerste_schijf": 0.36,
+    "tarief_eerste_schijf_starters": 0.50,
+    "grens_eerste_schijf_eur": 391020,
+    "tarief_tweede_schijf": 0.16,
+    "so_aftrek_zelfstandigen_eur": 15979,
+    "so_aftrek_zelfstandigen_starters_extra_eur": 7996
+  },
+  "grondslag": {
+    "default_so_uurloon_eur": 29,
+    "default_so_uurloon_condition": "Applies when the applicant did not use WBSO in 2024. If they did, RVO bases the S&O-uurloon on their own 2024 payroll data and this default is wrong for them.",
+    "forfait_kosten_eur_per_uur_first_1800": 10,
+    "forfait_kosten_eur_per_uur_above_1800": 4,
+    "forfait_threshold_hours": 1800,
+    "formula": "S&O-grondslag = (S&O-uren x S&O-uurloon) + (werkelijke kosten en uitgaven OR forfait). Voordeel = tarief_schijf1 * min(grondslag, grens) + tarief_schijf2 * max(0, grondslag - grens)."
+  },
+  "deadlines": {
+    "rule": "U kunt tot en met de laatste dag van iedere maand WBSO aanvragen; de aanvraagperiode start op de 1e dag van de maand daarna. Twee uitzonderingen: voor een ingangsdatum van 1 januari uiterlijk 20 december indienen, en voor een (extra) aanvraag over oktober-december uiterlijk 30 september indienen.",
+    "voor_ingangsdatum_1_januari_2027": "2026-12-20",
+    "voor_extra_aanvraag_okt_dec_2026": "2026-09-30",
+    "mededeling_gerealiseerde_uren_over_2025": "2026-03-31",
+    "note": "The 2027 calendar was not published by RVO on the freeze date. `voor_ingangsdatum_1_januari_2027` is RVO's standing rule ('uiterlijk 20 december') applied to 2026, not a date RVO has printed for 2027. Re-check https://www.rvo.nl/subsidies-financiering/wbso/kalender before any briefing is sent."
+  },
+  "worked_examples_published_by_rvo": [
+    {
+      "id": "situatie_1",
+      "starter": true,
+      "so_uren": 500,
+      "so_uurloon_eur": 29,
+      "kosten_mode": "forfait",
+      "expected_voordeel_eur": 9750,
+      "quote": "Situatie 1: Ondernemer A is starter, het personeel besteedt 500 uur aan S&O en het S&O-uurloon is EUR 29. De ondernemer vraagt forfait kosten en uitgaven aan. ... Het totale WBSO-voordeel is EUR 9.750."
+    },
+    {
+      "id": "situatie_2",
+      "starter": true,
+      "so_uren": 1500,
+      "so_uurloon_eur": 29,
+      "kosten_mode": "werkelijk",
+      "werkelijke_kosten_eur": 55000,
+      "expected_voordeel_eur": 49250,
+      "quote": "Situatie 2: Ondernemer B is starter, het personeel besteedt 1.500 uur aan S&O en het S&O-uurloon is EUR 29. De ondernemer vraagt EUR 55.000 aan werkelijke kosten en uitgaven aan. ... Het totale WBSO-voordeel is EUR 49.250."
+    },
+    {
+      "id": "situatie_3",
+      "starter": false,
+      "so_uren": 4000,
+      "so_uurloon_eur": 29,
+      "kosten_mode": "werkelijk",
+      "werkelijke_kosten_eur": 345000,
+      "expected_voordeel_eur": 151964,
+      "quote": "Situatie 3: Ondernemer C is geen starter, het personeel besteedt 4.000 uur aan S&O en het S&O-uurloon is EUR 29. De ondernemer vraagt EUR 345.000 aan werkelijke kosten en uitgaven aan. ... Het totale WBSO-voordeel is EUR 151.964"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.rvo.nl/subsidies-financiering/wbso",
+      "accessed_utc": "2026-08-19T06:35:00Z",
+      "http_status": 200,
+      "quotes": [
+        "Tarief 1e schijf 36%",
+        "Tarief 1e schijf starters 50%",
+        "Grens 1e schijf EUR 391.020 S&O-grondslag",
+        "Tarief 2e schijf 16%",
+        "In 2026 is de aftrek voor S&O (S&O-aftrek) voor zelfstandigen EUR 15.979. De aanvullende S&O-aftrek voor starters is EUR 7.996."
+      ]
+    },
+    {
+      "url": "https://www.rvo.nl/subsidies-financiering/wbso/bereken-wbso-voordeel",
+      "accessed_utc": "2026-08-19T06:39:00Z",
+      "http_status": 200,
+      "quotes": [
+        "het S&O-uurloon 2026 (maakte u in 2024 gebruik van de WBSO? Dan baseren we het S&O-uurloon op de gegevens van 2024. Anders rekenen we met een S&O-uurloon van EUR 29)",
+        "EUR 10 per S&O-uur voor de eerste 1.800 S&O-uren",
+        "EUR 4 per S&O-uur voor alle S&O-uren boven de 1.800",
+        "Bereken het totaal aan loonkosten (S&O-uren x S&O-uurloon); Tel hierbij het totaal aan werkelijke kosten en uitgaven of het forfait voor kosten en uitgaven bij op",
+        "U kunt maximaal 3 jaar als starter worden aangemerkt in de 1e 5 jaar dat u ondernemer bent voor de inkomstenbelasting."
+      ]
+    },
+    {
+      "url": "https://www.rvo.nl/subsidies-financiering/wbso/kalender",
+      "accessed_utc": "2026-08-19T06:37:00Z",
+      "http_status": 200,
+      "quotes": [
+        "Wilt u vanaf 1 januari gebruik maken van WBSO? Dien dan uiterlijk 20 december uw aanvraag in.",
+        "Wilt u een (extra) aanvraag indienen voor de periode oktober - december? Dien dan uiterlijk 30 september uw aanvraag in.",
+        "woensdag 30 september 2026 Uiterste datum voor het aanvragen van WBSO voor 2026",
+        "dinsdag 31 maart 2026 Uiterste datum voor het doorgeven van gerealiseerde S&O-uren (en eventuele kosten en uitgaven) in 2025"
+      ]
+    },
+    {
+      "url": "https://www.rvo.nl/subsidies-financiering/wbso/voorwaarden",
+      "accessed_utc": "2026-08-19T06:37:00Z",
+      "http_status": 200,
+      "page_checked_by_rvo_on": "11 augustus 2026",
+      "quotes": [
+        "U ontwikkelt zelf een product, productieproces of programmatuur. Of u voert technisch-wetenschappelijk onderzoek uit.",
+        "Uw S&O-project vindt plaats in een lidstaat van de Europese Unie (EU).",
+        "U gaat nog beginnen of u bent nog bezig met S&O. U kunt alleen WBSO aanvragen voor toekomstige S&O-werkzaamheden.",
+        "U hanteert een planmatige aanpak voor de S&O-werkzaamheden, met bijvoorbeeld meerdere projectfases.",
+        "U bent ondernemer voor de belastingdienst en u valt onder de inkomsten- of vennootschapsbelasting.",
+        "De ontwikkeling is technisch nieuw voor uw bedrijf. Dit betekent dat de werkzaamheden uw eigen technische kennis en kunde overtreffen. Hierdoor zijn er risico's of onzekerheden of de ontwikkeling slaagt. Zijn die er niet, dan is er geen sprake van S&O.",
+        "Tijdens de ontwikkeling verwacht u concrete technische problemen die u en/of uw S&O-medewerkers zelf moeten oplossen.",
+        "U werkt per kalenderjaar minimaal 1.225 uur voor uw onderneming. (zelfstandigen)",
+        "U realiseert per kalenderjaar minimaal 500 S&O-uren. (zelfstandigen)",
+        "U bent geen publieke kennisinstelling."
+      ]
+    }
+  ]
+}

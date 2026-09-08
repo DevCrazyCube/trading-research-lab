@@ -1,0 +1,90 @@
+loaded mints 466
+mints by h {0: 156, 1: 139, 2: 171}
+bars by h {0: 20116, 1: 19362, 2: 26130}
+thresholds train(h1+h2) {'n': 42392, 'vacc_lo': 2.8812654886843236, 'vacc_hi': 26.78824225513242, 'vwap_q90': 0.08215514132506174, 'vrel_q90': 3.4107115907397128}
+thresholds h1 only {'n': 17972, 'vacc_lo': 2.9524252781960136, 'vacc_hi': 34.585307633826815, 'vwap_q90': 0.10202300205165989, 'vrel_q90': 3.845166504295126}
+thresholds h2 only {'n': 24420, 'vacc_lo': 2.8289057296940237, 'vacc_hi': 23.38806472418593, 'vwap_q90': 0.07108137292093217, 'vrel_q90': 3.1545853171497167}
+thresholds h0 (in-sample sensitivity only) {'n': 18556, 'vacc_lo': 3.259155120888596, 'vacc_hi': 36.80451296747173, 'vwap_q90': 0.07857751678236546, 'vrel_q90': 4.058858735680451}
+
+signal bars: reserved 108 / 18556 legal (0.582%) across 32 mints
+signal bars: train    268 / 42392 legal (0.632%) across 65 mints
+
+=== HOLDOUT (h==0) RULE #1, train-fixed thresholds ===
+n_trades 92  clusters 32  resolution 0.9891  (tp 7, cap 84, drop 1)
+  toll 0.0114 drop -0.30 : mint-eq mean +6.0162%  median +1.6661%  (trade-pooled mean +3.0009%)
+  toll 0.0114 drop -0.50 : mint-eq mean +5.9544%  median +1.6661%  (trade-pooled mean +2.7860%)
+  toll 0.0114 drop -1.00 : mint-eq mean +5.8000%  median +1.6661%  (trade-pooled mean +2.2487%)
+  toll 0.0250 drop -0.30 : mint-eq mean +4.5578%  median +0.2675%  (trade-pooled mean +1.5840%)
+  toll 0.0250 drop -0.50 : mint-eq mean +4.4968%  median +0.2675%  (trade-pooled mean +1.3720%)
+  toll 0.0250 drop -1.00 : mint-eq mean +4.3445%  median +0.2675%  (trade-pooled mean +0.8421%)
+
+=== TRAIN/VALIDATE (h in 1,2) RULE #1  [reproduction check] ===
+n_trades 216  clusters 65  resolution 1.0000  (tp 19, cap 197, drop 0)
+  toll 0.0114 drop -0.30 : mint-eq mean +8.0239%  median +3.5268%  (trade-pooled mean +3.6444%)
+  toll 0.0114 drop -0.50 : mint-eq mean +8.0239%  median +3.5268%  (trade-pooled mean +3.6444%)
+  toll 0.0114 drop -1.00 : mint-eq mean +8.0239%  median +3.5268%  (trade-pooled mean +3.6444%)
+  toll 0.0250 drop -0.30 : mint-eq mean +6.5378%  median +2.1026%  (trade-pooled mean +2.2186%)
+  toll 0.0250 drop -0.50 : mint-eq mean +6.5378%  median +2.1026%  (trade-pooled mean +2.2186%)
+  toll 0.0250 drop -1.00 : mint-eq mean +6.5378%  median +2.1026%  (trade-pooled mean +2.2186%)
+
+=== MATCHED RANDOM CONTROL (same reserved mints, same k per mint, same +60%TP/5min structure) ===
+  toll 0.0114 drop -0.30 : random mint-eq mean -3.0374% (sd 3.9742%) median -2.0969% | RULE +6.0162% | diff +9.0537% | pct-of-random-draws-above-rule 0.005
+  toll 0.0114 drop -1.00 : random mint-eq mean -3.2656% (sd 4.0137%) median -2.1837% | RULE +5.8000% | diff +9.0656% | pct-of-random-draws-above-rule 0.007
+  toll 0.0250 drop -0.30 : random mint-eq mean -4.9526% (sd 4.0151%) median -3.7373% | RULE +4.5578% | diff +9.5104% | pct-of-random-draws-above-rule 0.007
+  toll 0.0250 drop -1.00 : random mint-eq mean -4.4701% (sd 3.8969%) median -3.4984% | RULE +4.3445% | diff +8.8146% | pct-of-random-draws-above-rule 0.013
+
+=== UNIVERSE RANDOM CONTROL (all reserved mints, 1 random legal entry each, same structure) ===
+  toll 0.0114 drop -0.30 : mean -8.3697%
+  toll 0.0114 drop -1.00 : mean -14.5500%
+  toll 0.0250 drop -0.30 : mean -9.7215%
+  toll 0.0250 drop -1.00 : mean -15.8877%
+
+=== CLUSTER BOOTSTRAP BY MINT (holdout rule) ===
+  toll 0.0114 drop -0.30 : mean +6.0162%  95%CI [-3.3063%, +15.5293%]  Bonf(6) 99.1667%CI [-6.4506%, +18.8728%]  boot p=0.2109
+  toll 0.0114 drop -0.50 : mean +5.9544%  95%CI [-3.3363%, +15.6004%]  Bonf(6) 99.1667%CI [-6.3825%, +19.1007%]  boot p=0.2134
+  toll 0.0114 drop -1.00 : mean +5.8000%  95%CI [-3.4979%, +15.3168%]  Bonf(6) 99.1667%CI [-6.5183%, +18.9850%]  boot p=0.2295
+  toll 0.0250 drop -0.30 : mean +4.5578%  95%CI [-4.5326%, +13.9486%]  Bonf(6) 99.1667%CI [-7.5719%, +17.5425%]  boot p=0.3336
+  toll 0.0250 drop -0.50 : mean +4.4968%  95%CI [-4.5830%, +14.0793%]  Bonf(6) 99.1667%CI [-7.5457%, +17.1362%]  boot p=0.3425
+  toll 0.0250 drop -1.00 : mean +4.3445%  95%CI [-4.8790%, +13.9481%]  Bonf(6) 99.1667%CI [-7.9636%, +17.3709%]  boot p=0.3692
+
+=== RULE MINUS MATCHED-RANDOM, cluster bootstrap by mint (toll 1.14%, drop -30%) ===
+  mean diff +9.2510%  95%CI [-0.7222%, +19.7356%]  boot p=0.0730
+
+=== SENSITIVITY ===
+  h1-only thresholds : n=67 clusters=28 mean +3.1447% median -4.8042%
+  h2-only thresholds : n=101 clusters=33 mean +8.5229% median -1.3568%
+  TP window includes exit bar : n=92 clusters=32 mean +6.0282% median +1.6661%
+
+=== PER-MINT (holdout, toll 1.14%, drop -30%) ===
+  366gLzZCnFaTCKwu3WTVgAupyEjPobADzQcpyDqg2znb k=1 mean +58.1760%
+  AiJqiFRQwLZCLC9H3hjq5ybqtxomQBw1Av3zVQxGpump k=1 mean +58.1760%
+  4ERm7CM2jebnkMw3DmUpETxoGNS6jLfV4ALfjc5Spump k=1 mean +58.1760%
+  71LpepycprfPA9TojHe4RyiRwHJKP2LVsU3pcnWupump k=1 mean +57.7944%
+  2ENza2td1vrHsA5KTBxKXS6KwQMxA6m8yVtpeEN6pump k=1 mean +45.6700%
+  DDWjoEafc3AYGXRHtCjqNKXEDmrsmSnF2n54qpqRpump k=1 mean +35.1991%
+  9P5QjsLxo1yTKiGesHxKN1wk9Kh7E8iJdSpsLsJBpump k=1 mean +20.1861%
+  HmFiZ9cnF86oni8eKGRpNmupXNYkVjB1DXUhRDFjpump k=3 mean +18.3119%
+  GHY6qJW3e5tfg2qDTB1bHJM7JfqLeXwzwYhooPdApump k=6 mean +14.3639%
+  CPP68w7Vjh5SM41vEX4V56RPagz8sEzZcH5rsq5Npump k=1 mean +12.7930%
+  BGBsxrYAt7SLUGXHY5gk1P1kScwfrYKgNsATt3v6pump k=1 mean +11.3505%
+  6ReG5TSHpGmsH3PNv6RougY2X16hwnzYLjq6yV6pump k=10 mean +10.9044%
+  FGd9DLzT86zpFdY3fGYEjZq7Q6HUuaoFSqkEYAvHtoqQ k=5 mean +10.1192%
+  ELBWGw6MJq5Epww3WXVKdre2zQwKJe8VmBfjCrkzandy k=1 mean +8.4073%
+  6aMCxYx2Ytabigt8sWBHeZRv1dwPajkf7AQsZhjUpump k=7 mean +4.9121%
+  Hdmk47dydrBXmHeqBToSSHPT5oNP6xzY9XgMn67bpump k=4 mean +3.8261%
+  owsjKRT7xbxk4wX5bkHRVsddQGwSnhbiLr5ErpYpump k=1 mean -0.4938%
+  HhqF5NowD4qThZBNDbgYAFvChEpAexSk1Qmu1nCzpump k=6 mean -1.6307%
+  HLWEEijW4FUpkpnMvoWWjbZh15gmzbCSUf1jzannpump k=2 mean -6.0192%
+  6Quog29HQ5tA5BdnCv3FWpW8WEpdxCsxEpt2TGCZpump k=10 mean -6.0435%
+  57aJfPxk73pdZP9wcywGengaZKWEWYf76LPYWN3sNueA k=1 mean -7.6195%
+  E2rNPRhsueQ9LygMVthiWVPEnS4nHyoG5kw1NKmwpump k=10 mean -7.7159%
+  9SwAztznorPvF5teWG1SdT6XFZW5PsGP6Hgc4c28jRGo k=3 mean -8.4302%
+  9Tuju31pXHzz9PvRY1JZaXKh7LQCHy1CBPyB5kCnpump k=4 mean -8.8636%
+  DDMXBssrBUHH4JxAxjUt3SQ8pogcaFNTNPzhx7RApump k=1 mean -10.0782%
+  886US8inua7uDEhfWNWUtSaNNKzMQrMXbqXDuaXvpump k=2 mean -10.1063%
+  7S4XmHSx1NzNgZLzvNyppkk5AT8cG6GXVkzWoWeVpump k=1 mean -11.7549%
+  3zh9CTwPf8vvPrM5xBWmdkzpWRbmRJyvYo46fZBVpump k=2 mean -12.8792%
+  AQi9C9ak1TKTse3kSFKANybEhZmaVpTab1ukhsEhpump k=1 mean -25.4302%
+  2C3CURT1uZUdqxoxFcMGwbVevom1ETu6FNDcaaByDR7A k=1 mean -29.2021%
+  CLswSJX4iM6spxTxppNv2YBdR2gbTTHB1SVTAojrpump k=1 mean -35.8449%
+  FeeJBAonCaKwtD5i3hkWAUnamvDWZFLqzcnHZwB3pump k=1 mean -53.7342%

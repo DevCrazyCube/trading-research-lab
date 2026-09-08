@@ -1,0 +1,9 @@
+curves 1272 rows 94944
+mode S H=450 n=94944 mean -0.1748 med -0.2313 p90 0.2749 grad 0.0439
+mode S H=900 n=94944 mean -0.2129 med -0.3039 p90 0.1767 grad 0.0550
+mode S H=2250 n=94944 mean -0.2362 med -0.3532 p90 0.0851 grad 0.0663
+mode S H=4500 n=94944 mean -0.2498 med -0.3807 p90 0.0437 grad 0.0699
+mode L1 H=450 n=94944 mean -0.1802 med -0.2542 p90 0.2746 grad 0.0440
+mode L1 H=900 n=94943 mean -0.2184 med -0.3228 p90 0.1791 grad 0.0551
+mode L1 H=2250 n=94943 mean -0.2417 med -0.3677 p90 0.0841 grad 0.0664
+mode L1 H=4500 n=94943 mean -0.2554 med -0.3917 p90 0.0426 grad 0.0700

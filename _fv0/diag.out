@@ -1,0 +1,15 @@
+n mints 369
+top10 mint means [np.float64(74.7), np.float64(76.6), np.float64(83.9), np.float64(103.9), np.float64(123.8), np.float64(149.3), np.float64(169.8), np.float64(452.4), np.float64(523.3), np.float64(10268.3)]
+bot10 [np.float64(-100.0), np.float64(-100.0), np.float64(-96.1), np.float64(-95.7), np.float64(-95.6), np.float64(-93.5), np.float64(-93.0), np.float64(-73.1), np.float64(-65.0), np.float64(-65.0)]
+p1 -95.61
+p5 -61.43
+p10 -40.36
+p25 -26.24
+p50 -9.75
+p75 -3.67
+p90 3.48
+p95 20.19
+p99 155.85
+mean 17.1 trimmed10% -14.34
+boot CI mean -14.03 75.62
+frac mints >0 14.6

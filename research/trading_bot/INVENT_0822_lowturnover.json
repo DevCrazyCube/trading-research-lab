@@ -1,0 +1,142 @@
+{
+ "theme": "LOW-TURNOVER weekly/monthly signals where the execution-cost wall is not binding",
+ "date": "2026-08-22",
+ "verdict": "HONEST ZERO on alpha; one strongly generalisable structural finding (the rho1 gate predicts gross Sharpe with rank corr -0.84 across 19 tethered bond/credit RV pairs)",
+ "windows": {
+  "xs_design": [
+   "2016-01-04",
+   "2021-12-31"
+  ],
+  "xs_holdout": [
+   "2022-01-03",
+   "2026-08-14"
+  ],
+  "ts_design": [
+   "2002-07-30",
+   "2016-12-31"
+  ],
+  "ts_holdout": [
+   "2017-01-03",
+   "2026-08-14"
+  ]
+ },
+ "multiple_testing": {
+  "distinct_formulas": 48,
+  "design_cells": 81,
+  "sqrt_2lnN": 2.9646076147350224,
+  "empirical_null_sigma_t": 0.9458469101242077,
+  "empirical_null_draws": 60,
+  "pooled_bar_t": 2.8040649521278187,
+  "best_genuine_design_gross_t": 1.82,
+  "best_any_design_gross_t": 5.12,
+  "best_any_note": "RV_SHORTGOV_SCHO_VGSH; rho1(ds)=-0.428 => pure bid-ask bounce; net -2.86 design / -6.30 heldout"
+ },
+ "premise_check": {
+  "claim": "at a 21-63 day hold the 5bp half-spread stops binding",
+  "result": "CONFIRMED as mechanics",
+  "turnover_per_day_range": [
+   0.004,
+   0.027
+  ],
+  "breakeven_cost_bps_range": [
+   15,
+   226
+  ],
+  "cost_share_of_gross_range": [
+   0.06,
+   0.34
+  ],
+  "charged_half_spread_bps": 5.0
+ },
+ "key_finding": {
+  "name": "rho1 gate predicts gross Sharpe inside the tethered-RV family",
+  "spearman_rho1_vs_design_gross_sharpe": -0.837,
+  "pearson": -0.76,
+  "spearman_rho1_vs_design_net_sharpe": -0.3,
+  "n_pairs": 19,
+  "asset_class": "bond/credit ETFs",
+  "clock": "weekly",
+  "sample": "2002-07-30..2026-08-20",
+  "implication": "within this family a HIGH gross Sharpe is evidence AGAINST the spread; apply the gate before looking at Sharpe, not as a tiebreak"
+ },
+ "survivors": [],
+ "logging_only": [
+  {
+   "name": "DIV_CUT_DEPTH",
+   "desc": "-max(0, 1 - TTM dividend / prior-year TTM dividend), payers only; long non-cutters, short by cut depth; monthly overlapping book",
+   "mechanism": "a dividend cut evicts a price-insensitive income clientele and the eviction takes months",
+   "cells_positive_gross": "8/8",
+   "cells_positive_net": "7/8",
+   "design_gross_sharpe_h21_narrow": 0.51,
+   "heldout_gross_sharpe_h21_narrow": 0.52,
+   "heldout_net_sharpe_h21_narrow": 0.37,
+   "best_design_gross_t": 1.82,
+   "bar": 2.8,
+   "breakeven_cost_bps": [
+    15,
+    74
+   ],
+   "status": "logging-only, promoted by nothing"
+  }
+ ],
+ "ruled_out": [
+  "slow cross-sectional equity tilts (42+12 cells, nothing above 0.65x bar)",
+  "illiquidity/neglect premium at $20M+ AND $2M+ ADV (negative out of sample)",
+  "duration-tethered bond/credit RV on a weekly clock (19 pairs, 24y) -- gross Sharpe is bounce",
+  "curve-shape RV (2s10s30s butterfly, TIPS breakeven): half-lives 288-1678d, ADF fails to reject",
+  "rebalancing/diversification premium (real, far too small; 4/4 negative out of sample)",
+  "term premium duration-matched TLT/SHY (design SR -0.89, heldout -1.21)",
+  "sector rotation on a monthly clock (underpowered by construction; design best t 0.26)"
+ ],
+ "published_benchmarks_in_window": {
+  "BETA_LOW": {
+   "design": [
+    -0.55,
+    -0.53
+   ],
+   "heldout": [
+    -0.36,
+    -0.38
+   ]
+  },
+  "IVOL_LOW": {
+   "design": [
+    -0.22,
+    -0.25
+   ],
+   "heldout": [
+    -0.13,
+    -0.15
+   ]
+  },
+  "DIVY_TTM": {
+   "design": [
+    -0.23,
+    -0.25
+   ],
+   "heldout": [
+    -0.12,
+    -0.14
+   ]
+  },
+  "note": "gross Sharpe [h21,h63]; the published slow tilts were negative in this window and universe"
+ },
+ "files": {
+  "md": "research/trading_bot/INVENT_0822_lowturnover.md",
+  "freeze": "research/trading_bot/INVENT_0822_slowturn_FREEZE.md",
+  "xs_design": "research/trading_bot/INVENT_0822_slowturn_XS_DESIGN.json",
+  "xs_holdout": "research/trading_bot/INVENT_0822_slowturn_XS_HOLDOUT.json",
+  "wide": "research/trading_bot/INVENT_0822_slowturn_WIDE.json",
+  "sector": "research/trading_bot/INVENT_0822_slowturn_SECTOR.json",
+  "ts": "research/trading_bot/INVENT_0822_slowturn_TS.json",
+  "null": "research/data/inv0822_cache/NULL.json",
+  "selftest": "research/data/inv0822_cache/SELFTEST.json",
+  "scripts": [
+   "scripts/trading_bot/invent0822_slow_xs.py",
+   "scripts/trading_bot/invent0822_slow_wide.py",
+   "scripts/trading_bot/invent0822_slow_sector.py",
+   "scripts/trading_bot/invent0822_slow_ts.py"
+  ]
+ },
+ "next_move": "not another formula sweep: every dead end here shares one shape -- free data prices a STATISTIC but not a CLAIM. The two owned survivors (T12 CEF, dual-class) work because a third party publishes the tether's true value. Ask which cheap feed publishes a TETHER VALUE the programme does not yet consume."
+}

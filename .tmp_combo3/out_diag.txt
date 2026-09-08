@@ -1,0 +1,40 @@
+TRAIN H=5  mint-equal mean=-0.0182 median=-0.0370 | pooled mean=0.0162 median=-0.0006 | n=18416 k=163 dropfrac=0.013
+    per-trade quantiles: -0.945 -0.159 -0.042 -0.001 0.031 0.102 0.764 10.036
+    max per-trade 70.9 ; per-mint mean top5 [0.911197   1.33219145 2.07337741 2.71649569 2.99191739]
+    winsor[-100%,+300%] pooled mean=-0.0064
+VALID H=5  mint-equal mean=-0.0322 median=-0.0478 | pooled mean=0.0077 median=0.0005 | n=24948 k=199 dropfrac=0.012
+    per-trade quantiles: -0.905 -0.132 -0.037 0.001 0.033 0.097 0.666 3.750
+    max per-trade 127.2 ; per-mint mean top5 [0.5566562  0.61592637 0.80539861 3.9854025  5.16563528]
+    winsor[-100%,+300%] pooled mean=-0.0033
+TRAIN H=15  mint-equal mean=-0.0579 median=-0.0866 | pooled mean=0.0123 median=-0.0047 | n=18271 k=160 dropfrac=0.021
+    per-trade quantiles: -1.000 -0.306 -0.097 -0.005 0.061 0.175 1.246 18.396
+    max per-trade 34.1 ; per-mint mean top5 [0.99007146 1.26302601 1.3793404  2.07337741 4.06130791]
+    winsor[-100%,+300%] pooled mean=-0.0231
+VALID H=15  mint-equal mean=0.9389 median=-0.0894 | pooled mean=0.4700 median=-0.0022 | n=24736 k=198 dropfrac=0.021
+    per-trade quantiles: -1.000 -0.258 -0.083 -0.002 0.059 0.181 0.972 6.990
+    max per-trade 10385.7 ; per-mint mean top5 [  1.10520418   1.81603493   2.60949169   6.70861698 204.6732792 ]
+    winsor[-100%,+300%] pooled mean=-0.0182
+TRAIN H=60  mint-equal mean=-0.2148 median=-0.1961 | pooled mean=-0.0773 median=-0.0458 | n=17705 k=154 dropfrac=0.052
+    per-trade quantiles: -1.000 -0.803 -0.309 -0.046 0.083 0.337 1.581 6.397
+    max per-trade 27.0 ; per-mint mean top5 [0.30259799 0.35370972 0.4258551  0.70265179 1.07420748]
+    winsor[-100%,+300%] pooled mean=-0.0965
+VALID H=60  mint-equal mean=0.3316 median=-0.1840 | pooled mean=0.2169 median=-0.0203 | n=23890 k=187 dropfrac=0.054
+    per-trade quantiles: -1.000 -0.697 -0.201 -0.020 0.099 0.350 1.588 14.672
+    max per-trade 4824.6 ; per-mint mean top5 [ 0.44817999  0.92100776  6.97196066 10.93236942 89.1280582 ]
+    winsor[-100%,+300%] pooled mean=-0.0550
+--- biggest single moves (validate, H=15) ---
+n moves >+500%: 37
+   10385.7x mint=GaFQuLuVt3y8 ts=1785246000 op_in=6.509e-10 op_out=6.761e-06 bars=14
+   729.8x mint=GaFQuLuVt3y8 ts=1785246120 op_in=1.267e-08 op_out=9.259e-06 bars=15
+   415.3x mint=GaFQuLuVt3y8 ts=1785246180 op_in=2.354e-08 op_out=9.799e-06 bars=15
+   161.4x mint=GaFQuLuVt3y8 ts=1785246240 op_in=5.754e-08 op_out=9.345e-06 bars=15
+   110.2x mint=GaFQuLuVt3y8 ts=1785246300 op_in=8.347e-08 op_out=9.282e-06 bars=15
+   37.1x mint=3jRu3raCzB9u ts=1785210240 op_in=1.121e-08 op_out=4.267e-07 bars=14
+   26.1x mint=GaFQuLuVt3y8 ts=1785246420 op_in=3.240e-07 op_out=8.767e-06 bars=15
+   20.3x mint=3jRu3raCzB9u ts=1785210180 op_in=2.297e-08 op_out=4.898e-07 bars=14
+   18.2x mint=3jRu3raCzB9u ts=1785210720 op_in=8.020e-08 op_out=1.536e-06 bars=11
+   17.8x mint=FxfSbGfC83vm ts=1785198780 op_in=1.055e-08 op_out=1.983e-07 bars=2
+   17.7x mint=FxfSbGfC83vm ts=1785198900 op_in=1.060e-08 op_out=1.983e-07 bars=1
+   17.7x mint=FxfSbGfC83vm ts=1785198720 op_in=1.062e-08 op_out=1.983e-07 bars=3
+distinct mints with >+500% 15m moves: 9
+bars with open outside [low,high]: 0 of 46110

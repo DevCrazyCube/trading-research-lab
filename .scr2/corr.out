@@ -1,0 +1,29 @@
+done first     /p_single   /h15   /m_plain  
+done first     /p_single   /h60   /m_plain  
+done first     /p_single   /h480  /m_plain  
+done first     /p_single   /h1440 /m_plain  
+done allbars   /p_single   /h15   /m_plain  
+done allbars   /p_single   /h60   /m_plain  
+done allbars   /p_single   /h180  /m_plain  
+done age60     /p_single   /h60   /m_plain  
+done allbars   /p_single   /h60   /m_tp100  
+done allbars   /p_single   /h60   /m_sl35   
+done allbars   /p_single   /h60   /m_tr40   
+done allbars   /p_50_50_15 /h60   /m_plain  
+
+=== SPEARMAN rho(feature, per-mint net return) over 12 representative structures ===
+feature          TRAIN mean   TRAIN +% VALID mean   VALID +%
+nprior              -0.0993       0.08    -0.0588       0.25
+prior_grad          -0.1415       0.08    -0.1069       0.08
+prior_gradrate      -0.1511       0.08    -0.1312       0.08
+prior_grad_lag      -0.1511       0.00    -0.0614       0.08
+burst300            -0.0740       0.08    -0.0416       0.25
+burst600            -0.1291       0.08    -0.0694       0.08
+burst1800           -0.1221       0.08    -0.0540       0.08
+burst3600           -0.1166       0.08    -0.0550       0.25
+burst7200           -0.1174       0.08    -0.0634       0.25
+gap                 +0.1171       0.83    +0.0789       0.75
+age_creator         -0.1015       0.08    -0.0387       0.33
+rate_per_h          -0.1058       0.08    -0.0797       0.17
+
+noise floor |rho| at p=.05: train(n=175)=0.149  valid(n=207)=0.137

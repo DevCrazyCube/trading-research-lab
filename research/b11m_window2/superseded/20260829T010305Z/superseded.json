@@ -1,0 +1,35 @@
+{
+  "archived_at": "20260829T010305Z",
+  "moved": [
+    {
+      "from": "/home/anont/meme/research/b11m_window2/receipts/decode_and_reserves.json",
+      "stage": "decode_and_reserves",
+      "to": "/home/anont/meme/research/b11m_window2/superseded/20260829T010305Z/receipts/decode_and_reserves.json"
+    }
+  ],
+  "quarantine_cleared": {
+    "exit_code": 1,
+    "reason_code": "Q07_stage_failed",
+    "stage": "decode_and_reserves"
+  },
+  "reason": "T37 2026-08-29 03:00 CEST (durable supervisor CHUNK B, T34_RESTART_2026-08-25.md s6b): retire the FAILED decode_and_reserves receipt (exit 1, Q07: 'boundary_completed_at_unix is absent') so the stage runs again. Root cause fixed upstream: the live b11a_bodies.sqlite (started 08-25) never had stage-1 program_boundary run into it; the frozen stage-1 argv (collect-boundary, cutoff 438854169) was re-run directly into the live artifact at 03:02 CEST via mainnet-beta (disclosed single-stage supervisor bypass; stdout in logs/program_boundary_rerun_20260829.stdout.log): last_deploy_slot pump 433095571 / pumpswap 433112355 = the 08-13 values, evidence keys identical, program_version 2 rows, raw_boundary_response 4 rows, boundary_completed_at_unix present. clear_quarantine=True requested explicitly: Q07 recorded verbatim here. Manifest unchanged (33da3a7e...), so reattest_in_place is deliberately NOT called (it refuses a no-op by design).",
+  "stages_completed_after": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory",
+    "transaction_bodies"
+  ],
+  "stages_completed_before": [
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory",
+    "transaction_bodies"
+  ],
+  "superseded_stages": [
+    "decode_and_reserves"
+  ]
+}

@@ -1,0 +1,33 @@
+mints with bars: 440   median bars/mint: 28.0   total bars: 53962
+
+=== exit=time  entry_gap_tol=None  TOLL=1.14% RT ===
+  charge  -30%  n= 4556 clusters=209 res= 98.9%  CELL mean=  -2.86% MED=  +4.91% meanCI95[  -7.21,  +2.02]
+                                            CTRL mean= +10.24% MED=  +1.69%   (CELL-CTRL) CI95[ -48.31,  +4.76]
+  charge  -50%  n= 4556 clusters=209 res= 98.9%  CELL mean=  -3.08% MED=  +4.91% meanCI95[  -7.39,  +1.75]
+                                            CTRL mean=  +9.86% MED=  +1.69%   (CELL-CTRL) CI95[ -48.14,  +4.85]
+  charge -100%  n= 4556 clusters=209 res= 98.9%  CELL mean=  -3.61% MED=  +4.91% meanCI95[  -7.97,  +1.37]
+                                            CTRL mean=  +8.91% MED=  +1.69%   (CELL-CTRL) CI95[ -47.85,  +5.36]
+
+=== exit=time  entry_gap_tol=900  TOLL=1.14% RT ===
+  charge  -30%  n= 4556 clusters=209 res= 98.8%  CELL mean=  -2.89% MED=  +4.90% meanCI95[  -7.24,  +1.98]
+                                            CTRL mean=  +9.56% MED=  +1.39%   (CELL-CTRL) CI95[ -47.65,  +5.38]
+  charge  -50%  n= 4556 clusters=209 res= 98.8%  CELL mean=  -3.13% MED=  +4.90% meanCI95[  -7.44,  +1.68]
+                                            CTRL mean=  +8.71% MED=  +1.39%   (CELL-CTRL) CI95[ -46.97,  +6.03]
+  charge -100%  n= 4556 clusters=209 res= 98.8%  CELL mean=  -3.72% MED=  +4.90% meanCI95[  -8.09,  +1.26]
+                                            CTRL mean=  +6.58% MED=  +1.39%   (CELL-CTRL) CI95[ -45.59,  +7.81]
+
+=== exit=bars  entry_gap_tol=None  TOLL=1.14% RT ===
+  charge  -30%  n= 4556 clusters=209 res= 94.1%  CELL mean=  +0.12% MED=  +5.27% meanCI95[  -3.49,  +4.91]
+                                            CTRL mean= +12.30% MED=  +1.87%   (CELL-CTRL) CI95[ -47.92,  +5.81]
+  charge  -50%  n= 4556 clusters=209 res= 94.1%  CELL mean=  -1.07% MED=  +5.27% meanCI95[  -4.80,  +3.89]
+                                            CTRL mean= +10.13% MED=  +1.87%   (CELL-CTRL) CI95[ -46.93,  +6.81]
+  charge -100%  n= 4556 clusters=209 res= 94.1%  CELL mean=  -4.04% MED=  +5.27% meanCI95[  -8.45,  +0.95]
+                                            CTRL mean=  +4.71% MED=  +1.87%   (CELL-CTRL) CI95[ -44.35,  +9.36]
+
+=== exit=bars  entry_gap_tol=900  TOLL=1.14% RT ===
+  charge  -30%  n= 4556 clusters=209 res= 94.0%  CELL mean=  +0.11% MED=  +5.27% meanCI95[  -3.50,  +4.89]
+                                            CTRL mean= +11.99% MED=  +1.71%   (CELL-CTRL) CI95[ -47.58,  +6.21]
+  charge  -50%  n= 4556 clusters=209 res= 94.0%  CELL mean=  -1.09% MED=  +5.27% meanCI95[  -4.83,  +3.87]
+                                            CTRL mean=  +9.64% MED=  +1.71%   (CELL-CTRL) CI95[ -46.42,  +7.26]
+  charge -100%  n= 4556 clusters=209 res= 94.0%  CELL mean=  -4.10% MED=  +5.27% meanCI95[  -8.54,  +0.91]
+                                            CTRL mean=  +3.78% MED=  +1.71%   (CELL-CTRL) CI95[ -43.47, +10.14]

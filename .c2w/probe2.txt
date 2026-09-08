@@ -1,0 +1,13 @@
+wl tables ['window_label', 'metadata']
+wl cols ['bonding_curve', 'mint', 'creator', 'create_slot', 'block_time', 'complete', 'account_missing', 'status', 'creator_onchain', 'virtual_token_reserves', 'real_token_reserves', 'data_len', 'fetched_at_unix']
+wl count (33866, 1075)
+wl sample [('DjSqk3XLJb4Wboo67WsYkW4BFrzmTNKqQDpRaasbhWdV', 'B6VzvpYJa9nRTX6VNJxwmTAJ1MRnU3Jmyk6VWUxkpump', 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 435569160, 1785168436, 0, 0, 'ok', 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 1073000000000000, 793100000000000, 151, 1788383767.6913838), ('8eVedziyhkPjoUw7qnHbWjQGV3KCq3gbvCJ7Svg8iJBv', 'DnQu4Mg8Y4qV41SwgjthSVHn1UzqVUU8QdpF3tK4pump', 'DwyEawtMyDDVFxgLvaLrDkbQYi8hTb6YWgrpJCKB6UVC', 435569191, 1785168449, 0, 0, 'ok', 'DwyEawtMyDDVFxgLvaLrDkbQYi8hTb6YWgrpJCKB6UVC', 1073000000000000, 793100000000000, 151, 1788383767.6913838)]
+snap keys ['ath', 'ath_ts', 'complete', 'created_ms', 'creator', 'has_tg', 'has_web', 'has_x', 'last_trade_ms', 'live', 'mcap', 'mint', 'name', 'pool', 'replies', 'rsol', 'rtok', 'sym', 'ts_ms', 'vsol', 'vtok']
+snap sample {'ts_ms': 1788448363901, 'mint': 'iG8wRS2S8LRVQQnUhYTDmbv5i9VF9tGQzbTo65Ppump', 'sym': 'PONS', 'name': 'Pons', 'mcap': 901055203.0917726, 'ath': 906563344.416743, 'ath_ts': 1788447994000, 'created_ms': 1788413869000, 'last_trade_ms': 1788448375000, 'complete': True, 'live': False, 'replies': 0, 'creator': '7272sSKFvgkwXM4gPABXeccjJY8nyiceHQPqPb6uWoUd', 'vsol': 30000000000.0, 'rsol': 0.0, 'vtok': 1073000000000000.0, 'rtok': 0.0, 'has_x': True, 'has_tg': False, 'has_web': True, 'pool': 'FW8tRvXq3orFWhYxaDV99ipuujYonVbncihiVtTtfv5p'}
+snap rows 25330 distinct mints 340
+snaps per mint quantiles [1, 2, 6, 12, 23, 42, 60, 101, 179, 218]
+ohlcv ok mints 594 h12 387
+overlap with snapshots 0
+overlap with window_labels 387
+train(h1) 178 validate(h2) 209
+total bars h12 46146

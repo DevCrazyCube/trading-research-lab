@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Keep the AFTERSHOCK tape-driven scan/track loop alive. PAPER / READ-ONLY: no orders, no wallet, no SOL.
+# RETIRED 2026-08-27: V1 uses the burned pre-execution-realism resolver.  Preserve ledgers; never
+# restart this paper loop.  Reuse this existing cron heartbeat only to keep PAC's read-only SOL/USD
+# evidence recorder alive; it has no strategy/order path.
 cd /home/anont/meme || exit 1
-if ! pgrep -f "aftershock run --loop" >/dev/null 2>&1; then
-  setsid nohup python -m scripts.trading_bot.aftershock run --loop --interval 90 \
-      >> scripts/trading_bot/aftershock/scan.log 2>&1 < /dev/null &
-  echo "$(date -Is) watchdog: aftershock scan loop restarted (pid $!)" \
-      >> scripts/trading_bot/aftershock/scan_watchdog.log
-fi
+bash scripts/trading_bot/aftershock/solusd_recorder_watchdog.sh
+pkill -TERM -f '^python -m scripts\.trading_bot\.aftershock run --loop --interval 90$' 2>/dev/null || true
+exit 0

@@ -18,6 +18,7 @@ from . import pac_scalp_ll_calibration as calibration
 from . import pac_scalp_ll_campaign as campaigns
 from . import pac_scalp_ll_manifest as manifest
 from . import pac_scalp_ll_route as routes
+from . import pac_scalp_ll_tx as tx
 
 
 RAW_SCHEMA = 1
@@ -89,7 +90,9 @@ def _verify_finalized(attempt: dict, response: dict, campaign: campaigns.Campaig
     result = response["result"]
     transaction = result.get("transaction")
     meta = result.get("meta")
-    if (type(result.get("slot")) is not int or result["slot"] != attempt["processed_slot"]
+    expected_slot = attempt["processed_slot"] if attempt["stage"] == "PROCESSED" else result.get("slot")
+    if (type(result.get("slot")) is not int or result["slot"] <= 0
+            or result["slot"] != expected_slot
             or not isinstance(transaction, list) or len(transaction) != 2
             or transaction[1] != "base64" or transaction[0] != attempt["wire_base64"]
             or not isinstance(meta, dict) or meta.get("err") is not None
@@ -101,6 +104,34 @@ def _verify_finalized(attempt: dict, response: dict, campaign: campaigns.Campaig
     calibration._validate_attempt(attempt, campaign, attempt["attempt_index"])
     return {"finalized_slot": result["slot"], "meta_fee_lamports": meta["fee"],
             "raw_response_sha256": campaigns.sha(response)}
+
+
+def _verify_expired_absence(url: str, attempt: dict, campaign: campaigns.Campaign,
+                            request_id: int, *, rpc) -> tuple[dict, dict, dict]:
+    """Prove that a locally failed wire can no longer land, not merely that one lookup missed it."""
+    if attempt.get("stage") != "FAILED":
+        raise AttestationRefused("only a failed ITT attempt can use expiry-backed absence")
+    parsed = tx.verify(
+        attempt.get("wire_base64"),
+        expected_memo=tx.campaign_memo(
+            campaign.campaign_sha256, attempt.get("arm"), attempt.get("attempt_index")),
+        expected_profile=campaign.profile)
+    request = {"jsonrpc": "2.0", "id": request_id, "method": "isBlockhashValid",
+               "params": [parsed["recent_blockhash"],
+                          {"commitment": "finalized"}]}
+    response = rpc(url, request)
+    result = response.get("result") if isinstance(response, dict) else None
+    context = result.get("context") if isinstance(result, dict) else None
+    if (not isinstance(response, dict) or response.get("jsonrpc") != "2.0"
+            or response.get("id") != request_id or not isinstance(result, dict)
+            or not isinstance(context, dict) or type(context.get("slot")) is not int
+            or context["slot"] <= 0 or result.get("value") is not False):
+        raise AttestationRefused(
+            "failed ITT absence requires a finalized expired-blockhash proof")
+    safe = {"blockhash_expired_at_finalized": True,
+            "absence_finalized_slot": context["slot"],
+            "expiry_response_sha256": campaigns.sha(response)}
+    return request, response, safe
 
 
 def attest(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
@@ -136,12 +167,17 @@ def attest(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
         if response["result"] is None:
             if attempt["stage"] != "FAILED":
                 raise AttestationRefused("processed sample is absent at finalized commitment")
+            expiry_request, expiry_response, expiry_safe = _verify_expired_absence(
+                verification_url, attempt, campaign, 100_000 + ordinal, rpc=rpc)
             verified = {"finalized_slot": None, "meta_fee_lamports": None,
                         "raw_response_sha256": campaigns.sha(response),
-                        "finalized_after_local_failure": False}
+                        "finalized_after_local_failure": False, **expiry_safe}
         else:
             verified = _verify_finalized(attempt, response, campaign)
             verified["finalized_after_local_failure"] = attempt["stage"] == "FAILED"
+            verified.update(blockhash_expired_at_finalized=False,
+                            absence_finalized_slot=None, expiry_response_sha256=None)
+            expiry_request = expiry_response = None
         raw_body = {
             "schema": RAW_SCHEMA, "instrument_id": campaigns.INSTRUMENT,
             "campaign_sha256": campaign.campaign_sha256,
@@ -149,6 +185,7 @@ def attest(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
             "request_started_unix_nanos": started,
             "response_received_unix_nanos": finished,
             "request_json": request, "response_json": response,
+            "expiry_request_json": expiry_request, "expiry_response_json": expiry_response,
         }
         raw_rows.append({**raw_body, "raw_row_sha256": campaigns.sha(raw_body)})
         safe_rows.append({

@@ -1,0 +1,104 @@
+[
+ {
+  "venue": "polymarket",
+  "market_id": "1193650",
+  "question": "Will the 2026 Midterm Elections happen as scheduled?",
+  "category": "politics/trump/elections",
+  "p_market": 0.9605,
+  "yes_bid": 0.96,
+  "yes_ask": 0.961,
+  "spread": 0.001,
+  "close_time": "2026-12-31T00:00:00Z",
+  "q_agent": 0.99,
+  "confidence": 0.9,
+  "thesis": "Election Day is fixed by federal statute (2 U.S.C. s.7, 1872) and has never been moved in 150+ years, including 1918 (influenza), 1942 (WWII) and 2020 (COVID); moving it needs an Act of Congress signed by the President, and with ~10 weeks left no such vehicle exists. The 4% NO here is a capital-lock/time-value discount plus tail-ambiguity premium, not a probability; in a no-capital calibration tracker the true probability is ~0.99 (residual = a catastrophic national event forcing an emergency statute).",
+  "event_refs": [
+   "https://polymarket.com/event/will-the-2026-midterm-elections-happen-as-scheduled"
+  ]
+ },
+ {
+  "venue": "polymarket",
+  "market_id": "559651",
+  "question": "Xi Jinping out before 2027?",
+  "category": "hfc/geopolitics/world",
+  "p_market": 0.0495,
+  "yes_bid": 0.049,
+  "yes_ask": 0.05,
+  "spread": 0.001,
+  "close_time": "2026-12-31T00:00:00Z",
+  "q_agent": 0.012,
+  "confidence": 0.7,
+  "thesis": "Structural longshot fade from actuarial base rates over the REMAINING 4-month window only: Xi Jinping (73) has no institutional rival and no term limit; the paths to YES are death/incapacity (male-73 mortality ~2.5%/yr => ~0.8% in 4 months) or a coup/forced removal (<0.3%). The 'prevented from fulfilling duties' clause adds a hospitalisation tail (~0.2%). q=0.012 vs market 0.0495: the market carries a standard 3-4 point longshot premium on tail-risk names.",
+  "event_refs": [
+   "https://polymarket.com/event/xi-jinping-out-before-2027"
+  ]
+ },
+ {
+  "venue": "polymarket",
+  "market_id": "677394",
+  "question": "Modi out by December 31, 2026?",
+  "category": "politics/india-pakistan/geopolitics",
+  "p_market": 0.0705,
+  "yes_bid": 0.069,
+  "yes_ask": 0.072,
+  "spread": 0.003,
+  "close_time": "2026-12-31T00:00:00Z",
+  "q_agent": 0.025,
+  "confidence": 0.6,
+  "thesis": "Actuarial + institutional base rate over the remaining 4 months: Modi (76) leads a stable NDA majority with no general election due until 2029; YES requires death/incapacity (~1.2% in 4 months at age 76), an RSS-driven age-norm handover that he already declined at 75 (Sept 2025), or a coalition collapse (TDP/JDU) which has no visible trigger. q=0.025 vs 0.0705; the market carries the usual 'X out' longshot premium. Caveat: I have no 2026 Indian political news; confidence reduced accordingly.",
+  "event_refs": [
+   "https://polymarket.com/event/modi-out-before-2027"
+  ]
+ },
+ {
+  "venue": "polymarket",
+  "market_id": "567690",
+  "question": "Erdoğan out by December 31, 2026?",
+  "category": "geopolitics/turkey/politics",
+  "p_market": 0.055,
+  "yes_bid": 0.05,
+  "yes_ask": 0.06,
+  "spread": 0.01,
+  "close_time": "2026-12-31T00:00:00Z",
+  "q_agent": 0.02,
+  "confidence": 0.6,
+  "thesis": "Actuarial base rate over the remaining 4 months: Erdogan (72) holds a term to 2028 with the state apparatus consolidated; YES paths are death/incapacity (~0.7%), removal (~0.3%) and the 'any period of time' temporary-incapacity clause (~0.5%, e.g. surgery with formal deputisation). q=0.02 vs 0.055 -- a longshot premium on a perennial health-rumour name. Caveat: no 2026 Turkish news in my information set.",
+  "event_refs": [
+   "https://polymarket.com/event/erdoan-out-before-2027"
+  ]
+ },
+ {
+  "venue": "polymarket",
+  "market_id": "637008",
+  "question": "Will UNRWA win the Nobel Peace Prize in 2026?",
+  "category": "awards/politics/geopolitics",
+  "p_market": 0.043,
+  "yes_bid": 0.042,
+  "yes_ask": 0.044,
+  "spread": 0.002,
+  "close_time": "2026-10-10T00:00:00Z",
+  "q_agent": 0.015,
+  "confidence": 0.6,
+  "thesis": "The Norwegian Nobel Committee has never given the prize to a body under live, unresolved terrorism-affiliation allegations and a donor funding ban; UNRWA is the most politically contested UN agency of the decade (Israeli ban law, US/EU funding freezes). Prior UN-agency awards (UNHCR, UNICEF, WFP 2020) came at uncontroversial moments, and the committee's recent picks (Machado 2025, Nihon Hidankyo 2024) favour dissidents/civil society over embattled agencies. q=0.015 vs 0.043.",
+  "event_refs": [
+   "https://polymarket.com/event/nobel-peace-prize-winner-2026-139"
+  ]
+ },
+ {
+  "venue": "polymarket",
+  "market_id": "1060714",
+  "question": "Nothing Ever Happens: 2026",
+  "category": "20-50-daily/parlays/world",
+  "p_market": 0.815,
+  "yes_bid": 0.81,
+  "yes_ask": 0.82,
+  "spread": 0.01,
+  "close_time": "2026-12-31T00:00:00Z",
+  "q_agent": 0.75,
+  "confidence": 0.5,
+  "thesis": "Relative-value read that needs no news: this is a 13-leg 'nothing happens' parlay. Multiplying (1-p) across the SAME crowd's component markets (Trump out 0.065, Taiwan 0.039, Xi out 0.0495, US invades Iran 0.155, Iranian regime falls 0.075, Greenland 0.0355, Russia-NATO ~0.02, BTC 1M/10k ~0.01, plus M9 quake ~2%, VEI6 ~0.5%, 250kt meteor ~0.5%, Epstein alive ~0.5%, R trifecta+Senate supermajority ~0.1%) gives ~0.60, yet the parlay trades at 0.815. Using my own longshot-faded component estimates instead gives ~0.75. Either the components are overpriced (my standing view) or the parlay is; both readings put the parlay BELOW 0.815. q=0.75, side NO. Risk: a single tail leg (the US-Iran and Iran-regime legs are the fat ones, and I have no post-Jan-2026 news on them) decides the whole parlay, so confidence is moderate.",
+  "event_refs": [
+   "https://polymarket.com/event/nothing-ever-happens-2026"
+  ]
+ }
+]

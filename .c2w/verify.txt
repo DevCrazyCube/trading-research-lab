@@ -1,0 +1,70 @@
+=== ROBUSTNESS OF THE 7 CELLS POSITIVE ON BOTH TRAIN AND VALIDATE ===
+(validate = h2; toll 1.14%, dropout -30%; mint-equal)
+
+  vol_share15 q3 & mdd15 q4   n=254 k=68
+    validate mean=+1.4911 median=-0.0246  frac mints>0 = 0.279
+    top mint contributes +1.5800 of the mean (its own mean +108.93, 1 trades)
+    drop top-1 mint: -0.1125 | drop top-2: -0.1257 | drop top-3: -0.1308
+    mint-matched random control: -0.0796 (sd 0.1702)  p(random>=rule)=0.005  edge=+1.5706
+
+  age_min q2 & mdd15 q4   n=366 k=93
+    validate mean=+0.4134 median=-0.2272  frac mints>0 = 0.086
+    top mint contributes +0.5884 of the mean (its own mean +55.13, 2 trades)
+    drop top-1 mint: -0.1814 | drop top-2: -0.1900 | drop top-3: -0.1937
+    mint-matched random control: -0.0827 (sd 0.1309)  p(random>=rule)=0.050  edge=+0.4961
+
+  accel_5_15 q0 & mdd15 q4   n=130 k=48
+    validate mean=+0.2098 median=-0.0243  frac mints>0 = 0.438
+    top mint contributes +0.3526 of the mean (its own mean +17.14, 1 trades)
+    drop top-1 mint: -0.1504 | drop top-2: -0.1664 | drop top-3: -0.1731
+    mint-matched random control: -0.0399 (sd 0.3102)  p(random>=rule)=0.062  edge=+0.2497
+
+  bar_range q4 & age_min q2   n=219 k=54
+    validate mean=+0.1856 median=-0.1389  frac mints>0 = 0.222
+    top mint contributes +0.3261 of the mean (its own mean +17.79, 6 trades)
+    drop top-1 mint: -0.1466 | drop top-2: -0.1528 | drop top-3: -0.1593
+    mint-matched random control: -0.0357 (sd 0.1065)  p(random>=rule)=0.090  edge=+0.2214
+
+  r5 q2 & r15 q0   n=182 k=58
+    validate mean=+0.0219 median=-0.0256  frac mints>0 = 0.345
+    top mint contributes +0.0795 of the mean (its own mean +4.63, 1 trades)
+    drop top-1 mint: -0.0590 | drop top-2: -0.0641 | drop top-3: -0.0687
+    mint-matched random control: -0.0363 (sd 0.1886)  p(random>=rule)=0.113  edge=+0.0582
+
+  cumvol60 q2 & up_frac15 q3   n=145 k=26
+    validate mean=+0.0152 median=-0.0205  frac mints>0 = 0.423
+    top mint contributes +0.0324 of the mean (its own mean +0.86, 1 trades)
+    drop top-1 mint: -0.0186 | drop top-2: -0.0539 | drop top-3: -0.0671
+    mint-matched random control: -0.0306 (sd 0.0400)  p(random>=rule)=0.113  edge=+0.0457
+
+  age_min q2 & dd60 q2   n=301 k=50
+    validate mean=+0.0102 median=-0.0715  frac mints>0 = 0.220
+    top mint contributes +0.1207 of the mean (its own mean +6.05, 1 trades)
+    drop top-1 mint: -0.1130 | drop top-2: -0.1170 | drop top-3: -0.1210
+    mint-matched random control: -0.0012 (sd 0.3207)  p(random>=rule)=0.145  edge=+0.0113
+
+
+=== SWAPPED SPLIT: train on h2, validate on h1 (full re-sweep) ===
+cells enumerated 8915 ; evaluated 6831 ; frac>0 = 0.085
+train(h2)-positive cells: 578
+validated(h1) with support: 531 ; frac>0 = 0.024
+top 15 by validate(h1) mean:
+   tr(h2)=+3.6684 va(h1)=+0.7617 med=-0.1332 n=133 k=30 | age_min q2 & dd60 q1
+   tr(h2)=+0.0684 va(h1)=+0.3399 med=-0.1029 n=70 k=45 | r1 q4 & body_pos q1
+   tr(h2)=+0.9257 va(h1)=+0.1379 med=-0.1551 n=97 k=50 | mdd15 q4 & dd60 q1
+   tr(h2)=+0.0224 va(h1)=+0.1171 med=-0.0240 n=223 k=27 | vol_share15 q1 & ath_age_min q4
+   tr(h2)=+0.8328 va(h1)=+0.0381 med=-0.1257 n=191 k=71 | vol_accel q4 & dd60 q1
+   tr(h2)=+0.0009 va(h1)=+0.0323 med=+0.0413 n=85 k=22 | r60 q4 & rvol15 q1
+   tr(h2)=+0.7709 va(h1)=+0.0275 med=-0.0979 n=192 k=56 | cumvol60 q0 & dd60 q1
+   tr(h2)=+0.8115 va(h1)=+0.0242 med=-0.1076 n=203 k=54 | price_level q0 & dd60 q1
+   tr(h2)=+0.2142 va(h1)=+0.0205 med=-0.0590 n=111 k=38 | accel_5_15 q0 & mdd15 q4
+   tr(h2)=+0.0000 va(h1)=+0.0191 med=-0.0516 n=136 k=29 | ath_age_min q4 & accel_5_15 q0
+   tr(h2)=+0.8366 va(h1)=+0.0186 med=-0.0326 n=187 k=52 | active_frac15 q0 & vol_share15 q3
+   tr(h2)=+0.7481 va(h1)=+0.0159 med=-0.0834 n=226 k=60 | active_frac15 q0 & dd60 q1
+   tr(h2)=+0.6856 va(h1)=+0.0092 med=-0.0829 n=215 k=64 | accel_5_15 q2 & dd60 q1
+   tr(h2)=+0.0181 va(h1)=-0.0024 med=-0.0184 n=256 k=41 | vwap_dev15 q3 & accel_5_15 q3
+   tr(h2)=+0.0364 va(h1)=-0.0048 med=-0.0208 n=184 k=37 | r15 q3 & accel_5_15 q3
+
+cells positive in BOTH directions of the split: [('accel_5_15', 0, 'mdd15', 4)]
+
+DONE

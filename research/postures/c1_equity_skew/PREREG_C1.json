@@ -1,0 +1,41 @@
+{
+  "posture": "C1 -- is the US equity cross-section tail-dominated too?",
+  "declared_utc": "2026-09-03T01:20:00Z",
+  "declared_before": "any effect statistic was computed or read",
+  "question": "At tradeable horizons (1d/21d/252d), in a liquid US equity universe that INCLUDES delisted names, does the MEDIAN name track the EW-MEAN basket, or is the return tail-dominated as in crypto?",
+  "crypto_reference": {
+    "panel": "Binance USD-M perps, 919 symbols incl. delisted, 2221 days, qv>=$1M/day",
+    "ew_mean_pct_per_day": 0.1267,
+    "median_pct_per_day": -0.4441,
+    "gap_pp_per_day": 0.5707,
+    "round_trip_bp": 24.1,
+    "gap_over_cost_per_day": 2.368
+  },
+  "gate1_coverage_minimums": {
+    "note": "declared BEFORE counting anything",
+    "g1a_survivorship": ">=20% of panel symbols must cease trading before the panel end date (point-in-time universe, delisted names present)",
+    "g1b_span": ">=1500 trading sessions",
+    "g1c_breadth": "liquid subset holds >=400 names on >=90% of sessions",
+    "g1d_integrity": "daily close present on >=95% of each name's in-universe sessions",
+    "on_failure": "declare sample insufficient; report every number as an upper bound or REFUSE"
+  },
+  "gate2_power": {
+    "note": "MDE computed from dispersion only, BEFORE the effect mean is read",
+    "alpha": 0.05, "sided": "one", "power": 0.80,
+    "cluster": "DATE", "icc_assumed": 0.3,
+    "estimator_a": "name-day returns; DEFF = 1 + (nbar-1)*ICC; n_eff = n_obs/DEFF; MDE = (z0.95+z0.80)*SD/sqrt(n_eff)",
+    "estimator_b": "per-date gap series g_t = EWmean_t - median_t; MDE = (z0.95+z0.80)*SD(g)/sqrt(T)",
+    "report": "both; the larger MDE governs"
+  },
+  "gate3_effect": {
+    "method": "cluster bootstrap by DATE, 5000 draws, seed 20260903",
+    "statistics": ["mean daily EW basket return", "mean daily median-name return", "gap", "compound EW vs compound median at 1d/21d/252d", "share of total return from top 1% and top 5% of names"]
+  },
+  "kill_lines_declared_in_advance": {
+    "VIABLE_name_selection_has_a_home": "gap point estimate < 0.1427 pp/day (25% of crypto) AND bootstrap CI upper bound < 0.25 pp/day AND 252d median name compound return > 0",
+    "DEAD_do_not_pick_names_is_universal": "bootstrap CI lower bound on the gap >= 0.2854 pp/day (50% of crypto)",
+    "MARGINAL": "anything between those two"
+  },
+  "control_rule": "the median is a MEASUREMENT here, never a benchmark; the only benchmark is the EW mean of the investable universe",
+  "economics": "net of a sourced realistic US equity round trip; edge/cost ratio stated explicitly"
+}

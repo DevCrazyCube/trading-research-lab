@@ -1,0 +1,9 @@
+04:38:27
+A done 04:34:48
+surface done 04:35:09
+B done 04:37:13
+C done 04:37:36
+--C tail--
+  C1 trailvol_log x logpx kept=2389 swept=15610 t=23.7
+  C1 trailvol_log x dd_ath kept=2697 swept=18396 t=27.8
+  C1 trailvol_log x ret1 kept=3820 swept=21924 t=34.7

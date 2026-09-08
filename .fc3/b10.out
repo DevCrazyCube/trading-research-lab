@@ -1,0 +1,72 @@
+=== A_lvl3_atATH_lowrv  H=30 tp=0.4 sl=-0.25 all ===
+  train    base      mean=+0.1310 cilo=+0.0372 medmint=+0.1850 n=  40 k= 16 res=1.00 fracpos=0.69 ex-top1=+0.1141
+  validate base      mean=+0.1735 cilo=+0.0936 medmint=+0.2327 n=  73 k= 23 res=0.97 fracpos=0.78 ex-top1=+0.1639
+  validate fill=close  mean=+0.0618 cilo=-0.0918 n=  73 k= 23
+  validate fill=low    mean=+0.0574 cilo=-0.0976 n=  73 k= 23
+  validate fill=slip5  mean=+0.1495 cilo=+0.0718 n=  73 k= 23
+  validate WORST(entry+2%,slip5,toll2.5%,drop-50%) mean=+0.1261 cilo=+0.0480 n=  73 k= 23
+  validate drop=-100%  mean=+0.1712
+  validate cap=+100%   mean=+0.1735 cilo=+0.0936
+=== B_lvl3_lowrv_H120  H=120 tp=0.4 sl=-0.25 all ===
+  train    base      mean=+0.0858 cilo=-0.0095 medmint=+0.0647 n=  48 k= 24 res=0.96 fracpos=0.58 ex-top1=+0.0728
+  validate base      mean=+0.1305 cilo=+0.0614 medmint=+0.0627 n= 146 k= 32 res=0.97 fracpos=0.62 ex-top1=+0.1223
+  validate fill=close  mean=-0.0171 cilo=-0.1360 n= 146 k= 32
+  validate fill=low    mean=-0.0321 cilo=-0.1585 n= 146 k= 32
+  validate fill=slip5  mean=+0.0956 cilo=+0.0269 n= 146 k= 32
+  validate WORST(entry+2%,slip5,toll2.5%,drop-50%) mean=+0.0430 cilo=-0.0236 n= 147 k= 32
+  validate drop=-100%  mean=+0.1208
+  validate cap=+100%   mean=+0.1305 cilo=+0.0614
+=== C_age3_10_atATH  H=60 tp=1.0 sl=-0.25 all ===
+  train    base      mean=+0.2566 cilo=+0.1216 medmint=+0.1648 n=  45 k= 39 res=0.98 fracpos=0.54 ex-top1=+0.2377
+  validate base      mean=+0.1167 cilo=+0.0075 medmint=-0.2585 n=  63 k= 53 res=0.97 fracpos=0.42 ex-top1=+0.1002
+  validate fill=close  mean=-0.1909 cilo=-0.3683 n=  63 k= 53
+  validate fill=low    mean=-0.1976 cilo=-0.3736 n=  63 k= 53
+  validate fill=slip5  mean=+0.0886 cilo=-0.0218 n=  63 k= 53
+  validate WORST(entry+2%,slip5,toll2.5%,drop-50%) mean=+0.0361 cilo=-0.0724 n=  63 k= 53
+  validate drop=-100%  mean=+0.0906
+  validate cap=+100%   mean=+0.1167 cilo=+0.0075
+=== D_age10_20_stoponly  H=15 tp=None sl=-0.25 all ===
+  train    base      mean=+0.1750 cilo=+0.0296 medmint=-0.0911 n= 295 k=121 res=0.98 fracpos=0.35 ex-top1=+0.1065
+  validate base      mean=+0.2291 cilo=+0.0601 medmint=-0.0961 n= 304 k=151 res=0.97 fracpos=0.34 ex-top1=+0.1714
+  validate fill=close  mean=+0.1423 cilo=-0.0303 n= 304 k=151
+  validate fill=low    mean=+0.1281 cilo=-0.0454 n= 304 k=151
+  validate fill=slip5  mean=+0.2164 cilo=+0.0461 n= 304 k=151
+  validate WORST(entry+2%,slip5,toll2.5%,drop-50%) mean=+0.1766 cilo=+0.0106 n= 307 k=151
+  validate drop=-100%  mean=+0.2030
+  validate cap=+100%   mean=+0.0030 cilo=-0.0410
+=== E_age30_60_v0hi_new  H=30 tp=None sl=-0.25 all ===
+  train    base      mean=+0.1668 cilo=+0.0123 medmint=+0.0678 n=  61 k= 29 res=0.95 fracpos=0.59 ex-top1=+0.0674
+  validate base      mean=+0.2363 cilo=+0.0574 medmint=+0.0759 n=  63 k= 40 res=0.92 fracpos=0.57 ex-top1=+0.1016
+  validate fill=close  mean=+0.1858 cilo=-0.0114 n=  63 k= 40
+  validate fill=low    mean=+0.1838 cilo=-0.0136 n=  63 k= 40
+  validate fill=slip5  mean=+0.2322 cilo=+0.0528 n=  63 k= 40
+  validate WORST(entry+2%,slip5,toll2.5%,drop-50%) mean=+0.1828 cilo=+0.0065 n=  63 k= 40
+  validate drop=-100%  mean=+0.1963
+  validate cap=+100%   mean=+0.1159 cilo=+0.0449
+=== F_age6_10_v0hi  H=60 tp=1.0 sl=-0.25 all ===
+  train    base      mean=+0.1828 cilo=+0.0540 medmint=-0.2442 n=  55 k= 43 res=0.95 fracpos=0.47 ex-top1=+0.1639
+  validate base      mean=+0.1506 cilo=+0.0506 medmint=-0.0442 n=  87 k= 58 res=0.99 fracpos=0.45 ex-top1=+0.1360
+  validate fill=close  mean=-0.0580 cilo=-0.2086 n=  87 k= 58
+  validate fill=low    mean=-0.0686 cilo=-0.2199 n=  87 k= 58
+  validate fill=slip5  mean=+0.1240 cilo=+0.0237 n=  87 k= 58
+  validate WORST(entry+2%,slip5,toll2.5%,drop-50%) mean=+0.0984 cilo=+0.0011 n=  88 k= 58
+  validate drop=-100%  mean=+0.1466
+  validate cap=+100%   mean=+0.1506 cilo=+0.0506
+=== G_age1_3_v0hi_tp15  H=60 tp=0.15 sl=-0.25 all ===
+  train    base      mean=+0.0567 cilo=+0.0193 medmint=+0.1369 n=  51 k= 37 res=1.00 fracpos=0.73 ex-top1=+0.0545
+  validate base      mean=+0.0687 cilo=+0.0352 medmint=+0.1369 n=  68 k= 53 res=1.00 fracpos=0.79 ex-top1=+0.0674
+  validate fill=close  mean=-0.0012 cilo=-0.0712 n=  68 k= 53
+  validate fill=low    mean=-0.0141 cilo=-0.0899 n=  68 k= 53
+  validate fill=slip5  mean=+0.0348 cilo=+0.0009 n=  68 k= 53
+  validate WORST(entry+2%,slip5,toll2.5%,drop-50%) mean=+0.0095 cilo=-0.0264 n=  68 k= 53
+  validate drop=-100%  mean=+0.0687
+  validate cap=+100%   mean=+0.0687 cilo=+0.0352
+=== H_age10_20_v0hi_tp100  H=60 tp=1.0 sl=-0.25 all ===
+  train    base      mean=+0.1873 cilo=+0.0472 medmint=+0.0504 n=  56 k= 31 res=0.95 fracpos=0.52 ex-top1=+0.1610
+  validate base      mean=+0.1260 cilo=+0.0274 medmint=-0.0224 n=  85 k= 48 res=0.95 fracpos=0.40 ex-top1=+0.1078
+  validate fill=close  mean=-0.0734 cilo=-0.2283 n=  85 k= 48
+  validate fill=low    mean=-0.0801 cilo=-0.2361 n=  85 k= 48
+  validate fill=slip5  mean=+0.1067 cilo=+0.0060 n=  85 k= 48
+  validate WORST(entry+2%,slip5,toll2.5%,drop-50%) mean=+0.0724 cilo=-0.0246 n=  84 k= 48
+  validate drop=-100%  mean=+0.1087
+  validate cap=+100%   mean=+0.1260 cilo=+0.0274rc=0

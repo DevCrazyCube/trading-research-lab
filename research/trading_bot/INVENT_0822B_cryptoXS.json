@@ -1,0 +1,324 @@
+{
+ "theme": "cross-sectional crypto spot momentum / reversal / volume / volatility, Binance spot daily klines (free), 2019-2026",
+ "date": "2026-08-22",
+ "harness": [
+  "scripts/trading_bot/inv0822b_xs_lib.py",
+  "inv0822b_xs_forms.py",
+  "inv0822b_xs_gate.py",
+  "inv0822b_xs_sweep.py",
+  "inv0822b_xs_diag.py"
+ ],
+ "data": "research/data/xspot_cache/spot_daily.npz (677 USDT pairs incl. delisted, 2017-08..2026-08); no network, no orders, no money",
+ "n_signals": 27,
+ "n_holds": 3,
+ "n_primary_tests": 81,
+ "design_window": [
+  "2019-01-01",
+  "2023-01-01"
+ ],
+ "holdout_window": [
+  "2023-01-01",
+  "2026-08-01"
+ ],
+ "construction": {
+  "universe": "top-50 by trailing-30d mean quote volume, >=$1M ADV, stables/wrapped excluded",
+  "book": "long top-10 / short bottom-10, equal weight, dollar-neutral, unit gross",
+  "signal_lag": "information through the CLOSE of day d-1",
+  "execution": "entered at the VWAP of day d (=quote_vol/base_vol), marked to the VWAP of day d+1",
+  "holds": "overlapping tranches H in {1,5,20}",
+  "fee_bp": 10.0,
+  "shock_bp": 20.0
+ },
+ "bounce_gate": {
+  "rho1_close_to_close_mean": -0.04192985960527938,
+  "rho1_vwap_to_vwap_mean": 0.19268329306873638,
+  "frac_coins_below_minus_035": 0.0,
+  "gate": "PASS -- no family gated out",
+  "finding": "rho1 is a SPREAD diagnostic, not a cross-sectional-returns diagnostic: the microstructure term scales as 1/vol and single-coin daily vol (~5%) is ~100x a stablecoin spread's, so bounce cannot dominate. The theme-specific artefact is the MIRROR image: VWAP is a time-AVERAGED price, whose returns carry rho1 = +0.19 (theory +0.25) and manufacture fake MOMENTUM. Both artefacts are killed by the harness's one-day gap.",
+  "self_test": {
+   "planted_gross_sharpe": 2.7310771715743134,
+   "planted_net_sharpe": -0.7782557405017551,
+   "planted_turnover": 1.6620000000000008,
+   "bounce_gross_sharpe_gap1": -0.3207666637179874,
+   "bounce_net_sharpe_gap1": -3.9124123197406124,
+   "bounce_rho1": -0.26126141794046703,
+   "bounce_breakeven_bp_gap1": -0.8927180059435339,
+   "bounce_gross_sharpe_gap0": 36.70896657850856,
+   "bounce_breakeven_bp_gap0": 90.84995242007312,
+   "avgprice_rho1": 0.25220289466081636,
+   "avgprice_mom_gross_gap1": -0.5496281040533568,
+   "avgprice_mom_gross_gap0": 31.93956704963115,
+   "control_gross_sharpe": 0.3717687882265931
+  }
+ },
+ "nulls": {
+  "analytic_sign_agnostic_sqrt2ln162": 1.699389541960608,
+  "programme_cumulative": 1.9857954779063165,
+  "size_matched_placebo_slot_permutation": {
+   "method": "permute the signal across the day's ADV-rank slots, one permutation per replicate; turnover, universe, neutrality and cross-sectional return covariance all exactly preserved",
+   "n_permutations": 400,
+   "n_tests": 81,
+   "E_max_abs_sharpe": 1.3084932716371491,
+   "p50": 1.2990374705822334,
+   "p95": 1.7490880854548634,
+   "p99": 1.9739478585711783,
+   "sd_single": 0.5243804764535392,
+   "observed_max": 2.1402230339772084,
+   "observed_max_key": "S1_VOL30|H1",
+   "frac_placebo_max_ge_observed": 0.0
+  },
+  "rotate_returns_placebo_REJECTED": {
+   "method": "hold weights fixed, rotate the return panel circularly",
+   "n_tests": 81,
+   "n_replicates": 600,
+   "placebo_E_max_abs_sharpe": 2.169418092894297,
+   "placebo_p50": 1.8742509457890992,
+   "placebo_p95": 5.737076415464248,
+   "placebo_p99": 7.079351329915808,
+   "placebo_sd_single_formula_sharpe": 0.532747745513916,
+   "analytic_bar_sharpe_one_sided": 1.5793880230834714,
+   "analytic_bar_sharpe_sign_agnostic": 1.699389541960608,
+   "programme_cumulative_bar_sharpe": 1.9857954779063165,
+   "observed_max_gross": 2.1402230339772097,
+   "frac_placebo_max_above_observed": 0.33,
+   "why_rejected": "coins not yet listed at the rotated date have no return, so a dollar-neutral book silently acquires a 12.8% net directional leg (real book: 0.36%); the null grows a fat right tail (p95 5.74 on a per-formula SD of 0.53) and is not size-matched"
+  }
+ },
+ "verdict": {
+  "momentum_reversal": "DEAD -- 30 pure-horizon tests (1..180d) median design gross +0.47, median holdout NET +0.18",
+  "volume": "DEAD -- 15 tests, median design gross +0.69, median holdout NET -0.13",
+  "momentum_refinements": "WEAK -- 18 tests, median design gross +0.36, median holdout NET +0.80, none clears the design bar",
+  "volatility": "SURVIVES -- 18 tests, median design gross +1.13, median holdout NET +2.47"
+ },
+ "best": {
+  "name": "S1_VOL30",
+  "key": "S1_VOL30|H20",
+  "desc": "long the 10 LOWEST / short the 10 HIGHEST 30-day realised-volatility coins in the top-50-by-volume Binance spot USDT universe, equal weight, 20-day overlapping tranches, VWAP-to-VWAP",
+  "sign": -1.0,
+  "design": {
+   "gross": 2.0176688674817447,
+   "gross_t": 4.036719463384383,
+   "net": 1.9532784781168713,
+   "net_t": 3.907894589197522,
+   "turnover": 0.04408966461327859,
+   "breakeven_bp_per_side": 313.2690933420559,
+   "ann_return_pct": 48.8,
+   "ann_vol_pct": 25.0
+  },
+  "holdout": {
+   "gross": 2.921645160757451,
+   "net": 2.8466988671138154,
+   "net_t": 5.388885651843523,
+   "ann_return_pct": 64.5,
+   "ann_vol_pct": 22.6,
+   "breakeven_bp_per_side": 389.6269031022001
+  },
+  "beats_analytic_bar": true,
+  "beats_size_matched_placebo": true,
+  "placebo_p_value_max_stat": 0.0,
+  "per_year_net_sharpe": {
+   "2019": 1.72,
+   "2020": 1.83,
+   "2021": 1.79,
+   "2022": 2.75,
+   "2023": 1.39,
+   "2024": 1.77,
+   "2025": 3.6,
+   "2026": 5.86
+  },
+  "tail": {
+   "design_skew": -0.02,
+   "holdout_skew": 0.02,
+   "design_kurt": 8.0,
+   "holdout_kurt": 4.6,
+   "design_worst_day_bp": -778,
+   "holdout_worst_day_bp": -530,
+   "design_maxdd_annvol_units": -1.63,
+   "holdout_maxdd_annvol_units": -0.79,
+   "months_positive": "69/92",
+   "rolling_1y_net_sharpe_min": 0.08
+  }
+ },
+ "robustness": {
+  "lag1_placebo": {
+   "design": 2.0095185299048355,
+   "holdout": 2.963549569235073
+  },
+  "universe_size_design": {
+   "top30": 1.89,
+   "top50": 2.14,
+   "top80": 2.91,
+   "top120": 2.82
+  },
+  "extremes_k_design": {
+   "5": 2.15,
+   "10": 2.14,
+   "15": 1.49
+  },
+  "vol_estimator": {
+   "vwap_returns": [
+    2.02,
+    2.9
+   ],
+   "close_returns": [
+    1.89,
+    3.12
+   ],
+   "parkinson_hl": [
+    1.92,
+    3.15
+   ]
+  },
+  "vol_lookback": {
+   "10d": [
+    2.02,
+    2.42
+   ],
+   "30d": [
+    2.02,
+    2.9
+   ],
+   "60d": [
+    1.71,
+    2.91
+   ],
+   "120d": [
+    1.5,
+    2.68
+   ]
+  },
+  "orthogonal_to_30d_return": {
+   "design_net": 2.5,
+   "holdout_net": 2.87,
+   "note": "NOT short-horizon reversal in disguise -- it is STRONGER once vol is residualised on past return"
+  },
+  "orthogonal_to_log_ADV_design_gross": 2.04,
+  "pure_ADV_size_sort_design_gross": -0.26,
+  "exclude_majors_design_gross": {
+   "ex_BTC": 1.85,
+   "ex_BTC_ETH": 1.73,
+   "ex_top10": 1.34
+  },
+  "listing_age_filter": {
+   "ge90d": [
+    1.62,
+    2.53
+   ],
+   "ge180d": [
+    1.24,
+    2.57
+   ],
+   "ge365d": [
+    1.13,
+    2.16
+   ]
+  },
+  "no_lookahead_universe": {
+   "design_net": 1.95,
+   "holdout_net": 2.85
+  },
+  "delisting_attribution": {
+   "short_leg_pnl_from_names_in_final_30d_of_data_design_pct": 9.7,
+   "holdout_pct": 2.1
+  },
+  "liquidity_floor": {
+   "0M": {
+    "univ": 49.19277108433735,
+    "Dgross": 2.0176688674817447,
+    "Dnet": 1.9532784781168713,
+    "Hgross": 2.8990508750409085,
+    "Hnet": 2.8235222441010257,
+    "Hnet_borrow5": 2.4226381443782716,
+    "Hnet_borrow10": 2.0217314753952933,
+    "Hannret": 0.6348056763494073
+   },
+   "1M": {
+    "univ": 49.19277108433735,
+    "Dgross": 2.0176688674817447,
+    "Dnet": 1.9532784781168713,
+    "Hgross": 2.8990508750409085,
+    "Hnet": 2.8235222441010257,
+    "Hnet_borrow5": 2.4226381443782716,
+    "Hnet_borrow10": 2.0217314753952933,
+    "Hannret": 0.6348056763494073
+   },
+   "5M": {
+    "univ": 49.17168674698795,
+    "Dgross": 2.0098194415664166,
+    "Dnet": 1.9600638928690621,
+    "Hgross": 2.896879126071533,
+    "Hnet": 2.821357711809107,
+    "Hnet_borrow5": 2.4205122035970654,
+    "Hnet_borrow10": 2.019644158380618,
+    "Hannret": 0.6343802758837995
+   },
+   "25M": {
+    "univ": 33.57379518072289,
+    "Dgross": 1.3039433645384337,
+    "Dnet": 1.2597459529172756,
+    "Hgross": 2.218649037951113,
+    "Hnet": 2.158418759429173,
+    "Hnet_borrow5": 1.8418367779931426,
+    "Hnet_borrow10": 1.524493921811099,
+    "Hannret": 0.4079930835562597
+   },
+   "100M": {
+    "univ": 10.36972891566265,
+    "Dgross": 0.977478277593038,
+    "Dnet": 0.9462757619535817,
+    "Hgross": 0.9985150892648632,
+    "Hnet": 0.9640619273129203,
+    "Hnet_borrow5": 0.8544873401656669,
+    "Hnet_borrow10": 0.7437237471039108,
+    "Hannret": 0.04231165309290144
+   }
+  },
+  "inverse_vol_weighted_legs": {
+   "design_net": 1.79,
+   "holdout_net": 1.62
+  },
+  "rank_weighted_all_names": {
+   "design_net": 1.93,
+   "holdout_net": 2.66
+  }
+ },
+ "the_wall": {
+  "headline": "the entire edge is the SHORT leg; the long low-vol leg is worthless",
+  "long_leg_vs_short_BTC": {
+   "design_net": 0.11,
+   "holdout_net": -1.26
+  },
+  "short_leg_vs_long_BTC": {
+   "design_net": 1.54,
+   "holdout_net": 3.0,
+   "note": "chosen AFTER seeing the result -- reported as an observation, not as evidence"
+  },
+  "full_notional_ann_return_pct": {
+   "long_low_vol_design": 47.8,
+   "long_low_vol_holdout": 11.7,
+   "short_high_vol_design": 53.0,
+   "short_high_vol_holdout": 120.7,
+   "equal_weight_market_design": 11.2,
+   "equal_weight_market_holdout": -39.9
+  },
+  "borrow_sensitivity_holdout_net": {
+   "0bp/day": 2.85,
+   "2bp/day": 2.69,
+   "5bp/day": 2.45,
+   "10bp/day": 2.04,
+   "20bp/day": 1.24
+  },
+  "borrow_sensitivity_design_net": {
+   "0bp/day": 1.95,
+   "2bp/day": 1.83,
+   "5bp/day": 1.63,
+   "10bp/day": 1.31,
+   "20bp/day": 0.67
+  },
+  "unpriced_input": "Binance cross-margin borrow RATE and AVAILABILITY for small high-volatility alts is not in any free daily feed. It is the price of this trade and this round cannot measure it. Lesson 7 applies: free data prices a statistic, not a claim."
+ },
+ "originality_disclosure": "S1_VOL30 is the crypto low-volatility / lottery (MAX) anomaly. It is a PUBLISHED effect, not an invention. The theme brief asked for exactly this ranking, so it was tested; it is recorded as a found factor, not as an original strategy. The programme's own D0821 round contains two unfollowed hints of it (D4_XS_AMIHUD holdout +1.39 t 2.64; C4_XS_BAB holdout +0.79) that were rejected on their design windows.",
+ "holdout_reuse_disclosure": "2023-01..2026-08 has now been read by D0821 crypto-spot (34 formulas), rounds 2/3 on perps, and this round. The design-window result (gross 2.02-2.14, clean-placebo p<1/400) stands on its own and was frozen before the holdout was opened; the holdout number is a third look at that calendar.",
+ "promotions": 0,
+ "shortlist": "S1_VOL30|H20 -- forward-log leg, pending a measured alt borrow curve"
+}

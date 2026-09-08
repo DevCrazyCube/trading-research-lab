@@ -1,0 +1,54 @@
+{
+  "after": [
+    {
+      "receipt_unix_nanos": 1788894216404742521,
+      "sampled_unix_nanos": 1788894216411086429,
+      "sequence": 373533,
+      "slot": 445412284,
+      "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+      "status": "OBSERVED_NOT_CENSUS"
+    },
+    {
+      "receipt_unix_nanos": 1788894216373945185,
+      "sampled_unix_nanos": 1788894216411918302,
+      "sequence": 29317,
+      "slot": 445413104,
+      "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+      "status": "OBSERVED_NOT_CENSUS"
+    }
+  ],
+  "before": [
+    {
+      "receipt_unix_nanos": 1788894216271930609,
+      "sampled_unix_nanos": 1788894216279296081,
+      "sequence": 373503,
+      "slot": 445412284,
+      "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite",
+      "status": "OBSERVED_NOT_CENSUS"
+    },
+    {
+      "receipt_unix_nanos": 1788894216230584245,
+      "sampled_unix_nanos": 1788894216281029078,
+      "sequence": 29253,
+      "slot": 445413103,
+      "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+      "status": "OBSERVED_NOT_CENSUS"
+    }
+  ],
+  "comparison": "before/after bracket around public RPC; not independent-provider consensus",
+  "finalized_head_slot": 445413125,
+  "index": 1,
+  "slot_lag_brackets": [
+    {
+      "head_minus_feed_after": 841,
+      "head_minus_feed_before": 841,
+      "source": "research/midcap/birth_stream_forward_v2_20260908T1823.sqlite"
+    },
+    {
+      "head_minus_feed_after": 21,
+      "head_minus_feed_before": 22,
+      "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite"
+    }
+  ],
+  "started_unix_nanos": 1788894216277482925
+}

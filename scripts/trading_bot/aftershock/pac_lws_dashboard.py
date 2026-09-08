@@ -31,6 +31,7 @@ Run:
 from __future__ import annotations
 
 import json
+import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -47,6 +48,7 @@ CREATION_REGISTRY = ROOT / "research/data/aftershock/pac_lws/creation_registry.j
 FEED_HEALTH = ROOT / "research/data/aftershock/pac_lws/feed_health.json"
 ELIGIBILITY = ROOT / "research/data/aftershock/pac_lws/eligibility_v2.jsonl"
 ELIGIBILITY_HEALTH = ROOT / "research/data/aftershock/pac_lws/eligibility_v2_health.json"
+ELIGIBILITY_SUSPENSION = ROOT / "research/trading_bot/aftershock/AFTERSHOCK_PAC_LWS_ELIGIBILITY_V2_SUSPENSION.json"
 
 HOST = "127.0.0.1"   # localhost only — never bind 0.0.0.0
 PORT = 8793
@@ -57,6 +59,8 @@ MINT_ROWS = 16       # most-recently-active mints shown in the mint list
 MINT_SCAN = 3500     # feed rows scanned (tail) to aggregate the mint list
 
 import time as _time
+
+from . import pac_lws_feed as _feed
 import threading as _threading
 _TTL_CACHE: dict = {}
 _TTL_LOCK = _threading.Lock()
@@ -267,13 +271,27 @@ def _tail_feed_count(path: Path) -> int:
 
 def _read_eligibility(path: Path) -> dict:
     def build(candidate):
-        total = base = veto = unreadable = 0
+        total = base = veto = unreadable = 0; previous = "0" * 64; valid = True
         if candidate is not None:
-            for row in _iter_json_lines(candidate):
-                total += 1; base += int(row.get("base_eligible") is True)
-                veto += int(row.get("veto_eligible") is True)
-                unreadable += int(row.get("filter") in ("UNREADABLE", "NO_NET_TOKENS"))
-        return {"total": total, "base": base, "veto": veto, "unreadable": unreadable}
+            try:
+                with candidate.open() as handle:
+                    for line in handle:
+                        if not line.strip(): continue
+                        row = json.loads(line); body = dict(row); observed = body.pop("record_hash", None)
+                        expected = hashlib.sha256(json.dumps(
+                            body, sort_keys=True, separators=(",", ":"),
+                            ensure_ascii=True).encode()).hexdigest()
+                        if (body.get("previous_record_hash") != previous or observed != expected):
+                            raise ValueError("eligibility chain mismatch")
+                        previous = observed; total += 1
+                        base += int(row.get("base_eligible") is True)
+                        veto += int(row.get("veto_eligible") is True)
+                        unreadable += int(row.get("filter") in ("UNREADABLE", "NO_NET_TOKENS"))
+            except (OSError, ValueError, TypeError):
+                valid = False; total = base = veto = unreadable = 0
+        status = "SUSPENDED_AUTHORITY_INCOMPLETE" if ELIGIBILITY_SUSPENSION.exists() else "ACTIVE"
+        return {"total": total, "base": base, "veto": veto,
+                "unreadable": unreadable, "valid": valid, "status": status}
     return _cached(path, build)
 
 
@@ -367,18 +385,28 @@ def _read_mints(path: Path, entered: set = frozenset(), vetoed: set = frozenset(
 
 
 def _read_health() -> dict:
-    """feed_health.json projection + a present/stale flag. Never raises."""
+    """Project the feed's authenticated health contract; forged/future rows never render green."""
     try:
-        obj = json.loads(FEED_HEALTH.read_text(encoding="utf-8"))
-    except (OSError, ValueError, TypeError):
+        obj = _feed.load_health(FEED_HEALTH, now=_time.time_ns(), require_fresh=False)
+    except Exception:  # read-only presentation: invalid authority degrades visibly
+        present = FEED_HEALTH.exists()
+        return {"present": present, "status": "INVALID" if present else "STALE", "lag": None,
+                "observed_sec": None, "instrument_id": None}
+    try:
+        _feed.load_health(FEED_HEALTH, now=_time.time_ns(), require_fresh=True)
+        status = "FRESH"
+    except Exception:
+        status = "STALE" if obj.get("status") == "FRESH" else obj.get("status", "DEGRADED")
+    if not isinstance(obj, dict):
         return {"present": False, "status": "STALE", "lag": None,
                 "observed_sec": None, "instrument_id": None}
     obs = obj.get("observed_unix_nanos")
+    observed_sec = (obs / 1e9) if type(obs) is int else None
     return {
         "present": True,
-        "status": obj.get("status") or "UNKNOWN",
+        "status": status,
         "lag": obj.get("head_slot_lag"),
-        "observed_sec": (obs / 1e9) if obs else None,
+        "observed_sec": observed_sec,
         "instrument_id": obj.get("instrument_id"),
     }
 
@@ -395,6 +423,8 @@ def build_state() -> dict:
     tape = _read_tape(FEED_EVENTS)
     feed_count = _tail_feed_count(FEED_EVENTS)
     health = _read_health()
+    if not eligibility["valid"]:
+        health = {**health, "status": "DEGRADED"}
 
     open_book = max(lws["filled"] - lws["resolved"], 0)
     # veto rate = B20B vetoes / (vetoes + admitted decisions); entry_rejected (coverage floor) is not a veto

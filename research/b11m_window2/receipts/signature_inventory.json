@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "/usr/bin/python",
+    "scripts/b9c_signature_inventory.py",
+    "--source",
+    "/home/anont/meme/research/b11m_window2/b11a_subsample.sqlite",
+    "--database",
+    "/home/anont/meme/research/b11m_window2/b11a_signatures.sqlite",
+    "--creates",
+    "/home/anont/meme/research/b11m_window2/b11a_creates.sqlite",
+    "--cutoff-slot",
+    "438854169"
+  ],
+  "completed": true,
+  "endpoint": "https://solana-mainnet.core.chainstack.com",
+  "exit_code": 0,
+  "finished_at": 1786900580,
+  "manifest_sha256": "b901e2ade981123def610fa245c07829dfc202ae9afe6fbef6806d4b8cb7a107",
+  "schema_version": "1.0.0",
+  "stage": "signature_inventory",
+  "started_at": 1786898195,
+  "stderr_log": "/home/anont/meme/research/b11m_window2/logs/signature_inventory.stderr.log",
+  "stdout_log": "/home/anont/meme/research/b11m_window2/logs/signature_inventory.stdout.log"
+}

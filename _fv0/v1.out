@@ -1,0 +1,168 @@
+train hits 403 combos so far 153552
+unique rule x exit 403
+validated 401 t 2.71891450881958
+
+=== survive validate (mean>0 AND trim5>0) === 45
+volshare20>0.2 & vol_now<=100                      H= 30 tp=-1 sl=-1 pa=0 | TR mean=   17.53 trim=   6.41 k= 29 || VA mean=  185.07 trim=  35.02 med=  -2.14 CI=[-6.4,552.1] dmean= 159.86 k= 36 n=  87 res=100.0
+volshare20>0.2 & vol_now<=100                      H=  5 tp=-1 sl=-1 pa=0 | TR mean=   74.36 trim=  12.69 k= 29 || VA mean=   39.42 trim=  17.38 med=  -1.69 CI=[-0.1,101.3] dmean=  46.96 k= 36 n= 101 res=100.0
+volshare20>0.2 & vol_now<=100                      H=  3 tp=-1 sl=-1 pa=0 | TR mean=  103.00 trim=  42.84 k= 29 || VA mean=   24.31 trim=  15.47 med=  -1.51 CI=[2.7,54.2] dmean=  29.89 k= 36 n= 103 res=100.0
+rangerel20>8 & vol_now<=100                        H=  3 tp=-1 sl=-1 pa=0 | TR mean=   63.07 trim=   3.38 k= 45 || VA mean=   32.57 trim=   9.72 med=  -0.73 CI=[4.8,77.3] dmean=  38.16 k= 56 n= 133 res=97.7
+rangerel20>8 & vol_now<=100                        H= 10 tp=-1 sl=-1 pa=0 | TR mean=   69.08 trim=  10.16 k= 45 || VA mean=   14.29 trim=   7.73 med=  -1.06 CI=[0.6,31.2] dmean=  18.27 k= 56 n= 119 res=97.5
+rangerel20>8 & notional20<=5                       H=  3 tp=-1 sl=-1 pa=0 | TR mean=   86.46 trim=  35.75 k= 35 || VA mean=   34.60 trim=   6.89 med=  -1.31 CI=[2.7,86.8] dmean=  40.18 k= 47 n= 141 res=99.3
+rangerel20>8 & notional20<=5                       H= 10 tp=-1 sl=-1 pa=0 | TR mean=   95.11 trim=  45.07 k= 35 || VA mean=   13.75 trim=   6.69 med=  -2.16 CI=[-0.3,31.1] dmean=  17.73 k= 47 n= 124 res=99.2
+rangerel20>8 & notional20<=5                       H= 30 tp=-1 sl=-1 pa=0 | TR mean=   49.95 trim=  27.16 k= 35 || VA mean=   18.62 trim=   5.85 med=  -2.57 CI=[-1.2,44.4] dmean=  -6.59 k= 47 n= 105 res=97.1
+volshare20>0.2 & vol_now<=100                      H= 10 tp=-1 sl=-1 pa=0 | TR mean=   82.10 trim=  21.67 k= 29 || VA mean=  141.97 trim=   5.66 med=  -2.21 CI=[-7.9,432.2] dmean= 145.94 k= 36 n= 100 res=100.0
+notional20<=5 & volshare20>0.2                     H= 30 tp=-1 sl=-1 pa=0 | TR mean=   20.60 trim=   8.92 k= 33 || VA mean=  150.43 trim=   5.59 med=  -2.08 CI=[-2.7,424.3] dmean= 125.21 k= 45 n= 124 res=98.4
+rangerel20>8 & notional20<=5                       H= 30 tp=3 sl=1 pa=1 | TR mean=   18.45 trim=   5.73 k= 35 || VA mean=   11.95 trim=   4.98 med=  -2.03 CI=[0.6,26.6] dmean=   3.30 k= 47 n= 111 res=97.3
+rangerel20>8 & notional20<=50                      H=  3 tp=-1 sl=-1 pa=0 | TR mean=   49.03 trim=   2.02 k= 57 || VA mean=   23.94 trim=   4.85 med=  -1.58 CI=[-1.1,62.5] dmean=  29.52 k= 65 n= 291 res=98.6
+rangerel20>8 & vol_now<=100                        H= 30 tp=-1 sl=-1 pa=0 | TR mean=   30.25 trim=   3.33 k= 45 || VA mean=   14.45 trim=   4.76 med=  -1.29 CI=[-3.4,37.5] dmean= -10.76 k= 56 n= 103 res=95.1
+volshare20>0.2 & vol_now<=100                      H= 15 tp=3 sl=-1 pa=1 | TR mean=   41.70 trim=  11.08 k= 29 || VA mean=  115.24 trim=   4.66 med=  -2.16 CI=[-3.4,346.2] dmean= 102.40 k= 36 n=  96 res=100.0
+rangerel20>8 & vol_now<=100                        H= 15 tp=3 sl=-1 pa=1 | TR mean=   37.87 trim=   8.90 k= 45 || VA mean=    7.13 trim=   4.48 med=  -0.67 CI=[0.0,15.6] dmean=  -5.71 k= 56 n= 114 res=97.4
+rangerel20>8 & notional20<=5                       H= 15 tp=-1 sl=1 pa=0 | TR mean=   86.32 trim=  35.08 k= 35 || VA mean=    9.61 trim=   3.73 med=  -1.78 CI=[-0.4,22.6] dmean= -16.94 k= 47 n= 121 res=98.3
+rangerel20>8 & vol_now<=100                        H= 15 tp=-1 sl=1 pa=0 | TR mean=   63.37 trim=   2.50 k= 45 || VA mean=    8.66 trim=   3.49 med=  -0.94 CI=[-1.0,20.8] dmean= -17.89 k= 56 n= 121 res=97.5
+rangerel20>8 & notional20<=5                       H= 15 tp=3 sl=-1 pa=1 | TR mean=   46.32 trim=  21.31 k= 35 || VA mean=    6.20 trim=   3.44 med=  -1.74 CI=[-1.4,15.1] dmean=  -6.63 k= 47 n= 115 res=98.3
+rangerel20>8 & notional20<=5                       H= 10 tp=1 sl=1 pa=1 | TR mean=   41.07 trim=  15.51 k= 35 || VA mean=    6.93 trim=   3.01 med=  -2.09 CI=[-0.5,16.0] dmean=  11.06 k= 47 n= 130 res=99.2
+notional20<=5 & volshare20>0.2                     H=  3 tp=-1 sl=-1 pa=0 | TR mean=   81.52 trim=  27.22 k= 33 || VA mean=    9.90 trim=   2.98 med=  -1.35 CI=[-1.6,25.0] dmean=  15.48 k= 45 n= 152 res=100.0
+rangerel20>8 & vol_now<=100                        H= 15 tp=-1 sl=-1 pa=0 | TR mean=   69.74 trim=  11.02 k= 45 || VA mean=    7.38 trim=   2.62 med=  -1.09 CI=[-2.9,20.5] dmean= -32.51 k= 56 n= 114 res=97.4
+volaccel<=0.5 & rvol20<=0.02                       H= 30 tp=3 sl=1 pa=1 | TR mean=    0.99 trim=   0.50 k= 46 || VA mean=    3.21 trim=   2.48 med=  -1.49 CI=[-1.9,8.7] dmean=  -5.43 k= 67 n= 277 res=96.8
+rangerel20>8 & notional20<=5                       H= 15 tp=-1 sl=-1 pa=0 | TR mean=   91.53 trim=  41.44 k= 35 || VA mean=    7.56 trim=   2.21 med=  -1.93 CI=[-3.2,20.7] dmean= -32.33 k= 47 n= 115 res=98.3
+rangerel20>8 & vol_now<=100                        H= 15 tp=2 sl=-1 pa=0 | TR mean=    1.72 trim=   3.29 k= 45 || VA mean=    2.06 trim=   2.21 med=  -0.74 CI=[-2.1,6.2] dmean=  17.70 k= 56 n= 123 res=97.6
+rangerel20>8 & vol_now<=100                        H=  5 tp=-1 sl=-1 pa=0 | TR mean=   63.05 trim=   3.31 k= 45 || VA mean=    6.47 trim=   2.15 med=  -1.14 CI=[-1.8,17.4] dmean=  14.00 k= 56 n= 128 res=97.7
+volshare20>0.2 & vol_now<=100                      H= 15 tp=-1 sl=1 pa=0 | TR mean=   69.39 trim=   5.51 k= 29 || VA mean=  224.55 trim=   2.05 med=  -2.40 CI=[-6.0,679.1] dmean= 198.00 k= 36 n= 101 res=100.0
+rangerel20>8 & vol_now<=100                        H= 60 tp=3 sl=2 pa=0 | TR mean=    2.25 trim=   2.10 k= 45 || VA mean=    2.82 trim=   2.05 med=  -0.39 CI=[-2.7,8.6] dmean=  16.32 k= 56 n= 107 res=95.3
+volshare20>0.2 & vol_now<=100                      H= 30 tp=3 sl=1 pa=1 | TR mean=    7.79 trim=   0.41 k= 29 || VA mean=   79.15 trim=   1.94 med=  -2.16 CI=[-5.0,241.0] dmean=  70.51 k= 36 n=  93 res=100.0
+density20<=0.95 & rvol20<=0.02                     H= 30 tp=3 sl=1 pa=1 | TR mean=    3.61 trim=   3.06 k= 51 || VA mean=    2.32 trim=   1.53 med=  -1.33 CI=[-2.7,7.5] dmean=  -6.33 k= 70 n= 340 res=96.2
+density20<=0.5 & rvol20<=0.02                      H= 30 tp=3 sl=1 pa=1 | TR mean=    2.75 trim=   2.08 k= 48 || VA mean=    2.25 trim=   1.40 med=  -1.47 CI=[-3.1,7.6] dmean=  -6.39 k= 66 n= 312 res=95.8
+density20<=0.5 & rvol20<=0.02                      H= 60 tp=3 sl=2 pa=0 | TR mean=    0.95 trim=   0.69 k= 48 || VA mean=    1.49 trim=   1.26 med=  -2.92 CI=[-6.3,9.3] dmean=  14.99 k= 66 n= 233 res=94.4
+volshare20>0.2 & vol_now<=100                      H= 10 tp=1 sl=1 pa=1 | TR mean=   32.22 trim=   0.32 k= 29 || VA mean=   70.09 trim=   1.25 med=  -2.29 CI=[-5.3,216.5] dmean=  74.22 k= 36 n= 105 res=100.0
+volrel20>16 & vol_now<=100                         H= 10 tp=-1 sl=-1 pa=0 | TR mean=    7.59 trim=   0.01 k= 29 || VA mean=   42.29 trim=   1.07 med=  -1.51 CI=[-6.6,134.6] dmean=  46.26 k= 38 n= 105 res=99.0
+volaccel>2 & ret5>0.4                              H=  5 tp=-1 sl=-1 pa=0 | TR mean=   18.91 trim=   6.58 k= 41 || VA mean=    1.36 trim=   1.07 med=  -2.03 CI=[-11.2,13.9] dmean=   8.90 k= 40 n= 105 res=98.1
+density20<=0.95 & rvol20<=0.02                     H= 60 tp=3 sl=2 pa=0 | TR mean=    1.43 trim=   1.23 k= 51 || VA mean=    1.22 trim=   0.98 med=  -1.43 CI=[-6.3,8.9] dmean=  14.72 k= 70 n= 254 res=94.9
+rvol20<=0.05 & age_min<=15                         H=  5 tp=0 sl=0 pa=0 | TR mean=    1.66 trim=   2.12 k= 27 || VA mean=    0.57 trim=   0.96 med=   3.17 CI=[-1.4,2.4] dmean=   6.95 k= 49 n=  96 res=100.0
+notional20<=5 & volshare20>0.2                     H=  5 tp=-1 sl=-1 pa=0 | TR mean=   69.61 trim=  13.97 k= 33 || VA mean=   19.94 trim=   0.92 med=  -1.79 CI=[-3.6,62.3] dmean=  27.48 k= 45 n= 149 res=99.3
+volshare20>0.2 & maxgap20>2                        H=  3 tp=-1 sl=-1 pa=0 | TR mean=   48.99 trim=   1.68 k= 56 || VA mean=    4.65 trim=   0.84 med=  -1.35 CI=[-5.0,16.7] dmean=  10.23 k= 57 n= 330 res=99.4
+rangerel20>8 & notional20<=5                       H=  5 tp=-1 sl=-1 pa=0 | TR mean=   93.14 trim=  42.65 k= 35 || VA mean=    4.78 trim=   0.69 med=  -1.87 CI=[-2.8,14.3] dmean=  12.32 k= 47 n= 134 res=99.3
+notional20<=5 & volshare20>0.2                     H= 10 tp=-1 sl=-1 pa=0 | TR mean=   64.48 trim=   8.50 k= 33 || VA mean=  113.77 trim=   0.64 med=  -2.35 CI=[-5.7,343.5] dmean= 117.74 k= 45 n= 140 res=99.3
+rvol20<=0.02 & vwapdev20>0.05                      H=  5 tp=0 sl=0 pa=0 | TR mean=    0.46 trim=   0.83 k= 27 || VA mean=    0.62 trim=   0.63 med=   1.08 CI=[-0.2,1.4] dmean=   7.01 k= 42 n= 366 res=100.0
+rvol20<=0.02 & vwapdev20>0.05                      H= 30 tp=3 sl=1 pa=1 | TR mean=    3.49 trim=   3.95 k= 27 || VA mean=    0.39 trim=   0.45 med=   2.84 CI=[-5.1,5.6] dmean=  -8.25 k= 42 n= 101 res=100.0
+volshare20>0.2 & vol_now<=100                      H= 15 tp=-1 sl=-1 pa=0 | TR mean=   77.95 trim=  17.19 k= 29 || VA mean=  221.14 trim=   0.31 med=  -2.40 CI=[-11.6,677.5] dmean= 181.25 k= 36 n=  96 res=100.0
+volrel20>4 & vol_now<=100                          H=  3 tp=-1 sl=-1 pa=0 | TR mean=   23.13 trim=   1.52 k= 60 || VA mean=    4.34 trim=   0.19 med=  -1.54 CI=[-5.1,15.9] dmean=   9.92 k= 67 n= 523 res=98.5
+notional20<=5 & volshare20>0.2                     H= 15 tp=3 sl=-1 pa=1 | TR mean=   33.99 trim=   5.66 k= 33 || VA mean=   90.71 trim=   0.13 med=  -2.08 CI=[-5.2,276.4] dmean=  77.87 k= 45 n= 134 res=98.5
+
+=== ALSO bootstrap CI-low > 0 on validate === 6
+volshare20>0.2 & vol_now<=100                      H=  3 tp=-1 sl=-1 pa=0 VA mean=   24.31 CIlo=2.71 trim=  15.47 k=36 n=103
+rangerel20>8 & vol_now<=100                        H=  3 tp=-1 sl=-1 pa=0 VA mean=   32.57 CIlo=4.84 trim=   9.72 k=56 n=133
+rangerel20>8 & vol_now<=100                        H= 10 tp=-1 sl=-1 pa=0 VA mean=   14.29 CIlo=0.60 trim=   7.73 k=56 n=119
+rangerel20>8 & notional20<=5                       H=  3 tp=-1 sl=-1 pa=0 VA mean=   34.60 CIlo=2.67 trim=   6.89 k=47 n=141
+rangerel20>8 & notional20<=5                       H= 30 tp=3 sl=1 pa=1 VA mean=   11.95 CIlo=0.64 trim=   4.98 k=47 n=111
+rangerel20>8 & vol_now<=100                        H= 15 tp=3 sl=-1 pa=1 VA mean=    7.13 CIlo=0.02 trim=   4.48 k=56 n=114
+
+=== DEEP DIVE (matched random control C2, validate) ===
+
+rangerel20>8 & vol_now<=100 | H=3 tp=-1 sl=-1 pa=0
+  VA mean=32.57 trim=9.72 med=-0.73 k=56 n=133 res=97.7 CI=[4.8, 77.3]
+  top5 mint means: [np.float64(90.5), np.float64(109.3), np.float64(113.9), np.float64(292.2), np.float64(1086.8)]  bot3: [np.float64(-30.0), np.float64(-30.0), np.float64(-22.9)]
+  C2 matched-random mean: 9.45 (p5=-7.2 p95=40.4) -> edge=23.13, pctile=91%
+  C2 matched-random trim: -2.52 -> edge=12.24, pctile=99%
+  dropout -50%: 31.68  -100%: 29.45  toll2.5%/-30%: 30.79  toll2.5%/-100%: 27.67
+  CAPACITY: vol_now at signal median=3.60 p90=286.1 | notional20 median=2.03 p90=41.4 (USD/min)
+  entry-gap minutes median=0
+
+volshare20>0.2 & vol_now<=100 | H=3 tp=-1 sl=-1 pa=0
+  VA mean=24.31 trim=15.47 med=-1.51 k=36 n=103 res=100.0 CI=[2.7, 54.2]
+  top5 mint means: [np.float64(66.2), np.float64(90.5), np.float64(158.6), np.float64(219.6), np.float64(397.4)]  bot3: [np.float64(-48.3), np.float64(-27.9), np.float64(-25.5)]
+  C2 matched-random mean: 13.75 (p5=-7.6 p95=52.7) -> edge=10.56, pctile=73%
+  C2 matched-random trim: 1.23 -> edge=14.24, pctile=94%
+  dropout -50%: 24.31  -100%: 24.31  toll2.5%/-30%: 22.60  toll2.5%/-100%: 22.60
+  CAPACITY: vol_now at signal median=2.43 p90=18.9 | notional20 median=1.97 p90=6.5 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=3 tp=-1 sl=-1 pa=0
+  VA mean=34.60 trim=6.89 med=-1.31 k=47 n=141 res=99.3 CI=[2.7, 86.8]
+  top5 mint means: [np.float64(54.8), np.float64(90.5), np.float64(109.3), np.float64(286.3), np.float64(1086.8)]  bot3: [np.float64(-22.9), np.float64(-20.3), np.float64(-19.1)]
+  C2 matched-random mean: 11.61 (p5=-7.2 p95=52.8) -> edge=22.99, pctile=85%
+  C2 matched-random trim: -2.72 -> edge=9.60, pctile=99%
+  dropout -50%: 34.38  -100%: 33.85  toll2.5%/-30%: 32.75  toll2.5%/-100%: 32.01
+  CAPACITY: vol_now at signal median=1.75 p90=30.5 | notional20 median=1.62 p90=3.8 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=30 tp=3 sl=1 pa=1
+  VA mean=11.95 trim=4.98 med=-2.03 k=47 n=111 res=97.3 CI=[0.6, 26.6]
+  top5 mint means: [np.float64(57.1), np.float64(79.8), np.float64(96.2), np.float64(132.0), np.float64(254.7)]  bot3: [np.float64(-20.3), np.float64(-19.1), np.float64(-18.8)]
+  C2 matched-random mean: 18.40 (p5=-9.9 p95=111.1) -> edge=-6.45, pctile=65%
+  C2 matched-random trim: -6.92 -> edge=11.90, pctile=99%
+  dropout -50%: 11.60  -100%: 10.74  toll2.5%/-30%: 10.42  toll2.5%/-100%: 9.22
+  CAPACITY: vol_now at signal median=1.75 p90=48.7 | notional20 median=1.62 p90=3.8 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & vol_now<=100 | H=10 tp=-1 sl=-1 pa=0
+  VA mean=14.29 trim=7.73 med=-1.06 k=56 n=119 res=97.5 CI=[0.6, 31.2]
+  top5 mint means: [np.float64(58.4), np.float64(111.2), np.float64(211.2), np.float64(222.8), np.float64(266.2)]  bot3: [np.float64(-51.6), np.float64(-39.2), np.float64(-36.1)]
+  C2 matched-random mean: 15.46 (p5=-12.0 p95=101.8) -> edge=-1.16, pctile=58%
+  C2 matched-random trim: -7.12 -> edge=14.86, pctile=100%
+  dropout -50%: 13.40  -100%: 11.17  toll2.5%/-30%: 12.76  toll2.5%/-100%: 9.64
+  CAPACITY: vol_now at signal median=3.25 p90=282.9 | notional20 median=2.15 p90=46.7 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & vol_now<=100 | H=15 tp=3 sl=-1 pa=1
+  VA mean=7.13 trim=4.48 med=-0.67 k=56 n=114 res=97.4 CI=[0.0, 15.6]
+  top5 mint means: [np.float64(56.5), np.float64(63.0), np.float64(77.6), np.float64(96.2), np.float64(136.1)]  bot3: [np.float64(-36.1), np.float64(-30.0), np.float64(-30.0)]
+  C2 matched-random mean: 28.35 (p5=-14.1 p95=128.0) -> edge=-21.22, pctile=67%
+  C2 matched-random trim: -7.34 -> edge=11.82, pctile=99%
+  dropout -50%: 6.24  -100%: 4.01  toll2.5%/-30%: 5.70  toll2.5%/-100%: 2.58
+  CAPACITY: vol_now at signal median=2.84 p90=290.2 | notional20 median=2.17 p90=55.6 (USD/min)
+  entry-gap minutes median=0
+
+volshare20>0.2 & vol_now<=100 | H=5 tp=-1 sl=-1 pa=0
+  VA mean=39.42 trim=17.38 med=-1.69 k=36 n=101 res=100.0 CI=[-0.1, 101.3]
+  top5 mint means: [np.float64(50.9), np.float64(63.6), np.float64(66.2), np.float64(440.9), np.float64(876.5)]  bot3: [np.float64(-48.3), np.float64(-27.9), np.float64(-26.4)]
+  C2 matched-random mean: 20.44 (p5=-8.7 p95=58.2) -> edge=18.99, pctile=77%
+  C2 matched-random trim: 2.30 -> edge=15.08, pctile=91%
+  dropout -50%: 39.42  -100%: 39.42  toll2.5%/-30%: 37.50  toll2.5%/-100%: 37.50
+  CAPACITY: vol_now at signal median=2.38 p90=18.6 | notional20 median=1.97 p90=6.5 (USD/min)
+  entry-gap minutes median=0
+
+rvol20<=0.02 & vwapdev20>0.05 | H=5 tp=0 sl=0 pa=0
+  VA mean=0.62 trim=0.63 med=1.08 k=42 n=366 res=100.0 CI=[-0.2, 1.4]
+  top5 mint means: [np.float64(3.2), np.float64(3.5), np.float64(3.8), np.float64(4.0), np.float64(8.7)]  bot3: [np.float64(-5.3), np.float64(-5.3), np.float64(-4.5)]
+  C2 matched-random mean: -0.64 (p5=-1.7 p95=0.3) -> edge=1.26, pctile=97%
+  C2 matched-random trim: -0.36 -> edge=0.99, pctile=96%
+  dropout -50%: 0.62  -100%: 0.62  toll2.5%/-30%: -0.76  toll2.5%/-100%: -0.76
+  CAPACITY: vol_now at signal median=1652.64 p90=2915.8 | notional20 median=1862.38 p90=3290.3 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=10 tp=-1 sl=-1 pa=0
+  VA mean=13.75 trim=6.69 med=-2.16 k=47 n=124 res=99.2 CI=[-0.3, 31.1]
+  top5 mint means: [np.float64(54.8), np.float64(111.2), np.float64(190.8), np.float64(211.2), np.float64(222.8)]  bot3: [np.float64(-39.2), np.float64(-36.1), np.float64(-34.0)]
+  C2 matched-random mean: 25.66 (p5=-10.6 p95=173.8) -> edge=-11.91, pctile=54%
+  C2 matched-random trim: -6.09 -> edge=12.77, pctile=100%
+  dropout -50%: 13.54  -100%: 13.01  toll2.5%/-30%: 12.20  toll2.5%/-100%: 11.45
+  CAPACITY: vol_now at signal median=1.58 p90=34.1 | notional20 median=1.64 p90=4.0 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=15 tp=-1 sl=1 pa=0
+  VA mean=9.61 trim=3.73 med=-1.78 k=47 n=121 res=98.3 CI=[-0.4, 22.6]
+  top5 mint means: [np.float64(43.4), np.float64(67.9), np.float64(97.1), np.float64(134.1), np.float64(208.1)]  bot3: [np.float64(-30.8), np.float64(-20.3), np.float64(-19.1)]
+  C2 matched-random mean: 31.84 (p5=-9.5 p95=159.9) -> edge=-22.23, pctile=59%
+  C2 matched-random trim: -7.48 -> edge=11.21, pctile=100%
+  dropout -50%: 9.34  -100%: 8.65  toll2.5%/-30%: 8.11  toll2.5%/-100%: 7.16
+  CAPACITY: vol_now at signal median=1.71 p90=28.3 | notional20 median=1.62 p90=3.8 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=10 tp=1 sl=1 pa=1
+  VA mean=6.93 trim=3.01 med=-2.09 k=47 n=130 res=99.2 CI=[-0.5, 16.0]
+  top5 mint means: [np.float64(25.1), np.float64(64.9), np.float64(83.9), np.float64(114.9), np.float64(120.7)]  bot3: [np.float64(-20.3), np.float64(-19.1), np.float64(-18.8)]
+  C2 matched-random mean: 10.37 (p5=-7.7 p95=98.8) -> edge=-3.44, pctile=59%
+  C2 matched-random trim: -4.84 -> edge=7.85, pctile=99%
+  dropout -50%: 6.71  -100%: 6.18  toll2.5%/-30%: 5.47  toll2.5%/-100%: 4.72
+  CAPACITY: vol_now at signal median=1.73 p90=36.9 | notional20 median=1.61 p90=3.8 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & vol_now<=100 | H=15 tp=-1 sl=1 pa=0
+  VA mean=8.66 trim=3.49 med=-0.94 k=56 n=121 res=97.5 CI=[-1.0, 20.8]
+  top5 mint means: [np.float64(48.4), np.float64(67.9), np.float64(97.1), np.float64(134.1), np.float64(230.7)]  bot3: [np.float64(-30.8), np.float64(-30.8), np.float64(-30.8)]
+  C2 matched-random mean: 67.04 (p5=-8.7 p95=525.8) -> edge=-58.38, pctile=56%
+  C2 matched-random trim: -6.30 -> edge=9.79, pctile=99%
+  dropout -50%: 7.77  -100%: 5.53  toll2.5%/-30%: 7.21  toll2.5%/-100%: 4.08
+  CAPACITY: vol_now at signal median=3.62 p90=294.6 | notional20 median=2.06 p90=43.1 (USD/min)
+  entry-gap minutes median=0

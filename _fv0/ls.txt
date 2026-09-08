@@ -1,0 +1,57 @@
+b2.out
+build_cache2.py
+build_cache.py
+build.out
+cache2.npz
+cache.npz
+chk2.txt
+chk.txt
+diag.out
+diag.py
+engine2.py
+engine.py
+err.txt
+f1a.txt
+f1.out
+final3.pkl
+final.py
+finalstats.py
+fs.out
+grid2.py
+grid3.py
+grid.py
+ls.txt
+p1.txt
+p2.txt
+passed.pkl
+patch.out
+plateau.py
+pl.out
+primscore.npy
+probe.out
+probe.py
+__pycache__
+s0.out
+s1.out
+s2a.txt
+s2.out
+s3a.txt
+s3.out
+stage0.py
+stage1.pkl
+stage2.pkl
+stage3.pkl
+stopwidth.py
+sw.out
+v1a.txt
+v1.out
+v3.out
+valid3.py
+valid.pkl
+valid.py
+wc.txt
+?? .combo2way/
+?? .combo2way_scratch/
+?? .fc3/
+?? .ff3/
+?? .fm3work/

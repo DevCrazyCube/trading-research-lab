@@ -1,0 +1,4 @@
+3.14.5 (main, May 10 2026, 18:26:20) [GCC 16.1.1 20260430]
+numpy 2.4.6
+(672, 66688)
+['mint', 'pool', 'n_bars', 'first_ts', 'last_ts', 'bars_json', 'fetched_at', 'status']

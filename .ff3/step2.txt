@@ -1,0 +1,35 @@
+allowed loaded 22561
+reserve_observation total (333888,)
+allowed reserve rows 216323 curves 2672
+instruction total (4461142,)
+idl_name dist (instruction, sample):
+  None 3754954
+  event:TradeEvent 330370
+  buy 125370
+  sell 118923
+  sell_v2 30463
+  buy_exact_quote_in_v2 27218
+  buy_exact_sol_in 21490
+  event:CloseUserVolumeAccumulatorEvent 9320
+  close_user_volume_accumulator 9320
+  buy_v2 7532
+  event:CreateEvent 3932
+  create_v2 3930
+  event:ClaimCashbackEvent 3436
+  claim_cashback 3423
+  init_user_volume_accumulator 2363
+  event:InitUserVolumeAccumulatorEvent 2363
+  extend_account 1997
+  event:ExtendAccountEvent 1881
+  event:SellEvent 463
+  event:DistributeCreatorFeesEvent 367
+  event:BuyEvent 302
+  migrate_bonding_curve_creator 261
+  event:MigrateBondingCurveCreatorEvent 261
+  distribute_creator_fees_v2 241
+  buy_exact_quote_in 139
+  distribute_creator_fees 126
+  migrate_v2 96
+  init_boost 82
+  event:InitBoostEvent 82
+  event:CreatePoolEvent 82

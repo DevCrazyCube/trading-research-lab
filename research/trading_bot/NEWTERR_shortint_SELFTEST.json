@@ -1,0 +1,53 @@
+{
+ "planted": [
+  30.234494044399785,
+  38.19809623617586
+ ],
+ "planted_flip": [
+  -31.08031378833731,
+  -39.3065592274181
+ ],
+ "planted_shift_back": [
+  -0.5876155345622642,
+  -1.3043478335268517
+ ],
+ "null_by_horizon": {
+  "1": {
+   "gross_mean_abs_t": 0.9421028833507965,
+   "gross_max_abs_t": 2.999960636702131,
+   "gross_sd_t": 1.1294350071559636,
+   "net_mean_t": -23.988937461846277,
+   "cost_bp_day": 7.113759092423521
+  },
+  "5": {
+   "gross_mean_abs_t": 0.7703805164661638,
+   "gross_max_abs_t": 2.3293363150407704,
+   "gross_sd_t": 0.9268545986650306,
+   "net_mean_t": -12.659958128986954,
+   "cost_bp_day": 1.6708449871081925
+  },
+  "10": {
+   "gross_mean_abs_t": 0.8812253120866558,
+   "gross_max_abs_t": 2.778016674184856,
+   "gross_sd_t": 1.0953233037235537,
+   "net_mean_t": -9.981963126196387,
+   "cost_bp_day": 0.924545746308304
+  },
+  "21": {
+   "gross_mean_abs_t": 0.9584670883256402,
+   "gross_max_abs_t": 2.828936219391158,
+   "gross_sd_t": 1.1484940664997672,
+   "net_mean_t": -8.222871093115272,
+   "cost_bp_day": 0.506144803193786
+  }
+ },
+ "null_note": "The NET t-stat is NOT a null-centred statistic: a random formula pays a deterministic turnover cost, so its net t is large and NEGATIVE. The multiple-testing bar sqrt(2 ln N) is therefore applied to the GROSS t, and profitability is gated separately on net mean > 0. The first run of this self-test applied the bar to the net t and the null came back at |t|=13; that is what caught it.",
+ "verdict": {
+  "planted_positive": true,
+  "sign_flip_mirrors": true,
+  "shifted_plant_collapses": true,
+  "gross_null_behaves": true,
+  "gross_null_mean_abs_t": 0.958,
+  "gross_null_max_abs_t": 3.0
+ }
+}

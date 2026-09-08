@@ -1,0 +1,102 @@
+{
+    "instrument_id": "AFTERSHOCK_V5",
+    "family": "scale-out quote-harvest (net-replacement entry + break-even + two-leg partial exit)",
+    "frozen_utc": "2026-08-27T20:00:00.000000+00:00",
+    "preregistration": "research/trading_bot/aftershock/AFTERSHOCK_V5_PREREGISTRATION.md",
+    "preregistration_sha256": "867888136813f8b016d825e63fe4aaca2e414e2b4bc70f212dfb04901f1b15b6",
+    "note": "NEW instrument. V1-V4 stay frozen and untouched. Scale-out MOTIVATED by a gap diagnostic + partial-exit backtest on burned data; params are round a-priori numbers, adjudicated only by fresh forward data + the promotion gate. PAPER: no orders/wallet/SOL/on-chain, free data only.",
+    "bankroll_usd": 100.0,
+    "bankroll_sol": 5.0,
+    "position_fraction": 0.02,
+    "toll_per_side": 0.0125,
+    "stop_frac": 0.5,
+    "target_frac": 0.5,
+    "sizing": {
+        "model": "forward arms at V1-comparable fraction; staged $10+$10 / 20%-settled capacity-capped is the intended LIVE sizing, gated on V5 proving positive",
+        "settled_equity_fraction": 0.20,
+        "max_position_usd": 50.0,
+        "probe_usd": 10.0,
+        "add_usd": 10.0,
+        "min_viable_usd": 10.0
+    },
+    "detector": {
+        "q_sol": 0.1,
+        "cluster_window_slots": 60,
+        "early_buyer_top_k": 3,
+        "material_sell_sol_floor": 0.5,
+        "material_sell_frac_of_R": 0.25,
+        "absorption_window_slots": 60,
+        "absorb_mult": 1.0,
+        "capacity_tail_slots": 10,
+        "net_replacement_ratio_min": 1.0,
+        "capacity_recover_frac": 1.0,
+        "absorb_min_new_wallets": 3,
+        "k60_max": 0.95,
+        "coverage_entry_floor": 10.0,
+        "entry_veto_no_exit_condition_true": false,
+        "stabilization_window_slots": 15,
+        "stabilization_requires_positive_net_reserve_flow": true,
+        "exclude_own_buy_from_flow": true,
+        "breakeven_gate": true,
+        "breakeven_min_quote": 0.90
+    },
+    "exit": {
+        "trail_on": "executable_full_position_quote",
+        "trail_frac": 0.12,
+        "coverage_exit_buffer": 6.0,
+        "cluster_resume_frac_of_R": 0.25,
+        "stale_or_conflicting_quote_exits": true,
+        "max_hold_slots": 3000,
+        "single_full_exit_only": false,
+        "partial_exits": true,
+        "max_exit_legs": 2,
+        "flow_flip_sell_frac": 0.65,
+        "flow_window_slots": 60,
+        "flow_min_window_sol": 0.1,
+        "flow_min_trades": 3
+    },
+    "arms": [
+        {"arm": "A", "label": "trail", "scale_out": false, "tp_level": null, "scale_frac": 0.0},
+        {"arm": "B", "label": "scale50@+50%", "scale_out": true, "tp_level": 1.50, "scale_frac": 0.5},
+        {"arm": "C", "label": "scale50@+100%", "scale_out": true, "tp_level": 2.00, "scale_frac": 0.5}
+    ],
+    "kill_switch": {
+        "N_min": 30,
+        "rule": "HALT if, after n>=N_min resolved PASS trades, upper95(log-growth g) < 0 OR dump_rate >= dump_rate_max"
+    },
+    "dump_rate_max": 0.13,
+    "ecr_fee_schedule": {
+        "fee_bps": 95,
+        "creator_fee_bps": 30,
+        "cashback_fee_bps": 0,
+        "buyback_fee_bps": 5000
+    },
+    "ecr_stress_policy": {
+        "base_fee_lamports": 5000,
+        "priority_fee_lamports": 100000,
+        "priority_fee_from_measured_landing": true,
+        "tip_lamports": 0,
+        "ata_rent_lamports": 2039280,
+        "ata_close_reclaims_rent": true,
+        "failed_attempts": 1,
+        "no_order_if_all_in_breakeven_infeasible": true,
+        "leg_note": "two legs charge the pinned per-side execution model on each leg; scale-out never exceeds max_exit_legs"
+    },
+    "decision_stream": {
+        "signal_source": "pumpportal_tape",
+        "final_decision_source": "canonical_onchain_events_real_slots_instruction_ordering",
+        "no_synthetic_slot_time": true
+    },
+    "promotion_criteria": [
+        "positive log-growth after ALL costs (curve fees, ATA rent, real-size slippage, failed-landing fees, BOTH legs)",
+        "positive per UTC day AND per creator-cluster",
+        "not carried by a single >=7x winner (drop-the-max robust)",
+        "unexitable rate under the B20B baseline",
+        "survives a fresh hash-frozen confirmation period never seen"
+    ],
+    "benchmarks": {
+        "score": "pot growth G = sum ln(1 + position_fraction * stressed_net_return); dump-rate is a hard kill-gate, not the score",
+        "null": "control = a material cluster sell fired but NET replacement was NOT confirmed; scored identically -> G_control",
+        "honest_prior": "~0 or small-positive; the loss mode is gaps after going green; scale-out banks a gap-proof gain on part while riding the rest for the fat tail"
+    }
+}

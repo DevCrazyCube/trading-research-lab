@@ -1,0 +1,17 @@
+[
+  {
+    "venue": "polymarket",
+    "market_id": "1125103",
+    "question": "Will United Russia win between 310 and 324 seats in the next Russian State Duma election?",
+    "category": "russia-election/international-election-props/politics",
+    "p_market": 0.2045,
+    "yes_bid": 0.204,
+    "yes_ask": 0.205,
+    "spread": 0.001,
+    "q_agent": 0.15,
+    "close_time": "2026-09-20T00:00:00Z",
+    "confidence": 0.35,
+    "thesis": "Coherent completion of the United Russia seat-bracket ladder frozen 2026-08-25 (<280 q=0.015, 340-354 q=0.29, >=355 q=0.14, implied 280-324 = 0.23 and 325-339 = 0.32) and the 08-29 abstention that placed ~0.03 on 280-294. Same seat arithmetic, no new information: ~200 of 225 SMDs plus a mid-50s list share puts the central case at 335-345, so the residual 280-324 mass (0.23) splits roughly 0.03 / 0.05 / 0.15 across 280-294 / 295-309 / 310-324. The market's 20.4c on 310-324 is the bracket that CONTAINS the 2021 anchor (324), i.e. the crowd's anchoring mass, which the frozen ladder already bets against. This is NOT an independent bet: it is perfectly correlated with the 08-25 ladder and must be counted as one shot for multiple-testing. Falsifier: official UR seat count inside 310-324 (the frozen ladder's own falsifier).",
+    "event_refs": ["ledger:1125100", "ledger:1125105", "ledger:1125106", "abstention:2026-08-29T09 (1125101)"]
+  }
+]

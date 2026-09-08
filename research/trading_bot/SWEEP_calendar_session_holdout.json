@@ -1,0 +1,200 @@
+[
+ {
+  "name": "REBAL_UNWIND_2D",
+  "desc": "first 2 sessions of the month: the REBAL_FLOW_2D position reversed (flow unwind)",
+  "dataset": "daily",
+  "design": {
+   "name": "REBAL_UNWIND_2D",
+   "desc": "first 2 sessions of the month: the REBAL_FLOW_2D position reversed (flow unwind)",
+   "dataset": "daily",
+   "window": "design",
+   "sharpe": 0.717,
+   "n_periods": 3632,
+   "n_active_periods": 519,
+   "years": 14.41,
+   "ann_return_pct": 3.501,
+   "ann_vol_pct": 4.885,
+   "total_return_pct": 50.46,
+   "max_drawdown_pct": -8.91
+  },
+  "holdout": {
+   "name": "REBAL_UNWIND_2D",
+   "desc": "first 2 sessions of the month: the REBAL_FLOW_2D position reversed (flow unwind)",
+   "dataset": "daily",
+   "window": "holdout",
+   "sharpe": 0.412,
+   "n_periods": 2421,
+   "n_active_periods": 348,
+   "years": 9.61,
+   "ann_return_pct": 1.634,
+   "ann_vol_pct": 3.963,
+   "total_return_pct": 15.7,
+   "max_drawdown_pct": -12.82
+  }
+ },
+ {
+  "name": "REBAL_FLOW_2D",
+  "desc": "last 2 sessions of the month: short SPY / long TLT when equities beat bonds month-to-date, reversed when they lagged (pension rebalance direction)",
+  "dataset": "daily",
+  "design": {
+   "name": "REBAL_FLOW_2D",
+   "desc": "last 2 sessions of the month: short SPY / long TLT when equities beat bonds month-to-date, reversed when they lagged (pension rebalance direction)",
+   "dataset": "daily",
+   "window": "design",
+   "sharpe": 0.55,
+   "n_periods": 3632,
+   "n_active_periods": 520,
+   "years": 14.41,
+   "ann_return_pct": 2.21,
+   "ann_vol_pct": 4.02,
+   "total_return_pct": 31.85,
+   "max_drawdown_pct": -6.77
+  },
+  "holdout": {
+   "name": "REBAL_FLOW_2D",
+   "desc": "last 2 sessions of the month: short SPY / long TLT when equities beat bonds month-to-date, reversed when they lagged (pension rebalance direction)",
+   "dataset": "daily",
+   "window": "holdout",
+   "sharpe": 0.519,
+   "n_periods": 2421,
+   "n_active_periods": 348,
+   "years": 9.61,
+   "ann_return_pct": 1.622,
+   "ann_vol_pct": 3.123,
+   "total_return_pct": 15.58,
+   "max_drawdown_pct": -6.37
+  }
+ },
+ {
+  "name": "XS_DEC_TAXLOSS",
+  "desc": "December: short the worst YTD tercile / long the best; reversed over the first 5 sessions of January",
+  "dataset": "xs",
+  "design": {
+   "name": "XS_DEC_TAXLOSS",
+   "desc": "December: short the worst YTD tercile / long the best; reversed over the first 5 sessions of January",
+   "dataset": "xs",
+   "window": "design",
+   "sharpe": -1.058,
+   "n_periods": 1511,
+   "n_active_periods": 160,
+   "years": 6.0,
+   "ann_return_pct": -2.468,
+   "ann_vol_pct": 2.333,
+   "total_return_pct": -14.8,
+   "max_drawdown_pct": -15.13
+  },
+  "holdout": {
+   "name": "XS_DEC_TAXLOSS",
+   "desc": "December: short the worst YTD tercile / long the best; reversed over the first 5 sessions of January",
+   "dataset": "xs",
+   "window": "holdout",
+   "sharpe": 0.511,
+   "n_periods": 1158,
+   "n_active_periods": 114,
+   "years": 4.6,
+   "ann_return_pct": 1.162,
+   "ann_vol_pct": 2.275,
+   "total_return_pct": 5.34,
+   "max_drawdown_pct": -5.05
+  }
+ },
+ {
+  "name": "XT_WEEKEND_ALTS",
+  "desc": "long an equal-weight ETH/SOL/BNB perp basket over Sat+Sun UTC",
+  "dataset": "crypto",
+  "design": {
+   "name": "XT_WEEKEND_ALTS",
+   "desc": "long an equal-weight ETH/SOL/BNB perp basket over Sat+Sun UTC",
+   "dataset": "crypto",
+   "window": "design",
+   "sharpe": 1.33,
+   "n_periods": 30696,
+   "n_active_periods": 8966,
+   "years": 3.5,
+   "ann_return_pct": 53.91,
+   "ann_vol_pct": 40.521,
+   "total_return_pct": 188.91,
+   "max_drawdown_pct": -44.9
+  },
+  "holdout": {
+   "name": "XT_WEEKEND_ALTS",
+   "desc": "long an equal-weight ETH/SOL/BNB perp basket over Sat+Sun UTC",
+   "dataset": "crypto",
+   "window": "holdout",
+   "sharpe": 0.43,
+   "n_periods": 23040,
+   "n_active_periods": 6714,
+   "years": 2.63,
+   "ann_return_pct": 11.411,
+   "ann_vol_pct": 26.519,
+   "total_return_pct": 30.01,
+   "max_drawdown_pct": -37.09
+  }
+ },
+ {
+  "name": "XT_TOM_BTC",
+  "desc": "long BTC perp on the last UTC day of the month and the first",
+  "dataset": "crypto",
+  "design": {
+   "name": "XT_TOM_BTC",
+   "desc": "long BTC perp on the last UTC day of the month and the first",
+   "dataset": "crypto",
+   "window": "design",
+   "sharpe": 0.825,
+   "n_periods": 30696,
+   "n_active_periods": 2058,
+   "years": 3.5,
+   "ann_return_pct": 12.753,
+   "ann_vol_pct": 15.464,
+   "total_return_pct": 44.69,
+   "max_drawdown_pct": -18.85
+  },
+  "holdout": {
+   "name": "XT_TOM_BTC",
+   "desc": "long BTC perp on the last UTC day of the month and the first",
+   "dataset": "crypto",
+   "window": "holdout",
+   "sharpe": -0.926,
+   "n_periods": 23040,
+   "n_active_periods": 1544,
+   "years": 2.63,
+   "ann_return_pct": -11.098,
+   "ann_vol_pct": 11.987,
+   "total_return_pct": -29.19,
+   "max_drawdown_pct": -38.24
+  }
+ },
+ {
+  "name": "XS_MONTHEND_DRESS",
+  "desc": "last 2 sessions of the month: long the month's winners, short the losers (window dressing)",
+  "dataset": "xs",
+  "design": {
+   "name": "XS_MONTHEND_DRESS",
+   "desc": "last 2 sessions of the month: long the month's winners, short the losers (window dressing)",
+   "dataset": "xs",
+   "window": "design",
+   "sharpe": -1.134,
+   "n_periods": 1511,
+   "n_active_periods": 212,
+   "years": 6.0,
+   "ann_return_pct": -3.052,
+   "ann_vol_pct": 2.691,
+   "total_return_pct": -18.3,
+   "max_drawdown_pct": -19.62
+  },
+  "holdout": {
+   "name": "XS_MONTHEND_DRESS",
+   "desc": "last 2 sessions of the month: long the month's winners, short the losers (window dressing)",
+   "dataset": "xs",
+   "window": "holdout",
+   "sharpe": -1.314,
+   "n_periods": 1158,
+   "n_active_periods": 168,
+   "years": 4.6,
+   "ann_return_pct": -3.62,
+   "ann_vol_pct": 2.754,
+   "total_return_pct": -16.63,
+   "max_drawdown_pct": -16.82
+  }
+ }
+]

@@ -1,0 +1,31 @@
+H=5 rows=4842 t=26.3
+H=15 rows=9537 t=42.5
+H=30 rows=14007 t=56.8
+H=60 rows=18255 t=69.3
+H=120 rows=22281 t=80.4
+H=240 rows=25992 t=91.0
+
+cells with both sides eligible: 25992   MIN_MCAP=10000
+train mean of cell means -0.2704 | validate -0.2938
+frac train>0 0.0005 | frac validate>0 0.0000 | frac BOTH>0 0.0000
+best validate mean overall +0.0172 | best train +0.0629
+corr(train,validate) across cells = 0.807
+cells positive on BOTH: 0
+
+top validate cells irrespective of train sign:
+  T-0.1373 V+0.0172 vn=73 vk=21 | H=120 half_tp50 add_dn25 age_360_900 all
+  T-0.0857 V-0.0027 vn=1054 vk=21 | H=5 tp100 add_dn25 age_360_900 all
+  T-0.0775 V-0.0051 vn=1054 vk=21 | H=5 tp100 add_up25 age_360_900 all
+  T-0.0956 V-0.0052 vn=1056 vk=21 | H=5 tp100_sl40 add_dn25 age_360_900 all
+  T-0.2169 V-0.0053 vn=76 vk=21 | H=240 tp25 add_dn25 age_360_900 all
+  T-0.0826 V-0.0062 vn=1056 vk=21 | H=5 tp100_sl40 add_up25 age_360_900 all
+  T-0.0781 V-0.0072 vn=1062 vk=21 | H=5 tp50 add_up25 age_360_900 all
+  T-0.0757 V-0.0076 vn=1054 vk=21 | H=5 time add_up25 age_360_900 all
+  T-0.0847 V-0.0079 vn=1067 vk=21 | H=5 tp50_sl30 add_up25 age_360_900 all
+  T-0.0793 V-0.0088 vn=1055 vk=21 | H=5 sl50 add_up25 age_360_900 all
+  T-0.0828 V-0.0088 vn=1055 vk=21 | H=5 trail50 add_up25 age_360_900 all
+  T-0.0770 V-0.0091 vn=1054 vk=21 | H=5 half_tp50 add_up25 age_360_900 all
+  T-0.1937 V-0.0097 vn=77 vk=21 | H=120 tp100 add_dn25 age_360_900 all
+  T-0.0865 V-0.0100 vn=1062 vk=21 | H=5 tp50 add_dn25 age_360_900 all
+  T-0.0854 V-0.0105 vn=1054 vk=21 | H=5 half_tp50 add_dn25 age_360_900 all
+elapsed 91.10056400299072

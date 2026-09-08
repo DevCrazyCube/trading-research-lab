@@ -1,0 +1,125 @@
+{
+ "window": [
+  "2016-01-26",
+  "2021-12-31"
+ ],
+ "n_sessions": 1496,
+ "census": {
+  "mean": {
+   "sessions": 1485,
+   "no_path_file": 0,
+   "no_path_symbol": 78,
+   "stock_days": 29642
+  },
+  "empirical": {
+   "sessions": 1485,
+   "no_path_file": 0,
+   "no_path_symbol": 78,
+   "stock_days": 29642
+  }
+ },
+ "configurations": {
+  "mean/zero_diagnostic": {
+   "label": "mean/zero_diagnostic",
+   "n_days": 1485,
+   "years": 5.892857142857143,
+   "mean_daily": 0.002217153945920891,
+   "sd_daily": 0.013278337455760545,
+   "annualised_return": 0.7105525600619522,
+   "annualised_vol": 0.21078707239401914,
+   "annualised_sharpe": 2.650650194181063,
+   "max_drawdown": 0.2798819263532504,
+   "final_multiple": 23.650462449140072,
+   "t_stat": 6.434508429902166,
+   "skew": 4.759687470745172,
+   "kurtosis_non_excess": 69.01302048180276,
+   "n_trades": 24227,
+   "gross_cap_mode": "pro_rata"
+  },
+  "mean/T6_measured": {
+   "label": "mean/T6_measured",
+   "n_days": 1485,
+   "years": 5.892857142857143,
+   "mean_daily": 0.00038971369379087943,
+   "sd_daily": 0.013272985706809081,
+   "annualised_return": 0.0798693456785986,
+   "annualised_vol": 0.2107021160131902,
+   "annualised_sharpe": 0.46609807577420675,
+   "max_drawdown": 0.34641202087409184,
+   "final_multiple": 1.5727213805900069,
+   "t_stat": 1.1314627649903495,
+   "skew": 4.753539239435073,
+   "kurtosis_non_excess": 69.00715864196037,
+   "n_trades": 24227,
+   "gross_cap_mode": "pro_rata"
+  },
+  "mean/T6_plus_paper_commission": {
+   "label": "mean/T6_plus_paper_commission",
+   "n_days": 1485,
+   "years": 5.892857142857143,
+   "mean_daily": -0.00021209754080354364,
+   "sd_daily": 0.013276027455498345,
+   "annualised_return": -0.07211093242536215,
+   "annualised_vol": 0.21075040227668548,
+   "annualised_sharpe": -0.2536108102527964,
+   "max_drawdown": 0.45647124939977324,
+   "final_multiple": 0.6433671947700002,
+   "t_stat": -0.6156455122099249,
+   "skew": 4.7243656972883254,
+   "kurtosis_non_excess": 68.72368940402889,
+   "n_trades": 24227,
+   "gross_cap_mode": "pro_rata"
+  },
+  "empirical/T6_measured": {
+   "label": "empirical/T6_measured",
+   "n_days": 1485,
+   "years": 5.892857142857143,
+   "mean_daily": 0.0008824053025425033,
+   "sd_daily": 0.013161538952263312,
+   "annualised_return": 0.22299598657572384,
+   "annualised_vol": 0.20893295363147002,
+   "annualised_sharpe": 1.0642942263331765,
+   "max_drawdown": 0.3233015547341831,
+   "final_multiple": 3.2747882492399913,
+   "t_stat": 2.583596351669041,
+   "skew": 4.840417351220302,
+   "kurtosis_non_excess": 71.52581658190333,
+   "n_trades": 24227,
+   "gross_cap_mode": "pro_rata"
+  },
+  "empirical/T6_plus_paper_commission": {
+   "label": "empirical/T6_plus_paper_commission",
+   "n_days": 1485,
+   "years": 5.892857142857143,
+   "mean_daily": 0.00027962118573828307,
+   "sd_daily": 0.013168154055820573,
+   "annualised_return": 0.05068063491815611,
+   "annualised_vol": 0.20903796514492673,
+   "annualised_sharpe": 0.3370896705638808,
+   "max_drawdown": 0.3573259137559056,
+   "final_multiple": 1.3382089557599992,
+   "t_stat": 0.8182921804008034,
+   "skew": 4.802959878033988,
+   "kurtosis_non_excess": 71.03291349777102,
+   "n_trades": 24227,
+   "gross_cap_mode": "pro_rata"
+  },
+  "empirical/T6_measured/truncate": {
+   "label": "empirical/T6_measured/truncate",
+   "n_days": 1485,
+   "years": 5.892857142857143,
+   "mean_daily": 0.0014446746671009968,
+   "sd_daily": 0.08859230589787008,
+   "annualised_return": -0.1857873515594195,
+   "annualised_vol": 1.4063592568771501,
+   "annualised_sharpe": 0.2588655880986268,
+   "max_drawdown": 0.9476120639259648,
+   "final_multiple": 0.29784538165999946,
+   "t_stat": 0.628401594630942,
+   "skew": 19.51362424198205,
+   "kurtosis_non_excess": 564.6235826326325,
+   "n_trades": 2292,
+   "gross_cap_mode": "truncate"
+  }
+ }
+}

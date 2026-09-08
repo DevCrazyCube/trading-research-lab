@@ -1,0 +1,41 @@
+MIN_MCAP=2000 STOP_FILL=low
+
+### H=240 tp25 add_dn25 gate=ath_ge90 cf=b60_3p
+  TRAIN toll=0.0114 chg=0.30 mean=+0.0576 med=+0.0205 n=47 k=15 res=0.872 lo5=-0.0479
+  TRAIN toll=0.0114 chg=0.50 mean=+0.0207 med=+0.0018 n=47 k=15 res=0.872 lo5=-0.0977
+  TRAIN toll=0.0114 chg=1.00 mean=-0.0715 med=+0.0018 n=47 k=15 res=0.872 lo5=-0.2378
+  TRAIN toll=0.0250 chg=0.30 mean=+0.0467 med=+0.0082 n=47 k=15 res=0.872 lo5=-0.0569
+  TRAIN toll=0.0250 chg=0.50 mean=+0.0098 med=-0.0085 n=47 k=15 res=0.872 lo5=-0.1066
+  TRAIN toll=0.0250 chg=1.00 mean=-0.0825 med=-0.0085 n=47 k=15 res=0.872 lo5=-0.2462
+  VALID toll=0.0114 chg=0.30 mean=+0.0634 med=+0.0711 n=88 k=26 res=0.898 lo5=-0.0234
+  VALID toll=0.0114 chg=0.50 mean=+0.0246 med=+0.0530 n=88 k=26 res=0.898 lo5=-0.0789
+  VALID toll=0.0114 chg=1.00 mean=-0.0723 med=+0.0258 n=88 k=26 res=0.898 lo5=-0.2275
+  VALID toll=0.0250 chg=0.30 mean=+0.0525 med=+0.0597 n=88 k=26 res=0.898 lo5=-0.0323
+  VALID toll=0.0250 chg=0.50 mean=+0.0137 med=+0.0433 n=88 k=26 res=0.898 lo5=-0.0877
+  VALID toll=0.0250 chg=1.00 mean=-0.0833 med=+0.0151 n=88 k=26 res=0.898 lo5=-0.2363
+  CONTROL(all mints, same structure+gate) TRAIN mean=-0.1522 med=-0.0881 n=315 k=103
+  CONTROL(all mints, same structure+gate) VALID mean=-0.1472 med=-0.1048 n=416 k=136
+
+### H=5 tp25 add_dn25 gate=ath_ge90 cf=b60_3p
+  TRAIN toll=0.0114 chg=0.30 mean=+0.0108 med=+0.0201 n=64 k=15 res=0.969 lo5=-0.1469
+  TRAIN toll=0.0114 chg=0.50 mean=+0.0069 med=+0.0201 n=64 k=15 res=0.969 lo5=-0.1492
+  TRAIN toll=0.0114 chg=1.00 mean=-0.0028 med=+0.0201 n=64 k=15 res=0.969 lo5=-0.1566
+  TRAIN toll=0.0250 chg=0.30 mean=-0.0004 med=+0.0129 n=64 k=15 res=0.969 lo5=-0.1558
+  TRAIN toll=0.0250 chg=0.50 mean=-0.0043 med=+0.0129 n=64 k=15 res=0.969 lo5=-0.1582
+  TRAIN toll=0.0250 chg=1.00 mean=-0.0140 med=+0.0129 n=64 k=15 res=0.969 lo5=-0.1660
+  VALID toll=0.0114 chg=0.30 mean=+0.0067 med=+0.0042 n=153 k=26 res=0.993 lo5=-0.1066
+  VALID toll=0.0114 chg=0.50 mean=+0.0059 med=+0.0042 n=153 k=26 res=0.993 lo5=-0.1074
+  VALID toll=0.0114 chg=1.00 mean=+0.0040 med=-0.0048 n=153 k=26 res=0.993 lo5=-0.1084
+  VALID toll=0.0250 chg=0.30 mean=-0.0048 med=-0.0057 n=153 k=26 res=0.993 lo5=-0.1167
+  VALID toll=0.0250 chg=0.50 mean=-0.0055 med=-0.0057 n=153 k=26 res=0.993 lo5=-0.1174
+  VALID toll=0.0250 chg=1.00 mean=-0.0075 med=-0.0123 n=153 k=26 res=0.993 lo5=-0.1186
+  CONTROL(all mints, same structure+gate) TRAIN mean=-0.1023 med=-0.0264 n=938 k=104
+  CONTROL(all mints, same structure+gate) VALID mean=-0.1087 med=-0.0393 n=1344 k=136
+
+=== np0 (first-time deployer) screen ===
+  H= 15 TRAIN  np0 mean=-0.2770 (k=72 res=0.958 lo5=-0.3524) | np1p mean=-0.3483 (k=34) | all=-0.2998
+  H= 15 VALID  np0 mean=-0.2814 (k=85 res=0.964 lo5=-0.3519) | np1p mean=-0.3607 (k=52) | all=-0.3115
+  H= 60 TRAIN  np0 mean=-0.2817 (k=72 res=0.847 lo5=-0.3687) | np1p mean=-0.3893 (k=34) | all=-0.3162
+  H= 60 VALID  np0 mean=-0.3702 (k=85 res=0.856 lo5=-0.4471) | np1p mean=-0.4885 (k=52) | all=-0.4151
+  H=240 TRAIN  np0 mean=-0.4276 (k=71 res=0.524 lo5=-0.5039) | np1p mean=-0.5095 (k=34) | all=-0.4541
+  H=240 VALID  np0 mean=-0.4286 (k=85 res=0.535 lo5=-0.4842) | np1p mean=-0.5097 (k=52) | all=-0.4594

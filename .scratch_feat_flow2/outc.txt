@@ -1,0 +1,14 @@
+ndp 203848
+n exits 14 n pos 3 n struct 210
+mints with dp 1273
+outcomes elapsed 54.4s
+bad pe 551
+dp on mints whose tape ends within 30min of window edge: 6 mints: 1
+frozen rate by H [0.053544798084847536, 0.03619854008869353, 0.031111416349436836, 0.03243593265570425, 0.042261881401828814]
+censored rate by H [0.0027079000039244927, 0.0027079000039244927, 0.0027079000039244927, 0.0027079000039244927, 0.0027079000039244927]
+saved 346.163368 MB
+H=60 uncond gross mean=-0.0345 med=-0.0014 n=203296
+H=180 uncond gross mean=-0.0516 med=-0.0599 n=203296
+H=600 uncond gross mean=-0.0912 med=-0.2222 n=203296
+H=1800 uncond gross mean=-0.1687 med=-0.3916 n=203296
+H=5400 uncond gross mean=-0.1994 med=-0.4796 n=203296

@@ -1,0 +1,40 @@
+raw_block_signatures min 435569222 max 437210794 n 113804 span 1641573
+instruction slots min 435569222 max 437210794 distinct 113804
+slot gap hist (capped 20): [(1, 71308), (2, 17204), (3, 7198), (4, 3736), (5, 2469), (6, 1654), (7, 1204), (8, 943), (9, 681), (10, 512), (11, 469), (12, 345), (13, 329), (14, 274), (15, 250), (16, 211), (17, 208), (18, 175), (19, 143), (20, 4490)]
+metadata:
+  boundary_context_slot:6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P = 437997563
+  boundary_program_context_slot:6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P = 437997562
+  boundary_last_deploy_slot:6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P = 433095571
+  boundary_program_evidence_key:6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P = c5aa420133654e7e0b7e8bf5f9e8dd71bfd3b24d9cd7526dcec2fe48cf52cfe4
+  boundary_endpoint_reference = https://solana-mainnet.core.chainstack.com
+  boundary_context_slot:pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA = 437997563
+  boundary_program_context_slot:pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA = 437997563
+  boundary_last_deploy_slot:pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA = 433112355
+  boundary_program_evidence_key:pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA = db8774e04e2d7a510b2fa647bbfe1ffd679bd45e9a858c5db363745347163f46
+  boundary_completed_at_unix = 1786194111.8547084
+  pump_idl_path = research/pump_idl_9c82f61.json
+  pump_idl_sha256 = b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49
+  pump_program = 6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P
+  pumpswap_idl_path = research/pump_amm_idl_9c82f61.json
+  pumpswap_idl_sha256 = 6b5c7ec4e5ef9742fa99dc57b0d75b1031b379bba02a7e1b3c5a4cad68d77e56
+  pumpswap_program = pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA
+  idl_source_repo = https://github.com/pump-fun/pump-public-docs
+  idl_source_commit = 9c82f61cb711b044a17f770ab8ce9f9bdf78f333
+  idl_access_date = 2026-07-29
+  b9c_sha256 = e735c6c59848ff57958402a7488474415c7f20febce7a12cf7227b4267c7391d
+  b9a_sha256 = 882d47d19a331e805be5796cd7d8ab616c7af65391bd327e0221d3c51c4edc38
+  endpoint_reference = https://solana-mainnet.core.chainstack.com
+  authorization_seq = 218
+  schema_version = b9d-v1
+  cutoff_slot = 437211659
+  started_at_unix = 1786196332.1685863
+  transaction_shape_preflight = GYJCSS74x6EPkZqTXjpU25VJNvwMKQ9VkGcEHjkjdF2bu7K3Ma3SBbuDq36UFSmpm8q2LKpGhmhmmRGCyWkQPER
+  b9c_content_sha256 = 561864623be82ad6286d20b5ffde2dddc07e64d4405df47444334fd00e931f80
+  b9a_content_sha256 = 17128ca487181cfa33111e40d75eb519ab43782f2a05f7247e160eae8cf1be8f
+  decoded_at_unix = 1786318546.664197
+  decoder_classification_failures = 0
+  reserve_reconciliation_failures = 0
+  reserve_balance_exact = 319410
+  reserve_balance_confounded = 4442
+  reserve_balance_failures = 0
+  reserve_eventless_resolved = 0

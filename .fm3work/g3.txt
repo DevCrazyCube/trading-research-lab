@@ -1,0 +1,5 @@
+
+=== MULTIPLICITY NULL: max-statistic permutation ===
+shuffle the mint->(X,TG,WEB) label assignment 300x, re-run the SAME 3-way grid on VALIDATE,
+count how often SOME cell reaches the survivor mean with mean>0 & bootlo>0.
+---err---

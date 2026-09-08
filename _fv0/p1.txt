@@ -1,0 +1,5 @@
+numpy 2.4.6
+8
+-rw-r--r-- 1 anont anont 12697600  2 sep 23:20 research/b11a/window_labels.sqlite
+-rw-r--r-- 1 anont anont  8904704  4 sep 02:07 research/midcap/grad_ohlcv.sqlite
+(eval):1: write failed: schijfquotum is overschreden

@@ -1,0 +1,10 @@
+REAL: train-positive=1580 survivors=2 ['R8[up_min=3 & density15=1]', 'M10[ret1=3 & barrange=6]'] (22s)
+NULL-B rep0 train-positive=1745 survivors=0 []
+NULL-B rep1 train-positive=1818 survivors=3 ['Q5[logvol5=3 & vwapdev=2]', 'R8[ret30=0 & dd_max=4]', 'R8[up_min=5 & logvol5=4]']
+NULL-B rep2 train-positive=1924 survivors=1 ['M10[bodypos=3 & vwapdev=7]']
+NULL-B rep3 train-positive=1563 survivors=2 ['R8[ret30=6 & tot_ret=7]', 'M10[volratio=8 & cumvol=7]']
+NULL-B rep4 train-positive=1687 survivors=4 ['R8[ret1=3 & ret30=7]', 'R8[dd_max=2 & vwapdev=1]', 'R8[volratio=2 & vwapdev=6]', 'R8[density15=4 & age_min=3]']
+NULL-B rep5 train-positive=1774 survivors=1 ['R8[rvol15=5 & age_min=7]']
+NULL-B rep6 train-positive=1882 survivors=3 ['R8[density15=4 & hour=1]', 'R8[age_min=4 & vwapdev=7]', 'R8[age_min=6 & vwapdev=6]']
+NULL-B rep7 train-positive=1458 survivors=7 ['Q5[rvol15=2 & logvol5=2]', 'R8[ret5=2 & up_min=7]', 'R8[dd_max=7 & age_min=2]', 'R8[age_min=2 & vwapdev=6]', 'M10[ret15=7 & age_min=3]', 'M10[logvol5=3 & age_min=8]']
+NULL-B rep8 train-positive=1954 survivors=4 ['R8[ret5=3 & vwapdev=6]', 'M10[ret1=3 & dd_max=8]', 'M10[ret5=3 & volratio=9]', 'M10[up_min=8 & barrange=5]']

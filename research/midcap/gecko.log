@@ -36,3 +36,22 @@ Traceback (most recent call last):
     c.commit()
     ~~~~~~~~^^
 sqlite3.OperationalError: database is locked
+1075 graduates, 672 already fetched, 403 to go
+[16:45:27] 0/403  with-bars=1
+[17:00:54] 25/403  with-bars=24
+[17:19:43] 50/403  with-bars=47
+[17:42:28] 75/403  with-bars=71
+[18:05:34] 100/403  with-bars=94
+[18:25:25] 125/403  with-bars=118
+[18:39:57] 150/403  with-bars=142
+[19:00:06] 175/403  with-bars=167
+[19:18:52] 200/403  with-bars=191
+[19:40:25] 225/403  with-bars=213
+[20:03:24] 250/403  with-bars=236
+[20:21:42] 275/403  with-bars=259
+[20:40:30] 300/403  with-bars=283
+[20:59:35] 325/403  with-bars=305
+[21:24:54] 350/403  with-bars=328
+[21:48:16] 375/403  with-bars=351
+[22:04:56] 400/403  with-bars=376
+DONE. 378 mints with bars.

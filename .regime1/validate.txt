@@ -1,0 +1,380 @@
+train positives to validate 2574
+passed mean>0, mean>ctrl, jackknife: 432  (17.1s)
+SURV NEWL60_q5 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1382 med -0.0805 n343 k89 || VA mean 0.3293 med -0.0496 n356 k103 || ctrl 0.1100/-0.0435 jack 0.2131 bootlo 0.1206 p 0.961 res 0.980
+SURV ALL | YOUNG30 | T60_TR25 | P1 || TR mean 0.1587 med -0.0700 n911 k175 || VA mean 0.2180 med -0.0436 n1025 k207 || ctrl 0.1100/-0.0435 jack 0.1600 bootlo 0.1163 p 0.966 res 0.988
+SURV LAUNCH60_q4 | YOUNG30 | T60_TR25 | P1 || TR mean 0.2639 med -0.0164 n251 k82 || VA mean 0.4422 med -0.0664 n248 k91 || ctrl 0.1100/-0.0435 jack 0.2674 bootlo 0.1131 p 0.951 res 0.985
+SURV MEDRET60_q1 | YOUNG30 | T60_TR25 | P1 || TR mean 0.0885 med -0.1074 n352 k106 || VA mean 0.4867 med -0.0742 n354 k123 || ctrl 0.1100/-0.0435 jack 0.2829 bootlo 0.1061 p 0.945 res 0.980
+SURV HOUR_b4 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1763 med -0.0777 n180 k41 || VA mean 0.3889 med 0.0253 n272 k53 || ctrl 0.1100/-0.0435 jack 0.1622 bootlo 0.1000 p 0.932 res 0.992
+SURV ALL | YOUNG30 | T60_TR25 | P2 || TR mean 0.1376 med -0.0577 n911 k175 || VA mean 0.1667 med -0.0406 n1025 k207 || ctrl 0.0780/-0.0355 jack 0.1342 bootlo 0.0970 p 0.987 res 0.988
+SURV ALL | YOUNG30 | T60_TR25 | P3 || TR mean 0.1354 med -0.0516 n911 k175 || VA mean 0.1584 med -0.0360 n1025 k207 || ctrl 0.0724/-0.0338 jack 0.1259 bootlo 0.0965 p 0.992 res 0.988
+SURV NEWL60_q5 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1272 med -0.0613 n343 k89 || VA mean 0.2271 med -0.0444 n356 k103 || ctrl 0.0780/-0.0355 jack 0.1621 bootlo 0.0949 p 0.971 res 0.980
+SURV HOUR_b4 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1663 med -0.0564 n180 k41 || VA mean 0.2732 med 0.0160 n272 k53 || ctrl 0.0780/-0.0355 jack 0.1466 bootlo 0.0939 p 0.975 res 0.992
+SURV NEWL60_q5 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1241 med -0.0546 n343 k89 || VA mean 0.2133 med -0.0472 n356 k103 || ctrl 0.0724/-0.0338 jack 0.1481 bootlo 0.0895 p 0.973 res 0.980
+SURV ACTCNT_q1 | YOUNG30 | T60_TR25 | P1 || TR mean 0.0942 med -0.0777 n270 k70 || VA mean 0.2947 med -0.0427 n358 k78 || ctrl 0.1100/-0.0435 jack 0.1404 bootlo 0.0885 p 0.890 res 0.991
+SURV YOUNGFRAC_q5 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1302 med -0.0784 n432 k116 || VA mean 0.2321 med -0.0625 n508 k134 || ctrl 0.1100/-0.0435 jack 0.1423 bootlo 0.0875 p 0.903 res 0.989
+SURV LAUNCH60_q4 | YOUNG30 | T60_TR25 | P2 || TR mean 0.2175 med -0.0242 n251 k82 || VA mean 0.3695 med -0.0466 n248 k91 || ctrl 0.0780/-0.0355 jack 0.1856 bootlo 0.0870 p 0.961 res 0.985
+SURV HOUR_b4 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1660 med -0.0715 n180 k41 || VA mean 0.2605 med 0.0126 n272 k53 || ctrl 0.0724/-0.0338 jack 0.1335 bootlo 0.0869 p 0.972 res 0.992
+SURV LAUNCH60_q4 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1956 med -0.0171 n251 k82 || VA mean 0.2721 med -0.0439 n248 k91 || ctrl 0.0724/-0.0338 jack 0.1854 bootlo 0.0867 p 0.968 res 0.985
+SURV MEDRET60_q1 | YOUNG30 | T60_TR25 | P2 || TR mean 0.0880 med -0.0714 n352 k106 || VA mean 0.3235 med -0.0702 n354 k123 || ctrl 0.0780/-0.0355 jack 0.2019 bootlo 0.0866 p 0.956 res 0.980
+SURV YOUNGFRAC_q5 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1179 med -0.0712 n432 k116 || VA mean 0.1843 med -0.0478 n508 k134 || ctrl 0.0780/-0.0355 jack 0.1342 bootlo 0.0845 p 0.963 res 0.989
+SURV NEWL60_q5 | ANY | T60_TR25 | P1 || TR mean 0.0367 med -0.0635 n647 k129 || VA mean 0.2184 med -0.0257 n642 k158 || ctrl 0.1100/-0.0435 jack 0.1423 bootlo 0.0798 p 0.878 res 0.990
+SURV LAUNCH60_q3 | YOUNG30 | T120_TR35 | P3 || TR mean 0.1046 med -0.1105 n225 k83 || VA mean 0.8919 med -0.0998 n217 k84 || ctrl 0.0007/-0.0643 jack 0.1318 bootlo 0.0788 p 0.999 res 0.981
+SURV YOUNGFRAC_q5 | YOUNG30 | T60_TR25 | P3 || TR mean 0.0994 med -0.0691 n432 k116 || VA mean 0.1708 med -0.0445 n508 k134 || ctrl 0.0724/-0.0338 jack 0.1205 bootlo 0.0786 p 0.963 res 0.989
+SURV ACTCNT_q1 | YOUNG30 | T60_TR25 | P2 || TR mean 0.0962 med -0.0688 n270 k70 || VA mean 0.2066 med -0.0474 n358 k78 || ctrl 0.0780/-0.0355 jack 0.1202 bootlo 0.0775 p 0.948 res 0.991
+SURV ACTCNT_q1 | YOUNG30 | T60_TR25 | P3 || TR mean 0.0863 med -0.0715 n270 k70 || VA mean 0.2048 med -0.0359 n358 k78 || ctrl 0.0724/-0.0338 jack 0.1184 bootlo 0.0741 p 0.953 res 0.991
+SURV MEDRET60_q1 | YOUNG30 | T60_TR25 | P3 || TR mean 0.0794 med -0.0681 n352 k106 || VA mean 0.2925 med -0.0594 n354 k123 || ctrl 0.0724/-0.0338 jack 0.1706 bootlo 0.0738 p 0.953 res 0.980
+SURV COHVOL15_q5 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1387 med -0.0718 n336 k102 || VA mean 0.1772 med -0.0311 n440 k132 || ctrl 0.0780/-0.0355 jack 0.1084 bootlo 0.0730 p 0.941 res 0.986
+SURV COHVOL15_q5 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1471 med -0.0708 n336 k102 || VA mean 0.1759 med -0.0309 n440 k132 || ctrl 0.0724/-0.0338 jack 0.1070 bootlo 0.0730 p 0.952 res 0.986
+SURV COHVOL15_q5 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1721 med -0.0792 n336 k102 || VA mean 0.2394 med -0.0343 n440 k132 || ctrl 0.1100/-0.0435 jack 0.1166 bootlo 0.0725 p 0.834 res 0.986
+SURV NEWL60_q5 | ANY | T60_TR25 | P2 || TR mean 0.0426 med -0.0484 n647 k129 || VA mean 0.1594 med -0.0238 n642 k158 || ctrl 0.0780/-0.0355 jack 0.1167 bootlo 0.0722 p 0.930 res 0.990
+SURV NEWL60_q5 | ANY | T60_TR25 | P3 || TR mean 0.0429 med -0.0427 n647 k129 || VA mean 0.1495 med -0.0214 n642 k158 || ctrl 0.0724/-0.0338 jack 0.1067 bootlo 0.0690 p 0.937 res 0.990
+SURV LAUNCH60_q3 | YOUNG30 | T120_TR35 | P2 || TR mean 0.1100 med -0.1127 n225 k83 || VA mean 0.8893 med -0.1047 n217 k84 || ctrl 0.0057/-0.0796 jack 0.1291 bootlo 0.0676 p 0.994 res 0.981
+SURV NEWL60_q4 | YOUNG30 | T60_TR25 | P1 || TR mean 0.2219 med -0.1103 n423 k112 || VA mean 0.1526 med -0.0605 n506 k133 || ctrl 0.1100/-0.0435 jack 0.1193 bootlo 0.0676 p 0.783 res 0.990
+SURV MEDRET15_q1 | YOUNG30 | T120_TR35 | P2 || TR mean 0.0887 med -0.1344 n277 k112 || VA mean 0.1934 med -0.1055 n351 k144 || ctrl 0.0057/-0.0796 jack 0.1361 bootlo 0.0663 p 0.995 res 0.987
+SURV LAUNCH60_q4 | YOUNG30 | T120_TR35 | P2 || TR mean 0.2125 med -0.0488 n210 k82 || VA mean 0.3301 med -0.1199 n212 k91 || ctrl 0.0057/-0.0796 jack 0.1458 bootlo 0.0657 p 0.993 res 0.967
+SURV COHVOL15_q5 | NEARHI | T60_TR25 | P3 || TR mean 0.1239 med -0.0525 n90 k47 || VA mean 0.1704 med -0.0053 n134 k67 || ctrl 0.0724/-0.0338 jack 0.1117 bootlo 0.0645 p 0.927 res 1.000
+SURV COHVOL15_q5 | NEARHI | T60_TR25 | P2 || TR mean 0.1295 med -0.0525 n90 k47 || VA mean 0.1682 med -0.0049 n134 k67 || ctrl 0.0780/-0.0355 jack 0.1095 bootlo 0.0644 p 0.918 res 1.000
+SURV HOUR_b1 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1799 med -0.0170 n169 k32 || VA mean 0.1943 med -0.0142 n156 k40 || ctrl 0.0724/-0.0338 jack 0.1373 bootlo 0.0623 p 0.927 res 0.977
+SURV ACTCNT_q4 | YOUNG30 | T60_TR25 | P1 || TR mean 0.0876 med -0.0714 n218 k68 || VA mean 0.1942 med -0.0494 n193 k75 || ctrl 0.1100/-0.0435 jack 0.1258 bootlo 0.0616 p 0.812 res 0.987
+SURV YOUNGFRAC_q4 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1593 med -0.0848 n391 k101 || VA mean 0.1418 med -0.0525 n395 k124 || ctrl 0.1100/-0.0435 jack 0.1096 bootlo 0.0603 p 0.718 res 0.982
+SURV FRACUP_q5 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1599 med -0.0841 n316 k113 || VA mean 0.1923 med -0.0670 n430 k143 || ctrl 0.1100/-0.0435 jack 0.1078 bootlo 0.0599 p 0.788 res 0.986
+SURV MEDRET15_q1 | YOUNG30 | T120_TR35 | P1 || TR mean 0.0996 med -0.1486 n277 k112 || VA mean 0.1886 med -0.0958 n351 k144 || ctrl -0.0091/-0.0915 jack 0.1335 bootlo 0.0596 p 0.998 res 0.987
+SURV LAUNCH60_q3 | YOUNG30 | T60_TR25 | P3 || TR mean 0.0865 med -0.0605 n283 k83 || VA mean 0.9794 med -0.0597 n255 k84 || ctrl 0.0724/-0.0338 jack 0.0998 bootlo 0.0591 p 0.912 res 0.987
+SURV COHVOL15_q5 | NEARHI | T120_TR35 | P2 || TR mean 0.1153 med -0.1325 n70 k47 || VA mean 0.2082 med -0.0718 n102 k67 || ctrl 0.0057/-0.0796 jack 0.1383 bootlo 0.0582 p 0.994 res 1.000
+SURV COHVOL15_q5 | NEARHI | T60_TR25 | P1 || TR mean 0.1462 med -0.0576 n90 k47 || VA mean 0.1888 med -0.0084 n134 k67 || ctrl 0.1100/-0.0435 jack 0.1102 bootlo 0.0581 p 0.803 res 1.000
+SURV LAUNCH60_q4 | YOUNG30 | T120_TR35 | P1 || TR mean 0.2382 med -0.0574 n210 k82 || VA mean 0.3178 med -0.1712 n212 k91 || ctrl -0.0091/-0.0915 jack 0.1417 bootlo 0.0576 p 0.993 res 0.967
+SURV COHVOL15_q4 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1038 med -0.0681 n364 k123 || VA mean 0.1539 med -0.0676 n417 k153 || ctrl 0.1100/-0.0435 jack 0.1107 bootlo 0.0575 p 0.743 res 0.991
+SURV COHVOL15_q5 | YOUNG30 | T120_TR35 | P3 || TR mean 0.1262 med -0.0986 n278 k102 || VA mean 0.1432 med -0.0711 n358 k132 || ctrl 0.0007/-0.0643 jack 0.1074 bootlo 0.0574 p 1.000 res 0.980
+SURV COHVOL15_q5 | YOUNG30 | T120_TR35 | P2 || TR mean 0.1340 med -0.1193 n278 k102 || VA mean 0.1408 med -0.0850 n358 k132 || ctrl 0.0057/-0.0796 jack 0.1050 bootlo 0.0571 p 0.996 res 0.980
+SURV NEWL60_q4 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1428 med -0.0702 n423 k112 || VA mean 0.1158 med -0.0337 n506 k133 || ctrl 0.0724/-0.0338 jack 0.0995 bootlo 0.0566 p 0.878 res 0.990
+SURV HOUR_b1 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1973 med 0.0082 n169 k32 || VA mean 0.2533 med -0.0247 n156 k40 || ctrl 0.1100/-0.0435 jack 0.1570 bootlo 0.0566 p 0.856 res 0.977
+SURV MEDRET60_q5 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1454 med -0.0389 n175 k51 || VA mean 0.1379 med -0.0422 n268 k70 || ctrl 0.1100/-0.0435 jack 0.1156 bootlo 0.0559 p 0.681 res 0.996
+SURV FRACUP_q5 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1306 med -0.0715 n316 k113 || VA mean 0.1388 med -0.0467 n430 k143 || ctrl 0.0724/-0.0338 jack 0.0914 bootlo 0.0554 p 0.877 res 0.986
+SURV HOUR_b1 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1869 med -0.0186 n169 k32 || VA mean 0.1898 med -0.0198 n156 k40 || ctrl 0.0780/-0.0355 jack 0.1326 bootlo 0.0552 p 0.900 res 0.977
+SURV HOUR_b0 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1495 med -0.0588 n272 k55 || VA mean 0.1688 med -0.0540 n239 k59 || ctrl 0.0780/-0.0355 jack 0.1003 bootlo 0.0546 p 0.878 res 0.986
+SURV MEDRET60_q5 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1490 med -0.0383 n175 k51 || VA mean 0.1300 med -0.0382 n268 k70 || ctrl 0.0780/-0.0355 jack 0.1106 bootlo 0.0546 p 0.869 res 0.996
+SURV MEDRET60_q5 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1266 med -0.0252 n175 k51 || VA mean 0.1190 med -0.0281 n268 k70 || ctrl 0.0724/-0.0338 jack 0.0999 bootlo 0.0542 p 0.867 res 0.996
+SURV COHVOL15_q5 | NEARHI | T120_TR35 | P3 || TR mean 0.1184 med -0.1265 n70 k47 || VA mean 0.2063 med -0.0718 n102 k67 || ctrl 0.0007/-0.0643 jack 0.1363 bootlo 0.0539 p 0.994 res 1.000
+SURV HOUR_b1 | YOUNG30 | T120_TR35 | P3 || TR mean 0.0876 med -0.0432 n131 k32 || VA mean 0.2424 med -0.0719 n130 k40 || ctrl 0.0007/-0.0643 jack 0.1249 bootlo 0.0531 p 0.987 res 0.971
+SURV NEWL60_q4 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1458 med -0.0829 n423 k112 || VA mean 0.1300 med -0.0270 n506 k133 || ctrl 0.0780/-0.0355 jack 0.0964 bootlo 0.0526 p 0.849 res 0.990
+SURV MEDRET15_q2 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1310 med -0.0635 n280 k114 || VA mean 0.3488 med -0.0756 n307 k148 || ctrl 0.0724/-0.0338 jack 0.1000 bootlo 0.0525 p 0.897 res 0.976
+SURV HOUR_b0 | YOUNG30 | T60_TR25 | P1 || TR mean 0.2144 med -0.0805 n272 k55 || VA mean 0.1888 med -0.0190 n239 k59 || ctrl 0.1100/-0.0435 jack 0.1237 bootlo 0.0523 p 0.812 res 0.986
+SURV COHVOL15_q5 | YOUNG30 | T120_TR35 | P1 || TR mean 0.1472 med -0.1227 n278 k102 || VA mean 0.1466 med -0.0842 n358 k132 || ctrl -0.0091/-0.0915 jack 0.1105 bootlo 0.0519 p 1.000 res 0.980
+SURV YOUNGFRAC_q5 | ANY | T60_TR25 | P2 || TR mean 0.0161 med -0.0550 n704 k129 || VA mean 0.1304 med -0.0422 n791 k154 || ctrl 0.0780/-0.0355 jack 0.0864 bootlo 0.0509 p 0.835 res 0.992
+SURV COHVOL15_q5 | NEARHI | T120_TR35 | P1 || TR mean 0.1344 med -0.0944 n70 k47 || VA mean 0.2187 med -0.0570 n102 k67 || ctrl -0.0091/-0.0915 jack 0.1483 bootlo 0.0507 p 0.996 res 1.000
+SURV NEWL60_q3 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1382 med -0.0592 n135 k42 || VA mean 0.1166 med -0.0283 n222 k70 || ctrl 0.0724/-0.0338 jack 0.0995 bootlo 0.0507 p 0.858 res 0.993
+SURV FRACUP_q5 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1443 med -0.0788 n316 k113 || VA mean 0.1375 med -0.0540 n430 k143 || ctrl 0.0780/-0.0355 jack 0.0902 bootlo 0.0506 p 0.838 res 0.986
+SURV YOUNGFRAC_q4 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1450 med -0.0702 n391 k101 || VA mean 0.1090 med -0.0435 n395 k124 || ctrl 0.0724/-0.0338 jack 0.0867 bootlo 0.0498 p 0.813 res 0.982
+SURV ALL | YOUNG30 | T120_TR35 | P3 || TR mean 0.1271 med -0.0858 n715 k175 || VA mean 0.1064 med -0.0756 n832 k207 || ctrl 0.0007/-0.0643 jack 0.0835 bootlo 0.0495 p 1.000 res 0.981
+SURV ALL | YOUNG30 | T120_TR35 | P2 || TR mean 0.1401 med -0.1004 n715 k175 || VA mean 0.1146 med -0.0871 n832 k207 || ctrl 0.0057/-0.0796 jack 0.0918 bootlo 0.0495 p 0.997 res 0.981
+SURV HOUR_b0 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1590 med -0.0507 n272 k55 || VA mean 0.1357 med -0.0414 n239 k59 || ctrl 0.0724/-0.0338 jack 0.1046 bootlo 0.0490 p 0.880 res 0.986
+SURV MEDRET15_q1 | YOUNG30 | T120_TR35 | P3 || TR mean 0.1010 med -0.1187 n277 k112 || VA mean 0.1425 med -0.1023 n351 k144 || ctrl 0.0007/-0.0643 jack 0.1098 bootlo 0.0488 p 0.997 res 0.987
+SURV LAUNCH60_q1 | YOUNG30 | T120_TR35 | P3 || TR mean 0.2053 med -0.0188 n61 k22 || VA mean 0.2591 med -0.0912 n67 k31 || ctrl 0.0007/-0.0643 jack 0.1349 bootlo 0.0483 p 0.987 res 0.991
+SURV ACTCNT_q4 | YOUNG30 | T60_TR25 | P2 || TR mean 0.0729 med -0.0613 n218 k68 || VA mean 0.1703 med -0.0717 n193 k75 || ctrl 0.0780/-0.0355 jack 0.0973 bootlo 0.0480 p 0.868 res 0.987
+SURV COHVOL15_q4 | YOUNG30 | T60_TR25 | P3 || TR mean 0.0797 med -0.0679 n364 k123 || VA mean 0.1164 med -0.0593 n417 k153 || ctrl 0.0724/-0.0338 jack 0.0860 bootlo 0.0476 p 0.837 res 0.991
+SURV LAUNCH60_q4 | YOUNG30 | T120_TR35 | P3 || TR mean 0.1825 med -0.0417 n210 k82 || VA mean 0.1947 med -0.1054 n212 k91 || ctrl 0.0007/-0.0643 jack 0.1070 bootlo 0.0469 p 0.985 res 0.967
+SURV COHVOL15_q4 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1042 med -0.0651 n364 k123 || VA mean 0.1212 med -0.0674 n417 k153 || ctrl 0.0780/-0.0355 jack 0.0908 bootlo 0.0464 p 0.801 res 0.991
+SURV LAUNCH60_q3 | YOUNG30 | T60_TR25 | P2 || TR mean 0.0743 med -0.0677 n283 k83 || VA mean 0.9697 med -0.0577 n255 k84 || ctrl 0.0780/-0.0355 jack 0.0900 bootlo 0.0463 p 0.853 res 0.987
+SURV YOUNGFRAC_q5 | NEARHI | T120_TR35 | P2 || TR mean 0.2092 med -0.0796 n66 k50 || VA mean 0.1813 med -0.0342 n92 k63 || ctrl 0.0057/-0.0796 jack 0.1065 bootlo 0.0463 p 0.989 res 0.999
+SURV FRACUP_q4 | YOUNG30 | T60_TR25 | P3 || TR mean 0.1091 med -0.0631 n256 k100 || VA mean 0.1121 med -0.0369 n319 k138 || ctrl 0.0724/-0.0338 jack 0.0860 bootlo 0.0456 p 0.816 res 0.989
+SURV FRACUP_q4 | YOUNG30 | T60_TR25 | P1 || TR mean 0.1187 med -0.1051 n256 k100 || VA mean 0.1444 med -0.0604 n319 k138 || ctrl 0.1100/-0.0435 jack 0.1006 bootlo 0.0454 p 0.669 res 0.989
+SURV MEDRET15_q1 | YOUNG30 | T60_TR25 | P2 || TR mean 0.1036 med -0.0820 n323 k112 || VA mean 0.1161 med -0.0521 n407 k144 || ctrl 0.0780/-0.0355 jack 0.0778 bootlo 0.0446 p 0.773 res 0.992
+SURV ALL | YOUNG30 | T120_TR35 | P1 || TR mean 0.1472 med -0.1042 n715 k175 || VA mean 0.1165 med -0.1045 n832 k207 || ctrl -0.0091/-0.0915 jack 0.0934 bootlo 0.0443 p 1.000 res 0.981
+HARD GATE (boot 5th pct > 0 and > control, p>0.95): 99
+HARD NEWL60_q5 | YOUNG30 | T60_TR25 | P1 va_mean 0.3293 bootlo 0.1206 ctrl 0.1100
+HARD ALL | YOUNG30 | T60_TR25 | P1 va_mean 0.2180 bootlo 0.1163 ctrl 0.1100
+HARD LAUNCH60_q4 | YOUNG30 | T60_TR25 | P1 va_mean 0.4422 bootlo 0.1131 ctrl 0.1100
+HARD ALL | YOUNG30 | T60_TR25 | P2 va_mean 0.1667 bootlo 0.0970 ctrl 0.0780
+HARD ALL | YOUNG30 | T60_TR25 | P3 va_mean 0.1584 bootlo 0.0965 ctrl 0.0724
+HARD NEWL60_q5 | YOUNG30 | T60_TR25 | P2 va_mean 0.2271 bootlo 0.0949 ctrl 0.0780
+HARD HOUR_b4 | YOUNG30 | T60_TR25 | P2 va_mean 0.2732 bootlo 0.0939 ctrl 0.0780
+HARD NEWL60_q5 | YOUNG30 | T60_TR25 | P3 va_mean 0.2133 bootlo 0.0895 ctrl 0.0724
+HARD LAUNCH60_q4 | YOUNG30 | T60_TR25 | P2 va_mean 0.3695 bootlo 0.0870 ctrl 0.0780
+HARD HOUR_b4 | YOUNG30 | T60_TR25 | P3 va_mean 0.2605 bootlo 0.0869 ctrl 0.0724
+HARD LAUNCH60_q4 | YOUNG30 | T60_TR25 | P3 va_mean 0.2721 bootlo 0.0867 ctrl 0.0724
+HARD MEDRET60_q1 | YOUNG30 | T60_TR25 | P2 va_mean 0.3235 bootlo 0.0866 ctrl 0.0780
+HARD YOUNGFRAC_q5 | YOUNG30 | T60_TR25 | P2 va_mean 0.1843 bootlo 0.0845 ctrl 0.0780
+HARD LAUNCH60_q3 | YOUNG30 | T120_TR35 | P3 va_mean 0.8919 bootlo 0.0788 ctrl 0.0007
+HARD YOUNGFRAC_q5 | YOUNG30 | T60_TR25 | P3 va_mean 0.1708 bootlo 0.0786 ctrl 0.0724
+HARD ACTCNT_q1 | YOUNG30 | T60_TR25 | P3 va_mean 0.2048 bootlo 0.0741 ctrl 0.0724
+HARD MEDRET60_q1 | YOUNG30 | T60_TR25 | P3 va_mean 0.2925 bootlo 0.0738 ctrl 0.0724
+HARD COHVOL15_q5 | YOUNG30 | T60_TR25 | P3 va_mean 0.1759 bootlo 0.0730 ctrl 0.0724
+HARD LAUNCH60_q3 | YOUNG30 | T120_TR35 | P2 va_mean 0.8893 bootlo 0.0676 ctrl 0.0057
+HARD MEDRET15_q1 | YOUNG30 | T120_TR35 | P2 va_mean 0.1934 bootlo 0.0663 ctrl 0.0057
+HARD LAUNCH60_q4 | YOUNG30 | T120_TR35 | P2 va_mean 0.3301 bootlo 0.0657 ctrl 0.0057
+HARD MEDRET15_q1 | YOUNG30 | T120_TR35 | P1 va_mean 0.1886 bootlo 0.0596 ctrl -0.0091
+HARD COHVOL15_q5 | NEARHI | T120_TR35 | P2 va_mean 0.2082 bootlo 0.0582 ctrl 0.0057
+HARD LAUNCH60_q4 | YOUNG30 | T120_TR35 | P1 va_mean 0.3178 bootlo 0.0576 ctrl -0.0091
+HARD COHVOL15_q5 | YOUNG30 | T120_TR35 | P3 va_mean 0.1432 bootlo 0.0574 ctrl 0.0007
+HARD COHVOL15_q5 | YOUNG30 | T120_TR35 | P2 va_mean 0.1408 bootlo 0.0571 ctrl 0.0057
+HARD COHVOL15_q5 | NEARHI | T120_TR35 | P3 va_mean 0.2063 bootlo 0.0539 ctrl 0.0007
+HARD HOUR_b1 | YOUNG30 | T120_TR35 | P3 va_mean 0.2424 bootlo 0.0531 ctrl 0.0007
+HARD COHVOL15_q5 | YOUNG30 | T120_TR35 | P1 va_mean 0.1466 bootlo 0.0519 ctrl -0.0091
+HARD COHVOL15_q5 | NEARHI | T120_TR35 | P1 va_mean 0.2187 bootlo 0.0507 ctrl -0.0091
+HARD ALL | YOUNG30 | T120_TR35 | P3 va_mean 0.1064 bootlo 0.0495 ctrl 0.0007
+HARD ALL | YOUNG30 | T120_TR35 | P2 va_mean 0.1146 bootlo 0.0495 ctrl 0.0057
+HARD MEDRET15_q1 | YOUNG30 | T120_TR35 | P3 va_mean 0.1425 bootlo 0.0488 ctrl 0.0007
+HARD LAUNCH60_q1 | YOUNG30 | T120_TR35 | P3 va_mean 0.2591 bootlo 0.0483 ctrl 0.0007
+HARD LAUNCH60_q4 | YOUNG30 | T120_TR35 | P3 va_mean 0.1947 bootlo 0.0469 ctrl 0.0007
+HARD YOUNGFRAC_q5 | NEARHI | T120_TR35 | P2 va_mean 0.1813 bootlo 0.0463 ctrl 0.0057
+HARD ALL | YOUNG30 | T120_TR35 | P1 va_mean 0.1165 bootlo 0.0443 ctrl -0.0091
+HARD NEWL60_q5 | YOUNG30 | T120_TR35 | P1 va_mean 0.1751 bootlo 0.0436 ctrl -0.0091
+HARD HOUR_b1 | YOUNG30 | T120_TR35 | P2 va_mean 0.2455 bootlo 0.0435 ctrl 0.0057
+HARD NEWL60_q5 | YOUNG30 | T120_TR35 | P2 va_mean 0.1562 bootlo 0.0426 ctrl 0.0057
+HARD YOUNGFRAC_q5 | NEARHI | T120_TR35 | P3 va_mean 0.1733 bootlo 0.0414 ctrl 0.0007
+HARD YOUNGFRAC_q5 | NEARHI | T120_TR35 | P1 va_mean 0.1771 bootlo 0.0410 ctrl -0.0091
+HARD LAUNCH60_q1 | YOUNG30 | T120_TR35 | P1 va_mean 0.3010 bootlo 0.0407 ctrl -0.0091
+HARD NEWL60_q5 | YOUNG30 | T120_TR35 | P3 va_mean 0.1391 bootlo 0.0406 ctrl 0.0007
+HARD MEDRET15_q2 | YOUNG30 | T120_TR35 | P3 va_mean 0.3092 bootlo 0.0393 ctrl 0.0007
+HARD YOUNGFRAC_q5 | YOUNG30 | T120_TR35 | P2 va_mean 0.1282 bootlo 0.0385 ctrl 0.0057
+HARD HOUR_b4 | YOUNG30 | T120_TR35 | P2 va_mean 0.1410 bootlo 0.0370 ctrl 0.0057
+HARD HOUR_b4 | YOUNG30 | T120_TR35 | P1 va_mean 0.1454 bootlo 0.0365 ctrl -0.0091
+HARD MEDRET60_q1 | YOUNG30 | T120_TR35 | P1 va_mean 0.3001 bootlo 0.0349 ctrl -0.0091
+HARD NEWL60_q5 | ANY | T120_TR35 | P3 va_mean 0.1016 bootlo 0.0349 ctrl 0.0007
+HARD YOUNGFRAC_q5 | YOUNG30 | T120_TR35 | P3 va_mean 0.1108 bootlo 0.0347 ctrl 0.0007
+HARD LAUNCH60_q3 | YOUNG30 | T120_TR35 | P1 va_mean 1.5640 bootlo 0.0342 ctrl -0.0091
+HARD HOUR_b4 | YOUNG30 | T120_TR35 | P3 va_mean 0.1325 bootlo 0.0340 ctrl 0.0007
+HARD LAUNCH60_q1 | YOUNG30 | T120_TR35 | P2 va_mean 0.2518 bootlo 0.0327 ctrl 0.0057
+HARD NEWL60_q5 | ANY | T120_TR35 | P2 va_mean 0.1113 bootlo 0.0324 ctrl 0.0057
+HARD MEDRET60_q1 | YOUNG30 | T120_TR35 | P2 va_mean 0.2175 bootlo 0.0308 ctrl 0.0057
+HARD ACTCNT_q4 | YOUNG30 | T120_TR35 | P1 va_mean 0.2053 bootlo 0.0291 ctrl -0.0091
+HARD LAUNCH60_q3 | NEARHI | T120_TR35 | P2 va_mean 0.1686 bootlo 0.0290 ctrl 0.0057
+HARD ACTCNT_q1 | YOUNG30 | T120_TR35 | P3 va_mean 0.1022 bootlo 0.0279 ctrl 0.0007
+HARD FRACUP_q5 | YOUNG30 | T120_TR35 | P3 va_mean 0.0936 bootlo 0.0231 ctrl 0.0007
+HARD HOUR_b1 | YOUNG30 | T120_TR35 | P1 va_mean 0.2641 bootlo 0.0229 ctrl -0.0091
+HARD HOUR_b0 | YOUNG30 | T120_TR35 | P2 va_mean 0.1863 bootlo 0.0220 ctrl 0.0057
+HARD YOUNGFRAC_q4 | YOUNG30 | T120_TR35 | P3 va_mean 0.1031 bootlo 0.0213 ctrl 0.0007
+HARD FRACUP_q5 | YOUNG30 | T120_TR35 | P2 va_mean 0.0962 bootlo 0.0210 ctrl 0.0057
+HARD MEDRET15_q2 | YOUNG30 | T120_TR35 | P1 va_mean 0.5135 bootlo 0.0204 ctrl -0.0091
+HARD MEDRET60_q1 | YOUNG30 | T120_TR35 | P3 va_mean 0.1888 bootlo 0.0203 ctrl 0.0007
+HARD NEWL60_q4 | YOUNG30 | T120_TR35 | P3 va_mean 0.0868 bootlo 0.0201 ctrl 0.0007
+HARD ACTCNT_q1 | YOUNG30 | T120_TR35 | P1 va_mean 0.1079 bootlo 0.0200 ctrl -0.0091
+HARD COHVOL15_q5 | ABOVEOPEN | T120_TR35 | P3 va_mean 0.1192 bootlo 0.0199 ctrl 0.0007
+HARD YOUNGFRAC_q5 | YOUNG30 | T120_TR35 | P1 va_mean 0.1137 bootlo 0.0197 ctrl -0.0091
+HARD HOUR_b0 | YOUNG30 | T120_TR35 | P1 va_mean 0.1837 bootlo 0.0196 ctrl -0.0091
+HARD LAUNCH60_q3 | NEARHI | T120_TR35 | P3 va_mean 0.1545 bootlo 0.0196 ctrl 0.0007
+HARD HOUR_b0 | YOUNG30 | T120_TR35 | P3 va_mean 0.1359 bootlo 0.0195 ctrl 0.0007
+HARD MEDRET15_q2 | YOUNG30 | T120_TR35 | P2 va_mean 0.2958 bootlo 0.0192 ctrl 0.0057
+HARD YOUNGFRAC_q4 | YOUNG30 | T120_TR35 | P1 va_mean 0.1227 bootlo 0.0181 ctrl -0.0091
+HARD YOUNGFRAC_q4 | YOUNG30 | T120_TR35 | P2 va_mean 0.1021 bootlo 0.0168 ctrl 0.0057
+HARD ACTCNT_q1 | YOUNG30 | T120_TR35 | P2 va_mean 0.0964 bootlo 0.0166 ctrl 0.0057
+HARD NEWL60_q3 | YOUNG30 | T120_TR35 | P3 va_mean 0.1098 bootlo 0.0152 ctrl 0.0007
+HARD ACTCNT_q4 | YOUNG30 | T120_TR35 | P2 va_mean 0.1914 bootlo 0.0149 ctrl 0.0057
+HARD NEWL60_q4 | YOUNG30 | T120_TR35 | P2 va_mean 0.0969 bootlo 0.0143 ctrl 0.0057
+HARD FRACUP_q5 | YOUNG30 | T120_TR35 | P1 va_mean 0.0996 bootlo 0.0142 ctrl -0.0091
+HARD NEWL60_q4 | YOUNG30 | T120_TR35 | P1 va_mean 0.1089 bootlo 0.0133 ctrl -0.0091
+HARD NEWL60_q5 | NEARHI | T120_TR35 | P2 va_mean 0.1483 bootlo 0.0132 ctrl 0.0057
+HARD COHVOL15_q5 | ABOVEOPEN | T120_TR35 | P2 va_mean 0.1178 bootlo 0.0121 ctrl 0.0057
+HARD NEWL60_q5 | NEARHI | T120_TR35 | P3 va_mean 0.1450 bootlo 0.0112 ctrl 0.0007
+HARD ACTCNT_q4 | YOUNG30 | T120_TR35 | P3 va_mean 0.1272 bootlo 0.0108 ctrl 0.0007
+HARD MEDRET60_q3 | YOUNG30 | T120_TR35 | P3 va_mean 0.0949 bootlo 0.0105 ctrl 0.0007
+HARD YOUNGFRAC_q5 | ANY | T120_TR35 | P3 va_mean 0.0726 bootlo 0.0089 ctrl 0.0007
+HARD MEDRET60_q5 | YOUNG30 | T120_TR35 | P3 va_mean 0.0858 bootlo 0.0068 ctrl 0.0007
+HARD FRACUP_q4 | YOUNG30 | T120_TR35 | P2 va_mean 0.0999 bootlo 0.0065 ctrl 0.0057
+HARD YOUNGFRAC_q5 | ABOVEOPEN | T120_TR35 | P2 va_mean 0.1071 bootlo 0.0063 ctrl 0.0057
+HARD FRACUP_q4 | YOUNG30 | T120_TR35 | P3 va_mean 0.1008 bootlo 0.0058 ctrl 0.0007
+HARD MEDRET60_q3 | YOUNG30 | T120_TR35 | P1 va_mean 0.1098 bootlo 0.0053 ctrl -0.0091
+HARD LAUNCH60_q3 | R5UP | T120_TR35 | P3 va_mean 0.0576 bootlo 0.0052 ctrl 0.0007
+HARD LAUNCH60_q3 | ANY | T120_TR35 | P3 va_mean 0.4650 bootlo 0.0050 ctrl 0.0007
+HARD COHVOL15_q5 | ANY | T120_TR35 | P3 va_mean 0.0589 bootlo 0.0049 ctrl 0.0007
+HARD YOUNGFRAC_q5 | ABOVEOPEN | T120_TR35 | P3 va_mean 0.1083 bootlo 0.0048 ctrl 0.0007
+HARD NEWL60_q5 | NEARHI | T120_TR35 | P1 va_mean 0.1459 bootlo 0.0018 ctrl -0.0091
+HARD NEWL60_q5 | ABOVEOPEN | T120_TR35 | P3 va_mean 0.1092 bootlo 0.0016 ctrl 0.0007
+TIMESPLIT NEWL60_q5|YOUNG30|T60_TR25|P1  h1 mean 0.3293 n356 k103  h2 none
+TIMESPLIT ALL|YOUNG30|T60_TR25|P1  h1 mean 0.2215 n994 k203  h2 mean 0.1409 n32 k5
+TIMESPLIT LAUNCH60_q4|YOUNG30|T60_TR25|P1  h1 mean 0.4422 n248 k91  h2 none
+TIMESPLIT ALL|YOUNG30|T60_TR25|P2  h1 mean 0.1694 n994 k203  h2 mean 0.1286 n32 k5
+TIMESPLIT ALL|YOUNG30|T60_TR25|P3  h1 mean 0.1611 n994 k203  h2 mean 0.1197 n32 k5
+TIMESPLIT NEWL60_q5|YOUNG30|T60_TR25|P2  h1 mean 0.2271 n356 k103  h2 none
+TIMESPLIT HOUR_b4|YOUNG30|T60_TR25|P2  h1 mean 0.2870 n257 k49  h2 mean 0.1053 n15 k4
+TIMESPLIT NEWL60_q5|YOUNG30|T60_TR25|P3  h1 mean 0.2133 n356 k103  h2 none
+TIMESPLIT LAUNCH60_q4|YOUNG30|T60_TR25|P2  h1 mean 0.3695 n248 k91  h2 none
+TIMESPLIT HOUR_b4|YOUNG30|T60_TR25|P3  h1 mean 0.2745 n257 k49  h2 mean 0.0889 n15 k4
+TIMESPLIT LAUNCH60_q4|YOUNG30|T60_TR25|P3  h1 mean 0.2721 n248 k91  h2 none
+TIMESPLIT MEDRET60_q1|YOUNG30|T60_TR25|P2  h1 mean 0.3278 n350 k121  h2 mean 0.0665 n4 k2
+TIMESPLIT YOUNGFRAC_q5|YOUNG30|T60_TR25|P2  h1 mean 0.1843 n508 k134  h2 none
+TIMESPLIT LAUNCH60_q3|YOUNG30|T120_TR35|P3  h1 mean 0.8919 n217 k84  h2 none
+TIMESPLIT YOUNGFRAC_q5|YOUNG30|T60_TR25|P3  h1 mean 0.1708 n508 k134  h2 none
+TIMESPLIT ACTCNT_q1|YOUNG30|T60_TR25|P3  h1 mean 0.2077 n348 k77  h2 mean -0.0204 n10 k1
+TIMESPLIT MEDRET60_q1|YOUNG30|T60_TR25|P3  h1 mean 0.2973 n350 k121  h2 mean 0.0065 n4 k2
+TIMESPLIT COHVOL15_q5|YOUNG30|T60_TR25|P3  h1 mean 0.1759 n440 k132  h2 none
+TIMESPLIT LAUNCH60_q3|YOUNG30|T120_TR35|P2  h1 mean 0.8893 n217 k84  h2 none
+TIMESPLIT MEDRET15_q1|YOUNG30|T120_TR35|P2  h1 mean 0.1934 n346 k142  h2 mean 0.1967 n5 k2
+TIMESPLIT LAUNCH60_q4|YOUNG30|T120_TR35|P2  h1 mean 0.3301 n212 k91  h2 none
+TIMESPLIT MEDRET15_q1|YOUNG30|T120_TR35|P1  h1 mean 0.1890 n346 k142  h2 mean 0.1552 n5 k2
+TIMESPLIT COHVOL15_q5|NEARHI|T120_TR35|P2  h1 mean 0.2082 n102 k67  h2 none
+TIMESPLIT LAUNCH60_q4|YOUNG30|T120_TR35|P1  h1 mean 0.3178 n212 k91  h2 none
+TIMESPLIT COHVOL15_q5|YOUNG30|T120_TR35|P3  h1 mean 0.1432 n358 k132  h2 none
+TIMESPLIT COHVOL15_q5|YOUNG30|T120_TR35|P2  h1 mean 0.1408 n358 k132  h2 none
+TIMESPLIT COHVOL15_q5|NEARHI|T120_TR35|P3  h1 mean 0.2063 n102 k67  h2 none
+TIMESPLIT HOUR_b1|YOUNG30|T120_TR35|P3  h1 mean 0.2424 n130 k40  h2 none
+TIMESPLIT COHVOL15_q5|YOUNG30|T120_TR35|P1  h1 mean 0.1466 n358 k132  h2 none
+TIMESPLIT COHVOL15_q5|NEARHI|T120_TR35|P1  h1 mean 0.2187 n102 k67  h2 none
+TIMESPLIT ALL|YOUNG30|T120_TR35|P3  h1 mean 0.1090 n810 k203  h2 mean 0.0112 n23 k5
+TIMESPLIT ALL|YOUNG30|T120_TR35|P2  h1 mean 0.1176 n810 k203  h2 mean 0.0014 n23 k5
+TIMESPLIT MEDRET15_q1|YOUNG30|T120_TR35|P3  h1 mean 0.1437 n346 k142  h2 mean 0.0617 n5 k2
+TIMESPLIT LAUNCH60_q1|YOUNG30|T120_TR35|P3  h1 mean 0.2591 n67 k31  h2 none
+TIMESPLIT LAUNCH60_q4|YOUNG30|T120_TR35|P3  h1 mean 0.1947 n212 k91  h2 none
+TIMESPLIT YOUNGFRAC_q5|NEARHI|T120_TR35|P2  h1 mean 0.1813 n92 k63  h2 none
+TIMESPLIT ALL|YOUNG30|T120_TR35|P1  h1 mean 0.1188 n810 k203  h2 mean 0.0292 n23 k5
+TIMESPLIT NEWL60_q5|YOUNG30|T120_TR35|P1  h1 mean 0.1751 n298 k103  h2 none
+TIMESPLIT HOUR_b1|YOUNG30|T120_TR35|P2  h1 mean 0.2455 n130 k40  h2 none
+TIMESPLIT NEWL60_q5|YOUNG30|T120_TR35|P2  h1 mean 0.1562 n298 k103  h2 none
+TIMESPLIT YOUNGFRAC_q5|NEARHI|T120_TR35|P3  h1 mean 0.1733 n92 k63  h2 none
+TIMESPLIT YOUNGFRAC_q5|NEARHI|T120_TR35|P1  h1 mean 0.1771 n92 k63  h2 none
+TIMESPLIT LAUNCH60_q1|YOUNG30|T120_TR35|P1  h1 mean 0.3010 n67 k31  h2 none
+TIMESPLIT NEWL60_q5|YOUNG30|T120_TR35|P3  h1 mean 0.1391 n298 k103  h2 none
+TIMESPLIT MEDRET15_q2|YOUNG30|T120_TR35|P3  h1 mean 0.3124 n269 k147  h2 mean -0.1636 n1 k1
+TIMESPLIT YOUNGFRAC_q5|YOUNG30|T120_TR35|P2  h1 mean 0.1282 n426 k134  h2 none
+TIMESPLIT HOUR_b4|YOUNG30|T120_TR35|P2  h1 mean 0.1562 n213 k49  h2 mean -0.0456 n12 k4
+TIMESPLIT HOUR_b4|YOUNG30|T120_TR35|P1  h1 mean 0.1606 n213 k49  h2 mean -0.0405 n12 k4
+TIMESPLIT MEDRET60_q1|YOUNG30|T120_TR35|P1  h1 mean 0.3069 n297 k121  h2 mean -0.1116 n4 k2
+TIMESPLIT NEWL60_q5|ANY|T120_TR35|P3  h1 mean 0.1016 n498 k158  h2 none
+TIMESPLIT YOUNGFRAC_q5|YOUNG30|T120_TR35|P3  h1 mean 0.1108 n426 k134  h2 none
+TIMESPLIT LAUNCH60_q3|YOUNG30|T120_TR35|P1  h1 mean 1.5640 n217 k84  h2 none
+TIMESPLIT HOUR_b4|YOUNG30|T120_TR35|P3  h1 mean 0.1474 n213 k49  h2 mean -0.0501 n12 k4
+TIMESPLIT LAUNCH60_q1|YOUNG30|T120_TR35|P2  h1 mean 0.2518 n67 k31  h2 none
+TIMESPLIT NEWL60_q5|ANY|T120_TR35|P2  h1 mean 0.1113 n498 k158  h2 none
+TIMESPLIT MEDRET60_q1|YOUNG30|T120_TR35|P2  h1 mean 0.2222 n297 k121  h2 mean -0.0660 n4 k2
+TIMESPLIT ACTCNT_q4|YOUNG30|T120_TR35|P1  h1 mean 0.2104 n159 k74  h2 mean -0.1754 n4 k1
+TIMESPLIT LAUNCH60_q3|NEARHI|T120_TR35|P2  h1 mean 0.1686 n80 k55  h2 none
+TIMESPLIT ACTCNT_q1|YOUNG30|T120_TR35|P3  h1 mean 0.1047 n290 k77  h2 mean -0.0903 n8 k1
+TIMESPLIT FRACUP_q5|YOUNG30|T120_TR35|P3  h1 mean 0.0940 n357 k141  h2 mean 0.0616 n5 k2
+TIMESPLIT HOUR_b1|YOUNG30|T120_TR35|P1  h1 mean 0.2641 n130 k40  h2 none
+TIMESPLIT HOUR_b0|YOUNG30|T120_TR35|P2  h1 mean 0.1863 n196 k59  h2 none
+TIMESPLIT YOUNGFRAC_q4|YOUNG30|T120_TR35|P3  h1 mean 0.1031 n338 k124  h2 none
+TIMESPLIT FRACUP_q5|YOUNG30|T120_TR35|P2  h1 mean 0.0970 n357 k141  h2 mean 0.0424 n5 k2
+TIMESPLIT MEDRET15_q2|YOUNG30|T120_TR35|P1  h1 mean 0.5193 n269 k147  h2 mean -0.3272 n1 k1
+TIMESPLIT MEDRET60_q1|YOUNG30|T120_TR35|P3  h1 mean 0.1932 n297 k121  h2 mean -0.0730 n4 k2
+TIMESPLIT NEWL60_q4|YOUNG30|T120_TR35|P3  h1 mean 0.0868 n427 k133  h2 none
+TIMESPLIT ACTCNT_q1|YOUNG30|T120_TR35|P1  h1 mean 0.1107 n290 k77  h2 mean -0.1045 n8 k1
+TIMESPLIT COHVOL15_q5|ABOVEOPEN|T120_TR35|P3  h1 mean 0.1192 n197 k83  h2 none
+TIMESPLIT YOUNGFRAC_q5|YOUNG30|T120_TR35|P1  h1 mean 0.1137 n426 k134  h2 none
+TIMESPLIT HOUR_b0|YOUNG30|T120_TR35|P1  h1 mean 0.1837 n196 k59  h2 none
+TIMESPLIT LAUNCH60_q3|NEARHI|T120_TR35|P3  h1 mean 0.1545 n80 k55  h2 none
+TIMESPLIT HOUR_b0|YOUNG30|T120_TR35|P3  h1 mean 0.1359 n196 k59  h2 none
+TIMESPLIT MEDRET15_q2|YOUNG30|T120_TR35|P2  h1 mean 0.2992 n269 k147  h2 mean -0.2018 n1 k1
+TIMESPLIT YOUNGFRAC_q4|YOUNG30|T120_TR35|P1  h1 mean 0.1227 n338 k124  h2 none
+TIMESPLIT YOUNGFRAC_q4|YOUNG30|T120_TR35|P2  h1 mean 0.1021 n338 k124  h2 none
+TIMESPLIT ACTCNT_q1|YOUNG30|T120_TR35|P2  h1 mean 0.0994 n290 k77  h2 mean -0.1411 n8 k1
+TIMESPLIT NEWL60_q3|YOUNG30|T120_TR35|P3  h1 mean 0.1161 n173 k67  h2 mean -0.0324 n7 k3
+TIMESPLIT ACTCNT_q4|YOUNG30|T120_TR35|P2  h1 mean 0.1966 n159 k74  h2 mean -0.1946 n4 k1
+TIMESPLIT NEWL60_q4|YOUNG30|T120_TR35|P2  h1 mean 0.0969 n427 k133  h2 none
+TIMESPLIT FRACUP_q5|YOUNG30|T120_TR35|P1  h1 mean 0.1000 n357 k141  h2 mean 0.0762 n5 k2
+TIMESPLIT NEWL60_q4|YOUNG30|T120_TR35|P1  h1 mean 0.1089 n427 k133  h2 none
+TIMESPLIT NEWL60_q5|NEARHI|T120_TR35|P2  h1 mean 0.1483 n81 k60  h2 none
+TIMESPLIT COHVOL15_q5|ABOVEOPEN|T120_TR35|P2  h1 mean 0.1178 n197 k83  h2 none
+TIMESPLIT NEWL60_q5|NEARHI|T120_TR35|P3  h1 mean 0.1450 n81 k60  h2 none
+TIMESPLIT ACTCNT_q4|YOUNG30|T120_TR35|P3  h1 mean 0.1318 n159 k74  h2 mean -0.2089 n4 k1
+TIMESPLIT MEDRET60_q3|YOUNG30|T120_TR35|P3  h1 mean 0.0945 n229 k121  h2 mean 0.1202 n2 k2
+TIMESPLIT YOUNGFRAC_q5|ANY|T120_TR35|P3  h1 mean 0.0741 n619 k153  h2 mean -0.1557 n1 k1
+TIMESPLIT MEDRET60_q5|YOUNG30|T120_TR35|P3  h1 mean 0.0928 n208 k67  h2 mean -0.0163 n16 k4
+TIMESPLIT FRACUP_q4|YOUNG30|T120_TR35|P2  h1 mean 0.1026 n279 k136  h2 mean -0.0815 n2 k2
+TIMESPLIT YOUNGFRAC_q5|ABOVEOPEN|T120_TR35|P2  h1 mean 0.1071 n196 k85  h2 none
+TIMESPLIT FRACUP_q4|YOUNG30|T120_TR35|P3  h1 mean 0.1033 n279 k136  h2 mean -0.0692 n2 k2
+TIMESPLIT MEDRET60_q3|YOUNG30|T120_TR35|P1  h1 mean 0.1059 n229 k121  h2 mean 0.3467 n2 k2
+TIMESPLIT LAUNCH60_q3|R5UP|T120_TR35|P3  h1 mean 0.0576 n233 k99  h2 none
+TIMESPLIT LAUNCH60_q3|ANY|T120_TR35|P3  h1 mean 0.4650 n485 k152  h2 none
+TIMESPLIT COHVOL15_q5|ANY|T120_TR35|P3  h1 mean 0.0589 n605 k163  h2 none
+TIMESPLIT YOUNGFRAC_q5|ABOVEOPEN|T120_TR35|P3  h1 mean 0.1083 n196 k85  h2 none
+TIMESPLIT NEWL60_q5|NEARHI|T120_TR35|P1  h1 mean 0.1459 n81 k60  h2 none
+TIMESPLIT NEWL60_q5|ABOVEOPEN|T120_TR35|P3  h1 mean 0.1092 n162 k78  h2 none
+SENS NEWL60_q5|YOUNG30|T60_TR25|P1 :: drop-30 toll0.011 mean 0.3293 med -0.0496 | drop-30 toll0.025 mean 0.3157 med -0.0632 | drop-50 toll0.011 mean 0.3268 med -0.0533 | drop-50 toll0.025 mean 0.3132 med -0.0669 | drop-100 toll0.011 mean 0.3206 med -0.0533 | drop-100 toll0.025 mean 0.3070 med -0.0669
+SENS ALL|YOUNG30|T60_TR25|P1 :: drop-30 toll0.011 mean 0.2180 med -0.0436 | drop-30 toll0.025 mean 0.2044 med -0.0572 | drop-50 toll0.011 mean 0.2138 med -0.0496 | drop-50 toll0.025 mean 0.2002 med -0.0632 | drop-100 toll0.011 mean 0.2032 med -0.0496 | drop-100 toll0.025 mean 0.1896 med -0.0632
+SENS LAUNCH60_q4|YOUNG30|T60_TR25|P1 :: drop-30 toll0.011 mean 0.4422 med -0.0664 | drop-30 toll0.025 mean 0.4286 med -0.0800 | drop-50 toll0.011 mean 0.4346 med -0.0664 | drop-50 toll0.025 mean 0.4210 med -0.0800 | drop-100 toll0.011 mean 0.4157 med -0.0664 | drop-100 toll0.025 mean 0.4021 med -0.0800
+SENS ALL|YOUNG30|T60_TR25|P2 :: drop-30 toll0.011 mean 0.1667 med -0.0406 | drop-30 toll0.025 mean 0.1550 med -0.0493 | drop-50 toll0.011 mean 0.1632 med -0.0406 | drop-50 toll0.025 mean 0.1514 med -0.0493 | drop-100 toll0.011 mean 0.1544 med -0.0406 | drop-100 toll0.025 mean 0.1427 med -0.0493
+SENS ALL|YOUNG30|T60_TR25|P3 :: drop-30 toll0.011 mean 0.1584 med -0.0360 | drop-30 toll0.025 mean 0.1482 med -0.0450 | drop-50 toll0.011 mean 0.1555 med -0.0360 | drop-50 toll0.025 mean 0.1453 med -0.0450 | drop-100 toll0.011 mean 0.1484 med -0.0360 | drop-100 toll0.025 mean 0.1382 med -0.0450
+SENS NEWL60_q5|YOUNG30|T60_TR25|P2 :: drop-30 toll0.011 mean 0.2271 med -0.0444 | drop-30 toll0.025 mean 0.2151 med -0.0565 | drop-50 toll0.011 mean 0.2246 med -0.0444 | drop-50 toll0.025 mean 0.2127 med -0.0565 | drop-100 toll0.011 mean 0.2184 med -0.0444 | drop-100 toll0.025 mean 0.2065 med -0.0565
+SENS HOUR_b4|YOUNG30|T60_TR25|P2 :: drop-30 toll0.011 mean 0.2732 med 0.0160 | drop-30 toll0.025 mean 0.2615 med 0.0024 | drop-50 toll0.011 mean 0.2710 med 0.0160 | drop-50 toll0.025 mean 0.2592 med 0.0024 | drop-100 toll0.011 mean 0.2653 med 0.0160 | drop-100 toll0.025 mean 0.2536 med 0.0024
+SENS NEWL60_q5|YOUNG30|T60_TR25|P3 :: drop-30 toll0.011 mean 0.2133 med -0.0472 | drop-30 toll0.025 mean 0.2033 med -0.0558 | drop-50 toll0.011 mean 0.2111 med -0.0477 | drop-50 toll0.025 mean 0.2012 med -0.0558 | drop-100 toll0.011 mean 0.2057 med -0.0477 | drop-100 toll0.025 mean 0.1958 med -0.0558
+SENS LAUNCH60_q4|YOUNG30|T60_TR25|P2 :: drop-30 toll0.011 mean 0.3695 med -0.0466 | drop-30 toll0.025 mean 0.3572 med -0.0585 | drop-50 toll0.011 mean 0.3619 med -0.0466 | drop-50 toll0.025 mean 0.3496 med -0.0585 | drop-100 toll0.011 mean 0.3430 med -0.0466 | drop-100 toll0.025 mean 0.3307 med -0.0585
+SENS HOUR_b4|YOUNG30|T60_TR25|P3 :: drop-30 toll0.011 mean 0.2605 med 0.0126 | drop-30 toll0.025 mean 0.2502 med 0.0024 | drop-50 toll0.011 mean 0.2582 med 0.0126 | drop-50 toll0.025 mean 0.2479 med 0.0024 | drop-100 toll0.011 mean 0.2525 med 0.0126 | drop-100 toll0.025 mean 0.2423 med 0.0024
+SENS LAUNCH60_q4|YOUNG30|T60_TR25|P3 :: drop-30 toll0.011 mean 0.2721 med -0.0439 | drop-30 toll0.025 mean 0.2621 med -0.0507 | drop-50 toll0.011 mean 0.2668 med -0.0439 | drop-50 toll0.025 mean 0.2568 med -0.0507 | drop-100 toll0.011 mean 0.2533 med -0.0439 | drop-100 toll0.025 mean 0.2433 med -0.0507
+SENS MEDRET60_q1|YOUNG30|T60_TR25|P2 :: drop-30 toll0.011 mean 0.3235 med -0.0702 | drop-30 toll0.025 mean 0.3113 med -0.0837 | drop-50 toll0.011 mean 0.3200 med -0.0702 | drop-50 toll0.025 mean 0.3078 med -0.0837 | drop-100 toll0.011 mean 0.3113 med -0.0702 | drop-100 toll0.025 mean 0.2990 med -0.0837
+SENS YOUNGFRAC_q5|YOUNG30|T60_TR25|P2 :: drop-30 toll0.011 mean 0.1843 med -0.0478 | drop-30 toll0.025 mean 0.1726 med -0.0593 | drop-50 toll0.011 mean 0.1787 med -0.0478 | drop-50 toll0.025 mean 0.1670 med -0.0593 | drop-100 toll0.011 mean 0.1645 med -0.0478 | drop-100 toll0.025 mean 0.1528 med -0.0593
+SENS LAUNCH60_q3|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.8919 med -0.0998 | drop-30 toll0.025 mean 0.8819 med -0.1134 | drop-50 toll0.011 mean 0.8875 med -0.0998 | drop-50 toll0.025 mean 0.8775 med -0.1134 | drop-100 toll0.011 mean 0.8766 med -0.0998 | drop-100 toll0.025 mean 0.8666 med -0.1134
+SENS YOUNGFRAC_q5|YOUNG30|T60_TR25|P3 :: drop-30 toll0.011 mean 0.1708 med -0.0445 | drop-30 toll0.025 mean 0.1610 med -0.0545 | drop-50 toll0.011 mean 0.1673 med -0.0445 | drop-50 toll0.025 mean 0.1575 med -0.0545 | drop-100 toll0.011 mean 0.1584 med -0.0445 | drop-100 toll0.025 mean 0.1487 med -0.0545
+SENS ACTCNT_q1|YOUNG30|T60_TR25|P3 :: drop-30 toll0.011 mean 0.2048 med -0.0359 | drop-30 toll0.025 mean 0.1946 med -0.0437 | drop-50 toll0.011 mean 0.2007 med -0.0359 | drop-50 toll0.025 mean 0.1905 med -0.0437 | drop-100 toll0.011 mean 0.1905 med -0.0359 | drop-100 toll0.025 mean 0.1803 med -0.0437
+SENS MEDRET60_q1|YOUNG30|T60_TR25|P3 :: drop-30 toll0.011 mean 0.2925 med -0.0594 | drop-30 toll0.025 mean 0.2823 med -0.0688 | drop-50 toll0.011 mean 0.2901 med -0.0594 | drop-50 toll0.025 mean 0.2799 med -0.0688 | drop-100 toll0.011 mean 0.2840 med -0.0594 | drop-100 toll0.025 mean 0.2738 med -0.0688
+SENS COHVOL15_q5|YOUNG30|T60_TR25|P3 :: drop-30 toll0.011 mean 0.1759 med -0.0309 | drop-30 toll0.025 mean 0.1657 med -0.0420 | drop-50 toll0.011 mean 0.1703 med -0.0309 | drop-50 toll0.025 mean 0.1600 med -0.0420 | drop-100 toll0.011 mean 0.1562 med -0.0309 | drop-100 toll0.025 mean 0.1460 med -0.0420
+SENS LAUNCH60_q3|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.8893 med -0.1047 | drop-30 toll0.025 mean 0.8773 med -0.1166 | drop-50 toll0.011 mean 0.8832 med -0.1047 | drop-50 toll0.025 mean 0.8712 med -0.1166 | drop-100 toll0.011 mean 0.8678 med -0.1047 | drop-100 toll0.025 mean 0.8559 med -0.1166
+SENS MEDRET15_q1|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1934 med -0.1055 | drop-30 toll0.025 mean 0.1811 med -0.1174 | drop-50 toll0.011 mean 0.1890 med -0.1055 | drop-50 toll0.025 mean 0.1767 med -0.1174 | drop-100 toll0.011 mean 0.1780 med -0.1055 | drop-100 toll0.025 mean 0.1657 med -0.1174
+SENS LAUNCH60_q4|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.3301 med -0.1199 | drop-30 toll0.025 mean 0.3176 med -0.1301 | drop-50 toll0.011 mean 0.3185 med -0.1199 | drop-50 toll0.025 mean 0.3060 med -0.1301 | drop-100 toll0.011 mean 0.2897 med -0.1199 | drop-100 toll0.025 mean 0.2772 med -0.1301
+SENS MEDRET15_q1|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1886 med -0.0958 | drop-30 toll0.025 mean 0.1750 med -0.1094 | drop-50 toll0.011 mean 0.1833 med -0.0958 | drop-50 toll0.025 mean 0.1697 med -0.1094 | drop-100 toll0.011 mean 0.1699 med -0.1050 | drop-100 toll0.025 mean 0.1563 med -0.1186
+SENS COHVOL15_q5|NEARHI|T120_TR35|P2 :: drop-30 toll0.011 mean 0.2082 med -0.0718 | drop-30 toll0.025 mean 0.1954 med -0.0854 | drop-50 toll0.011 mean 0.2082 med -0.0718 | drop-50 toll0.025 mean 0.1954 med -0.0854 | drop-100 toll0.011 mean 0.2082 med -0.0718 | drop-100 toll0.025 mean 0.1954 med -0.0854
+SENS LAUNCH60_q4|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.3178 med -0.1712 | drop-30 toll0.025 mean 0.3042 med -0.1848 | drop-50 toll0.011 mean 0.3062 med -0.1712 | drop-50 toll0.025 mean 0.2926 med -0.1848 | drop-100 toll0.011 mean 0.2774 med -0.1712 | drop-100 toll0.025 mean 0.2638 med -0.1848
+SENS COHVOL15_q5|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1432 med -0.0711 | drop-30 toll0.025 mean 0.1330 med -0.0826 | drop-50 toll0.011 mean 0.1369 med -0.0738 | drop-50 toll0.025 mean 0.1268 med -0.0854 | drop-100 toll0.011 mean 0.1214 med -0.0738 | drop-100 toll0.025 mean 0.1113 med -0.0854
+SENS COHVOL15_q5|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1408 med -0.0850 | drop-30 toll0.025 mean 0.1284 med -0.0970 | drop-50 toll0.011 mean 0.1326 med -0.0850 | drop-50 toll0.025 mean 0.1202 med -0.0970 | drop-100 toll0.011 mean 0.1122 med -0.0850 | drop-100 toll0.025 mean 0.0998 med -0.0970
+SENS COHVOL15_q5|NEARHI|T120_TR35|P3 :: drop-30 toll0.011 mean 0.2063 med -0.0718 | drop-30 toll0.025 mean 0.1947 med -0.0854 | drop-50 toll0.011 mean 0.2063 med -0.0718 | drop-50 toll0.025 mean 0.1947 med -0.0854 | drop-100 toll0.011 mean 0.2063 med -0.0718 | drop-100 toll0.025 mean 0.1947 med -0.0854
+SENS HOUR_b1|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.2424 med -0.0719 | drop-30 toll0.025 mean 0.2324 med -0.0821 | drop-50 toll0.011 mean 0.2398 med -0.0825 | drop-50 toll0.025 mean 0.2298 med -0.0929 | drop-100 toll0.011 mean 0.2333 med -0.0863 | drop-100 toll0.025 mean 0.2234 med -0.0943
+SENS COHVOL15_q5|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1466 med -0.0842 | drop-30 toll0.025 mean 0.1330 med -0.0978 | drop-50 toll0.011 mean 0.1382 med -0.0894 | drop-50 toll0.025 mean 0.1246 med -0.1030 | drop-100 toll0.011 mean 0.1171 med -0.0894 | drop-100 toll0.025 mean 0.1035 med -0.1030
+SENS COHVOL15_q5|NEARHI|T120_TR35|P1 :: drop-30 toll0.011 mean 0.2187 med -0.0570 | drop-30 toll0.025 mean 0.2051 med -0.0706 | drop-50 toll0.011 mean 0.2187 med -0.0570 | drop-50 toll0.025 mean 0.2051 med -0.0706 | drop-100 toll0.011 mean 0.2187 med -0.0570 | drop-100 toll0.025 mean 0.2051 med -0.0706
+SENS ALL|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1064 med -0.0756 | drop-30 toll0.025 mean 0.0963 med -0.0858 | drop-50 toll0.011 mean 0.1011 med -0.0761 | drop-50 toll0.025 mean 0.0909 med -0.0869 | drop-100 toll0.011 mean 0.0877 med -0.0786 | drop-100 toll0.025 mean 0.0775 med -0.0875
+SENS ALL|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1146 med -0.0871 | drop-30 toll0.025 mean 0.1027 med -0.0994 | drop-50 toll0.011 mean 0.1080 med -0.0871 | drop-50 toll0.025 mean 0.0961 med -0.0994 | drop-100 toll0.011 mean 0.0915 med -0.0915 | drop-100 toll0.025 mean 0.0796 med -0.1032
+SENS MEDRET15_q1|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1425 med -0.1023 | drop-30 toll0.025 mean 0.1326 med -0.1113 | drop-50 toll0.011 mean 0.1390 med -0.1023 | drop-50 toll0.025 mean 0.1290 med -0.1113 | drop-100 toll0.011 mean 0.1300 med -0.1023 | drop-100 toll0.025 mean 0.1200 med -0.1113
+SENS LAUNCH60_q1|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.2591 med -0.0912 | drop-30 toll0.025 mean 0.2486 med -0.1014 | drop-50 toll0.011 mean 0.2580 med -0.0912 | drop-50 toll0.025 mean 0.2475 med -0.1024 | drop-100 toll0.011 mean 0.2553 med -0.1211 | drop-100 toll0.025 mean 0.2448 med -0.1279
+SENS LAUNCH60_q4|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1947 med -0.1054 | drop-30 toll0.025 mean 0.1848 med -0.1122 | drop-50 toll0.011 mean 0.1862 med -0.1078 | drop-50 toll0.025 mean 0.1763 med -0.1146 | drop-100 toll0.011 mean 0.1649 med -0.1090 | drop-100 toll0.025 mean 0.1550 med -0.1158
+SENS YOUNGFRAC_q5|NEARHI|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1813 med -0.0342 | drop-30 toll0.025 mean 0.1690 med -0.0478 | drop-50 toll0.011 mean 0.1797 med -0.0342 | drop-50 toll0.025 mean 0.1674 med -0.0478 | drop-100 toll0.011 mean 0.1758 med -0.0342 | drop-100 toll0.025 mean 0.1634 med -0.0478
+SENS ALL|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1165 med -0.1045 | drop-30 toll0.025 mean 0.1029 med -0.1181 | drop-50 toll0.011 mean 0.1088 med -0.1045 | drop-50 toll0.025 mean 0.0952 med -0.1181 | drop-100 toll0.011 mean 0.0896 med -0.1063 | drop-100 toll0.025 mean 0.0760 med -0.1199
+SENS NEWL60_q5|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1751 med -0.1139 | drop-30 toll0.025 mean 0.1615 med -0.1275 | drop-50 toll0.011 mean 0.1679 med -0.1146 | drop-50 toll0.025 mean 0.1543 med -0.1282 | drop-100 toll0.011 mean 0.1499 med -0.1146 | drop-100 toll0.025 mean 0.1363 med -0.1282
+SENS HOUR_b1|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.2455 med -0.0977 | drop-30 toll0.025 mean 0.2337 med -0.1093 | drop-50 toll0.011 mean 0.2408 med -0.0990 | drop-50 toll0.025 mean 0.2289 med -0.1094 | drop-100 toll0.011 mean 0.2289 med -0.0990 | drop-100 toll0.025 mean 0.2170 med -0.1094
+SENS NEWL60_q5|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1562 med -0.1096 | drop-30 toll0.025 mean 0.1440 med -0.1232 | drop-50 toll0.011 mean 0.1494 med -0.1120 | drop-50 toll0.025 mean 0.1372 med -0.1234 | drop-100 toll0.011 mean 0.1325 med -0.1120 | drop-100 toll0.025 mean 0.1202 med -0.1234
+SENS YOUNGFRAC_q5|NEARHI|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1733 med -0.0342 | drop-30 toll0.025 mean 0.1617 med -0.0478 | drop-50 toll0.011 mean 0.1725 med -0.0342 | drop-50 toll0.025 mean 0.1610 med -0.0478 | drop-100 toll0.011 mean 0.1705 med -0.0342 | drop-100 toll0.025 mean 0.1590 med -0.0478
+SENS YOUNGFRAC_q5|NEARHI|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1771 med -0.0109 | drop-30 toll0.025 mean 0.1635 med -0.0245 | drop-50 toll0.011 mean 0.1755 med -0.0109 | drop-50 toll0.025 mean 0.1619 med -0.0245 | drop-100 toll0.011 mean 0.1716 med -0.0109 | drop-100 toll0.025 mean 0.1580 med -0.0245
+SENS LAUNCH60_q1|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.3010 med -0.0803 | drop-30 toll0.025 mean 0.2874 med -0.0939 | drop-50 toll0.011 mean 0.2988 med -0.1226 | drop-50 toll0.025 mean 0.2852 med -0.1362 | drop-100 toll0.011 mean 0.2935 med -0.1258 | drop-100 toll0.025 mean 0.2799 med -0.1394
+SENS NEWL60_q5|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1391 med -0.0704 | drop-30 toll0.025 mean 0.1290 med -0.0796 | drop-50 toll0.011 mean 0.1335 med -0.0707 | drop-50 toll0.025 mean 0.1233 med -0.0809 | drop-100 toll0.011 mean 0.1193 med -0.0707 | drop-100 toll0.025 mean 0.1092 med -0.0809
+SENS MEDRET15_q2|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.3092 med -0.1215 | drop-30 toll0.025 mean 0.2992 med -0.1317 | drop-50 toll0.011 mean 0.3043 med -0.1215 | drop-50 toll0.025 mean 0.2943 med -0.1317 | drop-100 toll0.011 mean 0.2920 med -0.1231 | drop-100 toll0.025 mean 0.2820 med -0.1362
+SENS YOUNGFRAC_q5|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1282 med -0.0999 | drop-30 toll0.025 mean 0.1162 med -0.1133 | drop-50 toll0.011 mean 0.1191 med -0.0999 | drop-50 toll0.025 mean 0.1072 med -0.1133 | drop-100 toll0.011 mean 0.0965 med -0.0999 | drop-100 toll0.025 mean 0.0846 med -0.1133
+SENS HOUR_b4|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1410 med -0.0424 | drop-30 toll0.025 mean 0.1291 med -0.0535 | drop-50 toll0.011 mean 0.1353 med -0.0424 | drop-50 toll0.025 mean 0.1234 med -0.0535 | drop-100 toll0.011 mean 0.1209 med -0.0424 | drop-100 toll0.025 mean 0.1091 med -0.0535
+SENS HOUR_b4|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1454 med -0.0437 | drop-30 toll0.025 mean 0.1318 med -0.0573 | drop-50 toll0.011 mean 0.1392 med -0.0437 | drop-50 toll0.025 mean 0.1256 med -0.0573 | drop-100 toll0.011 mean 0.1237 med -0.0437 | drop-100 toll0.025 mean 0.1101 med -0.0573
+SENS MEDRET60_q1|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.3001 med -0.1411 | drop-30 toll0.025 mean 0.2865 med -0.1547 | drop-50 toll0.011 mean 0.2918 med -0.1411 | drop-50 toll0.025 mean 0.2782 med -0.1547 | drop-100 toll0.011 mean 0.2711 med -0.1411 | drop-100 toll0.025 mean 0.2575 med -0.1547
+SENS NEWL60_q5|ANY|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1016 med -0.0425 | drop-30 toll0.025 mean 0.0920 med -0.0510 | drop-50 toll0.011 mean 0.0951 med -0.0425 | drop-50 toll0.025 mean 0.0856 med -0.0510 | drop-100 toll0.011 mean 0.0790 med -0.0425 | drop-100 toll0.025 mean 0.0695 med -0.0510
+SENS YOUNGFRAC_q5|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1108 med -0.0898 | drop-30 toll0.025 mean 0.1009 med -0.0999 | drop-50 toll0.011 mean 0.1048 med -0.0898 | drop-50 toll0.025 mean 0.0950 med -0.0999 | drop-100 toll0.011 mean 0.0899 med -0.0931 | drop-100 toll0.025 mean 0.0801 med -0.1016
+SENS LAUNCH60_q3|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 1.5640 med -0.1051 | drop-30 toll0.025 mean 1.5504 med -0.1187 | drop-50 toll0.011 mean 1.5577 med -0.1051 | drop-50 toll0.025 mean 1.5441 med -0.1187 | drop-100 toll0.011 mean 1.5417 med -0.1051 | drop-100 toll0.025 mean 1.5281 med -0.1187
+SENS HOUR_b4|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1325 med -0.0258 | drop-30 toll0.025 mean 0.1223 med -0.0341 | drop-50 toll0.011 mean 0.1272 med -0.0258 | drop-50 toll0.025 mean 0.1170 med -0.0341 | drop-100 toll0.011 mean 0.1141 med -0.0258 | drop-100 toll0.025 mean 0.1039 med -0.0341
+SENS LAUNCH60_q1|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.2518 med -0.1096 | drop-30 toll0.025 mean 0.2394 med -0.1232 | drop-50 toll0.011 mean 0.2497 med -0.1318 | drop-50 toll0.025 mean 0.2372 med -0.1432 | drop-100 toll0.011 mean 0.2443 med -0.1318 | drop-100 toll0.025 mean 0.2319 med -0.1432
+SENS NEWL60_q5|ANY|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1113 med -0.0498 | drop-30 toll0.025 mean 0.0987 med -0.0626 | drop-50 toll0.011 mean 0.1039 med -0.0498 | drop-50 toll0.025 mean 0.0913 med -0.0626 | drop-100 toll0.011 mean 0.0855 med -0.0498 | drop-100 toll0.025 mean 0.0729 med -0.0626
+SENS MEDRET60_q1|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.2175 med -0.1350 | drop-30 toll0.025 mean 0.2049 med -0.1486 | drop-50 toll0.011 mean 0.2098 med -0.1350 | drop-50 toll0.025 mean 0.1972 med -0.1486 | drop-100 toll0.011 mean 0.1905 med -0.1350 | drop-100 toll0.025 mean 0.1779 med -0.1486
+SENS ACTCNT_q4|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.2053 med -0.1157 | drop-30 toll0.025 mean 0.1917 med -0.1293 | drop-50 toll0.011 mean 0.1961 med -0.1157 | drop-50 toll0.025 mean 0.1825 med -0.1293 | drop-100 toll0.011 mean 0.1734 med -0.1220 | drop-100 toll0.025 mean 0.1598 med -0.1356
+SENS LAUNCH60_q3|NEARHI|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1686 med -0.0985 | drop-30 toll0.025 mean 0.1562 med -0.1121 | drop-50 toll0.011 mean 0.1686 med -0.0985 | drop-50 toll0.025 mean 0.1562 med -0.1121 | drop-100 toll0.011 mean 0.1686 med -0.0985 | drop-100 toll0.025 mean 0.1562 med -0.1121
+SENS ACTCNT_q1|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1022 med -0.0468 | drop-30 toll0.025 mean 0.0919 med -0.0552 | drop-50 toll0.011 mean 0.0973 med -0.0468 | drop-50 toll0.025 mean 0.0871 med -0.0552 | drop-100 toll0.011 mean 0.0852 med -0.0468 | drop-100 toll0.025 mean 0.0749 med -0.0552
+SENS FRACUP_q5|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.0936 med -0.0935 | drop-30 toll0.025 mean 0.0832 med -0.1046 | drop-50 toll0.011 mean 0.0886 med -0.0935 | drop-50 toll0.025 mean 0.0782 med -0.1046 | drop-100 toll0.011 mean 0.0760 med -0.0961 | drop-100 toll0.025 mean 0.0657 med -0.1071
+SENS HOUR_b1|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.2641 med -0.1314 | drop-30 toll0.025 mean 0.2505 med -0.1450 | drop-50 toll0.011 mean 0.2589 med -0.1353 | drop-50 toll0.025 mean 0.2453 med -0.1489 | drop-100 toll0.011 mean 0.2460 med -0.1486 | drop-100 toll0.025 mean 0.2324 med -0.1622
+SENS HOUR_b0|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1863 med -0.0715 | drop-30 toll0.025 mean 0.1740 med -0.0817 | drop-50 toll0.011 mean 0.1767 med -0.0715 | drop-50 toll0.025 mean 0.1644 med -0.0817 | drop-100 toll0.011 mean 0.1527 med -0.0921 | drop-100 toll0.025 mean 0.1403 med -0.1046
+SENS YOUNGFRAC_q4|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1031 med -0.0990 | drop-30 toll0.025 mean 0.0930 med -0.1109 | drop-50 toll0.011 mean 0.0962 med -0.0990 | drop-50 toll0.025 mean 0.0861 med -0.1109 | drop-100 toll0.011 mean 0.0791 med -0.1056 | drop-100 toll0.025 mean 0.0690 med -0.1158
+SENS FRACUP_q5|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.0962 med -0.1217 | drop-30 toll0.025 mean 0.0839 med -0.1319 | drop-50 toll0.011 mean 0.0907 med -0.1217 | drop-50 toll0.025 mean 0.0784 med -0.1319 | drop-100 toll0.011 mean 0.0768 med -0.1217 | drop-100 toll0.025 mean 0.0645 med -0.1319
+SENS MEDRET15_q2|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.5135 med -0.1551 | drop-30 toll0.025 mean 0.4999 med -0.1687 | drop-50 toll0.011 mean 0.5058 med -0.1568 | drop-50 toll0.025 mean 0.4922 med -0.1704 | drop-100 toll0.011 mean 0.4863 med -0.1568 | drop-100 toll0.025 mean 0.4727 med -0.1704
+SENS MEDRET60_q1|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1888 med -0.1185 | drop-30 toll0.025 mean 0.1785 med -0.1270 | drop-50 toll0.011 mean 0.1829 med -0.1185 | drop-50 toll0.025 mean 0.1725 med -0.1270 | drop-100 toll0.011 mean 0.1680 med -0.1185 | drop-100 toll0.025 mean 0.1576 med -0.1270
+SENS NEWL60_q4|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.0868 med -0.0966 | drop-30 toll0.025 mean 0.0768 med -0.1070 | drop-50 toll0.011 mean 0.0791 med -0.0966 | drop-50 toll0.025 mean 0.0691 med -0.1070 | drop-100 toll0.011 mean 0.0600 med -0.0976 | drop-100 toll0.025 mean 0.0500 med -0.1079
+SENS ACTCNT_q1|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1079 med -0.0951 | drop-30 toll0.025 mean 0.0943 med -0.1087 | drop-50 toll0.011 mean 0.0998 med -0.0951 | drop-50 toll0.025 mean 0.0862 med -0.1087 | drop-100 toll0.011 mean 0.0797 med -0.0951 | drop-100 toll0.025 mean 0.0661 med -0.1087
+SENS COHVOL15_q5|ABOVEOPEN|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1192 med -0.0886 | drop-30 toll0.025 mean 0.1082 med -0.0988 | drop-50 toll0.011 mean 0.1165 med -0.0917 | drop-50 toll0.025 mean 0.1054 med -0.1053 | drop-100 toll0.011 mean 0.1096 med -0.0917 | drop-100 toll0.025 mean 0.0986 med -0.1053
+SENS YOUNGFRAC_q5|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1137 med -0.1079 | drop-30 toll0.025 mean 0.1001 med -0.1215 | drop-50 toll0.011 mean 0.1038 med -0.1079 | drop-50 toll0.025 mean 0.0902 med -0.1215 | drop-100 toll0.011 mean 0.0789 med -0.1079 | drop-100 toll0.025 mean 0.0653 med -0.1215
+SENS HOUR_b0|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1837 med -0.0864 | drop-30 toll0.025 mean 0.1701 med -0.1000 | drop-50 toll0.011 mean 0.1724 med -0.0864 | drop-50 toll0.025 mean 0.1588 med -0.1000 | drop-100 toll0.011 mean 0.1442 med -0.0864 | drop-100 toll0.025 mean 0.1306 med -0.1000
+SENS LAUNCH60_q3|NEARHI|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1545 med -0.0941 | drop-30 toll0.025 mean 0.1434 med -0.1071 | drop-50 toll0.011 mean 0.1545 med -0.0941 | drop-50 toll0.025 mean 0.1434 med -0.1071 | drop-100 toll0.011 mean 0.1545 med -0.0941 | drop-100 toll0.025 mean 0.1434 med -0.1071
+SENS HOUR_b0|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1359 med -0.0715 | drop-30 toll0.025 mean 0.1252 med -0.0817 | drop-50 toll0.011 mean 0.1269 med -0.0715 | drop-50 toll0.025 mean 0.1162 med -0.0817 | drop-100 toll0.011 mean 0.1043 med -0.0935 | drop-100 toll0.025 mean 0.0936 med -0.1046
+SENS MEDRET15_q2|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.2958 med -0.1352 | drop-30 toll0.025 mean 0.2832 med -0.1477 | drop-50 toll0.011 mean 0.2886 med -0.1395 | drop-50 toll0.025 mean 0.2759 med -0.1522 | drop-100 toll0.011 mean 0.2704 med -0.1395 | drop-100 toll0.025 mean 0.2578 med -0.1522
+SENS YOUNGFRAC_q4|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1227 med -0.1264 | drop-30 toll0.025 mean 0.1091 med -0.1400 | drop-50 toll0.011 mean 0.1120 med -0.1264 | drop-50 toll0.025 mean 0.0984 med -0.1400 | drop-100 toll0.011 mean 0.0851 med -0.1366 | drop-100 toll0.025 mean 0.0715 med -0.1502
+SENS YOUNGFRAC_q4|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1021 med -0.1082 | drop-30 toll0.025 mean 0.0897 med -0.1201 | drop-50 toll0.011 mean 0.0925 med -0.1133 | drop-50 toll0.025 mean 0.0800 med -0.1241 | drop-100 toll0.011 mean 0.0683 med -0.1133 | drop-100 toll0.025 mean 0.0559 med -0.1241
+SENS ACTCNT_q1|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.0964 med -0.0666 | drop-30 toll0.025 mean 0.0844 med -0.0785 | drop-50 toll0.011 mean 0.0899 med -0.0666 | drop-50 toll0.025 mean 0.0779 med -0.0785 | drop-100 toll0.011 mean 0.0738 med -0.0666 | drop-100 toll0.025 mean 0.0618 med -0.0785
+SENS NEWL60_q3|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1098 med -0.0754 | drop-30 toll0.025 mean 0.0993 med -0.0867 | drop-50 toll0.011 mean 0.1033 med -0.0754 | drop-50 toll0.025 mean 0.0929 med -0.0867 | drop-100 toll0.011 mean 0.0873 med -0.0754 | drop-100 toll0.025 mean 0.0768 med -0.0867
+SENS ACTCNT_q4|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1914 med -0.1335 | drop-30 toll0.025 mean 0.1788 med -0.1451 | drop-50 toll0.011 mean 0.1846 med -0.1335 | drop-50 toll0.025 mean 0.1720 med -0.1451 | drop-100 toll0.011 mean 0.1677 med -0.1337 | drop-100 toll0.025 mean 0.1551 med -0.1471
+SENS NEWL60_q4|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.0969 med -0.0935 | drop-30 toll0.025 mean 0.0847 med -0.1065 | drop-50 toll0.011 mean 0.0884 med -0.0935 | drop-50 toll0.025 mean 0.0761 med -0.1065 | drop-100 toll0.011 mean 0.0671 med -0.0944 | drop-100 toll0.025 mean 0.0548 med -0.1071
+SENS FRACUP_q5|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.0996 med -0.1344 | drop-30 toll0.025 mean 0.0860 med -0.1480 | drop-50 toll0.011 mean 0.0929 med -0.1344 | drop-50 toll0.025 mean 0.0793 med -0.1480 | drop-100 toll0.011 mean 0.0759 med -0.1344 | drop-100 toll0.025 mean 0.0623 med -0.1480
+SENS NEWL60_q4|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1089 med -0.1045 | drop-30 toll0.025 mean 0.0953 med -0.1181 | drop-50 toll0.011 mean 0.0994 med -0.1045 | drop-50 toll0.025 mean 0.0858 med -0.1181 | drop-100 toll0.011 mean 0.0756 med -0.1063 | drop-100 toll0.025 mean 0.0620 med -0.1199
+SENS NEWL60_q5|NEARHI|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1483 med -0.0990 | drop-30 toll0.025 mean 0.1354 med -0.1126 | drop-50 toll0.011 mean 0.1483 med -0.0990 | drop-50 toll0.025 mean 0.1354 med -0.1126 | drop-100 toll0.011 mean 0.1483 med -0.0990 | drop-100 toll0.025 mean 0.1354 med -0.1126
+SENS COHVOL15_q5|ABOVEOPEN|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1178 med -0.0976 | drop-30 toll0.025 mean 0.1057 med -0.1112 | drop-50 toll0.011 mean 0.1151 med -0.0976 | drop-50 toll0.025 mean 0.1029 med -0.1112 | drop-100 toll0.011 mean 0.1082 med -0.0976 | drop-100 toll0.025 mean 0.0960 med -0.1112
+SENS NEWL60_q5|NEARHI|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1450 med -0.0709 | drop-30 toll0.025 mean 0.1333 med -0.0811 | drop-50 toll0.011 mean 0.1450 med -0.0709 | drop-50 toll0.025 mean 0.1333 med -0.0811 | drop-100 toll0.011 mean 0.1450 med -0.0709 | drop-100 toll0.025 mean 0.1333 med -0.0811
+SENS ACTCNT_q4|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1272 med -0.1006 | drop-30 toll0.025 mean 0.1165 med -0.1088 | drop-50 toll0.011 mean 0.1209 med -0.1006 | drop-50 toll0.025 mean 0.1102 med -0.1088 | drop-100 toll0.011 mean 0.1051 med -0.1009 | drop-100 toll0.025 mean 0.0943 med -0.1099
+SENS MEDRET60_q3|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.0949 med -0.0802 | drop-30 toll0.025 mean 0.0848 med -0.0884 | drop-50 toll0.011 mean 0.0916 med -0.0816 | drop-50 toll0.025 mean 0.0816 med -0.0884 | drop-100 toll0.011 mean 0.0835 med -0.0816 | drop-100 toll0.025 mean 0.0734 med -0.0884
+SENS YOUNGFRAC_q5|ANY|T120_TR35|P3 :: drop-30 toll0.011 mean 0.0726 med -0.0787 | drop-30 toll0.025 mean 0.0632 med -0.0891 | drop-50 toll0.011 mean 0.0646 med -0.0811 | drop-50 toll0.025 mean 0.0552 med -0.0896 | drop-100 toll0.011 mean 0.0445 med -0.0850 | drop-100 toll0.025 mean 0.0351 med -0.0931
+SENS MEDRET60_q5|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.0858 med -0.0823 | drop-30 toll0.025 mean 0.0758 med -0.0941 | drop-50 toll0.011 mean 0.0825 med -0.0823 | drop-50 toll0.025 mean 0.0726 med -0.0941 | drop-100 toll0.011 mean 0.0745 med -0.0823 | drop-100 toll0.025 mean 0.0646 med -0.0941
+SENS FRACUP_q4|YOUNG30|T120_TR35|P2 :: drop-30 toll0.011 mean 0.0999 med -0.1294 | drop-30 toll0.025 mean 0.0875 med -0.1406 | drop-50 toll0.011 mean 0.0932 med -0.1294 | drop-50 toll0.025 mean 0.0808 med -0.1406 | drop-100 toll0.011 mean 0.0765 med -0.1294 | drop-100 toll0.025 mean 0.0641 med -0.1406
+SENS YOUNGFRAC_q5|ABOVEOPEN|T120_TR35|P2 :: drop-30 toll0.011 mean 0.1071 med -0.1172 | drop-30 toll0.025 mean 0.0957 med -0.1308 | drop-50 toll0.011 mean 0.1064 med -0.1172 | drop-50 toll0.025 mean 0.0950 med -0.1308 | drop-100 toll0.011 mean 0.1046 med -0.1172 | drop-100 toll0.025 mean 0.0932 med -0.1308
+SENS FRACUP_q4|YOUNG30|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1008 med -0.1090 | drop-30 toll0.025 mean 0.0904 med -0.1209 | drop-50 toll0.011 mean 0.0952 med -0.1090 | drop-50 toll0.025 mean 0.0848 med -0.1209 | drop-100 toll0.011 mean 0.0813 med -0.1090 | drop-100 toll0.025 mean 0.0709 med -0.1209
+SENS MEDRET60_q3|YOUNG30|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1098 med -0.0921 | drop-30 toll0.025 mean 0.0962 med -0.1057 | drop-50 toll0.011 mean 0.1041 med -0.0974 | drop-50 toll0.025 mean 0.0905 med -0.1110 | drop-100 toll0.011 mean 0.0899 med -0.0974 | drop-100 toll0.025 mean 0.0763 med -0.1110
+SENS LAUNCH60_q3|R5UP|T120_TR35|P3 :: drop-30 toll0.011 mean 0.0576 med -0.0184 | drop-30 toll0.025 mean 0.0479 med -0.0272 | drop-50 toll0.011 mean 0.0512 med -0.0185 | drop-50 toll0.025 mean 0.0415 med -0.0272 | drop-100 toll0.011 mean 0.0353 med -0.0210 | drop-100 toll0.025 mean 0.0255 med -0.0312
+SENS LAUNCH60_q3|ANY|T120_TR35|P3 :: drop-30 toll0.011 mean 0.4650 med -0.0614 | drop-30 toll0.025 mean 0.4557 med -0.0723 | drop-50 toll0.011 mean 0.4554 med -0.0614 | drop-50 toll0.025 mean 0.4461 med -0.0731 | drop-100 toll0.011 mean 0.4316 med -0.0643 | drop-100 toll0.025 mean 0.4223 med -0.0741
+SENS COHVOL15_q5|ANY|T120_TR35|P3 :: drop-30 toll0.011 mean 0.0589 med -0.0577 | drop-30 toll0.025 mean 0.0492 med -0.0690 | drop-50 toll0.011 mean 0.0521 med -0.0599 | drop-50 toll0.025 mean 0.0424 med -0.0701 | drop-100 toll0.011 mean 0.0350 med -0.0599 | drop-100 toll0.025 mean 0.0253 med -0.0701
+SENS YOUNGFRAC_q5|ABOVEOPEN|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1083 med -0.1035 | drop-30 toll0.025 mean 0.0979 med -0.1171 | drop-50 toll0.011 mean 0.1076 med -0.1035 | drop-50 toll0.025 mean 0.0972 med -0.1171 | drop-100 toll0.011 mean 0.1058 med -0.1208 | drop-100 toll0.025 mean 0.0953 med -0.1344
+SENS NEWL60_q5|NEARHI|T120_TR35|P1 :: drop-30 toll0.011 mean 0.1459 med -0.0668 | drop-30 toll0.025 mean 0.1323 med -0.0804 | drop-50 toll0.011 mean 0.1459 med -0.0668 | drop-50 toll0.025 mean 0.1323 med -0.0804 | drop-100 toll0.011 mean 0.1459 med -0.0668 | drop-100 toll0.025 mean 0.1323 med -0.0804
+SENS NEWL60_q5|ABOVEOPEN|T120_TR35|P3 :: drop-30 toll0.011 mean 0.1092 med -0.0898 | drop-30 toll0.025 mean 0.0983 med -0.0992 | drop-50 toll0.011 mean 0.1050 med -0.0966 | drop-50 toll0.025 mean 0.0941 med -0.1094 | drop-100 toll0.011 mean 0.0945 med -0.0966 | drop-100 toll0.025 mean 0.0836 med -0.1094

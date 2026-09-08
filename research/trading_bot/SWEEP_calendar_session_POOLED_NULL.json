@@ -1,0 +1,714 @@
+{
+ "n_formulas_pooled": 100,
+ "replicates": 400,
+ "pooled_expected_max_abs_z": 2.696,
+ "pooled_max_abs_z_p50": 2.66,
+ "pooled_max_abs_z_p90": 3.223,
+ "pooled_max_abs_z_p95": 3.527,
+ "pooled_max_abs_z_p99": 3.889,
+ "analytic_sqrt_2lnN": 3.035,
+ "observed_design_max_abs_z": 3.403,
+ "family_wise_p_of_observed_max": 0.065,
+ "ranked": [
+  {
+   "batch": "b1",
+   "name": "REBAL_UNWIND_2D",
+   "design_sharpe": 0.717,
+   "z": 3.4,
+   "p": 0.0025
+  },
+  {
+   "batch": "b2",
+   "name": "XE_MONTHSTART_CONT",
+   "design_sharpe": 0.682,
+   "z": 3.18,
+   "p": 0.0
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_OPEXDAY_INTRADAY",
+   "design_sharpe": -0.695,
+   "z": -2.93,
+   "p": 0.0025
+  },
+  {
+   "batch": "b2",
+   "name": "TOM_DURATION_EXT",
+   "design_sharpe": 0.693,
+   "z": 2.78,
+   "p": 0.0
+  },
+  {
+   "batch": "b1",
+   "name": "XS_DEC_TAXLOSS",
+   "design_sharpe": -1.058,
+   "z": -2.44,
+   "p": 0.0075
+  },
+  {
+   "batch": "b1",
+   "name": "REBAL_FLOW_2D",
+   "design_sharpe": 0.55,
+   "z": 2.21,
+   "p": 0.0275
+  },
+  {
+   "batch": "b2",
+   "name": "XE_MONTHEND_REV",
+   "design_sharpe": 0.592,
+   "z": 2.12,
+   "p": 0.0325
+  },
+  {
+   "batch": "b1",
+   "name": "XT_WEEKEND_ALTS",
+   "design_sharpe": 1.33,
+   "z": 2.07,
+   "p": 0.0425
+  },
+  {
+   "batch": "b1",
+   "name": "XT_FUNDING_PRE",
+   "design_sharpe": -3.99,
+   "z": 1.98,
+   "p": 0.0325
+  },
+  {
+   "batch": "b2",
+   "name": "TOM_CREDIT_FLOW",
+   "design_sharpe": 0.309,
+   "z": 1.97,
+   "p": 0.05
+  },
+  {
+   "batch": "b2",
+   "name": "TOM_EM_MINUS_DM",
+   "design_sharpe": 0.591,
+   "z": 1.95,
+   "p": 0.06
+  },
+  {
+   "batch": "b2",
+   "name": "VIXEXP_WEEK_SPY",
+   "design_sharpe": 0.536,
+   "z": 1.8,
+   "p": 0.075
+  },
+  {
+   "batch": "b2",
+   "name": "XE_OPEXWEEK_LOWVOL",
+   "design_sharpe": 0.164,
+   "z": 1.75,
+   "p": 0.075
+  },
+  {
+   "batch": "b2",
+   "name": "TOQ_SPY_MINUS_TLT_UNCOND",
+   "design_sharpe": 0.339,
+   "z": 1.6,
+   "p": 0.1
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_TDOM1_GAP",
+   "design_sharpe": 0.411,
+   "z": 1.59,
+   "p": 0.105
+  },
+  {
+   "batch": "b1",
+   "name": "XT_TOM_BTC",
+   "design_sharpe": 0.825,
+   "z": 1.57,
+   "p": 0.1125
+  },
+  {
+   "batch": "b1",
+   "name": "OPEX_DAY_ONLY_SPY",
+   "design_sharpe": -0.253,
+   "z": -1.55,
+   "p": 0.1275
+  },
+  {
+   "batch": "b1",
+   "name": "XS_MONTHEND_DRESS",
+   "design_sharpe": -1.134,
+   "z": -1.52,
+   "p": 0.1125
+  },
+  {
+   "batch": "b2",
+   "name": "XT_WEEKEND_CONT_US",
+   "design_sharpe": 0.502,
+   "z": 1.5,
+   "p": 0.1325
+  },
+  {
+   "batch": "b2",
+   "name": "XT_POST_US_CLOSE",
+   "design_sharpe": -0.721,
+   "z": 1.46,
+   "p": 0.145
+  },
+  {
+   "batch": "b2",
+   "name": "XS_FRIDAY_REV",
+   "design_sharpe": -0.945,
+   "z": -1.44,
+   "p": 0.15
+  },
+  {
+   "batch": "b1",
+   "name": "XT_FUNDING_POST",
+   "design_sharpe": -4.05,
+   "z": 1.36,
+   "p": 0.2
+  },
+  {
+   "batch": "b2",
+   "name": "TOM_SECTOR_DEFENSIVE",
+   "design_sharpe": -0.436,
+   "z": -1.28,
+   "p": 0.215
+  },
+  {
+   "batch": "b1",
+   "name": "DEC_GLD",
+   "design_sharpe": -0.109,
+   "z": -1.13,
+   "p": 0.28
+  },
+  {
+   "batch": "b2",
+   "name": "XT_ALT_WEEKEND_SPREAD",
+   "design_sharpe": 0.137,
+   "z": 1.13,
+   "p": 0.3
+  },
+  {
+   "batch": "b2",
+   "name": "OPEX_PRE3_SPY",
+   "design_sharpe": 0.399,
+   "z": 1.11,
+   "p": 0.2625
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_EOM_GAP",
+   "design_sharpe": 0.32,
+   "z": 1.09,
+   "p": 0.2775
+  },
+  {
+   "batch": "b1",
+   "name": "TOM_TIGHT_SPY",
+   "design_sharpe": 0.357,
+   "z": 1.09,
+   "p": 0.31
+  },
+  {
+   "batch": "b1",
+   "name": "XT_USOPEN_BTC",
+   "design_sharpe": -1.337,
+   "z": 1.07,
+   "p": 0.2825
+  },
+  {
+   "batch": "b1",
+   "name": "SANTA_SPY",
+   "design_sharpe": 0.311,
+   "z": 1.07,
+   "p": 0.28
+  },
+  {
+   "batch": "b1",
+   "name": "DOW_MON_BASKET",
+   "design_sharpe": -0.077,
+   "z": -1.06,
+   "p": 0.3075
+  },
+  {
+   "batch": "b1",
+   "name": "XT_ASIA_BTC",
+   "design_sharpe": -1.05,
+   "z": -1.05,
+   "p": 0.3025
+  },
+  {
+   "batch": "b2",
+   "name": "THANKSGIVING_SPY",
+   "design_sharpe": 0.268,
+   "z": 1.04,
+   "p": 0.3225
+  },
+  {
+   "batch": "b1",
+   "name": "TOM_TLT",
+   "design_sharpe": -0.243,
+   "z": -1.04,
+   "p": 0.3025
+  },
+  {
+   "batch": "b1",
+   "name": "TOM_ARIEL_SPY",
+   "design_sharpe": 0.445,
+   "z": 1.02,
+   "p": 0.3025
+  },
+  {
+   "batch": "b1",
+   "name": "REBAL_FLOW_QTR",
+   "design_sharpe": 0.24,
+   "z": 1.0,
+   "p": 0.31
+  },
+  {
+   "batch": "b2",
+   "name": "XT_DERIBIT_EXPIRY_BLOCK",
+   "design_sharpe": 0.255,
+   "z": 0.97,
+   "p": 0.3375
+  },
+  {
+   "batch": "b1",
+   "name": "OPEX_QUAD_WEEK_SPY",
+   "design_sharpe": 0.331,
+   "z": 0.94,
+   "p": 0.3325
+  },
+  {
+   "batch": "b1",
+   "name": "DOW_THU_SPY",
+   "design_sharpe": 0.003,
+   "z": -0.93,
+   "p": 0.3625
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_OPEXDAY_OVERNIGHT",
+   "design_sharpe": 0.323,
+   "z": 0.93,
+   "p": 0.375
+  },
+  {
+   "batch": "b2",
+   "name": "XS_TOM_LOWVOL",
+   "design_sharpe": 0.154,
+   "z": 0.91,
+   "p": 0.385
+  },
+  {
+   "batch": "b1",
+   "name": "XT_HANDOFF_MOM",
+   "design_sharpe": -0.249,
+   "z": 0.91,
+   "p": 0.39
+  },
+  {
+   "batch": "b1",
+   "name": "XT_US_BTC",
+   "design_sharpe": -0.24,
+   "z": 0.91,
+   "p": 0.385
+  },
+  {
+   "batch": "b2",
+   "name": "XS_OPEXWEEK_MOM",
+   "design_sharpe": -0.309,
+   "z": 0.9,
+   "p": 0.34
+  },
+  {
+   "batch": "b1",
+   "name": "DOW_FRI_SPY",
+   "design_sharpe": 0.004,
+   "z": -0.9,
+   "p": 0.335
+  },
+  {
+   "batch": "b1",
+   "name": "TOM_EFA_MINUS_SPY",
+   "design_sharpe": 0.133,
+   "z": 0.89,
+   "p": 0.3725
+  },
+  {
+   "batch": "b1",
+   "name": "XS_TOM_HIVOL",
+   "design_sharpe": -0.427,
+   "z": -0.88,
+   "p": 0.4
+  },
+  {
+   "batch": "b1",
+   "name": "XS_DOW_MON",
+   "design_sharpe": -0.153,
+   "z": 0.88,
+   "p": 0.38
+  },
+  {
+   "batch": "b1",
+   "name": "XT_EU_BTC",
+   "design_sharpe": -0.644,
+   "z": 0.84,
+   "p": 0.4525
+  },
+  {
+   "batch": "b2",
+   "name": "XT_ALT_SESSION_ROT",
+   "design_sharpe": -5.063,
+   "z": -0.82,
+   "p": 0.4725
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_TOM_INTRADAY",
+   "design_sharpe": 0.064,
+   "z": 0.81,
+   "p": 0.455
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_TOM_OVERNIGHT",
+   "design_sharpe": 0.352,
+   "z": 0.81,
+   "p": 0.4525
+  },
+  {
+   "batch": "b1",
+   "name": "DOW_TUE_SPY",
+   "design_sharpe": 0.328,
+   "z": 0.8,
+   "p": 0.45
+  },
+  {
+   "batch": "b2",
+   "name": "XE_MON_REV",
+   "design_sharpe": 0.045,
+   "z": -0.79,
+   "p": 0.44
+  },
+  {
+   "batch": "b2",
+   "name": "XT_WEEKEND_REV_ASIA",
+   "design_sharpe": -0.999,
+   "z": -0.78,
+   "p": 0.4
+  },
+  {
+   "batch": "b2",
+   "name": "XT_SESSION_HANDOFF_EU",
+   "design_sharpe": -0.896,
+   "z": 0.75,
+   "p": 0.4875
+  },
+  {
+   "batch": "b1",
+   "name": "XS_TOM_LONGONLY",
+   "design_sharpe": 0.443,
+   "z": 0.73,
+   "p": 0.48
+  },
+  {
+   "batch": "b1",
+   "name": "TOQ_ARIEL_SPY",
+   "design_sharpe": 0.284,
+   "z": 0.72,
+   "p": 0.455
+  },
+  {
+   "batch": "b1",
+   "name": "HALLOWEEN_SPY",
+   "design_sharpe": 0.582,
+   "z": 0.71,
+   "p": 0.475
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_MOC_REVERSAL",
+   "design_sharpe": 0.179,
+   "z": 0.71,
+   "p": 0.495
+  },
+  {
+   "batch": "b2",
+   "name": "POST_LABORDAY_SHORT",
+   "design_sharpe": -0.247,
+   "z": -0.71,
+   "p": 0.445
+  },
+  {
+   "batch": "b1",
+   "name": "TOM_IWM_MINUS_SPY",
+   "design_sharpe": -0.197,
+   "z": -0.68,
+   "p": 0.46
+  },
+  {
+   "batch": "b2",
+   "name": "XT_FUNDING_MAG_8H",
+   "design_sharpe": -0.386,
+   "z": 0.65,
+   "p": 0.4775
+  },
+  {
+   "batch": "b1",
+   "name": "YEAREND_TLT",
+   "design_sharpe": 0.234,
+   "z": 0.65,
+   "p": 0.5025
+  },
+  {
+   "batch": "b1",
+   "name": "OPEX_WEEK_LONG_SPY",
+   "design_sharpe": 0.392,
+   "z": 0.61,
+   "p": 0.5375
+  },
+  {
+   "batch": "b1",
+   "name": "JAN_IWM_MINUS_SPY",
+   "design_sharpe": 0.089,
+   "z": 0.6,
+   "p": 0.5875
+  },
+  {
+   "batch": "b1",
+   "name": "XT_WEEKEND_BTC",
+   "design_sharpe": 0.506,
+   "z": 0.59,
+   "p": 0.5475
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_POSTHOL_GAP",
+   "design_sharpe": -0.024,
+   "z": -0.56,
+   "p": 0.6075
+  },
+  {
+   "batch": "b2",
+   "name": "XMAS_WEEK_SPY",
+   "design_sharpe": -0.008,
+   "z": -0.55,
+   "p": 0.565
+  },
+  {
+   "batch": "b1",
+   "name": "TOM_SPY_MINUS_TLT",
+   "design_sharpe": 0.258,
+   "z": 0.52,
+   "p": 0.6025
+  },
+  {
+   "batch": "b2",
+   "name": "VIXEXP_DAY_SPY",
+   "design_sharpe": -0.031,
+   "z": -0.52,
+   "p": 0.605
+  },
+  {
+   "batch": "b2",
+   "name": "OPEX_SPY_MINUS_IWM",
+   "design_sharpe": -0.135,
+   "z": -0.46,
+   "p": 0.655
+  },
+  {
+   "batch": "b1",
+   "name": "OPEX_POST_SHORT_SPY",
+   "design_sharpe": -0.214,
+   "z": 0.43,
+   "p": 0.6475
+  },
+  {
+   "batch": "b1",
+   "name": "XS_MONTHSTART_UNWIND",
+   "design_sharpe": -0.147,
+   "z": -0.4,
+   "p": 0.6725
+  },
+  {
+   "batch": "b1",
+   "name": "XT_MONDAY_BTC",
+   "design_sharpe": 0.226,
+   "z": 0.4,
+   "p": 0.6775
+  },
+  {
+   "batch": "b2",
+   "name": "TOM_GOLD_2X2",
+   "design_sharpe": 0.377,
+   "z": 0.4,
+   "p": 0.67
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_PREHOL_OVERNIGHT",
+   "design_sharpe": 0.188,
+   "z": 0.35,
+   "p": 0.75
+  },
+  {
+   "batch": "b1",
+   "name": "PREHOLIDAY_SPY",
+   "design_sharpe": 0.153,
+   "z": 0.33,
+   "p": 0.755
+  },
+  {
+   "batch": "b2",
+   "name": "PREHOL_SMALLCAP",
+   "design_sharpe": -0.16,
+   "z": -0.29,
+   "p": 0.7625
+  },
+  {
+   "batch": "b1",
+   "name": "DOW_MON_SPY",
+   "design_sharpe": 0.127,
+   "z": -0.27,
+   "p": 0.8025
+  },
+  {
+   "batch": "b2",
+   "name": "QUADWITCH_DISPERSION",
+   "design_sharpe": -0.093,
+   "z": -0.27,
+   "p": 0.7725
+  },
+  {
+   "batch": "b1",
+   "name": "DOW_MON_OVERNIGHT",
+   "design_sharpe": 0.158,
+   "z": -0.25,
+   "p": 0.8125
+  },
+  {
+   "batch": "b2",
+   "name": "XE_JAN_REV",
+   "design_sharpe": 0.039,
+   "z": 0.25,
+   "p": 0.7825
+  },
+  {
+   "batch": "b1",
+   "name": "MIDMONTH_SHORT_SPY",
+   "design_sharpe": -0.461,
+   "z": -0.22,
+   "p": 0.8275
+  },
+  {
+   "batch": "b1",
+   "name": "OPEX_WEEK_CONT",
+   "design_sharpe": -0.163,
+   "z": 0.22,
+   "p": 0.855
+  },
+  {
+   "batch": "b2",
+   "name": "TOM_USD",
+   "design_sharpe": 0.094,
+   "z": 0.19,
+   "p": 0.8575
+  },
+  {
+   "batch": "b1",
+   "name": "POSTHOLIDAY_SPY",
+   "design_sharpe": 0.129,
+   "z": 0.18,
+   "p": 0.83
+  },
+  {
+   "batch": "b2",
+   "name": "JULY4_SPY",
+   "design_sharpe": 0.025,
+   "z": -0.17,
+   "p": 0.885
+  },
+  {
+   "batch": "b2",
+   "name": "HALF_MONTH_SPLIT",
+   "design_sharpe": -0.026,
+   "z": 0.16,
+   "p": 0.915
+  },
+  {
+   "batch": "b1",
+   "name": "DOW_FRI_OVERNIGHT",
+   "design_sharpe": 0.263,
+   "z": 0.15,
+   "p": 0.885
+  },
+  {
+   "batch": "b2",
+   "name": "XT_MONTHEND_DERISK",
+   "design_sharpe": -0.076,
+   "z": 0.15,
+   "p": 0.885
+  },
+  {
+   "batch": "b2",
+   "name": "XE_TOM_DISPERSION",
+   "design_sharpe": 0.196,
+   "z": 0.14,
+   "p": 0.9075
+  },
+  {
+   "batch": "b2",
+   "name": "OPEX_MON_AFTER_SPY",
+   "design_sharpe": 0.115,
+   "z": 0.13,
+   "p": 0.895
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_PREHOL_INTRADAY",
+   "design_sharpe": -0.013,
+   "z": 0.12,
+   "p": 0.9125
+  },
+  {
+   "batch": "b1",
+   "name": "TOM_XSEC_BASKET",
+   "design_sharpe": 0.406,
+   "z": 0.1,
+   "p": 0.93
+  },
+  {
+   "batch": "b1",
+   "name": "OPEX_QQQ_MINUS_SPY",
+   "design_sharpe": 0.008,
+   "z": 0.08,
+   "p": 0.915
+  },
+  {
+   "batch": "b1",
+   "name": "XT_HANDOFF_REV",
+   "design_sharpe": -1.56,
+   "z": 0.07,
+   "p": 0.9575
+  },
+  {
+   "batch": "b2",
+   "name": "SESS_MON_GAP_VS_DAY",
+   "design_sharpe": -0.063,
+   "z": -0.06,
+   "p": 0.95
+  },
+  {
+   "batch": "b1",
+   "name": "DOW_MON_INTRADAY",
+   "design_sharpe": -0.089,
+   "z": -0.06,
+   "p": 0.96
+  },
+  {
+   "batch": "b1",
+   "name": "DOW_WED_SPY",
+   "design_sharpe": 0.17,
+   "z": -0.01,
+   "p": 0.9975
+  }
+ ]
+}

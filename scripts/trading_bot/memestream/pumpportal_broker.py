@@ -69,8 +69,11 @@ def trade_to_tape_line(ev: dict) -> dict | None:
     side = ev.get("txType")
     if not mint or side not in ("buy", "sell"):
         return None
+    recv_ns = time.time_ns()
     return {
-        "ts": time.time(),
+        "ts": recv_ns / 1_000_000_000,
+        "received_unix_nanos": recv_ns,
+        "observation_source": "pumpportal",
         "mint": mint,
         "trader": ev.get("traderPublicKey"),
         "side": side,

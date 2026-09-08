@@ -1,0 +1,13 @@
+H=15m TRAIN univ mean=-0.0719 med=-0.0214 n=1274 k=84 res=0.934
+   combos=26643  train cells mean>0 & bootlo>0: 0  (18s)
+H=30m TRAIN univ mean=-0.0829 med=-0.0270 n=721 k=84 res=0.883
+   combos=26643  train cells mean>0 & bootlo>0: 15  (25s)
+H=60m TRAIN univ mean=-0.1092 med=-0.0451 n=402 k=84 res=0.791
+   combos=26643  train cells mean>0 & bootlo>0: 16  (33s)
+TOTAL COMBOS SWEPT (panelA): 79929
+H=15m VALID univ mean=-0.0943 med=-0.0285 n=1020 k=92 | testing 0
+H=30m VALID univ mean=-0.0955 med=-0.0400 n=605 k=92 | testing 15
+H=60m VALID univ mean=-0.1238 med=-0.0852 n=351 k=92 | testing 16
+  SURVIVOR X1|cmp1|mar3|stale1            tr_mean=+0.0234 | VAL mean=+0.1071(lo+0.0149) med=-0.0004 ctrl=+0.0441 exc=+0.0630 n=21 k=9 res=1.00
+  SURVIVOR X1|mar3|stale1                 tr_mean=+0.0234 | VAL mean=+0.1071(lo+0.0149) med=-0.0004 ctrl=+0.0441 exc=+0.0630 n=21 k=9 res=1.00
+TOTAL VALIDATE SURVIVORS: 2

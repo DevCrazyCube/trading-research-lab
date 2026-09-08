@@ -1,0 +1,5 @@
+our bonding curves: 382
+distinct bonding_curves in reserve_observation: 3932 scan 5s
+our curves present: 48 of 382
+obs per our curve (hist): [(2, 2), (6, 2), (7, 1), (8, 14), (16, 1), (17, 1), (50, 27)]
+window creates covered by reserve_observation: 3932 of 33866

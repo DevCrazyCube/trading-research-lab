@@ -1,0 +1,263 @@
+{
+ "side_beta_controlled": [
+  {
+   "cond": "SPY_TREND200",
+   "variant": "LONGONLY_HI",
+   "design": {
+    "sharpe_unhedged": 1.9154910882731209,
+    "sharpe_BETA_HEDGED": 1.638104609644153,
+    "sharpe_raw_neutral_leg": 1.7432714375785803,
+    "d_sharpe_hedged_vs_raw": -0.10516682793442733,
+    "mean_hedged_bp": 6.747922906618597,
+    "mean_beta_contrib_bp": 3.174069151783853,
+    "avg_net_exposure": 0.5
+   },
+   "holdout": {
+    "sharpe_unhedged": 1.810752653790068,
+    "sharpe_BETA_HEDGED": 1.5494832792370459,
+    "sharpe_raw_neutral_leg": 1.3079766666053079,
+    "d_sharpe_hedged_vs_raw": 0.241506612631738,
+    "mean_hedged_bp": 8.44788446577355,
+    "mean_beta_contrib_bp": 4.899744703336167,
+    "avg_net_exposure": 0.7078651685393258
+   }
+  },
+  {
+   "cond": "SPY_TREND200",
+   "variant": "SIDE_TILT",
+   "design": {
+    "sharpe_unhedged": 1.425178352078178,
+    "sharpe_BETA_HEDGED": 1.6019642458768888,
+    "sharpe_raw_neutral_leg": 1.7432714375785803,
+    "d_sharpe_hedged_vs_raw": -0.14130719170169148,
+    "mean_hedged_bp": 6.263879361705717,
+    "mean_beta_contrib_bp": 0.994763501075412,
+    "avg_net_exposure": 0.0
+   },
+   "holdout": {
+    "sharpe_unhedged": 1.5081780710610482,
+    "sharpe_BETA_HEDGED": 1.3510267693330056,
+    "sharpe_raw_neutral_leg": 1.3079766666053079,
+    "d_sharpe_hedged_vs_raw": 0.043050102727697714,
+    "mean_hedged_bp": 6.593439305932619,
+    "mean_beta_contrib_bp": 2.1768000267082925,
+    "avg_net_exposure": 0.20786516853932585
+   }
+  },
+  {
+   "cond": "VIX_TERM",
+   "variant": "LONGONLY_HI",
+   "design": {
+    "sharpe_unhedged": 1.9941293546318755,
+    "sharpe_BETA_HEDGED": 1.8444123285529677,
+    "sharpe_raw_neutral_leg": 1.7432714375785803,
+    "d_sharpe_hedged_vs_raw": 0.10114089097438739,
+    "mean_hedged_bp": 8.148167937781638,
+    "mean_beta_contrib_bp": 3.6573325742192866,
+    "avg_net_exposure": 0.5
+   },
+   "holdout": {
+    "sharpe_unhedged": 1.7933072982399683,
+    "sharpe_BETA_HEDGED": 1.5747223701905224,
+    "sharpe_raw_neutral_leg": 1.3079766666053079,
+    "d_sharpe_hedged_vs_raw": 0.26674570358521454,
+    "mean_hedged_bp": 7.720816822641602,
+    "mean_beta_contrib_bp": 4.316180409890424,
+    "avg_net_exposure": 0.5696629213483146
+   }
+  },
+  {
+   "cond": "VIX_TERM",
+   "variant": "SIDE_TILT",
+   "design": {
+    "sharpe_unhedged": 1.9641523247533899,
+    "sharpe_BETA_HEDGED": 1.8413964927155733,
+    "sharpe_raw_neutral_leg": 1.7432714375785803,
+    "d_sharpe_hedged_vs_raw": 0.09812505513699299,
+    "mean_hedged_bp": 7.664124392868758,
+    "mean_beta_contrib_bp": 1.4780269235108459,
+    "avg_net_exposure": 0.0
+   },
+   "holdout": {
+    "sharpe_unhedged": 1.4259559463968328,
+    "sharpe_BETA_HEDGED": 1.2917418859022234,
+    "sharpe_raw_neutral_leg": 1.3079766666053079,
+    "d_sharpe_hedged_vs_raw": -0.016234780703084484,
+    "mean_hedged_bp": 5.8663716628006695,
+    "mean_beta_contrib_bp": 1.59323573326255,
+    "avg_net_exposure": 0.0696629213483146
+   }
+  },
+  {
+   "cond": "SPY_MOM20",
+   "variant": "LONGONLY_HI",
+   "design": {
+    "sharpe_unhedged": 1.726657601354712,
+    "sharpe_BETA_HEDGED": 1.5548246948211764,
+    "sharpe_raw_neutral_leg": 1.7432714375785803,
+    "d_sharpe_hedged_vs_raw": -0.18844674275740392,
+    "mean_hedged_bp": 6.4064295050971145,
+    "mean_beta_contrib_bp": 2.485911846514512,
+    "avg_net_exposure": 0.5
+   },
+   "holdout": {
+    "sharpe_unhedged": 1.6958692293764142,
+    "sharpe_BETA_HEDGED": 1.6560378495507035,
+    "sharpe_raw_neutral_leg": 1.3079766666053079,
+    "d_sharpe_hedged_vs_raw": 0.3480611829453957,
+    "mean_hedged_bp": 8.364332792183617,
+    "mean_beta_contrib_bp": 2.367181598314629,
+    "avg_net_exposure": 0.5258426966292135
+   }
+  },
+  {
+   "cond": "SPY_MOM20",
+   "variant": "SIDE_TILT",
+   "design": {
+    "sharpe_unhedged": 1.2183698285383124,
+    "sharpe_BETA_HEDGED": 1.4978736908102488,
+    "sharpe_raw_neutral_leg": 1.7432714375785803,
+    "d_sharpe_hedged_vs_raw": -0.24539774676833148,
+    "mean_hedged_bp": 5.922385960184235,
+    "mean_beta_contrib_bp": 0.3066061958060706,
+    "avg_net_exposure": 0.0
+   },
+   "holdout": {
+    "sharpe_unhedged": 1.0394230212442561,
+    "sharpe_BETA_HEDGED": 1.3380804668922606,
+    "sharpe_raw_neutral_leg": 1.3079766666053079,
+    "d_sharpe_hedged_vs_raw": 0.030103800286952698,
+    "mean_hedged_bp": 6.509887632342685,
+    "mean_beta_contrib_bp": -0.35576307831324483,
+    "avg_net_exposure": 0.025842696629213482
+   }
+  },
+  {
+   "cond": "VIX_LEVEL",
+   "variant": "LONGONLY_HI",
+   "design": {
+    "sharpe_unhedged": 1.6579828009755762,
+    "sharpe_BETA_HEDGED": 1.6902763744334397,
+    "sharpe_raw_neutral_leg": 1.7432714375785803,
+    "d_sharpe_hedged_vs_raw": -0.052995063145140575,
+    "mean_hedged_bp": 7.543416414014726,
+    "mean_beta_contrib_bp": 2.625636021571794,
+    "avg_net_exposure": 0.4994172494172494
+   },
+   "holdout": {
+    "sharpe_unhedged": 1.4409317938085295,
+    "sharpe_BETA_HEDGED": 1.4975007804719753,
+    "sharpe_raw_neutral_leg": 1.3079766666053079,
+    "d_sharpe_hedged_vs_raw": 0.18952411386666745,
+    "mean_hedged_bp": 7.330711410462061,
+    "mean_beta_contrib_bp": 2.145858520975522,
+    "avg_net_exposure": 0.46853932584269664
+   }
+  },
+  {
+   "cond": "VIX_LEVEL",
+   "variant": "SIDE_TILT",
+   "design": {
+    "sharpe_unhedged": 1.624731688505976,
+    "sharpe_BETA_HEDGED": 1.7057187756016832,
+    "sharpe_raw_neutral_leg": 1.7432714375785803,
+    "d_sharpe_hedged_vs_raw": -0.037552661976897106,
+    "mean_hedged_bp": 7.0593728691018445,
+    "mean_beta_contrib_bp": 0.4463303708633535,
+    "avg_net_exposure": -0.0005827505827505828
+   },
+   "holdout": {
+    "sharpe_unhedged": 0.9359044821651146,
+    "sharpe_BETA_HEDGED": 1.203202581023284,
+    "sharpe_raw_neutral_leg": 1.3079766666053079,
+    "d_sharpe_hedged_vs_raw": -0.10477408558202383,
+    "mean_hedged_bp": 5.476266250621128,
+    "mean_beta_contrib_bp": -0.5770861556523519,
+    "avg_net_exposure": -0.03146067415730337
+   }
+  }
+ ],
+ "diversification_null": {
+  "leg_holdout_sharpes": {
+   "T3": 1.2416375623110072,
+   "T7D1": 1.696327996432498,
+   "CEF": 1.8147645903831753
+  },
+  "realised_equal_risk_holdout_sharpe": 2.92545992531552,
+  "predicted_from_DESIGN_corr": 2.6087382011308793,
+  "predicted_from_HOLDOUT_corr": 2.9689712188479995,
+  "lift_over_best_single_leg": 1.1106953349323445,
+  "excess_over_diversification_prediction": 0.3167217241846405,
+  "n_weeks_holdout": 188,
+  "n_weeks_design": 71
+ },
+ "correlations": {
+  "design": [
+   [
+    1.0,
+    0.04291129905476683,
+    0.04560418036171746
+   ],
+   [
+    0.04291129905476683,
+    1.0,
+    0.07105355126290443
+   ],
+   [
+    0.04560418036171746,
+    0.07105355126290443,
+    1.0
+   ]
+  ],
+  "holdout": [
+   [
+    1.0,
+    -0.10071382538528409,
+    -0.02180809806912868
+   ],
+   [
+    -0.10071382538528408,
+    1.0,
+    -0.09619720550977894
+   ],
+   [
+    -0.021808098069128676,
+    -0.09619720550977894,
+    1.0
+   ]
+  ],
+  "order": [
+   "T3",
+   "T7D1",
+   "CEF"
+  ]
+ },
+ "t3_halves": {
+  "design": {
+   "long_half_vs_ctrl_bp": 9.512187167961345,
+   "short_half_vs_ctrl_bp": 7.576012988309826,
+   "long_half_t": 5.478240456276838,
+   "short_half_t": 4.745487702012478,
+   "ctrl_mean_bp": 4.3586113014168815
+  },
+  "holdout": {
+   "long_half_vs_ctrl_bp": 11.284440046239256,
+   "short_half_vs_ctrl_bp": 3.8666594068755273,
+   "long_half_t": 3.853243645426635,
+   "short_half_t": 1.35500798230168,
+   "ctrl_mean_bp": 5.445889353255748
+  }
+ },
+ "two_leg_full_history": {
+  "design_sharpe": 1.82790199815295,
+  "holdout_sharpe": 2.211729627050837,
+  "T3_design": 1.5179794361083332,
+  "T3_holdout": 1.2416375623110074,
+  "T7_design": 0.9903490341126914,
+  "T7_holdout": 1.6963279964324978,
+  "design_corr": -0.058472511067560504,
+  "holdout_corr": -0.10071382538528412,
+  "n_weeks_design": 361,
+  "n_weeks_holdout": 188
+ }
+}

@@ -1,0 +1,18 @@
+{
+  "planted_lag1": 3.959281919985977,
+  "planted_sign_flipped_lag1": -5.468023397635934,
+  "random_walk_lag1": -0.4629245699361701,
+  "noise_band_2se_sharpe": 0.709929573971954,
+  "random_walk_lag1_with_5bp_costs": -1.238250554021105,
+  "staleness_lag0": 20.814108675393115,
+  "staleness_lag1": 0.012286994821079145,
+  "staleness_retention_lag1_over_lag0": 0.0005903204894670841,
+  "assertions": {
+    "planted_edge_detected": true,
+    "sign_flip_is_negative": true,
+    "random_walk_inside_noise_band": true,
+    "staleness_is_spectacular_at_lag0": true,
+    "lagkill_gate_fires_on_staleness": true
+  },
+  "all_passed": true
+}

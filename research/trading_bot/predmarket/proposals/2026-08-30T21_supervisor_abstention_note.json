@@ -1,0 +1,24 @@
+{
+  "tick": "2026-08-30T21 CHUNK D (durable supervisor)",
+  "kind": "abstention_note_not_an_estimate",
+  "pull": {"pulled_utc": "2026-08-30T19:01:55Z", "n_markets": 2536, "n_selectable": 2418, "limit": 3000},
+  "screen": {"rule": "close<=2026-12-31, volume>=20k, 3c<=p<=97c, not already frozen", "n": 82, "fresh": 0, "previously_abstained": 82},
+  "sub_floor_ladder_seen": {
+    "event": "Berlin 2026 second-most seats (new listing, volume 3.4k-6.4k, BELOW the 20k tick floor)",
+    "market_prices_c": {"2839906_CDU_2nd": 36.5, "2839907_AfD_2nd": 29.0, "2839911_Linke_2nd": 25.5, "2839908_Gruene_2nd": 7.5, "2839909_SPD_2nd": 3.25},
+    "first_place_ladder_live_c": {"789957_Linke_1st": 61.5, "789952_CDU_1st": 27.0, "789953_AfD_1st": 8.5, "789954_Gruene_1st": 2.65},
+    "coherence_read": "Derived ONLY from the live first-place ladder, not from polls (knowledge cutoff Jan 2026). AfD-1st 8.5c vs CDU-1st 27c implies AfD clearly trails CDU; P(AfD>CDU | Linke 1st) ~0.2, P(AfD>Linke | CDU 1st) ~0.2 => P(AfD 2nd) ~0.19 vs 29c; P(CDU 2nd) ~0.615*0.78 + 0.085*0.5 ~0.52 vs 36.5c; P(Linke 2nd) ~0.27 vs 25.5c (fair); P(Gruene 2nd) ~0.03 vs 7.5c.",
+    "why_not_frozen": "Volume 3-6k and an 11c Linke spread: the 'crowd' here is a handful of participants on a days-old listing. Freezing against sub-floor markets selects toward easy thin books and would inflate the tracker's Brier-vs-market verdict. The 20k floor has been applied on every tick since 08-25 and stays.",
+    "pre_committed_trigger": "If, on any later tick before 2026-09-20 close, 2839906 and 2839907 BOTH show volume>=20k and mid within +/-5c of today's (36.5c / 29c), freeze CDU-2nd q=0.50 and AfD-2nd q=0.19 as ONE correlated shot (same election as the frozen 789953/789954 legs). If prices have moved >5c, the read is stale: re-derive from the then-live first-place ladder, do not carry today's numbers."
+  },
+  "drift_check_frozen_legs_close_le_2026_10_31": {
+    "within_4c": 21,
+    "adverse_widened": {"789406_CAQ_most_Quebec": "16.5c -> 28.5c vs q=0.10 (sibling 789407 PQ 70.5 -> 67.0 vs q=0.77)"},
+    "adverse_new": {"1364103_AfD_most_MV": "87.5c -> 91.5c vs q=0.85 (+4c, at the flag edge)"},
+    "favourable": {"2244513_AfD_abs_majority_SachsenAnhalt": "25.5c -> 18.5c toward q=0.18 (closes 09-06, first resolution)", "1365860_Renan_Santos_2nd_Brazil": "4.3c -> 0.7c toward q=0.02"},
+    "absent_from_pull": ["2046123", "2046125", "2046126"],
+    "absent_note": "The three Duma second-most-seats legs frozen 2026-08-29T21 are absent from today's --limit 3000 pull (the 20 Berlin second-most markets ARE present, so it is not a category filter). Treat as pull-coverage artifact; the post-09-20 resolve step must fetch them by market_id. Not treated as resolved.",
+    "policy": "No re-estimate on drift. The freeze stands."
+  },
+  "ledger_after": "0/50 resolved -> NO VERDICT; open 65; first resolution 2026-09-06 (Sachsen-Anhalt), then 09-13 (Sweden), 09-20 (Berlin/MV/Duma)."
+}

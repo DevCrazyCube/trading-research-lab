@@ -1,0 +1,113 @@
+=== liquidity census (h in 1,2 entries) ===
+notional20>=     0: entries= 43842 mints= 369 trainE= 18623 valE= 25219
+notional20>=    10: entries= 36028 mints= 287 trainE= 15253 valE= 20775
+notional20>=    50: entries= 30032 mints= 253 trainE= 12448 valE= 17584
+notional20>=   100: entries= 25908 mints= 243 trainE= 10291 valE= 15617
+notional20>=   300: entries= 17283 mints= 221 trainE=  6030 valE= 11253
+notional20>=  1000: entries= 10081 mints= 190 trainE=  4065 valE=  6016
+notional20>=  3000: entries=  4957 mints= 132 trainE=  2457 valE=  2500
+FEASIBLE floor 300.0 entries 17283 mints 221
+prims 172
+exits 238 core 16
+
+=== FEASIBLE-universe unconditional control ===
+H=  3 TRAIN mean=   -9.19 trim=  -8.40 med=  -3.82 k=96 n=1595 | VAL mean=  -11.18 trim= -10.15 med=  -6.92 k=125 n=2954
+H=  5 TRAIN mean=  -13.49 trim= -12.31 med=  -7.45 k=96 n=1104 | VAL mean=  -15.08 trim= -13.62 med= -11.09 k=125 n=2037
+H= 10 TRAIN mean=  -19.55 trim= -18.26 med= -12.83 k=96 n=649 | VAL mean=  -20.11 trim= -19.07 med= -17.74 k=125 n=1191
+H= 15 TRAIN mean=  -22.24 trim= -22.50 med= -16.46 k=96 n=488 | VAL mean=  -25.01 trim= -26.22 med= -23.58 k=125 n=868
+H= 30 TRAIN mean=  -33.49 trim= -34.33 med= -30.00 k=96 n=294 | VAL mean=  -36.14 trim= -36.77 med= -34.20 k=125 n=517
+H= 60 TRAIN mean=  -40.74 trim= -41.85 med= -39.48 k=96 n=204 | VAL mean=  -43.65 trim= -45.05 med= -43.51 k=125 n=336
+
+=== STAGE 3a: single prims inside FEASIBLE, all exits ===
+combos 40936 kept 37488 t 35.295947313308716
+train positive-expectancy singles: 183
+rvol20<=0.02           H= 60 tp=2 sl=0 pa=0 mean=  10.59 trim= 10.78 med=  15.34 dtrim= 14.43 k=21 n=66
+rvol20<=0.05           H= 60 tp=3 sl=0 pa=1 mean=   8.49 trim=  7.31 med=   4.79 dtrim= 12.18 k=29 n=96
+rvol20<=0.05           H= 60 tp=2 sl=0 pa=1 mean=   7.23 trim=  6.42 med=   8.75 dtrim= 10.68 k=29 n=96
+rvol20<=0.02           H= 30 tp=-1 sl=0 pa=0 mean=   5.78 trim=  5.80 med=   6.06 dtrim= 12.34 k=21 n=80
+rvol20<=0.02           H= 30 tp=3 sl=0 pa=0 mean=   5.78 trim=  5.80 med=   6.06 dtrim= 10.44 k=21 n=80
+rvol20<=0.02           H= 30 tp=3 sl=0 pa=1 mean=   5.78 trim=  5.80 med=   6.06 dtrim= 10.71 k=21 n=80
+rvol20<=0.05           H= 60 tp=1 sl=0 pa=1 mean=   6.25 trim=  5.64 med=   1.33 dtrim= 10.36 k=29 n=96
+rvol20<=0.02           H= 30 tp=2 sl=0 pa=0 mean=   5.56 trim=  5.56 med=   6.06 dtrim=  9.63 k=21 n=83
+rvol20<=0.02           H= 30 tp=2 sl=0 pa=1 mean=   5.51 trim=  5.50 med=   6.06 dtrim=  9.89 k=21 n=80
+rvol20<=0.05           H= 60 tp=-1 sl=0 pa=0 mean=   6.95 trim=  5.42 med=  -3.21 dtrim= 12.86 k=29 n=96
+rvol20<=0.02           H= 60 tp=2 sl=1 pa=0 mean=   4.77 trim=  5.13 med=  12.04 dtrim= 13.79 k=21 n=65
+rvol20<=0.02           H= 30 tp=0 sl=0 pa=1 mean=   4.67 trim=  5.06 med=   6.95 dtrim=  9.80 k=21 n=80
+rvol20<=0.02           H= 30 tp=1 sl=0 pa=1 mean=   4.82 trim=  4.97 med=   6.06 dtrim=  9.34 k=21 n=80
+rvol20<=0.05           H= 60 tp=2 sl=0 pa=0 mean=   5.22 trim=  4.96 med=   4.79 dtrim=  8.60 k=29 n=120
+age_min<=15            H= 60 tp=3 sl=0 pa=0 mean=   5.95 trim=  4.77 med=  -1.14 dtrim=  9.31 k=89 n=284
+eff20>0.9              H= 30 tp=3 sl=0 pa=0 mean=   5.43 trim=  4.72 med=   5.19 dtrim=  9.35 k=36 n=113
+eff20>0.9              H= 30 tp=3 sl=0 pa=1 mean=   5.68 trim=  4.55 med=   5.19 dtrim=  9.46 k=36 n=107
+rvol20<=0.05           H= 60 tp=0 sl=0 pa=1 mean=   5.03 trim=  4.51 med=  -0.60 dtrim=  9.65 k=29 n=96
+rvol20<=0.05           H= 30 tp=1 sl=0 pa=1 mean=   4.42 trim=  4.49 med=   4.82 dtrim=  8.87 k=29 n=130
+rvol20<=0.05           H= 60 tp=3 sl=0 pa=0 mean=   5.00 trim=  4.49 med=   0.51 dtrim=  9.03 k=29 n=105
+eff20>0.9              H= 30 tp=3 sl=1 pa=0 mean=   4.84 trim=  4.32 med=   5.91 dtrim= 13.86 k=36 n=102
+eff20>0.9              H= 60 tp=2 sl=0 pa=0 mean=   4.08 trim=  4.01 med=   8.75 dtrim=  7.65 k=36 n=105
+eff20>0.9              H= 30 tp=-1 sl=0 pa=0 mean=   5.50 trim=  3.94 med=   3.93 dtrim= 10.48 k=36 n=107
+rvol20<=0.05           H= 30 tp=0 sl=0 pa=1 mean=   3.79 trim=  3.91 med=   5.59 dtrim=  8.66 k=29 n=130
+eff20>0.9              H= 60 tp=3 sl=0 pa=0 mean=   4.65 trim=  3.89 med=  -0.52 dtrim=  8.43 k=36 n=91
+
+=== STAGE 3b: pairs inside FEASIBLE, core exits ===
+pairs 13928
+0 35.3 combos 40952
+3000 59.9 combos 88952
+6000 84.6 combos 136952
+9000 113.7 combos 184952
+12000 149.7 combos 232952
+combos 263784 kept 164562 train positive pairs 910 t 166.3961353302002
+rangerel20>1 & eff20>0.9                       H= 30 tp=3 sl=1 pa=1 mean=  14.48 trim= 10.76 med=  10.52 dtrim= 20.52 k=28 n=76
+rangerel20>1 & eff20>0.9                       H= 15 tp=-1 sl=1 pa=0 mean=  14.16 trim= 10.28 med=   6.49 dtrim= 19.48 k=28 n=116
+eff20>0.9 & clsloc<=0.5                        H= 15 tp=-1 sl=-1 pa=0 mean=  14.12 trim= 10.08 med=   3.36 dtrim= 32.59 k=27 n=69
+volrel20>1 & eff20>0.9                         H= 30 tp=3 sl=1 pa=1 mean=  12.19 trim=  9.71 med=   7.67 dtrim= 19.47 k=27 n=71
+eff20>0.9 & clsloc>0.5                         H= 30 tp=3 sl=1 pa=1 mean=  12.51 trim=  9.37 med=   8.87 dtrim= 19.12 k=34 n=87
+eff20>0.9 & vwapdev20>0.05                     H= 30 tp=3 sl=1 pa=1 mean=  13.68 trim=  9.01 med=  13.37 dtrim= 18.77 k=23 n=60
+volrel20>0.6 & eff20>0.9                       H= 30 tp=3 sl=1 pa=1 mean=  12.40 trim=  8.92 med=   6.95 dtrim= 18.68 k=31 n=79
+rvol20<=0.05 & range_now>0.02                  H= 30 tp=3 sl=1 pa=1 mean=   9.23 trim=  8.73 med=   9.47 dtrim= 18.49 k=25 n=67
+eff20>0.9 & vwapdev20>-0.05                    H= 30 tp=3 sl=1 pa=1 mean=  13.21 trim=  8.70 med=  10.16 dtrim= 18.46 k=24 n=69
+eff20>0.9 & vwapdev20>0                        H= 30 tp=3 sl=1 pa=1 mean=  13.21 trim=  8.70 med=  10.16 dtrim= 18.46 k=24 n=69
+eff20>0.9 & upvolfrac10>0.8                    H= 30 tp=3 sl=1 pa=1 mean=  13.37 trim=  8.67 med=   6.95 dtrim= 18.43 k=23 n=70
+eff20>0.9 & vwapdev20>-0.15                    H= 30 tp=3 sl=1 pa=1 mean=  12.94 trim=  8.60 med=   6.95 dtrim= 18.36 k=25 n=70
+eff20>0.9 & clsloc<=0.5                        H= 15 tp=3 sl=-1 pa=1 mean=   8.64 trim=  8.29 med=   3.36 dtrim= 28.99 k=27 n=69
+eff20>0.9 & clsloc>0.5                         H= 15 tp=-1 sl=1 pa=0 mean=  11.24 trim=  7.91 med=   4.55 dtrim= 17.11 k=34 n=133
+rvol20<=0.05 & clsloc<=0.5                     H= 30 tp=3 sl=1 pa=1 mean=   9.19 trim=  7.78 med=   3.93 dtrim= 17.54 k=21 n=86
+eff20>0.9 & clsloc<=0.9                        H= 30 tp=3 sl=1 pa=1 mean=  11.09 trim=  7.76 med=   6.42 dtrim= 17.52 k=33 n=85
+rvol20<=0.05 & clsloc<=0.75                    H= 30 tp=3 sl=1 pa=1 mean=   8.94 trim=  7.64 med=   4.82 dtrim= 17.40 k=23 n=103
+volrel5>4 & ret1>0                             H=  5 tp=-1 sl=-1 pa=0 mean=   9.82 trim=  7.45 med=   2.60 dtrim= 19.76 k=32 n=61
+volaccel>1 & eff20>0.9                         H= 30 tp=3 sl=1 pa=1 mean=   9.84 trim=  7.13 med=   3.09 dtrim= 16.89 k=27 n=73
+volaccel>1 & age_min<=15                       H= 30 tp=3 sl=1 pa=1 mean=  10.94 trim=  7.00 med=  13.69 dtrim= 16.76 k=61 n=75
+eff20>0.9 & clsloc>0.75                        H= 15 tp=-1 sl=1 pa=0 mean=  10.48 trim=  6.75 med=   3.96 dtrim= 15.95 k=31 n=126
+eff20>0.9 & volshare20>0.05                    H= 30 tp=3 sl=1 pa=1 mean=  11.22 trim=  6.73 med=   3.95 dtrim= 16.49 k=25 n=66
+volrel5>4 & ret1>0                             H=  3 tp=-1 sl=-1 pa=0 mean=   7.93 trim=  6.71 med=   2.31 dtrim= 15.11 k=32 n=61
+volrel5>4 & ret1>-0.05                         H=  5 tp=-1 sl=-1 pa=0 mean=   8.68 trim=  6.65 med=   1.80 dtrim= 18.96 k=38 n=77
+eff20>0.9 & ret5>-0.08                         H= 30 tp=3 sl=1 pa=1 mean=   9.95 trim=  6.64 med=   6.68 dtrim= 16.40 k=34 n=85
+volrel5>1 & eff20>0.9                          H= 30 tp=3 sl=1 pa=1 mean=   8.96 trim=  6.60 med=   6.47 dtrim= 16.36 k=31 n=78
+density20>0.5 & age_min<=15                    H= 30 tp=3 sl=1 pa=1 mean=   8.56 trim=  6.57 med=   8.70 dtrim= 16.32 k=74 n=98
+eff20>0.9 & upvolfrac10>0.65                   H= 30 tp=3 sl=1 pa=1 mean=  11.04 trim=  6.54 med=   5.40 dtrim= 16.30 k=25 n=72
+volaccel>2 & clsloc>0.75                       H=  5 tp=-1 sl=-1 pa=0 mean=   9.74 trim=  6.47 med=  -0.71 dtrim= 18.77 k=29 n=60
+volaccel>2 & clsloc>0.5                        H=  5 tp=-1 sl=-1 pa=0 mean=  14.33 trim=  6.42 med=  -0.96 dtrim= 18.73 k=33 n=82
+
+=== STAGE 3c: triples from top-24 pair-legs, core exits ===
+triple legs ['rvol20<=0.05', 'eff20>0.9', 'age_min<=15', 'rvol20<=0.02', 'volrel5>4', 'density20<=0.95', 'volaccel>2', 'rangerel20>2', 'density20<=0.75', 'clsloc<=0.5', 'rangerel20>1', 'volrel20>1', 'upvolfrac10>0.65', 'vwapdev20>0', 'upvolfrac10>0.8', 'clsloc>0.75', 'clsloc>0.5', 'eff20>0.7', 'vwapdev20>0.05', 'vwapdev20>-0.05', 'ret5>-0.08', 'clsloc>0.25', 'range_now<=0.02', 'ret5>0.08']
+triples 1704
+combos 291048 train positive triples 1092 t 177.41974329948425
+eff20>0.9 & rangerel20>1 & clsloc>0.5                          H= 15 tp=-1 sl=1 pa=0 mean=  20.27 trim= 15.35 k=20 n=104
+eff20>0.9 & rangerel20>1 & ret5>-0.08                          H= 15 tp=-1 sl=1 pa=0 mean=  19.94 trim= 14.98 k=20 n=105
+eff20>0.9 & rangerel20>1 & ret5>-0.08                          H= 30 tp=3 sl=1 pa=1 mean=  19.43 trim= 14.61 k=20 n=65
+eff20>0.9 & rangerel20>1 & clsloc>0.5                          H= 30 tp=3 sl=1 pa=1 mean=  18.67 trim= 13.77 k=20 n=64
+eff20>0.9 & volrel20>1 & upvolfrac10>0.8                       H= 30 tp=3 sl=1 pa=1 mean=  15.98 trim= 12.95 k=20 n=63
+eff20>0.9 & volrel20>1 & clsloc>0.5                            H= 30 tp=3 sl=1 pa=1 mean=  15.83 trim= 12.94 k=21 n=64
+rvol20<=0.05 & clsloc<=0.5 & ret5>-0.08                        H= 30 tp=3 sl=1 pa=1 mean=  12.17 trim= 11.02 k=20 n=82
+eff20>0.9 & clsloc>0.5 & ret5>-0.08                            H= 30 tp=3 sl=1 pa=1 mean=  14.43 trim= 10.84 k=29 n=78
+volaccel>2 & rangerel20>1 & clsloc>0.5                         H=  5 tp=-1 sl=-1 pa=0 mean=  21.79 trim= 10.74 k=24 n=62
+eff20>0.9 & rangerel20>1 & clsloc>0.5                          H= 15 tp=-1 sl=-1 pa=0 mean=  12.66 trim= 10.73 k=20 n=104
+age_min<=15 & clsloc>0.75 & ret5>-0.08                         H= 30 tp=3 sl=1 pa=1 mean=  14.16 trim= 10.70 k=56 n=61
+eff20>0.9 & volrel20>1 & ret5>-0.08                            H= 30 tp=3 sl=1 pa=1 mean=  13.48 trim= 10.65 k=23 n=66
+eff20>0.9 & volrel20>1 & upvolfrac10>0.65                      H= 30 tp=3 sl=1 pa=1 mean=  13.75 trim= 10.65 k=21 n=64
+eff20>0.9 & volrel20>1 & vwapdev20>0                           H= 30 tp=3 sl=1 pa=1 mean=  13.56 trim= 10.60 k=22 n=64
+eff20>0.9 & volrel20>1 & vwapdev20>-0.05                       H= 30 tp=3 sl=1 pa=1 mean=  13.56 trim= 10.60 k=22 n=64
+eff20>0.9 & volrel20>1 & clsloc>0.75                           H= 15 tp=-1 sl=1 pa=0 mean=  15.62 trim= 10.60 k=20 n=97
+eff20>0.9 & vwapdev20>0 & clsloc>0.5                           H= 30 tp=3 sl=1 pa=1 mean=  15.12 trim= 10.58 k=23 n=68
+eff20>0.9 & clsloc>0.5 & vwapdev20>-0.05                       H= 30 tp=3 sl=1 pa=1 mean=  15.12 trim= 10.58 k=23 n=68
+clsloc<=0.5 & eff20>0.7 & ret5>-0.08                           H= 15 tp=-1 sl=-1 pa=0 mean=  14.58 trim= 10.49 k=36 n=97
+eff20>0.9 & vwapdev20>0 & upvolfrac10>0.8                      H= 30 tp=3 sl=1 pa=1 mean=  15.19 trim= 10.43 k=22 n=67
+STAGE3 COMBOS 291048

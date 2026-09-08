@@ -1,0 +1,66 @@
+{
+ "note": "POST HOC, not pre-registered; reported as a sensitivity curve only",
+ "tie_break_sweep": {
+  "0.0000": {
+   "annualised_sharpe": 2.8571171623735436,
+   "annualised_return": 0.8332924504335002,
+   "max_drawdown": 0.11309264771970784,
+   "t_stat": 6.124661052913524,
+   "mean_daily": 0.002503082716014188
+  },
+  "0.1500": {
+   "annualised_sharpe": 1.7940439340697303,
+   "annualised_return": 0.42505208724470034,
+   "max_drawdown": 0.16293870005279099,
+   "t_stat": 3.845803439535694,
+   "mean_daily": 0.001492370291338412
+  },
+  "0.3000": {
+   "annualised_sharpe": 0.5765740465708981,
+   "annualised_return": 0.10156395041694433,
+   "max_drawdown": 0.33894540755874003,
+   "t_stat": 1.2359733278210725,
+   "mean_daily": 0.0004643924328936527
+  },
+  "0.4873": {
+   "annualised_sharpe": -1.0780529021944951,
+   "annualised_return": -0.199490430650333,
+   "max_drawdown": 0.7532075327504719,
+   "t_stat": -2.310968801001437,
+   "mean_daily": -0.0008121242405529056
+  },
+  "0.5423": {
+   "annualised_sharpe": -1.6544839180276532,
+   "annualised_return": -0.27917472101263996,
+   "max_drawdown": 0.8438486591119482,
+   "t_stat": -3.5466355208890508,
+   "mean_daily": -0.0012296250967888422
+  },
+  "0.7500": {
+   "annualised_sharpe": -3.647505188834394,
+   "annualised_return": -0.4766829121281818,
+   "max_drawdown": 0.9546811972053638,
+   "t_stat": -7.818976857006215,
+   "mean_daily": -0.0025076537630727347
+  },
+  "1.0000": {
+   "annualised_sharpe": -6.19272264341366,
+   "annualised_return": -0.618884621007109,
+   "max_drawdown": 0.98830737517,
+   "t_stat": -13.275033899590753,
+   "mean_daily": -0.003774292534322732
+  }
+ },
+ "exit_base": {
+  "trigger_level": {
+   "annualised_sharpe": -1.0780529021944951,
+   "max_drawdown": 0.7532075327504719,
+   "t_stat": -2.310968801001437
+  },
+  "t17_bar_gap": {
+   "annualised_sharpe": -3.092829212800949,
+   "max_drawdown": 0.9511616597303179,
+   "t_stat": -6.6299453422549535
+  }
+ }
+}

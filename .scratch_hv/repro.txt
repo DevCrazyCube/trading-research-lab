@@ -1,0 +1,3 @@
+[h==1] mints=88 raw_signals=2294 trades=722 clusters=82 res=95.8% mint-mean=-4.0311% mint-median=-3.4746% trade-median=-4.0573%
+[h==2] mints=113 raw_signals=2420 trades=724 clusters=102 res=93.5% mint-mean=-5.7151% mint-median=-4.6841% trade-median=-3.8375%
+[h in 1,2] mints=201 raw_signals=4714 trades=1446 clusters=184 res=94.7% mint-mean=-4.9646% mint-median=-3.9993% trade-median=-3.9975%

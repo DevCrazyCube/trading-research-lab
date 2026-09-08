@@ -1,0 +1,151 @@
+{
+  "raw": {
+    "raw_records": 1902,
+    "ticker_shaped": 1782
+  },
+  "by_year": {
+    "2020": 85,
+    "2021": 182,
+    "2022": 171,
+    "2023": 350,
+    "2024": 327,
+    "2025": 368,
+    "2026": 299
+  },
+  "funnel": {
+    "5": {
+      "design": {
+        "events": 267,
+        "rate_positive": 267,
+        "has_bars": 204,
+        "stops_trading": 176,
+        "entry_bar": 176,
+        "entry_auction_close": 162,
+        "price_gt_5": 145,
+        "dollar_vol_gt_1m": 117
+      },
+      "test": {
+        "events": 1515,
+        "rate_positive": 1515,
+        "has_bars": 1363,
+        "stops_trading": 1280,
+        "entry_bar": 1279,
+        "entry_auction_close": 814,
+        "price_gt_5": 680,
+        "dollar_vol_gt_1m": 482
+      }
+    },
+    "21": {
+      "design": {
+        "events": 267,
+        "rate_positive": 267,
+        "has_bars": 204,
+        "stops_trading": 176,
+        "entry_bar": 176,
+        "entry_auction_close": 167,
+        "price_gt_5": 142,
+        "dollar_vol_gt_1m": 117
+      },
+      "test": {
+        "events": 1515,
+        "rate_positive": 1515,
+        "has_bars": 1363,
+        "stops_trading": 1280,
+        "entry_bar": 1279,
+        "entry_auction_close": 813,
+        "price_gt_5": 678,
+        "dollar_vol_gt_1m": 487
+      }
+    },
+    "63": {
+      "design": {
+        "events": 267,
+        "rate_positive": 267,
+        "has_bars": 204,
+        "stops_trading": 176,
+        "entry_bar": 176,
+        "entry_auction_close": 169,
+        "price_gt_5": 140,
+        "dollar_vol_gt_1m": 112
+      },
+      "test": {
+        "events": 1515,
+        "rate_positive": 1515,
+        "has_bars": 1363,
+        "stops_trading": 1280,
+        "entry_bar": 1271,
+        "entry_auction_close": 796,
+        "price_gt_5": 631,
+        "dollar_vol_gt_1m": 443
+      }
+    }
+  },
+  "announcement_probe": {
+    "n": 80,
+    "issuer_name_available": 29,
+    "loose_rule_matched": 42,
+    "strict_rule_matched": 14,
+    "loose_lag_days": [
+      5,
+      7,
+      37,
+      43,
+      45,
+      48,
+      73,
+      84,
+      94,
+      116,
+      131,
+      131,
+      134,
+      142,
+      146,
+      149,
+      152,
+      156,
+      159,
+      167,
+      206,
+      230,
+      258,
+      259,
+      270,
+      276,
+      289,
+      291,
+      294,
+      306,
+      312,
+      317,
+      325,
+      430,
+      449,
+      449,
+      456,
+      477,
+      500,
+      643,
+      690,
+      700
+    ],
+    "strict_lag_days": [
+      36,
+      43,
+      84,
+      113,
+      142,
+      146,
+      148,
+      156,
+      159,
+      245,
+      259,
+      289,
+      317,
+      430
+    ],
+    "note": "LOOSE matches any acquisition-shaped phrase on a headline tagged to the acquiree and is contaminated by the acquiree ACQUIRING someone else; STRICT requires the acquiree in the object position and depends on an issuer name the asset endpoint often does not have for a delisted symbol. Neither is an announcement-date feed."
+  },
+  "survivorship_note": "Every record counted here is a merger that COMPLETED. An announced deal that broke leaves no corporate action of any type, so the break tail is not merely rare in this census -- it is structurally absent."
+}

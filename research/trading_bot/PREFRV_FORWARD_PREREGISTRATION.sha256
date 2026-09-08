@@ -1,0 +1,10 @@
+# PREFRV forward pre-registration pins (task T39). Lines starting with '#' are audit trail, not pins.
+# v1 (2026-08-30 15:00 CEST, T39): doc + power script + power json + the three frozen INVENT_0822 cache files. A1 (runner, T40) to be added by 2026-09-15.
+b01b51ba4a0a8c978fc54a83778e4d83efbaa5a81ec7c2b32d416ee7046070ad  research/trading_bot/PREFRV_FORWARD_PREREGISTRATION.md
+c7401ac09321628c4e0fc3a31e3acef5d54d664d39e29103ee445cda1b078a3b  scripts/trading_bot/prefrv_forward_power.py
+52344db2c924e54df3c63ee2fa6498832a1ad10e6a7f8a3a6521e4f7b3ea74e1  research/trading_bot/PREFRV_FORWARD_POWER.json
+e3f8714d178f7fda5b02ebdc8e1f8a4dc926d006d91b71b30bd7b40460ff10ec  research/data/inv0822_tether/pref_halfspread.json.gz
+e405ffc41ba93f2620cb344a3bd2c1ab0f02186f9aa32571a8d02a6f027ebaca  research/data/inv0822_tether/pref_bars_raw.json.gz
+3638f0824015123d94e41634ee24e07059a0603ab0b77db1825b179af2d7bd18  research/data/inv0822_tether/pref_bars.json.gz
+# A1 (2026-08-31 03:00 CEST, T40): runner pinned after 30/30 synthetic-panel selftest; v1 hashes above kept as audit trail; no threshold or rule constant changed.
+fa98d911a9e71ce5c9cd1ff83e3e0c7aa5dd7e0716a277a807a98e76374a2801  scripts/trading_bot/prefrv_forward.py

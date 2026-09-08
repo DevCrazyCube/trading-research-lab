@@ -1,0 +1,11 @@
+window_label block_time span hours 23.83
+CONFOUND 1  frac np==0 by sixth-of-window (creation time):
+   sixth 0  n=102  frac np==0 = 0.667
+   sixth 1  n=124  frac np==0 = 0.484
+   sixth 2  n= 94  frac np==0 = 0.394
+   sixth 3  n= 50  frac np==0 = 0.400
+   sixth 4  n=  6  frac np==0 = 0.500
+   sixth 5  n= 11  frac np==0 = 0.636
+CONFOUND 2  window_label complete flag among tradeable mints: {1: 387}
+snapshot lines 23122 h12 mints seen 205 with complete=1 190
+tradeable mints with a complete=1 snapshot: 0 of 387

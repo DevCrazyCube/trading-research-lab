@@ -1,0 +1,26 @@
+h30    TRAIN  k=43  TPhit=15 (0.35)  of those: onEntryBar=12 (0.80)  gappedThrough=0
+        bars-from-entry to TP: median=0  p90=17
+        CONSERVATIVE (TP cannot fill on the entry bar): mean=-0.0568 median=-0.7164 k=43
+        CONSERVATIVE unconditional control: mean=-0.1652 k=175  -> edge=+0.1084
+h30    VALID  k=50  TPhit=19 (0.38)  of those: onEntryBar=12 (0.63)  gappedThrough=0
+        bars-from-entry to TP: median=0  p90=11
+        CONSERVATIVE (TP cannot fill on the entry bar): mean=-0.0390 median=-0.6697 k=50
+        CONSERVATIVE unconditional control: mean=-0.1551 k=207  -> edge=+0.1161
+
+h180   TRAIN  k=43  TPhit=16 (0.37)  of those: onEntryBar=12 (0.75)  gappedThrough=0
+        bars-from-entry to TP: median=0.0  p90=23
+        CONSERVATIVE (TP cannot fill on the entry bar): mean=-0.1314 median=-0.8543 k=43
+        CONSERVATIVE unconditional control: mean=-0.2373 k=175  -> edge=+0.1058
+h180   VALID  k=50  TPhit=19 (0.38)  of those: onEntryBar=12 (0.63)  gappedThrough=0
+        bars-from-entry to TP: median=0  p90=11
+        CONSERVATIVE (TP cannot fill on the entry bar): mean=-0.0353 median=-0.7359 k=50
+        CONSERVATIVE unconditional control: mean=-0.2276 k=207  -> edge=+0.1923
+
+h480   TRAIN  k=43  TPhit=16 (0.37)  of those: onEntryBar=12 (0.75)  gappedThrough=0
+        bars-from-entry to TP: median=0.0  p90=23
+        CONSERVATIVE (TP cannot fill on the entry bar): mean=-0.0950 median=-0.7714 k=43
+        CONSERVATIVE unconditional control: mean=-0.2166 k=175  -> edge=+0.1216
+h480   VALID  k=50  TPhit=19 (0.38)  of those: onEntryBar=12 (0.63)  gappedThrough=0
+        bars-from-entry to TP: median=0  p90=11
+        CONSERVATIVE (TP cannot fill on the entry bar): mean=+0.0562 median=-0.3000 k=50
+        CONSERVATIVE unconditional control: mean=-0.1734 k=207  -> edge=+0.2296

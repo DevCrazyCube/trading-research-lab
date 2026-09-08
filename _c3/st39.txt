@@ -1,0 +1,51 @@
+04:59:03
+=== PLACEBO ===
+placebo panel built: FEAT circular-shifted per mint, META reassigned across mints
+bar features: ['trailvol_log', 'rvol10', 'px_vs_start', 'volaccel', 'age_min', 'logpx', 'dd_ath', 'ret1', 'ret30m', 'rng']
+C1 done kept=32640 swept=148428 t=152.4
+C2 done kept=42576 swept=205296 t=223.4
+carried to validate: 9980
+validated: 9765 t=244.7
+
+=== PLACEBO FUNNEL (3-way arm only) ===
+  combos swept                      : 205296
+  validated                         : 9765
+  BH-pass                           : 2205
+  BH-pass AND va>0                  : 409
+  BH-pass AND va>0 AND tr>0         : 109
+  BH AND va>0 AND tr>0 AND both med>0: 11
+   rvol10=q3|px_vs_start=q3|m_v0=1 | t5 TR +0.2017 VA +0.1662 n  128 k 13
+   volaccel=q2|logpx=q1|m_px0=0 | t15 TR +0.1430 VA +0.1014 n  118 k 16
+   volaccel=q2|dd_ath=q2|m_creator_prior=2 | t15h25 TR +0.1148 VA +0.0937 n  274 k 23
+   volaccel=q2|ret1=q3|m_px0=2 | t5 TR +0.0786 VA +0.0805 n  181 k 31
+   volaccel=q2|logpx=q1|m_px0=0 | t15h25 TR +0.1445 VA +0.0697 n  118 k 16
+   volaccel=q2|rng=q3|m_v0=1 | t15 TR +0.0672 VA +0.0900 n  133 k 27
+   volaccel=q2|dd_ath=q1|m_px0=0 | t15 TR +0.0870 VA +0.0640 n  251 k 32
+   trailvol_log=q1|rng=q2|m_v0=2 | t15 TR +0.0624 VA +0.0947 n  128 k 17
+   volaccel=q2|dd_ath=q2|m_creator_prior=2 | t5 TR +0.1221 VA +0.0581 n  506 k 23
+   volaccel=q2|dd_ath=q1|m_px0=0 | t15_pyr TR +0.0638 VA +0.0579 n  251 k 32
+   px_vs_start=q3|volaccel=q2|m_cohort10=1 | t5 TR +0.2264 VA +0.0570 n  413 k 24
+   volaccel=q3|logpx=q3|m_cohort10=2 | t30sl30 TR +0.0560 VA +0.0706 n   60 k 20
+t=245.1
+=== NULLBOOT ===
+candidates stress-tested: 60
+  dd_ath=q3|ret30m=q2|m_hour=2                         t5           VA +0.1036  matched-random-entry null: mean -0.0789 p95 -0.0247 p99.9 +0.0320 -> percentile 1.0000 (k=19 n=482)
+  dd_ath=q1|ret1=q1|m_hour=3                           t15          VA +0.1011  matched-random-entry null: mean -0.0073 p95 +0.1069 p99.9 +0.2063 -> percentile 0.9383 (k=25 n=165)
+  ret1=q2|m_creator_prior=2|m_cohort10=1               t30tp50      VA +0.1550  matched-random-entry null: mean -0.0733 p95 +0.0053 p99.9 +0.0676 -> percentile 1.0000 (k=14 n=64)
+  age_min=q0|m_px0=1|m_v0=2                            t30sl30      VA +0.0771  matched-random-entry null: mean -0.0002 p95 +0.0282 p99.9 +0.0556 -> percentile 0.9997 (k=29 n=117)
+  trailvol_log=q1|dd_ath=q0|m_cohort10=0               t5           VA +0.1271  matched-random-entry null: mean -0.1403 p95 -0.0817 p99.9 -0.0221 -> percentile 1.0000 (k=41 n=160)
+  volaccel=q2|dd_ath=q0|m_ttg=1                        t30sl30      VA +0.1086  matched-random-entry null: mean -0.1215 p95 -0.0764 p99.9 +0.0037 -> percentile 1.0000 (k=32 n=120)
+  volaccel=q3|age_min=q0|m_v0=2                        t30sl30      VA +0.0718  matched-random-entry null: mean -0.0554 p95 -0.0210 p99.9 +0.0216 -> percentile 1.0000 (k=63 n=177)
+  logpx=q3|cumvol_log=q1                               t30sl30      VA +0.0689  matched-random-entry null: mean -0.0417 p95 -0.0071 p99.9 +0.0224 -> percentile 1.0000 (k=48 n=124)
+  ret1=q2|ret30m=q2|m_cohort10=1                       t30tp50      VA +0.1137  matched-random-entry null: mean -0.1307 p95 -0.0722 p99.9 -0.0290 -> percentile 1.0000 (k=32 n=81)
+  volaccel=q3|ret1=q2|m_cohort10=1                     t30tp50      VA +0.0887  matched-random-entry null: mean -0.1305 p95 -0.0776 p99.9 -0.0282 -> percentile 1.0000 (k=32 n=83)
+  volaccel=q3|logpx=q3|m_creator_prior=0               t30sl30      VA +0.0637  matched-random-entry null: mean -0.0385 p95 -0.0048 p99.9 +0.0229 -> percentile 1.0000 (k=45 n=135)
+  rvol10=q0|ret1=q2|m_cohort10=1                       t30tp50_avg  VA +0.0686  matched-random-entry null: mean -0.0730 p95 -0.0374 p99.9 -0.0048 -> percentile 1.0000 (k=32 n=65)
+  ret1=q2|ret30m=q2|m_cohort10=1                       t30tp50_avg  VA +0.0755  matched-random-entry null: mean -0.0631 p95 -0.0293 p99.9 +0.0045 -> percentile 1.0000 (k=32 n=81)
+  cumvol_log=q1|m_ttg=0                                t30sl30      VA +0.0599  matched-random-entry null: mean -0.0648 p95 -0.0243 p99.9 +0.0112 -> percentile 1.0000 (k=66 n=392)
+  rvol10=q0|ret1=q2|m_cohort10=1                       t30tp50      VA +0.0727  matched-random-entry null: mean -0.1501 p95 -0.0866 p99.9 -0.0405 -> percentile 1.0000 (k=32 n=65)
+  ret30m=q0|cumvol_log=q1                              t15_pyr      VA +0.0576  matched-random-entry null: mean -0.0524 p95 -0.0126 p99.9 +0.0236 -> percentile 1.0000 (k=48 n=212)
+  age_min=q0|m_creator_prior=0|m_v0=2                  t30sl30      VA +0.0575  matched-random-entry null: mean -0.0324 p95 -0.0096 p99.9 +0.0117 -> percentile 1.0000 (k=43 n=161)
+  logpx=q0|ret1=q2|m_cohort10=1                        t30tp50      VA +0.0560  matched-random-entry null: mean -0.1403 p95 -0.0759 p99.9 -0.0246 -> percentile 1.0000 (k=27 n=66)
+  volaccel=q3|ret1=q2|m_cohort10=1                     t30tp50_avg  VA +0.0611  matched-random-entry null: mean -0.0629 p95 -0.0312 p99.9 -0.0010 -> percentile 1.0000 (k=32 n=83)
+  ret15m=q0|cumvol_log=q1                              t15_pyr      VA +0.0537  matched-random-entry null: mean -0.0561 p95 -0.0125 p99.9 +0.0319 -> percentile 1.0000 (k=48 n=253)

@@ -63,6 +63,7 @@ LEDGERS = PKG_DIR / "ledgers"
 POP_PATH = PKG_DIR / "population.json"
 STATE_PATH = PKG_DIR / "evo_state.json"
 GENLOG = PKG_DIR / "generation_log.jsonl"
+RETIREMENT_PATH = PKG_DIR / "EVO_V2_RETIREMENT.json"
 
 
 def _now_iso() -> str:
@@ -158,7 +159,15 @@ def stress_pass_R(gid: str) -> list:
 
 
 # ---- Population + state persistence ---------------------------------------------------------------
+def _verify_frozen() -> None:
+    """Refuse to run the evo search unless the EVO_V2 pre-registration is intact AND the engine constants
+    match the frozen block (the V1 divergence guard). Lazy import to avoid a circular dependency."""
+    from .frozen import load_frozen_evo   # frozen.py imports engine lazily; keep this call deferred too
+    load_frozen_evo()
+
+
 def load_pop() -> dict:
+    _verify_frozen()
     if not POP_PATH.exists():
         raise Refused("no population.json -- run `seed` first")
     return json.loads(POP_PATH.read_text())
@@ -169,6 +178,7 @@ def save_pop(pop: dict) -> None:
 
 
 def load_state() -> dict:
+    _verify_frozen()
     if not STATE_PATH.exists():
         raise Refused("no evo_state.json -- run `seed` first")
     return json.loads(STATE_PATH.read_text())
@@ -180,6 +190,7 @@ def save_state(state: dict) -> None:
 
 def seed(size: int = POP_SIZE, *, seed_int: int = 20260825) -> dict:
     """Create the initial population and state. Idempotent-refusing: will not clobber an existing run."""
+    _verify_frozen()   # refuse to seed unless the EVO_V2 freeze + engine constants verify
     if POP_PATH.exists() or STATE_PATH.exists():
         raise Refused("a population already exists; refusing to overwrite a running forward search. "
                       "Delete population.json/evo_state.json/ledgers to start a fresh pre-registration.")
@@ -442,11 +453,24 @@ def scan_once(pop: dict, state: dict, *, pages: int = 1) -> dict:
     ordered = sorted(uniq.items(), key=lambda kv: kv[0])   # variant-independent deterministic order
 
     opened_total, control_total = 0, 0
+    subminute_data_refusals = 0
+    scan_decision_epoch = time.time()
+    tick_bars: dict[str | None, list | None] = {}
     for gid in pop["active"]:
         spec = G.build_spec(pop["genomes"][gid])
         room = max(0, MAX_OPEN_PER_GENOME - len(open_positions(gid)))
         n_new = n_ctl = 0
         for addr, coin in ordered:
+            bars = None
+            if spec.get("use_subminute"):
+                mint = coin.get("base_token")
+                if mint not in tick_bars:
+                    tick_bars[mint] = evo_paper._load_tick_bars(mint)
+                bars = tick_bars[mint]
+                ready, _tick_diag = evo_paper.tick_entry_data_ready(bars, scan_decision_epoch)
+                if not ready:
+                    subminute_data_refusals += 1
+                    continue
             res = screen_mod.screen_coin(coin, spec)
             if res["verdict"] == "PASS":
                 if n_new >= min(room, MAX_NEW_PER_SCAN):
@@ -455,9 +479,7 @@ def scan_once(pop: dict, state: dict, *, pages: int = 1) -> dict:
                 # tick feed does not show price up >= entry_surge_bps over the window with buy-dominated
                 # flow and enough trades, there is NO entry (owner's "only buy what is pumping" rule).
                 if spec.get("use_momentum_entry"):
-                    import time as _t
-                    bars = evo_paper._load_tick_bars(coin.get("base_token"))
-                    ok, _diag = evo_paper.momentum_entry_qualifies(bars, _t.time(), spec)
+                    ok, _diag = evo_paper.momentum_entry_qualifies(bars, scan_decision_epoch, spec)
                     if not ok:
                         continue
                 try:
@@ -479,7 +501,8 @@ def scan_once(pop: dict, state: dict, *, pages: int = 1) -> dict:
     state["seen_pool_addresses"] = sorted(seen)[-8000:]
     return {"coins_seen": len(uniq), "gt_new_pools_ok": gt_new_pools_ok,
             "pumpportal_discovered": pp_n,
-            "pass_entries_opened": opened_total, "control_entries_opened": control_total}
+            "pass_entries_opened": opened_total, "control_entries_opened": control_total,
+            "subminute_data_refusals": subminute_data_refusals}
 
 
 def track_once(pop: dict, state: dict) -> dict:
@@ -625,6 +648,16 @@ def evolve_generation(*, cycles: int = 1, pages: int = 1, live: bool = True) -> 
     """Accumulate forward trades (optional live cycles), then run one selection+breed generation if
     enough genomes are mature. Always returns the honest generation report with the K-corrected bar."""
     pop, state = load_pop(), load_state()
+    if RETIREMENT_PATH.is_file():
+        try:
+            retirement = json.loads(RETIREMENT_PATH.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            raise Refused(f"EVO V2 retirement record is unreadable: {exc}") from exc
+        if retirement.get("instrument_id") != "MEMEBOT_EVO_V2" or not retirement.get("retired_utc"):
+            raise Refused("EVO V2 retirement record is malformed; refusing rather than resuming")
+        return {"retired": True, "retirement": retirement,
+                "note": "MEMEBOT_EVO_V2 is immutable and retired; no track, scan, selection, or entries ran.",
+                "report": _last_report(pop, state)}
     if state.get("halted"):
         return {"halted": True, "halt_reason": state.get("halt_reason"),
                 "note": "search HALTED; no further generations. See report below.",
@@ -735,6 +768,11 @@ def _build_report(pop, state, k, bar, reports, mature, best, gate, selection, ac
             verdict = (f"best stress-fitness genome {best['genome_id']} looks positive only after missing "
                        f"exits are excluded (reported t={best['t']:.2f}, stress t={best['stress_t']:.2f}, "
                        f"bar={bar:.2f}). It FAILS the executable/full-loss gate; no real edge.")
+        elif best["t"] is None:
+            verdict = (f"best stress-fitness genome {best['genome_id']} has "
+                       f"{best['resolved_terminal_pass']} terminal PASS outcomes but zero executable "
+                       "priced exits. Reported t is unavailable and full-loss stress mean is "
+                       f"{best['stress_mean_R']:.4f}R. No edge; the data path failed closed.")
         else:
             bt = best["t"]
             verdict = (f"best genome {best['genome_id']}: forward t={bt:.2f} vs K-corrected noise bar "
@@ -810,4 +848,8 @@ def _last_report(pop: dict, state: dict) -> dict:
 def status() -> dict:
     """Read-only snapshot of the population and the current K-corrected bar."""
     pop, state = load_pop(), load_state()
-    return _last_report(pop, state)
+    report = _last_report(pop, state)
+    if RETIREMENT_PATH.is_file():
+        report["retired"] = True
+        report["retirement"] = json.loads(RETIREMENT_PATH.read_text())
+    return report

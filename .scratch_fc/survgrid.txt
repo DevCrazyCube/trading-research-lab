@@ -1,0 +1,13 @@
+launches 2672 trades 216323
+h1 1362 h2 1310
+mint filters 43 [('ALL', 2672), ('np==0', 1087), ('np>=1', 1585), ('np>=2', 1390), ('np>=3', 1266), ('np>=4', 1172)]
+grid = 43 x 6 x 9 = 2322
+  age a<5 done 0.2s
+  age a<20 done 2.5s
+  age a<60 done 5.3s
+  age a20_120 done 8.3s
+  age a>=60 done 10.2s
+  age any done 12.1s
+combos swept 2322 TRAIN-positive 0 elapsed 14.9
+--- VALIDATE (h==2) for train-positives ---
+SURVIVORS (validate mean>0, beats control, bootLO>0): 0

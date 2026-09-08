@@ -1,0 +1,10 @@
+{
+  "instrument_id": "AFTERSHOCK_V2",
+  "retired_utc": "2026-08-28T00:11:11Z",
+  "status": "RETIRED_BURNED_NON_CAUSAL",
+  "ledgers_preserved": true,
+  "restart_allowed": false,
+  "reason": "Legacy entry and exit booked historical boundary states unavailable at action time. The arm-C +2.3% pot-growth headline is not valid return evidence.",
+  "successor": "AFTERSHOCK_PAC_V1",
+  "successor_inherits": "payable-absorption mechanism hypothesis only; no outcomes, thresholds, state, or ledger rows"
+}

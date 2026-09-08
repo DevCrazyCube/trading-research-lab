@@ -1,12 +1,12 @@
 {
   "composition_published": false,
   "cutoff_slot_inclusive": 438854169,
-  "endpoint": "https://solana-mainnet.core.chainstack.com",
-  "last_poll_at": 1786614619,
-  "last_tip_slot": 438995413,
-  "manifest_sha256": "b901e2ade981123def610fa245c07829dfc202ae9afe6fbef6806d4b8cb7a107",
+  "endpoint": "https://api.mainnet-beta.solana.com",
+  "last_poll_at": 1787965399,
+  "last_tip_slot": 442476853,
+  "manifest_sha256": "33da3a7ea16fa20ade57a8ebbeba61e4ce310adf53c7a0406ce08d5327c5e99f",
   "poll_seconds": 60,
-  "polls": 1,
+  "polls": 4,
   "preregistration_canonical_sha256": "459e1d16089a1329ed1e2fcdbe26d0a9b76f3ee905a35d38719daa5968dfebd0",
   "quarantine": null,
   "results_unlocked": false,
@@ -23,13 +23,22 @@
     "simulator_replay_gate"
   ],
   "schema_version": "1.0.0",
-  "stage_heartbeat_at": 1786784679,
-  "stage_in_flight": "enumerate_creates",
-  "stage_output_bytes": 264586,
-  "stage_pid": 2160272,
-  "stage_progress_at": 1786784679,
+  "stage_heartbeat_at": 1787968255,
+  "stage_in_flight": null,
+  "stage_output_bytes": 0,
+  "stage_pid": null,
+  "stage_progress_at": 1787967745,
   "stages_completed": [
-    "program_boundary"
+    "program_boundary",
+    "enumerate_creates",
+    "build_cohort",
+    "subsample_cohort",
+    "signature_inventory",
+    "transaction_bodies",
+    "decode_and_reserves",
+    "reserve_coverage_gate",
+    "failure_coverage_gate",
+    "simulator_replay_gate"
   ],
-  "state": "running_stage"
+  "state": "all_stages_complete"
 }

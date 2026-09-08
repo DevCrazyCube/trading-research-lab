@@ -1,0 +1,143 @@
+{
+  "round": "INVENT_D0821",
+  "date": "2026-08-21",
+  "total_formulas_tested": 202,
+  "themes": 4,
+  "themes_declared_noise": 3,
+  "promotions": 0,
+  "basket_changes": 0,
+  "pooled_bar": {
+    "headline_t": 3.258,
+    "headline_convention": "analytic sqrt(2 ln N), N=202",
+    "sign_agnostic_t": 3.465,
+    "sign_agnostic_convention": "sqrt(2 ln 2N), 2N=404",
+    "programme_cumulative_t": 3.734,
+    "programme_cumulative_convention": "sqrt(2 ln N), N=1065 (863 through round 3 + 202)",
+    "sharpe_equivalents": {
+      "xsfactor_design_5.60y": 1.38,
+      "volterm_design_8.88y": 1.09,
+      "seasonality_etf_design_10.66y": 1.0,
+      "seasonality_stock_design_6.00y": 1.33,
+      "crypto_spot_design_4.00y": 1.63
+    }
+  },
+  "round_maximum": {
+    "largest_correctly_signed_design_t": 3.08,
+    "formula": "P02_PENSION_MEQ_MAG",
+    "largest_absolute_design_t_anywhere": 3.21,
+    "largest_absolute_note": "tax-loss-harvesting family, WRONG SIGN vs pre-registered mechanism, not a candidate",
+    "verdict": "round maximum (3.08) is BELOW the expected maximum under the pooled null (3.258)"
+  },
+  "themes_detail": [
+    {
+      "name": "xs_equity_factor_fresh_structures",
+      "n": 84,
+      "within_theme_bar_sharpe": 1.26,
+      "within_theme_bar_t": 2.98,
+      "best_design_net_t": 0.78,
+      "best_design_gross_t": 2.32,
+      "best_name": "BETA_INSTAB (h=1)",
+      "held_out_best_net_sharpe": 0.28,
+      "theme_is_noise": true,
+      "survivors": 0,
+      "key_finding": "measured cost wall: factor-neutral reversal gross alpha fully persisted out of sample at h=5 (0.89->0.86, break-even 5.36->5.13bp) and is still net -0.29 because break-even sits exactly at the 5bp modelled half spread. 216 cells now tested on this panel across two independent searches, zero survivors."
+    },
+    {
+      "name": "vol_term_structure_directional",
+      "n": 43,
+      "within_theme_bar_sharpe": 0.947,
+      "within_theme_bar_convention": "circular-shift bootstrap E[max]; analytic sqrt(2 ln 43) = 0.92",
+      "best_design_sharpe": 0.882,
+      "best_design_t": 2.63,
+      "best_name": "H21_A4_INVERT_HOLD",
+      "best_bootstrap_p": 0.63,
+      "held_out_sharpe": 0.27,
+      "theme_is_noise": true,
+      "survivors": 0,
+      "key_finding": "buy-and-hold SPY (design 0.94 / holdout 0.82) beats all 43 in BOTH windows; best alpha-t vs SPY +1.11 against a 2.74 bar. Data-blocked, not idea-blocked: needs real VX futures settlements or intraday curve sampling, neither free from this host."
+    },
+    {
+      "name": "seasonality_with_mechanism",
+      "n": 41,
+      "within_theme_bar_sharpe": 0.909,
+      "within_theme_bar_t": 2.97,
+      "best_design_gross_t": 3.08,
+      "best_name": "P02_PENSION_MEQ_MAG",
+      "held_out_net_sharpe": 0.37,
+      "held_out_t": 1.33,
+      "theme_is_noise": false,
+      "survivors_within_theme": 1,
+      "survivors_after_pooling": 0,
+      "key_finding": "5 of 6 mechanisms are noise; theme loses 91% of design Sharpe out of sample (mean net +0.205 -> +0.018), 22/41 signs survive (coin flip), corr(design,holdout)=0.335. The one candidate clears its panel-local joint null (p=0.026) but not the pooled bar."
+    },
+    {
+      "name": "crypto_spot_cross_sectional",
+      "n": 34,
+      "within_theme_bar_sharpe": 1.452,
+      "within_theme_bar_convention": "analytic sqrt(2 ln 68); sign-flip block bootstrap E[max]=1.148, p95=1.574",
+      "best_design_net_sharpe": 1.43,
+      "best_design_t": 2.86,
+      "best_name": "D5_XS_CLOSELOC",
+      "held_out_net_sharpe": 0.03,
+      "theme_is_noise": true,
+      "survivors": 0,
+      "key_finding": "free-data cost wall replicates on a second asset class: strongest-gross fast formulas break even at 1-3 bp/side against a 10 bp fee; 26/34 keep gross sign across both windows. Not fixable by buying data. Cross-quote and cross-venue daily dispersion closed for good."
+    }
+  ],
+  "basket_proposals": [
+    {
+      "name": "P02_PENSION_MEQ_MAG",
+      "theme": "seasonality_with_mechanism",
+      "desc": "Balanced-mandate month-end rebalance fade. Minus the month-to-date divergence between equity and bond sleeves (z-scored on a causal 750-session trailing scale, clipped 2.5 SD), expressed as a vol-scaled SPY-vs-IEF spread held ONLY over the last 4 sessions of the month. ~0.46x gross notional, active 19% of sessions, two trades/month.",
+      "design_gross_sharpe": 0.94,
+      "design_t": 3.08,
+      "panel_joint_null_p": 0.026,
+      "pooled_bar_t": 3.258,
+      "beats_pooled_bar": false,
+      "held_out": "2014-01..2026-08, 12.6 untouched years: net Sharpe +0.37 (t 1.33), +0.29 at 2x measured cost, gross +0.46. Positive net of realistic cost, individually insignificant.",
+      "held_out_net_sharpe": 0.37,
+      "held_out_t": 1.33,
+      "diversifying": true,
+      "diversification_note": "Directional equity-vs-duration overlay on a monthly cadence driven by mandated asset-allocation flow. Every BASKET1 leg (T3 overnight reversal, ETF-sibling RV, dual-class RV, T7 ex-open, T12 CEF discount, XS_GLSR_Z) is a relative-value or short-horizon reversal book. Different instruments (SPY/IEF), different holding clock (4 sessions/month, 19% duty cycle), different driver. Structural overlap near zero.",
+      "recommend_freeze": false,
+      "disposition": "forward-log only, ZERO size, against BASKET_FORWARD_LOG.jsonl; revisit at 60 rebalance events (~5 years). Design and held-out are both spent.",
+      "guard": "IF ever sized (not this round): SPY-vs-IEF only, <=0.5x gross, last 4 sessions of month only, z clipped at 2.5 SD. Hard kill if the SPY-only leg's trailing 12-month Sharpe goes negative, or if the design sign flips over 12 consecutive rebalances, or if realised cost exceeds 2x the modelled 1.0/2.0 bp per side."
+    }
+  ],
+  "rejected_composites": [
+    {
+      "name": "crypto low-turnover equal-risk composite",
+      "numbers": "design 1.19, held-out 1.37 (t 2.60), 13 members, zero fitted parameters, mean pairwise corr 0.077",
+      "why_rejected": "design-fitted signs give E[design SR]=1.04 under a pure null; one-day-lag placebo takes held-out 1.37->0.85; market beta flips +0.89 -> -1.73; worst design day -15.1 sigma fails the controlled-tail requirement."
+    },
+    {
+      "name": "vol-term holdout maxima (G4_UNINVERSION_10D, G2_FRESH_INVERSION_5D)",
+      "numbers": "G4 design 0.36 -> holdout 1.42 (t +3.65), design bootstrap p 1.00, design alpha-t vs SPY -2.08",
+      "why_rejected": "the two best held-out numbers are two of the weakest design results; promoting either is selecting on the holdout. Design->holdout rank corr +0.35 in that theme is beta, not skill."
+    }
+  ],
+  "method_corrections": [
+    "Test on GROSS, size on NET: cost is sign-invariant, so best achievable net is sign*gross - cost. Ranking on net t produced four false hits with large negative net t.",
+    "Never freeze a sign before charging cost, or a shocked cost assumption can RAISE net Sharpe. Assert net_shock <= net <= gross in every sweep self-test.",
+    "Raw dividend-unadjusted price panels manufacture alpha via the ex-date drop (one formula printed a fake t=-13.97; true value -0.19). Neutralise ex-date returns on the inv3 stock panel.",
+    "Per-signal coverage belongs in the self-test: a conditional up/down-day beta silently had 0.000 coverage from a 250d window with default minobs=W//2.",
+    "Exclude zero-notional days rather than scoring them as zero-return days, or long group warm-ups deflate t-stats."
+  ],
+  "recommendations": [
+    "Promote nothing. Basket unchanged: T3, ETF-sibling RV, dual-class RV, T7 ex-open, T12 CEF, XS_GLSR_Z (decaying, logging-only).",
+    "Log P02_PENSION_MEQ_MAG forward at zero size; revisit at 60 rebalance events.",
+    "Stop re-mining the daily US equity cross-section on free data; the binding constraint is execution cost, not signal discovery.",
+    "Stop re-mining the daily crypto spot cross-section; buying data does not move a wall where the effect is already measured and smaller than the fee.",
+    "Vol term structure is the only theme worth re-opening, and only with real VX futures settlements or intraday curve sampling."
+  ],
+  "files": {
+    "master_md": "/home/anont/meme/research/trading_bot/INVENT_D0821_MASTER.md",
+    "master_json": "/home/anont/meme/research/trading_bot/INVENT_D0821_MASTER.json",
+    "themes": [
+      "/home/anont/meme/research/trading_bot/INVENT_D0821_xsfactor.md",
+      "/home/anont/meme/research/trading_bot/INVENT_D0821_volterm.md",
+      "/home/anont/meme/research/trading_bot/INVENT_D0821_seasonality_mechanism.md",
+      "/home/anont/meme/research/trading_bot/INVENT_D0821_crypto_spot_xs.md"
+    ]
+  }
+}

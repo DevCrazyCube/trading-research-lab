@@ -1,0 +1,19 @@
+h12 mints loaded 382 bars 46136
+mints with metadata 382
+features+triggers built  t=83s
+n conditions 52
+signals precomputed t=84s
+signal counts: {'all': 45754, 'r5<=-50': 1791, 'r5<=-30': 2885, 'r5>=+50': 957, 'r5>=+100': 439, 'r15<=-60': 1936}
+=== ROBUST RE-GATE (mint-equal; mean is outlier-dominated here) ===
+random-bar 15m VALIDATE: top 5 per-mint averages: [('6h7Y2aw9', -30.0), ('zWsbpwY3', -30.0), ('WiB7xUq9', -30.0), ('DqLouq9H', -30.0), ('FZMsepiF', -30.0)]
+  mean=-30.0% median=-30.0% trimmed10=-30.0% k=207
+random-bar 15m TRAIN   : mean=-30.0% median=-30.0% trimmed10=-30.0% k=175
+controls built t=95s
+combos (excl all): 14280
+R1 train trimmed > control trimmed          : 8306
+R2 + validate trimmed > control trimmed     : 6482
+R3 + validate trimmed > 0                   : 79
+R4 + train trimmed > 0                      : 78
+R5 + validate bootstrap lo(trimmed) > 0     : 0
+--- robust survivors (0) ---
+done t=197s

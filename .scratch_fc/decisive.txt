@@ -1,0 +1,113 @@
+T0..T1 hours 23.59
+creation-time third x np==0 counts:
+   third=0 np0=False  n=96
+   third=0 np0=True  n=125
+   third=1 np0=False  n=89
+   third=1 np0=True  n=60
+   third=2 np0=False  n=7
+   third=2 np0=True  n=10
+
+STRUCTURE H120|TP-|SL-|TR0.30|PC BARFILTER age<20
+   np==0            (val)     mean=+0.1323 med=-0.0771 k= 77 n= 315 clus= 77 bootLO=+0.0381
+   np>=1            (val)     mean=-0.0810 med=-0.0893 k= 95 n= 694 clus= 63 bootLO=-0.0926
+   ALL              (val)     mean=+0.0145 med=-0.0852 k=172 n=1009 clus=139 bootLO=-0.0300
+   third0 ALL       (val)     mean=+0.0095 med=-0.0851 k= 95 n= 569 clus= 81 bootLO=-0.0418
+   third1+2 ALL     (val)     mean=+0.0207 med=-0.0853 k= 77 n= 440 clus= 64 bootLO=-0.0506
+   third0 np==0     (val)     mean=+0.1246 med=-0.0710 k= 44 n= 200 clus= 44 bootLO=+0.0222
+   third0 np>=1     (val)     mean=-0.0898 med=-0.0906 k= 51 n= 369 clus= 37 bootLO=-0.1008
+   third1+2 np==0   (val)     mean=+0.1426 med=-0.0853 k= 33 n= 115 clus= 33 bootLO=-0.0191
+   third1+2 np>=1   (val)     mean=-0.0708 med=-0.0848 k= 44 n= 325 clus= 32 bootLO=-0.0917
+   third1+2 np==0   (all h12) mean=+0.1533 med=-0.0700 k= 59 n= 223 clus= 59 bootLO=+0.0358
+   third1+2 np>=1   (all h12) mean=-0.0768 med=-0.0868 k= 86 n= 653 clus= 48 bootLO=-0.0893
+   third0 ALL       (all h12) mean=-0.0053 med=-0.0855 k=175 n= 990 clus=138 bootLO=-0.0403
+   third1+2 ALL     (all h12) mean=+0.0169 med=-0.0855 k=145 n= 876 clus=106 bootLO=-0.0391
+
+STRUCTURE H120|TP-|SL-|TR0.30|PA BARFILTER age<20
+   np==0            (val)     mean=+0.1312 med=-0.1094 k= 77 n= 315 clus= 77 bootLO=+0.0268
+   np>=1            (val)     mean=-0.1388 med=-0.1528 k= 95 n= 694 clus= 63 bootLO=-0.1597
+   ALL              (val)     mean=-0.0179 med=-0.1384 k=172 n=1009 clus=139 bootLO=-0.0678
+   third0 ALL       (val)     mean=-0.0269 med=-0.1445 k= 95 n= 569 clus= 81 bootLO=-0.0865
+   third1+2 ALL     (val)     mean=-0.0068 med=-0.1319 k= 77 n= 440 clus= 64 bootLO=-0.0891
+   third0 np==0     (val)     mean=+0.1224 med=-0.1081 k= 44 n= 200 clus= 44 bootLO=-0.0011
+   third0 np>=1     (val)     mean=-0.1557 med=-0.1597 k= 51 n= 369 clus= 37 bootLO=-0.1730
+   third1+2 np==0   (val)     mean=+0.1430 med=-0.1160 k= 33 n= 115 clus= 33 bootLO=-0.0339
+   third1+2 np>=1   (val)     mean=-0.1191 med=-0.1351 k= 44 n= 325 clus= 32 bootLO=-0.1588
+   third1+2 np==0   (all h12) mean=+0.1589 med=-0.0863 k= 59 n= 223 clus= 59 bootLO=+0.0204
+   third1+2 np>=1   (all h12) mean=-0.1288 med=-0.1446 k= 86 n= 653 clus= 48 bootLO=-0.1534
+   third0 ALL       (all h12) mean=-0.0422 med=-0.1445 k=175 n= 990 clus=138 bootLO=-0.0851
+   third1+2 ALL     (all h12) mean=-0.0117 med=-0.1361 k=145 n= 876 clus=106 bootLO=-0.0723
+
+STRUCTURE H60|TP-|SL-|TR0.30|PC BARFILTER age<20
+   np==0            (val)     mean=+0.0841 med=-0.0722 k= 77 n= 317 clus= 77 bootLO=+0.0142
+   np>=1            (val)     mean=-0.0784 med=-0.0880 k= 95 n= 697 clus= 63 bootLO=-0.0890
+   ALL              (val)     mean=-0.0057 med=-0.0829 k=172 n=1014 clus=139 bootLO=-0.0381
+   third0 ALL       (val)     mean=-0.0030 med=-0.0828 k= 95 n= 573 clus= 81 bootLO=-0.0448
+   third1+2 ALL     (val)     mean=-0.0090 med=-0.0830 k= 77 n= 441 clus= 64 bootLO=-0.0543
+   third0 np==0     (val)     mean=+0.0957 med=-0.0655 k= 44 n= 202 clus= 44 bootLO=+0.0174
+   third0 np>=1     (val)     mean=-0.0881 med=-0.0902 k= 51 n= 371 clus= 37 bootLO=-0.0993
+   third1+2 np==0   (val)     mean=+0.0686 med=-0.0855 k= 33 n= 115 clus= 33 bootLO=-0.0286
+   third1+2 np>=1   (val)     mean=-0.0671 med=-0.0780 k= 44 n= 326 clus= 32 bootLO=-0.0892
+   third1+2 np==0   (all h12) mean=+0.0824 med=-0.0700 k= 59 n= 223 clus= 59 bootLO=+0.0097
+   third1+2 np>=1   (all h12) mean=-0.0711 med=-0.0855 k= 86 n= 655 clus= 48 bootLO=-0.0843
+   third0 ALL       (all h12) mean=-0.0179 med=-0.0834 k=175 n= 997 clus=138 bootLO=-0.0465
+   third1+2 ALL     (all h12) mean=-0.0086 med=-0.0834 k=145 n= 878 clus=106 bootLO=-0.0433
+
+STRUCTURE H120|TP0.80|SL0.25|TR-|PA BARFILTER age<20
+   np==0            (val)     mean=+0.0999 med=-0.0608 k= 77 n= 279 clus= 77 bootLO=+0.0203
+   np>=1            (val)     mean=-0.0559 med=-0.1642 k= 95 n= 619 clus= 63 bootLO=-0.0977
+   ALL              (val)     mean=+0.0139 med=-0.1464 k=172 n= 898 clus=139 bootLO=-0.0298
+   third0 ALL       (val)     mean=+0.0041 med=-0.1201 k= 95 n= 508 clus= 81 bootLO=-0.0497
+   third1+2 ALL     (val)     mean=+0.0259 med=-0.1721 k= 77 n= 390 clus= 64 bootLO=-0.0337
+   third0 np==0     (val)     mean=+0.1171 med=-0.0402 k= 44 n= 171 clus= 44 bootLO=+0.0216
+   third0 np>=1     (val)     mean=-0.0934 med=-0.1730 k= 51 n= 337 clus= 37 bootLO=-0.1418
+   third1+2 np==0   (val)     mean=+0.0770 med=-0.1755 k= 33 n= 108 clus= 33 bootLO=-0.0336
+   third1+2 np>=1   (val)     mean=-0.0124 med=-0.1496 k= 44 n= 282 clus= 32 bootLO=-0.0752
+   third1+2 np==0   (all h12) mean=+0.0982 med=-0.1753 k= 59 n= 203 clus= 59 bootLO=+0.0068
+   third1+2 np>=1   (all h12) mean=-0.0373 med=-0.1011 k= 86 n= 569 clus= 48 bootLO=-0.0826
+   third0 ALL       (all h12) mean=-0.0161 med=-0.1547 k=175 n= 877 clus=138 bootLO=-0.0583
+   third1+2 ALL     (all h12) mean=+0.0178 med=-0.1350 k=145 n= 772 clus=106 bootLO=-0.0269
+
+STRUCTURE H120|TP-|SL-|TR0.30|PC BARFILTER age<60
+   np==0            (val)     mean=+0.1082 med=-0.0779 k= 84 n= 512 clus= 84 bootLO=+0.0182
+   np>=1            (val)     mean=-0.0932 med=-0.0945 k= 96 n=1017 clus= 64 bootLO=-0.1012
+   ALL              (val)     mean=+0.0008 med=-0.0862 k=180 n=1529 clus=146 bootLO=-0.0417
+   third0 ALL       (val)     mean=-0.0024 med=-0.0859 k=100 n= 834 clus= 85 bootLO=-0.0529
+   third1+2 ALL     (val)     mean=+0.0047 med=-0.0864 k= 80 n= 695 clus= 67 bootLO=-0.0621
+   third0 np==0     (val)     mean=+0.0959 med=-0.0695 k= 49 n= 308 clus= 49 bootLO=+0.0082
+   third0 np>=1     (val)     mean=-0.0967 med=-0.1020 k= 51 n= 526 clus= 37 bootLO=-0.1085
+   third1+2 np==0   (val)     mean=+0.1255 med=-0.0853 k= 35 n= 204 clus= 35 bootLO=-0.0257
+   third1+2 np>=1   (val)     mean=-0.0892 med=-0.0870 k= 45 n= 491 clus= 33 bootLO=-0.1001
+   third1+2 np==0   (all h12) mean=+0.1355 med=-0.0774 k= 62 n= 395 clus= 62 bootLO=+0.0356
+   third1+2 np>=1   (all h12) mean=-0.0915 med=-0.0891 k= 90 n=1061 clus= 51 bootLO=-0.0971
+   third0 ALL       (all h12) mean=-0.0173 med=-0.0922 k=185 n=1469 clus=144 bootLO=-0.0525
+   third1+2 ALL     (all h12) mean=+0.0011 med=-0.0854 k=152 n=1456 clus=112 bootLO=-0.0496
+
+STRUCTURE H120|TP0.80|SL0.25|TR-|PC BARFILTER age<20
+   np==0            (val)     mean=+0.0808 med=-0.0658 k= 77 n= 279 clus= 77 bootLO=+0.0201
+   np>=1            (val)     mean=-0.0417 med=-0.0917 k= 95 n= 619 clus= 63 bootLO=-0.0657
+   ALL              (val)     mean=+0.0131 med=-0.0860 k=172 n= 898 clus=139 bootLO=-0.0150
+   third0 ALL       (val)     mean=+0.0106 med=-0.0701 k= 95 n= 508 clus= 81 bootLO=-0.0281
+   third1+2 ALL     (val)     mean=+0.0163 med=-0.0965 k= 77 n= 390 clus= 64 bootLO=-0.0269
+   third0 np==0     (val)     mean=+0.0973 med=-0.0318 k= 44 n= 171 clus= 44 bootLO=+0.0211
+   third0 np>=1     (val)     mean=-0.0642 med=-0.0960 k= 51 n= 337 clus= 37 bootLO=-0.0886
+   third1+2 np==0   (val)     mean=+0.0589 med=-0.1141 k= 33 n= 108 clus= 33 bootLO=-0.0398
+   third1+2 np>=1   (val)     mean=-0.0157 med=-0.0898 k= 44 n= 282 clus= 32 bootLO=-0.0554
+   third1+2 np==0   (all h12) mean=+0.0738 med=-0.0965 k= 59 n= 203 clus= 59 bootLO=-0.0005
+   third1+2 np>=1   (all h12) mean=-0.0308 med=-0.0615 k= 86 n= 569 clus= 48 bootLO=-0.0525
+   third0 ALL       (all h12) mean=-0.0017 med=-0.0847 k=175 n= 877 clus=138 bootLO=-0.0314
+   third1+2 ALL     (all h12) mean=+0.0117 med=-0.0773 k=145 n= 772 clus=106 bootLO=-0.0205
+
+STRUCTURE H240|TP-|SL-|TR0.30|PC BARFILTER age<20
+   np==0            (val)     mean=+0.1222 med=-0.0780 k= 77 n= 313 clus= 77 bootLO=+0.0197
+   np>=1            (val)     mean=-0.0823 med=-0.0902 k= 95 n= 693 clus= 63 bootLO=-0.0938
+   ALL              (val)     mean=+0.0092 med=-0.0859 k=172 n=1006 clus=139 bootLO=-0.0347
+   third0 ALL       (val)     mean=+0.0093 med=-0.0855 k= 95 n= 568 clus= 81 bootLO=-0.0450
+   third1+2 ALL     (val)     mean=+0.0092 med=-0.0865 k= 77 n= 438 clus= 64 bootLO=-0.0636
+   third0 np==0     (val)     mean=+0.1253 med=-0.0765 k= 44 n= 199 clus= 44 bootLO=+0.0202
+   third0 np>=1     (val)     mean=-0.0908 med=-0.0908 k= 51 n= 369 clus= 37 bootLO=-0.1023
+   third1+2 np==0   (val)     mean=+0.1180 med=-0.0863 k= 33 n= 114 clus= 33 bootLO=-0.0359
+   third1+2 np>=1   (val)     mean=-0.0725 med=-0.0868 k= 44 n= 324 clus= 32 bootLO=-0.0948
+   third1+2 np==0   (all h12) mean=+0.1381 med=-0.0700 k= 59 n= 222 clus= 59 bootLO=+0.0256
+   third1+2 np>=1   (all h12) mean=-0.0785 med=-0.0887 k= 86 n= 652 clus= 48 bootLO=-0.0925
+   third0 ALL       (all h12) mean=-0.0062 med=-0.0883 k=175 n= 988 clus=138 bootLO=-0.0463
+   third1+2 ALL     (all h12) mean=+0.0096 med=-0.0855 k=145 n= 874 clus=106 bootLO=-0.0441

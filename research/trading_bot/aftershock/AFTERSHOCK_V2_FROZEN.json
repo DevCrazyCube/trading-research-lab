@@ -1,0 +1,111 @@
+{
+    "instrument_id": "AFTERSHOCK_V2",
+    "family": "payable-absorption rug survivor (net reserve replacement)",
+    "frozen_utc": "2026-08-27T16:00:00.000000+00:00",
+    "preregistration": "research/trading_bot/aftershock/AFTERSHOCK_V2_PREREGISTRATION.md",
+    "preregistration_sha256": "d8c57a090d9f0af51028bebae0b8535e5435d2f7de51f2f2b10406f8ee314012",
+    "note": "NEW instrument. V1 (AFTERSHOCK) stays frozen and untouched. No threshold here is fitted to V1's 429 burned trades. PAPER: no orders, no wallet, no real SOL, no on-chain writes, free data only.",
+    "bankroll_usd": 100.0,
+    "sol_usd_reference_only": true,
+    "_forward_test_sizing_note": "The three forward arms size at the V1-comparable fraction below (bankroll_sol * position_fraction) so the MECHANISM is tested before the money is scaled; the staged $10+$10 / 20%-of-$100 model in `sizing` is the intended LIVE sizing, gated on V2 proving positive first.",
+    "bankroll_sol": 5.0,
+    "position_fraction": 0.02,
+    "toll_per_side": 0.0125,
+    "stop_frac": 0.5,
+    "target_frac": 0.5,
+    "sizing": {
+        "model": "staged, capacity-capped; aggressive owner-mode, NOT yet evidence-backed",
+        "settled_equity_fraction": 0.20,
+        "max_position_usd": 50.0,
+        "probe_usd": 10.0,
+        "add_usd": 10.0,
+        "max_per_mint_usd_at_100": 20.0,
+        "min_viable_usd": 10.0,
+        "max_concurrent_positions_at_100": 1,
+        "compounding_basis": "settled_equity_only",
+        "second_tranche_requires": [
+            "external reserve rose further after probe",
+            "no cluster wallet resumed selling",
+            "full max_per_mint sell-quote still clears the capacity gate",
+            "our own probe excluded from all flow/confirmation math"
+        ],
+        "forward_test_sizing_note": "The $20 live stand turns on ONLY after V2 is independently proven positive. Until then the three forward arms run at V1-comparable fractional sizing (position_fraction below) so the MECHANISM is tested before the money is scaled. On the V1 series, 20% sizing would have driven the pot to ~0.027x.",
+        "position_fraction": 0.02
+    },
+    "detector": {
+        "q_sol": 0.1,
+        "cluster_window_slots": 60,
+        "early_buyer_top_k": 3,
+        "material_sell_sol_floor": 0.5,
+        "material_sell_frac_of_R": 0.25,
+        "absorption_window_slots": 60,
+        "absorb_mult": 1.0,
+        "capacity_tail_slots": 10,
+        "net_replacement_ratio_min": 1.0,
+        "capacity_recover_frac": 1.0,
+        "absorb_min_new_wallets": 3,
+        "k60_max": 0.95,
+        "coverage_entry_floor": 10.0,
+        "entry_veto_no_exit_condition_true": true,
+        "stabilization_window_slots": 15,
+        "stabilization_requires_positive_net_reserve_flow": true,
+        "exclude_own_buy_from_flow": true
+    },
+    "exit": {
+        "trail_on": "executable_full_position_quote",
+        "trail_frac": 0.12,
+        "coverage_exit_buffer": 6.0,
+        "cluster_resume_frac_of_R": 0.25,
+        "stale_or_conflicting_quote_exits": true,
+        "max_hold_slots": 3000,
+        "single_full_exit_only": true,
+        "partial_exits": false,
+        "flow_flip_sell_frac": 0.65,
+        "flow_window_slots": 60,
+        "flow_min_window_sol": 0.1,
+        "flow_min_trades": 3
+    },
+    "arms": [
+        {"arm": "A", "label": "net_reserve_entry", "entry": "v2_gates_1_8", "veto_strict": false, "exit": "v1_existing"},
+        {"arm": "B", "label": "net_reserve_entry+veto", "entry": "v2_gates_1_8", "veto_strict": true, "exit": "v1_existing"},
+        {"arm": "C", "label": "net_reserve_entry+veto+quote_trail", "entry": "v2_gates_1_8", "veto_strict": true, "exit": "v2_capacity_and_quote_trail"}
+    ],
+    "kill_switch": {
+        "N_min": 30,
+        "rule": "HALT if, after n>=N_min resolved PASS trades, upper95(log-growth g) < 0 OR dump_rate >= dump_rate_max"
+    },
+    "dump_rate_max": 0.13,
+    "ecr_fee_schedule": {
+        "fee_bps": 95,
+        "creator_fee_bps": 30,
+        "cashback_fee_bps": 0,
+        "buyback_fee_bps": 5000
+    },
+    "ecr_stress_policy": {
+        "base_fee_lamports": 5000,
+        "priority_fee_lamports": 100000,
+        "priority_fee_from_measured_landing": true,
+        "tip_lamports": 0,
+        "ata_rent_lamports": 2039280,
+        "ata_close_reclaims_rent": true,
+        "failed_attempts": 1,
+        "no_order_if_all_in_breakeven_infeasible": true
+    },
+    "decision_stream": {
+        "signal_source": "pumpportal_tape",
+        "final_decision_source": "canonical_onchain_events_real_slots_instruction_ordering",
+        "no_synthetic_slot_time": true
+    },
+    "promotion_criteria": [
+        "positive log-growth after ALL costs (curve fees, ATA rent, real-size slippage, failed-landing fees)",
+        "positive per UTC day AND per creator-cluster",
+        "not carried by a single >=7x winner (drop-the-max robust)",
+        "unexitable rate well under the B20B baseline",
+        "survives a fresh hash-frozen confirmation period never seen"
+    ],
+    "benchmarks": {
+        "score": "pot growth G = sum ln(1 + position_fraction * stressed_net_return); dump-rate is a hard kill-gate, not the score",
+        "null": "control = a material cluster sell fired but NET replacement was NOT confirmed; scored identically -> G_control",
+        "honest_prior": "~0 or negative; V1 solved rugs but not fees/churn; V2 must prove net-replacement + veto close the gap"
+    }
+}

@@ -1,0 +1,76 @@
+{
+ "formula": "SESS_OPEXDAY_INTRADAY (short SPY open->close on the monthly OPEX session)",
+ "lookahead_probe": {
+  "true intraday": {
+   "design": 0.526,
+   "holdout": 0.416
+  },
+  "shifted +1 session": {
+   "design": 0.025,
+   "holdout": -0.192
+  },
+  "shifted -1 session": {
+   "design": -0.036,
+   "holdout": -0.35
+  }
+ },
+ "reading": "Not a clean decay and not a clean constant: the effect is strong in four consecutive design blocks 1993-2012 (+11 to +17bp per OPEX session), FLAT in 2013-2016 (+1.1bp), strong again in the 2017-2021 holdout block (+19.1bp), and FLAT again in 2022-2026 (+1.5bp). It is intermittent, and it is dormant in the most recent 4.5 years. That pattern is compatible with a real but regime-dependent expiry effect AND with an unstable statistic; 116 held-out observations cannot separate the two.",
+ "per_block": [
+  {
+   "block": "1993-1997",
+   "window": "design",
+   "n": 59,
+   "mean_bp": 11.5,
+   "sum_pct": 6.8,
+   "sharpe": 0.709
+  },
+  {
+   "block": "1998-2002",
+   "window": "design",
+   "n": 60,
+   "mean_bp": 15.0,
+   "sum_pct": 8.99,
+   "sharpe": 0.501
+  },
+  {
+   "block": "2003-2007",
+   "window": "design",
+   "n": 60,
+   "mean_bp": 17.4,
+   "sum_pct": 10.46,
+   "sharpe": 0.903
+  },
+  {
+   "block": "2008-2012",
+   "window": "design",
+   "n": 60,
+   "mean_bp": 13.2,
+   "sum_pct": 7.94,
+   "sharpe": 0.468
+  },
+  {
+   "block": "2013-2016",
+   "window": "design",
+   "n": 48,
+   "mean_bp": 1.1,
+   "sum_pct": 0.53,
+   "sharpe": 0.07
+  },
+  {
+   "block": "2017-2021",
+   "window": "holdout",
+   "n": 60,
+   "mean_bp": 19.1,
+   "sum_pct": 11.49,
+   "sharpe": 0.694
+  },
+  {
+   "block": "2022-2026",
+   "window": "holdout",
+   "n": 56,
+   "mean_bp": 1.5,
+   "sum_pct": 0.86,
+   "sharpe": 0.066
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+import json, collections, statistics as st
+OUT=open('/home/anont/meme/.scratch_att2/summ.txt','w')
+def P(*a): print(*a,file=OUT)
+n=json.load(open('/home/anont/meme/.scratch_att2/ogrid5_near.json'))
+P('both-halves-positive cells:',len(n))
+P('by condition:',collections.Counter(r['cond'] for r in n).most_common())
+P('by H:',collections.Counter(r['H'] for r in n).most_common())
+P('by pos:',collections.Counter(r['pos'] for r in n).most_common())
+P('validate trimmed range: %.2f%% .. %.2f%%'%(min(r['vtrim'] for r in n)*100,max(r['vtrim'] for r in n)*100))
+P('best validate bootstrap lo: %.2f%%'%(max(r['vlo'] for r in n)*100))
+P('distinct (cond,H,pos) families:',len(set((r['cond'],r['H'],r['pos']) for r in n)))
+OUT.close()

@@ -1,0 +1,66 @@
+
+##### A  rvol20<=0.05 | H=60 TP+0.20 half-out SL-0.15
+   exit: H=60m  TP=0.2  SL=0.15  scaleout=half at TP
+  TRAIN(h=1) mean=  6.25 [CI 0.49,12.20]  median=  1.33 [CI 0.40,11.67]  trim5=  5.64  fpos=69%  k=29  n=96  res=99.0%
+             C2 random-entry same-structure mean=  1.74 -> EDGE= 4.51pp (pct 97%) | C2 median=  0.22 -> edge= 1.11pp
+             TR_MEAN=0.062503
+  VALID(h=2) mean=  4.76 [CI 0.54,9.04]  median=  1.33 [CI 0.96,4.85]  trim5=  4.14  fpos=69%  k=48  n=234  res=98.1%
+             C2 random-entry same-structure mean=  0.41 -> EDGE= 4.35pp (pct 99%) | C2 median= -0.45 -> edge= 1.78pp
+             robustness: drop-50%=4.66 drop-100%=4.43 toll2.5%=3.32 toll2.5%+drop100%=2.99
+             capacity notional20: median $656/min  p10 $99/min
+             VA_MEAN=0.047552 VA_MED=0.013315 K=48 N=234
+
+##### B  rvol20<=0.05 | H=60 TP+0.20 half-out SL-0.12
+   exit: H=60m  TP=0.2  SL=0.12  scaleout=half at TP
+  TRAIN(h=1) mean=  7.43 [CI 1.91,13.13]  median=  2.81 [CI 1.13,12.26]  trim5=  6.80  fpos=72%  k=29  n=103  res=99.0%
+             C2 random-entry same-structure mean=  3.05 -> EDGE= 4.38pp (pct 98%) | C2 median=  1.23 -> edge= 1.58pp
+             TR_MEAN=0.074302
+  VALID(h=2) mean=  6.06 [CI 2.04,10.23]  median=  2.81 [CI 2.81,5.77]  trim5=  5.40  fpos=71%  k=48  n=259  res=98.3%
+             C2 random-entry same-structure mean=  1.63 -> EDGE= 4.43pp (pct 99%) | C2 median= -0.44 -> edge= 3.25pp
+             robustness: drop-50%=5.97 drop-100%=5.76 toll2.5%=4.60 toll2.5%+drop100%=4.30
+             capacity notional20: median $620/min  p10 $188/min
+             VA_MEAN=0.060582 VA_MED=0.028144 K=48 N=259
+
+##### C  rvol20<=0.05 | H=45 TP+0.20 half-out SL-0.12
+   exit: H=45m  TP=0.2  SL=0.12  scaleout=half at TP
+  TRAIN(h=1) mean=  7.26 [CI 2.08,12.51]  median=  6.12 [CI 1.45,11.61]  trim5=  6.69  fpos=69%  k=29  n=115  res=100.0%
+             C2 random-entry same-structure mean=  3.47 -> EDGE= 3.79pp (pct 99%) | C2 median=  2.16 -> edge= 3.95pp
+             TR_MEAN=0.072563
+  VALID(h=2) mean=  5.82 [CI 2.05,9.54]  median=  2.81 [CI 2.81,7.31]  trim5=  5.31  fpos=69%  k=48  n=299  res=98.5%
+             C2 random-entry same-structure mean=  1.64 -> EDGE= 4.18pp (pct 99%) | C2 median= -0.33 -> edge= 3.15pp
+             robustness: drop-50%=5.75 drop-100%=5.57 toll2.5%=4.37 toll2.5%+drop100%=4.12
+             capacity notional20: median $620/min  p10 $218/min
+             VA_MEAN=0.058194 VA_MED=0.028144 K=48 N=299
+
+##### D  rvol20<=0.05 | H=60 no TP  SL-0.15 (pure stop)
+   exit: H=60m  TP=none  SL=0.15  scaleout=full
+  TRAIN(h=1) mean=  6.95 [CI -1.80,16.29]  median= -3.21 [CI -15.97,15.58]  trim5=  5.42  fpos=48%  k=29  n=96  res=99.0%
+             C2 random-entry same-structure mean=  2.15 -> EDGE= 4.80pp (pct 92%) | C2 median= -9.71 -> edge= 6.50pp
+             TR_MEAN=0.069527
+  VALID(h=2) mean=  3.98 [CI -2.53,10.92]  median= -3.01 [CI -15.97,5.77]  trim5=  1.98  fpos=42%  k=48  n=234  res=97.9%
+             C2 random-entry same-structure mean=  0.35 -> EDGE= 3.63pp (pct 89%) | C2 median=-10.65 -> edge= 7.64pp
+             robustness: drop-50%=3.88 drop-100%=3.62 toll2.5%=2.55 toll2.5%+drop100%=2.19
+             capacity notional20: median $656/min  p10 $99/min
+             VA_MEAN=0.039796 VA_MED=-0.030086 K=48 N=234
+
+##### E  rvol20<=0.02 & eff20>0.5 | H=10 TP+0.10 SL-0.15
+   exit: H=10m  TP=0.1  SL=0.15  scaleout=full
+  TRAIN(h=1) mean=  1.64 [CI -0.94,3.73]  median=  2.98 [CI -0.12,5.05]  trim5=  2.29  fpos=70%  k=20  n=188  res=100.0%
+             C2 random-entry same-structure mean= -0.03 -> EDGE= 1.66pp (pct 93%) | C2 median=  2.58 -> edge= 0.40pp
+             TR_MEAN=0.016358
+  VALID(h=2) mean=  2.00 [CI 0.81,3.17]  median=  2.12 [CI 0.51,4.74]  trim5=  2.05  fpos=76%  k=33  n=302  res=100.0%
+             C2 random-entry same-structure mean=  0.87 -> EDGE= 1.13pp (pct 89%) | C2 median=  1.96 -> edge= 0.16pp
+             robustness: drop-50%=2.00 drop-100%=2.00 toll2.5%=0.60 toll2.5%+drop100%=0.60
+             capacity notional20: median $1551/min  p10 $386/min
+             VA_MEAN=0.019999 VA_MED=0.021152 K=33 N=302
+
+##### F  rvol20<=0.02 & volaccel<=1 | H=10 TP+0.10 SL-0.15
+   exit: H=10m  TP=0.1  SL=0.15  scaleout=full
+  TRAIN(h=1) mean=  1.56 [CI -1.15,3.82]  median=  2.84 [CI 1.22,4.92]  trim5=  2.11  fpos=76%  k=21  n=178  res=100.0%
+             C2 random-entry same-structure mean= -0.08 -> EDGE= 1.64pp (pct 93%) | C2 median=  2.41 -> edge= 0.43pp
+             TR_MEAN=0.015608
+  VALID(h=2) mean=  2.14 [CI 0.67,3.52]  median=  1.90 [CI 0.07,5.47]  trim5=  2.16  fpos=69%  k=35  n=359  res=99.4%
+             C2 random-entry same-structure mean=  0.84 -> EDGE= 1.29pp (pct 91%) | C2 median=  1.88 -> edge= 0.03pp
+             robustness: drop-50%=2.09 drop-100%=1.98 toll2.5%=0.73 toll2.5%+drop100%=0.57
+             capacity notional20: median $1312/min  p10 $367/min
+             VA_MEAN=0.021365 VA_MED=0.019045 K=35 N=359

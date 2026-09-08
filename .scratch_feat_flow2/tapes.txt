@@ -1,0 +1,15 @@
+rows fetched 330739
+rows kept (h in 1,2) 214100
+mints kept 2371
+h split mints Counter({1: 1209, 2: 1162})
+labels kept 22561
+tapes with label 2314
+grad kept 438
+grad overlap with tapes 77
+global bt range 1785168470 1785861735 span_days 8.023900462962963
+trades/mint  n=2371 mean=90.3 med=8 p90=148 max=11830
+mints with >=20 trades 827
+mints with >=50 trades 511
+sample mint 14A3yyU68JEaBdEST3eNK17v6a1RGSiSshZ1QwEopump first vs 33000000000.0 first vt 975454545454546.0 price0 3.3830382106244154e-05 pricemax 0.00012397867907122513 ret -0.17355371798898023
+vs monotone-with-buy check: corr(sign(dvs), isb) = 0.9999999999999998
+saved 25962211

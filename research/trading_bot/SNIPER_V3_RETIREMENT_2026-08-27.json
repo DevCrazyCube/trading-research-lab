@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "instrument": "Pump sniper V3",
+  "decision_utc": "2026-08-27T14:59:38.113955+00:00",
+  "status": "RETIRED_NO_NEW_PAPER_ENTRIES_DRAIN_EXISTING_OPEN",
+  "decision": "All three arms exceeded the frozen N=100 minimum and failed the preregistered positive full-loss-stress mean/equity gate. New paper entries are disabled; already-open positions resolve normally through the event-sourced book.",
+  "preregistration": {
+    "path": "research/trading_bot/SNIPER_V3_PREREGISTRATION.md",
+    "sha256": "ea486d591f426bfaec0c8d12a2d7e3b2a711405659b78d9e441582d76191e5e9"
+  },
+  "point_in_time_diagnostics": {
+    "path": "research/trading_bot/MEMECOIN_LOSS_DIAGNOSTICS.json",
+    "generated_utc": "2026-08-27T15:02:03.178714+00:00",
+    "sha256": "7c02cc8045e4733cc89866669668e20b8bbfb1a59b18c36419db10ff4e06fcde"
+  },
+  "arms": {
+    "v3_core_bal": {
+      "entries": 479,
+      "terminal": 479,
+      "open_drain": 0,
+      "stress_mean_R": -0.548364,
+      "stress_t_stat": -16.047621,
+      "paper_equity_usd": 130.346782,
+      "gate_pass": false
+    },
+    "v3_core_confirm": {
+      "entries": 651,
+      "terminal": 650,
+      "open_drain": 1,
+      "stress_mean_R": -0.381602,
+      "stress_t_stat": -13.042631,
+      "paper_equity_usd": 128.251788,
+      "gate_pass": false
+    },
+    "v3_core_ratchet": {
+      "entries": 510,
+      "terminal": 510,
+      "open_drain": 0,
+      "stress_mean_R": -0.517651,
+      "stress_t_stat": -16.118494,
+      "paper_equity_usd": 130.808582,
+      "gate_pass": false
+    }
+  },
+  "runtime_verification": {
+    "runtime_initialized_utc": "2026-08-27T14:59:38.113955+00:00",
+    "restart_invalidations": 0,
+    "entry_halted": [
+      "v3_core_bal",
+      "v3_core_confirm",
+      "v3_core_ratchet"
+    ]
+  },
+  "safety": "PAPER ONLY. No wallet, signer, order, transfer or on-chain write was added or enabled."
+}

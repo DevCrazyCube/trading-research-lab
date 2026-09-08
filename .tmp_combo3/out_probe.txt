@@ -1,0 +1,15 @@
+cnt (672, 66688)
+status [('nobars:200', 20), ('nobars:429', 28), ('nopool:429', 30), ('ok', 594)]
+ts range (1785168720, 1785332820, 1785172740, 1785337260)
+splitmints {0: 207, 1: 178, 2: 209} bars {0: 20542, 1: 19682, 2: 26464}
+nbars quantiles [2, 9, 12, 26, 109, 301, 1000]
+ngaps 45759 gap60 frac 0.7855503835311086
+gaps top [(60, 35946), (120, 2575), (180, 1296), (240, 755), (300, 581), (360, 387), (420, 310), (480, 276), (540, 233), (600, 186)]
+zero-vol bars 0 of 46146
+snap lines 25786 mints 343 ts range 1788448363 1788488473
+ohlcv mints 594 overlap with snaps 0
+wl cols ['bonding_curve', 'mint', 'creator', 'create_slot', 'block_time', 'complete', 'account_missing', 'status', 'creator_onchain', 'virtual_token_reserves', 'real_token_reserves', 'data_len', 'fetched_at_unix']
+wl cnt (33866, 1075)
+ohlcv in wl 594
+wl blocktime range (1785168436, 1785254238)
+numpy 2.4.6

@@ -1,0 +1,14 @@
+04:37:23
+A done 04:34:48
+surface done 04:35:09
+B done 04:37:13
+--B tail--
+  B rng=q0|age_min=q3                      t60          tr -0.0735 med -0.0584 base -0.2472 edge +0.1737 n   285 k  61 p 0.0000
+  B age_min=q2|trailvol_log=q1             t5           tr -0.0177 med -0.0114 base -0.1380 edge +0.1204 n   461 k  22 p 0.0000
+  B rvol10=q1|px_vs_start=q0               t30_avg      tr -0.0252 med -0.0235 base -0.1197 edge +0.0945 n   369 k  39 p 0.0000
+  B rng=q1|age_min=q2                      t60          tr -0.0502 med -0.0355 base -0.2472 edge +0.1970 n   159 k  53 p 0.0000
+features with ANY 2-way signal: ['ret1', 'ret5m', 'ret15m', 'ret30m', 'dd_ath', 'runup', 'rng', 'body', 'upwick', 'rvol10', 'volratio', 'volaccel', 'density5', 'age_min', 'px_vs_start', 'logpx', 'cumvol_log', 'trailvol_log']
+t=123.9
+--C tail--
+3-way bar features: ['ret1', 'ret5m', 'ret15m', 'ret30m', 'dd_ath', 'runup', 'rng', 'body', 'upwick']
+  C1 ret1 x ret5m kept=1273 swept=3444 t=5.7

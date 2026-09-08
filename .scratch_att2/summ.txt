@@ -1,0 +1,7 @@
+both-halves-positive cells: 126
+by condition: [('burst', 117), ('volz10_cg', 9)]
+by H: [(1, 92), (2, 16), (3, 13), (5, 1), (30, 1), (120, 1), (60, 1), (240, 1)]
+by pos: [('dip_add', 39), ('brk_add', 29), ('flat', 29), ('half_out', 29)]
+validate trimmed range: 0.02% .. 4.42%
+best validate bootstrap lo: -3.20%
+distinct (cond,H,pos) families: 18

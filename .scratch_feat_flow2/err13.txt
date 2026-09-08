@@ -1,0 +1,4 @@
+/home/anont/meme/.scratch_feat_flow2/s13_kill.py:61: RuntimeWarning: invalid value encountered in divide
+  g0=np.where(frozen,0.0,px/pe-1.0)
+/home/anont/meme/.scratch_feat_flow2/s13_kill.py:64: RuntimeWarning: invalid value encountered in divide
+  v2=PC[AR,f2]; gh=np.where(np.isfinite(v2),v2,endclose)/pe-1.0

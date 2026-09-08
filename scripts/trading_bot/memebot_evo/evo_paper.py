@@ -33,6 +33,10 @@ BITQUERY_CANDLE_DIR = pathlib.Path(__file__).resolve().parents[3] / \
 # Grace window past the horizon before we DECLARE a position unpriced: give the async ingester a
 # little slack to write the bars that cover the hold before calling the mint absent from the feed.
 SUBMIN_UNPRICED_GRACE_S = 120
+# Entry-data validity, not a trading knob.  Both live writers flush every 4--8 seconds, so a last
+# observed trade older than 10 seconds cannot support a seconds-scale entry.  Fail closed instead of
+# opening a paper position that is already known to have no executable tick oracle.
+SUBMIN_ENTRY_MAX_TICK_AGE_S = 10.0
 
 
 def _load_tick_bars(mint: str | None) -> list | None:
@@ -60,6 +64,41 @@ def _load_tick_bars(mint: str | None) -> list | None:
             bars.append(b)
     bars.sort(key=lambda b: b["t"])
     return bars
+
+
+def tick_entry_data_ready(bars: list | None, decision_epoch: float, *,
+                          max_age_s: float = SUBMIN_ENTRY_MAX_TICK_AGE_S) -> tuple[bool, dict]:
+    """Whether a seconds-scale entry has a causal, fresh tick at decision time.
+
+    Future bars never qualify.  A missing, non-numeric, future-only, or stale stream refuses before an
+    entry is written; this is deliberately stricter than resolving it as ``UNPRICED`` minutes later.
+    """
+    diag = {"reason": None, "last_tick_t": None, "tick_age_s": None,
+            "max_tick_age_s": max_age_s}
+    if not isinstance(decision_epoch, (int, float)) or isinstance(decision_epoch, bool) \
+            or not math.isfinite(float(decision_epoch)):
+        diag["reason"] = "invalid_decision_time"
+        return False, diag
+    if not isinstance(max_age_s, (int, float)) or isinstance(max_age_s, bool) \
+            or not math.isfinite(float(max_age_s)) or max_age_s < 0:
+        diag["reason"] = "invalid_max_age"
+        return False, diag
+    diag["max_tick_age_s"] = float(max_age_s)
+    causal = [b for b in (bars or [])
+              if isinstance(b, dict) and isinstance(b.get("t"), (int, float))
+              and not isinstance(b.get("t"), bool) and math.isfinite(float(b["t"]))
+              and float(b["t"]) <= float(decision_epoch)]
+    if not causal:
+        diag["reason"] = "missing_or_future_only"
+        return False, diag
+    last_t = max(float(b["t"]) for b in causal)
+    age = float(decision_epoch) - last_t
+    diag.update(last_tick_t=last_t, tick_age_s=age)
+    if age > float(max_age_s):
+        diag["reason"] = "stale"
+        return False, diag
+    diag["reason"] = "ready"
+    return True, diag
 
 # ---- MOMENTUM-ENTRY qualification (owner's thesis: only buy what is ALREADY moving) --------------
 def momentum_entry_qualifies(bars: list | None, entry_epoch: float, spec: dict) -> tuple[bool, dict]:

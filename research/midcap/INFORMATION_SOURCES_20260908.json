@@ -1,0 +1,48 @@
+{
+  "author": "Codex",
+  "access_date_utc": "2026-09-08",
+  "status": "PRIMARY_SOURCE_AND_READ_ONLY_PROBE_RECORD",
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/pump-fun/pump-public-docs/9c82f61cb711b044a17f770ab8ce9f9bdf78f333/docs/PUMP_PROGRAM_README.md",
+      "scope": "Pinned Pump documentation states migration LP tokens are burned; it does not prove every later pool operation is covered by our cache.",
+      "program": "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+      "version": "9c82f61cb711b044a17f770ab8ce9f9bdf78f333",
+      "local_idl_sha256": "b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49"
+    },
+    {
+      "url": "https://github.com/pump-fun/pump-public-docs/blob/main/docs/PUMP_SWAP_README.md",
+      "scope": "Pool LP supply and actual LP mint supply differ after direct burns; deposits and withdrawals are distinct instructions.",
+      "version": "main, accessed 2026-09-08; historical account roles taken from the pinned local IDL",
+      "local_idl_sha256": "6b5c7ec4e5ef9742fa99dc57b0d75b1031b379bba02a7e1b3c5a4cad68d77e56"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/solana-program/token-2022/main/interface/src/instruction.rs",
+      "scope": "TokenInstruction Burn and BurnChecked: tags 8 and 15; u64 little-endian amount; mint at account 1. Decoder admits only strict 9/10-byte payloads and binds the program and LP mint from the pinned migration accounts.",
+      "version": "main, accessed 2026-09-08; local raw transaction evidence independently retained"
+    },
+    {
+      "url": "https://docs.robinhood.com/chain/connecting/",
+      "scope": "Official mainnet chain ID 4663 and public RPC; do not confuse with testnet 46630.",
+      "version": "network documentation accessed 2026-09-08"
+    }
+  ],
+  "robinhood_probe": {
+    "url": "https://rpc.mainnet.chain.robinhood.com",
+    "request": [
+      {"jsonrpc": "2.0", "id": 1, "method": "eth_chainId", "params": []},
+      {"jsonrpc": "2.0", "id": 2, "method": "eth_blockNumber", "params": []}
+    ],
+    "observed_response": [
+      {"jsonrpc": "2.0", "id": 1, "result": "0x1237"},
+      {"jsonrpc": "2.0", "id": 2, "result": "0x372e5d3"}
+    ],
+    "timestamp_precision": "date only; no exact individual receipt timestamp retained",
+    "interpretation": "Read access and chain identity verified; no base rate or trading edge measured."
+  },
+  "blockscout_probe": {
+    "url": "https://robinhoodchain.blockscout.com/api/v2/stats",
+    "observed": "Cloudflare challenge HTML, not JSON statistics",
+    "interpretation": "This HTTP path did not provide a census. Not evidence of an empty chain or impossible RPC collection."
+  }
+}

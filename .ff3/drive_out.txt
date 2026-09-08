@@ -1,0 +1,205 @@
+rows 94944 train 44888 val 50056 curves 1272 structs 37
+flow conditions 736
+meta conditions 65
+CONTROL train H=450 hold n=2561 k=648 mean -0.1549 med -0.1448 grad 0.009
+CONTROL val H=450 hold n=2566 k=624 mean -0.1161 med -0.1568 grad 0.011
+CONTROL train H=900 hold n=2022 k=648 mean -0.1616 med -0.1683 grad 0.011
+CONTROL val H=900 hold n=2028 k=624 mean -0.1215 med -0.1930 grad 0.014
+CONTROL train H=2250 hold n=1535 k=648 mean -0.1691 med -0.1962 grad 0.015
+CONTROL val H=2250 hold n=1548 k=624 mean -0.1138 med -0.2136 grad 0.019
+CONTROL train H=4500 hold n=1294 k=648 mean -0.1678 med -0.2124 grad 0.018
+CONTROL val H=4500 hold n=1293 k=624 mean -0.1168 med -0.2386 grad 0.022
+
+=== STAGE1a: 2630 qualifying, 6 with mean>0. top 40 ===
+  mean +0.0126 med -0.0418 n  1025 k  408 H=4500 edge +0.1804  uniqbuy_150<=q10(3)
+  mean +0.0126 med -0.0418 n  1025 k  408 H=4500 edge +0.1804  uniqbuy_150@q0-q10[0,3]
+  mean +0.0063 med -0.0431 n   776 k  370 H=4500 edge +0.1741  imb_150<=q10(-0.388367)
+  mean +0.0063 med -0.0431 n   776 k  370 H=4500 edge +0.1741  imb_150@q0-q10[-1,-0.388367]
+  mean +0.0001 med -0.0426 n   826 k  382 H=4500 edge +0.1679  buygrowth_150<=q10(0.5)
+  mean +0.0001 med -0.0426 n   826 k  382 H=4500 edge +0.1679  buygrowth_150@q0-q10[0,0.5]
+  mean -0.0026 med -0.0378 n   912 k  370 H=2250 edge +0.1666  imb_150<=q10(-0.388367)
+  mean -0.0026 med -0.0378 n   912 k  370 H=2250 edge +0.1666  imb_150@q0-q10[-1,-0.388367]
+  mean -0.0044 med -0.0367 n   832 k  343 H=4500 edge +0.1634  newwal_150<=q20(0.628794)
+  mean -0.0044 med -0.0367 n   832 k  343 H=4500 edge +0.1634  newwal_150@q1-q20[0,0.628794]
+  mean -0.0048 med -0.0259 n  1009 k  215 H= 900 edge +0.1569  newwal_450<=q10(0.466077)
+  mean -0.0048 med -0.0259 n  1009 k  215 H= 900 edge +0.1569  newwal_450@q0-q10[0,0.466077]
+  mean -0.0067 med -0.0449 n   840 k  391 H=4500 edge +0.1611  buygrowth_150<=q20(0.923077)
+  mean -0.0067 med -0.0449 n   840 k  391 H=4500 edge +0.1611  buygrowth_150@q1-q20[0,0.923077]
+  mean -0.0070 med -0.0312 n   655 k  215 H=4500 edge +0.1607  newwal_450<=q10(0.466077)
+  mean -0.0070 med -0.0312 n   655 k  215 H=4500 edge +0.1607  newwal_450@q0-q10[0,0.466077]
+  mean -0.0074 med -0.0294 n   787 k  215 H=2250 edge +0.1617  newwal_450<=q10(0.466077)
+  mean -0.0074 med -0.0294 n   787 k  215 H=2250 edge +0.1617  newwal_450@q0-q10[0,0.466077]
+  mean -0.0079 med -0.0661 n   380 k  261 H=4500 edge +0.1599  sellratio_150>=q90(1.15737)
+  mean -0.0079 med -0.0661 n   380 k  261 H=4500 edge +0.1599  sellratio_150@q90-q100[1.15737,31]
+  mean -0.0108 med -0.0340 n   791 k  289 H=2250 edge +0.1584  sellratio_450>=q90(0.944444)
+  mean -0.0108 med -0.0340 n   791 k  289 H=2250 edge +0.1584  sellratio_450@q90-q100[0.944444,40]
+  mean -0.0139 med -0.0356 n  1239 k  408 H=2250 edge +0.1552  uniqbuy_150<=q10(3)
+  mean -0.0139 med -0.0356 n  1239 k  408 H=2250 edge +0.1552  uniqbuy_150@q0-q10[0,3]
+  mean -0.0145 med -0.0382 n   671 k  289 H=4500 edge +0.1533  sellratio_450>=q90(0.944444)
+  mean -0.0145 med -0.0382 n   671 k  289 H=4500 edge +0.1533  sellratio_450@q90-q100[0.944444,40]
+  mean -0.0156 med -0.0320 n  1139 k  370 H= 900 edge +0.1460  imb_150<=q10(-0.388367)
+  mean -0.0156 med -0.0320 n  1139 k  370 H= 900 edge +0.1460  imb_150@q0-q10[-1,-0.388367]
+  mean -0.0193 med -0.0455 n  1025 k  403 H=4500 edge +0.1485  buygrowth_150<=q30(1.36007)
+  mean -0.0197 med -0.0673 n  1227 k  622 H=4500 edge +0.1481  netsol_900<=q20(1.2571)
+  mean -0.0202 med -0.0673 n  1227 k  622 H=4500 edge +0.1476  netsol_900@q1-q20[-22.789,1.2571]
+  mean -0.0206 med -0.0511 n   818 k  349 H=2250 edge +0.1486  sellratio_900>=q90(0.891304)
+  mean -0.0206 med -0.0511 n   818 k  349 H=2250 edge +0.1486  sellratio_900@q90-q100[0.891304,31]
+  mean -0.0211 med -0.0271 n   942 k  238 H= 900 edge +0.1405  imb_450<=q10(-0.0684068)
+  mean -0.0211 med -0.0271 n   942 k  238 H= 900 edge +0.1405  imb_450@q0-q10[-1,-0.0684068]
+  mean -0.0212 med -0.0562 n   712 k  349 H=4500 edge +0.1466  sellratio_900>=q90(0.891304)
+  mean -0.0212 med -0.0562 n   712 k  349 H=4500 edge +0.1466  sellratio_900@q90-q100[0.891304,31]
+  mean -0.0217 med -0.0367 n   925 k  480 H=4500 edge +0.1461  imb_900<=q10(0.00211795)
+  mean -0.0217 med -0.0367 n   925 k  480 H=4500 edge +0.1461  imb_900@q0-q10[-1,0.00211795]
+  mean -0.0231 med -0.0315 n  1631 k  408 H= 900 edge +0.1385  uniqbuy_150<=q10(3)
+  --- bottom 10 ---
+  mean -0.3163 n   200 k  197 H=4500  netsol_450@q70-q95[15.5816,39.6139]
+  mean -0.3176 n   205 k  197 H=2250  netsol_450@q70-q95[15.5816,39.6139]
+  mean -0.3211 n   251 k  240 H=2250  netsol_150@q70-q95[12.5517,30.1613]
+  mean -0.3243 n   212 k  180 H= 900  netsol_900>=q70(17.239)
+  mean -0.3243 n   357 k  290 H= 900  netsol_900@q50-q90[10.305,33.5726]
+  mean -0.3244 n   322 k  290 H=2250  netsol_900@q50-q90[10.305,33.5726]
+  mean -0.3248 n   313 k  290 H=4500  netsol_900@q50-q90[10.305,33.5726]
+  mean -0.3286 n   246 k  240 H=4500  netsol_150@q70-q95[12.5517,30.1613]
+  mean -0.3288 n   377 k  309 H= 900  netsol_450@q50-q90[8.87841,29.3918]
+  mean -0.3372 n   202 k  170 H= 900  netsol_900@q70-q95[17.239,46.0418]
+nswept 2952 elapsed 21
+
+=== STAGE1b flow x meta: 26874 qualifying, 1895 mean>0. top 40 ===
+  mean +0.1544 med -0.0253 n   221 k   59 H= 900 edge +0.3160  newwal_450<=q10(0.466077)  &  uniqwal_all@q33-q66
+  mean +0.1544 med -0.0253 n   221 k   59 H= 900 edge +0.3160  newwal_450@q0-q10[0,0.466077]  &  uniqwal_all@q33-q66
+  mean +0.1523 med -0.0334 n   209 k  104 H=2250 edge +0.3214  sellratio_450>=q90(0.944444)  &  uniqwal_all@q33-q66
+  mean +0.1523 med -0.0334 n   209 k  104 H=2250 edge +0.3214  sellratio_450@q90-q100[0.944444,40]  &  uniqwal_all@q33-q66
+  mean +0.1327 med -0.0392 n   238 k   94 H=2250 edge +0.3018  newwal_150<=q20(0.628794)  &  uniqwal_all@q33-q66
+  mean +0.1327 med -0.0392 n   238 k   94 H=2250 edge +0.3018  newwal_150@q1-q20[0,0.628794]  &  uniqwal_all@q33-q66
+  mean +0.1322 med -0.0311 n   216 k  120 H=2250 edge +0.3014  sellratio_450>=q90(0.944444)  &  ntr@q33-q66
+  mean +0.1322 med -0.0311 n   216 k  120 H=2250 edge +0.3014  sellratio_450@q90-q100[0.944444,40]  &  ntr@q33-q66
+  mean +0.1278 med -0.0402 n   230 k  112 H=2250 edge +0.2970  maxshare_150>=q80(0.328741)  &  ntr@q33-q66
+  mean +0.1278 med -0.0402 n   230 k  112 H=2250 edge +0.2970  maxshare_150@q80-q99[0.328741,1]  &  ntr@q33-q66
+  mean +0.1237 med -0.0603 n   224 k  105 H=2250 edge +0.2929  maxshare_150>=q80(0.328741)  &  uniqwal_all@q33-q66
+  mean +0.1237 med -0.0603 n   224 k  105 H=2250 edge +0.2929  maxshare_150@q80-q99[0.328741,1]  &  uniqwal_all@q33-q66
+  mean +0.1161 med -0.0281 n   344 k  112 H= 450 edge +0.2710  maxshare_150>=q80(0.328741)  &  ntr@q33-q66
+  mean +0.1161 med -0.0281 n   344 k  112 H= 450 edge +0.2710  maxshare_150@q80-q99[0.328741,1]  &  ntr@q33-q66
+  mean +0.1119 med -0.0632 n   204 k  112 H=4500 edge +0.2796  maxshare_150>=q80(0.328741)  &  ntr@q33-q66
+  mean +0.1119 med -0.0632 n   204 k  112 H=4500 edge +0.2796  maxshare_150@q80-q99[0.328741,1]  &  ntr@q33-q66
+  mean +0.1115 med -0.0339 n   262 k  112 H=4500 edge +0.2792  uniqbuy_150<=q10(3)  &  ntr@q33-q66
+  mean +0.1115 med -0.0339 n   262 k  112 H=4500 edge +0.2792  uniqbuy_150@q0-q10[0,3]  &  ntr@q33-q66
+  mean +0.1103 med -0.0359 n   246 k  100 H=4500 edge +0.2781  uniqbuy_150<=q10(3)  &  uniqwal_all@q33-q66
+  mean +0.1103 med -0.0359 n   246 k  100 H=4500 edge +0.2781  uniqbuy_150@q0-q10[0,3]  &  uniqwal_all@q33-q66
+  mean +0.1095 med -0.0620 n   225 k  124 H=2250 edge +0.2787  sellratio_900>=q90(0.891304)  &  uniqwal_all@q33-q66
+  mean +0.1095 med -0.0620 n   225 k  124 H=2250 edge +0.2787  sellratio_900@q90-q100[0.891304,31]  &  uniqwal_all@q33-q66
+  mean +0.1091 med -0.0268 n   268 k   80 H=2250 edge +0.2782  buygrowth_450<=q20(1.64718)  &  uniqwal_all@q33-q66
+  mean +0.1091 med -0.0268 n   268 k   80 H=2250 edge +0.2782  buygrowth_450@q1-q20[0,1.64718]  &  uniqwal_all@q33-q66
+  mean +0.1040 med -0.0285 n   308 k  112 H=2250 edge +0.2732  uniqbuy_150<=q10(3)  &  ntr@q33-q66
+  mean +0.1040 med -0.0285 n   308 k  112 H=2250 edge +0.2732  uniqbuy_150@q0-q10[0,3]  &  ntr@q33-q66
+  mean +0.1034 med -0.0316 n   302 k  100 H=2250 edge +0.2726  uniqbuy_150<=q10(3)  &  uniqwal_all@q33-q66
+  mean +0.1034 med -0.0316 n   302 k  100 H=2250 edge +0.2726  uniqbuy_150@q0-q10[0,3]  &  uniqwal_all@q33-q66
+  mean +0.1004 med -0.0341 n   445 k  172 H=4500 edge +0.2682  uniqbuy_150<=q10(3)  &  ddown<=q20
+  mean +0.1004 med -0.0341 n   445 k  172 H=4500 edge +0.2682  uniqbuy_150@q0-q10[0,3]  &  ddown<=q20
+  mean +0.0993 med -0.0765 n   343 k  139 H=2250 edge +0.2684  netsol_450<=q30(2.58133)  &  uniqwal_all@q33-q66
+  mean +0.0989 med -0.0305 n   202 k   69 H=2250 edge +0.2681  newwal_450<=q20(0.722736)  &  uniqwal_all@q33-q66
+  mean +0.0989 med -0.0305 n   202 k   69 H=2250 edge +0.2681  newwal_450@q1-q20[0,0.722736]  &  uniqwal_all@q33-q66
+  mean +0.0979 med -0.1725 n   274 k   49 H= 450 edge +0.2528  maxshare_900>=q90(0.413061)  &  prog>q50
+  mean +0.0979 med -0.1725 n   274 k   49 H= 450 edge +0.2528  maxshare_900>=q90(0.413061)  &  logpx>q50
+  mean +0.0979 med -0.1725 n   274 k   49 H= 450 edge +0.2528  maxshare_900@q90-q100[0.413061,1]  &  prog>q50
+  mean +0.0979 med -0.1725 n   274 k   49 H= 450 edge +0.2528  maxshare_900@q90-q100[0.413061,1]  &  logpx>q50
+  mean +0.0934 med -0.0684 n   258 k   46 H=4500 edge +0.2612  buygrowth_900<=q10(1)  &  ntr>q80
+  mean +0.0934 med -0.0684 n   258 k   46 H=4500 edge +0.2612  buygrowth_900@q0-q10[0,1]  &  ntr>q80
+  mean +0.0921 med -0.0354 n   591 k  168 H=4500 edge +0.2599  uniqbuy_150<=q10(3)  &  cprior<=q33
+nswept 41952 elapsed 116
+
+=== STAGE1c flow x flow: 6168 qualifying, 908 mean>0. top 40 ===
+  mean +0.0691 med -0.0313 n   233 k   86 H= 900 edge +0.2307  repeat_450>=q90(0.278656)  &  imb_900<=q20(0.0376802)
+  mean +0.0691 med -0.0313 n   233 k   86 H= 900 edge +0.2307  repeat_450>=q90(0.278656)  &  imb_900@q1-q20[-1,0.0376802]
+  mean +0.0691 med -0.0313 n   233 k   86 H= 900 edge +0.2307  repeat_450@q90-q100[0.278656,1]  &  imb_900<=q20(0.0376802)
+  mean +0.0691 med -0.0313 n   233 k   86 H= 900 edge +0.2307  repeat_450@q90-q100[0.278656,1]  &  imb_900@q1-q20[-1,0.0376802]
+  mean +0.0662 med -0.0462 n   203 k  128 H=2250 edge +0.2353  sellratio_900>=q90(0.891304)  &  maxshare_150>=q90(0.520727)
+  mean +0.0662 med -0.0462 n   203 k  128 H=2250 edge +0.2353  sellratio_900>=q90(0.891304)  &  maxshare_150@q90-q100[0.520727,1]
+  mean +0.0662 med -0.0462 n   203 k  128 H=2250 edge +0.2353  sellratio_900@q90-q100[0.891304,31]  &  maxshare_150>=q90(0.520727)
+  mean +0.0662 med -0.0462 n   203 k  128 H=2250 edge +0.2353  sellratio_900@q90-q100[0.891304,31]  &  maxshare_150@q90-q100[0.520727,1]
+  mean +0.0625 med -0.0481 n   330 k  218 H=4500 edge +0.2302  uniqbuy_150<=q10(3)  &  sellratio_150>=q90(1.15737)
+  mean +0.0625 med -0.0481 n   330 k  218 H=4500 edge +0.2302  uniqbuy_150<=q10(3)  &  sellratio_150@q90-q100[1.15737,31]
+  mean +0.0625 med -0.0481 n   330 k  218 H=4500 edge +0.2302  uniqbuy_150@q0-q10[0,3]  &  sellratio_150>=q90(1.15737)
+  mean +0.0625 med -0.0481 n   330 k  218 H=4500 edge +0.2302  uniqbuy_150@q0-q10[0,3]  &  sellratio_150@q90-q100[1.15737,31]
+  mean +0.0610 med -0.0475 n   242 k   92 H= 900 edge +0.2226  buygrowth_150<=q10(0.5)  &  repeat_450>=q90(0.278656)
+  mean +0.0610 med -0.0475 n   242 k   92 H= 900 edge +0.2226  buygrowth_150<=q10(0.5)  &  repeat_450@q90-q100[0.278656,1]
+  mean +0.0610 med -0.0475 n   242 k   92 H= 900 edge +0.2226  buygrowth_150@q0-q10[0,0.5]  &  repeat_450>=q90(0.278656)
+  mean +0.0610 med -0.0475 n   242 k   92 H= 900 edge +0.2226  buygrowth_150@q0-q10[0,0.5]  &  repeat_450@q90-q100[0.278656,1]
+  mean +0.0499 med -0.0524 n   229 k   87 H= 900 edge +0.2115  imb_150<=q10(-0.388367)  &  repeat_450>=q90(0.278656)
+  mean +0.0499 med -0.0524 n   229 k   87 H= 900 edge +0.2115  imb_150<=q10(-0.388367)  &  repeat_450@q90-q100[0.278656,1]
+  mean +0.0499 med -0.0524 n   229 k   87 H= 900 edge +0.2115  imb_150@q0-q10[-1,-0.388367]  &  repeat_450>=q90(0.278656)
+  mean +0.0499 med -0.0524 n   229 k   87 H= 900 edge +0.2115  imb_150@q0-q10[-1,-0.388367]  &  repeat_450@q90-q100[0.278656,1]
+  mean +0.0474 med -0.0487 n   243 k   88 H= 900 edge +0.2091  repeat_450>=q90(0.278656)  &  sellratio_150@q80-q99[0.84,6]
+  mean +0.0474 med -0.0487 n   243 k   88 H= 900 edge +0.2091  repeat_450@q90-q100[0.278656,1]  &  sellratio_150@q80-q99[0.84,6]
+  mean +0.0466 med -0.0481 n   244 k   89 H= 900 edge +0.2082  repeat_450>=q90(0.278656)  &  sellratio_150>=q80(0.84)
+  mean +0.0466 med -0.0481 n   244 k   89 H= 900 edge +0.2082  repeat_450@q90-q100[0.278656,1]  &  sellratio_150>=q80(0.84)
+  mean +0.0431 med -0.0459 n   269 k   93 H= 900 edge +0.2047  repeat_450>=q90(0.278656)  &  imb_150<=q20(0.000104941)
+  mean +0.0431 med -0.0459 n   269 k   93 H= 900 edge +0.2047  repeat_450>=q90(0.278656)  &  imb_150@q1-q20[-1,0.000104941]
+  mean +0.0431 med -0.0459 n   269 k   93 H= 900 edge +0.2047  repeat_450@q90-q100[0.278656,1]  &  imb_150<=q20(0.000104941)
+  mean +0.0431 med -0.0459 n   269 k   93 H= 900 edge +0.2047  repeat_450@q90-q100[0.278656,1]  &  imb_150@q1-q20[-1,0.000104941]
+  mean +0.0428 med -0.0510 n   268 k   93 H= 900 edge +0.2045  repeat_450>=q90(0.278656)  &  netsol_150<=q20(1e-09)
+  mean +0.0428 med -0.0510 n   268 k   93 H= 900 edge +0.2045  repeat_450@q90-q100[0.278656,1]  &  netsol_150<=q20(1e-09)
+  mean +0.0413 med -0.0575 n   345 k  246 H=4500 edge +0.2091  sellratio_150>=q90(1.15737)  &  netsol_900<=q20(1.2571)
+  mean +0.0413 med -0.0575 n   345 k  246 H=4500 edge +0.2091  sellratio_150@q90-q100[1.15737,31]  &  netsol_900<=q20(1.2571)
+  mean +0.0390 med -0.0578 n   343 k  245 H=4500 edge +0.2067  sellratio_150>=q90(1.15737)  &  netsol_900@q1-q20[-22.789,1.2571]
+  mean +0.0390 med -0.0578 n   343 k  245 H=4500 edge +0.2067  sellratio_150@q90-q100[1.15737,31]  &  netsol_900@q1-q20[-22.789,1.2571]
+  mean +0.0343 med -0.0335 n   790 k  374 H=4500 edge +0.2020  buygrowth_150<=q10(0.5)  &  netsol_900<=q20(1.2571)
+  mean +0.0343 med -0.0335 n   790 k  374 H=4500 edge +0.2020  buygrowth_150@q0-q10[0,0.5]  &  netsol_900<=q20(1.2571)
+  mean +0.0342 med -0.0332 n   804 k  327 H=4500 edge +0.2019  uniqbuy_150<=q10(3)  &  newwal_150<=q20(0.628794)
+  mean +0.0342 med -0.0332 n   804 k  327 H=4500 edge +0.2019  uniqbuy_150<=q10(3)  &  newwal_150@q1-q20[0,0.628794]
+  mean +0.0342 med -0.0332 n   804 k  327 H=4500 edge +0.2019  uniqbuy_150@q0-q10[0,3]  &  newwal_150<=q20(0.628794)
+  mean +0.0342 med -0.0332 n   804 k  327 H=4500 edge +0.2019  uniqbuy_150@q0-q10[0,3]  &  newwal_150@q1-q20[0,0.628794]
+nswept 48740 elapsed 134
+
+=== STAGE2 structures: 7770 qualifying, 3518 mean>0. top 50 ===
+  mean +0.1756 med -0.0603 n   224 k  105 H=2250 ('sl', None, 0)  maxshare_150>=q80(0.328741) | uniqwal_all@q33-q66
+  mean +0.1756 med -0.0603 n   224 k  105 H=2250 ('sl', None, 0)  maxshare_150@q80-q99[0.328741,1] | uniqwal_all@q33-q66
+  mean +0.1740 med -0.0253 n   221 k   59 H= 900 ('sl', None, 1)  newwal_450<=q10(0.466077) | uniqwal_all@q33-q66
+  mean +0.1740 med -0.0253 n   221 k   59 H= 900 ('sl', None, 1)  newwal_450@q0-q10[0,0.466077] | uniqwal_all@q33-q66
+  mean +0.1650 med -0.0253 n   221 k   59 H= 900 ('sl', None, 2)  newwal_450<=q10(0.466077) | uniqwal_all@q33-q66
+  mean +0.1650 med -0.0253 n   221 k   59 H= 900 ('sl', None, 2)  newwal_450@q0-q10[0,0.466077] | uniqwal_all@q33-q66
+  mean +0.1582 med -0.0402 n   230 k  112 H=2250 ('sl', None, 0)  maxshare_150>=q80(0.328741) | ntr@q33-q66
+  mean +0.1582 med -0.0402 n   230 k  112 H=2250 ('sl', None, 0)  maxshare_150@q80-q99[0.328741,1] | ntr@q33-q66
+  mean +0.1544 med -0.0253 n   221 k   59 H= 900 ('hold', None, None)  newwal_450<=q10(0.466077) | uniqwal_all@q33-q66
+  mean +0.1544 med -0.0253 n   221 k   59 H= 900 ('hold', None, None)  newwal_450@q0-q10[0,0.466077] | uniqwal_all@q33-q66
+  mean +0.1523 med -0.0334 n   209 k  104 H=2250 ('hold', None, None)  sellratio_450>=q90(0.944444) | uniqwal_all@q33-q66
+  mean +0.1523 med -0.0334 n   209 k  104 H=2250 ('hold', None, None)  sellratio_450@q90-q100[0.944444,40] | uniqwal_all@q33-q66
+  mean +0.1520 med -0.0334 n   209 k  104 H=2250 ('sl', None, 1)  sellratio_450>=q90(0.944444) | uniqwal_all@q33-q66
+  mean +0.1520 med -0.0334 n   209 k  104 H=2250 ('sl', None, 1)  sellratio_450@q90-q100[0.944444,40] | uniqwal_all@q33-q66
+  mean +0.1518 med -0.0334 n   209 k  104 H=2250 ('sl', None, 2)  sellratio_450>=q90(0.944444) | uniqwal_all@q33-q66
+  mean +0.1518 med -0.0334 n   209 k  104 H=2250 ('sl', None, 2)  sellratio_450@q90-q100[0.944444,40] | uniqwal_all@q33-q66
+  mean +0.1502 med -0.0632 n   204 k  112 H=4500 ('sl', None, 0)  maxshare_150>=q80(0.328741) | ntr@q33-q66
+  mean +0.1502 med -0.0632 n   204 k  112 H=4500 ('sl', None, 0)  maxshare_150@q80-q99[0.328741,1] | ntr@q33-q66
+  mean +0.1498 med -0.0603 n   224 k  105 H=2250 ('sl', None, 1)  maxshare_150>=q80(0.328741) | uniqwal_all@q33-q66
+  mean +0.1498 med -0.0603 n   224 k  105 H=2250 ('sl', None, 1)  maxshare_150@q80-q99[0.328741,1] | uniqwal_all@q33-q66
+  mean +0.1475 med -0.0296 n   209 k  104 H=2250 ('pyr', None, None)  sellratio_450>=q90(0.944444) | uniqwal_all@q33-q66
+  mean +0.1475 med -0.0296 n   209 k  104 H=2250 ('pyr', None, None)  sellratio_450@q90-q100[0.944444,40] | uniqwal_all@q33-q66
+  mean +0.1428 med -0.0402 n   230 k  112 H=2250 ('sl', None, 1)  maxshare_150>=q80(0.328741) | ntr@q33-q66
+  mean +0.1428 med -0.0402 n   230 k  112 H=2250 ('sl', None, 1)  maxshare_150@q80-q99[0.328741,1] | ntr@q33-q66
+  mean +0.1408 med -0.0254 n   221 k   59 H= 900 ('pyr', None, None)  newwal_450<=q10(0.466077) | uniqwal_all@q33-q66
+  mean +0.1408 med -0.0254 n   221 k   59 H= 900 ('pyr', None, None)  newwal_450@q0-q10[0,0.466077] | uniqwal_all@q33-q66
+  mean +0.1394 med -0.0988 n   274 k   49 H= 450 ('pyr', None, None)  maxshare_900>=q90(0.413061) | prog>q50
+  mean +0.1394 med -0.0988 n   274 k   49 H= 450 ('pyr', None, None)  maxshare_900>=q90(0.413061) | logpx>q50
+  mean +0.1394 med -0.0988 n   274 k   49 H= 450 ('pyr', None, None)  maxshare_900@q90-q100[0.413061,1] | prog>q50
+  mean +0.1394 med -0.0988 n   274 k   49 H= 450 ('pyr', None, None)  maxshare_900@q90-q100[0.413061,1] | logpx>q50
+  mean +0.1388 med -0.0359 n   246 k  100 H=4500 ('sl', None, 0)  uniqbuy_150<=q10(3) | uniqwal_all@q33-q66
+  mean +0.1388 med -0.0359 n   246 k  100 H=4500 ('sl', None, 0)  uniqbuy_150@q0-q10[0,3] | uniqwal_all@q33-q66
+  mean +0.1381 med -0.0436 n   238 k   94 H=2250 ('sl', None, 1)  newwal_150<=q20(0.628794) | uniqwal_all@q33-q66
+  mean +0.1381 med -0.0436 n   238 k   94 H=2250 ('sl', None, 1)  newwal_150@q1-q20[0,0.628794] | uniqwal_all@q33-q66
+  mean +0.1362 med -0.0428 n   238 k   94 H=2250 ('sl', None, 0)  newwal_150<=q20(0.628794) | uniqwal_all@q33-q66
+  mean +0.1362 med -0.0428 n   238 k   94 H=2250 ('sl', None, 0)  newwal_150@q1-q20[0,0.628794] | uniqwal_all@q33-q66
+  mean +0.1360 med -0.0254 n   221 k   59 H= 900 ('sl', None, 0)  newwal_450<=q10(0.466077) | uniqwal_all@q33-q66
+  mean +0.1360 med -0.0254 n   221 k   59 H= 900 ('sl', None, 0)  newwal_450@q0-q10[0,0.466077] | uniqwal_all@q33-q66
+  mean +0.1327 med -0.0392 n   238 k   94 H=2250 ('hold', None, None)  newwal_150<=q20(0.628794) | uniqwal_all@q33-q66
+  mean +0.1327 med -0.0392 n   238 k   94 H=2250 ('hold', None, None)  newwal_150@q1-q20[0,0.628794] | uniqwal_all@q33-q66
+  mean +0.1322 med -0.0311 n   216 k  120 H=2250 ('hold', None, None)  sellratio_450>=q90(0.944444) | ntr@q33-q66
+  mean +0.1322 med -0.0311 n   216 k  120 H=2250 ('hold', None, None)  sellratio_450@q90-q100[0.944444,40] | ntr@q33-q66
+  mean +0.1318 med -0.0311 n   216 k  120 H=2250 ('sl', None, 1)  sellratio_450>=q90(0.944444) | ntr@q33-q66
+  mean +0.1318 med -0.0311 n   216 k  120 H=2250 ('sl', None, 1)  sellratio_450@q90-q100[0.944444,40] | ntr@q33-q66
+  mean +0.1317 med -0.0311 n   216 k  120 H=2250 ('sl', None, 2)  sellratio_450>=q90(0.944444) | ntr@q33-q66
+  mean +0.1317 med -0.0311 n   216 k  120 H=2250 ('sl', None, 2)  sellratio_450@q90-q100[0.944444,40] | ntr@q33-q66
+  mean +0.1315 med -0.0632 n   204 k  112 H=4500 ('sl', None, 1)  maxshare_150>=q80(0.328741) | ntr@q33-q66
+  mean +0.1315 med -0.0632 n   204 k  112 H=4500 ('sl', None, 1)  maxshare_150@q80-q99[0.328741,1] | ntr@q33-q66
+  mean +0.1313 med -0.0707 n   214 k  117 H=4500 ('sl', None, 0)  sellratio_150>=q90(1.15737) | cprior<=q33
+  mean +0.1304 med -0.0603 n   224 k  105 H=2250 ('sl', None, 2)  maxshare_150>=q80(0.328741) | uniqwal_all@q33-q66
+nswept 57620 elapsed 152
+TOTAL COMBOS SWEPT 57620

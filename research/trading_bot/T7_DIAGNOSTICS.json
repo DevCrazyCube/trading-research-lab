@@ -1,0 +1,155 @@
+{
+  "NOT_PREREGISTERED": "Every number in this file is exploratory and was computed AFTER the frozen verdict. No verdict follows from any of it.",
+  "frozen_config": {
+    "yield_min": 0.0,
+    "top_n": 500,
+    "include_special": true
+  },
+  "D1_close_to_open_design": {
+    "label": "D1 design 2016-2021",
+    "n_event_days": 1302,
+    "days_dropped_missing_spy_open": 0,
+    "gross_mean_per_day_bp": 2.6299443689058464,
+    "t_stat": 3.4847565242065723,
+    "annualised_sharpe": 1.4356979642732401,
+    "control_mean_per_day_bp": 0.7012450824413136,
+    "control_t_stat": 2.6603123846357146,
+    "basket_minus_control_bp": 1.9286992864645327,
+    "basket_minus_control_t": 2.488551968011033,
+    "label_permutation_p_right": 0.0827917208279172,
+    "label_permutation_null_mean_bp": 0.6896594097620905,
+    "label_permutation_null_sd_bp": 2.050020719962754,
+    "note": "EXPLORATORY. Not in the declared grid; no verdict follows."
+  },
+  "D1_close_to_open_heldout": {
+    "label": "D1 held-out 2022-2026",
+    "n_event_days": 1018,
+    "days_dropped_missing_spy_open": 0,
+    "gross_mean_per_day_bp": 3.715021162410248,
+    "t_stat": 3.2883084961845617,
+    "annualised_sharpe": 1.532127128415365,
+    "control_mean_per_day_bp": 0.08442333926770917,
+    "control_t_stat": 0.21664056648528401,
+    "basket_minus_control_bp": 3.6305978231425384,
+    "basket_minus_control_t": 3.180408231448483,
+    "label_permutation_p_right": 0.0423957604239576,
+    "label_permutation_null_mean_bp": 0.04023750884883245,
+    "label_permutation_null_sd_bp": 2.767264447740496,
+    "note": "EXPLORATORY. Not in the declared grid; no verdict follows."
+  },
+  "D2_dropoff_design": {
+    "label": "D2 design 2016-2021",
+    "n_event_days": 1302,
+    "n_events": 7942,
+    "mean_yield_pct": 0.6265172048679892,
+    "mean_excess_per_event_bp": 0.03752864924392876,
+    "t_stat_day_clustered": 0.014083729327491428,
+    "implied_dropoff_ratio": 0.9994009957116528,
+    "dropoff_ratio_95ci": [
+      0.9160389558811257,
+      1.0827630355421798
+    ],
+    "by_yield_bucket": {
+      "0.25-0.5%": {
+        "n_events": 2292,
+        "dollar_weighted_dropoff_ratio": 1.01386539302284,
+        "mean_excess_per_event_bp": -1.63251545762484
+      },
+      "0.5-1.0%": {
+        "n_events": 2973,
+        "dollar_weighted_dropoff_ratio": 0.9576173903584813,
+        "mean_excess_per_event_bp": 3.394602863921157
+      },
+      "<0.25%": {
+        "n_events": 1565,
+        "dollar_weighted_dropoff_ratio": 0.8346988253086134,
+        "mean_excess_per_event_bp": 0.5115777577174896
+      },
+      ">=1.0%": {
+        "n_events": 1112,
+        "dollar_weighted_dropoff_ratio": 1.0125465714421344,
+        "mean_excess_per_event_bp": -5.670814716741238
+      }
+    },
+    "note": "EXPLORATORY. The buckets are descriptive; none of them is a declared trial."
+  },
+  "D2_dropoff_heldout": {
+    "label": "D2 held-out 2022-2026",
+    "n_event_days": 1019,
+    "n_events": 6245,
+    "mean_yield_pct": 0.6127892080944939,
+    "mean_excess_per_event_bp": 2.4158302719612066,
+    "t_stat_day_clustered": 0.6550526402667736,
+    "implied_dropoff_ratio": 0.9605764879660107,
+    "dropoff_ratio_95ci": [
+      0.8426163747831213,
+      1.0785366011489
+    ],
+    "by_yield_bucket": {
+      "0.25-0.5%": {
+        "n_events": 2070,
+        "dollar_weighted_dropoff_ratio": 0.8034646410872149,
+        "mean_excess_per_event_bp": 5.5751514295627524
+      },
+      "0.5-1.0%": {
+        "n_events": 1791,
+        "dollar_weighted_dropoff_ratio": 0.9334944402007017,
+        "mean_excess_per_event_bp": 3.843466477212847
+      },
+      "<0.25%": {
+        "n_events": 1490,
+        "dollar_weighted_dropoff_ratio": 1.5937002951452173,
+        "mean_excess_per_event_bp": -4.313556225018046
+      },
+      ">=1.0%": {
+        "n_events": 894,
+        "dollar_weighted_dropoff_ratio": 0.7844990265573247,
+        "mean_excess_per_event_bp": 37.280020612104586
+      }
+    },
+    "note": "EXPLORATORY. The buckets are descriptive; none of them is a declared trial."
+  },
+  "D3_tax": {
+    "held_out_inputs": {
+      "mean_dividend_yield_per_event_pct": 0.6127892080944939,
+      "dollar_weighted_dropoff_ratio": 0.9523736233055143,
+      "event_days_per_year": 221,
+      "net_pre_tax_return_pct_per_year": 1.857235751740647
+    },
+    "ordinary_dividend_income_pct_of_equity_per_year": 67.71320749444158,
+    "short_term_capital_LOSS_pct_of_equity_per_year": 65.85597174270093,
+    "by_marginal_ordinary_rate": {
+      "0.240": {
+        "case_A_losses_fully_usable_after_tax_return_pct": 1.4114991713228917,
+        "case_B_losses_unusable_tax_on_dividend_pct_of_equity": 16.251169798665977,
+        "case_B_after_tax_return_pct": -14.393934046925331,
+        "dropoff_ratio_needed_to_break_even_case_B": 0.76
+      },
+      "0.320": {
+        "case_A_losses_fully_usable_after_tax_return_pct": 1.2629203111836398,
+        "case_B_losses_unusable_tax_on_dividend_pct_of_equity": 21.668226398221304,
+        "case_B_after_tax_return_pct": -19.810990646480658,
+        "dropoff_ratio_needed_to_break_even_case_B": 0.6799999999999999
+      },
+      "0.350": {
+        "case_A_losses_fully_usable_after_tax_return_pct": 1.2072032386314206,
+        "case_B_losses_unusable_tax_on_dividend_pct_of_equity": 23.69962262305455,
+        "case_B_after_tax_return_pct": -21.842386871313906,
+        "dropoff_ratio_needed_to_break_even_case_B": 0.65
+      },
+      "0.370": {
+        "case_A_losses_fully_usable_after_tax_return_pct": 1.1700585235966077,
+        "case_B_losses_unusable_tax_on_dividend_pct_of_equity": 25.053886772943386,
+        "case_B_after_tax_return_pct": -23.196651021202737,
+        "dropoff_ratio_needed_to_break_even_case_B": 0.63
+      },
+      "0.408": {
+        "case_A_losses_fully_usable_after_tax_return_pct": 1.099483565030463,
+        "case_B_losses_unusable_tax_on_dividend_pct_of_equity": 27.62698865773216,
+        "case_B_after_tax_return_pct": -25.76975290599151,
+        "dropoff_ratio_needed_to_break_even_case_B": 0.5920000000000001
+      }
+    },
+    "note": "EXPLORATORY arithmetic, but the INPUTS are the frozen held-out result. A one-day hold can never satisfy the 61-day qualified-dividend holding period of IRC 1(h)(11)(B)(iii), so every dollar of dividend here is ORDINARY income. Case A assumes the short-term capital losses are fully absorbed by other realised capital gains; case B assumes they are not, in which case IRC 1211(b) caps the deduction against ordinary income at $3,000/yr and the rest carries forward."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "benchmark_sha256": "c4a8dfd32017051d9a3c49f779951e9b215a0c9b2a0bab6a9f487ded9c149b73",
+  "frames": 2000,
+  "frames_per_second": 985.2482071738705,
+  "profile": "         619567 function calls (619524 primitive calls) in 1.963 seconds\n\n   Ordered by: internal time\n   List reduced from 112 to 18 due to restriction <18>\n\n   ncalls  tottime  percall  cumtime  percall filename:lineno(function)\n     1999    0.270    0.000    1.025    0.001 /home/anont/meme/scripts/birth_stream.py:46(decode_notification)\n     2000    0.217    0.000    0.217    0.000 {built-in method zlib.compress}\n    10003    0.183    0.000    0.183    0.000 {method 'execute' of 'sqlite3.Connection' objects}\n     2002    0.148    0.000    0.226    0.000 /home/anont/meme/scripts/b9d_transaction_bodies.py:1724(event_entries)\n    47618    0.132    0.000    0.132    0.000 {method 'fullmatch' of 're.Pattern' objects}\n    47618    0.098    0.000    0.363    0.000 /usr/lib/python3.14/re/__init__.py:169(fullmatch)\n    47618    0.093    0.000    0.133    0.000 /usr/lib/python3.14/re/__init__.py:330(_compile)\n     3999    0.070    0.000    0.070    0.000 {method '__exit__' of 'sqlite3.Connection' objects}\n    87772    0.061    0.000    0.061    0.000 {built-in method builtins.isinstance}\n     4003    0.059    0.000    0.059    0.000 /usr/lib/python3.14/json/encoder.py:207(iterencode)\n     2000    0.047    0.000    0.481    0.000 /home/anont/meme/scripts/birth_stream.py:192(append)\n    68223    0.043    0.000    0.043    0.000 {method 'get' of 'dict' objects}\n     2000    0.042    0.000    0.042    0.000 /usr/lib/python3.14/json/decoder.py:351(raw_decode)\n     2002    0.041    0.000    0.041    0.000 {method 'commit' of 'sqlite3.Connection' objects}\n    47618    0.040    0.000    0.040    0.000 {method 'lower' of 'str' objects}\n66003/65991    0.033    0.000    0.033    0.000 {built-in method builtins.len}\n     4003    0.032    0.000    0.133    0.000 /usr/lib/python3.14/json/__init__.py:185(dumps)\n     2005    0.028    0.000    0.030    0.000 /home/anont/meme/scripts/b9d_transaction_bodies.py:1586(idl_types)\n\n\n",
+  "purpose": "OFFLINE_ENGINEERING_BENCHMARK_NOT_LIVE_OR_STRATEGY_DATA",
+  "raw_prefix_sha256": "b79668429bbd35d1153b6631f8f2b9dd2734f9f7fcc43ee77beba9afce2e5c2e",
+  "recorder_sha256": "b08d7a0dbbd3a63040d8df75875941a24e29455382b4e75ac6ee75839670e675",
+  "seconds": 2.0299453330007964,
+  "source": "research/midcap/birth_stream_pilot_network_20260908.sqlite",
+  "stages_seconds": {
+    "decode": 1.1656444200052647,
+    "derived_commit": 0.24231373101974896,
+    "notification_commit": 0.10885799600509927,
+    "raw_commit": 0.49632867500258726
+  },
+  "temporary_database": "ephemeral timing fixture removed; not a recorded live cohort"
+}

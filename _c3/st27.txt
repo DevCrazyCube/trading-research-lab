@@ -1,0 +1,16 @@
+04:51:33
+A done 04:34:48
+surface done 04:35:09
+B done 04:37:13
+C done 04:37:36
+C done 04:41:56
+V done 04:51:22
+===
+total train-kept cells: 66387
+carried to validate (train edge>0 and train p<0.05): 34626
+validated cells evaluated: 32953 t=547.2
+BH q=0.10: 25655 of 32953 survive
+  V trailvol_log=q0|rng=q1|m_v0=2                              t15h25         TR -0.0378 | VA -0.0087 base -0.1477 edge +0.1390 matched +0.0382 n   241 k  25 res 0.979 p 0.0000 BH=True
+  V trailvol_log=q0|age_min=q1|m_v0=2                          t15            TR -0.0432 | VA -0.0176 base -0.1711 edge +0.1536 matched +0.0402 n   116 k  22 res 1.000 p 0.0000 BH=True
+  V volaccel=q0|age_min=q2|m_v0=2                              t15            TR -0.0276 | VA -0.0050 base -0.1711 edge +0.1661 matched +0.0183 n    72 k  17 res 1.000 p 0.0000 BH=True
+  V rvol10=q1|dd_ath=q0|m_ttg=1                                t60            TR -0.0626 | VA -0.0605 base -0.2449 edge +0.1844 matched +0.0742 n   120 k  21 res 0.917 p 0.0000 BH=True

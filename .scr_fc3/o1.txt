@@ -1,0 +1,32 @@
+== /home/anont/meme/research/midcap/grad_ohlcv.sqlite 8904704
+ TBL ohlcv
+   CREATE TABLE ohlcv(
+        mint text primary key, pool text, n_bars int, first_ts int, last_ts int,
+        bars_json text, fetched_at int, status text)
+== /home/anont/meme/research/b11a/window_labels.sqlite 12697600
+ TBL window_label
+   CREATE TABLE window_label (
+            bonding_curve TEXT PRIMARY KEY,
+            mint TEXT NOT NULL,
+            creator TEXT,
+            create_slot INTEGER NOT NULL,
+            block_time INTEGER,
+            complete INTEGER,
+            account_missing INTEGER NOT NULL,
+            status TEXT NOT NULL,
+            creator_onchain TEXT,
+            virtual_token_reserves INTEGER,
+            real_token_reserves INTEGER,
+            data_len INTEGER,
+            fetched_at_unix REAL NOT NULL
+        )
+ TBL metadata
+   CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)
+files: ['EXIT_DISCIPLINE_KILL_20260903.md', 'GRAD_MOMENTUM_PREREGISTRATION.md', 'MIDCAP_FLOW_PREREGISTRATION.md', 'attention.log', 'fresh_seen.json', 'MEMECOIN_CLOSURE_20260904.md', 'attention.jsonl', '.scalpbot.lock', 'gecko.log', 'AGE2H_SESSION_PREREGISTRATION.md', '.attention.lock', 'scalpbot_config.json', 'fresh_snapshots.jsonl', '.collector.lock', '_ps3_engine.py', 'scalpbot_ledger.jsonl', 'scalpbot.log', 'EXOGENOUS_ATTENTION_PREREGISTRATION.md', 'snapshots.jsonl', 'attention_seen.json', 'SIX_HYPOTHESES_RESULT_20260903.md', '.fresh.lock', 'PREREG_SHA256.txt', 'grad_ohlcv.sqlite', 'fresh_collector.log', 'seen_pairs.json', 'gecko_prio.log', 'reversion_harness.py', 'collector.log']
+(672, 66688)
+[('nobars:200', 20), ('nobars:429', 28), ('nopool:429', 30), ('ok', 594)]
+('AkhMGmhkHzdcwvxam1XoXGeaTeXRc1VZ4TUFVdRupump', 'DVicWWswLzfa1FbeRaD1sYYERnxFFsCYnqoCctPEX7LL', 71, 1785169680, 1785241440, '[[1785241440, 1.3986623349909798e-06, 1.3986623349909798e-06, 1.3984662865604283e-06, 1.3984662865604283e-06, 0.07989572166203146], [1785233580, 1.3980139774053158e-06, 1.3986623349909798e-06, 1.3980139774053158e-06, 1.3986623349909798e-06, 0.05919672013435349], [1785218640, 1.3979977800086922e-06, ', 'ok')
+('7AhXcxhEeR7HuqG5XxN4PescwsBiD3rGbKUgnxeApump', '2fPnsWr39z3ya2rdxARbdt5DS3HqguSxBw7afM6E5R4J', 833, 1785195420, 1785254880, '[[1785254880, 4.133607223078428e-05, 4.133607223078428e-05, 4.053905783665077e-05, 4.053905783665077e-05, 30.046807746282756], [1785254820, 4.2165263787091813e-05, 4.2165263787091813e-05, 4.0948165175457305e-05, 4.133607223078428e-05, 71.29701472770459], [1785254760, 4.108185336295965e-05, 4.3688800', 'ok')
+(33866, 8565, 1075)
+[('DjSqk3XLJb4Wboo67WsYkW4BFrzmTNKqQDpRaasbhWdV', 'B6VzvpYJa9nRTX6VNJxwmTAJ1MRnU3Jmyk6VWUxkpump', 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 435569160, 1785168436, 0, 0, 'ok', 'AAShyC4thUYA1bAcwV7YJcMQEz6L5es2dbwn5RUGmwB4', 1073000000000000, 793100000000000, 151, 1788383767.6913838), ('8eVedziyhkPjoUw7qnHbWjQGV3KCq3gbvCJ7Svg8iJBv', 'DnQu4Mg8Y4qV41SwgjthSVHn1UzqVUU8QdpF3tK4pump', 'DwyEawtMyDDVFxgLvaLrDkbQYi8hTb6YWgrpJCKB6UVC', 435569191, 1785168449, 0, 0, 'ok', 'DwyEawtMyDDVFxgLvaLrDkbQYi8hTb6YWgrpJCKB6UVC', 1073000000000000, 793100000000000, 151, 1788383767.6913838), ('6Eht2ZDu4JCKS3nVyuwGkEuTxbL9QDFeebqUAwXRahz2', '6e9dumX8UkKnY6UBXr4LGB9irHwSZWC3WLRgY7jHpump', '9Di6TDgz85Wr6TbeqayLmbZMhGtn4qeNvJQj1G2gQEv8', 435569199, 1785168452, 0, 0, 'ok', '9Di6TDgz85Wr6TbeqayLmbZMhGtn4qeNvJQj1G2gQEv8', 1073000000000000, 793100000000000, 115, 1788383767.6913838)]
+numpy 2.4.6

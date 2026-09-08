@@ -1,0 +1,21 @@
+{
+  "pulled_utc": "2026-08-25T15:28:09.628867+00:00",
+  "coins_seen": 0,
+  "gt_new_pools_ok": false,
+  "pumpportal_discovered": 0,
+  "passed_screen": 0,
+  "rejected_screen": 0,
+  "reject_reason_sample": {},
+  "variants": {
+    "MEMEBOT1": {
+      "paper_entries_opened": [],
+      "control_entries_opened": [],
+      "now_open_positions": 11
+    },
+    "MEMEBOT_FAST": {
+      "paper_entries_opened": [],
+      "control_entries_opened": [],
+      "now_open_positions": 7
+    }
+  }
+}

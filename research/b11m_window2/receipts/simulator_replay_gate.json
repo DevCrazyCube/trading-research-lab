@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "scripts/b10a_simulator_kernel.py",
+    "/home/anont/meme/research/b11m_window2/b11a_bodies.sqlite",
+    "--gate"
+  ],
+  "completed": true,
+  "endpoint": "https://api.mainnet-beta.solana.com",
+  "exit_code": 0,
+  "finished_at": 1787968260,
+  "manifest_sha256": "33da3a7ea16fa20ade57a8ebbeba61e4ce310adf53c7a0406ce08d5327c5e99f",
+  "schema_version": "1.0.0",
+  "stage": "simulator_replay_gate",
+  "started_at": 1787967745,
+  "stderr_log": "/home/anont/meme/research/b11m_window2/logs/simulator_replay_gate.stderr.log",
+  "stdout_log": "/home/anont/meme/research/b11m_window2/logs/simulator_replay_gate.stdout.log"
+}

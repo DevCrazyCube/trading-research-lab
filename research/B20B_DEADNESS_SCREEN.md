@@ -114,3 +114,45 @@ trading.
 *Burned data. A leakage-free observation, not a preregistered result. The honest next step would be
 to freeze this rule and evaluate it once on window 2, which is exactly what the B19 machinery
 exists for.*
+
+---
+
+## OUT-OF-SAMPLE (window-2) forward test — DECODE STATUS (2026-08-24)
+
+**Status: decode RUNNING on the free public RPC; OOS verdict PENDING.** The single blocker — the
+window-2 transaction-body decode that had 0 rows — is now unblocked and collecting.
+
+- **Free RPC confirmed to retain the window-2 slots.** Contrary to the earlier
+  `MEMECOIN_RECHECK.md` note, `https://api.mainnet-beta.solana.com` *does* serve BOTH
+  `getTransaction` and `getBlock` for the window-2 range (slots 437,211,673–438,846,716,
+  block_time ~2026-08). Verified directly: getTransaction on a known window-2 sig resolves; getBlock
+  for a window-2 slot returns 1,329 signatures. So the decode runs for $0, no key, read-only.
+- **The prior death was a code bug, not data unavailability.** `b9d.rpc_request` caught
+  `urllib.error.*`/`TimeoutError` but not a bare `ConnectionResetError` raised inside
+  `response.read()` (an `OSError`, not a urllib subclass). One transient reset after ~3,500 blocks
+  killed the otherwise-resumable run. Fixed: `OSError` added to the retry `except` (it routes to the
+  existing `is_retryable_error`, which already accepts `OSError`, so a genuinely fatal error still
+  exhausts the 8 backoff retries and raises). b9d's source is not hash-pinned by the B20B prereg
+  (only the runner is), so this edit is safe.
+- **Launched detached + resumable.** `research/b11m_window2/run_free_decode.sh` (restart loop; each
+  restart resumes from the per-row checkpoint on the same endpoint → no metadata drift). Settings:
+  `--workers 2 --calls-per-second 4` against the free endpoint. Log:
+  `research/b11m_window2/logs/free_decode.log`. Output DB: `b11a_bodies.sqlite` (fresh, single
+  endpoint; the 3%-complete Chainstack partial was moved to `b11a_bodies.chainstack-partial.sqlite`
+  because the endpoint-drift guard forbids mixing two endpoints' evidence in one artifact).
+- **Scale / ETA.** Full frozen population for the 5,000-curve subsample: **366,688 signatures +
+  118,384 getBlock slots ≈ 485K read-only calls.** The public endpoint throttles hard (429s even at
+  <2 cps), so measured steady rate ≈ **1.87 calls/s** ⇒ **~72 h (~3 days)**. The pinned B20B label
+  needs full-life reserves (real_quote after t0+60), so the *full* population is required — the
+  first-60-slot predictor alone (138k sigs) is not sufficient for the label, and b9d's exhaustive
+  freeze gates refuse a partial anyway.
+- **After the decode (all OFFLINE, no more RPC):** supervisor stage `decode_and_reserves`
+  (`b9d ... decode`, pinned-IDL decode + reserve reconstruction) → then the pinned
+  `b20b_deadness_screen_runner.py` against `--bodies`/`--paths`/`--identity` emits the verdict
+  (CONFIRMED / WEAKENED / FAILED vs the window-1 prior: 77.7% recall, 69.7% precision, ≥30pp lift).
+- **Honest framing unchanged:** this is a loss-*avoidance* entry filter, not an edge. A CONFIRMED
+  verdict means the guaranteed-loss class is filterable out of sample; it creates no return.
+
+**How to check progress:** `tail research/b11m_window2/logs/free_decode.log` and
+`sqlite3 research/b11m_window2/b11a_bodies.sqlite "SELECT count(*) FROM raw_block_signatures;
+SELECT count(*) FROM raw_transaction;"` (targets: 118,384 blocks then 366,688 bodies).

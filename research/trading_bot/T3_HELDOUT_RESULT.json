@@ -1,0 +1,187 @@
+{
+  "preregistration_sha256": "401fd377ce1a6e3d60d618a86c36a7834bdafe81c0240e11540b9c038fe4f29f",
+  "frozen_config": {
+    "window": 10,
+    "cut": 0.1,
+    "top_n": 500
+  },
+  "frozen_file_sha256": "ad671e3df8a2a8ec6936aecde6dcceb796a3f3f4d8e1251287716660a2be9e6d",
+  "test_period": [
+    "2022-01-03",
+    "2026-08-14"
+  ],
+  "test_half_spread": {
+    "median_half_spread_bp": 1.4267370523609657,
+    "p25": 0.8373806732544897,
+    "p75": 2.5170447705660965,
+    "p95": 5.268490374873169,
+    "mean_half_spread_bp": 1.9744259031740223,
+    "n_symbol_days": 19960,
+    "sample_days": 40,
+    "seed": 20260816,
+    "window": "[15:59:59, 16:00:00) ET -- declared deviation, see docstring"
+  },
+  "net": {
+    "label": "net at measured half-spread",
+    "n_nights": 1139,
+    "mean_per_night_bp": 5.351713022768077,
+    "sd_per_night_bp": 66.11004099276258,
+    "t_stat": 2.732041251954208,
+    "sharpe_per_observation": 0.08095159135287722,
+    "annualised_sharpe": 1.2850666737278393,
+    "annualised_return_pct": 13.486316817375554,
+    "cagr_pct": 13.517409391361678,
+    "max_drawdown_pct": -13.996555477953166,
+    "skew": -0.09973507245916705,
+    "kurtosis_non_excess": 12.33744828688097,
+    "final_equity": 1.7941613034981698
+  },
+  "gross_zero_cost": {
+    "label": "gross, zero cost (B19P diagnostic)",
+    "n_nights": 1139,
+    "mean_per_night_bp": 6.839168346316888,
+    "sd_per_night_bp": 66.1085947983257,
+    "t_stat": 3.491461280370284,
+    "sharpe_per_observation": 0.10345354287412717,
+    "annualised_sharpe": 1.6422740801609927,
+    "annualised_return_pct": 17.234704232718556,
+    "cagr_pct": 17.764051511176305,
+    "max_drawdown_pct": -13.273237985657182,
+    "skew": -0.0997270311162924,
+    "kurtosis_non_excess": 12.340052292296617,
+    "final_equity": 2.1251961585852044
+  },
+  "equal_weight_control": {
+    "label": "equal-weight universe overnight",
+    "n_nights": 1139,
+    "mean_per_night_bp": 2.96833318475161,
+    "sd_per_night_bp": 71.18612380226226,
+    "t_stat": 1.4072756197441374,
+    "sharpe_per_observation": 0.04169819939904183,
+    "annualised_sharpe": 0.6619383943742859,
+    "annualised_return_pct": 7.480199625574057,
+    "cagr_pct": 6.936104471891302,
+    "max_drawdown_pct": -21.10672371999245,
+    "skew": -0.29446544434897864,
+    "kurtosis_non_excess": 6.416661325719594,
+    "final_equity": 1.3623093030479687
+  },
+  "long_leg_vs_control": {
+    "label": "fade-buy decile minus control",
+    "n_nights": 1139,
+    "mean_per_night_bp": 8.812566959680339,
+    "sd_per_night_bp": 76.13850190312134,
+    "t_stat": 3.9062493687029387,
+    "sharpe_per_observation": 0.11574389749477146,
+    "annualised_sharpe": 1.837377411267103,
+    "annualised_return_pct": 22.20766873839445,
+    "cagr_pct": 23.427402606638047,
+    "max_drawdown_pct": -11.422463898957702,
+    "skew": 0.26839264138304936,
+    "kurtosis_non_excess": 11.249987438722144,
+    "final_equity": 2.6390427763555433
+  },
+  "short_leg_vs_control": {
+    "label": "control minus fade-sell decile",
+    "n_nights": 1139,
+    "mean_per_night_bp": 4.8657697329534395,
+    "sd_per_night_bp": 76.71770050913054,
+    "t_stat": 2.1405128411465597,
+    "sharpe_per_observation": 0.06342434276134672,
+    "annualised_sharpe": 1.0068302280854584,
+    "annualised_return_pct": 12.261739727042666,
+    "cagr_pct": 11.953958187625036,
+    "max_drawdown_pct": -17.421454563932247,
+    "skew": -0.05155865354656368,
+    "kurtosis_non_excess": 13.293493113701588,
+    "final_equity": 1.6830336546386828
+  },
+  "stress_ladder": {
+    "h (measured)": {
+      "mean_per_night_bp": 5.351713022768077,
+      "t_stat": 2.732041251954208,
+      "annualised_sharpe": 1.2850666737278393,
+      "annualised_return_pct": 13.486316817375554
+    },
+    "2h": {
+      "mean_per_night_bp": 3.9249759704071097,
+      "t_stat": 2.0036941851068915,
+      "annualised_sharpe": 0.9424750156247951,
+      "annualised_return_pct": 9.890939445425918
+    },
+    "4h": {
+      "mean_per_night_bp": 1.0715018656851778,
+      "t_stat": 0.5470000514122605,
+      "annualised_sharpe": 0.2572916994187073,
+      "annualised_return_pct": 2.7001847015266476
+    },
+    "h entry + h exit (auction rail not free)": {
+      "mean_per_night_bp": 3.9249759704071097,
+      "t_stat": 2.0036941851068915,
+      "annualised_sharpe": 0.9424750156247951,
+      "annualised_return_pct": 9.890939445425918
+    },
+    "zero cost": {
+      "mean_per_night_bp": 6.778450075129042,
+      "t_stat": 3.4603883188015225,
+      "annualised_sharpe": 1.6276583318308828,
+      "annualised_return_pct": 17.081694189325187
+    }
+  },
+  "dsr_trials_8": {
+    "dsr": 0.9379418632654088,
+    "name": "deflated Sharpe",
+    "observed_sharpe_per_observation": 0.08095159135287722,
+    "benchmark_sharpe_per_observation": 0.03476479873594816,
+    "benchmark_basis": "expected-max Sharpe under the null",
+    "trials": 8,
+    "sharpe_variance": 0.000567754355321037,
+    "n": 1139,
+    "skew": -0.09973507245916705,
+    "kurtosis_non_excess": 12.33744828688097,
+    "z": 1.5377233435858197,
+    "passes_at_0p95": false
+  },
+  "dsr_trials_24_sensitivity": {
+    "dsr": 0.8696211729347252,
+    "name": "deflated Sharpe",
+    "observed_sharpe_per_observation": 0.08095159135287722,
+    "benchmark_sharpe_per_observation": 0.04717323494050599,
+    "benchmark_basis": "expected-max Sharpe under the null",
+    "trials": 24,
+    "sharpe_variance": 0.000567754355321037,
+    "n": 1139,
+    "skew": -0.09973507245916705,
+    "kurtosis_non_excess": 12.33744828688097,
+    "z": 1.1246021691540136,
+    "passes_at_0p95": false
+  },
+  "label_permutation": {
+    "observed_mean": 0.0006839168346316889,
+    "trials": 10000,
+    "seed": 20260816,
+    "p_right_tail": 9.999000099990002e-05,
+    "null_mean": -1.786326108289775e-06,
+    "null_sd": 4.935672796426084e-05,
+    "null_p95": 7.879629538348777e-05
+  },
+  "exposure_timing_permutation_WIRING_CHECK_ONLY": {
+    "observed": 0.0005351713022768077,
+    "statistic": "mean",
+    "trials": 10000,
+    "seed": 20260816,
+    "p_right_tail": 1.0,
+    "p_left_tail": 1.0,
+    "p_two_tailed": 1.0,
+    "null_p05": 0.0005351713022768077,
+    "null_p50": 0.0005351713022768077,
+    "null_p95": 0.0005351713022768077,
+    "degenerate_exposure": true,
+    "note": "Exposure is shuffled against fixed market returns, so every permutation holds the same positions for the same number of bars. Only the timing changes. A constant exposure permutes to itself and correctly yields p = 1.0."
+  },
+  "gross_t_stat": 3.491461280370284,
+  "kill_conditions_triggered": [
+    "KILL 3: DSR < 0.95 at trials=8"
+  ],
+  "verdict": "DEAD"
+}

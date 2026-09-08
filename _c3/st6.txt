@@ -1,0 +1,54 @@
+04:34:51
+A done 04:34:48
+=== A results ===
+CAPSENS t15 h=1 cap=None mean   -0.1126 med -0.1707 n 2986 k 175
+CAPSENS t15 h=2 cap=None mean   +4.4068 med -0.1645 n 3769 k 207
+CAPSENS t15 h=1 cap=10.0 mean   -0.1660 med -0.1707 n 2986 k 175
+CAPSENS t15 h=2 cap=10.0 mean   -0.1562 med -0.1645 n 3769 k 207
+CAPSENS t15 h=1 cap=3.0 mean   -0.1858 med -0.1707 n 2986 k 175
+CAPSENS t15 h=2 cap=3.0 mean   -0.1711 med -0.1645 n 3769 k 207
+CAPSENS t15 h=1 cap=1.0 mean   -0.1991 med -0.1783 n 2986 k 175
+CAPSENS t15 h=2 cap=1.0 mean   -0.1810 med -0.1680 n 3769 k 207
+SANITY t15 train drop=0.30 toll=0.0114 mean -0.1858 med -0.1707 n 2986 k 175 res 0.9414
+SANITY t15 valid drop=0.30 toll=0.0114 mean -0.1711 med -0.1645 n 3769 k 207 res 0.9451
+SANITY t15 train drop=0.30 toll=0.0250 mean -0.1967 med -0.1823 n 2986 k 175 res 0.9414
+SANITY t15 valid drop=0.30 toll=0.0250 mean -0.1823 med -0.1768 n 3769 k 207 res 0.9451
+SANITY t15 train drop=0.50 toll=0.0114 mean -0.2253 med -0.2017 n 2986 k 175 res 0.9414
+SANITY t15 valid drop=0.50 toll=0.0114 mean -0.2069 med -0.1855 n 3769 k 207 res 0.9451
+SANITY t15 train drop=0.50 toll=0.0250 mean -0.2362 med -0.2136 n 2986 k 175 res 0.9414
+SANITY t15 valid drop=0.50 toll=0.0250 mean -0.2181 med -0.1968 n 3769 k 207 res 0.9451
+SANITY t15 train drop=1.00 toll=0.0114 mean -0.3239 med -0.2642 n 2986 k 175 res 0.9414
+SANITY t15 valid drop=1.00 toll=0.0114 mean -0.2963 med -0.2555 n 3769 k 207 res 0.9451
+SANITY t15 train drop=1.00 toll=0.0250 mean -0.3348 med -0.2761 n 2986 k 175 res 0.9414
+SANITY t15 valid drop=1.00 toll=0.0250 mean -0.3074 med -0.2674 n 3769 k 207 res 0.9451
+meta bucket sizes {'m_ttg': 3, 'm_hour': 4, 'm_creator_prior': 3, 'm_cohort10': 3, 'm_px0': 3, 'm_v0': 3}
+PHASE A done: 3615 cells kept, swept 3936, t=32.6
+  A cumvol_log=q1/6            t15            tr +0.0787 base -0.1858 edge +0.2646 n   546 k  56 p 0.0024
+  A cumvol_log=q1/6            t60tr35        tr +0.0009 base -0.2564 edge +0.2573 n   343 k  56 p 0.0001
+  A cumvol_log=q2/6            t60tr35        tr -0.0019 base -0.2564 edge +0.2544 n   300 k  60 p 0.0002
+  A cumvol_log=q1/6            t15sl25        tr +0.1204 base -0.1126 edge +0.2329 n   881 k  56 p 0.0022
+  A cumvol_log=q2/6            t10            tr +0.0630 base -0.1669 edge +0.2299 n   645 k  60 p 0.0001
+  A cumvol_log=q1/6            t10            tr +0.0519 base -0.1669 edge +0.2188 n   695 k  56 p 0.0036
+  A cumvol_log=q2/6            t15            tr +0.0305 base -0.1858 edge +0.2163 n   499 k  60 p 0.0001
+  A cumvol_log=q2/6            t30sl30        tr +0.0671 base -0.1482 edge +0.2153 n   410 k  60 p 0.0001
+  A rvol10=q1/6                t60            tr -0.0381 base -0.2472 edge +0.2091 n   381 k  71 p 0.0000
+  A cumvol_log=q1/6            t15h25         tr +0.0581 base -0.1482 edge +0.2063 n   546 k  56 p 0.0003
+  A rvol10=q1/6                t60tr35        tr -0.0533 base -0.2564 edge +0.2031 n   391 k  71 p 0.0000
+  A cumvol_log=q2/6            t15sl25        tr +0.0905 base -0.1126 edge +0.2031 n   604 k  60 p 0.0000
+  A cumvol_log=q3/6            t60tr35        tr -0.0538 base -0.2564 edge +0.2026 n   255 k  45 p 0.0073
+  A cumvol_log=q2/6            t30tr25        tr -0.0176 base -0.2194 edge +0.2018 n   451 k  60 p 0.0004
+  A cumvol_log=q1/6            t30tr25        tr -0.0186 base -0.2194 edge +0.2008 n   491 k  56 p 0.0006
+  A age_min=q3/6               t120           tr -0.0917 base -0.2902 edge +0.1985 n   170 k  98 p 0.0000
+  A cumvol_log=q2/6            t30            tr -0.0279 base -0.2242 edge +0.1964 n   332 k  60 p 0.0038
+  A cumvol_log=q3/6            t60sl30        tr +0.0263 base -0.1696 edge +0.1959 n   274 k  45 p 0.0041
+  A rvol10=q1/6                t60sl30        tr +0.0244 base -0.1696 edge +0.1940 n   392 k  71 p 0.0000
+  A px_vs_start=q0/6           t60tr35        tr -0.0715 base -0.2564 edge +0.1848 n   908 k 151 p 0.0000
+  A age_min=q4/6               t120           tr -0.1060 base -0.2902 edge +0.1842 n   179 k  88 p 0.0000
+  A px_vs_start=q0/6           t30tr25        tr -0.0360 base -0.2194 edge +0.1834 n  1197 k 151 p 0.0000
+  A runup=q0/6                 t60tr35        tr -0.0756 base -0.2564 edge +0.1808 n   808 k 158 p 0.0000
+  A cumvol_log=q2/6            t5             tr +0.0420 base -0.1380 edge +0.1801 n  1003 k  60 p 0.0010
+  A rvol10=q1/6                t30            tr -0.0481 base -0.2242 edge +0.1761 n   547 k  71 p 0.0000
+  A cumvol_log=q1/6            t5             tr +0.0375 base -0.1380 edge +0.1755 n  1064 k  56 p 0.0001
+  A cumvol_log=q2/6            t15h25         tr +0.0220 base -0.1482 edge +0.1701 n   499 k  60 p 0.0001
+  A cumvol_log=q2/6            t60h50         tr -0.0236 base -0.1892 edge +0.1656 n   224 k  60 p 0.0043
+  A runup=q0/6                 t30tr25        tr -0.0544 base -0.2194 edge +0.1650 n  1043 k 158 p 0.0000

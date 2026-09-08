@@ -1,0 +1,146 @@
+{
+  "candidate_id": "gh:createworkerai",
+  "display_name": "CreateWorker",
+  "github": "https://github.com/CreateWorkerAI",
+  "website": "https://www.createworker.com",
+  "public_email": "info@createworker.com",
+  "location_text": "Netherlands",
+  "review_flags": [
+    "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+    "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend"
+  ],
+  "score": 52,
+  "score_breakdown": {
+    "own_recent_repos": 18,
+    "recency": 10,
+    "language_breadth": 6,
+    "has_website": 8,
+    "website_reachable": 5,
+    "public_email": 5
+  },
+  "signals": {
+    "recent_repos_total": 3,
+    "recent_repos_own": 3,
+    "recent_repos_forks": 0,
+    "languages": [
+      "JavaScript",
+      "TypeScript"
+    ],
+    "pushed_since_filter": "2026-02-01",
+    "latest_push": "2026-07-17T08:13:05Z",
+    "org_type": "Organization",
+    "enriched": true,
+    "peppol_match": null,
+    "website_reachable": true,
+    "website_title": "Automate Your Workforce with AI Workers | CreateWorker",
+    "review_flags": [
+      "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+      "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend"
+    ]
+  },
+  "exclusions": [],
+  "evidence": [
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository CreateWorkerAI/Claude-Code-Agent (taal: JavaScript) had een commit op 2026-07-17. Omschrijving: “Turn Claude Code into a CreateWorker AI agent — claim tasks, do the work, submit for approval”.",
+      "url": "https://github.com/CreateWorkerAI/Claude-Code-Agent",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "CreateWorkerAI/Claude-Code-Agent",
+        "pushed_at": "2026-07-17T08:13:05Z",
+        "language": "JavaScript",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository CreateWorkerAI/createworker-mcp (taal: TypeScript) had een commit op 2026-07-08. Omschrijving: “MCP (Model Context Protocol) server for CreateWorker — drive AI workers from Claude Code, Claude Desktop, Cursor, and other MCP clients.”.",
+      "url": "https://github.com/CreateWorkerAI/createworker-mcp",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "CreateWorkerAI/createworker-mcp",
+        "pushed_at": "2026-07-08T15:56:15Z",
+        "language": "TypeScript",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository CreateWorkerAI/createworker-node (taal: TypeScript) had een commit op 2026-07-08. Omschrijving: “Official TypeScript/Node SDK for the CreateWorker API — create and run AI agents, read results, approve actions, verify webhooks.”.",
+      "url": "https://github.com/CreateWorkerAI/createworker-node",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "CreateWorkerAI/createworker-node",
+        "pushed_at": "2026-07-08T15:56:13Z",
+        "language": "TypeScript",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_location",
+      "claim_nl": "Het GitHub-profiel van CreateWorkerAI vermeldt als locatie “Netherlands”.",
+      "url": "https://github.com/CreateWorkerAI",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "location": "Netherlands"
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_website",
+      "claim_nl": "Het GitHub-profiel verwijst naar de website https://www.createworker.com.",
+      "url": "https://github.com/CreateWorkerAI",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "website": "https://www.createworker.com"
+      }
+    },
+    {
+      "source": "website",
+      "kind": "live_website",
+      "claim_nl": "De website https://www.createworker.com is bereikbaar en heeft als paginatitel “Automate Your Workforce with AI Workers | CreateWorker”.",
+      "url": "https://www.createworker.com",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "http_status": 200,
+        "title": "Automate Your Workforce with AI Workers | CreateWorker"
+      }
+    }
+  ],
+  "owner_checklist": [
+    "Is dit een Nederlandse onderneming (geen buitenlands filiaal, geen publieke instelling)?",
+    "Klopt het e-mailadres, en is het een zakelijk (geen persoonlijk) adres?",
+    "Zijn de genoemde repositories echt van dit bedrijf en niet van een naamgenoot?",
+    "Staat dit bedrijf niet op de blokkeerlijst / heeft het niet eerder afgemeld?",
+    "Is de RVO-parameterbron nog geldig (bevriezingsdatum hieronder) en de kalender voor 2027 gecontroleerd?",
+    "Klopt de aanname over het aantal ontwikkelaars ruwweg, of moet die naar beneden?"
+  ],
+  "params_frozen_on": "2026-08-19",
+  "generated": "2026-08-19",
+  "sent": false,
+  "sendable": false,
+  "sendable_reason": "sender profile carries placeholders; owner has not registered KVK",
+  "lint_allowed_urls": [
+    "https://github.com/CreateWorkerAI",
+    "https://github.com/CreateWorkerAI/Claude-Code-Agent",
+    "https://github.com/CreateWorkerAI/createworker-mcp",
+    "https://github.com/CreateWorkerAI/createworker-node",
+    "https://voorbeeld.nl",
+    "https://voorbeeld.nl/privacy",
+    "https://www.createworker.com"
+  ],
+  "lint": {
+    "ok": true,
+    "violations": [],
+    "missing": [],
+    "unsourced_urls": [],
+    "unlinked_claims": []
+  }
+}

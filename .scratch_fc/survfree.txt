@@ -1,0 +1,72 @@
+slot->time |residual| sec p50/p90/p99: 8.5 39.1 57.0
+curves with a price path 2672
+launches with path 2672
+np==0 count 1087 np>=1 1585
+grad rate np==0 0.0350  np>=1 0.0139
+
+=== ENTRY age<20 min | HOLD 120m | trail 0.3 | cap +300% | toll 1.14% | dropout -30%
+   np==0            mean=-0.1605 med=-0.3080 k= 735 n= 2926 res=0.822 clus= 733 bootLO=-0.1792 | d-100=-0.5619 toll2.5=-0.1720
+   np>=1            mean=-0.2099 med=-0.3080 k=1452 n= 3595 res=0.671 clus= 559 bootLO=-0.2192 | d-100=-0.6392 toll2.5=-0.2208
+   ALL              mean=-0.1933 med=-0.3080 k=2187 n= 6521 res=0.739 clus=1204 bootLO=-0.2031 | d-100=-0.6132 toll2.5=-0.2044
+   np==0 h2         mean=-0.1492 med=-0.3080 k= 358 n= 1299 res=0.808 clus= 357 bootLO=-0.1769 | d-100=-0.5348 toll2.5=-0.1609
+   np>=1 h2         mean=-0.2013 med=-0.2908 k= 714 n= 1744 res=0.674 clus= 367 bootLO=-0.2133 | d-100=-0.6192 toll2.5=-0.2122
+   np==0 h1         mean=-0.1712 med=-0.3080 k= 377 n= 1627 res=0.833 clus= 377 bootLO=-0.1958 | d-100=-0.5877 toll2.5=-0.1826
+   np>=1 h1         mean=-0.2183 med=-0.3080 k= 738 n= 1851 res=0.667 clus= 380 bootLO=-0.2291 | d-100=-0.6585 toll2.5=-0.2290
+   GRADUATED only   mean=+0.0550 med=-0.3080 k=  60 n=  147 res=0.639 clus=  59 bootLO=-0.0586 | d-100=-0.3861 toll2.5=+0.0405
+   np==0 & GRAD     mean=-0.0287 med=-0.3080 k=  38 n=   76 res=0.579 clus=  38 bootLO=-0.1785 | d-100=-0.5104 toll2.5=-0.0421
+
+=== ENTRY age<20 min | HOLD 120m | trail None | cap +300% | toll 1.14% | dropout -30%
+   np==0            mean=-0.2180 med=-0.3080 k= 735 n=  735 res=0.286 clus= 733 bootLO=-0.2331 | d-100=-0.7123 toll2.5=-0.2288
+   np>=1            mean=-0.2731 med=-0.3080 k=1452 n= 1452 res=0.173 clus= 559 bootLO=-0.2793 | d-100=-0.8455 toll2.5=-0.2831
+   ALL              mean=-0.2546 med=-0.3080 k=2187 n= 2187 res=0.211 clus=1204 bootLO=-0.2622 | d-100=-0.8008 toll2.5=-0.2649
+   np==0 h2         mean=-0.2178 med=-0.3080 k= 358 n=  358 res=0.299 clus= 357 bootLO=-0.2413 | d-100=-0.7030 toll2.5=-0.2286
+   np>=1 h2         mean=-0.2647 med=-0.3080 k= 714 n=  714 res=0.193 clus= 367 bootLO=-0.2748 | d-100=-0.8230 toll2.5=-0.2748
+   np==0 h1         mean=-0.2182 med=-0.3080 k= 377 n=  377 res=0.273 clus= 377 bootLO=-0.2393 | d-100=-0.7211 toll2.5=-0.2289
+   np>=1 h1         mean=-0.2813 med=-0.3080 k= 738 n=  738 res=0.153 clus= 380 bootLO=-0.2866 | d-100=-0.8674 toll2.5=-0.2912
+   GRADUATED only   mean=-0.2386 med=-0.3080 k=  60 n=   60 res=0.083 clus=  59 bootLO=-0.3008 | d-100=-0.8729 toll2.5=-0.2490
+   np==0 & GRAD     mean=-0.1984 med=-0.3080 k=  38 n=   38 res=0.132 clus=  38 bootLO=-0.2956 | d-100=-0.7993 toll2.5=-0.2094
+
+=== ENTRY age<20 min | HOLD 60m | trail 0.3 | cap +300% | toll 1.14% | dropout -30%
+   np==0            mean=-0.1593 med=-0.3080 k= 735 n= 2926 res=0.829 clus= 733 bootLO=-0.1777 | d-100=-0.5492 toll2.5=-0.1709
+   np>=1            mean=-0.2061 med=-0.3080 k=1452 n= 3595 res=0.681 clus= 559 bootLO=-0.2161 | d-100=-0.6244 toll2.5=-0.2170
+   ALL              mean=-0.1904 med=-0.3080 k=2187 n= 6521 res=0.747 clus=1204 bootLO=-0.1991 | d-100=-0.5992 toll2.5=-0.2015
+   np==0 h2         mean=-0.1534 med=-0.2937 k= 358 n= 1299 res=0.816 clus= 357 bootLO=-0.1801 | d-100=-0.5271 toll2.5=-0.1651
+   np>=1 h2         mean=-0.1973 med=-0.2728 k= 714 n= 1744 res=0.683 clus= 367 bootLO=-0.2082 | d-100=-0.6051 toll2.5=-0.2083
+   np==0 h1         mean=-0.1649 med=-0.3080 k= 377 n= 1627 res=0.839 clus= 377 bootLO=-0.1890 | d-100=-0.5702 toll2.5=-0.1764
+   np>=1 h1         mean=-0.2146 med=-0.3080 k= 738 n= 1851 res=0.678 clus= 380 bootLO=-0.2261 | d-100=-0.6431 toll2.5=-0.2254
+   GRADUATED only   mean=+0.0591 med=-0.3080 k=  60 n=  147 res=0.639 clus=  59 bootLO=-0.0639 | d-100=-0.3820 toll2.5=+0.0445
+   np==0 & GRAD     mean=-0.0222 med=-0.3080 k=  38 n=   76 res=0.579 clus=  38 bootLO=-0.1758 | d-100=-0.5039 toll2.5=-0.0357
+
+=== ENTRY age<60 min | HOLD 120m | trail 0.3 | cap +300% | toll 1.14% | dropout -30%
+   np==0            mean=-0.1751 med=-0.3080 k= 735 n= 3316 res=0.843 clus= 733 bootLO=-0.1908 | d-100=-0.5770 toll2.5=-0.1864
+   np>=1            mean=-0.2115 med=-0.3080 k=1452 n= 3633 res=0.673 clus= 559 bootLO=-0.2207 | d-100=-0.6410 toll2.5=-0.2224
+   ALL              mean=-0.1993 med=-0.3080 k=2187 n= 6949 res=0.754 clus=1204 bootLO=-0.2074 | d-100=-0.6195 toll2.5=-0.2103
+   np==0 h2         mean=-0.1612 med=-0.3080 k= 358 n= 1476 res=0.831 clus= 357 bootLO=-0.1878 | d-100=-0.5467 toll2.5=-0.1727
+   np>=1 h2         mean=-0.2043 med=-0.2908 k= 714 n= 1772 res=0.678 clus= 367 bootLO=-0.2157 | d-100=-0.6226 toll2.5=-0.2152
+   np==0 h1         mean=-0.1883 med=-0.3080 k= 377 n= 1840 res=0.852 clus= 377 bootLO=-0.2078 | d-100=-0.6057 toll2.5=-0.1994
+   np>=1 h1         mean=-0.2185 med=-0.3080 k= 738 n= 1861 res=0.668 clus= 380 bootLO=-0.2301 | d-100=-0.6589 toll2.5=-0.2292
+   GRADUATED only   mean=+0.0090 med=-0.3080 k=  60 n=  164 res=0.671 clus=  59 bootLO=-0.0814 | d-100=-0.4328 toll2.5=-0.0049
+   np==0 & GRAD     mean=-0.1009 med=-0.3080 k=  38 n=   91 res=0.648 clus=  38 bootLO=-0.1976 | d-100=-0.5826 toll2.5=-0.1133
+
+=== ENTRY age<20 min | HOLD 30m | trail None | cap +300% | toll 1.14% | dropout -30%
+   np==0            mean=-0.1773 med=-0.3080 k= 735 n=  735 res=0.348 clus= 733 bootLO=-0.1994 | d-100=-0.6282 toll2.5=-0.1886
+   np>=1            mean=-0.2561 med=-0.3080 k=1452 n= 1452 res=0.225 clus= 559 bootLO=-0.2651 | d-100=-0.7923 toll2.5=-0.2663
+   ALL              mean=-0.2296 med=-0.3080 k=2187 n= 2187 res=0.267 clus=1204 bootLO=-0.2394 | d-100=-0.7371 toll2.5=-0.2402
+   np==0 h2         mean=-0.1949 med=-0.3080 k= 358 n=  358 res=0.363 clus= 357 bootLO=-0.2224 | d-100=-0.6356 toll2.5=-0.2060
+   np>=1 h2         mean=-0.2480 med=-0.3080 k= 714 n=  714 res=0.242 clus= 367 bootLO=-0.2605 | d-100=-0.7723 toll2.5=-0.2583
+   np==0 h1         mean=-0.1605 med=-0.3080 k= 377 n=  377 res=0.334 clus= 377 bootLO=-0.1978 | d-100=-0.6212 toll2.5=-0.1720
+   np>=1 h1         mean=-0.2640 med=-0.3080 k= 738 n=  738 res=0.209 clus= 380 bootLO=-0.2758 | d-100=-0.8116 toll2.5=-0.2741
+   GRADUATED only   mean=-0.0954 med=-0.3080 k=  60 n=   60 res=0.133 clus=  59 bootLO=-0.2351 | d-100=-0.6951 toll2.5=-0.1078
+   np==0 & GRAD     mean=-0.1440 med=-0.3080 k=  38 n=   38 res=0.158 clus=  38 bootLO=-0.2845 | d-100=-0.7268 toll2.5=-0.1558
+
+=== ENTRY age<inf min | HOLD 120m | trail 0.3 | cap +300% | toll 1.14% | dropout -30%
+   np==0            mean=-0.2065 med=-0.3080 k= 735 n= 4039 res=0.847 clus= 733 bootLO=-0.2149 | d-100=-0.6302 toll2.5=-0.2174
+   np>=1            mean=-0.2184 med=-0.3080 k=1452 n= 4026 res=0.674 clus= 559 bootLO=-0.2277 | d-100=-0.6634 toll2.5=-0.2292
+   ALL              mean=-0.2144 med=-0.3080 k=2187 n= 8065 res=0.761 clus=1204 bootLO=-0.2213 | d-100=-0.6522 toll2.5=-0.2252
+   np==0 h2         mean=-0.1953 med=-0.3036 k= 358 n= 1778 res=0.834 clus= 357 bootLO=-0.2102 | d-100=-0.6041 toll2.5=-0.2064
+   np>=1 h2         mean=-0.2120 med=-0.2908 k= 714 n= 2015 res=0.683 clus= 367 bootLO=-0.2224 | d-100=-0.6464 toll2.5=-0.2228
+   np==0 h1         mean=-0.2172 med=-0.3080 k= 377 n= 2261 res=0.858 clus= 377 bootLO=-0.2298 | d-100=-0.6550 toll2.5=-0.2279
+   np>=1 h1         mean=-0.2247 med=-0.3080 k= 738 n= 2011 res=0.665 clus= 380 bootLO=-0.2357 | d-100=-0.6798 toll2.5=-0.2354
+   GRADUATED only   mean=+0.0161 med=-0.3080 k=  60 n=  199 res=0.698 clus=  59 bootLO=-0.0838 | d-100=-0.4362 toll2.5=+0.0021
+   np==0 & GRAD     mean=-0.0897 med=-0.3080 k=  38 n=  126 res=0.698 clus=  38 bootLO=-0.1915 | d-100=-0.5880 toll2.5=-0.1022
+elapsed 40.9

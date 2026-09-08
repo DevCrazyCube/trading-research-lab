@@ -1,0 +1,120 @@
+{
+ "median_dollar_volume": {
+  "BFUSDUSDT": 5504056.0,
+  "BUSDUSDT": 338482416.0,
+  "FDUSDUSDT": 302321808.0,
+  "PAXUSDT": 5888258.0,
+  "RLUSDUSDT": 18689392.0,
+  "SUSDUSDT": 167719.0,
+  "TUSDUSDT": 5948682.0,
+  "USD1USDT": 55738832.0,
+  "USDCUSDT": 202056592.0,
+  "USDEUSDT": 4767174.0,
+  "USDPUSDT": 842502.0,
+  "USDSUSDT": 54493.0,
+  "USTUSDT": 92058520.0,
+  "UUSDT": 15202093.0,
+  "XUSDUSDT": 6983079.0
+ },
+ "grid": [
+  {
+   "floor_musd": 0.0,
+   "formula": "A2_PEG_BAND20",
+   "Dgross": 0.154,
+   "Dnet": -0.292,
+   "Dnet_t": -0.625,
+   "Hgross": 1.527,
+   "Hnet": 0.359,
+   "Hnet_t": 0.679,
+   "days_on": 1915
+  },
+  {
+   "floor_musd": 0.0,
+   "formula": "A12_PEG_BAND20_SEASONED",
+   "Dgross": 2.641,
+   "Dnet": 1.315,
+   "Dnet_t": 2.819,
+   "Hgross": 1.17,
+   "Hnet": 0.382,
+   "Hnet_t": 0.724,
+   "days_on": 1415
+  },
+  {
+   "floor_musd": 0.0,
+   "formula": "A6_PEG_PREM_ONLY",
+   "Dgross": 1.355,
+   "Dnet": 0.836,
+   "Dnet_t": 1.791,
+   "Hgross": 1.18,
+   "Hnet": 0.492,
+   "Hnet_t": 0.931,
+   "days_on": 838
+  },
+  {
+   "floor_musd": 5.0,
+   "formula": "A2_PEG_BAND20",
+   "Dgross": -0.314,
+   "Dnet": -0.533,
+   "Dnet_t": -1.142,
+   "Hgross": 1.385,
+   "Hnet": 0.391,
+   "Hnet_t": 0.74,
+   "days_on": 1187
+  },
+  {
+   "floor_musd": 5.0,
+   "formula": "A12_PEG_BAND20_SEASONED",
+   "Dgross": 1.856,
+   "Dnet": 0.694,
+   "Dnet_t": 1.486,
+   "Hgross": 1.009,
+   "Hnet": 0.417,
+   "Hnet_t": 0.789,
+   "days_on": 934
+  },
+  {
+   "floor_musd": 5.0,
+   "formula": "A6_PEG_PREM_ONLY",
+   "Dgross": 0.608,
+   "Dnet": 0.193,
+   "Dnet_t": 0.415,
+   "Hgross": 1.203,
+   "Hnet": 0.579,
+   "Hnet_t": 1.096,
+   "days_on": 406
+  },
+  {
+   "floor_musd": 25.0,
+   "formula": "A2_PEG_BAND20",
+   "Dgross": -0.575,
+   "Dnet": -0.622,
+   "Dnet_t": -1.333,
+   "Hgross": 2.436,
+   "Hnet": 0.813,
+   "Hnet_t": 1.539,
+   "days_on": 719
+  },
+  {
+   "floor_musd": 25.0,
+   "formula": "A12_PEG_BAND20_SEASONED",
+   "Dgross": 1.219,
+   "Dnet": -0.031,
+   "Dnet_t": -0.066,
+   "Hgross": 1.809,
+   "Hnet": 0.562,
+   "Hnet_t": 1.063,
+   "days_on": 631
+  },
+  {
+   "floor_musd": 25.0,
+   "formula": "A6_PEG_PREM_ONLY",
+   "Dgross": 0.799,
+   "Dnet": 0.084,
+   "Dnet_t": 0.18,
+   "Hgross": 2.359,
+   "Hnet": 1.269,
+   "Hnet_t": 2.401,
+   "days_on": 179
+  }
+ ]
+}

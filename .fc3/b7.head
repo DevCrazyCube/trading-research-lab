@@ -1,0 +1,35 @@
+validated 68 train-survivors (train mean>0 AND train CI-lo>0)
+SURVIVORS on validate (v_mean>0 and v_cilo>0 and beats matched random):
+count=5
+age=any      dd=.9-1  lvl=3+    rv=.02-.2 H=30  tp=0.4   sl=-0.25 all   | TR mean=+0.1310 n= 40 k= 16 | VA mean=+0.1735 med=+0.0266 cilo=+0.0968 n= 73 k= 23 res=0.97 | ctrl_match=+0.0248(sd 0.014) ctrl_uncond=-0.0943
+age=any      dd=any   lvl=3+    rv=.02-.2 H=120 tp=0.4   sl=-0.25 all   | TR mean=+0.0858 n= 48 k= 24 | VA mean=+0.1305 med=-0.2585 cilo=+0.0542 n=146 k= 32 res=0.97 | ctrl_match=+0.0170(sd 0.022) ctrl_uncond=-0.1117
+age=10-30    dd=any   lvl=3+    rv=any    H=120 tp=0.4   sl=-0.25 all   | TR mean=+0.1443 n= 42 k= 23 | VA mean=+0.0842 med=-0.2585 cilo=+0.0090 n=118 k= 36 res=0.97 | ctrl_match=+0.0102(sd 0.017) ctrl_uncond=-0.1117
+age=3-10     dd=.9-1  lvl=any   rv=any    H=120 tp=1.0   sl=-0.25 all   | TR mean=+0.1716 n= 45 k= 39 | VA mean=+0.1191 med=-0.2585 cilo=+0.0010 n= 63 k= 53 res=0.97 | ctrl_match=-0.0192(sd 0.032) ctrl_uncond=-0.1049
+age=3-10     dd=.9-1  lvl=any   rv=any    H=60  tp=1.0   sl=-0.25 all   | TR mean=+0.2566 n= 45 k= 39 | VA mean=+0.1167 med=-0.2585 cilo=+0.0005 n= 63 k= 53 res=0.97 | ctrl_match=-0.0084(sd 0.027) ctrl_uncond=-0.0954
+
+--- all 68, sorted by validate CI-lo (top 25) ---
+age=any      dd=.9-1  lvl=3+    rv=.02-.2 H=30  tp=0.4   sl=-0.25 all   TRm=+0.1310 VAm=+0.1735 VAlo=+0.0968 VAn= 73 VAk= 23 ctrl=+0.0248
+age=any      dd=any   lvl=3+    rv=.02-.2 H=120 tp=0.4   sl=-0.25 all   TRm=+0.0858 VAm=+0.1305 VAlo=+0.0542 VAn=146 VAk= 32 ctrl=+0.0170
+age=10-30    dd=any   lvl=3+    rv=any    H=120 tp=0.4   sl=-0.25 all   TRm=+0.1443 VAm=+0.0842 VAlo=+0.0090 VAn=118 VAk= 36 ctrl=+0.0102
+age=3-10     dd=.9-1  lvl=any   rv=any    H=120 tp=1.0   sl=-0.25 all   TRm=+0.1716 VAm=+0.1191 VAlo=+0.0010 VAn= 63 VAk= 53 ctrl=-0.0192
+age=3-10     dd=.9-1  lvl=any   rv=any    H=60  tp=1.0   sl=-0.25 all   TRm=+0.2566 VAm=+0.1167 VAlo=+0.0005 VAn= 63 VAk= 53 ctrl=-0.0084
+age=10-30    dd=any   lvl=3+    rv=any    H=240 tp=0.4   sl=-0.25 all   TRm=+0.1201 VAm=+0.0731 VAlo=-0.0032 VAn=118 VAk= 36 ctrl=+0.0046
+age=10-30    dd=any   lvl=3+    rv=any    H=60  tp=0.4   sl=-0.25 all   TRm=+0.1314 VAm=+0.0701 VAlo=-0.0036 VAn=118 VAk= 36 ctrl=+0.0084
+age=any      dd=.9-1  lvl=any   rv=any    H=120 tp=1.0   sl=-0.25 first TRm=+0.1253 VAm=+0.0725 VAlo=-0.0053 VAn=105 VAk=105 ctrl=+0.0988
+age=any      dd=.9-1  lvl=any   rv=.02-.2 H=60  tp=1.0   sl=-0.25 all   TRm=+0.1232 VAm=+0.0871 VAlo=-0.0105 VAn=115 VAk= 60 ctrl=-0.0364
+age=10-30    dd=any   lvl=3+    rv=any    H=30  tp=0.4   sl=-0.25 all   TRm=+0.1173 VAm=+0.0507 VAlo=-0.0160 VAn=118 VAk= 36 ctrl=+0.0033
+age=any      dd=.9-1  lvl=any   rv=any    H=60  tp=1.0   sl=-0.25 first TRm=+0.1519 VAm=+0.0557 VAlo=-0.0192 VAn=105 VAk=105 ctrl=+0.0831
+age=3-10     dd=.9-1  lvl=any   rv=any    H=15  tp=1.0   sl=-0.25 all   TRm=+0.1209 VAm=+0.0382 VAlo=-0.0210 VAn= 63 VAk= 53 ctrl=-0.0219
+age=3-10     dd=.9-1  lvl=any   rv=any    H=15  tp=0.4   sl=-0.25 all   TRm=+0.0855 VAm=+0.0300 VAlo=-0.0234 VAn= 64 VAk= 53 ctrl=-0.0223
+age=3-10     dd=.9-1  lvl=any   rv=any    H=240 tp=0.4   sl=-0.25 all   TRm=+0.1143 VAm=+0.0470 VAlo=-0.0246 VAn= 64 VAk= 53 ctrl=-0.0478
+age=any      dd=.9-1  lvl=any   rv=any    H=15  tp=1.0   sl=-0.25 first TRm=+0.0824 VAm=+0.0310 VAlo=-0.0248 VAn=105 VAk=105 ctrl=+0.0674
+age=3-10     dd=.9-1  lvl=any   rv=any    H=120 tp=0.4   sl=-0.25 all   TRm=+0.1296 VAm=+0.0430 VAlo=-0.0281 VAn= 64 VAk= 53 ctrl=-0.0347
+age=3-10     dd=.9-1  lvl=any   rv=any    H=30  tp=0.4   sl=-0.25 all   TRm=+0.0920 VAm=+0.0373 VAlo=-0.0289 VAn= 64 VAk= 53 ctrl=-0.0271
+age=3-10     dd=.9-1  lvl=any   rv=any    H=30  tp=1.0   sl=-0.25 all   TRm=+0.1716 VAm=+0.0499 VAlo=-0.0301 VAn= 63 VAk= 53 ctrl=-0.0298
+age=3-10     dd=.9-1  lvl=any   rv=any    H=60  tp=0.4   sl=-0.25 all   TRm=+0.1303 VAm=+0.0367 VAlo=-0.0330 VAn= 64 VAk= 53 ctrl=-0.0322
+age=any      dd=.9-1  lvl=any   rv=any    H=240 tp=1.0   sl=-0.25 first TRm=+0.1181 VAm=+0.0461 VAlo=-0.0335 VAn=105 VAk=105 ctrl=+0.0742
+age=any      dd=.9-1  lvl=any   rv=any    H=30  tp=1.0   sl=-0.25 first TRm=+0.1114 VAm=+0.0244 VAlo=-0.0368 VAn=105 VAk=105 ctrl=+0.0574
+age=any      dd=.9-1  lvl=any   rv=any    H=30  tp=0.4   sl=-0.25 first TRm=+0.0657 VAm=+0.0050 VAlo=-0.0394 VAn=105 VAk=105 ctrl=+0.0303
+age=any      dd=.9-1  lvl=any   rv=any    H=120 tp=0.4   sl=-0.25 first TRm=+0.0820 VAm=+0.0044 VAlo=-0.0426 VAn=105 VAk=105 ctrl=+0.0268
+age=any      dd=.9-1  lvl=any   rv=any    H=240 tp=0.4   sl=-0.25 first TRm=+0.0787 VAm=+0.0039 VAlo=-0.0432 VAn=105 VAk=105 ctrl=+0.0291
+age=3-10     dd=.9-1  lvl=any   rv=any    H=240 tp=1.0   sl=-0.25 all   TRm=+0.1716 VAm=+0.0736 VAlo=-0.0448 VAn= 63 VAk= 53 ctrl=-0.0425rc=0

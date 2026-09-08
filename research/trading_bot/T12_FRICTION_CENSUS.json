@@ -1,0 +1,41 @@
+{
+  "alpaca_universe_match": {
+    "cef_tickers": 360,
+    "found_active_at_alpaca": 358,
+    "not_found": [
+      "BXSY",
+      "FXBY"
+    ],
+    "tradable": 358,
+    "shortable": 186,
+    "easy_to_borrow": 186,
+    "shortable_share": 0.5196,
+    "note": "LIVE FLAGS, NO HISTORY. This bounds what is executable today; it cannot be backtested and is not applied as a historical universe screen anywhere."
+  },
+  "measured_quoted_half_spread": {
+    "n_symbol_days": 3067,
+    "days_sampled": [
+      "2025-08-15",
+      "2025-08-22",
+      "2025-10-03",
+      "2025-10-10",
+      "2025-10-31",
+      "2026-01-09",
+      "2026-03-27",
+      "2026-04-17",
+      "2026-06-05",
+      "2026-06-19",
+      "2026-07-31",
+      "2026-08-14"
+    ],
+    "seed": 20260817,
+    "median_half_spread_bp": 11.525163273146124,
+    "p25": 7.147962830593128,
+    "p75": 18.382352941176897,
+    "p90": 27.247956403269615,
+    "p95": 36.40436852422362,
+    "max": 185.73996405032986,
+    "min": 1.249219237976016,
+    "window": "[15:59:59, 16:00:00) ET, SIP quotes, median per symbol-day"
+  }
+}

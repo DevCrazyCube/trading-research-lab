@@ -30,7 +30,18 @@ from .net import http_get_json
 KALSHI_EVENTS = ("https://api.elections.kalshi.com/trade-api/v2/events"
                  "?limit=200&status=open&with_nested_markets=true")
 POLY_EVENTS = ("https://gamma-api.polymarket.com/events?closed=false&limit={limit}"
-               "&order=volume&ascending=false&tag_slug={tag}")
+               "&order=volume&ascending=false&tag_slug={tag}&offset={offset}")
+
+# T48 (2026-09-03) -- SILENT TRUNCATION FIX.  Both venue endpoints are PAGED and both were being read
+# one page deep, so the proposer saw an arbitrary slice of an undisclosed API ordering and could not
+# tell.  Measured at the fix: Kalshi returned exactly its 200-event page-1 with a non-empty `cursor`,
+# of which only 39 events were rank-1 political -> 268 political markets visible out of >=11,687 that
+# exist (<=2.3% of the book).  Polymarket hit its per-tag event cap on 6 of 8 declared tags.  Page
+# depth is now bounded and, crucially, ALWAYS REPORTED: `feed_stats` carries pages/events/exhausted
+# per feed and `pull_open_markets` raises a DATA_PATH warning whenever a feed is still truncated or a
+# declared tag returns nothing.  A truncation you can see is a bounded sample; one you cannot is a bug.
+KALSHI_MAX_PAGES = 60          # 200 events/page; bounded so a pull can never become an unbounded crawl
+POLY_MAX_PAGES_PER_TAG = 6     # per declared tag, at --poly-limit events/page
 
 # Rank-1 categories only (scope §7). Kalshi event categories:
 KALSHI_POLITICAL_CATEGORIES = frozenset({"Politics", "Elections", "World"})
@@ -116,11 +127,31 @@ def _kalshi_price(m: dict, key: str):
         return None
 
 
-def pull_kalshi() -> list:
-    data = http_get_json(KALSHI_EVENTS)
+def pull_kalshi(max_pages: int = KALSHI_MAX_PAGES) -> tuple[list, dict]:
+    """Page the Kalshi event feed by cursor up to `max_pages`, returning (markets, feed_stats).
+
+    Returns the stats alongside the rows so silent truncation is impossible: the caller always learns
+    how deep the read went and whether the feed was exhausted.
+    """
     now = _iso_now()
     out = []
-    for e in data.get("events", []):
+    events, cursor, pages = [], None, 0
+    while pages < max_pages:
+        url = KALSHI_EVENTS + (f"&cursor={cursor}" if cursor else "")
+        data = http_get_json(url)
+        page = data.get("events", [])
+        if not page:
+            break
+        events.extend(page)
+        pages += 1
+        cursor = data.get("cursor")
+        if not cursor:
+            break
+    stats = {"pages": pages, "events_scanned": len(events),
+             "exhausted": not cursor,
+             "political_events": sum(1 for e in events
+                                     if e.get("category") in KALSHI_POLITICAL_CATEGORIES)}
+    for e in events:
         if e.get("category") not in KALSHI_POLITICAL_CATEGORIES:
             continue
         etitle = e.get("title") or ""
@@ -143,7 +174,8 @@ def pull_kalshi() -> list:
                 resolution_criteria=(m.get("rules_primary") or ""),
                 url_ref=f"https://kalshi.com/markets/{m.get('event_ticker')}",
                 fetched_utc=now))
-    return out
+    stats["markets"] = len(out)
+    return out, stats
 
 
 # --------------------------------------------------------------------------- Polymarket
@@ -164,14 +196,33 @@ def _poly_yes_price(m: dict):
         return None
 
 
-def pull_polymarket(limit: int = 40) -> list:
+def pull_polymarket(limit: int = 100, max_pages_per_tag: int = POLY_MAX_PAGES_PER_TAG) -> tuple[list, dict]:
+    """Page each declared political tag by offset up to `max_pages_per_tag`; return (markets, stats).
+
+    `stats["tags"][tag]` records events/pages/exhausted per DECLARED tag, so a tag that silently
+    returns nothing (a feed declared but not represented) is visible instead of being averaged away.
+    """
     now = _iso_now()
     seen, out = set(), []
+    tag_stats = {}
     for tag in POLY_POLITICAL_TAGS:
-        try:
-            events = http_get_json(POLY_EVENTS.format(limit=limit, tag=tag))
-        except Refused:
-            continue
+        events, pages, exhausted = [], 0, True
+        while pages < max_pages_per_tag:
+            try:
+                page = http_get_json(POLY_EVENTS.format(limit=limit, tag=tag,
+                                                        offset=pages * limit))
+            except Refused as exc:
+                tag_stats[tag] = {"events": len(events), "pages": pages, "exhausted": False,
+                                  "error": str(exc)[:160]}
+                events, exhausted = events, False
+                break
+            pages += 1
+            events.extend(page)
+            if len(page) < limit:
+                exhausted = True
+                break
+            exhausted = False
+        tag_stats.setdefault(tag, {"events": len(events), "pages": pages, "exhausted": exhausted})
         for e in events:
             tags = [t.get("slug") for t in (e.get("tags") or [])]
             for m in e.get("markets", []):
@@ -200,18 +251,46 @@ def pull_polymarket(limit: int = 40) -> list:
                     resolution_criteria=(m.get("description") or ""),
                     url_ref=f"https://polymarket.com/event/{e.get('slug')}",
                     fetched_utc=now))
-    return out
+    stats = {"tags": tag_stats, "markets": len(out),
+             "events_scanned": sum(t["events"] for t in tag_stats.values()),
+             "exhausted": all(t["exhausted"] for t in tag_stats.values()),
+             "empty_tags": sorted(t for t, v in tag_stats.items() if v["events"] == 0)}
+    return out, stats
 
 
-def pull_open_markets(spec: dict, *, min_volume: float = 0.0, poly_limit: int = 40) -> dict:
+def data_path_warnings(feed_stats: dict) -> list:
+    """T48 criterion (b): every DECLARED feed must actually be represented, and no feed may be
+    silently truncated. Returns a list of human-readable warnings (empty == clean)."""
+    warn = []
+    for name, st in feed_stats.items():
+        if st.get("error"):
+            warn.append(f"{name}: FEED ERROR -- {st['error']}")
+        if not st.get("exhausted", True):
+            warn.append(f"{name}: TRUNCATED -- page cap hit, the book is deeper than this read "
+                        f"({st.get('events_scanned')} events, {st.get('markets')} markets). "
+                        "The unseen remainder is selected by the venue's own ordering, not by us.")
+        if not st.get("markets"):
+            warn.append(f"{name}: NOT REPRESENTED -- contributed 0 markets to this pull")
+        for tag in st.get("empty_tags", []):
+            warn.append(f"{name}: declared tag {tag!r} returned 0 events (declared but not represented)")
+    return warn
+
+
+def pull_open_markets(spec: dict, *, min_volume: float = 0.0, poly_limit: int = 100,
+                      kalshi_max_pages: int = KALSHI_MAX_PAGES,
+                      poly_max_pages: int = POLY_MAX_PAGES_PER_TAG) -> dict:
     """Pull both venues, tag each market selectable/skipped, and attach the modeled round-trip cost."""
-    markets, errors = [], {}
-    for name, fn in (("kalshi", pull_kalshi),
-                     ("polymarket", lambda: pull_polymarket(limit=poly_limit))):
+    markets, errors, feed_stats = [], {}, {}
+    for name, fn in (("kalshi", lambda: pull_kalshi(max_pages=kalshi_max_pages)),
+                     ("polymarket", lambda: pull_polymarket(limit=poly_limit,
+                                                            max_pages_per_tag=poly_max_pages))):
         try:
-            markets.extend(fn())
+            rows, stats = fn()
+            markets.extend(rows)
+            feed_stats[name] = stats
         except Refused as exc:
             errors[name] = str(exc)
+            feed_stats[name] = {"markets": 0, "exhausted": False, "error": str(exc)[:160]}
     for m in markets:
         ok, reason = is_selectable(m, spec, min_volume=min_volume)
         m["selectable"] = ok
@@ -220,4 +299,6 @@ def pull_open_markets(spec: dict, *, min_volume: float = 0.0, poly_limit: int = 
             m["round_trip_cost"] = round(round_trip_cost(m["venue"], m["p_market"], m["spread"], spec), 4)
     return {"pulled_utc": _iso_now(), "n_markets": len(markets),
             "n_selectable": sum(1 for m in markets if m["selectable"]),
-            "errors": errors, "markets": markets}
+            "errors": errors, "feed_stats": feed_stats,
+            "data_path_warnings": data_path_warnings(feed_stats),
+            "markets": markets}

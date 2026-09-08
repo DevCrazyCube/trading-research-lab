@@ -1,0 +1,74 @@
+h12 mints loaded 382 bars 46136
+mints with metadata 382
+features+triggers built  t=98s
+n conditions 52
+signals precomputed t=99s
+signal counts: {'all': 45754, 'r5<=-50': 1791, 'r5<=-30': 2885, 'r5>=+50': 957, 'r5>=+100': 439, 'r15<=-60': 1936}
+=== COMBINED FULL-RANGE PASS ===
+    H  ctrl_mean   ctrl_med  ctrl_trim      k   trades    res%
+    1     -3.58%     -4.59%     -7.79%    207    15338   98.7
+    2     -6.92%     -6.25%     -9.53%    207    11390   98.1
+    3     -5.56%     -7.49%    -10.58%    207     9283   97.3
+    5     +3.96%    -11.01%    -12.49%    207     7033   96.2
+   15   +540.40%    -16.83%    -17.45%    207     3819   89.0
+   30   +518.26%    -20.48%    -20.91%    207     2700   79.5
+   60   +252.07%    -27.38%    -25.66%    207     2311   57.2
+  120     -3.99%    -30.00%    -31.89%    207     2290   35.0
+  240    -19.81%    -31.60%    -36.13%    207     2867   16.2
+  360    -25.78%    -32.82%    -38.04%    207     5560    5.6
+  720    -37.09%    -32.52%    -38.32%    207     7922    1.8
+controls built t=131s
+combos (excl all): 51612
+R1 train trimmed > control trimmed      : 28793
+R2 + validate trimmed > control trimmed : 24084
+R3 + validate trimmed > 0               : 233
+R4 + train trimmed > 0 (BOTH halves +)  : 126
+R5 + validate bootstrap lo(trim) > 0    : 0
+--- the 126 cells positive on BOTH halves, ranked by validate bootstrap lower bound ---
+  burst          H=   2 tp5          dip_add   tr=  +3.12%(med  +0.34%,k23,n40) va=  +0.92%(med  -0.70%,mean    +1.15%,k24,n41) lo=  -3.20% ctrl=  -5.51% res=100%
+  burst          H=   2 tp5_sl15     dip_add   tr=  +2.88%(med  +0.34%,k23,n40) va=  +0.83%(med  -0.70%,mean    +0.85%,k24,n41) lo=  -3.51% ctrl=  -5.32% res=100%
+  burst          H=   2 tp5_sl15     brk_add   tr=  +2.88%(med  +0.34%,k23,n40) va=  +0.83%(med  -0.70%,mean    +0.85%,k24,n41) lo=  -3.51% ctrl=  -5.32% res=100%
+  burst          H=   2 tp5          brk_add   tr=  +2.96%(med  +0.34%,k23,n40) va=  +0.73%(med  -0.70%,mean    +0.90%,k24,n41) lo=  -3.55% ctrl=  -5.45% res=100%
+  burst          H=   1 hold         dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 hold         brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp5          dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp5          brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp10         dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp10         brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp25         dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp25         brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp50         dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp50         brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp100        dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp100        brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp300        dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp300        brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp1000       dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp1000       brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 sl15         dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 sl15         brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 sl25         dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 sl25         brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 sl50         dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 sl50         brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 sl80         dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 sl80         brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp5_sl15     dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp5_sl15     brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp25_sl25    dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp25_sl25    brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp50_sl25    dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp50_sl25    brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp100_sl50   dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp100_sl50   brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp1000_sl80  dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp1000_sl80  brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp300_sl50   dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 tp300_sl50   brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 trail25      dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 trail25      brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 trail50      dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 trail50      brk_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+  burst          H=   1 gapexit      dip_add   tr=  +1.02%(med  -0.25%,k23,n41) va=  +0.80%(med  +0.40%,mean    +0.83%,k24,n41) lo=  -3.57% ctrl=  -4.73% res=100%
+FINAL survivors: 0
+done t=430s

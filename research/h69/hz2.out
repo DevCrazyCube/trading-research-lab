@@ -1,0 +1,7 @@
+MINUTE before=now- 30d -> HTTP 200 bars=2
+MINUTE before=now- 60d -> HTTP 200 bars=0
+MINUTE before=now-120d -> HTTP 200 bars=0
+MINUTE before=now-180d -> HTTP 200 bars=4
+MINUTE before=now-240d -> HTTP 401 bars=0
+MINUTE before=now-300d -> HTTP 401 bars=0
+HZ2 DONE

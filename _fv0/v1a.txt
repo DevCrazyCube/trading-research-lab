@@ -1,0 +1,125 @@
+train hits 403 combos so far 153552
+unique rule x exit 403
+validated 401 t 2.71891450881958
+
+=== survive validate (mean>0 AND trim5>0) === 45
+volshare20>0.2 & vol_now<=100                      H= 30 tp=-1 sl=-1 pa=0 | TR mean=   17.53 trim=   6.41 k= 29 || VA mean=  185.07 trim=  35.02 med=  -2.14 CI=[-6.4,552.1] dmean= 159.86 k= 36 n=  87 res=100.0
+volshare20>0.2 & vol_now<=100                      H=  5 tp=-1 sl=-1 pa=0 | TR mean=   74.36 trim=  12.69 k= 29 || VA mean=   39.42 trim=  17.38 med=  -1.69 CI=[-0.1,101.3] dmean=  46.96 k= 36 n= 101 res=100.0
+volshare20>0.2 & vol_now<=100                      H=  3 tp=-1 sl=-1 pa=0 | TR mean=  103.00 trim=  42.84 k= 29 || VA mean=   24.31 trim=  15.47 med=  -1.51 CI=[2.7,54.2] dmean=  29.89 k= 36 n= 103 res=100.0
+=== ALSO bootstrap CI-low > 0 on validate === 6
+volshare20>0.2 & vol_now<=100                      H=  3 tp=-1 sl=-1 pa=0 VA mean=   24.31 CIlo=2.71 trim=  15.47 k=36 n=103
+rangerel20>8 & vol_now<=100                        H=  3 tp=-1 sl=-1 pa=0 VA mean=   32.57 CIlo=4.84 trim=   9.72 k=56 n=133
+rangerel20>8 & vol_now<=100                        H= 10 tp=-1 sl=-1 pa=0 VA mean=   14.29 CIlo=0.60 trim=   7.73 k=56 n=119
+rangerel20>8 & notional20<=5                       H=  3 tp=-1 sl=-1 pa=0 VA mean=   34.60 CIlo=2.67 trim=   6.89 k=47 n=141
+rangerel20>8 & notional20<=5                       H= 30 tp=3 sl=1 pa=1 VA mean=   11.95 CIlo=0.64 trim=   4.98 k=47 n=111
+rangerel20>8 & vol_now<=100                        H= 15 tp=3 sl=-1 pa=1 VA mean=    7.13 CIlo=0.02 trim=   4.48 k=56 n=114
+
+=== DEEP DIVE (matched random control C2, validate) ===
+
+rangerel20>8 & vol_now<=100 | H=3 tp=-1 sl=-1 pa=0
+  VA mean=32.57 trim=9.72 med=-0.73 k=56 n=133 res=97.7 CI=[4.8, 77.3]
+  top5 mint means: [np.float64(90.5), np.float64(109.3), np.float64(113.9), np.float64(292.2), np.float64(1086.8)]  bot3: [np.float64(-30.0), np.float64(-30.0), np.float64(-22.9)]
+  C2 matched-random mean: 9.45 (p5=-7.2 p95=40.4) -> edge=23.13, pctile=91%
+  C2 matched-random trim: -2.52 -> edge=12.24, pctile=99%
+  dropout -50%: 31.68  -100%: 29.45  toll2.5%/-30%: 30.79  toll2.5%/-100%: 27.67
+  CAPACITY: vol_now at signal median=3.60 p90=286.1 | notional20 median=2.03 p90=41.4 (USD/min)
+  entry-gap minutes median=0
+
+volshare20>0.2 & vol_now<=100 | H=3 tp=-1 sl=-1 pa=0
+  VA mean=24.31 trim=15.47 med=-1.51 k=36 n=103 res=100.0 CI=[2.7, 54.2]
+  top5 mint means: [np.float64(66.2), np.float64(90.5), np.float64(158.6), np.float64(219.6), np.float64(397.4)]  bot3: [np.float64(-48.3), np.float64(-27.9), np.float64(-25.5)]
+  C2 matched-random mean: 13.75 (p5=-7.6 p95=52.7) -> edge=10.56, pctile=73%
+  C2 matched-random trim: 1.23 -> edge=14.24, pctile=94%
+  dropout -50%: 24.31  -100%: 24.31  toll2.5%/-30%: 22.60  toll2.5%/-100%: 22.60
+  CAPACITY: vol_now at signal median=2.43 p90=18.9 | notional20 median=1.97 p90=6.5 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=3 tp=-1 sl=-1 pa=0
+  VA mean=34.60 trim=6.89 med=-1.31 k=47 n=141 res=99.3 CI=[2.7, 86.8]
+  top5 mint means: [np.float64(54.8), np.float64(90.5), np.float64(109.3), np.float64(286.3), np.float64(1086.8)]  bot3: [np.float64(-22.9), np.float64(-20.3), np.float64(-19.1)]
+  C2 matched-random mean: 11.61 (p5=-7.2 p95=52.8) -> edge=22.99, pctile=85%
+  C2 matched-random trim: -2.72 -> edge=9.60, pctile=99%
+  dropout -50%: 34.38  -100%: 33.85  toll2.5%/-30%: 32.75  toll2.5%/-100%: 32.01
+  CAPACITY: vol_now at signal median=1.75 p90=30.5 | notional20 median=1.62 p90=3.8 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=30 tp=3 sl=1 pa=1
+  VA mean=11.95 trim=4.98 med=-2.03 k=47 n=111 res=97.3 CI=[0.6, 26.6]
+  top5 mint means: [np.float64(57.1), np.float64(79.8), np.float64(96.2), np.float64(132.0), np.float64(254.7)]  bot3: [np.float64(-20.3), np.float64(-19.1), np.float64(-18.8)]
+  C2 matched-random mean: 18.40 (p5=-9.9 p95=111.1) -> edge=-6.45, pctile=65%
+  C2 matched-random trim: -6.92 -> edge=11.90, pctile=99%
+  dropout -50%: 11.60  -100%: 10.74  toll2.5%/-30%: 10.42  toll2.5%/-100%: 9.22
+  CAPACITY: vol_now at signal median=1.75 p90=48.7 | notional20 median=1.62 p90=3.8 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & vol_now<=100 | H=10 tp=-1 sl=-1 pa=0
+  VA mean=14.29 trim=7.73 med=-1.06 k=56 n=119 res=97.5 CI=[0.6, 31.2]
+  top5 mint means: [np.float64(58.4), np.float64(111.2), np.float64(211.2), np.float64(222.8), np.float64(266.2)]  bot3: [np.float64(-51.6), np.float64(-39.2), np.float64(-36.1)]
+  C2 matched-random mean: 15.46 (p5=-12.0 p95=101.8) -> edge=-1.16, pctile=58%
+  C2 matched-random trim: -7.12 -> edge=14.86, pctile=100%
+  dropout -50%: 13.40  -100%: 11.17  toll2.5%/-30%: 12.76  toll2.5%/-100%: 9.64
+  CAPACITY: vol_now at signal median=3.25 p90=282.9 | notional20 median=2.15 p90=46.7 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & vol_now<=100 | H=15 tp=3 sl=-1 pa=1
+  VA mean=7.13 trim=4.48 med=-0.67 k=56 n=114 res=97.4 CI=[0.0, 15.6]
+  top5 mint means: [np.float64(56.5), np.float64(63.0), np.float64(77.6), np.float64(96.2), np.float64(136.1)]  bot3: [np.float64(-36.1), np.float64(-30.0), np.float64(-30.0)]
+  C2 matched-random mean: 28.35 (p5=-14.1 p95=128.0) -> edge=-21.22, pctile=67%
+  C2 matched-random trim: -7.34 -> edge=11.82, pctile=99%
+  dropout -50%: 6.24  -100%: 4.01  toll2.5%/-30%: 5.70  toll2.5%/-100%: 2.58
+  CAPACITY: vol_now at signal median=2.84 p90=290.2 | notional20 median=2.17 p90=55.6 (USD/min)
+  entry-gap minutes median=0
+
+volshare20>0.2 & vol_now<=100 | H=5 tp=-1 sl=-1 pa=0
+  VA mean=39.42 trim=17.38 med=-1.69 k=36 n=101 res=100.0 CI=[-0.1, 101.3]
+  top5 mint means: [np.float64(50.9), np.float64(63.6), np.float64(66.2), np.float64(440.9), np.float64(876.5)]  bot3: [np.float64(-48.3), np.float64(-27.9), np.float64(-26.4)]
+  C2 matched-random mean: 20.44 (p5=-8.7 p95=58.2) -> edge=18.99, pctile=77%
+  C2 matched-random trim: 2.30 -> edge=15.08, pctile=91%
+  dropout -50%: 39.42  -100%: 39.42  toll2.5%/-30%: 37.50  toll2.5%/-100%: 37.50
+  CAPACITY: vol_now at signal median=2.38 p90=18.6 | notional20 median=1.97 p90=6.5 (USD/min)
+  entry-gap minutes median=0
+
+rvol20<=0.02 & vwapdev20>0.05 | H=5 tp=0 sl=0 pa=0
+  VA mean=0.62 trim=0.63 med=1.08 k=42 n=366 res=100.0 CI=[-0.2, 1.4]
+  top5 mint means: [np.float64(3.2), np.float64(3.5), np.float64(3.8), np.float64(4.0), np.float64(8.7)]  bot3: [np.float64(-5.3), np.float64(-5.3), np.float64(-4.5)]
+  C2 matched-random mean: -0.64 (p5=-1.7 p95=0.3) -> edge=1.26, pctile=97%
+  C2 matched-random trim: -0.36 -> edge=0.99, pctile=96%
+  dropout -50%: 0.62  -100%: 0.62  toll2.5%/-30%: -0.76  toll2.5%/-100%: -0.76
+  CAPACITY: vol_now at signal median=1652.64 p90=2915.8 | notional20 median=1862.38 p90=3290.3 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=10 tp=-1 sl=-1 pa=0
+  VA mean=13.75 trim=6.69 med=-2.16 k=47 n=124 res=99.2 CI=[-0.3, 31.1]
+  top5 mint means: [np.float64(54.8), np.float64(111.2), np.float64(190.8), np.float64(211.2), np.float64(222.8)]  bot3: [np.float64(-39.2), np.float64(-36.1), np.float64(-34.0)]
+  C2 matched-random mean: 25.66 (p5=-10.6 p95=173.8) -> edge=-11.91, pctile=54%
+  C2 matched-random trim: -6.09 -> edge=12.77, pctile=100%
+  dropout -50%: 13.54  -100%: 13.01  toll2.5%/-30%: 12.20  toll2.5%/-100%: 11.45
+  CAPACITY: vol_now at signal median=1.58 p90=34.1 | notional20 median=1.64 p90=4.0 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=15 tp=-1 sl=1 pa=0
+  VA mean=9.61 trim=3.73 med=-1.78 k=47 n=121 res=98.3 CI=[-0.4, 22.6]
+  top5 mint means: [np.float64(43.4), np.float64(67.9), np.float64(97.1), np.float64(134.1), np.float64(208.1)]  bot3: [np.float64(-30.8), np.float64(-20.3), np.float64(-19.1)]
+  C2 matched-random mean: 31.84 (p5=-9.5 p95=159.9) -> edge=-22.23, pctile=59%
+  C2 matched-random trim: -7.48 -> edge=11.21, pctile=100%
+  dropout -50%: 9.34  -100%: 8.65  toll2.5%/-30%: 8.11  toll2.5%/-100%: 7.16
+  CAPACITY: vol_now at signal median=1.71 p90=28.3 | notional20 median=1.62 p90=3.8 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & notional20<=5 | H=10 tp=1 sl=1 pa=1
+  VA mean=6.93 trim=3.01 med=-2.09 k=47 n=130 res=99.2 CI=[-0.5, 16.0]
+  top5 mint means: [np.float64(25.1), np.float64(64.9), np.float64(83.9), np.float64(114.9), np.float64(120.7)]  bot3: [np.float64(-20.3), np.float64(-19.1), np.float64(-18.8)]
+  C2 matched-random mean: 10.37 (p5=-7.7 p95=98.8) -> edge=-3.44, pctile=59%
+  C2 matched-random trim: -4.84 -> edge=7.85, pctile=99%
+  dropout -50%: 6.71  -100%: 6.18  toll2.5%/-30%: 5.47  toll2.5%/-100%: 4.72
+  CAPACITY: vol_now at signal median=1.73 p90=36.9 | notional20 median=1.61 p90=3.8 (USD/min)
+  entry-gap minutes median=0
+
+rangerel20>8 & vol_now<=100 | H=15 tp=-1 sl=1 pa=0
+  VA mean=8.66 trim=3.49 med=-0.94 k=56 n=121 res=97.5 CI=[-1.0, 20.8]
+  top5 mint means: [np.float64(48.4), np.float64(67.9), np.float64(97.1), np.float64(134.1), np.float64(230.7)]  bot3: [np.float64(-30.8), np.float64(-30.8), np.float64(-30.8)]
+  C2 matched-random mean: 67.04 (p5=-8.7 p95=525.8) -> edge=-58.38, pctile=56%
+  C2 matched-random trim: -6.30 -> edge=9.79, pctile=99%
+  dropout -50%: 7.77  -100%: 5.53  toll2.5%/-30%: 7.21  toll2.5%/-100%: 4.08
+  CAPACITY: vol_now at signal median=3.62 p90=294.6 | notional20 median=2.06 p90=43.1 (USD/min)
+  entry-gap minutes median=0

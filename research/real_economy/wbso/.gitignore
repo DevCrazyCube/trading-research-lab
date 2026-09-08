@@ -1,0 +1,25 @@
+# The HTTP cache: hundreds of raw API responses, regenerable in one `python -m wbso.cli scan`.
+# The evidence that matters is already inlined in data/candidates.jsonl and in every briefing, each
+# with its source URL and observation date.
+data/cache/
+
+# A filled-in sender profile carries the owner's real KVK number, address and phone. The template
+# (params/sender_profile.example.json) is committed; the real one never is.
+params/sender_profile.json
+
+# Request receipts and run reports: point-in-time, regenerable, and they name the companies we
+# looked at. DRYRUN_REPORT.md is the curated version and is committed.
+#
+# The one exception is probe_report.json: it is the evidence for a claim made in prose — that the
+# TenderNed API contains no awarded-supplier field, correcting T26 §7 — and a correction whose
+# evidence is untracked is a correction nobody can check.
+logs/*
+!logs/probe_report.json
+
+# The bulk candidate list, including public business email addresses. Regenerable, and a repository
+# is the wrong place for a contact list even when every row is public. The ten dry-run briefings in
+# briefings/ stay, because the owner has to be able to read them.
+data/candidates.jsonl
+
+# pytest scratch
+.pytest_cache/

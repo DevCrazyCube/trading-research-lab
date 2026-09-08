@@ -1,0 +1,101 @@
+{
+ "probe": "SPX box spread implied financing rate, REGULAR TRADING HOURS (T32, final)",
+ "pre_registration": {
+  "launched_utc": "2026-08-24T13:07:17Z",
+  "capture_start_utc": "2026-08-24T13:30:00Z",
+  "duration_min": 60,
+  "interval_min": 5,
+  "expiries": [
+   "2027-08-20",
+   "2027-06-17",
+   "2027-12-17",
+   "2026-12-18"
+  ],
+  "primary": "2027-08-20",
+  "band": [
+   0.7,
+   1.3
+  ],
+  "width": [
+   500.0,
+   2000.0
+  ]
+ },
+ "tbill_3m_pct": 3.71,
+ "tbill_source": "FRED DTB3 2026-08-20 (live)",
+ "n_snapshots": 13,
+ "n_snapshots_clean": 13,
+ "first_snapshot_utc": "2026-08-24T13:30:05Z",
+ "last_snapshot_utc": "2026-08-24T14:30:02Z",
+ "market_open_at_start": true,
+ "per_expiry": {
+  "2027-08-20": {
+   "n_snapshots": 13,
+   "years_to_expiry": 0.989,
+   "median_pairs_per_snapshot": 5643.0,
+   "session_median_mid_pct": 4.323,
+   "session_median_executable_pct": 2.958,
+   "best_snapshot_median_executable_pct": 3.26,
+   "session_median_p90_executable_pct": 5.314,
+   "session_median_p25_mid_pct": 3.306,
+   "session_median_p75_mid_pct": 5.47,
+   "spread_vs_tbill_pp": {
+    "mid": 0.613,
+    "executable": -0.752,
+    "executable_p90": 1.604
+   }
+  },
+  "2027-06-17": {
+   "n_snapshots": 13,
+   "years_to_expiry": 0.814,
+   "median_pairs_per_snapshot": 5789.0,
+   "session_median_mid_pct": 4.253,
+   "session_median_executable_pct": 2.784,
+   "best_snapshot_median_executable_pct": 3.124,
+   "session_median_p90_executable_pct": 5.577,
+   "session_median_p25_mid_pct": 2.981,
+   "session_median_p75_mid_pct": 5.603,
+   "spread_vs_tbill_pp": {
+    "mid": 0.543,
+    "executable": -0.926,
+    "executable_p90": 1.867
+   }
+  },
+  "2027-12-17": {
+   "n_snapshots": 13,
+   "years_to_expiry": 1.315,
+   "median_pairs_per_snapshot": 1570.0,
+   "session_median_mid_pct": 4.376,
+   "session_median_executable_pct": 3.287,
+   "best_snapshot_median_executable_pct": 3.457,
+   "session_median_p90_executable_pct": 5.113,
+   "session_median_p25_mid_pct": 3.596,
+   "session_median_p75_mid_pct": 5.332,
+   "spread_vs_tbill_pp": {
+    "mid": 0.666,
+    "executable": -0.423,
+    "executable_p90": 1.403
+   }
+  },
+  "2026-12-18": {
+   "n_snapshots": 13,
+   "years_to_expiry": 0.318,
+   "median_pairs_per_snapshot": 28386.0,
+   "session_median_mid_pct": 3.065,
+   "session_median_executable_pct": 0.323,
+   "best_snapshot_median_executable_pct": 0.637,
+   "session_median_p90_executable_pct": 6.013,
+   "session_median_p25_mid_pct": 0.633,
+   "session_median_p75_mid_pct": 5.768,
+   "spread_vs_tbill_pp": {
+    "mid": -0.645,
+    "executable": -3.387,
+    "executable_p90": 2.303
+   }
+  }
+ },
+ "verdict": "BOX PERMANENTLY DEAD \u2014 executable four-leg rate below T-bills during RTH (third probe; no fourth)",
+ "verdict_note": "Primary expiry session-median executable 2.958 % vs T-bill 3.71 % (-0.75 pp). Even the p90 executable pair sits at 5.314 % (1.60 pp vs T-bill). Mid 4.323 % (0.61 pp). The estimand is a rate level, so power is not the issue.",
+ "raw_dir": "research/data/t32_box_rth",
+ "source": "Alpaca /v1beta1/options/snapshots/SPX latestQuote (default feed), quotes only"
+}

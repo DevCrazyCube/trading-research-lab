@@ -1,0 +1,2129 @@
+{
+ "round": "INVENT_0823_exotic_tether",
+ "stage": "design",
+ "windows": {
+  "design": [
+   "2016-01-05",
+   "2023-12-29"
+  ],
+  "heldout": [
+   "2024-01-02",
+   "2026-08-20"
+  ],
+  "coin_design": [
+   "2024-01-16",
+   "2025-06-30"
+  ],
+  "coin_heldout": [
+   "2025-07-01",
+   "2026-08-20"
+  ]
+ },
+ "n_scored_formulas": 29,
+ "cost_model": {
+  "half_spread_bp_per_symbol": {
+   "AGG": 1.0,
+   "AOA": 1.0,
+   "AOK": 1.0,
+   "AOM": 1.0,
+   "AOR": 1.0,
+   "ARKB": 1.0,
+   "BIL": 1.0,
+   "BITB": 1.0,
+   "BRRR": 1.0,
+   "BTC": 1.0,
+   "BTCO": 1.0,
+   "BTCW": 1.0,
+   "DBEF": 1.0,
+   "DBGR": 1.0,
+   "DBJP": 1.0,
+   "DUST": 1.0,
+   "EFA": 1.0,
+   "ERX": 1.0,
+   "ERY": 1.0,
+   "ETH": 1.0,
+   "ETHA": 1.0,
+   "ETHE": 1.0,
+   "ETHV": 1.0,
+   "ETHW": 1.0,
+   "EWG": 1.0,
+   "EWJ": 1.0,
+   "EWU": 1.0,
+   "EZBC": 1.0,
+   "EZET": 1.0,
+   "EZU": 1.0,
+   "FAS": 1.0,
+   "FAZ": 1.0,
+   "FBTC": 1.0,
+   "FETH": 1.0,
+   "FXA": 1.0,
+   "FXB": 1.0,
+   "FXC": 1.0,
+   "FXE": 1.0,
+   "FXF": 1.0,
+   "FXY": 1.0,
+   "GBTC": 1.0,
+   "GDX": 1.0,
+   "GLD": 1.0,
+   "GLL": 1.0,
+   "HEFA": 1.0,
+   "HEWG": 1.0,
+   "HEWJ": 1.0,
+   "HEWU": 1.0,
+   "HEZU": 1.0,
+   "HODL": 1.0,
+   "IAGG": 1.0,
+   "IBIT": 1.0,
+   "IDEV": 1.0,
+   "IEMG": 1.0,
+   "IJH": 1.0,
+   "IJR": 2.58,
+   "IUSB": 1.0,
+   "IVV": 1.0,
+   "IWM": 1.23,
+   "NUGT": 1.0,
+   "PSQ": 1.0,
+   "QETH": 1.0,
+   "QID": 1.0,
+   "QLD": 1.0,
+   "QQQ": 1.0,
+   "SDS": 1.0,
+   "SH": 1.0,
+   "SHV": 1.0,
+   "SOXL": 1.0,
+   "SOXS": 1.0,
+   "SOXX": 1.0,
+   "SPXL": 1.0,
+   "SPXS": 1.0,
+   "SPXU": 1.0,
+   "SPY": 1.0,
+   "SQQQ": 1.0,
+   "SSO": 1.0,
+   "TLT": 1.0,
+   "TMF": 1.0,
+   "TMV": 1.0,
+   "TNA": 2.48,
+   "TQQQ": 1.0,
+   "TWM": 1.0,
+   "TZA": 1.91,
+   "UGL": 1.0,
+   "UPRO": 1.0,
+   "UUP": 1.0,
+   "UWM": 1.0,
+   "XLE": 1.0,
+   "XLF": 1.16
+  },
+  "provenance": "Corwin-Schultz (2012) effective spread from the same daily high/low bars the backtest trades; median of daily estimates, negative estimates zeroed, floored at 1.0 bp half-spread",
+  "open_premium_multiplier": 1.5,
+  "shock_multiplier": 2.0,
+  "sec_fee_bp_on_sales": 0.278
+ },
+ "rho1_bounce_gate": {
+  "H_triangle_residual": {
+   "n": 8,
+   "median": -0.41678067455796747,
+   "mean": -0.42121875838589484,
+   "p10": -0.44325228651935167,
+   "p90": -0.40000523474198346
+  },
+  "L_levered_residual": {
+   "n": 28,
+   "median": -0.3285591288962521,
+   "mean": -0.3213766646199993,
+   "p10": -0.5259053275255029,
+   "p90": -0.07186335672376401
+  },
+  "F_fof_residual": {
+   "n": 4,
+   "median": -0.3546425287161777,
+   "mean": -0.35217252355806006,
+   "p10": -0.3622021078475541,
+   "p90": -0.34016693514207197
+  },
+  "C_btc_wrapper_residual": {
+   "n": 10,
+   "median": -0.470408128134988,
+   "mean": -0.4444442089419612,
+   "p10": -0.5251256329750987,
+   "p90": -0.4032238231696279
+  },
+  "C_eth_wrapper_residual": {
+   "n": 7,
+   "median": -0.5377168210008901,
+   "mean": -0.524823034217604,
+   "p10": -0.5629714908866181,
+   "p90": -0.47858740002336125
+  }
+ },
+ "stale_open_diagnostic": {
+  "AGG": {
+   "frac_open_eq_prev_close": 0.031835205992509365,
+   "corr_intraday_t_vs_closeclose_tm1": 0.056433474500870356,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.0348757207358372,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "AOA": {
+   "frac_open_eq_prev_close": 0.0348314606741573,
+   "corr_intraday_t_vs_closeclose_tm1": -0.04332778514288144,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.06330449556686717,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "AOK": {
+   "frac_open_eq_prev_close": 0.0947565543071161,
+   "corr_intraday_t_vs_closeclose_tm1": 0.016245295006880267,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.0676042024156086,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "AOM": {
+   "frac_open_eq_prev_close": 0.06928838951310862,
+   "corr_intraday_t_vs_closeclose_tm1": 0.0065980440529111355,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10649442401874415,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "AOR": {
+   "frac_open_eq_prev_close": 0.05318352059925094,
+   "corr_intraday_t_vs_closeclose_tm1": -0.0035969090305352203,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.12231748329664105,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "ARKB": {
+   "frac_open_eq_prev_close": 0.009202453987730062,
+   "corr_intraday_t_vs_closeclose_tm1": -0.01840134068819701,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10197528812489694,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "BIL": {
+   "frac_open_eq_prev_close": 0.3913857677902622,
+   "corr_intraday_t_vs_closeclose_tm1": -0.02890073178118748,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.06224967444874304,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "BITB": {
+   "frac_open_eq_prev_close": 0.004601226993865031,
+   "corr_intraday_t_vs_closeclose_tm1": -0.014670577405939257,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10515317332968038,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "BRRR": {
+   "frac_open_eq_prev_close": 0.013803680981595092,
+   "corr_intraday_t_vs_closeclose_tm1": -0.022242911755476193,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.09481769440913031,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "BTC": {
+   "frac_open_eq_prev_close": 0.609992542878449,
+   "corr_intraday_t_vs_closeclose_tm1": 0.047942757073095976,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.0031898088152627043,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "BTCO": {
+   "frac_open_eq_prev_close": 0.0,
+   "corr_intraday_t_vs_closeclose_tm1": -0.020392747136480295,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.09620842832904457,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "BTCW": {
+   "frac_open_eq_prev_close": 0.003067484662576687,
+   "corr_intraday_t_vs_closeclose_tm1": -0.018330209501433246,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10641876512072054,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "DBEF": {
+   "frac_open_eq_prev_close": 0.02958801498127341,
+   "corr_intraday_t_vs_closeclose_tm1": -0.07937582682334303,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.13400900579787767,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "DBGR": {
+   "frac_open_eq_prev_close": 0.10781932977173385,
+   "corr_intraday_t_vs_closeclose_tm1": -0.04406513733392264,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.010685151049856319,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "DBJP": {
+   "frac_open_eq_prev_close": 0.0149812734082397,
+   "corr_intraday_t_vs_closeclose_tm1": -0.11620511050808487,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.05093722683717629,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "DUST": {
+   "frac_open_eq_prev_close": 0.016686069072564997,
+   "corr_intraday_t_vs_closeclose_tm1": -0.046591832310198325,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.015065936602348787,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "EFA": {
+   "frac_open_eq_prev_close": 0.011610486891385767,
+   "corr_intraday_t_vs_closeclose_tm1": -0.035948686012478345,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10889001125501745,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "ERX": {
+   "frac_open_eq_prev_close": 0.007116104868913857,
+   "corr_intraday_t_vs_closeclose_tm1": 0.01784403984990401,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.0019826428793960366,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "ERY": {
+   "frac_open_eq_prev_close": 0.0149812734082397,
+   "corr_intraday_t_vs_closeclose_tm1": -0.06864117452856766,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.015732168136659407,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "ETH": {
+   "frac_open_eq_prev_close": 0.013461538461538462,
+   "corr_intraday_t_vs_closeclose_tm1": -0.009304036331818026,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.07568956634930772,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "ETHA": {
+   "frac_open_eq_prev_close": 0.009615384615384616,
+   "corr_intraday_t_vs_closeclose_tm1": -0.00532251930671259,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.081180742667284,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "ETHE": {
+   "frac_open_eq_prev_close": 0.0038461538461538464,
+   "corr_intraday_t_vs_closeclose_tm1": -0.0067696752784708785,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.07497263256792461,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "ETHV": {
+   "frac_open_eq_prev_close": 0.0057692307692307696,
+   "corr_intraday_t_vs_closeclose_tm1": -0.006092664746230887,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.07673005085447653,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "ETHW": {
+   "frac_open_eq_prev_close": 0.009615384615384616,
+   "corr_intraday_t_vs_closeclose_tm1": -0.005636994910915397,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.07570211278053357,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "EWG": {
+   "frac_open_eq_prev_close": 0.02696629213483146,
+   "corr_intraday_t_vs_closeclose_tm1": -0.0007094424821829208,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.05711363644302815,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "EWJ": {
+   "frac_open_eq_prev_close": 0.015730337078651686,
+   "corr_intraday_t_vs_closeclose_tm1": -0.055782537957756784,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.05236881772480251,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "EWU": {
+   "frac_open_eq_prev_close": 0.026217228464419477,
+   "corr_intraday_t_vs_closeclose_tm1": -0.05250254412327192,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.05136711760967458,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "EZBC": {
+   "frac_open_eq_prev_close": 0.007668711656441718,
+   "corr_intraday_t_vs_closeclose_tm1": -0.017076310520653726,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10492961071602915,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "EZET": {
+   "frac_open_eq_prev_close": 0.007692307692307693,
+   "corr_intraday_t_vs_closeclose_tm1": -0.009220512809301685,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.07638245347613837,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "EZU": {
+   "frac_open_eq_prev_close": 0.018726591760299626,
+   "corr_intraday_t_vs_closeclose_tm1": -0.015377839197412006,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.07648392007705525,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FAS": {
+   "frac_open_eq_prev_close": 0.008239700374531835,
+   "corr_intraday_t_vs_closeclose_tm1": -0.043373469882254705,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.002892605280327057,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FAZ": {
+   "frac_open_eq_prev_close": 0.03258426966292135,
+   "corr_intraday_t_vs_closeclose_tm1": -0.06096948936316081,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.06244013338121547,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FBTC": {
+   "frac_open_eq_prev_close": 0.0015337423312883436,
+   "corr_intraday_t_vs_closeclose_tm1": -0.019040742927719994,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10490391586886544,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FETH": {
+   "frac_open_eq_prev_close": 0.0038461538461538464,
+   "corr_intraday_t_vs_closeclose_tm1": -0.008404472900119564,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.07652235904446489,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FXA": {
+   "frac_open_eq_prev_close": 0.015355805243445693,
+   "corr_intraday_t_vs_closeclose_tm1": 0.00911573658229344,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.017740678174331677,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FXB": {
+   "frac_open_eq_prev_close": 0.013857677902621723,
+   "corr_intraday_t_vs_closeclose_tm1": 0.05343256740729418,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.015662737018929507,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FXC": {
+   "frac_open_eq_prev_close": 0.030337078651685393,
+   "corr_intraday_t_vs_closeclose_tm1": -0.03451476994631057,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.03445942200385443,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FXE": {
+   "frac_open_eq_prev_close": 0.014606741573033709,
+   "corr_intraday_t_vs_closeclose_tm1": 0.010826404645952081,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.006724581667042514,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FXF": {
+   "frac_open_eq_prev_close": 0.013857677902621723,
+   "corr_intraday_t_vs_closeclose_tm1": -0.03409001758936145,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.036941947216038634,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "FXY": {
+   "frac_open_eq_prev_close": 0.017228464419475654,
+   "corr_intraday_t_vs_closeclose_tm1": -0.055525132012259816,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.0014013795598049887,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "GBTC": {
+   "frac_open_eq_prev_close": 0.0015337423312883436,
+   "corr_intraday_t_vs_closeclose_tm1": -0.018377456483485082,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10639116931505863,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "GDX": {
+   "frac_open_eq_prev_close": 0.017602996254681647,
+   "corr_intraday_t_vs_closeclose_tm1": -0.037410224086201406,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.014669219574682507,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "GLD": {
+   "frac_open_eq_prev_close": 0.0018726591760299626,
+   "corr_intraday_t_vs_closeclose_tm1": -0.014015927110163964,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.0059440291875986935,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "GLL": {
+   "frac_open_eq_prev_close": 0.012359550561797753,
+   "corr_intraday_t_vs_closeclose_tm1": -0.019106150135398355,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.011388712736904116,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "HEFA": {
+   "frac_open_eq_prev_close": 0.035580524344569285,
+   "corr_intraday_t_vs_closeclose_tm1": -0.07153456197174804,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.13918557537994694,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "HEWG": {
+   "frac_open_eq_prev_close": 0.033271719038817,
+   "corr_intraday_t_vs_closeclose_tm1": -0.0523673651298255,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10932946202197544,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "HEWJ": {
+   "frac_open_eq_prev_close": 0.02958801498127341,
+   "corr_intraday_t_vs_closeclose_tm1": -0.10310722931562459,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.06185607385220696,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "HEWU": {
+   "frac_open_eq_prev_close": 0.13516260162601626,
+   "corr_intraday_t_vs_closeclose_tm1": -0.11349019288885794,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.042539368259748356,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "HEZU": {
+   "frac_open_eq_prev_close": 0.02883895131086142,
+   "corr_intraday_t_vs_closeclose_tm1": -0.024355381272029138,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.12143199404338177,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "HODL": {
+   "frac_open_eq_prev_close": 0.01687116564417178,
+   "corr_intraday_t_vs_closeclose_tm1": -0.015404594593146062,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10176762516899815,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "IAGG": {
+   "frac_open_eq_prev_close": 0.06666666666666667,
+   "corr_intraday_t_vs_closeclose_tm1": 0.006464266959375393,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.0889912314286475,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "IBIT": {
+   "frac_open_eq_prev_close": 0.003067484662576687,
+   "corr_intraday_t_vs_closeclose_tm1": -0.016941265188699744,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10617334536873768,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "IDEV": {
+   "frac_open_eq_prev_close": 0.025380710659898477,
+   "corr_intraday_t_vs_closeclose_tm1": -0.002111391013013494,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.11265846812078642,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "IEMG": {
+   "frac_open_eq_prev_close": 0.014606741573033709,
+   "corr_intraday_t_vs_closeclose_tm1": -0.04634590121290038,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.11270786951440705,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "IJH": {
+   "frac_open_eq_prev_close": 0.02397003745318352,
+   "corr_intraday_t_vs_closeclose_tm1": -0.05997812715927642,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.03482007311410359,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "IJR": {
+   "frac_open_eq_prev_close": 0.012734082397003745,
+   "corr_intraday_t_vs_closeclose_tm1": -0.06902923032872388,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.007233680726005877,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "IUSB": {
+   "frac_open_eq_prev_close": 0.06779026217228465,
+   "corr_intraday_t_vs_closeclose_tm1": 0.09087161894291972,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.03786850534499521,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "IVV": {
+   "frac_open_eq_prev_close": 0.006367041198501872,
+   "corr_intraday_t_vs_closeclose_tm1": -0.08362768122311204,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.11385962992529881,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "IWM": {
+   "frac_open_eq_prev_close": 0.0056179775280898875,
+   "corr_intraday_t_vs_closeclose_tm1": -0.05426633767463296,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.019252190134940794,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "NUGT": {
+   "frac_open_eq_prev_close": 0.009737827715355805,
+   "corr_intraday_t_vs_closeclose_tm1": -0.05784136849273618,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.019049172410649327,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "PSQ": {
+   "frac_open_eq_prev_close": 0.03932584269662921,
+   "corr_intraday_t_vs_closeclose_tm1": -0.0947752803661814,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.07209099963194399,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "QETH": {
+   "frac_open_eq_prev_close": 0.0057692307692307696,
+   "corr_intraday_t_vs_closeclose_tm1": 0.0033354290311182412,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.08290028202283115,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "QID": {
+   "frac_open_eq_prev_close": 0.020224719101123594,
+   "corr_intraday_t_vs_closeclose_tm1": -0.08729209031304534,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.07817999904742538,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "QLD": {
+   "frac_open_eq_prev_close": 0.011610486891385767,
+   "corr_intraday_t_vs_closeclose_tm1": -0.08525222920360101,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.06612190625224008,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "QQQ": {
+   "frac_open_eq_prev_close": 0.0026217228464419477,
+   "corr_intraday_t_vs_closeclose_tm1": -0.08582651396490927,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.08330438515168127,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SDS": {
+   "frac_open_eq_prev_close": 0.02247191011235955,
+   "corr_intraday_t_vs_closeclose_tm1": -0.08582663759998914,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.11480376111944748,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SH": {
+   "frac_open_eq_prev_close": 0.042352941176470586,
+   "corr_intraday_t_vs_closeclose_tm1": -0.08095625987151298,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.08851561664476576,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SHV": {
+   "frac_open_eq_prev_close": 0.35243445692883896,
+   "corr_intraday_t_vs_closeclose_tm1": 0.006555697525194542,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.007848500553435228,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SOXL": {
+   "frac_open_eq_prev_close": 0.008988764044943821,
+   "corr_intraday_t_vs_closeclose_tm1": -0.09839573910466037,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.02419912312183986,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SOXS": {
+   "frac_open_eq_prev_close": 0.018352059925093634,
+   "corr_intraday_t_vs_closeclose_tm1": -0.11648509356240916,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.055504136626380346,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SOXX": {
+   "frac_open_eq_prev_close": 0.007865168539325843,
+   "corr_intraday_t_vs_closeclose_tm1": -0.12305308817228972,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.047887757234487946,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SPXL": {
+   "frac_open_eq_prev_close": 0.00749063670411985,
+   "corr_intraday_t_vs_closeclose_tm1": -0.07215845362023796,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.05403803285059573,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SPXS": {
+   "frac_open_eq_prev_close": 0.026090675791274595,
+   "corr_intraday_t_vs_closeclose_tm1": -0.08685583622534658,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.12149079013211311,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SPXU": {
+   "frac_open_eq_prev_close": 0.017228464419475654,
+   "corr_intraday_t_vs_closeclose_tm1": -0.0858022563749027,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.09415051567842293,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SPY": {
+   "frac_open_eq_prev_close": 0.0022471910112359553,
+   "corr_intraday_t_vs_closeclose_tm1": -0.08157789872443184,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.084094764684753,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SQQQ": {
+   "frac_open_eq_prev_close": 0.01348314606741573,
+   "corr_intraday_t_vs_closeclose_tm1": -0.09057020487473856,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.0750304305142575,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "SSO": {
+   "frac_open_eq_prev_close": 0.023220973782771534,
+   "corr_intraday_t_vs_closeclose_tm1": -0.06891098055677489,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.10657687829579209,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "TLT": {
+   "frac_open_eq_prev_close": 0.00599250936329588,
+   "corr_intraday_t_vs_closeclose_tm1": 0.017351472784762415,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.04242471300559068,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "TMF": {
+   "frac_open_eq_prev_close": 0.008614232209737827,
+   "corr_intraday_t_vs_closeclose_tm1": 0.017276464081384352,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.02554720631334284,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "TMV": {
+   "frac_open_eq_prev_close": 0.01348314606741573,
+   "corr_intraday_t_vs_closeclose_tm1": 0.00012748842099533035,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.025594660978384264,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "TNA": {
+   "frac_open_eq_prev_close": 0.007116104868913857,
+   "corr_intraday_t_vs_closeclose_tm1": -0.04178090119694502,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.04512335959385777,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "TQQQ": {
+   "frac_open_eq_prev_close": 0.010112359550561797,
+   "corr_intraday_t_vs_closeclose_tm1": -0.08719074144884612,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.05721662180901043,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "TWM": {
+   "frac_open_eq_prev_close": 0.026217228464419477,
+   "corr_intraday_t_vs_closeclose_tm1": -0.05490571401881776,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.027949636250501946,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "TZA": {
+   "frac_open_eq_prev_close": 0.012734082397003745,
+   "corr_intraday_t_vs_closeclose_tm1": -0.05290952970309317,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.009807615751934702,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "UGL": {
+   "frac_open_eq_prev_close": 0.02659176029962547,
+   "corr_intraday_t_vs_closeclose_tm1": -0.020266574317277835,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.015420008197021978,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "UPRO": {
+   "frac_open_eq_prev_close": 0.013857677902621723,
+   "corr_intraday_t_vs_closeclose_tm1": -0.0823213438936552,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.05454906897589598,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "UUP": {
+   "frac_open_eq_prev_close": 0.06816479400749063,
+   "corr_intraday_t_vs_closeclose_tm1": 0.0009106679256731487,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.02471904765952006,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "UWM": {
+   "frac_open_eq_prev_close": 0.011610486891385767,
+   "corr_intraday_t_vs_closeclose_tm1": -0.05942823960696409,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.02996204977869582,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "XLE": {
+   "frac_open_eq_prev_close": 0.02397003745318352,
+   "corr_intraday_t_vs_closeclose_tm1": -0.05743315402610491,
+   "corr_overnightgap_t_vs_closeclose_tm1": 0.027650771345381533,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  },
+  "XLF": {
+   "frac_open_eq_prev_close": 0.02883895131086142,
+   "corr_intraday_t_vs_closeclose_tm1": -0.0818447743153034,
+   "corr_overnightgap_t_vs_closeclose_tm1": -0.04304046153961079,
+   "note": "non-overlapping windows; a stale opening print would show a LARGE positive corr_overnightgap"
+  }
+ },
+ "published_fee_tether_test": {
+  "BTC": {
+   "dear": "GBTC",
+   "cheap_basket": [
+    "IBIT",
+    "FBTC",
+    "BITB",
+    "ARKB",
+    "BTCO",
+    "HODL",
+    "BRRR",
+    "BTCW",
+    "EZBC"
+   ],
+   "published_fee_gap_pct_yr": 1.2666666666666666,
+   "design": {
+    "n_days": 364,
+    "realised_drift_pct_yr": 0.3495485691021717,
+    "se_pct_yr": 0.9185061062611932,
+    "t_vs_zero": 0.38056205257580666,
+    "t_vs_published": -0.998488841078751,
+    "ann_vol_pct": 1.1039069543171693,
+    "implied_sharpe": 0.31664676785951384
+   },
+   "heldout": "SEALED"
+  },
+  "ETH": {
+   "dear": "ETHE",
+   "cheap_basket": [
+    "ETHA",
+    "FETH",
+    "ETHW",
+    "ETHV",
+    "QETH",
+    "EZET"
+   ],
+   "published_fee_gap_pct_yr": 2.2600000000000002,
+   "design": {
+    "n_days": 233,
+    "realised_drift_pct_yr": 2.3700459279521464,
+    "se_pct_yr": 1.6519766667098545,
+    "t_vs_zero": 1.4346727624624558,
+    "t_vs_published": 0.06661469872411598,
+    "ann_vol_pct": 1.5884794434039138,
+    "implied_sharpe": 1.492021780825462
+   },
+   "heldout": "SEALED"
+  }
+ },
+ "nulls": {
+  "long_history_families": {
+   "n_formulas": 19,
+   "E_max_abs_sharpe": 0.7151388987702739,
+   "p95": 1.0690122062467333,
+   "p99": 1.2520142031604273,
+   "single_formula_null_sd": 0.35408068900796924
+  },
+  "coin_family": {
+   "n_formulas": 10,
+   "E_max_abs_sharpe": 1.2208736414004853,
+   "p95": 2.044299597599736,
+   "p99": 2.6347507827600687,
+   "single_formula_null_sd": 0.8320502943378437
+  },
+  "analytic": {
+   "N_scored": 29,
+   "sqrt_2lnN": 2.5951091807422957,
+   "sqrt_2ln2N": 2.849716831738346,
+   "SE_sharpe_long_window": 0.35408068900796924,
+   "SE_sharpe_coin_window": 0.8320502943378437,
+   "bar_sharpe_long": 1.0090296992595207,
+   "bar_sharpe_coin": 2.3711077286273983
+  }
+ },
+ "results": [
+  {
+   "formula": "C1_coin_z20_rev_H5",
+   "family": "C",
+   "H": 5,
+   "n_legs": 17,
+   "design": {
+    "days": 364,
+    "net_cash_weight": 1.4583114935409422e-18,
+    "short_weight": -0.2816426537721237,
+    "gross_sharpe": -0.10787853200036301,
+    "net_sharpe": -3.100570203159745,
+    "gross_t": -0.12965385954969721,
+    "net_t": -3.7264216168894198,
+    "gross_bp_day": -0.013894851059098426,
+    "net_bp_day": -0.39955595897893303,
+    "turnover_day": 0.23530268939587226,
+    "breakeven_bp": -0.03936731051898232
+   },
+   "design_shock_net_sharpe": -5.81906322322871,
+   "design_closelag_gross_sharpe": -0.9266394783410299,
+   "design_contaminated_gross_sharpe": 7.204975812198785,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": 1.4583114935409422e-18,
+    "short_weight": -0.2816426537721237,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.4364377350681397,
+     "sharpe": -3.3867742589671894
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.5113189168250138,
+     "sharpe": -3.967855220758062
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.7348448325171756,
+     "sharpe": -5.702425255954699
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "C2_coin_z60_rev_H5",
+   "family": "C",
+   "H": 5,
+   "n_legs": 17,
+   "design": {
+    "days": 364,
+    "net_cash_weight": -1.5418605895250588e-18,
+    "short_weight": -0.2924885344513194,
+    "gross_sharpe": -0.6168303715282444,
+    "net_sharpe": -2.737852516265575,
+    "gross_t": -0.7413378442695293,
+    "net_t": -3.2904892106845454,
+    "gross_bp_day": -0.08255398204755421,
+    "net_bp_day": -0.36735405892454615,
+    "turnover_day": 0.17376453744782921,
+    "breakeven_bp": -0.3167273877630337
+   },
+   "design_shock_net_sharpe": -4.651057983892572,
+   "design_closelag_gross_sharpe": -1.2199477327025134,
+   "design_contaminated_gross_sharpe": 4.674045503161661,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": -1.5418605895250588e-18,
+    "short_weight": -0.2924885344513194,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.4056561289122189,
+     "sharpe": -3.0233139563839466
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.4834209376750697,
+     "sharpe": -3.602887183290943
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.7155546951761168,
+     "sharpe": -5.33295651734168
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "C3_coin_d1_rev_H1",
+   "family": "C",
+   "H": 1,
+   "n_legs": 17,
+   "design": {
+    "days": 364,
+    "net_cash_weight": -7.917058721061733e-19,
+    "short_weight": -0.5,
+    "gross_sharpe": -0.8544791497112185,
+    "net_sharpe": -10.450372762673705,
+    "gross_t": -1.026956129366223,
+    "net_t": -12.559784947844104,
+    "gross_bp_day": -0.24848178320679054,
+    "net_bp_day": -3.0405694318855057,
+    "turnover_day": 1.7035312072475384,
+    "breakeven_bp": -0.09724184765920128
+   },
+   "design_shock_net_sharpe": -19.13353507890111,
+   "design_closelag_gross_sharpe": -1.8534492960770363,
+   "design_contaminated_gross_sharpe": 21.447765037533348,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": -7.917058721061733e-19,
+    "short_weight": -0.5,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -3.1060456223616963,
+     "sharpe": -10.675413043083191
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -3.2389821302982043,
+     "sharpe": -11.132313006338807
+    },
+    "hard_3pct": {
+     "excess_bp_day": -3.635807527123601,
+     "sharpe": -12.496193493669006
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "C4_coin_d5_rev_H5",
+   "family": "C",
+   "H": 5,
+   "n_legs": 17,
+   "design": {
+    "days": 364,
+    "net_cash_weight": 2.8916029369476037e-18,
+    "short_weight": -0.24366939045471916,
+    "gross_sharpe": -0.11722662227260537,
+    "net_sharpe": -4.747656066963252,
+    "gross_t": -0.14088886581777588,
+    "net_t": -5.7059724625679005,
+    "gross_bp_day": -0.01346548439463217,
+    "net_bp_day": -0.5444007925033771,
+    "turnover_day": 0.32393856504499385,
+    "breakeven_bp": -0.02771201260082935
+   },
+   "design_shock_net_sharpe": -8.977570947836881,
+   "design_closelag_gross_sharpe": -0.645285290538361,
+   "design_contaminated_gross_sharpe": 6.432623397572928,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": 2.8916029369476037e-18,
+    "short_weight": -0.24366939045471916,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.576309879348638,
+     "sharpe": -5.025931506379002
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.6410949950647736,
+     "sharpe": -5.590914974283707
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.8344834001875667,
+     "sharpe": -7.277432788924618
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "C5_coin_d20_rev_H20",
+   "family": "C",
+   "H": 20,
+   "n_legs": 17,
+   "design": {
+    "days": 364,
+    "net_cash_weight": 1.0044507626824841e-18,
+    "short_weight": -0.23689054164748977,
+    "gross_sharpe": -0.9595148236706577,
+    "net_sharpe": -1.9032620742974558,
+    "gross_t": -1.1531932987707816,
+    "net_t": -2.287436333175143,
+    "gross_bp_day": -0.11443862168034785,
+    "net_bp_day": -0.22721896309663123,
+    "turnover_day": 0.06881045846020949,
+    "breakeven_bp": -1.1087328316186453
+   },
+   "design_shock_net_sharpe": -2.7646209710243608,
+   "design_closelag_gross_sharpe": -1.1701336580431345,
+   "design_contaminated_gross_sharpe": 0.5364407194888713,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": 1.0044507626824841e-18,
+    "short_weight": -0.23689054164748977,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.25824034355046915,
+     "sharpe": -2.163107538362147
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.32122314629007953,
+     "sharpe": -2.6906725714631876
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.5092315126769762,
+     "sharpe": -4.265493565794651
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "C6_coin_z20_rev_H1",
+   "family": "C",
+   "H": 1,
+   "n_legs": 17,
+   "design": {
+    "days": 364,
+    "net_cash_weight": 1.4383550249814563e-18,
+    "short_weight": -0.4739010989010989,
+    "gross_sharpe": 0.36379413521375303,
+    "net_sharpe": -7.812366238616851,
+    "gross_t": 0.4372261360754221,
+    "net_t": -9.389295685345598,
+    "gross_bp_day": 0.08067049290723756,
+    "net_bp_day": -1.7771879528282415,
+    "turnover_day": 1.133531693554289,
+    "breakeven_bp": 0.047444927134054855
+   },
+   "design_shock_net_sharpe": -14.590170736781918,
+   "design_closelag_gross_sharpe": -2.6223483597595467,
+   "design_contaminated_gross_sharpe": 22.566522527978535,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": 1.4383550249814563e-18,
+    "short_weight": -0.4739010989010989,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -1.8392464300652902,
+     "sharpe": -8.085169996719719
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -1.9652439444556618,
+     "sharpe": -8.639044293474033
+    },
+    "hard_3pct": {
+     "excess_bp_day": -2.3413559277105023,
+     "sharpe": -10.2924004031884
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "H1_tri_z20_H5",
+   "family": "H",
+   "H": 5,
+   "n_legs": 18,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.13610661642074007,
+    "short_weight": -0.4505440340059844,
+    "gross_sharpe": 0.25212586860242375,
+    "net_sharpe": -1.0464900338031424,
+    "gross_t": 0.7120576649034628,
+    "net_t": -2.955512871190751,
+    "gross_bp_day": 0.06080654557939937,
+    "net_bp_day": -0.25195741261993704,
+    "turnover_day": 0.1908120236666979,
+    "breakeven_bp": 0.21244833671353122
+   },
+   "design_shock_net_sharpe": -2.235681095169454,
+   "design_closelag_gross_sharpe": 0.1435921967965263,
+   "design_contaminated_gross_sharpe": 3.4983087970600697,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.13610661642074007,
+    "short_weight": -0.4505440340059844,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.23641067944818867,
+     "sharpe": -0.981917608037789
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.3561981805529544,
+     "sharpe": -1.4794478246598064
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.7137728107164341,
+     "sharpe": -2.9646126503971706
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "H2_tri_z60_H5",
+   "family": "H",
+   "H": 5,
+   "n_legs": 18,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.18010691647274038,
+    "short_weight": -0.523940983126666,
+    "gross_sharpe": -0.0820589843991017,
+    "net_sharpe": -0.904205379650174,
+    "gross_t": -0.23175221622226005,
+    "net_t": -2.553670413892081,
+    "gross_bp_day": -0.019472964608717322,
+    "net_bp_day": -0.2142133357739038,
+    "turnover_day": 0.11880251357874798,
+    "breakeven_bp": -0.10927358365365288
+   },
+   "design_shock_net_sharpe": -1.6569188153540138,
+   "design_closelag_gross_sharpe": -0.2049885841983475,
+   "design_contaminated_gross_sharpe": 2.2940456174854327,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.18010691647274038,
+    "short_weight": -0.523940983126666,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.1841788353132326,
+     "sharpe": -0.7774282264279844
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.32348060463659223,
+     "sharpe": -1.3654280760261153
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.7393067817212478,
+     "sharpe": -3.1206515076623265
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "H3_tri_z20_H1",
+   "family": "H",
+   "H": 1,
+   "n_legs": 18,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.136503873792768,
+    "short_weight": -0.5630078996279273,
+    "gross_sharpe": 0.5709284946098909,
+    "net_sharpe": -3.0998972968357026,
+    "gross_t": 1.612424829519695,
+    "net_t": -8.754776504532654,
+    "gross_bp_day": 0.2057545239999228,
+    "net_bp_day": -1.1268753097739603,
+    "turnover_day": 0.813060880027007,
+    "breakeven_bp": 0.1687077635097373
+   },
+   "design_shock_net_sharpe": -6.327669113650309,
+   "design_closelag_gross_sharpe": 0.7065790952384744,
+   "design_contaminated_gross_sharpe": 7.917475256757892,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.136503873792768,
+    "short_weight": -0.5630078996279273,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -1.1258384069313343,
+     "sharpe": -3.0970449028830993
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -1.2755270151657436,
+     "sharpe": -3.508820108186001
+    },
+    "hard_3pct": {
+     "excess_bp_day": -1.7223586815371146,
+     "sharpe": -4.737999825508097
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "H4_tri_d5_H5",
+   "family": "H",
+   "H": 5,
+   "n_legs": 18,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.06567957005476399,
+    "short_weight": -0.32732542537362996,
+    "gross_sharpe": 0.6951248351607022,
+    "net_sharpe": -0.6638789468021153,
+    "gross_t": 1.9631819998662994,
+    "net_t": -1.8749368926673478,
+    "gross_bp_day": 0.257231788706259,
+    "net_bp_day": -0.2455866397159915,
+    "turnover_day": 0.30677253805931076,
+    "breakeven_bp": 0.5590065532670035
+   },
+   "design_shock_net_sharpe": -1.9076327988754438,
+   "design_closelag_gross_sharpe": 0.6164447787972049,
+   "design_contaminated_gross_sharpe": 2.921121989431019,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.06567957005476399,
+    "short_weight": -0.32732542537362996,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.2524775229548188,
+     "sharpe": -0.6825066388965201
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.3395045209708236,
+     "sharpe": -0.9177612596406672
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.5992866046006886,
+     "sharpe": -1.6200138588769266
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "H5_tri_clean_z20_H5",
+   "family": "H",
+   "H": 5,
+   "n_legs": 11,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.14491500846067246,
+    "short_weight": -0.43833255796755743,
+    "gross_sharpe": 0.09653920042849974,
+    "net_sharpe": -1.0207642495682172,
+    "gross_t": 0.272647459817632,
+    "net_t": -2.8828577249668736,
+    "gross_bp_day": 0.02698466167499002,
+    "net_bp_day": -0.28505748193508984,
+    "turnover_day": 0.1903716242833809,
+    "breakeven_bp": 0.09449819277275463
+   },
+   "design_shock_net_sharpe": -2.0423753070482227,
+   "design_closelag_gross_sharpe": -0.04000813609040047,
+   "design_contaminated_gross_sharpe": 2.623895767938034,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.14491500846067246,
+    "short_weight": -0.43833255796755743,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.263087208884048,
+     "sharpe": -0.9420907513968476
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.37962800802621605,
+     "sharpe": -1.3594124809402381
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.7275109905401504,
+     "sharpe": -2.6051489870399114
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "H6_tri_xs_z20_H5",
+   "family": "H",
+   "H": 5,
+   "n_legs": 18,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": 9.331735459636166e-05,
+    "short_weight": -0.33854454384142696,
+    "gross_sharpe": 0.6838450720483966,
+    "net_sharpe": -0.7963786034537427,
+    "gross_t": 1.9313255234684812,
+    "net_t": -2.24914441305727,
+    "gross_bp_day": 0.19406576337144613,
+    "net_bp_day": -0.2260440047253221,
+    "turnover_day": 0.25632078590406854,
+    "breakeven_bp": 0.5047471086850724
+   },
+   "design_shock_net_sharpe": -2.1482603890985152,
+   "design_closelag_gross_sharpe": 0.6179056166919465,
+   "design_contaminated_gross_sharpe": 3.552579912721221,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": 9.331735459636166e-05,
+    "short_weight": -0.33854454384142696,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.2704283293685323,
+     "sharpe": -0.9527496008511251
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.3604381882470069,
+     "sharpe": -1.2698645174701813
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.6291243341529013,
+     "sharpe": -2.216476208870349
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "L1_lev_te_z20_H1",
+   "family": "L",
+   "H": 1,
+   "n_legs": 37,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.004979348550583202,
+    "short_weight": -0.49726579367827667,
+    "gross_sharpe": 0.5441105218305692,
+    "net_sharpe": -5.139978428416217,
+    "gross_t": 1.5366851080046418,
+    "net_t": -14.516404277276282,
+    "gross_bp_day": 0.2696838451663471,
+    "net_bp_day": -2.55121231708962,
+    "turnover_day": 1.6298616017933685,
+    "breakeven_bp": 0.11030950720789572
+   },
+   "design_shock_net_sharpe": -10.322484175461732,
+   "design_closelag_gross_sharpe": -0.11050924674095387,
+   "design_contaminated_gross_sharpe": 3.367092277063191,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.004979348550583202,
+    "short_weight": -0.49726579367827667,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -2.6136032326598317,
+     "sharpe": -5.265678652584883
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -2.745812788915564,
+     "sharpe": -5.5320438871178395
+    },
+    "hard_3pct": {
+     "excess_bp_day": -3.1404681807237202,
+     "sharpe": -6.327163990201292
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "L2_lev_d5_H5",
+   "family": "L",
+   "H": 5,
+   "n_legs": 37,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.1335370840372812,
+    "short_weight": -0.4425681452041992,
+    "gross_sharpe": -0.15836453659964544,
+    "net_sharpe": -0.46686824320394626,
+    "gross_t": -0.4472555028158601,
+    "net_t": -1.318536304569376,
+    "gross_bp_day": -0.22870114024563618,
+    "net_bp_day": -0.6742307418788399,
+    "turnover_day": 0.25905146307805527,
+    "breakeven_bp": -0.588560377226991
+   },
+   "design_shock_net_sharpe": -0.7503605239932132,
+   "design_closelag_gross_sharpe": -0.04793147926823322,
+   "design_contaminated_gross_sharpe": -0.014481689683566378,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.1335370840372812,
+    "short_weight": -0.4425681452041992,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.6590468979625487,
+     "sharpe": -0.45635425430672133
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.7767138254573159,
+     "sharpe": -0.5378322236582879
+    },
+    "hard_3pct": {
+     "excess_bp_day": -1.1279583851431882,
+     "sharpe": -0.781050042618188
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "L3_lev_d20z60_H5",
+   "family": "L",
+   "H": 5,
+   "n_legs": 37,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.12267295326245116,
+    "short_weight": -0.3937681753595618,
+    "gross_sharpe": -0.3885808869231796,
+    "net_sharpe": -1.1336726548101725,
+    "gross_t": -1.097435977126767,
+    "net_t": -3.20173533887542,
+    "gross_bp_day": -0.18971808061487502,
+    "net_bp_day": -0.5535620019014943,
+    "turnover_day": 0.21010519709664685,
+    "breakeven_bp": -0.6019780669763128
+   },
+   "design_shock_net_sharpe": -1.818328833085605,
+   "design_closelag_gross_sharpe": -0.0415575292338708,
+   "design_contaminated_gross_sharpe": 0.5760781651679967,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.12267295326245116,
+    "short_weight": -0.3937681753595618,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.5379380462649291,
+     "sharpe": -1.101675423778601
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.6426303786025904,
+     "sharpe": -1.316081098177881
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.9551448034911316,
+     "sharpe": -1.9560980366831944
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "L4_lev_xs_H5",
+   "family": "L",
+   "H": 5,
+   "n_legs": 37,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.09603574193282452,
+    "short_weight": -0.404916988692763,
+    "gross_sharpe": 0.015267372788484357,
+    "net_sharpe": -0.8357298863904202,
+    "gross_t": 0.04311834353705954,
+    "net_t": -2.3602808973623826,
+    "gross_bp_day": 0.007548333213113745,
+    "net_bp_day": -0.4132516506389322,
+    "turnover_day": 0.2429823780241236,
+    "breakeven_bp": 0.02071023496846436
+   },
+   "design_shock_net_sharpe": -1.61768072745324,
+   "design_closelag_gross_sharpe": -0.04398025977969059,
+   "design_contaminated_gross_sharpe": 0.7617377533819046,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.09603574193282452,
+    "short_weight": -0.404916988692763,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.41367704587408616,
+     "sharpe": -0.8365901745731694
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.5213335468360509,
+     "sharpe": -1.0543068011831946
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.8426962362747517,
+     "sharpe": -1.7042071791235682
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "L5_levbull_d20z60_H5",
+   "family": "L",
+   "H": 5,
+   "n_legs": 22,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.032193570542155055,
+    "short_weight": -0.3410637549175756,
+    "gross_sharpe": -0.15277261183480353,
+    "net_sharpe": -0.8128589678866157,
+    "gross_t": -0.43146270490725663,
+    "net_t": -2.2956885058149017,
+    "gross_bp_day": -0.08656440045573663,
+    "net_bp_day": -0.4607625227204431,
+    "turnover_day": 0.2150475697475348,
+    "breakeven_bp": -0.2683573702859108
+   },
+   "design_shock_net_sharpe": -1.419472322673224,
+   "design_closelag_gross_sharpe": 0.0544340025671394,
+   "design_contaminated_gross_sharpe": 0.45124204953105707,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.032193570542155055,
+    "short_weight": -0.3410637549175756,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.4877929894032643,
+     "sharpe": -0.860545045129974
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.5784726385281753,
+     "sharpe": -1.0205184855929634
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.8491581583040289,
+     "sharpe": -1.4980511436914392
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "L6_bullbear_parity_z20_H5",
+   "family": "L",
+   "H": 5,
+   "n_legs": 18,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": 0.9681407656940901,
+    "short_weight": -0.0062677313383552365,
+    "gross_sharpe": -0.6680684959889869,
+    "net_sharpe": -0.7417985354769595,
+    "gross_t": -1.8867690804057118,
+    "net_t": -2.0949985653136367,
+    "gross_bp_day": -0.854198239271987,
+    "net_bp_day": -0.9483829493166651,
+    "turnover_day": 0.053392696515139115,
+    "breakeven_bp": -10.665606534528996
+   },
+   "design_shock_net_sharpe": -0.8097810543574084,
+   "design_closelag_gross_sharpe": -0.7035953219001152,
+   "design_contaminated_gross_sharpe": -0.448910708909027,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": 0.9681407656940901,
+    "short_weight": -0.0062677313383552365,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -1.4794612022025766,
+     "sharpe": -1.157193045150805
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -1.481127622836187,
+     "sharpe": -1.1584964726179385
+    },
+    "hard_3pct": {
+     "excess_bp_day": -1.4861020127872624,
+     "sharpe": -1.1623873008780397
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "F1_fof_z20_H5",
+   "family": "F",
+   "H": 5,
+   "n_legs": 11,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": 3.439240324262476e-19,
+    "short_weight": -0.3262077658016807,
+    "gross_sharpe": 0.11388111487555747,
+    "net_sharpe": -0.3989093536534542,
+    "gross_t": 0.32162475506534716,
+    "net_t": -1.1266057879944873,
+    "gross_bp_day": 0.05112784226416526,
+    "net_bp_day": -0.17922155380030455,
+    "turnover_day": 0.13830008240946307,
+    "breakeven_bp": 0.24645848059001532
+   },
+   "design_shock_net_sharpe": -0.8674753132432459,
+   "design_closelag_gross_sharpe": -0.04376380813803287,
+   "design_contaminated_gross_sharpe": 0.9070977189406404,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": 3.439240324262476e-19,
+    "short_weight": -0.3262077658016807,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.2219392374171913,
+     "sharpe": -0.4939899017228688
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.3086690799120826,
+     "sharpe": -0.6870322265910743
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.5675641321356387,
+     "sharpe": -1.2632779724663148
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "F2_fof_z60_H5",
+   "family": "F",
+   "H": 5,
+   "n_legs": 11,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -6.498740186122068e-19,
+    "short_weight": -0.3588954375792771,
+    "gross_sharpe": 0.09359050573998033,
+    "net_sharpe": -0.22507144166477142,
+    "gross_t": 0.264319711990489,
+    "net_t": -0.6356501460030366,
+    "gross_bp_day": 0.0433005598688609,
+    "net_bp_day": -0.10412609009301498,
+    "turnover_day": 0.08858385757802006,
+    "breakeven_bp": 0.325872463695198
+   },
+   "design_shock_net_sharpe": -0.5168304772533296,
+   "design_closelag_gross_sharpe": 0.12942134079759185,
+   "design_contaminated_gross_sharpe": 0.7728383025446687,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -6.498740186122068e-19,
+    "short_weight": -0.3588954375792771,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.15112430215696793,
+     "sharpe": -0.3266593850462173
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.24654491452923605,
+     "sharpe": -0.5329136943358197
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.5313825634016782,
+     "sharpe": -1.1485981996779162
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "F3_fof_d5_H5",
+   "family": "F",
+   "H": 5,
+   "n_legs": 11,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": 2.422355779202937e-18,
+    "short_weight": -0.26299502916629325,
+    "gross_sharpe": 0.3646083400053269,
+    "net_sharpe": -0.6346253102195084,
+    "gross_t": 1.0297323500664581,
+    "net_t": -1.7923183328566812,
+    "gross_bp_day": 0.14132632766884065,
+    "net_bp_day": -0.24594799745353071,
+    "turnover_day": 0.23191309798564477,
+    "breakeven_bp": 0.4062623137614207
+   },
+   "design_shock_net_sharpe": -1.548634002865825,
+   "design_closelag_gross_sharpe": 0.16771103777109442,
+   "design_contaminated_gross_sharpe": 1.2655695721284586,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": 2.422355779202937e-18,
+    "short_weight": -0.26299502916629325,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.2803878227014977,
+     "sharpe": -0.7234911884059175
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.35031110426555184,
+     "sharpe": -0.9039158501783237
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.5590373178895941,
+     "sharpe": -1.442496930095954
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "F4_fof_z20_H1",
+   "family": "F",
+   "H": 1,
+   "n_legs": 11,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -4.048766918744376e-19,
+    "short_weight": -0.418407960199005,
+    "gross_sharpe": 1.0107995796210552,
+    "net_sharpe": -0.5949650240499098,
+    "gross_t": 2.8547153544380537,
+    "net_t": -1.680309156980089,
+    "gross_bp_day": 0.540634127718628,
+    "net_bp_day": -0.3182957850124842,
+    "turnover_day": 0.5172513670556791,
+    "breakeven_bp": 0.696803865138207
+   },
+   "design_shock_net_sharpe": -2.043726673099434,
+   "design_closelag_gross_sharpe": 0.09273917668644945,
+   "design_contaminated_gross_sharpe": 4.044819890636673,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -4.048766918744376e-19,
+    "short_weight": -0.418407960199005,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.37308730360997294,
+     "sharpe": -0.6973824568751903
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.4843306898533592,
+     "sharpe": -0.9053208810962139
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.8164004995351092,
+     "sharpe": -1.526032595188822
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "C7_feecarry_btc",
+   "family": "C",
+   "H": 1,
+   "n_legs": 10,
+   "design": {
+    "days": 364,
+    "net_cash_weight": 0.0,
+    "short_weight": -0.5,
+    "gross_sharpe": 0.02575334369634496,
+    "net_sharpe": 0.02575334369634496,
+    "gross_t": 0.030951667070606353,
+    "net_t": 0.030951667070606353,
+    "gross_bp_day": 0.006706879779189276,
+    "net_bp_day": 0.006706879779189276,
+    "turnover_day": 0.0,
+    "breakeven_bp": NaN
+   },
+   "design_shock_net_sharpe": 0.02575334369634496,
+   "design_closelag_gross_sharpe": 0.5288862735990739,
+   "design_contaminated_gross_sharpe": 0.5288862735990739,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": 0.0,
+    "short_weight": -0.5,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.058769310697001205,
+     "sharpe": -0.2256647363612213
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.19170581863350913,
+     "sharpe": -0.7361196261750679
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.588531215458906,
+     "sharpe": -2.2598655659178934
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "C8_feecarry_eth",
+   "family": "C",
+   "H": 1,
+   "n_legs": 7,
+   "design": {
+    "days": 364,
+    "net_cash_weight": 0.0,
+    "short_weight": -0.3214285714285714,
+    "gross_sharpe": 0.6208891737681607,
+    "net_sharpe": 0.6033586522928372,
+    "gross_t": 0.7462159174671914,
+    "net_t": 0.725146852778891,
+    "gross_bp_day": 0.1881589348029787,
+    "net_bp_day": 0.18365618755023147,
+    "turnover_day": 0.002747252747252746,
+    "breakeven_bp": 45.65990151218952
+   },
+   "design_shock_net_sharpe": 0.5872983685996134,
+   "design_closelag_gross_sharpe": 1.3394634453312009,
+   "design_contaminated_gross_sharpe": 1.3394634453312009,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": 0.0,
+    "short_weight": -0.3214285714285714,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": 0.1415643508155376,
+     "sharpe": 0.4650759501223541
+    },
+    "moderate_1pct": {
+     "excess_bp_day": 0.05610516714206823,
+     "sharpe": 0.18432016086713107
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.19899687367425825,
+     "sharpe": -0.6537568219842813
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "C9_feecarry_pooled",
+   "family": "C",
+   "H": 1,
+   "n_legs": 17,
+   "design": {
+    "days": 364,
+    "net_cash_weight": 2.2303587548273235e-17,
+    "short_weight": -0.32142857142857145,
+    "gross_sharpe": 1.0595763252189803,
+    "net_sharpe": 1.0294900931415798,
+    "gross_t": 1.273452256948247,
+    "net_t": 1.2372931061347214,
+    "gross_bp_day": 0.19250795072552568,
+    "net_bp_day": 0.18800520347277846,
+    "turnover_day": 0.0027472527472527475,
+    "breakeven_bp": 46.71526270939423
+   },
+   "design_shock_net_sharpe": 1.0014839463253231,
+   "design_closelag_gross_sharpe": 1.7898993961950083,
+   "design_contaminated_gross_sharpe": 1.8062638043978665,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": 2.2303587548273235e-17,
+    "short_weight": -0.32142857142857145,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": 0.14591336673808453,
+     "sharpe": 0.7990011060281221
+    },
+    "moderate_1pct": {
+     "excess_bp_day": 0.06045418306461514,
+     "sharpe": 0.3310386170401935
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.19464785775171137,
+     "sharpe": -1.0658643351625783
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "C10_coin_cheapest3_vs_group_H5",
+   "family": "C",
+   "H": 5,
+   "n_legs": 17,
+   "design": {
+    "days": 364,
+    "net_cash_weight": -1.3372621081293738e-17,
+    "short_weight": -0.23879109119879585,
+    "gross_sharpe": -0.1550074822263142,
+    "net_sharpe": -3.0783006174403216,
+    "gross_t": -0.18629580841584958,
+    "net_t": -3.6996569058245123,
+    "gross_bp_day": -0.014319730752279021,
+    "net_bp_day": -0.2848820797195237,
+    "turnover_day": 0.1650776991868485,
+    "breakeven_bp": -0.05783026547626228
+   },
+   "design_shock_net_sharpe": -5.714218944225479,
+   "design_closelag_gross_sharpe": -1.0309755015259683,
+   "design_contaminated_gross_sharpe": 6.347025997443414,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": -1.3372621081293738e-17,
+    "short_weight": -0.23879109119879585,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.3161523416622231,
+     "sharpe": -3.416192234703516
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.37964044924285534,
+     "sharpe": -4.102214609146973
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.5691571882895188,
+     "sharpe": -6.150042592560278
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "L7_lev_decay_carry",
+   "family": "L",
+   "H": 1,
+   "n_legs": 22,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": 0.4347826086956522,
+    "short_weight": -0.2826086956521739,
+    "gross_sharpe": 1.2282238794172298,
+    "net_sharpe": 1.2282238794172298,
+    "gross_t": 3.4687683275197942,
+    "net_t": 3.4687683275197942,
+    "gross_bp_day": 0.5428732052505947,
+    "net_bp_day": 0.5428732052505947,
+    "turnover_day": 0.0,
+    "breakeven_bp": NaN
+   },
+   "design_shock_net_sharpe": 1.2282238794172298,
+   "design_closelag_gross_sharpe": 1.0959182784058037,
+   "design_contaminated_gross_sharpe": 1.0959182784058037,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": 0.4347826086956522,
+    "short_weight": -0.2826086956521739,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": 0.26773144353544914,
+     "sharpe": 0.6057291998217001
+    },
+    "moderate_1pct": {
+     "excess_bp_day": 0.19259341731046636,
+     "sharpe": 0.435733117551989
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.03169919828649703,
+     "sharpe": -0.0717178742978948
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "L8_bullbear_shortboth",
+   "family": "L",
+   "H": 1,
+   "n_legs": 18,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": -0.9537313432835821,
+    "short_weight": -0.9537313432835821,
+    "gross_sharpe": 0.6059365599684328,
+    "net_sharpe": 0.6051465650499509,
+    "gross_t": 1.7112951335078177,
+    "net_t": 1.7090640179937375,
+    "gross_bp_day": 0.7576325741081023,
+    "net_bp_day": 0.7566631081317715,
+    "turnover_day": 0.0004975124378109452,
+    "breakeven_bp": 1015.2276493048571
+   },
+   "design_shock_net_sharpe": 0.6044669976379967,
+   "design_closelag_gross_sharpe": 0.5694749186338286,
+   "design_contaminated_gross_sharpe": 0.6487169835367622,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": -0.9537313432835821,
+    "short_weight": -0.9537313432835821,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": 1.1541350549013336,
+     "sharpe": 0.92302750929896
+    },
+    "moderate_1pct": {
+     "excess_bp_day": 0.900563626329905,
+     "sharpe": 0.7202320018323976
+    },
+    "hard_3pct": {
+     "excess_bp_day": 0.1436339888032525,
+     "sharpe": 0.11487227805161407
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "F5_fof_fee_carry",
+   "family": "F",
+   "H": 1,
+   "n_legs": 11,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": 0.0,
+    "short_weight": -0.42388059701492536,
+    "gross_sharpe": 0.44318521862904187,
+    "net_sharpe": 0.4416517763237247,
+    "gross_t": 1.2516503508584937,
+    "net_t": 1.2473195800683288,
+    "gross_bp_day": 0.23640260280331776,
+    "net_bp_day": 0.2355687990045106,
+    "turnover_day": 0.0004975124378109452,
+    "breakeven_bp": 316.7794877564458
+   },
+   "design_shock_net_sharpe": 0.44023779172279165,
+   "design_closelag_gross_sharpe": 0.574942237830393,
+   "design_contaminated_gross_sharpe": 0.5717773637635098,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": 0.0,
+    "short_weight": -0.42388059701492536,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": 0.18006062558588942,
+     "sharpe": 0.3375833109988665
+    },
+    "moderate_1pct": {
+     "excess_bp_day": 0.06736221288747674,
+     "sharpe": 0.1262927904908211
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.269050959346591,
+     "sharpe": -0.5044251811749862
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "PLACEBO_C_idperm",
+   "family": "PLACEBO",
+   "H": 5,
+   "n_legs": 17,
+   "design": {
+    "days": 364,
+    "net_cash_weight": 2.7313554729923286e-18,
+    "short_weight": -0.2816426537721238,
+    "gross_sharpe": -0.16183155858413492,
+    "net_sharpe": -3.73680809198421,
+    "gross_t": -0.19449732748778434,
+    "net_t": -4.491084394072608,
+    "gross_bp_day": -0.017439073636984718,
+    "net_bp_day": -0.40310018155681937,
+    "turnover_day": 0.23530268939587226,
+    "breakeven_bp": -0.04940890867491756
+   },
+   "design_shock_net_sharpe": -6.971751710776162,
+   "design_closelag_gross_sharpe": -0.14790665496893796,
+   "design_contaminated_gross_sharpe": -0.08883597738611719,
+   "design_financing_ladder": {
+    "bil_bp_day": 1.889146298935977,
+    "net_cash_weight": 2.7313554729923286e-18,
+    "short_weight": -0.2816426537721238,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.43998195764602605,
+     "sharpe": -4.078708506924783
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.5148631394029002,
+     "sharpe": -4.772869955440494
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.738389055095062,
+     "sharpe": -6.844993682353064
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "PLACEBO_L_idperm",
+   "family": "PLACEBO",
+   "H": 5,
+   "n_legs": 37,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": 0.007984721258334998,
+    "short_weight": -0.3417268619966612,
+    "gross_sharpe": -0.36146876804577077,
+    "net_sharpe": -1.3503945672389626,
+    "gross_t": -1.0208655237835782,
+    "net_t": -3.813804619004708,
+    "gross_bp_day": -0.16124553003817257,
+    "net_bp_day": -0.6024798932473716,
+    "turnover_day": 0.2543436986838228,
+    "breakeven_bp": -0.4226447149338621
+   },
+   "design_shock_net_sharpe": -2.2590340727434777,
+   "design_closelag_gross_sharpe": -0.40780504748018853,
+   "design_contaminated_gross_sharpe": -0.3350884693313425,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": 0.007984721258334998,
+    "short_weight": -0.3417268619966612,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.6516031272219992,
+     "sharpe": -1.460499068697086
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.7424590786258733,
+     "sharpe": -1.6641430152457606
+    },
+    "hard_3pct": {
+     "excess_bp_day": -1.0136708738613187,
+     "sharpe": -2.2720353930029975
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "CTRL_LONG_SPY",
+   "family": "CTRL",
+   "H": 1,
+   "n_legs": 1,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": 1.0,
+    "short_weight": 0.0,
+    "gross_sharpe": 0.805138125920862,
+    "net_sharpe": 0.805138125920862,
+    "gross_t": 2.2738831879722787,
+    "net_t": 2.2738831879722787,
+    "gross_bp_day": 5.538425163876162,
+    "net_bp_day": 5.538425163876162,
+    "turnover_day": 0.0,
+    "breakeven_bp": NaN
+   },
+   "design_shock_net_sharpe": 0.805138125920862,
+   "design_closelag_gross_sharpe": 0.7778077729856135,
+   "design_contaminated_gross_sharpe": 0.7778077729856135,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": 1.0,
+    "short_weight": 0.0,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": 4.990718159550375,
+     "sharpe": 0.725516251837803
+    },
+    "moderate_1pct": {
+     "excess_bp_day": 4.990718159550375,
+     "sharpe": 0.725516251837803
+    },
+    "hard_3pct": {
+     "excess_bp_day": 4.990718159550375,
+     "sharpe": 0.725516251837803
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  },
+  {
+   "formula": "CTRL_SPY_IVV_z20_H5",
+   "family": "CTRL",
+   "H": 5,
+   "n_legs": 2,
+   "design": {
+    "days": 2010,
+    "net_cash_weight": 0.0,
+    "short_weight": -0.21557213930348262,
+    "gross_sharpe": -0.06662646563495517,
+    "net_sharpe": -6.388768006831426,
+    "gross_t": -0.18816746494033065,
+    "net_t": -18.043254560792032,
+    "gross_bp_day": -0.0028290323175157884,
+    "net_bp_day": -0.30111072385980436,
+    "turnover_day": 0.18199004975124378,
+    "breakeven_bp": -0.01036332232222842
+   },
+   "design_shock_net_sharpe": -9.92759128503034,
+   "design_closelag_gross_sharpe": -0.06207515031259744,
+   "design_contaminated_gross_sharpe": 0.5859302951278336,
+   "design_financing_ladder": {
+    "bil_bp_day": 0.5477070043257871,
+    "net_cash_weight": 0.0,
+    "short_weight": -0.21557213930348262,
+    "b22g_etb_0.33pct": {
+     "excess_bp_day": -0.3293404087685938,
+     "sharpe": -6.987726773481587
+    },
+    "moderate_1pct": {
+     "excess_bp_day": -0.3866552235834086,
+     "sharpe": -8.203794572437973
+    },
+    "hard_3pct": {
+     "excess_bp_day": -0.5577442230306171,
+     "sharpe": -11.833847703651072
+    }
+   },
+   "heldout": "SEALED",
+   "heldout_shock_net_sharpe": "SEALED"
+  }
+ ]
+}

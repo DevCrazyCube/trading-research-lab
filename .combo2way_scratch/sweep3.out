@@ -1,0 +1,20 @@
+
+===== fwd(train h1 -> val h2) =====
+all-bars on VAL: mean=-0.1573 med=-0.1548 n=2335 k=195
+swept=60781 train-positive=1269 validate+CI survivors=2 (39s)
+ R8[up_min=3 & density15=1]                   trM=+0.0470(n=42,k=26) vaM=+0.1347 vaMed=+0.0457 n=55 k=18 res=1.00 CI=[+0.0142,+0.3067] rc=-0.0430(hi+0.0621) edge=+0.1777 beat=True d50=+0.1347 d100=+0.1347 t250=+0.1191 raw=+0.1347
+ M10[ret1=3 & barrange=6]                     trM=+0.0189(n=71,k=16) vaM=+0.0509 vaMed=+0.0272 n=124 k=21 res=1.00 CI=[+0.0066,+0.0960] rc=-0.0572(hi+0.0206) edge=+0.1081 beat=True d50=+0.0509 d100=+0.0509 t250=+0.0365 raw=+0.0509
+
+===== rev(train h2 -> val h1) =====
+all-bars on VAL: mean=-0.1557 med=-0.1343 n=1732 k=154
+swept=57387 train-positive=1528 validate+CI survivors=2 (36s)
+ M10[cumvol=1]                                trM=+0.0079(n=430,k=37) vaM=+0.1562 vaMed=-0.0053 n=242 k=26 res=0.95 CI=[+0.0059,+0.3813] rc=-0.0919(hi-0.0170) edge=+0.2481 beat=True d50=+0.1444 d100=+0.1147 t250=+0.1409 raw=+0.1562
+ M10[barrange=3 & cumvol=1]                   trM=+0.0214(n=123,k=27) vaM=+0.1184 vaMed=-0.0045 n=77 k=18 res=0.96 CI=[+0.0055,+0.2533] rc=-0.0705(hi+0.0345) edge=+0.1889 beat=True d50=+0.1085 d100=+0.0837 t250=+0.1035 raw=+0.1184
+NULL rep0 train-positive=1314 survivors=0 []
+NULL rep1 train-positive=870 survivors=0 []
+NULL rep2 train-positive=1527 survivors=0 []
+NULL rep3 train-positive=1466 survivors=0 []
+NULL rep4 train-positive=1583 survivors=0 []
+NULL rep5 train-positive=1854 survivors=0 []
+NULL survivors per replicate: [0, 0, 0, 0, 0, 0]  mean=0.00
+WROTE sweep3_results.json

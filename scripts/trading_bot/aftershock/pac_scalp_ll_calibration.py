@@ -37,7 +37,6 @@ ATTEMPT_SCHEMA = 1
 SUMMARY_SCHEMA = 1
 TIMEOUT_SECONDS = 20.0
 BOOT_ID_PATH = pathlib.Path("/proc/sys/kernel/random/boot_id")
-_BROADCAST_CAPABILITY = object()
 
 
 class CalibrationRefused(RefusedExecution):
@@ -255,7 +254,9 @@ def _validate_attempt(row: dict, campaign: campaigns.Campaign, index: int) -> No
             != row["fee_lamports"] + campaign.profile.tip_lamports
             or not isinstance(row.get("clocks"), dict)
             or not isinstance(row.get("status_polls"), list)
-            or not isinstance(row.get("boot_id"), str) or not row["boot_id"]):
+            or not isinstance(row.get("boot_id"), str) or len(row["boot_id"]) != 36
+            or row["boot_id"].count("-") != 4
+            or any(char not in "0123456789abcdef-" for char in row["boot_id"])):
         raise CalibrationRefused(f"calibration attempt {index} schema/binding mismatch")
     memo = tx.campaign_memo(campaign.campaign_sha256, row["arm"], index)
     parsed = tx.verify(row.get("wire_base64"), expected_memo=memo,
@@ -392,6 +393,14 @@ def load_journal(path: pathlib.Path, campaign: campaigns.Campaign) -> dict:
 
 def _persist(path: pathlib.Path, journal: dict) -> None:
     sealed = _hash_row(journal, "journal_sha256")
+    # For the canonical broadcast journal, append an irreversible budget checkpoint first.  A crash
+    # can stop the campaign, but deletion/recreated genesis can never reset its spend reservation.
+    from . import pac_scalp_ll_manifest as manifest
+    if pathlib.Path(path).resolve() == manifest.RAW_JOURNAL.resolve() \
+            and manifest.SPEND_AUTHORITY.exists():
+        campaign = manifest.require_campaign_authority(
+            manifest.CAMPAIGN, file_sha256=hashlib.sha256(manifest.CAMPAIGN.read_bytes()).hexdigest())
+        manifest.checkpoint_spend_journal(campaign, sealed)
     _atomic_json(path, sealed)
     journal.clear(); journal.update(sealed)
 
@@ -474,9 +483,9 @@ def summary(journal: dict, campaign: campaigns.Campaign, *, raw_path: pathlib.Pa
         "reserved_lamports": sum(row["reserved_lamports"] for row in journal["attempts"]),
         "raw_journal_sha256": hashlib.sha256(pathlib.Path(raw_path).read_bytes()).hexdigest(),
         "arms": arm_summary,
-        "latency_definition": "BUILD_START_TO_FIRST_NEUTRAL_PROCESSED_OBSERVATION_MINUS_FEE_QUERY",
+        "latency_definition": "LOCAL_MONOTONIC_BUILD_TO_NEUTRAL_PROCESSED_MINUS_FEE_QUERY",
         "selection": "FIRST_N_DETERMINISTIC_MATCHED_ATTEMPTS_FAILURES_AT_DEADLINE",
-        "boundary": "CALIBRATION_ONLY_NO_PUMP_ACCOUNTS_NOT_LIVE_CONTENTION",
+        "boundary": "LOCAL_MONOTONIC_SCENARIO_FINALIZED_WIRE_NO_PUMP_NO_LIVE_CONTENTION",
     }
     return {**body, "summary_sha256": campaigns.sha(body)}
 
@@ -485,7 +494,10 @@ def _run_unlocked(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
         keypair_path: pathlib.Path, journal_path: pathlib.Path, summary_path: pathlib.Path,
         public_submit_url: str, intervention_submit_url: str, verification_url: str,
         broadcast: bool, rpc=_rpc, clock=time.time_ns, monotonic=time.monotonic_ns,
-        sleep=time.sleep, boot_id: str | None = None, _capability=None) -> dict:
+        sleep=time.sleep, boot_id: str | None = None, _campaign_lock=None) -> dict:
+    if broadcast:
+        from . import pac_scalp_ll_manifest as manifest
+        manifest.require_campaign_lock(_campaign_lock)
     campaign = campaigns.load(campaign_path, expected_sha256=campaign_file_sha256)
     if broadcast:
         # Local import avoids a module cycle: the manifest seals this sender and is consulted only
@@ -497,8 +509,9 @@ def _run_unlocked(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
         manifest.require_exact_path(
             summary_path, manifest.CALIBRATION_SUMMARY, label="calibration summary")
         manifest.require_spend_authority(campaign)
-        if _capability is not _BROADCAST_CAPABILITY:
-            raise CalibrationRefused("broadcast requires the locked public run wrapper")
+        if (rpc is not _rpc or clock is not time.time_ns or monotonic is not time.monotonic_ns
+                or sleep is not time.sleep or boot_id is not None):
+            raise CalibrationRefused("broadcast refuses injected clocks, boot ids, or RPC callables")
     campaigns.assert_runtime_urls(
         campaign, public_submit_url=public_submit_url,
         intervention_submit_url=intervention_submit_url, verification_url=verification_url)
@@ -632,7 +645,7 @@ def run(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
     manifest.require_exact_path(journal_path, manifest.RAW_JOURNAL, label="raw journal")
     manifest.require_exact_path(
         summary_path, manifest.CALIBRATION_SUMMARY, label="calibration summary")
-    with manifest.exclusive_campaign():
+    with manifest.exclusive_campaign() as campaign_lock:
         return _run_unlocked(
             campaign_path=campaign_path, campaign_file_sha256=campaign_file_sha256,
             keypair_path=keypair_path, journal_path=journal_path, summary_path=summary_path,
@@ -640,7 +653,7 @@ def run(*, campaign_path: pathlib.Path, campaign_file_sha256: str,
             intervention_submit_url=intervention_submit_url,
             verification_url=verification_url, broadcast=True, rpc=rpc, clock=clock,
             monotonic=monotonic, sleep=sleep, boot_id=boot_id,
-            _capability=_BROADCAST_CAPABILITY)
+            _campaign_lock=campaign_lock)
 
 
 def main(argv=None) -> int:

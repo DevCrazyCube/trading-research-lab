@@ -1,0 +1,35 @@
+realised log-return vol by group (whole-life, per bar):
+  burst1800s>=3          train  in: n= 44 med=0.4439    out: n=131 med=0.3913
+  burst1800s>=3          valid  in: n= 61 med=0.3764    out: n=146 med=0.5500
+  burst300s>=2           train  in: n= 22 med=0.4371    out: n=153 med=0.4165
+  burst300s>=2           valid  in: n= 26 med=0.2410    out: n=181 med=0.5181
+  burst600s>=2           train  in: n= 36 med=0.4439    out: n=139 med=0.4026
+  burst600s>=2           valid  in: n= 41 med=0.3519    out: n=166 med=0.5344
+  n>=3&gradrate>=0.05    train  in: n= 41 med=0.5197    out: n=134 med=0.3912
+  n>=3&gradrate>=0.05    valid  in: n= 42 med=0.5376    out: n=165 med=0.4485
+  rate>=5/h              train  in: n= 43 med=0.4397    out: n=132 med=0.4096
+  rate>=5/h              valid  in: n= 50 med=0.3928    out: n=157 med=0.5224
+
+burst300s>=2           first   /p_single /h60   /m_tp200  train  k= 22 obs=+0.1187 base=-0.0100 | p_rand=0.2782 p_volmatched=0.3493 | drop1=+0.031 drop2=-0.066 drop3=-0.173 drop5=-0.425
+burst300s>=2           first   /p_single /h60   /m_tp200  valid  k= 26 obs=+0.5549 base=-0.0327 | p_rand=0.0032 p_volmatched=0.0013 | drop1=+0.498 drop2=+0.437 drop3=+0.371 drop5=+0.219
+
+burst300s>=2           first   /p_single /h60   /m_tp50   train  k= 22 obs=+0.0711 base=+0.0466 | p_rand=0.4120 p_volmatched=0.4848 | drop1=+0.051 drop2=+0.030 drop3=+0.006 drop5=-0.050
+burst300s>=2           first   /p_single /h60   /m_tp50   valid  k= 26 obs=+0.0145 base=-0.0782 | p_rand=0.2105 p_volmatched=0.3750 | drop1=-0.004 drop2=-0.024 drop3=-0.047 drop5=-0.097
+
+burst600s>=2           first   /p_single /h60   /m_tp200  train  k= 36 obs=+0.2007 base=-0.0100 | p_rand=0.1035 p_volmatched=0.2008 | drop1=+0.150 drop2=+0.097 drop3=+0.040 drop5=-0.084
+burst600s>=2           first   /p_single /h60   /m_tp200  valid  k= 41 obs=+0.2623 base=-0.0327 | p_rand=0.0323 p_volmatched=0.0348 | drop1=+0.220 drop2=+0.175 drop3=+0.128 drop5=+0.026
+
+burst600s>=2           first   /p_single /h60   /m_tp50   train  k= 36 obs=+0.1422 base=+0.0466 | p_rand=0.1442 p_volmatched=0.2622 | drop1=+0.132 drop2=+0.122 drop3=+0.111 drop5=+0.087
+burst600s>=2           first   /p_single /h60   /m_tp50   valid  k= 41 obs=+0.0024 base=-0.0782 | p_rand=0.1885 p_volmatched=0.3882 | drop1=-0.010 drop2=-0.022 drop3=-0.035 drop5=-0.064
+
+burst600s>=2           first   /p_single /h180  /m_tp50   train  k= 36 obs=+0.1350 base=+0.0322 | p_rand=0.1422 p_volmatched=0.2028 | drop1=+0.125 drop2=+0.115 drop3=+0.103 drop5=+0.079
+burst600s>=2           first   /p_single /h180  /m_tp50   valid  k= 41 obs=+0.0626 base=-0.0656 | p_rand=0.0668 p_volmatched=0.1718 | drop1=+0.052 drop2=+0.041 drop3=+0.029 drop5=+0.004
+
+burst1800s>=3          first   /p_single /h180  /m_tp200  train  k= 44 obs=+0.1843 base=-0.0629 | p_rand=0.0535 p_volmatched=0.1055 | drop1=+0.143 drop2=+0.099 drop3=+0.054 drop5=-0.044
+burst1800s>=3          first   /p_single /h180  /m_tp200  valid  k= 61 obs=+0.2094 base=-0.0877 | p_rand=0.0147 p_volmatched=0.0175 | drop1=+0.180 drop2=+0.150 drop3=+0.119 drop5=+0.053
+
+rate>=5/h              first   /p_single /h480  /m_tp200  train  k= 43 obs=+0.2559 base=-0.0474 | p_rand=0.0305 p_volmatched=0.0475 | drop1=+0.215 drop2=+0.172 drop3=+0.128 drop5=+0.031
+rate>=5/h              first   /p_single /h480  /m_tp200  valid  k= 50 obs=+0.3628 base=-0.0396 | p_rand=0.0037 p_volmatched=0.0065 | drop1=+0.330 drop2=+0.296 drop3=+0.261 drop5=+0.185
+
+n>=3&gradrate>=0.05    first   /p_single /h15   /m_tp200  train  k= 41 obs=+0.1597 base=-0.0409 | p_rand=0.0825 p_volmatched=0.1092 | drop1=+0.115 drop2=+0.067 drop3=+0.017 drop5=-0.091
+n>=3&gradrate>=0.05    first   /p_single /h15   /m_tp200  valid  k= 42 obs=+0.3758 base=+0.0665 | p_rand=0.0220 p_volmatched=0.0315 | drop1=+0.337 drop2=+0.296 drop3=+0.253 drop5=+0.161

@@ -1,0 +1,9 @@
+04:37:14
+A done 04:34:48
+surface done 04:35:09
+B done 04:37:13
+--B--
+  B rvol10=q1|px_vs_start=q0               t30_avg      tr -0.0252 med -0.0235 base -0.1197 edge +0.0945 n   369 k  39 p 0.0000
+  B rng=q1|age_min=q2                      t60          tr -0.0502 med -0.0355 base -0.2472 edge +0.1970 n   159 k  53 p 0.0000
+features with ANY 2-way signal: ['ret1', 'ret5m', 'ret15m', 'ret30m', 'dd_ath', 'runup', 'rng', 'body', 'upwick', 'rvol10', 'volratio', 'volaccel', 'density5', 'age_min', 'px_vs_start', 'logpx', 'cumvol_log', 'trailvol_log']
+t=123.9

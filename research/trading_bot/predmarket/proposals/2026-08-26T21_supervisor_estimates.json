@@ -1,0 +1,19 @@
+[
+ {
+  "venue": "polymarket",
+  "market_id": "907686",
+  "question": "Will the Republican Party hold fewer than 22 governorships after the 2026 midterm elections?",
+  "category": "politics/elections/midterms",
+  "p_market": 0.16,
+  "yes_bid": 0.14,
+  "yes_ask": 0.18,
+  "spread": 0.04,
+  "close_time": "2026-11-03T00:00:00Z",
+  "q_agent": 0.09,
+  "confidence": 0.55,
+  "thesis": "Seat-count arithmetic, not a narrative. Stated baseline (as of the agent's Jan-2026 cutoff): Republicans hold 26 governorships after Virginia flipped D in Nov 2025 (NJ stayed D). YES needs a NET loss of >=5 for Republicans across the 36 races. Plausible R-held losses: NV (Lombardo), GA (open), IA (open), VT (only if Scott retires), plus low-probability AK/NH/OH. Against that, Democrats defend competitive open seats in KS (likely R flip), MI, WI, AZ (Hobbs) -- each R gain must be offset by an extra D pickup. A net -5 requires D to sweep essentially every competitive R seat while losing nothing, roughly a 1.5-2 sigma D-wave outcome; a reasonable distribution of net R change has mean -1 to -2 and SD ~2.5, giving P(<=-5) ~0.08-0.10. The 0.16 print is a wide 4c-spread tail on a $49k book, where thin-book longshot overpricing is the usual mechanism. Falsifier: a confirmed baseline of R=27 (not 26) makes YES even less likely; a Scott retirement in VT plus polling collapses in GA/IA/NV by Oct 1 would move the agent to ~0.15.",
+  "event_refs": [
+   "https://polymarket.com/event/how-many-republican-governors-after-the-2026-midterm-elections"
+  ]
+ }
+]

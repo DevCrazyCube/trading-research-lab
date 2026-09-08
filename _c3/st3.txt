@@ -1,0 +1,7 @@
+04:33:01
+cat: chain.log: Bestand of map bestaat niet
+--files--
+-rw-r--r-- 1 anont anont     878 04:33:00 build.log
+-rw-r--r-- 1 anont anont 1040886 04:29:15 phaseA.json
+-rw-r--r-- 1 anont anont     959 04:29:15 scores.json
+-rw-r--r-- 1 anont anont   11841 04:29:15 sweep.log

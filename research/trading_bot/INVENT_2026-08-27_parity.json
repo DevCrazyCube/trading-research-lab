@@ -1,0 +1,67 @@
+{
+ "prereg_sha256": "abb3c3f5e0db74678fba5e05561e71989bfe3b715479eea681e5d2ee1e1094bb",
+ "design": {
+  "label": "design 2020-01..2023-06",
+  "n_snapshots": 172,
+  "first": "2020-03-04",
+  "last": "2023-06-28",
+  "F3_async": {
+   "slope": 0.08066422989107323,
+   "t": 5.216189021223889,
+   "r2": 0.003265868029516561,
+   "n": 8306
+  },
+  "D_borrow": {
+   "median_xs_IQR_cres": 0.02078567133593115,
+   "median_noise_floor": 0.014462109943810714,
+   "ratio": 1.4372502640824343,
+   "measurable": false,
+   "median_c_level": 0.0029481573359788045
+  },
+  "F1_exec_t1_t6": {
+   "t_weekly": -2.427626154608534,
+   "mean_weekly": -0.0025255900045995532,
+   "n_weeks": 172,
+   "sharpe_ann": -1.334809399380566,
+   "placebo_p99": 0.002409850902550629,
+   "placebo_mean": 7.962544496527238e-06,
+   "placebo_sd": 0.0010566765455747884,
+   "clears_t": false,
+   "clears_placebo": false,
+   "net_mean_weekly_after_6p6bp": -0.0031855900045995532
+  },
+  "F2_sameprint_t0_t5": {
+   "t_weekly": -2.483728528829279,
+   "mean_weekly": -0.0024805906434409385,
+   "n_weeks": 172,
+   "sharpe_ann": -1.3656568081940095,
+   "placebo_p99": 0.0022431502956082863,
+   "placebo_mean": -5.638577945180779e-06,
+   "placebo_sd": 0.001020239114828039,
+   "clears_t": false,
+   "clears_placebo": false,
+   "net_mean_weekly_after_6p6bp": -0.0031405906434409385
+  }
+ },
+ "design_F1_clears_both_bars": false,
+ "heldout": {
+  "label": "held-out 2023-07..",
+  "n_snapshots": 159,
+  "first": "2023-07-05",
+  "last": "2026-08-19",
+  "F3_async": {
+   "slope": 0.3223883454762681,
+   "t": 14.775345641075447,
+   "r2": 0.026742928589127635,
+   "n": 7947
+  },
+  "D_borrow": {
+   "median_xs_IQR_cres": 0.02113065957519931,
+   "median_noise_floor": 0.015055926297584607,
+   "ratio": 1.4034778835619872,
+   "measurable": false,
+   "median_c_level": 0.00718388355789773
+  },
+  "note": "F1/F2 returns NOT read: design gate failed (prereg \u00a74). Diagnostics only."
+ }
+}

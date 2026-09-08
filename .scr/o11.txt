@@ -1,0 +1,43 @@
+MATCHED RANDOM-ENTRY PLACEBO (same mints, same #signal bars per mint, same exit+position, VALIDATE fold)
+B=400 draws
+
+lvolle0+rv15ge0+r1le2              ('TR', 0.15, 60)   ('FULL',)    k= 41 n=73
+    REAL  mean= +40.06%  median=  -4.72%
+    NULL  mean= +30.75% (sd 70.51)  median= -16.14%
+    edge over matched random =   +9.31pp   placebo p = 0.240
+lvolle0+rv15ge0+r1le2              ('TR', 0.15, 60)   ('PYR', 0.25) k= 41 n=73
+    REAL  mean= +35.37%  median=  -4.21%
+    NULL  mean= +24.25% (sd 49.53)  median=  -8.07%
+    edge over matched random =  +11.12pp   placebo p = 0.258
+r5le2+lvolle0+wickupge0            ('TR', 0.15, 60)   ('FULL',)    k= 47 n=67
+    REAL  mean= +41.16%  median=  -8.33%
+    NULL  mean=  +2.17% (sd 7.03)  median= -13.43%
+    edge over matched random =  +38.99pp   placebo p = 0.000
+r15le0+hi60le0+rv15ge2             ('TR', 0.35, 60)   ('FULL',)    k= 36 n=77
+    REAL  mean= +23.57%  median= -15.86%
+    NULL  mean= +29.98% (sd 38.73)  median= -11.65%
+    edge over matched random =   -6.41pp   placebo p = 0.393
+r15le0+lvolle0+r1le2               ('TR', 0.15, 60)   ('FULL',)    k= 42 n=75
+    REAL  mean= +44.52%  median=  -9.83%
+    NULL  mean= +25.53% (sd 60.64)  median= -16.14%
+    edge over matched random =  +18.99pp   placebo p = 0.100
+hi60le0+rv15ge2+wickupge0          ('TR', 0.35, 60)   ('FULL',)    k= 38 n=108
+    REAL  mean= +64.11%  median= -13.94%
+    NULL  mean= +38.16% (sd 33.47)  median= -10.75%
+    edge over matched random =  +25.95pp   placebo p = 0.250
+r15le0+rv15ge2+pgradge0            ('TR', 0.35, 60)   ('FULL',)    k= 36 n=77
+    REAL  mean= +23.57%  median= -15.86%
+    NULL  mean= +28.85% (sd 35.84)  median= -11.87%
+    edge over matched random =   -5.28pp   placebo p = 0.395
+r15le0+rv15ge2+pgradge0            ('TR', 0.35, 240)  ('FULL',)    k= 36 n=77
+    REAL  mean= +23.34%  median= -16.69%
+    NULL  mean= +30.12% (sd 42.38)  median= -16.63%
+    edge over matched random =   -6.78pp   placebo p = 0.355
+r15le0+hi60le0+rv15ge2             ('TR', 0.35, 240)  ('FULL',)    k= 36 n=77
+    REAL  mean= +23.34%  median= -16.69%
+    NULL  mean= +28.69% (sd 39.43)  median= -16.61%
+    edge over matched random =   -5.35pp   placebo p = 0.350
+lvolle0+rv15ge0+r1le2              ('TR', 0.15, 240)  ('FULL',)    k= 41 n=73
+    REAL  mean= +39.23%  median=  -4.72%
+    NULL  mean= +32.81% (sd 59.21)  median= -16.14%
+    edge over matched random =   +6.41pp   placebo p = 0.233

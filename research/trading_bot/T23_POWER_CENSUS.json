@@ -1,0 +1,523 @@
+{
+ "document": "T23_POWER_CENSUS",
+ "judged_against": {
+  "file": "research/trading_bot/T23_POWER_GATE.md",
+  "sha256": "a9ce4fc0680e5972e76bb593b97f1b73cc5e8fe7ce28304614b0d20fca47e1e7",
+  "expected_sha256": "a9ce4fc0680e5972e76bb593b97f1b73cc5e8fe7ce28304614b0d20fca47e1e7",
+  "matches": true
+ },
+ "windows": {
+  "design": [
+   "2020-01",
+   "2022-12"
+  ],
+  "heldout": [
+   "2023-01",
+   "2026-07"
+  ],
+  "heldout_clean": [
+   "2023-01",
+   "2024-09"
+  ]
+ },
+ "primary_configuration": {
+  "name": "liq20m_top3",
+  "top_n": 3,
+  "threshold_usd": 20000000,
+  "mode": "rank"
+ },
+ "panel": {
+  "symbols_enumerated": 920,
+  "symbol_months_enumerated": 21447,
+  "months_covered": [
+   "2020-01",
+   "2026-07"
+  ],
+  "usdt_symbols": 833
+ },
+ "gates": {
+  "G0_data_census": {
+   "pass": true,
+   "symbol_months_expected": 21447,
+   "present": {
+    "fundingRate": 21447,
+    "klines1d": 21329,
+    "premium1d": 21025
+   },
+   "coverage": {
+    "fundingRate": 1.0,
+    "klines1d": 0.9945,
+    "premium1d": 0.9803
+   },
+   "threshold": 0.98,
+   "consequence_if_failed": "the test is not run"
+  },
+  "G0b_survivorship_proof": {
+   "pass": true,
+   "heldout_symbols": 821,
+   "delisted_since_heldout_window": 146,
+   "threshold": 20,
+   "live_probe_error": null,
+   "examples": [
+    "1000WHYUSDT",
+    "1000XUSDT",
+    "42USDT",
+    "A2ZUSDT",
+    "ACXUSDT",
+    "AERGOUSDT",
+    "AGIXUSDT",
+    "AI16ZUSDT",
+    "AIUSDT",
+    "ALPACAUSDT",
+    "ALPHAUSDT",
+    "AMBUSDT",
+    "ANTUSDT",
+    "ATAUSDT",
+    "AUDIOUSDT"
+   ],
+   "consequence_if_failed": "the test is not run"
+  },
+  "G1_portfolio_power_BINDING": {
+   "pass": false,
+   "mde_annual_excess_pp": 15.247038746970347,
+   "threshold_pp": 2.2,
+   "z": 2.8,
+   "sd_annual_pp_used": 10.307920903441673,
+   "sd_annual_pp_design_measured": 10.307920903441673,
+   "sd_annual_pp_T21_reported": 3.08,
+   "sd_basis": "design-window measured",
+   "heldout_usable_months": 43,
+   "heldout_years": 3.5833333333333335,
+   "consequence_if_failed": "POWER-BLOCKED; the held-out window is NOT spent; DEAD-BY-INSUFFICIENT-POWER"
+  },
+  "G2_bar_separation_DIAGNOSTIC": {
+   "pass": false,
+   "mde_annual_excess_pp": 15.247038746970347,
+   "threshold_pp": 1.2,
+   "consequence_if_failed": "reported as a failure; does not by itself stop the test"
+  },
+  "G3_month_count": {
+   "pass": true,
+   "design_usable_months": 34,
+   "heldout_usable_months": 43,
+   "thresholds": {
+    "design": 30,
+    "heldout": 36
+   },
+   "consequence_if_failed": "the test is not run"
+  },
+  "G4_cost_resolution": {
+   "pass": true,
+   "heldout_symbol_months": 16006,
+   "with_quote_volume": 15914,
+   "coverage": 0.9943,
+   "threshold": 0.95,
+   "consequence_if_failed": "the test is not run"
+  }
+ },
+ "mde_context": {
+  "mde_heldout_full_pp": 15.247038746970347,
+  "mde_heldout_clean_pp": 21.81775619570472,
+  "mde_whole_panel_single_shot_pp": 11.393951570283544,
+  "years_needed_at_T10_arithmetic": 172.11267551169843,
+  "note": "years_needed is (z/S)^2 with S the EXCESS-over-T-bills Sharpe implied by T21's own claim and the dispersion input actually used.",
+  "sd_annual_pp_funding_only_design": 10.323977030307065,
+  "mde_heldout_full_pp_if_funding_only_sd": 15.270788287807544,
+  "years_needed_if_funding_only_sd": 172.64927551712674,
+  "funding_only_note": "Diagnostic only. T21's estimator ignored the premium mark-to-market; this row shows the census would reach the same verdict on T21's own noisier-or-quieter object, so a G1 failure is not an artefact of adding the basis leg."
+ },
+ "design_window_summary": {
+  "n_months": 34,
+  "years": 2.8333333333333335,
+  "first_month": "2020-03",
+  "last_month": "2022-12",
+  "gross_ann_pct": 25.059017411764707,
+  "funding_ann_pct": 24.91028729411765,
+  "dpremium_ann_pct": -0.14873011764705882,
+  "tail_ann_pct": 0.0,
+  "cost_ann_pct": 3.550117647058823,
+  "net_on_capital_ann_pct": 17.924083137254904,
+  "rf_ann_pct": 0.7189943593875906,
+  "excess_ann_pct": 17.20508877786731,
+  "excess_sd_ann_pct": 10.307920903441673,
+  "excess_sharpe_ann": 1.669113387562255,
+  "t_stat": 2.8095364833952083,
+  "worst_month_pct": -2.462493888888883,
+  "best_month_pct": 12.287360555555543,
+  "max_drawdown_pct": -5.334417945334979,
+  "months_negative_excess": 9,
+  "mean_turnover": 0.8039215686274509,
+  "total_delistings_held": 0,
+  "premium_missing_name_months": 0,
+  "median_pick_volume_usd": 60243801.547805,
+  "mean_eligible": 69.73529411764706,
+  "clears_venue_tail_bar": true
+ },
+ "design_window_eligible_counts": [
+  {
+   "month": "2020-01",
+   "n_eligible": 0,
+   "n_held": 0
+  },
+  {
+   "month": "2020-02",
+   "n_eligible": 0,
+   "n_held": 0
+  },
+  {
+   "month": "2020-03",
+   "n_eligible": 3,
+   "n_held": 3
+  },
+  {
+   "month": "2020-04",
+   "n_eligible": 8,
+   "n_held": 3
+  },
+  {
+   "month": "2020-05",
+   "n_eligible": 9,
+   "n_held": 3
+  },
+  {
+   "month": "2020-06",
+   "n_eligible": 9,
+   "n_held": 3
+  },
+  {
+   "month": "2020-07",
+   "n_eligible": 10,
+   "n_held": 3
+  },
+  {
+   "month": "2020-08",
+   "n_eligible": 12,
+   "n_held": 3
+  },
+  {
+   "month": "2020-09",
+   "n_eligible": 23,
+   "n_held": 3
+  },
+  {
+   "month": "2020-10",
+   "n_eligible": 19,
+   "n_held": 3
+  },
+  {
+   "month": "2020-11",
+   "n_eligible": 15,
+   "n_held": 3
+  },
+  {
+   "month": "2020-12",
+   "n_eligible": 29,
+   "n_held": 3
+  },
+  {
+   "month": "2021-01",
+   "n_eligible": 32,
+   "n_held": 3
+  },
+  {
+   "month": "2021-02",
+   "n_eligible": 54,
+   "n_held": 3
+  },
+  {
+   "month": "2021-03",
+   "n_eligible": 76,
+   "n_held": 3
+  },
+  {
+   "month": "2021-04",
+   "n_eligible": 83,
+   "n_held": 3
+  },
+  {
+   "month": "2021-05",
+   "n_eligible": 91,
+   "n_held": 3
+  },
+  {
+   "month": "2021-06",
+   "n_eligible": 105,
+   "n_held": 3
+  },
+  {
+   "month": "2021-07",
+   "n_eligible": 87,
+   "n_held": 3
+  },
+  {
+   "month": "2021-08",
+   "n_eligible": 88,
+   "n_held": 3
+  },
+  {
+   "month": "2021-09",
+   "n_eligible": 112,
+   "n_held": 3
+  },
+  {
+   "month": "2021-10",
+   "n_eligible": 112,
+   "n_held": 3
+  },
+  {
+   "month": "2021-11",
+   "n_eligible": 117,
+   "n_held": 3
+  },
+  {
+   "month": "2021-12",
+   "n_eligible": 123,
+   "n_held": 3
+  },
+  {
+   "month": "2022-01",
+   "n_eligible": 120,
+   "n_held": 3
+  },
+  {
+   "month": "2022-02",
+   "n_eligible": 103,
+   "n_held": 3
+  },
+  {
+   "month": "2022-03",
+   "n_eligible": 108,
+   "n_held": 3
+  },
+  {
+   "month": "2022-04",
+   "n_eligible": 101,
+   "n_held": 3
+  },
+  {
+   "month": "2022-05",
+   "n_eligible": 105,
+   "n_held": 3
+  },
+  {
+   "month": "2022-06",
+   "n_eligible": 109,
+   "n_held": 3
+  },
+  {
+   "month": "2022-07",
+   "n_eligible": 104,
+   "n_held": 3
+  },
+  {
+   "month": "2022-08",
+   "n_eligible": 83,
+   "n_held": 3
+  },
+  {
+   "month": "2022-09",
+   "n_eligible": 89,
+   "n_held": 3
+  },
+  {
+   "month": "2022-10",
+   "n_eligible": 80,
+   "n_held": 3
+  },
+  {
+   "month": "2022-11",
+   "n_eligible": 70,
+   "n_held": 3
+  },
+  {
+   "month": "2022-12",
+   "n_eligible": 82,
+   "n_held": 3
+  }
+ ],
+ "heldout_window_shape_only": [
+  {
+   "month": "2023-01",
+   "n_eligible": 58
+  },
+  {
+   "month": "2023-02",
+   "n_eligible": 96
+  },
+  {
+   "month": "2023-03",
+   "n_eligible": 111
+  },
+  {
+   "month": "2023-04",
+   "n_eligible": 97
+  },
+  {
+   "month": "2023-05",
+   "n_eligible": 107
+  },
+  {
+   "month": "2023-06",
+   "n_eligible": 90
+  },
+  {
+   "month": "2023-07",
+   "n_eligible": 96
+  },
+  {
+   "month": "2023-08",
+   "n_eligible": 86
+  },
+  {
+   "month": "2023-09",
+   "n_eligible": 78
+  },
+  {
+   "month": "2023-10",
+   "n_eligible": 74
+  },
+  {
+   "month": "2023-11",
+   "n_eligible": 82
+  },
+  {
+   "month": "2023-12",
+   "n_eligible": 114
+  },
+  {
+   "month": "2024-01",
+   "n_eligible": 126
+  },
+  {
+   "month": "2024-02",
+   "n_eligible": 116
+  },
+  {
+   "month": "2024-03",
+   "n_eligible": 125
+  },
+  {
+   "month": "2024-04",
+   "n_eligible": 208
+  },
+  {
+   "month": "2024-05",
+   "n_eligible": 154
+  },
+  {
+   "month": "2024-06",
+   "n_eligible": 122
+  },
+  {
+   "month": "2024-07",
+   "n_eligible": 114
+  },
+  {
+   "month": "2024-08",
+   "n_eligible": 105
+  },
+  {
+   "month": "2024-09",
+   "n_eligible": 106
+  },
+  {
+   "month": "2024-10",
+   "n_eligible": 95
+  },
+  {
+   "month": "2024-11",
+   "n_eligible": 104
+  },
+  {
+   "month": "2024-12",
+   "n_eligible": 159
+  },
+  {
+   "month": "2025-01",
+   "n_eligible": 173
+  },
+  {
+   "month": "2025-02",
+   "n_eligible": 139
+  },
+  {
+   "month": "2025-03",
+   "n_eligible": 129
+  },
+  {
+   "month": "2025-04",
+   "n_eligible": 112
+  },
+  {
+   "month": "2025-05",
+   "n_eligible": 107
+  },
+  {
+   "month": "2025-06",
+   "n_eligible": 136
+  },
+  {
+   "month": "2025-07",
+   "n_eligible": 103
+  },
+  {
+   "month": "2025-08",
+   "n_eligible": 123
+  },
+  {
+   "month": "2025-09",
+   "n_eligible": 117
+  },
+  {
+   "month": "2025-10",
+   "n_eligible": 108
+  },
+  {
+   "month": "2025-11",
+   "n_eligible": 115
+  },
+  {
+   "month": "2025-12",
+   "n_eligible": 102
+  },
+  {
+   "month": "2026-01",
+   "n_eligible": 79
+  },
+  {
+   "month": "2026-02",
+   "n_eligible": 84
+  },
+  {
+   "month": "2026-03",
+   "n_eligible": 81
+  },
+  {
+   "month": "2026-04",
+   "n_eligible": 74
+  },
+  {
+   "month": "2026-05",
+   "n_eligible": 82
+  },
+  {
+   "month": "2026-06",
+   "n_eligible": 87
+  },
+  {
+   "month": "2026-07",
+   "n_eligible": 90
+  }
+ ],
+ "capacity": {
+  "median_trailing_daily_volume_of_design_picks_usd": 60243801.547805,
+  "book_size_at_10pct_of_one_days_volume_usd": 18073140.4643415,
+  "T21_measured_top20_depth_usd": 52862,
+  "note": "The rule is dead at any book size where per-name notional exceeds measured depth. Reported whatever the statistical verdict."
+ },
+ "verdict": "POWER-BLOCKED",
+ "gates_failed": [
+  "G1_portfolio_power_BINDING",
+  "G2_bar_separation_DIAGNOSTIC"
+ ]
+}

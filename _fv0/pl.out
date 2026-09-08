@@ -1,0 +1,108 @@
+=== PLATEAU MAP: rvol20<=X, liquid floor $300, TP=0.20/SL=0.15/scale-out-half ===
+exit structure fixed = (H, tp=0.20 half-out, sl=0.15). rows: rvol threshold, cols: H
+  rvolTh    H |  TRmean  TRedge TRpct  TRn |  VAmean  VAedge VApct  VAn  VAk
+   0.005   10 |  (insufficient support)
+   0.005   15 |  (insufficient support)
+   0.005   30 |  (insufficient support)
+   0.005   45 |  (insufficient support)
+   0.005   60 |  (insufficient support)
+   0.005   90 |  (insufficient support)
+   0.010   10 |  (insufficient support)
+   0.010   15 |  (insufficient support)
+   0.010   30 |  (insufficient support)
+   0.010   45 |  (insufficient support)
+   0.010   60 |  (insufficient support)
+   0.010   90 |  (insufficient support)
+   0.020   10 |    0.14    0.03    51  194 |    1.62    0.61    73  403   35
+   0.020   15 |    1.28   -0.54    38  137 |    3.06    1.26    81  285   35
+   0.020   30 |    4.82   -0.44    45   80 |    7.16    4.40    99  165   35
+   0.020   45 |    7.11    1.12    62   64 |    7.56    3.59    96  126   35
+   0.020   60 |    7.39    1.71    71   51 |    7.51    4.47    96  106   35
+   0.020   90 |    7.86    1.32    61   44 |    5.82    3.60    90   82   35
+   0.030   10 |    0.74    0.99    76  234 |    1.06    1.55    94  522   43
+   0.030   15 |    1.66    1.15    79  169 |    2.37    2.38    98  387   43
+   0.030   30 |    4.96    1.96    86  103 |    4.99    3.95    99  244   43
+   0.030   45 |    7.10    3.37    92   84 |    5.61    4.03   100  187   43
+   0.030   60 |    7.33    4.29    95   71 |    6.19    4.72    99  162   43
+   0.030   90 |    7.28    3.79    90   61 |    4.99    4.57    97  134   43
+   0.050   10 |    1.25    1.71    95  278 |   -0.29    0.78    77  769   48
+   0.050   15 |    1.79    1.77    96  207 |    0.55    1.25    83  569   48
+   0.050   30 |    4.42    2.40    91  130 |    2.87    2.51    96  359   48
+   0.050   45 |    6.13    3.77    96  107 |    4.59    3.78    97  273   48
+   0.050   60 |    6.25    4.51    97   96 |    4.76    4.27    98  234   48
+   0.050   90 |    6.29    4.39    94   82 |    3.79    4.23    97  192   48
+   0.080   10 |   -1.41    0.30    61  350 |   -0.28    0.91    80  921   59
+   0.080   15 |   -0.89    0.56    68  262 |   -0.18    1.08    86  675   59
+   0.080   30 |    0.27    1.07    76  175 |    1.92    2.34    97  430   59
+   0.080   45 |    1.94    2.24    91  149 |    2.57    2.71    96  335   59
+   0.080   60 |    2.03    3.33    95  134 |    2.77    3.17    98  286   59
+   0.080   90 |    1.54    3.19    94  122 |    2.19    3.45    96  238   59
+   0.120   10 |   -2.11   -0.69    41  475 |   -1.87   -0.33    43 1027   71
+   0.120   15 |   -1.68   -0.50    57  362 |   -1.05    0.72    72  765   71
+   0.120   30 |   -0.55    0.76    76  247 |    0.24    1.92    95  496   71
+   0.120   45 |    0.55    1.97    91  216 |    0.41    2.05    97  388   71
+   0.120   60 |    0.66    2.67    97  196 |    0.97    2.82   100  333   71
+   0.120   90 |    0.03    2.37    92  179 |    0.37    2.93    98  284   71
+   0.200   10 |   -2.62   -0.09    52  672 |   -2.62   -0.22    48 1156   88
+   0.200   15 |   -2.13    0.23    69  523 |   -1.72    0.94    83  877   88
+   0.200   30 |   -1.21    1.98    98  361 |   -1.17    1.63    91  590   88
+   0.200   45 |   -0.74    2.67    99  321 |   -1.17    1.74    92  477   88
+   0.200   60 |   -1.25    2.59   100  294 |   -0.84    2.25    96  417   88
+   0.200   90 |   -1.92    2.57    98  265 |   -1.45    2.33    95  364   88
+
+=== TP/SL sensitivity at rvol<=0.05, H=60 ===
+TP=-     SL=-     pa=0 | TR mean= -30.35 edge= -0.58 pct= 47 | VA mean= -35.68 edge= -3.33 pct= 26 n=186 k=48
+TP=-     SL=0.15  pa=0 | TR mean=   6.95 edge=  4.79 pct= 92 | VA mean=   3.98 edge=  3.44 pct= 88 n=234 k=48
+TP=-     SL=0.30  pa=0 | TR mean=   0.15 edge=  4.87 pct= 87 | VA mean=  -4.34 edge=  2.07 pct= 73 n=197 k=48
+TP=-     SL=0.50  pa=0 | TR mean=  -9.72 edge=  2.98 pct= 72 | VA mean= -15.22 edge=  0.61 pct= 57 n=189 k=48
+TP=0.10  SL=-     pa=0 | TR mean= -10.98 edge= -0.07 pct= 49 | VA mean= -16.42 edge= -2.64 pct= 21 n=420 k=48
+TP=0.10  SL=-     pa=1 | TR mean= -17.24 edge=  2.21 pct= 65 | VA mean= -21.20 edge=  1.44 pct= 62 n=186 k=48
+TP=0.10  SL=0.15  pa=0 | TR mean=   0.92 edge=  1.16 pct= 92 | VA mean=   0.34 edge=  0.74 pct= 80 n=578 k=48
+TP=0.10  SL=0.15  pa=1 | TR mean=   5.03 edge=  3.80 pct= 98 | VA mean=   3.53 edge=  3.23 pct= 97 n=234 k=48
+TP=0.10  SL=0.30  pa=0 | TR mean=  -1.80 edge=  0.99 pct= 79 | VA mean=  -3.43 edge= -0.30 pct= 42 n=468 k=48
+TP=0.10  SL=0.30  pa=1 | TR mean=   0.72 edge=  4.06 pct= 94 | VA mean=  -1.79 edge=  2.80 pct= 90 n=197 k=48
+TP=0.10  SL=0.50  pa=0 | TR mean=  -5.40 edge=  0.35 pct= 56 | VA mean=  -7.72 edge= -1.09 pct= 30 n=424 k=48
+TP=0.10  SL=0.50  pa=1 | TR mean=  -5.09 edge=  3.53 pct= 81 | VA mean=  -8.72 edge=  2.19 pct= 79 n=189 k=48
+TP=0.20  SL=-     pa=0 | TR mean= -16.73 edge= -2.00 pct= 32 | VA mean= -21.29 edge= -0.38 pct= 48 n=278 k=48
+TP=0.20  SL=-     pa=1 | TR mean= -19.51 edge=  2.64 pct= 65 | VA mean= -23.33 edge=  2.67 pct= 71 n=186 k=48
+TP=0.20  SL=0.15  pa=0 | TR mean=   2.54 edge=  1.36 pct= 84 | VA mean=   1.76 edge=  1.55 pct= 89 n=382 k=48
+TP=0.20  SL=0.15  pa=1 | TR mean=   6.25 edge=  4.51 pct= 97 | VA mean=   4.76 edge=  4.27 pct= 98 n=234 k=48
+TP=0.20  SL=0.30  pa=0 | TR mean=  -1.02 edge=  1.34 pct= 76 | VA mean=  -3.57 edge=  0.63 pct= 64 n=300 k=48
+TP=0.20  SL=0.30  pa=1 | TR mean=   1.76 edge=  5.09 pct= 96 | VA mean=  -1.29 edge=  3.87 pct= 96 n=197 k=48
+TP=0.20  SL=0.50  pa=0 | TR mean=  -6.30 edge=  0.39 pct= 56 | VA mean=  -9.14 edge=  0.62 pct= 61 n=281 k=48
+TP=0.20  SL=0.50  pa=1 | TR mean=  -4.94 edge=  4.51 pct= 85 | VA mean=  -8.53 edge=  3.94 pct= 93 n=189 k=48
+TP=0.35  SL=-     pa=0 | TR mean= -17.99 edge=  1.95 pct= 61 | VA mean= -27.98 edge= -1.78 pct= 39 n=224 k=48
+TP=0.35  SL=-     pa=1 | TR mean= -20.96 edge=  3.68 pct= 72 | VA mean= -31.94 edge= -3.21 pct= 26 n=186 k=48
+TP=0.35  SL=0.15  pa=0 | TR mean=   5.22 edge=  3.30 pct= 95 | VA mean=   2.27 edge=  2.19 pct= 93 n=293 k=48
+TP=0.35  SL=0.15  pa=1 | TR mean=   7.23 edge=  5.09 pct= 98 | VA mean=   3.45 edge=  2.62 pct= 89 n=234 k=48
+TP=0.35  SL=0.30  pa=0 | TR mean=   1.53 edge=  3.95 pct= 91 | VA mean=  -4.32 edge=  1.06 pct= 73 n=239 k=48
+TP=0.35  SL=0.30  pa=1 | TR mean=   2.21 edge=  5.54 pct= 94 | VA mean=  -3.97 edge=  1.40 pct= 73 n=197 k=48
+TP=0.35  SL=0.50  pa=0 | TR mean=  -5.04 edge=  3.85 pct= 84 | VA mean= -13.38 edge= -0.42 pct= 47 n=227 k=48
+TP=0.35  SL=0.50  pa=1 | TR mean=  -5.37 edge=  4.77 pct= 85 | VA mean= -14.02 edge= -0.21 pct= 49 n=189 k=48
+TP=0.60  SL=-     pa=0 | TR mean= -30.39 edge= -3.03 pct= 33 | VA mean= -33.67 edge= -4.41 pct= 21 n=197 k=48
+TP=0.60  SL=-     pa=1 | TR mean= -25.16 edge=  3.39 pct= 67 | VA mean= -33.83 edge= -3.81 pct= 24 n=186 k=48
+TP=0.60  SL=0.15  pa=0 | TR mean=   5.00 edge=  3.08 pct= 87 | VA mean=   3.26 edge=  1.71 pct= 75 n=250 k=48
+TP=0.60  SL=0.15  pa=1 | TR mean=   8.49 edge=  6.43 pct= 99 | VA mean=   4.11 edge=  2.77 pct= 87 n=234 k=48
+TP=0.60  SL=0.30  pa=0 | TR mean=  -2.10 edge=  1.79 pct= 70 | VA mean=  -4.53 edge=  0.28 pct= 51 n=208 k=48
+TP=0.60  SL=0.30  pa=1 | TR mean=   1.88 edge=  6.10 pct= 94 | VA mean=  -3.78 edge=  1.60 pct= 72 n=197 k=48
+TP=0.60  SL=0.50  pa=0 | TR mean= -10.75 edge=  1.25 pct= 62 | VA mean= -14.71 edge= -1.74 pct= 31 n=200 k=48
+TP=0.60  SL=0.50  pa=1 | TR mean=  -6.65 edge=  5.53 pct= 84 | VA mean= -14.41 edge= -0.21 pct= 45 n=189 k=48
+
+=== LIQUIDITY FLOOR sensitivity (rvol<=0.05, H=60, TP0.20 half-out, SL0.15) ===
+floor=$    0 | TR mean=  -0.84 edge=  1.73 pct= 95 k= 77 | VA mean=  -1.02 edge=  1.43 pct= 94 k= 99 n=783
+floor=$  100 | TR mean=   5.46 edge=  1.65 pct= 84 k= 37 | VA mean=   4.13 edge=  3.34 pct= 99 k= 54 n=300
+floor=$  300 | TR mean=   6.25 edge=  4.51 pct= 97 k= 29 | VA mean=   4.76 edge=  4.27 pct= 98 k= 48 n=234
+floor=$ 1000 | TR mean=  10.00 edge=  7.26 pct= 99 k= 20 | VA mean=   6.69 edge=  4.77 pct= 99 k= 40 n=116
+3000 insufficient
+
+=== PLACEBO: shuffle rvol20 within each mint (destroys timing, keeps mint mix) ===
+placebo rvol<=0.05 H=60 | TR mean=  -3.12 edge= -0.58 | VA mean=  -3.33 edge= -0.55 k=93
+placebo rvol<=0.02 H=10 | TR mean=   1.77 edge=  1.37 | VA mean=  -1.36 edge= -0.42 k=68
+placebo rvol<=0.02 H=30 | TR mean=   1.25 edge=  1.17 | VA mean=  -0.37 edge=  0.14 k=68
+
+=== TIME STABILITY (validate, rvol<=0.05 H=60 TP0.20 half SL0.15): split by entry ts median ===
+Traceback (most recent call last):
+  File "/home/anont/meme/_fv0/plateau.py", line 90, in <module>
+    mid=np.median(E_ts[FEAS&VA])
+                  ^^^^
+NameError: name 'E_ts' is not defined

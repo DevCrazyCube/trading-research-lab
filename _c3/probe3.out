@@ -1,0 +1,14 @@
+usable mints (h in 1,2) 387
+n_bars stats 2 26 1000 46146
+bcs 387
+ro rows for our bcs (31073,)
+distinct bcs with ro (49,)
+ro index? [('sqlite_autoindex_metadata_1', None), ('sqlite_autoindex_raw_transaction_1', None), ('sqlite_autoindex_transaction_coordinate_1', None), ('sqlite_autoindex_transaction_coordinate_2', None), ('sqlite_autoindex_raw_boundary_response_1', None), ('sqlite_autoindex_program_version_1', None), ('sqlite_autoindex_instruction_1', None), ('sqlite_autoindex_reserve_observation_1', None), ('instruction_signature', 'CREATE INDEX instruction_signature ON instruction(signature)'), ('instruction_program', 'CREATE INDEX instruction_program ON instruction(program_id)')]
+first_ts - block_time (sec): min/med/max -59 159 82147
+neg 138
+first open px: min/med/max 9.368058587187512e-09 3.066923489394613e-05 0.023150504673899282
+median bar volume: min/med/max 0.0731630178686706 34.417531158339514 15093.475375961998
+gap dist (bars) top [(1, 35946), (2, 2575), (3, 1296), (4, 755), (5, 581), (6, 387), (7, 310), (8, 276), (9, 233), (10, 186), (12, 156), (11, 138)]
+total intervals 45759
+span minutes min/med/max 0.0 1050.0 1440.0
+frac of span covered by bars (nb/span) 0.06578947368421052

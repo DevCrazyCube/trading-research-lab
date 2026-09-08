@@ -1,0 +1,122 @@
+66:BH survivors with POSITIVE validate mean: 1003
+BH survivors with POSITIVE validate mean: 1003
+  DEEP ret30m=q2|rng=q1|m_px0=1 | t15h25
+    drop=0.30 toll=0.0114  va +0.0599  base -0.1477  edge +0.2076
+    drop=0.30 toll=0.0250  va +0.0465  base -0.1589  edge +0.2054
+    drop=0.50 toll=0.0114  va +0.0570  base -0.1835  edge +0.2404
+    drop=0.50 toll=0.0250  va +0.0436  base -0.1946  edge +0.2382
+    drop=1.00 toll=0.0114  va +0.0497  base -0.2728  edge +0.3225
+    drop=1.00 toll=0.0250  va +0.0363  base -0.2840  edge +0.3203
+    cluster-bootstrap mean CI95 [+0.0304, +0.0897]  k=42
+  DEEP ret30m=q2|rng=q1|m_px0=1 | t15
+    drop=0.30 toll=0.0114  va +0.0532  base -0.1711  edge +0.2243
+    drop=0.30 toll=0.0250  va +0.0398  base -0.1823  edge +0.2221
+    drop=0.50 toll=0.0114  va +0.0503  base -0.2069  edge +0.2572
+    drop=0.50 toll=0.0250  va +0.0369  base -0.2181  edge +0.2550
+    drop=1.00 toll=0.0114  va +0.0430  base -0.2963  edge +0.3393
+    drop=1.00 toll=0.0250  va +0.0296  base -0.3074  edge +0.3371
+    cluster-bootstrap mean CI95 [+0.0154, +0.0882]  k=42
+  DEEP volaccel=q0|ret30m=q2|m_creator_prior=0 | t15
+    drop=0.30 toll=0.0114  va +0.0341  base -0.1711  edge +0.2053
+    drop=0.30 toll=0.0250  va +0.0206  base -0.1823  edge +0.2029
+    drop=0.50 toll=0.0114  va +0.0335  base -0.2069  edge +0.2404
+    drop=0.50 toll=0.0250  va +0.0200  base -0.2181  edge +0.2381
+    drop=1.00 toll=0.0114  va +0.0321  base -0.2963  edge +0.3283
+    drop=1.00 toll=0.0250  va +0.0185  base -0.3074  edge +0.3259
+    cluster-bootstrap mean CI95 [-0.0005, +0.0678]  k=45
+  DEEP ret30m=q2|rng=q1|m_px0=1 | t5
+    drop=0.30 toll=0.0114  va +0.0181  base -0.1197  edge +0.1377
+    drop=0.30 toll=0.0250  va +0.0046  base -0.1317  edge +0.1363
+    drop=0.50 toll=0.0114  va +0.0165  base -0.1428  edge +0.1593
+    drop=0.50 toll=0.0250  va +0.0030  base -0.1548  edge +0.1578
+    drop=1.00 toll=0.0114  va +0.0125  base -0.2006  edge +0.2132
+    drop=1.00 toll=0.0250  va -0.0010  base -0.2127  edge +0.2117
+    cluster-bootstrap mean CI95 [+0.0015, +0.0367]  k=42
+  DEEP rvol10=q1|volaccel=q0|m_cohort10=2 | t15
+    drop=0.30 toll=0.0114  va +0.0012  base -0.1711  edge +0.1724
+    drop=0.30 toll=0.0250  va -0.0122  base -0.1823  edge +0.1701
+    drop=0.50 toll=0.0114  va -0.0009  base -0.2069  edge +0.2060
+    drop=0.50 toll=0.0250  va -0.0144  base -0.2181  edge +0.2037
+    drop=1.00 toll=0.0114  va -0.0062  base -0.2963  edge +0.2901
+    drop=1.00 toll=0.0250  va -0.0196  base -0.3074  edge +0.2878
+    cluster-bootstrap mean CI95 [-0.0241, +0.0299]  k=30
+  DEEP rvol10=q1|ret30m=q2|m_v0=2 | t5
+    drop=0.30 toll=0.0114  va +0.0212  base -0.1197  edge +0.1409
+    drop=0.30 toll=0.0250  va +0.0078  base -0.1317  edge +0.1395
+    drop=0.50 toll=0.0114  va +0.0175  base -0.1428  edge +0.1603
+    drop=0.50 toll=0.0250  va +0.0042  base -0.1548  edge +0.1590
+    drop=1.00 toll=0.0114  va +0.0083  base -0.2006  edge +0.2089
+    drop=1.00 toll=0.0250  va -0.0051  base -0.2127  edge +0.2076
+    cluster-bootstrap mean CI95 [+0.0023, +0.0410]  k=34
+  DEEP rvol10=q1|volaccel=q0|m_creator_prior=0 | t5
+    drop=0.30 toll=0.0114  va +0.0042  base -0.1197  edge +0.1239
+    drop=0.30 toll=0.0250  va -0.0093  base -0.1317  edge +0.1224
+    drop=0.50 toll=0.0114  va +0.0032  base -0.1428  edge +0.1460
+    drop=0.50 toll=0.0250  va -0.0103  base -0.1548  edge +0.1445
+    drop=1.00 toll=0.0114  va +0.0006  base -0.2006  edge +0.2013
+    drop=1.00 toll=0.0250  va -0.0129  base -0.2127  edge +0.1998
+    cluster-bootstrap mean CI95 [-0.0090, +0.0186]  k=42
+  DEEP rvol10=q1|volaccel=q2|m_creator_prior=2 | t15
+    drop=0.30 toll=0.0114  va +0.0099  base -0.1711  edge +0.1810
+    drop=0.30 toll=0.0250  va -0.0037  base -0.1823  edge +0.1786
+    drop=0.50 toll=0.0114  va +0.0096  base -0.2069  edge +0.2165
+    drop=0.50 toll=0.0250  va -0.0040  base -0.2181  edge +0.2141
+    drop=1.00 toll=0.0114  va +0.0089  base -0.2963  edge +0.3052
+    drop=1.00 toll=0.0250  va -0.0047  base -0.3074  edge +0.3028
+    cluster-bootstrap mean CI95 [-0.0196, +0.0434]  k=24
+  DEEP rvol10=q1|volaccel=q3|m_v0=2 | t5
+    drop=0.30 toll=0.0114  va +0.0151  base -0.1197  edge +0.1348
+    drop=0.30 toll=0.0250  va +0.0019  base -0.1317  edge +0.1336
+    drop=0.50 toll=0.0114  va +0.0090  base -0.1428  edge +0.1518
+    drop=0.50 toll=0.0250  va -0.0042  base -0.1548  edge +0.1506
+    drop=1.00 toll=0.0114  va -0.0063  base -0.2006  edge +0.1943
+    drop=1.00 toll=0.0250  va -0.0195  base -0.2127  edge +0.1932
+    cluster-bootstrap mean CI95 [-0.0045, +0.0346]  k=35
+  DEEP volaccel=q0|ret1=q2|m_px0=1 | t5
+    drop=0.30 toll=0.0114  va +0.0013  base -0.1197  edge +0.1210
+    drop=0.30 toll=0.0250  va -0.0123  base -0.1317  edge +0.1194
+    drop=0.50 toll=0.0114  va +0.0013  base -0.1428  edge +0.1441
+    drop=0.50 toll=0.0250  va -0.0123  base -0.1548  edge +0.1425
+    drop=1.00 toll=0.0114  va +0.0013  base -0.2006  edge +0.2019
+    drop=1.00 toll=0.0250  va -0.0123  base -0.2127  edge +0.2004
+    cluster-bootstrap mean CI95 [-0.0141, +0.0177]  k=41
+  DEEP rvol10=q1|volaccel=q0|m_cohort10=0 | t5
+    drop=0.30 toll=0.0114  va +0.0028  base -0.1197  edge +0.1225
+    drop=0.30 toll=0.0250  va -0.0108  base -0.1317  edge +0.1209
+    drop=0.50 toll=0.0114  va +0.0027  base -0.1428  edge +0.1455
+    drop=0.50 toll=0.0250  va -0.0109  base -0.1548  edge +0.1439
+    drop=1.00 toll=0.0114  va +0.0024  base -0.2006  edge +0.2031
+    drop=1.00 toll=0.0250  va -0.0112  base -0.2127  edge +0.2015
+    cluster-bootstrap mean CI95 [-0.0127, +0.0206]  k=30
+  DEEP rvol10=q1|volaccel=q0|m_hour=0 | t5
+    drop=0.30 toll=0.0114  va +0.0095  base -0.1197  edge +0.1292
+    drop=0.30 toll=0.0250  va -0.0041  base -0.1317  edge +0.1276
+    drop=0.50 toll=0.0114  va +0.0093  base -0.1428  edge +0.1521
+    drop=0.50 toll=0.0250  va -0.0043  base -0.1548  edge +0.1506
+    drop=1.00 toll=0.0114  va +0.0089  base -0.2006  edge +0.2095
+    drop=1.00 toll=0.0250  va -0.0047  base -0.2127  edge +0.2079
+    cluster-bootstrap mean CI95 [-0.0089, +0.0308]  k=18
+  DEEP rvol10=q1|volaccel=q2|m_creator_prior=2 | t15h25
+    drop=0.30 toll=0.0114  va +0.0074  base -0.1477  edge +0.1551
+    drop=0.30 toll=0.0250  va -0.0062  base -0.1589  edge +0.1527
+    drop=0.50 toll=0.0114  va +0.0071  base -0.1835  edge +0.1906
+    drop=0.50 toll=0.0250  va -0.0065  base -0.1946  edge +0.1882
+    drop=1.00 toll=0.0114  va +0.0064  base -0.2728  edge +0.2793
+    drop=1.00 toll=0.0250  va -0.0071  base -0.2840  edge +0.2769
+    cluster-bootstrap mean CI95 [-0.0212, +0.0385]  k=24
+  DEEP rvol10=q1|volaccel=q2|m_creator_prior=2 | t15_pyr
+    drop=0.30 toll=0.0114  va +0.0075  base -0.0950  edge +0.1025
+    drop=0.30 toll=0.0250  va -0.0010  base -0.1020  edge +0.1010
+    drop=0.50 toll=0.0114  va +0.0073  base -0.1140  edge +0.1213
+    drop=0.50 toll=0.0250  va -0.0011  base -0.1210  edge +0.1198
+    drop=1.00 toll=0.0114  va +0.0070  base -0.1613  edge +0.1683
+    drop=1.00 toll=0.0250  va -0.0015  base -0.1683  edge +0.1668
+    cluster-bootstrap mean CI95 [-0.0096, +0.0274]  k=24
+  DEEP rvol10=q1|cumvol_log=q2 | t15
+    drop=0.30 toll=0.0114  va +0.0399  base -0.1711  edge +0.2111
+    drop=0.30 toll=0.0250  va +0.0266  base -0.1823  edge +0.2089
+    drop=0.50 toll=0.0114  va +0.0366  base -0.2069  edge +0.2435
+    drop=0.50 toll=0.0250  va +0.0233  base -0.2181  edge +0.2413
+    drop=1.00 toll=0.0114  va +0.0284  base -0.2963  edge +0.3247
+    drop=1.00 toll=0.0250  va +0.0150  base -0.3074  edge +0.3225
+    cluster-bootstrap mean CI95 [-0.0029, +0.0845]  k=20

@@ -1,0 +1,37 @@
+bar volume quantiles (USD?) [2.200000e-01 1.363000e+01 1.727000e+02 8.557700e+02 3.540850e+03
+ 2.556463e+04]
+entry-bar volume quantiles [2.200000e-01 1.329000e+01 1.712500e+02 8.378000e+02 3.403970e+03
+ 2.322096e+04]
+mcap proxy = close*1e9 quantiles [9.8000000e+01 5.0940000e+03 6.0003000e+04 4.0988200e+05 2.3800015e+07]
+entry-vol>=     0 : bars  45754 (99.2%) mints 382
+entry-vol>=    60 : bars  28742 (62.3%) mints 316
+entry-vol>=   200 : bars  21214 (46.0%) mints 281
+entry-vol>=   600 : bars  13570 (29.4%) mints 259
+entry-vol>=  2000 : bars   7162 (15.5%) mints 237
+entry-vol>= 10000 : bars   1444 (3.1%) mints 142
+
+=== baselines and the cumvol_log=q1 cell under a tradability floor ===
+ thr=    0 t15      BASE tr -0.1858 (n 2986 k175) va -0.1711 (n 3769 k207)
+        cumvol_q1   tr -0.1813 (n  752 k152)  va -0.2110 (n  892 k168)
+        cumvol_q12  tr -0.1308 (n 1260 k156)  va -0.1525 (n 1695 k174)
+        rvol10_q1   tr -0.4236 (n  450 k175)  va -0.3517 (n  670 k207)
+ thr=    0 t60tr35  BASE tr -0.2564 (n 1899 k175) va -0.2478 (n 2236 k207)
+        cumvol_q1   tr -0.1617 (n  732 k152)  va -0.2306 (n  873 k168)
+        cumvol_q12  tr -0.1660 (n 1031 k156)  va -0.2041 (n 1271 k174)
+        rvol10_q1   tr -0.3025 (n  387 k175)  va -0.3246 (n  472 k207)
+ thr=  600 t15      BASE tr -0.3923 (n  604 k115) va -0.4336 (n 1004 k144)
+        cumvol_q1   tr -0.3323 (n  118 k 92)  va -0.3709 (n  152 k105)
+        cumvol_q12  tr -0.2726 (n  174 k 96)  va -0.3769 (n  234 k111)
+        rvol10_q1   tr -0.3212 (n  209 k102)  va -0.3195 (n  347 k132)
+ thr=  600 t60tr35  BASE tr -0.3986 (n  609 k115) va -0.4478 (n  779 k144)
+        cumvol_q1   tr -0.1693 (n  174 k 92)  va -0.3086 (n  202 k105)
+        cumvol_q12  tr -0.1974 (n  250 k 96)  va -0.3306 (n  331 k111)
+        rvol10_q1   tr -0.2486 (n  175 k102)  va -0.3220 (n  248 k132)
+ thr= 2000 t15      BASE tr -0.4635 (n  371 k103) va -0.4728 (n  556 k134)
+        cumvol_q1   tr -0.3051 (n   83 k 80)  va -0.3508 (n  101 k 94)
+        cumvol_q12  tr -0.2903 (n  109 k 84)  va -0.3878 (n  125 k100)
+        rvol10_q1   tr -0.3217 (n  172 k 85)  va -0.2906 (n  219 k114)
+ thr= 2000 t60tr35  BASE tr -0.4266 (n  440 k103) va -0.4561 (n  562 k134)
+        cumvol_q1   tr -0.1292 (n  124 k 80)  va -0.3071 (n  149 k 94)
+        cumvol_q12  tr -0.2026 (n  172 k 84)  va -0.3215 (n  231 k100)
+        rvol10_q1   tr -0.2296 (n  139 k 85)  va -0.2988 (n  178 k114)

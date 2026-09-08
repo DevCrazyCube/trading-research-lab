@@ -1,0 +1,86 @@
+stage-A rows 45921
+--- TRAIN mean net by axis level (mint-equal), n rows ---
+H      H60                    n= 9369  mean=-0.0362  med=-0.0202  frac>0=0.052
+H      H180                   n= 9327  mean=-0.0442  med=-0.0270  frac>0=0.060
+H      H600                   n= 9216  mean=-0.0534  med=-0.0307  frac>0=0.083
+H      H1800                  n= 9057  mean=-0.0594  med=-0.0337  frac>0=0.092
+H      H5400                  n= 8952  mean=-0.0611  med=-0.0359  frac>0=0.104
+exit   sl0.15                 n= 3309  mean= 0.0107  med=-0.0068  frac>0=0.409
+exit   sl0.3                  n= 3288  mean=-0.0222  med=-0.0175  frac>0=0.182
+exit   trail0.2               n= 3303  mean=-0.0278  med=-0.0184  frac>0=0.120
+exit   tpsl(0.5, 0.3)         n= 3315  mean=-0.0371  med=-0.0263  frac>0=0.051
+exit   tpsl(0.25, 0.3)        n= 3330  mean=-0.0419  med=-0.0303  frac>0=0.042
+exit   trail0.4               n= 3264  mean=-0.0458  med=-0.0296  frac>0=0.059
+exit   flowrev                n= 3306  mean=-0.0480  med=-0.0228  frac>0=0.057
+exit   sl0.5                  n= 3264  mean=-0.0538  med=-0.0313  frac>0=0.090
+exit   tpsl(1.0, 0.5)         n= 3276  mean=-0.0625  med=-0.0407  frac>0=0.016
+exit   time                   n= 3171  mean=-0.0680  med=-0.0393  frac>0=0.061
+exit   tp1.0                  n= 3213  mean=-0.0762  med=-0.0497  frac>0=0.000
+exit   tp0.5                  n= 3255  mean=-0.0784  med=-0.0521  frac>0=0.001
+exit   tp0.1                  n= 3330  mean=-0.0796  med=-0.0581  frac>0=0.001
+exit   tp0.25                 n= 3297  mean=-0.0809  med=-0.0571  frac>0=0.000
+feat   ubgrow_120             n= 1176  mean=-0.0218  med=-0.0191  frac>0=0.218
+feat   topshr_30              n= 1680  mean=-0.0267  med=-0.0221  frac>0=0.127
+feat   ubgrow_600             n= 1041  mean=-0.0277  med=-0.0177  frac>0=0.068
+feat   bvol_120               n= 1050  mean=-0.0299  med=-0.0194  frac>0=0.066
+feat   topshr_600             n= 1680  mean=-0.0304  med=-0.0188  frac>0=0.070
+feat   topshr_120             n= 1680  mean=-0.0307  med=-0.0208  frac>0=0.058
+feat   bvol_600               n= 1041  mean=-0.0312  med=-0.0176  frac>0=0.082
+feat   newrate_30             n= 1194  mean=-0.0349  med=-0.0213  frac>0=0.165
+feat   bvol_30                n= 1281  mean=-0.0363  med=-0.0215  frac>0=0.174
+feat   newrate_600            n= 1035  mean=-0.0431  med=-0.0266  frac>0=0.083
+feat   newrate_120            n= 1050  mean=-0.0433  med=-0.0200  frac>0=0.067
+feat   prog                   n= 1197  mean=-0.0437  med=-0.0326  frac>0=0.079
+feat   solincurve             n= 1197  mean=-0.0437  med=-0.0326  frac>0=0.079
+feat   ub_30                  n= 1113  mean=-0.0456  med=-0.0259  frac>0=0.121
+feat   rate_30                n= 1158  mean=-0.0488  med=-0.0227  frac>0=0.133
+feat   rate_120               n= 1035  mean=-0.0539  med=-0.0269  frac>0=0.050
+feat   vimb_30                n= 1680  mean=-0.0543  med=-0.0348  frac>0=0.085
+feat   repeat_30              n= 1680  mean=-0.0544  med=-0.0318  frac>0=0.098
+feat   repeat_600             n= 1680  mean=-0.0545  med=-0.0313  frac>0=0.060
+feat   vimb_600               n= 1680  mean=-0.0549  med=-0.0323  frac>0=0.032
+feat   vimb_120               n= 1680  mean=-0.0549  med=-0.0318  frac>0=0.030
+feat   repeat_120             n= 1680  mean=-0.0551  med=-0.0260  frac>0=0.039
+feat   meansz_600             n= 1680  mean=-0.0555  med=-0.0250  frac>0=0.045
+feat   ubgrow_30              n= 1347  mean=-0.0563  med=-0.0506  frac>0=0.108
+feat   ub_120                 n= 1035  mean=-0.0566  med=-0.0423  frac>0=0.054
+feat   ub_600                 n= 1032  mean=-0.0570  med=-0.0531  frac>0=0.074
+feat   ret_600                n= 1056  mean=-0.0579  med=-0.0413  frac>0=0.088
+feat   meansz_120             n= 1680  mean=-0.0590  med=-0.0259  frac>0=0.032
+feat   age                    n= 1680  mean=-0.0600  med=-0.0189  frac>0=0.044
+feat   rate_600               n= 1014  mean=-0.0602  med=-0.0586  frac>0=0.061
+feat   meansz_30              n= 1680  mean=-0.0633  med=-0.0326  frac>0=0.045
+feat   ubtot                  n=  840  mean=-0.0652  med=-0.0649  frac>0=0.063
+feat   ntot                   n=  840  mean=-0.0714  med=-0.0728  frac>0=0.068
+feat   ret_120                n= 1089  mean=-0.0900  med=-0.0727  frac>0=0.069
+feat   ret_30                 n= 1260  mean=-0.1092  med=-0.1025  frac>0=0.071
+pos    P1avgin                n=15307  mean=-0.0318  med=-0.0224  frac>0=0.141
+pos    P0                     n=15307  mean=-0.0596  med=-0.0330  frac>0=0.064
+pos    P2halfout25            n=15307  mean=-0.0607  med=-0.0348  frac>0=0.029
+
+--- validated rows by position ---
+P1avgin      validated= 557  vmean_avg= 0.1119  survivors=297
+P0           validated= 150  vmean_avg= 0.0445  survivors=12
+P2halfout25  validated= 130  vmean_avg= 0.0382  survivors=21
+
+--- survivors that use position P0 (no averaging-in) ---
+count 12
+cell                       struct                           trmean    vmean     vmed    vCIlo      n     k     ctrl     edge
+bvol_30>=p90               H60|sl0.15|P0                    0.0979   0.1855  -0.0335   0.0434    167    69  -0.0071   0.1925
+ubgrow_600>=p75            H600|sl0.15|P0                   0.1199   0.1734  -0.1078   0.0060    217    50   0.0160   0.1574
+bvol_30>=p90               H60|sl0.3|P0                     0.0777   0.1721  -0.0131   0.0266    127    69  -0.0551   0.2272
+newrate_30>=p90            H60|sl0.15|P0                    0.1809   0.1320  -0.1081   0.0189    146    58  -0.0071   0.1391
+bvol_600>=p75              H600|sl0.15|P0                   0.1225   0.1299  -0.1005   0.0179    285    64   0.0160   0.1139
+bvol_120>=p75              H600|sl0.15|P0                   0.1137   0.1262  -0.1240   0.0113    291   112   0.0160   0.1102
+ubgrow_120>=p75            H60|sl0.15|P0                    0.0672   0.1191  -0.0701   0.0360    537   142  -0.0011   0.1201
+bvol_120>=p75              H180|sl0.15|P0                   0.1302   0.1180  -0.1107   0.0125    392   112  -0.0031   0.1211
+ubgrow_120>=p75            H180|sl0.15|P0                   0.1574   0.1162  -0.1228   0.0094    416   142  -0.0031   0.1193
+ubgrow_120>=p75            H60|sl0.3|P0                     0.0405   0.0983  -0.1027   0.0082    417   142  -0.0451   0.1434
+ubgrow_120>=p90            H60|sl0.15|P0                    0.0724   0.0789  -0.0502   0.0019    140    40  -0.0071   0.0860
+ubgrow_30>=p90             H60|sl0.15|P0                    0.0450   0.0721  -0.1448   0.0000    249   124  -0.0071   0.0792
+
+--- survivors with a PURE TIME exit (no truncation at all) ---
+count 0
+
+--- how many stage-A TIME-exit rows were even train-positive? ---
+time-exit rows 3171 frac train mean>0 0.06054872280037843 mean -0.0680156653601228

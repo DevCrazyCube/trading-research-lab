@@ -1,0 +1,8 @@
+snapshot lines 25667 meta mints (h12) 222
+creates h12 22561
+mints with bars h12 380 global last ts 1785337260
+total bars 46128
+saved 380
+h split Counter({2: 206, 1: 174})
+meta coverage 0 / 380
+create coverage 380 / 380

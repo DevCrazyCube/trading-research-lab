@@ -3600,3 +3600,273 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
 - **Decision:** V2.6 starts at a new post-seal activation watermark and is judged only at 100 terminal
   positions. In addition to positive mean and capital index, its mean must remain positive after the
   single best outcome is removed. Passing remains paper evidence and cannot authorize live money.
+
+## 2026-08-31 — PAC V2.6 is retired after its early safety stop falsifies the loss-cap premise
+
+- **Verified fact:** The fresh V2.6 book produced eight resolved paper positions, zero wins, mean
+  -8.47%, median -7.97%, normalized index 93.22, and no full losses. Five risk-budget decisions
+  landed between -7.70% and -16.49%; the authenticated 3.79-second landing delay meant a decision
+  near -8% was not an enforceable -8% realized loss ceiling. Three premise exits also lost. One
+  ninth position is preserved as right-censored; no row is deleted or rewritten.
+- **Decision:** V2.6 is stopped and may not be restarted or threshold-tuned from this book. The
+  immutable retirement record pins the final ledger and state hashes. V2.5 remains the active frozen
+  baseline. The next research direction must not be another threshold variant on the same PAC flow
+  factors; this family has repeatedly selected exitability without demonstrating direction.
+
+## 2026-08-31 — DIP/EARLY arms retired; only the latency intervention can answer the convexity premise
+
+- **Verified fact:** The separately activated DIP book stopped at 14 resolved paper scenarios, mean
+  all-cost return -0.139663R (4 wins/10 losses, one full loss). EARLY stopped at 19 resolved, mean
+  -0.235222R (2 wins/17 losses, four full losses). The host sessions were terminated only after every
+  open paper position had reached a producer terminal row. Immutable retirement records pin both books.
+- **Decision:** Neither arm may restart. Both reused the already-falsified -6% stop and the 3.788307712s
+  public processed-inclusion p90, so they neither repair the toll/noise floor nor test the owner-approved
+  low-latency hinge. The next executable research instrument is the matched public-control versus paid
+  low-latency route with one precommitted -12% all-cost stop. No entry-feature fork may substitute for
+  measuring landing latency, rug-catch fraction, winner early dips, and forward all-cost return.
+
+## 2026-08-31 — PAC_SCALP_LL freezes latency first, profit-lock compounding second
+
+- **Verified fact:** the burned PAC scalp book remains negative (322 resolved, mean all-cost
+  `-0.1183899491R`) and its public-route hard-stop decision-to-resolution p90 is 6.461 seconds. Neither
+  the retired DIP nor EARLY arm tested the approved latency intervention; both reused the public
+  3.788307712-second p90 and the falsified `-6%` stop.
+- **Working hypothesis:** a genuinely paid/staked route can bring matched build/sign/send/processed p90
+  below one second and no higher than half a matched public control, making a precommitted `-12%`
+  all-cost stop able to catch at least 70% of otherwise unexitable rugs while retaining the rare right
+  tail. This is the last PAC-scalping premise, not a profit claim.
+- **Decision:** calibration uses the first 100 complete SHA-randomized pairs, identical no-trade
+  priority+tip+memo wires, a third neutral processed observer, a hard lamport cap, crash-safe raw
+  journaling, and independent finalized exact-wire/fee/slot attestation. The campaign serializes no
+  URLs or credentials and cannot broadcast unless its clean git commit strictly descends from the
+  complete dependency seal. No inherited p90 and no default are legal.
+- **Decision:** paper portfolio sizing starts `$100 -> $10`, then sizes each new position at 10% of
+  realized trading equity within `$10..$50`, a 40% concurrent-gross cap, and a 6x executable-capacity
+  limit. Each positive realized result locks 25% outside trading and compounds 75%; a 20% UTC-day
+  realized loss halts new entries. Unrealized marks never resize orders. This harvests portfolio profit
+  without prematurely clipping the strategy's rare runners.
+- **Verified engineering fact:** hostile preseal mutations found mandatory-ID, failed-cost reset,
+  pre-lock stale-CAS state corruption, and locally invented entry/exit economics. The current schema-2
+  repair requires non-null evidence IDs, monotonic cumulative failed costs, lock+CAS+relational
+  prevalidation before any WAL replacement, and exact kernel/PumpSwap repricing from embedded reserve
+  and bound AttemptCost evidence. Regression controls reproduce the attacks. Seal/spend remains NO-GO
+  until the continuing hostile review returns clean.
+- **Operational decision:** RPC credentials accidentally surfaced in local terminal output during
+  endpoint sanitization must be rotated before any network campaign. No broadcast or trade occurred.
+  A credential seen in that output may not be used as campaign authority.
+
+## 2026-09-01 — Negative PAC executors retired; eligibility is separated from portfolio scheduling
+
+- **Verified fact:** the stopped paper books finished at PAC_SCALP N=1,023, mean -0.115425R;
+  PAC_LWS N=514, mean -0.291421R; and PAC_LWS_NULL N=237, mean -0.096037R. The retirement artifact
+  pins each ledger/state hash and preserves eight LWS/NULL open positions as right-censored rather
+  than inventing terminal prices.
+- **Verified fact:** the LWS comparison is not a valid treatment/control estimate. Candidate scoring
+  occurred only when a book slot was free, while unscored evidence expired after five minutes. The
+  slower NULL book therefore classified the same launches much later and often as `UNREADABLE`; the
+  arms did not act on one shared causal cohort.
+- **Decision:** PAC_SCALP, PAC_LWS, and PAC_LWS_NULL may not restart. The creation-anchored observer is
+  retained. `AFTERSHOCK_PAC_LWS_ELIGIBILITY_V2` classifies every launch once after the global feed head
+  closes t0+60, before and independently of capacity. One record carries simultaneous base and veto
+  eligibility; `UNREADABLE` and `NO_NET_TOKENS` are non-tradeable in both. This is data-only and does
+  not authorize a replacement position runner.
+- **Decision:** the only remaining PAC money hypothesis is the preregistered matched low-latency route
+  with the -12% all-cost stop. It remains default-off until rotated credentials, a clean sealed campaign,
+  independent on-chain latency attestation, complete runtime/cost binding, and the rug ghost-label gate
+  exist. Portfolio scaling remains prohibited until positive forward all-cost expectancy is measured.
+
+## 2026-09-01 — Post-retirement measurement repair, disk containment, and Virality V1 retirement
+
+- **Verified fact:** hostile review reproduced future/post-window leakage and unauthoritative input
+  cursors in the first eligibility recorder. Those outputs are archived diagnostic-only. Eligibility V2
+  now sets its activation at the exact complete feed tail before consumption, pins the input seq/hash and
+  notional in a self-hashed state, validates epoch/sequence/previous-hash/event-hash continuity, defers
+  future receipts, closes only from state observed by t0+60, emits `MISSED_CLOSURE` after the bounded
+  overshoot, and reconciles append-first crashes from its validated output ledger. Eleven direct controls
+  pass. A second hostile pass then reproduced a stronger attack: activation, notional, both cursors and
+  their tail anchors can be changed together and locally re-sealed; registry rows also lack an independent
+  authenticated sequence. V2 emitted zero rows after its clean restart and is now suspended with its
+  state hash pinned. Its passing controls prove ordinary causal-window behavior only, not authoritative
+  cohort completeness, network completeness, or tradeability.
+- **Verified fact:** the Coinbase SOL/USD authority now writes exact schema-2 hash-chained receipts that
+  bind raw provider response, request/receive clocks, provider time, source, URL, product, sequence, and
+  previous record. Nine negative controls include stale-provider receipt retiming and an unterminated tail
+  larger than 65 KiB. The public recorder was restarted and is writing schema 2.
+- **Verified fact:** PAC_LWS raw capture filled the filesystem because `RawLog` was constructed with all
+  retention controls disabled. The active raw log reached multi-gigabyte size and the feed recorded an
+  `ENOSPC` degradation interval; the emergency external copy-truncate path also documented a 22,114-byte
+  maximum seam. `pac_lws_feed` now opens RawLog with the frozen 512 MiB self-rotation and 45 GiB reserve
+  authority. The emergency cron is removed. With only about 9 GiB free and the old credential exposed,
+  the feed is deliberately stopped and must not restart until both conditions are repaired. Dashboard
+  health now ages to `STALE` after the same five-second bound as the consumer.
+- **Verified fact:** VIRALITY_GATE_B_V1 resolved one optimistic paper row at -17.504%, but its implementation
+  mislabeled rolling DexScreener h1 trade counts as unique buyers, did not pin pair identity, used observed
+  API prices without causal landing, and charged a flat toll rather than exact costs. Its immutable
+  retirement record pins ledger/state hashes and its watchdog now refuses. The row is diagnostic only.
+- **Decision:** ExitGuard is also stopped while its local feed is stale; a stale safety card must never
+  unlock a referral CTA. It remains a read-only product concept, not trading evidence.
+- **Verified engineering fact:** PAC_SCALP_LL now refuses a single missing finalized transaction lookup as
+  proof of absence. A failed local attempt may be classified absent only after `isBlockhashValid` at
+  finalized commitment proves its exact signed wire's recent blockhash expired; late finalized landings
+  remain fee/slot/wire-attested. The LL suite passes 130 checks.
+- **Decision:** PAC_SCALP_LL remains **NO-GO for seal, calibration spend, activation, or paper performance**
+  until one sealed Stage-B runner binds the unchanged detector, both activated runtimes, unified terminal
+  ledger, portfolio settlement, post-exit ghost/rug classification, discovery scorer, and untouched
+  confirmation gate. Kernel tests are necessary engineering evidence, not a winning bot.
+
+## 2026-09-02 — MEME ARENA repaired into three distinct, authority-gated paper instruments
+
+- **Verified engineering fact:** the first Arena release was not release-safe: snapshot state could
+  self-activate, the shared constant-product fill omitted both percentage tolls, a resolved mint could
+  re-enter, ledger/state persistence was not one idempotent crash-safe transition, and only the snapshot
+  worker was supervised. Its zero-terminal V2.1 book is diagnostic and is not continued.
+- **Decision:** `VIRALITY_ARRIVAL_V2_2`, `BUNDLE_MOMENTUM_V1`, and `MEMEBOT_GRAD_V1` each require a
+  set-once, git-anchored activation that binds the full executable closure, preregistration, numeric spec,
+  and initial trade-tape coordinate. Open/terminal/void events use a state-first WAL plus idempotent,
+  fsynced hash-chain append. One mint can contribute at most one primary outcome.
+- **Decision:** Virality remains an optimistic snapshot KILL-filter; Bundle uses local-receipt causal
+  boundaries and routes migrations through exact-token PumpSwap quotes; Graduation enters only after a
+  confirmed migration plus 15 slots and uses exact `$10` point-in-time sizing. A positive Bundle result
+  cannot become PASS until its frozen latency/clump replay survives; Graduation applies its N=30 sign
+  tripwire and a 27-test-adjusted N=100 bootstrap boundary. No result authorizes real money.
+- **Verified protocol fact (provider docs accessed 2026-09-02):** PumpPortal CREATE/migration streams are
+  free, while `subscribeTokenTrade` requires a funded data API key and costs 0.01 SOL per 10,000 events.
+  Bundle and Graduation therefore fail closed without `PUMPPORTAL_DATA_API_KEY`; no Lightning/trading
+  credential is accepted as a substitute. This is a paid-data dependency, not evidence of alpha.
+
+## 2026-09-02 — Arena feed moved to official Pump events; contaminated fallback epoch invalidated
+
+- **Verified operational fact:** PumpPortal returned HTTP 403 from this host for both keyed and keyless
+  websocket handshakes. A live process therefore supplied no new events. Process liveness is no longer a
+  feed-health claim: each trade-consuming runner now refuses unless a shared atomic health receipt is
+  `CONNECTED` and has a message no older than 30 seconds; the dashboard exposes that same verdict.
+- **Decision:** the replacement tape is the Pump program's own Anchor events received read-only through an
+  authorized Helius `logsSubscribe(processed)` endpoint. The listener, exact decoder, pinned official IDL
+  (`research/pump_idl_9c82f61.json`) and CLI dispatch are part of every consuming arm's frozen closure.
+  Only SOL-quoted, non-Mayhem `CreateEvent`, `TradeEvent`, and `CompleteEvent` layouts are admitted. Unknown,
+  trailing, non-native, Mayhem, or reserve-inconsistent payloads fail closed rather than becoming prices.
+- **Verified measurement fact:** the first fallback decoder admitted 10,487 out-of-regime trades between
+  Helius sequences 40,252 and 147,203. Both active money-book epochs started inside this interval. Bundle's
+  26 resolved rows (diagnostic mean +0.03957) and Migration's four resolved controls/five opens are therefore
+  invalid performance evidence and were archived intact with hashes in
+  `FEED_INVALIDATION_20260902T134837Z.md`. The raw source tape remains unchanged.
+- **Decision:** fresh Bundle and Migration activations start only after the corrected decoder closure is
+  committed and pin the current tape head. This is a causal paper reset, not a favorable-outcome reset: all
+  earlier positive and negative results are equally excluded. It proves plumbing only, never profitability
+  or live-order authorization.
+
+## 2026-09-08 — New information requires birth clocks and verified event labels
+
+- **Status:** accepted engineering corrections; birth-origin profitability is a working hypothesis.
+- **Ratified by:** user requested a new information class and prohibited rerunning the killed families;
+  the particular birth-origin mechanism and observer constants are agent-proposed.
+- **Decision:** `scripts/birth_origin.py` is a separate NO_TRADE development observer. A fourth exact
+  creator/user group sharing a name fragment identifies the earliest previously observed mint within
+  six hours as a possible attention recipient. No prices, outcomes, or future graduation enter it.
+  Identity context is causal across all words; transactions are indivisible; mint emission is unique.
+  It neither continues the prior formation evaluation nor restarts any retired bot.
+- **Verified fact:** 33,866 creations produce 1,212 observations; all 20 fixed within-actor text
+  permutations produce more (1,319–1,417). These are signal counts, not profitable survivors. No return,
+  mean, median, or executable edge was evaluated; the corpus spans only 23.83 hours.
+- **Decision:** preserve and reject the first observer output for its missed cross-word identity
+  bridges. The corrected output is `birth_origin_v1_validated_20260908`; no economic parameter was tuned.
+- **Verified fact:** the fresh collector's $100k minimum and pre-harvest clock prevent a birth-census
+  claim; 118 first sightings precede reported creation under its recorded clock. The raw transaction
+  audit finds migration LP burns for 82/82 migrated mints. Seventy have OHLCV, only 67 on the matching
+  migration pool. No cached PumpSwap withdraw instruction establishes a post-graduation withdrawal
+  target, and collection was not complete pool-history coverage.
+- **Decision:** candle collapse is not an LP-withdrawal label; provider errors are not proof of death.
+  The user's -30/-50/-100% dropout treatments are sensitivity scenarios, not fabricated fills.
+  The corrected mint-equal benchmark supersedes the closure's trade-pooled -2.92%. The written zero-sum
+  aggregates have an unresolved arithmetic discrepancy (-5,436 SOL pasted; +1,674 SOL with the closure's
+  retained-curve row); the original raw reconciliation was not rerun or declared disproven.
+- **Open gates:** required +354%/-49% pair and entry instants, individual live receipt clocks, fresh
+  multiweek evaluation, executable routes/costs, and funding dependencies. No live or paper order path
+  is enabled. See `research/midcap/INFORMATION_AUDIT_20260908.md` for evidence, source pins, and 29 tests.
+
+## 2026-09-08 — Owner correction excludes anecdotes; direct creation recording is a separate instrument
+
+- **Status / author:** accepted owner steering, implemented by Codex; observation-only / NO_TRADE.
+- **Decision:** supersede the pair gate in the immediately preceding decision and preserved birth-origin
+  development spec/result. ANON/BRO are owner-reported, unaudited N=2 chat anecdotes, absent from the
+  repository. Exclude them from validation, parameter fitting, and sizing claims; do not request them
+  again as a prerequisite. The reported chains differ (Robinhood and BSC).
+- **Decision:** drop the buyer-to-LP-withdrawal join. Retain single-minute drawdown >=90% as a descriptive
+  statistic of unknown mechanism, never proof of LP removal or a fill at a crossed stop price.
+- **Decision:** preserve the original formation preregistration, SHA-256 beginning `1b25538f`, unchanged.
+  The fresh ranked collector cannot test it. Add a separate raw creation-event recorder with actual
+  per-frame receipt clocks and distinct creator/user/URI, all regimes and failed attempts retained.
+- **Verified engineering fact:** bounded pilot: 8,502 raw frames, six creation observations (five
+  successful, one failed), zero issues/pending/duplicate creates. Exact raw replay; all six observations
+  match preserved public-RPC transaction bodies/block ordering. Five use canonical B7d event coordinates;
+  one remains a failed transaction, not a birth. Offline replay reproduces those reconciliations.
+- **Decision:** no log position is promoted to an instruction coordinate; no backfill rewrites receipt
+  time; matching observed records is not a full birth census or independent-provider/deployment attestation.
+  No signing, treasury, order submission, strategy activation or retired-process restart is added.
+- **Decision:** future financial evaluation retains all seven harness conditions and adds uncertainty
+  clustered by mint AND preregistered session, with creator/wallet/funding leakage controls. The owner's
+  historical 4.01pp session noise is contextual, not an execution toll. No profitability is inferred from
+  observation counts, engineering tests, or the short pilot. Fifty-one engineering tests pass.
+- **Open gates:** independent creation recall, usable causal history, funding dependencies, pool/route
+  execution, whole-pipeline profitability placebo and fresh multiweek results; PLAN promotion gates remain.
+  Contract: `research/midcap/BIRTH_STREAM_FORWARD_CONTRACT_20260908.md`. Evidence and reproduction:
+  `research/midcap/INFORMATION_AUDIT_20260908.md`. Earlier artifacts and unrelated user changes are preserved.
+- **Decision / operational snapshot:** begin one separate eight-hour raw capture at 18:03:27 UTC,
+  `birth-create-20260908-1805`, with 8 GiB capture capacity and 16 GiB disk-free reserve. Bounded collection
+  is authorized research instrumentation, not automatic strategy evaluation or live trading. It has no
+  watchdog/reconnect; an outage must remain visible. No preexisting service is restarted or stopped.
+
+## 2026-09-08 — User-authorized reconnect repair; outages remain unrepaired evidence gaps
+
+- **Author / status:** Codex; implemented and restarted, read-only / NO_TRADE.
+- **Verified fact:** the first long capture ended at 18:07:13 UTC after a WebSocket protocol error
+  involving close code 1006. All 37,939 frames and 24 creation observations still replay exactly.
+  No capacity or decoder failure caused that stop. The responsible remote component remains unknown.
+- **Decision:** supersede the earlier no-reconnect operational choice after explicit owner request.
+  Schema v2 records connection epochs and UNKNOWN_UNREPAIRED outage intervals; retries transport failures
+  with 1-to-30-second capped exponential backoff and resubscribes. Thirty seconds without data triggers
+  reconnection. Only a decoded notification establishes resumption, never an acknowledgement alone.
+- **Decision:** preserve one global duration/storage budget across reconnections. Keep fatal storage/
+  persistence errors and capacity limits terminal. No process watchdog, backfill, gap erasure, receipt
+  backdating, signing or trading is added. Preserve old raw files and exact v1 source snapshots.
+- **Decision:** expose read-only freshness-based --status; a living PID is not evidence of current data.
+  Extend offline verification to epoch boundaries/acknowledgements/gaps while retaining v1 compatibility.
+- **Verified engineering result:** 62 tests pass, including deterministic runtime recovery attacks.
+  Exact replay of both real v1 captures remains valid. V2 restarted at 18:22:48.931 UTC, process 258843,
+  own tmux session birth-create-v2-20260908-1823, 8-hour/8-GiB bounds and 16-GiB disk reserve.
+- **Explanation / open gate:** eight hours is a configurable observation budget (six-hour proposed
+  lookback plus two hours), not processing time or a promise of complete history/profit. The observer
+  is not wired to live capture; gaps cannot satisfy continuous history. No strategy gate is relaxed.
+  Evidence, exact pins and health command: research/midcap/BIRTH_STREAM_RECONNECT_20260908.md.
+
+## 2026-09-08 — User-authorized backlog repair: bounded FULL-durable batches and chain-head verification
+
+- **Author / status:** Codex; engineering-verified, read-only / NO_TRADE. Owner also requested thinking
+  about other mechanisms for consistent memecoin income; no financial success is claimed.
+- **Verified fact:** v2 event-to-receipt delay reached 302.992 seconds despite fresh local receipt
+  timestamps. Same-disk offline profiling measured 159.40 frames/sec; SQLite commits took 5.570 of
+  12.547 seconds for 2,000 frames. Initial tmpfs profiles are retained but rejected as disk benchmarks.
+- **Decision:** separate batched runtime scripts/birth_stream_fast.py: 32 frames / 1 MiB / 50 ms receive
+  batches with individual clocks, FULL raw commit before any decode, separate derived commit/availability
+  clocks, immutable epoch bindings and explicit unrepaired gaps. Cache the pinned event map. Never turn
+  off FULL durability or backdate availability. Uncommitted receive-batch crash exposure is disclosed;
+  persistence/capacity failures remain fatal, not transport retries. All old raw data remain unchanged.
+- **Verified engineering fact:** same-prefix/same-disk v3 profile 865.95 frames/sec, about 5.43x v2.
+  Eight live public head comparisons: v2 22..990 slot lag brackets; v3 -1..22. Three after-cutover checks:
+  [1,0], [2,-1], [0,0]. Brackets acknowledge asynchronous clocks, not prediction. Provider independence
+  and full creation recall remain unproven. The latest 369-creation snapshot has 10.535..22.782-second
+  event-to-receipt delay. This is capture improvement, not an executable edge.
+- **Decision / operation:** v3 started 19:01:12.947 UTC, own tmux birth-create-v3-20260908-1901, PID 271662,
+  26,400 seconds / 8 GiB, 16 GiB reserve; planned stop 02:21:12.947 UTC September 9, before the old deadline.
+  After comparison, exact old PID 258843 was gracefully interrupted. Its 421,594 frames / 656 creation
+  observations / five gaps remain preserved; no other service was restarted or stopped.
+- **Verified tests:** 76 non-duplicated engineering tests pass. Separate 30-second live validation:
+  7,482 frames, 12 creates (11 successful), zero issues/pending/uncommitted; raw/derived/batch replay EXACT.
+  Maximum observed raw/derived commit delays 69.836/84.059 ms, not future guarantees.
+- **Working hypothesis / scope:** authenticated canonical-address resolution is proposed as a distinct
+  non-price information class, with explicit feasibility/kill tests before any financial cohort. A
+  transparent execution-savings service is a separate business option, not a disguised trading result.
+  No social collector, paid service, promotion, wallet, or new strategy is activated. Original formation
+  prereg and all seven harness conditions plus mint/session/funding controls remain unchanged.
+- **Evidence:** research/midcap/BIRTH_STREAM_BACKLOG_FIX_20260908.md and
+  research/midcap/NEW_INFORMATION_CANDIDATES_20260908.md; exact code/raw pins and reproduction therein.

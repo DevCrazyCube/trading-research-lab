@@ -1,0 +1,38 @@
+=== cap tag 'none'
+  H=  5 charge=-0.30  mintEqualMean=-0.0925 median=-0.0939 k=387 n=14016 res=0.972
+  H=  5 charge=-0.50  mintEqualMean=-0.1190 median=-0.1103 k=387 n=14016 res=0.972
+  H=  5 charge=-1.00  mintEqualMean=-0.1851 median=-0.1520 k=387 n=14016 res=0.972
+  H= 15 charge=-0.30  mintEqualMean=+2.2737 median=-0.1687 k=387 n=6760 res=0.943
+  H= 15 charge=-0.50  mintEqualMean=+2.2346 median=-0.1924 k=387 n=6760 res=0.943
+  H= 15 charge=-1.00  mintEqualMean=+2.1369 median=-0.2701 k=387 n=6760 res=0.943
+  H= 30 charge=-0.30  mintEqualMean=+2.6256 median=-0.2123 k=387 n=4363 res=0.911
+  H= 30 charge=-0.50  mintEqualMean=+2.5777 median=-0.2510 k=387 n=4363 res=0.911
+  H= 30 charge=-1.00  mintEqualMean=+2.4581 median=-0.3443 k=387 n=4363 res=0.911
+  H= 60 charge=-0.30  mintEqualMean=+1.5601 median=-0.2778 k=387 n=2845 res=0.864
+  H= 60 charge=-0.50  mintEqualMean=+1.5020 median=-0.3141 k=387 n=2845 res=0.864
+  H= 60 charge=-1.00  mintEqualMean=+1.3567 median=-0.4148 k=387 n=2845 res=0.864
+  H=120 charge=-0.30  mintEqualMean=-0.0942 median=-0.3080 k=387 n=1876 res=0.794
+  H=120 charge=-0.50  mintEqualMean=-0.1646 median=-0.4011 k=387 n=1876 res=0.794
+  H=120 charge=-1.00  mintEqualMean=-0.3406 median=-0.5285 k=387 n=1876 res=0.794
+  H=240 charge=-0.30  mintEqualMean=-0.2546 median=-0.3149 k=387 n=1225 res=0.684
+  H=240 charge=-0.50  mintEqualMean=-0.3438 median=-0.5057 k=387 n=1225 res=0.684
+  H=240 charge=-1.00  mintEqualMean=-0.5666 median=-0.6713 k=387 n=1225 res=0.684
+=== cap tag '_c3'
+  H=  5 charge=-0.30  mintEqualMean=-0.1305 median=-0.0939 k=387 n=14016 res=0.972
+  H=  5 charge=-0.50  mintEqualMean=-0.1569 median=-0.1104 k=387 n=14016 res=0.972
+  H=  5 charge=-1.00  mintEqualMean=-0.2231 median=-0.1539 k=387 n=14016 res=0.972
+  H= 15 charge=-0.30  mintEqualMean=-0.1798 median=-0.1687 k=387 n=6760 res=0.943
+  H= 15 charge=-0.50  mintEqualMean=-0.2189 median=-0.1924 k=387 n=6760 res=0.943
+  H= 15 charge=-1.00  mintEqualMean=-0.3166 median=-0.2701 k=387 n=6760 res=0.943
+  H= 30 charge=-0.30  mintEqualMean=-0.2166 median=-0.2123 k=387 n=4363 res=0.911
+  H= 30 charge=-0.50  mintEqualMean=-0.2645 median=-0.2510 k=387 n=4363 res=0.911
+  H= 30 charge=-1.00  mintEqualMean=-0.3841 median=-0.3443 k=387 n=4363 res=0.911
+  H= 60 charge=-0.30  mintEqualMean=-0.2473 median=-0.2778 k=387 n=2845 res=0.864
+  H= 60 charge=-0.50  mintEqualMean=-0.3054 median=-0.3141 k=387 n=2845 res=0.864
+  H= 60 charge=-1.00  mintEqualMean=-0.4507 median=-0.4148 k=387 n=2845 res=0.864
+  H=120 charge=-0.30  mintEqualMean=-0.2898 median=-0.3080 k=387 n=1876 res=0.794
+  H=120 charge=-0.50  mintEqualMean=-0.3602 median=-0.4011 k=387 n=1876 res=0.794
+  H=120 charge=-1.00  mintEqualMean=-0.5363 median=-0.5285 k=387 n=1876 res=0.794
+  H=240 charge=-0.30  mintEqualMean=-0.3507 median=-0.3149 k=387 n=1225 res=0.684
+  H=240 charge=-0.50  mintEqualMean=-0.4399 median=-0.5057 k=387 n=1225 res=0.684
+  H=240 charge=-1.00  mintEqualMean=-0.6627 median=-0.6713 k=387 n=1225 res=0.684

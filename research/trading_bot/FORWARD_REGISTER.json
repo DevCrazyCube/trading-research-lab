@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "note": "The register of PAPER forward tests. One entry per frozen strategy. A strategy that is not in this register is not being evaluated by anything, which is how a bot quietly runs for a year with nobody reading it. Adding an entry is step 6 of research/trading_bot/ITERATION_PROTOCOL.md and requires a pre-registration that already exists and is already hashed. The evaluator (scripts/trading_bot/forward_eval.py) verifies the hash on every run and REFUSES to score a strategy whose pre-registration has moved. A NEW idea is a NEW entry with a NEW ledger; it is never an edit to an entry that is RUNNING.",
+  "declared_trial_accounting": "Every forward test ever stood up in a family counts toward that family's declared trial number for DSR, whether it is still running or was retired. RETIRED entries are kept here forever for exactly that reason -- deleting a loser is how a search-max result gets laundered into a discovery.",
+  "strategies": [
+    {
+      "id": "T4",
+      "family": "T13 risk-shaping overlays",
+      "rule_id": "T13-VOL-L60-T0.1-WMAX1.0",
+      "rule": "w_t = min(1.0, 0.10 / realised_vol_60), remainder in T-bills",
+      "instrument": "SPY",
+      "rail": "market-on-close both sides, Alpaca PAPER",
+      "status": "RUNNING",
+      "inception": "2026-08-17",
+      "declared_trials": 1,
+      "prior_verdict": "DEAD on T13's frozen held-out gate (drawdown p = 0.233, DSR = 0.355). Run forward because 1990-2026 is burned for this rule, not because it was certified.",
+      "preregistration": "research/trading_bot/T4_FORWARD_PREREGISTRATION.md",
+      "preregistration_sha256": "52f3eea24e0a6303fc705c14d0857d411f9fda6f91815e965de9ab3b15b9ff99",
+      "ledger": "research/trading_bot/T4_FORWARD_LOG.jsonl",
+      "state": "research/trading_bot/T4_FORWARD_STATE.json",
+      "runner": "scripts/trading_bot/t4_forward.py",
+      "minimum_before_verdict": "3 completed >=20% peak-to-trough crash episodes in the un-overlaid benchmark curve (T4 prereg 6)",
+      "primary_gate": "FG1: maxDD of the overlay at least 3 pp better than the ex-post vol-matched constant-weight null N1, AND p < 0.05 by paired block bootstrap (21-session blocks, 10,000 draws)",
+      "retired_utc": null,
+      "retirement_reason": null
+    }
+  ]
+}

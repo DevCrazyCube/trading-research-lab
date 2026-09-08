@@ -1,0 +1,41 @@
+one-sided bootstrap p(mean<=0) for all 35 validate finalists, BH q=0.10 thresholds:
+rk   p1        BHthr     triple                   structure                          va_w    k     n
+1    0.00820   0.00286   volr/rng15/vlvl          (45, 0.1, -0.15, None, 'split3')  +0.0271   46   220
+2    0.00820   0.00571   volr/rng15/vlvl          (60, 0.1, -0.15, None, 'split3')  +0.0271   46   220
+3    0.14710   0.00857   volr/r15/vlvl            (30, 0.1, -0.35, None, 'split3')  +0.0178   43    80
+4    0.14970   0.01143   volr/r15/vlvl            (45, 0.1, -0.35, None, 'split3')  +0.0176   43    81
+5    0.15375   0.01429   volr/r15/vlvl            (60, 0.1, -0.35, None, 'split3')  +0.0172   43    80
+6    0.18285   0.01714   volr/r15/vlvl            (20, 0.1, -0.35, None, 'split3')  +0.0149   43    87
+7    0.31265   0.02000   r5/upfr/vlvl             (15, None, None, None, 'str3')  +0.0725   39    95
+8    0.56905   0.02286   r5/age/act15             (20, 0.3, -0.25, None, 'str3')  -0.0038   45    45
+9    0.58495   0.02571   r5/age/act15             (60, 0.3, -0.25, None, 'str3')  -0.0056   45    45
+10   0.60795   0.02857   r5/age/act15             (60, 0.3, -0.25, None, 'flat')  -0.0100   45    45
+11   0.63755   0.03143   r5/age/act15             (60, 0.3, -0.25, None, 'split3')  -0.0112   45    45
+12   0.68890   0.03429   r5/age/act15             (45, 0.3, -0.25, None, 'str3')  -0.0123   45    45
+13   0.69025   0.03714   r5/age/act15             (30, 0.3, -0.25, None, 'str3')  -0.0119   45    45
+14   0.70670   0.04000   r5/age/act15             (45, 0.3, -0.25, None, 'flat')  -0.0195   45    45
+15   0.72115   0.04286   r5/age/act15             (30, 0.3, -0.25, None, 'flat')  -0.0203   45    45
+16   0.74000   0.04571   r5/age/act15             (45, 0.3, -0.25, None, 'split3')  -0.0201   45    45
+17   0.75935   0.04857   r5/age/act15             (30, 0.3, -0.25, None, 'split3')  -0.0210   45    45
+18   0.88755   0.05143   r5/age/act15             (45, 0.3, -0.35, None, 'str3')  -0.0359   45    45
+19   0.95430   0.05429   rng15/age/upfr           (15, None, None, None, 'str3')  -0.0133   50   129
+20   0.96070   0.05714   volr/age/act15           (5, 0.3, None, None, 'flat')    -0.0553   39    74
+21   0.96970   0.06000   volr/age/act15           (5, 0.3, None, None, 'dip3')    -0.0387   39    74
+22   0.97160   0.06286   volr/age/act15           (5, 0.3, None, None, 'str3')    -0.0300   39    74
+23   0.97570   0.06571   volr/r15/r5              (3, None, None, None, 'flat')   -0.0134   49   139
+24   0.97755   0.06857   volr/age/act15           (5, 0.2, None, None, 'dip3')    -0.0347   39    81
+25   0.97775   0.07143   volr/age/act15           (5, 0.2, None, None, 'flat')    -0.0567   39    81
+26   0.98205   0.07429   volr/age/act15           (5, 0.3, None, None, 'split3')  -0.0435   39    74
+27   0.98745   0.07714   volr/age/act15           (5, 0.2, None, None, 'str3')    -0.0315   39    81
+28   0.99205   0.08000   volr/age/act15           (5, 0.2, None, None, 'split3')  -0.0419   39    81
+29   0.99845   0.08286   volr/r15/r5              (3, 0.3, None, None, 'dip3')    -0.0077   49   139
+30   0.99845   0.08571   volr/r15/r5              (3, 0.3, None, None, 'flat')    -0.0153   49   139
+31   0.99845   0.08857   volr/r15/r5              (3, 0.3, None, None, 'split3')  -0.0077   49   139
+32   0.99845   0.09143   volr/r15/r5              (3, 0.3, None, None, 'str3')    -0.0077   49   139
+33   0.99910   0.09429   rng15/age/upfr           (20, None, None, None, 'str3')  -0.0181   50   120
+34   0.99990   0.09714   r15/age/vlvl             (10, None, None, None, 'str3')  -0.0258   48   154
+35   0.99995   0.10000   rng15/age/upfr           (10, None, None, None, 'str3')  -0.0192   50   140
+BH survivors: []
+distinct (triple,cell) among finalists: 8
+  if BH were applied over 8 distinct rules, rank-1 threshold = 0.01250 ; smallest p1 = 0.00820 -> would survive
+done

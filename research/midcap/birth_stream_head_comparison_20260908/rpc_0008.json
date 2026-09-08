@@ -1,0 +1,20 @@
+{
+  "endpoint": "https://api.mainnet-beta.solana.com",
+  "http_status": 200,
+  "received_monotonic_nanos": 10467495219770,
+  "received_unix_nanos": 1788894397593148684,
+  "request": {
+    "id": 8,
+    "jsonrpc": "2.0",
+    "method": "getSlot",
+    "params": [
+      {
+        "commitment": "finalized"
+      }
+    ]
+  },
+  "response_bytes": 44,
+  "response_sha256": "d2628cd2fc52ae7ad90f14ba11bc70dcee02b5f85068a386a20563b460003cbb",
+  "sent_monotonic_nanos": 10467371083953,
+  "sent_unix_nanos": 1788894397469012842
+}

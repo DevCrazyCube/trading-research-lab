@@ -1,0 +1,57 @@
+=== 1-WAY REGION MAP ON VALIDATE (h2), net a30, mint-equal ===
+feature          q0      q1      q2      q3      q4   (blank = no support)
+r1               -0.179  -0.158  -0.118  -0.141  -0.006 
+r5               -0.192  -0.161  -0.152  -0.134  +0.083 
+r15              -0.163  -0.177  -0.168  -0.122  +0.218 
+r60              -0.157  -0.183  -0.193  -0.134  +0.133 
+r_since_first    -0.204  -0.191  -0.258  -0.250  +0.088 
+dd_from_ath      -0.205  -0.179  -0.084  +3.191  +0.139 
+runup_from_low   -0.179  -0.191  -0.210  -0.229  -0.006 
+rvol15           -0.183  -0.089  -0.091  -0.117  -0.048 
+bar_range        -0.144  -0.120  -0.141  -0.156  -0.125 
+body_pos            .    -0.168  -0.099  -0.064  -0.054 
+gap_prev            .    +0.012  -0.182     .       .   
+active_frac15    -0.097  -0.041  -0.009  -0.146     .   
+vol_z            -0.142  +0.035  -0.179  -0.138  -0.092 
+vol_share15      -0.112  -0.117  -0.109  +0.116  -0.183 
+cumvol60         -0.123  -0.052  -0.056  -0.088  -0.142 
+vwap_dev15       -0.146  -0.148  -0.189  -0.110  +0.140 
+age_min          -0.139  -0.181  +0.006  -0.174  -0.171 
+price_level      -0.110  -0.233  -0.352     .    -0.146 
+ath_age_min      +0.352  -0.144  -0.164  -0.170  -0.199 
+ttft_min         -0.181  -0.050     .       .       .   
+hour_utc         -0.147  -0.143  -0.160  -0.033  -0.153 
+creator_creates     .    -0.159  +0.001  -0.183     .   
+accel_5_15       -0.083  -0.095  -0.054  -0.097  -0.127 
+up_frac15        -0.122  -0.112  -0.193  -0.127  +0.127 
+mdd15            -0.151  -0.047  -0.092  -0.129  -0.015 
+vol_accel        -0.129  -0.098  -0.078  -0.133  -0.111 
+dd60             -0.142  +0.341  -0.111  -0.171  -0.108 
+ath_frac_life    -0.191  -0.152  -0.156  -0.126  +0.117 
+
+=== LEAST-BAD ROBUST CELLS (validate) ===
+filter: n>=150, k>=30, resolution>=0.95, and mean survives dropping the 3 best mints
+cells meeting the filter: 1880
+  mean=+0.0458 drop3=-0.0032 med=+0.0219 n=218 k=38 res=0.995 | r15 q3 & accel_5_15 q3
+  mean=+0.0055 drop3=-0.0106 med=-0.0029 n=257 k=35 res=0.981 | rvol15 q1 & vol_accel q2
+  mean=+0.0127 drop3=-0.0173 med=-0.0050 n=327 k=43 res=0.988 | r5 q4 & accel_5_15 q3
+  mean=+0.0345 drop3=-0.0189 med=-0.0063 n=154 k=34 res=0.987 | vol_share15 q2 & cumvol60 q1
+  mean=+0.0138 drop3=-0.0190 med=-0.0104 n=396 k=49 res=0.985 | vwap_dev15 q3 & accel_5_15 q3
+  mean=-0.0141 drop3=-0.0228 med=-0.0197 n=284 k=47 res=0.986 | r1 q2 & mdd15 q2
+  mean=-0.0062 drop3=-0.0233 med=-0.0211 n=324 k=49 res=0.981 | r5 q2 & rvol15 q2
+  mean=-0.0050 drop3=-0.0236 med=-0.0092 n=351 k=50 res=0.994 | r1 q2 & bar_range q1
+  mean=-0.0031 drop3=-0.0240 med=-0.0139 n=358 k=49 res=0.972 | r5 q3 & rvol15 q1
+  mean=-0.0124 drop3=-0.0259 med=-0.0147 n=186 k=34 res=0.968 | rvol15 q1 & cumvol60 q3
+  mean=+0.0020 drop3=-0.0279 med=-0.0087 n=263 k=37 res=0.989 | r15 q3 & mdd15 q2
+  mean=-0.0049 drop3=-0.0292 med=-0.0274 n=193 k=41 res=0.979 | vol_share15 q2 & hour_utc q1
+  mean=-0.0149 drop3=-0.0301 med=-0.0240 n=177 k=41 res=0.989 | rvol15 q1 & active_frac15 q1
+  mean=-0.0217 drop3=-0.0302 med=-0.0180 n=386 k=53 res=0.982 | rvol15 q2 & vol_share15 q0
+  mean=-0.0044 drop3=-0.0306 med=-0.0130 n=262 k=42 res=0.973 | vwap_dev15 q3 & ath_age_min q3
+  mean=-0.0182 drop3=-0.0310 med=-0.0250 n=245 k=47 res=1.000 | active_frac15 q1 & mdd15 q2
+  mean=-0.0149 drop3=-0.0313 med=-0.0155 n=214 k=33 res=0.995 | ath_age_min q3 & up_frac15 q3
+  mean=-0.0166 drop3=-0.0315 med=-0.0104 n=234 k=36 res=0.991 | vol_share15 q2 & ath_age_min q3
+  mean=-0.0143 drop3=-0.0325 med=+0.0001 n=398 k=51 res=0.985 | bar_range q2 & accel_5_15 q1
+  mean=-0.0196 drop3=-0.0330 med=-0.0130 n=420 k=66 res=0.960 | rvol15 q1 & vol_z q3
+  best drop-3-robust validate mean over the whole grid: -0.0032
+
+cells with drop-top-3 validate mean > 0 : 0 of 1880

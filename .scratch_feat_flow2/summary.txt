@@ -1,0 +1,30 @@
+=== UNCONDITIONAL on-curve baseline, every decision point, no entry filter ===
+   mint-equal weighted, no-overlap, pessimistic fills, toll 1.14%
+structure                          mean   median       n     k  frozen
+H60|time|P0                     -0.0656  -0.0579    5327   645   0.455   (train)
+                                -0.0357  -0.0665    5388   613   0.443   (valid)
+H180|time|P0                    -0.0906  -0.0924    3501   645   0.454   (train)
+                                -0.0575  -0.1039    3498   613   0.448   (valid)
+H600|time|P0                    -0.1196  -0.1323    2298   645   0.405   (train)
+                                -0.0773  -0.1391    2285   613   0.410   (valid)
+H1800|time|P0                   -0.1188  -0.1498    1690   645   0.365   (train)
+                                -0.0765  -0.1555    1661   613   0.364   (valid)
+H5400|time|P0                   -0.1082  -0.1451    1302   645   0.341   (train)
+                                -0.0842  -0.1608    1276   613   0.341   (valid)
+H180|flowrev|P0                 -0.0622  -0.0577    8451   645   0.248   (train)
+                                -0.0194  -0.0639    8973   613   0.231   (valid)
+H180|sl0.15|P0                  -0.0591  -0.0850    4347   645   0.377   (train)
+                                -0.0314  -0.0921    4401   613   0.363   (valid)
+H180|tp0.25|P0                  -0.1005  -0.0619    3972   645   0.400   (train)
+                                -0.0908  -0.0653    4106   613   0.384   (valid)
+
+=== dropout-charge sensitivity of the unconditional H1800 time hold (validate) ===
+  frozen=0       mean=-0.0765 med=-0.1555
+  frozen=-30%    mean=-0.1495 med=-0.2886
+  frozen=-50%    mean=-0.1982 med=-0.3457
+  frozen=-100%   mean=-0.3200 med=-0.4349
+
+=== decision-point universe ===
+mints with tapes (h in 1,2): 2371 ; with >=7 trades and a decision point: 1273
+decision points: 203848  (train h=1: 90650, validate h=2: 113198)
+holdout h==0 mints: never loaded, never counted

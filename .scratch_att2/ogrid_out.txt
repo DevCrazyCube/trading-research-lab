@@ -1,0 +1,39 @@
+h12 mints loaded 382 bars 46136
+mints with metadata 382
+features+triggers built  t=71s
+n conditions 52
+signals precomputed t=73s
+signal counts: {'all': 45754, 'r5<=-50': 1791, 'r5<=-30': 2885, 'r5>=+50': 957, 'r5>=+100': 439, 'r15<=-60': 1936}
+OHLCV combos swept (train): 17472 cells with >=8 mints: 16800 t=156s
+train-positive: 1171
+   gapup          H=   5 sl25         flat      mean= +73.72% med=  -4.59% k=40 n=60
+   gapup          H=   5 sl50         flat      mean= +73.55% med=  -4.59% k=40 n=60
+   gapup          H=   5 trail50      flat      mean= +73.53% med=  -4.59% k=40 n=60
+   gapup          H=   5 hold         flat      mean= +72.95% med=  -4.59% k=40 n=60
+   gapup          H=   5 gapexit      flat      mean= +72.95% med=  -4.59% k=40 n=60
+   gapup          H=   5 trail25      flat      mean= +72.63% med=  -4.59% k=40 n=60
+   bounce         H=   5 tp50_sl25    flat      mean= +63.31% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp50_sl25    half_out  mean= +63.31% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp100        flat      mean= +62.92% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp100_sl50   flat      mean= +62.85% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp100_sl50   half_out  mean= +62.54% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp100        half_out  mean= +62.42% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp50         flat      mean= +62.16% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp50         half_out  mean= +62.16% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp50_gap     flat      mean= +62.16% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp50_gap     half_out  mean= +62.16% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp25_sl25    flat      mean= +60.79% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp25_sl25    half_out  mean= +60.79% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp25         flat      mean= +60.17% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp25         half_out  mean= +60.17% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp10         flat      mean= +59.05% med=  -1.16% k=39 n=83
+   bounce         H=   5 tp10         half_out  mean= +59.05% med=  -1.16% k=39 n=83
+   bounce         H=  15 tp100        flat      mean= +59.03% med=  -3.12% k=39 n=83
+   bounce         H=  15 tp25_sl25    flat      mean= +58.22% med=  -3.12% k=39 n=83
+   bounce         H=  15 tp25_sl25    half_out  mean= +58.22% med=  -3.12% k=39 n=83
+   bounce         H=  15 tp100        half_out  mean= +57.83% med=  -3.12% k=39 n=83
+   bounce         H=  15 tp50_sl25    flat      mean= +57.59% med=  -3.71% k=39 n=83
+   bounce         H=  15 tp50_sl25    half_out  mean= +57.59% med=  -3.71% k=39 n=83
+   bounce         H= 120 tp25_sl25    flat      mean= +57.43% med=  -5.45% k=39 n=83
+   bounce         H= 120 tp25_sl25    half_out  mean= +57.43% med=  -5.45% k=39 n=83
+done t=157s

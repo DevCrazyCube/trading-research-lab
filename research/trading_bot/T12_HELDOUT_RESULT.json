@@ -1,0 +1,815 @@
+{
+  "preregistration_sha256": "d88663008a813064816f53cb8ac19c051d057a115560ebc9f41114186037bd3e",
+  "grid": {
+    "n_weekly_dates": 243,
+    "first": "2021-08-20",
+    "last": "2026-08-07",
+    "design_n": 125,
+    "heldout_n": 118,
+    "dropped_dates": [
+      "2025-04-18",
+      "2025-07-04",
+      "2026-04-03",
+      "2026-06-19",
+      "2026-07-03",
+      "2026-08-14"
+    ],
+    "dropped_reason": "fewer than half the live universe quoted (US market holidays + the truncated final date)"
+  },
+  "cost_model": {
+    "entry_half_spread": {
+      "name": "entry_half_spread",
+      "value": "2881290818286531/250000000000000",
+      "value_float": 11.525163273146124,
+      "unit": "bp of notional",
+      "provenance": "PUBLISHED_ACADEMIC_MEASUREMENT",
+      "provenance_meaning": "a peer-reviewed measurement of someone else's orders",
+      "source": "T12 first-party measurement: median quoted half-spread 11.525 bp over 3067 CEF symbol-days, SIP quotes in [15:59:59, 16:00:00) ET, SIP quotes, median per symbol-day (p75 18.38, p90 27.25, p95 36.40, max 185.7 bp). NOT the auction rail: costs.measured_auction_leg refuses for CEFs and EDGE_SHORTLIST section 2e measured CEF closing auctions clearing $0.0-0.3 M, so every leg of this candidate crosses a continuous spread."
+    },
+    "entry_extra_slippage": {
+      "name": "entry_extra_slippage",
+      "value": "0",
+      "value_float": 0.0,
+      "unit": "bp of notional",
+      "provenance": "STRESS_LADDER",
+      "provenance_meaning": "not a measurement; a deliberately adverse rung in a sweep",
+      "source": "NOT MEASURED for CEFs. Zero is a stated LOWER BOUND."
+    },
+    "exit_half_spread": {
+      "name": "exit_half_spread",
+      "value": "2881290818286531/250000000000000",
+      "value_float": 11.525163273146124,
+      "unit": "bp of notional",
+      "provenance": "PUBLISHED_ACADEMIC_MEASUREMENT",
+      "provenance_meaning": "a peer-reviewed measurement of someone else's orders",
+      "source": "T12 first-party measurement: median quoted half-spread 11.525 bp over 3067 CEF symbol-days, SIP quotes in [15:59:59, 16:00:00) ET, SIP quotes, median per symbol-day (p75 18.38, p90 27.25, p95 36.40, max 185.7 bp). NOT the auction rail: costs.measured_auction_leg refuses for CEFs and EDGE_SHORTLIST section 2e measured CEF closing auctions clearing $0.0-0.3 M, so every leg of this candidate crosses a continuous spread. Charged to the EXIT leg in its own component (T6)."
+    },
+    "exit_extra_slippage": {
+      "name": "exit_extra_slippage",
+      "value": "0",
+      "value_float": 0.0,
+      "unit": "bp of notional",
+      "provenance": "STRESS_LADDER",
+      "provenance_meaning": "not a measurement; a deliberately adverse rung in a sweep",
+      "source": "NOT MEASURED for CEFs. Zero is a stated LOWER BOUND."
+    },
+    "commission_per_share": {
+      "name": "commission_per_share",
+      "value": "0",
+      "value_float": 0.0,
+      "unit": "micro-dollars per share",
+      "provenance": "BROKER_SCHEDULE",
+      "provenance_meaning": "a published broker fee schedule",
+      "source": "Alpaca, $0/share."
+    },
+    "borrow_annual": {
+      "name": "borrow_annual",
+      "value": "33/10000",
+      "value_float": 0.0033,
+      "unit": "fraction of short notional per year",
+      "provenance": "VENDOR_FEED_SNAPSHOT",
+      "provenance_meaning": "a point-in-time snapshot this programme pulled from a named feed",
+      "source": "B22G tier 'etb_general_collateral': 0.33%/yr. median IBKR indicative fee across 14 ETB names in this universe. Sources: Alpaca /v2/assets borrow_status for the traded account (complete over the universe) and Interactive Brokers' shortable-securities feed for the rate. AVAILABILITY, STATED CORRECTLY (a rate cannot express it, but the earlier wording overstated it): 8 of the 52 names the ORB rule ACTUALLY screened are hard-to-borrow and NOT SHORTABLE AT ALPACA (15.4%) -- not 36 of 100, which is the size of the screen INPUT rather than of the traded universe. NOT SHORTABLE AT ALPACA IS NOT 'unborrowable at any price': 7 of the 11 hard-to-borrow names with an obtainable IBKR rate have shares AVAILABLE to borrow there, at 2.32%-259.96%/yr -- expensive, not impossible, and a COST at another broker rather than a constraint. Of the 227 short signals in the B22B sample, 39 are in names Alpaca will not short, and 38 of those 39 are LEVERAGED or INVERSE ETPs (MSTU, SOXL, SOXS, SQQQ, TSLL) -- an Alpaca PRODUCT restriction, not borrow scarcity; exactly 1 is an ordinary common stock (ONDS). A strategy with a short leg must still handle availability as a constraint rather than a cost, but the constraint is mostly 'this broker does not lend leveraged ETPs', which a universe filter or another broker removes."
+    },
+    "entry_bp": 11.525163273146124,
+    "exit_bp": 11.525163273146124,
+    "round_trip_bp": 23.050326546292247,
+    "note": "Spread and slippage are PER SIDE. round_trip_bp is entry + exit, and is the number to quote. Borrow accrues on CALENDAR days, not trading days. Price improvement is NOT modelled: the full half-spread is charged to every taker fill, which is the conservative side of the B22C uncertainty."
+  },
+  "design": {
+    "trial1": {
+      "cfg": {
+        "id": 1,
+        "family": "S1",
+        "L": 26,
+        "H": 1
+      },
+      "net": {
+        "n": 98,
+        "mean_bp": 13.923180091905518,
+        "sd_bp": 46.92354243116344,
+        "t": 2.937383745559074,
+        "sharpe_per_obs": 0.2967205664902802,
+        "ann_sharpe": 2.1396824339308544,
+        "ann_return": 0.07442431593607046,
+        "max_drawdown": -0.020616828454662173,
+        "skew": -0.05895717399690532,
+        "kurtosis_non_excess": 3.6678551255333507
+      },
+      "gross": {
+        "n": 98,
+        "mean_bp": 25.581357811195264,
+        "sd_bp": 47.107153371725815,
+        "t": 5.375882514598674,
+        "sharpe_per_obs": 0.5430461401335588,
+        "ann_sharpe": 3.915961406388698,
+        "ann_return": 0.1414334941249562,
+        "max_drawdown": -0.014645363418971713,
+        "skew": -0.053658357561824785,
+        "kurtosis_non_excess": 3.6018417038024086
+      },
+      "n_tranches": 98,
+      "mean_turnover_per_rebalance": 0.9657450076804915,
+      "mean_cost_bp_per_rebalance": 11.325594549035342,
+      "mean_n_per_leg": 30.540816326530614
+    },
+    "trial2": {
+      "cfg": {
+        "id": 2,
+        "family": "S1",
+        "L": 26,
+        "H": 4
+      },
+      "net": {
+        "n": 96,
+        "mean_bp": 15.572922052188819,
+        "sd_bp": 46.326110414628985,
+        "t": 3.2936685157105456,
+        "sharpe_per_obs": 0.33615863522336986,
+        "ann_sharpe": 2.42407439197571,
+        "ann_return": 0.08368389143661914,
+        "max_drawdown": -0.02419242681692202,
+        "skew": 0.3083533700364885,
+        "kurtosis_non_excess": 3.2893279558640764
+      },
+      "gross": {
+        "n": 96,
+        "mean_bp": 20.100900319049146,
+        "sd_bp": 46.53497539839358,
+        "t": 4.232253158463489,
+        "sharpe_per_obs": 0.431952529188251,
+        "ann_sharpe": 3.114853985109189,
+        "ann_return": 0.1094512641889478,
+        "max_drawdown": -0.018805374589772383,
+        "skew": 0.42091952184781084,
+        "kurtosis_non_excess": 3.419512043223211
+      },
+      "n_tranches": 24,
+      "mean_turnover_per_rebalance": 1.4309139784946237,
+      "mean_cost_bp_per_rebalance": 16.78023498524951,
+      "mean_n_per_leg": 30.5
+    },
+    "trial3": {
+      "cfg": {
+        "id": 3,
+        "family": "S1",
+        "L": 52,
+        "H": 1
+      },
+      "net": {
+        "n": 72,
+        "mean_bp": 12.54209158071745,
+        "sd_bp": 44.57898782552605,
+        "t": 2.387294581482578,
+        "sharpe_per_obs": 0.2813453645427053,
+        "ann_sharpe": 2.028810275945664,
+        "ann_return": 0.06680684134856318,
+        "max_drawdown": -0.01950725536704523,
+        "skew": 0.11919698315220881,
+        "kurtosis_non_excess": 4.271401244832947
+      },
+      "gross": {
+        "n": 72,
+        "mean_bp": 21.831177188956058,
+        "sd_bp": 44.88407750145523,
+        "t": 4.1271580366811556,
+        "sharpe_per_obs": 0.48639023912763385,
+        "ann_sharpe": 3.50740989411975,
+        "ann_return": 0.11950242283000612,
+        "max_drawdown": -0.016648212044950816,
+        "skew": 0.14812786705373981,
+        "kurtosis_non_excess": 4.286169226830704
+      },
+      "n_tranches": 72,
+      "mean_turnover_per_rebalance": 0.7639506859473488,
+      "mean_cost_bp_per_rebalance": 8.959462320567372,
+      "mean_n_per_leg": 30.36111111111111
+    },
+    "trial4": {
+      "cfg": {
+        "id": 4,
+        "family": "S1",
+        "L": 52,
+        "H": 4,
+        "primary": true
+      },
+      "net": {
+        "n": 72,
+        "mean_bp": 7.1446296227915385,
+        "sd_bp": 44.75618929660177,
+        "t": 1.3545432177513206,
+        "sharpe_per_obs": 0.15963444911370087,
+        "ann_sharpe": 1.1511403832197908,
+        "ann_return": 0.03730501345572668,
+        "max_drawdown": -0.022960954595816485,
+        "skew": 0.046391242650529574,
+        "kurtosis_non_excess": 3.6639189462342876
+      },
+      "gross": {
+        "n": 72,
+        "mean_bp": 10.81730390614067,
+        "sd_bp": 43.87154557930395,
+        "t": 2.0921958901204922,
+        "sharpe_per_obs": 0.24656765024580415,
+        "ann_sharpe": 1.7780246116638359,
+        "ann_return": 0.0573093553304711,
+        "max_drawdown": -0.018449823343367533,
+        "skew": 0.1290104492838601,
+        "kurtosis_non_excess": 3.609473211977392
+      },
+      "n_tranches": 18,
+      "mean_turnover_per_rebalance": 1.1402031063321385,
+      "mean_cost_bp_per_rebalance": 13.372203982711591,
+      "mean_n_per_leg": 30.444444444444443
+    },
+    "trial5": {
+      "cfg": {
+        "id": 5,
+        "family": "S2",
+        "L": null,
+        "H": 1
+      },
+      "net": {
+        "n": 124,
+        "mean_bp": 16.93228554724148,
+        "sd_bp": 48.72060275390391,
+        "t": 3.8700250293450575,
+        "sharpe_per_obs": 0.34753850712334877,
+        "ann_sharpe": 2.5061358152628816,
+        "ann_return": 0.09129289666411333,
+        "max_drawdown": -0.012756443428103337,
+        "skew": -0.0768444508378023,
+        "kurtosis_non_excess": 3.0088371652677077
+      },
+      "gross": {
+        "n": 124,
+        "mean_bp": 20.34136383798356,
+        "sd_bp": 48.90030327966387,
+        "t": 4.6321152660655915,
+        "sharpe_per_obs": 0.41597623069227274,
+        "ann_sharpe": 2.999647258270453,
+        "ann_return": 0.1107698291298822,
+        "max_drawdown": -0.01203328026359951,
+        "skew": -0.05697636843540654,
+        "kurtosis_non_excess": 3.022053458726674
+      },
+      "n_tranches": 124,
+      "mean_turnover_per_rebalance": 0.2623325312174818,
+      "mean_cost_bp_per_rebalance": 3.074776478987768,
+      "mean_n_per_leg": 30.798387096774192
+    },
+    "trial6": {
+      "cfg": {
+        "id": 6,
+        "family": "S2",
+        "L": null,
+        "H": 4
+      },
+      "net": {
+        "n": 124,
+        "mean_bp": 13.848971470821374,
+        "sd_bp": 49.54004559525976,
+        "t": 3.1129486818424312,
+        "sharpe_per_obs": 0.27955104409808035,
+        "ann_sharpe": 2.015871247210247,
+        "ann_return": 0.0739391856296796,
+        "max_drawdown": -0.016667402491743366,
+        "skew": -0.11443129221330649,
+        "kurtosis_non_excess": 2.9827438548010483
+      },
+      "gross": {
+        "n": 124,
+        "mean_bp": 15.416424647274926,
+        "sd_bp": 49.72048666704307,
+        "t": 3.452702316779492,
+        "sharpe_per_obs": 0.31006182120686304,
+        "ann_sharpe": 2.2358875898501847,
+        "ann_return": 0.08271076610711448,
+        "max_drawdown": -0.015584489550218072,
+        "skew": -0.08682585348105915,
+        "kurtosis_non_excess": 2.987942068448503
+      },
+      "n_tranches": 31,
+      "mean_turnover_per_rebalance": 0.4208398369753729,
+      "mean_cost_bp_per_rebalance": 4.932605458796961,
+      "mean_n_per_leg": 30.870967741935484
+    }
+  },
+  "heldout": {
+    "trial1": {
+      "cfg": {
+        "id": 1,
+        "family": "S1",
+        "L": 26,
+        "H": 1
+      },
+      "net": {
+        "n": 116,
+        "mean_bp": -6.139755843206416,
+        "sd_bp": 38.64666272787436,
+        "t": -1.7110712676044917,
+        "sharpe_per_obs": -0.15886897884142645,
+        "ann_sharpe": -1.1456204985867333,
+        "ann_return": -0.03180506365830671,
+        "max_drawdown": -0.11422995958242899,
+        "skew": 0.1696632456153966,
+        "kurtosis_non_excess": 4.033200681768994
+      },
+      "gross": {
+        "n": 116,
+        "mean_bp": 4.709616988981167,
+        "sd_bp": 38.74243558424103,
+        "t": 1.3092653201421587,
+        "sharpe_per_obs": 0.12156223319364212,
+        "ann_sharpe": 0.8765977298791745,
+        "ann_return": 0.02439057835982017,
+        "max_drawdown": -0.038110227288741694,
+        "skew": 0.173155551631148,
+        "kurtosis_non_excess": 4.101993105256176
+      },
+      "n_tranches": 116,
+      "mean_turnover_per_rebalance": 0.8962110678531702,
+      "mean_cost_bp_per_rebalance": 10.505655307388338
+    },
+    "trial2": {
+      "cfg": {
+        "id": 2,
+        "family": "S1",
+        "L": 26,
+        "H": 4
+      },
+      "net": {
+        "n": 116,
+        "mean_bp": 1.1648267532314571,
+        "sd_bp": 37.24923815606186,
+        "t": 0.33680066215743376,
+        "sharpe_per_obs": 0.03127115642878983,
+        "ann_sharpe": 0.2254995158941142,
+        "ann_return": 0.005715326121162656,
+        "max_drawdown": -0.02980106538062155,
+        "skew": -0.1381177631403503,
+        "kurtosis_non_excess": 4.227917401895851
+      },
+      "gross": {
+        "n": 116,
+        "mean_bp": 5.489374919116712,
+        "sd_bp": 36.43518637813156,
+        "t": 1.6226725627695313,
+        "sharpe_per_obs": 0.15066136514705578,
+        "ann_sharpe": 1.0864345545382255,
+        "ann_return": 0.028596482317283067,
+        "max_drawdown": -0.019204988283300528,
+        "skew": 0.15888923657982507,
+        "kurtosis_non_excess": 4.242072373954352
+      },
+      "n_tranches": 29,
+      "mean_turnover_per_rebalance": 1.3583147942157954,
+      "mean_cost_bp_per_rebalance": 15.923322564344039
+    },
+    "trial3": {
+      "cfg": {
+        "id": 3,
+        "family": "S1",
+        "L": 52,
+        "H": 1
+      },
+      "net": {
+        "n": 116,
+        "mean_bp": -2.5259681569825156,
+        "sd_bp": 39.684718974556134,
+        "t": -0.6855411944152133,
+        "sharpe_per_obs": -0.06365090196561655,
+        "ann_sharpe": -0.4589931815331242,
+        "ann_return": -0.013451746052356883,
+        "max_drawdown": -0.07244615848639546,
+        "skew": -0.17896060895191826,
+        "kurtosis_non_excess": 3.788885906608184
+      },
+      "gross": {
+        "n": 116,
+        "mean_bp": 6.340047268725072,
+        "sd_bp": 39.76307432057327,
+        "t": 1.7172816745430792,
+        "sharpe_per_obs": 0.1594456006497655,
+        "ann_sharpe": 1.1497785775797678,
+        "ann_return": 0.033086131731189905,
+        "max_drawdown": -0.027046221704366546,
+        "skew": -0.1802688795648661,
+        "kurtosis_non_excess": 3.8891264444681473
+      },
+      "n_tranches": 116,
+      "mean_turnover_per_rebalance": 0.7269865823136819,
+      "mean_cost_bp_per_rebalance": 8.522297900908343
+    },
+    "trial4": {
+      "cfg": {
+        "id": 4,
+        "family": "S1",
+        "L": 52,
+        "H": 4,
+        "primary": true
+      },
+      "net": {
+        "n": 116,
+        "mean_bp": -0.2711844856224008,
+        "sd_bp": 34.81601785579655,
+        "t": -0.08389087771400523,
+        "sharpe_per_obs": -0.007789072453535953,
+        "ann_sharpe": -0.05616780023905596,
+        "ann_return": -0.0017214594023534646,
+        "max_drawdown": -0.03645881417759711,
+        "skew": -0.4101825427654243,
+        "kurtosis_non_excess": 4.135921141153747
+      },
+      "gross": {
+        "n": 116,
+        "mean_bp": 3.3045586214435096,
+        "sd_bp": 34.46805480146218,
+        "t": 1.0325846871147244,
+        "sharpe_per_obs": 0.09587308133510702,
+        "ann_sharpe": 0.6913506213809159,
+        "ann_return": 0.017017895464279897,
+        "max_drawdown": -0.019262679560796303,
+        "skew": -0.16916597622584473,
+        "kurtosis_non_excess": 4.195187446832444
+      },
+      "n_tranches": 29,
+      "mean_turnover_per_rebalance": 1.1028225806451613,
+      "mean_cost_bp_per_rebalance": 12.928102329066663
+    },
+    "trial5": {
+      "cfg": {
+        "id": 5,
+        "family": "S2",
+        "L": null,
+        "H": 1
+      },
+      "net": {
+        "n": 116,
+        "mean_bp": 12.929895761669744,
+        "sd_bp": 40.56776664241334,
+        "t": 3.432755873864852,
+        "sharpe_per_obs": 0.3187233814382974,
+        "ann_sharpe": 2.298346988930098,
+        "ann_return": 0.06904828004739327,
+        "max_drawdown": -0.029997755622295674,
+        "skew": -0.0979434363635302,
+        "kurtosis_non_excess": 3.492463589470075
+      },
+      "gross": {
+        "n": 116,
+        "mean_bp": 16.547767339716383,
+        "sd_bp": 40.79989188723624,
+        "t": 4.368269139574273,
+        "sharpe_per_obs": 0.405583607560812,
+        "ann_sharpe": 2.9247049870963435,
+        "ann_return": 0.08931546900589349,
+        "max_drawdown": -0.024927229647123017,
+        "skew": -0.09980316254448075,
+        "kurtosis_non_excess": 3.5181705731922124
+      },
+      "n_tranches": 116,
+      "mean_turnover_per_rebalance": 0.27932946329254726,
+      "mean_cost_bp_per_rebalance": 3.2741540532473947
+    },
+    "trial6": {
+      "cfg": {
+        "id": 6,
+        "family": "S2",
+        "L": null,
+        "H": 4
+      },
+      "net": {
+        "n": 116,
+        "mean_bp": 14.482016154669022,
+        "sd_bp": 40.70090166327284,
+        "t": 3.8322514020789287,
+        "sharpe_per_obs": 0.35581561004426393,
+        "ann_sharpe": 2.5658228532501863,
+        "ann_return": 0.07769678919269585,
+        "max_drawdown": -0.02255285284214925,
+        "skew": -0.06578860250618726,
+        "kurtosis_non_excess": 3.098902068946797
+      },
+      "gross": {
+        "n": 116,
+        "mean_bp": 16.06146568752268,
+        "sd_bp": 40.59744005954157,
+        "t": 4.261039102199106,
+        "sharpe_per_obs": 0.3956275485342523,
+        "ann_sharpe": 2.8529108244527293,
+        "ann_return": 0.08657342396925372,
+        "max_drawdown": -0.021611208250044478,
+        "skew": -0.0428630860425598,
+        "kurtosis_non_excess": 3.244464645731713
+      },
+      "n_tranches": 29,
+      "mean_turnover_per_rebalance": 0.4216838153503893,
+      "mean_cost_bp_per_rebalance": 4.942928032217653
+    }
+  },
+  "history_gate": {
+    "heldout_weekly_observations": 117,
+    "trials": 6,
+    "sharpe_variance_across_design_trials": 0.0044823113197270574,
+    "sd_of_design_trial_sharpes": 0.06695006586798147,
+    "sigma_annualised_design_window": 0.03227414708065405,
+    "min_detectable_annualised_sharpe": 1.7449780327374458,
+    "min_detectable_annualised_sharpe_at_trials_1": 1.107763748531386,
+    "benchmark": {
+      "annual_return": 0.06,
+      "source": "Pontiff (1995) JFE 37 -- the largest clean figure in this literature, declared in T12_PREREGISTRATION.md section 3b before measurement",
+      "implied_annualised_sharpe": 1.859073141423636
+    },
+    "passes": true,
+    "heldout_weekly_observations_required": 97,
+    "years_of_weekly_history_required": 1.8653846153846154,
+    "years_available_heldout": 2.25
+  },
+  "primary_heldout": {
+    "cfg": {
+      "id": 4,
+      "family": "S1",
+      "L": 52,
+      "H": 4,
+      "primary": true
+    },
+    "net": {
+      "n": 116,
+      "mean_bp": -0.2711844856224008,
+      "sd_bp": 34.81601785579655,
+      "t": -0.08389087771400523,
+      "sharpe_per_obs": -0.007789072453535953,
+      "ann_sharpe": -0.05616780023905596,
+      "ann_return": -0.0017214594023534646,
+      "max_drawdown": -0.03645881417759711,
+      "skew": -0.4101825427654243,
+      "kurtosis_non_excess": 4.135921141153747
+    },
+    "gross": {
+      "n": 116,
+      "mean_bp": 3.3045586214435096,
+      "sd_bp": 34.46805480146218,
+      "t": 1.0325846871147244,
+      "sharpe_per_obs": 0.09587308133510702,
+      "ann_sharpe": 0.6913506213809159,
+      "ann_return": 0.017017895464279897,
+      "max_drawdown": -0.019262679560796303,
+      "skew": -0.16916597622584473,
+      "kurtosis_non_excess": 4.195187446832444
+    },
+    "dsr_trials6": {
+      "dsr": 0.15420094479385804,
+      "name": "deflated Sharpe",
+      "observed_sharpe_per_observation": -0.007789072453535953,
+      "benchmark_sharpe_per_observation": 0.08704451138391114,
+      "benchmark_basis": "expected-max Sharpe under the null",
+      "trials": 6,
+      "sharpe_variance": 0.0044823113197270574,
+      "n": 116,
+      "skew": -0.4101825427654243,
+      "kurtosis_non_excess": 4.135921141153747,
+      "z": -1.0185810814312333,
+      "passes_at_0p95": false
+    },
+    "dsr_trials1": {
+      "dsr": 0.4666632789630978,
+      "name": "probabilistic Sharpe (single trial)",
+      "observed_sharpe_per_observation": -0.007789072453535953,
+      "benchmark_sharpe_per_observation": 0.0,
+      "benchmark_basis": "zero (single trial)",
+      "trials": 1,
+      "sharpe_variance": null,
+      "n": 116,
+      "skew": -0.4101825427654243,
+      "kurtosis_non_excess": 4.135921141153747,
+      "z": -0.08366025538661596,
+      "passes_at_0p95": false
+    },
+    "dsr_trials12": {
+      "dsr": 0.10012971545865917,
+      "name": "deflated Sharpe",
+      "observed_sharpe_per_observation": -0.007789072453535953,
+      "benchmark_sharpe_per_observation": 0.11145923208268764,
+      "benchmark_basis": "expected-max Sharpe under the null",
+      "trials": 12,
+      "sharpe_variance": 0.0044823113197270574,
+      "n": 116,
+      "skew": -0.4101825427654243,
+      "kurtosis_non_excess": 4.135921141153747,
+      "z": -1.2808127888696843,
+      "passes_at_0p95": false
+    },
+    "permutation": {
+      "observed_mean_bp": 3.2460277303128913,
+      "p_right_tail": 0.053894610538946106,
+      "trials": 10000,
+      "seed": 20260817,
+      "real_dispersion_bp": 34.76429154689993,
+      "null_median_dispersion_bp": 22.80759806650207,
+      "dispersion_ratio": 1.5242416779502472,
+      "note": "Decile-label permutation. Report the dispersion ratio beside the p-value: far from 1 means the p-value is about WHICH partition, not about the mean (T10 section 5)."
+    }
+  },
+  "stress_ladder": [
+    {
+      "half_spread_bp": 0.0,
+      "label": "0",
+      "net": {
+        "n": 116,
+        "mean_bp": 2.9063680901895594,
+        "sd_bp": 34.4529245068863,
+        "t": 0.9085598032607785,
+        "sharpe_per_obs": 0.08435765996029299,
+        "ann_sharpe": 0.6083117369299837,
+        "ann_return": 0.014915142437634366,
+        "max_drawdown": -0.01981889758620481,
+        "skew": -0.17520508614192476,
+        "kurtosis_non_excess": 4.195826707395527
+      }
+    },
+    {
+      "half_spread_bp": 5.762581636573062,
+      "label": "0.5h",
+      "net": {
+        "n": 116,
+        "mean_bp": 1.3175918022835797,
+        "sd_bp": 34.52152545895995,
+        "t": 0.4110738971985293,
+        "sharpe_per_obs": 0.03816725317801978,
+        "ann_sharpe": 0.2752279767539324,
+        "ann_return": 0.006565167608280964,
+        "max_drawdown": -0.027087488820671357,
+        "skew": -0.29633922258351936,
+        "kurtosis_non_excess": 4.15043988279776
+      }
+    },
+    {
+      "half_spread_bp": 11.525163273146124,
+      "label": "h (primary)",
+      "net": {
+        "n": 116,
+        "mean_bp": -0.2711844856224008,
+        "sd_bp": 34.81601785579655,
+        "t": -0.08389087771400523,
+        "sharpe_per_obs": -0.007789072453535953,
+        "ann_sharpe": -0.05616780023905596,
+        "ann_return": -0.0017214594023534646,
+        "max_drawdown": -0.03645881417759711,
+        "skew": -0.4101825427654243,
+        "kurtosis_non_excess": 4.135921141153747
+      }
+    },
+    {
+      "half_spread_bp": 23.050326546292247,
+      "label": "2h",
+      "net": {
+        "n": 116,
+        "mean_bp": -3.4487370614343615,
+        "sd_bp": 36.056301212597056,
+        "t": -1.0301676449168473,
+        "sharpe_per_obs": -0.09564866460094552,
+        "ann_sharpe": -0.6897323292967329,
+        "ann_return": -0.01810642752085989,
+        "max_drawdown": -0.06133343971229155,
+        "skew": -0.6076160131868579,
+        "kurtosis_non_excess": 4.176488906951535
+      }
+    },
+    {
+      "half_spread_bp": 11.525163273146124,
+      "extra_slippage_bp": 5,
+      "label": "h + 5bp impact",
+      "net": {
+        "n": 116,
+        "mean_bp": -1.6497127114288526,
+        "sd_bp": 35.250295613122546,
+        "t": -0.5040510827467716,
+        "sharpe_per_obs": -0.04679996813458545,
+        "ann_sharpe": -0.33747936959865726,
+        "ann_return": -0.008860502406438098,
+        "max_drawdown": -0.04491088953321898,
+        "skew": -0.5012247038347131,
+        "kurtosis_non_excess": 4.144824597472907
+      }
+    },
+    {
+      "half_spread_bp": 11.525163273146124,
+      "extra_slippage_bp": 10,
+      "label": "h + 10bp impact",
+      "net": {
+        "n": 116,
+        "mean_bp": -3.028240937235304,
+        "sd_bp": 35.84441337868294,
+        "t": -0.909908964079845,
+        "sharpe_per_obs": -0.08448292639756888,
+        "ann_sharpe": -0.6092150460553696,
+        "ann_return": -0.01595247142684464,
+        "max_drawdown": -0.0570593351477674,
+        "skew": -0.5840590368326481,
+        "kurtosis_non_excess": 4.167749903829058
+      }
+    },
+    {
+      "half_spread_bp": 11.525163273146124,
+      "extra_slippage_bp": 25,
+      "label": "h + 25bp impact",
+      "net": {
+        "n": 116,
+        "mean_bp": -7.163825614654659,
+        "sd_bp": 38.50195044984103,
+        "t": -2.003970247416193,
+        "sharpe_per_obs": -0.18606396639535017,
+        "ann_sharpe": -1.3417263427092871,
+        "ann_return": -0.03694876890410281,
+        "max_drawdown": -0.09829399287530383,
+        "skew": -0.7814087419859055,
+        "kurtosis_non_excess": 4.253738225772443
+      }
+    },
+    {
+      "half_spread_bp": 11.525163273146124,
+      "extra_slippage_bp": 50,
+      "label": "h + 50bp impact",
+      "net": {
+        "n": 116,
+        "mean_bp": -14.056466743686917,
+        "sd_bp": 45.25378417158924,
+        "t": -3.3454170256233398,
+        "sharpe_per_obs": -0.31061417295819654,
+        "ann_sharpe": -2.2398706549732355,
+        "ann_return": -0.07102734011180911,
+        "max_drawdown": -0.16319134625606813,
+        "skew": -0.9720485962492659,
+        "kurtosis_non_excess": 4.220892716196361
+      }
+    }
+  ],
+  "frictionless_diagnostic": {
+    "net": {
+      "n": 116,
+      "mean_bp": 3.250085614988804,
+      "sd_bp": 34.46667151055397,
+      "t": 1.0156041130140738,
+      "sharpe_per_obs": 0.09429647461007663,
+      "ann_sharpe": 0.679981548604239,
+      "ann_return": 0.016729969135652834,
+      "max_drawdown": -0.0193219195089962,
+      "skew": -0.1733358576224523,
+      "kurtosis_non_excess": 4.193026954150395
+    },
+    "note": "B19P diagnostic. Not a tradeable assumption."
+  },
+  "diagnostics": {
+    "raw_cefconnect_price_series": {
+      "n": 116,
+      "mean_bp": -0.9526668146952706,
+      "sd_bp": 37.973925046121025,
+      "t": -0.2701995012204274,
+      "sharpe_per_obs": -0.025087393877199004,
+      "ann_sharpe": -0.18090776998400468,
+      "ann_return": -0.005311912196386381,
+      "max_drawdown": -0.04249608315532449,
+      "skew": -0.20536577629202582,
+      "kurtosis_non_excess": 4.140873149811122
+    },
+    "nav_return_series": {
+      "n": 116,
+      "mean_bp": -2.1793768034797063,
+      "sd_bp": 35.49213952122886,
+      "t": -0.6613466205137837,
+      "sharpe_per_obs": -0.06140449217427872,
+      "ann_sharpe": -0.4427940901563784,
+      "ann_return": -0.011591623375001747,
+      "max_drawdown": -0.05840303277731096,
+      "skew": -0.6383789169773258,
+      "kurtosis_non_excess": 4.31374499056619
+    },
+    "note": "raw_cefconnect_price ignores distributions (CEFs pay 7-8 %/yr, and the widest-discount funds distribute most), so it is the CONSERVATIVE leg; the primary uses Alpaca adjustment=all. nav_return_series is the NAV leg of the long-short book -- it is NOT tradeable and is reported only to decompose whether P&L came from the discount narrowing or from the assets."
+  },
+  "heldout_year_by_year": {
+    "2024": {
+      "n": 41,
+      "mean_bp": 3.8575787387939733,
+      "total_pct": 1.559546284466573
+    },
+    "2025": {
+      "n": 48,
+      "mean_bp": -2.6315387150531797,
+      "total_pct": -1.2734132457759006
+    },
+    "2026": {
+      "n": 27,
+      "mean_bp": -2.344602603711065,
+      "total_pct": -0.6481588016923445
+    }
+  },
+  "verdict": {
+    "verdict": "DEAD",
+    "failed_gates": [
+      "net mean <= 0",
+      "permutation p = 0.0539 >= 0.05",
+      "DSR = 0.1542 < 0.95"
+    ]
+  }
+}

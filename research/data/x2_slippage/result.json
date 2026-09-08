@@ -1,72 +1,74 @@
 {
   "instrument": "X2_FLOWSTREAK",
-  "window": "design",
-  "generated_unix": 1788290097,
-  "verdict": "POC",
-  "max_tradeable_aum_usd": 5000000,
-  "note": "design-window method check passed; the frozen SIZE/KILL verdict runs on held-out 2025-2026",
-  "n_rebalances": 10944,
-  "n_days": 456,
+  "window": "holdout",
+  "depth_window": "design",
+  "depth_is_proxy": true,
+  "generated_unix": 1788290821,
+  "verdict": "PENDING_DATA",
+  "max_tradeable_aum_usd": null,
+  "note": "depth is a design-era proxy covering only 68% of holdout turnover (2025-26 has new listings absent from 2023-24 depth; uncovered names hit the 100 bp cap and fabricate cost). Download held-out bookDepth for the real verdict.",
+  "n_rebalances": 14208,
+  "n_days": 592,
   "n_names_median": 20,
-  "gross_mean_R_daily": 0.00233,
-  "gross_t": 5.15,
+  "gross_mean_R_daily": 0.00271,
+  "gross_t": 4.44,
   "breakeven_bp": 17.9,
   "capacity_curve": [
     {
       "aum_usd": 100000,
-      "cost_bp_per_side": 6.98,
-      "net_mean_R": 0.00137,
-      "t": 3.01,
-      "n_days": 456
+      "cost_bp_per_side": 37.23,
+      "net_mean_R": -0.00271,
+      "t": -4.42,
+      "n_days": 592
     },
     {
       "aum_usd": 250000,
-      "cost_bp_per_side": 6.99,
-      "net_mean_R": 0.00136,
-      "t": 3.0,
-      "n_days": 456
+      "cost_bp_per_side": 37.24,
+      "net_mean_R": -0.00271,
+      "t": -4.42,
+      "n_days": 592
     },
     {
       "aum_usd": 500000,
-      "cost_bp_per_side": 7.01,
-      "net_mean_R": 0.00136,
-      "t": 3.0,
-      "n_days": 456
+      "cost_bp_per_side": 37.25,
+      "net_mean_R": -0.00271,
+      "t": -4.42,
+      "n_days": 592
     },
     {
       "aum_usd": 1000000,
-      "cost_bp_per_side": 7.05,
-      "net_mean_R": 0.00136,
-      "t": 2.99,
-      "n_days": 456
+      "cost_bp_per_side": 37.27,
+      "net_mean_R": -0.00271,
+      "t": -4.43,
+      "n_days": 592
     },
     {
       "aum_usd": 2500000,
-      "cost_bp_per_side": 7.16,
-      "net_mean_R": 0.00134,
-      "t": 2.95,
-      "n_days": 456
+      "cost_bp_per_side": 37.34,
+      "net_mean_R": -0.00272,
+      "t": -4.44,
+      "n_days": 592
     },
     {
       "aum_usd": 5000000,
-      "cost_bp_per_side": 7.35,
-      "net_mean_R": 0.00132,
-      "t": 2.9,
-      "n_days": 456
+      "cost_bp_per_side": 37.46,
+      "net_mean_R": -0.00274,
+      "t": -4.47,
+      "n_days": 592
     }
   ],
   "per_side_cost_components": {
-    "slippage_bp": 1.99,
+    "slippage_bp": 32.24,
     "fee_bp": 5.0,
     "half_spread_bp": null
   },
   "coverage": {
-    "names_with_depth": 89,
-    "names_active": 89,
-    "frac_rebalance_notional_covered": 0.9803
+    "names_with_depth": 60,
+    "names_active": 100,
+    "frac_rebalance_notional_covered": 0.6778
   },
   "caveats": [
     "half-spread/adverse-selection NOT in +-1% bookDepth -> reported 0 (LOWER BOUND); needs aggTrades/L2",
-    "design-window PoC is a method check, not the frozen verdict"
+    "depth is a DESIGN-era proxy (held-out bookDepth not yet downloaded); depth is stable for the majors carrying most turnover, but the rigorous run uses held-out depth"
   ]
 }

@@ -1,0 +1,135 @@
+{
+ "T3_control_design": {
+  "t3_net_sharpe": -0.351,
+  "t3_gross_sharpe": 1.3249,
+  "c2_net_sharpe": 1.6675,
+  "corr_c2_t3": 0.188,
+  "c2_net_sharpe_orthogonal_to_t3": 1.765,
+  "c2_mean_bp": 1.719,
+  "c2_orth_mean_bp": 1.787
+ },
+ "T3_control_holdout": {
+  "t3_net_sharpe": 0.4314,
+  "t3_gross_sharpe": 1.8301,
+  "c2_net_sharpe": 0.9605,
+  "corr_c2_t3": -0.0722,
+  "c2_net_sharpe_orthogonal_to_t3": 0.9942,
+  "c2_mean_bp": 1.453,
+  "c2_orth_mean_bp": 1.5
+ },
+ "C5_AUCT_RESID_OPEN_TO_CLOSE": {
+  "design": {
+   "net_sharpe": -3.7569,
+   "gross_sharpe": -1.7991,
+   "gross_bp": -2.457,
+   "turn": 1.941
+  },
+  "holdout": {
+   "net_sharpe": -2.689,
+   "gross_sharpe": -1.0525,
+   "gross_bp": -1.775,
+   "turn": 2.0
+  }
+ },
+ "C6_AUCT_RESID_OPEN_TO_OPEN": {
+  "design": {
+   "net_sharpe": -0.9832,
+   "gross_sharpe": 0.5728,
+   "gross_bp": 0.985,
+   "turn": 1.941
+  },
+  "holdout": {
+   "net_sharpe": -1.0654,
+   "gross_sharpe": 0.1007,
+   "gross_bp": 0.238,
+   "turn": 2.0
+  }
+ },
+ "C2_cost_ladder_net_sharpe": {
+  "0bp_per_side": {
+   "design": 4.168,
+   "holdout": 2.719
+  },
+  "1bp_per_side": {
+   "design": 2.288,
+   "holdout": 1.397
+  },
+  "1.38bp_per_side": {
+   "design": 1.573,
+   "holdout": 0.895
+  },
+  "2bp_per_side": {
+   "design": 0.405,
+   "holdout": 0.075
+  },
+  "3bp_per_side": {
+   "design": -1.478,
+   "holdout": -1.246
+  },
+  "5bp_per_side": {
+   "design": -5.237,
+   "holdout": -3.89
+  },
+  "8bp_per_side": {
+   "design": -10.819,
+   "holdout": -7.855
+  },
+  "12bp_per_side": {
+   "design": -18.063,
+   "holdout": -13.143
+  }
+ },
+ "C2_note": "entry price is the closing auction print that the signal is measured FROM, so the only real entry is the post-close session; the ladder above is what that entry has to beat",
+ "C2_by_year_net": {
+  "2021": {
+   "net_sharpe": 0.729,
+   "mean_bp": 0.592
+  },
+  "2022": {
+   "net_sharpe": 0.841,
+   "mean_bp": 1.102
+  },
+  "2023": {
+   "net_sharpe": 3.129,
+   "mean_bp": 2.908
+  },
+  "2024": {
+   "net_sharpe": 2.131,
+   "mean_bp": 2.511
+  },
+  "2025": {
+   "net_sharpe": 1.334,
+   "mean_bp": 2.108
+  },
+  "2026": {
+   "net_sharpe": -0.128,
+   "mean_bp": -0.197
+  }
+ },
+ "C2_liquidity_split": {
+  "design_liquid_half": {
+   "net_sharpe": 1.751,
+   "gross_sharpe": 3.421,
+   "gross_bp": 4.169,
+   "median_abs_disloc_bp": 1.9
+  },
+  "design_illiquid_half": {
+   "net_sharpe": 1.059,
+   "gross_sharpe": 3.843,
+   "gross_bp": 4.665,
+   "median_abs_disloc_bp": 2.15
+  },
+  "holdout_liquid_half": {
+   "net_sharpe": 0.623,
+   "gross_sharpe": 1.938,
+   "gross_bp": 3.094,
+   "median_abs_disloc_bp": 1.9
+  },
+  "holdout_illiquid_half": {
+   "net_sharpe": 1.09,
+   "gross_sharpe": 3.031,
+   "gross_bp": 5.451,
+   "median_abs_disloc_bp": 2.15
+  }
+ }
+}

@@ -1,0 +1,17 @@
+[
+ {
+  "venue": "polymarket",
+  "market_id": "2125867",
+  "question": "Will Indiana use a new congressional map for the 2026 United States midterm elections?",
+  "category": "politics/elections/redistricting",
+  "p_market": 0.045,
+  "q_agent": 0.012,
+  "yes_bid": 0.04,
+  "yes_ask": 0.05,
+  "spread": 0.01,
+  "close_time": "2026-11-03T00:00:00Z",
+  "confidence": 0.6,
+  "event_refs": ["https://polymarket.com/event/which-states-will-use-new-congressional-maps-in-the-midterms"],
+  "thesis": "Structural longshot-bias read, not live news. The Indiana Senate voted down the mid-decade congressional redistricting push in December 2025 (31-19 against), ending the only legislative path to a new map; Indiana's 2026 candidate filing closed in February and its primary was held on 5 May 2026 under the existing 2021 map. Resolution requires a map that is enacted AND in effect for the 2026 midterm -- adopting a new map after the primary has already been run on the old districts would require re-running nominations, which has no precedent and no live proposal. The only YES paths are (a) a special session reversing the Senate vote after the primary plus a court allowing a post-primary map swap, or (b) a resolver counting something other than a genuinely new enacted map. I price that residual at ~1.2%; the market's 4.5% is the usual 3-5c floor that dead tails carry on Polymarket (same family as the frozen aliens/Greenland/impeachment legs). Kill: any credible report of an Indiana special session on redistricting before 3 Nov 2026 invalidates the thesis."
+ }
+]

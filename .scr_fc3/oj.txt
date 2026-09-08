@@ -1,0 +1,33 @@
+H=5 rows=6615 t=43.0
+H=15 rows=13098 t=72.5
+H=30 rows=19368 t=96.3
+H=60 rows=25371 t=111.8
+H=120 rows=31140 t=126.1
+H=240 rows=36570 t=140.4
+
+cells with both sides eligible: 36570   MIN_MCAP=2000
+train mean of cell means -0.2334 | validate -0.2462
+frac train>0 0.0036 | frac validate>0 0.0035 | frac BOTH>0 0.0001
+best validate mean overall +0.0914 | best train +0.0698
+corr(train,validate) across cells = 0.833
+cells positive on BOTH: 2
+  T+0.0207 V+0.0246(med+0.0530) vn=88 vk=26 ctrlT+0.1729 ctrlV+0.1718 | H=240 tp25 add_dn25 ath_ge90 b60_3p
+  T+0.0069 V+0.0059(med+0.0042) vn=153 vk=26 ctrlT+0.1093 ctrlV+0.1146 | H=5 tp25 add_dn25 ath_ge90 b60_3p
+
+top validate cells irrespective of train sign:
+  T-0.0406 V+0.0914 vn=153 vk=29 | H=5 tp100 add_dn25 mc_2k_5k b60_1p
+  T-0.0843 V+0.0907 vn=75 vk=29 | H=30 tp100 add_dn25 mc_2k_5k b60_1p
+  T-0.0408 V+0.0840 vn=160 vk=30 | H=5 tp100 add_dn25 mc_2k_5k np2p
+  T-0.0607 V+0.0796 vn=181 vk=34 | H=5 tp100 add_dn25 mc_2k_5k np1p
+  T-0.0558 V+0.0789 vn=181 vk=34 | H=5 tp100 add_up25 mc_2k_5k np1p
+  T-0.0402 V+0.0773 vn=154 vk=30 | H=5 tp100 add_dn25 mc_2k_5k rec_lt120
+  T-0.0436 V+0.0765 vn=153 vk=29 | H=5 tp100 add_up25 mc_2k_5k b60_1p
+  T-0.1027 V+0.0761 vn=105 vk=29 | H=15 tp100 add_dn25 mc_2k_5k b60_1p
+  T-0.0473 V+0.0757 vn=330 vk=52 | H=5 tp100 add_dn25 mc_2k_5k dlen151
+  T-0.0440 V+0.0725 vn=160 vk=30 | H=5 tp100 add_up25 mc_2k_5k np2p
+  T-0.1116 V+0.0711 vn=87 vk=29 | H=60 tp100 add_dn25 mc_2k_5k b60_1p
+  T-0.0925 V+0.0710 vn=76 vk=30 | H=30 tp100 add_dn25 mc_2k_5k rec_lt120
+  T-0.0472 V+0.0703 vn=149 vk=26 | H=5 tp100 add_dn25 mc_2k_5k np3p
+  T-0.0519 V+0.0681 vn=149 vk=26 | H=5 tp100 add_up25 mc_2k_5k np3p
+  T-0.0436 V+0.0669 vn=154 vk=30 | H=5 tp100 add_up25 mc_2k_5k rec_lt120
+elapsed 140.4711401462555

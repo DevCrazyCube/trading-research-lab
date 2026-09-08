@@ -1,0 +1,26 @@
+tables [('metadata',), ('raw_transaction',), ('raw_block_signatures',), ('transaction_coordinate',), ('raw_boundary_response',), ('program_version',), ('instruction',), ('reserve_observation',), ('classification_failure',), ('sqlite_sequence',)]
+-- metadata ['key', 'value']
+   n= 36
+-- raw_transaction ['signature', 'method', 'params_json', 'received_at_unix', 'response_sha256', 'raw_zlib']
+   n= 326509
+-- raw_block_signatures ['slot', 'method', 'params_json', 'received_at_unix', 'response_sha256', 'raw_zlib']
+   n= 113804
+-- transaction_coordinate ['signature', 'slot', 'transaction_index']
+   n= 326509
+-- raw_boundary_response ['request_key', 'program_id', 'method', 'params_json', 'received_at_unix', 'response_sha256', 'raw_zlib']
+   n= 4
+-- program_version ['program_id', 'from_slot', 'to_slot', 'idl_path', 'idl_sha256', 'deploy_slot', 'evidence_key', 'coverage']
+   n= 2
+-- instruction ['slot', 'transaction_index', 'outer_index', 'inner_index', 'signature', 'program_id', 'discriminator', 'idl_name', 'target', 'accounts_json', 'data_len']
+   n= 4461142
+-- reserve_observation ['slot', 'transaction_index', 'outer_index', 'inner_index', 'bonding_curve', 'virtual_quote_before', 'virtual_token_before', 'real_quote_before', 'real_token_before', 'virtual_quote_after', 'virtual_token_after', 'real_quote_after', 'real_token_after', 'evidence']
+   n= 333888
+-- classification_failure ['id', 'signature', 'slot', 'transaction_index', 'outer_index', 'inner_index', 'program_id', 'discriminator', 'reason', 'context_json', 'category']
+   n= 0
+-- sqlite_sequence ['name', 'seq']
+   n= 0
+indexes [('sqlite_autoindex_metadata_1', 'metadata', None), ('sqlite_autoindex_raw_transaction_1', 'raw_transaction', None), ('sqlite_autoindex_transaction_coordinate_1', 'transaction_coordinate', None), ('sqlite_autoindex_transaction_coordinate_2', 'transaction_coordinate', None), ('sqlite_autoindex_raw_boundary_response_1', 'raw_boundary_response', None), ('sqlite_autoindex_program_version_1', 'program_version', None), ('sqlite_autoindex_instruction_1', 'instruction', None), ('sqlite_autoindex_reserve_observation_1', 'reserve_observation', None), ('instruction_signature', 'instruction', 'CREATE INDEX instruction_signature ON instruction(signature)'), ('instruction_program', 'instruction', 'CREATE INDEX instruction_program ON instruction(program_id)')]
+ro sample [(435569222, 989, 0, -1, 'E33k9N3ZUrXE1iLBwvgacrxdmwTfbLALqQ56gJBzWrhP', None, None, None, None, 30000000000, 1073000000000000, 0, 793100000000000, '{"chain_check":"anchor","event_inner_index":14,"event_outer_index":0,"kind":"anchor_cpi:CreateEvent"}'), (435569242, 433, 2, -1, '6UQTUdicTMbXEQxu2Lj3rFbWwuaucShnnJh7xkr64uPz', None, None, None, None, 30000000000, 1073000000000000, 0, 793100000000000, '{"chain_check":"anchor","event_inner_index":14,"event_outer_index":2,"kind":"anchor_cpi:CreateEvent"}')]
+ins sample [(435569222, 989, 0, -1, 'GYJCSS74x6EPkZqTXjpU25VJNvwMKQ9VkGcEHjkjdF2bu7K3Ma3SBbuDq36UFSmpm8q2LKpGhmhmmRGCyWkQPER', '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P', 'd6904cec5f8b31b4', 'create_v2', 1, '["8TPKwc8adA9uxVRSyW1FGXgacg184bnZKssDGbh9pump","TSLvdd1pWpHVjahSpsvCXUbgwsL3JAcvokwaKt1eokM","E33k9N3ZUrXE1iLBwvgacrxdmwTfbLALqQ56gJBzWrhP","4xdQ2maz3QEAZEtTK93FutyUqPnT2Lr2uptdi3PmNScY","4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf","AJNaSsbH1tB4aVM8NXtXZ6c5cCzVV2C3yJrDJBjfqvQ2","11111111111111111111111111111111","TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb","ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL","MAyhSmzXzV1pTf7LsNkrNwkWKTo4ougAJ1PPg47MD4e","13ec7XdrjF3h3YcqBTFDSReRcUFwbCnJaAQspM4j6DDJ","BwWK17cbHxwWBKZkUYvzxLcNQ1YVyaFezduWbtm2de6s","4FSkpU2ZJQdu8KuA3e1G4Lnfg3VaBPi5A3Bz9tjxtrZv","6D991etpou3dMQjwm2Hth1zGH68Vg9ad39S5W6eCq7Z3","Ce6TQqeHC9p8KetsN6JsjHK7UTZk7nasjjnr7XxXp9F1","6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"]', 136)]
+complete dist for ohlcv mints [(1, 387)]
+creator dupes (286, 387)

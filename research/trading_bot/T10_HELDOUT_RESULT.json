@@ -1,0 +1,268 @@
+{
+  "chosen": {
+    "cfg": {
+      "K": 63,
+      "cut": 0.1,
+      "top_n": 500
+    },
+    "family": "B",
+    "trial": "B3"
+  },
+  "diagnostics": {
+    "ew500_intraday_leg": {
+      "ann_return": 0.023822594332902902,
+      "ann_sharpe": 0.22810969577104767,
+      "kurtosis_non_excess": 11.432399425721579,
+      "label": "EW500 intraday",
+      "max_drawdown": -0.16562424985421054,
+      "mean_bp": 1.4488839103880273,
+      "n": 1140,
+      "sd_bp": 99.87719542878312,
+      "sharpe_per_obs": 0.014506653938046808,
+      "skew": 0.5585483782015305,
+      "t": 0.4898010102737681
+    },
+    "ew500_overnight_leg": {
+      "ann_return": 0.07153212503703577,
+      "ann_sharpe": 0.6696478218053838,
+      "kurtosis_non_excess": 6.437110778826791,
+      "label": "EW500 overnight",
+      "max_drawdown": -0.2094204389380787,
+      "mean_bp": 3.0514064153142657,
+      "n": 1140,
+      "sd_bp": 71.65229228754364,
+      "sharpe_per_obs": 0.04258630558627272,
+      "skew": -0.2997368388173894,
+      "t": 1.4378791683502616
+    },
+    "spy_intraday_leg": {
+      "ann_return": 0.03154199834384719,
+      "ann_sharpe": 0.28378782898492305,
+      "kurtosis_non_excess": 23.699584188425842,
+      "label": "SPY intraday",
+      "max_drawdown": -0.1630958350598748,
+      "mean_bp": 1.6915150704750965,
+      "n": 1055,
+      "sd_bp": 93.7256800506873,
+      "sharpe_per_obs": 0.018047509173156354,
+      "skew": 1.3410794772274166,
+      "t": 0.5861968778999908
+    },
+    "spy_overnight_leg": {
+      "ann_return": 0.07288405064453496,
+      "ann_sharpe": 0.7238983224599943,
+      "kurtosis_non_excess": 8.629973112210344,
+      "label": "SPY overnight",
+      "max_drawdown": -0.1536125186314996,
+      "mean_bp": 3.067639232917104,
+      "n": 1055,
+      "sd_bp": 66.63512360162503,
+      "sharpe_per_obs": 0.04603637041715179,
+      "skew": -0.25988559513162135,
+      "t": 1.495296461659157
+    }
+  },
+  "dsr_trials_24": {
+    "benchmark_basis": "expected-max Sharpe under the null",
+    "benchmark_sharpe_per_observation": 0.03178046474605858,
+    "dsr": 0.2769765690208615,
+    "kurtosis_non_excess": 17.53479549776668,
+    "n": 1140,
+    "name": "deflated Sharpe",
+    "observed_sharpe_per_observation": 0.014045375441977299,
+    "passes_at_0p95": false,
+    "sharpe_variance": 0.00025768529950659987,
+    "skew": -1.562075406233279,
+    "trials": 24,
+    "z": -0.5918468642051609
+  },
+  "dsr_trials_8": {
+    "benchmark_basis": "expected-max Sharpe under the null",
+    "benchmark_sharpe_per_observation": 0.023420939056332007,
+    "dsr": 0.37718713347685584,
+    "kurtosis_non_excess": 17.53479549776668,
+    "n": 1140,
+    "name": "deflated Sharpe",
+    "observed_sharpe_per_observation": 0.014045375441977299,
+    "passes_at_0p95": false,
+    "sharpe_variance": 0.00025768529950659987,
+    "skew": -1.562075406233279,
+    "trials": 8,
+    "z": -0.3128767963990405
+  },
+  "frozen_config_sha256": null,
+  "ladder": {
+    "0.5h = 0.715 bp half-spread on EVERY leg": {
+      "ann_return": -0.04684567164539377,
+      "ann_sharpe": -0.20531802714639377,
+      "kurtosis_non_excess": 17.53477831488726,
+      "label": "0.5h = 0.715 bp half-spread on EVERY leg",
+      "max_drawdown": -0.28070561637866054,
+      "mean_bp": -1.3774890534211024,
+      "n": 1140,
+      "sd_bp": 105.49638257457087,
+      "sharpe_per_obs": -0.013057215989822346,
+      "skew": -1.5620831584458295,
+      "t": -0.4408623525790726
+    },
+    "1.0h = 1.430 bp half-spread on EVERY leg": {
+      "ann_return": -0.11192880779307357,
+      "ann_sharpe": -0.6314911617360652,
+      "kurtosis_non_excess": 17.534758311619555,
+      "label": "1.0h = 1.430 bp half-spread on EVERY leg",
+      "max_drawdown": -0.4780747443860631,
+      "mean_bp": -4.236712330625898,
+      "n": 1140,
+      "sd_bp": 105.49653474057591,
+      "sharpe_per_obs": -0.04015972980576375,
+      "skew": -1.5620906785579114,
+      "t": -1.3559485402484945
+    },
+    "2.0h = 2.860 bp half-spread on EVERY leg": {
+      "ann_return": -0.22911335098925045,
+      "ann_sharpe": -1.483833562507522,
+      "kurtosis_non_excess": 17.534709848742878,
+      "label": "2.0h = 2.860 bp half-spread on EVERY leg",
+      "max_drawdown": -0.7252789366819851,
+      "mean_bp": -9.95515888503548,
+      "n": 1140,
+      "sd_bp": 105.49685188428167,
+      "sharpe_per_obs": -0.09436451142594458,
+      "skew": -1.5621050159367398,
+      "t": -3.1861126092762695
+    },
+    "4.0h = 5.720 bp half-spread on EVERY leg": {
+      "ann_return": -0.41927520419167086,
+      "ann_sharpe": -3.1885014414779995,
+      "kurtosis_non_excess": 17.534579133983364,
+      "label": "4.0h = 5.720 bp half-spread on EVERY leg",
+      "max_drawdown": -0.9239890128707771,
+      "mean_bp": -21.392051993854643,
+      "n": 1140,
+      "sd_bp": 105.49753741792568,
+      "sharpe_per_obs": -0.202772998473989,
+      "skew": -1.5621308335155015,
+      "t": -6.8464044108970725
+    },
+    "PRIMARY: M0 auction rail + SEC31 + TAF + borrow": {
+      "ann_return": 0.02298645094044427,
+      "ann_sharpe": 0.22085632791285575,
+      "kurtosis_non_excess": 17.53479549776668,
+      "label": "PRIMARY: M0 auction rail + SEC31 + TAF + borrow",
+      "max_drawdown": -0.19126603404838827,
+      "mean_bp": 1.4817342237836895,
+      "n": 1140,
+      "sd_bp": 105.49623467915585,
+      "sharpe_per_obs": 0.014045375441977299,
+      "skew": -1.562075406233279,
+      "t": 0.4742264557033411
+    },
+    "frictionless (B19P diagnostic: every cost zero)": {
+      "ann_return": 0.04274518128414373,
+      "ann_sharpe": 0.3361899128683168,
+      "kurtosis_non_excess": 17.53392941960916,
+      "label": "frictionless (B19P diagnostic: every cost zero)",
+      "max_drawdown": -0.18337479875363538,
+      "mean_bp": 2.2554797232630346,
+      "n": 1140,
+      "sd_bp": 105.49472465022495,
+      "sharpe_per_obs": 0.021380023794945514,
+      "skew": -1.5620233191979673,
+      "t": 0.721872686779724
+    }
+  },
+  "mean_cost_bp": 0.7813994202521729,
+  "mean_sold_notional_per_session": 1.9994568372061499,
+  "mean_traded_notional_per_session": 3.998913674412297,
+  "obs_per_year": 247.25950118764848,
+  "panel_counts": {
+    "dropped": {
+      "session_early_close": 42,
+      "symday_corporate_action": 57253,
+      "symday_missing_print": 4645
+    },
+    "first": "2016-02-01",
+    "last": "2026-08-14",
+    "sessions_design": 1468,
+    "sessions_kept": 2608,
+    "sessions_test": 1140,
+    "spy_sessions_design": 1403,
+    "spy_sessions_test": 1055,
+    "symbol_days_design": 705838,
+    "symbol_days_test": 536264
+  },
+  "permutation": {
+    "cost_mean_subtracted_from_both_sides": 7.813994202521729e-05,
+    "instrument": "cross-sectional label permutation (which name held which rank)",
+    "null_mean": 3.55972809439652e-09,
+    "null_p95": 0.00013236872209641543,
+    "null_sd": 8.057183952380866e-05,
+    "observed_mean": 0.00022631336440358623,
+    "p_right_tail": 0.001999800019998,
+    "seed": 20260817,
+    "trials": 10000
+  },
+  "power": {
+    "benchmark_B22F_ann_sharpe": 0.3821661451160974,
+    "benchmark_design_ann_sharpe": 0.9029190354204258,
+    "mde_annualised_sharpe_80pct_power": 1.30401353766489,
+    "n_test": 1140,
+    "obs_per_year": 247.25950118764848,
+    "underpowered": true
+  },
+  "preregistration_sha256": "7f66195125718298c5eb545ae936e9bac89ca537482009b2e8e531a75bbb6d99",
+  "primary_gross": {
+    "ann_return": 0.042942517832866844,
+    "ann_sharpe": 0.33733076717483057,
+    "kurtosis_non_excess": 17.533929460267082,
+    "label": "gross (costs excluded, regulatory still off)",
+    "max_drawdown": -0.18329714002891395,
+    "mean_bp": 2.2631336440358623,
+    "n": 1140,
+    "sd_bp": 105.49472426229276,
+    "sharpe_per_obs": 0.021452576513769604,
+    "skew": -1.5620232980207536,
+    "t": 0.7243223485094319
+  },
+  "primary_net": {
+    "ann_return": 0.02298645094044427,
+    "ann_sharpe": 0.22085632791285575,
+    "kurtosis_non_excess": 17.53479549776668,
+    "label": "PRIMARY: M0 auction rail + SEC31 + TAF + borrow",
+    "max_drawdown": -0.19126603404838827,
+    "mean_bp": 1.4817342237836895,
+    "n": 1140,
+    "sd_bp": 105.49623467915585,
+    "sharpe_per_obs": 0.014045375441977299,
+    "skew": -1.562075406233279,
+    "t": 0.4742264557033411
+  },
+  "run_utc": "2026-08-17T09:22:23Z",
+  "years": {
+    "2022": {
+      "mean_bp": -2.2796365485439645,
+      "n": 249,
+      "t": -0.3079284019090175
+    },
+    "2023": {
+      "mean_bp": 2.209861412516149,
+      "n": 246,
+      "t": 0.5652369978574988
+    },
+    "2024": {
+      "mean_bp": 5.871727929092594,
+      "n": 246,
+      "t": 0.9540567585950075
+    },
+    "2025": {
+      "mean_bp": -0.3053306228862815,
+      "n": 244,
+      "t": -0.03937428177425536
+    },
+    "2026": {
+      "mean_bp": 2.214427159028096,
+      "n": 155,
+      "t": 0.21580972145343916
+    }
+  }
+}

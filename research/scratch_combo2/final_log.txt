@@ -1,0 +1,44 @@
+thresholds: body Q2 = (-0.4358, 0.2488];  hilopos D1 >= 0.9999
+thresholds: rvol Q1 = (0.00658, 0.02394];  retlife Q2 = (-0.4563, 0.0856]
+==========================================================================================
+CANDIDATE: body Q2 & hilopos D1
+  TRAIN mean  0.0404 med  0.0305 n 64 clusters 13 res 1.000
+    per-mint means sorted: [-0.503, -0.246, -0.178, 0.001, 0.018, 0.026, 0.031, 0.042, 0.063, 0.115, 0.141, 0.186, 0.831]
+    leave-one-mint-out mean: min -0.0255 max  0.0857  (drop worst-driver mint -> -0.0255)
+    frac of mints with positive mean: 0.769 ; top-1 mint contributes 158.2% of total
+    trimmed(10%) mean  0.0180
+  VALID mean  0.0610 med -0.0039 n 70 clusters 21 res 0.971
+    per-mint means sorted: [-0.122, -0.097, -0.09, -0.059, -0.026, -0.024, -0.02, -0.02, -0.019, -0.008, -0.004, 0.007, 0.009, 0.01, 0.021, 0.066, 0.106, 0.159, 0.167, 0.194, 1.031]
+    leave-one-mint-out mean: min  0.0125 max  0.0701  (drop worst-driver mint ->  0.0125)
+    frac of mints with positive mean: 0.476 ; top-1 mint contributes 80.5% of total
+    trimmed(10%) mean  0.0161
+  VALID early-half mean  0.0459 n 35 cl 12
+  VALID late-half mean  0.0571 n 35 cl 13
+  leg-only body Q2        TRAIN mean -0.2013 n   866 cl  120
+  leg-only body Q2        VALID mean -0.1617 n  1127 cl  127
+  leg-only hilopos D1     TRAIN mean -0.1302 n   757 cl  118
+  leg-only hilopos D1     VALID mean -0.1662 n  1020 cl  151
+==========================================================================================
+CANDIDATE: rvol Q1 & retlife Q2
+  TRAIN mean  0.1221 med  0.1006 n 107 clusters 15 res 0.981
+    per-mint means sorted: [-0.073, -0.054, -0.021, -0.017, -0.002, 0.045, 0.056, 0.101, 0.103, 0.109, 0.11, 0.201, 0.23, 0.245, 0.8]
+    leave-one-mint-out mean: min  0.0737 max  0.1360  (drop worst-driver mint ->  0.0737)
+    frac of mints with positive mean: 0.667 ; top-1 mint contributes 43.6% of total
+    trimmed(10%) mean  0.0850
+  VALID mean  0.0213 med -0.0041 n 229 clusters 22 res 0.996
+    per-mint means sorted: [-0.155, -0.113, -0.106, -0.074, -0.059, -0.049, -0.046, -0.034, -0.017, -0.012, -0.008, -0.0, 0.016, 0.019, 0.025, 0.066, 0.154, 0.155, 0.162, 0.171, 0.175, 0.198]
+    leave-one-mint-out mean: min  0.0129 max  0.0297  (drop worst-driver mint ->  0.0129)
+    frac of mints with positive mean: 0.455 ; top-1 mint contributes 42.3% of total
+    trimmed(10%) mean  0.0201
+  VALID early-half mean  0.0210 n 115 cl 17
+  VALID late-half mean  0.0127 n 114 cl 11
+  leg-only rvol Q1        TRAIN mean -0.0854 n   557 cl   72
+  leg-only rvol Q1        VALID mean -0.0698 n   761 cl   87
+  leg-only retlife Q2     TRAIN mean -0.3020 n   414 cl   99
+  leg-only retlife Q2     VALID mean -0.2355 n   673 cl  126
+==========================================================================================
+PERMUTATION TEST (validate): shuffle signal times within mint, same trade count per mint
+  body Q2 & hilopos D1     obs  0.0610 | null mean -0.0241 sd 0.0485 p95  0.0535 p99  0.1111 | one-sided p = 0.0395
+     -> with 8779 cells tested, expected cells this extreme by chance: 347
+  rvol Q1 & retlife Q2     obs  0.0213 | null mean -0.0231 sd 0.0426 p95  0.0412 p99  0.0626 | one-sided p = 0.1440
+     -> with 8779 cells tested, expected cells this extreme by chance: 1264

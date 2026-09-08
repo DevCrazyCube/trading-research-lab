@@ -1,0 +1,7 @@
+04:36:39
+A done 04:34:48
+surface done 04:35:09
+--B log--
+B bar x bar done kept=13413 swept=26424 t=77.3
+--C log--
+tail: kan 'sweepC.log' niet openen om te lezen: Bestand of map bestaat niet

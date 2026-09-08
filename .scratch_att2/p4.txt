@@ -1,0 +1,21 @@
+file end ts 1788490595317
+n h12 series 70
+avail vs obs (minutes): showing gap = avail-obs
+ gap min/p25/med/p75/max [0.0, 0.0, 0.0, 0.0, 1.5]
+ series where gap > 5m (i.e. TRULY stopped early): 0
+ series where gap > 20m: 0
+avail horizon distribution: [18.0, 30.0, 33.0, 44.0, 44.0, 45.0, 48.0, 50.0, 50.0, 80.0, 86.0, 86.0, 86.0, 98.0, 98.0, 104.0, 104.0, 104.0, 115.0, 115.0, 115.0, 115.0, 130.0, 133.0, 137.0, 139.0, 142.0, 148.0, 163.0, 166.0, 169.0, 177.0, 187.0, 196.0, 196.0, 219.0, 220.0, 222.0, 225.0, 226.0, 237.0, 238.0, 247.0, 253.0, 256.0, 261.0, 261.0, 262.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0, 265.0]
+H=5m: calendar-eligible=70 (h1=37,h2=33) with-data=70 resolution=100.0%
+H=15m: calendar-eligible=70 (h1=37,h2=33) with-data=70 resolution=100.0%
+H=30m: calendar-eligible=69 (h1=37,h2=32) with-data=69 resolution=100.0%
+H=60m: calendar-eligible=61 (h1=31,h2=30) with-data=61 resolution=100.0%
+H=120m: calendar-eligible=48 (h1=25,h2=23) with-data=48 resolution=100.0%
+H=180m: calendar-eligible=38 (h1=20,h2=18) with-data=38 resolution=100.0%
+H=240m: calendar-eligible=28 (h1=17,h2=11) with-data=28 resolution=100.0%
+--- event metadata for h12 ---
+joined events 70 of 70
+feed Counter({'token-profiles/latest/v1': 49, 'token-boosts/latest/v1': 13, 'token-boosts/top/v1': 8})
+mcap n 70 min/p25/med/p75/max [2045, 9447, 21673, 49101, 2051550]
+liq n 70 quantiles [0, 0, 2071, 19236, 259462]
+age_h n 70 quantiles [0.02, 0.14, 0.34, 6.03, 3692.98]
+total(paid) values Counter({None: 49, 100: 8, 10: 7, 30: 3, 50: 2, 500: 1})

@@ -1,0 +1,38 @@
+
+=== R8[up_min=3 & density15=1]  VAL n=55 k=18 mean=+0.1347 med=+0.0457 res=1.000
+  top mints by per-mint mean:
+    FQmF2CL24Fnc8aGJmnJz9LPNqiqpNJTdqQuCftjEpump   trades=1 mean=+1.2645
+    BSpQndWVfsCou8cbbBXnvc3iD2CKwbRR8UYxWVtjpump   trades=1 mean=+0.4248
+    GtChxcK3GEFDKzetPoxKrzWVVnTiAhVAE4MW6TcPpump   trades=1 mean=+0.4033
+    64X96jeQJcPHvrM8XuZz1yPzYA3JNgFEEAG3ck99pump   trades=1 mean=+0.2870
+    HijRTQfZxdDKGXScF9vFmHnZxBzB21rTFaZCrSAypump   trades=6 mean=+0.2060
+    37BQqh2pvVxXkHdzk7RW49J8dWx78JuZDJJgKtvspump   trades=10 mean=+0.1650
+  bottom:
+    FXKURg3t17hXovHNVWx5D8kCQqthT6ZNs8jhi1Bppump   trades=1 mean=-0.0798
+    7YEPtrYqRgTgQuXtvtx18Qhd2HsA1VFBUJRHQ5dJpump   trades=7 mean=-0.0945
+    AmWybzTxo5zLu6JgeWmE4fJh5RgwjfWqdPeUMCYwbZm6   trades=5 mean=-0.1154
+    6UgFtcjYSaBeCsDnNMKje71mZy3aznfWWKLpqv2Xpump   trades=1 mean=-0.1472
+  leave-one-mint-out mean: min=+0.0682 max=+0.1513  (drop worst-case mint -> +0.0682)
+  fraction of mints with positive mean: 0.611 (11/18)
+  share of total from top mint: 8.389
+  resolution-MATCHED random control: mean=-0.0232  p97.5=+0.0859  -> cell above control hi? True
+  TRAIN same cell: n=42 k=26 mean=+0.0470 med=-0.0899 posfrac=0.231
+
+=== M10[ret1=3 & barrange=6]  VAL n=124 k=21 mean=+0.0509 med=+0.0272 res=1.000
+  top mints by per-mint mean:
+    HijRTQfZxdDKGXScF9vFmHnZxBzB21rTFaZCrSAypump   trades=2 mean=+0.2976
+    9MEYExzYucFLtAk2v8PCdw4SM4xox5o4gPZEywyvpump   trades=13 mean=+0.2065
+    AMYREuuqVkL2EnrzJbtz1R56bYntNCAj7sR4D6Tjpump   trades=1 mean=+0.1826
+    stv3S5bo7dnTK4Uci1dUBKzGj226CdF3gpg9Ng7pump    trades=2 mean=+0.1759
+    nLjU18Sfypwa4BW5od8jGhkTPN97TTmaDqEx6oepump    trades=1 mean=+0.1521
+    hSfVykrG9jejUx4bq7aNdfJ5TdUkwTPd9KV1zjfpump    trades=2 mean=+0.1052
+  bottom:
+    FKB6XstL7KEzwqo1NefpyGCxF2hWa4AgG7uqzWWqpump   trades=1 mean=-0.0435
+    37BQqh2pvVxXkHdzk7RW49J8dWx78JuZDJJgKtvspump   trades=2 mean=-0.0467
+    Gihvutvj8wvAFLrazDgoHewwfy75ozjv3bGGdr87pump   trades=9 mean=-0.0775
+    FXKURg3t17hXovHNVWx5D8kCQqthT6ZNs8jhi1Bppump   trades=1 mean=-0.2170
+  leave-one-mint-out mean: min=+0.0386 max=+0.0643  (drop worst-case mint -> +0.0386)
+  fraction of mints with positive mean: 0.667 (14/21)
+  share of total from top mint: 4.845
+  resolution-MATCHED random control: mean=-0.0314  p97.5=+0.0471  -> cell above control hi? True
+  TRAIN same cell: n=71 k=16 mean=+0.0189 med=-0.0222 posfrac=0.500

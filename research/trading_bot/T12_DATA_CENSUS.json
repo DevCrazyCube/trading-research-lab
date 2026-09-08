@@ -1,0 +1,48 @@
+{
+  "generated": "2026-08-17T09:37:29Z",
+  "source": "CEFConnect /api/v3/DailyPricing + /api/v3/pricinghistory",
+  "universe_live_funds": 360,
+  "WARNING_live_only": "CEFConnect serves only funds alive today. There is no delisted/liquidated list. Funds that merged, liquidated, converted to an ETF or were tendered by an activist between 2021 and today are ABSENT from every window below. Those are disproportionately the WIDE-DISCOUNT funds whose discount was closed BY the event, so the survivorship direction here is NOT obviously conservative.",
+  "periods": {
+    "5Y": {
+      "funds_with_history": 353,
+      "funds_with_no_history": 7,
+      "obs_per_fund_min": 1,
+      "obs_per_fund_median": 243,
+      "obs_per_fund_max": 244,
+      "median_gap_between_obs_days": 7.0,
+      "sampling": "WEEKLY",
+      "union_of_dates": 249,
+      "first_date": "2021-08-20",
+      "last_date": "2026-08-14",
+      "earliest_fund_start": "2021-08-20",
+      "latest_fund_start": "2026-07-31",
+      "rows_with_missing_nav_or_discount": 0
+    },
+    "1Y": {
+      "funds_with_history": 359,
+      "funds_with_no_history": 1,
+      "obs_per_fund_min": 1,
+      "obs_per_fund_median": 244,
+      "obs_per_fund_max": 245,
+      "median_gap_between_obs_days": 1.0,
+      "sampling": "DAILY",
+      "union_of_dates": 253,
+      "first_date": "2025-08-18",
+      "last_date": "2026-08-14",
+      "earliest_fund_start": "2025-08-18",
+      "latest_fund_start": "2026-06-30",
+      "rows_with_missing_nav_or_discount": 0
+    }
+  },
+  "liquidity_statics_today": {
+    "n_with_adv": 352,
+    "price_median": 11.68,
+    "n_price_below_5": 25,
+    "dollar_adv_median_usd": 12339919.899999999,
+    "n_dollar_adv_above_1m": 341,
+    "n_dollar_adv_above_250k": 350,
+    "market_cap_musd_median": 389.3615
+  },
+  "statics_note": "Liquidity statics are TODAY's snapshot; CEFConnect publishes no history of them. A universe screen built on them is therefore look-ahead by construction and is declared as such wherever it is used."
+}

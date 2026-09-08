@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/usr/bin/python",
+    "scripts/b11d_cohort_adapter.py",
+    "build",
+    "--source",
+    "/home/anont/meme/research/b11m_window2/b11a_creates.sqlite",
+    "--output",
+    "/home/anont/meme/research/b11m_window2/b11a_cohort.sqlite"
+  ],
+  "completed": true,
+  "endpoint": "https://solana-mainnet.core.chainstack.com",
+  "exit_code": 0,
+  "finished_at": 1786898194,
+  "manifest_sha256": "b901e2ade981123def610fa245c07829dfc202ae9afe6fbef6806d4b8cb7a107",
+  "schema_version": "1.0.0",
+  "stage": "build_cohort",
+  "started_at": 1786898192,
+  "stderr_log": "/home/anont/meme/research/b11m_window2/logs/build_cohort.stderr.log",
+  "stdout_log": "/home/anont/meme/research/b11m_window2/logs/build_cohort.stdout.log"
+}

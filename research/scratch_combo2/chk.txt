@@ -1,0 +1,19 @@
+/home/anont/meme/research/scratch_combo2/build.py:153: RuntimeWarning: divide by zero encountered in scalar divide
+  vwapdev = (cl[i] / ((cum_vtp[i + 1] - cum_vtp[s15]) / vv15) - 1.0) if vv15 > 0 else np.nan
+/home/anont/meme/research/scratch_combo2/build.py:154: RuntimeWarning: divide by zero encountered in scalar divide
+  vwapdev60 = (cl[i] / ((cum_vtp[i + 1] - cum_vtp[s60]) / vv60) - 1.0) if vv60 > 0 else np.nan
+rc=0
+feat vwapdev finite 44449 q: [-0.56079, -0.05459, -0.00082, 0.03773, 0.24153]
+feat vwapdev60 finite 44450 q: [-0.87684, -0.16463, -0.00935, 0.085, 0.54685]
+feat hilopos finite 44451 q: [0.0, 0.08592, 0.47262, 0.9185, 1.0]
+feat upfrac finite 40539 q: [0.15385, 0.375, 0.5, 0.66667, 1.0]
+feat retlife finite 44451 q: [-0.94866, -0.74634, -0.13297, 0.44367, 2.59895]
+feat priorcr finite 44451 q: [0.0, 0.0, 0.0, 3.0, 35.0]
+ALT shape (44451, 14)
+alt H 300 res rate 0.9484
+alt H 600 res rate 0.9387
+alt H 1800 res rate 0.9033
+alt H 3600 res rate 0.8528
+MFE q: [0.0, 0.0073, 0.0468, 0.1543, 0.6609]
+MAE q: [-0.7762, -0.1877, -0.0524, -0.0095, 0.0]
+SAVED

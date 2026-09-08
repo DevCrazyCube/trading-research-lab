@@ -1,0 +1,3 @@
+taped mints 2187
+snapshot lines 23004 bad 0 ; taped mints with snapshots 0
+grad_ohlcv ok mints overlapping taped: 49

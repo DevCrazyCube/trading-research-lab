@@ -594,6 +594,17 @@ def _subscribe(ws) -> None:
 # Run
 # ==============================================================================================
 
+def retained_raw_log(path: pathlib.Path = RAW):
+    """Open raw evidence with the frozen self-rotation and disk-reserve authority."""
+    document = b15i.B15J.verify_preregistration()
+    return b15i.RawLog(
+        path, retention=b15i.B15J,
+        max_segment_bytes=document["segment_format"]["max_segment_bytes"],
+        reserve_bytes=document["free_space_guard"]["reserve_bytes"],
+        check_interval_seconds=document["free_space_guard"]["check_interval_seconds"],
+        stem="pac_lws_raw_frames")
+
+
 def run_collector(*, seconds: float | None = None, ws_url: str | None = None,
                   http_url: str | None = None, reconnect_pause: float = 2.0) -> dict:
     """Subscribe at processed, write raw, seed creates, chain trades, reconcile. Read-only."""
@@ -608,7 +619,7 @@ def run_collector(*, seconds: float | None = None, ws_url: str | None = None,
     b7d, discriminator, create_type, types = pilot.load_pinned_create_type()
     decoder = {"b7d": b7d, "discriminator": discriminator,
                "create_type": create_type, "types": types}
-    raw = b15i.RawLog(RAW)                    # reused: append-only, flushed per frame
+    raw = retained_raw_log(RAW)
     writer = FeedWriter()
     counts = {"frames": 0, "head_gated_frames": 0, "faults": 0, "sessions": 0}
 
@@ -644,7 +655,21 @@ def run_collector(*, seconds: float | None = None, ws_url: str | None = None,
                     if message is None:
                         break
                     handle_frame(message, received, raw, writer, head_state, decoder, counts)
-            except Exception as exc:  # noqa: BLE001 - collector retries visibly, never trades
+            except b15i.B15J.RetentionRefused as exc:
+                # A disk-reserve refusal poisons the raw authority. Reconnecting would keep a
+                # degraded decoded feed alive without raw coverage, so the collector terminates.
+                counts["faults"] += 1
+                now = time.time_ns()
+                try:
+                    write_health(status="DEGRADED", epoch=writer.epoch, observed_unix_nanos=now,
+                                 head_slot=head_state.snapshot()[0], event_slot=None,
+                                 reason=f"RETENTION_REFUSED:{str(exc)[:160]}")
+                except OSError:
+                    pass
+                print(f"{dt.datetime.now(dt.timezone.utc).isoformat()} PAC_LWS_FEED_TERMINAL "
+                      f"RETENTION_REFUSED:{str(exc)[:180]}", flush=True)
+                raise
+            except Exception as exc:  # noqa: BLE001 - network faults retry visibly, never trade
                 counts["faults"] += 1
                 now = time.time_ns()
                 write_health(status="DEGRADED", epoch=writer.epoch, observed_unix_nanos=now,

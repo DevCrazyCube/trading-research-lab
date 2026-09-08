@@ -110,22 +110,33 @@ def _ledger_index(path: pathlib.Path) -> tuple[dict[str, dict], str, int]:
     return by_mint, previous, count
 
 
-def _last_complete(path: pathlib.Path) -> dict | None:
+def _last_complete(path: pathlib.Path) -> tuple[int, dict | None]:
     if not path.exists() or path.stat().st_size == 0:
-        return None
+        return 0, None
     with path.open("rb") as handle:
-        end = handle.seek(0, 2); position = end; data = b""
+        end = handle.seek(0, 2); complete_end = end
+        handle.seek(end - 1)
+        if handle.read(1) != b"\n":
+            cursor = end
+            while cursor > 0:
+                size = min(65_536, cursor); cursor -= size; handle.seek(cursor)
+                block = handle.read(size); index = block.rfind(b"\n")
+                if index >= 0:
+                    complete_end = cursor + index + 1; break
+            else:
+                return 0, None
+        position = complete_end; data = b""
         while position > 0 and data.count(b"\n") < 2:
             size = min(65_536, position); position -= size; handle.seek(position)
-            data = handle.read(size) + data
+            data = handle.read(min(size, complete_end - position)) + data
     lines = [line for line in data.split(b"\n") if line.strip()]
     if not lines:
-        return None
+        return complete_end, None
     try:
         value = json.loads(lines[-1])
     except json.JSONDecodeError as exc:
         raise RefusedExecution("eligibility cannot anchor a malformed feed tail") from exc
-    return value
+    return complete_end, value
 
 
 def _seal_state(body: dict) -> dict:
@@ -135,7 +146,7 @@ def _seal_state(body: dict) -> dict:
 
 def _new_state(now: int, quote_input_lamports: int,
                registry_path: pathlib.Path, events_path: pathlib.Path) -> dict:
-    tail = _last_complete(events_path)
+    event_offset, tail = _last_complete(events_path)
     if tail is None:
         input_seq, input_hash = -1, GENESIS
     else:
@@ -148,7 +159,7 @@ def _new_state(now: int, quote_input_lamports: int,
     return _seal_state({
         "schema": SCHEMA, "instrument_id": INSTRUMENT, "activation_unix_nanos": now,
         "registry_offset": registry_path.stat().st_size if registry_path.exists() else 0,
-        "event_offset": events_path.stat().st_size if events_path.exists() else 0,
+        "event_offset": event_offset,
         "input_seq": input_seq, "input_hash": input_hash, "last_head_slot": None,
         "quote_input_lamports": quote_input_lamports,
         "pending": {}, "orphans": {}, "last_record_hash": GENESIS, "emitted": 0,

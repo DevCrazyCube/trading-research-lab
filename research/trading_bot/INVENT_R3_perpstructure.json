@@ -1,0 +1,187 @@
+{
+ "theme": "deeper perp funding / OI / liquidation structure beyond XS_GLSR_Z",
+ "round": 3,
+ "verdict": "NOISE - zero survivors",
+ "n_formulas_tested": 32,
+ "n_formulas_predeclared_candidates": 23,
+ "n_formulas_decomposition_audits": 9,
+ "n_formulas_cumulative_this_theme": 138,
+ "expected_max_sharpe_under_null": {
+  "analytic_sqrt_2lnN_thisround_N32": 2.633,
+  "analytic_sqrt_2lnN_cumulative_N138": 3.141,
+  "bootstrap_classA_design_p95": 2.145,
+  "bootstrap_classA_design_mean": 1.461,
+  "bootstrap_classB_design_p95": 2.258,
+  "bootstrap_classB_design_mean": 1.436,
+  "bar_used": "block-bootstrap p95 (accounts for cross-formula correlation and window length)"
+ },
+ "panel": {
+  "source": "Binance USD-M perps, 1h UTC grid",
+  "class_A": "panel1h_ext_trim.npz, 150 symbols, 2022-10-01..2026-08-16, price/flow/funding",
+  "class_B": "panel1h_r3meta.npz (BUILT THIS ROUND from 91,602 daily metrics zips), OI + L/S ratios on the same grid, 123 symbols",
+  "universe": "top-60 by trailing 7d quote volume, min 20 names (min 8 on the thin window)",
+  "cost_bp_per_side": 5.5
+ },
+ "windows": {
+  "classA_design": [
+   "2022-11-01",
+   "2024-10-01"
+  ],
+  "classA_holdout": [
+   "2024-10-01",
+   "2026-08-16"
+  ],
+  "classB_design": [
+   "2023-01-01",
+   "2024-06-01"
+  ],
+  "classB_hold_b1": [
+   "2024-06-01",
+   "2025-01-01"
+  ],
+  "classB_hold_b2_thin": [
+   "2025-01-01",
+   "2026-08-16"
+  ]
+ },
+ "best_by_design_sharpe": {
+  "name": "R3B_TT_CONC",
+  "desc": "top-trader POSITION long/short ratio minus top-trader ACCOUNT-COUNT long/short ratio (log): conviction concentration inside the smart-money cohort",
+  "design_sharpe_net": 3.79,
+  "beats_noise_bar_on_design": true,
+  "held_out": "FAILS: +0.46 on 2024-06..2025-01, +0.67 on the thin 2025-01..2026-08 window",
+  "promotable": false
+ },
+ "survivors": [],
+ "killed": [
+  {
+   "family": "funding term structure",
+   "names": [
+    "R3A_FUND_TERM",
+    "R3A_FUND_CONVEX"
+   ],
+   "why": "gross Sharpe 0.2-0.4 with 1.55-1.71x/day turnover -> breakeven 0.7-1.4 bp/side against a 4.5 bp published taker fee"
+  },
+  {
+   "family": "funding second-order (AR1 / beta / idio / carry IR)",
+   "names": [
+    "R3A_FUND_AR1",
+    "R3A_FUND_BETA",
+    "R3A_FUND_ALPHA",
+    "R3A_CARRY_IR",
+    "R3A_FUND_DECAY"
+   ],
+   "why": "all in the +0.4..+1.2 net band on both windows; none clears the 2.145 bootstrap bar"
+  },
+  {
+   "family": "funding/flow lead-lag",
+   "names": [
+    "R3A_FUND_LEAD_FLOW",
+    "R3A_FLOW_VS_FUND",
+    "R3A_TAKER_AR1"
+   ],
+   "why": "FUND_LEAD_FLOW is -2.5 net on both windows; the others sit below the bar and decay"
+  },
+  {
+   "family": "weekend carry cross-section",
+   "names": [
+    "R3A_WEEKEND_CARRY"
+   ],
+   "why": "+0.51 / +0.35, below bar"
+  },
+  {
+   "family": "liquidation heatmap via reconstructed OI-weighted cost basis",
+   "names": [
+    "R3B_OIWAP_GAP",
+    "R3B_LIQ_ASYM",
+    "R3B_LIQ_DIST_25X"
+   ],
+   "why": "positive in design AND both holdouts, but decomposition shows the OI weighting adds nothing: residual of GAP_OI on an equal-weight 7d EWMA gap is +0.08 design, -2.29 hold_b1, -0.85 hold_b2; corr(GAP_OI,GAP_EQ)=0.93-0.96 and corr(GAP_OI,r168/vol)=0.84-0.86. It is 7d vol-scaled cross-sectional momentum (round-1 XS_MOM168). LIQ_DIST_25X is additionally OIWAP_GAP plus a low-vol tilt."
+  },
+  {
+   "family": "net-carry momentum",
+   "names": [
+    "R3A_NETCARRY_MOM"
+   ],
+   "why": "corr 0.998 with pure r168 on design and 0.987 on holdout; residual on r168 is +0.07; tripling the funding weight barely moves it. It IS round-1 XS_MOM168."
+  },
+  {
+   "family": "OI share / leverage rotation",
+   "names": [
+    "R3B_OISHARE_CHG",
+    "R3B_FUNDxOISHARE"
+   ],
+   "why": "built on OI VALUE, so dlog(oi_value,168h) = dlog(oi_units,168h) + r168 and the signal mechanically embeds the 7d price return. Construction error, reported not buried."
+  },
+  {
+   "family": "flow-quadrant decomposition",
+   "names": [
+    "R3B_COVER_SHARE",
+    "R3B_NEWLONG_SHARE",
+    "R3B_FLUSH_ASYM"
+   ],
+   "why": "COVER_SHARE had the round's second-best design Sharpe (3.53) and is -1.02 on the virgin 2025-2026 window; NEWLONG_SHARE is -0.07 on hold_b1"
+  },
+  {
+   "family": "top-trader concentration",
+   "names": [
+    "R3B_TT_CONC"
+   ],
+   "why": "3.79 design -> 0.46 / 0.67 out of sample"
+  },
+  {
+   "family": "orthogonalised incumbent",
+   "names": [
+    "R3B_GLSR_RESID_OI"
+   ],
+   "why": "0.92-0.96 correlated with XS_GLSR_Z's daily P&L, and no better in any window (+0.53 hold_b1, -1.30 hold_b2)"
+  }
+ ],
+ "untested_not_dead": [
+  "cross-venue funding dispersion / cross-venue funding term structure: the cache is Binance USD-M only, no second venue's funding exists in this repo, and no network crawl was run this round"
+ ],
+ "escalation": {
+  "finding": "the incumbent basket leg XS_GLSR_Z decays monotonically and is NEGATIVE on 2025-01..2026-08",
+  "numbers": {
+   "design_2023_01_2024_06": 3.0,
+   "hold_2024_06_2025_01": 0.3,
+   "hold_2025_01_2026_08_thin": -1.21,
+   "gross_on_last_window": -0.6,
+   "breakeven_bp_per_side_last_window": -5.4
+  },
+  "caveat": "the last window is the thin ~20-name A-B-ticker cross-section (the metrics cache download is alphabetical and stops at BNXUSDT after 2024-12), run at min 8 names. One window, small biased universe. NOT proof the leg is broken.",
+  "corroboration": "R3B_GLSR_RESID_OI, the OI-orthogonalised version, decays identically, which rules out leverage-build contamination as the cause",
+  "recommendation": "continue the Binance metrics backfill past BNXUSDT and re-run XS_GLSR_Z on a full 2025-2026 cross-section before sizing that leg again. Cheap data job, highest-value follow-up in this theme."
+ },
+ "diversification_vs_basket": {
+  "note": "daily-net-P&L correlation vs REF_XS_GLSR_Z on the class-B design window",
+  "R3B_GLSR_RESID_OI": 0.924,
+  "R3B_OISHARE_CHG": 0.413,
+  "R3B_LIQ_ASYM": 0.348,
+  "R3B_OIWAP_GAP": 0.342,
+  "R3B_FUNDxOISHARE": 0.339,
+  "R3B_NEWLONG_SHARE": 0.272,
+  "R3B_TT_CONC": 0.263,
+  "R3B_LIQ_DIST_25X": 0.254,
+  "R3B_FLUSH_ASYM": 0.209,
+  "R3B_OI_STICKY": 0.117,
+  "R3B_COVER_SHARE": -0.016
+ },
+ "files": {
+  "metapanel_builder": "scripts/trading_bot/perpmicro_r3_metapanel.py",
+  "sweep": "scripts/trading_bot/perpmicro_r3.py",
+  "attrib_momentum": "scripts/trading_bot/perpmicro_r3_attrib.py",
+  "attrib_oiwap": "scripts/trading_bot/perpmicro_r3_attrib_oiwap.py",
+  "results": [
+   "research/trading_bot/INVENT_R3_perpstructure_A.json",
+   "research/trading_bot/INVENT_R3_perpstructure_B.json",
+   "research/trading_bot/INVENT_R3_perpstructure_ATTRIB.json",
+   "research/trading_bot/INVENT_R3_perpstructure_ATTRIB_OIWAP.json"
+  ],
+  "pnl": [
+   "research/trading_bot/INVENT_R3_perpstructure_A_pnl.npz",
+   "research/trading_bot/INVENT_R3_perpstructure_B_pnl.npz"
+  ],
+  "writeup": "research/trading_bot/INVENT_R3_perpstructure.md"
+ }
+}

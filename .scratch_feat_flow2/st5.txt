@@ -1,0 +1,9 @@
+rc=0
+/home/anont/meme/.scratch_feat_flow2/s5_outcomes.py:69: RuntimeWarning: invalid value encountered in maximum
+  np.maximum.at(hiB,bidx,price)
+/home/anont/meme/.scratch_feat_flow2/s5_outcomes.py:70: RuntimeWarning: invalid value encountered in minimum
+  np.minimum.at(loB,bidx,price)
+/home/anont/meme/.scratch_feat_flow2/s5_outcomes.py:151: RuntimeWarning: invalid value encountered in divide
+  g0=px/pe-1.0
+/home/anont/meme/.scratch_feat_flow2/s5_outcomes.py:157: RuntimeWarning: invalid value encountered in divide
+  g1=0.5*g0+0.5*(px/p1entry-1.0)

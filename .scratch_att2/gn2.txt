@@ -1,0 +1,3 @@
+    vals=list(per_mint.values())
+    return (st.mean(vals), st.median(vals), len(vals), sum(len(SIG[cname][m]) for m in per_mint))
+

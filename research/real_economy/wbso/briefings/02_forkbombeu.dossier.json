@@ -1,0 +1,180 @@
+{
+  "candidate_id": "gh:forkbombeu",
+  "display_name": "Forkbomb",
+  "github": "https://github.com/ForkbombEu",
+  "website": "https://forkbomb.solutions",
+  "public_email": "info@forkbomb.eu",
+  "location_text": "Netherlands",
+  "review_flags": [
+    "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+    "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend"
+  ],
+  "score": 75,
+  "score_breakdown": {
+    "own_recent_repos": 30,
+    "recency": 15,
+    "language_breadth": 9,
+    "has_website": 8,
+    "website_reachable": 5,
+    "public_email": 5,
+    "org_older_than_1y": 3
+  },
+  "signals": {
+    "recent_repos_total": 10,
+    "recent_repos_own": 10,
+    "recent_repos_forks": 0,
+    "languages": [
+      "CSS",
+      "Go",
+      "TypeScript"
+    ],
+    "pushed_since_filter": "2026-02-01",
+    "latest_push": "2026-08-18T15:04:53Z",
+    "org_type": "Organization",
+    "enriched": true,
+    "peppol_match": null,
+    "website_reachable": true,
+    "website_title": "Forkbomb BV | Cryptography, decentralized identities, DPP",
+    "careers_url": "https://forkbomb.solutions/community/#join-us",
+    "careers_dev_terms": [],
+    "review_flags": [
+      "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+      "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend"
+    ]
+  },
+  "exclusions": [],
+  "evidence": [
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository ForkbombEu/avdctl (taal: Go) had een commit op 2026-08-18. Omschrijving: “avdctl is a CLI tool for managing Android Virtual Device (AVD) golden images and clones. It enables fast creation of disposable emulator instances backed by QCO”.",
+      "url": "https://github.com/ForkbombEu/avdctl",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "ForkbombEu/avdctl",
+        "pushed_at": "2026-08-18T10:49:52Z",
+        "language": "Go",
+        "stargazers": 1,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository ForkbombEu/credimi-runner (taal: Go) had een commit op 2026-08-18. Omschrijving: “Runner node for self-hosted credimi enabled devices”.",
+      "url": "https://github.com/ForkbombEu/credimi-runner",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "ForkbombEu/credimi-runner",
+        "pushed_at": "2026-08-18T15:04:53Z",
+        "language": "Go",
+        "stargazers": 1,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository ForkbombEu/eudi-trusted-list-publisher (taal: TypeScript) had een commit op 2026-08-06. Omschrijving: “Credimi Trusted List Publisher”.",
+      "url": "https://github.com/ForkbombEu/eudi-trusted-list-publisher",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "ForkbombEu/eudi-trusted-list-publisher",
+        "pushed_at": "2026-08-06T08:10:56Z",
+        "language": "TypeScript",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository ForkbombEu/eudi-conformance-evidence (taal: Go) had een commit op 2026-08-05. Omschrijving: “tool to extract EUDI Wallet protocol context (credential offers, presentation requests, issuer metadata) from Credimi interoperability pipeline runs for conform”.",
+      "url": "https://github.com/ForkbombEu/eudi-conformance-evidence",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "ForkbombEu/eudi-conformance-evidence",
+        "pushed_at": "2026-08-05T14:00:19Z",
+        "language": "Go",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository ForkbombEu/eudi-conformance-atlas (taal: CSS) had een commit op 2026-08-05.",
+      "url": "https://github.com/ForkbombEu/eudi-conformance-atlas",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "ForkbombEu/eudi-conformance-atlas",
+        "pushed_at": "2026-08-05T13:54:29Z",
+        "language": "CSS",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_location",
+      "claim_nl": "Het GitHub-profiel van ForkbombEu vermeldt als locatie “Netherlands”.",
+      "url": "https://github.com/ForkbombEu",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "location": "Netherlands"
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_website",
+      "claim_nl": "Het GitHub-profiel verwijst naar de website https://forkbomb.solutions.",
+      "url": "https://github.com/ForkbombEu",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "website": "https://forkbomb.solutions"
+      }
+    },
+    {
+      "source": "website",
+      "kind": "live_website",
+      "claim_nl": "De website https://forkbomb.solutions is bereikbaar en heeft als paginatitel “Forkbomb BV | Cryptography, decentralized identities, DPP”.",
+      "url": "https://forkbomb.solutions",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "http_status": 200,
+        "title": "Forkbomb BV | Cryptography, decentralized identities, DPP"
+      }
+    }
+  ],
+  "owner_checklist": [
+    "Is dit een Nederlandse onderneming (geen buitenlands filiaal, geen publieke instelling)?",
+    "Klopt het e-mailadres, en is het een zakelijk (geen persoonlijk) adres?",
+    "Zijn de genoemde repositories echt van dit bedrijf en niet van een naamgenoot?",
+    "Staat dit bedrijf niet op de blokkeerlijst / heeft het niet eerder afgemeld?",
+    "Is de RVO-parameterbron nog geldig (bevriezingsdatum hieronder) en de kalender voor 2027 gecontroleerd?",
+    "Klopt de aanname over het aantal ontwikkelaars ruwweg, of moet die naar beneden?"
+  ],
+  "params_frozen_on": "2026-08-19",
+  "generated": "2026-08-19",
+  "sent": false,
+  "sendable": false,
+  "sendable_reason": "sender profile carries placeholders; owner has not registered KVK",
+  "lint_allowed_urls": [
+    "https://forkbomb.solutions",
+    "https://github.com/ForkbombEu",
+    "https://github.com/ForkbombEu/avdctl",
+    "https://github.com/ForkbombEu/credimi-runner",
+    "https://github.com/ForkbombEu/eudi-conformance-atlas",
+    "https://github.com/ForkbombEu/eudi-conformance-evidence",
+    "https://github.com/ForkbombEu/eudi-trusted-list-publisher",
+    "https://voorbeeld.nl",
+    "https://voorbeeld.nl/privacy"
+  ],
+  "lint": {
+    "ok": true,
+    "violations": [],
+    "missing": [],
+    "unsourced_urls": [],
+    "unlinked_claims": []
+  }
+}

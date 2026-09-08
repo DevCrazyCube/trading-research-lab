@@ -1,0 +1,4 @@
+9:anch=sorted(set(W.execute('select create_slot,block_time from window_label where block_time is not null').fetchall()))
+21:    if h3(mint)==0: continue          # NEVER touch holdout
+28:    if h3(mint)==0: continue
+holdout mints in event table: 0 of 382

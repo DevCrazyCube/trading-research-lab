@@ -1,0 +1,9 @@
+rows 41386 feed-clean 41115
+train rows 17328 val rows 23787
+ALLBARS train capped mean=-0.1557 med=-0.1343 n=1732 k=154 res=0.916 | raw mean=-0.1485
+ALLBARS val   capped mean=-0.1573 med=-0.1548 n=2335 k=195 res=0.922 | raw mean=+0.4609
+cells swept on train: 29892  train-positive: 621  validate+CI survivors: 1  (21s)
+R8[up_min=3 & density15=1]                     trM=+0.0470(n=42,k=26) vaM=+0.1347 vaMed=+0.0457 n=55 k=18 res=1.00 CI=[+0.0112,+0.2865] rc=-0.0458(hi +0.0587) edge=+0.1805 beat=True | d50=+0.1347 d100=+0.1347 t250=+0.1191 raw=+0.1347
+NULL rep0: train-positive 691  validate+CI survivors 0
+NULL rep1: train-positive 639  validate+CI survivors 2
+WROTE sweep2_results.json

@@ -1,0 +1,6 @@
+CONSERVATIVE FILLS (take-profit cannot trigger inside the entry bar)
+mint-equal mean net, toll 1.14%%, dropout -30%%, winsor +300%%.  base = same structure, all mints.
+
+filter           timing   hold  tp       | TRAIN mean/base (k)      | VALID mean/base (k)     
+
+cells positive in ABSOLUTE terms on BOTH splits under conservative fills: 0

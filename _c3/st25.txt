@@ -1,0 +1,14 @@
+04:49:56
+A done 04:34:48
+surface done 04:35:09
+B done 04:37:13
+C done 04:37:36
+C done 04:41:56
+--C--
+  C trailvol_log=q0|logpx=q0|m_v0=2                      t60tr35        tr -0.0513 med -0.0519 base -0.2564 edge +0.2050 n   209 k  18 p 0.0000
+t=246.0
+--V--
+total train-kept cells: 66387
+carried to validate (train edge>0 and train p<0.05): 34626
+--LIQ--
+tail: kan 'sweepCliq.log' niet openen om te lezen: Bestand of map bestaat niet

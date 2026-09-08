@@ -1,0 +1,55 @@
+=== E-neighbourhood: validate, fill=close (pessimistic), toll 1.14%, drop -30% ===
+age            v0thr   H     SL   pri0  | mean      cilo      n      k    
+30-60          20000   30    -0.25 True  | +0.2637  -0.0095  n=46   k=29  
+30-60          20000   30    None  True  | +0.2617  -0.0154  n=35   k=29  
+30-60          20000   30    -0.4  True  | +0.2604  -0.0131  n=44   k=29  
+30-60          5040    30    -0.4  True  | +0.1955  -0.0018  n=59   k=40  
+30-90          20000   60    -0.25 True  | +0.1952  -0.1066  n=59   k=29  
+30-60          5040    30    None  True  | +0.1920  -0.0082  n=48   k=40  
+30-90          20000   60    -0.4  True  | +0.1919  -0.1112  n=57   k=29  
+30-90          20000   60    None  True  | +0.1909  -0.1106  n=40   k=29  
+30-60          5040    30    -0.25 True  | +0.1858  -0.0114  n=63   k=40  
+30-60          20000   60    -0.25 True  | +0.1454  -0.1713  n=45   k=29  
+30-60          20000   60    -0.4  True  | +0.1420  -0.1768  n=43   k=29  
+30-60          20000   30    -0.25 False | +0.1386  -0.0619  n=77   k=40  
+30-60          20000   30    -0.4  False | +0.1374  -0.0652  n=69   k=40  
+30-60          20000   60    None  True  | +0.1256  -0.1970  n=33   k=29  
+30-60          0       30    -0.4  True  | +0.1163  -0.0485  n=107  k=64  
+30-60          20000   30    None  False | +0.1087  -0.1040  n=49   k=40  
+30-60          0       30    -0.25 True  | +0.1027  -0.0612  n=124  k=64  
+30-60          0       30    None  True  | +0.1025  -0.0616  n=80   k=64  
+30-90          5040    60    -0.25 True  | +0.0972  -0.1044  n=89   k=43  
+30-60          207     30    -0.4  True  | +0.0873  -0.0662  n=90   k=54  
+30-90          20000   60    -0.25 False | +0.0854  -0.1214  n=99   k=41  
+30-60          20000   15    None  True  | +0.0813  -0.0523  n=58   k=29  
+30-60          207     30    -0.25 True  | +0.0803  -0.0722  n=105  k=54  
+30-90          20000   60    -0.4  False | +0.0757  -0.1320  n=89   k=41  
+30-60          5040    60    -0.25 True  | +0.0736  -0.1474  n=61   k=40  
+30-90          5040    60    -0.4  True  | +0.0730  -0.1310  n=80   k=43  
+30-60          5040    30    -0.4  False | +0.0730  -0.0735  n=103  k=60  
+30-90          20000   60    None  False | +0.0726  -0.1399  n=59   k=41  
+30-60          207     30    None  True  | +0.0694  -0.0875  n=66   k=54  
+30-60          20000   15    -0.25 True  | +0.0690  -0.0721  n=69   k=29  
+... total neighbourhood cells evaluated: 648 ; positive-mean: 100
+
+=== same neighbourhood on TRAIN (fill=close) ===
+train/validate sign agreement across neighbourhood: 539/646
+TRAIN 0-30       v0>=5040   H=60  SL=-0.25 pri0=True  mean=+0.2620 n=73   k=32  
+TRAIN 0-30       v0>=5040   H=60  SL=-0.4  pri0=True  mean=+0.2155 n=67   k=32  
+TRAIN 0-30       v0>=5040   H=60  SL=None  pri0=True  mean=+0.1803 n=36   k=32  
+TRAIN 0-30       v0>=5040   H=30  SL=-0.25 pri0=True  mean=+0.1753 n=73   k=32  
+TRAIN 0-30       v0>=5040   H=30  SL=-0.4  pri0=True  mean=+0.1587 n=67   k=32  
+TRAIN 0-30       v0>=5040   H=30  SL=None  pri0=True  mean=+0.1456 n=40   k=32  
+TRAIN 30-60      v0>=5040   H=30  SL=-0.25 pri0=True  mean=+0.1108 n=61   k=29  
+TRAIN 30-60      v0>=5040   H=30  SL=-0.4  pri0=True  mean=+0.1037 n=55   k=29  
+TRAIN 20-45      v0>=5040   H=30  SL=-0.25 pri0=True  mean=+0.0900 n=53   k=29  
+TRAIN 0-30       v0>=5040   H=60  SL=-0.25 pri0=False mean=+0.0890 n=189  k=52  
+TRAIN 20-45      v0>=20000  H=30  SL=-0.25 pri0=True  mean=+0.0811 n=31   k=22  
+TRAIN 20-45      v0>=5040   H=30  SL=-0.4  pri0=True  mean=+0.0804 n=47   k=29  
+TRAIN 20-45      v0>=20000  H=30  SL=-0.4  pri0=True  mean=+0.0782 n=30   k=22  
+TRAIN 20-45      v0>=20000  H=30  SL=None  pri0=True  mean=+0.0738 n=26   k=22  
+TRAIN 30-60      v0>=5040   H=30  SL=None  pri0=True  mean=+0.0727 n=35   k=29  
+
+=== matched-random control for E (same mints/counts, random bars, fill=close) ===
+E validate fill=close mean=+0.1858 n=63 k=40
+random 2%-of-bars entries, same exit+fill: mean=-0.1428 (sd 0.0527, 12 draws)rc=0

@@ -13,6 +13,7 @@ from .strategy import ConvexityStrategy, PRESETS
 from .execution import DryRunExecutor
 from .types import EntrySignal, Bar
 from . import paper_ledger as PL
+from .run import v3_entry_gate
 
 
 def _open_one(strat, ex, mint="MINT", price=1e-6):
@@ -107,6 +108,17 @@ def main() -> int:
     intents = s5.on_bar("MINT", crash)
     ok &= _check("reopened position resolves against live bars (exit intent on a crash bar)",
                  len(intents) >= 1 and intents[0].side == "sell")
+
+    # 7. A failed frozen N=100 V3 gate stops NEW entries while below-minimum accumulation stays open.
+    below = v3_entry_gate({"terminal": 99, "stress_r": [-1.0] * 99,
+                           "adjudication_equity_usd": 900.0, "commitment_failures": 0,
+                           "duplicate_terminal": 0})
+    failed_gate = v3_entry_gate({"terminal": 100, "stress_r": [-0.2] * 100,
+                                 "adjudication_equity_usd": 800.0, "commitment_failures": 0,
+                                 "duplicate_terminal": 0})
+    ok &= _check("V3 gate: N99 accumulates; failed N100 refuses NEW entries",
+                 below["allow_new_entries"] and not failed_gate["allow_new_entries"],
+                 failed_gate["reason"])
 
     print("\nRESTART SELFTEST: " + ("PASS" if ok else "FAIL"))
     return 0 if ok else 1

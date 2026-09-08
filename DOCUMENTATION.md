@@ -387,3 +387,117 @@ Prefer, in order:
 4. Third-party analysis, clearly labeled and independently checked.
 
 Web pages change. Record access dates and archive critical specifications or pin official IDL revisions when implementation begins.
+
+## Current memecoin paper-evaluation rails (2026-08-27)
+
+- `scripts/trading_bot/memecoin_trade_audit.py` is the read-only census for every local sniper,
+  frozen-MEMEBOT and genome ledger. Its JSON output records byte length and SHA-256 of each snapshot;
+  parallel arms are never summed into a fictitious portfolio.
+- Legacy sniper resolution ledgers are retired evidence. The clean forward cohort was Pump-only sniper V3,
+  preregistered in `research/trading_bot/SNIPER_V3_PREREGISTRATION.md`; entry and terminal events are
+  append-only and sizing uses restored full-loss-stress equity. Ordinary provider reconnects preserve the
+  paper book. True process restarts reopen reconstructable positions from entry/mark events; only malformed
+  or unreconstructable rows are invalidated at the frozen full-loss bound.
+- `MEMEBOT_EXIT_V2` is the separately frozen Pump-only exitability experiment. Off-venue observations are
+  scope exclusions (not controls), stop gaps use the worse observed mark, and an unavailable exit is
+  −100% before toll for adjudication. Earlier MEMEBOT freezes remain unchanged.
+- Genome fitness version 2 includes every terminal PASS. `UNPRICED` and `UNEXITABLE` receive a conservative
+  full-loss bound for selection and promotion; a candidate must also repeat on a fresh stress slice.
+  Provider unavailability is labeled separately from market unexitability and refresh work is bounded.
+- **Verified status at implementation:** no genome cleared the K-corrected full-loss-stress bar, no live
+  trading was enabled, and no profitable edge is claimed. V3 and EXIT_V2 need their frozen forward minimums.
+- The evolutionary census is experiment-namespaced. `memebot_evo/v1_archive` and current V2 retain
+  separate population/state/K bars; repeated deterministic genome ids are separate forward records and
+  both remain in the all-trade audit.
+- `MEMECOIN_LOSS_DIAGNOSTICS.{json,md}` attributes losses by cost component, exit reason and fixed
+  pre-entry slices. It is post-hoc descriptive evidence only; none of its feature boundaries may become
+  a strategy rule without a new preregistered forward cohort.
+- Honest kill decisions are executable paper-entry gates. HALTED MEMEBOT instruments keep resolving
+  existing positions but open no new PASS/control rows. Sniper V3 is retired from new entries after all
+  three arms failed the frozen N=100 stress gate; the event-sourced book drains any existing open row.
+- **Verified current conclusion:** no recorded V3 feature slice with n≥20 was positive; EXIT_V2's
+  unavailable-exit tail remains too large at its still-immature snapshot; no replacement sniper variant
+  is licensed by these same rows.
+- PAC V1 is now a burned, immutable baseline rather than the focused mechanism. Its validator reconciles
+  525 resolved uncalibrated all-cost scenarios (113 wins, 412 losses, mean −0.1255R, 28 full losses,
+  normalized index −559.0818). The return remains negative even outside the full-loss tail, and its
+  later-trade execution boundary can wedge a silent mint. These are paper scenarios, not executable PnL,
+  but they reject parameter-tuning on V1.
+- PAC V2 is the active authenticated paper challenger: original PAC plus authentic measured-p90 recovery dwell, ≥3
+  observed buyer addresses, and 6× largest-shock reserve cover; entry and exits use post-target processed
+  bonding-curve account snapshots so no later trade is required; horizon is absolute and has a bounded
+  30-second observation fallback. Its code/tests are paper/read-only and contain no wallet/order path.
+  Handoff-439's forgeable-calibration and crash-wedge paths are repaired: activation has no latency default
+  and requires 100 unique campaign-memo transactions, exact sent/on-chain wire and fee-payer equality,
+  independent finalized RPC attestations, monotonic clocks, whole-file pins, and strict git ancestry.
+  First-fill commit ordering, terminal permanent snapshot refusals, a 30-second snapshot age,
+  `minContextSlot`, continuity seeds, fsync recovery, future-receipt cutoff deferral, exact native-SOL
+  115/151-byte account decoding, collector-epoch buffer resets, and one-failure-domain supervision are
+  enforced. The current git-anchored chain is seal `40c342dc…` → campaign `1839368c` → evidence
+  `e960e91a` → activation `ed4baa47`; 100 independently re-read Memo landings set p90 to
+  12.164662268 seconds. The supervisor/feed/runner and read-only dashboard are active with a fresh
+  SOL/USD input. There are no resolved rows yet, so the verified claim is liveness only, not performance.
+- PAC V2/V2.1 are now retired observation paths. V2.1's event rows were ordered and hash-valid, but
+  reconnect-time full-history recovery left the public-RPC stream materially behind the processed head
+  and compressed queued events into misleading local dwell intervals. It generated zero fills or
+  outcomes. PAC V2.2 is the separately preregistered successor: one subscription, pre-decode raw-frame
+  clocking, O(1) tail recovery, and an independent fail-closed head-lag/age gate. Its seal and default-off
+  campaign are anchored; the low-lag read-only feed and dashboard diagnostics run under the watchdog.
+  The explicitly authorized campaign subsequently produced 100 processed samples and 11 visible failures
+  for 555,000 lamports, with 100 matching independent finalized attestations; anchored activation pins a
+  6.378252335-second processed p90. The V2.2 paper runner is active and supervised. Initial outcomes are
+  far below its 100-resolution gate and are not a profitability result.
+
+## Verified new-information audit, 2026-09-08
+
+Older operational statuses above are historical snapshots, not present-tense liveness claims.
+Later dated decisions retire their respective instruments.
+
+- The fresh snapshot collector filters to market cap >= $100k and timestamps before its network
+  harvest. In the audited prefix, all 2,464 first-seen mints meet that floor and 118 have recorded
+  sighting times before their reported births. It is not a census of creations or a receipt-time feed.
+- Raw migration transactions contain positive LP-token burn evidence for 82/82 distinct migrated
+  mints. Seventy overlap nonempty OHLCV; 67 also match the canonical migration pool. Candle collapse
+  does not establish LP withdrawal. Zero cached PumpSwap withdraw instructions cannot establish
+  absence because the cache is not a complete post-graduation pool census.
+- `scripts/birth_origin.py` tests a working hypothesis about attention accruing to an earlier coin
+  when new actors copy its name. Its development-only replay emits NO_TRADE observations, never fills.
+  Real observations: 1,212; twenty text permutations: 1,319–1,417. This is not a profitability placebo
+  or positive performance evidence. The owner-supplied ANON/BRO trades are unaudited chat anecdotes
+  and explicitly excluded from validation, not a required pair gate. Entry/return evaluation needs
+  fresh clocks/cohorts, execution evidence, and dependency controls; the LP-withdrawal join is dropped.
+- A separate direct finalized-creation recorder preserves every received raw frame before decode,
+  without a price floor. Its 45-second pilot's 8,502 frames replay exactly; five successful creates
+  and one failed attempt reconcile with preserved RPC transaction bodies and canonical block order.
+  This is single-source observation engineering, not full creation recall or profitability. See
+  `research/midcap/BIRTH_STREAM_FORWARD_CONTRACT_20260908.md` for the owner-corrected harness,
+  including mint/session dependence, dropout stresses and whole-pipeline profitability placebos.
+- The owner's mint-equal benchmark correction supersedes the old trade-pooled number. The written
+  conservation table also has an arithmetic discrepancy; its original raw reconciliation was not rerun.
+
+See `research/midcap/INFORMATION_AUDIT_20260908.md` and its source/JSON artifacts for reproducible
+evidence, exact scope, versions, and access dates. Fifty-one adversarial engineering tests pass.
+
+## Creation-recorder reconnect repair, 2026-09-08
+
+The first long birth capture stopped at 18:07:13 UTC on a WebSocket protocol error; its 37,939
+frames and 24 creation observations remain preserved and replay exactly. The owner-authorized
+v2 recorder restarts connections with bounded backoff and records explicit UNKNOWN_UNREPAIRED gaps.
+It retains one duration/storage budget and never equates reconnecting with recovering missed data.
+Freshness is available through `python -m scripts.birth_stream --status <capture.sqlite>`.
+The upgraded replay verifier supports both source schemas; 62 tests pass. Details and restart
+snapshot: `research/midcap/BIRTH_STREAM_RECONNECT_20260908.md`. This supersedes the old no-reconnect
+operational detail only; all trading and research promotion gates remain unchanged.
+
+## Creation-feed backlog repair, 2026-09-08
+
+V2's immediate local receipts masked up to 302.992 seconds of creation-event delay. Same-disk
+profiling and live head comparison motivated a separate v3 batched recorder, preserving individual
+receipt clocks and FULL raw durability before decoding. Observed same-prefix throughput improved
+159.40 -> 865.95 frames/sec; eight live head checks found v3 within -1..22 slots, and three later
+checks within -1..2 slots. These are asynchronous brackets, not a completeness guarantee. V3 remains
+read-only and uses the remaining prior time budget. Old data and source snapshots are preserved.
+The 7,482-frame real validation replays exactly; 76 engineering tests pass. See
+`research/midcap/BIRTH_STREAM_BACKLOG_FIX_20260908.md` for limits, durability exposure, pins and status.
+`research/midcap/NEW_INFORMATION_CANDIDATES_20260908.md` records new hypotheses and their rejection
+tests; no profitable memecoin strategy has been demonstrated or activated.

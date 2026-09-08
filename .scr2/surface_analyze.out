@@ -1,0 +1,101 @@
+structures=3120 filters=84 cells=262080
+
+=== A. UNCONDITIONAL SURFACE (no deployer filter) ===
+ -- timing (validate-split mint-equal mean net, toll 1.14%, dropout -30%, cap +300%)
+    age15          cells=520  mean=-0.1072  best=+0.0165  worst=-0.4623  fracPos=0.00
+    age240         cells=520  mean=-0.1077  best=-0.0356  worst=-0.3378  fracPos=0.00
+    age60          cells=520  mean=-0.1074  best=-0.0251  worst=-0.3924  fracPos=0.00
+    allbars        cells=520  mean=-0.1518  best=+0.0371  worst=-0.4941  fracPos=0.00
+    allbars_a60    cells=520  mean=-0.1545  best=-0.0932  worst=-0.3611  fracPos=0.00
+    first          cells=520  mean=-0.1443  best=+0.2582  worst=-0.6471  fracPos=0.08
+ -- pos (validate-split mint-equal mean net, toll 1.14%, dropout -30%, cap +300%)
+    p_25_75_10     cells=624  mean=-0.1144  best=+0.0394  worst=-0.4854  fracPos=0.02
+    p_3x_0_5_15    cells=624  mean=-0.1300  best=+0.0323  worst=-0.5278  fracPos=0.00
+    p_50_50_15     cells=624  mean=-0.1327  best=+0.0394  worst=-0.5146  fracPos=0.00
+    p_50_50_5      cells=624  mean=-0.1339  best=+0.0632  worst=-0.5584  fracPos=0.01
+    p_single       cells=624  mean=-0.1329  best=+0.2582  worst=-0.6471  fracPos=0.04
+ -- hold (validate-split mint-equal mean net, toll 1.14%, dropout -30%, cap +300%)
+    1440           cells=390  mean=-0.2097  best=+0.2582  worst=-0.5781  fracPos=0.06
+    15             cells=390  mean=-0.0838  best=+0.0665  worst=-0.2811  fracPos=0.01
+    180            cells=390  mean=-0.1690  best=+0.0143  worst=-0.6471  fracPos=0.01
+    2              cells=390  mean=-0.0664  best=+0.1465  worst=-0.1214  fracPos=0.02
+    30             cells=390  mean=-0.1068  best=-0.0178  worst=-0.3885  fracPos=0.00
+    480            cells=390  mean=-0.1942  best=+0.0219  worst=-0.5874  fracPos=0.01
+    5              cells=390  mean=-0.0716  best=+0.1236  worst=-0.1796  fracPos=0.02
+    60             cells=390  mean=-0.1288  best=-0.0008  worst=-0.4587  fracPos=0.00
+ -- mod (validate-split mint-equal mean net, toll 1.14%, dropout -30%, cap +300%)
+    m_half50       cells=240  mean=-0.1550  best=+0.0010  worst=-0.4034  fracPos=0.00
+    m_plain        cells=240  mean=-0.1789  best=-0.0174  worst=-0.6471  fracPos=0.00
+    m_sl20         cells=240  mean=-0.1318  best=-0.0268  worst=-0.3320  fracPos=0.00
+    m_sl35         cells=240  mean=-0.1588  best=-0.0380  worst=-0.4079  fracPos=0.00
+    m_sl60         cells=240  mean=-0.1865  best=-0.0353  worst=-0.5781  fracPos=0.00
+    m_tp100        cells=240  mean=-0.0995  best=+0.2183  worst=-0.2329  fracPos=0.04
+    m_tp100sl50    cells=240  mean=-0.1153  best=-0.0264  worst=-0.2671  fracPos=0.00
+    m_tp200        cells=240  mean=-0.1094  best=+0.2582  worst=-0.2967  fracPos=0.05
+    m_tp30         cells=240  mean=-0.1030  best=+0.1269  worst=-0.2244  fracPos=0.03
+    m_tp400        cells=240  mean=-0.1255  best=+0.1559  worst=-0.3342  fracPos=0.03
+    m_tp50         cells=240  mean=-0.1033  best=+0.1425  worst=-0.2319  fracPos=0.03
+    m_tr25         cells=240  mean=-0.0901  best=+0.0165  worst=-0.2589  fracPos=0.03
+    m_tr40         cells=240  mean=-0.1172  best=-0.0157  worst=-0.2971  fracPos=0.00
+  overall unconditional validate cells: mean=-0.1288  fracPos=0.015  best=+0.2582
+  best unconditional structure: ('first', 'p_single', 1440, 'm_tp200') tr=+0.2438 va=+0.2582
+
+=== B. DEPLOYER-FILTER EDGE ACROSS THE WHOLE STRUCTURE GRID ===
+edge = filtered mint-equal mean - same-structure UNCONDITIONAL mean (this is the
+       random-entry / random-mint control demanded by the contract).
+filter                      cells   TRedge   TR+%   VAedge   VA+% VAedgeMed   (ktr,kva)
+burst300s>=2                 2600  -0.0191   0.36  +0.0492   0.75  +0.0269   (22, 26)
+burst600s>=2                 3120  -0.0166   0.28  +0.0334   0.76  +0.0217   (36, 41)
+nprior in[4,12]              2600  -0.0149   0.37  +0.0241   0.62  +0.0107   (30, 27)
+burst1800s>=3                3120  -0.0065   0.38  +0.0208   0.76  +0.0210   (44, 61)
+rate>=5/h                    3120  -0.0085   0.36  +0.0186   0.73  +0.0193   (43, 50)
+burst3600s>=5                3120  -0.0111   0.36  +0.0153   0.72  +0.0160   (45, 53)
+rate<20/h&nprior>=2          3120  -0.0126   0.33  +0.0145   0.77  +0.0158   (67, 83)
+burst300s>=1                 3120  -0.0274   0.25  +0.0145   0.62  +0.0083   (47, 46)
+n>=3&gradrate<0.30           3120  -0.0070   0.38  +0.0134   0.72  +0.0169   (55, 71)
+n>=3&gradrate>=0.05          3120  -0.0083   0.36  +0.0104   0.58  +0.0096   (41, 42)
+priorgrad==0                 3120  +0.0052   0.63  +0.0068   0.60  +0.0047   (119, 135)
+n>=3&gradrate>=0.12          2600  -0.0251   0.31  +0.0064   0.48  -0.0012   (28, 28)
+nprior>=5                    3120  -0.0084   0.38  +0.0051   0.68  +0.0095   (64, 76)
+nprior==0                    3120  +0.0206   0.68  +0.0038   0.54  +0.0016   (85, 96)
+n>=3&gradrate<0.02           2600  -0.0019   0.56  +0.0031   0.57  +0.0081   (24, 28)
+nprior>=2                    3120  -0.0090   0.38  +0.0030   0.61  +0.0057   (80, 99)
+gap<=1800s                   3120  -0.0212   0.31  +0.0025   0.60  +0.0059   (74, 84)
+nprior>=3                    3120  -0.0076   0.38  +0.0011   0.62  +0.0062   (76, 90)
+n>=8&gradrate<0.05           2600  -0.0188   0.46  +0.0007   0.57  +0.0089   (24, 32)
+rate>=1/h                    3120  -0.0125   0.33  +0.0001   0.59  +0.0052   (78, 91)
+ALL                          3120  +0.0000   0.00  +0.0000   0.00  +0.0000   (175, 207)
+n>=8&gradrate<0.12           3120  +0.0036   0.50  -0.0002   0.50  +0.0000   (37, 46)
+nprior in[13,40]             2600  +0.0086   0.50  -0.0007   0.43  -0.0030   (22, 30)
+n>=3&gradrate>=0.02          3120  -0.0140   0.35  -0.0008   0.54  +0.0024   (52, 62)
+tenure>=6h                   3120  -0.0372   0.25  -0.0025   0.43  -0.0049   (31, 27)
+nprior<=1                    3120  +0.0083   0.60  -0.0028   0.37  -0.0052   (95, 108)
+n>=8&gradrate>=0.05          2600  +0.0187   0.42  -0.0029   0.33  -0.0142   (26, 29)
+nprior>=1                    3120  -0.0185   0.30  -0.0034   0.44  -0.0014   (90, 111)
+nprior>=20                   3120  +0.0029   0.50  -0.0047   0.40  -0.0069   (36, 40)
+n>=8&gradrate<0.30           3120  -0.0057   0.39  -0.0054   0.47  -0.0008   (41, 51)
+o60_cold                     3120  -0.0272   0.22  -0.0057   0.38  -0.0086   (32, 28)
+gap<=600s                    3120  -0.0306   0.23  -0.0059   0.55  +0.0031   (58, 69)
+nprior>=8                    3120  -0.0031   0.37  -0.0061   0.45  -0.0020   (50, 61)
+n>=3&gradrate<0.05           3120  -0.0081   0.52  -0.0067   0.49  +0.0000   (35, 48)
+n>=3&gradrate<0.12           3120  +0.0050   0.53  -0.0067   0.46  -0.0028   (48, 62)
+nprior>=12                   3120  +0.0049   0.50  -0.0087   0.41  -0.0046   (42, 56)
+rate<5/h&nprior>=2           3120  -0.0103   0.37  -0.0112   0.32  -0.0084   (37, 49)
+priorgrad>=1                 3120  -0.0111   0.35  -0.0130   0.38  -0.0087   (56, 72)
+gap<=180s                    3120  -0.0336   0.22  -0.0136   0.28  -0.0144   (32, 36)
+burst300s==0&nprior>=3       3120  +0.0035   0.47  -0.0140   0.39  -0.0090   (35, 45)
+n>=8&priorgrad>=1            3120  -0.0005   0.35  -0.0150   0.32  -0.0101   (39, 50)
+burst7200s>=10               3120  -0.0038   0.44  -0.0176   0.36  -0.0119   (29, 46)
+n>=8&gradrate>=0.02          3120  -0.0053   0.33  -0.0186   0.30  -0.0116   (37, 49)
+nprior>=30                   2600  +0.0065   0.48  -0.0194   0.41  -0.0045   (27, 26)
+n>=8&gap<=600                3120  -0.0202   0.26  -0.0225   0.33  -0.0117   (39, 49)
+o15_cold                     3120  -0.0147   0.32  -0.0240   0.21  -0.0238   (37, 43)
+burst1800s>=8                1040  -0.0348   0.18  -0.0252   0.28  -0.0261   (21, 21)
+priorgradLAG>=2              2600  -0.0041   0.39  -0.0292   0.20  -0.0228   (29, 27)
+priorgradLAG>=1              3120  -0.0242   0.29  -0.0376   0.07  -0.0300   (40, 49)
+priorgrad>=3                 3120  -0.0232   0.30  -0.0463   0.09  -0.0344   (34, 33)
+n>=20&priorgrad>=2           1560  +0.0269   0.52  -0.0530   0.23  -0.0245   (23, 28)
+priorgrad>=2                 3120  -0.0137   0.35  -0.0540   0.06  -0.0428   (42, 45)
+
+filters with BOTH train and validate mean edge > 0 and both frac-positive > 0.60:
+   NONE

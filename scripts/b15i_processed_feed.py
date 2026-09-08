@@ -289,6 +289,7 @@ class RawLog:
         self.bytes_written = self.path.stat().st_size if self.path.exists() else 0
         self.rotations = 0
         self._last_space_check = 0.0
+        self._poisoned = None
         if self.path.exists():
             with self.path.open() as existing:
                 self.count = sum(1 for _ in existing)
@@ -296,13 +297,23 @@ class RawLog:
             self.count = 0
 
     def append(self, record):
-        self.count += 1
+        if self._poisoned is not None:
+            raise B15J.RetentionRefused(f"raw log is poisoned after refusal: {self._poisoned}")
         line = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
-        self.handle.write(line)
-        self.handle.flush()
-        self.bytes_written += len(line.encode())
-        self._maybe_check_space()
-        self._maybe_rotate()
+        try:
+            # The reserve protects unrelated evidence.  It must refuse before the first byte, not
+            # after a write has already consumed the space it promised to preserve.
+            self._maybe_check_space()
+            self.handle.write(line)
+            self.handle.flush()
+            self.bytes_written += len(line.encode())
+            self.count += 1
+            self._maybe_rotate()
+        except Exception as exc:
+            self._poisoned = f"{type(exc).__name__}:{str(exc)[:160]}"
+            if not self.handle.closed:
+                self.handle.close()
+            raise
         return self.count
 
     def _maybe_check_space(self):
@@ -311,11 +322,11 @@ class RawLog:
         now = time.monotonic()
         if now - self._last_space_check < self.check_interval_seconds:
             return
-        self._last_space_check = now
         # Raises RetentionRefused, which stops capture. It does not degrade, sample or filter:
         # a feed that keeps writing a thinner record past the guard changes its own coverage at
         # an unmarked moment, and no later census can say when.
         self.retention.assert_free_space(self.path.parent, self.reserve_bytes)
+        self._last_space_check = now
 
     def _maybe_rotate(self):
         if self.retention is None or not self.max_segment_bytes:
@@ -324,16 +335,15 @@ class RawLog:
             return
         # Close first: the seal must be taken over a file nobody is appending to.
         self.handle.close()
-        try:
-            self.retention.rotate(self.path, self.path.parent, self.stem,
-                                  self.retention.verify_preregistration())
-            self.rotations += 1
-            self.bytes_written = 0
-        finally:
-            self.handle = open(self.path, "a", encoding="utf-8")
+        self.retention.rotate(self.path, self.path.parent, self.stem,
+                              self.retention.verify_preregistration())
+        self.rotations += 1
+        self.bytes_written = 0
+        self.handle = open(self.path, "a", encoding="utf-8")
 
     def close(self):
-        self.handle.close()
+        if not self.handle.closed:
+            self.handle.close()
 
 
 # --------------------------------------------------------------------------------------------

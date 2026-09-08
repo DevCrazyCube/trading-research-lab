@@ -1,0 +1,13 @@
+train hits 132 of 120744 combos
+H=5 done, survivors so far 1, t=2.0
+H=15 done, survivors so far 1, t=3.6
+H=30 done, survivors so far 1, t=5.2
+H=60 done, survivors so far 1, t=7.0
+H=120 done, survivors so far 1, t=9.0
+H=240 done, survivors so far 2, t=11.7
+VALIDATE-POSITIVE 2
+STRICT SURVIVORS 0
+--- loose (validate mean>0 only), top 40 by validate mean ---
+ V+0.0246(med+0.0530 lo-0.0789) T+0.0207 | ctrlV+0.1718 pperm=0.0005 stress-0.0833 vn=88 vk=26 | H=240 tp25 add_dn25 ath_ge90 b60_3p
+ V+0.0059(med+0.0042 lo-0.1074) T+0.0069 | ctrlV+0.1146 pperm=0.0110 stress-0.0075 vn=153 vk=26 | H=5 tp25 add_dn25 ath_ge90 b60_3p
+elapsed 11.730382680892944

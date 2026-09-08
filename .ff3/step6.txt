@@ -1,0 +1,4 @@
+curves>=2 trades: perfect chain 2000 broken 0
+breaks hist [(0, 2000)]
+perfect-chain last slot p10 435592412 p50 435689940 p90 435965401 max 437210794
+trades usable in perfect prefixes: 213464

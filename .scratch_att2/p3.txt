@@ -1,0 +1,22 @@
+events 99 ticks 10603
+tick series (mint,t0) 90
+unique tick mints 90
+series lengths min/p25/med/p75/max 2 70 138 167 168
+cadence min (minutes) p10/med/p90 1.5 1.5 1.5
+horizon minutes min/med/max 1.5 220.2 265.2
+ticks with px None 0
+ticks with ctrl_px None 3
+ticks with ctrl None 0
+series with changing ctrl 0
+series with h(mint) in 1,2 70
+  h=1 37  h=2 33
+  of those, ctrl also h12 49
+  h12 series with horizon >= 5m 70
+  h12 series with horizon >= 10m 70
+  h12 series with horizon >= 15m 70
+  h12 series with horizon >= 30m 68
+  h12 series with horizon >= 60m 61
+  h12 series with horizon >= 120m 48
+event keys that appear as tick t0 keys 90
+event mints with any tick series 90
+sample series AK53BkSH [(0.0, 0.0002487, 0.0001509), (1.5, 0.0002278, 0.0001882), (3.0, 0.0002069, 0.0001176), (4.5, 0.0002034, 0.0001249), (6.0, 0.0002131, 9.792e-05), (7.5, 0.0002217, 2.872e-06), (9.0, 0.0002289, 2.148e-06), (10.5, 0.0002291, 2.149e-06), (12.0, 0.0002134, 2.148e-06), (13.5, 0.0002262, 2.147e-06), (15.0, 0.0002071, 2.147e-06), (16.5, 0.0002128, 2.147e-06)]

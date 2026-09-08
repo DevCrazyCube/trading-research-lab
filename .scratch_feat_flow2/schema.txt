@@ -1,0 +1,36 @@
+===== b11a_bodies
+'CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
+None
+'CREATE TABLE raw_transaction (\n            signature TEXT PRIMARY KEY,\n            method TEXT NOT NULL,\n            params_json TEXT NOT NULL,\n            received_at_unix REAL NOT NULL,\n            response_sha256 TEXT NOT NULL,\n            raw_zlib BLOB NOT NULL\n        )'
+None
+'CREATE TABLE raw_block_signatures (\n            slot INTEGER PRIMARY KEY,\n            method TEXT NOT NULL,\n            params_json TEXT NOT NULL,\n            received_at_unix REAL NOT NULL,\n            response_sha256 TEXT NOT NULL,\n            raw_zlib BLOB NOT NULL\n        )'
+'CREATE TABLE transaction_coordinate (\n            signature TEXT PRIMARY KEY,\n            slot INTEGER NOT NULL,\n            transaction_index INTEGER NOT NULL,\n            UNIQUE(slot, transaction_index),\n            FOREIGN KEY(slot) REFERENCES raw_block_signatures(slot)\n        )'
+None
+None
+'CREATE TABLE raw_boundary_response (\n            request_key TEXT PRIMARY KEY,\n            program_id TEXT NOT NULL,\n            method TEXT NOT NULL,\n            params_json TEXT NOT NULL,\n            received_at_unix REAL NOT NULL,\n            response_sha256 TEXT NOT NULL,\n            raw_zlib BLOB NOT NULL\n        )'
+None
+"CREATE TABLE program_version (\n            program_id TEXT NOT NULL,\n            from_slot INTEGER NOT NULL,          -- inclusive\n            to_slot INTEGER NOT NULL,            -- inclusive\n            idl_path TEXT,                       -- NULL only for a KNOWN-UNCOVERED interval\n            idl_sha256 TEXT,\n            deploy_slot INTEGER,                 -- the deployment that opened this interval\n            evidence_key TEXT,                   -- -> raw_boundary_response.request_key\n            coverage TEXT NOT NULL CHECK(coverage IN ('covered','uncovered')),\n            PRIMARY KEY(program_id, from_slot),\n            CHECK(to_slot >= from_slot)\n        )"
+None
+'CREATE TABLE instruction (\n            slot INTEGER NOT NULL,\n            transaction_index INTEGER NOT NULL,\n            outer_index INTEGER NOT NULL,\n            inner_index INTEGER NOT NULL,\n            signature TEXT NOT NULL,\n            program_id TEXT NOT NULL,\n            discriminator TEXT,\n            idl_name TEXT,\n            target INTEGER NOT NULL CHECK(target IN (0,1)),\n            accounts_json TEXT,\n            data_len INTEGER,\n            PRIMARY KEY(slot, transaction_index, outer_index, inner_index)\n        )'
+None
+'CREATE TABLE reserve_observation (\n            slot INTEGER NOT NULL,\n            transaction_index INTEGER NOT NULL,\n            outer_index INTEGER NOT NULL,\n            inner_index INTEGER NOT NULL,\n            bonding_curve TEXT NOT NULL,\n            virtual_quote_before INTEGER, virtual_token_before INTEGER,\n            real_quote_before INTEGER,    real_token_before INTEGER,\n            virtual_quote_after INTEGER,  virtual_token_after INTEGER,\n            real_quote_after INTEGER,     real_token_after INTEGER,\n            evidence TEXT NOT NULL,\n            PRIMARY KEY(slot, transaction_index, outer_index, inner_index, bonding_curve)\n        )'
+None
+'CREATE TABLE classification_failure (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            signature TEXT,\n            slot INTEGER,\n            transaction_index INTEGER,\n            outer_index INTEGER,\n            inner_index INTEGER,\n            program_id TEXT,\n            discriminator TEXT,\n            reason TEXT NOT NULL,\n            context_json TEXT,\n            -- Machine-readable failure class. Written explicitly at every insert site so the\n            -- downstream coverage gate does not have to infer a class from prose. NULL means a row\n            -- written before this column existed; B9f REFUSES those rather than guessing.\n            category TEXT\n        )'
+'CREATE TABLE sqlite_sequence(name,seq)'
+'CREATE INDEX instruction_signature ON instruction(signature)'
+'CREATE INDEX instruction_program ON instruction(program_id)'
+===== window_labels
+'CREATE TABLE window_label (\n            bonding_curve TEXT PRIMARY KEY,\n            mint TEXT NOT NULL,\n            creator TEXT,\n            create_slot INTEGER NOT NULL,\n            block_time INTEGER,\n            complete INTEGER,\n            account_missing INTEGER NOT NULL,\n            status TEXT NOT NULL,\n            creator_onchain TEXT,\n            virtual_token_reserves INTEGER,\n            real_token_reserves INTEGER,\n            data_len INTEGER,\n            fetched_at_unix REAL NOT NULL\n        )'
+None
+'CREATE INDEX ix_wl_creator ON window_label(creator)'
+'CREATE INDEX ix_wl_slot ON window_label(create_slot)'
+'CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
+None
+===== b11a_trade_attribution
+'CREATE TABLE trade_attribution(signature text,slot int,txi int,oi int,ii int,\n  idl_name text,program_id text,blocktime int,payer text,trader text,is_buy int,mint text,\n  sol_amount int,token_amount int,virtual_sol int,virtual_token int,user_acct_index int)'
+'CREATE INDEX ta_trader on trade_attribution(trader)'
+'CREATE INDEX ta_mint2 on trade_attribution(mint)'
+===== grad_ohlcv
+'CREATE TABLE ohlcv(\n        mint text primary key, pool text, n_bars int, first_ts int, last_ts int,\n        bars_json text, fetched_at int, status text)'
+None
+ohlcv count (672,)

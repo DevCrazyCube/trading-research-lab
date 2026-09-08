@@ -1,0 +1,90 @@
+=== RESPONSE SURFACE: TRAIN excess by EXIT family (all 32670 cells of stage-3b grid) ===
+  exit=('BR', '240')      cells= 8815 medianTexc=  +5.66pp  frac>0= 88.2%  medianTmedian=  -9.28%
+  exit=('BR', '60')       cells= 8825 medianTexc=  +5.65pp  frac>0= 89.4%  medianTmedian=  -6.74%
+  exit=('H', '120')       cells=  255 medianTexc= +31.18pp  frac>0=100.0%  medianTmedian= -25.06%
+  exit=('H', '15')        cells=  385 medianTexc= +57.00pp  frac>0=100.0%  medianTmedian=  -5.59%
+  exit=('H', '240')       cells=  255 medianTexc= +14.77pp  frac>0=100.0%  medianTmedian= -25.57%
+  exit=('H', '30')        cells=  335 medianTexc= +62.04pp  frac>0=100.0%  medianTmedian= -13.37%
+  exit=('H', '5')         cells=  610 medianTexc= +43.65pp  frac>0=100.0%  medianTmedian=  -6.41%
+  exit=('H', '60')        cells=  255 medianTexc= +34.52pp  frac>0=100.0%  medianTmedian= -16.89%
+  exit=('SC', '240')      cells=  765 medianTexc= +12.17pp  frac>0=100.0%  medianTmedian= -25.57%
+  exit=('SC', '60')       cells=  765 medianTexc= +22.03pp  frac>0=100.0%  medianTmedian= -14.79%
+  exit=('TP', '15')       cells= 3085 medianTexc=  +2.42pp  frac>0= 67.4%  medianTmedian=  -3.35%
+  exit=('TP', '240')      cells= 2630 medianTexc=  +2.72pp  frac>0= 63.8%  medianTmedian= -10.11%
+  exit=('TP', '60')       cells= 2700 medianTexc=  +1.49pp  frac>0= 62.9%  medianTmedian=  -3.37%
+  exit=('TR', '240')      cells= 1495 medianTexc= +40.37pp  frac>0= 99.2%  medianTmedian=  -6.23%
+  exit=('TR', '60')       cells= 1495 medianTexc= +42.55pp  frac>0= 99.4%  medianTmedian=  -4.54%
+
+=== TRAIN excess by POSITION structure ===
+  ('ADD', 0.2)     cells= 6534 medianTexc=  +6.53pp frac>0= 86.4%
+  ('ADD', 0.4)     cells= 6534 medianTexc=  +5.74pp frac>0= 84.5%
+  ('FULL',)        cells= 6534 medianTexc=  +9.55pp frac>0= 87.1%
+  ('PYR', 0.25)    cells= 6534 medianTexc=  +7.89pp frac>0= 88.5%
+  ('PYR', 1.0)     cells= 6534 medianTexc=  +4.69pp frac>0= 77.7%
+
+=== TRAIN excess by FEATURE appearing in the triple ===
+  lvol         cells=  5825 medianTexc= +10.17pp
+  pxrel        cells=  2605 medianTexc=  +9.10pp
+  r15          cells= 14600 medianTexc=  +8.79pp
+  r5           cells=  2690 medianTexc=  +8.10pp
+  r1           cells=  6540 medianTexc=  +7.63pp
+  body         cells=  6165 medianTexc=  +7.48pp
+  hi60         cells=  5790 medianTexc=  +6.79pp
+  age          cells=  2800 medianTexc=  +6.47pp
+  r60          cells=  5370 medianTexc=  +6.38pp
+  rv15         cells= 11465 medianTexc=  +6.32pp
+  pgrad        cells=  4175 medianTexc=  +6.11pp
+  wickup       cells=  6485 medianTexc=  +6.09pp
+  lmcap        cells=  8795 medianTexc=  +5.37pp
+  dd           cells=  6390 medianTexc=  +4.75pp
+  gap          cells=  5290 medianTexc=  +4.62pp
+  pcreate      cells=  1510 medianTexc=  +3.69pp
+  vol15        cells=   690 medianTexc=  +1.92pp
+  lret15       cells=   825 medianTexc=  +1.40pp
+
+=== VALIDATE: sign agreement of the 400 train-best cells ===
+  validate mean>0 : 62.7%   validate excess>0 : 59.5%   validate MEDIAN>0 : 0.0%
+  median validate mean +4.09%  median validate excess +2.66pp  median validate median -11.88%
+  corr(train excess, validate excess) = -0.188
+
+=== VALIDATE excess by exit family (the 400) ===
+  TR   n= 233 medianVexc=  +3.51pp frac>0= 72.5%
+  H    n= 167 medianVexc=  -5.10pp frac>0= 41.3%
+
+=== CONCENTRATION STRESS TEST on top-20 by p (drop single best mint) ===
+  lvolle0+rv15ge0+r1le2                ('TR', 0.15, 60)   ('FULL',)    k= 41 V=  +40.1% drop1=  +25.9% drop2=  +17.5% ctrl= +10.0% top1share= 37.0%
+  lvolle0+rv15ge0+r1le2                ('TR', 0.15, 60)   ('PYR', 0.25) k= 41 V=  +35.4% drop1=  +22.8% drop2=  +15.6% ctrl= +10.0% top1share= 37.0%
+  r5le2+lvolle0+wickupge0              ('TR', 0.15, 60)   ('FULL',)    k= 47 V=  +41.2% drop1=  +25.6% drop2=  +15.1% ctrl= +10.0% top1share= 39.2%
+  r15le0+hi60le0+rv15ge2               ('TR', 0.35, 60)   ('FULL',)    k= 36 V=  +23.6% drop1=  +12.7% drop2=   +6.5% ctrl=  -3.5% top1share= 47.5%
+  r15le0+lvolle0+r1le2                 ('TR', 0.15, 60)   ('FULL',)    k= 42 V=  +44.5% drop1=  +23.2% drop2=  +15.0% ctrl= +10.0% top1share= 49.2%
+  hi60le0+rv15ge2+wickupge0            ('TR', 0.35, 60)   ('FULL',)    k= 38 V=  +64.1% drop1=   +9.3% drop2=   +4.9% ctrl=  -3.5% top1share= 85.8%
+  r15le0+rv15ge2+pgradge0              ('TR', 0.35, 60)   ('FULL',)    k= 36 V=  +23.6% drop1=  +12.7% drop2=   +6.5% ctrl=  -3.5% top1share= 47.5%
+  r15le0+rv15ge2+pgradge0              ('TR', 0.35, 240)  ('FULL',)    k= 36 V=  +23.3% drop1=  +12.5% drop2=   +6.3% ctrl=  -3.0% top1share= 48.0%
+  r15le0+hi60le0+rv15ge2               ('TR', 0.35, 240)  ('FULL',)    k= 36 V=  +23.3% drop1=  +12.5% drop2=   +6.3% ctrl=  -3.0% top1share= 48.0%
+  lvolle0+rv15ge0+r1le2                ('TR', 0.15, 240)  ('FULL',)    k= 41 V=  +39.2% drop1=  +25.0% drop2=  +16.7% ctrl= +13.0% top1share= 37.8%
+  r15le0+rv15ge2+gapge0                ('TR', 0.35, 240)  ('FULL',)    k= 36 V=  +23.3% drop1=  +12.5% drop2=   +6.3% ctrl=  -3.0% top1share= 48.0%
+  lvolle0+rv15ge0+r1le2                ('H', 5)           ('FULL',)    k= 41 V=  +64.4% drop1=  +16.7% drop2=   +5.2% ctrl= -14.6% top1share= 74.7%
+  r15le0+rv15ge2+gapge0                ('TR', 0.35, 60)   ('FULL',)    k= 36 V=  +23.6% drop1=  +12.7% drop2=   +6.5% ctrl=  -3.5% top1share= 47.5%
+  hi60le0+rv15ge2+wickupge0            ('TR', 0.35, 240)  ('FULL',)    k= 38 V=  +64.0% drop1=   +9.2% drop2=   +4.8% ctrl=  -3.0% top1share= 86.0%
+  r60le0+lmcaple2+rv15ge0              ('TR', 0.15, 60)   ('PYR', 0.25) k= 41 V=  +31.1% drop1=  +20.4% drop2=  +11.6% ctrl= +10.0% top1share= 35.8%
+  lmcaple2+lvolle0+rv15ge0             ('TR', 0.15, 60)   ('PYR', 0.25) k= 43 V=  +26.4% drop1=  +18.3% drop2=  +11.4% ctrl= +10.0% top1share= 32.3%
+  r60le0+lmcaple2+rv15ge0              ('TR', 0.15, 60)   ('FULL',)    k= 41 V=  +33.7% drop1=  +21.7% drop2=  +11.6% ctrl= +10.0% top1share= 37.2%
+  hi60le0+lmcaple2+rv15ge0             ('TR', 0.15, 60)   ('PYR', 0.25) k= 44 V=  +25.6% drop1=  +17.7% drop2=  +11.0% ctrl= +10.0% top1share= 32.4%
+  r15le0+lmcaple2+rv15ge0              ('TR', 0.15, 60)   ('FULL',)    k= 41 V=  +30.3% drop1=  +20.6% drop2=  +10.7% ctrl= +10.0% top1share= 33.7%
+  lmcaple2+rv15ge0+pgradge0            ('TR', 0.15, 60)   ('PYR', 0.25) k= 44 V=  +25.6% drop1=  +17.6% drop2=  +11.0% ctrl= +10.0% top1share= 32.5%
+
+=== SAME STRESS on the ALL-BARS control (random entries) for reference ===
+  ctrl ('TR', 0.15, 60)   k=206 mean=  +10.0% drop1=   +4.6% drop2=   +2.7% median=  -2.3% top1share= 53.9%
+  ctrl ('TR', 0.35, 60)   k=206 mean=   -3.5% drop1=   -5.1% drop2=   -6.0% median=  -8.9% top1share=-44.2%
+  ctrl ('H', 5)           k=206 mean=  -14.6% drop1=  -15.4% drop2=  -15.9% median= -10.0% top1share= -5.2%
+  ctrl ('H', 15)          k=206 mean=  +24.8% drop1=  -19.3% drop2=  -22.0% median= -17.6% top1share=177.5%
+
+=== ROBUSTNESS of top-8: toll 2.5%, dropout -30/-100, and MEDIAN ===
+  lvolle0+rv15ge0+r1le2              ('TR', 0.15, 60) toll1.14/drop-0.30:   +40.5%  toll1.14/drop-1.00:   +38.8%  toll2.50/drop-0.50:   +38.7%
+  lvolle0+rv15ge0+r1le2              ('TR', 0.15, 60) toll1.14/drop-0.30:   +35.6%  toll1.14/drop-1.00:   +34.8%  toll2.50/drop-0.50:   +34.4%
+  r5le2+lvolle0+wickupge0            ('TR', 0.15, 60) toll1.14/drop-0.30:   +41.2%  toll1.14/drop-1.00:   +41.2%  toll2.50/drop-0.50:   +39.8%
+  r15le0+hi60le0+rv15ge2             ('TR', 0.35, 60) toll1.14/drop-0.30:   +25.1%  toll1.14/drop-1.00:   +19.8%  toll2.50/drop-0.50:   +22.2%
+  r15le0+lvolle0+r1le2               ('TR', 0.15, 60) toll1.14/drop-0.30:   +45.0%  toll1.14/drop-1.00:   +43.3%  toll2.50/drop-0.50:   +43.2%
+  hi60le0+rv15ge2+wickupge0          ('TR', 0.35, 60) toll1.14/drop-0.30:   +64.8%  toll1.14/drop-1.00:   +62.3%  toll2.50/drop-0.50:   +62.8%
+  r15le0+rv15ge2+pgradge0            ('TR', 0.35, 60) toll1.14/drop-0.30:   +25.1%  toll1.14/drop-1.00:   +19.8%  toll2.50/drop-0.50:   +22.2%
+  r15le0+rv15ge2+pgradge0            ('TR', 0.35, 240) toll1.14/drop-0.30:   +24.8%  toll1.14/drop-1.00:   +19.6%  toll2.50/drop-0.50:   +22.0%

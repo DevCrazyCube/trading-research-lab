@@ -1,0 +1,10 @@
+train-positive 3-way (cell,structure) combos: 1119 ; all sized combos: 15909
+validate baselines: (15, 0.2, -0.25, None, 'flat') -0.0968 | (15, None, None, 0.3, 'flat') -0.0806 | (15, None, None, None, 'flat') -0.1416 | (30, 0.3, -0.35, None, 'flat') -0.1199 | (30, None, None, None, 'flat') -0.1748 | (5, None, None, None, 'flat') -0.1088 | (60, None, None, None, 'flat') -0.1998
+TRAIN-POSITIVE cells (all)         validated=1119  frac wmean>0 on VALIDATE = 0.236  mean va_wmean=-0.0309  median va_wmean=-0.0270  mean edge vs ctrl=+0.0829
+TRAIN-POSITIVE top200 by t-vs-0    validated= 200  frac wmean>0 on VALIDATE = 0.310  mean va_wmean=-0.0246  median va_wmean=-0.0216  mean edge vs ctrl=+0.0802
+TRAIN-POSITIVE top50 by t-vs-0     validated=  50  frac wmean>0 on VALIDATE = 0.420  mean va_wmean=-0.0204  median va_wmean=-0.0196  mean edge vs ctrl=+0.0820
+RANDOM 3-way cells (control)       validated=1500  frac wmean>0 on VALIDATE = 0.078  mean va_wmean=-0.0767  median va_wmean=-0.0581  mean edge vs ctrl=+0.0527
+TRAIN-NEGATIVE cells (control)     validated=1500  frac wmean>0 on VALIDATE = 0.069  mean va_wmean=-0.0781  median va_wmean=-0.0574  mean edge vs ctrl=+0.0523
+
+If selection carried real information, TRAIN-POSITIVE would replicate far above RANDOM.
+done t=32.3

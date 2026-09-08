@@ -1,0 +1,1191 @@
+{
+ "theme": "rates / treasury term-structure & curve structure",
+ "date": "2026-08-23",
+ "verdict": "NOISE \u2014 zero survivors, and one transferable structural finding",
+ "headline": "The Treasury complex has the programme's best published tether (the US Treasury constant-maturity curve explains 89-92% of a Treasury ETF's daily variance) and it is useless, because FRED H.15 is a 15:30 ET snapshot against a 16:00 ET ETF print. A published tether must be SYNCHRONOUS, not merely published.",
+ "windows": {
+  "design": [
+   "2010-08-06",
+   "2020-12-31"
+  ],
+  "holdout": [
+   "2021-01-01",
+   "2026-08-18"
+  ]
+ },
+ "n_formulas": 33,
+ "families": {
+  "A ladder-residual": 8,
+  "B sibling": 9,
+  "C breakeven-gap": 6,
+  "D roll-down": 4,
+  "F butterfly-gap": 2,
+  "G real-curve ladder": 2,
+  "E decoy": 2
+ },
+ "nulls": {
+  "analytic_bar_1sided_sqrt2lnN": 2.6444309639188845,
+  "analytic_bar_2sided_sqrt2ln2N": 2.8947036953810747,
+  "placebo_design": {
+   "draws": 400,
+   "p50": 2.8259043368523526,
+   "p95": 4.0493551390682185,
+   "mean": 2.8832639212476217,
+   "max": 4.962187345955894
+  },
+  "placebo_holdout": {
+   "draws": 400,
+   "p50": 2.3089917976717143,
+   "p95": 3.393400084440191,
+   "mean": 2.397978510308893,
+   "max": 4.451810719053656
+  },
+  "bar_used": 4.0493551390682185,
+  "placebo_over_analytic_ratio": 1.3988841571348252,
+  "in_annualised_sharpe_on_median_design_book": {
+   "median_n_days": 1960,
+   "analytic_bar": 1.0379498016796356,
+   "placebo_mean": 1.0338478580810475,
+   "placebo_p95": 1.451971533470876
+  },
+  "placebo_construction": "XS books: per-day permutation of the signal across panel slots with duration weights left attached to slots (same gross/turnover/cost/covariance, only the signal-to-instrument assignment destroyed). TS books: circular shift of the signal by a uniform offset in [63, T-63]. Rotate-the-returns was NOT used; that null is broken."
+ },
+ "gate_ledger": {
+  "rho1_delta_spread_design": {
+   "ladder_resid:SHY": -0.3958451239855958,
+   "ladder_resid:VGSH": -0.4223883468856203,
+   "ladder_resid:SCHO": -0.36768359528121985,
+   "ladder_resid:IEI": -0.43986507842191463,
+   "ladder_resid:VGIT": -0.4100796412312031,
+   "ladder_resid:SCHR": -0.41560655525093804,
+   "ladder_resid:IEF": -0.43434343432272005,
+   "ladder_resid:TLH": -0.40996681171403426,
+   "ladder_resid:TLT": -0.41913465777086906,
+   "ladder_resid:VGLT": -0.40719582984867775,
+   "ladder_resid:SPTL": -0.4176588265780655,
+   "ladder_resid:EDV": -0.43094396673935403,
+   "ladder_resid:ZROZ": -0.4621234653709619,
+   "sibling:EDV/ZROZ": -0.44182781265568416,
+   "sibling:TLT/VGLT": -0.45819943077429653,
+   "sibling:TLT/SPTL": -0.4432598410181166,
+   "sibling:IEI/VGIT": -0.395276962350098,
+   "sibling:SHY/VGSH": -0.37460739634991447,
+   "sibling:SHY/SCHO": -0.36645233055231635,
+   "sibling:IEI/SCHR": -0.39463139430306904,
+   "breakeven:TIP": 0.23288291703110375,
+   "breakeven:STIP": 0.17390431539277304,
+   "breakeven:LTPZ": 0.1843040323941162,
+   "real_ladder:STIP": -0.218646438942849,
+   "real_ladder:SCHP": -0.21440639059536973,
+   "real_ladder:LTPZ": -0.3287661720574166,
+   "butterfly:IEF_SHY_TLT": -0.11480453169157706
+  },
+  "cleared_gross_bar": 18,
+  "of_which_failed_rho1_bounce_gate": 16,
+  "entitled_to_holdout": [
+   "G1_realladder_resid_fade_5d"
+  ],
+  "survivors": []
+ },
+ "anchor_clock_finding": {
+  "hypothesis": "The A/G-family rho1 ~ -0.42 is NOT bid-ask bounce; it is the FRED H.15 15:30 ET anchor being stale against a 16:00 ET ETF print.",
+  "P1_replace_anchor_with_a_1600_clock": {
+   "TLT": {
+    "cross_anchor": "IEF",
+    "rho1_raw_return": -0.03364631535900204,
+    "rho1_resid_vs_published_1530_curve": -0.41913465777086906,
+    "rho1_resid_vs_1600_etf_anchor": -0.0003266514405161325
+   },
+   "EDV": {
+    "cross_anchor": "TLT",
+    "rho1_raw_return": -0.000784847745349118,
+    "rho1_resid_vs_published_1530_curve": -0.43094396673935403,
+    "rho1_resid_vs_1600_etf_anchor": -0.3491462462735723
+   },
+   "TLH": {
+    "cross_anchor": "IEF",
+    "rho1_raw_return": -0.030885067877610865,
+    "rho1_resid_vs_published_1530_curve": -0.40996681171403426,
+    "rho1_resid_vs_1600_etf_anchor": -0.18283175083595032
+   },
+   "IEF": {
+    "cross_anchor": "TLT",
+    "rho1_raw_return": -0.04772312719444603,
+    "rho1_resid_vs_published_1530_curve": -0.43434343432272005,
+    "rho1_resid_vs_1600_etf_anchor": -0.009377668831034304
+   },
+   "IEI": {
+    "cross_anchor": "IEF",
+    "rho1_raw_return": -0.037778364827400226,
+    "rho1_resid_vs_published_1530_curve": -0.43986507842191463,
+    "rho1_resid_vs_1600_etf_anchor": -0.06838463078768042
+   },
+   "SHY": {
+    "cross_anchor": "IEI",
+    "rho1_raw_return": -0.09262864804081822,
+    "rho1_resid_vs_published_1530_curve": -0.3958451239855958,
+    "rho1_resid_vs_1600_etf_anchor": -0.28038968528910935
+   }
+  },
+  "P2_roll_implied_tracks_the_missing_half_hour": {
+   "SHY": {
+    "daily_sigma_bp": 5.776120684868453,
+    "predicted_30min_slice_bp": 1.602007638658568,
+    "roll_implied_half_spread_bp": 1.9035100771918354,
+    "charged_half_spread_bp": 1.2,
+    "median_duration_yrs": 1.5987360143809854,
+    "r2_of_published_curve": 0.7257609736979757
+   },
+   "IEI": {
+    "daily_sigma_bp": 19.772454949511122,
+    "predicted_30min_slice_bp": 5.483892320174161,
+    "roll_implied_half_spread_bp": 3.62372795447024,
+    "charged_half_spread_bp": 2.5,
+    "median_duration_yrs": 4.212584991358126,
+    "r2_of_published_curve": 0.9236714145699662
+   },
+   "IEF": {
+    "daily_sigma_bp": 38.06923453801322,
+    "predicted_30min_slice_bp": 10.558505934190102,
+    "roll_implied_half_spread_bp": 7.413223002736728,
+    "charged_half_spread_bp": 1.2,
+    "median_duration_yrs": 7.255692533005333,
+    "r2_of_published_curve": 0.9127331511672709
+   },
+   "TLH": {
+    "daily_sigma_bp": 56.96026580895912,
+    "predicted_30min_slice_bp": 15.797935310635419,
+    "roll_implied_half_spread_bp": 12.062627551526562,
+    "charged_half_spread_bp": 8.0,
+    "median_duration_yrs": 9.909807958515506,
+    "r2_of_published_curve": 0.8906527571401202
+   },
+   "TLT": {
+    "daily_sigma_bp": 92.28634679111642,
+    "predicted_30min_slice_bp": 25.59562733697091,
+    "roll_implied_half_spread_bp": 19.485249808487428,
+    "charged_half_spread_bp": 0.7,
+    "median_duration_yrs": 17.14169728201793,
+    "r2_of_published_curve": 0.8936836182271541
+   },
+   "EDV": {
+    "daily_sigma_bp": 130.3646986126255,
+    "predicted_30min_slice_bp": 36.15666195063311,
+    "roll_implied_half_spread_bp": 24.446471468460512,
+    "charged_half_spread_bp": 4.0,
+    "median_duration_yrs": 24.62416536062533,
+    "r2_of_published_curve": 0.9184341687887281
+   }
+  },
+  "P2_fit": {
+   "corr_roll_vs_predicted_30min_slice": 0.9952211624771258,
+   "corr_roll_vs_charged_bidask": 0.20989874785038834,
+   "mean_ratio_roll_over_predicted": 0.7920104999552929,
+   "mean_ratio_roll_over_charged": 7.444825480183314
+  }
+ },
+ "infrastructure_bug": {
+  "file": "scripts/trading_bot/newterr_ratescredit.py:70",
+  "defect": "_to_date adds 43200s to a Yahoo timestamp already stamped at the session open (13:30 UTC), rolling every daily bar forward one day.",
+  "measured_impact": {
+   "corr_rTLT_dDGS20_buggy": -0.2,
+   "corr_rTLT_dDGS20_correct": -0.744,
+   "implied_TLT_duration_buggy_yrs": 3.72,
+   "implied_TLT_duration_correct_yrs": 13.85
+  },
+  "blast_radius": "that script has never written a result file; no published finding needs revision",
+  "recommendation": "fix or delete before newterr_ratescredit.py is ever run; ratescredit_cache is shared"
+ },
+ "rows": [
+  {
+   "name": "A8_ladderwide_resid_fade_5d",
+   "family": "ladder_resid",
+   "kind": "xs",
+   "rho1_worst_leg": -0.4621234653709619,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 4.859529960393888,
+    "gross_t": 14.24041421217256,
+    "net_sharpe": -12.500426025085071,
+    "net_t": -36.631370909668085,
+    "breakeven_hs_bp": 1.1042566167002017,
+    "turnover": 1.1264611693983033,
+    "n_days": 2164
+   },
+   "design_lag2_gross_t": 0.13259938976366856,
+   "design_lag0_gross_t": -18.94894034007829,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 1.13152207867205,
+    "gross_t": 2.678428826716098,
+    "net_sharpe": -4.895897120508044,
+    "net_t": -11.589090683581551,
+    "breakeven_hs_bp": 0.507375148385606,
+    "turnover": 1.010392443148268,
+    "n_days": 1412
+   },
+   "mechanism": "Every Treasury wrapper is a claim on one segment of the SAME published constant-maturity curve, and the US Treasury publishes that curve every business day for free.  Strip out each wrapper's move that its OWN published key rate explains and what remains is the wrapper dislocating from the published claim.  Index funds are mandate-locked to their maturity bucket and cannot move to the cheap segment; only authorised participants can, and only at T+1 with a real Treasury basket to source, so the dislocation is closed with a lag.  Widened to all 13 nominal wrappers.  FLAGGED: this panel contains sponsor siblings, so part of any score here is sibling tick bounce rather than a curve-segment dislocation."
+  },
+  {
+   "name": "E1_decoy_BIL_vs_publishedbill",
+   "family": "decoy",
+   "kind": "ts",
+   "rho1_worst_leg": null,
+   "bounce_gate": null,
+   "design": {
+    "gross_sharpe": 4.195641549146957,
+    "gross_t": 12.86142105091723,
+    "net_sharpe": -10.656718680860337,
+    "net_t": -32.6673631124629,
+    "breakeven_hs_bp": 0.32377954194618525,
+    "turnover": 0.7411317567567568,
+    "n_days": 2368
+   },
+   "design_lag2_gross_t": 0.5384382504099178,
+   "design_lag0_gross_t": -14.05080571421421,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 2.7856132344842512,
+    "gross_t": 6.5938322618333425,
+    "net_sharpe": -10.565317420200916,
+    "net_t": -25.009190076858992,
+    "breakeven_hs_bp": 0.17998867291911452,
+    "turnover": 0.7011331444759207,
+    "n_days": 1412
+   },
+   "mechanism": "NEGATIVE CONTROL.  BIL has essentially no duration, so its return IS the published 3-month bill yield over 252 and nothing else.  Any 'residual' here is pure tick bounce.  If this scores, a high gross Sharpe in this complex means bounce, not edge."
+  },
+  {
+   "name": "B8_sib_pool_band10",
+   "family": "sibling",
+   "kind": "xs",
+   "rho1_worst_leg": -0.45819943077429653,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 4.575022146725294,
+    "gross_t": 11.973285162676271,
+    "net_sharpe": -5.979151857732292,
+    "net_t": -15.648031403480095,
+    "breakeven_hs_bp": 1.997991484417413,
+    "turnover": 0.7931048427330126,
+    "n_days": 1726
+   },
+   "design_lag2_gross_t": -0.010940992750551546,
+   "design_lag0_gross_t": -14.935871535575087,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 2.701795368175672,
+    "gross_t": 6.098663821768939,
+    "net_sharpe": -7.820103719586899,
+    "net_t": -17.652033976699148,
+    "breakeven_hs_bp": 0.76816856942311,
+    "turnover": 0.6843265427281151,
+    "n_days": 1284
+   },
+   "mechanism": "Two wrappers on the SAME published curve segment from different sponsors with different authorised-participant sets.  The claim is identical; only the flow differs, so divergence is flow and creation/redemption restores it.  Pooled across all seven sponsor pairs."
+  },
+  {
+   "name": "A1_ladder_resid_fade_1d",
+   "family": "ladder_resid",
+   "kind": "xs",
+   "rho1_worst_leg": -0.4621234653709619,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 3.1950864969756703,
+    "gross_t": 9.37156212178055,
+    "net_sharpe": -8.291218518227065,
+    "net_t": -24.319112951205305,
+    "breakeven_hs_bp": 0.6058572993852339,
+    "turnover": 1.5652111179521122,
+    "n_days": 2168
+   },
+   "design_lag2_gross_t": 0.11307515800494046,
+   "design_lag0_gross_t": -22.724426406847563,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.7744676630052885,
+    "gross_t": 1.8332443997798702,
+    "net_sharpe": -5.303410153973773,
+    "net_t": -12.553715834668397,
+    "breakeven_hs_bp": 0.24634077429465445,
+    "turnover": 1.5214594023807027,
+    "n_days": 1412
+   },
+   "mechanism": "Every Treasury wrapper is a claim on one segment of the SAME published constant-maturity curve, and the US Treasury publishes that curve every business day for free.  Strip out each wrapper's move that its OWN published key rate explains and what remains is the wrapper dislocating from the published claim.  Index funds are mandate-locked to their maturity bucket and cannot move to the cheap segment; only authorised participants can, and only at T+1 with a real Treasury basket to source, so the dislocation is closed with a lag."
+  },
+  {
+   "name": "A2_ladder_resid_fade_3d",
+   "family": "ladder_resid",
+   "kind": "xs",
+   "rho1_worst_leg": -0.4621234653709619,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 3.131780859255452,
+    "gross_t": 9.181641280675223,
+    "net_sharpe": -5.585133072962285,
+    "net_t": -16.374290119700913,
+    "breakeven_hs_bp": 0.8289949459008302,
+    "turnover": 1.1338311708517417,
+    "n_days": 2166
+   },
+   "design_lag2_gross_t": -1.1194139512382215,
+   "design_lag0_gross_t": -13.328462793769848,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.8351116146041603,
+    "gross_t": 1.9767948538010784,
+    "net_sharpe": -3.5942405425229773,
+    "net_t": -8.50793604535173,
+    "breakeven_hs_bp": 0.3696026860273902,
+    "turnover": 1.0666010970669542,
+    "n_days": 1412
+   },
+   "mechanism": "Every Treasury wrapper is a claim on one segment of the SAME published constant-maturity curve, and the US Treasury publishes that curve every business day for free.  Strip out each wrapper's move that its OWN published key rate explains and what remains is the wrapper dislocating from the published claim.  Index funds are mandate-locked to their maturity bucket and cannot move to the cheap segment; only authorised participants can, and only at T+1 with a real Treasury basket to source, so the dislocation is closed with a lag."
+  },
+  {
+   "name": "A3_ladder_resid_fade_5d",
+   "family": "ladder_resid",
+   "kind": "xs",
+   "rho1_worst_leg": -0.4621234653709619,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 2.453101454062257,
+    "gross_t": 7.188592537764255,
+    "net_sharpe": -5.727123946006056,
+    "net_t": -16.782820128753333,
+    "breakeven_hs_bp": 0.7002791306018568,
+    "turnover": 1.0418343574087428,
+    "n_days": 2164
+   },
+   "design_lag2_gross_t": 1.0330187031173956,
+   "design_lag0_gross_t": -12.422779233554593,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.2825300532391436,
+    "gross_t": 0.6687776166926053,
+    "net_sharpe": -3.606660068083912,
+    "net_t": -8.537334336294125,
+    "breakeven_hs_bp": 0.14386316977505773,
+    "turnover": 0.9372197010971152,
+    "n_days": 1412
+   },
+   "mechanism": "Every Treasury wrapper is a claim on one segment of the SAME published constant-maturity curve, and the US Treasury publishes that curve every business day for free.  Strip out each wrapper's move that its OWN published key rate explains and what remains is the wrapper dislocating from the published claim.  Index funds are mandate-locked to their maturity bucket and cannot move to the cheap segment; only authorised participants can, and only at T+1 with a real Treasury basket to source, so the dislocation is closed with a lag."
+  },
+  {
+   "name": "B9_sib_pool_band20",
+   "family": "sibling",
+   "kind": "xs",
+   "rho1_worst_leg": -0.45819943077429653,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 4.638894680438112,
+    "gross_t": 7.013349532948393,
+    "net_sharpe": -2.0594580613593787,
+    "net_t": -3.113607923385209,
+    "breakeven_hs_bp": 3.3108672286833816,
+    "turnover": 0.7688509099545225,
+    "n_days": 576
+   },
+   "design_lag2_gross_t": -0.03999385352545072,
+   "design_lag0_gross_t": -9.997791227798277,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 2.519971953973906,
+    "gross_t": 3.4451321901930485,
+    "net_sharpe": -3.1480342160178068,
+    "net_t": -4.3037756814433115,
+    "breakeven_hs_bp": 1.4270581014628403,
+    "turnover": 0.5992963098725268,
+    "n_days": 471
+   },
+   "mechanism": "Two wrappers on the SAME published curve segment from different sponsors with different authorised-participant sets.  The claim is identical; only the flow differs, so divergence is flow and creation/redemption restores it.  Pooled, and only once the dislocation clears twice its own sigma -- the OU lesson that a low band fades measurement-error bounce."
+  },
+  {
+   "name": "B3_sib_TLT_SPTL",
+   "family": "sibling",
+   "kind": "ts",
+   "rho1_worst_leg": -0.45819943077429653,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 4.441708289857808,
+    "gross_t": 6.887887964617845,
+    "net_sharpe": -0.21034740796845797,
+    "net_t": -0.3261919255352276,
+    "breakeven_hs_bp": 4.522211736466539,
+    "turnover": 0.4770669282443539,
+    "n_days": 606
+   },
+   "design_lag2_gross_t": -0.4505527020456728,
+   "design_lag0_gross_t": -8.113618465873728,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 3.306642395841797,
+    "gross_t": 4.749945549257146,
+    "net_sharpe": 0.13102108159942497,
+    "net_t": 0.18820995103209862,
+    "breakeven_hs_bp": 2.9325054604216767,
+    "turnover": 0.26363922979190946,
+    "n_days": 520
+   },
+   "mechanism": "Two wrappers on the SAME published curve segment from different sponsors with different authorised-participant sets.  The claim is identical; only the flow differs, so divergence is flow and creation/redemption restores it."
+  },
+  {
+   "name": "B6_sib_SHY_SCHO",
+   "family": "sibling",
+   "kind": "ts",
+   "rho1_worst_leg": -0.45819943077429653,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 3.585685261489934,
+    "gross_t": 6.400732365077485,
+    "net_sharpe": -3.2801544919044403,
+    "net_t": -5.855335727392588,
+    "breakeven_hs_bp": 1.3525451791739285,
+    "turnover": 0.32630823766436867,
+    "n_days": 803
+   },
+   "design_lag2_gross_t": 1.1312559998382874,
+   "design_lag0_gross_t": -8.722284571430514,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 3.1924742730665123,
+    "gross_t": 4.897274892784597,
+    "net_sharpe": -3.2730862014067683,
+    "net_t": -5.020934079657381,
+    "breakeven_hs_bp": 1.006931113016105,
+    "turnover": 0.4156755266856258,
+    "n_days": 593
+   },
+   "mechanism": "Two wrappers on the SAME published curve segment from different sponsors with different authorised-participant sets.  The claim is identical; only the flow differs, so divergence is flow and creation/redemption restores it."
+  },
+  {
+   "name": "A4_ladder_resid_fade_10d",
+   "family": "ladder_resid",
+   "kind": "xs",
+   "rho1_worst_leg": -0.4621234653709619,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 1.955996339526026,
+    "gross_t": 5.725245162712297,
+    "net_sharpe": -5.017876099327802,
+    "net_t": -14.687435903754098,
+    "breakeven_hs_bp": 0.6656989182560535,
+    "turnover": 0.867012294795918,
+    "n_days": 2159
+   },
+   "design_lag2_gross_t": 0.8599210134768503,
+   "design_lag0_gross_t": -9.157633721554477,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.4386363765384878,
+    "gross_t": 1.0382972966340962,
+    "net_sharpe": -3.165873871775443,
+    "net_t": -7.493948195745539,
+    "breakeven_hs_bp": 0.24618920954844134,
+    "turnover": 0.8213936593553247,
+    "n_days": 1412
+   },
+   "mechanism": "Every Treasury wrapper is a claim on one segment of the SAME published constant-maturity curve, and the US Treasury publishes that curve every business day for free.  Strip out each wrapper's move that its OWN published key rate explains and what remains is the wrapper dislocating from the published claim.  Index funds are mandate-locked to their maturity bucket and cannot move to the cheap segment; only authorised participants can, and only at T+1 with a real Treasury basket to source, so the dislocation is closed with a lag."
+  },
+  {
+   "name": "B4_sib_IEI_VGIT",
+   "family": "sibling",
+   "kind": "ts",
+   "rho1_worst_leg": -0.45819943077429653,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 3.301276048352099,
+    "gross_t": 5.71419486277638,
+    "net_sharpe": -4.434165749054956,
+    "net_t": -7.675119188108078,
+    "breakeven_hs_bp": 2.009604127611378,
+    "turnover": 0.2891493750682131,
+    "n_days": 755
+   },
+   "design_lag2_gross_t": 0.8726775645938323,
+   "design_lag0_gross_t": -8.538316316931297,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 1.4015104075794347,
+    "gross_t": 2.221252408843946,
+    "net_sharpe": -3.7956728452612727,
+    "net_t": -6.015758003025958,
+    "breakeven_hs_bp": 0.8899849096728945,
+    "turnover": 0.16451724081979935,
+    "n_days": 633
+   },
+   "mechanism": "Two wrappers on the SAME published curve segment from different sponsors with different authorised-participant sets.  The claim is identical; only the flow differs, so divergence is flow and creation/redemption restores it."
+  },
+  {
+   "name": "B5_sib_SHY_VGSH",
+   "family": "sibling",
+   "kind": "ts",
+   "rho1_worst_leg": -0.45819943077429653,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 3.238682361017801,
+    "gross_t": 5.657587187620044,
+    "net_sharpe": -2.291816770293925,
+    "net_t": -4.003527283828126,
+    "breakeven_hs_bp": 1.5463754587225913,
+    "turnover": 0.28124819196466394,
+    "n_days": 769
+   },
+   "design_lag2_gross_t": 1.186384118064307,
+   "design_lag0_gross_t": -7.2256960610176675,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 4.935370374516624,
+    "gross_t": 7.455098772368044,
+    "net_sharpe": -5.221449706652051,
+    "net_t": -7.887234461477614,
+    "breakeven_hs_bp": 0.9498464030152203,
+    "turnover": 0.4808273143597324,
+    "n_days": 575
+   },
+   "mechanism": "Two wrappers on the SAME published curve segment from different sponsors with different authorised-participant sets.  The claim is identical; only the flow differs, so divergence is flow and creation/redemption restores it."
+  },
+  {
+   "name": "B7_sib_IEI_SCHR",
+   "family": "sibling",
+   "kind": "ts",
+   "rho1_worst_leg": -0.45819943077429653,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 3.205730144980478,
+    "gross_t": 5.4897037674294795,
+    "net_sharpe": -5.19165721075781,
+    "net_t": -8.890536277273936,
+    "breakeven_hs_bp": 1.8390558304589484,
+    "turnover": 0.29541707647975607,
+    "n_days": 739
+   },
+   "design_lag2_gross_t": -0.12582107134399736,
+   "design_lag0_gross_t": -8.143403544719671,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 1.808511435448695,
+    "gross_t": 2.8798602797367847,
+    "net_sharpe": -3.2032165645395367,
+    "net_t": -5.100778447288965,
+    "breakeven_hs_bp": 1.2564289902144867,
+    "turnover": 0.18965029723410992,
+    "n_days": 639
+   },
+   "mechanism": "Two wrappers on the SAME published curve segment from different sponsors with different authorised-participant sets.  The claim is identical; only the flow differs, so divergence is flow and creation/redemption restores it."
+  },
+  {
+   "name": "B1_sib_EDV_ZROZ",
+   "family": "sibling",
+   "kind": "ts",
+   "rho1_worst_leg": -0.45819943077429653,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 3.0587902858268237,
+    "gross_t": 5.381418076622799,
+    "net_sharpe": 0.850955552140747,
+    "net_t": 1.4971106753907137,
+    "breakeven_hs_bp": 8.636915745538097,
+    "turnover": 0.30160335530749854,
+    "n_days": 780
+   },
+   "design_lag2_gross_t": -0.25464514051479903,
+   "design_lag0_gross_t": -6.4611967975747095,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 1.0168181106893597,
+    "gross_t": 1.526571571024924,
+    "net_sharpe": -1.1250563355403367,
+    "net_t": -1.6890720174849931,
+    "breakeven_hs_bp": 3.018836691842375,
+    "turnover": 0.1763488875245199,
+    "n_days": 568
+   },
+   "mechanism": "Two wrappers on the SAME published curve segment from different sponsors with different authorised-participant sets.  The claim is identical; only the flow differs, so divergence is flow and creation/redemption restores it."
+  },
+  {
+   "name": "A6_ladder_resid_fade_5d_band15",
+   "family": "ladder_resid",
+   "kind": "xs",
+   "rho1_worst_leg": -0.4621234653709619,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 2.7849544544226035,
+    "gross_t": 4.977551554002101,
+    "net_sharpe": -3.7422367880766867,
+    "net_t": -6.6885031137059885,
+    "breakeven_hs_bp": 1.0178995653298037,
+    "turnover": 0.9924952124871554,
+    "n_days": 805
+   },
+   "design_lag2_gross_t": -0.1523319078448864,
+   "design_lag0_gross_t": -9.260353886946254,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 1.1666757937439594,
+    "gross_t": 1.672687443161779,
+    "net_sharpe": -2.528891134484301,
+    "net_t": -3.625724017295732,
+    "breakeven_hs_bp": 0.6346146726578804,
+    "turnover": 0.9222041021316055,
+    "n_days": 518
+   },
+   "mechanism": "Every Treasury wrapper is a claim on one segment of the SAME published constant-maturity curve, and the US Treasury publishes that curve every business day for free.  Strip out each wrapper's move that its OWN published key rate explains and what remains is the wrapper dislocating from the published claim.  Index funds are mandate-locked to their maturity bucket and cannot move to the cheap segment; only authorised participants can, and only at T+1 with a real Treasury basket to source, so the dislocation is closed with a lag.  Act only when the dislocation exceeds its own bounce: |z|>=1.5."
+  },
+  {
+   "name": "B2_sib_TLT_VGLT",
+   "family": "sibling",
+   "kind": "ts",
+   "rho1_worst_leg": -0.45819943077429653,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 2.9864531399800986,
+    "gross_t": 4.766756290110103,
+    "net_sharpe": -0.21984799688702822,
+    "net_t": -0.3509051617117728,
+    "breakeven_hs_bp": 4.450825418003129,
+    "turnover": 0.38805697398807293,
+    "n_days": 642
+   },
+   "design_lag2_gross_t": -0.21259509606326085,
+   "design_lag0_gross_t": -7.500143986287091,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 2.283533833417706,
+    "gross_t": 3.3520238113460032,
+    "net_sharpe": -0.42212020962409463,
+    "net_t": -0.619634784124307,
+    "breakeven_hs_bp": 2.4294875014019954,
+    "turnover": 0.2101488097830707,
+    "n_days": 543
+   },
+   "mechanism": "Two wrappers on the SAME published curve segment from different sponsors with different authorised-participant sets.  The claim is identical; only the flow differs, so divergence is flow and creation/redemption restores it."
+  },
+  {
+   "name": "A5_ladder_resid_fade_21d",
+   "family": "ladder_resid",
+   "kind": "xs",
+   "rho1_worst_leg": -0.4621234653709619,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": 1.6293640360084858,
+    "gross_t": 4.757020185593264,
+    "net_sharpe": -3.9099990625256935,
+    "net_t": -11.415462754198531,
+    "breakeven_hs_bp": 0.714839395491503,
+    "turnover": 0.6888376793319616,
+    "n_days": 2148
+   },
+   "design_lag2_gross_t": 0.3952370357351931,
+   "design_lag0_gross_t": -7.278084427566325,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.2579427455626895,
+    "gross_t": 0.6105769373658348,
+    "net_sharpe": -2.7298398810950637,
+    "net_t": -6.461811013378746,
+    "breakeven_hs_bp": 0.17670027651553905,
+    "turnover": 0.6785602246129222,
+    "n_days": 1412
+   },
+   "mechanism": "Every Treasury wrapper is a claim on one segment of the SAME published constant-maturity curve, and the US Treasury publishes that curve every business day for free.  Strip out each wrapper's move that its OWN published key rate explains and what remains is the wrapper dislocating from the published claim.  Index funds are mandate-locked to their maturity bucket and cannot move to the cheap segment; only authorised participants can, and only at T+1 with a real Treasury basket to source, so the dislocation is closed with a lag."
+  },
+  {
+   "name": "G1_realladder_resid_fade_5d",
+   "family": "real_ladder",
+   "kind": "xs",
+   "rho1_worst_leg": -0.3287661720574166,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": 1.5508818883780198,
+    "gross_t": 4.544719482060619,
+    "net_sharpe": -9.13541510794014,
+    "net_t": -26.770509945917095,
+    "breakeven_hs_bp": 0.8798768532441046,
+    "turnover": 0.8423773217825069,
+    "n_days": 2164
+   },
+   "design_lag2_gross_t": -0.306889050670707,
+   "design_lag0_gross_t": -10.120207881882278,
+   "clears_gross_bar": true,
+   "entitled_to_holdout": true,
+   "holdout": {
+    "gross_sharpe": 0.3156345051957512,
+    "gross_t": 0.7471392501812565,
+    "net_sharpe": -5.793516936152159,
+    "net_t": -13.713848861057292,
+    "breakeven_hs_bp": 0.23085709131759805,
+    "turnover": 0.8304816904245245,
+    "n_days": 1412
+   },
+   "mechanism": "FRED publishes the TIPS real-yield curve (DFII5/10/30) daily.  The same wrapper-versus-published-claim argument as family A, on the real curve, where the wrappers are far thinner and the authorised-participant channel far narrower -- so if the mechanism exists anywhere it should be largest here."
+  },
+  {
+   "name": "G2_realladder_resid_fade_10d",
+   "family": "real_ladder",
+   "kind": "xs",
+   "rho1_worst_leg": -0.3287661720574166,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": 1.0834572175277273,
+    "gross_t": 3.1713035798213514,
+    "net_sharpe": -7.7930830842520535,
+    "net_t": -22.810529002084277,
+    "breakeven_hs_bp": 0.7470527578304849,
+    "turnover": 0.6890073695777934,
+    "n_days": 2159
+   },
+   "design_lag2_gross_t": 0.36814072800689435,
+   "design_lag0_gross_t": -8.73255970400049,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.42513050613221276,
+    "gross_t": 1.0063275160103604,
+    "net_sharpe": -4.853136971739162,
+    "net_t": -11.487873025299836,
+    "breakeven_hs_bp": 0.36721876880826587,
+    "turnover": 0.6739644185888636,
+    "n_days": 1412
+   },
+   "mechanism": "FRED publishes the TIPS real-yield curve (DFII5/10/30) daily.  The same wrapper-versus-published-claim argument as family A, on the real curve, where the wrappers are far thinner and the authorised-participant channel far narrower -- so if the mechanism exists anywhere it should be largest here."
+  },
+  {
+   "name": "F1_flygap_10d",
+   "family": "butterfly",
+   "kind": "ts",
+   "rho1_worst_leg": -0.11480453169157706,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": 1.0995026239005428,
+    "gross_t": 3.0655839788510435,
+    "net_sharpe": -2.305809779723271,
+    "net_t": -6.428955570766441,
+    "breakeven_hs_bp": 0.44975563575472594,
+    "turnover": 0.47932163684746615,
+    "n_days": 1959
+   },
+   "design_lag2_gross_t": 1.8818119392213022,
+   "design_lag0_gross_t": -7.636027951944976,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 1.0277996951215687,
+    "gross_t": 2.4329073054715873,
+    "net_sharpe": -1.322756154919171,
+    "net_t": -3.1310995011335496,
+    "breakeven_hs_bp": 0.6442940902541965,
+    "turnover": 0.38504101557970327,
+    "n_days": 1412
+   },
+   "mechanism": "The published curve pins CURVATURE as well as level and slope: the 2s-7s-30s butterfly is a number the Treasury publishes daily.  A duration-weighted belly-versus-wings ETF book is the tradable expression of exactly that number, so the gap between the two is a published-anchor dislocation.  Mortgage servicers and GSEs are structurally short convexity and must hedge at the wings on a schedule set by lock periods, which is what opens the gap."
+  },
+  {
+   "name": "C5_begap_LTPZ_TLT_10d",
+   "family": "breakeven",
+   "kind": "ts",
+   "rho1_worst_leg": 0.17390431539277304,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": 1.0523958843086723,
+    "gross_t": 2.934991894966818,
+    "net_sharpe": 0.07879755122308262,
+    "net_t": 0.21975587099041488,
+    "breakeven_hs_bp": 5.3562798745181075,
+    "turnover": 0.34036934822896364,
+    "n_days": 1960
+   },
+   "design_lag2_gross_t": 3.7464844692483363,
+   "design_lag0_gross_t": -4.639766400409778,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.8230959031073801,
+    "gross_t": 1.9483524321699865,
+    "net_sharpe": -0.21475613563277035,
+    "net_t": -0.5083498017714577,
+    "breakeven_hs_bp": 3.9671647123738785,
+    "turnover": 0.38370631162734564,
+    "n_days": 1412
+   },
+   "mechanism": "FRED publishes the 5y and 10y breakeven inflation rate every business day.  A TIPS wrapper held against a duration-matched NOMINAL wrapper is a tradable long-breakeven book, so its return must track the PUBLISHED breakeven.  The gap between the two is a tradable claim priced against a third-party published anchor -- structurally the same object as a closed-end fund's discount to NAV.  TIPS are the least liquid Treasury instrument and the first leg a levered relative-value book liquidates, so the gap opens on forced flow, not on information.  Long segment, the thinnest TIPS wrapper of all."
+  },
+  {
+   "name": "E2_decoy_TLH_follows_TLT",
+   "family": "decoy",
+   "kind": "ts",
+   "rho1_worst_leg": null,
+   "bounce_gate": null,
+   "design": {
+    "gross_sharpe": 0.8205188999767701,
+    "gross_t": 2.6391181551063156,
+    "net_sharpe": -2.97620860740595,
+    "net_t": -9.572681591382112,
+    "breakeven_hs_bp": 0.9667723773233019,
+    "turnover": 1.0736478711162256,
+    "n_days": 2607
+   },
+   "design_lag2_gross_t": -0.09450033354437144,
+   "design_lag0_gross_t": -49.8974797608964,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 1.3043822542531214,
+    "gross_t": 3.084324814129292,
+    "net_sharpe": -2.1152484571888577,
+    "net_t": -5.0016881809634475,
+    "breakeven_hs_bp": 0.9626839184164764,
+    "turnover": 1.0440028388928317,
+    "n_days": 1409
+   },
+   "mechanism": "DECOY / positive control for the lag test.  TLH is the thinnest nominal Treasury wrapper (51k shares/day) and should LAG TLT's print.  A large lag-0 diagnostic here with nothing at lag 1 is the signature of quote staleness."
+  },
+  {
+   "name": "C6_begap_pool_10d",
+   "family": "breakeven",
+   "kind": "xs",
+   "rho1_worst_leg": 0.17390431539277304,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": 0.9206977679671013,
+    "gross_t": 2.5677033965907303,
+    "net_sharpe": -1.429914351225428,
+    "net_t": -3.987840596792406,
+    "breakeven_hs_bp": 1.5646428310616383,
+    "turnover": 0.5355442888941353,
+    "n_days": 1960
+   },
+   "design_lag2_gross_t": 2.879706047894263,
+   "design_lag0_gross_t": -7.474828108520442,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.7327840176832736,
+    "gross_t": 1.7345749355798235,
+    "net_sharpe": -1.1595998111290373,
+    "net_t": -2.7448916995306316,
+    "breakeven_hs_bp": 1.2133370561285992,
+    "turnover": 0.5380120543802903,
+    "n_days": 1412
+   },
+   "mechanism": "FRED publishes the 5y and 10y breakeven inflation rate every business day.  A TIPS wrapper held against a duration-matched NOMINAL wrapper is a tradable long-breakeven book, so its return must track the PUBLISHED breakeven.  The gap between the two is a tradable claim priced against a third-party published anchor -- structurally the same object as a closed-end fund's discount to NAV.  TIPS are the least liquid Treasury instrument and the first leg a levered relative-value book liquidates, so the gap opens on forced flow, not on information.  Pooled across the three TIPS segments."
+  },
+  {
+   "name": "F2_flygap_21d",
+   "family": "butterfly",
+   "kind": "ts",
+   "rho1_worst_leg": -0.11480453169157706,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": 0.2689676045195116,
+    "gross_t": 0.7478150151197596,
+    "net_sharpe": -2.2376309582727645,
+    "net_t": -6.221321827520686,
+    "breakeven_hs_bp": 0.1563862428768638,
+    "turnover": 0.33838171651248855,
+    "n_days": 1948
+   },
+   "design_lag2_gross_t": -0.4639742659513953,
+   "design_lag0_gross_t": -5.904679178132905,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.3139628127234285,
+    "gross_t": 0.7431821826244942,
+    "net_sharpe": -1.301639759194744,
+    "net_t": -3.081114826427929,
+    "breakeven_hs_bp": 0.30126736943294685,
+    "turnover": 0.2520187197560451,
+    "n_days": 1412
+   },
+   "mechanism": "The published curve pins CURVATURE as well as level and slope: the 2s-7s-30s butterfly is a number the Treasury publishes daily.  A duration-weighted belly-versus-wings ETF book is the tradable expression of exactly that number, so the gap between the two is a published-anchor dislocation.  Mortgage servicers and GSEs are structurally short convexity and must hedge at the wings on a schedule set by lock periods, which is what opens the gap."
+  },
+  {
+   "name": "C3_begap_TIP_IEF_21d",
+   "family": "breakeven",
+   "kind": "ts",
+   "rho1_worst_leg": 0.17390431539277304,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": 0.15167118139748167,
+    "gross_t": 0.42180208169321415,
+    "net_sharpe": -0.5304669484323482,
+    "net_t": -1.475244413978874,
+    "breakeven_hs_bp": 0.5283847452264167,
+    "turnover": 0.23479688221417375,
+    "n_days": 1949
+   },
+   "design_lag2_gross_t": 0.8271461015847746,
+   "design_lag0_gross_t": -3.4940600357098304,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.14430238909425327,
+    "gross_t": 0.3415785568829995,
+    "net_sharpe": -0.2929044904243304,
+    "net_t": -0.6933349736735409,
+    "breakeven_hs_bp": 0.5424054875455666,
+    "turnover": 0.22540364423777856,
+    "n_days": 1412
+   },
+   "mechanism": "FRED publishes the 5y and 10y breakeven inflation rate every business day.  A TIPS wrapper held against a duration-matched NOMINAL wrapper is a tradable long-breakeven book, so its return must track the PUBLISHED breakeven.  The gap between the two is a tradable claim priced against a third-party published anchor -- structurally the same object as a closed-end fund's discount to NAV.  TIPS are the least liquid Treasury instrument and the first leg a levered relative-value book liquidates, so the gap opens on forced flow, not on information."
+  },
+  {
+   "name": "C1_begap_TIP_IEF_5d",
+   "family": "breakeven",
+   "kind": "ts",
+   "rho1_worst_leg": 0.17390431539277304,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": 0.1464615013569495,
+    "gross_t": 0.40898227714722196,
+    "net_sharpe": -1.1699806726109139,
+    "net_t": -3.2670794390975657,
+    "breakeven_hs_bp": 0.24577145674557796,
+    "turnover": 0.4861625831953907,
+    "n_days": 1965
+   },
+   "design_lag2_gross_t": 1.9950276415650554,
+   "design_lag0_gross_t": -8.65334554455774,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.09939329764670529,
+    "gross_t": 0.23527413085190618,
+    "net_sharpe": -0.797278888823978,
+    "net_t": -1.8872409111667388,
+    "breakeven_hs_bp": 0.16332877803663845,
+    "turnover": 0.515602850962266,
+    "n_days": 1412
+   },
+   "mechanism": "FRED publishes the 5y and 10y breakeven inflation rate every business day.  A TIPS wrapper held against a duration-matched NOMINAL wrapper is a tradable long-breakeven book, so its return must track the PUBLISHED breakeven.  The gap between the two is a tradable claim priced against a third-party published anchor -- structurally the same object as a closed-end fund's discount to NAV.  TIPS are the least liquid Treasury instrument and the first leg a levered relative-value book liquidates, so the gap opens on forced flow, not on information."
+  },
+  {
+   "name": "C2_begap_TIP_IEF_10d",
+   "family": "breakeven",
+   "kind": "ts",
+   "rho1_worst_leg": 0.17390431539277304,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": 0.11369889049831494,
+    "gross_t": 0.31709105580405045,
+    "net_sharpe": -0.899501562437832,
+    "net_t": -2.508590003655596,
+    "breakeven_hs_bp": 0.2536826741495183,
+    "turnover": 0.3660514091413522,
+    "n_days": 1960
+   },
+   "design_lag2_gross_t": 1.339793379933897,
+   "design_lag0_gross_t": -6.301984850351598,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": 0.038906749528836444,
+    "gross_t": 0.09209626701598057,
+    "net_sharpe": -0.6042523270891947,
+    "net_t": -1.4303272397348066,
+    "breakeven_hs_bp": 0.09271321359067418,
+    "turnover": 0.35555881560628616,
+    "n_days": 1412
+   },
+   "mechanism": "FRED publishes the 5y and 10y breakeven inflation rate every business day.  A TIPS wrapper held against a duration-matched NOMINAL wrapper is a tradable long-breakeven book, so its return must track the PUBLISHED breakeven.  The gap between the two is a tradable claim priced against a third-party published anchor -- structurally the same object as a closed-end fund's discount to NAV.  TIPS are the least liquid Treasury instrument and the first leg a levered relative-value book liquidates, so the gap opens on forced flow, not on information."
+  },
+  {
+   "name": "D3_rolldown_smooth21_weekly",
+   "family": "rolldown",
+   "kind": "xs",
+   "rho1_worst_leg": null,
+   "bounce_gate": null,
+   "design": {
+    "gross_sharpe": 0.01686200517946801,
+    "gross_t": 0.05148141276002228,
+    "net_sharpe": -0.17428371473345855,
+    "net_t": -0.5321058652305687,
+    "breakeven_hs_bp": 0.3587663543038922,
+    "turnover": 0.01841022687066582,
+    "n_days": 2349
+   },
+   "design_lag2_gross_t": 0.15142030803804526,
+   "design_lag0_gross_t": 0.0973785147192903,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": -1.7112734479166136,
+    "gross_t": -4.050759786033441,
+    "net_sharpe": -1.9042507944036848,
+    "net_t": -4.507556959925758,
+    "breakeven_hs_bp": -73.62022406891477,
+    "turnover": 0.012058778767010732,
+    "n_days": 1412
+   },
+   "mechanism": "The shape of the published curve IS the term premium.  Carry plus roll-down per unit duration is computable from the published curve alone -- no estimation, no fitting -- and it is the structural reason one maturity bucket out-earns another.  Index funds are mandate-locked to their bucket and cannot migrate to the richest point on the curve, so the compensation survives inside the complex.  Month-averaged published shape, to price the term premium rather than the day's curve noise."
+  },
+  {
+   "name": "D4_rolldown_smooth21_monthly",
+   "family": "rolldown",
+   "kind": "xs",
+   "rho1_worst_leg": null,
+   "bounce_gate": null,
+   "design": {
+    "gross_sharpe": 0.005698278602728546,
+    "gross_t": 0.017386309750036345,
+    "net_sharpe": -0.16216813996165752,
+    "net_t": -0.49479951921103704,
+    "breakeven_hs_bp": 0.15705219191136802,
+    "turnover": 0.013963907083230432,
+    "n_days": 2346
+   },
+   "design_lag2_gross_t": 0.04421327502451857,
+   "design_lag0_gross_t": 0.15900142444567916,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": -1.8065142896444069,
+    "gross_t": -4.276204627784833,
+    "net_sharpe": -1.9916221376342687,
+    "net_t": -4.71437389151612,
+    "breakeven_hs_bp": -93.97147930667084,
+    "turnover": 0.00989324166142405,
+    "n_days": 1412
+   },
+   "mechanism": "The shape of the published curve IS the term premium.  Carry plus roll-down per unit duration is computable from the published curve alone -- no estimation, no fitting -- and it is the structural reason one maturity bucket out-earns another.  Index funds are mandate-locked to their bucket and cannot migrate to the richest point on the curve, so the compensation survives inside the complex.  Monthly refresh -- the cheapest expression of the same shape."
+  },
+  {
+   "name": "D1_rolldown_daily",
+   "family": "rolldown",
+   "kind": "xs",
+   "rho1_worst_leg": null,
+   "bounce_gate": null,
+   "design": {
+    "gross_sharpe": -0.029451909801832297,
+    "gross_t": -0.09030165745856222,
+    "net_sharpe": -0.769030065021274,
+    "net_t": -2.3579010656404544,
+    "breakeven_hs_bp": -0.08934888357790026,
+    "turnover": 0.12751999237558717,
+    "n_days": 2369
+   },
+   "design_lag2_gross_t": 0.10785299582993692,
+   "design_lag0_gross_t": 0.6542005379739644,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": -1.4018387684323685,
+    "gross_t": -3.3182961592618505,
+    "net_sharpe": -1.8628501106960058,
+    "net_t": -4.409557294891787,
+    "breakeven_hs_bp": -8.379304512929963,
+    "turnover": 0.08661552662539351,
+    "n_days": 1412
+   },
+   "mechanism": "The shape of the published curve IS the term premium.  Carry plus roll-down per unit duration is computable from the published curve alone -- no estimation, no fitting -- and it is the structural reason one maturity bucket out-earns another.  Index funds are mandate-locked to their bucket and cannot migrate to the richest point on the curve, so the compensation survives inside the complex."
+  },
+  {
+   "name": "D2_rolldown_weekly",
+   "family": "rolldown",
+   "kind": "xs",
+   "rho1_worst_leg": null,
+   "bounce_gate": null,
+   "design": {
+    "gross_sharpe": -0.06627756740540393,
+    "gross_t": -0.2032117519474818,
+    "net_sharpe": -0.3823696711410916,
+    "net_t": -1.1723727017450596,
+    "breakeven_hs_bp": -0.5775236311030661,
+    "turnover": 0.04486714362867935,
+    "n_days": 2369
+   },
+   "design_lag2_gross_t": 0.3597613796138257,
+   "design_lag0_gross_t": 0.013045075554246189,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": -1.5754007515065789,
+    "gross_t": -3.7291351764143483,
+    "net_sharpe": -1.8192303998348005,
+    "net_t": -4.306304964967489,
+    "breakeven_hs_bp": -32.827850437654476,
+    "turnover": 0.024507780519570546,
+    "n_days": 1412
+   },
+   "mechanism": "The shape of the published curve IS the term premium.  Carry plus roll-down per unit duration is computable from the published curve alone -- no estimation, no fitting -- and it is the structural reason one maturity bucket out-earns another.  Index funds are mandate-locked to their bucket and cannot migrate to the richest point on the curve, so the compensation survives inside the complex.  Weekly refresh; the published shape moves slowly."
+  },
+  {
+   "name": "C4_begap_STIP_SHY_10d",
+   "family": "breakeven",
+   "kind": "ts",
+   "rho1_worst_leg": 0.17390431539277304,
+   "bounce_gate": "pass",
+   "design": {
+    "gross_sharpe": -0.2988903434814333,
+    "gross_t": -0.8263038097727762,
+    "net_sharpe": -3.601451072912224,
+    "net_t": -9.956470013700802,
+    "breakeven_hs_bp": -0.3702906636846287,
+    "turnover": 0.31070085520246504,
+    "n_days": 1926
+   },
+   "design_lag2_gross_t": 0.25410711921525986,
+   "design_lag0_gross_t": -6.001134456231844,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": -0.2067341268081614,
+    "gross_t": -0.4893608840216424,
+    "net_sharpe": -2.562104091833098,
+    "net_t": -6.064763194604866,
+    "breakeven_hs_bp": -0.24759101856680749,
+    "turnover": 0.3193020740942337,
+    "n_days": 1412
+   },
+   "mechanism": "FRED publishes the 5y and 10y breakeven inflation rate every business day.  A TIPS wrapper held against a duration-matched NOMINAL wrapper is a tradable long-breakeven book, so its return must track the PUBLISHED breakeven.  The gap between the two is a tradable claim priced against a third-party published anchor -- structurally the same object as a closed-end fund's discount to NAV.  TIPS are the least liquid Treasury instrument and the first leg a levered relative-value book liquidates, so the gap opens on forced flow, not on information.  Front segment against the published 5y breakeven, where the seasonal NSA-CPI accrual makes the wrapper hardest to price."
+  },
+  {
+   "name": "A7_ladder_resid_ride_63d",
+   "family": "ladder_resid",
+   "kind": "xs",
+   "rho1_worst_leg": -0.4621234653709619,
+   "bounce_gate": "FAIL",
+   "design": {
+    "gross_sharpe": -1.2535967343031076,
+    "gross_t": -3.6239881184159892,
+    "net_sharpe": -4.9249146726008535,
+    "net_t": -14.237299579150491,
+    "breakeven_hs_bp": -0.844389350566011,
+    "turnover": 0.46379039338078404,
+    "n_days": 2106
+   },
+   "design_lag2_gross_t": -0.5645120976552872,
+   "design_lag0_gross_t": 4.0672985011861975,
+   "clears_gross_bar": false,
+   "entitled_to_holdout": false,
+   "holdout": {
+    "gross_sharpe": -0.20978890626287808,
+    "gross_t": -0.49659186033663894,
+    "net_sharpe": -2.1871493227136383,
+    "net_t": -5.1772067949075025,
+    "breakeven_hs_bp": -0.2213393583164582,
+    "turnover": 0.45905453038201727,
+    "n_days": 1412
+   },
+   "mechanism": "Competing mechanism, OPPOSITE sign, pre-registered as such: sponsor-level flow into a maturity bucket is persistent because advisor model portfolios reallocate duration over quarters, so a segment that has richened against the published curve keeps richening."
+  }
+ ]
+}

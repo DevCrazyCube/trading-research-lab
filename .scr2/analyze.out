@@ -1,0 +1,220 @@
+combos swept: 262080 structures: 3120 filters: 84 train mints: 175 valid mints: 207 elapsed 368s
+rows passing TRAIN gate: 13926
+
+=== UNCONDITIONAL SURFACE (no creator filter), validate-split mint-equal mean, toll1.14 drop-30, cap+300% ===
+ -- timing
+    age15          n=520 meanOfCells=-0.1072  best=+0.0165  worst=-0.4623
+    age240         n=520 meanOfCells=-0.1077  best=-0.0356  worst=-0.3378
+    age60          n=520 meanOfCells=-0.1074  best=-0.0251  worst=-0.3924
+    allbars        n=520 meanOfCells=-0.1518  best=+0.0371  worst=-0.4941
+    allbars_a60    n=520 meanOfCells=-0.1545  best=-0.0932  worst=-0.3611
+    first          n=520 meanOfCells=-0.1443  best=+0.2582  worst=-0.6471
+ -- pos
+    p_25_75_10     n=624 meanOfCells=-0.1144  best=+0.0394  worst=-0.4854
+    p_3x_0_5_15    n=624 meanOfCells=-0.1300  best=+0.0323  worst=-0.5278
+    p_50_50_15     n=624 meanOfCells=-0.1327  best=+0.0394  worst=-0.5146
+    p_50_50_5      n=624 meanOfCells=-0.1339  best=+0.0632  worst=-0.5584
+    p_single       n=624 meanOfCells=-0.1329  best=+0.2582  worst=-0.6471
+ -- hold
+    2              n=390 meanOfCells=-0.0664  best=+0.1465  worst=-0.1214
+    5              n=390 meanOfCells=-0.0716  best=+0.1236  worst=-0.1796
+    15             n=390 meanOfCells=-0.0838  best=+0.0665  worst=-0.2811
+    30             n=390 meanOfCells=-0.1068  best=-0.0178  worst=-0.3885
+    60             n=390 meanOfCells=-0.1288  best=-0.0008  worst=-0.4587
+    180            n=390 meanOfCells=-0.1690  best=+0.0143  worst=-0.6471
+    480            n=390 meanOfCells=-0.1942  best=+0.0219  worst=-0.5874
+    1440           n=390 meanOfCells=-0.2097  best=+0.2582  worst=-0.5781
+ -- mod
+    m_half50       n=240 meanOfCells=-0.1550  best=+0.0010  worst=-0.4034
+    m_plain        n=240 meanOfCells=-0.1789  best=-0.0174  worst=-0.6471
+    m_sl20         n=240 meanOfCells=-0.1318  best=-0.0268  worst=-0.3320
+    m_sl35         n=240 meanOfCells=-0.1588  best=-0.0380  worst=-0.4079
+    m_sl60         n=240 meanOfCells=-0.1865  best=-0.0353  worst=-0.5781
+    m_tp100        n=240 meanOfCells=-0.0995  best=+0.2183  worst=-0.2329
+    m_tp100sl50    n=240 meanOfCells=-0.1153  best=-0.0264  worst=-0.2671
+    m_tp200        n=240 meanOfCells=-0.1094  best=+0.2582  worst=-0.2967
+    m_tp30         n=240 meanOfCells=-0.1030  best=+0.1269  worst=-0.2244
+    m_tp400        n=240 meanOfCells=-0.1255  best=+0.1559  worst=-0.3342
+    m_tp50         n=240 meanOfCells=-0.1033  best=+0.1425  worst=-0.2319
+    m_tr25         n=240 meanOfCells=-0.0901  best=+0.0165  worst=-0.2589
+    m_tr40         n=240 meanOfCells=-0.1172  best=-0.0157  worst=-0.2971
+ -- best 15 unconditional structures (validate)
+    first/p_single/h1440/m_tp200  train=+0.2438 valid=+0.2582 k=207 res=0.246
+    first/p_single/h1440/m_tp100  train=+0.3058 valid=+0.2183 k=207 res=0.406
+    first/p_single/h1440/m_tp400  train=+0.2021 valid=+0.1559 k=207 res=0.140
+    first/p_single/h2/m_tp200  train=+0.0701 valid=+0.1465 k=207 res=1.000
+    first/p_single/h1440/m_tp50  train=+0.2145 valid=+0.1425 k=207 res=0.565
+    first/p_single/h1440/m_tp30  train=+0.1314 valid=+0.1269 k=207 res=0.729
+    first/p_single/h5/m_tp200  train=+0.0567 valid=+0.1236 k=207 res=0.995
+    first/p_single/h2/m_tp100  train=+0.1161 valid=+0.0772 k=207 res=1.000
+    first/p_single/h15/m_tp200  train=-0.0409 valid=+0.0665 k=207 res=0.990
+    first/p_50_50_5/h1440/m_tp100  train=+0.0330 valid=+0.0632 k=207 res=0.271
+    first/p_single/h5/m_tp100  train=+0.1084 valid=+0.0631 k=207 res=1.000
+    first/p_single/h2/m_tp400  train=+0.0141 valid=+0.0516 k=207 res=0.995
+    first/p_50_50_5/h1440/m_tp200  train=+0.0237 valid=+0.0513 k=207 res=0.155
+    first/p_single/h2/m_tp50  train=+0.0656 valid=+0.0508 k=207 res=1.000
+    first/p_single/h5/m_tp400  train=-0.0030 valid=+0.0485 k=207 res=0.990
+ -- worst 8 unconditional structures (validate)
+    first/p_single/h180/m_plain  train=-0.6047 valid=-0.6471
+    first/p_single/h480/m_plain  train=-0.6554 valid=-0.5874
+    first/p_single/h1440/m_sl60  train=-0.5837 valid=-0.5781
+    first/p_50_50_5/h180/m_plain  train=-0.5217 valid=-0.5584
+    first/p_50_50_5/h1440/m_sl60  train=-0.5576 valid=-0.5487
+    first/p_3x_0_5_15/h1440/m_sl60  train=-0.5410 valid=-0.5278
+    first/p_50_50_15/h180/m_plain  train=-0.4539 valid=-0.5146
+    first/p_50_50_5/h480/m_plain  train=-0.5907 valid=-0.5122
+
+=== filter sizes (train,valid mints) ===
+   ALL                      175 207
+   priorgrad==0             119 135
+   nprior<=1                 95 108
+   nprior>=1                 90 111
+   nprior==0                 85  96
+   nprior>=2                 80  99
+   rate>=1/h                 78  91
+   nprior>=3                 76  90
+   gap<=1800s                74  84
+   rate<20/h&nprior>=2       67  83
+   nprior>=5                 64  76
+   gap<=600s                 58  69
+   priorgrad>=1              56  72
+   n>=3&gradrate<0.30        55  71
+   n>=3&gradrate>=0.02       52  62
+   nprior>=8                 50  61
+   n>=3&gradrate<0.12        48  62
+   burst300s>=1              47  46
+   burst3600s>=5             45  53
+   burst1800s>=3             44  61
+   rate>=5/h                 43  50
+   nprior>=12                42  56
+   priorgrad>=2              42  45
+   n>=3&gradrate>=0.05       41  42
+   n>=8&gradrate<0.30        41  51
+   priorgradLAG>=1           40  49
+   n>=8&gap<=600             39  49
+   n>=8&priorgrad>=1         39  50
+   n>=8&gradrate>=0.02       37  49
+   n>=8&gradrate<0.12        37  46
+   rate<5/h&nprior>=2        37  49
+   o15_cold                  37  43
+   nprior>=20                36  40
+   burst600s>=2              36  41
+   n>=3&gradrate<0.05        35  48
+   burst300s==0&nprior>=3    35  45
+   priorgrad>=3              34  33
+   gap<=180s                 32  36
+   o60_cold                  32  28
+   tenure>=6h                31  27
+   nprior in[4,12]           30  27
+   priorgradLAG>=2           29  27
+   burst7200s>=10            29  46
+   n>=3&gradrate>=0.12       28  28
+   nprior>=30                27  26
+   n>=8&gradrate>=0.05       26  29
+   n>=3&gradrate<0.02        24  28
+   n>=8&gradrate<0.05        24  32
+   priorgrad>=5              23  16
+   n>=20&priorgrad>=2        23  28
+   nprior in[13,40]          22  30
+   burst300s>=2              22  26
+   n>=3&gradrate>=0.30       21  19
+   burst1800s>=8             21  21
+   nprior>=45                19  21
+   nprior in[1,3]            19  31
+   n>=20&burst3600>=10       18  22
+   nprior>=60                16  15
+   burst3600s>=15            16  20
+   o60_dead                  16  10
+   n>=5&gradrate==0          15  20
+   burst600s>=5              15  14
+   n>=8&gradrate<0.02        13  12
+   n>=8&gradrate>=0.12       13  15
+   rate>=20/h                13  16
+   o15_dead                  13  12
+   gap<=60s                  12  16
+   burst7200s>=30            11  14
+   gap>=3600s&nprior>=1      11  16
+   n>=8&priorgrad==0         11  11
+   tenure<=30m&nprior>=2     10   8
+   n>=8&gradrate>=0.30        9  10
+   burst300s>=4               9  10
+   o15_veryhot                8   7
+   rate<1/h&nprior>=2         7  12
+   n>=20&gradrate==0          6   5
+   burst3600s==0&nprior>=3    5   5
+   gap>=14400s&nprior>=1      5   3
+   o15_hot                    5   7
+   o60_veryhot                3   3
+   n>=8&gap>=3600             3   2
+   o60_hot                    2   2
+   n<=2&priorgrad>=1          2   9
+   gap>=43200s&nprior>=1      0   0
+
+=== rows surviving VALIDATE gate (mean>0, beats same-structure unconditional, robust to toll 2.5%% and -50%% dropout) ===
+survivors: 1413
+  first        p_single     h180   m_tp200      burst300s>=2               | TR m=+0.0609 k=22 | VA m=+0.5437 med=-0.3000 k=26 kc=22 n=26 res=0.85 | base VA m=-0.0877 edge=+0.6315 | m50=+0.5130 m100=+0.4361 m25=+0.5240 raw=+0.5437
+  first        p_single     h480   m_tp200      burst300s>=2               | TR m=+0.0338 k=22 | VA m=+0.5676 med=-0.3000 k=26 kc=22 n=26 res=0.81 | base VA m=-0.0396 edge=+0.6072 | m50=+0.5292 m100=+0.4330 m25=+0.5479 raw=+0.5676
+  first        p_single     h60    m_tp200      burst300s>=2               | TR m=+0.1187 k=22 | VA m=+0.5549 med=+0.3872 k=26 kc=22 n=26 res=0.96 | base VA m=-0.0327 edge=+0.5875 | m50=+0.5472 m100=+0.5280 m25=+0.5339 raw=+0.5549
+  first        p_single     h30    m_tp200      burst300s>=2               | TR m=+0.1531 k=22 | VA m=+0.5229 med=-0.0661 k=26 kc=22 n=26 res=0.96 | base VA m=-0.0246 edge=+0.5475 | m50=+0.5153 m100=+0.4960 m25=+0.5024 raw=+0.5229
+  first        p_single     h1440  m_tp200      burst300s>=2               | TR m=+0.4209 k=22 | VA m=+0.7458 med=-0.3000 k=26 kc=22 n=26 res=0.46 | base VA m=+0.2582 edge=+0.4875 | m50=+0.6381 m100=+0.3688 m25=+0.7269 raw=+0.7458
+  first        p_single     h15    m_tp200      burst300s>=2               | TR m=+0.0737 k=22 | VA m=+0.5519 med=+0.0577 k=26 kc=22 n=26 res=0.96 | base VA m=+0.0665 edge=+0.4855 | m50=+0.5442 m100=+0.5250 m25=+0.5309 raw=+0.5519
+  first        p_50_50_5    h1440  m_tp400      nprior in[13,40]           | TR m=+0.2917 k=22 | VA m=+0.4594 med=-0.3000 k=30 kc=22 n=30 res=0.23 | base VA m=+0.0144 edge=+0.4449 | m50=+0.3060 m100=-0.0773 m25=+0.4467 raw=+0.6900
+  first        p_single     h1440  m_tp400      n>=8&gradrate>=0.05        | TR m=+0.7014 k=26 | VA m=+0.5978 med=-0.3000 k=29 kc=17 n=29 res=0.28 | base VA m=+0.1559 edge=+0.4418 | m50=+0.4529 m100=+0.0909 m25=+0.5828 raw=+0.8705
+  first        p_single     h480   m_tp200      rate>=5/h                  | TR m=+0.2559 k=43 | VA m=+0.3628 med=-0.3000 k=50 kc=32 n=50 res=0.84 | base VA m=-0.0396 edge=+0.4024 | m50=+0.3308 m100=+0.2508 m25=+0.3456 raw=+0.3628
+  first        p_single     h1440  m_tp400      n>=3&gradrate>=0.05        | TR m=+0.4938 k=41 | VA m=+0.5523 med=-0.3000 k=42 kc=27 n=42 res=0.26 | base VA m=+0.1559 edge=+0.3964 | m50=+0.4047 m100=+0.0357 m25=+0.5381 raw=+0.8113
+  first        p_single     h180   m_tp200      rate>=5/h                  | TR m=+0.2412 k=43 | VA m=+0.2984 med=-0.4614 k=50 kc=32 n=50 res=0.94 | base VA m=-0.0877 edge=+0.3861 | m50=+0.2864 m100=+0.2564 m25=+0.2811 raw=+0.2984
+  first        p_50_50_5    h180   m_tp400      nprior in[13,40]           | TR m=+0.0140 k=22 | VA m=+0.0496 med=-0.6550 k=30 kc=22 n=30 res=0.87 | base VA m=-0.3326 edge=+0.3822 | m50=+0.0229 m100=-0.0438 m25=+0.0364 raw=+0.2473
+  first        p_single     h180   m_tp200      n>=8&gradrate>=0.05        | TR m=+0.5663 k=26 | VA m=+0.2943 med=-0.7143 k=29 kc=17 n=29 res=1.00 | base VA m=-0.0877 edge=+0.3821 | m50=+0.2943 m100=+0.2943 m25=+0.2765 raw=+0.2943
+  first        p_single     h1440  m_tp200      n>=8&gradrate>=0.05        | TR m=+0.8329 k=26 | VA m=+0.6376 med=-0.3000 k=29 kc=17 n=29 res=0.41 | base VA m=+0.2582 edge=+0.3793 | m50=+0.5203 m100=+0.2272 m25=+0.6207 raw=+0.6376
+  first        p_single     h180   m_tp200      n>=3&gradrate>=0.05        | TR m=+0.2574 k=41 | VA m=+0.2850 med=-0.6826 k=42 kc=27 n=42 res=0.98 | base VA m=-0.0877 edge=+0.3728 | m50=+0.2803 m100=+0.2684 m25=+0.2676 raw=+0.2850
+  first        p_single     h60    m_tp400      n>=8&gradrate>=0.05        | TR m=+0.3094 k=26 | VA m=+0.2399 med=-0.7035 k=29 kc=17 n=29 res=1.00 | base VA m=-0.1309 edge=+0.3708 | m50=+0.2399 m100=+0.2399 m25=+0.2229 raw=+0.4785
+  first        p_single     h60    m_tp200      n>=8&gradrate>=0.05        | TR m=+0.6219 k=26 | VA m=+0.3356 med=-0.6510 k=29 kc=17 n=29 res=1.00 | base VA m=-0.0327 edge=+0.3682 | m50=+0.3356 m100=+0.3356 m25=+0.3172 raw=+0.3356
+  first        p_single     h480   m_tp400      n>=8&gradrate>=0.05        | TR m=+0.3258 k=26 | VA m=+0.1905 med=-0.9126 k=29 kc=17 n=29 res=0.97 | base VA m=-0.1776 edge=+0.3681 | m50=+0.1836 m100=+0.1663 m25=+0.1744 raw=+0.4291
+  first        p_single     h480   m_tp400      n>=3&gradrate>=0.05        | TR m=+0.1687 k=41 | VA m=+0.1897 med=-0.7210 k=42 kc=27 n=42 res=0.88 | base VA m=-0.1776 edge=+0.3673 | m50=+0.1659 m100=+0.1064 m25=+0.1745 raw=+0.4251
+  first        p_single     h30    m_tp200      n>=8&gradrate>=0.05        | TR m=+0.6653 k=26 | VA m=+0.3426 med=-0.6071 k=29 kc=17 n=29 res=1.00 | base VA m=-0.0246 edge=+0.3672 | m50=+0.3426 m100=+0.3426 m25=+0.3242 raw=+0.3426
+  first        p_single     h30    m_tp400      n>=8&gradrate>=0.05        | TR m=+0.3695 k=26 | VA m=+0.2462 med=-0.7277 k=29 kc=17 n=29 res=1.00 | base VA m=-0.1209 edge=+0.3672 | m50=+0.2462 m100=+0.2462 m25=+0.2291 raw=+0.4849
+  first        p_single     h180   m_tp200      n>=8&gradrate<0.12         | TR m=+0.1286 k=37 | VA m=+0.2761 med=-0.4559 k=46 kc=30 n=46 res=0.91 | base VA m=-0.0877 edge=+0.3639 | m50=+0.2587 m100=+0.2153 m25=+0.2594 raw=+0.2761
+  first        p_single     h480   m_tp200      n>=8&gradrate<0.12         | TR m=+0.0961 k=37 | VA m=+0.3218 med=-0.3000 k=46 kc=30 n=46 res=0.85 | base VA m=-0.0396 edge=+0.3614 | m50=+0.2914 m100=+0.2153 m25=+0.3051 raw=+0.3218
+  first        p_single     h1440  m_tp200      n>=3&gradrate>=0.05        | TR m=+0.5290 k=41 | VA m=+0.6171 med=-0.3000 k=42 kc=27 n=42 res=0.40 | base VA m=+0.2582 edge=+0.3589 | m50=+0.4981 m100=+0.2004 m25=+0.6006 raw=+0.6171
+  first        p_single     h480   m_tp200      n>=3&gradrate>=0.05        | TR m=+0.2870 k=41 | VA m=+0.3126 med=-0.4614 k=42 kc=27 n=42 res=0.93 | base VA m=-0.0396 edge=+0.3522 | m50=+0.2983 m100=+0.2626 m25=+0.2953 raw=+0.3126
+  first        p_single     h180   m_tp200      burst600s>=2               | TR m=+0.1612 k=36 | VA m=+0.2633 med=-0.3110 k=41 kc=29 n=41 res=0.90 | base VA m=-0.0877 edge=+0.3510 | m50=+0.2438 m100=+0.1950 m25=+0.2468 raw=+0.2633
+  first        p_single     h180   m_tp400      n>=8&gradrate>=0.05        | TR m=+0.3070 k=26 | VA m=+0.1173 med=-0.8623 k=29 kc=17 n=29 res=1.00 | base VA m=-0.2332 edge=+0.3505 | m50=+0.1173 m100=+0.1173 m25=+0.1019 raw=+0.3559
+  first        p_single     h1440  m_tp200      rate>=5/h                  | TR m=+0.5431 k=43 | VA m=+0.6063 med=-0.3000 k=50 kc=32 n=50 res=0.40 | base VA m=+0.2582 edge=+0.3481 | m50=+0.4863 m100=+0.1863 m25=+0.5900 raw=+0.6063
+  first        p_single     h60    m_tp200      n>=3&gradrate>=0.05        | TR m=+0.2985 k=41 | VA m=+0.3150 med=-0.6314 k=42 kc=27 n=42 res=0.98 | base VA m=-0.0327 edge=+0.3477 | m50=+0.3103 m100=+0.2984 m25=+0.2972 raw=+0.3150
+  first        p_single     h180   m_tp400      n>=3&gradrate>=0.05        | TR m=+0.1412 k=41 | VA m=+0.1091 med=-0.8892 k=42 kc=27 n=42 res=0.95 | base VA m=-0.2332 edge=+0.3423 | m50=+0.0996 m100=+0.0758 m25=+0.0943 raw=+0.3445
+  first        p_single     h30    m_tp200      nprior>=30                 | TR m=+0.0525 k=27 | VA m=+0.3151 med=-0.5086 k=26 kc=14 n=26 res=0.96 | base VA m=-0.0246 edge=+0.3396 | m50=+0.3074 m100=+0.2881 m25=+0.2973 raw=+0.3151
+  first        p_single     h60    m_tp200      nprior>=30                 | TR m=+0.0075 k=27 | VA m=+0.3009 med=-0.5556 k=26 kc=14 n=26 res=0.96 | base VA m=-0.0327 edge=+0.3335 | m50=+0.2932 m100=+0.2740 m25=+0.2834 raw=+0.3009
+  first        p_single     h480   m_tp200      n>=8&gradrate>=0.05        | TR m=+0.5884 k=26 | VA m=+0.2907 med=-0.7143 k=29 kc=17 n=29 res=1.00 | base VA m=-0.0396 edge=+0.3303 | m50=+0.2907 m100=+0.2907 m25=+0.2730 raw=+0.2907
+  first        p_single     h480   m_tp200      burst600s>=2               | TR m=+0.1439 k=36 | VA m=+0.2892 med=-0.3000 k=41 kc=29 n=41 res=0.85 | base VA m=-0.0396 edge=+0.3287 | m50=+0.2599 m100=+0.1867 m25=+0.2728 raw=+0.2892
+  first        p_single     h1440  m_tp200      n>=8&gradrate<0.12         | TR m=+0.4349 k=37 | VA m=+0.5866 med=-0.3000 k=46 kc=30 n=46 res=0.39 | base VA m=+0.2582 edge=+0.3284 | m50=+0.4649 m100=+0.1605 m25=+0.5707 raw=+0.5866
+  first        p_single     h30    m_tp200      n>=3&gradrate>=0.05        | TR m=+0.3350 k=41 | VA m=+0.3036 med=-0.6094 k=42 kc=27 n=42 res=1.00 | base VA m=-0.0246 edge=+0.3281 | m50=+0.3036 m100=+0.3036 m25=+0.2856 raw=+0.3036
+  first        p_single     h60    m_tp400      n>=3&gradrate>=0.05        | TR m=+0.1486 k=41 | VA m=+0.1953 med=-0.7156 k=42 kc=27 n=42 res=0.95 | base VA m=-0.1309 edge=+0.3263 | m50=+0.1858 m100=+0.1620 m25=+0.1794 raw=+0.4307
+  first        p_single     h480   m_tp200      nprior in[4,12]            | TR m=+0.0412 k=30 | VA m=+0.2866 med=-0.3000 k=27 kc=21 n=27 res=0.85 | base VA m=-0.0396 edge=+0.3261 | m50=+0.2569 m100=+0.1828 m25=+0.2703 raw=+0.2866
+  first        p_single     h1440  m_tp400      n>=8&gradrate<0.12         | TR m=+0.4037 k=37 | VA m=+0.4782 med=-0.3000 k=46 kc=30 n=46 res=0.24 | base VA m=+0.1559 edge=+0.3223 | m50=+0.3261 m100=-0.0544 m25=+0.4652 raw=+0.7146
+  first        p_single     h180   m_tp200      nprior>=20                 | TR m=+0.1343 k=36 | VA m=+0.2268 med=-0.6129 k=40 kc=26 n=40 res=0.93 | base VA m=-0.0877 edge=+0.3145 | m50=+0.2118 m100=+0.1743 m25=+0.2106 raw=+0.2268
+  allbars      p_single     h1440  m_tp200      burst300s>=2               | TR m=+0.1205 k=22 | VA m=+0.3512 med=-0.3000 k=26 kc=22 n=57 res=0.54 | base VA m=+0.0371 edge=+0.3142 | m50=+0.2087 m100=-0.1476 m25=+0.3395 raw=+0.3512
+  first        p_single     h15    m_tp200      n>=8&gradrate>=0.05        | TR m=+0.3948 k=26 | VA m=+0.3804 med=-0.2670 k=29 kc=17 n=29 res=1.00 | base VA m=+0.0665 edge=+0.3139 | m50=+0.3804 m100=+0.3804 m25=+0.3614 raw=+0.3804
+  first        p_single     h2     m_tp200      burst300s>=2               | TR m=+0.0985 k=22 | VA m=+0.4601 med=+0.1801 k=26 kc=22 n=26 res=1.00 | base VA m=+0.1465 edge=+0.3136 | m50=+0.4601 m100=+0.4601 m25=+0.4400 raw=+0.4601
+  first        p_single     h1440  m_tp200      nprior>=30                 | TR m=+0.2874 k=27 | VA m=+0.5715 med=-0.3000 k=26 kc=14 n=26 res=0.38 | base VA m=+0.2582 edge=+0.3132 | m50=+0.4484 m100=+0.1407 m25=+0.5558 raw=+0.5715
+  first        p_single     h180   m_tp200      nprior in[4,12]            | TR m=+0.0182 k=30 | VA m=+0.2252 med=-0.5493 k=27 kc=21 n=27 res=0.96 | base VA m=-0.0877 edge=+0.3129 | m50=+0.2178 m100=+0.1993 m25=+0.2087 raw=+0.2252
+  first        p_single     h15    m_tp400      n>=8&gradrate>=0.05        | TR m=+0.1718 k=26 | VA m=+0.3119 med=-0.6071 k=29 kc=17 n=29 res=1.00 | base VA m=+0.0016 edge=+0.3103 | m50=+0.3119 m100=+0.3119 m25=+0.2939 raw=+0.5505
+  first        p_single     h15    m_tp200      n>=3&gradrate>=0.05        | TR m=+0.1597 k=41 | VA m=+0.3758 med=-0.2563 k=42 kc=27 n=42 res=1.00 | base VA m=+0.0665 edge=+0.3093 | m50=+0.3758 m100=+0.3758 m25=+0.3569 raw=+0.3758
+  first        p_single     h30    m_tp200      rate>=5/h                  | TR m=+0.3182 k=43 | VA m=+0.2822 med=-0.5500 k=50 kc=32 n=50 res=0.98 | base VA m=-0.0246 edge=+0.3067 | m50=+0.2782 m100=+0.2682 m25=+0.2647 raw=+0.2822
+  first        p_3x_0_5_15  h1440  m_tp400      nprior in[13,40]           | TR m=+0.1438 k=22 | VA m=+0.2424 med=-0.3000 k=30 kc=22 n=30 res=0.17 | base VA m=-0.0642 edge=+0.3066 | m50=+0.0757 m100=-0.3409 m25=+0.2333 raw=+0.4072
+  first        p_single     h60    m_tp200      gap<=180s                  | TR m=+0.0412 k=32 | VA m=+0.2729 med=-0.4614 k=36 kc=28 n=36 res=0.94 | base VA m=-0.0327 edge=+0.3056 | m50=+0.2618 m100=+0.2340 m25=+0.2559 raw=+0.2729
+  first        p_single     h180   m_tp200      n>=8&gradrate<0.30         | TR m=+0.0963 k=41 | VA m=+0.2174 med=-0.6140 k=51 kc=32 n=51 res=0.92 | base VA m=-0.0877 edge=+0.3051 | m50=+0.2017 m100=+0.1624 m25=+0.2014 raw=+0.2174
+  first        p_single     h60    m_tp200      rate>=5/h                  | TR m=+0.3035 k=43 | VA m=+0.2724 med=-0.5744 k=50 kc=32 n=50 res=0.98 | base VA m=-0.0327 edge=+0.3050 | m50=+0.2684 m100=+0.2584 m25=+0.2551 raw=+0.2724
+  first        p_single     h30    m_tp400      n>=3&gradrate>=0.05        | TR m=+0.1957 k=41 | VA m=+0.1834 med=-0.8163 k=42 kc=27 n=42 res=0.98 | base VA m=-0.1209 edge=+0.3043 | m50=+0.1786 m100=+0.1667 m25=+0.1673 raw=+0.4187
+  first        p_single     h1440  m_tp400      nprior in[13,40]           | TR m=+0.8834 k=22 | VA m=+0.4594 med=-0.3000 k=30 kc=22 n=30 res=0.23 | base VA m=+0.1559 edge=+0.3034 | m50=+0.3060 m100=-0.0773 m25=+0.4467 raw=+0.6900
+  first        p_single     h180   m_tp400      burst300s>=2               | TR m=+0.3754 k=22 | VA m=+0.0666 med=-0.5213 k=26 kc=22 n=26 res=0.81 | base VA m=-0.2332 edge=+0.2998 | m50=+0.0282 m100=-0.0680 m25=+0.0538 raw=+0.2567
+  first        p_single     h480   m_tp200      n>=8&gradrate<0.30         | TR m=+0.0814 k=41 | VA m=+0.2585 med=-0.3000 k=51 kc=32 n=51 res=0.86 | base VA m=-0.0396 edge=+0.2981 | m50=+0.2311 m100=+0.1624 m25=+0.2425 raw=+0.2585
+  first        p_single     h180   m_tp200      burst1800s>=3              | TR m=+0.1843 k=44 | VA m=+0.2094 med=-0.6737 k=61 kc=41 n=61 res=0.95 | base VA m=-0.0877 edge=+0.2971 | m50=+0.1996 m100=+0.1750 m25=+0.1932 raw=+0.2094
+  first        p_single     h1440  m_tp200      burst1800s>=3              | TR m=+0.4724 k=44 | VA m=+0.5543 med=-0.3000 k=61 kc=41 n=61 res=0.38 | base VA m=+0.2582 edge=+0.2961 | m50=+0.4297 m100=+0.1183 m25=+0.5389 raw=+0.5543
+  first        p_single     h1440  m_tp400      burst300s>=2               | TR m=+0.7355 k=22 | VA m=+0.4510 med=-0.3000 k=26 kc=22 n=26 res=0.23 | base VA m=+0.1559 edge=+0.2951 | m50=+0.2972 m100=-0.0874 m25=+0.4385 raw=+0.6792
+  first        p_single     h60    m_tp200      burst600s>=2               | TR m=+0.2007 k=36 | VA m=+0.2623 med=-0.5594 k=41 kc=29 n=41 res=0.98 | base VA m=-0.0327 edge=+0.2949 | m50=+0.2574 m100=+0.2452 m25=+0.2451 raw=+0.2623
+
+survivor filters (count): [('burst300s>=2', 147), ('n>=3&gradrate>=0.12', 93), ('nprior in[13,40]', 75), ('n>=3&gradrate>=0.05', 70), ('burst600s>=2', 70), ('burst1800s>=3', 69), ('nprior>=20', 59), ('rate>=5/h', 46), ('nprior in[4,12]', 42), ('tenure>=6h', 40), ('nprior==0', 36), ('n>=8&gradrate<0.12', 35), ('o60_cold', 35), ('burst300s>=1', 35), ('n>=8&gradrate>=0.05', 32), ('burst3600s>=5', 32), ('o15_cold', 30), ('n>=3&gradrate<0.02', 28), ('priorgrad==0', 25), ('rate<20/h&nprior>=2', 24), ('burst300s==0&nprior>=3', 24), ('nprior<=1', 23), ('n>=8&gradrate<0.30', 22), ('nprior>=8', 22), ('n>=3&gradrate>=0.02', 20), ('nprior>=30', 19), ('n>=3&gradrate<0.12', 18), ('n>=3&gradrate<0.30', 18), ('nprior>=2', 18), ('nprior>=12', 17)]
+survivor mods: [('m_tp200', 464), ('m_tp400', 240), ('m_tp100', 188), ('m_tp50', 149), ('m_tr25', 101), ('m_tp30', 94), ('m_tr40', 46), ('m_half50', 36), ('m_plain', 27), ('m_tp100sl50', 25), ('m_sl60', 19), ('m_sl20', 13), ('m_sl35', 11)]
+survivor timings: [('first', 727), ('age15', 537), ('age60', 82), ('allbars', 66), ('age240', 1)]
+survivor holds: [(5, 330), (2, 293), (1440, 250), (15, 184), (30, 126), (480, 84), (60, 80), (180, 66)]
+survivor positions: [('p_single', 701), ('p_25_75_10', 289), ('p_50_50_5', 254), ('p_50_50_15', 86), ('p_3x_0_5_15', 83)]

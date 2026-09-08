@@ -2,7 +2,7 @@
 """PREDMARKET CLI -- the agent-driven prediction-market forward CALIBRATION tracker.
 
     python -m scripts.trading_bot.predmarket selftest          # hermetic wiring check, no network
-    python -m scripts.trading_bot.predmarket pull              # OPEN politics markets + live p_market
+    python -m scripts.trading_bot.predmarket pull              # settle open book FIRST, then OPEN markets + live p_market
     python -m scripts.trading_bot.predmarket propose FILE.json # validate+freeze+log agent estimates
     python -m scripts.trading_bot.predmarket propose --no-trade "reason"   # log a disciplined abstention
     python -m scripts.trading_bot.predmarket resolve           # settle open estimates (official outcomes)
@@ -24,12 +24,41 @@ from . import venues, proposer, ledger, resolve as resolver, scoring
 
 
 def cmd_pull(spec, args) -> int:
-    pulled = venues.pull_open_markets(spec, min_volume=args.min_volume, poly_limit=args.poly_limit)
+    # T43: settle the open book BEFORE any market data is shown. Every tick starts with `pull`,
+    # so harvesting resolutions is mechanical, not a step the agent must remember to run.
+    resolution = None
+    if not args.no_resolve:
+        resolution = resolver.resolve_pass(spec)
+    pulled = venues.pull_open_markets(spec, min_volume=args.min_volume, poly_limit=args.poly_limit,
+                                      kalshi_max_pages=args.kalshi_max_pages,
+                                      poly_max_pages=args.poly_max_pages)
     sel = [m for m in pulled["markets"] if m["selectable"]]
     sel.sort(key=lambda m: (m.get("volume") or 0), reverse=True)
     digest = {"pulled_utc": pulled["pulled_utc"], "n_markets": pulled["n_markets"],
               "n_selectable": pulled["n_selectable"], "errors": pulled["errors"],
-              "markets": sel[:args.limit]}
+              # T48: the read's own breadth, always reported -- a truncation you can see is a bounded
+              # sample; one you cannot see is a bug (the 2026-09-03 page-1 fault).
+              "feed_stats": pulled["feed_stats"],
+              "data_path_warnings": pulled["data_path_warnings"],
+              "n_displayed": min(args.limit, len(sel)),
+              "display_rule": "selectable markets ranked by volume desc; NOT the whole book"}
+    if resolution is not None:
+        digest["resolution_pass"] = {k: resolution[k] for k in
+                                     ("n_open_before", "n_newly_resolved",
+                                      "n_unique_markets_checked", "n_unresolvable_noted")}
+        digest["resolved_total"] = len(ledger.resolved_stream())
+        if resolution["n_newly_resolved"] > 0:
+            digest["ACTION_REQUIRED"] = ("new resolutions landed this pass: write the resolved count "
+                                         "and Brier-so-far (from `status`) to research/FINDINGS.md")
+    shown = sel[:args.limit]
+    if args.criteria_chars >= 0:
+        shown = [dict(m, resolution_criteria=(m.get("resolution_criteria") or "")[:args.criteria_chars])
+                 for m in shown]
+    if len(sel) > len(shown):
+        digest.setdefault("data_path_warnings", []).append(
+            f"DISPLAY TRUNCATED: {len(shown)} of {len(sel)} selectable markets shown "
+            "(volume-ranked). Raise --limit to see deeper; the unshown tail is low-volume.")
+    digest["markets"] = shown
     json.dump(digest, sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")
     return 0
@@ -67,27 +96,8 @@ def cmd_propose(spec, args) -> int:
 
 
 def cmd_resolve(spec, args) -> int:
-    ledger.verify_preregistration_hashes(ledger.read_preregistrations())
-    state = ledger.load_state(spec)
-    open_es = ledger.open_estimates()
-    results = []
-    for est in open_es:
-        try:
-            rec = resolver.resolve_estimate(est, spec)
-        except Refused as exc:
-            rec = {"kind": "resolution", "status": "ERROR", "estimate_sha256": est["estimate_sha256"],
-                   "venue": est["venue"], "market_id": est["market_id"], "refused": str(exc)}
-        if rec.get("status") == "RESOLVED":
-            ledger.append_resolution(rec)
-            if est["estimate_sha256"] not in state["resolved_estimate_hashes"]:
-                state["resolved_estimate_hashes"].append(est["estimate_sha256"])
-        results.append({"market_id": rec["market_id"], "status": rec["status"],
-                        "yes_outcome": rec.get("yes_outcome"),
-                        "brier_agent": rec.get("brier_agent"), "brier_market": rec.get("brier_market"),
-                        "note": rec.get("note") or rec.get("refused")})
-    ledger.save_state(state)
-    json.dump({"framing": FRAMING, "n_open_before": len(open_es), "results": results},
-              sys.stdout, indent=2, default=str)
+    summary = resolver.resolve_pass(spec)
+    json.dump(dict({"framing": FRAMING}, **summary), sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")
     return 0
 
@@ -117,10 +127,24 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="scripts.trading_bot.predmarket",
                                 description=__doc__.split("\n\n")[0])
     sub = p.add_subparsers(dest="command", required=True)
-    pl = sub.add_parser("pull", help="pull OPEN politics markets + live implied probability")
-    pl.add_argument("--limit", type=int, default=40)
+    pl = sub.add_parser("pull", help="settle the open book, then pull OPEN politics markets "
+                                     "+ live implied probability")
+    pl.add_argument("--limit", type=int, default=3000,
+                    help="max markets displayed; T43 floor is 3000 -- the old 40-row digest hid "
+                         "the near-dated book (default %(default)s)")
     pl.add_argument("--min-volume", type=float, default=0.0, dest="min_volume")
-    pl.add_argument("--poly-limit", type=int, default=40, dest="poly_limit")
+    pl.add_argument("--poly-limit", type=int, default=100, dest="poly_limit",
+                    help="events per Polymarket tag PAGE (default %(default)s)")
+    pl.add_argument("--kalshi-max-pages", type=int, default=venues.KALSHI_MAX_PAGES,
+                    dest="kalshi_max_pages",
+                    help="T48: Kalshi cursor pages to follow; 1 reproduces the pre-fix truncated read")
+    pl.add_argument("--poly-max-pages", type=int, default=venues.POLY_MAX_PAGES_PER_TAG,
+                    dest="poly_max_pages", help="T48: Polymarket offset pages per declared tag")
+    pl.add_argument("--criteria-chars", type=int, default=240,
+                    help="trim resolution_criteria in the DISPLAY to this many chars "
+                         "(-1 = full text); bounds the digest now that the whole book is read")
+    pl.add_argument("--no-resolve", action="store_true",
+                    help="skip the resolve-first pass (testing only)")
     pr = sub.add_parser("propose", help="validate+freeze+log agent estimates (or an abstention)")
     pr.add_argument("file", nargs="?", default=None, help="JSON file of raw estimates")
     pr.add_argument("--no-trade", default=None, help="log a disciplined abstention with this reason")

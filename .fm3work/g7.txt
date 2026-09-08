@@ -1,0 +1,18 @@
+   combos=26643  train cells mean>0 & bootlo>0: 0  (18s)
+   combos=26643  train cells mean>0 & bootlo>0: 15  (25s)
+   combos=26643  train cells mean>0 & bootlo>0: 16  (33s)
+TOTAL COMBOS SWEPT (panelA): 79929
+TOTAL VALIDATE SURVIVORS: 2
+--- panelB ---
+H=  5 TRAIN univ mean=-0.1626 med=-0.0533 n=2248 k=98 res=0.991 | combos=8525 cells=1542 8s
+   train cells with mean>0 AND excess>0 AND both boot-lo>0: 13
+H= 15 TRAIN univ mean=-0.3588 med=-0.2620 n=925 k=98 res=0.969 | combos=8525 cells=1276 7s
+   train cells with mean>0 AND excess>0 AND both boot-lo>0: 3
+H= 30 TRAIN univ mean=-0.3654 med=-0.3114 n=543 k=98 res=0.936 | combos=8525 cells=1045 8s
+   train cells with mean>0 AND excess>0 AND both boot-lo>0: 0
+H= 60 TRAIN univ mean=-0.3831 med=-0.3114 n=312 k=98 res=0.859 | combos=8525 cells=814 6s
+   train cells with mean>0 AND excess>0 AND both boot-lo>0: 0
+H=120 TRAIN univ mean=-0.4528 med=-0.3564 n=212 k=98 res=0.788 | combos=8525 cells=684 6s
+   train cells with mean>0 AND excess>0 AND both boot-lo>0: 0
+TOTAL COMBOS SWEPT: 42625
+TOTAL VALIDATE SURVIVORS: 0

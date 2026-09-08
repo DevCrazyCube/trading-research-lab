@@ -1,0 +1,14 @@
+meta sample keys [(('ctrl', 'ctrl_px', 'ev', 'liq', 'mint', 'px', 't0', 'ts_ms'), 10585)]
+meta[0] {"ev": "TICK", "ts_ms": 1788474682134, "mint": "AK53BkSHcBMUmCzw6AVpmrjhFCuPfwbesmNahxSXpump", "t0": 1788474682134, "px": 0.0002487, "liq": 41745.15, "ctrl": "3Syvgx9gYcG4buznB4zSRAmpwdq32bbEmhKYd9Kvpump", "ctrl_px": 0.0001509}
+meta[-1] {"ev": "TICK", "ts_ms": 1788490505317, "mint": "2ezdFs8GwqxxQCVFUAWEzYBKVnGVHskd1kthJASipump", "t0": 1788484724795, "px": 4.469e-05, "liq": 17129.62, "ctrl": "EzX3CHD4xd9xmayv4VgEqs5sFcXGxikc9UHqB1Ghpump", "ctrl_px": 8.247e-06}
+meta ev values Counter({'TICK': 10585})
+meta ts range 1788474682134 1788490505317 4.395328611111111 hours
+snapshot rows 26820 unique mints 356
+snap ts range 1788448363901 1788490453425 11.691534444444445 hours
+per-mint snapshot count: min 1 p25 8 med 39 p75 127 max 231
+attention event mints in snapshots 16 of 90
+attention control mints in snapshots 14 of 72
+h12 event mints 70 of which in snapshots 13
+snap counts for h12 event mints [4, 4, 8, 12, 14, 18, 21, 21, 55, 87, 116, 204, 231]
+h12 control mints 55 in snapshots 12
+snap counts for h12 control mints [1, 2, 5, 8, 10, 15, 18, 87, 118, 198, 202, 230]

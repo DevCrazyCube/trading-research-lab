@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "retired_utc": "2026-09-01T11:25:05Z",
+  "status": "RETIRED_PAPER_EXECUTORS",
+  "reason": "All three forward paper books are materially negative; PAC_LWS vs PAC_LWS_NULL is additionally non-comparable because eligibility was scored only when a portfolio slot was free and its evidence buffer expired while the NULL book was occupied.",
+  "boundary": "No wallet, signer, or live order was used. Open positions are right-censored at retirement and were not assigned invented exits.",
+  "preserved_service": "AFTERSHOCK_PAC_LWS_FEED",
+  "runners": [
+    {
+      "instrument_id": "AFTERSHOCK_PAC_LWS",
+      "resolved": 514,
+      "mean_all_cost_r": -0.29142134960618565,
+      "net_return_lamports": -15006091876,
+      "unexitable_full_losses": 132,
+      "ledger_rows": 13868,
+      "ledger_sha256": "9de6512e0eb8a6d84af233aa8e0d85e367662236d33348d186c44b1f1d4ca153",
+      "state_sha256": "76e70586cd2f1b2f1df68ced5c4b2c93264edae64a01a2dae4e41109179d2f0e",
+      "right_censored_open_mints": [
+        "CBbyj2NyMDNFhjYmEkPpTVXHpKJ3GqKxV6eAaHpGpump",
+        "CjbMDjuzuTMh6syMHbqRpV34jsLC5G4vySUmptUupump",
+        "FN7aJipippAVhhotjRwFGU2gkgphfbDKiuNUTBwexAB6",
+        "FTbo8ijxcWaL6f9ekqJoSpARHJkzYGG4ZyWhnpsCq8rK"
+      ]
+    },
+    {
+      "instrument_id": "AFTERSHOCK_PAC_LWS_NULL",
+      "resolved": 237,
+      "mean_all_cost_r": -0.09603698054212242,
+      "net_return_lamports": -2286254039,
+      "unexitable_full_losses": 17,
+      "ledger_rows": 3875,
+      "ledger_sha256": "9f1a12032db99087da665ee489485c77f3163d2c989242b63d84feac0fa5f184",
+      "state_sha256": "9353fb5e70cc98255aa588beaf6df6c7f9bd71da08da02b29167aeda296933ae",
+      "right_censored_open_mints": [
+        "33ihk7Q8Hpfayt8mSYiDdEve19oYauYVMBikXUQjpump",
+        "7G4FCz9k3vJxAHFRBM1qasaRipnLhHfMJ2HkFM41pump",
+        "924PrszFjcaJLjpHNYdj7FELxSFBMrjJKhBLMTQGpump",
+        "GYwqeHavNKdrEvFZSHGuyutpeFhXuhbyCMQhxu3Cpump"
+      ]
+    },
+    {
+      "instrument_id": "AFTERSHOCK_PAC_SCALP",
+      "resolved": 1023,
+      "mean_all_cost_r": -0.1154249988752489,
+      "net_return_lamports": -11845519692,
+      "unexitable_full_losses": 48,
+      "ledger_rows": 8866,
+      "ledger_sha256": "59f2ba9c794c48c8d857817cebca8d2143c0f539f1c969630c7f78c634a9ecbf",
+      "state_sha256": "997c15f227717c296c0052c99c6543a1516efa5b086130c4ca5a28d8782b13d1",
+      "right_censored_open_mints": []
+    }
+  ],
+  "replacement_measurement": "AFTERSHOCK_PAC_LWS_ELIGIBILITY_V2 emits simultaneous base/veto cohort flags before any portfolio scheduling; it is data-only and cannot trade."
+}

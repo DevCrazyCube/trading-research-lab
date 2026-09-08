@@ -1,0 +1,17 @@
+rc=0
+train k 175 mean -0.2308 median -0.2071
+ top5 mints: [('AAiCr9pD', 1.11, 11), ('BHuccRJs', 0.374, 9), ('Fg9P4xK8', 0.314, 63), ('CvZmyFSc', 0.287, 3), ('6ixaEct5', 0.239, 5)]
+ mean excl top1 -0.2385  excl top3 -0.2452
+ winsor[-1,1] mean -0.2313
+ winsor[-1,0.5] mean -0.2342
+ quantiles [-0.6786, -0.3819, -0.2071, -0.0518, 0.0092, 0.079, 0.3293]
+ trades 2253 mints with a dropout 110
+ bars per mint median 25
+val k 207 mean 0.2720 median -0.1757
+ top5 mints: [('GaFQuLuV', 90.794, 8), ('FxfSbGfC', 5.223, 3), ('EDMyAVsR', 1.204, 7), ('A1KeY89Z', 0.707, 7), ('3jRu3raC', 0.615, 25)]
+ mean excl top1 -0.1674  excl top3 -0.2006
+ winsor[-1,1] mean -0.1831
+ winsor[-1,0.5] mean -0.1919
+ quantiles [-0.6332, -0.3351, -0.1757, -0.0299, 0.04, 0.119, 1.1741]
+ trades 2890 mints with a dropout 122
+ bars per mint median 28

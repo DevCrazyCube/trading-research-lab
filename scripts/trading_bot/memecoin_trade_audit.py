@@ -44,7 +44,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 DEFAULT_JSON = ROOT / "research" / "trading_bot" / "MEMECOIN_TRADE_AUDIT.json"
 DEFAULT_MD = ROOT / "research" / "trading_bot" / "MEMECOIN_TRADE_AUDIT.md"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def _mean(values: Iterable[float]) -> float | None:
@@ -97,6 +97,35 @@ def _read_jsonl(path: Path) -> tuple[list[dict], list[dict], dict]:
     snapshot = {"exists": path.exists(), "bytes": len(payload),
                 "sha256": hashlib.sha256(payload).hexdigest()}
     return rows, errors, snapshot
+
+
+def _read_json_object(path: Path) -> tuple[dict, list[dict], dict]:
+    """Read one immutable byte snapshot of a JSON object.
+
+    The active genome state/population are atomically replaced by a background writer. Parsing one
+    read and hashing a later read could therefore describe two different cohorts. Keep the parsed
+    object and its evidence hash tied to the exact same bytes, as the JSONL reader already does.
+    """
+    payload = path.read_bytes() if path.exists() else b""
+    errors: list[dict] = []
+    obj: dict = {}
+    if payload:
+        try:
+            decoded = json.loads(payload)
+            if isinstance(decoded, dict):
+                obj = decoded
+            else:
+                errors.append({"error": "non_object_json"})
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            errors.append({"error": type(exc).__name__})
+    elif not path.exists():
+        errors.append({"error": "missing"})
+    snapshot = {
+        "exists": path.exists(),
+        "bytes": len(payload),
+        "sha256": hashlib.sha256(payload).hexdigest(),
+    }
+    return obj, errors, snapshot
 
 
 def _snapshot_source(path: Path, root: Path, snapshot: dict) -> dict:
@@ -291,6 +320,11 @@ def audit_sniper(root: Path) -> dict:
     if cutover_path.exists():
         cutover = json.loads(cutover_path.read_text())
         sources.append(_source(cutover_path, root))
+    retirement_path = root / "research" / "trading_bot" / "SNIPER_V3_RETIREMENT_2026-08-27.json"
+    retirement = None
+    if retirement_path.exists():
+        retirement = json.loads(retirement_path.read_text())
+        sources.append(_source(retirement_path, root))
     # V2 is a clean entry->terminal event ledger. Include expected paths even before the first forward
     # event so the audit makes the reset explicit instead of silently falling back to legacy rows.
     from scripts.trading_bot.sniper.paper_ledger import canonical_sha256
@@ -369,6 +403,7 @@ def audit_sniper(root: Path) -> dict:
             x["round_trip_tip_fraction_of_notional"] for x in all_current)),
         "watchdog_restart_events": restarts,
         "legacy_cutover": cutover,
+        "v3_retirement": retirement,
         "unresolved_trade_count_at_cutover": (
             cutover.get("totals", {}).get("n_open_cutover_dropouts") if cutover else None),
         "unresolved_trade_count_reason": (
@@ -552,19 +587,34 @@ def _audit_genome(gid: str, rows: list[dict], pop: dict, state: dict) -> dict:
     }
 
 
-def audit_genomes(root: Path) -> dict:
-    pkg = root / "scripts" / "trading_bot" / "memebot_evo"
-    pop_path, state_path = pkg / "population.json", pkg / "evo_state.json"
-    pop = json.loads(pop_path.read_text())
-    state = json.loads(state_path.read_text())
-    sources = [_source(pop_path, root), _source(state_path, root)]
+def _audit_genome_experiment(
+    root: Path,
+    *,
+    experiment_id: str,
+    ledger_dir: Path,
+    pop_path: Path,
+    state_path: Path,
+    archived: bool,
+) -> dict:
+    """Audit one internally coherent evolutionary experiment.
+
+    Genome ids can recur after a clean reset (V1 and V2 currently share deterministic seed ids), so
+    experiments must never be merged by bare genome id. Each experiment also has its own K and its own
+    multiple-testing bar.
+    """
+    pop, pop_errors, pop_snapshot = _read_json_object(pop_path)
+    state, state_errors, state_snapshot = _read_json_object(state_path)
+    sources = [
+        _snapshot_source(pop_path, root, pop_snapshot) | {"parse_errors": pop_errors},
+        _snapshot_source(state_path, root, state_snapshot) | {"parse_errors": state_errors},
+    ]
     genomes: dict[str, dict] = {}
-    parse_errors = 0
-    for path in sorted((pkg / "ledgers").glob("*.jsonl")):
+    parse_errors = len(pop_errors) + len(state_errors)
+    for path in sorted(ledger_dir.glob("*.jsonl")):
         rows, errors, snapshot = _read_jsonl(path)
         parse_errors += len(errors)
         gid = path.stem
-        genomes[gid] = _audit_genome(gid, rows, pop, state)
+        genomes[gid] = _audit_genome(gid, rows, pop, state) | {"experiment_id": experiment_id}
         sources.append(_snapshot_source(path, root, snapshot) | {"parse_errors": errors})
 
     mature_reported = [g for g in genomes.values() if g["reported_pass"]["n"] >= 20]
@@ -586,7 +636,10 @@ def audit_genomes(root: Path) -> dict:
     ]
 
     return {
-        "scope": "every genome ledger on disk, active and inactive",
+        "experiment_id": experiment_id,
+        "archived": archived,
+        "scope": "every genome ledger belonging to this evolutionary experiment",
+        "ledger_directory": str(ledger_dir.relative_to(root)),
         "sources": sources,
         "parse_errors": parse_errors,
         "ledger_genomes": len(genomes),
@@ -612,6 +665,89 @@ def audit_genomes(root: Path) -> dict:
         "warning": (
             "genomes enter at different calendar times and are ranked on unequal, mostly unpaired cohorts; "
             "these rows are strategy-arm observations, not independent portfolio trades"
+        ),
+    }
+
+
+def audit_genomes(root: Path) -> dict:
+    pkg = root / "scripts" / "trading_bot" / "memebot_evo"
+    experiment_specs = [
+        (
+            "v2_current",
+            pkg / "ledgers",
+            pkg / "population.json",
+            pkg / "evo_state.json",
+            False,
+        ),
+    ]
+    archive = pkg / "v1_archive"
+    if archive.exists():
+        experiment_specs.insert(0, (
+            "v1_archive",
+            archive / "ledgers",
+            archive / "population.json",
+            archive / "evo_state.json",
+            True,
+        ))
+
+    experiments = {
+        experiment_id: _audit_genome_experiment(
+            root,
+            experiment_id=experiment_id,
+            ledger_dir=ledger_dir,
+            pop_path=pop_path,
+            state_path=state_path,
+            archived=archived,
+        )
+        for experiment_id, ledger_dir, pop_path, state_path, archived in experiment_specs
+    }
+    current = experiments["v2_current"]
+    combined_genomes = {
+        f"{experiment_id}:{gid}": row
+        for experiment_id, experiment in experiments.items()
+        for gid, row in experiment["genomes"].items()
+    }
+    all_sources = [source for experiment in experiments.values() for source in experiment["sources"]]
+    redeclared = [
+        f"{experiment_id}:{gid}"
+        for experiment_id, experiment in experiments.items()
+        for gid in experiment["candidate_also_previously_falsified"]
+    ]
+    clearers = {
+        experiment_id: experiment["full_loss_stress_genomes_clearing_K_bar"]
+        for experiment_id, experiment in experiments.items()
+    }
+    return {
+        "scope": "every genome ledger file in current V2 and the immutable V1 archive",
+        "sources": all_sources,
+        "parse_errors": sum(x["parse_errors"] for x in experiments.values()),
+        "experiments": experiments,
+        "ledger_genomes": sum(x["ledger_genomes"] for x in experiments.values()),
+        "distinct_genome_ids_across_experiments": len({
+            row["genome_id"] for row in combined_genomes.values()
+        }),
+        "active_genomes": current["active_genomes"],
+        "population_registry_genomes": current["population_registry_genomes"],
+        "K_registered_genomes": current["K_registered_genomes"],
+        "ledger_ids_missing_from_K": current["ledger_ids_missing_from_K"],
+        "K_ids_without_ledger": current["K_ids_without_ledger"],
+        "population_ids_missing_from_K": current["population_ids_missing_from_K"],
+        "resolution_rows_across_arms": sum(x["resolution_rows_across_arms"] for x in experiments.values()),
+        "resolved_pass_priced_across_arms": sum(
+            x["resolved_pass_priced_across_arms"] for x in experiments.values()),
+        "resolved_pass_unpriced_across_arms": sum(
+            x["resolved_pass_unpriced_across_arms"] for x in experiments.values()),
+        "candidate_also_previously_falsified": sorted(redeclared),
+        "K_corrected_noise_bar_SE": current["K_corrected_noise_bar_SE"],
+        "full_loss_stress_genomes_clearing_K_bar": current[
+            "full_loss_stress_genomes_clearing_K_bar"],
+        "full_loss_stress_clearers_by_experiment": clearers,
+        "top_reported_mature": current["top_reported_mature"],
+        "top_full_loss_stress_mature": current["top_full_loss_stress_mature"],
+        "genomes": combined_genomes,
+        "warning": (
+            "V1 and V2 are separate experiments with separate K bars; repeated genome ids are separate "
+            "forward records. Parallel genome arms share opportunities and are not portfolio trades."
         ),
     }
 
@@ -693,6 +829,12 @@ def render_markdown(audit: dict) -> str:
             f"{row['restart_invalidations']} | {row['commitment_failures']}/"
             f"{row['experiment_preregistration_failures']} |"
         )
+    if audit["sniper"].get("v3_retirement"):
+        lines += [
+            "",
+            "V3 is **retired from new paper entries** after every arm failed its frozen N=100 "
+            "positive-stress gate. Existing open positions drain through the restart-proof book.",
+        ]
 
     lines += [
         "",
@@ -714,25 +856,44 @@ def render_markdown(audit: dict) -> str:
 
     lines += [
         "",
-        "## Genome population",
+        "## Genome experiments",
         "",
-        f"Ledger genomes: **{audit['genomes']['ledger_genomes']}**; active: "
-        f"**{audit['genomes']['active_genomes']}**; priced PASS resolutions across arms: "
+        f"Ledger files across V1 archive + current V2: **{audit['genomes']['ledger_genomes']}**; "
+        f"current active genomes: **{audit['genomes']['active_genomes']}**; priced PASS resolutions "
+        f"across both experiments: "
         f"**{audit['genomes']['resolved_pass_priced_across_arms']:,}**; terminal unpriced PASS rows: "
         f"**{audit['genomes']['resolved_pass_unpriced_across_arms']:,}**.",
         "",
-        "| reported rank (mature) | n | mean R | stress rank (mature) | n | stress mean R |",
-        "|---|---:|---:|---|---:|---:|",
+        "| experiment | ledger arms | active | K | all resolutions | priced PASS | unpriced PASS | stress clearers |",
+        "|---|---:|---:|---:|---:|---:|---:|---|",
     ]
-    left = audit["genomes"]["top_reported_mature"]
-    right = audit["genomes"]["top_full_loss_stress_mature"]
-    for i in range(max(len(left), len(right))):
-        l = left[i] if i < len(left) else {}
-        r = right[i] if i < len(right) else {}
+    for experiment_id, experiment in audit["genomes"]["experiments"].items():
+        clearers = ", ".join(experiment["full_loss_stress_genomes_clearing_K_bar"]) or "none"
         lines.append(
-            f"| {l.get('genome_id', '—')} | {l.get('n', '—')} | {_fmt(l.get('mean_R'))} | "
-            f"{r.get('genome_id', '—')} | {r.get('n', '—')} | {_fmt(r.get('mean_R'))} |"
+            f"| {experiment_id} | {experiment['ledger_genomes']} | {experiment['active_genomes']} | "
+            f"{experiment['K_registered_genomes']} | {experiment['resolution_rows_across_arms']:,} | "
+            f"{experiment['resolved_pass_priced_across_arms']:,} | "
+            f"{experiment['resolved_pass_unpriced_across_arms']:,} | {clearers} |"
         )
+    for experiment_id, experiment in audit["genomes"]["experiments"].items():
+        lines += [
+            "",
+            f"### {experiment_id} mature ranks",
+            "",
+            "| reported rank | n | mean R | stress rank | n | stress mean R |",
+            "|---|---:|---:|---|---:|---:|",
+        ]
+        left = experiment["top_reported_mature"]
+        right = experiment["top_full_loss_stress_mature"]
+        if not left and not right:
+            lines.append("| — | — | — | — | — | — |")
+        for i in range(max(len(left), len(right))):
+            l = left[i] if i < len(left) else {}
+            r = right[i] if i < len(right) else {}
+            lines.append(
+                f"| {l.get('genome_id', '—')} | {l.get('n', '—')} | {_fmt(l.get('mean_R'))} | "
+                f"{r.get('genome_id', '—')} | {r.get('n', '—')} | {_fmt(r.get('mean_R'))} |"
+            )
     redeclared = audit["genomes"]["candidate_also_previously_falsified"]
     lines += [
         "",
@@ -744,8 +905,11 @@ def render_markdown(audit: dict) -> str:
         "entry hashes cannot be recomputed from the retained fields.",
         f"- Genome candidates that are simultaneously in the falsified registry: "
         f"**{', '.join(redeclared) if redeclared else 'none'}**.",
-        f"- Genomes clearing the K={audit['genomes']['K_registered_genomes']} noise bar after the "
-        f"full-loss stress: **{', '.join(audit['genomes']['full_loss_stress_genomes_clearing_K_bar']) or 'none'}**.",
+        "- Genomes clearing their own experiment's K noise bar after full-loss stress: **" +
+        "; ".join(
+            f"{experiment_id}={','.join(clearers) or 'none'}"
+            for experiment_id, clearers in audit["genomes"]["full_loss_stress_clearers_by_experiment"].items()
+        ) + "**.",
         "- Reported price marks remain paper observations. Exact position-sized on-chain exit quotes, "
         "landing failures and latency are not present in these ledgers.",
         "",

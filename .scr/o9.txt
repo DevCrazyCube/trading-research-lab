@@ -1,0 +1,59 @@
+distinct positive train entry-conditions 2355
+controls done 41.868966579437256
+ent 0 64 42.6
+ent 20 1337 60.4
+ent 40 3129 82.3
+ent 60 4393 101.2
+ent 80 5730 118.3
+ent 100 7293 139.9
+ent 120 8890 167.8
+ent 140 10594 198.2
+STAGE3B SWEPT 41250 train-positive 11135
+validating 400
+val 0 210.1
+val 50 210.9
+val 100 211.9
+val 150 212.9
+val 200 214.0
+val 250 215.1
+val 300 216.2
+val 350 217.2
+
+SURVIVED BOTH SIGNS: 207 of 400
+BH q=0.10 -> significant: 0 of 400
+
+p=0.0362   lvolle0+rv15ge0+r1le2                    ('TR', 0.15, 60)     ('FULL',)    T:  +92.0(exc +87.5) V:  +40.1(exc +30.1) Vmed=  -4.7 n=  73 k= 41 res=99%
+p=0.0362   lvolle0+rv15ge0+r1le2                    ('TR', 0.15, 60)     ('PYR', 0.25) T:  +81.8(exc +76.6) V:  +35.4(exc +25.3) Vmed=  -4.2 n=  73 k= 41 res=99%
+p=0.0445   r5le2+lvolle0+wickupge0                  ('TR', 0.15, 60)     ('FULL',)    T:  +88.2(exc +83.7) V:  +41.2(exc +31.2) Vmed=  -8.3 n=  67 k= 47 res=100%
+p=0.0485   r15le0+hi60le0+rv15ge2                   ('TR', 0.35, 60)     ('FULL',)    T:  +82.6(exc +86.1) V:  +23.6(exc +27.1) Vmed= -15.9 n=  77 k= 36 res=95%
+p=0.0515   r15le0+lvolle0+r1le2                     ('TR', 0.15, 60)     ('FULL',)    T:  +90.4(exc +85.8) V:  +44.5(exc +34.6) Vmed=  -9.8 n=  75 k= 42 res=99%
+p=0.0515   hi60le0+rv15ge2+wickupge0                ('TR', 0.35, 60)     ('FULL',)    T:  +75.3(exc +78.8) V:  +64.1(exc +67.6) Vmed= -13.9 n= 108 k= 38 res=96%
+p=0.0517   r15le0+rv15ge2+pgradge0                  ('TR', 0.35, 60)     ('FULL',)    T:  +81.9(exc +85.4) V:  +23.6(exc +27.1) Vmed= -15.9 n=  77 k= 36 res=95%
+p=0.0537   r15le0+rv15ge2+pgradge0                  ('TR', 0.35, 240)    ('FULL',)    T:  +82.8(exc +86.1) V:  +23.3(exc +26.4) Vmed= -16.7 n=  77 k= 36 res=95%
+p=0.0568   r15le0+hi60le0+rv15ge2                   ('TR', 0.35, 240)    ('FULL',)    T:  +83.4(exc +86.8) V:  +23.3(exc +26.4) Vmed= -16.7 n=  77 k= 36 res=95%
+p=0.0590   lvolle0+rv15ge0+r1le2                    ('TR', 0.15, 240)    ('FULL',)    T:  +91.9(exc +86.3) V:  +39.2(exc +26.2) Vmed=  -4.7 n=  73 k= 41 res=99%
+p=0.0592   r15le0+rv15ge2+gapge0                    ('TR', 0.35, 240)    ('FULL',)    T:  +82.8(exc +86.1) V:  +23.3(exc +26.4) Vmed= -16.7 n=  77 k= 36 res=95%
+p=0.0592   lvolle0+rv15ge0+r1le2                    ('H', 5)             ('FULL',)    T:  +73.9(exc +83.5) V:  +64.4(exc +79.0) Vmed= -15.9 n=  59 k= 41 res=100%
+p=0.0595   r15le0+rv15ge2+gapge0                    ('TR', 0.35, 60)     ('FULL',)    T:  +81.9(exc +85.4) V:  +23.6(exc +27.1) Vmed= -15.9 n=  77 k= 36 res=95%
+p=0.0597   hi60le0+rv15ge2+wickupge0                ('TR', 0.35, 240)    ('FULL',)    T:  +75.1(exc +78.4) V:  +64.0(exc +67.0) Vmed= -14.8 n= 108 k= 38 res=96%
+p=0.0622   r60le0+lmcaple2+rv15ge0                  ('TR', 0.15, 60)     ('PYR', 0.25) T:  +84.0(exc +78.8) V:  +31.1(exc +21.0) Vmed=  -4.6 n= 106 k= 41 res=100%
+p=0.0658   lmcaple2+lvolle0+rv15ge0                 ('TR', 0.15, 60)     ('PYR', 0.25) T:  +87.1(exc +81.9) V:  +26.4(exc +16.3) Vmed=  -3.6 n= 118 k= 43 res=98%
+p=0.0680   r60le0+lmcaple2+rv15ge0                  ('TR', 0.15, 60)     ('FULL',)    T:  +93.9(exc +89.3) V:  +33.7(exc +23.8) Vmed=  -7.3 n= 106 k= 41 res=100%
+p=0.0740   hi60le0+lmcaple2+rv15ge0                 ('TR', 0.15, 60)     ('PYR', 0.25) T:  +82.4(exc +77.2) V:  +25.6(exc +15.6) Vmed=  -4.8 n= 116 k= 44 res=99%
+p=0.0772   r15le0+lmcaple2+rv15ge0                  ('TR', 0.15, 60)     ('FULL',)    T:  +91.6(exc +87.1) V:  +30.3(exc +20.3) Vmed=  -9.8 n= 106 k= 41 res=100%
+p=0.0772   lmcaple2+rv15ge0+pgradge0                ('TR', 0.15, 60)     ('PYR', 0.25) T:  +82.5(exc +77.3) V:  +25.6(exc +15.5) Vmed=  -4.0 n= 120 k= 44 res=98%
+p=0.0815   lmcaple2+rv15ge0+gapge0                  ('TR', 0.15, 60)     ('PYR', 0.25) T:  +82.5(exc +77.3) V:  +25.6(exc +15.5) Vmed=  -4.0 n= 120 k= 44 res=98%
+p=0.0823   r15le0+lvolle0+r1le2                     ('TR', 0.15, 240)    ('FULL',)    T:  +90.2(exc +84.7) V:  +44.1(exc +31.1) Vmed= -11.7 n=  75 k= 42 res=99%
+p=0.0865   lmcaple2+rv15ge0+gapge0                  ('TR', 0.15, 60)     ('FULL',)    T:  +92.3(exc +87.8) V:  +27.0(exc +17.1) Vmed=  -6.8 n= 120 k= 44 res=98%
+p=0.0905   lmcaple2+lvolle0+rv15ge0                 ('TR', 0.15, 60)     ('FULL',)    T:  +97.4(exc +92.9) V:  +27.6(exc +17.7) Vmed=  -6.4 n= 118 k= 43 res=98%
+p=0.0915   lmcaple2+rv15ge0+agele0                  ('TR', 0.15, 60)     ('PYR', 0.25) T:  +86.7(exc +81.6) V:  +26.3(exc +16.2) Vmed=  -4.9 n= 106 k= 39 res=100%
+p=0.0935   hi60le0+lmcaple2+rv15ge0                 ('TR', 0.15, 60)     ('FULL',)    T:  +92.1(exc +87.6) V:  +27.1(exc +17.2) Vmed=  -8.3 n= 116 k= 44 res=99%
+p=0.0985   r5le2+lvolle0+wickupge0                  ('TR', 0.15, 240)    ('FULL',)    T:  +86.4(exc +80.9) V:  +38.9(exc +25.9) Vmed=  -9.6 n=  67 k= 47 res=97%
+p=0.0988   r5le2+lvolle0+wickupge0                  ('TR', 0.35, 60)     ('FULL',)    T:  +76.9(exc +80.5) V:  +18.7(exc +22.2) Vmed= -14.4 n=  61 k= 47 res=100%
+p=0.1013   lmcaple2+rv15ge0+pgradge0                ('TR', 0.15, 60)     ('FULL',)    T:  +92.3(exc +87.8) V:  +27.0(exc +17.1) Vmed=  -6.8 n= 120 k= 44 res=98%
+p=0.1025   r5le0+lvolle0+r1le2                      ('H', 5)             ('FULL',)    T:  +67.5(exc +77.1) V:  +59.1(exc +73.7) Vmed= -17.9 n=  51 k= 41 res=100%
+p=0.1032   lmcaple2+rv15ge0+agele0                  ('TR', 0.15, 60)     ('FULL',)    T:  +97.0(exc +92.4) V:  +28.0(exc +18.1) Vmed=  -9.3 n= 106 k= 39 res=100%
+p=0.1105   r15le0+rv15ge2+wickupge0                 ('TR', 0.35, 60)     ('PYR', 0.25) T:  +93.7(exc +93.9) V:  +11.6(exc +11.7) Vmed= -11.8 n=  75 k= 35 res=95%
+p=0.1242   r60le0+lmcaple2+rv15ge0                  ('TR', 0.15, 240)    ('FULL',)    T:  +91.6(exc +86.1) V:  +32.6(exc +19.6) Vmed= -10.2 n= 106 k= 41 res=99%
+p=0.1268   r60le0+ddle0+rv15ge2                     ('TR', 0.35, 240)    ('PYR', 0.25) T: +104.0(exc+103.5) V:  +15.8(exc +15.0) Vmed= -12.0 n=  53 k= 25 res=92%
+p=0.1283   r60le0+ddle0+rv15ge2                     ('TR', 0.35, 60)     ('PYR', 0.25) T: +103.2(exc+103.4) V:  +14.4(exc +14.5) Vmed=  -9.9 n=  53 k= 25 res=92%

@@ -161,3 +161,48 @@ whether their spreads ever tighten enough to transact — a low-priority lead gi
 **Gates (unchanged, not triggered):** any real position would need (1) a forward *paper* validation of
 a *specific* frozen rule first, then (2) an explicit owner money/account gate. Nothing here clears bar
 (1), so neither gate is engaged.
+
+---
+
+## Addendum 2026-09-03 (21:00 CEST tick) — two more structural zeros, now on the WIDE book
+
+The scope caveat above ("the illiquid political-longshot tail is unproven") is the exact corner this
+tick tested, and it is now materially closer to closed. This was the **first proposer tick to run on
+the T48-fixed data path** (`research/trading_bot/T48_DATAPATH_AUDIT_PREDMARKET_2026-09-03.md`):
+27,819 selectable markets versus the ~200 page-1 slice every prior tick saw. If a crowd-beating
+structural bias existed in the political book, a 100x wider read is where it should have shown up.
+
+Two knowledge-free tests, both pre-stated, both zero:
+
+**(1) Named-longshot overpricing — FALSIFIED, not merely unproven.** Target: the Polymarket Nobel
+Peace Prize 2026 book (20 named candidates, 0.6–7.5¢, resolves ~2026-10-09) — as pure a
+political-longshot basket as exists. The thesis says a book of named longshots sums well above 1.
+Measured: **Σ p(named) = 0.339**, leaving 0.661 on the unnamed field. That sits *inside* the
+historical base rate for "the winner was on the public shortlist." The crowd has already priced the
+prize's obscurity bias correctly; there is nothing to fade. Note the direction: on the liquid Kalshi
+sample the bias was *absent*; here on the illiquid political tail it is absent too, and by the
+mechanism the bias story predicts should be strongest.
+
+**(2) Tenor-monotonicity arbitrage — zero.** For cumulative "will X happen by <DATE>" events, an
+earlier deadline can never be worth more than a later one. Grouped all 3,000 volume-ranked markets by
+question stem modulo their date token and tested every within-stem pair for `bid(earlier) >
+ask(later)` at a 0.5¢ threshold. **0 violations.** The Iran/Hormuz/blockade ladders (Sep 7 / 14 / 30)
+are cleanly monotone, and the US–Iran-meeting YES/NO complement sums to 0.987 — inside its own spread.
+One apparent contradiction (United Russia "gain the most seats" 0.705 vs "win the most seats" 0.991)
+was checked and is **not** one: the 0.705 leg belongs to a coherent net-seat-*gain* partition summing
+to 1.009. Same lesson as §cross-market above, now on a much larger sample: the naïve positives are
+bundling artifacts, and simultaneous quotes leave nothing.
+
+**Declined on purpose (recorded so it is not mistaken for an edge later).** ~a dozen markets are
+structurally near-certain and priced just short of it (United Russia wins most seats, 0.991; honest
+estimate ≥0.997). That gap is **cost of capital on a month-locked position, not crowd error** — the
+same finding as "near-certain yield: net −0.001/contract" above. Logging a batch of these would pad
+the tracker's Brier with guaranteed micro-wins and contaminate the calibration read it exists to
+produce. Abstention logged instead.
+
+**Standing:** the tracker keeps its 66 open calibration estimates and its first settlements (09-06,
+09-20). Those still answer the only live question here — *can the agent out-forecast the crowd on
+markets it chose* — and that verdict is untouched. But the *structural* (knowledge-free) side of the
+prediction-market thesis is now **three-for-three dead**, and the last excuse for it ("we only ever
+looked at the liquid corner / we only ever saw 2% of the book") is gone. Do not spend further ticks
+re-running structural scans on this book; only the calibration clock is worth waiting on.

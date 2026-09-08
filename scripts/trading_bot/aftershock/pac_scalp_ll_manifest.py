@@ -38,6 +38,7 @@ SPEND_AUTHORITY = RESEARCH / f"{INSTRUMENT}_SPEND_AUTHORITY.json"
 RAW_ROOT = ROOT / "research" / "data" / "aftershock" / "pac_scalp_ll"
 RAW_JOURNAL = RAW_ROOT / "calibration_journal.json"
 RAW_ATTESTATION = RAW_ROOT / "calibration_attestation_raw.json"
+SPEND_HIGH_WATER = RAW_ROOT / "spend_high_water.jsonl"
 CAMPAIGN_LOCK = RAW_ROOT / "campaign.lock"
 FROZEN_MAX_LAMPORTS = 3_000_000
 
@@ -129,12 +130,31 @@ def exclusive_campaign():
             fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
             raise RefusedExecution("PAC_SCALP_LL campaign already has an active writer") from exc
-        yield
+        yield {"descriptor": descriptor, "path": str(CAMPAIGN_LOCK.resolve())}
     finally:
         try:
             fcntl.flock(descriptor, fcntl.LOCK_UN)
         finally:
             os.close(descriptor)
+
+
+def require_campaign_lock(token: object) -> None:
+    """Prove the sender owns a live OS lock, not a module-global capability object."""
+    if (not isinstance(token, dict) or set(token) != {"descriptor", "path"}
+            or token.get("path") != str(CAMPAIGN_LOCK.resolve())
+            or type(token.get("descriptor")) is not int):
+        raise RefusedExecution("PAC_SCALP_LL broadcast lacks an active campaign lock")
+    descriptor = token["descriptor"]
+    try:
+        observed = os.fstat(descriptor)
+        expected = CAMPAIGN_LOCK.stat()
+        if (observed.st_dev, observed.st_ino) != (expected.st_dev, expected.st_ino):
+            raise RefusedExecution("PAC_SCALP_LL campaign lock inode differs")
+        # Reasserting LOCK_EX on the same open description is harmless; a caller cannot pass a
+        # closed/arbitrary descriptor and pretend the manifest-owned lock is held.
+        fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except (OSError, BlockingIOError) as exc:
+        raise RefusedExecution("PAC_SCALP_LL campaign lock is not live") from exc
 
 
 def _git(*args: str) -> subprocess.CompletedProcess:
@@ -239,10 +259,21 @@ def write_spend_authority() -> dict:
             raise RefusedExecution("PAC_SCALP_LL pre-authority journal is not pristine genesis")
     else:
         calibration._atomic_json(RAW_JOURNAL, genesis)
+    if SPEND_HIGH_WATER.exists():
+        rows = _read_spend_high_water()
+        if len(rows) != 1 or rows[0]["attempts"] != 0 \
+                or rows[0]["journal_sha256"] != genesis["journal_sha256"]:
+            raise RefusedExecution("PAC_SCALP_LL pre-authority spend high-water is not genesis")
+    else:
+        _append_spend_high_water(genesis)
+    high_water_sha = _sha_bytes(SPEND_HIGH_WATER.read_bytes())
+    high_water_head = _read_spend_high_water()[-1]["record_sha256"]
     body = {"schema": 1, "instrument_id": INSTRUMENT,
             "campaign_sha256": campaign.campaign_sha256,
             "max_lamports": campaign.max_lamports,
             "journal_genesis_sha256": _sha_bytes(RAW_JOURNAL.read_bytes()),
+            "spend_high_water_genesis_file_sha256": high_water_sha,
+            "spend_high_water_genesis_record_sha256": high_water_head,
             "created_unix_nanos": time.time_ns(),
             "boundary": "SET_ONCE_CALIBRATION_SPEND_CAP_NO_TRADING"}
     value = {**body, "spend_authority_sha256": _sha_bytes(_canonical(body))}
@@ -260,12 +291,93 @@ def require_spend_authority(campaign: campaigns.Campaign) -> dict:
             or value.get("instrument_id") != INSTRUMENT
             or value.get("campaign_sha256") != campaign.campaign_sha256
             or value.get("max_lamports") != campaign.max_lamports
-            or value.get("boundary") != "SET_ONCE_CALIBRATION_SPEND_CAP_NO_TRADING"):
+            or value.get("boundary") != "SET_ONCE_CALIBRATION_SPEND_CAP_NO_TRADING"
+            or not isinstance(value.get("spend_high_water_genesis_file_sha256"), str)
+            or not isinstance(value.get("spend_high_water_genesis_record_sha256"), str)):
         raise RefusedExecution("PAC_SCALP_LL spend authority content refuses")
     if not RAW_JOURNAL.exists():
         raise RefusedExecution("PAC_SCALP_LL campaign journal is missing after spend authorization")
-    calibration.load_journal(RAW_JOURNAL, campaign)
+    journal = calibration.load_journal(RAW_JOURNAL, campaign)
+    rows = _read_spend_high_water()
+    first, last = rows[0], rows[-1]
+    if (_sha_bytes((_canonical(first) + b"\n"))
+            != value["spend_high_water_genesis_file_sha256"]
+            or first["record_sha256"] != value["spend_high_water_genesis_record_sha256"]):
+        raise RefusedExecution("PAC_SCALP_LL journal differs from irreversible spend high-water")
+    _assert_spend_high_water(journal, rows)
     return value
+
+
+def _assert_spend_high_water(journal: dict, rows: list[dict]) -> None:
+    last = rows[-1] if rows else None
+    if (last is None or last["journal_sha256"] != journal.get("journal_sha256")
+            or last["attempts"] != len(journal.get("attempts", []))
+            or last["reserved_lamports"]
+            != sum(row.get("reserved_lamports", -1) for row in journal.get("attempts", []))):
+        raise RefusedExecution("PAC_SCALP_LL journal differs from irreversible spend high-water")
+
+
+def _read_spend_high_water(path: pathlib.Path = SPEND_HIGH_WATER) -> list[dict]:
+    previous = "0" * 64; rows = []
+    try:
+        lines = path.read_text().splitlines()
+    except OSError as exc:
+        raise RefusedExecution("PAC_SCALP_LL spend high-water is missing") from exc
+    for sequence, line in enumerate(lines, 1):
+        try:
+            row = json.loads(line); body = dict(row); observed = body.pop("record_sha256", None)
+        except (json.JSONDecodeError, TypeError) as exc:
+            raise RefusedExecution("PAC_SCALP_LL spend high-water is malformed") from exc
+        if (set(body) != {"schema", "instrument_id", "sequence", "previous_record_sha256",
+                         "campaign_sha256", "journal_sha256", "attempts", "reserved_lamports"}
+                or body["schema"] != 1 or body["instrument_id"] != INSTRUMENT
+                or body["sequence"] != sequence or body["previous_record_sha256"] != previous
+                or observed != _sha_bytes(_canonical(body))
+                or type(body["attempts"]) is not int or body["attempts"] < 0
+                or type(body["reserved_lamports"]) is not int or body["reserved_lamports"] < 0
+                or (rows and (body["attempts"] < rows[-1]["attempts"]
+                              or body["reserved_lamports"] < rows[-1]["reserved_lamports"]))):
+            raise RefusedExecution("PAC_SCALP_LL spend high-water chain refuses")
+        rows.append(row); previous = observed
+    if not rows:
+        raise RefusedExecution("PAC_SCALP_LL spend high-water is empty")
+    return rows
+
+
+def _append_spend_high_water(journal: dict, path: pathlib.Path = SPEND_HIGH_WATER) -> dict:
+    rows = _read_spend_high_water(path) if path.exists() else []
+    previous = rows[-1]["record_sha256"] if rows else "0" * 64
+    body = {"schema": 1, "instrument_id": INSTRUMENT, "sequence": len(rows) + 1,
+            "previous_record_sha256": previous,
+            "campaign_sha256": journal["campaign_sha256"],
+            "journal_sha256": journal["journal_sha256"],
+            "attempts": len(journal["attempts"]),
+            "reserved_lamports": sum(row["reserved_lamports"] for row in journal["attempts"])}
+    row = {**body, "record_sha256": _sha_bytes(_canonical(body))}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    try:
+        payload = _canonical(row) + b"\n"
+        if os.write(descriptor, payload) != len(payload):
+            raise OSError("short spend high-water append")
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    return row
+
+
+def checkpoint_spend_journal(campaign: campaigns.Campaign, journal: dict) -> dict:
+    """Advance the non-rewritable budget high-water before replacing the convenience journal."""
+    require_spend_authority(campaign)
+    rows = _read_spend_high_water(); last = rows[-1]
+    attempts = len(journal.get("attempts", []))
+    reserved = sum(row.get("reserved_lamports", -1) for row in journal.get("attempts", []))
+    if (journal.get("campaign_sha256") != campaign.campaign_sha256
+            or journal.get("journal_sha256") != campaigns.sha(
+                {k: v for k, v in journal.items() if k != "journal_sha256"})
+            or attempts < last["attempts"] or reserved < last["reserved_lamports"]):
+        raise RefusedExecution("PAC_SCALP_LL spend checkpoint regresses or is malformed")
+    return _append_spend_high_water(journal)
 
 
 def _evidence_bundle() -> tuple[campaigns.Campaign, dict, dict, dict]:
@@ -306,13 +418,30 @@ def _evidence_bundle() -> tuple[campaigns.Campaign, dict, dict, dict]:
                     or row.get("meta_fee_lamports") != attempt["fee_lamports"]):
                 raise RefusedExecution("PAC_SCALP_LL processed attempt lacks exact finalized evidence")
         elif attempt["stage"] == "FAILED":
-            if row.get("finalized_slot") is not None or row.get("meta_fee_lamports") is not None:
-                raise RefusedExecution("PAC_SCALP_LL failed ITT attempt gained invented finalized evidence")
+            absent = (row.get("finalized_slot") is None
+                      and row.get("meta_fee_lamports") is None
+                      and row.get("finalized_after_local_failure") is False
+                      and row.get("blockhash_expired_at_finalized") is True
+                      and type(row.get("absence_finalized_slot")) is int
+                      and row["absence_finalized_slot"] > 0
+                      and isinstance(row.get("expiry_response_sha256"), str)
+                      and len(row["expiry_response_sha256"]) == 64)
+            late = (type(row.get("finalized_slot")) is int
+                    and row["finalized_slot"] > 0
+                    and row.get("meta_fee_lamports") == attempt["fee_lamports"]
+                    and row.get("finalized_after_local_failure") is True
+                    and row.get("blockhash_expired_at_finalized") is False
+                    and row.get("absence_finalized_slot") is None
+                    and row.get("expiry_response_sha256") is None)
+            if not (absent or late):
+                raise RefusedExecution("PAC_SCALP_LL failed ITT finalized evidence is inconsistent")
         else:
             raise RefusedExecution("PAC_SCALP_LL activation saw a nonterminal ITT attempt")
     profile = runtime.load(
         RUNTIME_PROFILE, expected_file_sha256=_sha_bytes(RUNTIME_PROFILE.read_bytes()),
-        campaign=campaign)
+        campaign=campaign, attestation=attestation)
+    if profile.get("attestation_sha256") != attestation["attestation_sha256"]:
+        raise RefusedExecution("PAC_SCALP_LL runtime cost profile lacks this attestation authority")
     return campaign, summary, attestation, profile
 
 

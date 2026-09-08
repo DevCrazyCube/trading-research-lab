@@ -1,0 +1,172 @@
+TRAIN bars 17029 mints 137 | VALIDATE bars 23191 mints 169
+bins per feature: r1=5, r5=5, r15=5, r60=5, r_since_first=5, dd_from_ath=5, runup_from_low=5, rvol15=5, bar_range=5, body_pos=5, gap_prev=3, active_frac15=4, vol_z=5, vol_share15=5, cumvol60=5, vwap_dev15=5, age_min=5, price_level=5, ath_age_min=5, ttft_min=5, hour_utc=5, creator_creates=4, accel_5_15=5, up_frac15=5, mdd15=5, vol_accel=5, dd60=5, ath_frac_life=5
+BASELINE train a30  n=2667 k=137 res=0.759 mean=-0.1590 median=-0.1486
+BASELINE train a50  n=2667 k=137 res=0.759 mean=-0.2606 median=-0.2308
+BASELINE train a100 n=2667 k=137 res=0.759 mean=-0.5147 median=-0.4469
+BASELINE train b30  n=2667 k=137 res=0.759 mean=-0.1656 median=-0.1561
+BASELINE valid a30  n=3382 k=169 res=0.784 mean=-0.1110 median=-0.1669
+BASELINE valid a50  n=3382 k=169 res=0.784 mean=-0.2146 median=-0.2763
+BASELINE valid a100 n=3382 k=169 res=0.784 mean=-0.4738 median=-0.5395
+BASELINE valid b30  n=3382 k=169 res=0.784 mean=-0.1182 median=-0.1741
+CALIB(overlapping, all bars) train a30  n=17029 k=137 res=0.932 mean=-0.1549 median=-0.1487
+CALIB(overlapping, all bars) train a50  n=17029 k=137 res=0.932 mean=-0.2399 median=-0.2018
+CALIB(overlapping, all bars) train a100 n=17029 k=137 res=0.932 mean=-0.4523 median=-0.3315
+CALIB(overlapping, all bars) valid a30  n=23191 k=169 res=0.938 mean=-0.1488 median=-0.1712
+CALIB(overlapping, all bars) valid a50  n=23191 k=169 res=0.938 mean=-0.2378 median=-0.2245
+CALIB(overlapping, all bars) valid a100 n=23191 k=169 res=0.938 mean=-0.4602 median=-0.4019
+
+=== 1-WAY MARGINALS (train, a30) ===
+  +0.1674  hour_utc       q1  n=447 k=84 med=-0.1535
+  +0.0944  ttft_min       q3  n=323 k=9 med=-0.0415
+  -0.0055  price_level    q1  n=538 k=45 med=-0.1910
+  -0.0293  ttft_min       q4  n=318 k=12 med=-0.0564
+  -0.0356  r_since_first  q0  n=1399 k=119 med=-0.2265
+  -0.0438  rvol15         q1  n=571 k=73 med=-0.0204
+  -0.0473  rvol15         q2  n=562 k=61 med=-0.0381
+  -0.0492  accel_5_15     q3  n=991 k=80 med=-0.0600
+  -0.0504  dd_from_ath    q0  n=1277 k=115 med=-0.2399
+  -0.0556  active_frac15  q2  n=158 k=52 med=-0.0704
+  -0.0641  cumvol60       q2  n=311 k=47 med=-0.0893
+  -0.0664  bar_range      q2  n=1025 k=89 med=-0.0651
+  -0.0678  mdd15          q2  n=639 k=69 med=-0.0576
+  -0.0738  vol_accel      q3  n=650 k=77 med=-0.0676
+  ...
+  -0.2234  r_since_first  q2  n=335 k=36 med=-0.1876
+  -0.2340  r_since_first  q3  n=305 k=34 med=-0.1306
+  -0.2350  ath_frac_life  q4  n=302 k=47 med=-0.0815
+  -0.2489  runup_from_low q3  n=391 k=56 med=-0.2673
+  -0.2667  runup_from_low q4  n=354 k=52 med=-0.1262
+  -0.2907  dd_from_ath    q3  n=330 k=36 med=-0.1276
+
+=== 2-WAY SWEEP ON TRAIN ===
+2-way cells enumerated: 8915 ; evaluated with support (n>=60,k>=20): 6674
+train cell mean distribution: min=-0.4233 p5=-0.2156 p25=-0.1532 p50=-0.1083 p75=-0.0660 p95=+0.0434 max=+0.8747
+cells with train mean > 0        : 498 (7.5%)
+cells with train mean > baseline : 5200 (77.9%)
+
+Top 30 TRAIN cells (a30, mint-equal):
+  +0.8747 med=-0.0954 n= 176 k= 24 res=0.938 | r5 q3 & price_level q1
+  +0.8663 med=-0.0831 n= 292 k= 25 res=0.949 | r5 q1 & price_level q1
+  +0.8340 med=-0.1189 n= 101 k= 28 res=0.772 | ath_age_min q3 & hour_utc q1
+  +0.7966 med=-0.0731 n= 182 k= 23 res=0.989 | cumvol60 q1 & price_level q1
+  +0.7582 med=-0.0743 n= 319 k= 29 res=0.950 | r1 q1 & price_level q1
+  +0.6974 med=-0.0714 n= 166 k= 31 res=0.988 | vol_share15 q2 & price_level q1
+  +0.6752 med=-0.0797 n= 200 k= 35 res=0.860 | hour_utc q1 & creator_creates q1
+  +0.6651 med=-0.0970 n= 217 k= 25 res=0.940 | r1 q2 & price_level q1
+  +0.6647 med=-0.0469 n= 196 k= 25 res=0.954 | r1 q3 & price_level q1
+  +0.6479 med=-0.1330 n= 206 k= 32 res=0.903 | price_level q1 & vol_accel q4
+  +0.6395 med=-0.0742 n= 252 k= 28 res=0.964 | bar_range q2 & price_level q1
+  +0.6388 med=-0.1389 n= 200 k= 32 res=0.895 | runup_from_low q0 & price_level q1
+  +0.6275 med=-0.1499 n= 116 k= 32 res=0.716 | runup_from_low q1 & age_min q4
+  +0.6108 med=-0.1190 n= 256 k= 35 res=0.984 | vol_z q1 & price_level q1
+  +0.5934 med=-0.0764 n= 155 k= 22 res=0.961 | r15 q3 & price_level q1
+  +0.5930 med=-0.1238 n= 243 k= 32 res=0.988 | price_level q1 & up_frac15 q1
+  +0.5690 med=-0.2063 n=  77 k= 25 res=0.584 | dd_from_ath q0 & ath_frac_life q3
+  +0.5622 med=-0.1276 n= 232 k= 27 res=0.935 | r5 q2 & price_level q1
+  +0.5460 med=-0.1279 n= 133 k= 39 res=0.752 | age_min q2 & hour_utc q1
+  +0.5400 med=-0.1296 n= 254 k= 31 res=0.886 | vol_z q2 & price_level q1
+  +0.5191 med=-0.1106 n= 181 k= 37 res=0.873 | r5 q3 & age_min q4
+  +0.5156 med=-0.0983 n= 260 k= 34 res=0.962 | runup_from_low q1 & price_level q1
+  +0.5142 med=-0.0867 n= 145 k= 27 res=0.972 | price_level q1 & vol_accel q3
+  +0.5127 med=-0.0871 n= 360 k= 31 res=0.908 | vol_share15 q4 & price_level q1
+  +0.5030 med=-0.0529 n= 110 k= 44 res=0.927 | r_since_first q0 & vol_share15 q2
+  +0.4901 med=-0.3000 n= 347 k= 78 res=0.657 | r_since_first q0 & ath_age_min q3
+  +0.4861 med=-0.0702 n= 130 k= 42 res=0.854 | dd_from_ath q0 & body_pos q2
+  +0.4833 med=-0.3000 n= 124 k= 41 res=0.758 | r15 q0 & age_min q2
+  +0.4691 med=-0.1027 n= 137 k= 45 res=0.861 | r60 q1 & hour_utc q1
+  +0.4678 med=-0.0472 n= 116 k= 40 res=0.922 | dd_from_ath q0 & vol_share15 q2
+
+train-positive cells carried to validate: 498
+of those, validate had support: 480
+
+All train-positive cells re-tested on VALIDATE (sorted by validate mean):
+  tr=+0.0010  va=+1.4911 med=-0.0246 n= 254 k= 68 res=0.921 CI90=[-0.1503,+4.6985] t2.5%=+1.4583 d50=+1.4600 d100=+1.3822 | vol_share15 q3 & mdd15 q4
+  tr=+0.0212  va=+0.4134 med=-0.2272 n= 366 k= 93 res=0.645 CI90=[-0.1967,+1.6041] t2.5%=+0.3994 d50=+0.2997 d100=+0.0154 | age_min q2 & mdd15 q4
+  tr=+0.0180  va=+0.2098 med=-0.0243 n= 130 k= 48 res=0.862 CI90=[-0.2008,+0.8999] t2.5%=+0.1952 d50=+0.1658 d100=+0.0560 | accel_5_15 q0 & mdd15 q4
+  tr=+0.0727  va=+0.1856 med=-0.1389 n= 219 k= 54 res=0.877 CI90=[-0.1689,+0.8450] t2.5%=+0.1727 d50=+0.1151 d100=-0.0614 | bar_range q4 & age_min q2
+  tr=+0.0558  va=+0.0219 med=-0.0256 n= 182 k= 58 res=0.962 CI90=[-0.0813,+0.1889] t2.5%=+0.0088 d50=+0.0009 d100=-0.0515 | r5 q2 & r15 q0
+  tr=+0.0588  va=+0.0152 med=-0.0205 n= 145 k= 26 res=0.993 CI90=[-0.0788,+0.1130] t2.5%=+0.0016 d50=+0.0075 d100=-0.0118 | cumvol60 q2 & up_frac15 q3
+  tr=+0.3989  va=+0.0102 med=-0.0715 n= 301 k= 50 res=0.904 CI90=[-0.1324,+0.2534] t2.5%=-0.0009 d50=-0.0495 d100=-0.1986 | age_min q2 & dd60 q2
+  tr=+0.0268  va=-0.0021 med=-0.0188 n= 222 k= 32 res=0.986 CI90=[-0.0591,+0.0626] t2.5%=-0.0157 d50=-0.0050 d100=-0.0124 | vol_z q1 & cumvol60 q2
+  tr=+0.0077  va=-0.0049 med=-0.0316 n= 268 k= 63 res=0.963 CI90=[-0.1043,+0.1452] t2.5%=-0.0176 d50=-0.0263 d100=-0.0799 | r5 q2 & accel_5_15 q4
+  tr=+0.0702  va=-0.0088 med=+0.0111 n= 123 k= 29 res=0.984 CI90=[-0.0628,+0.0485] t2.5%=-0.0218 d50=-0.0226 d100=-0.0571 | r5 q4 & cumvol60 q2
+  tr=+0.0049  va=-0.0106 med=-0.0306 n= 209 k= 35 res=0.995 CI90=[-0.0656,+0.0505] t2.5%=-0.0242 d50=-0.0113 d100=-0.0129 | vol_share15 q1 & cumvol60 q2
+  tr=+0.0199  va=-0.0114 med=-0.0179 n= 273 k= 54 res=0.996 CI90=[-0.0482,+0.0284] t2.5%=-0.0249 d50=-0.0132 d100=-0.0179 | r15 q1 & active_frac15 q1
+  tr=+0.0039  va=-0.0118 med=-0.0075 n= 195 k= 49 res=0.949 CI90=[-0.0529,+0.0291] t2.5%=-0.0244 d50=-0.0326 d100=-0.0847 | r1 q4 & rvol15 q1
+  tr=+0.1769  va=-0.0129 med=-0.0287 n= 113 k= 22 res=0.938 CI90=[-0.0730,+0.0718] t2.5%=-0.0258 d50=-0.0278 d100=-0.0650 | ath_age_min q4 & accel_5_15 q0
+  tr=+0.1267  va=-0.0164 med=-0.0145 n= 202 k= 34 res=0.995 CI90=[-0.0567,+0.0235] t2.5%=-0.0299 d50=-0.0166 d100=-0.0170 | vol_share15 q2 & cumvol60 q2
+  tr=+0.4466  va=-0.0164 med=-0.0361 n=  85 k= 28 res=0.941 CI90=[-0.0661,+0.0459] t2.5%=-0.0292 d50=-0.0322 d100=-0.0717 | dd_from_ath q0 & cumvol60 q1
+  tr=+0.0714  va=-0.0165 med=-0.0410 n= 168 k= 35 res=0.988 CI90=[-0.0783,+0.0506] t2.5%=-0.0295 d50=-0.0280 d100=-0.0565 | r1 q4 & cumvol60 q2
+  tr=+0.1489  va=-0.0166 med=-0.0104 n= 234 k= 36 res=0.991 CI90=[-0.0435,+0.0085] t2.5%=-0.0298 d50=-0.0224 d100=-0.0370 | vol_share15 q2 & ath_age_min q3
+  tr=+0.0058  va=-0.0176 med=-0.0130 n= 190 k= 22 res=0.984 CI90=[-0.0959,+0.0827] t2.5%=-0.0306 d50=-0.0278 d100=-0.0534 | active_frac15 q3 & hour_utc q3
+  tr=+0.0069  va=-0.0182 med=-0.0250 n= 245 k= 47 res=1.000 CI90=[-0.0378,+0.0019] t2.5%=-0.0317 d50=-0.0182 d100=-0.0182 | active_frac15 q1 & mdd15 q2
+  tr=+0.0053  va=-0.0196 med=-0.0149 n= 196 k= 28 res=0.980 CI90=[-0.0415,+0.0036] t2.5%=-0.0326 d50=-0.0293 d100=-0.0537 | rvol15 q2 & age_min q2
+  tr=+0.0437  va=-0.0204 med=-0.0097 n= 150 k= 30 res=0.960 CI90=[-0.0523,+0.0101] t2.5%=-0.0331 d50=-0.0364 d100=-0.0765 | rvol15 q2 & hour_utc q3
+  tr=+0.0047  va=-0.0206 med=+0.0201 n=  64 k= 26 res=0.984 CI90=[-0.1193,+0.0657] t2.5%=-0.0337 d50=-0.0283 d100=-0.0475 | r60 q4 & rvol15 q1
+  tr=+0.0113  va=-0.0232 med=-0.0508 n= 301 k= 66 res=0.977 CI90=[-0.0891,+0.0846] t2.5%=-0.0358 d50=-0.0401 d100=-0.0824 | r15 q0 & bar_range q2
+  tr=+0.0290  va=-0.0233 med=-0.0055 n= 156 k= 57 res=0.936 CI90=[-0.0686,+0.0192] t2.5%=-0.0359 d50=-0.0405 d100=-0.0837 | r1 q4 & bar_range q1
+  tr=+0.0255  va=-0.0235 med=-0.0116 n= 153 k= 44 res=0.974 CI90=[-0.0594,+0.0147] t2.5%=-0.0365 d50=-0.0332 d100=-0.0573 | active_frac15 q1 & accel_5_15 q2
+  tr=+0.0154  va=-0.0241 med=-0.0297 n= 865 k= 68 res=0.984 CI90=[-0.0765,+0.0339] t2.5%=-0.0369 d50=-0.0365 d100=-0.0674 | gap_prev q1 & accel_5_15 q3
+  tr=+0.1545  va=-0.0272 med=-0.1607 n= 192 k= 71 res=0.865 CI90=[-0.1798,+0.2121] t2.5%=-0.0384 d50=-0.0729 d100=-0.1873 | r5 q4 & dd60 q0
+  tr=+0.1468  va=-0.0276 med=-0.0397 n=  83 k= 26 res=0.964 CI90=[-0.1376,+0.0781] t2.5%=-0.0398 d50=-0.0507 d100=-0.1084 | r60 q4 & runup_from_low q2
+  tr=+0.0073  va=-0.0289 med=-0.0295 n= 104 k= 24 res=0.990 CI90=[-0.0536,-0.0039] t2.5%=-0.0423 d50=-0.0295 d100=-0.0310 | cumvol60 q1 & hour_utc q4
+  tr=+0.8747  va=-0.0294 med=-0.0351 n= 181 k= 22 res=0.972 CI90=[-0.1086,+0.0558] t2.5%=-0.0424 d50=-0.0364 d100=-0.0538 | r5 q3 & price_level q1
+  tr=+0.1010  va=-0.0306 med=-0.0135 n= 194 k= 30 res=0.985 CI90=[-0.0843,+0.0215] t2.5%=-0.0434 d50=-0.0409 d100=-0.0666 | r15 q3 & runup_from_low q2
+  tr=+0.0351  va=-0.0312 med=-0.0246 n= 195 k= 21 res=0.964 CI90=[-0.0726,+0.0072] t2.5%=-0.0434 d50=-0.0551 d100=-0.1146 | runup_from_low q2 & rvol15 q2
+  tr=+0.1673  va=-0.0341 med=-0.0148 n= 279 k= 32 res=0.964 CI90=[-0.0807,+0.0187] t2.5%=-0.0458 d50=-0.0685 d100=-0.1544 | vol_share15 q1 & age_min q3
+  tr=+0.0541  va=-0.0343 med=-0.1142 n=  94 k= 32 res=0.904 CI90=[-0.1495,+0.1165] t2.5%=-0.0460 d50=-0.0665 d100=-0.1471 | r5 q0 & ath_frac_life q2
+  tr=+0.1468  va=-0.0349 med=-0.0217 n= 143 k= 33 res=0.937 CI90=[-0.1058,+0.0374] t2.5%=-0.0465 d50=-0.0702 d100=-0.1586 | cumvol60 q2 & accel_5_15 q2
+  tr=+0.1250  va=-0.0351 med=-0.0180 n= 208 k= 29 res=0.990 CI90=[-0.0801,+0.0059] t2.5%=-0.0480 d50=-0.0429 d100=-0.0623 | r1 q3 & cumvol60 q2
+  tr=+0.1004  va=-0.0376 med=-0.0250 n= 206 k= 31 res=0.927 CI90=[-0.0942,+0.0197] t2.5%=-0.0493 d50=-0.0710 d100=-0.1542 | age_min q4 & vol_accel q3
+  tr=+0.1149  va=-0.0386 med=-0.0220 n= 249 k= 26 res=0.952 CI90=[-0.0772,-0.0016] t2.5%=-0.0507 d50=-0.0621 d100=-0.1207 | vol_share15 q2 & age_min q4
+  tr=+0.4180  va=-0.0388 med=-0.0455 n=  81 k= 30 res=0.926 CI90=[-0.0861,+0.0199] t2.5%=-0.0509 d50=-0.0606 d100=-0.1152 | r_since_first q0 & cumvol60 q1
+
+validate means of train-positive cells: p5=-0.2169 p50=-0.1220 p95=-0.0233 ; frac>0 = 0.015 ; frac>base = 0.442
+
+cells positive on BOTH train and validate (no CI requirement): 7
+   vol_share15 q3 & mdd15 q4 tr=+0.0010 va=+1.4911 med=-0.0246 n=254 k=68 CI90=[-0.1503,+4.6985]
+   age_min q2 & mdd15 q4 tr=+0.0212 va=+0.4134 med=-0.2272 n=366 k=93 CI90=[-0.1967,+1.6041]
+   accel_5_15 q0 & mdd15 q4 tr=+0.0180 va=+0.2098 med=-0.0243 n=130 k=48 CI90=[-0.2008,+0.8999]
+   bar_range q4 & age_min q2 tr=+0.0727 va=+0.1856 med=-0.1389 n=219 k=54 CI90=[-0.1689,+0.8450]
+   r5 q2 & r15 q0 tr=+0.0558 va=+0.0219 med=-0.0256 n=182 k=58 CI90=[-0.0813,+0.1889]
+   cumvol60 q2 & up_frac15 q3 tr=+0.0588 va=+0.0152 med=-0.0205 n=145 k=26 CI90=[-0.0788,+0.1130]
+   age_min q2 & dd60 q2 tr=+0.3989 va=+0.0102 med=-0.0715 n=301 k=50 CI90=[-0.1324,+0.2534]
+
+=== SURFACE SHAPE: best TRAIN cell mean per feature (over all its 2-way cells) ===
+  r5              best2way=+0.8747 (med -0.0954) via r5 q3 & price_level q1
+  price_level     best2way=+0.8747 (med -0.0954) via r5 q3 & price_level q1
+  ath_age_min     best2way=+0.8340 (med -0.1189) via ath_age_min q3 & hour_utc q1
+  hour_utc        best2way=+0.8340 (med -0.1189) via ath_age_min q3 & hour_utc q1
+  cumvol60        best2way=+0.7966 (med -0.0731) via cumvol60 q1 & price_level q1
+  r1              best2way=+0.7582 (med -0.0743) via r1 q1 & price_level q1
+  vol_share15     best2way=+0.6974 (med -0.0714) via vol_share15 q2 & price_level q1
+  creator_creates best2way=+0.6752 (med -0.0797) via hour_utc q1 & creator_creates q1
+  vol_accel       best2way=+0.6479 (med -0.1330) via price_level q1 & vol_accel q4
+  bar_range       best2way=+0.6395 (med -0.0742) via bar_range q2 & price_level q1
+  runup_from_low  best2way=+0.6388 (med -0.1389) via runup_from_low q0 & price_level q1
+  age_min         best2way=+0.6275 (med -0.1499) via runup_from_low q1 & age_min q4
+  vol_z           best2way=+0.6108 (med -0.1190) via vol_z q1 & price_level q1
+  r15             best2way=+0.5934 (med -0.0764) via r15 q3 & price_level q1
+  up_frac15       best2way=+0.5930 (med -0.1238) via price_level q1 & up_frac15 q1
+  dd_from_ath     best2way=+0.5690 (med -0.2063) via dd_from_ath q0 & ath_frac_life q3
+  ath_frac_life   best2way=+0.5690 (med -0.2063) via dd_from_ath q0 & ath_frac_life q3
+  r_since_first   best2way=+0.5030 (med -0.0529) via r_since_first q0 & vol_share15 q2
+  body_pos        best2way=+0.4861 (med -0.0702) via dd_from_ath q0 & body_pos q2
+  r60             best2way=+0.4691 (med -0.1027) via r60 q1 & hour_utc q1
+  accel_5_15      best2way=+0.4469 (med -0.1228) via price_level q1 & accel_5_15 q4
+  dd60            best2way=+0.4416 (med -0.0992) via hour_utc q1 & dd60 q2
+  rvol15          best2way=+0.3576 (med -0.0518) via r15 q3 & rvol15 q4
+  mdd15           best2way=+0.3454 (med -0.0630) via r15 q3 & mdd15 q0
+  active_frac15   best2way=+0.2302 (med -0.1681) via active_frac15 q0 & hour_utc q1
+  vwap_dev15      best2way=+0.2179 (med -0.0344) via vwap_dev15 q0 & age_min q4
+  gap_prev        best2way=+0.1915 (med -0.1490) via gap_prev q2 & hour_utc q1
+  ttft_min        best2way=+0.0271 (med -0.0453) via rvol15 q2 & ttft_min q1
+
+=== FRACTION OF MINTS WITH POSITIVE MEAN, unconditional (validate) ===
+  0.065 of 169 mints
+
+=== STRICT SURVIVORS (validate mean>0 AND cluster-bootstrap 5% > 0) : 0 ===
+
+=== MINT-MATCHED RANDOM CONTROL (same mints, same trade counts, random bars) ===
+
+DONE

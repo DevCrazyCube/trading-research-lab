@@ -1,0 +1,7 @@
+my mints 387
+lines 24969 hits 0
+keys ['ath', 'ath_ts', 'complete', 'created_ms', 'creator', 'has_tg', 'has_web', 'has_x', 'last_trade_ms', 'live', 'mcap', 'mint', 'name', 'pool', 'replies', 'rsol', 'rtok', 'sym', 'ts_ms', 'vsol', 'vtok']
+sample {"ts_ms": 1788448363901, "mint": "iG8wRS2S8LRVQQnUhYTDmbv5i9VF9tGQzbTo65Ppump", "sym": "PONS", "name": "Pons", "mcap": 901055203.0917726, "ath": 906563344.416743, "ath_ts": 1788447994000, "created_ms": 1788413869000, "last_trade_ms": 1788448375000, "complete": true, "live": false, "replies": 0, "creator": "7272sSKFvgkwXM4gPABXeccjJY8nyiceHQPqPb6uWoUd", "vsol": 30000000000.0, "rsol": 0.0, "vtok": 1073000000000000.0, "rtok": 0.0, "has_x": true, "has_tg": false, "has_web": true, "pool": "FW8tRvXq3orFWhYxaDV99ipuujYonVbncihiVtTtfv5p"}
+window_label matches 387
+[('7AhXcxhEeR7HuqG5XxN4PescwsBiD3rGbKUgnxeApump', 1785168511, 435569340, 1, 0, 0, 151), ('zWsbpwY3sAK35xwquyqP9Y71cAnhvxZWchxsdW8pump', 1785168667, 435569713, 1, 0, 0, 115), ('4h6b9Q8bW85ANyKofvGsA2vY68WkBE6xzarqA6FrPump', 1785168733, 435569874, 1, 0, 0, 115)]
+attention lines 7570 hits 0 keys ['age_h', 'amount', 'control', 'control_mcap', 'control_px', 'created_ms', 'ev', 'feed', 'liq', 'mcap', 'mint', 'px', 'sym', 'total', 'ts_ms']

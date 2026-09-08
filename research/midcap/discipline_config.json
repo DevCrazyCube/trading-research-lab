@@ -1,0 +1,29 @@
+{
+  "armed": false,
+  "position_usd": 20.0,
+  "max_positions": 4,
+  "adds_allowed": false,
+  "trim_ladder": [
+    [
+      50,
+      33
+    ],
+    [
+      150,
+      33
+    ]
+  ],
+  "entry": {
+    "max_pct_of_peak": 0.6,
+    "min_liq_usd": 30000,
+    "min_liq_ratio": 0.08,
+    "min_flow_h24": 1.1,
+    "max_age_h": 2.0
+  },
+  "kill": {
+    "liq_ratio": 0.05,
+    "liq_drain_pct": -20,
+    "flow_m5": 0.8
+  },
+  "poll_s": 60
+}

@@ -1,0 +1,48 @@
+H=5 combos=20124 eligible=6735 hits=322 t=23.0
+H=15 combos=40248 eligible=13353 hits=574 t=37.0
+H=30 combos=60372 eligible=19749 hits=847 t=47.8
+H=60 combos=80496 eligible=25920 hits=1200 t=58.4
+H=120 combos=100620 eligible=31851 hits=1532 t=67.6
+H=240 combos=120744 eligible=37419 hits=1845 t=76.8
+TOTAL COMBOS 120744 ELIGIBLE 37419 TRAIN POSITIVE 1845
+  +0.3459 med+0.1693 n=  54 k= 28 res=0.963 H=240 trail30    add_dn25  mc_ge250k    np0
+  +0.3459 med+0.1693 n=  54 k= 28 res=0.963 H=240 trail30    add_dn25  mc_ge250k    b60_0
+  +0.3304 med+0.1248 n=  96 k= 38 res=0.990 H=240 trail30    add_dn25  age_lt60     dlen115
+  +0.3172 med+0.1311 n=  57 k= 30 res=0.947 H=240 trail30    add_dn25  mc_ge250k    all
+  +0.3172 med+0.1311 n=  57 k= 30 res=0.947 H=240 trail30    add_dn25  mc_ge250k    np0_l2h
+  +0.3172 med+0.1311 n=  57 k= 30 res=0.947 H=240 trail30    add_dn25  mc_ge250k    ng0
+  +0.2779 med+0.0852 n= 199 k= 40 res=0.995 H=240 trail30    add_dn25  ath_ge60     dlen115
+  +0.2766 med+0.0852 n=  72 k= 40 res=0.986 H=240 trail30    add_dn25  ath_ge90     dlen115
+  +0.2562 med+0.2362 n=  48 k= 22 res=0.979 H=120 trail30    add_dn25  mc_ge250k    dlen115
+  +0.2451 med-0.0266 n=  96 k= 38 res=0.990 H=240 trail30    flat      age_lt60     dlen115
+  +0.2331 med-0.0266 n=  96 k= 38 res=0.990 H=120 trail30    flat      age_lt60     dlen115
+  +0.2327 med+0.1414 n=  48 k= 22 res=0.979 H=120 trail30    flat      mc_ge250k    dlen115
+  +0.2258 med+0.0633 n=  54 k= 28 res=0.963 H=240 trail30    flat      mc_ge250k    np0
+  +0.2258 med+0.0633 n=  54 k= 28 res=0.963 H=240 trail30    flat      mc_ge250k    b60_0
+  +0.2216 med-0.0067 n= 463 k= 15 res=0.991 H=  5 trail30    add_dn25  mc_5k_50k    b60_3p
+  +0.2216 med+0.0296 n= 240 k= 58 res=0.996 H=240 trail30    add_dn25  age_lt60     np0
+  +0.2198 med+0.1248 n=  96 k= 38 res=0.990 H=120 trail30    add_dn25  age_lt60     dlen115
+  +0.2152 med-0.0064 n= 286 k= 15 res=0.986 H= 15 trail30    add_dn25  mc_5k_50k    b60_3p
+  +0.2131 med-0.0055 n= 238 k= 15 res=0.983 H= 30 trail30    add_dn25  mc_5k_50k    b60_3p
+  +0.2130 med+0.0417 n= 311 k= 67 res=0.990 H=240 trail30    add_dn25  age_lt60     np0_l2h
+  +0.2119 med-0.0131 n= 210 k= 15 res=0.976 H= 60 trail30    add_dn25  mc_5k_50k    b60_3p
+  +0.2114 med-0.0108 n= 196 k= 15 res=0.980 H=120 trail30    add_dn25  mc_5k_50k    b60_3p
+  +0.2113 med-0.0078 n=  48 k= 15 res=0.979 H=120 trail30    add_dn25  ath_ge90     b60_3p
+  +0.2113 med-0.0078 n=  48 k= 15 res=0.979 H=240 trail30    add_dn25  ath_ge90     b60_3p
+  +0.2095 med-0.0158 n= 188 k= 15 res=0.979 H=240 trail30    add_dn25  mc_5k_50k    b60_3p
+  +0.2092 med-0.0262 n=  96 k= 15 res=0.990 H=120 trail30    add_dn25  ath_ge60     b60_3p
+  +0.2092 med-0.0262 n=  96 k= 15 res=0.990 H=240 trail30    add_dn25  ath_ge60     b60_3p
+  +0.2087 med-0.0307 n=  98 k= 15 res=0.980 H= 60 trail30    add_dn25  ath_ge60     b60_3p
+  +0.2085 med-0.0307 n=  99 k= 15 res=0.980 H= 30 trail30    add_dn25  ath_ge60     b60_3p
+  +0.2077 med-0.0128 n=  60 k= 15 res=0.967 H=  5 trail30    add_dn25  ath_ge90     b60_3p
+  +0.2065 med-0.0307 n= 101 k= 15 res=0.980 H= 15 trail30    add_dn25  ath_ge60     b60_3p
+  +0.2057 med-0.0859 n=  96 k= 38 res=0.990 H=240 trail30    add_up25  age_lt60     dlen115
+  +0.2055 med-0.0262 n= 124 k= 15 res=0.984 H=  5 trail30    add_dn25  ath_ge60     b60_3p
+  +0.2025 med-0.0262 n=  49 k= 15 res=0.959 H= 60 trail30    add_dn25  ath_ge90     b60_3p
+  +0.2023 med-0.0262 n=  49 k= 15 res=0.959 H= 30 trail30    add_dn25  ath_ge90     b60_3p
+  +0.2014 med-0.0262 n=  51 k= 15 res=0.961 H= 15 trail30    add_dn25  ath_ge90     b60_3p
+  +0.1998 med-0.0262 n=  79 k= 15 res=0.987 H= 15 trail30    add_dn25  ath_ge60     b15_1p
+  +0.1998 med-0.0262 n=  79 k= 15 res=0.987 H= 30 trail30    add_dn25  ath_ge60     b15_1p
+  +0.1998 med-0.0262 n=  79 k= 15 res=0.987 H= 60 trail30    add_dn25  ath_ge60     b15_1p
+  +0.1998 med-0.0262 n=  79 k= 15 res=0.987 H=120 trail30    add_dn25  ath_ge60     b15_1p
+elapsed 76.85195732116699

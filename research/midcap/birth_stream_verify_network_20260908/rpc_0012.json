@@ -1,0 +1,24 @@
+{
+  "endpoint": "https://api.mainnet-beta.solana.com",
+  "http_status": 200,
+  "received_monotonic_nanos": 6396884732844,
+  "received_unix_nanos": 1788890326982659558,
+  "request": {
+    "id": 12,
+    "jsonrpc": "2.0",
+    "method": "getBlock",
+    "params": [
+      445398697,
+      {
+        "commitment": "finalized",
+        "maxSupportedTransactionVersion": 0,
+        "rewards": false,
+        "transactionDetails": "signatures"
+      }
+    ]
+  },
+  "response_bytes": 162087,
+  "response_sha256": "215e9e5268d3821932286dda6c3497c94e4fc26a8ae26b865a4a3eb6f4f271ed",
+  "sent_monotonic_nanos": 6396605346013,
+  "sent_unix_nanos": 1788890326703273341
+}

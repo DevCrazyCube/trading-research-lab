@@ -1,0 +1,3 @@
+rows 23933 distinct mints 324
+keys ['ath', 'ath_ts', 'complete', 'created_ms', 'creator', 'has_tg', 'has_web', 'has_x', 'last_trade_ms', 'live', 'mcap', 'mint', 'name', 'pool', 'replies', 'rsol', 'rtok', 'sym', 'ts_ms', 'vsol', 'vtok']
+our mints covered by snapshots: 0 of 382

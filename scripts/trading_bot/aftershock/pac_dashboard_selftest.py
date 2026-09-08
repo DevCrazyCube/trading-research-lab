@@ -424,7 +424,8 @@ def main() -> int:
                      focused["instrument_id"] == "AFTERSHOCK_PAC_V22_ACTIVE")
 
         with (patch.object(dash, "_v26_successor_status",
-                           return_value={"activation": "ANCHORED"}),
+                           return_value={"activation": "ANCHORED",
+                                         "status": "ACTIVATED_ALL_COST_RISK_PAPER_CHALLENGER"}),
               patch.object(dash, "v26_snapshot",
                            return_value={"instrument_id": "AFTERSHOCK_PAC_V26"})):
             focused = dash.focus_snapshot()

@@ -1,0 +1,180 @@
+{
+  "candidate_id": "gh:weprodev",
+  "display_name": "WeProDev",
+  "github": "https://github.com/weprodev",
+  "website": "https://weprodev.com",
+  "public_email": "info@weprodev.com",
+  "location_text": "Netherlands",
+  "review_flags": [
+    "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+    "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend",
+    "GitHub-org draagt geen echte bedrijfsnaam"
+  ],
+  "score": 75,
+  "score_breakdown": {
+    "own_recent_repos": 30,
+    "recency": 15,
+    "language_breadth": 9,
+    "has_website": 8,
+    "website_reachable": 5,
+    "public_email": 5,
+    "org_older_than_1y": 3
+  },
+  "signals": {
+    "recent_repos_total": 6,
+    "recent_repos_own": 6,
+    "recent_repos_forks": 0,
+    "languages": [
+      "Go",
+      "Shell",
+      "TypeScript"
+    ],
+    "pushed_since_filter": "2026-02-01",
+    "latest_push": "2026-08-17T19:23:03Z",
+    "org_type": "Organization",
+    "enriched": true,
+    "peppol_match": null,
+    "website_reachable": true,
+    "website_title": "WeProDev - Technical Excellence & Innovation",
+    "review_flags": [
+      "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+      "geen vacaturepagina met ontwikkelfuncties gevonden — loonkosten onbekend",
+      "GitHub-org draagt geen echte bedrijfsnaam"
+    ]
+  },
+  "exclusions": [],
+  "evidence": [
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository weprodev/wpd-message-gateway (taal: Go) had een commit op 2026-08-17. Omschrijving: “A unified Go gateway for sending messages through multiple providers (Email, SMS, Push, Chat). One API, any provider.”.",
+      "url": "https://github.com/weprodev/wpd-message-gateway",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "weprodev/wpd-message-gateway",
+        "pushed_at": "2026-08-17T19:23:03Z",
+        "language": "Go",
+        "stargazers": 2,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository weprodev/go-pkg (taal: Go) had een commit op 2026-08-11. Omschrijving: “Modular set of utilities for Go backend services.”.",
+      "url": "https://github.com/weprodev/go-pkg",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "weprodev/go-pkg",
+        "pushed_at": "2026-08-11T21:32:28Z",
+        "language": "Go",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository weprodev/wpd-gogate (taal: Go) had een commit op 2026-07-28. Omschrijving: “A clean, idiomatic Go RBAC library. Manage user roles and permissions directly with your own raw PostgreSQL queries and migrations. Simple, fast, and framework-”.",
+      "url": "https://github.com/weprodev/wpd-gogate",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "weprodev/wpd-gogate",
+        "pushed_at": "2026-07-28T18:26:48Z",
+        "language": "Go",
+        "stargazers": 0,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository weprodev/ui-localization (taal: TypeScript) had een commit op 2026-07-28. Omschrijving: “A lightweight, professional localization package for React and React Native applications built on top of i18next and react-i18next. This package provides a clea”.",
+      "url": "https://github.com/weprodev/ui-localization",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "weprodev/ui-localization",
+        "pushed_at": "2026-07-28T18:22:49Z",
+        "language": "TypeScript",
+        "stargazers": 5,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository weprodev/FlowAI (taal: Shell) had een commit op 2026-04-16. Omschrijving: “Bash-native multi-agent terminal orchestrator for spec-driven software development. Coordinates AI agents (Claude, Gemini, Cursor, Copilot) through a five-phase”.",
+      "url": "https://github.com/weprodev/FlowAI",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "weprodev/FlowAI",
+        "pushed_at": "2026-04-16T20:01:11Z",
+        "language": "Shell",
+        "stargazers": 3,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_location",
+      "claim_nl": "Het GitHub-profiel van weprodev vermeldt als locatie “Netherlands”.",
+      "url": "https://github.com/weprodev",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "location": "Netherlands"
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_website",
+      "claim_nl": "Het GitHub-profiel verwijst naar de website https://weprodev.com.",
+      "url": "https://github.com/weprodev",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "website": "https://weprodev.com"
+      }
+    },
+    {
+      "source": "website",
+      "kind": "live_website",
+      "claim_nl": "De website https://weprodev.com is bereikbaar en heeft als paginatitel “WeProDev - Technical Excellence & Innovation”.",
+      "url": "https://weprodev.com",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "http_status": 200,
+        "title": "WeProDev - Technical Excellence & Innovation"
+      }
+    }
+  ],
+  "owner_checklist": [
+    "Is dit een Nederlandse onderneming (geen buitenlands filiaal, geen publieke instelling)?",
+    "Klopt het e-mailadres, en is het een zakelijk (geen persoonlijk) adres?",
+    "Zijn de genoemde repositories echt van dit bedrijf en niet van een naamgenoot?",
+    "Staat dit bedrijf niet op de blokkeerlijst / heeft het niet eerder afgemeld?",
+    "Is de RVO-parameterbron nog geldig (bevriezingsdatum hieronder) en de kalender voor 2027 gecontroleerd?",
+    "Klopt de aanname over het aantal ontwikkelaars ruwweg, of moet die naar beneden?"
+  ],
+  "params_frozen_on": "2026-08-19",
+  "generated": "2026-08-19",
+  "sent": false,
+  "sendable": false,
+  "sendable_reason": "sender profile carries placeholders; owner has not registered KVK",
+  "lint_allowed_urls": [
+    "https://github.com/weprodev",
+    "https://github.com/weprodev/FlowAI",
+    "https://github.com/weprodev/go-pkg",
+    "https://github.com/weprodev/ui-localization",
+    "https://github.com/weprodev/wpd-gogate",
+    "https://github.com/weprodev/wpd-message-gateway",
+    "https://voorbeeld.nl",
+    "https://voorbeeld.nl/privacy",
+    "https://weprodev.com"
+  ],
+  "lint": {
+    "ok": true,
+    "violations": [],
+    "missing": [],
+    "unsourced_urls": [],
+    "unlinked_claims": []
+  }
+}

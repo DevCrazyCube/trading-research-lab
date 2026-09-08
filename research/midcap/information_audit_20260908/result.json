@@ -1,0 +1,2781 @@
+{
+  "code_sha256": "d3d2d84b7c88f819310bc456af344fb1030d7cb0d9ff5810a0bbd7c74b48bf1d",
+  "corpus": {
+    "confirmed_withdrawal_instructions_in_this_cache": 0,
+    "envelope_decoder_sha256": "23745172aabd5739829e0ee8949f45a56760569a0055081f357164065a9b10cb",
+    "graduate_overlap": [
+      {
+        "bar_status": "nobars:429",
+        "bonding_curve": "2ZvAZgegK9U84WsCVa9ovMJiNc12e37HmCPZkHZXsgK2",
+        "first_slot": 435687172,
+        "last_slot": 435687172,
+        "mint": "9rr2WZfA9YDmT1tJE7oFSBdbLU8orFkLhyaX3URtpump",
+        "n_bars": 0,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "2bsB7wsgWKJgGEQWJi1uLoNpMPJV5P9tHu8qnNdCb7No",
+        "first_slot": 435755247,
+        "last_slot": 435755247,
+        "mint": "21Dbzdjsr3ykwrpUxxiLdWJFjGgGasDtMQdr8z9Jpump",
+        "n_bars": 25,
+        "observations": 6
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "3U5bQ2KWtw8MQ1ZRZ39Vzm4bNzcB164hUtRpSK9qg9iA",
+        "first_slot": 435726589,
+        "last_slot": 435728304,
+        "mint": "BXZxpUXc8NgweUTgpzrvacc8QVyAwj8BwTbUnvVPpump",
+        "n_bars": 56,
+        "observations": 210
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "3fr6WWVvfgLwEP3XrihybxG1iYjqLFvFYbJTtgQ6ZBfe",
+        "first_slot": 435635908,
+        "last_slot": 435637490,
+        "mint": "Yf91rjD4RjtgmYn5L5J3BExkEbcTrKJ3gp75zuQpump",
+        "n_bars": 448,
+        "observations": 599
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "3uH3f5n3s18MPhWHqvDhcVrcHvTczxtcqUtZ4tNBsNXw",
+        "first_slot": 435716083,
+        "last_slot": 435738113,
+        "mint": "ohxBWcjo5BsABGLSL86G5U9CrCJNtxoYo5KK3ZWpump",
+        "n_bars": 13,
+        "observations": 16
+      },
+      {
+        "bar_status": "nopool:429",
+        "bonding_curve": "3ufeMNMm8BHh85xZLJUNJFxVu6JaBYX7Kb7iaKcJCLnK",
+        "first_slot": 435701102,
+        "last_slot": 435705205,
+        "mint": "GTQ9LhnDbyRE3MFQA3LzF7fY1MMe4S4NMQWpkUcspump",
+        "n_bars": 0,
+        "observations": 146
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "4CufMg4ECSeZNT74FFo5s7rcdr8Y61azPk6vNF8Uq6ca",
+        "first_slot": 435580312,
+        "last_slot": 435580312,
+        "mint": "7Sxj4hyh5KhwwE6kVqxboZQ53Bojfd8XRmduKoRZPUMP",
+        "n_bars": 2,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "4DDawFLnNHtE7m4iR3mAsFSPREV87Jgpn32QBbDND7J1",
+        "first_slot": 435650231,
+        "last_slot": 435650523,
+        "mint": "H2eHzfnyNSkLZNq2eemF878iu6pnnkZGbK8U28Rbpump",
+        "n_bars": 175,
+        "observations": 1088
+      },
+      {
+        "bar_status": "nobars:429",
+        "bonding_curve": "4JDeQuYVpzxwpLmRTTn4LXzasrfiZX8hAqETQyFokhqu",
+        "first_slot": 435747283,
+        "last_slot": 435752002,
+        "mint": "85PbYtsF8i2jdvRfv523dYU5Xo43DKkX3oPXYgWmpump",
+        "n_bars": 0,
+        "observations": 828
+      },
+      {
+        "bar_status": "nopool:429",
+        "bonding_curve": "4LaJKrCq7me9UgYW4SvAuoZDoQV7wGsQtSeTqiFZeHJs",
+        "first_slot": 435758039,
+        "last_slot": 435758039,
+        "mint": "GhgqLqGoSZTkmyNtBPFNmrJpgxLvRjy9QWApREY1pump",
+        "n_bars": 0,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "4ZSfDEg1MFiS59FAf4c4wuFEUABbAbB5eZYC75Cagrxn",
+        "first_slot": 435670311,
+        "last_slot": 435671267,
+        "mint": "DDWjoEafc3AYGXRHtCjqNKXEDmrsmSnF2n54qpqRpump",
+        "n_bars": 418,
+        "observations": 240
+      },
+      {
+        "bar_status": "nopool:429",
+        "bonding_curve": "4f12PvWibuu3vSFthaNXumC8AnjdChzGowS3QvL4BTbk",
+        "first_slot": 435759952,
+        "last_slot": 435759952,
+        "mint": "BQaxKoDhGhsSJMLSiwBSPA8EkE8eykPb2q5FRWRBpump",
+        "n_bars": 0,
+        "observations": 12
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "4nRiVQh5oq3JsN95RSwmYnwCVQBg5pTJK1ckypp3qGT6",
+        "first_slot": 435761368,
+        "last_slot": 435761828,
+        "mint": "2ENza2td1vrHsA5KTBxKXS6KwQMxA6m8yVtpeEN6pump",
+        "n_bars": 203,
+        "observations": 955
+      },
+      {
+        "bar_status": "nobars:200",
+        "bonding_curve": "542AqdrD44N7sqYfE3yXDXzpEuxt2wgxD7pnq3a8FMri",
+        "first_slot": 435569448,
+        "last_slot": 436255705,
+        "mint": "9Uh4Mfn57L6JSg4H3ZzmZsi6wbz6ugeaNZmA1Duepump",
+        "n_bars": 0,
+        "observations": 895
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "5jmikVCnywmsgz4nRxvVsE6LN1mFDdoGxxaC9uhLR2GJ",
+        "first_slot": 435728020,
+        "last_slot": 435728068,
+        "mint": "5mPEBha7xRWoqbiKRCyTmfaYPxGufQGDTBCmpS6upump",
+        "n_bars": 122,
+        "observations": 171
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "63ysFUgNmWb3BEYsYqGbeqTkVxtZNfCmeJkTWT7QSKzp",
+        "first_slot": 435582247,
+        "last_slot": 435582247,
+        "mint": "DPMvj9sJEKdZ3TP2K5hzX94XJXLgt51WSN3gC2ENPUMP",
+        "n_bars": 19,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "6KJNKted6N1ZWxdqb83GBB9rHQMzpJmwBsTy1Hvee5M4",
+        "first_slot": 435652302,
+        "last_slot": 435652636,
+        "mint": "EADnJpzEqmemYptgKbDXpyN3qmyDnPyCq3Pha5LMpump",
+        "n_bars": 103,
+        "observations": 1178
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "6MyYxys8nVzZM56ANz3Jqq1G9szGYBaeKMm7sHrYZoBr",
+        "first_slot": 435619822,
+        "last_slot": 435621312,
+        "mint": "4dM8HLiEobeNcsvoFxYbtfTnkSDzw6DHM8zfPqhKpump",
+        "n_bars": 109,
+        "observations": 3048
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "6Ta8Zke9qgYypKHe5PHiCUoafe5oSf3sqnRRVNg8CpZ1",
+        "first_slot": 435725308,
+        "last_slot": 435725701,
+        "mint": "3H2YikWBHcQXvWSGEbqHfi6pQN1CdLhj1Py4Xnt6pump",
+        "n_bars": 123,
+        "observations": 1295
+      },
+      {
+        "bar_status": "nobars:429",
+        "bonding_curve": "6ivVEnTk44m58sv3h96ob7bc8hc4pTXpKPHxXTHLmuAd",
+        "first_slot": 435736968,
+        "last_slot": 435736968,
+        "mint": "FraXXm5jchvnUqj4tfoGSBbduNECLmdmjLN7qRMbpump",
+        "n_bars": 0,
+        "observations": 6
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "6kdJ3z5pWjzCAXTt8XKBQfuabdgbXPQncYN9PWRot8Wp",
+        "first_slot": 435713279,
+        "last_slot": 435713279,
+        "mint": "88ETnhDnrcPQV5qRzsFD6KEhfYXRZXwH6tEFtVjCpump",
+        "n_bars": 36,
+        "observations": 6
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "7TyADMpJbr8E5KaHnp5oY7bK7MQzB4FEutZ8DsrjzJWa",
+        "first_slot": 435659253,
+        "last_slot": 435659253,
+        "mint": "DBkHPoZHZ3B3MUK5YzHJPrhSf4H1qZBR1TE5nPpDpump",
+        "n_bars": 2,
+        "observations": 3
+      },
+      {
+        "bar_status": "nobars:200",
+        "bonding_curve": "7Xbrx64Yk6gqhKZAtJjkjX2dzZX11iZwrtx5ZvL4JV1g",
+        "first_slot": 435616789,
+        "last_slot": 435823478,
+        "mint": "CmJAVBW5LzpJWkSVdiypNXB35vcxM7SrNdXk7v1fpump",
+        "n_bars": 0,
+        "observations": 1415
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "7qurswLGC8BikqxFh9rkGfswpdP74zrHDXNFSkjcaAk5",
+        "first_slot": 435649065,
+        "last_slot": 435649065,
+        "mint": "sAp9EmAbK1NcTy48uS4B9ysFuEJqhc4GvUiaCQipump",
+        "n_bars": 23,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "7yvTP7R3odXnFKDAyv88DmXvWAkK1LnZ9ajqyfqEQ32t",
+        "first_slot": 435739374,
+        "last_slot": 435739374,
+        "mint": "TeSVsMGAipr8HARaTBb3tjuVYewSJFGpsb1TM9Npump",
+        "n_bars": 61,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "8FUVnPQiRivaSsBERKEStJnLqtF8QgFZL8sMbfNLBaok",
+        "first_slot": 435580627,
+        "last_slot": 435580933,
+        "mint": "E2rNPRhsueQ9LygMVthiWVPEnS4nHyoG5kw1NKmwpump",
+        "n_bars": 788,
+        "observations": 1067
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "8MEdtJpXTMY65qBGwhKKTwAxM1hBdh5RNB1JozWLC2zc",
+        "first_slot": 435577585,
+        "last_slot": 435578069,
+        "mint": "DDMXBssrBUHH4JxAxjUt3SQ8pogcaFNTNPzhx7RApump",
+        "n_bars": 153,
+        "observations": 823
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "8gS91T1ptrGwAuvzMH6sMDs3ohmvmoWyJTZontDUgbAR",
+        "first_slot": 435652694,
+        "last_slot": 435652694,
+        "mint": "HMQYKkS7yoLQLkCRwa71vvu73YKTKUah9JqhmacKPump",
+        "n_bars": 19,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "8ip7pJGkvebsNn2Rn2Wp8bH6gVD6SJxnskFiXTksExr4",
+        "first_slot": 435656806,
+        "last_slot": 435658264,
+        "mint": "H3GtwGSrYRVqp7dtjkaDfjE2inydLkHwFkFJSPzrpump",
+        "n_bars": 1000,
+        "observations": 10330
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "8prbtqugLHbsrcs6gKuFhcF5gF5rcQqN65G6EYJxCxxq",
+        "first_slot": 435592731,
+        "last_slot": 435592969,
+        "mint": "7w3pLqE8SxX3gEkb7retk6CL8pWzqwGoD2vnHVW2pump",
+        "n_bars": 85,
+        "observations": 927
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "8ysRikv3qVDLoF5f5ceE5afPM7vPsXFzt9EWCrM8M1b1",
+        "first_slot": 435624205,
+        "last_slot": 435624205,
+        "mint": "9ecXsd2PPYWQb5G5Z5WfoKDzFNb1d1pn6PiZuXotPump",
+        "n_bars": 13,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "98w2Acf7RSRJDYDVyQXswxLQEM1j1CDPquKxb8iM5R2u",
+        "first_slot": 435637788,
+        "last_slot": 435637788,
+        "mint": "cjMRxiVwjfPh3nxXiwS1pm8yBk5EKTbeHx4hm41pump",
+        "n_bars": 216,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "9rvtBSZb36c58mDJCN26HbENwh31ne95r9nyXMpEPYvd",
+        "first_slot": 435634652,
+        "last_slot": 435634794,
+        "mint": "7uJU7tWaexcJEfUE9E3BtdSjrcckhFmaX3PE21Eipump",
+        "n_bars": 28,
+        "observations": 255
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "A5xyMVU5CsphGhYmmKwQywCv4jyVBHPQ4eU2smDq4E21",
+        "first_slot": 435597022,
+        "last_slot": 435600404,
+        "mint": "Dbz6dp6wxG3W2Bjtj1sXvV2YsPHvDEvu3oWde8Jhpump",
+        "n_bars": 152,
+        "observations": 2403
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "AceDoZiAfqN62uHP65TUyCDSfKQvUPdppYKakFKxYtfy",
+        "first_slot": 435635061,
+        "last_slot": 435635061,
+        "mint": "BmPtJiQhLz2RBGMPiGk3tyQzsaWc2ozDyAeNyx7pump",
+        "n_bars": 88,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "AexHag2CnQpj7UewyGp1X9qUyec1yhWfqzK8ZqZUupoE",
+        "first_slot": 435584161,
+        "last_slot": 435584231,
+        "mint": "FeeJBAonCaKwtD5i3hkWAUnamvDWZFLqzcnHZwB3pump",
+        "n_bars": 116,
+        "observations": 482
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "AqRUtKcX6E56ZoW5UoZY4TgymahjKLoYT13pLm47QdMM",
+        "first_slot": 435602391,
+        "last_slot": 435602391,
+        "mint": "6jP3oTRsMJbDsy2dMNXHZEb4XXXTghZrveAEDdFyPump",
+        "n_bars": 98,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "B8bPrQ1i2k4UDcdmQ3iDovvcVPgK4Jzb1KAjJuqhXCBK",
+        "first_slot": 435596593,
+        "last_slot": 435606781,
+        "mint": "3zh9CTwPf8vvPrM5xBWmdkzpWRbmRJyvYo46fZBVpump",
+        "n_bars": 255,
+        "observations": 3050
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "BHYejhLFTyaMTmeECJzMy8SLwaTepf3CirwCbJmKyvgo",
+        "first_slot": 435663381,
+        "last_slot": 435664275,
+        "mint": "CpqEW3QDVjibGkFwDLWt12z7pH6y9V6uwmfjo7Hmpump",
+        "n_bars": 516,
+        "observations": 1781
+      },
+      {
+        "bar_status": "nopool:429",
+        "bonding_curve": "BKV5im1qJSeK2vkuheUR1xNBJDSFXHYVArn6uacXYQSf",
+        "first_slot": 435739585,
+        "last_slot": 435739585,
+        "mint": "AT67qrjjJM8HqM7ps1oWmtYAH5FQPv2T6gkgPNWrpump",
+        "n_bars": 0,
+        "observations": 6
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "BNFFnepTwvejJ7SDtRmkN7Yk3ZcZpPJNjAduAvKLiXR4",
+        "first_slot": 435592257,
+        "last_slot": 435592306,
+        "mint": "GZLMdhQGcfwZZHPR2nweaG1EVn21nWAHEKy2HQtApump",
+        "n_bars": 18,
+        "observations": 394
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "BW87eX27nHqvcj7shwGjzMyKCqYA4ALxxmaWc6VNfcok",
+        "first_slot": 435729343,
+        "last_slot": 435900633,
+        "mint": "E7LHb9qQAQ3PEJn1VzUD696jDAChRAceGCCCeuGypump",
+        "n_bars": 61,
+        "observations": 1037
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "Ba9fGFfkExaAJha7nYib7BDuKJYsny31VksPpGkJnyVb",
+        "first_slot": 435646961,
+        "last_slot": 435646961,
+        "mint": "6sjFBLF2QkLZpMmXim7nqUcYoyfqoJbCyuiPAtKaPump",
+        "n_bars": 14,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "BtSaRjdzqKBa2dZcyMLT1ELJyRf7FYGv8r4nbie4tLRr",
+        "first_slot": 435606708,
+        "last_slot": 435606708,
+        "mint": "AEqSr3N63z8oUWLgp8vwVarzvaBnCeVvfQBeXQ67pump",
+        "n_bars": 12,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "CHhtANs3Rh1gNpzxAPVY7VM1enStWiL35A6ffXzyxHZi",
+        "first_slot": 435739038,
+        "last_slot": 435739038,
+        "mint": "8wqrnjFJYwtYPvAYaWtHRB4H3VdBQe4w56Ai2d3WPUMP",
+        "n_bars": 12,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "CJ9D4vhDfVVgNd3b8R4o5w6vzng69Km2kH17S218kurT",
+        "first_slot": 435767081,
+        "last_slot": 435767081,
+        "mint": "CpTBsGDfxsgVkFqFauCvGeQh2xrST58wKknA8jutpump",
+        "n_bars": 32,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "Cb512vPPpnRsvAUowREcaGUJ46kwkk23neDW1TGT8PmN",
+        "first_slot": 435721681,
+        "last_slot": 435721681,
+        "mint": "8N9MgyuVDDq8xNbM2gayfTXcWz6S5uZXfpkb7wD8PUMP",
+        "n_bars": 33,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "Ccr9Lpei2HoDXeoRLz6jsD71sbDXeXhn68imapj7jepj",
+        "first_slot": 435757996,
+        "last_slot": 435758128,
+        "mint": "64X96jeQJcPHvrM8XuZz1yPzYA3JNgFEEAG3ck99pump",
+        "n_bars": 247,
+        "observations": 496
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "CxpboPEZet2Nkwu45FUUeEiEGDA37eKyGfDcQLKHQgTy",
+        "first_slot": 435769299,
+        "last_slot": 435769299,
+        "mint": "joHQQsWHjSAhfh3xfQvJwu4oxC76NCXLtBK9rWXpump",
+        "n_bars": 112,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "D3w7s4RauzUpgZFFehw7xow4Azc7G55xjerHsx2kuXnH",
+        "first_slot": 435621859,
+        "last_slot": 435638885,
+        "mint": "8ia4CNMPh1gQFBFHCwegu6WuoDQFGiDvrV27opdTpump",
+        "n_bars": 69,
+        "observations": 1305
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "D7N8pCH4RFhsEcaEqygwHCs5NZ5UvGDAmEQaFBr22XgY",
+        "first_slot": 435584634,
+        "last_slot": 435585189,
+        "mint": "2CvMZhhpPbQU3aYASA2R59shzWHCb9sCGhDdSgvApump",
+        "n_bars": 122,
+        "observations": 2023
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "DEK8RUdeago61tVkHky19wAZK9zjaDDAGzJ3bfaVrtjH",
+        "first_slot": 435590461,
+        "last_slot": 435590760,
+        "mint": "HPipG16NpPL2XKbn2SL1mREeVFmrKMfTAykjVKn1Qqhs",
+        "n_bars": 67,
+        "observations": 666
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "DVd5CBUkYqwLUjtydYoGbL9f8SC2o4nwU76daqRSSgtP",
+        "first_slot": 435753083,
+        "last_slot": 435753083,
+        "mint": "CDs83SFtAPim8etvQwMPFH9zpBbU9sBFApyzxHeWPUMP",
+        "n_bars": 42,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "DrRhg4Rxk3ncDKSkj6EYjiF5SsKWB9e4BuA5rGuEHrou",
+        "first_slot": 435632684,
+        "last_slot": 435632684,
+        "mint": "3aQ341XkAyq6474VfU8JDR6kCbfaJan3JSMg9ZgApump",
+        "n_bars": 158,
+        "observations": 2
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "DwXmPzXqLKhCJdFJG93w1xdeapA3pVuVM3koBAdgaYfm",
+        "first_slot": 435667967,
+        "last_slot": 435668814,
+        "mint": "9M2MvRpFSQp6aVANpFRTqi9vmZRvmqeAKuSLpw85pump",
+        "n_bars": 7,
+        "observations": 341
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "E1TZLkXdofrcxn5Xq4gVFqqGKvqq4Z8hJumZ1LQJWtve",
+        "first_slot": 435619650,
+        "last_slot": 435620998,
+        "mint": "CA3TC3NG5CeLARATrrbKZM2XgS7NQRAUMopBBTRYpump",
+        "n_bars": 36,
+        "observations": 376
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "EG46cjPqbtkWKYCPRBfXmDzs6KPLgvrmbbmjopo3eZ7p",
+        "first_slot": 435603978,
+        "last_slot": 435604159,
+        "mint": "HB7MPRYpegrJaJtsZvrXAEHx5kxdehiQQUNneVLnpump",
+        "n_bars": 1000,
+        "observations": 759
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "EG7vnqAkMFLZGUGHRLXEMUhjB64CFREDo41mC55Br6NZ",
+        "first_slot": 435744214,
+        "last_slot": 435753876,
+        "mint": "BkZtsy3BQZmBZYqvmZbgmNVYTWJMZnwdkZ2i2HUtpump",
+        "n_bars": 78,
+        "observations": 1438
+      },
+      {
+        "bar_status": "nopool:429",
+        "bonding_curve": "EHDpABbYW9zwidj1Yz7ywxuov9W2kk5MCoZuwJDh7hMa",
+        "first_slot": 435686442,
+        "last_slot": 435686442,
+        "mint": "9ufyZ2pyL9Apa7fB7JdHnSujhYTQ4Y19qNdBEgJUpump",
+        "n_bars": 0,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "ELkFfzGMVCrrVUGHo3fRMea3PJya68iHgtid9zzPXVsZ",
+        "first_slot": 435662062,
+        "last_slot": 435662062,
+        "mint": "2V7VW4t1oTyDyC2p9onL7WVS4BbdofxcaTKLkP74PUMP",
+        "n_bars": 180,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "EMyzP9oXq1fEPFAmCGEHmTULTeGNF3EdF6rnCYeqnPx1",
+        "first_slot": 435762727,
+        "last_slot": 435786995,
+        "mint": "FXKURg3t17hXovHNVWx5D8kCQqthT6ZNs8jhi1Bppump",
+        "n_bars": 230,
+        "observations": 2487
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "EUt6TqCH4KNc7BXKy89ozokRwBjGALPQY7Ee9aF2wPnH",
+        "first_slot": 435752613,
+        "last_slot": 435760240,
+        "mint": "E8nwnRa82KWgTPxq5211hLh4fSpoT923TT64Egjpump",
+        "n_bars": 737,
+        "observations": 2710
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "EgvA6gUaoSRQZKLmaQwLxwSzZxeQmGXzLhK6NSfZUiGV",
+        "first_slot": 435755727,
+        "last_slot": 435755727,
+        "mint": "VANwVXGaZ3MQo9g5pnDzVygiExH7e3FT794rmWppump",
+        "n_bars": 22,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "EiwrKJPgG5EVKdLRRe7mMSHbTtnsuZQgkU8Yun8oaJ96",
+        "first_slot": 435605511,
+        "last_slot": 435605560,
+        "mint": "65FW6UMo4odrZBiL1D4k3Pbw2XVvX6aDDA5m79zppump",
+        "n_bars": 39,
+        "observations": 166
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "EmvMk3zQNMdof119XRjiwTkf5jx5ZhvYKPYKhbs1BxJo",
+        "first_slot": 435698927,
+        "last_slot": 435698927,
+        "mint": "Cit5JZ5GQDoPfMnyKFYmJaVZ7knBBRMqQQD8TYjpump",
+        "n_bars": 62,
+        "observations": 8
+      },
+      {
+        "bar_status": "nobars:429",
+        "bonding_curve": "F26iKpS5EK7gsiEsqZF5t3fZMaY2NkXFvNUXJXsB7HcF",
+        "first_slot": 435692235,
+        "last_slot": 435693119,
+        "mint": "fw1Sc83K6JK36pkRmXmYVMgje2xUeERVxcE5u7Fpump",
+        "n_bars": 0,
+        "observations": 518
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "FUHT6VVvj5hNRuJQWp74rmx5QKapzNjkjEWKDwSPwZQ7",
+        "first_slot": 435770832,
+        "last_slot": 435770832,
+        "mint": "4mw6avfnDkecXfERVAGxaqymFmKjX7oQEus2jqECHPU6",
+        "n_bars": 129,
+        "observations": 2
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "FcU4eaH7aEhMyTavLdg97oxursBn98jaGHUp999rz6Mj",
+        "first_slot": 435628174,
+        "last_slot": 435628520,
+        "mint": "kMnJ98cTFNEpmE4iyLDTc2vQoPsWH2CyhjGcoe3pump",
+        "n_bars": 25,
+        "observations": 88
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "FdmJMtwfqE1A6GUj4XShpdRWELdDpuNPBDyumVqZv2p4",
+        "first_slot": 435764896,
+        "last_slot": 435958585,
+        "mint": "6ixaEct565dgKCaaQxrQKKhedUp9zWWXG9adkdVDpump",
+        "n_bars": 75,
+        "observations": 88
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "G1REzvphtxqmAscTCKbeir5eB7UKnaY9HKqr7z7gKafB",
+        "first_slot": 435605948,
+        "last_slot": 435605948,
+        "mint": "HQYzDQpuewMgTL4ycZ8Ek9SPUzP1eYNRxF2yfQoTpump",
+        "n_bars": 62,
+        "observations": 8
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "GPu69w8Meh2oipdTnQH1GJth9ip5dsKNVZ2SHdX2nuRK",
+        "first_slot": 435631589,
+        "last_slot": 435631589,
+        "mint": "5Lxdugp5gpE7dau8YRRyKn5KeLaiFUGF9EMmHT1ypump",
+        "n_bars": 220,
+        "observations": 6
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "GYTrxJJVYWuoPAz5U5GefgW8HCbESvzTGcZExM2FWpnh",
+        "first_slot": 435659008,
+        "last_slot": 435659008,
+        "mint": "Fjk85AkFthZYYyJW5PvZtkJuVhkTLuusscdcacE4pump",
+        "n_bars": 7,
+        "observations": 7
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "GdeV5H8JQpwNaKrUzphPHPfhfun3qS2R4zf4WHK5VvTk",
+        "first_slot": 435611387,
+        "last_slot": 435611396,
+        "mint": "ENGNF2NEz9EmgW2pGr1vSJHbuSDG183pQ6VnKnGcpump",
+        "n_bars": 1000,
+        "observations": 70
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "GpqzwayBSLqBvqarvPqHxBnaELe1fqQ6eEfbcSh4KtVY",
+        "first_slot": 435675711,
+        "last_slot": 435675711,
+        "mint": "CPP68w7Vjh5SM41vEX4V56RPagz8sEzZcH5rsq5Npump",
+        "n_bars": 144,
+        "observations": 2
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "H2hqUbvYAefKFZMJRxB97Rd6EsSK4J5oSCqhyh5zuaK7",
+        "first_slot": 435700667,
+        "last_slot": 435700667,
+        "mint": "9n1JBxrWYkDEFhss4woiQWPvNM7MGGDeoTuJiuP1pump",
+        "n_bars": 22,
+        "observations": 17
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "HjtHaWoGdn6jZ4u5n1zuiR5G9nwFz72uXBALDLyZgtS4",
+        "first_slot": 435749632,
+        "last_slot": 435749652,
+        "mint": "4ydvhjACCSgMqAoP5Wt82DxxHgTqt74ZMYE69wDKpump",
+        "n_bars": 26,
+        "observations": 194
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "J65X6XXSZUN4soVdRdQL66ddK3waDcqipvHR2XZBnrJi",
+        "first_slot": 435670360,
+        "last_slot": 435670508,
+        "mint": "8K49gkoTf23wyQfTAkXN3k1wwp868uKnkY1qbfbapump",
+        "n_bars": 15,
+        "observations": 92
+      },
+      {
+        "bar_status": "nopool:429",
+        "bonding_curve": "NEwco2TFaF13ZSNHRDezzkctLjDWyWXmoX4FLB1SV1b",
+        "first_slot": 435669117,
+        "last_slot": 435669380,
+        "mint": "7FCKz8JzVCMm6coHUySn61rL9diJ6BTYToY7aXrvpump",
+        "n_bars": 0,
+        "observations": 122
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "PivrKePEtANzBjx3tys7JE8GnUYsuH1m4MXQvJ5NcTi",
+        "first_slot": 435768583,
+        "last_slot": 435769947,
+        "mint": "2myP8d6yUStpyGhgriRg4E4YjQiHqeXnPCZvXhzGpump",
+        "n_bars": 49,
+        "observations": 365
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "ZyZd5Yi2e3F2tiFzGd6cKLLSeZmASnzpBKGpjccTjUf",
+        "first_slot": 435644612,
+        "last_slot": 435646872,
+        "mint": "AB2vtk2cWBKdRwpe5GmAhNfefN7nivJEko8EA1xDpump",
+        "n_bars": 207,
+        "observations": 1976
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "bY4TLEoyDetVzZ3qCJJXPXGECiE6YZLdFeDY1vxGqVh",
+        "first_slot": 435771201,
+        "last_slot": 435771201,
+        "mint": "DVyHsC2eR5YcmygYAMb2dDbf8KXETzM92Q13yhbFpump",
+        "n_bars": 12,
+        "observations": 6
+      },
+      {
+        "bar_status": "ok",
+        "bonding_curve": "rHddCNyg34cwZvMrvsFhEFPZzMw9C7H4L5ULuHCEbh7",
+        "first_slot": 435708434,
+        "last_slot": 435708553,
+        "mint": "3BtRXdy2vU2915qjKamwFDsQnkUjRyAXRA7Mjk1epump",
+        "n_bars": 31,
+        "observations": 51
+      }
+    ],
+    "graduate_overlap_with_bars": 70,
+    "labels": {
+      "complete": 1075,
+      "n": 33866,
+      "rows_sha256": "a847e5d3847dd9bf7a9f5384fb06d71d8febe329e67a004c18f11ef82b5b1a31"
+    },
+    "migration_count": 122,
+    "migration_positive_lp_burn_count": 82,
+    "migration_rows_sha256": "3ddc817148264cae12dcd022b51bdbf037365921155c7750bac3037c153d47f8",
+    "migrations": [
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "6uZVazdqZPKUSGthNxeQLP7gHoLw47dtxpTvfg52EafM",
+        "mint": "DDMXBssrBUHH4JxAxjUt3SQ8pogcaFNTNPzhx7RApump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "Cj8EyUBC8JiD7D16MeC8Y9oexJrdSfvqrm43kkyosLGj",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388292915,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "034ff4a99caf8de471634bb25945633ad5e6f2c6ff790df8be689098cc147ab4",
+        "signature": "2dNfpDkCGJo4ZNBtZHPgQFEWjKPL2J3aTYtpAoqMxGUSt9uTVToHnzg4rrZ2dkECkwJKtVsSBNBiCdqetW1Lmjdi",
+        "slot": 435578072
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "CnWzhLLSmodhVVbygLDDruwh8V6oGSdA2HjNgdUwP9Ac",
+        "mint": "7Sxj4hyh5KhwwE6kVqxboZQ53Bojfd8XRmduKoRZPUMP",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "ok",
+        "pool": "HWcCkce8yUi4iWLD5boxRsPvkHeMj8s9x1tERp99ZpXS",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "61b7398c75a4dc88d1b92eb30e53b9e2918d449577f0bd8986ee6656878a983a",
+        "signature": "61FYaGpC6bDi4eDXzu23Ld89BgCHyCxg7p7TpdiNjCA9dtjHkHAEE6TA3b95sovLYSf98DbrVwqZCg7VhhygjHX2",
+        "slot": 435580312
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "BkYvcnUxjCTQZC6dZHtrUDJYdgTSqRqBL3ocvSvjhFjF",
+        "mint": "E2rNPRhsueQ9LygMVthiWVPEnS4nHyoG5kw1NKmwpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "B2s14JhE8CnGCHQeinjsd6qmzeeED5QFDUoosRfiM3gu",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388295086,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "5188de21fd1725d40e39f357d4c725cb54df896271a1a7b90ece544f73066d43",
+        "signature": "2jztawKbeeVhLrYBDSA9xCu8dXj8drg5u9ea9ZJRRRTxfyuXwEN1BLUjbSZAMcwVzQgHe6c4FwFWrZfsq33YfWFi",
+        "slot": 435580935
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "8ebUAYKuNrtfd97aMzJLqL343WTzuuh6Hq81oB1HNgWQ",
+        "mint": "DPMvj9sJEKdZ3TP2K5hzX94XJXLgt51WSN3gC2ENPUMP",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "1iUwnNbmytEvFZDpRuymTPunAtKMxmCkESMFmoXYZp6",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "324e37415853be70a710a5847bbd9ba2948b7e0eba7c01ba3d97655bc5cca3b8",
+        "signature": "5qNzkncF8PZz5YEjigEsBDGeBTctzWiQ6ZKEyZGrqmGXjrPRPW7jprS52ERC5tNAj9ET5BTDBCHH5bWHyvLMzRnr",
+        "slot": 435582247
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "9T2NkHiouWnKpR6Cn6mRN9HYEQ2nDRvGCjocgwEgNXrd",
+        "mint": "FeeJBAonCaKwtD5i3hkWAUnamvDWZFLqzcnHZwB3pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "EHmnYd437vpuieu9dhVdhxha6gQjvGvten1NFVKu5bHZ",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388289140,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "0722622d445331825db6219197958219239606681f8acb73be05d72179b741a3",
+        "signature": "3GVNiyfCZaMwPFTxAaaju6gox5gppdbKkaVuuBgiYYMegCyUd9iNTAuXjNLesbVcSEhhQ3jAmeWn75rxKcHgCVn3",
+        "slot": 435584232
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "9T2NkHiouWnKpR6Cn6mRN9HYEQ2nDRvGCjocgwEgNXrd",
+        "mint": "FeeJBAonCaKwtD5i3hkWAUnamvDWZFLqzcnHZwB3pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "EHmnYd437vpuieu9dhVdhxha6gQjvGvten1NFVKu5bHZ",
+        "raw_lp_burns": [],
+        "response_sha256": "dbdce7a6ed56b21e0514e84a11f35d37f789ce929575c6f700a1414354ab8bb3",
+        "signature": "5S2rJ3qV5ft8yCmskYWKjoLyEEGFweEcYSeacSCqd4SBuAizDMwtnLS7UywSLFqcuxrwGgHpE9yF5LRQB3gFC7Cw",
+        "slot": 435584234
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Ht2c9bVmefc6Wbn2Ac4WYV7YXySaw7howNYP8JKNdWiw",
+        "mint": "2CvMZhhpPbQU3aYASA2R59shzWHCb9sCGhDdSgvApump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "3m5X6DLHvaGvmL9bnh5MWeVTdRwCtnrxQCAXtd3Cfucw",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388311294,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "65a4f440d46ca2511cd5d284921b78bd80b02cda703789469cbe077b59404cf0",
+        "signature": "63iVkQMmiCAiTA7fvFkNensmgZj7HJfCh1EUgUkFgk91U8KcYaJLqU1Xh1JwoMJWUjQmMvxZaqxmofKcpEAvaP1K",
+        "slot": 435585190
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Ht2c9bVmefc6Wbn2Ac4WYV7YXySaw7howNYP8JKNdWiw",
+        "mint": "2CvMZhhpPbQU3aYASA2R59shzWHCb9sCGhDdSgvApump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "3m5X6DLHvaGvmL9bnh5MWeVTdRwCtnrxQCAXtd3Cfucw",
+        "raw_lp_burns": [],
+        "response_sha256": "6b287ff9a720786b42429d9b8a2c122d02b28455f2fb91eee0038f0a41e481e3",
+        "signature": "3rg8e5zdh3h9XtiZs3sxCSLcKJEaMK7Ue1FRXuGSut7iWY8vZZDX9RkxnFceTAX3WJyRDAdzgmCaoH2wjyHZGnQe",
+        "slot": 435585191
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Ht2c9bVmefc6Wbn2Ac4WYV7YXySaw7howNYP8JKNdWiw",
+        "mint": "2CvMZhhpPbQU3aYASA2R59shzWHCb9sCGhDdSgvApump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "3m5X6DLHvaGvmL9bnh5MWeVTdRwCtnrxQCAXtd3Cfucw",
+        "raw_lp_burns": [],
+        "response_sha256": "7e0b3a70778ae0a0971f12396adafc376425c69373f7e433dece7680538922a8",
+        "signature": "hvHwUi9YTvqBWob92GmNhMmdTPF7evhKZvGDXHKyLBJi2b8YMoi93STvCdbeyPv33xs5TL6RWFVoSF1Cqe8NWoq",
+        "slot": 435585191
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Ht2c9bVmefc6Wbn2Ac4WYV7YXySaw7howNYP8JKNdWiw",
+        "mint": "2CvMZhhpPbQU3aYASA2R59shzWHCb9sCGhDdSgvApump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "3m5X6DLHvaGvmL9bnh5MWeVTdRwCtnrxQCAXtd3Cfucw",
+        "raw_lp_burns": [],
+        "response_sha256": "d3e44d1284edea6983e487839a7f01aea694615d87b7c302f84e49879d10d760",
+        "signature": "fRqSst9eYJwivAK5S5WT8f4r8oQQs9qqdeELoSsSUEChzBm21D3etimvTvC7r2S5vZdL3NeUCfuMFd88RNsQGt7",
+        "slot": 435585192
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "5UdHY2AnNpy1Kk2QkYZ1PCzcbQAu4Wjsw76T89838wea",
+        "mint": "HPipG16NpPL2XKbn2SL1mREeVFmrKMfTAykjVKn1Qqhs",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "8bxFJwv7G4PWXPMtZKN72rSKcNzKB56q6ZCY6ph4xFNv",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388293088,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "de1a220bf7e2cea31e7c29dfc1d6cd8f65795225e51538471bba62b1258a971e",
+        "signature": "2RWsBn4s5Dz3wTKCH9ifV7xHcCq6AWzLcj46pTi9obNPe4bEW171zEsZ9xnLT1vebzqoS2xRT7KJADgXvZh9ofC3",
+        "slot": 435590767
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "BNBVjPhYDC4e1yNFLQxQ8gPQUff23NRqw5KicLwffGAJ",
+        "mint": "GZLMdhQGcfwZZHPR2nweaG1EVn21nWAHEKy2HQtApump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "3rNomJrDjpdDge1hsXkW4ZvBYqH41ufskDk4uwNTnbU5",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388284058,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "78cda8f863ae0522fa02cf40eb757866bbab4f85aa973c2922fb6ac5feb7ea6d",
+        "signature": "fPVBRGzAams3aUdS8miL7NaosJ1PXwHrypkwkJgULDt8m81LZSq4ycgdYjFQsJZLXuGPPqAsA2vDtEm9a3Gq8h6",
+        "slot": 435592308
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "H86nHgGA5sQxBUUkZGPC1dTL3SZSmQXcpmn2fNNsNBjT",
+        "mint": "7w3pLqE8SxX3gEkb7retk6CL8pWzqwGoD2vnHVW2pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "2EyVMGpw9PWExUfDvqFMhhLGr26m7CKKtjqjyqwUH2XJ",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388295406,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "4367d09933d83a6cfc26e93bff992922732cad68b336922f3c8bdf9d15eb4c2b",
+        "signature": "SyiDcdLnKBsUtYx7mVxMcnsvFZkvCKyEorH7BC2MtRiNHjdLG5RXaA4qagBSLeRc9myMJKdYH54nYfe9CPZw8K3",
+        "slot": 435592971
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "H86nHgGA5sQxBUUkZGPC1dTL3SZSmQXcpmn2fNNsNBjT",
+        "mint": "7w3pLqE8SxX3gEkb7retk6CL8pWzqwGoD2vnHVW2pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "2EyVMGpw9PWExUfDvqFMhhLGr26m7CKKtjqjyqwUH2XJ",
+        "raw_lp_burns": [],
+        "response_sha256": "8d54e3c46f2e6809e82dea155a4a3e55fe423c15d6c0c013e34ece6dbba7289c",
+        "signature": "4MMFeS1XrymbNpiFAXNmDhQEMVdsXUGk1hf5XETRKi225pNDzUn4fv7gBaHFBvYcFyVpraRFb3jc7qfXSMCjSqiG",
+        "slot": 435592978
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GNk6BHCC7Egawxkpfw79mV5nDXipL8EEWv4Q9RUcHkT1",
+        "mint": "Dbz6dp6wxG3W2Bjtj1sXvV2YsPHvDEvu3oWde8Jhpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "BdJbW6UApYgDAyWzivRoTCmgaESycwAnqp9WBbaQy9Gw",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388327527,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "7d28109ee8a4ff00988451e37e1a2c173e0771eea397a2bd7ab975f888429e64",
+        "signature": "XMNYcjNE3gj6qyHNGdUxS7PrCHYTZxCrgf4JuwJRwyJWzXzRm71akTaiYzRLivWgRLeaeEBcjbBUbAPpMCzUvQr",
+        "slot": 435600407
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2tdtfDBqfynR1NjZajeqdpyYnseNwPmsGhj1NtjF71gp",
+        "mint": "6jP3oTRsMJbDsy2dMNXHZEb4XXXTghZrveAEDdFyPump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "FaUeuqx6jhptZDUdiu4YeMCE7mUu6Ps6tHkMDGo85nev",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "6ca7e99e6fb54a410c5a6da42204f150b1d6ffc08202b07195fb15f4e77e8c6d",
+        "signature": "NJANb8akUQHMVW9fr5ZZLbTPEmjmobX5otHfJXn5UtDgagwZVnLkCjZ8ghCktscUcraoBBDNYP76fbWX46JoXtc",
+        "slot": 435602391
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "FCEA22FWuEHGHt1mdVMKyE4wBzSTHJSNSG1ea6UBj8Rr",
+        "mint": "HB7MPRYpegrJaJtsZvrXAEHx5kxdehiQQUNneVLnpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "GcdFfwa4ULLVZ39Dx3p4KkakRBv4c7eqEMEeDd4uVn9V",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388289930,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "2f2d6b260ce18983a480ff6284a37d0f7e03b78c623e2370623a3e1a69b64181",
+        "signature": "2XcuTZrGjLbojxRztG7irKX1knCmoKT7ixxmKBMC4ohD18AC5umq3aHYssMEdhwfFESgeN71cmJxFKjELwx17VbE",
+        "slot": 435604161
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "FCEA22FWuEHGHt1mdVMKyE4wBzSTHJSNSG1ea6UBj8Rr",
+        "mint": "HB7MPRYpegrJaJtsZvrXAEHx5kxdehiQQUNneVLnpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "GcdFfwa4ULLVZ39Dx3p4KkakRBv4c7eqEMEeDd4uVn9V",
+        "raw_lp_burns": [],
+        "response_sha256": "588da93545bd7d9f853b23acadfe9f4b0e451dfbc970907fa11397e4bda64987",
+        "signature": "2BxUVNpty37E5URX1cCUKMyjdhL9JtMBJPbp3dgi2xgLewo3HrppMVjCi3aH3s2oK1s28tSzeV3FUGNJKFo8NApi",
+        "slot": 435604238
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "tX8ruemqmx1SjvS1DAqvqtuf6vV6chWfBYQfkziwuEU",
+        "mint": "65FW6UMo4odrZBiL1D4k3Pbw2XVvX6aDDA5m79zppump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "AkD5UPg9k3kjPv5ogSkfYNzqLMp7VATQxQ8ikTZkZwnK",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388286451,
+            "inner_index": 37,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "ec3fc118edc7b7e0813f8b699484bde1f3ddba458d7eaea8fca21632379ce2df",
+        "signature": "2qzs5B5Ef19Q8TV2G6U6ifN8PriTcGKgcQCfXfZgo8fz9ukcKXSVXkmZtAj35hcTsyrgx1fmxLLumDihEqYvEWtm",
+        "slot": 435605562
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "EXcFv9YvTnDMdtc4Ykrm4tVyp8aw8tM4AgyWVRYRz3V8",
+        "mint": "HQYzDQpuewMgTL4ycZ8Ek9SPUzP1eYNRxF2yfQoTpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "LrdEtiT8WjpVCXEZ5L6URUSu5A91bZuXJu7isiTu94g",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "ce48f0bacfe6647b0ec39ed4695c54bed40dc9b3059b9183ce2292759c1fa0ec",
+        "signature": "JHawZueATRy7dhFcsNMRRKELqyFtgWPzP1dxRQ1JfsDM2S8sDFRwjfQVQbW6J9UHJr6exhGQVxbSj5rQ3gAk82e",
+        "slot": 435605948
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "EXcFv9YvTnDMdtc4Ykrm4tVyp8aw8tM4AgyWVRYRz3V8",
+        "mint": "HQYzDQpuewMgTL4ycZ8Ek9SPUzP1eYNRxF2yfQoTpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "LrdEtiT8WjpVCXEZ5L6URUSu5A91bZuXJu7isiTu94g",
+        "raw_lp_burns": [],
+        "response_sha256": "f7ffc5a40f28f254e9b42d9d3c412b588aec8181e3f46cc0ca396c7510b83a3e",
+        "signature": "3j17A1DzwwtsHX6ATUQk9z1T85YYQ5Gqww35sm9GnbUkqg2JqKDxgSr893DwmfVjouhtTSApNSmainmE4yiiFqLR",
+        "slot": 435605949
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Dw1YWEG37Kcac58nbgBKLppJYEv5rZqQsXhPs3qwnfRy",
+        "mint": "AEqSr3N63z8oUWLgp8vwVarzvaBnCeVvfQBeXQ67pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5ShNgPiMciBmQ6Zi6Ea4o8bDQ5jBA32dowhNY5bt7t4c",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282628,
+            "inner_index": 38,
+            "outer_index": 3
+          }
+        ],
+        "response_sha256": "b9c714bc846afbfc063a16a168ae445fd55b69dcbb58f7348073ce93909bdf93",
+        "signature": "5CiSf7mBVHRwcfMtbwmjREYQDqXnFXutgckiuZ1xc3Nq2tXrGav5kPtDoV7WpzJbHV6Bf9sNFS4tAHa4NRkFULbq",
+        "slot": 435606708
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Dw1YWEG37Kcac58nbgBKLppJYEv5rZqQsXhPs3qwnfRy",
+        "mint": "AEqSr3N63z8oUWLgp8vwVarzvaBnCeVvfQBeXQ67pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5ShNgPiMciBmQ6Zi6Ea4o8bDQ5jBA32dowhNY5bt7t4c",
+        "raw_lp_burns": [],
+        "response_sha256": "4733c3a860b34d835d8434ded0356f977a2b4647a4f3524e6dbc959baad32d84",
+        "signature": "2RWjSAz3Vp82jxHyHncRsErrwsh6Jh5XCdyLGbX6iH2oLijpSvfoYAepK3fnp2D4Sa8MFHF15GYsG8b5M7bboU67",
+        "slot": 435606710
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2d6tukdg3rxQh1gdPU7nZMrPqKgUBycd8kLE95Bnos1M",
+        "mint": "3zh9CTwPf8vvPrM5xBWmdkzpWRbmRJyvYo46fZBVpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "BNiVaqvJg5WXBUdZdqrcHAttGtii5fDvBTR5UaERRsbj",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388347904,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "83f1f1f873a5c95a0c1cc50bd433b9a04b93190af56fb0aa321ef98d610a1510",
+        "signature": "3xs5vwkckbJaLALVU4a3w7rH5aRg61CAvMSbT832sqvPxYZoYZS2KKGWjcU4YnKA9vDq8dwVnCpPWcGZwmZic1gr",
+        "slot": 435606785
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GTkBmByuzqW38FQpzM5vAqQZBzFFLR9efMKMUfR5r1QL",
+        "mint": "ENGNF2NEz9EmgW2pGr1vSJHbuSDG183pQ6VnKnGcpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "3ukv4k8WEfnuic9tHAXBCSWkLEcQsHCZgh6iBUoFkygm",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388283516,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "a4fc5fb8862a692f3a11ee548290317879f287a529d42a72d768d941d7102a94",
+        "signature": "3D8WVEEnFvWdYaivpvu25p84tFQGd8bqtG6Pck49edrEGkpwhXbWzQKaq4kXiVyg1zvNeXGFuupVXAZ1SsBDtkW",
+        "slot": 435611397
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GTkBmByuzqW38FQpzM5vAqQZBzFFLR9efMKMUfR5r1QL",
+        "mint": "ENGNF2NEz9EmgW2pGr1vSJHbuSDG183pQ6VnKnGcpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "3ukv4k8WEfnuic9tHAXBCSWkLEcQsHCZgh6iBUoFkygm",
+        "raw_lp_burns": [],
+        "response_sha256": "8932e3a432a19b9369a8f11d334d000952857bca265501785901fb31c2f37db8",
+        "signature": "2bZzL3N6tKYzBKM1CHxHxyTKmKnTvmEuYL88JCqU5vQcCPfEr4Vx5Q8bmn1x73cXNeTG9hzQZAHEG2imGbVKmhNk",
+        "slot": 435611404
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "98xP6kC7kW2ziZd6TzrNLdfishQRocA62RGaTNLLNobb",
+        "mint": "CA3TC3NG5CeLARATrrbKZM2XgS7NQRAUMopBBTRYpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HwpWhttUyMtNbrY8dPW3EgVYWeHbU5zGGGR5LGxqu7m4",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388288351,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "991addc8dd61a66c86e4134dac5134c8779c2cb4d15f10f72fd1742d7c06f507",
+        "signature": "2NcbCbpxdZK1YRVpWf1aF7UKYEWCh9B9vvYq7DyoxSN5CtKJJyVkb5cnYbU6dxgKxcqmB9KRd59NuKFTcgeryuVh",
+        "slot": 435620998
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "98xP6kC7kW2ziZd6TzrNLdfishQRocA62RGaTNLLNobb",
+        "mint": "CA3TC3NG5CeLARATrrbKZM2XgS7NQRAUMopBBTRYpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HwpWhttUyMtNbrY8dPW3EgVYWeHbU5zGGGR5LGxqu7m4",
+        "raw_lp_burns": [],
+        "response_sha256": "274ab9e54c4143ecc18fd73b02eef72afa59f89acb1908b9a0645483695bd4aa",
+        "signature": "49NjmgLdnMgo6WpfcxSnksbCiEXE69wnBy6LsZB4Fs8FYNni8Qtdz2c9cqWNE8Znz5mfM7fXpeV9YeX8BtuPcTKs",
+        "slot": 435620998
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "4U5JRoAL5ourtCUcNHQMacuGCUUiHH4UwWbdgRrJpnHX",
+        "mint": "4dM8HLiEobeNcsvoFxYbtfTnkSDzw6DHM8zfPqhKpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "9SRrRKGJrswHZ2wRQ3CQMKuuQj3FTsyhhW7ANfVF17hz",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388324542,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "20525410523569e369238e49546b2a4d21732470064feb861e0def421c745cc2",
+        "signature": "3hsvRwGpBjeszL3m5biwqz8yMuM2QvGV4Wyutaoxmri17CdQoMcC5KnjFwjv42LDh888v6C1qEfbh6bdprv2pxqY",
+        "slot": 435621317
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "FSPxDT4cQv4twNTPJgaDUerKaRXGvpMfoNxA3imdZK8F",
+        "mint": "9ecXsd2PPYWQb5G5Z5WfoKDzFNb1d1pn6PiZuXotPump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "9JyfVkvdxyBiLhubYQAnmdQJdCSb9WTGC8J6kBiWB4yf",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "b1c2d4eb2c1319621dd8f62ced245c043c18d6e66bde31042491831d60057f3b",
+        "signature": "398yicw7H9Jt7KUkbUkunTgXKFFKsx979fj94LVecfwwkwvToiKugjctkdPn2sipf5CtbXyh5An7amSeBJ32xRa6",
+        "slot": 435624205
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "EFCgv83tSPVrUMijEKQYdEUQzQNSzTnzG5kMET3CsqUA",
+        "mint": "kMnJ98cTFNEpmE4iyLDTc2vQoPsWH2CyhjGcoe3pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HvvedC1ESgMTFgGCSkVDxZQety2ai9z3fCttWvdVUtfz",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388284922,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "7c4be1fc5971855390124fdade544589f9c94656166b1a814d60913f617d73a2",
+        "signature": "3gMCz13nhtsLHcDkiukChqWrtkQDyaw8Fai5P91JW7Y5WdJwpdzdkB1v1NSgqEh6ZGjfuqrhnTswZpWizCbHWa6x",
+        "slot": 435628520
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "EFCgv83tSPVrUMijEKQYdEUQzQNSzTnzG5kMET3CsqUA",
+        "mint": "kMnJ98cTFNEpmE4iyLDTc2vQoPsWH2CyhjGcoe3pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HvvedC1ESgMTFgGCSkVDxZQety2ai9z3fCttWvdVUtfz",
+        "raw_lp_burns": [],
+        "response_sha256": "158e3e015966d90605bff37318532cf577767e85e742971f6c77853b070f2a31",
+        "signature": "2fBNLH1Ca7Ketc6AxH8EG313kYrG5eByzoQ2ggdRLmLbGU3FtRbMemsuKzRyzRfAvS4pFWzmmmt13SN73XEumeck",
+        "slot": 435628520
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "EFCgv83tSPVrUMijEKQYdEUQzQNSzTnzG5kMET3CsqUA",
+        "mint": "kMnJ98cTFNEpmE4iyLDTc2vQoPsWH2CyhjGcoe3pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HvvedC1ESgMTFgGCSkVDxZQety2ai9z3fCttWvdVUtfz",
+        "raw_lp_burns": [],
+        "response_sha256": "a8ccbd726ebfa5c7d7a5d4766adb28ef4c2f6f0e6521b3bf003310f7953eed6d",
+        "signature": "4FD5MBe4VgfJkxh8habT11q9UbbzN5pLhQgefmNq5drYiwRDwXNiDgYGChVCCj4FKbtZZUeqtKkKWvPqTzfw3oXD",
+        "slot": 435628521
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "FQeJ6e7gh4s5WRy9XVKUEWj2ry4RoTnxCY68m1xzh96G",
+        "mint": "5Lxdugp5gpE7dau8YRRyKn5KeLaiFUGF9EMmHT1ypump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "EDTBEcVQnP1eDJzxgZ8fh65Vg5Af4ynGqC9GWWfPwHt8",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "881bc964210e3075e4892195eb5b10bc34b729c51d182f341580494ced46f8ab",
+        "signature": "5jf5vuA519Gs1MegQwZdU3BdAXzUmoSgzWqNRDm2K613vbR69GvhSF9iWpsWXF5PgUSzTKTFPjVjSZuE1L2QPxzY",
+        "slot": 435631589
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "FQeJ6e7gh4s5WRy9XVKUEWj2ry4RoTnxCY68m1xzh96G",
+        "mint": "5Lxdugp5gpE7dau8YRRyKn5KeLaiFUGF9EMmHT1ypump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "EDTBEcVQnP1eDJzxgZ8fh65Vg5Af4ynGqC9GWWfPwHt8",
+        "raw_lp_burns": [],
+        "response_sha256": "4d4b7ac9ebebdc20c0fa7c2890a6ed9e3060080d866f6cf4c0a9a345d37ef88d",
+        "signature": "dC78iXDahS6XZrxqayXWc5Lj3PsHTpaGTewoJQqwTC43iPoJ7nwdD44bmpPWdX7iLcUiU1tobtdUsxG21NyXugN",
+        "slot": 435631590
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "FQeJ6e7gh4s5WRy9XVKUEWj2ry4RoTnxCY68m1xzh96G",
+        "mint": "5Lxdugp5gpE7dau8YRRyKn5KeLaiFUGF9EMmHT1ypump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "EDTBEcVQnP1eDJzxgZ8fh65Vg5Af4ynGqC9GWWfPwHt8",
+        "raw_lp_burns": [],
+        "response_sha256": "d89fbbc8d2eba846f898815c22b804556217e69212dd6bd93f17c20ffbefcc29",
+        "signature": "4hQVb8VvQfVHuyM9EY9bu7X5ffQ3RhUKdvmsJQsKU6HedyrtxxjLp1W6uzsPZhqjFDxDE1XoJCEZz7yqkjuNd3wU",
+        "slot": 435631590
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2iJosiAWfKo1njPAjBDsxNwUDs1omKp7jjyL2dT3oX3w",
+        "mint": "3aQ341XkAyq6474VfU8JDR6kCbfaJan3JSMg9ZgApump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "DxZAHPuVLjawuQH5i4W13gEighjDhWxT38HNmzJkm9mB",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "0e612c49a2636b6e7e5732ff07252b5771ef1aad8811e02ba359d29720b2da03",
+        "signature": "3FCS7xm5eeSNjjq184Ww2WS2THfZNNveTtAhpKFS1BrRFjbW4HehgyNLMKnsakeddLXinUY5Kd3JqXa7k348Tma1",
+        "slot": 435632684
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2iJosiAWfKo1njPAjBDsxNwUDs1omKp7jjyL2dT3oX3w",
+        "mint": "3aQ341XkAyq6474VfU8JDR6kCbfaJan3JSMg9ZgApump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "DxZAHPuVLjawuQH5i4W13gEighjDhWxT38HNmzJkm9mB",
+        "raw_lp_burns": [],
+        "response_sha256": "aa36abf9f14a5eeece0429cf77df68b1f7dea442a38b2d05439d1c8d26ef6bbc",
+        "signature": "5xUk5MtNifWGz5BBXSMM65XurTvFQqrjHL36W7YLLqjfg1rbqRJ4jz4ZbNANFqUwg9oMpkC3eBGfYDjnfbPDwst9",
+        "slot": 435632685
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Gg39n5gNxZFJwkAVhggCdFnruWfw86vdTB5nip4Ft9v3",
+        "mint": "7uJU7tWaexcJEfUE9E3BtdSjrcckhFmaX3PE21Eipump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "EGXrUjU4bKCjQ7mTvo2fiWaShMhGTfsDXqG6CPZfJGhQ",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388285465,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "1a2832f09831b652c825fc95c68191bf5e6f6651e6b06dddd327efcb65e5f6b9",
+        "signature": "3WRk8v6QpMZPTrX8aTo4779a4TZnDnTuZ2EUUeqZHwVFcPhDKDURtSUFh4XMPHd7LWvur2ezrYsfjAcvJcwT8vq4",
+        "slot": 435634796
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "ER1fAgGco36dQJL846LW9v84p8Nbo4eysZje1JQ3ugUa",
+        "mint": "BmPtJiQhLz2RBGMPiGk3tyQzsaWc2ozDyAeNyx7pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "4rrYAZLoss1rw21R499dSw6fmGCsj1XfX5xL4s5kCbWg",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282726,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "9710b4208348281ec59a8cace7b61feaf1352f47ba7038df01d2efaef87d286e",
+        "signature": "2518iuiBPsWMKSCKvkQdPfjGdUrRyR5Ln2Wn92dEz4r3qVD2qLBoGz1zFw8Kyn1JnqP4hNbJYJwLxEg5oyDTSrmV",
+        "slot": 435635061
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "ER1fAgGco36dQJL846LW9v84p8Nbo4eysZje1JQ3ugUa",
+        "mint": "BmPtJiQhLz2RBGMPiGk3tyQzsaWc2ozDyAeNyx7pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "4rrYAZLoss1rw21R499dSw6fmGCsj1XfX5xL4s5kCbWg",
+        "raw_lp_burns": [],
+        "response_sha256": "a82186130635b6a5b73911a7add934083fd8de86e98575bd01b5f828161ab26d",
+        "signature": "HaRv2EnzgP6isTDff5nif1f6tmkvfoY3m4D71CkXS9cWXt9tYgrCqK5s59N3UgXFEozRekLmr576ACGgocLeFFF",
+        "slot": 435635062
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "AasPwkAXVKp5Z9rgEZs4uz5CkEJPUYgwo4Y57WJsSq7V",
+        "mint": "Yf91rjD4RjtgmYn5L5J3BExkEbcTrKJ3gp75zuQpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "7gJiLcnnmB5kunAR4SPtCC599G6KFddVvnrr1ttDHAXK",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388295234,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "f284ea4aa8304af14b04f351515b5025e393f0c5ec6ca92cf65dd5c2740249eb",
+        "signature": "3pPJokSzPui9eLKbKJ22mMourmwBeprk3xZUbcbZVug12wm4KYRVnauQFPXFtM9LfLTV66QGRHLBsejbpusDyBdx",
+        "slot": 435637491
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "AasPwkAXVKp5Z9rgEZs4uz5CkEJPUYgwo4Y57WJsSq7V",
+        "mint": "Yf91rjD4RjtgmYn5L5J3BExkEbcTrKJ3gp75zuQpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "7gJiLcnnmB5kunAR4SPtCC599G6KFddVvnrr1ttDHAXK",
+        "raw_lp_burns": [],
+        "response_sha256": "e662e9604c6c69de1595c30360a6bb70f277fdfd79ea9afa9070fe6c9e27339a",
+        "signature": "3N9kxMq9f2oJNnCsCE8irgA3zdGA74KPt1AA8Kiti3Y3MSeyeaj4ECzFD7kMVDe13NEZeAefLW2WLXuQowpEM6xM",
+        "slot": 435637492
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "AVppkyavX3QndovPMyDStVbaqFTVpqgySRkE1vvRsFfz",
+        "mint": "cjMRxiVwjfPh3nxXiwS1pm8yBk5EKTbeHx4hm41pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "463bZzACTptTKMGZfpQ3CQozXRerLrSW91Q94hCTTRVM",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282677,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "b15e1c06180563c7129694780a709176b31e165472bc403b744bc98812d6f410",
+        "signature": "5sD95KLoCFza8hbWeTDaWG2fqkT5VGCGaEUSAM4eD8QWPmo8uvJ6nKT1Cxh1srMjHzvkbggwhb8pyn1aJbhQ2h8z",
+        "slot": 435637788
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GbFwUqyEKifL4HdUUWRFfG9a9qnGNhHFnzFja9r4p2ji",
+        "mint": "8ia4CNMPh1gQFBFHCwegu6WuoDQFGiDvrV27opdTpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "6NKotjzUqvK9yLakDfSFj4qx8VDj7XuhL9F7yxsP9r7d",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388310578,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "49d43f1eba0e54df80298c13444f0544269adbe32effe558b87a7c2682df71ae",
+        "signature": "22Ew5jAhvL8gPyPEabZhY6GkFYu3ZpK7z46HhqTqdvRGMqrBA6Z5WjL4VEto1RYo3kxf5aA3igRc9aatQmYjvUo1",
+        "slot": 435638888
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "9Kr1bft7yoXmfaPaGMwugV7F6huM7GCB7gWgAxjHfDGM",
+        "mint": "AB2vtk2cWBKdRwpe5GmAhNfefN7nivJEko8EA1xDpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "CzK7Qkb4s6E9e8uWB15UvdneP7qkNSJ5sXQfeCJpoTLU",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388315093,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "06f0a87a5383f6fb9990a50ec37ad94d89a1d7906b94df94813618f46b9bae17",
+        "signature": "5G9miUM9gckS7jkhqBPFSmYBmRjPdjeExEoN9L8cLCV9AQB3tL1RmgV365W5Vfsm1ceV5pv9qrUGXCgDRLbesa6c",
+        "slot": 435646874
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "25fW9fR2xPyYdM8gxRaReb5fQ24vWo1TK9GJuPSVqbga",
+        "mint": "6sjFBLF2QkLZpMmXim7nqUcYoyfqoJbCyuiPAtKaPump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "FDb7AWgUzxLHjdVCZUJEHxcGBM8uCrdkbV3X9ytAjr9c",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "3fc19916ff746204f38c993d1bc622abadc875300124434b66c2b0c8784e518a",
+        "signature": "5CZTZzWkeXYwZnsPDt54gb6aSp5tvq1zmC6krQ7qXDWUuuZRKRJrDtGyDjR5pPxgX6pvJuGGf6Khfdkygp6m3esF",
+        "slot": 435646961
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "99QF9rKNj2WZa4Mitz1mLqW6ZrkE5bryWUdVDgmBMnZA",
+        "mint": "sAp9EmAbK1NcTy48uS4B9ysFuEJqhc4GvUiaCQipump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "938nRLFeMKgHUf5NWAPvLoL531i28ip2UEV2RXeDA4XL",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282603,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "ed7691c656cbf9eb515821080c8a0aa2e5e7e0e04c39bb18c21658001a65727d",
+        "signature": "3NbYTfpaPJj4DGT7NrG6QKEZYVZCHfCdt5efhRYYixQN4TwTowJt28Nx3kstbXWoomoAiAFZUDEmrjyVV3y1bbG9",
+        "slot": 435649065
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Eik1yqQiNa2UbdGG7zR46xb7cMUQ9ZrEwYeyuBWHbNW2",
+        "mint": "H2eHzfnyNSkLZNq2eemF878iu6pnnkZGbK8U28Rbpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HHKPe7ARbz54xTEi4G6tA5yGdhBHwidUjq84mg2F1e3W",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388298836,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "531b7a27be22b35ab96c3f4a7f21e7265d242c6c39e36f58a305d6cf90c80735",
+        "signature": "2mwRWHjDrXYDyYPTpvZYvNem1nmhA3hfKmsfvZGpomhixLRDvntVYnUART89mCxQzzAtvjufPeQv8hJXCZ3aQLXm",
+        "slot": 435650527
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "EgWzbW7KVriSTizyS4kmTRecZekF4sdChrDxjj6iRqm7",
+        "mint": "EADnJpzEqmemYptgKbDXpyN3qmyDnPyCq3Pha5LMpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "75dyKpiWe9DXPtZEz8KfJpE7FZxfQw8azHKmenrfGg9B",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388296936,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "72d8b828f1ef8712f22a83f43868e1fc545649bbe830d0a5c0df69bad8e524b3",
+        "signature": "5yMZW3nYUM5e32jgoL6ySGcMVPksrfo9Egv97vpfNVNrg7S3oHtFxTrUECYRrV7oj7R1yoKnMbrDzUkP4VsQTFSb",
+        "slot": 435652638
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "8EMvEr1pQu25UiWXkDQP6dkCS2htrzze8Fdf1MwNhqxC",
+        "mint": "HMQYKkS7yoLQLkCRwa71vvu73YKTKUah9JqhmacKPump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5mqThG6AgML7FeQ2ADM6Zejc6397YUZUTJVuVKVLaxmL",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "bafa9c1993da52e86445b35d3ab22a6230a82d7305dc3144bad369e7113963a4",
+        "signature": "2tS6Lib6RhrcEVD6T58pG2zN5CaYDHMEu6gedb6fMev2wmBznJiAChZm9upWoxrtJMNdgcG8AMuKsq1TYG8e3Wtj",
+        "slot": 435652694
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Z3b7nwRkS5watm4kFVxKd3UvC1rWa7Vo3mhKnhFxGJh",
+        "mint": "H3GtwGSrYRVqp7dtjkaDfjE2inydLkHwFkFJSPzrpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "DEzRbg1HWUTJupoudSznJNaFBWxY66nwKQxoLGMtPZnp",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388407728,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "1d0026d1f7f36bcd632a4410794e40ebaed25665f61233ff1ac8e61371677939",
+        "signature": "2GLmAAaVhto7KHsrZENxAPA4Rauz6iFvuJvyJEmvmUFUiXRZBPqMdFiqsCTmeVowuewwHJxH5eeaJQa5o15WQMnR",
+        "slot": 435658324
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "BRgkC5mVD9xUcFPEhLHpcY5KmVcLiBiFuyjcSFqg7YgG",
+        "mint": "Fjk85AkFthZYYyJW5PvZtkJuVhkTLuusscdcacE4pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "67QuZJxewyULFUb3gC8qPb4r2CC5AqpkP4d4MQcu68eH",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282652,
+            "inner_index": 47,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "384c1d0c3652f47a1ee5e9f07a7569d8a8c494b8e56311cc4e0f100043402f83",
+        "signature": "5gWSzzchkYiYCixrLmyhevggQ4HAFaD8JiZGLEdeQ3Vue4pmhe2iMrqd3pHM2suy9TMiRvRhAGAb9Z35yXRPj8ez",
+        "slot": 435659008
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "BRgkC5mVD9xUcFPEhLHpcY5KmVcLiBiFuyjcSFqg7YgG",
+        "mint": "Fjk85AkFthZYYyJW5PvZtkJuVhkTLuusscdcacE4pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "67QuZJxewyULFUb3gC8qPb4r2CC5AqpkP4d4MQcu68eH",
+        "raw_lp_burns": [],
+        "response_sha256": "6fd175cd534805338100524038be4eae5f8a1e3a534e7a0b0cf35294be9bfc82",
+        "signature": "4riQ6vVL5Epr6jUhcDVBpCRnVwdH8wkidSjPk55vZbxBGwVeWELQF66Qtn4o7Uj2eTVhP2FfHMb3bXhoHtAjW8xL",
+        "slot": 435659009
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2iPTmwTcyuD8zWEa5AnMYVE3aHoqWtUH9HaC4RzmuLmE",
+        "mint": "DBkHPoZHZ3B3MUK5YzHJPrhSf4H1qZBR1TE5nPpDpump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "ok",
+        "pool": "7RPwa7hgRNqM6SP39CAes3NPqYnh74yFG8eNKK4adWMb",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 49,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "ce45d81d5dccf81ae798da6113889039721096319c9c71d8b4e6115257fcce77",
+        "signature": "5FPRLLHe6eh8R4UMLJK6AhpHEbDWwuY8gFEPLYtuHzrQronuAzPdWUJ933uovRpJVn1X3ZU1xyc7DmhkBKMjPEzx",
+        "slot": 435659253
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "4zWqRxQ5kaAqzmt95jLCeTgQz4wwovH6Qzn1g1mjo13q",
+        "mint": "2V7VW4t1oTyDyC2p9onL7WVS4BbdofxcaTKLkP74PUMP",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "8beZWJXPgLJJwugyZNzX9yir5eoRTu7dF5uGkNZ7ccFb",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "8e8e1acaa8c7345c86d3d83e520378ebab7fad71fbc8c3b3740ba81f61ab65f5",
+        "signature": "59TQTJezN4m85HUfty1yfDo4xzvPdgMjzDAUq7byPSATw2sBAZNJ4dCjeh5rZmFzpB3VCFQ1QSPXAVH1LSUPHUfY",
+        "slot": 435662062
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "4rBwVr1Uncv8Cj1GbjnQuAYTwX3brkrs8JBE6MseWKgL",
+        "mint": "CpqEW3QDVjibGkFwDLWt12z7pH6y9V6uwmfjo7Hmpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "3zguv6ES1AtphoVdDBhjRShjsKrfvwaQQqqX3DrpLDoW",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388309986,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "bf61d7ca9945852fcdb55795a59d837e5d961773e01b3d1f77f5eba3c3f91d8e",
+        "signature": "W7ZWammdgX1mZRoM3ScfqokosSW4ydWoH4HcBcVZxuzPKvs9v323aqLVLJWBrbanMLGbn4KjGuiZLYUFdEk5me6",
+        "slot": 435664277
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "9125rahmLzi4gHD6E3jA3ekK4yPUfn8m6mC2NDGrWSga",
+        "mint": "9M2MvRpFSQp6aVANpFRTqi9vmZRvmqeAKuSLpw85pump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "ok",
+        "pool": "5vyUsxGkxzLFHf3tr5sYydRbDeYfGQQqqJumzVy4K3Wd",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388288622,
+            "inner_index": 46,
+            "outer_index": 4
+          }
+        ],
+        "response_sha256": "a8ad9603e78b5b9dab9e21d5246d0596de2d05b48dc9f1cea6cd7d6ea8ec39dc",
+        "signature": "6xB2G6vvnYR4JuHFmTjAvtHsnBkBJx3nDB1BoGJY5UCvV2vXUXoWry9jUz123mo6qZdkzxXCgGw2mr4MDQDa5UE",
+        "slot": 435668815
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "9125rahmLzi4gHD6E3jA3ekK4yPUfn8m6mC2NDGrWSga",
+        "mint": "9M2MvRpFSQp6aVANpFRTqi9vmZRvmqeAKuSLpw85pump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "ok",
+        "pool": "5vyUsxGkxzLFHf3tr5sYydRbDeYfGQQqqJumzVy4K3Wd",
+        "raw_lp_burns": [],
+        "response_sha256": "77ca4c512bd8fe26382ef7e9b9a947c96a40e03011d651935ca0a92274c73f40",
+        "signature": "2sdD8XSZ8JX8VyghH327UjrrfXXkP856AyH77kaMKhB3HkJVHkcZouMN25y4ZjKRtxpyudmgx3oCnhhPBvFW1y2c",
+        "slot": 435668817
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "CrF4SVqHe6nG4GiXEvLweFbxzyL6v4mtfLfbeVhBik7o",
+        "mint": "7FCKz8JzVCMm6coHUySn61rL9diJ6BTYToY7aXrvpump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "nopool:429",
+        "pool": "CdkWmADhNQW9F5DzmbrVWXd9PGQKyzGQxN5vmTVxPAY8",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388284552,
+            "inner_index": 46,
+            "outer_index": 4
+          }
+        ],
+        "response_sha256": "fd1808299fbae723e10aaa75ce77132f97329ad956983b8bafb448ff9216363d",
+        "signature": "4nCZTihQCCUzGn7ruKqpeU1n9TnLAjigFCQuyqXiRUka8Md62bPrRjMG1P821zwUo2PH7jRywb7exQZW1KnNLvjg",
+        "slot": 435669381
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "CrF4SVqHe6nG4GiXEvLweFbxzyL6v4mtfLfbeVhBik7o",
+        "mint": "7FCKz8JzVCMm6coHUySn61rL9diJ6BTYToY7aXrvpump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "nopool:429",
+        "pool": "CdkWmADhNQW9F5DzmbrVWXd9PGQKyzGQxN5vmTVxPAY8",
+        "raw_lp_burns": [],
+        "response_sha256": "7353dddecbacaab16f48ef18981c75e9da977c30950458b0ac1951048787e09e",
+        "signature": "3MPLLJGswpc8eGbq782kdBR5rJM29MAnCNQXJxzEW54VSojh4G94qmzP5fYDJ4558TRZ4cg9kNhsHWrSj54Lqx8f",
+        "slot": 435669383
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "9s38wv1DKqmaNVLLgGP3eG4JfgFWnLXF76sh6D3gHk6Y",
+        "mint": "8K49gkoTf23wyQfTAkXN3k1wwp868uKnkY1qbfbapump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "J4obqxUigv61LNAgtNNZnmoG1Ti9yscB4f5CCh5fhF3H",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388284108,
+            "inner_index": 46,
+            "outer_index": 4
+          }
+        ],
+        "response_sha256": "405a9564d42297b0837021f82faeb9b924bfee4f7b7e9629516303a5b31641d7",
+        "signature": "5GTwsNHCm9yRofkg67SgW4JtL74b1pe7NxFMxeShBFraxneFKPBERdRUDKipTJNxNJQD38sjMya2w1sHdtCPNsHS",
+        "slot": 435670509
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "9s38wv1DKqmaNVLLgGP3eG4JfgFWnLXF76sh6D3gHk6Y",
+        "mint": "8K49gkoTf23wyQfTAkXN3k1wwp868uKnkY1qbfbapump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "J4obqxUigv61LNAgtNNZnmoG1Ti9yscB4f5CCh5fhF3H",
+        "raw_lp_burns": [],
+        "response_sha256": "fbcc17aac1fdb2d9a7fe59003b52afdd4c6c3be3df0ca1e2a1bda41ba7fdcde9",
+        "signature": "5ZShQfsgAK22zRDuC9gbDn9BPgbwq8FeRxKu2Y6g99QnhKMMVEXu45nzGPTYfAkaN3w3ArniyxMqTimounuMCKSW",
+        "slot": 435670510
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "qZcBVa7PYA8cTcAE7A4St5FY61YbufotfF4qPKN5fHc",
+        "mint": "DDWjoEafc3AYGXRHtCjqNKXEDmrsmSnF2n54qpqRpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "7icXpDd688MGgfJaxsXddy9gch4q1jYLiHXqTDDLBGxq",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388286254,
+            "inner_index": 46,
+            "outer_index": 4
+          }
+        ],
+        "response_sha256": "611dafd7317729359d5591685113493e0bccc19e359501f90bf6435dfa1ab8bf",
+        "signature": "5RnLtPSYbhoa8aKuXNx5bkgHZivWvL28VKfqtPwg3WnEYJKnw9VQvvJorX5w2FUPk5xtmW7dY3vpKgWVuCsXz6Vt",
+        "slot": 435671267
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "qZcBVa7PYA8cTcAE7A4St5FY61YbufotfF4qPKN5fHc",
+        "mint": "DDWjoEafc3AYGXRHtCjqNKXEDmrsmSnF2n54qpqRpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "7icXpDd688MGgfJaxsXddy9gch4q1jYLiHXqTDDLBGxq",
+        "raw_lp_burns": [],
+        "response_sha256": "51da179030c98320e294e5daa2b411972b7d60650e8c23312bb90eabfb978cbb",
+        "signature": "4JYFNiv8E6V7BQy2pNTsJNPQ49aaP4bo2VRJobvLFnKYujfj5D7RLD6ihy7QdhiDYp2joQYMxjRxQ98ymWHQPpwG",
+        "slot": 435671269
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "AyDo6sp1S61vLT64TXJ6Mw9awrKNsqB3qdKt5LBEhn6C",
+        "mint": "CPP68w7Vjh5SM41vEX4V56RPagz8sEzZcH5rsq5Npump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "C8uqUt3XUp17uv14Ug6M8dB463fEUVrw8TvFBvMf7aMg",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "9ab5ea62a918fdc0c5888c9e75f3d92c1b83abb5017bc2a3cb5b0ac988eb469c",
+        "signature": "3UTtd7jFKtDhHhrEKQGKVEQE2hDCfNx6YcwwhWC9a8SjtNTR1WykPwg9yob62nT1sryzg6nkaFJ497WQTyyT8SX6",
+        "slot": 435675711
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GdgDtYTDFNJyQ3tW66m2oWKrkQFSnAMiNU8vEwgPhymq",
+        "mint": "9ufyZ2pyL9Apa7fB7JdHnSujhYTQ4Y19qNdBEgJUpump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "nopool:429",
+        "pool": "3ZQiktteX7PncsjsbLoAq3YC6dyFJSdjo5g2SJ2h4xNR",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "955109255e265998739788a6a62dfe37c581ce6db34b494ec484c14abda4dfc7",
+        "signature": "4ahHD3BNVVirgaPz44TRuX6woDWsYV4upwYXk4SmTTBkNd6HR5Ru5Vrcxj6mHVh6pVXNYf1R17oEx8fNkjhFWYht",
+        "slot": 435686442
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "DExLUYikac5ALbzcCtQHJcsAQEm1Vggwmo9pwATUUMkv",
+        "mint": "9rr2WZfA9YDmT1tJE7oFSBdbLU8orFkLhyaX3URtpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "nobars:429",
+        "pool": "6cr3vS681QrZT6ux4LGqSrjm1hvFqRL7tnEtqEbMKsjV",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "ce2ab209eabe5d5dc64a32a934809d7ee9ad66fd0d2bceee95a072db836a3e89",
+        "signature": "3iUo4PhDpNJcHhTUHVrfD4tfEf8ntxSwJSTcPxTmCLLEVqgwRoU37y4ozwXUrUv5iZYqZ33ASeqokqVKnm5yGpRa",
+        "slot": 435687172
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "JfJxMUQ5EdwSyieRPjvvxGkR8Bt12k8TBDnRx98v9ip",
+        "mint": "fw1Sc83K6JK36pkRmXmYVMgje2xUeERVxcE5u7Fpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "nobars:429",
+        "pool": "CMmHWy157MyE7AqY7LDJ3Ehk8xrsZ1dURrdSwWSgAJ6x",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388289288,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "d65b4a80d5f35e37a3cdddf2b3bd7e27e06dc811053cbe9caa9c00e955317e4c",
+        "signature": "2ySGdc8yvXFJyCdqDqtoGs3YFLgyEfh1kSLATgzwnaZZL5TPzaNJLw3BJfzhmh6GY4m2TLxDXExgSw9sbzrHtAuf",
+        "slot": 435693120
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "JfJxMUQ5EdwSyieRPjvvxGkR8Bt12k8TBDnRx98v9ip",
+        "mint": "fw1Sc83K6JK36pkRmXmYVMgje2xUeERVxcE5u7Fpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "nobars:429",
+        "pool": "CMmHWy157MyE7AqY7LDJ3Ehk8xrsZ1dURrdSwWSgAJ6x",
+        "raw_lp_burns": [],
+        "response_sha256": "2cbdb3e65562a63d1a695d461ca1f534b5ab31ad07b1b678e911765087f96065",
+        "signature": "57dJicPdsF4SJ9dM994dDN5XsVHPy14C8eqjxnrSUrXXCqkXcnB6GoLyfsJ9oBX7CNZKLVBwguE4rSMKqpUAyii6",
+        "slot": 435693122
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Bk8wT25CiuRxDqRpk8eFjYDMCMKSJMMqTQgtCd7x3VJ4",
+        "mint": "Cit5JZ5GQDoPfMnyKFYmJaVZ7knBBRMqQQD8TYjpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "CEwFvt4Mu9WoRS5ErgDUgrJkHgdyH4NFkexJrxjcfAQP",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282603,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "ce1cb9c2c6820155a1814e146c16aeda005214fb991cd9d056b8bd8a5601ff83",
+        "signature": "2aJ2Yw7oRNjkCHPicQaqBtFdnF9FgCURk219dkjKikvoAYFN7GZedaVQCJVvyTNtT54z3jkM33J4agzTMaCcCBRn",
+        "slot": 435698927
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Bk8wT25CiuRxDqRpk8eFjYDMCMKSJMMqTQgtCd7x3VJ4",
+        "mint": "Cit5JZ5GQDoPfMnyKFYmJaVZ7knBBRMqQQD8TYjpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "CEwFvt4Mu9WoRS5ErgDUgrJkHgdyH4NFkexJrxjcfAQP",
+        "raw_lp_burns": [],
+        "response_sha256": "241ba3b94a6a6713a01b677f73d7f7941d6c76139d597d6edfd2a3bc0d9e6f83",
+        "signature": "7SyfEKCjqpEEjqbKAZBTqAwBo2Lf5Dmbbn1dYWqThXnK3mJ3G7zV6sabz2yThRaVuQBr3eRWgFv3LdeXXU11BKr",
+        "slot": 435698930
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GKwZZngywTNVTpPbhYTcQ2eorh6Bp2gTVtXhqJeRhkS4",
+        "mint": "9n1JBxrWYkDEFhss4woiQWPvNM7MGGDeoTuJiuP1pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "BkYf3ibYAgZJWLKJSkiEVcX7CEuw7sG4sU7t5qjpfNQP",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388283368,
+            "inner_index": 47,
+            "outer_index": 3
+          }
+        ],
+        "response_sha256": "55e6b8ea97ba0fd3b1623ffb8085b041eee7c22abc7918996967481348496370",
+        "signature": "4LBzgskKTdUuexyASsRAWeuupoMrQicc35GsjewsW1Adzm4EqgTdFRdbQZude1LjddCesDs5fZx9EbhFVx4Fx2Hn",
+        "slot": 435700667
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2ZmuwJPHEcmSsDJn1ibTLGHZjMw6j57npTRLDbDFFkQe",
+        "mint": "GTQ9LhnDbyRE3MFQA3LzF7fY1MMe4S4NMQWpkUcspump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "nopool:429",
+        "pool": "3qP7DXo4ZuqWJcJL3vMpWdm2WGM3McSTt8K4BqtBKbtm",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388283762,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "d435d86d94c6cce072fca781fef3d13537ad014e21d5bec7623ee742e2bf6ad2",
+        "signature": "5MUk5EzKBUDzuT8yhqtYbZgbRWc8MpTh4CHGKvEWW7krHRa6CxqaJs7tcBZmb5smkYgfLZjumgphr5zrXkmEpKAH",
+        "slot": 435705207
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "CzCkrUUHAnWLWbWanHQPKXSJGTuBLB14Vp6yBqyyBgBE",
+        "mint": "3BtRXdy2vU2915qjKamwFDsQnkUjRyAXRA7Mjk1epump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "EzQUitLKYeqkNcko8nSgF7Uminyg1GYDDgYBgTs5cb2",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388283146,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "042e5ecf20b57ddfe029fb26daf6fce02edbb2761284b7b184b40fcde74e0bc4",
+        "signature": "5jsnLB58LqfmPUwLg53hRRfYkqPmfct2QaKbfsbSATkNBDJXL7LpWPUmyUjq9VHkTTBJNphz9BJvTtxWHcxfeZUX",
+        "slot": 435708553
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "8cbbrJjXCSLsw6P42ydWghgjaw3zAUpYgfKWtpvkFRsx",
+        "mint": "88ETnhDnrcPQV5qRzsFD6KEhfYXRZXwH6tEFtVjCpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "7xUQtb9LTQ5Mpc6Yk4PQffoVsEPLCuJh9tTtqKVcyYMj",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "c0c6480c239ad351d7965d914500a2c88db7bc6d91a565f7badecad984929069",
+        "signature": "zEoR42JsFfEBuhzB67B11FdKKGBmnCtTPfwRgtUbvAfajedoKwhsxPLtDJ3QRU96W9iqfkSHkeCuuLeqghk8Ujr",
+        "slot": 435713279
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "BSFHAeRH4yKxM84PrtvR4GzrBBtQvJJ5QRsK148hjkwd",
+        "mint": "8N9MgyuVDDq8xNbM2gayfTXcWz6S5uZXfpkb7wD8PUMP",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5SQAFcHcDYjC9PtXyNEMYZNddMrBGHbNUkbzihrU8bRC",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "f4116b4559a80994adcdfc5c18f9533d26beab9309e7ebcdd416f746058e4df2",
+        "signature": "dgXDHLDRZt1PtDECE9vYkb1f9DFBuZDpwZHHaUeMWGJrU8cdTzUtyiZCbgtej7yetrazRVbBmotx8d95NchREHz",
+        "slot": 435721681
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "AbDAviaddPfmxFvuFVy7ZDr88KL9kUHJxLqrGYSm2b7C",
+        "mint": "3H2YikWBHcQXvWSGEbqHfi6pQN1CdLhj1Py4Xnt6pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "4D1qXovqxDxL1ihNwWjhBJjbNATLkAJGsMCUS4XQcCyv",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388301969,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "e5f2da8a2372cefbdc59a422386d368f8b4e732595cbe246689e17566e4ad52a",
+        "signature": "2TompaR8rFfVkYe7NfAPCP3pZFa58abxjGqrqomWasT5T2ZvCb8kZXqmesMdpdqPhF2VZWHnZbqoDs5LGTZh7ozu",
+        "slot": 435725703
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "6Am3rmpPWS5k7F4WTjCZyPXYRBHbabRQKnwXFFwc2hF9",
+        "mint": "5mPEBha7xRWoqbiKRCyTmfaYPxGufQGDTBCmpS6upump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "Eu1N8Kih9ECbJyvRfpL24CXi3KGqMtVna5smePdps5JW",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388284724,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "07ee8e4af15334f91188dfdcdfcc124dc385cc04bfe24366a932bddb0d646114",
+        "signature": "57boruYHVuApnNsYytDkx5msBh5B8kq8jsXzSu2wUmZxjo6QVeZ8uvvEJwM9NaZgHzA8Krj7HzYpMH9URSUi2YyW",
+        "slot": 435728070
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "AWL8GEDnaUCqzY68cpdQo8cvRpFiESyKVRHuS2F3SJpC",
+        "mint": "BXZxpUXc8NgweUTgpzrvacc8QVyAwj8BwTbUnvVPpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "FkS49ceYUcJ1EcgdyxmMpLyG84JKAc19TQMo7iTj1WNb",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388286427,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "89f2da0ff96e18db7627d299592b33bc587abf070d6f2269fe66617892b2eaac",
+        "signature": "3zgn7B1iHFhSazVPfADjiWXnQ4wpUX5BNakC11KDux6iFVvvzDctgp4soASHVQxfX4hzZDZpbmwHzPrFLr7nfd44",
+        "slot": 435728304
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "328FtCtJhbkRGLNBjKETCtDcgK62U4CyEStxik6YSbyJ",
+        "mint": "FraXXm5jchvnUqj4tfoGSBbduNECLmdmjLN7qRMbpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "nobars:429",
+        "pool": "Cc6hoYxB66BxH5LCApaCGZKkoMgou8LTiwsjK1ennCtP",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "717b1ed82cad6c4c3b154bc41f75f6a71f06f141264bb4249992a3d5f8971528",
+        "signature": "2vLNFRizGqX5CqdvE4uHnZJDxNzPChW392DHfVZzar3uE5ruED7mZGKGRDfvf9BZBUqUonV4dvecAdnAtNGDGktw",
+        "slot": 435736968
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "328FtCtJhbkRGLNBjKETCtDcgK62U4CyEStxik6YSbyJ",
+        "mint": "FraXXm5jchvnUqj4tfoGSBbduNECLmdmjLN7qRMbpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "nobars:429",
+        "pool": "Cc6hoYxB66BxH5LCApaCGZKkoMgou8LTiwsjK1ennCtP",
+        "raw_lp_burns": [],
+        "response_sha256": "45f527db252fd834b6c4a812085e2c619971a3efb7027166c487a698cf54d7f9",
+        "signature": "5TABwyibEb8cGVJfmuAq62HYrBZi9hfuEaDj7r8hFc8MAUjzdivB5nJFpmV12uhtGrTraVr5fMitNT7G7PrmLaz",
+        "slot": 435736968
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GoTLdWTpjD8LcNubTj82rxFg9xLucDRVjR68KU9tghbX",
+        "mint": "ohxBWcjo5BsABGLSL86G5U9CrCJNtxoYo5KK3ZWpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "FBNz9ixMHP3Lt8pzaBYpdQwm8LoePHLf7ZvvoK6MiAhD",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282924,
+            "inner_index": 47,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "f2c36508aa2e8223f5bf26ea9737eac3d2aabdb8d2b9db4e08e73ffd452f9a44",
+        "signature": "4SyX6t2pt5hEqVFt3116HDqqRzXXMJp5Wcf4MYtNF7cGYr85KmUmqipgisFdxunKE7j5aL51Xikm8gYvfRd8YnJB",
+        "slot": 435738113
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GoTLdWTpjD8LcNubTj82rxFg9xLucDRVjR68KU9tghbX",
+        "mint": "ohxBWcjo5BsABGLSL86G5U9CrCJNtxoYo5KK3ZWpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "FBNz9ixMHP3Lt8pzaBYpdQwm8LoePHLf7ZvvoK6MiAhD",
+        "raw_lp_burns": [],
+        "response_sha256": "f3cc54d99be228d485621fd187124290aedcc127c51eae99ad5bac174273117e",
+        "signature": "FcCMgky6xwiuNFyouQa2MXg1uTwizJa5BXgMyFjsT5WBhWFj1HNSPDe9RvgJVaZrzT257kwLSSDbarboCnR2oTc",
+        "slot": 435738113
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GoTLdWTpjD8LcNubTj82rxFg9xLucDRVjR68KU9tghbX",
+        "mint": "ohxBWcjo5BsABGLSL86G5U9CrCJNtxoYo5KK3ZWpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "FBNz9ixMHP3Lt8pzaBYpdQwm8LoePHLf7ZvvoK6MiAhD",
+        "raw_lp_burns": [],
+        "response_sha256": "6d7f09478ac4eee23fb2a6e32cae8bf7c35f5ccd53f3baf7ac6be445e7267d37",
+        "signature": "3gPTAwbYoTL5mxMpgTr3ZZEBNo4ChK46V7fmJo6cQiefb6vBWewhxDQ3dGhRJPEbwiJb9tBCQk3UZF51KcVvqsz4",
+        "slot": 435738113
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GoTLdWTpjD8LcNubTj82rxFg9xLucDRVjR68KU9tghbX",
+        "mint": "ohxBWcjo5BsABGLSL86G5U9CrCJNtxoYo5KK3ZWpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "FBNz9ixMHP3Lt8pzaBYpdQwm8LoePHLf7ZvvoK6MiAhD",
+        "raw_lp_burns": [],
+        "response_sha256": "34e54d13c8c4164b424032a461ab6770c31d11b01826ff558ecbf832fca3ce9f",
+        "signature": "5VpLr4SxMugGiBy2ELjAmSDMoY7zsSpSkCMSzLkJ6R26YFm4cCUFehUHrfMvYKdn4wuFtiAMP1LZQhYNowAfssHM",
+        "slot": 435738117
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "8fP5144BvVNqSb2fMfcPWvhoxQ135CjkSwbbPamhf2LL",
+        "mint": "8wqrnjFJYwtYPvAYaWtHRB4H3VdBQe4w56Ai2d3WPUMP",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HXF6GZxbe4yYvou7wNdVN6hGdyDXZH7eJDaaPjFihtYZ",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "fbd0e5e8b1b9386577419a84be6fd748c500533bbbbad01c03af9d66f08e669a",
+        "signature": "2wneG8BVt6zMW4mtZLy6o1uSQgb6hEZn1SzJkdGV8KjWJGJWyAM7QqqQbGiya1wGmfaFbvk8jfJHtpn59brpojbn",
+        "slot": 435739038
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "A26QUfGrtiFWBrM22uoSskmtc4zHyu5Q1Z2DY4d2xwUW",
+        "mint": "TeSVsMGAipr8HARaTBb3tjuVYewSJFGpsb1TM9Npump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HK6fbtESZumMMqbLrjnprDkeEdCtvKqT4X9q9cb4EfG4",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282603,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "b8157316c06393a735b4544d707b70eff4cc8f87aa2d4babb2eee1a320386981",
+        "signature": "48WEPJ1T4s1peyXEjUdNo2u31Y7SkgW8HJ6pDBm33rNsLRkfyWZC9kYtYUqZpfA3KZdmZU2wvexaxekfymCULDyZ",
+        "slot": 435739374
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "AQTzTtbuAPq22Y5Hf6vaBe8BoWoavAja6frCEcJiZtEs",
+        "mint": "AT67qrjjJM8HqM7ps1oWmtYAH5FQPv2T6gkgPNWrpump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "nopool:429",
+        "pool": "FoEDDCKseVj1bQyWVzzp7MWxaXo5rA5D4udoz9F8YswD",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "26f7f678027ca7839128f83258f0065c7a838fe3f536c64c33c888127745cae9",
+        "signature": "kR5hr6LYGhALFHSRwQcceEhEBeDDXd4YzqWtrEe98X2QMf8J1VgRnd5dmffqzz8hSqHZt9KTjvyzK7CTHM1TAmu",
+        "slot": 435739585
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Ed2wkRBxsUmf7SFHe5GgFN8c6xAtCSofGmqpmuAfa8Dw",
+        "mint": "4ydvhjACCSgMqAoP5Wt82DxxHgTqt74ZMYE69wDKpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5QTLDZGfHbzKuGZoc9xzTzyfDptumNixy5tmxKaYi5jx",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388285267,
+            "inner_index": 37,
+            "outer_index": 0
+          }
+        ],
+        "response_sha256": "cb2b8762625fbfd747ae42c4217c9fc5338cae2d297232ee1a29c9e4c9f461a8",
+        "signature": "3UrbqowYHHL52NszHHDr3YFBBF81PHBs3DVctgeqM1Bf4cxJRdAhUWFAQqETFg1Jr94gba4J5BXWNoZdWkUpyXTM",
+        "slot": 435749652
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2E9BrSiqdkZWvviiFsoxWYSQLwXyuqqEeVP62VdY9yAa",
+        "mint": "85PbYtsF8i2jdvRfv523dYU5Xo43DKkX3oPXYgWmpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "nobars:429",
+        "pool": "B6PEFUXpRvgKMcwRz2TrJWgBosEDmVfYJnmupPdMSLRN",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388297380,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "054f7cfee6b2abe1785d95188e898b9418b5dacda93ed0d888c56f94adac6ea1",
+        "signature": "2jJgDz9jC1dFPxEkkbMWQxkbQyTWQmrEC9wd6nrGov2cRbikUkjYEJTyjFSNAfifTKzVfFwV8PFNkXY8Se7KfMtM",
+        "slot": 435752004
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2E9BrSiqdkZWvviiFsoxWYSQLwXyuqqEeVP62VdY9yAa",
+        "mint": "85PbYtsF8i2jdvRfv523dYU5Xo43DKkX3oPXYgWmpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "nobars:429",
+        "pool": "B6PEFUXpRvgKMcwRz2TrJWgBosEDmVfYJnmupPdMSLRN",
+        "raw_lp_burns": [],
+        "response_sha256": "20be364f44120ae4028b17b4bb8633789e7084b0ea13dd624a443d94ace6ac8f",
+        "signature": "4GksWyfwzsGpzAfgPNFEx1gPjw7eKVd67nocdDb4BjHJfHLaEMo6iMRdYpnvASzCLSi42Y9kjMYFSVUAV1XgTkju",
+        "slot": 435752058
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "5hc3hLjC2edDpKQ8vRoniszKsd7aYSmTFueJ6HGwcxik",
+        "mint": "CDs83SFtAPim8etvQwMPFH9zpBbU9sBFApyzxHeWPUMP",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "8LKXXYbNt4YBivJxsMQiD88sVpZ6p8vrkQazdHKuFzf6",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "725c56f030a599d333796b86e6c9693585deb842f332f004539ee87c49f22a55",
+        "signature": "3ThHZo6CDjSwEwVXoaiihSkDCDoGfT4pQtJ7fzRUXwpMFP6TvXPrYf6jP2YmwDqZTeiGAwhFvRTFc15NXHMgnpZs",
+        "slot": 435753083
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "5hc3hLjC2edDpKQ8vRoniszKsd7aYSmTFueJ6HGwcxik",
+        "mint": "CDs83SFtAPim8etvQwMPFH9zpBbU9sBFApyzxHeWPUMP",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "8LKXXYbNt4YBivJxsMQiD88sVpZ6p8vrkQazdHKuFzf6",
+        "raw_lp_burns": [],
+        "response_sha256": "6f0ba30cb7941b21c2ef8bd96345b838e271bb9cb81eca9f4f9adc06a130a7fc",
+        "signature": "4uVtTB5HwGYJL4wft2MH2dy35AttMNxxzdDRkje33mr4dGqtwLgy9CHs5g2xPFijYh9wRnWR7udN8EWMc3tpt9Pi",
+        "slot": 435753086
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "DBSAjV43CZ7TxXsEpmyDdM2qYut17MbGHdLjHmGXXeUq",
+        "mint": "BkZtsy3BQZmBZYqvmZbgmNVYTWJMZnwdkZ2i2HUtpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "AWzFBo4rCnPUkx4NTtDZmeBTAgqwbuWgxqRX8si7st8u",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388315118,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "37261963652b0b26d1d64fe2d41e10b14e8ec0c57d44058aa8d9f40a4c2468e8",
+        "signature": "4RUVmYvuFYT8fgg5p8B2LsUkXiKra15wbVASf5CU5bBPeHqCMWmvAkbmZuhUXs8JegegoogEnurpkQ7sVqoVj3ta",
+        "slot": 435753880
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "DBSAjV43CZ7TxXsEpmyDdM2qYut17MbGHdLjHmGXXeUq",
+        "mint": "BkZtsy3BQZmBZYqvmZbgmNVYTWJMZnwdkZ2i2HUtpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "AWzFBo4rCnPUkx4NTtDZmeBTAgqwbuWgxqRX8si7st8u",
+        "raw_lp_burns": [],
+        "response_sha256": "fd0ae579fcd651903275efd3b1dd515298d0d75b9e27cf62e8b929e250921ed6",
+        "signature": "2n3Nh5ytBXswNPwJ88Zc3ybjFi8Tiv4X6sp4ymSVSMc1QKBVALtoybYyxhAAGxABGbeLgALpGQfZbaQp4ecZvszq",
+        "slot": 435753881
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "AKQhTTekXAmEsZZPtyf6AMqAJBUqrZrV6GkyrJ8QT1jd",
+        "mint": "21Dbzdjsr3ykwrpUxxiLdWJFjGgGasDtMQdr8z9Jpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5sB2FZmSsEHryFE4Pu5no6EqQXCdTkDp26XJkv8DdUsg",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "03c1a71c0fe946f9b09e665bbd06298413393fa996e29430f11d6eb3d0d6803b",
+        "signature": "2voegtEyNELz7DXSoAMYPGYqZVzsEgKg7CidDfCP4fBSmTL5HpGjqhPnrUV7x5kTbVCtv11KyCDai5ctsdvdS5Px",
+        "slot": 435755247
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "7iBf21WnqG4Vom1pY1DYjA2TraQkAdYRoPRNp2XQ6U8d",
+        "mint": "VANwVXGaZ3MQo9g5pnDzVygiExH7e3FT794rmWppump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "CMNgfEGAbTSVxKgejPhxhgQm1B6PGjewjbCzXqqPCocv",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282652,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "ffc9deb5773f0052d49a27866d6fd993649179cf9bd28020132ae73146b2b3fe",
+        "signature": "2jjrdoHtuyFEksBxBUhiqjhXHMUfmD1YQR4iLmJp3dfyhC1MTQXy8vNPYwUaWkQ6bUfnUTsfhK5oiePr5G8NDNSL",
+        "slot": 435755727
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "6eNvP3BikmJLS7cwfZPFzu5SoaRhYuPcEcdMxuyRxPSR",
+        "mint": "GhgqLqGoSZTkmyNtBPFNmrJpgxLvRjy9QWApREY1pump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "nopool:429",
+        "pool": "Hpi7R3b71au7fMAYqqDgYrJA9nnVPQbSGVmsJQpBrSgy",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "434eb5db9f1674472f1e20e1007e424a2a32d0be3374e1922db82e63087d3573",
+        "signature": "7L3f8t7PdcSZUxJ7jVy62jqF8aEoNYHdrdhjBZti7aYTwdFsXLyUeRXiB3H9oUFdXGbwpGWgrCFx9PMzh4nFvvs",
+        "slot": 435758039
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "DFZbrWKuMLT3MkrYU7myVGWLNUyctDNkXLkmPAsHG22z",
+        "mint": "64X96jeQJcPHvrM8XuZz1yPzYA3JNgFEEAG3ck99pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "6oyymDyWrw85eCSngUWetx2FLGjqcSExS98qyKbFkPYH",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388289979,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "58dfdd081f9565cbfaeebe8f6bc5dc3618b0814e4b88888d413c4386fe8476ab",
+        "signature": "2DAEmCiiY26eXXrjajCdHsW1CSdeav3GCaJRnQuodVunnPdaQPGqYbsSeZB29UDzCRyD62ovjAqsgUSCHrJ2fbBM",
+        "slot": 435758130
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "DFZbrWKuMLT3MkrYU7myVGWLNUyctDNkXLkmPAsHG22z",
+        "mint": "64X96jeQJcPHvrM8XuZz1yPzYA3JNgFEEAG3ck99pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "6oyymDyWrw85eCSngUWetx2FLGjqcSExS98qyKbFkPYH",
+        "raw_lp_burns": [],
+        "response_sha256": "03bacfe50e945f64846c35f2366c801568af02650be0e7cd0b5480aa1b9816d5",
+        "signature": "3Mydq9h9kubrkfhtUEfQcYbmpy7Q3w7co5DATWb77vCvr6RqBEDBeuCPYsFXKCutBGvE2KtSTas9wEAhgCLovo2J",
+        "slot": 435758189
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "9bkzZWsEPLcaCHcy3DDYTdyRuGzmew2eEvCzpkvKNXaq",
+        "mint": "BQaxKoDhGhsSJMLSiwBSPA8EkE8eykPb2q5FRWRBpump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "nopool:429",
+        "pool": "ArzJaotdxT4zhuCqUrk8uxBRoEXAkY2CLXeF8HCEMuQG",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282874,
+            "inner_index": 38,
+            "outer_index": 3
+          }
+        ],
+        "response_sha256": "f9ddf4f52268ad047e521a3e1b80f2c4315406cf5581ca2faf22db966b824dbe",
+        "signature": "4VUF41RLN5QbT1Yvo1jiqTgETcMtpfahC1pq1oc989h81mPE1XNFLLTKzvWuPjMfKb4T7gAYpheqMkYnwuPFQT1b",
+        "slot": 435759952
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "9bkzZWsEPLcaCHcy3DDYTdyRuGzmew2eEvCzpkvKNXaq",
+        "mint": "BQaxKoDhGhsSJMLSiwBSPA8EkE8eykPb2q5FRWRBpump",
+        "ohlcv_pool_matches_migration": false,
+        "ohlcv_status": "nopool:429",
+        "pool": "ArzJaotdxT4zhuCqUrk8uxBRoEXAkY2CLXeF8HCEMuQG",
+        "raw_lp_burns": [],
+        "response_sha256": "39fa8f86416e6f1bc9bfb9770782c288370891d0bdebadecab3c333575a7e65f",
+        "signature": "4H4VkKub4H3RucrHEPDBhuz7u9K6BVy75R4fwPaRiF8WgAi513LjAV4ANajTj5ffiR5YWV3nJQcf2SArbrHWx6HF",
+        "slot": 435759954
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "GFNJ4N52qo1fVwSKxWWGrrJxnzzxGq4mhzuhdPyK3jMQ",
+        "mint": "E8nwnRa82KWgTPxq5211hLh4fSpoT923TT64Egjpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "8MDZvCBEqinmnRAK7SRtyYaP7pGjYwC2SnFHMRRCSQK5",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388337789,
+            "inner_index": 46,
+            "outer_index": 0
+          }
+        ],
+        "response_sha256": "b9728c714b0dd9912a41a1d14555994dce346265c284dcb292ad16c35b1b0dc0",
+        "signature": "2CYrZWaEbfwHsTW9Pfsjwc7upM49oeEjcFFpGARCZmUFb2TzacLpouLiC1vGSC1s5Esednw51cAABsXsnshDuwVw",
+        "slot": 435760240
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "8Mp99Yt8ZM2e3mfVSEL6kzaNG7zwcpucWfrt5P8RJp5w",
+        "mint": "2ENza2td1vrHsA5KTBxKXS6KwQMxA6m8yVtpeEN6pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "AK6cgTcjgvLjrBA8sSkauudCFsjYZwXqS2EY8mHUvCGQ",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388298096,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "c3270edf621776b6a8e164742c7327e2540f33b0ebe42fcb3ddf8a6e7099cfce",
+        "signature": "4r4mGjaEwV9apDhYgXRaeyjVMzQw1zjVog1SC6ZduUodEUZHLNLttKn2k1uUXD9Z3mtHj9RkM33zzkNA7eRmu4Zw",
+        "slot": 435761831
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "8Mp99Yt8ZM2e3mfVSEL6kzaNG7zwcpucWfrt5P8RJp5w",
+        "mint": "2ENza2td1vrHsA5KTBxKXS6KwQMxA6m8yVtpeEN6pump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "AK6cgTcjgvLjrBA8sSkauudCFsjYZwXqS2EY8mHUvCGQ",
+        "raw_lp_burns": [],
+        "response_sha256": "08fb092f96bc0577bd27fedca78236a942b1ae6d4eca20b13f346ecff552f111",
+        "signature": "3DqiNtTGWhkKkSBFHvUxC9fmC4DVoxFZY74Hsi5eQLTzFh4tFMXwc5VTvZTsXfLw4KR1wwb1zuvtwxycuKF6S7Mj",
+        "slot": 435761956
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "4bAwJ4rui4yCDrVfe3AG2ZMiivox4rSuRjyyNAWxWxoW",
+        "mint": "CpTBsGDfxsgVkFqFauCvGeQh2xrST58wKknA8jutpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "Hx24yFua5gaDC1yWhm1GxWHeG8d1jDvJvYAYYpVJ2rbp",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "56c7b99beaf4349915911848d819501714a0f83766442543bac99281f281666a",
+        "signature": "UWRjqpvWdz8cjJaSY9eW3aRYc3fQ6uwPy8Zc6x5MNpCvzRAQiKNmvxGtYxsFCo58n4m6Tmrwc5hQ35FTMHj2nDv",
+        "slot": 435767081
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "4bAwJ4rui4yCDrVfe3AG2ZMiivox4rSuRjyyNAWxWxoW",
+        "mint": "CpTBsGDfxsgVkFqFauCvGeQh2xrST58wKknA8jutpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "Hx24yFua5gaDC1yWhm1GxWHeG8d1jDvJvYAYYpVJ2rbp",
+        "raw_lp_burns": [],
+        "response_sha256": "ad66999b74c2d2342b7873f553c44691264e2a5c757e53007d4ee3edffb43727",
+        "signature": "3nYhBGP6pwDHa7Roze2GXq2Nwsrth7cWRHsxkC7Ct839JCLRn8A74hqMe8pwvYYnZCvaDnQqXrtMGcJapWMiKcip",
+        "slot": 435767082
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "6vqN8CDDmSsMzRoPJKyfTmREE7uMd5bqJK7qrDmZfS2i",
+        "mint": "joHQQsWHjSAhfh3xfQvJwu4oxC76NCXLtBK9rWXpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5cP4zKrV41szjUWKzSuEZ68nzc1tEJaZSqhbX3QQugSf",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282628,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "92bfed9a7d019d39de9e7c9041e52b0bb045b266cd2883082ada1a9ab15f98f4",
+        "signature": "2dGAqCWLEiSmVkwrT43akkehWaMKgoMtUBUnK9ufijethBFkk1TeSBrBiQytFkH4MV8UAUcxrvDiuKw9KjbBT8Rs",
+        "slot": 435769299
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2kwV3Xs4pcK4bs5VhqAce3b1Ne1ePz1emRdHZHUNPvAq",
+        "mint": "2myP8d6yUStpyGhgriRg4E4YjQiHqeXnPCZvXhzGpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HfCT9FXPZ2AdNcr29RiCAGfVCQK1EhcWAzLrA85UcC4t",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388288351,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "e27b3ad68becc79dec5333137064e18bbd3bf9d7c7a8be306d5b4b43ddda8ada",
+        "signature": "3CsTRx2Ek5rM53TntxER1fZyPnsSaJ7rojhbegC1o9D9DPGKKLpw93Mu1rpTG5iKNasz5uJso7LfP9ZodLZmLoPM",
+        "slot": 435769948
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "2kwV3Xs4pcK4bs5VhqAce3b1Ne1ePz1emRdHZHUNPvAq",
+        "mint": "2myP8d6yUStpyGhgriRg4E4YjQiHqeXnPCZvXhzGpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "HfCT9FXPZ2AdNcr29RiCAGfVCQK1EhcWAzLrA85UcC4t",
+        "raw_lp_burns": [],
+        "response_sha256": "d7a19b3e685df2957e7fc1bc371b0a65eccf485cafa3ae8e69f96d406f26fdee",
+        "signature": "4FonoPKjn36z2Fq1hauovkkm9xVhCEcE5kZhgguHZ1wH5daGDf8AqjfRgzdv45x8CL67h5uoMYfjDVcPi2CxhiDz",
+        "slot": 435769950
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "HdmJydhTvrNW4tsd8ay6wdTJMSExhDuQjHwuUdb7NcHG",
+        "mint": "4mw6avfnDkecXfERVAGxaqymFmKjX7oQEus2jqECHPU6",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5oa2maFsxfNAEDBTftFYhoAwgW3RUMrfxwL4tB9ZF6Cb",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 1
+          }
+        ],
+        "response_sha256": "4a98da066b331b5210ca498e20d5625530907f8a7530bc80fa54f9544511300e",
+        "signature": "4sHo6sb4RKQ3bBN6x3rkhgMESHuHkXEu3xrArwSmPSMK78cK5Pu7PzPGawTTjub46FcUrc3Zzmo1cJ7Tm6mKuoj8",
+        "slot": 435770832
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "HdmJydhTvrNW4tsd8ay6wdTJMSExhDuQjHwuUdb7NcHG",
+        "mint": "4mw6avfnDkecXfERVAGxaqymFmKjX7oQEus2jqECHPU6",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5oa2maFsxfNAEDBTftFYhoAwgW3RUMrfxwL4tB9ZF6Cb",
+        "raw_lp_burns": [],
+        "response_sha256": "9ec7193be78c8df34d5b634f73c7e937dc1308a363adeb8a44f92d06803b4e55",
+        "signature": "L2ZkcV8hMW9vzjE78ApnCZx6aJmfJu3DnhNas87ch7x9PWtebwzRazKV8R3xLb2nc4wJd21H3AYzwMSmdkqZ7wL",
+        "slot": 435770832
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "HdmJydhTvrNW4tsd8ay6wdTJMSExhDuQjHwuUdb7NcHG",
+        "mint": "4mw6avfnDkecXfERVAGxaqymFmKjX7oQEus2jqECHPU6",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "5oa2maFsxfNAEDBTftFYhoAwgW3RUMrfxwL4tB9ZF6Cb",
+        "raw_lp_burns": [],
+        "response_sha256": "4782fe5c6198839fd0f4eb6627cc3c59d71e0f1772f3c94b3505416834182a26",
+        "signature": "6T9XpeKvFreUvGmS76Lf9Yt5GwBjHToJyxaGqDUNuXfx3QDNWTYboAuCoZhsWdu56xD9695C6BYaiWu2ude2TXP",
+        "slot": 435770833
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Farxp3PMemc1eMD9P11M7ByEwwavbbcRkr4PTsFTB3Z5",
+        "mint": "DVyHsC2eR5YcmygYAMb2dDbf8KXETzM92Q13yhbFpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "CCyM7g5EHe6N6YWCWsRPNZkqnBkCmZKhUtjfLFcwahEP",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388282504,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "5e7c243a0350af94f62401862688e62b9d8c28fb8ab4987a20d93e0b8d94045a",
+        "signature": "34HCK4ozjA8sRuN4wV3RdDgqrk5Fv9pJtAMGYZnLssQHtfqykvnqRsgQXx2YZdacndfseH5dbUN9gDZyu25NkJSx",
+        "slot": 435771201
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Farxp3PMemc1eMD9P11M7ByEwwavbbcRkr4PTsFTB3Z5",
+        "mint": "DVyHsC2eR5YcmygYAMb2dDbf8KXETzM92Q13yhbFpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "CCyM7g5EHe6N6YWCWsRPNZkqnBkCmZKhUtjfLFcwahEP",
+        "raw_lp_burns": [],
+        "response_sha256": "b0800137bac595a9a758f4260e5ef4c48ec92dcec50c50d2103c88ee8b80eccc",
+        "signature": "yXdtzsHNBSwtpG3VM6avcdNoN84JNvAQzgtn8eRoQe2NZtGCDFMMyZZZokMQLW9it4CqsMicRqnc5YmSdn61MB1",
+        "slot": 435771202
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "8uYGbv6jQBzXRa5i337hBA9QYMwZQ2P9G9Lo37Jp3pZt",
+        "mint": "FXKURg3t17hXovHNVWx5D8kCQqthT6ZNs8jhi1Bppump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "GCQfQi9ZJ5wWS551G5YzrvayfLxF8pNjVyDYqC5SKMtC",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388334138,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "5321addeebc469ab12b5473b4df22a768b76448af130480fa63944cde68ecabc",
+        "signature": "2sUB7D6kWCpZsy5YUdo1Are15SpA1Sx83TDZsSvAi3cm5bXebHBcsYbSxeSgGf9s17WtcjmrmYLxsk2JuxeMxyBk",
+        "slot": 435786997
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "Aowvj6BrjmaYTLHEL7wB46DGwwx2eqr9NrRwrCkVkWDL",
+        "mint": "CmJAVBW5LzpJWkSVdiypNXB35vcxM7SrNdXk7v1fpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "nobars:200",
+        "pool": "AhDwSJRtprjZSouwewezNCbh872w1yixderbQKcRtt52",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388312379,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "bafd9701837a8172472e76e4873abc5caaec49dbca4f0d046be3b00a63e37d69",
+        "signature": "4aPqSzcTn5XXGQ3yGRxFkNrrEGBpeToD3V1ciiGxuj8npVK5w3LoDizxgMMq8vtRw7U2LwuyuKNuHN1kGg8dzNZE",
+        "slot": 435823481
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "FKDDXvn9fAwmczn8bxSsHdS6p5uvvy26fnnHt958vSTK",
+        "mint": "E7LHb9qQAQ3PEJn1VzUD696jDAChRAceGCCCeuGypump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "GxRzsC6DreDgYTCnJoFrABovyKjAjj9UXUw2vbhxKfwM",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388304855,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "89efbdc917883d82e1797a605cc66a557500a876ef519630b784b5d82bdf81de",
+        "signature": "5ARBPAUGXUGCgHjEzC67kPpuvzibSpvZeqF4376pcrercDMXEtnEFHKZaAPRjKv9Y4NqnVEAHoQwv8vRG5vAWN2g",
+        "slot": 435900635
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "DcHhE47bbduTYk7KyBFsFGVRwZcUEuGg1qnyxejSZr6n",
+        "mint": "6ixaEct565dgKCaaQxrQKKhedUp9zWWXG9adkdVDpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "EHcukYf2fdTeNxv5PuF6JB3d35gMvcevCqjtA1ucEq9a",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388284034,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "6f9f862a5f8b29075f3508f517ae6e24df7c477fd273f805bf62853fabbffa53",
+        "signature": "3FrAdnWf9HcP74CZH16TcLYgPxkQp6YJMXtwDkW7AMxpFMCCv4YFRaL1QxhBC532Sd3vCKaZTEQXbwD1FbsR5Z8P",
+        "slot": 435958587
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "DcHhE47bbduTYk7KyBFsFGVRwZcUEuGg1qnyxejSZr6n",
+        "mint": "6ixaEct565dgKCaaQxrQKKhedUp9zWWXG9adkdVDpump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "ok",
+        "pool": "EHcukYf2fdTeNxv5PuF6JB3d35gMvcevCqjtA1ucEq9a",
+        "raw_lp_burns": [],
+        "response_sha256": "97c487bf9437f868b873455a7fc5eda166ba141ad3051a21e6706e765616409e",
+        "signature": "4aEFmnAoR3yHTe9pXugXKFcYkW5yh3aakj4duxcPmJ7C1Jjq8KhgVtd6B3z5phQWskvPeYzA6TxnzvHn6LWpSfa6",
+        "slot": 435958591
+      },
+      {
+        "interpretation": "positive LP burn evidence at migration; no later withdrawal coverage claim",
+        "lp_mint": "C3Jceu9iiNsSSDXXBENXJELsgs7dK4QyH1fpbinQAfjf",
+        "mint": "9Uh4Mfn57L6JSg4H3ZzmZsi6wbz6ugeaNZmA1Duepump",
+        "ohlcv_pool_matches_migration": true,
+        "ohlcv_status": "nobars:200",
+        "pool": "3oQzFc6uwGT6NgkkZTWEXmA3pdkmA3NJVYMWEd4hAdrJ",
+        "raw_lp_burns": [
+          {
+            "amount_raw": 4193388303202,
+            "inner_index": 46,
+            "outer_index": 2
+          }
+        ],
+        "response_sha256": "52f68e058def476bfc3dff1bed643ffba17aaf79df2f17010d76e129830faea0",
+        "signature": "54XSiF9ZnsfWKDiEXWtXh3Fpt7d5fe5upAGVMZbAb6pP4mdV8TtFgZ1jX8kSSbrTGpVfriexoURrG7LcEfkVqDAv",
+        "slot": 436255707
+      }
+    ],
+    "ohlcv": {
+      "bars": 110199,
+      "collection_limitation": "pools[0] at later fetch; at most one 1000-bar request; no retained raw HTTP pool response",
+      "faults": {
+        "duplicate_timestamps": 96
+      },
+      "rows": 1075,
+      "rows_sha256": "887446cd0f5a3fc8eb9732e4f9c621b29ff63f1713a29d297d5914f2e33e84fe",
+      "statuses": {
+        "nobars:200": 34,
+        "nobars:429": 32,
+        "nopool:429": 37,
+        "ok": 972
+      }
+    },
+    "ohlcv_pool_matches_migration_count": 110,
+    "post_graduation_withdrawal_coverage": "UNKNOWN_NOT_A_POOL_CENSUS",
+    "pump_idl_sha256": "b90bc471327f671449271d5d1d42354d1fae6f5a06502f5834459a3108138e49",
+    "pumpswap_instruction_counts": {
+      "buy": 163,
+      "buy_exact_quote_in": 139,
+      "claim_cashback": 264,
+      "close_user_volume_accumulator": 230,
+      "collect_coin_creator_fee": 6,
+      "create_pool": 82,
+      "event:BuyEvent": 302,
+      "event:ClaimCashbackEvent": 264,
+      "event:CloseUserVolumeAccumulatorEvent": 230,
+      "event:CollectCoinCreatorFeeEvent": 1,
+      "event:CreatePoolEvent": 82,
+      "event:InitBoostEvent": 82,
+      "event:InitUserVolumeAccumulatorEvent": 43,
+      "event:MigratePoolCoinCreatorEvent": 1,
+      "event:SellEvent": 463,
+      "extend_account": 1,
+      "init_boost": 82,
+      "init_user_volume_accumulator": 43,
+      "migrate_pool_coin_creator": 1,
+      "sell": 463,
+      "transfer_creator_fees_to_pump": 7,
+      "transfer_creator_fees_to_pump_v2": 5
+    },
+    "reserve_curves": 3932
+  },
+  "performance_evaluated": false,
+  "snapshots": {
+    "birth_census_eligible": false,
+    "clock_limitation": "ts_ms is sampled BEFORE network harvest, not individual response receipt",
+    "counts": {
+      "cycle_rows": 2257,
+      "partial_tail": 1,
+      "snapshot_rows": 262006
+    },
+    "distinct_mints": 2464,
+    "file": "research/midcap/fresh_snapshots.jsonl",
+    "first_cycle_ms": 1788448363901,
+    "first_seen_mcap_ge_100k": 2464,
+    "first_sighting_age_seconds": {
+      "median": 107.357,
+      "n": 2464,
+      "negative": 118,
+      "within_60s": 661
+    },
+    "last_cycle_ms": 1788854569311,
+    "prefix_bytes": 162189312,
+    "prefix_sha256": "5be771a115f88d95fb7a254269bf8843b0eaec46ebb23d21c53dd2f2e62ccdc1"
+  },
+  "status": "EVIDENCE_AUDIT_ONLY"
+}

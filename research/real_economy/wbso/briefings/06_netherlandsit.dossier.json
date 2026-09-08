@@ -1,0 +1,140 @@
+{
+  "candidate_id": "gh:netherlandsit",
+  "display_name": "Netherlands IT",
+  "github": "https://github.com/NetherlandsIT",
+  "website": "https://netherlandsit.nl",
+  "public_email": "info@netherlandsit.nl",
+  "location_text": "Netherlands",
+  "review_flags": [
+    "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+    "slechts één eigen recente repository — dun bewijs"
+  ],
+  "score": 55,
+  "score_breakdown": {
+    "own_recent_repos": 6,
+    "recency": 10,
+    "language_breadth": 3,
+    "has_website": 8,
+    "website_reachable": 5,
+    "careers_dev_roles": 15,
+    "public_email": 5,
+    "org_older_than_1y": 3
+  },
+  "signals": {
+    "recent_repos_total": 1,
+    "recent_repos_own": 1,
+    "recent_repos_forks": 0,
+    "languages": [
+      "Dockerfile"
+    ],
+    "pushed_since_filter": "2026-02-01",
+    "latest_push": "2026-06-02T12:46:48Z",
+    "org_type": "Organization",
+    "enriched": true,
+    "peppol_match": null,
+    "website_reachable": true,
+    "website_title": "NetherlandsIT | Custom Software & Cloud Solutions",
+    "careers_url": "https://netherlandsit.nl/careers",
+    "careers_dev_terms": [
+      "backend",
+      "developer",
+      "frontend",
+      "machine learning"
+    ],
+    "review_flags": [
+      "geen NL-entiteit met dezelfde naam gevonden in de Peppol Directory",
+      "slechts één eigen recente repository — dun bewijs"
+    ]
+  },
+  "exclusions": [],
+  "evidence": [
+    {
+      "source": "github",
+      "kind": "recent_public_repo",
+      "claim_nl": "De publieke repository NetherlandsIT/docker (taal: Dockerfile) had een commit op 2026-06-02.",
+      "url": "https://github.com/NetherlandsIT/docker",
+      "observed_utc": "2026-08-19T07:42:38Z",
+      "detail": {
+        "full_name": "NetherlandsIT/docker",
+        "pushed_at": "2026-06-02T12:46:48Z",
+        "language": "Dockerfile",
+        "stargazers": 1,
+        "fork": false
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_location",
+      "claim_nl": "Het GitHub-profiel van NetherlandsIT vermeldt als locatie “Netherlands”.",
+      "url": "https://github.com/NetherlandsIT",
+      "observed_utc": "2026-08-19T07:42:43Z",
+      "detail": {
+        "location": "Netherlands"
+      }
+    },
+    {
+      "source": "github",
+      "kind": "stated_website",
+      "claim_nl": "Het GitHub-profiel verwijst naar de website https://netherlandsit.nl.",
+      "url": "https://github.com/NetherlandsIT",
+      "observed_utc": "2026-08-19T07:42:43Z",
+      "detail": {
+        "website": "https://netherlandsit.nl"
+      }
+    },
+    {
+      "source": "website",
+      "kind": "live_website",
+      "claim_nl": "De website https://netherlandsit.nl is bereikbaar en heeft als paginatitel “NetherlandsIT | Custom Software & Cloud Solutions”.",
+      "url": "https://netherlandsit.nl",
+      "observed_utc": "2026-08-19T07:42:43Z",
+      "detail": {
+        "http_status": 200,
+        "title": "NetherlandsIT | Custom Software & Cloud Solutions"
+      }
+    },
+    {
+      "source": "website",
+      "kind": "careers_dev_roles",
+      "claim_nl": "Op uw eigen vacaturepagina staan termen die op ontwikkelwerk wijzen: backend, developer, frontend, machine learning.",
+      "url": "https://netherlandsit.nl/careers",
+      "observed_utc": "2026-08-19T07:42:43Z",
+      "detail": {
+        "terms": [
+          "backend",
+          "developer",
+          "frontend",
+          "machine learning"
+        ]
+      }
+    }
+  ],
+  "owner_checklist": [
+    "Is dit een Nederlandse onderneming (geen buitenlands filiaal, geen publieke instelling)?",
+    "Klopt het e-mailadres, en is het een zakelijk (geen persoonlijk) adres?",
+    "Zijn de genoemde repositories echt van dit bedrijf en niet van een naamgenoot?",
+    "Staat dit bedrijf niet op de blokkeerlijst / heeft het niet eerder afgemeld?",
+    "Is de RVO-parameterbron nog geldig (bevriezingsdatum hieronder) en de kalender voor 2027 gecontroleerd?",
+    "Klopt de aanname over het aantal ontwikkelaars ruwweg, of moet die naar beneden?"
+  ],
+  "params_frozen_on": "2026-08-19",
+  "generated": "2026-08-19",
+  "sent": false,
+  "sendable": false,
+  "sendable_reason": "sender profile carries placeholders; owner has not registered KVK",
+  "lint_allowed_urls": [
+    "https://github.com/NetherlandsIT",
+    "https://github.com/NetherlandsIT/docker",
+    "https://netherlandsit.nl",
+    "https://netherlandsit.nl/careers",
+    "https://voorbeeld.nl",
+    "https://voorbeeld.nl/privacy"
+  ],
+  "lint": {
+    "ok": true,
+    "violations": [],
+    "missing": [],
+    "unsourced_urls": [],
+    "unlinked_claims": []
+  }
+}

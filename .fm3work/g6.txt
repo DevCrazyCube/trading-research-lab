@@ -1,0 +1,4 @@
+done
+done
+-rw-r--r-- 1 anont anont 5400  4 sep 02:32 /home/anont/meme/.fm3work/effects_out.txt
+-rw-r--r-- 1 anont anont  327  4 sep 02:32 /home/anont/meme/.fm3work/null2_out.txt

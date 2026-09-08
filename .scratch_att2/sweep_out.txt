@@ -1,0 +1,47 @@
+event series h12: 70  train(h=1): 37  val(h=2): 33
+placebo control series (h12 mint AND h12 ctrl): 49
+combos swept on TRAIN: 125440
+cells with n>=6: 92480
+cells with POSITIVE train mean: 18889
+top 40 train cells:
+   S=  3.0 H= 60.0 tp100          flat      drift_-10_0                      mean= +39.11% med=  +7.25% n=8
+   S=  3.0 H= 60.0 tp100_sl50     flat      drift_-10_0                      mean= +39.11% med=  +7.25% n=8
+   S=  3.0 H= 60.0 tp100_trail25  flat      drift_-10_0                      mean= +39.11% med=  +7.25% n=8
+   S=  1.5 H= 15.0 sl25           flat      drift_gt10                       mean= +37.88% med= -27.06% n=6
+   S=  5.0 H= 15.0 ctrlcross      flat      ctrl_dead                        mean= +36.74% med=  -6.06% n=6
+   S=  7.5 H= 60.0 tp50           flat      drift_0_10                       mean= +35.88% med= +11.64% n=7
+   S=  7.5 H= 60.0 tp50           half_out  drift_0_10                       mean= +35.88% med= +11.64% n=7
+   S=  7.5 H= 60.0 tp50_sl25      flat      drift_0_10                       mean= +35.88% med= +11.64% n=7
+   S=  7.5 H= 60.0 tp50_sl25      half_out  drift_0_10                       mean= +35.88% med= +11.64% n=7
+   S=  0.0 H= 15.0 trail25        flat      drift_0_10                       mean= +35.38% med=  +7.54% n=9
+   S=  0.0 H= 15.0 sl25           flat      drift_0_10                       mean= +34.73% med=  +7.54% n=9
+   S=  1.5 H= 15.0 trail25        flat      drift_gt10                       mean= +34.64% med= -20.38% n=6
+   S=  0.0 H= 15.0 trail50        flat      drift_0_10                       mean= +34.64% med=  +7.54% n=9
+   S=  1.5 H= 15.0 sl25           brk_add   drift_gt10                       mean= +34.59% med= -15.62% n=6
+   S=  0.0 H= 15.0 sl50           flat      drift_0_10                       mean= +34.17% med=  +7.54% n=9
+   S=  1.5 H= 15.0 trail25        brk_add   drift_gt10                       mean= +33.62% med= -14.77% n=6
+   S=  5.0 H=  7.5 ctrlcross      flat      ctrl_dead                        mean= +33.29% med=  -2.27% n=6
+   S=  1.5 H= 15.0 sl50           flat      drift_gt10                       mean= +33.01% med= -22.38% n=6
+   S=  1.5 H= 15.0 sl50           brk_add   drift_gt10                       mean= +32.55% med= -19.20% n=6
+   S=  0.0 H= 15.0 hold           flat      drift_0_10                       mean= +32.42% med=  +7.54% n=9
+   S=  0.0 H= 15.0 liqdrop50      flat      drift_0_10                       mean= +32.42% med=  +7.54% n=9
+   S=  7.5 H=180.0 tp50           flat      drift_0_10                       mean= +31.16% med=  +5.77% n=6
+   S=  7.5 H=180.0 tp50           half_out  drift_0_10                       mean= +31.16% med=  +5.77% n=6
+   S=  7.5 H=180.0 tp100          flat      drift_0_10                       mean= +31.16% med=  +5.77% n=6
+   S=  7.5 H=180.0 tp100          half_out  drift_0_10                       mean= +31.16% med=  +5.77% n=6
+   S=  7.5 H=180.0 tp50_sl25      flat      drift_0_10                       mean= +31.16% med=  +5.77% n=6
+   S=  7.5 H=180.0 tp50_sl25      half_out  drift_0_10                       mean= +31.16% med=  +5.77% n=6
+   S=  7.5 H=180.0 tp100_sl50     flat      drift_0_10                       mean= +31.16% med=  +5.77% n=6
+   S=  7.5 H=180.0 tp100_sl50     half_out  drift_0_10                       mean= +31.16% med=  +5.77% n=6
+   S=  3.0 H=180.0 tp100          flat      mcap_lt20k                       mean= +30.34% med=  -4.45% n=8
+   S=  3.0 H=180.0 tp100_sl50     flat      mcap_lt20k                       mean= +30.34% med=  -4.45% n=8
+   S=  1.5 H= 15.0 hold           brk_add   drift_gt10                       mean= +30.16% med= -20.97% n=6
+   S=  1.5 H= 15.0 liqdrop50      brk_add   drift_gt10                       mean= +30.16% med= -20.97% n=6
+   S=  7.5 H= 60.0 tp100_trail25  half_out  drift_0_10                       mean= +29.88% med= +11.64% n=7
+   S=  5.0 H= 60.0 tp50_sl25      flat      drift_gt0                        mean= +29.88% med=  +3.36% n=13
+   S=  5.0 H= 60.0 tp50_sl25      half_out  drift_gt0                        mean= +29.88% med=  +3.36% n=13
+   S=  1.5 H= 15.0 trail50        brk_add   drift_gt10                       mean= +29.81% med= -20.97% n=6
+   S=  7.5 H= 60.0 tp100          half_out  drift_0_10                       mean= +29.64% med= +11.64% n=7
+   S=  7.5 H= 60.0 tp100_sl50     half_out  drift_0_10                       mean= +29.64% med= +11.64% n=7
+   S=  3.0 H= 60.0 tp100          half_out  drift_-10_0                      mean= +29.10% med=  +7.25% n=8
+saved.

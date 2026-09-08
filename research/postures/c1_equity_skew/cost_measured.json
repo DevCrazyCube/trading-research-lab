@@ -1,0 +1,26 @@
+{
+  "method": "historical NBBO from Alpaca SIP; first quote at each of 5 RTH instants per sampled session; 60 random names from that session's top-500 by trailing-21d dollar volume (point-in-time, delisted names included)",
+  "n_quote_observations": 8661,
+  "n_sample_sessions": 32,
+  "relative_quoted_spread_bp": {
+    "median": 3.904,
+    "mean": 6.069,
+    "p25": 2.049,
+    "p75": 7.641,
+    "p90": 13.25
+  },
+  "round_trip_bp_median": 3.904,
+  "round_trip_bp_mean": 6.069,
+  "by_year_median_bp": {
+    "2018": 4.407,
+    "2019": 3.343,
+    "2020": 4.13,
+    "2021": 3.93,
+    "2022": 3.161,
+    "2023": 3.428,
+    "2024": 3.896,
+    "2025": 5.674,
+    "2026": 4.362
+  },
+  "note": "commissions at US retail brokers are $0; this is the spread component only"
+}

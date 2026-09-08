@@ -1,0 +1,14 @@
+mean=+0.0308 med=+0.0308 n=11 k=2
+   mar2 stale3  (thin)
+   mar3 stale0  mean=-0.0221 med=-0.0001 n=51 k=21
+   mar3 stale1  mean=+0.1071 med=-0.0004 n=21 k=9
+   mar3 stale2  mean=-0.1625 med=-0.1022 n=8 k=3
+   mar3 stale3  (thin)
+   mar4 stale0  mean=-0.1232 med=-0.0908 n=78 k=26
+   mar4 stale1  mean=-0.0068 med=-0.0464 n=55 k=15
+   mar4 stale2  (thin)
+   mar4 stale3  (thin)
+
+=== MULTIPLICITY NULL: max-statistic permutation ===
+shuffle the mint->(X,TG,WEB) label assignment 300x, re-run the SAME 3-way grid on VALIDATE,
+count how often SOME cell reaches the survivor mean with mean>0 & bootlo>0.

@@ -1,0 +1,144 @@
+{
+ "note": "POST-HOC. Not in the pre-registered N=54 grid. No promotion claim.",
+ "half_spread_bp_charged": {
+  "design": 1.13,
+  "held": 1.43
+ },
+ "cells": {
+  "d_t": {
+   "design": {
+    "gross_bp": 0.7486790617353345,
+    "gross_t": 14.255932150701089,
+    "gross_sharpe": 5.906536095492542,
+    "n_days": 1468,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.26,
+    "net_bp": -1.5113209382646653,
+    "net_t": -28.777736489512577,
+    "net_sharpe": -11.923228697010854,
+    "breakeven_half_spread_bp": 0.37433953086766725
+   },
+   "held": {
+    "gross_bp": 1.0055745597143917,
+    "gross_t": 20.57189565392188,
+    "gross_sharpe": 9.676375677472636,
+    "n_days": 1139,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.86,
+    "net_bp": -1.8544254402856086,
+    "net_t": -37.937561453791126,
+    "net_sharpe": -17.84464120806987,
+    "breakeven_half_spread_bp": 0.5027872798571958
+   }
+  },
+  "mean5_d": {
+   "design": {
+    "gross_bp": 1.0885283591380408,
+    "gross_t": 22.260493028558052,
+    "gross_sharpe": 9.229285148051533,
+    "n_days": 1466,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.26,
+    "net_bp": -1.171471640861959,
+    "net_t": -23.95668985161837,
+    "net_sharpe": -9.9325348077585,
+    "breakeven_half_spread_bp": 0.5442641795690204
+   },
+   "held": {
+    "gross_bp": 1.297633477307511,
+    "gross_t": 26.369816764432105,
+    "gross_sharpe": 12.403536254089243,
+    "n_days": 1139,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.86,
+    "net_bp": -1.5623665226924888,
+    "net_t": -31.749580788998504,
+    "net_sharpe": -14.934008828595637,
+    "breakeven_half_spread_bp": 0.6488167386537556
+   }
+  },
+  "mean20_d": {
+   "design": {
+    "gross_bp": 1.0909404032336876,
+    "gross_t": 26.762198153712355,
+    "gross_sharpe": 11.129925991532591,
+    "n_days": 1457,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.26,
+    "net_bp": -1.1690595967663122,
+    "net_t": -28.67856437383893,
+    "net_sharpe": -11.926908888085995,
+    "breakeven_half_spread_bp": 0.5454702016168438
+   },
+   "held": {
+    "gross_bp": 1.23117112683655,
+    "gross_t": 26.593736428571162,
+    "gross_sharpe": 12.50886105391487,
+    "n_days": 1139,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.86,
+    "net_bp": -1.6288288731634502,
+    "net_t": -35.18328589418428,
+    "net_sharpe": -16.549116212104995,
+    "breakeven_half_spread_bp": 0.615585563418275
+   }
+  },
+  "mean60_d": {
+   "design": {
+    "gross_bp": 0.9667911050281384,
+    "gross_t": 25.25618487816971,
+    "gross_sharpe": 10.60971980502913,
+    "n_days": 1428,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.26,
+    "net_bp": -1.2932088949718619,
+    "net_t": -33.783433430071,
+    "net_sharpe": -14.191880700664349,
+    "breakeven_half_spread_bp": 0.4833955525140692
+   },
+   "held": {
+    "gross_bp": 0.9710114752727075,
+    "gross_t": 22.596157637390935,
+    "gross_sharpe": 10.628525141537132,
+    "n_days": 1139,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.86,
+    "net_bp": -1.8889885247272924,
+    "net_t": -43.95816482804461,
+    "net_sharpe": -20.67654455010484,
+    "breakeven_half_spread_bp": 0.48550573763635374
+   }
+  },
+  "sign_d_t": {
+   "design": {
+    "gross_bp": 0.3861672721002977,
+    "gross_t": 20.953410055339084,
+    "gross_sharpe": 8.681443732139973,
+    "n_days": 1468,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.26,
+    "net_bp": -1.873832727899702,
+    "net_t": -101.67403702869828,
+    "net_sharpe": -42.12571744422324,
+    "breakeven_half_spread_bp": 0.19308363605014886
+   },
+   "held": {
+    "gross_bp": 0.5571905422604222,
+    "gross_t": 27.28269897779404,
+    "gross_sharpe": 12.832927467926593,
+    "n_days": 1139,
+    "crossed_notional": 2.0,
+    "cost_bp_per_day": 2.86,
+    "net_bp": -2.3028094577395777,
+    "net_t": -112.75650333878374,
+    "net_sharpe": -53.037129136724154,
+    "breakeven_half_spread_bp": 0.2785952711302111
+   }
+  }
+ },
+ "rho1_level_raw": 0.0563022342912522,
+ "rho1_level_after_symbol_demeaning": 0.03641818833227689,
+ "sd_of_symbol_mean_d_bp": 3.9120700281911915,
+ "median_abs_d_bp": 1.5467904129895516,
+ "median_full_tick_bp": 1.1107408641563923
+}

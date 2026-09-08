@@ -1,0 +1,5 @@
+/home/anont/meme/research/scratch_combo2/build.py:137: RuntimeWarning: divide by zero encountered in scalar divide
+  vwapdev = (cl[i] / ((cum_vtp[i + 1] - cum_vtp[s15]) / vv15) - 1.0) if vv15 > 0 else np.nan
+/home/anont/meme/research/scratch_combo2/build.py:138: RuntimeWarning: divide by zero encountered in scalar divide
+  vwapdev60 = (cl[i] / ((cum_vtp[i + 1] - cum_vtp[s60]) / vv60) - 1.0) if vv60 > 0 else np.nan
+rc=0

@@ -1,0 +1,45 @@
+trip 800 3953 112.7
+trip 900 4204 122.5
+trip 1000 4362 134.2
+trip 1100 4656 157.7
+SWEPT 41040 POSITIVE-ON-TRAIN 4742 elapsed 166.941330909729
+ddle0+rv15ge2+r1le0                          ('TR', 0.35, 60)       exc=+138.34 mean= +134.82 med= -17.03 n=   67 k= 25
+ddle0+rv15ge2+bodyle0                        ('TR', 0.35, 60)       exc=+138.34 mean= +134.82 med= -17.03 n=   67 k= 25
+lvolle1+wickupge1+gapge1                     ('H', 5)               exc=+135.93 mean= +126.37 med= -23.86 n=   68 k= 47
+vol15le1+lvolle1+wickupge1                   ('H', 5)               exc=+130.66 mean= +121.10 med= -23.01 n=   78 k= 51
+r15le0+rv15ge2+r1le0                         ('TR', 0.35, 60)       exc=+127.90 mean= +124.37 med= -10.24 n=   73 k= 28
+r15le0+rv15ge2+bodyle0                       ('TR', 0.35, 60)       exc=+127.90 mean= +124.37 med= -10.24 n=   73 k= 28
+r60le0+rv15ge2+r1le0                         ('TR', 0.35, 60)       exc=+126.79 mean= +123.27 med= -10.24 n=   71 k= 28
+r60le0+rv15ge2+bodyle0                       ('TR', 0.35, 60)       exc=+126.79 mean= +123.27 med= -10.24 n=   71 k= 28
+lvolle1+bodyle1+gapge1                       ('H', 5)               exc=+123.94 mean= +114.38 med= -23.07 n=   76 k= 51
+lvolle1+r1le1+gapge1                         ('H', 5)               exc=+119.97 mean= +110.41 med= -20.86 n=   79 k= 53
+ddle0+rv15ge2+wickupge0                      ('TR', 0.35, 60)       exc=+118.45 mean= +114.92 med= -22.30 n=   83 k= 27
+r60le0+ddle0+rv15ge2                         ('TR', 0.35, 60)       exc=+116.59 mean= +113.06 med= -19.67 n=   77 k= 28
+r15le0+ddle0+rv15ge2                         ('TR', 0.35, 60)       exc=+110.76 mean= +107.24 med= -21.25 n=   77 k= 28
+ddle0+wickupge0+gapge2                       ('H', 5)               exc=+108.11 mean=  +98.55 med= -20.29 n=   73 k= 60
+r60le0+rv15ge2+wickupge0                     ('TR', 0.35, 60)       exc=+106.47 mean= +102.94 med= -17.03 n=   91 k= 33
+r15le0+rv15ge2+wickupge0                     ('TR', 0.35, 60)       exc=+105.72 mean= +102.19 med= -17.03 n=   94 k= 33
+hi60le0+rv15ge2+r1le0                        ('TR', 0.35, 60)       exc=+101.12 mean=  +97.59 med= -16.06 n=   95 k= 33
+hi60le0+rv15ge2+bodyle0                      ('TR', 0.35, 60)       exc=+101.12 mean=  +97.59 med= -16.06 n=   95 k= 33
+hi60le2+lvolle0+agele0                       ('H', 5)               exc=+100.32 mean=  +90.76 med=  -5.47 n=   71 k= 37
+rv15ge2+r1le0+bodyle0                        ('TR', 0.35, 60)       exc= +97.96 mean=  +94.44 med= -12.78 n=  101 k= 34
+rv15ge2+r1le0+wickupge0                      ('TR', 0.35, 60)       exc= +97.96 mean=  +94.44 med= -12.78 n=  101 k= 34
+rv15ge2+r1le0+gapge0                         ('TR', 0.35, 60)       exc= +97.96 mean=  +94.44 med= -12.78 n=  101 k= 34
+rv15ge2+r1le0+pgradge0                       ('TR', 0.35, 60)       exc= +97.96 mean=  +94.44 med= -12.78 n=  101 k= 34
+rv15ge2+bodyle0+wickupge0                    ('TR', 0.35, 60)       exc= +97.96 mean=  +94.44 med= -12.78 n=  101 k= 34
+rv15ge2+bodyle0+gapge0                       ('TR', 0.35, 60)       exc= +97.96 mean=  +94.44 med= -12.78 n=  101 k= 34
+rv15ge2+bodyle0+pgradge0                     ('TR', 0.35, 60)       exc= +97.96 mean=  +94.44 med= -12.78 n=  101 k= 34
+r15le0+lmcaple2+agele0                       ('H', 5)               exc= +96.34 mean=  +86.78 med= -16.47 n=   71 k= 43
+ddle0+r1le0+gapge2                           ('H', 5)               exc= +95.47 mean=  +85.91 med= -15.58 n=   84 k= 69
+ddle0+bodyle0+gapge2                         ('H', 5)               exc= +95.47 mean=  +85.91 med= -15.58 n=   84 k= 69
+r15le0+pxrelle0+lmcaple2                     ('H', 5)               exc= +94.51 mean=  +84.95 med= -16.47 n=   62 k= 39
+r15le2+r60le0+lvolle0                        ('H', 5)               exc= +91.69 mean=  +82.13 med=  -1.36 n=   84 k= 62
+r15le2+ddle0+lvolle0                         ('H', 5)               exc= +91.69 mean=  +82.13 med=  -1.36 n=   84 k= 62
+r15le2+hi60le0+lvolle0                       ('H', 5)               exc= +91.69 mean=  +82.13 med=  -1.36 n=   84 k= 62
+r15le2+pxrelle0+lvolle0                      ('H', 5)               exc= +91.69 mean=  +82.13 med=  -1.36 n=   84 k= 62
+r15le2+lvolle0+rv15ge0                       ('H', 5)               exc= +91.69 mean=  +82.13 med=  -1.36 n=   84 k= 62
+r15le2+lvolle0+gapge0                        ('H', 5)               exc= +91.69 mean=  +82.13 med=  -1.36 n=   84 k= 62
+r15le2+lvolle0+pgradge0                      ('H', 5)               exc= +91.69 mean=  +82.13 med=  -1.36 n=   84 k= 62
+r15le0+r60le0+lmcaple2                       ('H', 5)               exc= +90.98 mean=  +81.42 med= -17.96 n=   75 k= 45
+r15le1+r60le1+pgradge1                       ('H', 5)               exc= +90.40 mean=  +80.84 med= -10.53 n=   65 k= 29
+r5le0+rv15ge2+r1le0                          ('TR', 0.35, 60)       exc= +89.86 mean=  +86.33 med= -19.54 n=   77 k= 30

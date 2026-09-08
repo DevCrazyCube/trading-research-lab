@@ -1,0 +1,41 @@
+{
+  "panel": "research/data/xll_cache/eq_daily_panel.npz (SURVIVORSHIP-BIASED: Stooq snapshot of tickers still listed Aug-2026)",
+  "symbols": 3812,
+  "dates": [
+    "2016-01-04",
+    "2026-08-14"
+  ],
+  "sessions": 2669,
+  "top500": {
+    "days": 2647,
+    "avg_names": 500.0,
+    "EW_mean_pp_per_day": 0.0542,
+    "MEDIAN_pp_per_day": 0.0394,
+    "GAP_pp_per_day": 0.0148,
+    "GAP_ci95_pp": [
+      0.0046,
+      0.0249
+    ],
+    "xsec_log_dispersion_pct_per_day": 2.439,
+    "MECHANICAL_gap_if_lognormal_pp_per_day": 0.0414,
+    "EXCESS_SKEW_RATIO_gap_over_mechanical": 0.357,
+    "compound_EW_pct": 252.6,
+    "compound_daily_median_pct": 144.9
+  },
+  "top1000": {
+    "days": 2647,
+    "avg_names": 1000.0,
+    "EW_mean_pp_per_day": 0.0549,
+    "MEDIAN_pp_per_day": 0.0396,
+    "GAP_pp_per_day": 0.0153,
+    "GAP_ci95_pp": [
+      0.0064,
+      0.0241
+    ],
+    "xsec_log_dispersion_pct_per_day": 2.47,
+    "MECHANICAL_gap_if_lognormal_pp_per_day": 0.0386,
+    "EXCESS_SKEW_RATIO_gap_over_mechanical": 0.397,
+    "compound_EW_pct": 258.4,
+    "compound_daily_median_pct": 145.8
+  }
+}

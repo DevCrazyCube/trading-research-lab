@@ -1,0 +1,279 @@
+{
+ "schema_version": 1,
+ "key": "DEEPMINE_MASTER",
+ "date_utc": "2026-08-20",
+ "scope": "cross-family synthesis of 5 deep-mine sweeps inside families already believed productive",
+ "total_formulas_tested": 358,
+ "pooled_noise_bar": {
+  "one_sided_sqrt_2lnN": 3.4294,
+  "two_sided_sqrt_2ln2N": 3.6259,
+  "headline_used": 3.6259,
+  "basis": "sign was free on every formula (a negative result is traded the other way), so the search is two-sided and the count is 2N",
+  "expected_false_positives_over_358": 0.1031,
+  "empirically_calibrated_range": [
+   3.735,
+   4.17
+  ],
+  "empirical_calibration_note": "ETF family block bootstrap put its p95 at 1.15x the naive bar; overnight family within-day permutation put its p95 at 1.03x. Correlation among tries pushes the true bar down, fat tails and autocorrelation push it up; the measured net effect is an inflation of 1.03-1.15x. No verdict in this synthesis depends on the choice within that range.",
+  "in_annualised_sharpe_units_by_design_span": {
+   "6.00y (crosslist, holdco, overnight)": 1.48,
+   "3.99y (etf structural)": 1.815,
+   "2.40y / 125wk (cef modal)": 2.339,
+   "1.40y / 73wk (cef 52wk-warmup)": 3.06
+  }
+ },
+ "funnel": {
+  "tested": 358,
+  "clear_pooled_design_bar": 25,
+  "also_positive_heldout_net": 12,
+  "also_positive_residual_alpha_over_basket": 1,
+  "note": "23 of the 25 clearers are one family and mutually correlated; the other 2 correlate 0.985/0.943 with the T3 book and ARE leg L1. Effective independent discoveries: one."
+ },
+ "families": [
+  {
+   "name": "CEF / BDC / fund NAV-discount relative value",
+   "n": 66,
+   "is_noise": false,
+   "design_distribution_t": {
+    "min": -1.0,
+    "p25": 2.05,
+    "median": 3.1,
+    "p75": 3.88,
+    "max": 7.18
+   },
+   "n_clearing_pooled_bar": 23,
+   "n_basket_ready": 1,
+   "contribution": "the only family that produced a candidate; also produced the sweep's most valuable KILL (the whole short-horizon discount-reversal branch is closing-print bid-ask bounce)"
+  },
+  {
+   "name": "Cross-listing / multi-ticker identical-claim RV (ADR vs home ordinary, DLC, ADR share-class)",
+   "n": 30,
+   "is_noise": true,
+   "design_distribution": "GROSS Sharpe max 0.888, then 0.698, 0.653, rest <0.6; NET best -10.02",
+   "n_clearing_pooled_bar": 0,
+   "n_basket_ready": 0,
+   "contribution": "boundary condition: spread-change rho1 = -0.44..-0.52 in every bloc (iid measurement error predicts -0.50). Not a cost story."
+  },
+  {
+   "name": "ETF structural RV beyond same-index siblings",
+   "n": 51,
+   "is_noise": true,
+   "design_distribution_net_sharpe": {
+    "max": -1.0,
+    "p90": -1.61,
+    "p75": -5.71,
+    "median": -13.93,
+    "p25": -27.31,
+    "min": -66.27
+   },
+   "design_distribution_gross_sharpe": {
+    "max": 2.93,
+    "p90": 1.96,
+    "median": 0.63,
+    "min": -1.13,
+    "n_positive": 42
+   },
+   "n_clearing_pooled_bar": 0,
+   "n_basket_ready": 0,
+   "contribution": "signal is real GROSS (beats its own before-cost bar) and 0-for-51 NET; 45 of 51 lose at a literally zero spread"
+  },
+  {
+   "name": "Holdco / corporate-structure RV (paired-entity/DLC, holdco-vs-stake, spinoff pair-RV, merger ratio)",
+   "n": 130,
+   "is_noise": true,
+   "design_distribution_t": {
+    "min": -2.75,
+    "p10": -1.28,
+    "p25": -0.6,
+    "median": 0.12,
+    "p75": 0.99,
+    "p90": 2.01,
+    "max": 2.35
+   },
+   "n_clearing_pooled_bar": 0,
+   "n_basket_ready": 0,
+   "contribution": "textbook null; blockers are all paid-data asks (PIT holdco ratios, survivorship-free deal list, borrow history)"
+  },
+  {
+   "name": "Overnight-equity EVENT anomalies on the 15:59 -> next-open rail",
+   "n": 81,
+   "n_scored_table": 53,
+   "is_noise": true,
+   "design_distribution_net_sharpe": {
+    "min": -1.55,
+    "p10": -0.94,
+    "p25": -0.47,
+    "median": 0.08,
+    "p75": 0.68,
+    "p90": 2.2,
+    "max": 4.71
+   },
+   "n_clearing_pooled_bar": 2,
+   "n_basket_ready": 0,
+   "contribution": "both clearers ARE leg L1 (corr 0.985/0.943 to T3, no residual alpha). Recommend closing the overnight-equity family."
+  }
+ ],
+ "families_that_were_noise": 4,
+ "pooled_correction_changed_a_verdict": {
+  "formula": "N07_ann_p10_fade",
+  "family": "overnight-equity event",
+  "design_t": 3.537,
+  "own_family_bar": 3.27,
+  "pooled_bar": 3.6259,
+  "outcome": "cleared its own family bar, FAILS the pooled bar, and independently died out of sample (held net Sharpe -0.51, residual alpha over T3 t -0.99). The pooled correction would have rejected it pre-emptively and the holdout agreed."
+ },
+ "basket_ready_candidates": [
+  {
+   "name": "Y05_muni_eq_static_H1",
+   "proposed_slot": "L7",
+   "proposed_id": "CEFMUNIEQ",
+   "family": "CEF NAV-discount relative value",
+   "status": "SATELLITE forward-test candidate, NOT a proven edge",
+   "design": {
+    "window": "2021-08-20..2024-02-23",
+    "n_weeks": 125,
+    "net_t": 4.981,
+    "ann_sharpe": 3.213,
+    "clearance_over_pooled_bar": 1.374,
+    "clears_fat_tail_inflated_bar_4p17": true
+   },
+   "held_out": {
+    "window": "2024-03-01..2026-08-07",
+    "n_weeks": 114,
+    "measured_spread_11p53bp": {
+     "mean_bp_per_week": 33.264,
+     "ann_sharpe": 3.067,
+     "t": 4.542
+    },
+    "stressed_lag1_plus_p90_spread": {
+     "mean_bp_per_week": 18.58,
+     "ann_sharpe": 1.95,
+     "t": 2.89
+    },
+    "stressed_2factor_alpha_to_L5": {
+     "alpha_bp": 20.19,
+     "alpha_t": 2.929,
+     "ann_sharpe": 2.136
+    },
+    "second_round_bar": 2.751,
+    "alpha_clearance": 1.065,
+    "beta_to_L5": -0.0034,
+    "corr_to_L5": -0.0996,
+    "block_bootstrap_8wk_5000draws": {
+     "P_alpha_gt_0": 0.999,
+     "mean_bp_per_week": 20.2,
+     "ci95": [
+      7.6,
+      32.7
+     ]
+    }
+   },
+   "honest_sensitivity": "the 2.751 bar charges the 22 formulas pre-registered into the holdout (defensible: the shortlist was on disk before the holdout was read, and the other four families carried ZERO formulas into an alpha test). If you instead charge all 66 alphas the bar is sqrt(2 ln 132)=3.125 and Y05 FAILS at 0.94x. Both readings stated; the conservative one is why this is sized as a satellite.",
+   "diversifying": true,
+   "diversification_detail": {
+    "vs_L1_T3": "orthogonal (CEF vs common, 1wk vs overnight)",
+    "vs_L2_ETFRV": "orthogonal",
+    "vs_L3_DUALCLASS": "orthogonal",
+    "vs_L4_T7": "negligible overlap (distribution-adjusted decile tilt, not an ex-date event trade)",
+    "vs_L5_T12CEF": "held-out corr -0.10 / beta -0.003 = statistically diversifying, but SAME asset class, NAV feed, broker rail and liquidity regime = structurally adjacent. Design-window corr was 0.585; the orthogonality claim rests entirely on the held-out window and could revert.",
+    "vs_L6_ORB": "orthogonal"
+   },
+   "frozen_spec": {
+    "universe": "CEFConnect ~360 live CEFs restricted to Morningstar category MUNI or EQUITY ONLY (taxable-credit CEFs excluded - a signal-defining choice, not a filter); price > $5.00 both legs; short leg restricted to broker easy_to_borrow=true (186 of 360). Typical book 18 long / 7 short.",
+    "signal": "score = -Discount, where Discount=(Price-NAV)/NAV from point-in-time weekly NAV. RAW LEVEL - deliberately not a z-score, not a change, not an acceleration (every such branch tested and shown to be closing-print bid-ask bounce). Long the widest-discount decile, short the narrowest/premium decile. Dollar-neutral, equal-weight within each side. Hold 1 week, rebalance weekly, realised turnover 0.333 of book/week.",
+    "execution_rail": "MANDATORY 1 trading-day implementation lag (CEFConnect publishes NAV after the close; NAVPublished trails LastUpdated by a session), so a discount observed at grid date k is actionable no earlier than the next session's close. Entry and exit at the closing print, weekly. Returns must be distribution-adjusted (adjustment=all) - CEFs pay 7-8%/yr.",
+    "cost_and_borrow_guard": "Both legs charged on every unit of realised turnover at the p90 half-spread 27.25bp (NOT the 11.53bp median - the book deliberately holds the extremes of a universe whose spread distribution is 11.5/18.4/27.2 at median/p75/p90); plus SEC s31 0.278bp of sale notional; plus 200bp/yr REALISED short borrow (not the 33bp ETB floor) accrued daily on short notional. Easy-to-borrow is a hard exclusion, never a price.",
+    "sizing": "SATELLITE: 8% of BASKET1 risk (half a standard leg; a full equal leg in a 7-leg basket is ~14.3%). COMBINED CEF CAP L5+L7 <= 25% of basket risk. HARD NOTIONAL CAP - short leg is 7 names and CEF closing auctions clear $0.0-0.3M, so low single-digit $M at best; size to the auction, not to the Sharpe. Inherit the basket vol overlay T13-VOL-L60-T0.1-WMAX1.0.",
+    "forward_gates": "N_min=40 settled weekly observations (~9 months) before any verdict. Kill switch (basket convention): drop when n>=40 and mean_net + 1.645*se < 0; budget NOT reallocated. LEG-SPECIFIC GATE: half-sample re-check after 26 forward weeks, no budget increase before it under any forward result - the stressed held-out edge is entirely in one half (1st 57wk Sharpe 0.54, 2nd 57wk 3.53) and 37% of the stressed mean comes from the 5 best of 114 weeks. declared_trials_in_leg_family=66; basket declared_trials_now 6 -> 7."
+   },
+   "weaknesses": [
+    "stressed held-out edge is in ONE half: 1st 57wk Sharpe 0.54, 2nd 57wk 3.53 - an edge that arrived, not a stable one",
+    "37% of the stressed held-out mean comes from the 5 best of 114 weeks",
+    "short leg is 7 names (median) - severe concentration, capacity is trivial",
+    "it was a SECONDARY pick; the pre-committed primary Y04 FAILED out of sample",
+    "stressed alpha t 2.93 vs the second-round bar 2.751 = 1.06x, not a clear beat; fails a conservative 66-alpha bar of 3.125",
+    "design-window corr to L5 was 0.585 - the -0.10 orthogonality is a held-out-only fact"
+   ]
+  }
+ ],
+ "near_misses_rejected": [
+  {
+   "formula": "T03_p10_annnight_excl / T01_p10_quiet",
+   "design_t": [
+    5.427,
+    4.921
+   ],
+   "why_rejected": "corr 0.985/0.943 to the T3 book at beta ~1.0; held-out residual alpha over T3 t -0.41/+0.43. They ARE leg L1."
+  },
+  {
+   "formula": "Z03_z13_H1",
+   "design_t": 7.184,
+   "why_rejected": "strongest of all 358 and it is closing-print bid-ask bounce: held-out stressed t -6.58, alpha -5.74 once a 1-day implementation lag and the p90 spread are charged. Same collapse for M01/M05/M02/S01/Z05/Z01."
+  },
+  {
+   "formula": "X02_levered_H1 / C03_grp_demean_H1 / Y02_level_resid_yield_H1",
+   "design_t": [
+    5.09,
+    5.06,
+    3.71
+   ],
+   "why_rejected": "clear the pooled bar AND are held-out positive under stress, but collinear with L5 (design corr 0.92/0.88/0.77); stressed held-out alpha t 0.69/0.23/0.39. Already owned."
+  },
+  {
+   "formula": "Y04_level_in_loyield_H4",
+   "design_t": 3.38,
+   "why_rejected": "the PRE-COMMITTED PRIMARY. Held-out standalone Sharpe 1.77 but alpha to L5 t=0.77 (2-factor 1.05, stressed 0.92) against a design alpha t of 2.90. A subset of L5 and worse than L5 (2.73) OOS. Reported as a failure, not swapped."
+  },
+  {
+   "formula": "C02_cat_within_H1/H4",
+   "design_t": [
+    2.203,
+    1.98
+   ],
+   "why_rejected": "best held-out alpha after Y05 (3.87/2.28 stressed) but design t below every bar. This is what would have been picked by peeking; named and claimed as nothing."
+  },
+  {
+   "formula": "M03_spy_fomc_eve",
+   "design_t": 2.056,
+   "why_rejected": "held out +18.87bp/night Sharpe 6.55 t 2.51, survives 2x stress - but design t 2.06 is nowhere near the bar, placebo lags k=2/k=5 give design Sharpes +4.57/+4.58 on 48 nights, it is the published Lucca-Moench drift not an invention, and it is ~8 nights/yr."
+  },
+  {
+   "formula": "B15",
+   "design_t": -1.17,
+   "why_rejected": "the cross-listing family's only held-out-positive formula (+9.35bp) and it was NEGATIVE in design. A coin flip that landed heads."
+  },
+  {
+   "formula": "L07_rebal_flow_fade_nextopen",
+   "design_net_sharpe": -1.001,
+   "why_rejected": "net negative on both windows; positive only at an arithmetic tick-floor fill no account can achieve. Worth ONE separate fresh pre-registration as a once-a-session rule in the L2 mould, never rescored on this design window."
+  },
+  {
+   "formula": "H ret/L60/K2.5",
+   "held_out_t": 3.21,
+   "why_rejected": "above the bar OUT OF SAMPLE, but group H produced the worst design t-stats in the entire sweep (-2.75,-2.24,-1.82). Selecting it is selecting on held-out data."
+  }
+ ],
+ "corrections_to_the_record": [
+  "The pre-registered T12 PRIMARY (trial 4: 52-week z of the discount, H=4) is DEAD - it failed three of four kill gates. What sits in slot L5 is trial 5/6, the raw discount LEVEL, promoted out of T12_DIAGNOSTICS.json. The z-score branch had already been tested and lost before this sweep began.",
+  "The deep-mine premise is substantially disconfirmed: 1 candidate from 358 tries across five neighbourhoods of two proven families. The productive families are productive at a POINT, not over a region."
+ ],
+ "recommendations": [
+  "Wire Y05 as L7 CEFMUNIEQ on the frozen spec at satellite budget (8%), combined L5+L7 cap 25%, 26-week half-sample re-check as a hard pre-condition on any budget increase.",
+  "CLOSE the overnight-equity family - three independent sweeps (8+51+81) agree T3 is the only thing there.",
+  "Retire cross-listing/ADR RV on daily data permanently - the verdict rests on a measurement-noise statistic every bloc shares.",
+  "Add nothing from ETF structural RV; L07 as a once-a-session rule deserves a separate fresh pre-registration with measured execution.",
+  "Stop sweeping holdco RV on free data - all three blockers are paid-data asks, not tuning problems.",
+  "Raise the standing multiple-testing count: future families should be scored against the CUMULATIVE trial count, not a fresh one."
+ ],
+ "files": {
+  "master_md": "/home/anont/meme/research/trading_bot/DEEPMINE_MASTER.md",
+  "master_json": "/home/anont/meme/research/trading_bot/DEEPMINE_MASTER.json",
+  "sub_family_artefacts": [
+   "DEEPMINE_crosslist.{md,json}",
+   "DEEPMINE_CEFNAV.{md,json}",
+   "DEEPMINE_etf_structural_rv.{md,json}",
+   "DEEPMINE_holdco_corpstructure.{md,json}",
+   "DEEPMINE_overnight_event.{md,json}"
+  ]
+ }
+}

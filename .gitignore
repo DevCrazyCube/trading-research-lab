@@ -116,3 +116,20 @@ research/swf_run.log
 research/data/arena/*/state.json
 research/data/arena/*/*.log
 research/data/arena/*.log
+
+# --- 2026-09-08: pre-push hygiene -------------------------------------------
+# GitHub hard-rejects any single file over 100 MB. These are append-only collector
+# outputs and process logs: regenerable, and their conclusions already live in the
+# markdown record. Kept on disk, never pushed.
+*.log
+.venv/
+research/midcap/fresh_snapshots.jsonl
+research/midcap/attention.jsonl
+research/midcap/*.jsonl
+# Data caches: 20k+ regenerable files (memebot tape, flow/gex/opts caches). The 27
+# evidence files already tracked under research/data stay tracked -- .gitignore does
+# not affect tracked paths -- but nothing new is swept in.
+research/data/
+# Numeric panel caches: regenerable, and one is 104.9 MB -- over GitHub's 100 MB hard limit.
+*.npz
+*.npy

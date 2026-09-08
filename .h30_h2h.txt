@@ -1,0 +1,57 @@
+buckets 178  sizes min/med/max 6/277/570
+
+== gas $0.20/pos | toll 1.14%RT | dropout -100% | 100 x15m cycles | 20k paths | W0=$60 ==
+  F  FLAT    dep0.40 N=5  $4.80/tkt    med $   5.62 mean $    5.56 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9998 P(<5) 0.1275 max $      96
+  B  BARBELL dep0.10 N=2  $3.00/tkt    med $   9.81 mean $   11.08 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9567 P(<5) 0.0000 max $      91
+  B2 BARBELL fixed $3 x2 no-compound   med $   0.78 mean $    3.78 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9419 P(<5) 0.8367 max $     103
+  B3 BARBELL dep0.10 N=1  $6.00/tkt    med $  17.15 mean $   20.03 P(>120) 0.0013 P(>300) 0.0000 P(<20) 0.6058 P(<5) 0.0397 max $     215
+  B4 ULTRA   dep0.05 N=1  $3.00/tkt    med $  27.26 mean $   28.55 P(>120) 0.0001 P(>300) 0.0000 P(<20) 0.1099 P(<5) 0.0000 max $     121
+
+== gas $0.20/pos | toll 1.14%RT | dropout -100% | 500 x15m cycles | 20k paths | W0=$60 ==
+  F  FLAT    dep0.40 N=5  $4.80/tkt    med $   5.62 mean $    5.55 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.1258 max $       6
+  B  BARBELL dep0.10 N=2  $3.00/tkt    med $   9.75 mean $    9.70 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.0000 max $      10
+  B2 BARBELL fixed $3 x2 no-compound   med $   0.70 mean $    0.63 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 1.0000 max $       1
+  B3 BARBELL dep0.10 N=1  $6.00/tkt    med $   4.87 mean $    4.84 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.9999 max $      28
+  B4 ULTRA   dep0.05 N=1  $3.00/tkt    med $   9.87 mean $    9.84 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.0000 max $      13
+
+== gas $0.20/pos | toll 3.00%RT | dropout -100% | 100 x15m cycles | 20k paths | W0=$60 ==
+  F  FLAT    dep0.40 N=5  $4.80/tkt    med $   5.61 mean $    5.54 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.1315 max $       6
+  B  BARBELL dep0.10 N=2  $3.00/tkt    med $   9.76 mean $   10.22 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9849 P(<5) 0.0000 max $      86
+  B2 BARBELL fixed $3 x2 no-compound   med $   0.72 mean $    1.94 P(>120) 0.0001 P(>300) 0.0000 P(<20) 0.9770 P(<5) 0.9306 max $     127
+  B3 BARBELL dep0.10 N=1  $6.00/tkt    med $  12.77 mean $   15.23 P(>120) 0.0004 P(>300) 0.0000 P(<20) 0.7762 P(<5) 0.0937 max $     293
+  B4 ULTRA   dep0.05 N=1  $3.00/tkt    med $  24.25 mean $   25.36 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.2296 P(<5) 0.0000 max $     114
+
+== gas $0.20/pos | toll 3.00%RT | dropout -100% | 500 x15m cycles | 20k paths | W0=$60 ==
+  F  FLAT    dep0.40 N=5  $4.80/tkt    med $   5.61 mean $    5.54 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.1279 max $       6
+  B  BARBELL dep0.10 N=2  $3.00/tkt    med $   9.74 mean $    9.70 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.0000 max $      10
+  B2 BARBELL fixed $3 x2 no-compound   med $   0.69 mean $    0.62 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 1.0000 max $       1
+  B3 BARBELL dep0.10 N=1  $6.00/tkt    med $   4.87 mean $    4.83 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 1.0000 max $       5
+  B4 ULTRA   dep0.05 N=1  $3.00/tkt    med $   9.87 mean $    9.83 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.0000 max $      10
+
+== gas $0.02/pos | toll 1.14%RT | dropout -100% | 100 x15m cycles | 20k paths | W0=$60 ==
+  F  FLAT    dep0.40 N=5  $4.80/tkt    med $   6.04 mean $    7.52 P(>120) 0.0008 P(>300) 0.0001 P(<20) 0.9677 P(<5) 0.0379 max $     326
+  B  BARBELL dep0.10 N=2  $3.00/tkt    med $  30.39 mean $   32.64 P(>120) 0.0004 P(>300) 0.0000 P(<20) 0.0858 P(<5) 0.0000 max $     148
+  B2 BARBELL fixed $3 x2 no-compound   med $  23.58 mean $   25.46 P(>120) 0.0005 P(>300) 0.0000 P(<20) 0.4238 P(<5) 0.1584 max $     143
+  B3 BARBELL dep0.10 N=1  $6.00/tkt    med $  30.68 mean $   33.87 P(>120) 0.0030 P(>300) 0.0001 P(<20) 0.1303 P(<5) 0.0000 max $     306
+  B4 ULTRA   dep0.05 N=1  $3.00/tkt    med $  42.95 mean $   44.42 P(>120) 0.0005 P(>300) 0.0000 P(<20) 0.0000 P(<5) 0.0000 max $     150
+
+== gas $0.02/pos | toll 1.14%RT | dropout -100% | 500 x15m cycles | 20k paths | W0=$60 ==
+  F  FLAT    dep0.40 N=5  $4.80/tkt    med $   5.97 mean $    5.85 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.0443 max $       6
+  B  BARBELL dep0.10 N=2  $3.00/tkt    med $   9.86 mean $    9.82 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9993 P(<5) 0.0000 max $      32
+  B2 BARBELL fixed $3 x2 no-compound   med $   0.77 mean $    0.75 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9982 P(<5) 0.9970 max $      72
+  B3 BARBELL dep0.10 N=1  $6.00/tkt    med $   4.92 mean $    5.43 P(>120) 0.0001 P(>300) 0.0000 P(<20) 0.9908 P(<5) 0.9192 max $     140
+  B4 ULTRA   dep0.05 N=1  $3.00/tkt    med $   9.98 mean $   12.74 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9084 P(<5) 0.0000 max $     117
+
+== gas $0.02/pos | toll 3.00%RT | dropout -100% | 100 x15m cycles | 20k paths | W0=$60 ==
+  F  FLAT    dep0.40 N=5  $4.80/tkt    med $   5.99 mean $    6.15 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9947 P(<5) 0.0414 max $     102
+  B  BARBELL dep0.10 N=2  $3.00/tkt    med $  24.96 mean $   26.77 P(>120) 0.0001 P(>300) 0.0000 P(<20) 0.2311 P(<5) 0.0000 max $     144
+  B2 BARBELL fixed $3 x2 no-compound   med $  12.18 mean $   16.12 P(>120) 0.0001 P(>300) 0.0000 P(<20) 0.6562 P(<5) 0.3591 max $     135
+  B3 BARBELL dep0.10 N=1  $6.00/tkt    med $  25.34 mean $   27.96 P(>120) 0.0008 P(>300) 0.0000 P(<20) 0.2646 P(<5) 0.0000 max $     228
+  B4 ULTRA   dep0.05 N=1  $3.00/tkt    med $  39.26 mean $   40.58 P(>120) 0.0003 P(>300) 0.0000 P(<20) 0.0001 P(<5) 0.0000 max $     142
+
+== gas $0.02/pos | toll 3.00%RT | dropout -100% | 500 x15m cycles | 20k paths | W0=$60 ==
+  F  FLAT    dep0.40 N=5  $4.80/tkt    med $   5.97 mean $    5.85 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.0417 max $       6
+  B  BARBELL dep0.10 N=2  $3.00/tkt    med $   9.87 mean $    9.80 P(>120) 0.0000 P(>300) 0.0000 P(<20) 1.0000 P(<5) 0.0000 max $      17
+  B2 BARBELL fixed $3 x2 no-compound   med $   0.79 mean $    0.68 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9999 P(<5) 0.9998 max $      28
+  B3 BARBELL dep0.10 N=1  $6.00/tkt    med $   4.91 mean $    4.90 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9996 P(<5) 0.9898 max $      28
+  B4 ULTRA   dep0.05 N=1  $3.00/tkt    med $   9.93 mean $   10.42 P(>120) 0.0000 P(>300) 0.0000 P(<20) 0.9873 P(<5) 0.0000 max $      65

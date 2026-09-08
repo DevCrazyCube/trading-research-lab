@@ -1,0 +1,25 @@
+thresholds: [(('r5', 'le'), -0.812706300208058), (('lvol', 'le'), 1.0887312646839997), (('wickup', 'ge'), 0.03539848622302266)]
+
+--- TRAIN --- k=48 n=71 res=96% mean=+88.24% median=-3.43%
+  trade-level: mean=+82.41% median=-7.22% winrate=36.6% max=+1868.0% min=-51.1%
+  ENTRY-BAR volume (USD): median=0.6 p25=0.2 p75=1.9  frac<$100=100% frac<$500=100%
+  SIGNAL-BAR volume (USD): median=1.4
+  concentration: top1=+1868.0% share=44%  mean_drop1=+50.4% mean_drop3=+17.1%
+  matched-random null mean=+4.54% sd=11.13  placebo p=0.0000
+
+--- VALIDATE --- k=47 n=67 res=100% mean=+41.16% median=-8.33%
+  trade-level: mean=+31.28% median=-14.38% winrate=26.9% max=+757.5% min=-16.1%
+  ENTRY-BAR volume (USD): median=1.0 p25=0.2 p75=2.6  frac<$100=99% frac<$500=99%
+  SIGNAL-BAR volume (USD): median=1.8
+  concentration: top1=+757.5% share=39%  mean_drop1=+25.6% mean_drop3=+7.4%
+  matched-random null mean=+2.62% sd=7.72  placebo p=0.0025
+
+UNIVERSE bar volume (USD): median=172.7 p25=13.6 frac<$100=43%
+
+SLIPPAGE SENSITIVITY on VALIDATE (extra round-trip cost beyond the 1.14% toll):
+  extra=   0%  mean= +41.16%  median=  -8.33%
+  extra=   5%  mean= +36.16%  median= -13.33%
+  extra=  10%  mean= +31.16%  median= -18.33%
+  extra=  20%  mean= +21.16%  median= -28.33%
+  extra=  30%  mean= +11.16%  median= -38.33%
+  extra=  50%  mean=  -8.84%  median= -58.33%

@@ -1,0 +1,110 @@
+{
+ "theme": "crypto_perp_microstructure_round2",
+ "n_formulas_round2": 51,
+ "n_formulas_cumulative": 107,
+ "design_window": [
+  "2023-01-01",
+  "2024-04-01"
+ ],
+ "holdout_burned": [
+  "2024-04-01",
+  "2025-01-01"
+ ],
+ "holdout_virgin": [
+  "2025-01-01",
+  "2026-08-01"
+ ],
+ "universe": "point-in-time top-50 Binance USD-M perps by trailing-7d quote volume",
+ "cost_bp_per_side": 5.5,
+ "cost_shock_bp_per_side": 15.0,
+ "noise_bar": {
+  "metrics_bootstrap_p95": 2.8207925570031005,
+  "klines_bootstrap_p95": 2.755171151733295,
+  "analytic_N51": 2.7210316967927253,
+  "analytic_cumulative_N107": 2.9309160036649575
+ },
+ "lookahead_violations": 0,
+ "design_to_virgin_rank_corr": 0.39,
+ "verdict": "metrics/open-interest/long-short-ratio transforms are NOISE on the top-50 (4 cleared the design bar, mean held-out net Sharpe -0.21, none survive 15bp). Cross-sectional taker aggressor-flow imbalance repeats on a virgin 2025-01..2026-08 window (X2_FLOWSTREAK net +2.31, X2_TOD_FLOW_EU net +1.85 at 5.5bp/side) but collapses to +0.54 / +0.21 at 15bp/side, and it is the SAME hypothesis as round 1 XS_TAKER24. Real but not deployable without a measured slippage number.",
+ "survivors": [
+  {
+   "name": "X2_FLOWSTREAK",
+   "desc": "fraction of the last 24 hours with net taker BUYING (one-sidedness, not magnitude)",
+   "design_gross": 4.61300247836204,
+   "design_net": 3.1082927629814763,
+   "burned_h1_net": -0.6705189488353622,
+   "virgin_h2_gross": 3.3385731485711645,
+   "virgin_h2_net": 2.3116881264781894,
+   "virgin_h2_net_at_15bp": 0.5393638755863476,
+   "virgin_breakeven_bp_per_side": 17.89318179871868,
+   "virgin_net_sharpe_by_year": {
+    "2025": 2.528008558411219,
+    "2026": 2.0148944708709657
+   },
+   "corr_to_equalweight_basket": -0.008835136755860711,
+   "turnover_per_day": 1.3782072550951086
+  },
+  {
+   "name": "X2_TOD_FLOW_EU",
+   "desc": "24h taker imbalance held ONLY during 07-15 UTC (Europe session)",
+   "design_gross": 3.2449798470366744,
+   "design_net": 2.1776881572822817,
+   "burned_h1_net": 1.0644264121539704,
+   "virgin_h2_gross": 2.8015330596445884,
+   "virgin_h2_net": 1.8505239927242663,
+   "virgin_h2_net_at_15bp": 0.21042113149761896,
+   "virgin_breakeven_bp_per_side": 16.220296938552643,
+   "virgin_net_sharpe_by_year": {
+    "2025": 1.7202916211985273,
+    "2026": 2.0562576459634823
+   },
+   "corr_to_equalweight_basket": -0.05941470351997175,
+   "turnover_per_day": 0.42471675764669237
+  },
+  {
+   "name": "X2_IDIOVOL",
+   "desc": "7d residual (idiosyncratic) volatility after removing the basket",
+   "design_gross": 2.7747336375170373,
+   "design_net": 2.630357497777528,
+   "burned_h1_net": 0.07191546227999271,
+   "virgin_h2_gross": 1.9711848906061737,
+   "virgin_h2_net": 1.872510249168295,
+   "virgin_h2_net_at_15bp": 1.7020331269608144,
+   "virgin_breakeven_bp_per_side": 109.78852646073481,
+   "virgin_net_sharpe_by_year": {
+    "2025": 1.783595332352127,
+    "2026": 2.017364879842011
+   },
+   "corr_to_equalweight_basket": 0.4700212672515399,
+   "turnover_per_day": 0.24765168508492297
+  }
+ ],
+ "shortlist_mean_abs_pairwise_corr": 0.34872394280599345,
+ "clusters": {
+  "taker_flow": [
+   "X2_FLOWSTREAK",
+   "X2_TOD_FLOW_EU",
+   "X2_FLOW_VA"
+  ],
+  "liquidity_lowvol_tilt": [
+   "X2_IDIOVOL",
+   "X2_KYLE"
+  ],
+  "candle_shape_DIED_OOS": [
+   "X2_UPWICK",
+   "X2_WICKASYM"
+  ],
+  "residual_mom_carry_never_cleared_bar": [
+   "X2_RESID_MOM",
+   "X2_FUNDPATH_REV"
+  ]
+ },
+ "files": [
+  "research/trading_bot/SWEEP_crypto_perp_microstructure_R2.md",
+  "research/trading_bot/SWEEP_crypto_perp_microstructure_R2_metrics_top50_DESIGN_FROZEN.json",
+  "research/trading_bot/SWEEP_crypto_perp_microstructure_R2_ext_top50_DESIGN_FROZEN.json",
+  "research/trading_bot/SWEEP_crypto_perp_microstructure_R2_metrics_top50_holdout.json",
+  "research/trading_bot/SWEEP_crypto_perp_microstructure_R2_ext_top50_holdout.json",
+  "research/trading_bot/SWEEP_crypto_perp_microstructure_R2_SHORTLIST.json"
+ ]
+}

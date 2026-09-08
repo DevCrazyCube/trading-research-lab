@@ -1,0 +1,13 @@
+pump.fun graduates: 420 mints, DENSITY-MATCHED bars only (real bar exactly 5 min earlier)
+
+--- unresolved charged at -50% ---
+  <-10%              n= 6336 clusters=399 res= 98.3% mean=  -3.45% MED=  -8.02% meanCI95[ -10.49,  +6.47]
+  -10..-4.8%         n= 3706 clusters=182 res= 98.8% mean=  -2.41% MED=  -3.48% meanCI95[  -4.20,  -0.92]
+  -4.8..0%           n= 8599 clusters=215 res= 98.6% mean=  -1.81% MED=  -1.42% meanCI95[  -2.79,  -0.71]
+  0..+4.8%           n=12412 clusters=223 res= 99.0% mean=  -3.51% MED=  +0.51% meanCI95[  -5.35,  -2.06]
+  CELL +4.8..+9.5%   n= 4568 clusters=211 res= 99.0% mean=  -3.06% MED=  +4.86% meanCI95[  -7.65,  +1.61]
+  +9.5..+20%         n= 2582 clusters=194 res= 98.6% mean=  -6.24% MED=  -6.23% meanCI95[ -10.20,  -3.25]
+  +20..+50%          n= 1709 clusters=176 res= 99.1% mean=  -9.08% MED=  -9.49% meanCI95[ -13.07,  -5.59]
+  >+50%              n=  750 clusters=141 res= 97.2% mean= -21.41% MED= -25.86% meanCI95[ -28.03, -13.21]
+  >> CELL - (all other density-matched bars): mean diff -0.13pp  median diff +6.44pp  CI95[-3.01,+3.14] clusters=210
+

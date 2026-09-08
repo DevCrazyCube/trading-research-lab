@@ -1,0 +1,11 @@
+first   /h60    train  k=175 mean=-0.4612 med=-0.8111 sd=0.730  SE(k)=0.0552  SE(k=50)=0.1033 SE(k=25)=0.1460
+first   /h60    valid  k=207 mean=-0.4587 med=-0.8471 sd=0.787  SE(k)=0.0547  SE(k=50)=0.1113 SE(k=25)=0.1575
+allbars /h60    train  k=175 mean=-0.2455 med=-0.2826 sd=0.204  SE(k)=0.0154  SE(k=50)=0.0288 SE(k=25)=0.0408
+allbars /h60    valid  k=207 mean=-0.2432 med=-0.2705 sd=0.204  SE(k)=0.0142  SE(k=50)=0.0288 SE(k=25)=0.0407
+allbars /h15    train  k=175 mean=-0.1845 med=-0.1697 sd=0.187  SE(k)=0.0141  SE(k=50)=0.0264 SE(k=25)=0.0373
+allbars /h15    valid  k=207 mean=-0.1699 med=-0.1631 sd=0.176  SE(k)=0.0122  SE(k=50)=0.0248 SE(k=25)=0.0351
+allbars /h1440  train  k=175 mean=-0.3000 med=-0.3000 sd=0.000  SE(k)=0.0000  SE(k=50)=0.0000 SE(k=25)=0.0000
+allbars /h1440  valid  k=207 mean=-0.3000 med=-0.3000 sd=0.000  SE(k)=0.0000  SE(k=50)=0.0000 SE(k=25)=0.0000
+
+dev-buy region: mints with >=1 b11a-covered PRIOR coin by the same creator: total=60 train=22 valid=38
+b11a block coverage: 3932 of 33866 window creates (11.6%%) -> dev-buy history is UNMEASURABLE at usable k

@@ -1,0 +1,79 @@
+launches 2672 trades 216323
+h1 1362 h2 1310
+mint filters 43 [('ALL', 2672), ('np==0', 1087), ('np>=1', 1585), ('np>=2', 1390), ('np>=3', 1266), ('np>=4', 1172)]
+grid = 43 x 6 x 9 = 2322
+  age a<5 done 0.3s
+  age a<20 done 2.6s
+  age a<60 done 5.5s
+  age a20_120 done 8.8s
+  age a>=60 done 10.7s
+  age any done 12.7s
+combos swept 2322 TRAIN-positive 1872 elapsed 15.5
+   np==0&dev>=2   a<5      (120, None, 1.6, 0.4)  trmean=-0.0651 trmed=-0.3080 k=66 n=180
+   np==0&dev>=2   a<20     (120, None, 1.6, 0.4)  trmean=-0.0715 trmed=-0.3080 k=66 n=195
+   np==0&dev>=2   a<5      (15, None, None, None) trmean=-0.0784 trmed=-0.3080 k=66 n=66
+   np==0&dev>=2   a<5      (60, None, 0.4, 0.25)  trmean=-0.0832 trmed=-0.0816 k=66 n=380
+   np==0&dev>=2   a<60     (120, None, 1.6, 0.4)  trmean=-0.0944 trmed=-0.3080 k=66 n=200
+   np==0&dev>=2   a<5      (120, 0.5, None, None) trmean=-0.0973 trmed=-0.3080 k=66 n=161
+   dev1.5_3       a20_120  (15, None, None, None) trmean=-0.1014 trmed=-0.0367 k=25 n=55
+   dev1.5_3       a20_120  (60, None, 0.4, 0.25)  trmean=-0.1017 trmed=-0.0443 k=25 n=39
+   np==0&dev>=2   a<20     (60, None, 0.4, 0.25)  trmean=-0.1022 trmed=-0.0821 k=66 n=442
+   np==0&dev<1    a<5      (60, 0.3, None, None)  trmean=-0.1042 trmed=-0.3080 k=182 n=262
+   np==0&dev>=2   a<5      (60, 0.3, None, None)  trmean=-0.1048 trmed=-0.1631 k=66 n=253
+   np==0&dev>=2   a<5      (120, None, 0.8, 0.3)  trmean=-0.1055 trmed=-0.3080 k=66 n=258
+   np==0&dev<1    a<5      (120, None, 1.6, 0.4)  trmean=-0.1071 trmed=-0.3080 k=182 n=253
+   dev1.5_3       a20_120  (120, None, 1.6, 0.4)  trmean=-0.1075 trmed=-0.0734 k=25 n=27
+   np==0&dev>=2   a<60     (60, None, 0.4, 0.25)  trmean=-0.1082 trmed=-0.0821 k=66 n=464
+   np==0          a<5      (60, 0.3, None, None)  trmean=-0.1084 trmed=-0.3080 k=322 n=973
+   dev1.5_3       a20_120  (60, 0.3, None, None)  trmean=-0.1091 trmed=-0.0443 k=25 n=37
+   np==0&dev<1    a<5      (120, 0.3, None, None) trmean=-0.1104 trmed=-0.3080 k=182 n=262
+   np==0          a<5      (120, None, 1.6, 0.4)  trmean=-0.1112 trmed=-0.3080 k=322 n=705
+   np==0&dev<1    a20_120  (15, None, None, None) trmean=-0.1115 trmed=-0.0263 k=30 n=57
+   np==0          a<5      (120, 0.3, None, None) trmean=-0.1139 trmed=-0.3080 k=322 n=973
+   np==0&dev>=2   a<20     (120, 0.5, None, None) trmean=-0.1141 trmed=-0.3080 k=66 n=180
+   np==0&dev>=2   a<20     (120, None, 0.8, 0.3)  trmean=-0.1148 trmed=-0.2903 k=66 n=299
+   dev1.5_3       a20_120  (120, None, 0.8, 0.3)  trmean=-0.1173 trmed=-0.0734 k=25 n=28
+   np==0&dev>=2   a<5      (120, 0.3, None, None) trmean=-0.1173 trmed=-0.1980 k=66 n=253
+   np==0          a20_120  (60, None, 0.4, 0.25)  trmean=-0.1179 trmed=-0.0533 k=66 n=454
+   np==0          a20_120  (15, None, None, None) trmean=-0.1198 trmed=-0.0372 k=66 n=154
+   dev>=3         a20_120  (15, None, None, None) trmean=-0.1203 trmed=-0.0227 k=56 n=121
+   gf>=0.05       a<5      (60, None, 0.4, 0.25)  trmean=-0.1204 trmed=-0.1265 k=46 n=305
+   np==0&dev<1    a20_120  (60, None, 0.4, 0.25)  trmean=-0.1205 trmed=-0.0435 k=30 n=141
+   gf>=0.05       a<20     (60, None, 0.4, 0.25)  trmean=-0.1205 trmed=-0.1265 k=46 n=339
+   gf>=0.05       a<60     (60, None, 0.4, 0.25)  trmean=-0.1206 trmed=-0.1265 k=46 n=340
+   np>=3&dev>=2   a20_120  (15, None, None, None) trmean=-0.1208 trmed=-0.0452 k=46 n=94
+   dev1.5_3       a20_120  (120, 0.3, None, None) trmean=-0.1213 trmed=-0.0734 k=25 n=31
+   np==0&dev>=2   a<60     (120, None, 0.8, 0.3)  trmean=-0.1228 trmed=-0.2903 k=66 n=312
+worst 5:
+   dev>=10        a<5      (120, None, None, None) trmean=-0.3467
+   dev>=10        a<20     (120, None, None, None) trmean=-0.3467
+   dev>=10        a<60     (120, None, None, None) trmean=-0.3467
+   dev>=10        a<5      (60, None, None, None) trmean=-0.3289
+   dev>=10        a<20     (60, None, None, None) trmean=-0.3289
+--- VALIDATE (h==2) for train-positives ---
+   np==0&dev>=2   a<5      (120, None, 1.6, 0.4)  trm=-0.0651 vm=-0.1249 vmed=-0.3080 ctrl=-0.1886 k=67 n=189 clus=67 bootLO=-0.2076
+   np==0&dev>=2   a<20     (120, None, 1.6, 0.4)  trm=-0.0715 vm=-0.1486 vmed=-0.3080 ctrl=-0.1986 k=67 n=211 clus=67 bootLO=-0.2238
+   np==0&dev>=2   a<5      (15, None, None, None) trm=-0.0784 vm=-0.1577 vmed=-0.3080 ctrl=-0.2280 k=67 n=67 clus=67 bootLO=-0.2706
+   np==0&dev>=2   a<5      (60, None, 0.4, 0.25)  trm=-0.0832 vm=-0.1062 vmed=-0.1653 ctrl=-0.1702 k=67 n=365 clus=67 bootLO=-0.1552
+   np==0&dev>=2   a<60     (120, None, 1.6, 0.4)  trm=-0.0944 vm=-0.1664 vmed=-0.3080 ctrl=-0.2037 k=67 n=218 clus=67 bootLO=-0.2282
+   np==0&dev>=2   a<5      (120, 0.5, None, None) trm=-0.0973 vm=-0.1405 vmed=-0.3076 ctrl=-0.2077 k=67 n=179 clus=67 bootLO=-0.2243
+   dev1.5_3       a20_120  (15, None, None, None) trm=-0.1014 vm=-0.1080 vmed=-0.0476 ctrl=-0.0726 k=21 n=52 clus=20 bootLO=-0.1550
+   dev1.5_3       a20_120  (60, None, 0.4, 0.25)  trm=-0.1017 vm=-0.1019 vmed=-0.1056 ctrl=-0.0883 k=21 n=68 clus=20 bootLO=-0.1556
+   np==0&dev>=2   a<20     (60, None, 0.4, 0.25)  trm=-0.1022 vm=-0.1315 vmed=-0.1612 ctrl=-0.1766 k=67 n=438 clus=67 bootLO=-0.1732
+   np==0&dev<1    a<5      (60, 0.3, None, None)  trm=-0.1042 vm=-0.1911 vmed=-0.3080 ctrl=-0.1787 k=176 n=436 clus=176 bootLO=-0.2127
+   np==0&dev>=2   a<5      (60, 0.3, None, None)  trm=-0.1048 vm=-0.0804 vmed=-0.1875 ctrl=-0.1787 k=67 n=275 clus=67 bootLO=-0.1712
+   np==0&dev>=2   a<5      (120, None, 0.8, 0.3)  trm=-0.1055 vm=-0.1164 vmed=-0.3080 ctrl=-0.1812 k=67 n=259 clus=67 bootLO=-0.1774
+   np==0&dev<1    a<5      (120, None, 1.6, 0.4)  trm=-0.1071 vm=-0.1508 vmed=-0.3080 ctrl=-0.1886 k=176 n=322 clus=176 bootLO=-0.1964
+   dev1.5_3       a20_120  (120, None, 1.6, 0.4)  trm=-0.1075 vm=-0.1193 vmed=-0.1056 ctrl=-0.1102 k=21 n=33 clus=20 bootLO=-0.1839
+   np==0&dev>=2   a<60     (60, None, 0.4, 0.25)  trm=-0.1082 vm=-0.1343 vmed=-0.1612 ctrl=-0.1786 k=67 n=464 clus=67 bootLO=-0.1663
+   np==0          a<5      (60, 0.3, None, None)  trm=-0.1084 vm=-0.1418 vmed=-0.2754 ctrl=-0.1787 k=291 n=1014 clus=291 bootLO=-0.1735
+   dev1.5_3       a20_120  (60, 0.3, None, None)  trm=-0.1091 vm=-0.1205 vmed=-0.1056 ctrl=-0.1038 k=21 n=59 clus=20 bootLO=-0.1681
+   np==0&dev<1    a<5      (120, 0.3, None, None) trm=-0.1104 vm=-0.1815 vmed=-0.3080 ctrl=-0.1800 k=176 n=436 clus=176 bootLO=-0.2120
+   np==0          a<5      (120, None, 1.6, 0.4)  trm=-0.1112 vm=-0.1344 vmed=-0.3080 ctrl=-0.1886 k=291 n=751 clus=291 bootLO=-0.1769
+   np==0&dev<1    a20_120  (15, None, None, None) trm=-0.1115 vm=+0.0484 vmed=-0.0165 ctrl=-0.0726 k=34 n=66 clus=34 bootLO=-0.0935
+   np==0          a<5      (120, 0.3, None, None) trm=-0.1139 vm=-0.1364 vmed=-0.2959 ctrl=-0.1800 k=291 n=1014 clus=291 bootLO=-0.1766
+   np==0&dev>=2   a<20     (120, 0.5, None, None) trm=-0.1141 vm=-0.1612 vmed=-0.3080 ctrl=-0.2258 k=67 n=195 clus=67 bootLO=-0.2379
+   np==0&dev>=2   a<20     (120, None, 0.8, 0.3)  trm=-0.1148 vm=-0.1481 vmed=-0.3080 ctrl=-0.1923 k=67 n=305 clus=67 bootLO=-0.2005
+   dev1.5_3       a20_120  (120, None, 0.8, 0.3)  trm=-0.1173 vm=-0.1243 vmed=-0.1056 ctrl=-0.1104 k=21 n=44 clus=20 bootLO=-0.1761
+   np==0&dev>=2   a<5      (120, 0.3, None, None) trm=-0.1173 vm=-0.0838 vmed=-0.1886 ctrl=-0.1800 k=67 n=275 clus=67 bootLO=-0.1688
+SURVIVORS (validate mean>0, beats control, bootLO>0): 0

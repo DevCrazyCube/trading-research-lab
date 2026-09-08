@@ -25,7 +25,8 @@ otherwise unexitable rugs. This is a hypothesis, not a profit claim.
   and a campaign memo. The parser proves there are no Pump accounts or trading instructions.
 - A third endpoint observes first successful processed status. Effective latency is build-start through
   that observation minus the explicit `getFeeForMessage` measurement interval. Raw signatures and wires
-  remain local; a commit-safe summary contains hashes and aggregates only.
+  remain local; a commit-safe summary contains hashes and aggregates only. The elapsed time is explicitly
+  `LOCAL_MONOTONIC_SCENARIO_WITH_FINALIZED_WIRE`: finalized RPC proves wire/fee/slot, not the host clock.
 - A send/landing failure remains in its assigned arm at the frozen 30-second deadline; the sender never
   keeps sampling until it accumulates a flattering success-only set. Every attempted signature must
   later be independently re-read (or explicitly absent) at finalized commitment. Local processed

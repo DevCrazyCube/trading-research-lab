@@ -1,0 +1,447 @@
+{
+ "document": "T17_FAT_TAIL_POST_HOC",
+ "status": "POST HOC. Not a gate, not a declared trial. The held-out verdict is in T17_HELDOUT_RESULT.json and this does not amend it.",
+ "window": [
+  "2022-01-03",
+  "2026-08-14"
+ ],
+ "sessions": 1158,
+ "seeds": 50,
+ "what_varies": "ONLY the sequence of draws from B22B's 425 decontaminated measured entry-slippage observations. Same rule, same selection, same paths, same sizing, same cost model.",
+ "annualised_sharpe": {
+  "min": 0.9065348622783923,
+  "p10": 1.0399495719555032,
+  "p50": 1.1005860861712657,
+  "p90": 1.1900807437600303,
+  "max": 1.2230039534008652,
+  "mean": 1.102848909369532
+ },
+ "max_drawdown": {
+  "min": 0.23699635394315532,
+  "p10": 0.2521746804151237,
+  "p50": 0.2747258286300861,
+  "p90": 0.2975519875737761,
+  "max": 0.31265155412001355,
+  "mean": 0.27515268863314823
+ },
+ "annualised_return": {
+  "min": 0.19195584779704822,
+  "p10": 0.22687573588170484,
+  "p50": 0.24555972245096735,
+  "p90": 0.2711409344112594,
+  "max": 0.28033095828905896,
+  "mean": 0.24537011755147212
+ },
+ "t_stat": {
+  "min": 1.9432940438089357,
+  "p10": 2.2292885724919476,
+  "p50": 2.3592720754061913,
+  "p90": 2.55111735602548,
+  "max": 2.621693215664577,
+  "mean": 2.364122777818597
+ },
+ "share_of_seeds_with_sharpe_below_1": 0.06,
+ "share_of_seeds_with_t_below_1p96": 0.02,
+ "per_seed": [
+  {
+   "seed_index": 0,
+   "annualised_sharpe": 1.0882197303767718,
+   "max_drawdown": 0.27901329563069033,
+   "final_multiple": 2.6981534458000076,
+   "annualised_return": 0.24110135308623026,
+   "t_stat": 2.3327629288095966
+  },
+  {
+   "seed_index": 1,
+   "annualised_sharpe": 1.0663400250278259,
+   "max_drawdown": 0.2625285363690072,
+   "final_multiple": 2.64381368319999,
+   "annualised_return": 0.2356185874988641,
+   "t_stat": 2.285860484288005
+  },
+  {
+   "seed_index": 2,
+   "annualised_sharpe": 1.095206700597912,
+   "max_drawdown": 0.257151520368454,
+   "final_multiple": 2.7133184112500004,
+   "annualised_return": 0.24261603438400914,
+   "t_stat": 2.3477405520428465
+  },
+  {
+   "seed_index": 3,
+   "annualised_sharpe": 1.0504326196299274,
+   "max_drawdown": 0.2832711845289728,
+   "final_multiple": 2.582244879979999,
+   "annualised_return": 0.22929883692338326,
+   "t_stat": 2.251760564418958
+  },
+  {
+   "seed_index": 4,
+   "annualised_sharpe": 1.1387179888056003,
+   "max_drawdown": 0.2664952279505789,
+   "final_multiple": 2.85681625055001,
+   "annualised_return": 0.25663036234356107,
+   "t_stat": 2.4410135531494364
+  },
+  {
+   "seed_index": 5,
+   "annualised_sharpe": 1.198822650137495,
+   "max_drawdown": 0.27377216487555556,
+   "final_multiple": 3.033345099430012,
+   "annualised_return": 0.27313418312313753,
+   "t_stat": 2.56985694928521
+  },
+  {
+   "seed_index": 6,
+   "annualised_sharpe": 1.2230039534008652,
+   "max_drawdown": 0.25155960409931166,
+   "final_multiple": 3.1129437777799867,
+   "annualised_return": 0.28033095828905896,
+   "t_stat": 2.621693215664577
+  },
+  {
+   "seed_index": 7,
+   "annualised_sharpe": 1.1215890388624514,
+   "max_drawdown": 0.27338014203068184,
+   "final_multiple": 2.8030653591300005,
+   "annualised_return": 0.2514468558450216,
+   "t_stat": 2.404295068525951
+  },
+  {
+   "seed_index": 8,
+   "annualised_sharpe": 1.141267459059429,
+   "max_drawdown": 0.2910833069038916,
+   "final_multiple": 2.8655131237999987,
+   "annualised_return": 0.25746186529294435,
+   "t_stat": 2.4464787267078822
+  },
+  {
+   "seed_index": 9,
+   "annualised_sharpe": 1.0953528210523529,
+   "max_drawdown": 0.27872323706252233,
+   "final_multiple": 2.7101105639299865,
+   "annualised_return": 0.24229618699180167,
+   "t_stat": 2.34805378324951
+  },
+  {
+   "seed_index": 10,
+   "annualised_sharpe": 1.0399495719555032,
+   "max_drawdown": 0.27550807919613807,
+   "final_multiple": 2.558938192830007,
+   "annualised_return": 0.22687573588170484,
+   "t_stat": 2.2292885724919476
+  },
+  {
+   "seed_index": 11,
+   "annualised_sharpe": 1.1900807437600303,
+   "max_drawdown": 0.2746194368157874,
+   "final_multiple": 3.0311553943299945,
+   "annualised_return": 0.2729341266331087,
+   "t_stat": 2.55111735602548
+  },
+  {
+   "seed_index": 12,
+   "annualised_sharpe": 1.1005860861712657,
+   "max_drawdown": 0.23699635394315532,
+   "final_multiple": 2.7429812622699905,
+   "annualised_return": 0.24555972245096735,
+   "t_stat": 2.3592720754061913
+  },
+  {
+   "seed_index": 13,
+   "annualised_sharpe": 1.1334422435651035,
+   "max_drawdown": 0.2834088267488062,
+   "final_multiple": 2.842070249069991,
+   "annualised_return": 0.25521596889145703,
+   "t_stat": 2.4297041984526477
+  },
+  {
+   "seed_index": 14,
+   "annualised_sharpe": 1.0324858858469057,
+   "max_drawdown": 0.27427944318098063,
+   "final_multiple": 2.5481592116799976,
+   "annualised_return": 0.22574924594920942,
+   "t_stat": 2.213289036938242
+  },
+  {
+   "seed_index": 15,
+   "annualised_sharpe": 1.1916346702983909,
+   "max_drawdown": 0.2607890868529513,
+   "final_multiple": 3.0115832994700065,
+   "annualised_return": 0.2711409344112594,
+   "t_stat": 2.5544484316544125
+  },
+  {
+   "seed_index": 16,
+   "annualised_sharpe": 1.2057440339071641,
+   "max_drawdown": 0.2521746804151237,
+   "final_multiple": 3.040479507000004,
+   "annualised_return": 0.2737852161819474,
+   "t_stat": 2.5846939780793474
+  },
+  {
+   "seed_index": 17,
+   "annualised_sharpe": 1.080912706195974,
+   "max_drawdown": 0.2806674850770202,
+   "final_multiple": 2.679228508579998,
+   "annualised_return": 0.23920175375131092,
+   "t_stat": 2.317099221698737
+  },
+  {
+   "seed_index": 18,
+   "annualised_sharpe": 1.1000584085686347,
+   "max_drawdown": 0.2751757970976966,
+   "final_multiple": 2.7198983254100013,
+   "annualised_return": 0.24327117843554813,
+   "t_stat": 2.358140918972045
+  },
+  {
+   "seed_index": 19,
+   "annualised_sharpe": 1.1169812738367182,
+   "max_drawdown": 0.28111183795892014,
+   "final_multiple": 2.787677342130001,
+   "annualised_return": 0.249948591194332,
+   "t_stat": 2.394417630048545
+  },
+  {
+   "seed_index": 20,
+   "annualised_sharpe": 1.1593802637062685,
+   "max_drawdown": 0.24928226009497856,
+   "final_multiple": 2.8761015995900014,
+   "annualised_return": 0.25847156213230793,
+   "t_stat": 2.485306252103225
+  },
+  {
+   "seed_index": 21,
+   "annualised_sharpe": 1.1290274771884035,
+   "max_drawdown": 0.26360224312221614,
+   "final_multiple": 2.8077795040400013,
+   "annualised_return": 0.2519045639114039,
+   "t_stat": 2.4202404816540604
+  },
+  {
+   "seed_index": 22,
+   "annualised_sharpe": 1.0659040143155547,
+   "max_drawdown": 0.2868108723601154,
+   "final_multiple": 2.632571304449997,
+   "annualised_return": 0.23447326590977413,
+   "t_stat": 2.284925829642662
+  },
+  {
+   "seed_index": 23,
+   "annualised_sharpe": 1.1100029051608375,
+   "max_drawdown": 0.3027547806380302,
+   "final_multiple": 2.762921545080013,
+   "annualised_return": 0.24752459112698832,
+   "t_stat": 2.379458445523353
+  },
+  {
+   "seed_index": 24,
+   "annualised_sharpe": 1.175539412646501,
+   "max_drawdown": 0.26761412255787476,
+   "final_multiple": 2.9703737997200035,
+   "annualised_return": 0.2673353121504698,
+   "t_stat": 2.519945822179607
+  },
+  {
+   "seed_index": 25,
+   "annualised_sharpe": 1.0930385390101083,
+   "max_drawdown": 0.26153482036533915,
+   "final_multiple": 2.709372575999988,
+   "annualised_return": 0.24222256193350034,
+   "t_stat": 2.34309277105293
+  },
+  {
+   "seed_index": 26,
+   "annualised_sharpe": 1.0975307090980075,
+   "max_drawdown": 0.26107178543296206,
+   "final_multiple": 2.720268729019997,
+   "annualised_return": 0.24330802162787823,
+   "t_stat": 2.352722414367089
+  },
+  {
+   "seed_index": 27,
+   "annualised_sharpe": 1.1332343052081015,
+   "max_drawdown": 0.27480014108245476,
+   "final_multiple": 2.8451378202799944,
+   "annualised_return": 0.25551067354139145,
+   "t_stat": 2.42925845125918
+  },
+  {
+   "seed_index": 28,
+   "annualised_sharpe": 1.0594003713893823,
+   "max_drawdown": 0.2975519875737761,
+   "final_multiple": 2.616159581499994,
+   "annualised_return": 0.23279442527541905,
+   "t_stat": 2.2709842912778533
+  },
+  {
+   "seed_index": 29,
+   "annualised_sharpe": 1.1247248157109333,
+   "max_drawdown": 0.2747258286300861,
+   "final_multiple": 2.792293750010002,
+   "annualised_return": 0.2503987488537698,
+   "t_stat": 2.411017078595209
+  },
+  {
+   "seed_index": 30,
+   "annualised_sharpe": 1.1815425012372205,
+   "max_drawdown": 0.23740446639528057,
+   "final_multiple": 2.977704646089991,
+   "annualised_return": 0.26801531017253466,
+   "t_stat": 2.5328143469194973
+  },
+  {
+   "seed_index": 31,
+   "annualised_sharpe": 1.1543986168503184,
+   "max_drawdown": 0.25061275847317144,
+   "final_multiple": 2.8890341021700072,
+   "annualised_return": 0.2597008431496939,
+   "t_stat": 2.4746273415986733
+  },
+  {
+   "seed_index": 32,
+   "annualised_sharpe": 0.9345621523377139,
+   "max_drawdown": 0.31265155412001355,
+   "final_multiple": 2.299616067849995,
+   "annualised_return": 0.19867706871924096,
+   "t_stat": 2.003374762270769
+  },
+  {
+   "seed_index": 33,
+   "annualised_sharpe": 1.1589972925153558,
+   "max_drawdown": 0.2683920026206277,
+   "final_multiple": 2.8892208631300043,
+   "annualised_return": 0.2597185638894812,
+   "t_stat": 2.4844852956621453
+  },
+  {
+   "seed_index": 34,
+   "annualised_sharpe": 1.0535195062604745,
+   "max_drawdown": 0.29752742836534773,
+   "final_multiple": 2.5907862448399976,
+   "annualised_return": 0.23018256383907487,
+   "t_stat": 2.258377770940921
+  },
+  {
+   "seed_index": 35,
+   "annualised_sharpe": 1.0787648964626162,
+   "max_drawdown": 0.29345777136519324,
+   "final_multiple": 2.6728670005600046,
+   "annualised_return": 0.23856085696254237,
+   "t_stat": 2.3124950679747656
+  },
+  {
+   "seed_index": 36,
+   "annualised_sharpe": 1.055713615574131,
+   "max_drawdown": 0.29633039706701125,
+   "final_multiple": 2.5960585783499814,
+   "annualised_return": 0.23072692531636596,
+   "t_stat": 2.2630811747901434
+  },
+  {
+   "seed_index": 37,
+   "annualised_sharpe": 1.113126247373045,
+   "max_drawdown": 0.30291143723947267,
+   "final_multiple": 2.7797924453199876,
+   "annualised_return": 0.2491783642238694,
+   "t_stat": 2.3861538000765194
+  },
+  {
+   "seed_index": 38,
+   "annualised_sharpe": 1.1595886947102374,
+   "max_drawdown": 0.26350855978624566,
+   "final_multiple": 2.9000675368099977,
+   "annualised_return": 0.2607462121410624,
+   "t_stat": 2.4857530553596825
+  },
+  {
+   "seed_index": 39,
+   "annualised_sharpe": 1.055426184860704,
+   "max_drawdown": 0.2623748043589773,
+   "final_multiple": 2.6060247058899946,
+   "annualised_return": 0.23175355643504703,
+   "t_stat": 2.262465023755415
+  },
+  {
+   "seed_index": 40,
+   "annualised_sharpe": 1.0971181329897102,
+   "max_drawdown": 0.2698628717214234,
+   "final_multiple": 2.7343953468199955,
+   "annualised_return": 0.2447102432388102,
+   "t_stat": 2.351837995325711
+  },
+  {
+   "seed_index": 41,
+   "annualised_sharpe": 0.9461200087539864,
+   "max_drawdown": 0.27976102212406173,
+   "final_multiple": 2.330980867050002,
+   "annualised_return": 0.20221603695523993,
+   "t_stat": 2.028150768652357
+  },
+  {
+   "seed_index": 42,
+   "annualised_sharpe": 0.9065348622783923,
+   "max_drawdown": 0.27552373524552143,
+   "final_multiple": 2.2409575616600006,
+   "annualised_return": 0.19195584779704822,
+   "t_stat": 1.9432940438089357
+  },
+  {
+   "seed_index": 43,
+   "annualised_sharpe": 1.0950987643615648,
+   "max_drawdown": 0.2697455569084125,
+   "final_multiple": 2.7189506662199974,
+   "annualised_return": 0.24317689909027362,
+   "t_stat": 2.347509174459995
+  },
+  {
+   "seed_index": 44,
+   "annualised_sharpe": 1.0786479074768789,
+   "max_drawdown": 0.2936736824323557,
+   "final_multiple": 2.66632981394,
+   "annualised_return": 0.23790101673767028,
+   "t_stat": 2.3122442844598288
+  },
+  {
+   "seed_index": 45,
+   "annualised_sharpe": 1.0922499311404608,
+   "max_drawdown": 0.2667518569996339,
+   "final_multiple": 2.7156319759100045,
+   "annualised_return": 0.2428465312378214,
+   "t_stat": 2.3414022712831417
+  },
+  {
+   "seed_index": 46,
+   "annualised_sharpe": 1.136650923101202,
+   "max_drawdown": 0.29651085810514477,
+   "final_multiple": 2.8165671688200073,
+   "annualised_return": 0.25275617758622326,
+   "t_stat": 2.436582486415364
+  },
+  {
+   "seed_index": 47,
+   "annualised_sharpe": 1.1150744726882966,
+   "max_drawdown": 0.30809205484633384,
+   "final_multiple": 2.767560547569998,
+   "annualised_return": 0.24798011599083591,
+   "t_stat": 2.39033011453354
+  },
+  {
+   "seed_index": 48,
+   "annualised_sharpe": 1.1597942053388475,
+   "max_drawdown": 0.27389085557418014,
+   "final_multiple": 2.8973634178200065,
+   "annualised_return": 0.26049029709995764,
+   "t_stat": 2.486193598351613
+  },
+  {
+   "seed_index": 49,
+   "annualised_sharpe": 1.0109051276750194,
+   "max_drawdown": 0.28719266894492446,
+   "final_multiple": 2.4904225638499975,
+   "annualised_return": 0.21965102296905226,
+   "t_stat": 2.1670274307260926
+  }
+ ]
+}

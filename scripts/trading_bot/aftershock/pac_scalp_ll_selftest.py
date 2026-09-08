@@ -251,26 +251,42 @@ def main() -> int:
             intervention_submit_url=env["PAC_SCALP_LL_INTERVENTION_SUBMIT_RPC_URL"],
             verification_url="https://neutral.example.net/rpc?key=verify-secret")
         check(True, "campaign runtime URLs match credential-safe committed pins")
-        runtime_cost = routes.AttemptCost(5_000, 50, 0, 0, 1_000, 100)
+        runtime_cost = routes.AttemptCost(5_000, 500, 5_000, 0, 1_000, 100)
+        runtime_attestation_body = {
+            "campaign_sha256": loaded_campaign.campaign_sha256,
+            "evidence_status": "FINALIZED_ATTESTED_COMPLETE",
+            "meta_fee_lamports_by_arm": {arm: 550_000 for arm in routes.ARMS}}
+        runtime_attestation = {**runtime_attestation_body,
+                               "attestation_sha256": ll_campaign.sha(runtime_attestation_body)}
         runtime_row = ll_runtime.build(
-            campaign=loaded_campaign,
+            campaign=loaded_campaign, attestation=runtime_attestation,
             route_by_arm={routes.PUBLIC_CONTROL: public,
                           routes.LOW_LATENCY_INTERVENTION: paid},
             costs_by_arm={arm: {name: runtime_cost for name in ll_runtime.COST_NAMES}
-                          for arm in routes.ARMS})
+                          for arm in routes.ARMS},
+            provider_cost_receipt_sha256_by_arm={arm: "7" * 64 for arm in routes.ARMS})
         runtime_path = pathlib.Path(directory) / "runtime.json"
         runtime_payload = json.dumps(
             runtime_row, sort_keys=True, separators=(",", ":")).encode() + b"\n"
         runtime_path.write_bytes(runtime_payload)
         loaded_runtime = ll_runtime.load(
             runtime_path, expected_file_sha256=hashlib.sha256(runtime_payload).hexdigest(),
-            campaign=loaded_campaign)
+            campaign=loaded_campaign, attestation=runtime_attestation)
         ll_runtime.assert_environment(
             loaded_runtime, {routes.PUBLIC_CONTROL: public,
                              routes.LOW_LATENCY_INTERVENTION: paid})
         check(ll_runtime.attempt_cost(
             loaded_runtime, routes.LOW_LATENCY_INTERVENTION, "exit") == runtime_cost,
             "runtime profile binds both routes and every exact attempt cost")
+        zero_cost = routes.AttemptCost(0, 0, 0, 0, 0, 1)
+        refuses(lambda: ll_runtime.build(
+            campaign=loaded_campaign, attestation=runtime_attestation,
+            route_by_arm={routes.PUBLIC_CONTROL: public,
+                          routes.LOW_LATENCY_INTERVENTION: paid},
+            costs_by_arm={arm: {name: zero_cost for name in ll_runtime.COST_NAMES}
+                          for arm in routes.ARMS},
+            provider_cost_receipt_sha256_by_arm={arm: "7" * 64 for arm in routes.ARMS}),
+            "zero-cost runtime profile refuses against attested/frozen floors")
         mutated_route = routes.Route(
             paid.arm, "different-provider", paid.region, paid.submit_url, paid.observe_url,
             paid.submit_endpoint_identity, paid.observe_endpoint_identity,
@@ -289,8 +305,21 @@ def main() -> int:
         runtime_path.write_bytes(tampered_bytes)
         refuses(lambda: ll_runtime.load(
             runtime_path, expected_file_sha256=hashlib.sha256(tampered_bytes).hexdigest(),
-            campaign=loaded_campaign),
+            campaign=loaded_campaign, attestation=runtime_attestation),
             "rehash-valid runtime cost mutation breaks the inner profile authority")
+        runtime_path.write_bytes(runtime_payload)
+        zero_paid = json.loads(runtime_payload)
+        zero_paid["arms"][routes.LOW_LATENCY_INTERVENTION]["costs"]["entry"][
+            "infra_subscription_num_lamports"] = 0
+        zero_body = dict(zero_paid); zero_body.pop("runtime_profile_sha256")
+        zero_paid["runtime_profile_sha256"] = ll_runtime._sha(zero_body)
+        zero_paid_bytes = json.dumps(
+            zero_paid, sort_keys=True, separators=(",", ":")).encode() + b"\n"
+        runtime_path.write_bytes(zero_paid_bytes)
+        refuses(lambda: ll_runtime.load(
+            runtime_path, expected_file_sha256=hashlib.sha256(zero_paid_bytes).hexdigest(),
+            campaign=loaded_campaign, attestation=runtime_attestation),
+            "rehash-valid persisted paid runtime cannot erase subscription cost")
         runtime_path.write_bytes(runtime_payload)
 
         activation_summary = {
@@ -300,7 +329,7 @@ def main() -> int:
                                         "paired_samples": 100, "failed_samples": 0},
                 routes.LOW_LATENCY_INTERVENTION: {"p90_effective_nanos": 800_000_000,
                                                   "paired_samples": 100, "failed_samples": 0}}}
-        activation_attestation = {"attestation_sha256": "2" * 64}
+        activation_attestation = {"attestation_sha256": runtime_attestation["attestation_sha256"]}
         with patch.object(ll_manifest, "_evidence_bundle", return_value=(
                 loaded_campaign, activation_summary, activation_attestation, loaded_runtime)), \
              patch.object(ll_manifest, "verify_seal", return_value={"seal_sha256": "3" * 64}):
@@ -392,7 +421,7 @@ def main() -> int:
             }
             synthetic["attempts"].append(ll_calibration._attempt_body(
                 campaign=loaded_payer_campaign, attempt_index=attempt_index, arm=arm,
-                boot_id="synthetic", stage="PROCESSED", wire_base64=wire,
+                boot_id="12345678-1234-1234-1234-123456789abc", stage="PROCESSED", wire_base64=wire,
                 signature=signature, fee_lamports=5_500, clocks=clocks, polls=[{
                     "request_start_wall": 1_800 + attempt_index * 100,
                     "request_start_mono": 1_800 + attempt_index * 100,
@@ -482,6 +511,31 @@ def main() -> int:
         refuses(lambda: ll_attest._verify_finalized(
             first_attempt, wrong_wire, loaded_payer_campaign),
             "finalized attester refuses transaction substitution")
+        failed_attempt = json.loads(json.dumps(reloaded["attempts"][1]))
+        failed_attempt.update(stage="FAILED", processed_slot=None,
+                              confirmation_status=None, failure="LOCAL_DEADLINE")
+        failed_attempt["clocks"].update(processed_wall=None, processed_mono=None)
+        failed_attempt["status_polls"] = []
+        failed_attempt = ll_calibration._hash_row(failed_attempt, "attempt_sha256")
+
+        def expired_rpc(_url, request):
+            return {"jsonrpc": "2.0", "id": request["id"], "result": {
+                "context": {"slot": 12345}, "value": False}}
+
+        _rq, _rp, expiry = ll_attest._verify_expired_absence(
+            "https://verify.example", failed_attempt, loaded_payer_campaign,
+            99, rpc=expired_rpc)
+        check(expiry["blockhash_expired_at_finalized"] is True,
+              "nonzero-index failed absence requires its exact expired blockhash")
+
+        def still_valid_rpc(_url, request):
+            return {"jsonrpc": "2.0", "id": request["id"], "result": {
+                "context": {"slot": 12345}, "value": True}}
+
+        refuses(lambda: ll_attest._verify_expired_absence(
+            "https://verify.example", failed_attempt, loaded_payer_campaign,
+            100, rpc=still_valid_rpc),
+            "one missing transaction lookup cannot prove permanent absence")
         fake_summary = json.loads(json.dumps(local_summary))
         fake_summary["arms"][first_attempt["arm"]]["p90_effective_nanos"] = 1
         fake_body = dict(fake_summary); fake_body.pop("summary_sha256")
@@ -513,6 +567,27 @@ def main() -> int:
     with ll_manifest.exclusive_campaign():
         refuses(lambda: ll_manifest.exclusive_campaign().__enter__(),
                 "a concurrent calibration writer cannot acquire the global campaign lock")
+    refuses(lambda: ll_calibration._run_unlocked(
+        campaign_path=pathlib.Path("missing"), campaign_file_sha256="0" * 64,
+        keypair_path=pathlib.Path("missing"), journal_path=pathlib.Path("missing"),
+        summary_path=pathlib.Path("missing"), public_submit_url="https://public.example",
+        intervention_submit_url="https://paid.example",
+        verification_url="https://verify.example", broadcast=True),
+        "direct broadcast body refuses without an active OS campaign lock")
+    with tempfile.TemporaryDirectory() as high_water_directory:
+        high_water_path = pathlib.Path(high_water_directory) / "spend.jsonl"
+        genesis_journal = ll_calibration._new_journal(loaded_payer_campaign)
+        ll_manifest._append_spend_high_water(genesis_journal, high_water_path)
+        spent_journal = json.loads(json.dumps(genesis_journal))
+        spent_attempt = json.loads(json.dumps(reloaded["attempts"][0]))
+        spent_attempt["campaign_sha256"] = loaded_payer_campaign.campaign_sha256
+        spent_journal["attempts"] = [spent_attempt]
+        spent_journal = ll_calibration._hash_row(spent_journal, "journal_sha256")
+        ll_manifest._append_spend_high_water(spent_journal, high_water_path)
+        high_water_rows = ll_manifest._read_spend_high_water(high_water_path)
+        refuses(lambda: ll_manifest._assert_spend_high_water(
+            genesis_journal, high_water_rows),
+            "deleted journal cannot recreate genesis below irreversible spend high-water")
 
     authority = _authority()
     with tempfile.TemporaryDirectory() as directory:

@@ -1,0 +1,110 @@
+[
+  {
+    "name": "E2_VIX_CONTANGO_SHORTVOL",
+    "desc": "same vol-curve sign but expressed in SVXY (harvest the vol roll directly)",
+    "design": {
+      "sharpe": 0.5608312692888844,
+      "t_stat": 1.8047574819005274,
+      "ann_ret": 0.26748325507951487,
+      "ann_vol": 0.4769406945134762,
+      "max_dd": -0.526224726741215,
+      "orientation": 1,
+      "sharpe_as_written": 0.5608312692888844,
+      "gross_sharpe": 0.5885226289555004,
+      "cost_drag_annual": 0.013284238410596028,
+      "n_days": 3020,
+      "years": 11.98,
+      "frac_days_live": 0.6019867549668875,
+      "first": 20070103,
+      "last": 20181231
+    },
+    "holdout": {
+      "sharpe": 0.5778398793578292,
+      "t_stat": 1.4761099370990973,
+      "ann_ret": 0.2146314912781762,
+      "ann_vol": 0.37143765763744563,
+      "max_dd": -0.4426922751209069,
+      "orientation": 1,
+      "sharpe_as_written": 0.5778398793578292,
+      "gross_sharpe": 0.6242265374943947,
+      "cost_drag_annual": 0.017334028139656073,
+      "n_days": 1919,
+      "years": 7.62,
+      "frac_days_live": 0.9900990099009901,
+      "first": 20190102,
+      "last": 20260820
+    }
+  },
+  {
+    "name": "H1_MULTI_ASSET_CARRY",
+    "desc": "one gross-1 book: commodity ladder carry + vol-curve carry + rates curve carry",
+    "design": {
+      "sharpe": 0.6231970867222537,
+      "t_stat": 1.974205650662405,
+      "ann_ret": 0.17919067204203654,
+      "ann_vol": 0.28753451493892845,
+      "max_dd": -0.39682207578483797,
+      "orientation": 1,
+      "sharpe_as_written": 0.6231970867222537,
+      "gross_sharpe": 0.6691205210360649,
+      "cost_drag_annual": 0.013259179143487242,
+      "n_days": 3020,
+      "years": 11.98,
+      "frac_days_live": 0.9996688741721854,
+      "first": 20070103,
+      "last": 20181231
+    },
+    "holdout": {
+      "sharpe": 0.5994584186170957,
+      "t_stat": 1.52305314000583,
+      "ann_ret": 0.14429571016840093,
+      "ann_vol": 0.2407101238168946,
+      "max_dd": -0.32521367101505827,
+      "orientation": 1,
+      "sharpe_as_written": 0.5994584186170957,
+      "gross_sharpe": 0.6692402282300127,
+      "cost_drag_annual": 0.016867927582305604,
+      "n_days": 1919,
+      "years": 7.62,
+      "frac_days_live": 1.0,
+      "first": 20190102,
+      "last": 20260820
+    }
+  },
+  {
+    "name": "D8_CRUDE_DRIVING_SEASON",
+    "desc": "long USO Feb-Jun (refinery/driving build), short Jul-Jan; fixed prior",
+    "design": {
+      "sharpe": 0.797745940988159,
+      "t_stat": 2.4053443947807502,
+      "ann_ret": 0.27386634033850127,
+      "ann_vol": 0.3433001990574419,
+      "max_dd": -0.6565049741860403,
+      "orientation": 1,
+      "sharpe_as_written": 0.797745940988159,
+      "gross_sharpe": 0.8012186164621101,
+      "cost_drag_annual": 0.00120158940397351,
+      "n_days": 3020,
+      "years": 11.98,
+      "frac_days_live": 1.0,
+      "first": 20070103,
+      "last": 20181231
+    },
+    "holdout": {
+      "sharpe": 0.13349617174953624,
+      "t_stat": 0.3667580738259615,
+      "ann_ret": 0.05624675952701079,
+      "ann_vol": 0.4213361236495997,
+      "max_dd": -0.8662843450665849,
+      "orientation": -1,
+      "sharpe_as_written": -0.13948828725704657,
+      "gross_sharpe": 0.13649243177809645,
+      "cost_drag_annual": 0.001260656591974987,
+      "n_days": 1919,
+      "years": 7.62,
+      "frac_days_live": 1.0,
+      "first": 20190102,
+      "last": 20260820
+    }
+  }
+]

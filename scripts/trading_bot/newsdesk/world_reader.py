@@ -14,6 +14,7 @@ feed that errors is recorded as an error rather than silently dropped.
 from __future__ import annotations
 
 import datetime as dt
+import email.utils as eut
 import hashlib
 import re
 import urllib.parse
@@ -35,11 +36,77 @@ def _event_id(source: str, headline: str, link: str) -> str:
     return hashlib.sha256(f"{source}|{norm}|{link}".encode()).hexdigest()[:16]
 
 
-def _mk_event(source, headline, ts, link, snippet, tickers=None, assets=None) -> dict:
-    return {"id": _event_id(source, headline, link), "source": source,
-            "headline": (headline or "").strip(), "ts": ts, "link": (link or "").strip(),
-            "snippet": re.sub(r"\s+", " ", (snippet or "").strip())[:400],
-            "tickers": sorted(set(tickers or [])), "assets": sorted(set(assets or []))}
+def _ts_utc(ts: str):
+    """Normalize a feed timestamp to an aware UTC datetime, or None if unparseable.
+
+    The feeds disagree on format: SEC EDGAR emits ISO-8601 ("2026-09-02T15:33:00-04:00") while the
+    RSS feeds emit RFC-822 ("Wed, 02 Sep 2026 15:33:00 +0000"). Sorting the RAW strings therefore
+    orders the stream by WEEKDAY NAME, not by time -- which silently buried the whole SEC feed below
+    every RSS item. Parse to real datetimes and sort on those. Unparseable timestamps sort last
+    rather than being dropped: absence of a readable date is not a reason to hide an event.
+    """
+    ts = (ts or "").strip()
+    if not ts:
+        return None
+    try:
+        d = dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    except ValueError:
+        try:
+            d = eut.parsedate_to_datetime(ts)
+        except (TypeError, ValueError):
+            return None
+    if d is None:
+        return None
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=dt.timezone.utc)
+    return d.astimezone(dt.timezone.utc)
+
+
+# Company-name aliases for the frozen equity watchlist. Reading surface only: used to decide
+# whether a headline actually MENTIONS a universe name, never to price or resolve anything.
+_TICKER_ALIASES = {
+    "SPY": ("S&P 500", "SPDR S&P"), "QQQ": ("Nasdaq 100", "Nasdaq-100", "Invesco QQQ"),
+    "IWM": ("Russell 2000",), "AAPL": ("Apple",), "MSFT": ("Microsoft",),
+    "NVDA": ("Nvidia",), "AMZN": ("Amazon",), "GOOGL": ("Google", "Alphabet"),
+    "META": ("Meta Platforms", "Facebook", "Instagram"), "TSLA": ("Tesla",),
+    "AMD": ("Advanced Micro",), "NFLX": ("Netflix",), "JPM": ("JPMorgan", "JP Morgan"),
+    "XOM": ("Exxon",), "AVGO": ("Broadcom",), "COST": ("Costco",),
+    "BA": ("Boeing",), "DIS": ("Disney",),
+}
+
+
+def _mentions_ticker(text: str, tk: str) -> bool:
+    """True only if `text` literally names the ticker (word-boundary symbol) or a company alias.
+
+    FAULT FIX 2026-09-03: Yahoo's per-ticker RSS returns general market news, so tagging every item
+    from ticker tk's feed AS tk produced false attributions (a Goldgroup Mining story tagged NVDA).
+    Subscription provenance is kept separately in `feed_ticker`; `tickers` now means "mentioned".
+    """
+    if not text:
+        return False
+    if re.search(r"(?<![A-Za-z0-9.])" + re.escape(tk) + r"(?![A-Za-z0-9])", text):
+        return True
+    low = text.lower()
+    return any(a.lower() in low for a in _TICKER_ALIASES.get(tk, ()))
+
+
+def _mk_event(source, headline, ts, link, snippet, tickers=None, assets=None,
+              feed_ticker=None, verify_mentions=False) -> dict:
+    parsed = _ts_utc(ts)
+    head = (headline or "").strip()
+    snip = re.sub(r"\s+", " ", (snippet or "").strip())[:400]
+    tks = sorted(set(tickers or []))
+    if verify_mentions:
+        blob = head + " " + snip
+        tks = sorted(t for t in tks if _mentions_ticker(blob, t))
+    ev = {"id": _event_id(source, headline, link), "source": source,
+          "headline": head, "ts": ts,
+          "ts_utc": parsed.isoformat() if parsed else None, "link": (link or "").strip(),
+          "snippet": snip,
+          "tickers": tks, "assets": sorted(set(assets or []))}
+    if feed_ticker:
+        ev["feed_ticker"] = feed_ticker
+    return ev
 
 
 # ---------------------------------------------------------------------------
@@ -92,23 +159,48 @@ def read_yahoo_headlines(spec: dict, tickers: list = None) -> list:
             continue  # a single ticker's feed failing must not blind the whole desk
         for it in items:
             out.append(_mk_event("YAHOO_RSS", it["title"], it["pub"] or _now_utc(),
-                                 it["link"], it["desc"], tickers=[tk]))
+                                 it["link"], it["desc"], tickers=[tk],
+                                 feed_ticker=tk, verify_mentions=True))
     return out
 
 
+class _PartialList(list):
+    """A feed result that succeeded only partially; carries the failures so they cannot go silent."""
+    partial_errors: list = []
+
+
 def read_google_news(spec: dict, queries: list) -> list:
-    """Google News RSS keyword search -- macro/thematic context the ticker feeds miss."""
+    """Google News RSS keyword search -- macro/thematic context the ticker feeds miss.
+
+    A per-query failure used to be swallowed with `continue`, so every query could fail and the feed
+    would report zero items with NO error -- a blind eye indistinguishable from "no news today".
+    Every query that fails is now raised past the boundary once ALL queries have failed, and partial
+    failures are recorded on the returned list so read_world can surface them.
+    """
     tmpl = spec["sources"]["google_news_rss"]
-    out = []
+    out, failed = [], []
     for q in queries:
         url = tmpl.format(query=urllib.parse.quote(q)) + "&hl=en-US&gl=US&ceid=US:en"
         try:
             items = _parse_rss_items(http_get_text(url))
-        except (Refused, ET.ParseError):
+        except (Refused, ET.ParseError) as exc:
+            failed.append(f"{q}: {type(exc).__name__}")
+            continue
+        if not items:
+            # Google throttles by serving a well-formed 200 RSS envelope with ZERO <item>s. For a
+            # broad standing query ("earnings", "stock market") a genuinely empty result is not a
+            # real state of the world, so a blank is a THROTTLE, not "no news". Measured live
+            # 2026-09-03: the same query returned 103 items, then 0, within one minute.
+            failed.append(f"{q}: BLANK (valid RSS, 0 items -- throttled)")
             continue
         for it in items[:15]:
             out.append(_mk_event("GOOGLE_NEWS", it["title"], it["pub"] or _now_utc(),
                                  it["link"], f"[q={q}] {it['desc']}"))
+    if failed and len(failed) == len(queries):
+        raise Refused("GOOGLE_NEWS: every query failed or came back blank (" + "; ".join(failed) + ")")
+    if failed:
+        out = _PartialList(out)
+        out.partial_errors = failed
     return out
 
 
@@ -147,6 +239,9 @@ def read_world(spec: dict, *, google_queries: list = None) -> dict:
         try:
             got = fn()
             feeds[name] = len(got)
+            partial = getattr(got, "partial_errors", None)
+            if partial:
+                errors[name] = "PARTIAL: " + "; ".join(partial)
             for e in got:
                 if e["id"] not in seen:
                     seen.add(e["id"])
@@ -160,7 +255,10 @@ def read_world(spec: dict, *, google_queries: list = None) -> dict:
     _collect("GOOGLE_NEWS", lambda: read_google_news(spec, google_queries))
     _collect("COINGECKO_TRENDING", lambda: read_coingecko_trending(spec))
 
-    events.sort(key=lambda e: e["ts"], reverse=True)
+    _floor = dt.datetime.min.replace(tzinfo=dt.timezone.utc)
+    events.sort(key=lambda e: _ts_utc(e.get("ts_utc") or e.get("ts")) or _floor, reverse=True)
+    # feed_counts is the RAW per-feed count BEFORE cross-feed de-dup; n_raw is their sum. Reporting
+    # shown/feed_counts as if it were coverage understates it (T56, 2026-09-06: 440 raw -> 387 unique).
     return {"kind": "event_stream", "pulled_utc": _now_utc(),
-            "feed_counts": feeds, "feed_errors": errors,
-            "n_events": len(events), "events": events}
+            "feed_counts_raw_prededupe": feeds, "feed_counts": feeds, "feed_errors": errors,
+            "n_raw": sum(feeds.values()), "n_events": len(events), "events": events}

@@ -98,6 +98,73 @@ def run_selftest() -> int:
     assert abs(exp["expectancy_R"] - 1.0) < 1e-9, f"expectancy wrong: {exp}"
     out["expectancy_arithmetic_correct"] = True
 
+    # Ticker attribution (FAULT FIX 2026-09-03): a per-ticker feed item that does not name the
+    # ticker must NOT be tagged with it; provenance survives in feed_ticker.
+    from . import world_reader as _wr
+    _false = _wr._mk_event("YAHOO_RSS", "Why Goldgroup Mining Stock Soared on Wednesday", None,
+                           "http://x/1", "Precious metals had a good day.", tickers=["NVDA"],
+                           feed_ticker="NVDA", verify_mentions=True)
+    assert _false["tickers"] == [], f"false ticker attribution survived: {_false}"
+    assert _false["feed_ticker"] == "NVDA", "feed provenance lost"
+    _sym = _wr._mk_event("YAHOO_RSS", "NVDA guides higher", None, "http://x/2", "", tickers=["NVDA"],
+                         feed_ticker="NVDA", verify_mentions=True)
+    _name = _wr._mk_event("YAHOO_RSS", "Broadcom outlook weighs on stock", None, "http://x/3", "",
+                          tickers=["AVGO"], feed_ticker="AVGO", verify_mentions=True)
+    assert _sym["tickers"] == ["NVDA"] and _name["tickers"] == ["AVGO"], "true mention dropped"
+    out["ticker_attribution_verified"] = True
+
+    # Data-path fault #1 (FIXED 2026-09-03): the read digest truncated a globally recency-sorted
+    # stream, so a high-volume feed crowded the window and a low-volume feed could be 0% visible to
+    # the agent proposing off it. Measured live: SEC_8K 7/40, GOOGLE_NEWS 0/15. The digest must now
+    # represent EVERY feed present in the stream.
+    from .__main__ import _stratified
+    synth = ([{"source": "LOUD", "id": f"l{i}"} for i in range(500)]
+             + [{"source": "QUIET", "id": f"q{i}"} for i in range(3)]
+             + [{"source": "RARE", "id": "r0"}])
+    picked = _stratified(synth, 60)
+    seen = {e["source"] for e in picked}
+    assert seen == {"LOUD", "QUIET", "RARE"}, f"digest hid a whole feed: {seen}"
+    assert len(picked) == 60, f"digest lost its budget: {len(picked)}"
+    assert sum(1 for e in picked if e["source"] == "QUIET") == 3, "low-volume feed under-shown"
+    out["datapath_digest_represents_every_feed"] = True
+
+    # Data-path fault #2 (FIXED 2026-09-03): read_google_news caught each query's failure and
+    # `continue`d, so ALL queries could fail and the feed reported 0 items with feed_errors == {} --
+    # a blind eye indistinguishable from "no news". Partial failure must surface; total failure raises.
+    from . import world_reader as _w
+    _calls = {"n": 0}
+
+    def _flaky(url):
+        _calls["n"] += 1
+        if _calls["n"] % 2:
+            raise Refused("simulated 429")
+        return ("<rss><channel><item><title>ok</title><link>http://x</link>"
+                "<description>d</description></item></channel></rss>")
+
+    _real = _w.http_get_text
+    try:
+        _w.http_get_text = _flaky
+        got = _w.read_google_news(spec, ["a", "b", "c", "d"])
+        assert getattr(got, "partial_errors", None), "partial feed failure went silent"
+        # A well-formed 200 with zero items is a throttle, not "no news" -- it must not go silent.
+        _w.http_get_text = lambda url: "<rss><channel></channel></rss>"
+        blank = _w.read_google_news(spec, ["a", "b"])
+        raise AssertionError(f"blank-but-valid feed did not raise: {blank}")
+    except Refused:
+        pass
+    finally:
+        _w.http_get_text = _real
+    try:
+        _w.http_get_text = lambda url: (_ for _ in ()).throw(Refused("simulated 429"))
+        try:
+            _w.read_google_news(spec, ["a", "b"])
+            raise AssertionError("total feed failure did not raise past its boundary")
+        except Refused:
+            pass
+    finally:
+        _w.http_get_text = _real
+    out["datapath_feed_failure_never_silent"] = True
+
     out["ALL_PASSED"] = True
     json.dump(out, sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")

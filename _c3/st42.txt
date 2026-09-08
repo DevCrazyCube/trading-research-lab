@@ -1,0 +1,10 @@
+05:09:31
+=== PLACEBO FUNNEL (3-way arm only) ===
+  combos swept                      : 210196
+  validated                         : 9313
+  BH-pass                           : 1832
+  BH-pass AND va>0                  : 345
+  BH-pass AND va>0 AND tr>0         : 69
+  BH AND va>0 AND tr>0 AND both med>0: 4
+   volaccel=q2|dd_ath=q1|m_cohort10=2 | t15 TR +0.1787 VA +0.1622 n  249 k 34
+   dd_ath=q1|ret30m=q3|m_px0=1 | t5 TR +0.1589 VA +0.1663 n  180 k 18

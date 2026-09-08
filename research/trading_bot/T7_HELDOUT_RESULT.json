@@ -1,0 +1,254 @@
+{
+  "preregistration_sha256": "7bd072a7565a27b39d83a35afa659fb4c80bdf700dcb84e1100ea0e1816c7cdd",
+  "frozen_config": {
+    "yield_min": 0.0,
+    "top_n": 500,
+    "include_special": true
+  },
+  "frozen_file_sha256": "2f25e00c64e02b6efd5a36e1c903a8a05bb4c1848ae10707a2a8540172aa3b2c",
+  "test_period": [
+    "2022-01-03",
+    "2026-08-14"
+  ],
+  "periods_per_year_used": 221,
+  "mean_events_per_day": 6.12855740922473,
+  "cost_model_primary_rung": {
+    "entry_half_spread": {
+      "name": "entry_half_spread",
+      "value": "0",
+      "value_float": 0.0,
+      "unit": "bp of notional",
+      "provenance": "EXCHANGE_MECHANISM_UNVERIFIED_FILL",
+      "provenance_meaning": "NOT a measurement and NOT an assumption about size: a structural property of the venue's matching mechanism -- a single-price call auction clears every participant at one price, so there is no bid-ask to cross. It is legitimate ONLY while the order is actually filled AT that print, which in this programme is M0 and is UNPERFORMED. Any component carrying this provenance must be accompanied by a stress rung that charges a real half-spread on the same leg, and the report must say M0 is outstanding.",
+      "source": "The entry leg is an official single-price CLOSING AUCTION print (condition code 6): every participant clears at one price, so there is no bid-ask to cross. T1 section 2c verified type=market,tif=cls is accepted by the broker. THIS ZERO IS DECLARED, NOT INHERITED FROM THE OTHER SIDE -- T6's correction was that an unmeasured exit must never take the entry's number, and here each side states the same venue fact for itself. It is legitimate ONLY if the order actually fills AT the print, which is M0 and is UNPERFORMED; the stress ladder charges a real measured half-spread on this leg at 0.5h / h / 2h / 4h for exactly that reason."
+    },
+    "entry_extra_slippage": {
+      "name": "entry_extra_slippage",
+      "value": "0",
+      "value_float": 0.0,
+      "unit": "bp of notional",
+      "provenance": "STRESS_LADDER",
+      "provenance_meaning": "not a measurement; a deliberately adverse rung in a sweep",
+      "source": "NOT MEASURED for this population. Zero here makes the model a stated LOWER BOUND on entry impact, never a claim that impact is absent. At $100k against single-stock closing auctions clearing $28-130M (T1 2e) the omission is tolerable; the ladder sweeps it."
+    },
+    "exit_half_spread": {
+      "name": "exit_half_spread",
+      "value": "0",
+      "value_float": 0.0,
+      "unit": "bp of notional",
+      "provenance": "EXCHANGE_MECHANISM_UNVERIFIED_FILL",
+      "provenance_meaning": "NOT a measurement and NOT an assumption about size: a structural property of the venue's matching mechanism -- a single-price call auction clears every participant at one price, so there is no bid-ask to cross. It is legitimate ONLY while the order is actually filled AT that print, which in this programme is M0 and is UNPERFORMED. Any component carrying this provenance must be accompanied by a stress rung that charges a real half-spread on the same leg, and the report must say M0 is outstanding.",
+      "source": "The exit leg is an official single-price CLOSING AUCTION print (condition code 6): every participant clears at one price, so there is no bid-ask to cross. T1 section 2c verified type=market,tif=cls is accepted by the broker. THIS ZERO IS DECLARED, NOT INHERITED FROM THE OTHER SIDE -- T6's correction was that an unmeasured exit must never take the entry's number, and here each side states the same venue fact for itself. It is legitimate ONLY if the order actually fills AT the print, which is M0 and is UNPERFORMED; the stress ladder charges a real measured half-spread on this leg at 0.5h / h / 2h / 4h for exactly that reason."
+    },
+    "exit_extra_slippage": {
+      "name": "exit_extra_slippage",
+      "value": "0",
+      "value_float": 0.0,
+      "unit": "bp of notional",
+      "provenance": "STRESS_LADDER",
+      "provenance_meaning": "not a measurement; a deliberately adverse rung in a sweep",
+      "source": "NOT MEASURED for this population. Zero here makes the model a stated LOWER BOUND on exit impact, never a claim that impact is absent. At $100k against single-stock closing auctions clearing $28-130M (T1 2e) the omission is tolerable; the ladder sweeps it."
+    },
+    "commission_per_share": {
+      "name": "commission_per_share",
+      "value": "166",
+      "value_float": 166.0,
+      "unit": "micro-dollars per share",
+      "provenance": "BROKER_SCHEDULE",
+      "provenance_meaning": "a published broker fee schedule",
+      "source": "FINRA Trading Activity Fee, $0.000166 per share. Broker commission itself is $0 (Alpaca and every zero-commission US retail broker). TAF is legally a SALE-side fee only; this field is side-agnostic, so charging it on every share traded OVERCHARGES by ~2x. That is the conservative direction and it is stated rather than optimised away. The SEC Section 31 fee is ad valorem and sale-side and cannot be expressed in a per-share field, so it is charged separately in the runner at $27.80 per $1M -- the TOP of the 2016-2026 range -- on both sale legs, in both periods."
+    },
+    "borrow_annual": {
+      "name": "borrow_annual",
+      "value": "33/10000",
+      "value_float": 0.0033,
+      "unit": "fraction of short notional per year",
+      "provenance": "VENDOR_FEED_SNAPSHOT",
+      "provenance_meaning": "a point-in-time snapshot this programme pulled from a named feed",
+      "source": "B22G tier 'etb_general_collateral': 0.33%/yr. median IBKR indicative fee across 14 ETB names in this universe. Sources: Alpaca /v2/assets borrow_status for the traded account (complete over the universe) and Interactive Brokers' shortable-securities feed for the rate. AVAILABILITY, STATED CORRECTLY (a rate cannot express it, but the earlier wording overstated it): 8 of the 52 names the ORB rule ACTUALLY screened are hard-to-borrow and NOT SHORTABLE AT ALPACA (15.4%) -- not 36 of 100, which is the size of the screen INPUT rather than of the traded universe. NOT SHORTABLE AT ALPACA IS NOT 'unborrowable at any price': 7 of the 11 hard-to-borrow names with an obtainable IBKR rate have shares AVAILABLE to borrow there, at 2.32%-259.96%/yr -- expensive, not impossible, and a COST at another broker rather than a constraint. Of the 227 short signals in the B22B sample, 39 are in names Alpaca will not short, and 38 of those 39 are LEVERAGED or INVERSE ETPs (MSTU, SOXL, SOXS, SQQQ, TSLL) -- an Alpaca PRODUCT restriction, not borrow scarcity; exactly 1 is an ordinary common stock (ONDS). A strategy with a short leg must still handle availability as a constraint rather than a cost, but the constraint is mostly 'this broker does not lend leveraged ETPs', which a universe filter or another broker removes."
+    },
+    "entry_bp": 0.0,
+    "exit_bp": 0.0,
+    "round_trip_bp": 0.0,
+    "note": "Spread and slippage are PER SIDE. round_trip_bp is entry + exit, and is the number to quote. Borrow accrues on CALENDAR days, not trading days. Price improvement is NOT modelled: the full half-spread is charged to every taker fill, which is the conservative side of the B22C uncertainty."
+  },
+  "sec31_bp_of_sale_notional": 0.278,
+  "net": {
+    "label": "net, auction rail + regulatory + borrow",
+    "n_event_days": 1019,
+    "mean_per_day_bp": 0.8403781682084376,
+    "sd_per_day_bp": 58.863351872631604,
+    "t_stat": 0.45573970295393784,
+    "sharpe_per_observation": 0.014276763749825972,
+    "periods_per_year_used": 221,
+    "annualised_sharpe": 0.21223935139413763,
+    "annualised_return_pct": 1.857235751740647,
+    "cagr_pct": 1.483582397044736,
+    "max_drawdown_pct": -20.532742552397675,
+    "skew": -0.8284560211663703,
+    "kurtosis_non_excess": 9.399080882292592,
+    "final_equity": 1.0702982841830326
+  },
+  "gross_zero_cost": {
+    "label": "gross, zero cost (B19P diagnostic)",
+    "n_event_days": 1019,
+    "mean_per_day_bp": 1.2079151359806033,
+    "sd_per_day_bp": 58.86366702958791,
+    "t_stat": 0.6550526402667736,
+    "sharpe_per_observation": 0.020520555326147844,
+    "periods_per_year_used": 221,
+    "annualised_sharpe": 0.3050599862116668,
+    "annualised_return_pct": 2.6694924505171334,
+    "cagr_pct": 2.310770696669251,
+    "max_drawdown_pct": -19.30057880185567,
+    "skew": -0.8285573906905287,
+    "kurtosis_non_excess": 9.399959184955861,
+    "final_equity": 1.1111401689065912
+  },
+  "equal_weight_non_exdiv_control": {
+    "label": "equal-weight NON-ex-dividend universe, market-adjusted, same days",
+    "n_event_days": 1019,
+    "mean_per_day_bp": -1.4089866164726887,
+    "sd_per_day_bp": 40.36356365068044,
+    "t_stat": -1.1143059700196027,
+    "sharpe_per_observation": -0.03490738896759767,
+    "periods_per_year_used": 221,
+    "annualised_sharpe": -0.5189356441816946,
+    "annualised_return_pct": -3.1138604224046422,
+    "cagr_pct": -3.238678402200701,
+    "max_drawdown_pct": -16.113200215013045,
+    "skew": 0.11991527925324218,
+    "kurtosis_non_excess": 3.789389690055286,
+    "final_equity": 0.8590926669383875
+  },
+  "dropoff_heldout": {
+    "dollar_weighted_dropoff_ratio": 0.9523736233055143,
+    "sum_market_adjusted_drop": 4579.720006550174,
+    "sum_dividends": 4808.7430127,
+    "n_events": 6245,
+    "mean_yield_pct": 0.6127892080944939
+  },
+  "stress_ladder": {
+    "zero cost (B19P diagnostic: no spread, no reg fee, no borrow)": {
+      "mean_per_day_bp": 1.2079151359806033,
+      "t_stat": 0.6550526402667736,
+      "annualised_sharpe": 0.3050599862116668,
+      "annualised_return_pct": 2.6694924505171334
+    },
+    "PRIMARY: auction rail, spread 0, + SEC31 + TAF + borrow": {
+      "mean_per_day_bp": 0.8403781682084376,
+      "t_stat": 0.45573970295393784,
+      "annualised_sharpe": 0.21223935139413763,
+      "annualised_return_pct": 1.857235751740647
+    },
+    "0.5h per leg (h = 1.43 bp measured, T3)": {
+      "mean_per_day_bp": -0.5896218317915627,
+      "t_stat": -0.31975375924948446,
+      "annualised_sharpe": -0.14891028810761073,
+      "annualised_return_pct": -1.3030642482593535
+    },
+    "h per leg -- M0 wrong, MOC fills at the touch": {
+      "mean_per_day_bp": -2.019621831791563,
+      "t_stat": -1.0952472214529068,
+      "annualised_sharpe": -0.5100599276093591,
+      "annualised_return_pct": -4.463364248259354
+    },
+    "2h per leg": {
+      "mean_per_day_bp": -4.879621831791564,
+      "t_stat": -2.646234145859751,
+      "annualised_sharpe": -1.2323592066128557,
+      "annualised_return_pct": -10.783964248259355
+    },
+    "4h per leg": {
+      "mean_per_day_bp": -10.599621831791561,
+      "t_stat": -5.748207994673439,
+      "annualised_sharpe": -2.6769577646198486,
+      "annualised_return_pct": -23.42516424825935
+    }
+  },
+  "dsr_trials_8": {
+    "dsr": 0.07622173739380957,
+    "name": "deflated Sharpe",
+    "observed_sharpe_per_observation": 0.014276763749825972,
+    "benchmark_sharpe_per_observation": 0.05939964369167559,
+    "benchmark_basis": "expected-max Sharpe under the null",
+    "trials": 8,
+    "sharpe_variance": 0.0016574815974688495,
+    "n": 1019,
+    "skew": -0.8284560211663703,
+    "kurtosis_non_excess": 9.399080882292592,
+    "z": -1.4309537359769007,
+    "passes_at_0p95": false
+  },
+  "dsr_trials_24_sensitivity": {
+    "dsr": 0.01771998236662921,
+    "name": "deflated Sharpe",
+    "observed_sharpe_per_observation": 0.014276763749825972,
+    "benchmark_sharpe_per_observation": 0.08060087931279473,
+    "benchmark_basis": "expected-max Sharpe under the null",
+    "trials": 24,
+    "sharpe_variance": 0.0016574815974688495,
+    "n": 1019,
+    "skew": -0.8284560211663703,
+    "kurtosis_non_excess": 9.399080882292592,
+    "z": -2.103295292155582,
+    "passes_at_0p95": false
+  },
+  "label_permutation": {
+    "observed_mean_bp": 1.207915135980603,
+    "trials": 10000,
+    "seed": 20260817,
+    "n_days": 1019,
+    "p_right_tail": 0.21327867213278673,
+    "null_mean_bp": -0.7295906712116687,
+    "null_sd_bp": 2.4278379207931327,
+    "null_p95_bp": 3.2405953014119975
+  },
+  "exposure_timing_permutation_WIRING_CHECK_ONLY": {
+    "observed": 8.403781682084376e-05,
+    "statistic": "mean",
+    "trials": 10000,
+    "seed": 20260817,
+    "p_right_tail": 1.0,
+    "p_left_tail": 1.0,
+    "p_two_tailed": 1.0,
+    "null_p05": 8.403781682084376e-05,
+    "null_p50": 8.403781682084376e-05,
+    "null_p95": 8.403781682084376e-05,
+    "degenerate_exposure": true,
+    "note": "Exposure is shuffled against fixed market returns, so every permutation holds the same positions for the same number of bars. Only the timing changes. A constant exposure permutes to itself and correctly yields p = 1.0."
+  },
+  "gross_t_stat": 0.6550526402667736,
+  "net_by_year": {
+    "2022": {
+      "n": 223,
+      "mean_bp": 3.1770049019585884,
+      "t": 0.8676969503611851
+    },
+    "2023": {
+      "n": 217,
+      "mean_bp": 5.701060359826942,
+      "t": 1.7268159429983123
+    },
+    "2024": {
+      "n": 222,
+      "mean_bp": -2.5664271996515846,
+      "t": -0.7030380181650563
+    },
+    "2025": {
+      "n": 219,
+      "mean_bp": -5.1922041895773035,
+      "t": -1.3346202726241274
+    },
+    "2026": {
+      "n": 138,
+      "mean_bp": 4.475237087139618,
+      "t": 0.628820150833904
+    }
+  },
+  "kill_conditions_triggered": [
+    "KILL 2: label-permutation p >= 0.05",
+    "KILL 3: DSR < 0.95 at trials=8"
+  ],
+  "verdict": "DEAD"
+}

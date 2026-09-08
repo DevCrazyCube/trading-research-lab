@@ -1,0 +1,76 @@
+eligible cells 37419  mean=-0.2329 med=-0.2165  frac>0=0.0035
+cell-mean pctiles -0.557 -0.455 -0.305 -0.216 -0.142 -0.073 -0.030
+  variant time        n= 2607 mean=-0.2775 med=-0.2671 frac>0=0.0031
+  variant tp25        n= 3339 mean=-0.1310 med=-0.1193 frac>0=0.0045
+  variant tp50        n= 3129 mean=-0.1616 med=-0.1518 frac>0=0.0058
+  variant tp100       n= 2913 mean=-0.1833 med=-0.1738 frac>0=0.0144
+  variant sl30        n= 3207 mean=-0.2851 med=-0.2779 frac>0=0.0009
+  variant sl50        n= 3027 mean=-0.3136 med=-0.3007 frac>0=0.0007
+  variant tp50_sl30   n= 3357 mean=-0.2349 med=-0.2287 frac>0=0.0000
+  variant tp100_sl40  n= 3246 mean=-0.2516 med=-0.2407 frac>0=0.0077
+  variant tp25_sl15   n= 3384 mean=-0.2044 med=-0.2012 frac>0=0.0000
+  variant half_tp50   n= 2607 mean=-0.1715 med=-0.1694 frac>0=0.0073
+  variant trail30     n= 3375 mean=-0.2736 med=-0.2698 frac>0=0.0000
+  variant trail50     n= 3228 mean=-0.3047 med=-0.3028 frac>0=0.0000
+  gate    all          n= 4716 mean=-0.2381 med=-0.2296 frac>0=0.0000
+  gate    age_lt60     n= 3657 mean=-0.2244 med=-0.2178 frac>0=0.0016
+  gate    age_60_360   n= 2376 mean=-0.1839 med=-0.1670 frac>0=0.0000
+  gate    age_360_900  n= 1911 mean=-0.1475 med=-0.1248 frac>0=0.0000
+  gate    age_ge900    n= 1443 mean=-0.1528 med=-0.1430 frac>0=0.0000
+  gate    mc_2k_5k     n= 2526 mean=-0.2013 med=-0.1972 frac>0=0.0000
+  gate    mc_5k_50k    n= 3978 mean=-0.2721 med=-0.2628 frac>0=0.0040
+  gate    mc_50k_250k  n= 1296 mean=-0.2482 med=-0.2402 frac>0=0.0000
+  gate    mc_ge250k    n= 1248 mean=-0.2709 med=-0.2436 frac>0=0.0000
+  gate    ath_lt20     n= 3144 mean=-0.1544 med=-0.1424 frac>0=0.0267
+  gate    ath_20_60    n= 3357 mean=-0.2319 med=-0.2114 frac>0=0.0027
+  gate    ath_ge60     n= 4170 mean=-0.3013 med=-0.3059 frac>0=0.0026
+  gate    ath_ge90     n= 3597 mean=-0.2951 med=-0.2977 frac>0=0.0017
+  --- creator filters, mean over all their eligible cells (TRAIN) ---
+  cf pdb_pos      ncells= 1071 mean=-0.1897 med=-0.1744 frac>0=0.0047
+  cf dlen151      ncells= 2592 mean=-0.1991 med=-0.1838 frac>0=0.0031
+  cf b60_1p       ncells= 1953 mean=-0.2082 med=-0.1919 frac>0=0.0097
+  cf np2p         ncells= 2016 mean=-0.2096 med=-0.1914 frac>0=0.0040
+  cf rec_lt120    ncells= 1974 mean=-0.2113 med=-0.1943 frac>0=0.0061
+  cf np1p         ncells= 2199 mean=-0.2154 med=-0.1958 frac>0=0.0005
+  cf np3p         ncells= 1776 mean=-0.2261 med=-0.2082 frac>0=0.0062
+  cf b60_3p       ncells=  663 mean=-0.2282 med=-0.2552 frac>0=0.0452
+  cf np5p         ncells= 1296 mean=-0.2286 med=-0.2139 frac>0=0.0093
+  cf b360_5p      ncells= 1296 mean=-0.2286 med=-0.2139 frac>0=0.0093
+  cf db_pos       ncells=  693 mean=-0.2310 med=-0.2308 frac>0=0.0000
+  cf rec_lt30     ncells= 1128 mean=-0.2328 med=-0.2424 frac>0=0.0106
+  cf ng0          ncells= 2802 mean=-0.2338 med=-0.2149 frac>0=0.0000
+  cf np0_l2h      ncells= 2802 mean=-0.2349 med=-0.2166 frac>0=0.0000
+  cf all          ncells= 2802 mean=-0.2368 med=-0.2195 frac>0=0.0000
+  cf np0          ncells= 2778 mean=-0.2439 med=-0.2241 frac>0=0.0000
+  cf b60_0        ncells= 2796 mean=-0.2454 med=-0.2267 frac>0=0.0000
+  cf np1p_l2h     ncells= 1575 mean=-0.2568 med=-0.2451 frac>0=0.0013
+  cf np10p        ncells=  852 mean=-0.2716 med=-0.2646 frac>0=0.0000
+  cf b15_1p       ncells=  420 mean=-0.2828 med=-0.3016 frac>0=0.0000
+  cf np3p_l2h     ncells=  411 mean=-0.2979 med=-0.2920 frac>0=0.0000
+  cf dlen115      ncells= 1524 mean=-0.3213 med=-0.3086 frac>0=0.0000
+
+=== canonical per-mint outcomes, creator filters, train vs validate ===
+cell H=15 time flat : mints with >=2 trades = 176
+cell H=15 tp50_sl30 flat : mints with >=2 trades = 222
+cell H=60 time flat : mints with >=2 trades = 130
+cell H=60 tp100_sl40 flat : mints with >=2 trades = 196
+cell H=240 time flat : mints with >=2 trades = 84
+
+filter         ktr   kva | H15/time  H60/time  H240/time  H15/tp50_s  H60/tp100_
+np0             54    61 | +0.027/+0.042  +0.082/+0.076  +0.100/+0.059  +0.009/-0.006  +0.028/+0.001  | trainpos=5 validpos=4 BOTH=4
+np1p            25    36 | -0.058/-0.071  -0.153/-0.136  -0.192/-0.091  -0.017/+0.010  -0.047/-0.001  | trainpos=0 validpos=1 BOTH=0
+np2p            23    30 | -0.048/-0.068  -0.119/-0.115  -0.170/-0.085  -0.004/+0.035  -0.024/+0.033  | trainpos=0 validpos=2 BOTH=0
+np0_l2h         62    71 | +0.022/+0.043  +0.071/+0.058  +0.077/+0.030  +0.007/-0.012  +0.025/-0.006  | trainpos=5 validpos=3 BOTH=3
+np1p_l2h        17    26 | -0.080/-0.117  -0.229/-0.157  -0.214/-0.069  -0.024/+0.040  -0.076/+0.017  | trainpos=0 validpos=2 BOTH=0
+ng0             72    88 | +0.010/+0.012  +0.019/+0.005  +0.016/+0.001  +0.010/-0.006  +0.019/-0.005  | trainpos=5 validpos=3 BOTH=3
+rec_lt120       21    33 | -0.044/-0.069  -0.116/-0.135  -0.156/-0.085  -0.006/+0.015  -0.017/+0.014  | trainpos=0 validpos=2 BOTH=0
+b60_0           60    67 | +0.007/+0.033  +0.040/+0.056  +0.063/+0.050  +0.002/-0.003  +0.002/-0.002  | trainpos=5 validpos=3 BOTH=3
+b60_1p          19    30 | -0.022/-0.073  -0.099/-0.123  -0.156/-0.093  -0.006/+0.007  -0.004/+0.005  | trainpos=0 validpos=2 BOTH=0
+dlen151         54    57 | +0.005/-0.030  -0.051/-0.117  -0.109/-0.082  +0.044/+0.048  +0.035/+0.056  | trainpos=3 validpos=2 BOTH=2
+
+=== validate permutation tests (mint-level, 5000 draws) ===
+  np0          H15/time         k= 61  vmean=-0.0791 pool=-0.1210  p=0.0014
+  np0          H60/time         k= 43  vmean=-0.0456 pool=-0.1212  p=0.0032
+  np0          H240/time        k= 28  vmean=-0.1997 pool=-0.2585  p=0.1202
+  np0          H15/tp50_sl30    k= 78  vmean=-0.2164 pool=-0.2103  p=0.6348
+  np0          H60/tp100_sl40   k= 66  vmean=-0.2159 pool=-0.2169  p=0.4846

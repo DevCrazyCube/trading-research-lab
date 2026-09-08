@@ -1,0 +1,9 @@
+building caches...
+cache size 4480
+REAL SPLIT: cells=93952 trainpos=18672 +valpos=6672 +beat_placebo=3584 +boot_lo>0=147 (4.1% of gate-3) best_val=(0.25442835055993257, (7.5, 180.0, 'tp10', 'flat'), 'rs_neg', 7)
+PERM 0: cells=100800 trainpos=32473 +valpos=5018 +beat_placebo=2425 +boot_lo>0=249 (10.3% of gate-3) best_val=(0.4353481911594609, (7.5, 60.0, 'trail50', 'half_out'), 'drift_0_10', 6)
+PERM 1: cells=89280 trainpos=34905 +valpos=4500 +beat_placebo=2447 +boot_lo>0=312 (12.8% of gate-3) best_val=(0.19525844005263712, (7.5, 60.0, 'tp10', 'flat'), 'drift_gt0', 13)
+PERM 2: cells=87936 trainpos=17008 +valpos=4945 +beat_placebo=2187 +boot_lo>0=204 (9.3% of gate-3) best_val=(0.35044550952684456, (7.5, 60.0, 'tp100_trail25', 'flat'), 'drift_gt0', 12)
+PERM 3: cells=99840 trainpos=25374 +valpos=3750 +beat_placebo=1589 +boot_lo>0=350 (22.0% of gate-3) best_val=(0.27542527828226226, (3.0, 60.0, 'tp25', 'flat'), 'age_ge6h', 6)
+PERM 4: cells=87424 trainpos=18631 +valpos=3565 +beat_placebo=1365 +boot_lo>0=222 (16.3% of gate-3) best_val=(0.27535389265615084, (7.5, 60.0, 'tp100_trail25', 'half_out'), 'drift_gt0', 11)
+REAL survivors 147 PERM survivors [249, 312, 204, 350, 222] mean perm 267.4

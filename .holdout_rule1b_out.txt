@@ -1,0 +1,23 @@
+loaded mints 466
+mints by h {0: 156, 1: 139, 2: 171}
+bars by h {0: 20116, 1: 19362, 2: 26130}
+thresholds train(h1+h2) {'n': 42392, 'vacc_lo': 2.8812654886843236, 'vacc_hi': 26.78824225513242, 'vwap_q90': 0.08215514132506174, 'vrel_q90': 3.4107115907397128}
+thresholds h1 only {'n': 17972, 'vacc_lo': 2.9524252781960136, 'vacc_hi': 34.585307633826815, 'vwap_q90': 0.10202300205165989, 'vrel_q90': 3.845166504295126}
+thresholds h2 only {'n': 24420, 'vacc_lo': 2.8289057296940237, 'vacc_hi': 23.38806472418593, 'vwap_q90': 0.07108137292093217, 'vrel_q90': 3.1545853171497167}
+thresholds h0 (in-sample sensitivity only) {'n': 18556, 'vacc_lo': 3.259155120888596, 'vacc_hi': 36.80451296747173, 'vwap_q90': 0.07857751678236546, 'vrel_q90': 4.058858735680451}
+holdout n=92 clusters=32 mean +6.0162% median +1.6661%
+TP trades 7 across 7 mints
+excluding TP trades: n=85 clusters=29 mean -1.1749% median -6.0192%
+leave-one-mint-out mean range: min +4.3337% (366gLzZC)  max +7.9437% (FeeJBAon)
+  drop top-1 mints: mean +4.3337% (n_mints=31)
+  drop top-2 mints: mean +2.5389% (n_mints=30)
+  drop top-3 mints: mean +0.6204% (n_mints=29)
+  drop top-4 mints: mean -1.4215% (n_mints=28)
+  drop top-5 mints: mean -3.1657% (n_mints=27)
+  drop top-6 mints: mean -4.6412% (n_mints=26)
+  drop top-7 mints: mean -5.6343% (n_mints=25)
+randomization toll 0.0114 drop -0.30: rule mean +6.0162% | null mean -3.1620% sd 4.0081% | one-sided p(mean)=0.01000 p(median)=0.01725
+randomization toll 0.0250 drop -0.30: rule mean +4.5578% | null mean -4.4416% sd 3.8963% | one-sided p(mean)=0.01050 p(median)=0.01675
+randomization toll 0.0114 drop -1.00: rule mean +5.8000% | null mean -2.9810% sd 3.9396% | one-sided p(mean)=0.01500 p(median)=0.01575
+median toll 0.0114: +1.6661% 95%CI [-7.7159%, +11.3505%] p=0.9003
+median toll 0.0250: +0.2675% 95%CI [-8.9379%, +9.8187%] p=0.9405

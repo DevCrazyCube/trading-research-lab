@@ -1,0 +1,317 @@
+{
+  "certifiability": {
+    "binding_axis": "completed crash episodes",
+    "certifiable": false,
+    "crash_axis": {
+      "completed": 0,
+      "definition": ">= 20% peak-to-trough decline in the un-overlaid benchmark curve, peak -> trough (T4 prereg \u00a76, frozen before any evidence accrued)",
+      "effect_size_used": {
+        "n": 3,
+        "per_crash_advantage_pp": 6.0,
+        "sd_pp": 6.84,
+        "source": "T13 held-out window; the same three episodes that failed the gate"
+      },
+      "episodes": [],
+      "expected_years_before_any_verdict": 27.0,
+      "expected_years_per_crash": 9.0,
+      "power_table": [
+        {
+          "crashes_remaining": 5.0,
+          "crashes_required": 5.0,
+          "expected_years_remaining": 45.0,
+          "power": 0.5
+        },
+        {
+          "crashes_remaining": 10.2,
+          "crashes_required": 10.2,
+          "expected_years_remaining": 92.0,
+          "power": 0.8
+        },
+        {
+          "crashes_remaining": 13.7,
+          "crashes_required": 13.7,
+          "expected_years_remaining": 123.0,
+          "power": 0.9
+        }
+      ],
+      "remaining_before_any_verdict": 3,
+      "required_before_any_verdict": 3,
+      "the_honest_expectation": "T4 prereg \u00a76 states it plainly and it is repeated here so it cannot be discovered in year twelve: at the measured effect size this forward test is NOT expected to certify the overlay. 80% power is ~10 crashes, ~92 years. What it IS expected to produce is an execution measurement that accrues daily, a behavioural check outside the observation window, and a working verifiable bot on the safe side of the owner gate."
+    },
+    "execution_axis": {
+      "note": "the only axis on which this test buys information at a useful rate. ~300 clean fills bounds the non-fill rate under 1% by the rule of three; that is a year of sessions, not a career. Fills accrue only from 2026-08-18, when the order type was changed from market-on-close (which expires unfilled on the paper account) to a near-close market order.",
+      "orders_reconciled": 2
+    },
+    "power_arithmetic": {
+      "inputs_that_are_not_results": {
+        "DISCLAIMER": "EVERY NUMBER IN THIS SUB-BLOCK IS AN INPUT TO A POWER CALCULATION, NOT A RESULT. T4 prereg \u00a78 forbids quoting a Sharpe, a CAGR or a p-value from this sample as evidence. They appear here because sizing the remaining sample is impossible without an effect-size estimate, and hiding the estimate would make the power arithmetic unauditable rather than honest.",
+        "paired_excess_vs_N1": {
+          "computable": false,
+          "reason": "13 settled sessions is below the 30 needed for skew and kurtosis to be anything but noise, and DSR's denominator is built from both."
+        }
+      }
+    },
+    "session_axis": {
+      "note": "sessions accrue fast and buy almost nothing on the primary question. They are the denominator for FG4 (the rail) and FG5 (DSR), not for FG1.",
+      "settled_sessions": 13
+    },
+    "verdict": "NO VERDICT -- the pre-registered minimum is not met. This is neither a pass nor a 'promising'.",
+    "what_would_change_the_answer": [
+      "a completed >=20% crash episode -- the only event that moves the primary gate",
+      "a persistent positive shortfall on fills -- which would fail FG4 and force the whole accrual to be restated at the taker rail",
+      "a weight mismatch -- which invalidates the window outright under FG3",
+      "NOT: a good month, a bad month, or any amount of calm-market performance"
+    ]
+  },
+  "claims_explicitly_not_licensed": [
+    "the overlay makes money",
+    "the overlay beats buy-and-hold",
+    "the overlay reduces the drawdown you will live through",
+    "any CAGR, Sharpe, information ratio, hit rate or p-value computed before the pre-registered minimum is met",
+    "that a calm stretch without a crash is evidence about crashes",
+    "that this log is a reason to fund a live account"
+  ],
+  "claims_licensed": [],
+  "drawdown": {
+    "computable": true,
+    "strategy_maxdd_pct": 0.8592327845941417,
+    "vs_benchmark_DIAGNOSTIC_ONLY": {
+      "benchmark": "un-overlaid buy-and-hold of the same instrument, one entry charged",
+      "benchmark_maxdd_pct": 1.20866294903385,
+      "delta_maxdd_pp": 0.3494301644397084,
+      "why_this_is_not_the_answer": "beating 100% exposure is the easy comparison and an overlay with mean exposure ~0.74 wins it by construction. T13 \u00a75i records this exact error. It is a diagnostic and may never be quoted as the result."
+    },
+    "vs_vol_matched_null_N1": {
+      "definition": "ex-post volatility-matched CONSTANT weight in the same instrument plus T-bills, solved by bisection over THIS forward window. It is fitted with hindsight the strategy never had. That is deliberate: it is the gate that killed both T13 families.",
+      "delta_maxdd_pp": 0.026182505512791637,
+      "gate_FG1_threshold_pp": 3.0,
+      "matched_weight": 0.742712214589119,
+      "null_maxdd_pct": 0.8854152901069332,
+      "null_realised_vol_annual": 0.061782305041574045,
+      "reminder": "the size half of a gate is not the gate. T13's overlay cleared +7.25 pp and died on p = 0.233.",
+      "significance_half_of_FG1": {
+        "computed": false,
+        "reason": "13 settled sessions. A paired block bootstrap with 21-session blocks needs at least 252 to resample anything but itself, and T4 prereg \u00a78 forbids quoting a p-value before the \u00a76 minimum in any case. Withheld deliberately."
+      },
+      "size_half_of_FG1_met": false,
+      "strategy_realised_vol_annual": 0.06178230813894107
+    }
+  },
+  "elapsed": {
+    "calendar_days": 16,
+    "discontinuities_over_5_sessions": [],
+    "first_run_logged": "2026-08-17",
+    "first_settled": "2026-08-19",
+    "last_run_logged": "2026-09-07",
+    "last_settled": "2026-09-04",
+    "note": "T4 prereg \u00a77: a gap of more than five consecutive sessions is a recorded operational discontinuity. The curve stays continuous because a weight persists until something moves it; the OPERATIONAL record does not.",
+    "runs_logged": 17,
+    "sessions_settled": 13,
+    "years": 0.04380561259411362
+  },
+  "execution_rail_FG4": {
+    "fill_rate": 0.5,
+    "gate_FG4": {
+      "consequence_if_it_fails": "the ENTIRE accrual is restated at the taker rail (2.5 bp/side) BEFORE FG1 is read, not after.",
+      "fill_rate_threshold": 0.99,
+      "median_shortfall_threshold_bp": 2.0,
+      "status": "AT RISK"
+    },
+    "non_fills": [
+      {
+        "decision_dropped": 0.7242369236978444,
+        "filled_qty": 0,
+        "qty_ordered": 93,
+        "session": "2026-08-17",
+        "status": "expired"
+      }
+    ],
+    "orders_fully_filled": 1,
+    "orders_reconciled": 2,
+    "power_on_this_axis": {
+      "n": 2,
+      "non_fills": 1,
+      "note": "a non-fill has occurred; FG4 is a live question, not a formality.",
+      "observed_non_fill_rate": 0.5
+    },
+    "rail_measured": "NEAR-CLOSE MARKET (type=market, tif=day, sent 15:50-15:58 ET) since 2026-08-18 -- the window is read from t4_forward.ACTION_WINDOW_ET rather than restated here, so this label cannot drift away from the schedule it describes. Before that: MARKET-ON-CLOSE (tif=cls), which expired unfilled on the paper account and never produced a fill observation at all. The shortfall field spans both rails and is NOT one measurement -- read the session date with the number.",
+    "shortfall_bp_adverse_positive": {
+      "max": 5.065137793991934,
+      "mean": 5.065137793991934,
+      "median": 5.065137793991934,
+      "n": 1
+    },
+    "why_this_matters_most_right_now": "the drawdown question needs decades. This one needs sessions, and it is the measured half M0 explicitly did not claim. If the rail is not what was assumed, that is worth knowing in months rather than in 2050. It is now KNOWN not to be what was assumed -- the executed rail is a near-close market order and the priced rail is M0's auction -- so FG4 is measuring a live discrepancy, not a formality."
+  },
+  "exposure_path": {
+    "behaviour_check": {
+      "decisions_reconstructed_from_the_frozen_rule": 17,
+      "n_below_the_cap": 17,
+      "n_decisions": 17,
+      "note": "w = min(w_max, target/realised_vol) is MECHANICAL, so agreement here is a wiring check and not a finding. It is reported because a broken implementation makes every other number on this page meaningless regardless of what the PnL says. A single break invalidates the window under FG3.",
+      "realised_vol_max": 0.1390333146628043,
+      "realised_vol_min": 0.12555727409593762,
+      "reconstruction_breaks": [],
+      "target_weight_max": 0.7964492755998395,
+      "target_weight_min": 0.7192520745299694
+    },
+    "path": [
+      {
+        "date": "2026-08-19",
+        "weight": 0.7287301117074827
+      },
+      {
+        "date": "2026-08-20",
+        "weight": 0.7243843297450895
+      },
+      {
+        "date": "2026-08-21",
+        "weight": 0.7250870307762838
+      },
+      {
+        "date": "2026-08-24",
+        "weight": 0.7218579293097207
+      },
+      {
+        "date": "2026-08-25",
+        "weight": 0.7207972991521254
+      },
+      {
+        "date": "2026-08-26",
+        "weight": 0.7220551458186673
+      },
+      {
+        "date": "2026-08-27",
+        "weight": 0.7217721549189725
+      },
+      {
+        "date": "2026-08-28",
+        "weight": 0.7222465365290234
+      },
+      {
+        "date": "2026-08-31",
+        "weight": 0.7192520745299694
+      },
+      {
+        "date": "2026-09-01",
+        "weight": 0.7230079528480879
+      },
+      {
+        "date": "2026-09-02",
+        "weight": 0.7230556602123794
+      },
+      {
+        "date": "2026-09-03",
+        "weight": 0.7795547868012842
+      },
+      {
+        "date": "2026-09-04",
+        "weight": 0.778379832754843
+      }
+    ],
+    "summary": {
+      "changes": 12,
+      "changes_per_year": 232.61538461538464,
+      "latest": 0.778379832754843,
+      "max": 0.7795547868012842,
+      "mean": 0.7315523727003023,
+      "min": 0.7192520745299694,
+      "n": 13,
+      "time_at_cap": 0.0
+    }
+  },
+  "fidelity_FG3": {
+    "consequence_if_it_fails": "T4 prereg \u00a75: one mismatch invalidates the window. It is not a rounding note to reconcile later.",
+    "cross_check_notes": [
+      "scripts.t13_risk_shaping.vol_exposure == local recomputation"
+    ],
+    "gate_FG3": "PASS",
+    "mismatches": [],
+    "sessions_checked": 13
+  },
+  "framing": "READ-ONLY EVALUATION OF A FORWARD TEST THAT HAS CERTIFIED NOTHING. This report is evidence about what the bot DID, never a forecast of what it WILL do, and it licenses no return claim at any sample size short of the pre-registered minimum. Improvement is a NEW pre-registered forward test (ITERATION_PROTOCOL.md), never an edit to a running rule.",
+  "gates": {
+    "FG1_drawdown_vs_N1": {
+      "size_half": "+0.0262 pp (does not meet the size half)",
+      "state": "NOT READABLE -- \u00a76 minimum not met",
+      "threshold": ">= 3.0 pp AND p < 0.05 (paired block bootstrap, 21-session blocks, 10000 draws)"
+    },
+    "FG2_delta_cagr_vs_N1": {
+      "state": "NOT READABLE -- T4 prereg \u00a78 forbids computing a CAGR from this sample, so this gate is deliberately not evaluated before the \u00a76 minimum",
+      "threshold": ">= -0.5%/yr"
+    },
+    "FG3_fidelity": {
+      "readable_now": true,
+      "state": "PASS",
+      "threshold": "every settled weight equals the frozen rule's weight; one mismatch invalidates the window"
+    },
+    "FG4_execution_rail": {
+      "note": "the only gate that accrues fast enough to be answered on a human timescale",
+      "readable_now": true,
+      "state": "AT RISK",
+      "threshold": "median adverse shortfall <= 2.0 bp AND fill rate >= 99%"
+    },
+    "FG5_dsr": {
+      "state": "NOT READABLE -- \u00a76 minimum not met",
+      "threshold": ">= 0.95 at 1 declared trial(s)"
+    },
+    "minimum_sample_met": false,
+    "read_order": "FG4 first (it can force a restatement), then FG3, then FG1, FG2, FG5",
+    "verdict": "NO VERDICT -- the pre-registered minimum is not met. This is neither a pass nor a 'promising'."
+  },
+  "generated_utc": "2026-09-07T20:35:01.434860+00:00",
+  "hit_rate": {
+    "n_sessions": 13,
+    "paired_vs_N1": {
+      "NOT_LICENSED": "a hit rate is not the claim under test. T4's claim is entirely about the LEFT TAIL, where per-session win rates carry almost no information. Reported because it was asked for, fenced because it is the number most likely to be misread as an edge.",
+      "binomial_se": 0.1386750490563073,
+      "paired_hit_rate": 0.46153846153846156,
+      "sessions_beating_the_vol_matched_null": 6,
+      "sessions_needed_to_separate_from_0.5_at_80pct_power": 1326.4604685660272
+    },
+    "raw_hit_rate": 0.5384615384615384,
+    "sessions_up": 7,
+    "why_raw_is_nearly_meaningless": "a long-only overlay's daily win rate is the instrument's win rate scaled by exposure. It measures SPY, not the rule. The paired rate below is the only one that is about the rule at all."
+  },
+  "iteration_protocol": "research/trading_bot/ITERATION_PROTOCOL.md -- how a new idea is stood up as a SEPARATE frozen forward test, and how a running one is retired. Nothing in this report may be used to modify a running rule.",
+  "realised_pnl": {
+    "broker": {
+      "account_type": "ALPACA PAPER. No real money. Live execution is owner-gated.",
+      "first_equity_usd": 100000.0,
+      "first_seen": "2026-08-17",
+      "last_equity_usd": 100220.85,
+      "last_seen": "2026-09-07",
+      "note": "the paper account pays no interest on idle cash, so compare it against `model_excash`, never against `model_withcash`.",
+      "pnl_pct": 0.22085000000000576,
+      "pnl_usd": 220.85000000000582
+    },
+    "curve": {
+      "benchmark_multiple": 1.0035700730805053,
+      "benchmark_return_pct": 0.3570073080505276,
+      "cumulative_cost_bp": 0.005206645094331302,
+      "cumulative_cost_bp_if_taker_rail": 2.015055910080458,
+      "model_excash_multiple": 1.00299997585501,
+      "model_excash_return_pct": 0.29999758550101063,
+      "model_withcash_multiple": 1.0034725117769985,
+      "model_withcash_return_pct": 0.3472511776998477
+    },
+    "note": "realised, not projected. No annualisation is applied at any sample size: annualising a few sessions is the single most common way a forward log is turned into a forecast it cannot support."
+  },
+  "status_line": "T4 T13-VOL-L60-T0.1-WMAX1.0 PAPER | 13 settled sessions (0.04y) | realised +0.35% | vs N1 +0.03pp | crashes 0/3 (3 more, ~27y) | NOT CERTIFIABLE -- NO VERDICT",
+  "strategy": {
+    "declared_trials": 1,
+    "family": "T13 risk-shaping overlays",
+    "id": "T4",
+    "inception": "2026-08-17",
+    "integrity": {
+      "actual_sha256": "52f3eea24e0a6303fc705c14d0857d411f9fda6f91815e965de9ab3b15b9ff99",
+      "declared_sha256": "52f3eea24e0a6303fc705c14d0857d411f9fda6f91815e965de9ab3b15b9ff99",
+      "frozen": true,
+      "preregistration": "research/trading_bot/T4_FORWARD_PREREGISTRATION.md"
+    },
+    "ledger": "research/trading_bot/T4_FORWARD_LOG.jsonl",
+    "prior_verdict_on_this_rule": "DEAD on T13's frozen held-out gate (drawdown p = 0.233, DSR = 0.355). Run forward because 1990-2026 is burned for this rule, not because it was certified.",
+    "rule_id": "T13-VOL-L60-T0.1-WMAX1.0",
+    "status": "RUNNING"
+  }
+}

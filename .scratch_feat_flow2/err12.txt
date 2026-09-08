@@ -1,0 +1,6 @@
+/home/anont/meme/.scratch_feat_flow2/s12_lagflow.py:65: RuntimeWarning: invalid value encountered in divide
+  g0=np.where(frozen,0.0,px/pe-1.0)
+/home/anont/meme/.scratch_feat_flow2/s12_lagflow.py:67: RuntimeWarning: invalid value encountered in divide
+  g1=np.where(frozen,0.0,0.5*g0+0.5*(px/p1entry-1.0))
+/home/anont/meme/.scratch_feat_flow2/s12_lagflow.py:75: RuntimeWarning: invalid value encountered in divide
+  gh=np.where(np.isfinite(v2),v2,endclose)/pe-1.0

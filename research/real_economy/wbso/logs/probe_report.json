@@ -1,0 +1,221 @@
+{
+  "probed_utc": "2026-08-19T06:52:56.088114+00:00",
+  "sources": {
+    "github_rate_limit": {
+      "status": 200,
+      "search": {
+        "limit": 10,
+        "remaining": 10,
+        "reset": 1787122436,
+        "used": 0
+      },
+      "core": {
+        "limit": 60,
+        "remaining": 60,
+        "reset": 1787125976,
+        "used": 0
+      }
+    },
+    "github_nl_orgs": {
+      "status": 200,
+      "total_count": 19575,
+      "note": "search returns at most 1,000 of these; partition by created: windows"
+    },
+    "peppol": {
+      "endpoint": "https://directory.peppol.eu/search/1.0/json?country=NL",
+      "status": 200,
+      "nl_participants": 112678,
+      "observed_utc": "2026-08-19T06:53:03Z"
+    },
+    "tenderned_demand": {
+      "publications_seen": 100,
+      "ict_matches": 13,
+      "top_buyers": [
+        [
+          "Gemeente Rotterdam",
+          2
+        ],
+        [
+          "Gemeente Amstelveen",
+          1
+        ],
+        [
+          "Omgevingsdienst Utrecht (ODU)",
+          1
+        ],
+        [
+          "Rijkswaterstaat Centrale Informatievoorziening",
+          1
+        ],
+        [
+          "ProRail B.V.",
+          1
+        ],
+        [
+          "Veiligheidsregio Twente",
+          1
+        ],
+        [
+          "NS Groep N.V.",
+          1
+        ],
+        [
+          "Waterschap Hunze en Aa's",
+          1
+        ],
+        [
+          "Shared Service Centrum Ons",
+          1
+        ],
+        [
+          "Autoriteit Consument en Markt",
+          1
+        ],
+        [
+          "Gemeente Amersfoort",
+          1
+        ],
+        [
+          "Universiteit van Amsterdam",
+          1
+        ]
+      ],
+      "sample": [
+        {
+          "publicatieId": "436630",
+          "naam": "Gegevensbeheerder BAG (AI26-1639)",
+          "opdrachtgever": "Gemeente Amstelveen",
+          "datum": "2026-08-19",
+          "type": "Aankondiging gegunde opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436630"
+        },
+        {
+          "publicatieId": "436567",
+          "naam": "Procesondersteuner  afdeling vergunningverlening Bodem en Ondergrond (32 - 36 uur per week)",
+          "opdrachtgever": "Omgevingsdienst Utrecht (ODU)",
+          "datum": "2026-08-19",
+          "type": "Aankondiging gegunde opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436567"
+        },
+        {
+          "publicatieId": "436556",
+          "naam": "Debiet ADM",
+          "opdrachtgever": "Rijkswaterstaat Centrale Informatievoorziening",
+          "datum": "2026-08-19",
+          "type": "Aankondiging gegunde opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436556"
+        },
+        {
+          "publicatieId": "436547",
+          "naam": "ERTMS - Onderzoek ERTMS-readiness Goederenmaterieel",
+          "opdrachtgever": "ProRail B.V.",
+          "datum": "2026-08-19",
+          "type": "Aankondiging gegunde opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436547"
+        },
+        {
+          "publicatieId": "436546",
+          "naam": "Warmtebeeldcamera's t.b.v. Brandweer Twente",
+          "opdrachtgever": "Veiligheidsregio Twente",
+          "datum": "2026-08-19",
+          "type": "Aankondiging opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436546"
+        },
+        {
+          "publicatieId": "436529",
+          "naam": "vrijwillige transparantie vooraf m.b.t. verlenging overeenkomst \"software ontwikkeling en beheer domein eerstelijns medewerkers\"",
+          "opdrachtgever": "NS Groep N.V.",
+          "datum": "2026-08-19",
+          "type": "Aankondiging gegunde opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436529"
+        },
+        {
+          "publicatieId": "436510",
+          "naam": "Vaste datacommunicatie verbindingen",
+          "opdrachtgever": "Waterschap Hunze en Aa's",
+          "datum": "2026-08-19",
+          "type": "Aankondiging gegunde opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436510"
+        },
+        {
+          "publicatieId": "436526",
+          "naam": "Azure Cloud Engineer - cluster BCO",
+          "opdrachtgever": "Gemeente Rotterdam",
+          "datum": "2026-08-19",
+          "type": "Aankondiging gegunde opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436526"
+        },
+        {
+          "publicatieId": "436493",
+          "naam": "ICT Hardware Broker commodity",
+          "opdrachtgever": "Shared Service Centrum Ons",
+          "datum": "2026-08-19",
+          "type": "Aankondiging gegunde opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436493"
+        },
+        {
+          "publicatieId": "436485",
+          "naam": "Weighted Average Cost of Capital (WACC)",
+          "opdrachtgever": "Autoriteit Consument en Markt",
+          "datum": "2026-08-19",
+          "type": "Aankondiging gegunde opdracht",
+          "url": "https://www.tenderned.nl/aankondigingen/overzicht/436485"
+        }
+      ],
+      "observed_utc": "2026-08-19T06:53:03Z"
+    },
+    "tenderned_supplier_field": {
+      "publication_id": "436635",
+      "status": 200,
+      "detail_fields": [
+        "aanbestedingNaam",
+        "aanbestedingStatus",
+        "aankondigingCode",
+        "afgerondeAanbesteding",
+        "cpvCodes",
+        "digitaalInschrijvenCode",
+        "gerelateerdePublicaties",
+        "isDigitaalInschrijvenMogelijk",
+        "isGegund",
+        "isGeimporteerd",
+        "isVroegtijdigBeeindigd",
+        "juridischKaderCode",
+        "kenmerk",
+        "links",
+        "nationaalOfEuropeesCode",
+        "numberOfDaysBeforeAanmeldenInschrijven",
+        "nutsCodes",
+        "onlyGunningProcedure",
+        "opdrachtAardCode",
+        "opdrachtBeschrijving",
+        "opdrachtgeverNaam",
+        "procedureCode",
+        "publicatieCode",
+        "publicatieDatum",
+        "publicatieIDLaatsteRectificatie",
+        "publicatieId",
+        "publicatiePdfId",
+        "sluitingsDatum",
+        "trefwoord1",
+        "trefwoord2",
+        "trefwoord3",
+        "trefwoord4",
+        "typeOpdrachtCode",
+        "typePublicatie"
+      ],
+      "supplier_name_fields_found": [],
+      "conclusion": "no awarded-supplier name in the JSON; it exists only in the publication PDF"
+    }
+  },
+  "client": {
+    "requests_made": 5,
+    "budget": 12,
+    "receipts": 5,
+    "cache_hits": 0,
+    "by_host": {
+      "api.github.com": 2,
+      "directory.peppol.eu": 1,
+      "www.tenderned.nl": 2
+    }
+  }
+}

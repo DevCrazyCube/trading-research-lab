@@ -1,0 +1,111 @@
+train hits 1845 of 120744 combos
+H=5 done, survivors so far 150, t=16.9
+H=15 done, survivors so far 304, t=33.9
+H=30 done, survivors so far 488, t=56.2
+H=60 done, survivors so far 727, t=82.6
+H=120 done, survivors so far 984, t=110.7
+H=240 done, survivors so far 1229, t=142.0
+VALIDATE-POSITIVE 1229
+STRICT SURVIVORS 200
+ V+0.4186(med+0.1156 lo+0.2493) T+0.3459 | ctrlV+0.0445 ctrlT+0.0287 pperm=0.0255 stress+0.3917 vn=129 vk=46 res=0.969 | H=240 trail30 add_dn25 mc_ge250k b60_0
+ V+0.3762(med+0.1130 lo+0.2284) T+0.3304 | ctrlV+0.1152 ctrlT+0.1744 pperm=0.0420 stress+0.3569 vn=105 vk=53 res=0.990 | H=240 trail30 add_dn25 age_lt60 dlen115
+ V+0.3488(med+0.1094 lo+0.2095) T+0.2779 | ctrlV+0.1431 ctrlT+0.1523 pperm=0.0125 stress+0.3287 vn=109 vk=57 res=0.972 | H=240 trail30 add_dn25 ath_ge60 dlen115
+ V+0.3479(med+0.1094 lo+0.2077) T+0.2766 | ctrlV+0.1396 ctrlT+0.1469 pperm=0.0155 stress+0.3288 vn=85 vk=57 res=0.976 | H=240 trail30 add_dn25 ath_ge90 dlen115
+ V+0.3417(med+0.0216 lo+0.2145) T+0.2130 | ctrlV+0.0806 ctrlT+0.0570 pperm=0.0010 stress+0.3247 vn=367 vk=86 res=0.992 | H=240 trail30 add_dn25 age_lt60 np0_l2h
+ V+0.2860(med+0.1182 lo+0.1833) T+0.2562 | ctrlV+0.0591 ctrlT+0.0950 pperm=0.0000 stress+0.2687 vn=118 vk=43 res=0.983 | H=120 trail30 add_dn25 mc_ge250k dlen115
+ V+0.2799(med+0.0172 lo+0.1689) T+0.1595 | ctrlV+0.0668 ctrlT+0.0443 pperm=0.0000 stress+0.2630 vn=367 vk=86 res=0.989 | H=120 trail30 add_dn25 age_lt60 np0_l2h
+ V+0.2753(med+0.0183 lo+0.1700) T+0.1692 | ctrlV+0.0670 ctrlT+0.0396 pperm=0.0005 stress+0.2581 vn=231 vk=105 res=0.978 | H=240 trail30 add_dn25 ath_ge90 np0_l2h
+ V+0.2692(med+0.0171 lo+0.1606) T+0.1609 | ctrlV+0.0635 ctrlT+0.0353 pperm=0.0025 stress+0.2509 vn=356 vk=106 res=0.978 | H=240 trail30 add_dn25 ath_ge60 np0_l2h
+ V+0.2684(med-0.0149 lo+0.1152) T+0.2258 | ctrlV+0.0398 ctrlT+0.0263 pperm=0.0420 stress+0.2324 vn=129 vk=46 res=0.969 | H=240 trail30 flat mc_ge250k b60_0
+ V+0.2555(med+0.0988 lo+0.1576) T+0.1779 | ctrlV+0.0285 ctrlT+0.0167 pperm=0.0415 stress+0.2336 vn=157 vk=46 res=0.981 | H=120 trail30 add_dn25 mc_ge250k b60_0
+ V+0.2544(med-0.0405 lo+0.1286) T+0.1395 | ctrlV+0.0789 ctrlT+0.0592 pperm=0.0025 stress+0.2338 vn=367 vk=86 res=0.992 | H=240 trail30 flat age_lt60 np0_l2h
+ V+0.2541(med-0.0419 lo+0.1282) T+0.1539 | ctrlV+0.0791 ctrlT+0.0649 pperm=0.0010 stress+0.2321 vn=367 vk=86 res=0.989 | H=120 trail30 flat age_lt60 np0_l2h
+ V+0.2522(med+0.0075 lo+0.0354) T+0.1908 | ctrlV+0.1774 ctrlT+0.1641 pperm=0.0180 stress+0.2351 vn=112 vk=28 res=0.982 | H=30 trail30 add_dn25 ath_ge90 b15_1p
+ V+0.2499(med+0.0075 lo+0.0323) T+0.1908 | ctrlV+0.1540 ctrlT+0.1460 pperm=0.0495 stress+0.2328 vn=105 vk=28 res=0.981 | H=60 trail30 add_dn25 ath_ge90 b15_1p
+ V+0.2481(med+0.0075 lo+0.0299) T+0.1908 | ctrlV+0.1877 ctrlT+0.1755 pperm=0.0090 stress+0.2312 vn=121 vk=28 res=0.983 | H=15 trail30 add_dn25 ath_ge90 b15_1p
+ V+0.2477(med-0.0221 lo+0.0120) T+0.2023 | ctrlV+0.1729 ctrlT+0.1755 pperm=0.0330 stress+0.2349 vn=106 vk=26 res=0.991 | H=30 trail30 add_dn25 ath_ge90 b60_3p
+ V+0.2433(med-0.0221 lo+0.0070) T+0.2014 | ctrlV+0.1829 ctrlT+0.1861 pperm=0.0195 stress+0.2308 vn=115 vk=26 res=0.991 | H=15 trail30 add_dn25 ath_ge90 b60_3p
+ V+0.2338(med+0.0075 lo+0.0161) T+0.1899 | ctrlV+0.1798 ctrlT+0.1797 pperm=0.0125 stress+0.2175 vn=160 vk=28 res=0.988 | H=5 trail30 add_dn25 ath_ge90 b15_1p
+ V+0.2310(med-0.0141 lo+0.0031) T+0.0847 | ctrlV+0.1767 ctrlT+0.0812 pperm=0.0155 stress+0.2153 vn=553 vk=27 res=0.980 | H=15 trail30 add_dn25 all b60_3p
+ V+0.2309(med-0.0040 lo+0.0029) T+0.2065 | ctrlV+0.1721 ctrlT+0.1911 pperm=0.0270 stress+0.2190 vn=293 vk=27 res=0.997 | H=15 trail30 add_dn25 ath_ge60 b60_3p
+ V+0.2299(med-0.0123 lo+0.0022) T+0.0858 | ctrlV+0.1654 ctrlT+0.0753 pperm=0.0245 stress+0.2141 vn=441 vk=27 res=0.975 | H=30 trail30 add_dn25 all b60_3p
+ V+0.2280(med-0.0129 lo+0.1246) T+0.0934 | ctrlV+0.0569 ctrlT+0.0266 pperm=0.0035 stress+0.2061 vn=728 vk=106 res=0.964 | H=240 trail30 add_dn25 all np0_l2h
+ V+0.2254(med-0.0553 lo+0.1068) T+0.1177 | ctrlV+0.0690 ctrlT+0.0478 pperm=0.0005 stress+0.2102 vn=367 vk=86 res=0.989 | H=120 trail30 add_up25 age_lt60 np0_l2h
+ V+0.2254(med-0.0541 lo+0.1060) T+0.1114 | ctrlV+0.0688 ctrlT+0.0452 pperm=0.0020 stress+0.2109 vn=367 vk=86 res=0.992 | H=240 trail30 add_up25 age_lt60 np0_l2h
+ V+0.2244(med-0.0507 lo+0.0014) T+0.1263 | ctrlV+0.1878 ctrlT+0.1499 pperm=0.0135 stress+0.2088 vn=112 vk=28 res=0.982 | H=30 trail30 add_up25 ath_ge90 b15_1p
+ V+0.2230(med+0.0068 lo+0.0118) T+0.1998 | ctrlV+0.1641 ctrlT+0.1844 pperm=0.0160 stress+0.2068 vn=309 vk=29 res=0.994 | H=15 trail30 add_dn25 ath_ge60 b15_1p
+ V+0.2223(med-0.0128 lo+0.0117) T+0.0959 | ctrlV+0.1680 ctrlT+0.0924 pperm=0.0105 stress+0.2030 vn=609 vk=29 res=0.979 | H=15 trail30 add_dn25 all b15_1p
+ V+0.2206(med-0.0123 lo+0.0100) T+0.0995 | ctrlV+0.1561 ctrlT+0.0890 pperm=0.0250 stress+0.2002 vn=497 vk=29 res=0.972 | H=30 trail30 add_dn25 all b15_1p
+ V+0.2133(med-0.0069 lo+0.0045) T+0.0987 | ctrlV+0.1621 ctrlT+0.0953 pperm=0.0090 stress+0.1950 vn=987 vk=29 res=0.986 | H=5 trail30 add_dn25 all b15_1p
+ V+0.2126(med-0.0405 lo+0.1011) T+0.1067 | ctrlV+0.0708 ctrlT+0.0526 pperm=0.0005 stress+0.1938 vn=367 vk=86 res=0.995 | H=60 trail30 flat age_lt60 np0_l2h
+ V+0.2100(med+0.0068 lo+0.0002) T+0.1990 | ctrlV+0.1578 ctrlT+0.1898 pperm=0.0155 stress+0.1942 vn=553 vk=29 res=0.995 | H=5 trail30 add_dn25 ath_ge60 b15_1p
+ V+0.2004(med-0.0137 lo+0.0963) T+0.2327 | ctrlV+0.0605 ctrlT+0.1099 pperm=0.0005 stress+0.1822 vn=118 vk=43 res=0.983 | H=120 trail30 flat mc_ge250k dlen115
+ V+0.1979(med+0.0183 lo+0.1108) T+0.1043 | ctrlV+0.0494 ctrlT+0.0251 pperm=0.0035 stress+0.1829 vn=255 vk=105 res=0.984 | H=120 trail30 add_dn25 ath_ge90 np0_l2h
+ V+0.1952(med+0.0216 lo+0.1030) T+0.1041 | ctrlV+0.0483 ctrlT+0.0299 pperm=0.0010 stress+0.1817 vn=367 vk=86 res=0.995 | H=60 trail30 add_dn25 age_lt60 np0_l2h
+ V+0.1927(med+0.0137 lo+0.1068) T+0.0966 | ctrlV+0.0462 ctrlT+0.0211 pperm=0.0010 stress+0.1770 vn=390 vk=106 res=0.982 | H=120 trail30 add_dn25 ath_ge60 np0_l2h
+ V+0.1873(med-0.0221 lo+0.0151) T+0.1509 | ctrlV+0.1126 ctrlT+0.1242 pperm=0.0480 stress+0.1701 vn=138 vk=36 res=0.978 | H=30 trail30 add_dn25 ath_ge90 rec_lt30
+ V+0.1870(med-0.0491 lo+0.0849) T+0.0897 | ctrlV+0.0690 ctrlT+0.0464 pperm=0.0000 stress+0.1649 vn=231 vk=105 res=0.978 | H=240 trail30 flat ath_ge90 np0_l2h
+ V+0.1828(med-0.0541 lo+0.0780) T+0.0749 | ctrlV+0.0599 ctrlT+0.0368 pperm=0.0010 stress+0.1693 vn=367 vk=86 res=0.995 | H=60 trail30 add_up25 age_lt60 np0_l2h
+ V+0.1825(med-0.0221 lo+0.0102) T+0.1497 | ctrlV+0.1222 ctrlT+0.1344 pperm=0.0300 stress+0.1657 vn=148 vk=36 res=0.980 | H=15 trail30 add_dn25 ath_ge90 rec_lt30
+ V+0.1767(med-0.0543 lo+0.0719) T+0.0768 | ctrlV+0.0605 ctrlT+0.0376 pperm=0.0030 stress+0.1527 vn=356 vk=106 res=0.978 | H=240 trail30 flat ath_ge60 np0_l2h
+ V+0.1718(med-0.0044 lo+0.0067) T+0.1504 | ctrlV+0.1129 ctrlT+0.1349 pperm=0.0340 stress+0.1559 vn=368 vk=37 res=0.992 | H=15 trail30 add_dn25 ath_ge60 rec_lt30
+ V+0.1700(med-0.0148 lo+0.0698) T+0.1418 | ctrlV+0.0302 ctrlT+0.0191 pperm=0.0320 stress+0.1417 vn=157 vk=46 res=0.981 | H=120 trail30 flat mc_ge250k b60_0
+ V+0.1680(med-0.0779 lo+0.0718) T+0.0776 | ctrlV+0.0565 ctrlT+0.0361 pperm=0.0030 stress+0.1532 vn=231 vk=105 res=0.978 | H=240 trail30 add_up25 ath_ge90 np0_l2h
+ V+0.1676(med-0.0141 lo+0.0014) T+0.0620 | ctrlV+0.1134 ctrlT+0.0585 pperm=0.0295 stress+0.1489 vn=765 vk=37 res=0.978 | H=15 trail30 add_dn25 all rec_lt30
+ V+0.1672(med-0.0147 lo+0.0833) T+0.0622 | ctrlV+0.0428 ctrlT+0.0191 pperm=0.0045 stress+0.1483 vn=786 vk=106 res=0.972 | H=120 trail30 add_dn25 all np0_l2h
+ V+0.1636(med-0.0660 lo+0.0656) T+0.0720 | ctrlV+0.0525 ctrlT+0.0317 pperm=0.0025 stress+0.1478 vn=356 vk=106 res=0.978 | H=240 trail30 add_up25 ath_ge60 np0_l2h
+ V+0.1593(med-0.0300 lo+0.0164) T+0.0055 | ctrlV+0.0472 ctrlT+0.0334 pperm=0.0000 stress+0.1411 vn=348 vk=52 res=0.948 | H=5 trail30 add_dn25 mc_2k_5k dlen151
+ V+0.1581(med-0.0190 lo+0.0316) T+0.0370 | ctrlV+0.0769 ctrlT+0.0119 pperm=0.0480 stress+0.1436 vn=558 vk=58 res=0.989 | H=15 trail30 add_dn25 age_lt60 dlen151
+ V+0.1546(med-0.0133 lo+0.0308) T+0.0314 | ctrlV+0.0828 ctrlT+0.0175 pperm=0.0100 stress+0.1410 vn=621 vk=58 res=0.992 | H=5 trail30 add_dn25 age_lt60 dlen151
+ V+0.1456(med-0.0176 lo+0.0553) T+0.1790 | ctrlV+0.0396 ctrlT+0.0758 pperm=0.0135 stress+0.1317 vn=118 vk=43 res=0.983 | H=120 trail30 add_up25 mc_ge250k dlen115
+ V+0.1387(med-0.0460 lo+0.0509) T+0.0532 | ctrlV+0.0579 ctrlT+0.0382 pperm=0.0000 stress+0.1199 vn=255 vk=105 res=0.984 | H=120 trail30 flat ath_ge90 np0_l2h
+ V+0.1376(med-0.0715 lo+0.0433) T+0.0040 | ctrlV+0.0483 ctrlT+0.0174 pperm=0.0025 stress+0.1165 vn=728 vk=106 res=0.964 | H=240 trail30 add_up25 all np0_l2h
+ V+0.1375(med+0.0172 lo+0.0516) T+0.0607 | ctrlV+0.0337 ctrlT+0.0172 pperm=0.0150 stress+0.1251 vn=392 vk=86 res=0.995 | H=30 trail30 add_dn25 age_lt60 np0_l2h
+ V+0.1308(med-0.1163 lo+0.0103) T+0.0613 | ctrlV+0.0657 ctrlT+0.0684 pperm=0.0035 stress+0.1071 vn=208 vk=86 res=0.971 | H=240 trail50 add_dn25 age_lt60 np0_l2h
+ V+0.1297(med+0.0068 lo+0.0551) T+0.0623 | ctrlV+0.0338 ctrlT+0.0175 pperm=0.0085 stress+0.1161 vn=301 vk=105 res=0.987 | H=60 trail30 add_dn25 ath_ge90 np0_l2h
+ V+0.1294(med-0.0512 lo+0.0412) T+0.0403 | ctrlV+0.0498 ctrlT+0.0296 pperm=0.0025 stress+0.1094 vn=390 vk=106 res=0.982 | H=120 trail30 flat ath_ge60 np0_l2h
+ V+0.1288(med-0.0183 lo+0.0457) T+0.1157 | ctrlV+0.0228 ctrlT+0.0125 pperm=0.0460 stress+0.1101 vn=157 vk=46 res=0.981 | H=120 trail30 add_up25 mc_ge250k b60_0
+ V+0.1264(med-0.0753 lo+0.0424) T+0.0450 | ctrlV+0.0470 ctrlT+0.0288 pperm=0.0025 stress+0.1135 vn=255 vk=105 res=0.984 | H=120 trail30 add_up25 ath_ge90 np0_l2h
+ V+0.1259(med+0.0037 lo+0.0520) T+0.0548 | ctrlV+0.0309 ctrlT+0.0125 pperm=0.0165 stress+0.1115 vn=457 vk=106 res=0.985 | H=60 trail30 add_dn25 ath_ge60 np0_l2h
+--- loose (validate mean>0 only), top 40 by validate mean ---
+ V+0.4275(med+0.1182 lo+0.2562) T+0.3172 | ctrlV+0.0535 pperm=0.0165 stress+0.4003 vn=122 vk=45 | H=240 trail30 add_dn25 mc_ge250k np0_l2h
+ V+0.4261(med+0.1130 lo+0.2480) T+0.3459 | ctrlV+0.0520 pperm=0.1015 stress+0.3985 vn=120 vk=43 | H=240 trail30 add_dn25 mc_ge250k np0
+ V+0.4186(med+0.1156 lo+0.2493) T+0.3459 | ctrlV+0.0445 pperm=0.0255 stress+0.3917 vn=129 vk=46 | H=240 trail30 add_dn25 mc_ge250k b60_0
+ V+0.3964(med+0.1112 lo+0.2388) T+0.3172 | ctrlV+0.0224 pperm=0.1765 stress+0.3699 vn=145 vk=48 | H=240 trail30 add_dn25 mc_ge250k ng0
+ V+0.3762(med+0.1130 lo+0.2284) T+0.3304 | ctrlV+0.1152 pperm=0.0420 stress+0.3569 vn=105 vk=53 | H=240 trail30 add_dn25 age_lt60 dlen115
+ V+0.3741(med+0.1094 lo+0.2227) T+0.3172 | ctrlV+0.0000 pperm=0.5620 stress+0.3482 vn=174 vk=51 | H=240 trail30 add_dn25 mc_ge250k all
+ V+0.3488(med+0.1094 lo+0.2095) T+0.2779 | ctrlV+0.1431 pperm=0.0125 stress+0.3287 vn=109 vk=57 | H=240 trail30 add_dn25 ath_ge60 dlen115
+ V+0.3479(med+0.1094 lo+0.2077) T+0.2766 | ctrlV+0.1396 pperm=0.0155 stress+0.3288 vn=85 vk=57 | H=240 trail30 add_dn25 ath_ge90 dlen115
+ V+0.3417(med+0.0216 lo+0.2145) T+0.2130 | ctrlV+0.0806 pperm=0.0010 stress+0.3247 vn=367 vk=86 | H=240 trail30 add_dn25 age_lt60 np0_l2h
+ V+0.3308(med+0.0140 lo+0.1993) T+0.2216 | ctrlV+0.0697 pperm=0.0925 stress+0.3148 vn=261 vk=69 | H=240 trail30 add_dn25 age_lt60 np0
+ V+0.3005(med+0.0062 lo+0.1881) T+0.1921 | ctrlV+0.0394 pperm=0.1815 stress+0.2842 vn=317 vk=77 | H=240 trail30 add_dn25 age_lt60 b60_0
+ V+0.2860(med+0.1182 lo+0.1833) T+0.2562 | ctrlV+0.0591 pperm=0.0000 stress+0.2687 vn=118 vk=43 | H=120 trail30 add_dn25 mc_ge250k dlen115
+ V+0.2836(med-0.0070 lo+0.1735) T+0.1783 | ctrlV+0.0225 pperm=0.1530 stress+0.2661 vn=545 vk=101 | H=240 trail30 add_dn25 age_lt60 ng0
+ V+0.2799(med+0.0172 lo+0.1689) T+0.1595 | ctrlV+0.0668 pperm=0.0000 stress+0.2630 vn=367 vk=86 | H=120 trail30 add_dn25 age_lt60 np0_l2h
+ V+0.2771(med-0.0152 lo+0.1131) T+0.2258 | ctrlV+0.0485 pperm=0.0920 stress+0.2397 vn=120 vk=43 | H=240 trail30 flat mc_ge250k np0
+ V+0.2765(med+0.1130 lo+0.1687) T+0.2198 | ctrlV+0.0634 pperm=0.1510 stress+0.2585 vn=105 vk=53 | H=120 trail30 add_dn25 age_lt60 dlen115
+ V+0.2759(med-0.0152 lo+0.1189) T+0.1996 | ctrlV+0.0473 pperm=0.0305 stress+0.2394 vn=122 vk=45 | H=240 trail30 flat mc_ge250k np0_l2h
+ V+0.2753(med+0.0183 lo+0.1700) T+0.1692 | ctrlV+0.0670 pperm=0.0005 stress+0.2581 vn=231 vk=105 | H=240 trail30 add_dn25 ath_ge90 np0_l2h
+ V+0.2698(med+0.0237 lo+0.1393) T+0.1857 | ctrlV+0.0987 pperm=0.0570 stress+0.2460 vn=173 vk=57 | H=240 trail30 add_dn25 all dlen115
+ V+0.2692(med+0.0171 lo+0.1606) T+0.1609 | ctrlV+0.0635 pperm=0.0025 stress+0.2509 vn=356 vk=106 | H=240 trail30 add_dn25 ath_ge60 np0_l2h
+ V+0.2684(med-0.0149 lo+0.1152) T+0.2258 | ctrlV+0.0398 pperm=0.0420 stress+0.2324 vn=129 vk=46 | H=240 trail30 flat mc_ge250k b60_0
+ V+0.2611(med-0.0085 lo+0.1605) T+0.1560 | ctrlV+0.0000 pperm=0.4060 stress+0.2437 vn=654 vk=111 | H=240 trail30 add_dn25 age_lt60 all
+ V+0.2608(med+0.1094 lo+0.1575) T+0.1612 | ctrlV+0.0339 pperm=0.0320 stress+0.2387 vn=150 vk=45 | H=120 trail30 add_dn25 mc_ge250k np0_l2h
+ V+0.2555(med+0.0988 lo+0.1576) T+0.1779 | ctrlV+0.0285 pperm=0.0415 stress+0.2336 vn=157 vk=46 | H=120 trail30 add_dn25 mc_ge250k b60_0
+ V+0.2544(med-0.0405 lo+0.1286) T+0.1395 | ctrlV+0.0789 pperm=0.0025 stress+0.2338 vn=367 vk=86 | H=240 trail30 flat age_lt60 np0_l2h
+ V+0.2541(med-0.0419 lo+0.1282) T+0.1539 | ctrlV+0.0791 pperm=0.0010 stress+0.2321 vn=367 vk=86 | H=120 trail30 flat age_lt60 np0_l2h
+ V+0.2538(med+0.0158 lo+0.1457) T+0.1538 | ctrlV+0.0455 pperm=0.1560 stress+0.2372 vn=180 vk=85 | H=240 trail30 add_dn25 ath_ge90 np0
+ V+0.2537(med+0.0079 lo+0.1514) T+0.1492 | ctrlV+0.0407 pperm=0.1990 stress+0.2378 vn=261 vk=69 | H=120 trail30 add_dn25 age_lt60 np0
+ V+0.2522(med+0.0075 lo+0.0354) T+0.1908 | ctrlV+0.1774 pperm=0.0180 stress+0.2351 vn=112 vk=28 | H=30 trail30 add_dn25 ath_ge90 b15_1p
+ V+0.2516(med+0.0882 lo+0.1482) T+0.1779 | ctrlV+0.0247 pperm=0.1855 stress+0.2294 vn=148 vk=43 | H=120 trail30 add_dn25 mc_ge250k np0
+ V+0.2512(med+0.0091 lo+0.1438) T+0.1459 | ctrlV+0.0455 pperm=0.1315 stress+0.2332 vn=277 vk=85 | H=240 trail30 add_dn25 ath_ge60 np0
+ V+0.2507(med-0.0264 lo+0.1055) T+0.2331 | ctrlV+0.0756 pperm=0.1385 stress+0.2299 vn=105 vk=53 | H=120 trail30 flat age_lt60 dlen115
+ V+0.2500(med-0.0246 lo+0.0994) T+0.2451 | ctrlV+0.0745 pperm=0.1535 stress+0.2292 vn=105 vk=53 | H=240 trail30 flat age_lt60 dlen115
+ V+0.2499(med+0.0075 lo+0.0323) T+0.1908 | ctrlV+0.1540 pperm=0.0495 stress+0.2328 vn=105 vk=28 | H=60 trail30 add_dn25 ath_ge90 b15_1p
+ V+0.2498(med+0.0075 lo+0.0323) T+0.1908 | ctrlV+0.1013 pperm=0.1365 stress+0.2328 vn=105 vk=28 | H=120 trail30 add_dn25 ath_ge90 b15_1p
+ V+0.2498(med+0.0075 lo+0.0323) T+0.1908 | ctrlV+0.0415 pperm=0.3340 stress+0.2328 vn=105 vk=28 | H=240 trail30 add_dn25 ath_ge90 b15_1p
+ V+0.2486(med-0.0235 lo+0.1027) T+0.1996 | ctrlV+0.0200 pperm=0.1915 stress+0.2129 vn=145 vk=48 | H=240 trail30 flat mc_ge250k ng0
+ V+0.2481(med+0.0075 lo+0.0299) T+0.1908 | ctrlV+0.1877 pperm=0.0090 stress+0.2312 vn=121 vk=28 | H=15 trail30 add_dn25 ath_ge90 b15_1p
+ V+0.2477(med-0.0221 lo+0.0120) T+0.2023 | ctrlV+0.1729 pperm=0.0330 stress+0.2349 vn=106 vk=26 | H=30 trail30 add_dn25 ath_ge90 b60_3p
+ V+0.2453(med-0.0221 lo+0.0089) T+0.2025 | ctrlV+0.1493 pperm=0.0695 stress+0.2326 vn=99 vk=26 | H=60 trail30 add_dn25 ath_ge90 b60_3p
+elapsed 142.01175665855408

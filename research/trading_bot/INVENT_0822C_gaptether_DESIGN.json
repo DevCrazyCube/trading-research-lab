@@ -1,0 +1,282 @@
+{
+ "A1_EQ": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 1.1528154870604255,
+  "gross_sr": 0.43597051695606664,
+  "net_sr": -1.8452825468779435,
+  "breakeven_bp": 0.5730037332567058
+ },
+ "A2_YW": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 0.6970377806162888,
+  "gross_sr": 0.2636049957379384,
+  "net_sr": -1.8776654057551951,
+  "breakeven_bp": 0.3690753155546806
+ },
+ "A3_YHI": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 0.2635615097482679,
+  "gross_sr": 0.09967340736172027,
+  "net_sr": -1.3487517146074344,
+  "breakeven_bp": 0.20607536442919722
+ },
+ "A4_YLO": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 1.4965827763199504,
+  "gross_sr": 0.5659760594676629,
+  "net_sr": -0.9869113866534347,
+  "breakeven_bp": 1.0929356526467338
+ },
+ "A5_YSPREAD": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": -0.42367204918002505,
+  "gross_sr": -0.1602238383974538,
+  "net_sr": -2.037345321249481,
+  "breakeven_bp": -0.2541437946914335
+ },
+ "A6_SPECIAL": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 1.754160238032846,
+  "gross_sr": 0.6633864260004266,
+  "net_sr": 0.5851941427304223,
+  "breakeven_bp": 22.53051926083893
+ },
+ "A7_REG": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 1.7283062151534725,
+  "gross_sr": 0.6536089795255741,
+  "net_sr": -1.5067401601595682,
+  "breakeven_bp": 0.9071735231647694
+ },
+ "A8_IRREG": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 1.2883666873689454,
+  "gross_sr": 0.4872331236228204,
+  "net_sr": -0.42976728962530586,
+  "breakeven_bp": 1.5940718713554267
+ },
+ "A9_ADVHI": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 0.5360743162181045,
+  "gross_sr": 0.2027320064587463,
+  "net_sr": -1.5822406407391598,
+  "breakeven_bp": 0.34027738511925876
+ },
+ "A10_ADVLO": {
+  "sign": 1.0,
+  "family": "A",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 2.151285079451766,
+  "gross_sr": 0.8135706700124327,
+  "net_sr": -0.7022408371775765,
+  "breakeven_bp": 1.6102453524814015
+ },
+ "B1_EPS_OC": {
+  "sign": -1.0,
+  "family": "B",
+  "H": 1,
+  "apriori": false,
+  "gross_t": 1.0383471656947147,
+  "gross_sr": 0.3926810106985173,
+  "net_sr": -0.46572467007664875,
+  "breakeven_bp": 1.3723111816901252
+ },
+ "B2_Y_OC": {
+  "sign": -1.0,
+  "family": "B",
+  "H": 1,
+  "apriori": false,
+  "gross_t": 2.0456750311095835,
+  "gross_sr": 0.773631175888441,
+  "net_sr": -0.20610918027491412,
+  "breakeven_bp": 2.3691858723395893
+ },
+ "B3_GRAW_OC": {
+  "sign": -1.0,
+  "family": "B",
+  "H": 1,
+  "apriori": false,
+  "gross_t": 0.3296019627933465,
+  "gross_sr": 0.12464851463364976,
+  "net_sr": -0.7300405626687858,
+  "breakeven_bp": 0.43731330028260096
+ },
+ "C1_EPS_H1": {
+  "sign": 1.0,
+  "family": "C",
+  "H": 1,
+  "apriori": false,
+  "gross_t": 0.06198501504263372,
+  "gross_sr": 0.02344142610416729,
+  "net_sr": -0.6298374790496212,
+  "breakeven_bp": 0.10760372425871235
+ },
+ "C2_EPS_H5": {
+  "sign": -1.0,
+  "family": "C",
+  "H": 5,
+  "apriori": false,
+  "gross_t": 0.8043432253739776,
+  "gross_sr": 0.30418565304893624,
+  "net_sr": -0.003390073396680602,
+  "breakeven_bp": 2.9669381728847655
+ },
+ "C3_EPS_H20": {
+  "sign": 1.0,
+  "family": "C",
+  "H": 20,
+  "apriori": false,
+  "gross_t": 0.4025567611326341,
+  "gross_sr": 0.15223848154804953,
+  "net_sr": 0.008655600395470314,
+  "breakeven_bp": 3.180841565876282
+ },
+ "C4_EPS_GAP5": {
+  "sign": -1.0,
+  "family": "C",
+  "H": 5,
+  "apriori": false,
+  "gross_t": 1.739656219486517,
+  "gross_sr": 0.6579013119170729,
+  "net_sr": 0.34676497962795055,
+  "breakeven_bp": 6.340702533068446
+ },
+ "C5_EPSAGG_TS": {
+  "sign": 1.0,
+  "family": "C",
+  "H": 1,
+  "apriori": false,
+  "gross_t": 0.9819228116250589,
+  "gross_sr": 0.3713425093609042,
+  "net_sr": 0.2284767052909485,
+  "breakeven_bp": 7.8009952219237
+ },
+ "C6_EPS_VOLADJ": {
+  "sign": -1.0,
+  "family": "C",
+  "H": 5,
+  "apriori": false,
+  "gross_t": 0.7824113198442364,
+  "gross_sr": 0.29589146868122423,
+  "net_sr": -0.045042141870714834,
+  "breakeven_bp": 2.60370061327516
+ },
+ "D1_FWD_GAP": {
+  "sign": 1.0,
+  "family": "D",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 2.4986181846067277,
+  "gross_sr": 0.9449247289316874,
+  "net_sr": 0.844628176914174,
+  "breakeven_bp": 25.815092214480636
+ },
+ "D2_FWD_H20": {
+  "sign": -1.0,
+  "family": "D",
+  "H": 20,
+  "apriori": false,
+  "gross_t": 1.262212555293437,
+  "gross_sr": 0.477342182176005,
+  "net_sr": 0.44779047919641574,
+  "breakeven_bp": 47.121266023064464
+ },
+ "D3_REV_GAP": {
+  "sign": -1.0,
+  "family": "D",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 1.1568592903513615,
+  "gross_sr": 0.4374997981211848,
+  "net_sr": 0.38534163884794953,
+  "breakeven_bp": 23.91075450755913
+ },
+ "D4_REV_H20": {
+  "sign": -1.0,
+  "family": "D",
+  "H": 20,
+  "apriori": true,
+  "gross_t": 0.6820122768453866,
+  "gross_sr": 0.25792266693506183,
+  "net_sr": 0.2502081719206016,
+  "breakeven_bp": 98.09549660578458
+ },
+ "E1_PLACEBO_DATE": {
+  "sign": 1.0,
+  "family": "E",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 1.467220554067618,
+  "gross_sr": 0.5548718859394517,
+  "net_sr": -1.5837405532149875,
+  "breakeven_bp": 0.7780704979302728
+ },
+ "E2_SHUFFLE_RATE": {
+  "sign": 1.0,
+  "family": "E",
+  "H": 1,
+  "apriori": true,
+  "gross_t": 9.828822026941454,
+  "gross_sr": 3.7170533084018462,
+  "net_sr": 2.5984242718985757,
+  "breakeven_bp": 9.93095090006372
+ },
+ "E3_NOTETHER": {
+  "sign": 1.0,
+  "family": "E",
+  "H": 1,
+  "apriori": true,
+  "gross_t": -34.65856426916542,
+  "gross_sr": -13.107138437142718,
+  "net_sr": -14.72452552486404,
+  "breakeven_bp": -22.129922544618655
+ },
+ "E4_RUNUP5": {
+  "sign": 1.0,
+  "family": "E",
+  "H": 5,
+  "apriori": false,
+  "gross_t": 1.8949327298235539,
+  "gross_sr": 0.7166236150459028,
+  "net_sr": 0.14857892744540838,
+  "breakeven_bp": 3.7845169640971488
+ },
+ "E5_RUNUP20": {
+  "sign": 1.0,
+  "family": "E",
+  "H": 20,
+  "apriori": false,
+  "gross_t": 0.8823434413370403,
+  "gross_sr": 0.33368369055605973,
+  "net_sr": 0.09080059271241257,
+  "breakeven_bp": 4.121454708786909
+ }
+}

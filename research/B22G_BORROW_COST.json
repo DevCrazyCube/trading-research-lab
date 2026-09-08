@@ -1,0 +1,1259 @@
+{
+ "document": "B22G_BORROW_COST",
+ "created": "2026-08-16",
+ "question": "What does it cost to borrow the names this programme would actually short, and can it be sourced repeatably?",
+ "why": "The T2 cost model carried borrow_annual = 0.003 (30 bp/yr) with a BROKER_SCHEDULE provenance whose own source string warned that hard-to-borrow names are not that. The ORB universe is the day's most-active names, which is exactly the population where that warning bites. This measures it instead of inheriting it.",
+ "universe": {
+  "what": "the 100-symbol ORB most-actives pool used by the B22B slippage run",
+  "path": "/home/anont/.claude/jobs/5d56bbe0/tmp/orb_universe.json",
+  "n": 100
+ },
+ "sources": [
+  {
+   "id": "alpaca_assets",
+   "what": "GET /v2/assets/{symbol} on the account this programme would trade in",
+   "gives": "shortable, easy_to_borrow, borrow_status, margin_requirement_short",
+   "does_not_give": "a RATE. It is a status flag. Reading easy_to_borrow as 'free' is the zero-where-a-measurement-is-missing error this programme keeps dying of.",
+   "coverage": "100/100 symbols -- complete",
+   "fetched": "2026-08-16"
+  },
+  {
+   "id": "alpaca_fee_schedule",
+   "what": "Alpaca's published short-selling fee schedule",
+   "gives": "$0 locate and borrow fee on ETB shares for Trading API users; HTB charged as sum(HTB short market value * that stock's HTB rate) / 360 per day",
+   "rate_source": "GET /v1/locates/quotes on the LIVE trading host",
+   "status_here": "endpoint exists on api.alpaca.markets but returns 403 for this key (no live/HTB entitlement); 404 on paper-api. Rates NOT obtainable by us.",
+   "url": "https://docs.alpaca.markets/us/docs/margin-and-short-selling"
+  },
+  {
+   "id": "ibkr_via_chartexchange",
+   "what": "Interactive Brokers' shortable-securities feed (usa.txt, republished 15-minutely)",
+   "gives": "indicative cost to borrow, percent per year, plus shares available",
+   "why_republished": "ftp3.interactivebrokers.com and ftp.interactivebrokers.com are both unreachable from this host (connect timeout); the republication was used instead and is labelled as second-hand.",
+   "coverage": "25/100 symbols",
+   "why_partial": "ChartExchange bot-blocked the host after ~22 symbol pages ('Please verify you are not a robot') and the block did not lift on retry. The uncovered symbols are UNKNOWN, not zero, and are listed below.",
+   "fetched": "2026-08-16"
+  },
+  {
+   "id": "davolio_2002",
+   "what": "D'Avolio, The Market for Borrowing Stock, JFE 66 (2002) 271-306",
+   "gives": "91% of borrowed stock is general collateral at ~17 bp/yr mean; the other ~9% are loan-market specials averaging 4.30%/yr",
+   "role": "an independent order-of-magnitude check on the measured split, not a substitute for it -- the sample is 2000-2001 institutional data, not 2026 retail."
+  }
+ ],
+ "measured": {
+  "alpaca_borrow_status": {
+   "hard_to_borrow": 36,
+   "easy_to_borrow": 64
+  },
+  "shortable_true": 64,
+  "shortable_false": 36,
+  "finding_status_equals_shortability": "Every hard-to-borrow name in this universe is also shortable=False at Alpaca. For this account HTB is not an expensive short, it is NO short at all: 36 of 100 names in the ORB pool cannot be shorted, so the paper's bearish-opening-candle leg is unavailable in them.",
+  "ibkr_fee_pct_per_year_by_alpaca_status": {
+   "easy_to_borrow": {
+    "n": 14,
+    "min": 0.25,
+    "p25": 0.28,
+    "p50": 0.33,
+    "p75": 0.41,
+    "p90": 0.51,
+    "max": 10.58,
+    "sum": 16.11
+   },
+   "hard_to_borrow": {
+    "n": 11,
+    "min": 2.32,
+    "p25": 4.37,
+    "p50": 10.28,
+    "p75": 105.86,
+    "p90": 123.23,
+    "max": 259.96,
+    "sum": 742.56
+   }
+  },
+  "n_with_measured_fee": 25,
+  "symbols_without_a_measured_fee": [
+   "SNXX",
+   "MSTU",
+   "DRAM",
+   "GPUS",
+   "SNDQ",
+   "RIG",
+   "NBIZ",
+   "DAMD",
+   "SOXL",
+   "SOXS",
+   "ACHR",
+   "OPEN",
+   "CXAI",
+   "KEEL",
+   "IREN",
+   "SPCH",
+   "NVD",
+   "ABEV",
+   "CIFR",
+   "HTZ",
+   "TQQQ",
+   "CDE",
+   "SQQQ",
+   "SMR",
+   "TSLG",
+   "GIPR",
+   "MARA",
+   "SOFI",
+   "SNAP",
+   "YYAI",
+   "CRWV",
+   "HUMA",
+   "INV",
+   "TLT",
+   "SPY",
+   "MUU",
+   "WULF",
+   "ITUB",
+   "LFS",
+   "HIVE",
+   "SCNX",
+   "AVGO",
+   "LQD",
+   "CSCO",
+   "STKH",
+   "NBIS",
+   "AAPL",
+   "XLF",
+   "MU",
+   "BBD",
+   "AMZN",
+   "NIO",
+   "T",
+   "TE",
+   "DFSC",
+   "HYG",
+   "NFLX",
+   "JOBY",
+   "BMNR",
+   "AMD",
+   "QXO",
+   "VWAV",
+   "PLTR",
+   "QQQ",
+   "NKE",
+   "IBIT",
+   "PFE",
+   "XLE",
+   "DNN",
+   "PCG",
+   "SSPC",
+   "BTBT",
+   "ORCL",
+   "BAC",
+   "RDDT"
+  ],
+  "per_symbol": [
+   {
+    "symbol": "MDXH",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 5.39,
+    "ibkr_shares_available": 0,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "SURG",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 99.56,
+    "ibkr_shares_available": 0,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "VBIO",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 259.96,
+    "ibkr_shares_available": 950000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "NU",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.29,
+    "ibkr_shares_available": 10000000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "SNXX",
+    "exchange": "BATS",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "TSLL",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 4.37,
+    "ibkr_shares_available": 1700000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "OTLK",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 4.27,
+    "ibkr_shares_available": 1600000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "SPCX",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.44,
+    "ibkr_shares_available": 8700000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "ONDS",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 10.28,
+    "ibkr_shares_available": 150000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "INTC",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.41,
+    "ibkr_shares_available": 10000000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "MSTU",
+    "exchange": "BATS",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "ONFO",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 117.68,
+    "ibkr_shares_available": 0,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "CYCU",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 105.86,
+    "ibkr_shares_available": 700000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "NVDA",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.28,
+    "ibkr_shares_available": 10000000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "NOK",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "100",
+    "ibkr_fee_pct_per_year": 0.28,
+    "ibkr_shares_available": 10000000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "CAPR",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 10.58,
+    "ibkr_shares_available": 1600000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "DRAM",
+    "exchange": "BATS",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "WETO",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 123.23,
+    "ibkr_shares_available": 0,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "GPUS",
+    "exchange": "AMEX",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SMCI",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.35,
+    "ibkr_shares_available": 10000000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "RCON",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 9.64,
+    "ibkr_shares_available": 1500000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "BZAI",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 2.32,
+    "ibkr_shares_available": 25000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "PATH",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.33,
+    "ibkr_shares_available": 6100000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "PLUG",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.51,
+    "ibkr_shares_available": 9200000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "F",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.27,
+    "ibkr_shares_available": 10000000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "SNDQ",
+    "exchange": "BATS",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "BITO",
+    "exchange": "ARCA",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 1.54,
+    "ibkr_shares_available": 4200000,
+    "ibkr_as_of": "2026-08-16 05:09:49 PM EDT"
+   },
+   {
+    "symbol": "RIG",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "AAL",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.33,
+    "ibkr_shares_available": 10000000,
+    "ibkr_as_of": "2026-08-16"
+   },
+   {
+    "symbol": "TSLA",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "50",
+    "ibkr_fee_pct_per_year": 0.25,
+    "ibkr_shares_available": 10000000,
+    "ibkr_as_of": "2026-08-16"
+   },
+   {
+    "symbol": "NBIZ",
+    "exchange": "BATS",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "DAMD",
+    "exchange": "ARCA",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SOXL",
+    "exchange": "ARCA",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "90",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SOXS",
+    "exchange": "ARCA",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "100",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "ACHR",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "OPEN",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "CXAI",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "KEEL",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "IREN",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "HL",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": 0.25,
+    "ibkr_shares_available": 10000000,
+    "ibkr_as_of": "2026-08-16"
+   },
+   {
+    "symbol": "SPCH",
+    "exchange": "BATS",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "NVD",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "ABEV",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "CIFR",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "HTZ",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "TQQQ",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "100",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "CDE",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SQQQ",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "90",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SMR",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "TSLG",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "GIPR",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "MARA",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SOFI",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SNAP",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "YYAI",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "CRWV",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "HUMA",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "INV",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "TLT",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SPY",
+    "exchange": "ARCA",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "MUU",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "WULF",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "ITUB",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "LFS",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "HIVE",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SCNX",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "AVGO",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "LQD",
+    "exchange": "ARCA",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "CSCO",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "STKH",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "NBIS",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "100",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "AAPL",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "XLF",
+    "exchange": "ARCA",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "MU",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "BBD",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "AMZN",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "NIO",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "100",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "T",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "TE",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "DFSC",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "HYG",
+    "exchange": "ARCA",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "NFLX",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "JOBY",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "BMNR",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "AMD",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "QXO",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "VWAV",
+    "exchange": "NASDAQ",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "PLTR",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "QQQ",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "NKE",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "IBIT",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "PFE",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "XLE",
+    "exchange": "ARCA",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "DNN",
+    "exchange": "AMEX",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "PCG",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "SSPC",
+    "exchange": "BATS",
+    "shortable": false,
+    "borrow_status": "hard_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "BTBT",
+    "exchange": "NASDAQ",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "ORCL",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "BAC",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   },
+   {
+    "symbol": "RDDT",
+    "exchange": "NYSE",
+    "shortable": true,
+    "borrow_status": "easy_to_borrow",
+    "margin_requirement_short": "30",
+    "ibkr_fee_pct_per_year": null,
+    "ibkr_shares_available": null,
+    "ibkr_as_of": null
+   }
+  ]
+ },
+ "rates_for_the_cost_model": {
+  "etb_general_collateral": {
+   "annual_rate": "0.0033",
+   "as_pct_per_year": 0.33,
+   "basis": "median IBKR indicative fee across 14 ETB names in this universe",
+   "note": "Alpaca itself charges $0 borrow on ETB for Trading API users, so this is the BROKER-INDEPENDENT cost of the borrow, and is the conservative side."
+  },
+  "htb_median": {
+   "annual_rate": "0.1028",
+   "as_pct_per_year": 10.28,
+   "basis": "median IBKR indicative fee across 11 HTB names in this universe"
+  },
+  "htb_p90": {
+   "annual_rate": "1.2323",
+   "as_pct_per_year": 123.23,
+   "basis": "the tail, kept because a strategy that shorts most-actives will meet it"
+  }
+ },
+ "applied_to_the_b22b_signal_set": {
+  "source": "research/B22B_SLIPPAGE_RESULT.json, the 429 triggered stock-days over the pinned 30-day 2025 sample",
+  "n_triggered": 429,
+  "n_short_signals": 227,
+  "n_short_signals_in_names_not_shortable_at_alpaca_today": 39,
+  "share_of_shorts_unavailable": "17.2%",
+  "what_that_means": "The short leg is the MAJORITY of the rule's signals in this sample (227 of 429), and roughly one in six of them is in a name that cannot be shorted at this broker at any price. That is not a cost the model can carry; it removes the trade. Any backtest of this rule that fills every short signal is overstating its opportunity set before slippage is even considered.",
+  "borrow_fee_pct_per_year_across_short_signals": {
+   "n": 52,
+   "min": 0.25,
+   "p25": 0.28,
+   "p50": 0.35,
+   "p75": 0.41,
+   "p90": 4.37,
+   "max": 10.28,
+   "sum": 67.17
+  },
+  "coverage_caveat": "52 of 227 short signals sit in a name with a measured fee; the rest are the bot-blocked symbols and are unknown."
+ },
+ "t6_correction_screened_universe": {
+  "added": "2026-08-17",
+  "added_by": {
+   "script": "/home/anont/.claude/jobs/5d56bbe0/tmp/t6_decontaminate.py",
+   "sha256": "16a68f3fe67de21455eb62c3161922c50ec9b64d414acf06a5bdc641cbad1644"
+  },
+  "why": "The T5 write-up quoted '36 of 100 names cannot be shorted at any price'. Both halves were wrong in the strategy's disfavour-sounding but analytically loose direction: 100 is not the denominator the rule ever meets, and 'at any price' is not what a broker flag measures. Corrected here from the same checkpoints, so the cost model can quote a number that is true.",
+  "denominator": {
+   "names_in_the_b22g_pool": 100,
+   "names_the_b22b_rule_ACTUALLY_screened": 52,
+   "names_with_at_least_one_TRIGGERED_stock_day": 49,
+   "hard_to_borrow_among_screened": 8,
+   "hard_to_borrow_share_of_screened": "15.4%",
+   "hard_to_borrow_symbols_among_screened": [
+    "HTZ",
+    "MSTU",
+    "ONDS",
+    "SOXL",
+    "SOXS",
+    "SQQQ",
+    "TSLL",
+    "VBIO"
+   ],
+   "note": "The 100-name pool is the ORB most-actives SCREEN INPUT. Only 52 names ever passed the screen on any pinned day, and those are the only names a backtest of this rule would have traded. 8/52 = 15.4%, not 36%."
+  },
+  "what_the_alpaca_flag_does_and_does_not_mean": {
+   "measured": "shortable=False on GET /v2/assets for THIS account at Alpaca.",
+   "means": "not shortable at Alpaca -- this broker will not locate it for this account.",
+   "does_NOT_mean": "'cannot be borrowed at any price'. Of the 11 hard-to-borrow names in the pool for which an IBKR indicative rate was obtainable, 7 show shares AVAILABLE to borrow at IBKR (2.32%-259.96%/yr). They are expensive, not impossible, and at another broker they are a COST rather than a constraint.",
+   "htb_with_an_ibkr_rate": 11,
+   "htb_borrowable_elsewhere": 7,
+   "htb_borrowable_elsewhere_symbols": [
+    "VBIO",
+    "TSLL",
+    "OTLK",
+    "ONDS",
+    "CYCU",
+    "RCON",
+    "BZAI"
+   ]
+  },
+  "unavailable_short_signals": {
+   "short_signals": 227,
+   "in_names_not_shortable_at_alpaca": 39,
+   "symbols": [
+    "MSTU",
+    "ONDS",
+    "SOXL",
+    "SOXS",
+    "SQQQ",
+    "TSLL"
+   ],
+   "leveraged_or_inverse_etp_symbols": [
+    "MSTU",
+    "SOXL",
+    "SOXS",
+    "SQQQ",
+    "TSLL"
+   ],
+   "leveraged_or_inverse_etp_signals": 38,
+   "non_etp_signals": 1,
+   "non_etp_symbols": [
+    "ONDS"
+   ],
+   "what_that_means": "38 of the 39 unavailable short signals are in LEVERAGED or INVERSE ETPs (SQQQ, TSLL, SOXL, SOXS, MSTU). That is an Alpaca PRODUCT restriction, not borrow scarcity -- the shares exist and trade in size. Exactly ONE unavailable short signal (ONDS) is an ordinary common stock. The constraint is therefore mostly 'this broker does not lend leveraged ETPs', which a different broker or a different universe filter removes, and it should not be reported as a borrow-market fact."
+  }
+ }
+}

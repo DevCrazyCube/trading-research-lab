@@ -1,0 +1,33 @@
+mints 382
+rows 46099
+minutes 2810
+regime LAUNCH60 finite 2810 min 0.0 med 523.0 max 1490.0
+regime COHVOL15 finite 2810 min 8.81698773024982 med 284054.58958535275 max 2383978.222130972
+regime ACTCNT finite 2810 min 1.0 med 46.0 max 124.0
+regime FRACUP finite 2810 min 0.0 med 0.21846590909090907 max 1.0
+regime MEDRET15 finite 2782 min -0.42050923768131143 med -0.007674250479530215 max 1.948425791037975
+regime MEDRET60 finite 2724 min -0.1849926733705688 med -0.01516718862907096 max 2.1350855951501106
+regime YOUNGFRAC finite 2810 min 0.0 med 0.03225806451612903 max 1.0
+regime NEWL60 finite 2810 min 0.0 med 2.0 max 46.0
+regime HOUR finite 2810 min 0.0 med 11.0 max 23.0
+create coverage minutes 1426 of 2810
+horizon rows built
+n exit structures 16
+exit built T5 resolved 0.986853905549358
+exit built T10 resolved 0.9824791652995604
+exit built T15 resolved 0.9784762779709955
+exit built T30 resolved 0.9667301004002887
+exit built T60 resolved 0.9457532209025089
+exit built T120 resolved 0.906118074239342
+exit built T15_TP15 resolved 0.9833978607520178
+exit built T15_TP30 resolved 0.9819104490670867
+exit built T60_TP30 resolved 0.9557276286720476
+exit built T60_TP50 resolved 0.9524028260822014
+exit built T60_TP30_SL20 resolved 0.9705361244176127
+exit built T60_TP50_SL30 resolved 0.9660520156615701
+exit built T60_TP20_SL15 resolved 0.9746921276549205
+exit built T15_TP20_SL15 resolved 0.986853905549358
+exit built T60_TR25 resolved 0.9674956799440033
+exit built T120_TR35 resolved 0.9441564407113328
+exits done
+SAVED

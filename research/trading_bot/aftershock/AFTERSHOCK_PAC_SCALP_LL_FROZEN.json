@@ -5,6 +5,12 @@
   "entry_family": "PAC_SCALP_UNCHANGED_BETWEEN_ROUTE_ARMS",
   "stop_all_cost_num": 88,
   "stop_all_cost_den": 100,
+  "runtime_cost_floor": {
+    "base_fee_lamports": 5000,
+    "priority_fee_lamports": 500,
+    "tip_lamports": 5000,
+    "paid_subscription_must_be_positive": true
+  },
   "calibration": {
     "attempted_pairs": 100,
     "max_lamports": 3000000,

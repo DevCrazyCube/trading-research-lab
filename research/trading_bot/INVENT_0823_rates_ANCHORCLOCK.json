@@ -1,0 +1,97 @@
+{
+ "hypothesis": "The A/G-family rho1 ~ -0.42 is NOT bid-ask bounce; it is the FRED H.15 15:30 ET anchor being stale against a 16:00 ET ETF print.",
+ "P1_replace_anchor_with_a_1600_clock": {
+  "TLT": {
+   "cross_anchor": "IEF",
+   "rho1_raw_return": -0.03364631535900204,
+   "rho1_resid_vs_published_1530_curve": -0.41913465777086906,
+   "rho1_resid_vs_1600_etf_anchor": -0.0003266514405161325
+  },
+  "EDV": {
+   "cross_anchor": "TLT",
+   "rho1_raw_return": -0.000784847745349118,
+   "rho1_resid_vs_published_1530_curve": -0.43094396673935403,
+   "rho1_resid_vs_1600_etf_anchor": -0.3491462462735723
+  },
+  "TLH": {
+   "cross_anchor": "IEF",
+   "rho1_raw_return": -0.030885067877610865,
+   "rho1_resid_vs_published_1530_curve": -0.40996681171403426,
+   "rho1_resid_vs_1600_etf_anchor": -0.18283175083595032
+  },
+  "IEF": {
+   "cross_anchor": "TLT",
+   "rho1_raw_return": -0.04772312719444603,
+   "rho1_resid_vs_published_1530_curve": -0.43434343432272005,
+   "rho1_resid_vs_1600_etf_anchor": -0.009377668831034304
+  },
+  "IEI": {
+   "cross_anchor": "IEF",
+   "rho1_raw_return": -0.037778364827400226,
+   "rho1_resid_vs_published_1530_curve": -0.43986507842191463,
+   "rho1_resid_vs_1600_etf_anchor": -0.06838463078768042
+  },
+  "SHY": {
+   "cross_anchor": "IEI",
+   "rho1_raw_return": -0.09262864804081822,
+   "rho1_resid_vs_published_1530_curve": -0.3958451239855958,
+   "rho1_resid_vs_1600_etf_anchor": -0.28038968528910935
+  }
+ },
+ "P2_roll_implied_tracks_the_missing_half_hour": {
+  "SHY": {
+   "daily_sigma_bp": 5.776120684868453,
+   "predicted_30min_slice_bp": 1.602007638658568,
+   "roll_implied_half_spread_bp": 1.9035100771918354,
+   "charged_half_spread_bp": 1.2,
+   "median_duration_yrs": 1.5987360143809854,
+   "r2_of_published_curve": 0.7257609736979757
+  },
+  "IEI": {
+   "daily_sigma_bp": 19.772454949511122,
+   "predicted_30min_slice_bp": 5.483892320174161,
+   "roll_implied_half_spread_bp": 3.62372795447024,
+   "charged_half_spread_bp": 2.5,
+   "median_duration_yrs": 4.212584991358126,
+   "r2_of_published_curve": 0.9236714145699662
+  },
+  "IEF": {
+   "daily_sigma_bp": 38.06923453801322,
+   "predicted_30min_slice_bp": 10.558505934190102,
+   "roll_implied_half_spread_bp": 7.413223002736728,
+   "charged_half_spread_bp": 1.2,
+   "median_duration_yrs": 7.255692533005333,
+   "r2_of_published_curve": 0.9127331511672709
+  },
+  "TLH": {
+   "daily_sigma_bp": 56.96026580895912,
+   "predicted_30min_slice_bp": 15.797935310635419,
+   "roll_implied_half_spread_bp": 12.062627551526562,
+   "charged_half_spread_bp": 8.0,
+   "median_duration_yrs": 9.909807958515506,
+   "r2_of_published_curve": 0.8906527571401202
+  },
+  "TLT": {
+   "daily_sigma_bp": 92.28634679111642,
+   "predicted_30min_slice_bp": 25.59562733697091,
+   "roll_implied_half_spread_bp": 19.485249808487428,
+   "charged_half_spread_bp": 0.7,
+   "median_duration_yrs": 17.14169728201793,
+   "r2_of_published_curve": 0.8936836182271541
+  },
+  "EDV": {
+   "daily_sigma_bp": 130.3646986126255,
+   "predicted_30min_slice_bp": 36.15666195063311,
+   "roll_implied_half_spread_bp": 24.446471468460512,
+   "charged_half_spread_bp": 4.0,
+   "median_duration_yrs": 24.62416536062533,
+   "r2_of_published_curve": 0.9184341687887281
+  }
+ },
+ "P2_fit": {
+  "corr_roll_vs_predicted_30min_slice": 0.9952211624771258,
+  "corr_roll_vs_charged_bidask": 0.20989874785038834,
+  "mean_ratio_roll_over_predicted": 0.7920104999552929,
+  "mean_ratio_roll_over_charged": 7.444825480183314
+ }
+}

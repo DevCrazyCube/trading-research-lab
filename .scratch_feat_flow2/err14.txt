@@ -1,0 +1,2 @@
+<string>:61: RuntimeWarning: invalid value encountered in divide
+<string>:64: RuntimeWarning: invalid value encountered in divide

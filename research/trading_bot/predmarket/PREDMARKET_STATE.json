@@ -1,0 +1,12 @@
+{
+  "created_utc": "2026-08-23T17:18:05.195216+00:00",
+  "freeze": {
+    "preregistration_sha256": "98acac4a1acbcfe8d61feaab033e43e2decd578fb17d08e7e24175e28d2b7929",
+    "utc": "2026-08-23T00:00:00Z"
+  },
+  "instrument_id": "PREDMARKET1",
+  "resolved_estimate_hashes": [
+    "259cf5ecc0f67249cc0b6fa27bb8f5057080de1d039ee3c68621b635c4d4eac0"
+  ],
+  "schema_version": 1
+}

@@ -1,0 +1,4 @@
+RANDOMBAR15 h12 drop-30%: n=4622 k=201 res=97.1% mint-mean=39.094% mint-median=-5.883% trade-median=-1.800%
+RANDOMBAR15 h12 drop-50%: n=4622 k=201 res=97.1% mint-mean=37.903% mint-median=-6.766% trade-median=-1.800%
+RANDOMBAR15 h12 drop-100%: n=4622 k=201 res=97.1% mint-mean=34.926% mint-median=-8.088% trade-median=-1.800%
+RANDOMBAR15 h12 GROSS drop-30%: mint-mean=40.698%

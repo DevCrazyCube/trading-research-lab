@@ -1,0 +1,45 @@
+{
+  "NOT_PREREGISTERED": "declared deviation, exploratory; the verdict is DEAD in T10_HELDOUT_RESULT.json and no diagnostic can promote it",
+  "runs": {
+    "design_extra_lag_0": {
+      "ann_return": 0.0994396420107797,
+      "ann_sharpe": 0.9029190354204258,
+      "gross_bp": 4.8690020003264065,
+      "n": 1430,
+      "net_bp": 4.071927210954129,
+      "note": "as frozen (signal ends at C(t-1) -- the print traded at)",
+      "t": 2.167088085362114
+    },
+    "design_extra_lag_1": {
+      "ann_return": 0.12951896370933413,
+      "ann_sharpe": 1.149939557913853,
+      "gross_bp": 5.954737895537944,
+      "n": 1429,
+      "net_bp": 5.157772164081746,
+      "note": "corrected (signal ends at C(t-2); nothing after 15:50 on t-1)",
+      "t": 2.7593039204748147
+    },
+    "heldout_extra_lag_0": {
+      "ann_return": 0.02298645094044427,
+      "ann_sharpe": 0.22085632791285575,
+      "dsr_trials_8": 0.37718713347685584,
+      "gross_bp": 2.2631336440358623,
+      "n": 1140,
+      "net_bp": 1.4817342237836895,
+      "note": "as frozen (signal ends at C(t-1) -- the print traded at)",
+      "permutation_p": 0.001999800019998,
+      "t": 0.4742264557033411
+    },
+    "heldout_extra_lag_1": {
+      "ann_return": 0.062106714522745854,
+      "ann_sharpe": 0.4535190264698394,
+      "dsr_trials_8": 0.5712971802340865,
+      "gross_bp": 3.753705024493221,
+      "n": 1140,
+      "net_bp": 2.972305237805232,
+      "note": "corrected (signal ends at C(t-2); nothing after 15:50 on t-1)",
+      "permutation_p": 9.999000099990002e-05,
+      "t": 0.9738037508333609
+    }
+  }
+}

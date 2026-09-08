@@ -1,0 +1,339 @@
+{
+ "n_clusters": 15,
+ "clusters": [
+  {
+   "start": 20180612,
+   "end": 20180718
+  },
+  {
+   "start": 20180917,
+   "end": 20190217
+  },
+  {
+   "start": 20190403,
+   "end": 20190526
+  },
+  {
+   "start": 20190626,
+   "end": 20190630
+  },
+  {
+   "start": 20200226,
+   "end": 20200510
+  },
+  {
+   "start": 20201207,
+   "end": 20210521
+  },
+  {
+   "start": 20210621,
+   "end": 20210711
+  },
+  {
+   "start": 20210907,
+   "end": 20210907
+  },
+  {
+   "start": 20211215,
+   "end": 20211218
+  },
+  {
+   "start": 20220509,
+   "end": 20220513
+  },
+  {
+   "start": 20230311,
+   "end": 20230312
+  },
+  {
+   "start": 20240115,
+   "end": 20240326
+  },
+  {
+   "start": 20241206,
+   "end": 20241211
+  },
+  {
+   "start": 20250402,
+   "end": 20250402
+  },
+  {
+   "start": 20250612,
+   "end": 20250612
+  }
+ ],
+ "A2_PEG_BAND20": {
+  "n_episodes": 15,
+  "mean_bp_per_episode": -146.0,
+  "median_bp_per_episode": 64.6,
+  "t_across_episodes": -0.5,
+  "pct_episodes_positive": 0.8,
+  "worst_episode_bp": -4159.3,
+  "best_episode_bp": 608.2,
+  "quiet_period_total_bp": 334.2,
+  "design_episodes": 10,
+  "held_episodes": 5,
+  "design_mean_bp": -254.1,
+  "held_mean_bp": 70.3,
+  "t_across_episodes_exUST": 2.51,
+  "mean_bp_per_episode_exUST": 140.7,
+  "per_instrument_gross": {
+   "BUSDUSDT": {
+    "gross_bp": 148.4,
+    "days_on": 185
+   },
+   "FDUSDUSDT": {
+    "gross_bp": 685.1,
+    "days_on": 458
+   },
+   "PAXUSDT": {
+    "gross_bp": 348.9,
+    "days_on": 422
+   },
+   "SUSDUSDT": {
+    "gross_bp": 2893.9,
+    "days_on": 392
+   },
+   "TUSDUSDT": {
+    "gross_bp": 1279.1,
+    "days_on": 1181
+   },
+   "USDCUSDT": {
+    "gross_bp": 807.1,
+    "days_on": 427
+   },
+   "USDEUSDT": {
+    "gross_bp": 4.5,
+    "days_on": 2
+   },
+   "USDPUSDT": {
+    "gross_bp": 278.7,
+    "days_on": 138
+   },
+   "USDSUSDT": {
+    "gross_bp": 246.1,
+    "days_on": 380
+   },
+   "USTUSDT": {
+    "gross_bp": -4088.1,
+    "days_on": 67
+   }
+  }
+ },
+ "A12_PEG_BAND20_SEASONED": {
+  "n_episodes": 15,
+  "mean_bp_per_episode": 143.7,
+  "median_bp_per_episode": 64.6,
+  "t_across_episodes": 2.28,
+  "pct_episodes_positive": 0.73,
+  "worst_episode_bp": -156.6,
+  "best_episode_bp": 748.3,
+  "quiet_period_total_bp": 693.2,
+  "design_episodes": 10,
+  "held_episodes": 5,
+  "design_mean_bp": 169.7,
+  "held_mean_bp": 91.7,
+  "t_across_episodes_exUST": 2.26,
+  "mean_bp_per_episode_exUST": 152.1,
+  "per_instrument_gross": {
+   "BUSDUSDT": {
+    "gross_bp": 54.9,
+    "days_on": 125
+   },
+   "FDUSDUSDT": {
+    "gross_bp": 437.9,
+    "days_on": 418
+   },
+   "PAXUSDT": {
+    "gross_bp": 339.4,
+    "days_on": 187
+   },
+   "SUSDUSDT": {
+    "gross_bp": 2565.3,
+    "days_on": 156
+   },
+   "TUSDUSDT": {
+    "gross_bp": 2082.8,
+    "days_on": 981
+   },
+   "USDCUSDT": {
+    "gross_bp": 432.6,
+    "days_on": 225
+   },
+   "USDPUSDT": {
+    "gross_bp": 274.4,
+    "days_on": 132
+   },
+   "USDSUSDT": {
+    "gross_bp": 26.5,
+    "days_on": 163
+   }
+  }
+ },
+ "A3_PEG_BAND50": {
+  "n_episodes": 15,
+  "mean_bp_per_episode": -109.6,
+  "median_bp_per_episode": 118.8,
+  "t_across_episodes": -0.3,
+  "pct_episodes_positive": 0.93,
+  "worst_episode_bp": -5148.4,
+  "best_episode_bp": 700.5,
+  "quiet_period_total_bp": 1151.1,
+  "design_episodes": 10,
+  "held_episodes": 5,
+  "design_mean_bp": -220.7,
+  "held_mean_bp": 112.7,
+  "t_across_episodes_exUST": 3.9,
+  "mean_bp_per_episode_exUST": 250.3,
+  "per_instrument_gross": {
+   "BUSDUSDT": {
+    "gross_bp": 46.9,
+    "days_on": 10
+   },
+   "FDUSDUSDT": {
+    "gross_bp": 296.6,
+    "days_on": 12
+   },
+   "PAXUSDT": {
+    "gross_bp": 363.3,
+    "days_on": 221
+   },
+   "SUSDUSDT": {
+    "gross_bp": 2941.6,
+    "days_on": 282
+   },
+   "TUSDUSDT": {
+    "gross_bp": 1513.2,
+    "days_on": 488
+   },
+   "USDCUSDT": {
+    "gross_bp": 553.1,
+    "days_on": 173
+   },
+   "USDPUSDT": {
+    "gross_bp": 115.2,
+    "days_on": 12
+   },
+   "USDSUSDT": {
+    "gross_bp": 790.4,
+    "days_on": 235
+   },
+   "USTUSDT": {
+    "gross_bp": -5088.3,
+    "days_on": 29
+   }
+  }
+ },
+ "A6_PEG_PREM_ONLY": {
+  "n_episodes": 15,
+  "mean_bp_per_episode": 107.1,
+  "median_bp_per_episode": 27.9,
+  "t_across_episodes": 2.74,
+  "pct_episodes_positive": 0.8,
+  "worst_episode_bp": 0.0,
+  "best_episode_bp": 517.4,
+  "quiet_period_total_bp": 898.3,
+  "design_episodes": 10,
+  "held_episodes": 5,
+  "design_mean_bp": 138.0,
+  "held_mean_bp": 45.3,
+  "t_across_episodes_exUST": 2.72,
+  "mean_bp_per_episode_exUST": 112.8,
+  "per_instrument_gross": {
+   "BUSDUSDT": {
+    "gross_bp": 82.7,
+    "days_on": 103
+   },
+   "FDUSDUSDT": {
+    "gross_bp": 439.1,
+    "days_on": 45
+   },
+   "PAXUSDT": {
+    "gross_bp": 123.6,
+    "days_on": 216
+   },
+   "SUSDUSDT": {
+    "gross_bp": 2098.6,
+    "days_on": 275
+   },
+   "TUSDUSDT": {
+    "gross_bp": 589.5,
+    "days_on": 388
+   },
+   "USDCUSDT": {
+    "gross_bp": 377.8,
+    "days_on": 198
+   },
+   "USDPUSDT": {
+    "gross_bp": 273.0,
+    "days_on": 114
+   },
+   "USDSUSDT": {
+    "gross_bp": 327.4,
+    "days_on": 85
+   },
+   "USTUSDT": {
+    "gross_bp": 54.4,
+    "days_on": 58
+   }
+  }
+ },
+ "A5_PEG_DISC_ONLY": {
+  "n_episodes": 15,
+  "mean_bp_per_episode": -613.9,
+  "median_bp_per_episode": 58.0,
+  "t_across_episodes": -0.91,
+  "pct_episodes_positive": 0.6,
+  "worst_episode_bp": -10081.9,
+  "best_episode_bp": 344.7,
+  "quiet_period_total_bp": -242.3,
+  "design_episodes": 10,
+  "held_episodes": 5,
+  "design_mean_bp": -935.8,
+  "held_mean_bp": 29.8,
+  "t_across_episodes_exUST": 1.66,
+  "mean_bp_per_episode_exUST": 62.4,
+  "per_instrument_gross": {
+   "BUSDUSDT": {
+    "gross_bp": 79.1,
+    "days_on": 82
+   },
+   "FDUSDUSDT": {
+    "gross_bp": 419.2,
+    "days_on": 423
+   },
+   "PAXUSDT": {
+    "gross_bp": 186.3,
+    "days_on": 211
+   },
+   "SUSDUSDT": {
+    "gross_bp": 1641.7,
+    "days_on": 144
+   },
+   "TUSDUSDT": {
+    "gross_bp": 554.1,
+    "days_on": 799
+   },
+   "USDCUSDT": {
+    "gross_bp": 494.9,
+    "days_on": 235
+   },
+   "USDEUSDT": {
+    "gross_bp": 4.5,
+    "days_on": 2
+   },
+   "USDPUSDT": {
+    "gross_bp": 33.8,
+    "days_on": 24
+   },
+   "USDSUSDT": {
+    "gross_bp": 100.8,
+    "days_on": 301
+   },
+   "USTUSDT": {
+    "gross_bp": -10043.8,
+    "days_on": 9
+   }
+  }
+ }
+}

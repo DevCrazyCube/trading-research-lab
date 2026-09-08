@@ -11,8 +11,11 @@ carry distinct sealed closures, and no execution surface is imported.
 from __future__ import annotations
 
 import importlib
+import pathlib
 import random
+import tempfile
 
+from . import pac_lws_feed as feed
 from . import pac_lws_screen as screen
 from . import pac_lws_runner as runner
 from . import pac_lws_common as common
@@ -208,6 +211,47 @@ def _runner_checks():
     import inspect
     runner_source = inspect.getsource(src)
     yield "no execution surface in the runner", not any(tok in runner_source for tok in surface)
+
+    with tempfile.TemporaryDirectory() as temporary:
+        raw = feed.retained_raw_log(pathlib.Path(temporary) / "raw_frames.jsonl")
+        try:
+            document = feed.b15i.B15J.verify_preregistration()
+            yield "LWS raw feed pins self-rotation and disk reserve", (
+                raw.retention is feed.b15i.B15J
+                and raw.max_segment_bytes == document["segment_format"]["max_segment_bytes"]
+                and raw.reserve_bytes == document["free_space_guard"]["reserve_bytes"]
+                and raw.check_interval_seconds
+                    == document["free_space_guard"]["check_interval_seconds"])
+        finally:
+            raw.close()
+
+    class RefusingRetention:
+        class RetentionRefused(RuntimeError):
+            pass
+
+        @staticmethod
+        def assert_free_space(_path, _reserve):
+            raise RefusingRetention.RetentionRefused("disk reserve")
+
+    with tempfile.TemporaryDirectory() as temporary:
+        path = pathlib.Path(temporary) / "raw.jsonl"
+        raw = feed.b15i.RawLog(
+            path, retention=RefusingRetention, reserve_bytes=1,
+            max_segment_bytes=512, check_interval_seconds=60)
+        first_refused = second_refused = False
+        try:
+            try:
+                raw.append({"x": 1})
+            except RefusingRetention.RetentionRefused:
+                first_refused = True
+            try:
+                raw.append({"x": 2})
+            except feed.b15i.B15J.RetentionRefused:
+                second_refused = True
+        finally:
+            raw.close()
+        yield "raw reserve refusal writes zero bytes and poisons later appends", (
+            first_refused and second_refused and path.stat().st_size == 0)
 
 
 def run() -> int:

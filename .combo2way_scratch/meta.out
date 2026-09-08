@@ -1,0 +1,37 @@
+my mints 387
+window_label rows 387
+idl_name counts:
+    event:TradeEvent 330370
+    buy 125370
+    sell 118923
+    sell_v2 30463
+    buy_exact_quote_in_v2 27218
+    buy_exact_sol_in 21490
+    event:CloseUserVolumeAccumulatorEvent 9320
+    close_user_volume_accumulator 9320
+    buy_v2 7532
+    event:CreateEvent 3932
+    create_v2 3930
+    event:ClaimCashbackEvent 3436
+    claim_cashback 3423
+    init_user_volume_accumulator 2363
+    event:InitUserVolumeAccumulatorEvent 2363
+    extend_account 1997
+    event:ExtendAccountEvent 1881
+    event:SellEvent 463
+    event:DistributeCreatorFeesEvent 367
+    event:BuyEvent 302
+    migrate_bonding_curve_creator 261
+    event:MigrateBondingCurveCreatorEvent 261
+    distribute_creator_fees_v2 241
+    buy_exact_quote_in 139
+    distribute_creator_fees 126
+    migrate_v2 96
+    init_boost 82
+    event:InitBoostEvent 82
+    event:CreatePoolEvent 82
+    event:CompletePumpAmmMigrationEvent 82
+reserve_observation scanned 333888 curves hit 49
+keys wanted 31073
+instruction rows matched 31073
+coverage {'gradspeed': 387, 'data_len': 387, 'create_hour': 387, 'bc_n': 49, 'bc_buyfrac': 49, 'bc_maxbuy': 49, 'bc_top1': 49, 'bc_top5': 49, 'bc_totbuy': 49, 'bc_sellratio': 49, 'bc_slots': 49, 'bc_wallets': 49, 'bc_tpw': 49} of 387

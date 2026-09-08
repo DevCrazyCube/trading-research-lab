@@ -1,0 +1,801 @@
+{
+ "document": "B22B_SLIPPAGE_RESULT",
+ "created": "2026-08-16",
+ "preregistration": "research/B22B_SLIPPAGE_PREREGISTRATION.json",
+ "pinned_harness_sha256": "a0f1b4c434d89fe54edb4f835f7c5401a5dbc2ca023d155fd9aefad1d8b57baf",
+ "pinned_harness_sha256_matches_preregistration": true,
+ "collection_runner": "/home/anont/.claude/jobs/5d56bbe0/tmp/b22b_runner.py",
+ "collection_runner_sha256": "e4e6d3aa07cd94723b4771e9a91fc38a9da18335e1f5194c6835ae622a827daa",
+ "how_it_was_run": "The first pass died at day 11 of 30 on a ConnectionResetError with every result held in process memory, and lost all of it. The runner -- NOT the frozen harness -- was given per-stock-day checkpointing to disk plus backoff-retry on transient transport failures (429/5xx/reset/timeout), and the pinned days were then partitioned across three worker processes by index. The partition changes only WHICH PROCESS fetches a day; the pinned day set, the screen, the measurement and the verdict rule are untouched, and every measurement decision is still a call into the frozen harness.",
+ "days_pinned": 30,
+ "days_complete": 30,
+ "days_incomplete": [],
+ "days_with_zero_candidates": [
+  "2025-01-09"
+ ],
+ "note_on_zero_candidate_days": "2025-01-09 screens zero candidates because the US market was CLOSED that day (national day of mourning). The pinned sample was drawn from weekdays, not from an exchange calendar, so it contains one non-trading day. It is reported as a day with no observations, not silently replaced -- replacing it would be choosing a day after seeing the sample.",
+ "n_stock_days_recorded": 580,
+ "n_triggered": 429,
+ "n_no_trigger": 150,
+ "n_refused": 1,
+ "by_direction": {
+  "long": 202,
+  "short": 227
+ },
+ "units": {
+  "r_bp": "basis points of R, R = 10% of ATR(14) -- the paper's own unit, and the unit the preregistered verdict thresholds are stated in",
+  "notional_bp": "basis points of the fill price -- the unit the T2 cost model charges in, computed as slippage_micros * 10000 // fill_micros from the same integers",
+  "notional_centibp": "the SAME quantity in hundredths of a basis point. It exists because whole basis points are too coarse here: the typical entry gap is a fraction of a bp on a $50 stock, so integer bp truncates most of the distribution to 0 and a genuine small cost becomes indistinguishable from no cost at all. The cost model reads THIS field.",
+  "sign": "POSITIVE IS ADVERSE, inherited from the frozen harness. Negative entries are genuinely favourable fills, not sign errors, and are left in the distribution."
+ },
+ "percentile_convention": "integer index, rounding DOWN, per the frozen harness -- for a cost distribution that reports the more favourable of two candidates",
+ "r_bp": {
+  "0": {
+   "n": 429,
+   "p10": 0,
+   "p25": 0,
+   "p50": 0,
+   "p75": 0,
+   "p90": 233,
+   "p95": 420,
+   "min": -1041919,
+   "max": 1095,
+   "sum": -1126779,
+   "verdict": "NOT_YET_FATAL"
+  },
+  "100": {
+   "n": 429,
+   "p10": -176,
+   "p25": 0,
+   "p50": 0,
+   "p75": 547,
+   "p90": 1181,
+   "p95": 1654,
+   "min": -37907,
+   "max": 3616,
+   "sum": 40636,
+   "verdict": "NOT_YET_FATAL"
+  },
+  "500": {
+   "n": 429,
+   "p10": -715,
+   "p25": 0,
+   "p50": 0,
+   "p75": 760,
+   "p90": 1486,
+   "p95": 2028,
+   "min": -37907,
+   "max": 6888,
+   "sum": 43268,
+   "verdict": "NOT_YET_FATAL"
+  },
+  "1000": {
+   "n": 429,
+   "p10": -821,
+   "p25": 0,
+   "p50": 0,
+   "p75": 814,
+   "p90": 1835,
+   "p95": 2402,
+   "min": -37702,
+   "max": 6888,
+   "sum": 72299,
+   "verdict": "NOT_YET_FATAL"
+  }
+ },
+ "notional_bp": {
+  "0": {
+   "n": 428,
+   "p10": 0,
+   "p25": 0,
+   "p50": 0,
+   "p75": 0,
+   "p90": 0,
+   "p95": 2,
+   "min": -153,
+   "max": 8,
+   "sum": -389
+  },
+  "100": {
+   "n": 429,
+   "p10": -1,
+   "p25": 0,
+   "p50": 0,
+   "p75": 2,
+   "p90": 5,
+   "p95": 8,
+   "min": -152,
+   "max": 31,
+   "sum": 226
+  },
+  "500": {
+   "n": 429,
+   "p10": -4,
+   "p25": 0,
+   "p50": 0,
+   "p75": 3,
+   "p90": 7,
+   "p95": 11,
+   "min": -152,
+   "max": 60,
+   "sum": 124
+  },
+  "1000": {
+   "n": 429,
+   "p10": -5,
+   "p25": 0,
+   "p50": 0,
+   "p75": 3,
+   "p90": 10,
+   "p95": 13,
+   "min": -155,
+   "max": 60,
+   "sum": 300
+  }
+ },
+ "notional_centibp": {
+  "0": {
+   "n": 428,
+   "p10": 0,
+   "p25": 0,
+   "p50": 0,
+   "p75": 0,
+   "p90": 92,
+   "p95": 249,
+   "min": -15277,
+   "max": 899,
+   "sum": -33530
+  },
+  "100": {
+   "n": 429,
+   "p10": -46,
+   "p25": 0,
+   "p50": 0,
+   "p75": 248,
+   "p90": 562,
+   "p95": 899,
+   "min": -15198,
+   "max": 3167,
+   "sum": 34888
+  },
+  "500": {
+   "n": 429,
+   "p10": -391,
+   "p25": 0,
+   "p50": 0,
+   "p75": 328,
+   "p90": 705,
+   "p95": 1194,
+   "min": -15198,
+   "max": 6050,
+   "sum": 27819
+  },
+  "1000": {
+   "n": 429,
+   "p10": -434,
+   "p25": 0,
+   "p50": 0,
+   "p75": 376,
+   "p90": 1014,
+   "p95": 1385,
+   "min": -15476,
+   "max": 6050,
+   "sum": 44758
+  }
+ },
+ "spread_bp": {
+  "0": {
+   "n": 428,
+   "p10": 0,
+   "p25": 1,
+   "p50": 3,
+   "p75": 6,
+   "p90": 11,
+   "p95": 14,
+   "min": 0,
+   "max": 37,
+   "sum": 1853
+  },
+  "100": {
+   "n": 429,
+   "p10": 0,
+   "p25": 1,
+   "p50": 3,
+   "p75": 6,
+   "p90": 11,
+   "p95": 16,
+   "min": 0,
+   "max": 129,
+   "sum": 2067
+  },
+  "500": {
+   "n": 429,
+   "p10": 0,
+   "p25": 1,
+   "p50": 3,
+   "p75": 6,
+   "p90": 11,
+   "p95": 15,
+   "min": 0,
+   "max": 133,
+   "sum": 2154
+  },
+  "1000": {
+   "n": 429,
+   "p10": 0,
+   "p25": 1,
+   "p50": 3,
+   "p75": 6,
+   "p90": 11,
+   "p95": 15,
+   "min": 0,
+   "max": 131,
+   "sum": 2179
+  }
+ },
+ "quote_age_ms": {
+  "0": {
+   "n": 429,
+   "p10": 0,
+   "p25": 0,
+   "p50": 0,
+   "p75": 2,
+   "p90": 37,
+   "p95": 158,
+   "min": 0,
+   "max": 1448,
+   "sum": 14862
+  },
+  "100": {
+   "n": 429,
+   "p10": 0,
+   "p25": 4,
+   "p50": 18,
+   "p75": 53,
+   "p90": 91,
+   "p95": 102,
+   "min": 0,
+   "max": 1548,
+   "sum": 23268
+  },
+  "500": {
+   "n": 429,
+   "p10": 1,
+   "p25": 7,
+   "p50": 27,
+   "p75": 93,
+   "p90": 220,
+   "p95": 302,
+   "min": 0,
+   "max": 1578,
+   "sum": 35270
+  },
+  "1000": {
+   "n": 429,
+   "p10": 1,
+   "p25": 6,
+   "p50": 34,
+   "p75": 113,
+   "p90": 308,
+   "p95": 427,
+   "min": 0,
+   "max": 2078,
+   "sum": 44261
+  }
+ },
+ "resting_size_shares": {
+  "0": {
+   "n": 429,
+   "p10": 1,
+   "p25": 4,
+   "p50": 17,
+   "p75": 100,
+   "p90": 528,
+   "p95": 1300,
+   "min": 0,
+   "max": 34300,
+   "sum": 172474
+  },
+  "100": {
+   "n": 429,
+   "p10": 1,
+   "p25": 3,
+   "p50": 16,
+   "p75": 77,
+   "p90": 369,
+   "p95": 1200,
+   "min": 1,
+   "max": 118400,
+   "sum": 249022
+  },
+  "500": {
+   "n": 429,
+   "p10": 1,
+   "p25": 2,
+   "p50": 13,
+   "p75": 70,
+   "p90": 369,
+   "p95": 1000,
+   "min": 1,
+   "max": 119200,
+   "sum": 219372
+  },
+  "1000": {
+   "n": 429,
+   "p10": 1,
+   "p25": 2,
+   "p50": 11,
+   "p75": 64,
+   "p90": 355,
+   "p95": 1300,
+   "min": 1,
+   "max": 132000,
+   "sum": 255175
+  }
+ },
+ "n_adverse_of_n": {
+  "0": {
+   "adverse": 93,
+   "exactly_zero": 296,
+   "favourable": 40,
+   "n": 429
+  },
+  "100": {
+   "adverse": 213,
+   "exactly_zero": 166,
+   "favourable": 50,
+   "n": 429
+  },
+  "500": {
+   "adverse": 202,
+   "exactly_zero": 127,
+   "favourable": 100,
+   "n": 429
+  },
+  "1000": {
+   "adverse": 210,
+   "exactly_zero": 114,
+   "favourable": 105,
+   "n": 429
+  }
+ },
+ "verdict_rung_ms": 100,
+ "post_hoc_sensitivity_not_the_result": {
+  "what": "the same distribution with stock-days whose TRIGGER PRINT was more than one ATR through the stop removed, as a check on odd-lot/out-of-sequence prints",
+  "status": "POST HOC. The preregistered result is the unfiltered one above. This exists to show how much the answer moves, not to replace it.",
+  "n_removed": 1,
+  "removed": [
+   {
+    "symbol": "QQQ",
+    "day": "2025-08-25",
+    "direction": "short",
+    "stop_micros": 569160000,
+    "trigger_price_micros": 555987300,
+    "slippage_r_bp_100ms": -14288
+   }
+  ],
+  "r_bp_100ms_after_removal": {
+   "n": 428,
+   "p10": -171,
+   "p25": 0,
+   "p50": 0,
+   "p75": 547,
+   "p90": 1181,
+   "p95": 1654,
+   "min": -37907,
+   "max": 3616,
+   "sum": 54924
+  },
+  "notional_bp_100ms_after_removal": {
+   "n": 428,
+   "p10": -1,
+   "p25": 0,
+   "p50": 0,
+   "p75": 2,
+   "p90": 5,
+   "p95": 8,
+   "min": -152,
+   "max": 31,
+   "sum": 242
+  }
+ },
+ "capacity_note": "The preregistration's falsification condition has TWO parts: a median below 0.05R AND a resting size at the touched side large enough to fill a 1%-risk position. See resting_size_shares -- the size standing at the far side at the trigger instant is measured in tens to hundreds of shares, not thousands, so the second part is where this result is weakest and it is not a slippage number that fixes it.",
+ "verdict": "NOT_YET_FATAL",
+ "median_r_bp_at_100ms": 0,
+ "scope_limit": {
+  "measures": "ENTRY slippage only",
+  "does_not_measure": "exit slippage (stop-loss market orders, market-on-close)",
+  "therefore": "the number produced is a LOWER BOUND on total friction",
+  "consequence_for_the_verdict": "The classification is asymmetric by construction. A bad result is decisive; a good result is not vindication. The most favourable verdict the harness can emit is NOT_YET_FATAL. There is no verdict named SURVIVES, and a test asserts that no input can produce one."
+ },
+ "per_day": [
+  {
+   "day": "2025-01-09",
+   "complete": true,
+   "screened": 0,
+   "top_n": 0,
+   "records": 0
+  },
+  {
+   "day": "2025-01-27",
+   "complete": true,
+   "screened": 46,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-01-29",
+   "complete": true,
+   "screened": 45,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-01-30",
+   "complete": true,
+   "screened": 44,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-03-10",
+   "complete": true,
+   "screened": 45,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-03-12",
+   "complete": true,
+   "screened": 44,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-04-22",
+   "complete": true,
+   "screened": 52,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-04-24",
+   "complete": true,
+   "screened": 51,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-05-15",
+   "complete": true,
+   "screened": 45,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-05-21",
+   "complete": true,
+   "screened": 46,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-05-22",
+   "complete": true,
+   "screened": 46,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-06-12",
+   "complete": true,
+   "screened": 43,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-06-13",
+   "complete": true,
+   "screened": 43,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-07-01",
+   "complete": true,
+   "screened": 45,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-07-07",
+   "complete": true,
+   "screened": 44,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-07-17",
+   "complete": true,
+   "screened": 45,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-07-31",
+   "complete": true,
+   "screened": 42,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-08-21",
+   "complete": true,
+   "screened": 41,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-08-25",
+   "complete": true,
+   "screened": 42,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-08-27",
+   "complete": true,
+   "screened": 42,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-09-04",
+   "complete": true,
+   "screened": 44,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-09-25",
+   "complete": true,
+   "screened": 45,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-09-29",
+   "complete": true,
+   "screened": 44,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-10-01",
+   "complete": true,
+   "screened": 46,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-10-14",
+   "complete": true,
+   "screened": 52,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-10-24",
+   "complete": true,
+   "screened": 51,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-10-31",
+   "complete": true,
+   "screened": 49,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-11-07",
+   "complete": true,
+   "screened": 48,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-11-18",
+   "complete": true,
+   "screened": 51,
+   "top_n": 20,
+   "records": 20
+  },
+  {
+   "day": "2025-12-08",
+   "complete": true,
+   "screened": 54,
+   "top_n": 20,
+   "records": 20
+  }
+ ],
+ "t6_decontamination_ladder": {
+  "added": "2026-08-17",
+  "added_by": {
+   "script": "/home/anont/.claude/jobs/5d56bbe0/tmp/t6_decontaminate.py",
+   "sha256": "16a68f3fe67de21455eb62c3161922c50ec9b64d414acf06a5bdc641cbad1644"
+  },
+  "what": "The mean entry slippage at the 100 ms rung, in hundredths of a basis point of notional, with stock-days whose TRIGGER PRINT was more than `threshold_atr` ATR(14) through the stop removed. The cost model charges the MEAN, and the mean is the statistic a dislocated print moves most.",
+  "why": "POSITIVE IS ADVERSE, so a print far through the stop produces a hugely FAVOURABLE measured gap and pulls the charged cost DOWN. Contamination here flatters the strategy, which makes it exactly the direction this programme is required to be paranoid about. The 1-ATR rung already in the file is too loose to remove the very print the result's own prose names (TSLA 2025-03-12, 0.92 ATR through).",
+  "status": "POST HOC, and NOT a replacement for the preregistered distribution above. The preregistered result is the unfiltered one. This ladder exists so the cost model can charge a defensible rung and report the sensitivity next to it.",
+  "unit": "hundredths of a basis point of the fill price (centi-bp), 100 ms latency rung",
+  "recommended_rung": "0.1",
+  "why_that_rung": "0.1 ATR is not an arbitrary cut: R -- the paper's own risk unit, the denominator of every verdict threshold in the preregistration -- is DEFINED as 10% of ATR(14). So the 0.1-ATR rung is 'the trigger print was more than one full R beyond the stop'. A print a whole risk-unit through the level is not that level being touched; it is a dislocated print. It is also the ADVERSE side of the ladder, which is the side this programme takes when it is uncertain.",
+  "rungs": {
+   "none": {
+    "n": 429,
+    "sum": 34888,
+    "mean_centibp_float": 81.32400932400932,
+    "mean_bp_float": 0.8132400932400933,
+    "threshold_atr": null,
+    "n_removed": 0,
+    "removed": [],
+    "mean_bp_vs_unfiltered_pct": 0.0
+   },
+   "1.0": {
+    "n": 428,
+    "sum": 36485,
+    "mean_centibp_float": 85.24532710280374,
+    "mean_bp_float": 0.8524532710280375,
+    "threshold_atr": "1",
+    "n_removed": 1,
+    "removed": [
+     {
+      "symbol": "QQQ",
+      "day": "2025-08-25",
+      "direction": "short",
+      "through_atr_float": 2.068125183691002,
+      "notional_centibp_100ms": -1597
+     }
+    ],
+    "mean_bp_vs_unfiltered_pct": 4.82
+   },
+   "0.5": {
+    "n": 427,
+    "sum": 51683,
+    "mean_centibp_float": 121.03747072599532,
+    "mean_bp_float": 1.210374707259953,
+    "threshold_atr": "1/2",
+    "n_removed": 2,
+    "removed": [
+     {
+      "symbol": "TSLA",
+      "day": "2025-03-12",
+      "direction": "short",
+      "through_atr_float": 0.9233932063361086,
+      "notional_centibp_100ms": -15198
+     },
+     {
+      "symbol": "QQQ",
+      "day": "2025-08-25",
+      "direction": "short",
+      "through_atr_float": 2.068125183691002,
+      "notional_centibp_100ms": -1597
+     }
+    ],
+    "mean_bp_vs_unfiltered_pct": 48.83
+   },
+   "0.25": {
+    "n": 427,
+    "sum": 51683,
+    "mean_centibp_float": 121.03747072599532,
+    "mean_bp_float": 1.210374707259953,
+    "threshold_atr": "1/4",
+    "n_removed": 2,
+    "removed": [
+     {
+      "symbol": "TSLA",
+      "day": "2025-03-12",
+      "direction": "short",
+      "through_atr_float": 0.9233932063361086,
+      "notional_centibp_100ms": -15198
+     },
+     {
+      "symbol": "QQQ",
+      "day": "2025-08-25",
+      "direction": "short",
+      "through_atr_float": 2.068125183691002,
+      "notional_centibp_100ms": -1597
+     }
+    ],
+    "mean_bp_vs_unfiltered_pct": 48.83
+   },
+   "0.1": {
+    "n": 425,
+    "sum": 65671,
+    "mean_centibp_float": 154.52,
+    "mean_bp_float": 1.5452000000000001,
+    "threshold_atr": "1/10",
+    "n_removed": 4,
+    "removed": [
+     {
+      "symbol": "TSLA",
+      "day": "2025-03-12",
+      "direction": "short",
+      "through_atr_float": 0.9233932063361086,
+      "notional_centibp_100ms": -15198
+     },
+     {
+      "symbol": "PLTR",
+      "day": "2025-07-31",
+      "direction": "short",
+      "through_atr_float": 0.10040057781557028,
+      "notional_centibp_100ms": -11552
+     },
+     {
+      "symbol": "QQQ",
+      "day": "2025-08-25",
+      "direction": "short",
+      "through_atr_float": 2.068125183691002,
+      "notional_centibp_100ms": -1597
+     },
+     {
+      "symbol": "TQQQ",
+      "day": "2025-10-31",
+      "direction": "short",
+      "through_atr_float": 0.17378144659026146,
+      "notional_centibp_100ms": -2436
+     }
+    ],
+    "mean_bp_vs_unfiltered_pct": 90.01
+   },
+   "0.05": {
+    "n": 424,
+    "sum": 70166,
+    "mean_centibp_float": 165.48584905660377,
+    "mean_bp_float": 1.6548584905660377,
+    "threshold_atr": "1/20",
+    "n_removed": 5,
+    "removed": [
+     {
+      "symbol": "TSLA",
+      "day": "2025-03-12",
+      "direction": "short",
+      "through_atr_float": 0.9233932063361086,
+      "notional_centibp_100ms": -15198
+     },
+     {
+      "symbol": "PLTR",
+      "day": "2025-07-31",
+      "direction": "short",
+      "through_atr_float": 0.10040057781557028,
+      "notional_centibp_100ms": -11552
+     },
+     {
+      "symbol": "QQQ",
+      "day": "2025-08-25",
+      "direction": "short",
+      "through_atr_float": 2.068125183691002,
+      "notional_centibp_100ms": -1597
+     },
+     {
+      "symbol": "TSLA",
+      "day": "2025-10-24",
+      "direction": "short",
+      "through_atr_float": 0.06790595025889143,
+      "notional_centibp_100ms": -4495
+     },
+     {
+      "symbol": "TQQQ",
+      "day": "2025-10-31",
+      "direction": "short",
+      "through_atr_float": 0.17378144659026146,
+      "notional_centibp_100ms": -2436
+     }
+    ],
+    "mean_bp_vs_unfiltered_pct": 103.49
+   }
+  }
+ }
+}

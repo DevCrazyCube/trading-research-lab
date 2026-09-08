@@ -1,0 +1,47 @@
+[
+ {
+  "venue": "polymarket",
+  "market_id": "2046123",
+  "question": "Will the Communist Party of the Russian Federation (KPRF) win the second-most seats in the next Russian parliamentary election?",
+  "category": "politics/elections/russia",
+  "p_market": 0.845,
+  "q_agent": 0.76,
+  "yes_bid": 0.84,
+  "yes_ask": 0.85,
+  "spread": 0.01,
+  "close_time": "2026-09-20T00:00:00Z",
+  "confidence": 0.5,
+  "event_refs": ["https://polymarket.com/event/russian-parliamentary-election-second-most-seats"],
+  "thesis": "Structural read (knowledge cutoff Jan 2026, no live campaign polling). KPRF's 2021 lead in seats (57 vs LDPR 21) rested on ~19% list vote plus 9 SMD wins; by late 2025 the list-vote polling gap had closed to parity or reversed (VCIOM weekly: LDPR ~10-11%, KPRF ~9-10%; FOM similar), so the 2026 list allocation (225 seats) should split within a handful of seats between the two, leaving KPRF's second place to be decided by the managed SMD contests where its regional machine is stronger but the Kremlin's post-Zhirinovsky promotion of LDPR under Slutsky and the Zyuganov succession weakness cut the other way. I still make KPRF the favourite but price it at 0.76, not the market's 0.845, because the crowd looks anchored on the 2021 seat gap rather than on list-vote parity. Coherent ladder with sibling legs: LDPR 0.20, New People 0.03, other ~0.01. Falsifier: any Aug-Sep 2026 VCIOM/FOM list-vote poll showing KPRF ahead of LDPR by >=3 points restores the 2021 structure and invalidates the tightening."
+ },
+ {
+  "venue": "polymarket",
+  "market_id": "2046125",
+  "question": "Will the Liberal Democratic Party of Russia (LDPR) win the second-most seats in the next Russian parliamentary election?",
+  "category": "politics/elections/russia",
+  "p_market": 0.081,
+  "q_agent": 0.20,
+  "yes_bid": 0.071,
+  "yes_ask": 0.091,
+  "spread": 0.02,
+  "close_time": "2026-09-20T00:00:00Z",
+  "confidence": 0.5,
+  "event_refs": ["https://polymarket.com/event/russian-parliamentary-election-second-most-seats"],
+  "thesis": "Structural read, the other side of the KPRF leg. Late-2025 list-vote polling had LDPR at parity with or ahead of KPRF (VCIOM ~10-11% vs ~9-10%), a reversal of the 2021 result (KPRF 18.9%, LDPR 7.6%) that the market's 8c does not seem to carry: at list parity the 225 list seats split within a few seats and LDPR needs only a small share of the managed SMDs to overtake KPRF's 2021 edge (9 vs 2 SMD wins). The Kremlin has actively promoted LDPR since Zhirinovsky's death and has an incentive to weaken an ageing-Zyuganov KPRF, but KPRF keeps the stronger regional organisation and the SMD allocation is opaque to me, so I stop at 0.20 rather than a coin flip. This is a genuine disagreement with the crowd (8c -> 20c, above the 1c round-trip floor), not a stale-prior guess about a realignment I cannot see: the book's KPRF-favourite shape is consistent with my prior; the disagreement is the width of the tail. Falsifier: any Aug-Sep 2026 VCIOM/FOM list-vote poll with KPRF >= LDPR + 3 points kills this leg; conversely LDPR >= KPRF + 3 would say 0.20 was too timid."
+ },
+ {
+  "venue": "polymarket",
+  "market_id": "2046126",
+  "question": "Will New People (NL) win the second-most seats in the next Russian parliamentary election?",
+  "category": "politics/elections/russia",
+  "p_market": 0.069,
+  "q_agent": 0.03,
+  "yes_bid": 0.067,
+  "yes_ask": 0.071,
+  "spread": 0.004,
+  "close_time": "2026-09-20T00:00:00Z",
+  "confidence": 0.55,
+  "event_refs": ["https://polymarket.com/event/russian-parliamentary-election-second-most-seats"],
+  "thesis": "Structural dead-tail read, third leg of the ladder. New People won 13 seats on 5.3% in 2021 with zero SMD wins and polled ~5-6% through 2025, roughly half of either KPRF or LDPR on the list vote and without a regional SMD machine; overtaking BOTH of them for second place requires a list-vote swing of 4-5 points that no pre-cutoff poll showed and that the Kremlin's managed allocation has no evident reason to engineer. The market's 6.9c is the usual Polymarket 3-7c floor on a dead tail (same family as the frozen Berlin-Gruene and Renan-Santos legs). Ladder coherence: KPRF 0.76 + LDPR 0.20 + NL 0.03 + other 0.01 = 1.00. Falsifier: any Aug-Sep 2026 poll with New People within 2 points of the lower of KPRF/LDPR on the list vote."
+ }
+]

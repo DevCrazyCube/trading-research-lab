@@ -1,0 +1,19 @@
+n_event_rows 99 n_meta 10551
+keys ['age_h', 'amount', 'control', 'control_mcap', 'control_px', 'created_ms', 'ev', 'feed', 'liq', 'mcap', 'mint', 'px', 'sym', 'total', 'ts_ms']
+feeds Counter({'token-profiles/latest/v1': 65, 'token-boosts/latest/v1': 22, 'token-boosts/top/v1': 12})
+ts range 1788474682134 1788490415316
+unique mints 90
+unique controls 72
+amount dist [(None, 77), (10, 14), (30, 4), (50, 4)]
+total dist [(None, 65), (100, 11), (10, 10), (30, 6), (40, 2), (500, 2), (50, 2), (130, 1)]
+unique (mint,total) 94
+unique (mint,ts) 90
+ohlcv cols ['mint', 'pool', 'n_bars', 'first_ts', 'last_ts', 'bars_json', 'fetched_at', 'status']
+ohlcv mints with bars 594
+ohlcv h dist Counter({2: 209, 0: 207, 1: 178})
+event rows whose mint in ohlcv 0 unique 0
+event rows whose control in ohlcv 0 unique 0
+rows with BOTH in ohlcv 0 unique mints 0
+BOTH and both h in (1,2) 0 unique 0
+event-mint-only h12 0 unique 0
+ev12 with event ts inside bar range (sec assumption) 0 of 0
