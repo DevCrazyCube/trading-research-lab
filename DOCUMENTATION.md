@@ -501,3 +501,69 @@ The 7,482-frame real validation replays exactly; 76 engineering tests pass. See
 `research/midcap/BIRTH_STREAM_BACKLOG_FIX_20260908.md` for limits, durability exposure, pins and status.
 `research/midcap/NEW_INFORMATION_CANDIDATES_20260908.md` records new hypotheses and their rejection
 tests; no profitable memecoin strategy has been demonstrated or activated.
+
+## FOMO probe and completed capture, 2026-09-09
+
+The bounded FOMO probe preserves receipt-clocked raw frames with unknown replay status explicit.
+Actual welcome reported realtime/zero configured delay; 105 alerts contained no transaction hashes.
+No chain-to-app lead or executable return was measured. Capped account history leaves opening
+inventory unresolved; API-reported cash flow is not audited P&L.
+The creation tracker closed normally with 9,613,996 frames, seven unrepaired gaps and one
+truncated-log refusal. Full read-only replay is running separately; closure alone is not attestation.
+See `research/midcap/FOMO_FEASIBILITY_20260909.md`.
+
+## Completed replay and multi-day cohort evidence, 2026-09-09 15:20 UTC
+
+The full unsampled tracker replay finished EXACT in 2,453.209 seconds: all 9,613,996
+raw frames, 10,891 create observations, seven unrepaired gaps, one decode refusal.
+The source contains 9,995 successful unique mints, not 10,891 unique successful mints.
+Internal replay is not independent chain recall. The supplied 99.43% recall claim
+is unsupported by receipt-gap arithmetic; rapid error detection can coexist with
+170/137-slot advances across reconnects. This supersedes the pending status above.
+
+FOMO paired probes are stopped, with no measured lead or profit. Two public-RPC
+429 failures and zero eligible selected-roster associations are feasibility failures,
+not financial kills. Three identity resolutions cost 30 reported credits total;
+the second attempt reused them. Historical owner inventory read refused on missing
+RPC state metadata; no zero-balance or audited P&L inference was made.
+
+The user's new multi-day cohort candidate is open. Existing history collectors use
+today's leaderboard for older trades, unequal roster sizes, inexact owner accounting,
+and unrecorded collection failures. The current evaluator also drops missing entries
+and uses next-bar closes; it cannot validate the candidate. The original files remain
+Claude-owned and unchanged. Independent `scripts/cohort_evidence.py` supplies exact
+raw-unit owner deltas, fee-payer attribution, unknown/ambiguous refusal, causal-time
+checks and all-signal chart-sensitivity denominators (NOT executable P&L).
+Twenty-three engineering tests pass. A 30/30 identity roster was frozen privately
+at 15:20:14.748359579 UTC, without changing any financial preregistration or activating
+orders. Activity matching and economic independence remain unproven. See
+`research/midcap/COHORT_EVIDENCE_AUDIT_20260909.md` for evidence and next boundaries.
+
+## Prospective instrument audit and Pons identity, 2026-09-09 20:40 UTC
+
+**Verified engineering facts:** all ten reported processes were alive at 20:39 UTC.
+All three cohort databases reject the evaluator's missing `recv_ns` reference.
+Robinhood successful-request ranges omit 2,919 blocks despite zero reported poll
+errors. Of 367 follower followups marked done in the audit snapshot, 226 lack trades
+and 301 lack bars. Mayhem +23-hour observations were up to 7,094 seconds late.
+These are evidence-quality findings, not negative or positive trading results.
+
+**Decision:** existing scripts remain Claude-owned; Codex supplied separate
+`rh_capture_contract.py` (gap ledger / no-skip range planner), `rh_curve_capture.py`
+(raw-first curve-log indexing) and `rh_curve_probe.py` (bounded public discovery).
+Twenty new synthetic tests and 57 combined tests pass. A retained factory response
+replays 727 records; its source-shaped records remain unverified as deployed ABI
+and chain-complete history. The helpers are not wired into the running collector.
+
+**Verified RPC observations:** current Pons V2 factory
+`0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e` returned enabled, 9,900 starting tax bps
+and a three-second window at block 58,835,011. One curve's factory/token binding
+was verified separately. The current pinned curve source lacks the tax methods
+called by its factory; explorer verification refused HTTP403 and the later curve
+log fetch refused HTTP429. Exact tax execution and financial expectancy are open.
+
+**Decision:** no Robinhood financial preregistration or early tape read yet. The
+owner's approximately 24-hour collection condition and verified execution model
+must precede that freeze. Mayhem collection lasts through September 10 04:20:10 UTC;
+turnover still lacked a result file at the audit. See the two dated audit/discovery
+notes for source URLs, evidence paths, defects and integration requirements.

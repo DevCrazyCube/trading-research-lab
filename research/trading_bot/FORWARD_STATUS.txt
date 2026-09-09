@@ -1,1 +1,1 @@
-T4 T13-VOL-L60-T0.1-WMAX1.0 PAPER | 13 settled sessions (0.04y) | realised +0.35% | vs N1 +0.03pp | crashes 0/3 (3 more, ~27y) | NOT CERTIFIABLE -- NO VERDICT
+T4 T13-VOL-L60-T0.1-WMAX1.0 PAPER | 14 settled sessions (0.05y) | realised -0.08% | vs N1 +0.03pp | crashes 0/3 (3 more, ~27y) | NOT CERTIFIABLE -- NO VERDICT

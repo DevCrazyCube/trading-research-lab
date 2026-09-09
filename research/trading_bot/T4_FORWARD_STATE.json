@@ -1,14 +1,14 @@
 {
   "benchmark_entered": true,
   "created_utc": "2026-08-17T11:21:39.224707+00:00",
-  "cum_cost_fraction": 5.206645094331302e-07,
+  "cum_cost_fraction": 5.241230007936626e-07,
   "curves": {
-    "benchmark": 1.0035700730805053,
-    "model_excash": 1.00299997585501,
-    "model_withcash": 1.0034725117769985
+    "benchmark": 0.9980583144116956,
+    "model_excash": 0.9986126299328991,
+    "model_withcash": 0.9991674880263764
   },
   "inception_date": "2026-08-17",
-  "last_settled_date": "2026-09-04",
+  "last_settled_date": "2026-09-08",
   "maxdd": {
     "benchmark": 0.0120866294903385,
     "model_excash": 0.008734522538923727,
@@ -21,20 +21,16 @@
   },
   "pending_order": null,
   "pending_weights": {
-    "2026-09-04": {
-      "reference_close_date": "2026-09-03",
-      "weight": 0.7705201363969301
-    },
-    "2026-09-07": {
-      "reference_close_date": "2026-09-04",
-      "weight": 0.7964492755998395
-    },
     "2026-09-08": {
       "reference_close_date": "2026-09-04",
       "weight": 0.7964492755998395
+    },
+    "2026-09-09": {
+      "reference_close_date": "2026-09-08",
+      "weight": 0.8207000030422434
     }
   },
-  "prev_weight": 0.778379832754843,
+  "prev_weight": 0.7964492755998395,
   "rule": {
     "L": 60,
     "heldout_window": [
@@ -50,7 +46,7 @@
     "wmax": 1.0
   },
   "schema_version": 1,
-  "sessions_settled": 13,
+  "sessions_settled": 14,
   "symbol": "SPY",
   "weight_changes": {
     "2026-08-19": 0.7287301117074827,
@@ -65,6 +61,7 @@
     "2026-09-01": 0.7230079528480879,
     "2026-09-02": 0.7230556602123794,
     "2026-09-03": 0.7795547868012842,
-    "2026-09-04": 0.778379832754843
+    "2026-09-04": 0.778379832754843,
+    "2026-09-08": 0.7964492755998395
   }
 }

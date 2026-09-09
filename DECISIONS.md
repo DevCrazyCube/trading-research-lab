@@ -3870,3 +3870,95 @@ Building the measurement-chain repair BEFORE any secondary-sell test. Pure, pape
   prereg and all seven harness conditions plus mint/session/funding controls remain unchanged.
 - **Evidence:** research/midcap/BIRTH_STREAM_BACKLOG_FIX_20260908.md and
   research/midcap/NEW_INFORMATION_CANDIDATES_20260908.md; exact code/raw pins and reproduction therein.
+
+## 2026-09-09 — FOMO feasibility only; closed tracker requires full replay
+
+- **Decision / scope:** owner asked to continue with FOMO access and the completed tracker.
+  Add one bounded read-only alert connection, private raw evidence and no retries, paid
+  upgrade, signing, strategy activation or outcome selection. Unknown replay stays unknown.
+- **Verified:** welcome reported realtime/zero configured delay. Connection closed after
+  25.196 seconds with 100 explicitly replayed alerts and five unflagged alerts. No transaction
+  identity exists in these messages, including nested payloads. No chain join or lead measured.
+  Eleven probe tests pass; internal raw hash-chain replay is exact.
+- **Verified correction:** 29 tokens with visible buys are not 29 proven complete positions.
+  ANON sells exceed visible buys by 70,095.48 tokens; the claimed profit lacks opening basis.
+  Capped API history remains ineligible as a strategy validation set.
+- **Verified tracker status:** duration complete, 9,613,996 frames / 10,891 create observations,
+  seven unrepaired gaps, one reproducible truncated-log refusal. Longest epoch 107.880 minutes;
+  no six-hour continuous-history or profitability claim.
+- **Decision:** start full offline replay, existing verifier unchanged, with a thin progress
+  wrapper and cached pinned IDL map. Real pilot report equality verified before full launch.
+  Full result remains pending until result.json says EXACT; no sampling shortcut.
+- **Evidence:** research/midcap/FOMO_FEASIBILITY_20260909.md and paths/pins therein.
+
+## 2026-09-09 — Replay complete; stop timing retries and repair cohort evidence
+
+- **Author / status:** Codex; implemented research-only. Owner supplied Claude's new
+  multi-day cohort work and requested continued progress. No profit or live authority.
+- **Verified fact:** full raw/derived replay is EXACT for 9,613,996 frames; elapsed
+  2,453.209 seconds. Result SHA256 55cde4aae333ed40977f9b2c309c1691b3aae2d216f26a61bddbc239f12d05ef.
+  Source and original verifier unchanged; all gaps/refusals preserved. The prior
+  pending result is superseded. No chain-recall percentage or complete wallet ledger.
+- **Decision:** leave paired FOMO/Robinhood probes stopped after two 429 failures
+  (125/52 RPC calls, 61/25 log ranges, 119/117 alerts, 100 replays in each). Three
+  previously selected identities yielded zero eligible associations. No financial
+  verdict, paid stream/upgrade, or more retries. Thirty FOMO resolution credits
+  reported in the first run; zero new resolutions in the second. Gzip/deflate handling
+  and 12 tests added without overwriting raw evidence or earlier source snapshots.
+- **Verified fact:** historical owner inventory probe made 30 read-only RPC calls
+  and refused historical eth_call error -32000 missing metadata. No balance/basis
+  result. Four tests pass. No FOMO credits used by that probe.
+- **Decision:** current leaderboard's preceding 14 days are development data, never
+  out-of-sample evidence. Random-wallet controls do not cure future winner selection;
+  126 board wallets versus 30 controls also confounds any k-wallet threshold. Exact
+  raw owner balances and actual quote consideration precede strategy interpretation.
+- **Decision:** Codex owns only new scripts/cohort_evidence.py and its tests/report,
+  leaving existing memebot cohort collectors/evaluator with Claude. Durable handoff
+  466 records defects and requested repair. No concurrent edits or service restarts.
+  New evidence code sums raw account units, attributes fees only to payer, refuses
+  missing/contradictory metadata, and labels exchange shapes unproven. It does not
+  replace canonical program-event decoding, generate orders, or compute executable P&L.
+- **Verified tests:** 23 new controls pass; 12 saved transactions yield 27 decoded
+  owner cases, including 15 old non-payer fee-addback errors. Multi-account overwrite
+  is synthetically demonstrated; not claimed observed in that real sample.
+- **Decision:** freeze a deterministic private 30/30 identity roster at local
+  2026-09-09 15:20:14.748359579 UTC. Manifest SHA256
+  6f572e3501d750924ff6d1921c53c7a90a646ec9af9161ac0991f678bfe5ee2f.
+  Identity freeze only; no financial rule, valid placebo, collector, paper or live
+  strategy activated. Activity/funding matching, protocol authentication, causal
+  real-open execution and full financial harness remain required before a fresh test.
+- **Open question:** can known-roster multi-day accumulation produce positive all-cost
+  mean AND median and repeat across untouched weeks? No result exists. Preserve the
+  sealed window-2 asset and original narrative preregistration unchanged.
+- **Evidence:** research/midcap/COHORT_EVIDENCE_AUDIT_20260909.md and updated
+  research/midcap/FOMO_FEASIBILITY_20260909.md. No killed strategy family rerun.
+
+## 2026-09-09 — audit active instruments before prospective promotion; isolate RH helpers
+
+- **Author / status:** Codex; owner requested current status, source audit, Pons V2
+  curve discovery and bounded engineering. Research-only; no financial gate passed.
+- **Verified facts:** acknowledged 471–474; ten processes active. Three real cohort
+  schemas reject the evaluator query. Separate interval-union audit found 2,919
+  unrequested Robinhood blocks. Follower done flags include failed data fetches;
+  Mayhem nominal baseline marks can be almost two hours late. See the audit note.
+- **Decision:** no early cohort/wave returns, new roster, changed financial cell,
+  service restart, Telegram message, paid input or order. Existing implementation
+  remains Claude-owned, with repairs requested in durable handoff 475. Do not make
+  read-only inspection of unguarded live modules execute their imports.
+- **Decision:** separate new `rh_capture_contract.py` and `rh_curve_capture.py`
+  supply no-skip catch-up, explicit gap records, raw-before-derived durability,
+  request identity, canonical coordinates and unknown-emitter labels for integration
+  into the existing shared-budget reader. They are not an independent background
+  poller. Twenty new tests / 57 combined pass; 727 retained real factory records
+  replay as source shapes only. No ABI, execution or complete-history attestation.
+- **Verified RPC fact:** current Pons factory is enabled with three-second tax window,
+  not the advertised five. One curve/factory/token relation matches. Pinned source
+  is internally inconsistent for snipe-tax calls; HTTP403 explorer and HTTP429 curve
+  history remain refusals. Do not manufacture missing bytecode/fee semantics.
+- **Decision:** no financial Robinhood preregistration until the owner's approximately
+  24-hour collection condition and protocol prerequisites are met, and no opening
+  outcome tape before the freeze. Existing discovery slices remain development-only.
+  Fee-right CPMM snapshot is not a global CLMM kill: the claimed absent CLMM lock ID
+  is actually in the retained SDK. No new scan or valuation business started.
+- **Evidence:** `research/midcap/PROSPECTIVE_INSTRUMENT_AUDIT_20260909.md`,
+  `research/midcap/PONS_V2_DISCOVERY_20260909.md`; scoped helpers and private raws.

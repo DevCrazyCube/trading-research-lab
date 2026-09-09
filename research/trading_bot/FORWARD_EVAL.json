@@ -47,13 +47,13 @@
         "DISCLAIMER": "EVERY NUMBER IN THIS SUB-BLOCK IS AN INPUT TO A POWER CALCULATION, NOT A RESULT. T4 prereg \u00a78 forbids quoting a Sharpe, a CAGR or a p-value from this sample as evidence. They appear here because sizing the remaining sample is impossible without an effect-size estimate, and hiding the estimate would make the power arithmetic unauditable rather than honest.",
         "paired_excess_vs_N1": {
           "computable": false,
-          "reason": "13 settled sessions is below the 30 needed for skew and kurtosis to be anything but noise, and DSR's denominator is built from both."
+          "reason": "14 settled sessions is below the 30 needed for skew and kurtosis to be anything but noise, and DSR's denominator is built from both."
         }
       }
     },
     "session_axis": {
       "note": "sessions accrue fast and buy almost nothing on the primary question. They are the denominator for FG4 (the rail) and FG5 (DSR), not for FG1.",
-      "settled_sessions": 13
+      "settled_sessions": 14
     },
     "verdict": "NO VERDICT -- the pre-registered minimum is not met. This is neither a pass nor a 'promising'.",
     "what_would_change_the_answer": [
@@ -83,31 +83,31 @@
     },
     "vs_vol_matched_null_N1": {
       "definition": "ex-post volatility-matched CONSTANT weight in the same instrument plus T-bills, solved by bisection over THIS forward window. It is fitted with hindsight the strategy never had. That is deliberate: it is the gate that killed both T13 families.",
-      "delta_maxdd_pp": 0.026182505512791637,
+      "delta_maxdd_pp": 0.03223249144586344,
       "gate_FG1_threshold_pp": 3.0,
-      "matched_weight": 0.742712214589119,
-      "null_maxdd_pct": 0.8854152901069332,
-      "null_realised_vol_annual": 0.061782305041574045,
+      "matched_weight": 0.7475231140851974,
+      "null_maxdd_pct": 0.891465276040005,
+      "null_realised_vol_annual": 0.06239091078326887,
       "reminder": "the size half of a gate is not the gate. T13's overlay cleared +7.25 pp and died on p = 0.233.",
       "significance_half_of_FG1": {
         "computed": false,
-        "reason": "13 settled sessions. A paired block bootstrap with 21-session blocks needs at least 252 to resample anything but itself, and T4 prereg \u00a78 forbids quoting a p-value before the \u00a76 minimum in any case. Withheld deliberately."
+        "reason": "14 settled sessions. A paired block bootstrap with 21-session blocks needs at least 252 to resample anything but itself, and T4 prereg \u00a78 forbids quoting a p-value before the \u00a76 minimum in any case. Withheld deliberately."
       },
       "size_half_of_FG1_met": false,
-      "strategy_realised_vol_annual": 0.06178230813894107
+      "strategy_realised_vol_annual": 0.06239090814057205
     }
   },
   "elapsed": {
-    "calendar_days": 16,
+    "calendar_days": 20,
     "discontinuities_over_5_sessions": [],
     "first_run_logged": "2026-08-17",
     "first_settled": "2026-08-19",
-    "last_run_logged": "2026-09-07",
-    "last_settled": "2026-09-04",
+    "last_run_logged": "2026-09-09",
+    "last_settled": "2026-09-08",
     "note": "T4 prereg \u00a77: a gap of more than five consecutive sessions is a recorded operational discontinuity. The curve stays continuous because a weight persists until something moves it; the OPERATIONAL record does not.",
-    "runs_logged": 17,
-    "sessions_settled": 13,
-    "years": 0.04380561259411362
+    "runs_logged": 19,
+    "sessions_settled": 14,
+    "years": 0.05475701574264202
   },
   "execution_rail_FG4": {
     "fill_rate": 0.5,
@@ -145,14 +145,14 @@
   },
   "exposure_path": {
     "behaviour_check": {
-      "decisions_reconstructed_from_the_frozen_rule": 17,
-      "n_below_the_cap": 17,
-      "n_decisions": 17,
+      "decisions_reconstructed_from_the_frozen_rule": 19,
+      "n_below_the_cap": 19,
+      "n_decisions": 19,
       "note": "w = min(w_max, target/realised_vol) is MECHANICAL, so agreement here is a wiring check and not a finding. It is reported because a broken implementation makes every other number on this page meaningless regardless of what the PnL says. A single break invalidates the window under FG3.",
       "realised_vol_max": 0.1390333146628043,
-      "realised_vol_min": 0.12555727409593762,
+      "realised_vol_min": 0.12184720315500323,
       "reconstruction_breaks": [],
-      "target_weight_max": 0.7964492755998395,
+      "target_weight_max": 0.8207000030422434,
       "target_weight_min": 0.7192520745299694
     },
     "path": [
@@ -207,16 +207,20 @@
       {
         "date": "2026-09-04",
         "weight": 0.778379832754843
+      },
+      {
+        "date": "2026-09-08",
+        "weight": 0.7964492755998395
       }
     ],
     "summary": {
-      "changes": 12,
-      "changes_per_year": 232.61538461538464,
-      "latest": 0.778379832754843,
-      "max": 0.7795547868012842,
-      "mean": 0.7315523727003023,
+      "changes": 13,
+      "changes_per_year": 234.0,
+      "latest": 0.7964492755998395,
+      "max": 0.7964492755998395,
+      "mean": 0.736187865764555,
       "min": 0.7192520745299694,
-      "n": 13,
+      "n": 14,
       "time_at_cap": 0.0
     }
   },
@@ -227,12 +231,12 @@
     ],
     "gate_FG3": "PASS",
     "mismatches": [],
-    "sessions_checked": 13
+    "sessions_checked": 14
   },
   "framing": "READ-ONLY EVALUATION OF A FORWARD TEST THAT HAS CERTIFIED NOTHING. This report is evidence about what the bot DID, never a forecast of what it WILL do, and it licenses no return claim at any sample size short of the pre-registered minimum. Improvement is a NEW pre-registered forward test (ITERATION_PROTOCOL.md), never an edit to a running rule.",
   "gates": {
     "FG1_drawdown_vs_N1": {
-      "size_half": "+0.0262 pp (does not meet the size half)",
+      "size_half": "+0.0322 pp (does not meet the size half)",
       "state": "NOT READABLE -- \u00a76 minimum not met",
       "threshold": ">= 3.0 pp AND p < 0.05 (paired block bootstrap, 21-session blocks, 10000 draws)"
     },
@@ -259,17 +263,17 @@
     "read_order": "FG4 first (it can force a restatement), then FG3, then FG1, FG2, FG5",
     "verdict": "NO VERDICT -- the pre-registered minimum is not met. This is neither a pass nor a 'promising'."
   },
-  "generated_utc": "2026-09-07T20:35:01.434860+00:00",
+  "generated_utc": "2026-09-09T20:35:01.190992+00:00",
   "hit_rate": {
-    "n_sessions": 13,
+    "n_sessions": 14,
     "paired_vs_N1": {
       "NOT_LICENSED": "a hit rate is not the claim under test. T4's claim is entirely about the LEFT TAIL, where per-session win rates carry almost no information. Reported because it was asked for, fenced because it is the number most likely to be misread as an edge.",
-      "binomial_se": 0.1386750490563073,
-      "paired_hit_rate": 0.46153846153846156,
+      "binomial_se": 0.1336306209562122,
+      "paired_hit_rate": 0.42857142857142855,
       "sessions_beating_the_vol_matched_null": 6,
-      "sessions_needed_to_separate_from_0.5_at_80pct_power": 1326.4604685660272
+      "sessions_needed_to_separate_from_0.5_at_80pct_power": 384.59504709902484
     },
-    "raw_hit_rate": 0.5384615384615384,
+    "raw_hit_rate": 0.5,
     "sessions_up": 7,
     "why_raw_is_nearly_meaningless": "a long-only overlay's daily win rate is the instrument's win rate scaled by exposure. It measures SPY, not the rule. The paired rate below is the only one that is about the rule at all."
   },
@@ -279,25 +283,25 @@
       "account_type": "ALPACA PAPER. No real money. Live execution is owner-gated.",
       "first_equity_usd": 100000.0,
       "first_seen": "2026-08-17",
-      "last_equity_usd": 100220.85,
-      "last_seen": "2026-09-07",
+      "last_equity_usd": 99509.27,
+      "last_seen": "2026-09-09",
       "note": "the paper account pays no interest on idle cash, so compare it against `model_excash`, never against `model_withcash`.",
-      "pnl_pct": 0.22085000000000576,
-      "pnl_usd": 220.85000000000582
+      "pnl_pct": -0.4907299999999948,
+      "pnl_usd": -490.7299999999959
     },
     "curve": {
-      "benchmark_multiple": 1.0035700730805053,
-      "benchmark_return_pct": 0.3570073080505276,
-      "cumulative_cost_bp": 0.005206645094331302,
-      "cumulative_cost_bp_if_taker_rail": 2.015055910080458,
-      "model_excash_multiple": 1.00299997585501,
-      "model_excash_return_pct": 0.29999758550101063,
-      "model_withcash_multiple": 1.0034725117769985,
-      "model_withcash_return_pct": 0.3472511776998477
+      "benchmark_multiple": 0.9980583144116956,
+      "benchmark_return_pct": -0.19416855883044315,
+      "cumulative_cost_bp": 0.005241230007936625,
+      "cumulative_cost_bp_if_taker_rail": 2.060229517192949,
+      "model_excash_multiple": 0.9986126299328991,
+      "model_excash_return_pct": -0.13873700671008793,
+      "model_withcash_multiple": 0.9991674880263764,
+      "model_withcash_return_pct": -0.08325119736235509
     },
     "note": "realised, not projected. No annualisation is applied at any sample size: annualising a few sessions is the single most common way a forward log is turned into a forecast it cannot support."
   },
-  "status_line": "T4 T13-VOL-L60-T0.1-WMAX1.0 PAPER | 13 settled sessions (0.04y) | realised +0.35% | vs N1 +0.03pp | crashes 0/3 (3 more, ~27y) | NOT CERTIFIABLE -- NO VERDICT",
+  "status_line": "T4 T13-VOL-L60-T0.1-WMAX1.0 PAPER | 14 settled sessions (0.05y) | realised -0.08% | vs N1 +0.03pp | crashes 0/3 (3 more, ~27y) | NOT CERTIFIABLE -- NO VERDICT",
   "strategy": {
     "declared_trials": 1,
     "family": "T13 risk-shaping overlays",

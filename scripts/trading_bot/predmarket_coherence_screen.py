@@ -34,6 +34,11 @@ CATALOGUED_TRAPS = [
     (re.compile(r"gain the most seats", re.I), "Russia gains-vs-wins: resolves on NET SEAT GAIN vs before the election, not most seats held"),
     (re.compile(r"de facto leader", re.I), "Venezuela de-facto-leader wording differs from the plain leader market"),
     (re.compile(r"finish in (second|third) place", re.I), "Brazil two-advance runoff field sums to 2, not 1"),
+    # 2026-09-09: largest apparent cross-venue gap in the book (Poly 3701625 p=0.345 vs Kalshi
+    # KXPRESSSECANNOUNCE-26AUG-OCT01 p=0.445, SAME 2026-10-01T03:59Z deadline). Not an edge:
+    # Polymarket excludes acting/interim announcements, Kalshi explicitly includes them, so the
+    # Kalshi event set strictly contains the Polymarket one and p_kalshi >= p_poly is REQUIRED.
+    (re.compile(r"press secretary", re.I), "Press Secretary acting/interim: Kalshi INCLUDES acting/interim, Polymarket EXCLUDES it -- Kalshi's event set strictly contains Polymarket's, so a positive gap is required, not an edge"),
 ]
 
 # A field is winner-take-one only if EVERY leg reads as "one named contender takes the single

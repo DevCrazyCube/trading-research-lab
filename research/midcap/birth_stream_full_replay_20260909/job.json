@@ -1,0 +1,11 @@
+{
+  "network": "DISABLED",
+  "pid": 1434245,
+  "sampling": "NONE",
+  "source": "research/midcap/birth_stream_forward_v3_20260908T1901.sqlite",
+  "source_access": "READ_ONLY",
+  "started_unix_nanos": 1788948867624452231,
+  "status": "FULL_REPLAY_STARTED_NO_TRADE",
+  "verifier_sha256": "947bd2c975c9148f94507d11fe69c48d81a9927cd53e48a702739e114b36b7d3",
+  "wrapper_sha256": "f9c19d7d14744c0a6cb6fb0f279446f9a812d0e868ea4472d0faa023656e9d13"
+}

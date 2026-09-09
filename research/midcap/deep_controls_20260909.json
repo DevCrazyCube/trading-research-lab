@@ -1,0 +1,58 @@
+[
+ {
+  "mint": "ECGNShoLBXSzut43MwerXPj1kZtpX4qwn8SVSfVMpump",
+  "symbol": "WOFI",
+  "name": "WOFI",
+  "ath_usd": 976749657.0684956,
+  "ath_ts_ms": 1788665449000,
+  "last_mcap_usd": 699279.7389174151,
+  "created_ms": 1788602791000,
+  "socials_at_launch": {
+   "x": false,
+   "tg": false,
+   "web": false
+  }
+ },
+ {
+  "mint": "GujsSzRn27oCS6CpHfBSjq58t1TpwbkPSkNDFb3Dpump",
+  "symbol": "PONS",
+  "name": "Pons",
+  "ath_usd": 526995310.992955,
+  "ath_ts_ms": 1788830839000,
+  "last_mcap_usd": 19151141.91809161,
+  "created_ms": 1788798151000,
+  "socials_at_launch": {
+   "x": true,
+   "tg": false,
+   "web": true
+  }
+ },
+ {
+  "mint": "E1iQX1xKyg3u6PsWyfBVULktn18k2WR2w36meAbppump",
+  "symbol": "NTDA",
+  "name": "National Trump Digital Accounts",
+  "ath_usd": 517049778.4617174,
+  "ath_ts_ms": 1788717393000,
+  "last_mcap_usd": 13321433.938989548,
+  "created_ms": 1788684474000,
+  "socials_at_launch": {
+   "x": false,
+   "tg": false,
+   "web": true
+  }
+ },
+ {
+  "mint": "cWBXT8pMsqDS5CcRzuCLZ21Eu4wFrewcoMxdoyapump",
+  "symbol": "USMS",
+  "name": "USMS",
+  "ath_usd": 507704193.6307452,
+  "ath_ts_ms": 1788597143000,
+  "last_mcap_usd": 10457874.032836111,
+  "created_ms": 1788504773000,
+  "socials_at_launch": {
+   "x": false,
+   "tg": false,
+   "web": false
+  }
+ }
+]

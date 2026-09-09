@@ -541,3 +541,49 @@ V3 is running under the remaining time/storage budget and the old process is gra
 all evidence preserved. See `research/midcap/BIRTH_STREAM_BACKLOG_FIX_20260908.md`.
 New conceptual work is in `research/midcap/NEW_INFORMATION_CANDIDATES_20260908.md`; it proposes a
 source-authenticated address-resolution feasibility test, not a proven strategy or a relaxed gate.
+
+2026-09-09 follow-up: the creation tracker finished normally. Seven unrepaired gaps prevent
+treating elapsed duration as six-hour complete history; full offline replay is underway.
+A bounded FOMO alert connection verified realtime access but supplied no transaction identity
+or executable lead. See `research/midcap/FOMO_FEASIBILITY_20260909.md`.
+
+2026-09-09 15:20 UTC follow-up: full offline replay is EXACT, 9,613,996 frames;
+the prior pending state above is superseded. Internal replay does not establish chain
+recall or complete wallet histories. The FOMO paired timing probes are stopped after
+two public-RPC rate-limit failures and zero eligible roster associations; no economic
+verdict or paid upgrade. Owner inventory historical read also refused visibly.
+
+- [x] Audit the owner-supplied multi-day leaderboard-cohort candidate without rerunning
+  the retired scalp, handling or attention tests. Current-roster historical replay is
+  development-only due to roster lookahead; 126/30 arm sizes are not comparable.
+- [x] Add offline exact owner-accounting and causal/denominator guards; 23 tests pass.
+  Freeze a private deterministic 30/30 forward identity roster, not a strategy.
+- [ ] Collector owner repairs raw-response retention, missing/capped history states,
+  exact owner/quote accounting and protocol-level purchase authentication.
+- [ ] Establish activity/funding controls, freeze one financial rule before its future
+  cohort, and test executable mean/median and weekly outcomes under all original gates.
+
+Evidence: `research/midcap/COHORT_EVIDENCE_AUDIT_20260909.md`.
+No cohort money runner was activated, and the sealed window-2 asset is untouched.
+
+## 2026-09-09 20:40 UTC — prospective instrument audit and Pons discovery
+
+This supersedes older operational status above, not the financial promotion gates.
+
+- [x] Acknowledge handoffs 471–474 and verify the ten reported host processes.
+- [x] Audit six live/prospective instruments without reading cohort return outcomes;
+  reproduce evaluator/schema and coverage failures; report them to Claude in handoff 475.
+- [x] Add separate gap/cursor and raw curve-log integration helpers; 20 new synthetic
+  tests, 57 including prior fee-rights/cohort tests. Replay 727 retained factory logs.
+- [x] Identify current Pons V2 factory and one curve binding via public RPC; current
+  factory tax window returns three seconds. Preserve the incompatible source/ABI gate.
+- [ ] Claude integrates helpers and repairs existing scripts without concurrent edits,
+  lost observations, retrospective rule changes or unrecorded activation boundaries.
+- [ ] Complete Mayhem marks (latest +26h due September 10 04:20:10 UTC) and obtain the
+  frozen turnover output; no completed prediction verdict at this audit snapshot.
+- [ ] After the owner's approximately 24-hour collection prerequisite and protocol
+  verification, freeze a Robinhood financial spec before opening eligible outcomes.
+
+Evidence: `research/midcap/PROSPECTIVE_INSTRUMENT_AUDIT_20260909.md` and
+`research/midcap/PONS_V2_DISCOVERY_20260909.md`. No new live collector, alert, order,
+paid service or roster change was enabled by Codex. Existing services remain with Claude.

@@ -9,6 +9,15 @@
 
 ---
 
+> **ADDENDUM 2026-09-09 12:00 CEST (T77) — read this before §0.** The ~09-23 T30 read is a
+> **one-branch fork: neither branch produces a bot.** If T30 dies, the fork fires and item (a)
+> of the menu dies with it. If T30 *lives*, what follows is `PREFRV`, whose own pre-registered
+> power finding is ~4,430 book-weeks needed against an N_max of 156 weeks — expectation
+> UNDECIDED→RETIRED (§6). So the read decides **how much is left on the paid menu**, not whether
+> we have a strategy. The packet has been decision-complete since 2026-09-04; the fortnight to
+> 09-23 changes the fork's wording, not its existence. Reasoning:
+> `research/trading_bot/STRATEGIST_2026-09-09_1200.md` §2–§4.
+
 ## 0. The decision, in one paragraph
 
 For thirteen months this programme has tested candidate trading edges against a hostile bar
@@ -430,3 +439,13 @@ and not nearly enough to find a tenth edge.
 
 No order, no spend, no wallet, no broker auth. No BASKET1 leg and no re-freeze. `t4` untouched. No
 instrument restarted, re-activated, re-epoched or resolved. Nothing committed or staged.
+
+> **ADDENDUM 2026-09-10 00:00 CEST (T80) — read after T77.** The T33 US-options collector gate
+> (2026-10-07) is a **scheduled FAIL by arithmetic**: the host reboot at 21:04:59 CEST on 09-09
+> killed the collector inside its pre-capture sleep, 09-09 is a failed day under the frozen rule,
+> and with 08-25 already failed the best case is 28/30 = 0.933 < 0.95. The protocol's one bounded
+> fix tick (T78) can make future captures reboot-proof; it cannot restore the ratio. Consequence
+> for §6: item (b)'s December convexity read runs on **T31 (Deribit crypto vol) only** — outside
+> the goal universe — unless the owner deliberately re-bases T33 (a clock reset; owner call, never
+> autonomous). This further shrinks the paid menu and strengthens the STOP lean recorded in T77.
+> Source: `research/trading_bot/STRATEGIST_2026-09-10_0000.md` §1.

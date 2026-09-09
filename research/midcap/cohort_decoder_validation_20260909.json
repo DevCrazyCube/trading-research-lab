@@ -1,0 +1,62 @@
+{
+  "counts": {
+    "decoded": 27,
+    "distinct_transactions": 12,
+    "nontransaction_skipped": 7,
+    "old_fee_addback_to_nonpayer": 15,
+    "old_token_delta_mismatch": 0,
+    "owner_transaction_cases": 27
+  },
+  "inputs": [
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_2cpQNe28aTEqKMwM4Uu65BCPdAPQ4gLe7k8v5euG7fdCwtnFmsk3hzWdjgzUaxyVEYp1NcLtsb2eTXDNrLbdryfj.json",
+      "sha256": "8a106b5160f3792b0c88fc60ebf75c151ef972d16b2b143b89b6250d3169f4d2"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_2vYzXZpM.json",
+      "sha256": "f9cded85e7b0f703e3db55c5980f7c40f3501d889c8807b0dfc42594b70d6d64"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_3PV7w2y7.json",
+      "sha256": "adccd2c111eb1d3457b2e982649b38c0d407a338056476e7b0dcc10c604b52c4"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_3fyxj1nuy3W1zGUUmYhYbA9vt6Rmmp6Joy3B83CbP1z6DKsLGQpWXc1TiXYrYCJjk8x9DrFUvDiAc6rmEs9pcFf6.json",
+      "sha256": "717b8d112491d3f96ac93e3818db0d0f86d06a7b3e79aaafd6a6ec0756b2c6f2"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_3kVZ17oNshySzcew9bpo8gwEN8nJdqa4yTfgjn8qErvxxpeQgk8gdRHUbzufk4mpYqPa1BrXp5UP9T6oghwzp5Uy.json",
+      "sha256": "b033655f8d57e676be71fd258cbb52c10059712fba502100d5291d339870c882"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_48jjPiXGd5DhNhALwbzvC3LLu6WnZMPpdNXJBFZofGKeexK6apMdMCXcwKFyx2bocbdMfPD7JQPxq45ZeiF5kxpp.json",
+      "sha256": "6f74be86355713e9a34e76bd26a69ea72c9413b9be1c8db1577eeabf80bb635a"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_4DedfSSvVGtMHbSicB5AaYxRWvhPE2Ej3Td87mRpXJbMWbLoUQWkMFpCsL3JFxqqD1FymoWG2mRXnUYZTnaunHoy.json",
+      "sha256": "f204ed2aa3a3c3a2df6ca1881b7b34d135706e6b47e5d64a479da43f72bee0b5"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_5d4ngQnkdzPtThdPN9pBhZLfxErGW9Nm4uPFYJdvugL7NXmXHuS73A2jVAebmbMZJFGY7VQf8h7gKYH81gFs4Xy.json",
+      "sha256": "65a85799db41849f5711fe06855b1a6c8c24fadecceb781fe07cfc8f4b90f369"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_5ujPHoQhPFXcsncnQezUBA57PnqzFFfSSbeXFajX4msAB8xTGQJe1b3i2sbGoBf1W2wDTB7FXgbeP1BzarQU7iGZ.json",
+      "sha256": "a7ac49a55b6b1aa45152842aed0b1bd3c3d0dbb4c23c4637662f452b581810f3"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/tx_dL2B9t9L.json",
+      "sha256": "0cbc3a2411c79bbb05d57f74b457a7b4d82d0c711cd273eb193db8268843961e"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/creator_first_tx.json",
+      "sha256": "fa78130ad3d8e41696dd8b02ed6e3ab4725a5d7c932f84b7a16032543f9b3a86"
+    },
+    {
+      "path": "/tmp/claude-1000/-home-anont-meme/5d56bbe0-2440-41b7-9176-f7470b1d1b38/scratchpad/deep/ntda_curve_txs.json",
+      "sha256": "ba9b6f10ae9bff0b23b3c4c9f1c5c86c61bd78150be57ddc969aa37d8ba0dba8"
+    }
+  ],
+  "refusals": {},
+  "status": "OFFLINE_DECODER_VALIDATION_NOT_PNL"
+}

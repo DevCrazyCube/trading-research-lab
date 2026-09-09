@@ -1,0 +1,23 @@
+INPUT-RECENCY ALARM  2026-09-08T22:00:30.836941+00:00  (13 instruments)
+------------------------------------------------------------------------------------------------------------
+STATUS          INSTRUMENT                LANE          AGE(h)  ALLOW(h)  SOURCE
+STALE           ARENA_BUNDLE_V2           memecoin      151.23      48.0  row.decision_unix_nanos
+STALE           ARENA_MIGRATION_V1        memecoin      149.32      48.0  row.decision_unix_nanos
+STALE           ARENA_TAPE_PUMPPORTAL     memecoin      149.32       2.0  row.received_unix_nanos
+STALE           ARENA_VIRALITY_V2_2       memecoin      142.03      48.0  row.entry_day
+STALE           MULTIVENUE_LAUNCH_TAPE    memecoin       13.90       2.0  row.received_unix_nanos
+OK              BASKET1                   equities       46.01      48.0  row.run_utc
+OK              NEWSDESK                  news           17.96      48.0  row.proposed_utc
+OK              PREDMARKET                predmarket      2.89      48.0  row.proposed_utc
+OK              T30_BORROW                equities       22.03      48.0  days key
+OK              T31_DERIBIT               crypto-vol     -1.97      48.0  days key
+OK              T33_US_OPTIONS            equities       -1.97      48.0  days key
+OK              T45_ETF_LIQ               equities        0.76      48.0  last_scan
+OK              T4_REALMONEY_READONLY     equities        2.18      48.0  row.run_utc
+------------------------------------------------------------------------------------------------------------
+ALARM: 5 instrument(s) not live:
+  - ARENA_TAPE_PUMPPORTAL: newest input row is 149.3h old (calendar), allowed 2.0h  [research/data/memebot_cache/pumpportal_trades_v2.jsonl]
+  - ARENA_MIGRATION_V1: newest input row is 149.3h old (calendar), allowed 48.0h  [research/data/arena/MIGRATION_ACCEPTANCE_V1/ledger.jsonl]
+  - ARENA_BUNDLE_V2: newest input row is 151.2h old (calendar), allowed 48.0h  [research/data/arena/BUNDLE_MOMENTUM_V2/ledger.jsonl]
+  - ARENA_VIRALITY_V2_2: newest input row is 142.0h old (calendar), allowed 48.0h  [research/data/arena/VIRALITY_ARRIVAL_V2_2/ledger.jsonl]
+  - MULTIVENUE_LAUNCH_TAPE: newest input row is 13.9h old (calendar), allowed 2.0h  [research/data/memebot_cache/multivenue_launch_tape_v1.jsonl]

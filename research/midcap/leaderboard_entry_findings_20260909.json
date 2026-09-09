@@ -1,0 +1,62 @@
+{
+ "STONK": {
+  "origin": "pump.fun 2026-07-23 19:06, never completed the curve; Orca pool opened 2026-08-05 03:58 at ~$2.6M mcap",
+  "crosses": {
+   "10M": "2026-08-12 16:00",
+   "100M": "2026-09-06 05:00",
+   "peak": "$197-224M 2026-09-09"
+  },
+  "leaderboard_holders": 34,
+  "pre_pool_touchers": 9,
+  "pre_pool_mechanism": "TOKEN TRANSFERS (allocations), SOL delta 0, 0.7M-5.8M tokens each, 2026-08-02..08-05, incl. ranks 3,6,8,27,28",
+  "pre_pool_share_of_board_pnl": "38% ($11.6M of $30.3M)",
+  "pool_era_entries": {
+   "below_1M": 0,
+   "1_10M": 14,
+   "10_50M": 5,
+   "above_50M": 6
+  },
+  "within_first_hour": 9,
+  "within_first_24h": 12
+ },
+ "ZCAT": {
+  "origin": "Raydium CLMM ZEC/ZCAT pair 2026-08-30 23:29 at ~$369k; ZEC-themed derivative launched mid ZEC run (ZEC $467 on 08-11 -> $863 at launch -> $1,230 a week later)",
+  "crosses": {
+   "1M": "2026-08-31 21:00",
+   "10M": "2026-09-04 20:00",
+   "100M": "2026-09-06 12:00",
+   "peak": "$171M 2026-09-07 01:00"
+  },
+  "leaderboard_holders": 26,
+  "entry_mcap_q25_med_q75": [
+   368718,
+   1045598,
+   5553227
+  ],
+  "below_1M": 11,
+  "1_10M": 10,
+  "above_50M": 3,
+  "within_first_hour": 9,
+  "within_first_24h": 12,
+  "first_30min_cohort": [
+   "koy",
+   "valueandtime",
+   "LevisNFT",
+   "BertLuvv",
+   "mrfernando88",
+   "zakum",
+   "motiyawerey",
+   "spartee",
+   "dreamloaderxo"
+  ]
+ },
+ "USELESS": {
+  "origin": "2025-05-10 (16 months old); re-ran 09-01 to $100M+",
+  "leaderboard_holders": 6,
+  "entries": "all at $65M-$230M, 2026-06..09; pure hold of a large coin re-running"
+ },
+ "leaderboard_structure": {
+  "top150_7d_pnl_share_top5_tokens": "71%",
+  "traders_with_pnl_gt_volume": "46/150"
+ }
+}

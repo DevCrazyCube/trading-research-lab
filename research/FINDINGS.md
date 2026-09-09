@@ -3029,3 +3029,468 @@ Portfolio honesty note: ~50 of the 75 open estimates are the *same trade* (q<p
 favourite-longshot fade on long-dated "before 2027" questions) and only 1 has resolved.
 The reported Brier edge (+0.0326) is one resolution deep and means nothing. What the
 tracker needs is short-dated legs that actually settle — not more correlated fades.
+
+## 2026-09-09 00:00 — STRATEGIST: the host was down 8h on 09-08, **we lost a T30 day**, and all three green proxies said fine
+
+Full note: [STRATEGIST_2026-09-09_0000.md](trading_bot/STRATEGIST_2026-09-09_0000.md)
+(sha256 `aaf52c1e…`). Shell PROVEN (canary emitted + acked).
+
+**Direction UNCHANGED and converged** — wait out the gates, free-data invention stays suspended,
+directional record still 0-for-9. This tick checked whether the evidence we are waiting on is
+actually accumulating. It is not.
+
+**The event.** `uptime -s` = 2026-09-08 18:12:10; the host was down ~09-08 10:05→18:12 CEST.
+`crontab -l` is intact — nothing was misconfigured, the machine was off. Checked each job
+individually: **`t30_borrow_collect.py` (16:30 daily) MISSED — the borrow ledger's newest day is
+2026-09-07 and `borrow_forward/cron.log` has no 09-08 line.** T31 (02:15), T33 (20:45, ran after
+boot) and T45 (23:15) all have clean 09-08 entries. This supervisor's own ticks **h12, h15 and
+h18 never fired**. This is the **first actual loss of forward evidence in the equities spine** —
+every prior liveness finding (T50, T52, T67, the 09-08 T31 note) was an exposure caught before it
+bit.
+
+**Why nothing told us — three proxies, one lost day:**
+
+1. **T30's ledger summary reads `days_attempted 15 / days_clean 15` = 1.00.** This is the T31
+   denominator defect found blind 24h ago, now *realised in production on a different
+   instrument*: `record()` only runs inside a collector run, so a day cron never fired gets no
+   entry at all — not failed, nothing — and the denominator does not grow. The 09-08 note's
+   *"T30 is NOT exposed"* was right about the **gate** (`MIN_CLEAN_DAYS = 30` counts clean days
+   absolutely, so an outage can only delay it, never fake it — still the safer design) and should
+   not be read as right about the **ledger line a human reads**.
+2. **T52 printed `OK  T30_BORROW  22.03h / 48.0h` for a feed that missed a day.** The monitor we
+   built so a proxy could not lie fails two stacking ways on `daykeys` instruments: a bare date
+   key is credited to **23:59 of its own day** (verified: `_parse_ts('2026-09-07','date')` →
+   `2026-09-07 23:59Z`), so every such instrument is reported **~24h younger than it is**; and
+   `allowed_hours = cadence * tolerance = 24 * 2.0 = 48`. Stacked, a calendar-daily feed must
+   miss **two consecutive collections** before it is called STALE. Plus a third, T30-specific
+   error: T30 is registered `business_days=True`, which subtracts weekend hours — but the T30
+   collector is **calendar**-daily (its ledger holds clean 08-29/08-30/09-05/09-06 weekend
+   entries), so that grace is a suppression, not a grace.
+3. **The supervisor's absences leave no trace.** h12/h15/h18 produced no canary nonce, no
+   `input_recency_*.txt`, no `claude_*.log` — those and the "wrote no FINDINGS line" auto-stamp
+   are all written by `durable_tick.sh`, so a tick that never runs cannot record that it never
+   ran. FINDINGS shows an unbroken dated sequence across 09-08 with a nine-hour hole and no
+   marker in it. **We monitor the instruments; nothing monitors the monitor's attendance.**
+
+**Date correction (an estimate moving, NOT a frozen rule).** The frozen T30 rule is "30 clean
+days"; `~09-22` was only our arithmetic. 15 clean days banked (08-24…09-07), 09-08 lost, 15 more
+run 09-09…09-23 → the **T30 fork is ~2026-09-23, not ~09-22**, now landing the same day as T31's
+gate. Each further outage moves it another day one-for-one. **New kill-condition for the evidence
+clock:** at **3** cumulative lost T30 days the panel is no longer 30 consecutive days of one
+borrow regime and must be read as a spliced panel, disclosed. Today the count is **1**.
+
+**Filed, priority 1:** **T72** — a strictly additive read-only *calendar-gap reader* (same
+pattern the 09-08 tick chose for T31: do not patch a running monitor blind, add a companion that
+computes the honest number). Enumerates every calendar/trading date from day 0 to today per
+instrument and reports dates with **no ledger entry at all** — the quantity neither the ledger
+summary nor T52 can express — and corrects the three §2b alarm errors in the companion, not in
+the live alarm. Expected output today: T30 missing `2026-09-08`; T31/T33/T45 complete.
+**T73** — a missing-tick reconciler that stamps absent 3-hourly slots into FINDINGS.
+
+**STALE (observed only, no restart — T53 is an owner spend gate):** `ARENA_BUNDLE_V2` 151.2h,
+`ARENA_MIGRATION_V1` 149.3h, `ARENA_TAPE_PUMPPORTAL` 149.3h, `ARENA_VIRALITY_V2_2` 142.0h — all
+the known 09-02 Helius outage, one line, no re-investigation. **`MULTIVENUE_LAUNCH_TAPE` 13.9h vs
+2.0h allowance is newly stale**, window consistent with the same host downtime; noted only.
+
+**NOT VERIFIED this tick (T50 rule):** BASKET1 contents/hash, t4 beyond T52's read-only row,
+NEWSDESK/PREDMARKET ledgers, window-2/U4, all pin sha256s other than the two source lines quoted.
+
+**Next step:** the 03:00 CHUNK B tick builds and pins **T72**, and reports the lost-day count per
+instrument before the ~09-23 fork.
+
+Nothing forbidden was touched: no BASKET1 leg and no re-freeze, no frozen spec/pin/gate/
+kill-condition moved, no collector edited, **the lost 09-08 day was NOT backfilled**, no arm
+restarted, t4 untouched, crontab unmodified, no orders, no spend, no wallet, no commit, no stage.
+
+---
+
+## 2026-09-09 03:00 CHUNK B — T72 BUILT + PINNED, and the denominator lens closes T69
+
+Shell verified (`TICKCANARY-1270399-1788915600-3414`). Integrity work under the T61 standing
+duty, not an invention round. The 00:00 tick's directed deliverable was T72; it is built, pinned
+and its first read is on disk.
+
+**T72 — calendar-gap reader.** `scripts/trading_bot/t72_calendar_gap_reader.py`, pinned
+`8fbc2ee3…` (`research/data/calendar_gap/T72_PIN.sha256`), hermetic selftest **ALL_PASSED
+(11/11)**, first read saved to `research/data/calendar_gap/T72_READ_2026-09-09.json`. Read-only:
+it enumerates every date from an instrument's day 0 whose declared capture instant + grace has
+passed, and reports the dates carrying **no ledger entry at all**. It corrects the three §2b T52
+errors **in the companion, not in the live alarm** — E1 a date is credited to its crontab capture
+instant, not to the end of its day; E2 ONE missed due capture is already a gap (not `24h × 2.0`);
+E3 T30 is calendar-daily, so no weekend suppression. It also flags a *declared-calendar mismatch*
+when a ledger holds entries a label does not expect (explicit `market_closed` rows excluded — T33
+records closures honestly and its own gate already excludes them from `days_attempted`, verified
+at `t33_us_options_collect.py:294`).
+
+**First read (asof 2026-09-09T01:07Z):**
+
+| instrument | status | present/due | true age(h) | newest |
+|---|---|---|---|---|
+| T30_BORROW | **GAP — 2026-09-08 missing** | 15/16 | 34.6 | 2026-09-07 |
+| T31_DERIBIT | COMPLETE | 16/16 | 0.9 | 2026-09-09 |
+| T33_US_OPTIONS | COMPLETE | 10/10 | 6.4 | 2026-09-08 |
+| T45_ETF_LIQ | **UNMEASURABLE** | — | — | — |
+| BASKET1 | COMPLETE | 12/12 | 123.1 | 2026-09-04 |
+| NEWSDESK1 | COMPLETE | 7/7 | 9.1 | 2026-09-08 |
+| PREDMARKET1 | COMPLETE | 6/6 | 6.1 | 2026-09-08 |
+
+The predicted single lost T30 day is now **mechanically measured, not inferred** — and its true
+age is 34.6h where T52 reports 25.0h. Two corrections to the 00:00 tick's expectation: **T45 is
+not "complete", it is UNMEASURABLE** (see T69/D1), and **BASKET1's T52 STALE at 49h is fully
+explained** — 09-05/06 weekend + 09-07 Labor Day + the free-tier SIP embargo leave the 09-08
+session legitimately in flight inside T72's 48h grace, so its date axis has no gap. Cumulative
+lost-day count against the T30 splice threshold stays at **1** (threshold 3).
+
+**T69 — the denominator lens applied to the five instruments T67 did not cover. CLOSED with two
+defects, one caveat and one absence** (`research/trading_bot/T69_DENOMINATOR_AUDIT_2026-09-09.md`).
+SAFE: **T30** (absolute clean count — a gap delays, never fake-passes) and **T45's K1** (a
+shortfall fires the block). GUARDED, and the template the programme should copy: **T35
+convexity**, the only gate that pairs an observed-unit N with an explicit `≤10 % dropped` cap that
+forces UNDECIDED.
+
+- **B1 (defect) — BASKET1 prints `ALIVE` for legs that have produced zero evidence.** Both the
+  kill switch (`N_min = 40`) and the retirement rule (`N_max = 500`) are denominated in settled
+  observations, and an observation only accrues when a leg FIRES; there is no calendar dormancy
+  rule anywhere in the prereg. Measured on the newest row: **12 of 14 legs are at n=0 and all 12
+  report `verdict: ALIVE`** (only T3 n=10 and ETFRV n=1 are accumulating). A never-firing leg can
+  be neither killed nor retired — immortal by non-observation — while still counting in
+  `declared_trials_now`, inflating the multiple-testing cost of the legs that do fire. Nothing is
+  touched (clock locked, kill switch frozen); the correction is interpretive: **stop reading
+  `ALIVE` as information.** The honest state of BASKET1 is one leg accumulating, one barely
+  started, twelve unmeasured. Any future basket-shaped instrument must declare a
+  calendar-denominated dormancy rule before day 0.
+- **P1 (defect) — 20 % of the PREDMARKET1 book can never enter its own verdict, and the exclusion
+  is known at freeze time.** Of 76 frozen estimates (plus 39 abstentions), close dates run
+  2026-09 ×15, 10 ×12, 11 ×11, 12 ×24, 2027-01 ×12, 2029 ×2: **15 of 76 (19.7 %) close after
+  2026-12-31** and are permanently outside a verdict read that day, selected purely on
+  `close_time`. Horizon is not independent of calibration skill for a stale-knowledge agent, so
+  this is a selection, not a random thinning, and nothing in the ledger marks those 15 as
+  excluded-by-construction. Additive to T60 (i.i.d. SE) and to the 09-06 correlated-book note
+  (which covered the 24-market lump, i.e. the other side of the same denominator). Second,
+  smaller: 24 estimates close **on** 2026-12-31 and settlement lags close, so a same-day read can
+  sit below `N_min` while looking as if it crossed. Resolved to date: **1 of 76**.
+- **C1 (caveat, verdict unchanged)** — T35's drop cap counts only trades whose ENTRY snapshot
+  exists, so a date the collector never ran is invisible to the 10 % ratio and shrinks N instead
+  (the safe direction). T67 + T72 are the compensating measurements.
+- **D1 (absence)** — T45's `state.json` carries only `last_scan` and `seen_accessions`; there is
+  **no per-date scan record**, so scan attendance is unreconstructable for any past date. "T45 was
+  scanning on date X" is not a verifiable claim, ever. Same fact as T62_t45_d1, restated as an
+  absence of evidence rather than a weak proxy.
+
+**Six consecutive integrity sweeps, six real defects** (T52 → T55/T56 → T60 → T64 → T67 → T69/T72)
+against nine free-data invention rounds returning nine deaths. The T61 standing duty's
+kill-condition (two consecutive CHUNK B ticks with **zero** new defects) has **not** fired.
+Direction and the ~09-23 fork are UNCHANGED; nothing here is a reason to change what we trade.
+
+**STALE (observed only, no restart — T53 is an owner spend gate):** `ARENA_BUNDLE_V2` 154.2h,
+`ARENA_MIGRATION_V1` 152.3h, `ARENA_TAPE_PUMPPORTAL` 152.3h, `ARENA_VIRALITY_V2_2` 145.0h — the
+known 09-02 Helius outage, one line each, no re-investigation. `MULTIVENUE_LAUNCH_TAPE` 16.9h vs a
+2.0h allowance, second consecutive tick stale, same host-downtime window; noted only.
+**`BASKET1` 49.0h — T72 shows this is NOT a gap** (weekend + Labor Day + SIP embargo).
+
+**NOT VERIFIED this tick (T50 rule):** BASKET1 file hash and prereg contents beyond §7a/§7b and
+the kill-switch block of the newest row, t4 beyond T52's read-only row, window-2/U4, T30/T31/T33
+pin sha256s, T33 per-underlying coverage, the arena feeds beyond their file ages.
+
+**Next step:** run `t72_calendar_gap_reader` at the top of every CHUNK B tick (it is now the
+lost-day counter of record against the T30 splice threshold of 3), and build **T73**, the
+missing-tick reconciler — the supervisor's own attendance is still the one unmonitored clock.
+
+Nothing forbidden was touched: no BASKET1 leg and no re-freeze, no frozen spec/pin/gate/
+kill-condition moved, no collector edited, **the lost 09-08 T30 day was NOT backfilled**, no arm
+restarted or re-epoched, t4 untouched, crontab unmodified, no orders, no spend, no wallet, no
+commit, no stage.
+
+---
+
+## 2026-09-09 06:00 CEST — NEWSDESK (CHUNK C): abstain #8, and a sampling confound that would have manufactured the T55 kill
+
+**Abstention is NOT price-blocked this time.** 09-08 was a full US session, so equity spot is live
+again (SPY 765.96, NVDA 225.73, AAPL 316.22, AMD 505.74, …; BTC 78722). Every frozen name was
+priceable and nothing was frozen anyway: the tape (395 events, coverage 100.0%, 0 feed errors,
+sha256 `35e6186a…`) holds only post-print or telegraphed items — NVDA's earnings already printed,
+the AAPL iPhone event is dated and universally known, the rest is commentary. Logged to
+`NEWSDESK_PREREGISTRATION_LOG.jsonl`. NEWSDESK1 stands at 2/30 resolved, kill ALIVE, 0 open.
+
+**T55 starvation counter, tick 4/20:** 395 events, 143 in-universe, fresh≤15min **1** (first
+non-zero), qualifying **0**. Window total 0/4, status COLLECTING. Definition not tuned.
+
+**The 09-08 "duty cycle" hypothesis, re-read on a business day — confirmed, and it buys nothing.**
+8-Ks came back (n=40, median age 6.8h), so EDGAR's staleness on 09-08 was a holiday duty cycle as
+argued. But SEC_8K min age 392.3 min before an 04:02Z pull puts the newest filing at ~21:30Z =
+**17:30 ET, exactly EDGAR's same-day acceptance cutoff**. The channel is not slow; we poll it 6.5h
+after it closes. This measurement *cannot* separate feed lag from tick placement and is fully
+consistent with zero feed lag — but either way, at an 04Z tick the freshest possible 8-K is ~6.5h
+old **by construction**, so the frozen FRESH≤15min bar is unreachable at that hour regardless of
+feed health. Freshness here is bounded by *when* we poll, not *what* we poll.
+
+**DEFECT (load-bearing for the kill rule).** All four starvation samples (09-05, 09-07, 09-08,
+09-09) were taken at ~04:02Z — the single worst hour of the day for this measurement. The lane also
+fires at ~16:02Z (12:00 ET, mid-session): **15 such ticks exist in the preregistration log and not
+one has ever written a starvation record**, because the counter was built 09-05 and has only ever
+been invoked from the 04Z arm. So the 20-tick window is being filled exclusively from the hour at
+which the metric is pinned to zero. If it closes 0/20 and NEWSDESK1 is killed as STRUCTURALLY
+STARVED, we will have killed it on *"we never look when the news happens"* and called it structure.
+The starvation thesis may still be right — a mega-cap files a handful of 8-Ks a year while the
+EDGAR firehose is trusts and microcaps, and the hour of the poll does not touch that argument — but
+this window would not have tested it. Same family as
+[[selftests-dont-cover-the-data-path]]: the decision path is healthy while the input surface is
+quietly biased.
+
+**Deliberately NOT fixed in-tick.** Changing what fills a pre-registered window mid-flight is the
+freeze-then-test violation this programme keeps repeating, so the definition and the kill rule are
+untouched. Required repair is **additive and hour-labelled**: have the 16Z arm also record the
+counter into the same ledger, and at verdict time report the 04Z and 16Z counts **separately** — a
+kill then requires the mid-session arm to starve too, which *raises* the bar. Recorded as a
+precondition on T55 in `agenda.json`. Until that split exists, a STRUCTURALLY_STARVED verdict from
+this window must be read as **UNCONFIRMED**.
+
+**STALE this tick (T52, observed only — nothing restarted):** `BASKET1` (52.0h),
+`ARENA_TAPE_PUMPPORTAL` (155.3h), `ARENA_MIGRATION_V1` (155.3h), `ARENA_BUNDLE_V2` (157.2h),
+`ARENA_VIRALITY_V2_2` (148.0h), `MULTIVENUE_LAUNCH_TAPE` (19.9h). The five arena/tape instruments
+are the known, already-logged Helius-quota outage — one line, not a re-investigation.
+
+**NOT VERIFIED this tick (T50 rule):** anything outside the newsdesk lane — BASKET1 contents,
+t4 beyond T52's read-only row, T30/T31/T33/T45 pins and coverage, window-2/U4, the arena feeds
+beyond their T52 file ages.
+
+**Next step:** implement the additive 16Z starvation sample (hour-labelled, both arms in one
+ledger, split reporting at verdict) before the T55 window closes — otherwise the counter cannot
+distinguish a starved design from a badly-timed poll.
+
+Nothing forbidden was touched: no BASKET1 leg and no re-freeze, no frozen spec/pin/gate/
+kill-condition moved, no collector edited, no arm restarted or re-epoched, t4 untouched, crontab
+unmodified, no orders, no spend, no wallet, no commit, no stage.
+
+## 2026-09-09 (CHUNK D, PREDMARKET) — the coherence escape route is worth zero at executable prices
+
+The T47 cross-market coherence screen was opened as the *knowledge-free* way around the agent's
+May-2026 cutoff: arithmetic violations need no forecast. This tick priced that route at
+executable prices for the first time. It is zero-to-negative.
+
+- **Only flag over 1,045 screened candidates** (Maxwell pardon date-ladder, Polymarket 566760
+  "by end of 2026" mid 0.0550 vs 687689 "before 2027" mid 0.0445): a real 1.05pp nesting
+  violation on mids that pays **+0.50pp executed** (sell bid 0.050 / buy ask 0.045) over 3.8
+  months ≈ 1.6%/yr, with a live 2026-12-31 close-stamp gap and a $22.8k long leg against a $748k
+  short leg. **DEAD at the friction floor.**
+- **The cleanest test the book offers** — Polymarket's mechanically exhaustive Musk tweet-count
+  partitions, where Σp = 1 is an identity — pays **exactly zero**: the 11-leg Sep 4–11 family
+  shows +2.45pp mid overround and Σbid = **1.0000 to the tick**; the 3-leg Sep 7–9 family pays
+  **−0.80pp**. The mid overround is 100% spread. The makers already run this screen.
+- **Largest apparent cross-venue gap is a wording trap, catalogued:** Poly 3701625 "Press Sec
+  announced by Sep 30" 0.345 vs Kalshi KXPRESSSECANNOUNCE-26AUG-OCT01 0.445 on the *same*
+  2026-10-01T03:59Z deadline — Kalshi INCLUDES acting/interim, Polymarket EXCLUDES it, so
+  Kalshi's event set strictly contains Polymarket's and a positive gap is *required*.
+- Abstained on estimates (366 unseen liquid mid-priced candidates, all foreign or post-cutoff
+  domestic politics against books up to $10.2M/leg). Abstention streak now runs 08-31 → 09-09.
+
+Opened **T76** (screen must score flags at executable prices, not mids) and pre-registered a
+kill on T47: no flag worth > +2.0pp executed in the next 3 CHUNK D ticks ⇒ T47 killed.
+Write-up: `research/trading_bot/predmarket/PREDMARKET_EXECUTABLE_PRICE_KILL_2026-09-09.md`.
+
+## 2026-09-09 (CHUNK A, STRATEGIST) — the ~09-23 T30 gate is a ONE-BRANCH fork; the spine is honest
+
+**T72 verified independently.** The calendar-gap reader specified at 00:00 and built at 03:07 was
+run read-only from this tick. It reports the quantity neither a ledger summary nor T52 can express —
+due dates with **no ledger entry at all**: `T30_BORROW` **15/16, one gap = 2026-09-08**, true age
+**43.52h** where T52 this morning printed **34.03h OK** (T52's ~24h end-of-day-credit error is now
+*measured*, not argued). `T31` 17/17, `T33` 10/10, `BASKET1` 12/12, `NEWSDESK1` 7/7, `PREDMARKET1`
+7/7 — zero gaps. The 09-08 host outage cost the programme **exactly one collection**; cumulative
+lost T30 days = **1**, against the kill-condition of 3. `T45_ETF_LIQ` returns **UNMEASURABLE**:
+`state.json` holds one scalar (`last_scan`) plus `seen_accessions`, so scan attendance is
+unreconstructable for *every* past date — T62_t45_d1 confirmed from a second direction, and T45 is
+the one live instrument whose input history cannot be audited. T52 left unpatched by design; T72 is
+the companion.
+
+**Having confirmed the clock, the strategist asked what it decides — and the answer is in our own
+record.** `PAY_OR_STOP_DECISION_PACKET.md` §6: if T30 **dies**, the pay-or-stop fork fires and item
+(a) of the paid menu dies with it (item (a) exists only to make T30 decidable). If T30 **lives**,
+the follow-on is `PREFRV` (prereg 2026-08-30, sha `b01b51ba…`), needing **~4,430 book-weeks** at 80%
+power against a pre-registered **N_max of 156 weeks**, recorded expectation **UNDECIDED→RETIRED or
+DEAD**. **Neither branch produces a tradeable strategy.** Both terminate in the same owner question —
+spend on data, or stop — decision-complete in the packet since 2026-09-04. The gate stays pinned and
+is still informative, because a T30 death *prunes the menu* and cheapens STOP; but it must be
+described honestly: **~09-23 decides how much is left on the paid menu, not whether we have a bot.**
+Filed as **T77** and pointed to from the head of the packet so a cold read reaches it before §0.
+
+**Direction, stated as convergence:** the most promising direction available is no longer a strategy
+— it is **closing the owner spend decision with correct expectations attached**. Everything else on
+the board is $0 background on a frozen clock or process hygiene. For the next fortnight: protect the
+~09-23 read's integrity (T62 cluster diagnostic, T61, T64), and fix the *next* gate's date before it
+arrives (**T68 promoted to priority 1** — T33's frozen rule counts the 30th TRADING day while its
+doc estimates ~10-07 from a calendar count; a gate with a wrong date gets read early, and an early
+read of a forward gate cannot be undone). **Hygiene cap recorded on T61:** 15 of 17 open tasks are
+process/integrity work on instruments that are themselves waiting; from now on integrity work is
+admissible only if it changes a number a gate reads, or shows a gate reads a number it should not.
+
+**Kill-condition:** if the ~09-23 read is **ALIVE and the owner declines item (a)**, the equities
+spine holds no promotable object and this direction is **EXHAUSTED** — correct action is
+**STOP-AND-HOLD** (packet §6), ticks reduce to $0 background maintenance, and a new direction then
+requires a *surprise* from one of the remaining background reads (T31 gate, T33 ~10-07, T35 12-23,
+U4). There is no third source of evidence on the board. If the read is **DEAD**, the fork fires
+exactly as pinned.
+
+**STALE this tick (T52, observed only — nothing restarted):** `ARENA_BUNDLE_V2` 163.2h,
+`ARENA_MIGRATION_V1` 161.3h, `ARENA_TAPE_PUMPPORTAL` 161.3h, `ARENA_VIRALITY_V2_2` 154.0h — the
+known 2026-09-02 Helius-quota outage, one line, restoration is the T53 owner spend gate.
+`MULTIVENUE_LAUNCH_TAPE` 25.9h against a 2.0h allowance — still down since the 09-08 host outage,
+not restarted, not investigated (memecoin lane is not the critical path).
+
+**NOT VERIFIED this tick (T50 rule):** BASKET1 contents and hash (only its T72 attendance row),
+t4 beyond T52's read-only row, the NEWSDESK/PREDMARKET ledger contents, window-2/U4, and the
+`PREFRV` prereg itself — its power numbers are quoted **as recorded in the packet**, not re-derived.
+
+**Next step:** at the ~09-23 read, run T62's pinned cluster diagnostic alongside the frozen verdict;
+before then, close T68's gate-date arithmetic.
+
+Nothing forbidden was touched: no BASKET1 leg and no re-freeze, no frozen spec/pin/gate/
+kill-condition moved, no collector edited, no arm restarted or re-epoched, no backfill of the lost
+09-08 day, t4 untouched, crontab unmodified, no orders, no spend, no wallet, no commit, no stage.
+
+## 2026-09-09 15:00 CEST — CHUNK B (T61 integrity duty, not an invention round): **T68 ADJUDICATED — T33's gate is trading day 30 = Tue 2026-10-06, first honest read = the 2026-10-07 00:00 CEST tick**; T46 triage 4/4 rejected; ZERO new defects (T61 clean streak 1 of 2)
+
+Shell verified (`TICKCANARY-1490402-1788958801-17878`). Invention stays suspended per the
+09-06 12:00 directive; the tick spent itself on the strategist's priority-1 item.
+
+**T72 read at the top of the tick (lost-day counter of record):** `T30_BORROW` **15/16, one gap =
+2026-09-08**, true age 46.5h — cumulative lost T30 days stays at **1** against the splice threshold
+of 3. T31 17/17, T33 10/10, BASKET1 12/12, NEWSDESK1 7/7, PREDMARKET1 7/7 — no gaps. T45
+UNMEASURABLE (D1, known).
+
+**T68 — the T33 gate-date disagreement, settled** (`research/trading_bot/T68_T33_GATE_DATE_ADJUDICATION_2026-09-09.md`).
+The collector's `record()` counts 2026-08-25 (ledgered `failed`) in `days_attempted`, so on the
+denominator the gate actually reads, **trading day 30 is Tue 2026-10-06** (Labor Day excluded).
+The doc's "≈ 2026-10-07" is the 30th trading day *after* day 0 counted exclusively — an
+off-by-one in the *estimate*, not the rule. The number that matters is the read instant: capture
+15:45 ET = 21:45 CEST, plus T72's 4h grace = 23:45 CEST, so the **10-06 21:00 tick is too early
+and the first admissible read is the 2026-10-07 00:00 CEST CHUNK A tick**. Both dates were
+"right" on different clocks. **Verdict-invariant:** with the ledger at 9 clean / 10, the gate
+passes iff ≤ 1 further failed-or-missing trading day on either denominator (29/30 = 0.967 vs
+30/31 = 0.968; 28/30 = 0.933 vs 29/31 = 0.935) — zero slack, as the frozen doc already says.
+Correction FILED for the owner (amend the two estimate strings; rule untouched); T67 stays
+pinned and its `DOES NOT MATCH DOC` flag is now adjudicated as a labelling mismatch. No frozen
+text was edited. **T68 → done.**
+
+**T46 standing duty — 4 candidates pending, all read, all REJECTED:** three Franklin Fund
+Allocator Series 497s (2026-09-08) are internal-use mutual funds converting *into* Franklin ETFs by
+share exchange (Feb 2027 / Q1 2027 / Q3 2027) — no cash terminal, no listed ticker; one BNY
+Mellon/Dreyfus batch is mutual + money-market funds (same CIK set as the 09-02 rejection). 0 pending,
+0 events, chain OK (31 links), DECIDER COLLECTING. 15 accessions since 09-02, none a listed-ETF
+cash liquidation: honest zero. Observation, not a defect: the "liquidation and dissolution" query
+is now dominated by mutual-fund-to-ETF *conversion* boilerplate (5 of 15 hits) — precision cost only.
+
+**T61 kill-condition counter:** ZERO new input-surface defects this tick → clean streak **1 of 2**
+(the 09-09 03:00 tick found T69's B1/P1, so the streak restarted at 0). If the next CHUNK B tick is
+also clean, T61 closes as pre-registered and CHUNK B reduces to a one-paragraph clock report.
+Direction and the ~09-23 fork are UNCHANGED.
+
+**STALE (T52, observed only — nothing restarted):** `ARENA_BUNDLE_V2` 166.2h,
+`ARENA_MIGRATION_V1` 164.3h, `ARENA_TAPE_PUMPPORTAL` 164.3h, `ARENA_VIRALITY_V2_2` 157.0h — the
+known 09-02 Helius outage, T53 owner spend gate. `MULTIVENUE_LAUNCH_TAPE` 28.9h vs 2.0h — third
+consecutive tick down since the 09-08 host outage, not restarted, memecoin lane not critical path.
+
+**NOT VERIFIED this tick (T50 rule):** the NYSE 2026 holiday calendar beyond Labor Day (from
+memory; next closure 11-26 is outside the window), the T33 pin sha256 and per-underlying coverage,
+BASKET1 contents/hash beyond its T72 attendance row, t4 beyond T52's row, window-2/U4, the
+NEWSDESK/PREDMARKET ledger contents.
+
+**Next step:** carry the read instruction forward — T33's gate is read at the **2026-10-07 00:00
+CEST** tick and at no earlier tick; before that, the ~09-23 T30 read with T62's cluster diagnostic.
+
+Nothing forbidden was touched: no BASKET1 leg and no re-freeze, no frozen spec/pin/gate/
+kill-condition moved, no collector edited, the lost 09-08 T30 day NOT backfilled, no arm
+restarted or re-epoched, t4 untouched, crontab unmodified, no orders, no spend, no wallet, no
+commit, no stage. Four one-shot SEC filing fetches; no crawl.
+
+## 2026-09-09 18:00 CEST — CHUNK C (NEWSDESK propose): **ABSTAIN, 9th consecutive; not price-blocked — the frozen 18-name watchlist, not the tape, is now the binding constraint**
+
+Shell verified (`TICKCANARY-1552097-1788969601-10098`). Tape read in full: 384 events, coverage
+100%, `tape_sha256 55d31d13…`, no feed errors. Equity and crypto spot LIVE (SPY 762.19, XOM 163.49,
+AAPL 313.09, META 652.95; BTC 78,949). Abstention frozen at 16:02:50Z with the receipt attached
+(ledger now 36 rows: 33 no-trade + 2 setups + 1 resolution pair); `status`: resolved 2/30, NO
+VERDICT, kill ALIVE, open 0.
+
+**Why nothing was frozen:** Brent/WTI through $100 on Iran war fears is a headline-momentum long
+at XOM's intraday high (+1.8% already) — the identical 08-23 setup was stopped for -1R while the
+null short marked +0.98R; the Apple foldable event is a crowded sell-the-news pattern whose size
+sits inside event-day noise; META +5-6% on Muse is a chase. Every genuinely event-shaped item
+today (Oracle earnings tonight, Centerspace/IRT all-stock merger at 3.8x, DOJ stepping up the
+Fox-Roku review, UNH -3%, ServiceTitan -30%) is OUTSIDE the frozen watchlist, so no `entry_ref`
+can be frozen without a re-freeze, which is an owner call, not an autonomous one. 8-K feed is
+titles-only (40 filings, no item codes) and per-filing fetches are forbidden in-tick.
+
+**For the owner (observation, not a recommendation to act):** NEWSDESK1 has 2/30 resolutions
+after 17 days and 9 straight abstentions. The logger cannot reach a verdict on this watchlist.
+The choices are (a) accept it as a standing honest-zero instrument, or (b) one deliberate
+re-freeze widening the watchlist to event-bearing names — never done mid-run by a tick.
+Manufacturing setups to feed the counter is the exact failure the logger exists to catch.
+
+**STALE (T52, observed only — nothing restarted):** `ARENA_BUNDLE_V2` 169.2h, `ARENA_MIGRATION_V1`
+167.3h, `ARENA_TAPE_PUMPPORTAL` 167.3h, `ARENA_VIRALITY_V2_2` 160.0h — the known 09-02 Helius
+outage, T53 owner spend gate. `MULTIVENUE_LAUNCH_TAPE` 31.9h vs 2.0h — fourth consecutive tick
+down since the 09-08 host outage, not restarted, memecoin lane not critical path.
+
+**NOT VERIFIED this tick (T50 rule):** BASKET1 contents/hash, t4 beyond T52's read-only row,
+T30/T31/T33 ledgers beyond T52's ages, window-2/U4, PREDMARKET ledger contents, the 8-K bodies.
+
+**Next step:** unchanged — the ~09-23 T30 read with T62's cluster diagnostic; T33 read at the
+2026-10-07 00:00 CEST tick and no earlier.
+
+Nothing forbidden was touched: no BASKET1 leg and no re-freeze, no watchlist change, no frozen
+spec/pin/gate moved, no collector edited, no arm restarted, t4 untouched, crontab unmodified, no
+orders, no spend, no wallet, no commit, no stage.
+
+## 2026-09-09 21:00 CEST — CHUNK D (PREDMARKET) tick — **MISSING SLOT, stamped by the 2026-09-10 00:00 tick (T73 by hand)**
+
+The tick started (`scripts/agent_graph/logs/cron.log:1619` `headless claude: START`, canary
+nonce+ack written, `predmarket_resolve OK` at 21:00:31) and was killed by the host reboot at
+**21:04:59 CEST** (`uptime -s`). `claude_20260909_h21.log` is 0 bytes; durable_tick.sh's
+AUTO-STAMP never fired because the harness died with the host. No proposal, no abstention, no
+FINDINGS line was written by that tick. Process record, not evidence.
+
+## 2026-09-10 00:00 CEST — STRATEGIST (CHUNK A): **T33's day-30 gate is a SCHEDULED FAIL — the 21:05 reboot killed the collector inside its 60-minute pre-capture sleep; the protocol's ONE bounded fix tick is invoked (T78)**
+
+Shell PROVEN (`TICKCANARY-83887-1788991200-17097`). Full note:
+`research/trading_bot/STRATEGIST_2026-09-10_0000.md` (sha `45b81a2e`).
+
+**Direction unchanged and converged** (hold the line to the ~09-23 T30 read, which is a spend
+decision, not a bot — T77). One new fact, and it changes a number a gate reads:
+
+- **T33 2026-09-09 = FAILED** under the frozen rule (`T33_US_OPTIONS_FORWARD.md` 65-67: a silent
+  cron death is a failed day). Host rebooted 21:04:59 CEST, 20 min into the collector's in-process
+  sleep toward the 15:45 ET capture; no process, no snapshot, no ledger entry. With 08-25 already
+  failed, best case is **28/30 = 0.933 < 0.95** on both T68 denominators: no future clean run
+  restores the gate. Outcome at the 2026-10-07 00:00 CEST read is known today. T67's fake-pass
+  exposure bit on its first live day (collector's own summary would read 28/29 = 0.966 PASS).
+- **Consequence:** unless the owner deliberately re-bases T33 (a clock reset — the BASKET1
+  lesson — never autonomous), the December convexity read runs on T31 (Deribit crypto vol) only,
+  outside the goal universe. Packet addendum T80 written. Recommendation: let it fail as pinned.
+- **T78 filed (prio 1, CHUNK B 2026-09-10 03:00):** the protocol's one fix tick, scoped to
+  reboot-survival of the 15:45 ET capture, crontab-only preferred, script no-ops on an existing
+  snapshot (line 354). Retry must land 15:45–15:59 ET (a post-close retry would record a trading
+  day as `market_closed` = excluded from the denominator = fake pass). No backfill, no re-base,
+  no bar/date move.
+- **T79 filed (prio 2):** the same reboot exposure on T30/T31/T45 (single-shot crons, no retry);
+  two reboots in 36 h have already cost one T30 day (lost-day count 1 of 3) and one T33 day.
+- **T73 promoted to prio 1** (the 21:00 tick vanished with no stamp — see the entry above).
+  **T65 killed** (superseded by T72). **T74 closed** as a recorded standing rule.
+
+**Spine verified:** T30 16/17 (09-09 landed on its own cron 16:30:04, CLEAN; gap 09-08 unchanged),
+T31 17/17 (T67 ratio 1.00), T33 9 clean / 1 failed / 1 closed as of 22:01 UTC (09-09 not yet
+overdue on T72's clock; becomes MISSING at 01:45 CEST), BASKET1 13/13 sha `d53b4fe4` git-clean,
+t4 git-clean. All 16 checkable pins intact.
+
+**STALE (T52, observed only, nothing restarted):** `ARENA_BUNDLE_V2` 175.2h, `ARENA_MIGRATION_V1`
+173.3h, `ARENA_TAPE_PUMPPORTAL` 173.3h, `ARENA_VIRALITY_V2_2` 166.0h — known 09-02 Helius outage,
+T53 owner gate. `MULTIVENUE_LAUNCH_TAPE` 37.9h vs 2.0h — down since the 09-08 reboot, fifth tick.
+Side observation: three `cohort_watch` PIDs running concurrently after the post-reboot restarts.
+
+**NOT VERIFIED:** NEWSDESK/PREDMARKET contents, U4/window-2, t4 beyond file status, reboot cause.
+
+**Next step:** T78 at 03:00, bounded as scoped; then the ~09-23 T30 read with T62's cluster
+diagnostic; the T33 read stays at the 2026-10-07 00:00 CEST tick and is NOT read earlier even
+though its outcome is known.
+
+Nothing forbidden was touched: no BASKET1 leg or re-freeze, no frozen spec/pin/gate/kill-condition
+moved, no collector edited, no ledger written, no backfill, no arm restarted, t4 untouched, crontab
+unmodified, no orders, no spend, no wallet, no commit, no stage.

@@ -1,0 +1,596 @@
+[
+ {
+  "handle": "unipcs",
+  "rank": 1,
+  "token": "SOL_C",
+  "first": 1780743549,
+  "n": 160,
+  "pnl": 4257709.699226536,
+  "value": 5087509.644232422
+ },
+ {
+  "handle": "pointfarmcap",
+  "rank": 2,
+  "token": "SOL_A",
+  "first": 1785907090,
+  "n": 1180,
+  "pnl": 7608388.094854707,
+  "value": 8059787.377753451
+ },
+ {
+  "handle": "pointfarmcap",
+  "rank": 2,
+  "token": "SOL_B",
+  "first": 1788325915,
+  "n": 554,
+  "pnl": 640152.8590221663,
+  "value": 862289.5314291657
+ },
+ {
+  "handle": "The__Solstice",
+  "rank": 3,
+  "token": "SOL_A",
+  "first": 1785873764,
+  "n": 359,
+  "pnl": 4573224.5975395525,
+  "value": 4710861.2853225265
+ },
+ {
+  "handle": "theveeman",
+  "rank": 5,
+  "token": "SOL_A",
+  "first": 1786469130,
+  "n": 26,
+  "pnl": 3903089.04964142,
+  "value": 4083376.560720156
+ },
+ {
+  "handle": "frankdegods",
+  "rank": 6,
+  "token": "SOL_A",
+  "first": 1785798030,
+  "n": 70,
+  "pnl": 583903.215018945,
+  "value": 1022669.0622689452
+ },
+ {
+  "handle": "0xdetweiler",
+  "rank": 8,
+  "token": "SOL_A",
+  "first": 1785868460,
+  "n": 397,
+  "pnl": 2020682.9660025756,
+  "value": 1865448.4962284414
+ },
+ {
+  "handle": "motiyawerey",
+  "rank": 9,
+  "token": "SOL_B",
+  "first": 1788135825,
+  "n": 42,
+  "pnl": 1546772.9636930136,
+  "value": 1558072.888381014
+ },
+ {
+  "handle": "motiyawerey",
+  "rank": 9,
+  "token": "SOL_A",
+  "first": 1787535683,
+  "n": 48,
+  "pnl": 525252.1144111166,
+  "value": 506471.4655381166
+ },
+ {
+  "handle": "cryptoalbus",
+  "rank": 14,
+  "token": "SOL_B",
+  "first": 1788491217,
+  "n": 32,
+  "pnl": 795905.9460625557,
+  "value": 840918.1738535557
+ },
+ {
+  "handle": "FullPinkYak",
+  "rank": 15,
+  "token": "SOL_C",
+  "first": 1787759690,
+  "n": 6,
+  "pnl": 1360688.4858079772,
+  "value": 1602444.255997366
+ },
+ {
+  "handle": "dreamloaderxo",
+  "rank": 19,
+  "token": "SOL_B",
+  "first": 1788136410,
+  "n": 124,
+  "pnl": 1059188.092777965,
+  "value": 448496.97823403706
+ },
+ {
+  "handle": "dreamloaderxo",
+  "rank": 19,
+  "token": "SOL_A",
+  "first": 1787010476,
+  "n": 45,
+  "pnl": 196150.8902345383,
+  "value": 193370.21902663787
+ },
+ {
+  "handle": "cryptolyxe",
+  "rank": 20,
+  "token": "SOL_C",
+  "first": 1788195284,
+  "n": 3,
+  "pnl": 1185533.871061539,
+  "value": 1614470.0456216265
+ },
+ {
+  "handle": "TheOnlyOMP",
+  "rank": 23,
+  "token": "SOL_A",
+  "first": 1787757972,
+  "n": 40,
+  "pnl": 1049234.1295990106,
+  "value": 1091501.256795821
+ },
+ {
+  "handle": "AnselFang",
+  "rank": 24,
+  "token": "SOL_A",
+  "first": 1788629458,
+  "n": 36,
+  "pnl": 912604.6798198067,
+  "value": 1305806.5867967992
+ },
+ {
+  "handle": "mrfernando88",
+  "rank": 26,
+  "token": "SOL_B",
+  "first": 1788134883,
+  "n": 34,
+  "pnl": 1163152.891158583,
+  "value": 778919.9974155829
+ },
+ {
+  "handle": "TheDazzleNovak",
+  "rank": 27,
+  "token": "SOL_A",
+  "first": 1785876752,
+  "n": 180,
+  "pnl": 1232436.1510452484,
+  "value": 1121988.0756748081
+ },
+ {
+  "handle": "RZDxbt",
+  "rank": 28,
+  "token": "SOL_A",
+  "first": 1785800590,
+  "n": 377,
+  "pnl": 1374499.0939425537,
+  "value": 1277248.7593889113
+ },
+ {
+  "handle": "zakum",
+  "rank": 30,
+  "token": "SOL_B",
+  "first": 1788135239,
+  "n": 32,
+  "pnl": 1010717.671610971,
+  "value": 1000006.7481309708
+ },
+ {
+  "handle": "tremendoustoad",
+  "rank": 33,
+  "token": "SOL_B",
+  "first": 1788255359,
+  "n": 18,
+  "pnl": 495008.7121513292,
+  "value": 376998.10231032904
+ },
+ {
+  "handle": "tremendoustoad",
+  "rank": 33,
+  "token": "SOL_A",
+  "first": 1788430254,
+  "n": 67,
+  "pnl": 174770.7434425772,
+  "value": 177954.2091959743
+ },
+ {
+  "handle": "derek518",
+  "rank": 34,
+  "token": "SOL_A",
+  "first": 1788658270,
+  "n": 39,
+  "pnl": 394383.57540741516,
+  "value": 681557.6806008274
+ },
+ {
+  "handle": "derek518",
+  "rank": 34,
+  "token": "SOL_C",
+  "first": 1788195832,
+  "n": 13,
+  "pnl": 386519.1192186762,
+  "value": 557971.6890586761
+ },
+ {
+  "handle": "dtrainz",
+  "rank": 36,
+  "token": "SOL_B",
+  "first": 1788138677,
+  "n": 96,
+  "pnl": 857154.6833044796,
+  "value": 502007.5593784797
+ },
+ {
+  "handle": "artthatfucks",
+  "rank": 38,
+  "token": "SOL_B",
+  "first": 1788208276,
+  "n": 50,
+  "pnl": 758032.2644721251,
+  "value": 800822.680992125
+ },
+ {
+  "handle": "Milliardi",
+  "rank": 41,
+  "token": "SOL_A",
+  "first": 1788662072,
+  "n": 36,
+  "pnl": 301984.9761742431,
+  "value": 461962.65854276513
+ },
+ {
+  "handle": "Milliardi",
+  "rank": 41,
+  "token": "SOL_B",
+  "first": 1788663348,
+  "n": 6,
+  "pnl": 7703.289142311871,
+  "value": 37554.14496931187
+ },
+ {
+  "handle": "pianches",
+  "rank": 42,
+  "token": "SOL_C",
+  "first": 1788142128,
+  "n": 13,
+  "pnl": 236665.33834211773,
+  "value": 293711.1596666245
+ },
+ {
+  "handle": "pianches",
+  "rank": 42,
+  "token": "SOL_A",
+  "first": 1788740743,
+  "n": 60,
+  "pnl": 32618.90971515287,
+  "value": 141955.48779972535
+ },
+ {
+  "handle": "spartee",
+  "rank": 45,
+  "token": "SOL_B",
+  "first": 1788136180,
+  "n": 75,
+  "pnl": -8129.071312795189,
+  "value": 41347.903630938585
+ },
+ {
+  "handle": "valueandtime",
+  "rank": 46,
+  "token": "SOL_B",
+  "first": 1788134372,
+  "n": 87,
+  "pnl": 851377.0551570731,
+  "value": 560149.6272814702
+ },
+ {
+  "handle": "0xElyy",
+  "rank": 47,
+  "token": "SOL_A",
+  "first": 1785971487,
+  "n": 233,
+  "pnl": 735684.8240215926,
+  "value": 636664.3852768516
+ },
+ {
+  "handle": "SolSwizzle",
+  "rank": 48,
+  "token": "SOL_C",
+  "first": 1788817538,
+  "n": 5,
+  "pnl": 245920.9405576505,
+  "value": 840298.0136212438
+ },
+ {
+  "handle": "Pyro",
+  "rank": 49,
+  "token": "SOL_A",
+  "first": 1785888458,
+  "n": 86,
+  "pnl": 861684.824250398,
+  "value": 875025.8306981722
+ },
+ {
+  "handle": "the_nutgod",
+  "rank": 51,
+  "token": "SOL_B",
+  "first": 1788314311,
+  "n": 25,
+  "pnl": 572854.5194056194,
+  "value": 572804.7468736193
+ },
+ {
+  "handle": "CryptoCurb",
+  "rank": 52,
+  "token": "SOL_B",
+  "first": 1788262866,
+  "n": 94,
+  "pnl": 562469.1043165469,
+  "value": 536586.3037712047
+ },
+ {
+  "handle": "CryptoCurb",
+  "rank": 52,
+  "token": "SOL_A",
+  "first": 1786475509,
+  "n": 142,
+  "pnl": 32531.624685666713,
+  "value": 38949.74362839714
+ },
+ {
+  "handle": "koy",
+  "rank": 53,
+  "token": "SOL_B",
+  "first": 1788134350,
+  "n": 38,
+  "pnl": 813327.5093799158,
+  "value": 665918.1405099871
+ },
+ {
+  "handle": "nova6",
+  "rank": 57,
+  "token": "SOL_A",
+  "first": 1788664699,
+  "n": 113,
+  "pnl": 2181.7975725806123,
+  "value": 10711.204616890858
+ },
+ {
+  "handle": "Jols",
+  "rank": 60,
+  "token": "SOL_B",
+  "first": 1788770247,
+  "n": 2,
+  "pnl": -0.8772906146113827,
+  "value": 4.022709385388618
+ },
+ {
+  "handle": "xbtDLN",
+  "rank": 62,
+  "token": "SOL_A",
+  "first": 1785710671,
+  "n": 12,
+  "pnl": 571890.1996573511,
+  "value": 573512.4205737924
+ },
+ {
+  "handle": "paidinfullintel",
+  "rank": 67,
+  "token": "SOL_B",
+  "first": 1788479996,
+  "n": 12,
+  "pnl": 122469.77627300771,
+  "value": 135594.70041900768
+ },
+ {
+  "handle": "retardedgains",
+  "rank": 70,
+  "token": "SOL_A",
+  "first": 1786261598,
+  "n": 273,
+  "pnl": 510268.8262200777,
+  "value": 470904.4444835865
+ },
+ {
+  "handle": "BertLuvv",
+  "rank": 71,
+  "token": "SOL_B",
+  "first": 1788134839,
+  "n": 58,
+  "pnl": 422787.1572857497,
+  "value": 288215.6555197497
+ },
+ {
+  "handle": "wokkrr",
+  "rank": 74,
+  "token": "SOL_B",
+  "first": 1788482797,
+  "n": 53,
+  "pnl": 519718.2993863998,
+  "value": 619392.2212443999
+ },
+ {
+  "handle": "Fren0x",
+  "rank": 76,
+  "token": "SOL_B",
+  "first": 1788416640,
+  "n": 22,
+  "pnl": 376685.9033799375,
+  "value": 282856.64850793756
+ },
+ {
+  "handle": "buggyllama",
+  "rank": 77,
+  "token": "SOL_A",
+  "first": 1785930920,
+  "n": 328,
+  "pnl": 448483.603026835,
+  "value": 457717.28553562844
+ },
+ {
+  "handle": "ultrapara",
+  "rank": 82,
+  "token": "SOL_A",
+  "first": 1788635812,
+  "n": 11,
+  "pnl": 439066.49812676007,
+  "value": 575631.7885107602
+ },
+ {
+  "handle": "lockelamora",
+  "rank": 83,
+  "token": "SOL_B",
+  "first": 1788472261,
+  "n": 67,
+  "pnl": 281716.59482274,
+  "value": 348941.5822858307
+ },
+ {
+  "handle": "Carver___________",
+  "rank": 89,
+  "token": "SOL_A",
+  "first": 1787619069,
+  "n": 93,
+  "pnl": 221372.72116185323,
+  "value": 241261.6459013998
+ },
+ {
+  "handle": "LevisNFT",
+  "rank": 90,
+  "token": "SOL_B",
+  "first": 1788134454,
+  "n": 32,
+  "pnl": 368334.54224495945,
+  "value": 119235.04636195941
+ },
+ {
+  "handle": "WashedUpWalter",
+  "rank": 102,
+  "token": "SOL_A",
+  "first": 1788325963,
+  "n": 15,
+  "pnl": 353971.3748659456,
+  "value": 354181.97874394554
+ },
+ {
+  "handle": "rainnen23",
+  "rank": 103,
+  "token": "SOL_A",
+  "first": 1787404755,
+  "n": 21,
+  "pnl": 172977.52552332814,
+  "value": 63507.506198097835
+ },
+ {
+  "handle": "QuickZippyFlea",
+  "rank": 104,
+  "token": "SOL_A",
+  "first": 1787744364,
+  "n": 14,
+  "pnl": 105497.15582668547,
+  "value": 298241.3398736854
+ },
+ {
+  "handle": "BTCdayu",
+  "rank": 108,
+  "token": "SOL_A",
+  "first": 1788668451,
+  "n": 8,
+  "pnl": 118697.10587481788,
+  "value": 224457.14401998286
+ },
+ {
+  "handle": "ThePumponomics",
+  "rank": 115,
+  "token": "SOL_A",
+  "first": 1788753935,
+  "n": 23,
+  "pnl": 138041.60267153347,
+  "value": 339003.8541386221
+ },
+ {
+  "handle": "Tekkerrss",
+  "rank": 123,
+  "token": "SOL_A",
+  "first": 1785720474,
+  "n": 235,
+  "pnl": 260191.62947367743,
+  "value": 43166.96407921295
+ },
+ {
+  "handle": "justtmike",
+  "rank": 125,
+  "token": "SOL_B",
+  "first": 1788163547,
+  "n": 36,
+  "pnl": 307589.0950557947,
+  "value": 225428.60633479466
+ },
+ {
+  "handle": "painkillerbill",
+  "rank": 129,
+  "token": "SOL_B",
+  "first": 1788727507,
+  "n": 7,
+  "pnl": -5842.865951298526,
+  "value": 43939.41675858749
+ },
+ {
+  "handle": "woody6969",
+  "rank": 135,
+  "token": "SOL_B",
+  "first": 1788470701,
+  "n": 13,
+  "pnl": 256162.39560106807,
+  "value": 269176.4677170681
+ },
+ {
+  "handle": "Cellar1544720",
+  "rank": 141,
+  "token": "SOL_A",
+  "first": 1786203954,
+  "n": 58,
+  "pnl": 313866.9889964188,
+  "value": 196974.97538022816
+ },
+ {
+  "handle": "heeshilio",
+  "rank": 142,
+  "token": "SOL_A",
+  "first": 1785871210,
+  "n": 43,
+  "pnl": 102140.30582752824,
+  "value": 236290.32969352824
+ },
+ {
+  "handle": "shahkishanp",
+  "rank": 143,
+  "token": "SOL_A",
+  "first": 1788537914,
+  "n": 99,
+  "pnl": 46928.1632960912,
+  "value": 45532.67102919498
+ },
+ {
+  "handle": "maxpain",
+  "rank": 145,
+  "token": "SOL_B",
+  "first": 1788234374,
+  "n": 40,
+  "pnl": 255060.50317427295,
+  "value": 206030.1431689892
+ },
+ {
+  "handle": "maxpain",
+  "rank": 145,
+  "token": "SOL_A",
+  "first": 1786392820,
+  "n": 40,
+  "pnl": 12797.637632692253,
+  "value": 42647.75763269226
+ }
+]
