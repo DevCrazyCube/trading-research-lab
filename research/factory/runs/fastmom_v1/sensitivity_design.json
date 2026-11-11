@@ -1,0 +1,259 @@
+{
+ "meta": {
+  "written_utc": "2026-11-10T18:54:34Z",
+  "prereg_sha256": "340b178b79d23fabd4c12939c68cfaebf91c3740a95e875623906e549e284f24",
+  "code_sha256": "282dfc1521d1987470fe51d27105cb1e1b995009cbd98ec838cdd3be1f2720f2",
+  "python": "3.12.12",
+  "numpy": "2.5.4",
+  "scipy": "1.18.1",
+  "symbols": [
+   "BTCUSDT",
+   "ETHUSDT",
+   "SOLUSDT"
+  ],
+  "formulas_per_symbol": 43,
+  "cost_side_bp": {
+   "BTCUSDT": 5.07,
+   "ETHUSDT": 5.24,
+   "SOLUSDT": 5.6
+  },
+  "maker_bound_side_bp": 2.0,
+  "sigma_window": 1440,
+  "bh_q": 0.1,
+  "design_t_min": 3.0,
+  "holdout_t_min": 2.0,
+  "control_seed": 20261110,
+  "window": "design",
+  "status": "SENSITIVITY - alternative readings, not part of the decision rule"
+ },
+ "summary": [
+  {
+   "reading": "R0_registered",
+   "what": "the registered readings R1-R16 (must equal design_ledger.csv)",
+   "pairs": 129,
+   "trades": 6400436,
+   "trades_registered_same_pairs": 6400436,
+   "mean_gross_positive": 33,
+   "mean_net_positive": 0,
+   "mean_maker_positive": 0,
+   "t_net_ge_3": 0,
+   "median_gross_bp": -0.3646489654480349,
+   "best_net_pair": "ETHUSDT|M1.k15.x3.h60",
+   "best_net_bp": -6.9033686287889555,
+   "best_gross_pair": "ETHUSDT|M1.k15.x3.h60",
+   "best_gross_bp": 3.5766313712110445,
+   "largest_gross_change_vs_registered_bp": 0.0,
+   "mean_gross_change_vs_registered_bp": 0.0
+  },
+  {
+   "reading": "S1_sigma_excludes_signal_bar",
+   "what": "sigma_k from the 1,440 returns ending at t-1, so a burst does not inflate its own threshold",
+   "pairs": 129,
+   "trades": 6407835,
+   "trades_registered_same_pairs": 6400436,
+   "mean_gross_positive": 33,
+   "mean_net_positive": 0,
+   "mean_maker_positive": 0,
+   "t_net_ge_3": 0,
+   "median_gross_bp": -0.3746578710526266,
+   "best_net_pair": "ETHUSDT|M1.k15.x3.h60",
+   "best_net_bp": -6.725479011695415,
+   "best_gross_pair": "ETHUSDT|M1.k15.x3.h60",
+   "best_gross_bp": 3.7545209883045834,
+   "largest_gross_change_vs_registered_bp": 0.26999763840676283,
+   "mean_gross_change_vs_registered_bp": 0.0063284210610650895
+  },
+  {
+   "reading": "S2_reentry_at_exit_print",
+   "what": "a signal at the close just before an exit open may be filled at that same open",
+   "pairs": 129,
+   "trades": 7995652,
+   "trades_registered_same_pairs": 6400436,
+   "mean_gross_positive": 35,
+   "mean_net_positive": 0,
+   "mean_maker_positive": 0,
+   "t_net_ge_3": 0,
+   "median_gross_bp": -0.4319961508921651,
+   "best_net_pair": "ETHUSDT|M1.k15.x3.h60",
+   "best_net_bp": -6.587855686451961,
+   "best_gross_pair": "ETHUSDT|M1.k15.x3.h60",
+   "best_gross_bp": 3.8921443135480387,
+   "largest_gross_change_vs_registered_bp": -2.3265408617956385,
+   "mean_gross_change_vs_registered_bp": -0.06943633802801812
+  },
+  {
+   "reading": "S3_m2_adverse_extreme_first",
+   "what": "M2 only: inside a bar the adverse extreme always comes first (no same-bar ratchet stop)",
+   "pairs": 12,
+   "trades": 437178,
+   "trades_registered_same_pairs": 552355,
+   "mean_gross_positive": 4,
+   "mean_net_positive": 0,
+   "mean_maker_positive": 0,
+   "t_net_ge_3": 0,
+   "median_gross_bp": -0.8160608776986542,
+   "best_net_pair": "SOLUSDT|M2.N120.y1",
+   "best_net_bp": -10.7960651415206,
+   "best_gross_pair": "SOLUSDT|M2.N120.y1",
+   "best_gross_bp": 0.40393485847939664,
+   "largest_gross_change_vs_registered_bp": 6.237550502849654,
+   "mean_gross_change_vs_registered_bp": 3.6477834307292873
+  }
+ ],
+ "trades_carried_across_archive_holes": [
+  {
+   "pair_id": "SOLUSDT|M1.k1.x1.h5",
+   "n_carried": 1,
+   "mean_bp_gross_all": -0.009641421666243584,
+   "mean_bp_gross_without_them": -0.014527713214829069,
+   "largest_abs_carried_trade_bp": 752.2935779816509
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k1.x1.h15",
+   "n_carried": 2,
+   "mean_bp_gross_all": 0.10332099638357363,
+   "mean_bp_gross_without_them": 0.12311662489629956,
+   "largest_abs_carried_trade_bp": 785.7026542908319
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k1.x1.h60",
+   "n_carried": 2,
+   "mean_bp_gross_all": 1.1018382692088007,
+   "mean_bp_gross_without_them": 1.154683189547317,
+   "largest_abs_carried_trade_bp": 663.2858407791997
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k1.x2.h15",
+   "n_carried": 1,
+   "mean_bp_gross_all": -0.576103851418645,
+   "mean_bp_gross_without_them": -0.599650331561712,
+   "largest_abs_carried_trade_bp": 755.0539904197451
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k1.x2.h60",
+   "n_carried": 2,
+   "mean_bp_gross_all": 1.3627665579936563,
+   "mean_bp_gross_without_them": 1.4485601961391652,
+   "largest_abs_carried_trade_bp": 649.5699011174527
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k1.x3.h15",
+   "n_carried": 1,
+   "mean_bp_gross_all": -1.2747011894553812,
+   "mean_bp_gross_without_them": -1.2035967078031673,
+   "largest_abs_carried_trade_bp": 831.5617334423541
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k1.x3.h60",
+   "n_carried": 1,
+   "mean_bp_gross_all": -0.5852518753749396,
+   "mean_bp_gross_without_them": -0.47323024130012437,
+   "largest_abs_carried_trade_bp": 831.5617334423541
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k5.x1.h5",
+   "n_carried": 1,
+   "mean_bp_gross_all": -0.3243897293197246,
+   "mean_bp_gross_without_them": -0.33053625895491856,
+   "largest_abs_carried_trade_bp": 752.2935779816509
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k5.x1.h15",
+   "n_carried": 2,
+   "mean_bp_gross_all": -0.3024949592424236,
+   "mean_bp_gross_without_them": -0.27905953122451393,
+   "largest_abs_carried_trade_bp": 801.257725252087
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k5.x1.h60",
+   "n_carried": 2,
+   "mean_bp_gross_all": 1.6387402792805155,
+   "mean_bp_gross_without_them": 1.6439008287666765,
+   "largest_abs_carried_trade_bp": 668.438431183056
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k5.x2.h15",
+   "n_carried": 1,
+   "mean_bp_gross_all": 0.25750915951014497,
+   "mean_bp_gross_without_them": 0.2894297918460224,
+   "largest_abs_carried_trade_bp": 711.8279569892483
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k5.x2.h60",
+   "n_carried": 1,
+   "mean_bp_gross_all": 0.07344197912160623,
+   "mean_bp_gross_without_them": 0.13368071655335195,
+   "largest_abs_carried_trade_bp": 711.8279569892483
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k15.x1.h1",
+   "n_carried": 1,
+   "mean_bp_gross_all": -0.12823970933536033,
+   "mean_bp_gross_without_them": -0.12485279768968166,
+   "largest_abs_carried_trade_bp": 752.2935779816509
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k15.x1.h5",
+   "n_carried": 2,
+   "mean_bp_gross_all": -0.2221538347582517,
+   "mean_bp_gross_without_them": -0.20635796803896483,
+   "largest_abs_carried_trade_bp": 812.1123081945814
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k15.x1.h15",
+   "n_carried": 1,
+   "mean_bp_gross_all": -0.45299970708411547,
+   "mean_bp_gross_without_them": -0.4406772919883241,
+   "largest_abs_carried_trade_bp": 655.6851000106967
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k15.x1.h60",
+   "n_carried": 2,
+   "mean_bp_gross_all": 1.986314288105919,
+   "mean_bp_gross_without_them": 1.9951386813077323,
+   "largest_abs_carried_trade_bp": 718.5047333926686
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k15.x2.h5",
+   "n_carried": 1,
+   "mean_bp_gross_all": -1.5597804723150888,
+   "mean_bp_gross_without_them": -1.5268494088667375,
+   "largest_abs_carried_trade_bp": 801.257725252087
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k15.x2.h15",
+   "n_carried": 2,
+   "mean_bp_gross_all": -1.7199353523220464,
+   "mean_bp_gross_without_them": -1.6179334352427952,
+   "largest_abs_carried_trade_bp": 785.7026542908319
+  },
+  {
+   "pair_id": "SOLUSDT|M1.k15.x2.h60",
+   "n_carried": 2,
+   "mean_bp_gross_all": -1.774362062848562,
+   "mean_bp_gross_without_them": -1.6010427089114168,
+   "largest_abs_carried_trade_bp": 785.7026542908319
+  },
+  {
+   "pair_id": "SOLUSDT|M2.N30.y2",
+   "n_carried": 1,
+   "mean_bp_gross_all": -4.9694376509949505,
+   "mean_bp_gross_without_them": -4.9537862767967,
+   "largest_abs_carried_trade_bp": 713.3036797412041
+  },
+  {
+   "pair_id": "SOLUSDT|M2.N120.y2",
+   "n_carried": 1,
+   "mean_bp_gross_all": -6.003771971499912,
+   "mean_bp_gross_without_them": -5.970741022798825,
+   "largest_abs_carried_trade_bp": 758.547876228377
+  },
+  {
+   "pair_id": "SOLUSDT|M3.a1.b2",
+   "n_carried": 1,
+   "mean_bp_gross_all": -1.742305528046486,
+   "mean_bp_gross_without_them": -1.725281931314137,
+   "largest_abs_carried_trade_bp": 824.7310659567542
+  }
+ ]
+}

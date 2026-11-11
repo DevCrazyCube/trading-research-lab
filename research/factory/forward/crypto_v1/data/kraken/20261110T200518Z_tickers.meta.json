@@ -1,0 +1,12 @@
+{
+ "url": "https://futures.kraken.com/derivatives/api/v3/tickers",
+ "method": "GET",
+ "fetched_utc": "2026-11-10T20:05:33Z",
+ "http_status": 200,
+ "bytes": 132219,
+ "sha256": "8ab9726286a5e9cd155f5fdf872c9770059c09d83c86dc5d1089778165ae9360",
+ "saved_as": "20261110T200518Z_tickers.json.gz",
+ "encoding": "gzip of the raw response body, byte for byte",
+ "fetched_by": "scripts/factory/forward_crypto.py",
+ "payload_server_time": "2026-11-10T20:05:33.194Z"
+}

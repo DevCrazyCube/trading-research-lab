@@ -133,3 +133,19 @@ research/data/
 # Numeric panel caches: regenerable, and one is 104.9 MB -- over GitHub's 100 MB hard limit.
 *.npz
 *.npy
+
+# FACTORY programme (2026-11-10). In git: code, pre-registrations, frozen panels, run ledgers, the forward
+# ledger and its stored responses. Not in git: the Python environment, raw downloads (see
+# research/factory/data/.gitignore) and saved web pages, except the instrument lists the code reads.
+research/factory/.venv/
+research/factory/landscape/evidence/*
+!research/factory/landscape/evidence/venue_instruments/
+!research/factory/landscape/evidence/platforms_R1/
+research/factory/landscape/evidence/platforms_R1/*
+!research/factory/landscape/evidence/platforms_R1/raw/
+research/factory/landscape/evidence/platforms_R1/raw/*
+!research/factory/landscape/evidence/platforms_R1/raw/kf_tickers.json
+research/factory/forward/crypto_v1/.lock
+*.zip.partial
+*.parquet.partial
+.pytest_cache/

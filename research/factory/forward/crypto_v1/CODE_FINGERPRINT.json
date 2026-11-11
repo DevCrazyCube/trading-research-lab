@@ -1,0 +1,22 @@
+{
+ "written_utc": "2026-11-11T01:20:35Z",
+ "note": "sha256 of the code the first forward row was computed with",
+ "files": {
+  "forward_crypto.py": "e35432f99cd87563eb5de17258154460dec562dc332964bf37ff9d2eb8d73dce",
+  "v2.py": "980ceee5df263891ad6cc6b432391d98a1e44d14a96d16fe299c6a20f051765b",
+  "v2_extras.py": "d696f3c134eede98e26da2150a7541332983c70e82b3a51fbdbadfc200a54591",
+  "panel.py": "a00a43f7b14e0b97646e1be36fe35d6fd7b5064379bec89cda313462766a2897",
+  "engine.py": "5d5c546f7ed854cfd87228e1392d9e4ca5c54f8da81c05bb7145ebfb8ed54c24",
+  "stats.py": "fe0474c2883885542214f83d8ca20acd4ae12f426be8ed8979951457ced075aa",
+  "portfolio.py": "2ad6137472983725b8b75b1ad31582831112f1210e68b92fa0083e3f9b2ec884",
+  "realism.py": "85b1e07ba6b0bd9b2245613d80eeec6d87ea1cd16b41485a5a5a4daf58109afc",
+  "data/crypto.py": "83201f1c9b260f2f622e2af2ece1439ad104ac830b6203fc6ec5ff64188dba08",
+  "data/crypto_build.py": "3376a531834162da7d663db3d84cca3c85039759737ea7f117fb560af1feb59e",
+  "data/universe.py": "f768d176fabc896f796e554d2255aa4b67f913880497c6d8c8d7e05d9c6ce526",
+  "data/panelio.py": "d82396a1d4ee3e482b6847a15fa9953cbeb877b356f4d879ab394b27998dbd7a",
+  "strategies/common.py": "9cbacf11617693cbef3e50a44c860de280db5f2b74734f943975a79dc80c3e71",
+  "strategies/registry.py": "2006cf66308f26b798292f587ee4529b4bb5eaf54861add61bafeb5094854570",
+  "strategies/rules_trend.py": "e45174833b5287af0876422d068e6399eceb178ac7bab1ed01447ab722fd0be2",
+  "strategies/rules_xs.py": "9e51d62d78bdf17d6299cc1b1622d55da3e9198303524158f8841b534a59cf73"
+ }
+}

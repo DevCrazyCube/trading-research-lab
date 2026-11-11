@@ -1,0 +1,88 @@
+{
+ "prereg_sha256": "83d568c3b3b51692a1ed62bdcc421b08635b02751b98d5a1269888d830e3329c",
+ "n_formulas": 255,
+ "n_errors": 0,
+ "bh_q": 0.1,
+ "bh_reject": [
+  "CRYPTO-PERP|ALL|XSMOM.HIGH_PROXIMITY.L252"
+ ],
+ "alpha_block": 0.01,
+ "blocks": {
+  "CRYPTO-PERP__ALL": {
+   "n_formulas": 46,
+   "n_rows": 1279,
+   "stepm_superior": [],
+   "stepm_block": 22,
+   "stepm_first_critical_value": 3.376843731364957,
+   "spa_p": {
+    "p_lower": 0.011,
+    "p_consistent": 0.0135,
+    "p_upper": 0.0155
+   },
+   "spa_best": "CRYPTO-PERP|ALL|XSMOM.HIGH_PROXIMITY.L252",
+   "pbo": 0.2743589743589744,
+   "pbo_slope": -0.105563300453739
+  },
+  "CRYPTO-SPOT__ALL": {
+   "n_formulas": 33,
+   "n_rows": 1979,
+   "stepm_superior": [],
+   "stepm_block": 26,
+   "stepm_first_critical_value": 3.383983000899085,
+   "spa_p": {
+    "p_lower": 0.044,
+    "p_consistent": 0.044,
+    "p_upper": 0.044
+   },
+   "spa_best": "CRYPTO-SPOT|ALL|TREND.BREAKOUT.L40",
+   "pbo": 0.406993006993007,
+   "pbo_slope": -1.0131579516444784
+  },
+  "FX__G10": {
+   "n_formulas": 67,
+   "n_rows": 4351,
+   "stepm_superior": [],
+   "stepm_block": 33,
+   "stepm_first_critical_value": 3.8686817027821787,
+   "spa_p": {
+    "p_lower": 0.175,
+    "p_consistent": 0.2235,
+    "p_upper": 0.234
+   },
+   "spa_best": "FX|G10|TREND.TSMOM_SIGN.L126",
+   "pbo": 0.6551670551670552,
+   "pbo_slope": -0.9796855740544053
+  },
+  "FX__G10EM": {
+   "n_formulas": 64,
+   "n_rows": 4351,
+   "stepm_superior": [],
+   "stepm_block": 33,
+   "stepm_first_critical_value": 3.6919071110699866,
+   "spa_p": {
+    "p_lower": 0.165,
+    "p_consistent": 0.208,
+    "p_upper": 0.2375
+   },
+   "spa_best": "FX|G10EM|TREND.DONCHIAN.L100",
+   "pbo": 0.6742812742812743,
+   "pbo_slope": -0.8387237937706197
+  },
+  "MACRO__ALL": {
+   "n_formulas": 45,
+   "n_rows": 1259,
+   "stepm_superior": [],
+   "stepm_block": 22,
+   "stepm_first_critical_value": 3.1645892874146755,
+   "spa_p": {
+    "p_lower": 0.1345,
+    "p_consistent": 0.1625,
+    "p_upper": 0.1725
+   },
+   "spa_best": "MACRO|ALL|VOL.MANAGED_BASKET.252_21",
+   "pbo": 0.47653457653457654,
+   "pbo_slope": -0.4943408256958056
+  }
+ },
+ "stepm_superior_all": []
+}

@@ -1,0 +1,230 @@
+{
+ "meta": {
+  "written_utc": "2026-11-10T18:41:32Z",
+  "prereg_sha256": "340b178b79d23fabd4c12939c68cfaebf91c3740a95e875623906e549e284f24",
+  "code_sha256": "7481080e8f0d00d2aa0df857d55296e80f2328b838670b47548cb87a7d70776d",
+  "python": "3.12.12",
+  "numpy": "2.5.4",
+  "scipy": "1.18.1",
+  "symbols": [
+   "BTCUSDT",
+   "ETHUSDT",
+   "SOLUSDT"
+  ],
+  "formulas_per_symbol": 43,
+  "cost_side_bp": {
+   "BTCUSDT": 5.07,
+   "ETHUSDT": 5.24,
+   "SOLUSDT": 5.6
+  },
+  "maker_bound_side_bp": 2.0,
+  "sigma_window": 1440,
+  "bh_q": 0.1,
+  "design_t_min": 3.0,
+  "holdout_t_min": 2.0,
+  "control_seed": 20261110,
+  "window": "design",
+  "window_days": "2021-01-01..2023-12-31",
+  "redesign_after_freeze": false,
+  "holdout_months_parsed": 0
+ },
+ "symbols": [
+  {
+   "symbol": "BTCUSDT",
+   "first_month": "2021-01",
+   "last_month": "2023-12",
+   "first_bar_utc": "2021-01-01T00:00Z",
+   "last_bar_utc": "2023-12-31T23:59Z",
+   "files": 36,
+   "files_with_header_row": 24,
+   "files_in_microseconds": 0,
+   "bars_expected": 1576800,
+   "bars_present": 1576800,
+   "bars_missing": 0,
+   "missing_runs": 0,
+   "longest_missing_run_min": 0,
+   "missing_run_list": [],
+   "zero_volume_bars": 241,
+   "zero_trade_count_bars": 241,
+   "zero_volume_runs": 5,
+   "longest_zero_volume_run_min": 99,
+   "zero_volume_run_list": [
+    {
+     "start_utc": "2021-03-02T01:01Z",
+     "minutes": 59
+    },
+    {
+     "start_utc": "2022-05-01T22:26Z",
+     "minutes": 29
+    },
+    {
+     "start_utc": "2022-05-28T16:40Z",
+     "minutes": 35
+    },
+    {
+     "start_utc": "2023-09-12T08:34Z",
+     "minutes": 19
+    },
+    {
+     "start_utc": "2023-11-10T15:07Z",
+     "minutes": 99
+    }
+   ],
+   "ohlc_inconsistent_bars": 0,
+   "tradeable_bars": 1576559,
+   "months_with_missing_bars": [],
+   "window": "design",
+   "scored_from_utc": "2021-01-01T00:00Z",
+   "scored_days": 1095,
+   "scored_bars": 1576800,
+   "scored_bars_tradeable": 1576559,
+   "scored_bars_missing": 0,
+   "scored_bars_zero_volume": 241,
+   "scored_bars_sigma1_defined": 1575360,
+   "scored_bars_sigma5_defined": 1575356,
+   "scored_bars_sigma15_defined": 1575346
+  },
+  {
+   "symbol": "ETHUSDT",
+   "first_month": "2021-01",
+   "last_month": "2023-12",
+   "first_bar_utc": "2021-01-01T00:00Z",
+   "last_bar_utc": "2023-12-31T23:59Z",
+   "files": 36,
+   "files_with_header_row": 24,
+   "files_in_microseconds": 0,
+   "bars_expected": 1576800,
+   "bars_present": 1576800,
+   "bars_missing": 0,
+   "missing_runs": 0,
+   "longest_missing_run_min": 0,
+   "missing_run_list": [],
+   "zero_volume_bars": 145,
+   "zero_trade_count_bars": 145,
+   "zero_volume_runs": 5,
+   "longest_zero_volume_run_min": 59,
+   "zero_volume_run_list": [
+    {
+     "start_utc": "2021-03-02T01:01Z",
+     "minutes": 59
+    },
+    {
+     "start_utc": "2022-05-01T22:26Z",
+     "minutes": 29
+    },
+    {
+     "start_utc": "2022-05-28T16:40Z",
+     "minutes": 35
+    },
+    {
+     "start_utc": "2023-09-12T08:34Z",
+     "minutes": 19
+    },
+    {
+     "start_utc": "2023-11-14T11:39Z",
+     "minutes": 3
+    }
+   ],
+   "ohlc_inconsistent_bars": 0,
+   "tradeable_bars": 1576655,
+   "months_with_missing_bars": [],
+   "window": "design",
+   "scored_from_utc": "2021-01-01T00:00Z",
+   "scored_days": 1095,
+   "scored_bars": 1576800,
+   "scored_bars_tradeable": 1576655,
+   "scored_bars_missing": 0,
+   "scored_bars_zero_volume": 145,
+   "scored_bars_sigma1_defined": 1575360,
+   "scored_bars_sigma5_defined": 1575356,
+   "scored_bars_sigma15_defined": 1575346
+  },
+  {
+   "symbol": "SOLUSDT",
+   "first_month": "2021-01",
+   "last_month": "2023-12",
+   "first_bar_utc": "2021-01-01T00:00Z",
+   "last_bar_utc": "2023-12-31T23:59Z",
+   "files": 36,
+   "files_with_header_row": 23,
+   "files_in_microseconds": 0,
+   "bars_expected": 1576800,
+   "bars_present": 1569600,
+   "bars_missing": 7200,
+   "missing_runs": 2,
+   "longest_missing_run_min": 4320,
+   "missing_run_list": [
+    {
+     "start_utc": "2022-02-26T00:00Z",
+     "minutes": 4320
+    },
+    {
+     "start_utc": "2022-04-01T00:00Z",
+     "minutes": 2880
+    }
+   ],
+   "zero_volume_bars": 148,
+   "zero_trade_count_bars": 148,
+   "zero_volume_runs": 8,
+   "longest_zero_volume_run_min": 59,
+   "zero_volume_run_list": [
+    {
+     "start_utc": "2021-01-30T04:42Z",
+     "minutes": 1
+    },
+    {
+     "start_utc": "2021-03-02T01:01Z",
+     "minutes": 59
+    },
+    {
+     "start_utc": "2021-03-03T22:32Z",
+     "minutes": 1
+    },
+    {
+     "start_utc": "2021-04-01T21:25Z",
+     "minutes": 1
+    },
+    {
+     "start_utc": "2022-05-01T22:26Z",
+     "minutes": 29
+    },
+    {
+     "start_utc": "2022-05-28T16:40Z",
+     "minutes": 35
+    },
+    {
+     "start_utc": "2023-09-12T08:34Z",
+     "minutes": 19
+    },
+    {
+     "start_utc": "2023-11-14T11:39Z",
+     "minutes": 3
+    }
+   ],
+   "ohlc_inconsistent_bars": 0,
+   "tradeable_bars": 1569452,
+   "months_with_missing_bars": [
+    {
+     "month": "2022-02",
+     "expected": 40320,
+     "present": 36000
+    },
+    {
+     "month": "2022-04",
+     "expected": 43200,
+     "present": 40320
+    }
+   ],
+   "window": "design",
+   "scored_from_utc": "2021-01-01T00:00Z",
+   "scored_days": 1095,
+   "scored_bars": 1576800,
+   "scored_bars_tradeable": 1569452,
+   "scored_bars_missing": 7200,
+   "scored_bars_zero_volume": 148,
+   "scored_bars_sigma1_defined": 1565280,
+   "scored_bars_sigma5_defined": 1565268,
+   "scored_bars_sigma15_defined": 1565238
+  }
+ ]
+}

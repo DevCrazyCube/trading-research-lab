@@ -1,0 +1,24 @@
+{
+ "frozen_utc": "2026-11-10T17:35:52.134236+00:00",
+ "prereg_sha256": "83d568c3b3b51692a1ed62bdcc421b08635b02751b98d5a1269888d830e3329c",
+ "design_ledger_sha256": "1f45afd14f3669b636ee7e4d6517ff306d43076344bf0eb74ec22eee9c756c38",
+ "mtest_sha256": "ff938071b6065a2134f91e2837cb5a18a688c0e1a95a35896933e2c94f2a1fc4",
+ "n_formulas": 255,
+ "candidates": [
+  {
+   "formula_id": "CRYPTO-PERP|ALL|XSMOM.HIGH_PROXIMITY.L252",
+   "bh": true,
+   "stepm": false,
+   "d_sharpe": 1.7701978292299105,
+   "d_hac_t": 3.3823164475359397,
+   "stress_sharpe": 1.5264794212214434,
+   "retail_sharpe": 1.7701978292299105,
+   "survives": true,
+   "excluded_for": []
+  }
+ ],
+ "survivors": [
+  "CRYPTO-PERP|ALL|XSMOM.HIGH_PROXIMITY.L252"
+ ],
+ "survivors_sha256": "af06a3d475ad83c00f034742faac23cbb4cecd7d2d805cc3fc02173f87da51a2"
+}

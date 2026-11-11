@@ -1,0 +1,122 @@
+{
+ "written_utc": "2026-11-10T16:03:09Z",
+ "lanes": {
+  "FX": {
+   "built": true,
+   "built_utc": "2026-11-10T15:47:38Z",
+   "rows": 7132,
+   "columns": 17,
+   "first_print": "1999-01-04 13:15:00+00:00",
+   "last_print": "2026-11-09 13:15:00+00:00",
+   "periods_per_year": 252,
+   "aux": [
+    "cpi",
+    "oil",
+    "rates",
+    "universe_mask"
+   ],
+   "exec_prices_strictly_after_decision": false,
+   "manifest": "research/factory/data/FX/manifest.json",
+   "parquet_bytes": 2036158
+  },
+  "FX-EXEC": {
+   "built": true,
+   "built_utc": "2026-11-10T15:47:45Z",
+   "rows": 6893,
+   "columns": 12,
+   "first_print": "1999-01-04 13:15:00+00:00",
+   "last_print": "2026-11-06 13:15:00+00:00",
+   "periods_per_year": 252,
+   "aux": [
+    "cpi",
+    "exec_prices",
+    "oil",
+    "rates",
+    "universe_mask"
+   ],
+   "exec_prices_strictly_after_decision": true,
+   "manifest": "research/factory/data/FX-EXEC/manifest.json",
+   "parquet_bytes": 2094124
+  },
+  "FX-FRED": {
+   "built": true,
+   "built_utc": "2026-11-10T15:47:50Z",
+   "rows": 14011,
+   "columns": 9,
+   "first_print": "1971-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "periods_per_year": 252,
+   "aux": [
+    "cpi",
+    "oil",
+    "rates",
+    "universe_mask"
+   ],
+   "exec_prices_strictly_after_decision": false,
+   "manifest": "research/factory/data/FX-FRED/manifest.json",
+   "parquet_bytes": 2039278
+  },
+  "MACRO": {
+   "built": true,
+   "built_utc": "2026-11-10T15:43:53Z",
+   "rows": 2729,
+   "columns": 40,
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "periods_per_year": 252,
+   "aux": [
+    "rates",
+    "raw_close",
+    "trade_count",
+    "usd_per_eur",
+    "volume"
+   ],
+   "exec_prices_strictly_after_decision": false,
+   "manifest": "research/factory/data/MACRO/manifest.json",
+   "parquet_bytes": 2208116
+  },
+  "CRYPTO-PERP": {
+   "built": true,
+   "built_utc": "2026-11-10T15:51:17Z",
+   "rows": 2620,
+   "columns": 693,
+   "first_print": "2019-09-09 00:00:00+00:00",
+   "last_print": "2026-11-10 00:00:00+00:00",
+   "periods_per_year": 365,
+   "aux": [
+    "exec_prices",
+    "exec_prices_alt",
+    "funding_obs",
+    "live_at_print",
+    "settlement_row",
+    "terminal_return",
+    "universe_mask",
+    "volume_quote"
+   ],
+   "exec_prices_strictly_after_decision": true,
+   "manifest": "research/factory/data/CRYPTO-PERP/manifest.json",
+   "parquet_bytes": 20524354
+  },
+  "CRYPTO-SPOT": {
+   "built": true,
+   "built_utc": "2026-11-10T16:02:18Z",
+   "rows": 3372,
+   "columns": 602,
+   "first_print": "2017-08-18 00:00:00+00:00",
+   "last_print": "2026-11-10 00:00:00+00:00",
+   "periods_per_year": 365,
+   "aux": [
+    "exec_prices",
+    "exec_prices_alt",
+    "live_at_print",
+    "settlement_row",
+    "terminal_return",
+    "universe_mask",
+    "volume_quote"
+   ],
+   "exec_prices_strictly_after_decision": true,
+   "manifest": "research/factory/data/CRYPTO-SPOT/manifest.json",
+   "parquet_bytes": 19690368
+  }
+ }
+}

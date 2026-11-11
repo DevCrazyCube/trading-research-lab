@@ -1,0 +1,10 @@
+[Unit]
+Description=FORWARD-CRYPTO v1 daily run at 01:20 UTC
+
+[Timer]
+OnCalendar=*-*-* 01:20:00 UTC
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,27 @@
+{
+ "written_utc": "2026-11-10T19:12:53Z",
+ "code_sha256": "72b810a95ff76f0d840447d39376a5e907df3a023ad9c0f42c11d86a00ff2d46",
+ "files": {
+  "design_ledger.csv": {
+   "sha256_on_disk": "cc852fbc1ccb92a090141ee7434c79a030ad05a87c2c15ed0ec5f1031e9f09ce",
+   "sha256_recomputed": "cc852fbc1ccb92a090141ee7434c79a030ad05a87c2c15ed0ec5f1031e9f09ce",
+   "identical": true
+  },
+  "control_design.csv": {
+   "sha256_on_disk": "1ed99cd89269c8b2d66505296e0bf70ca90bf56830259ac30d008cf832510ff7",
+   "sha256_recomputed": "1ed99cd89269c8b2d66505296e0bf70ca90bf56830259ac30d008cf832510ff7",
+   "identical": true
+  },
+  "holdout_descriptive.csv": {
+   "sha256_on_disk": "d185621e265fc628a22d66395ba3f85d59560094dafa76c396d51e432bf3969c",
+   "sha256_recomputed": "d185621e265fc628a22d66395ba3f85d59560094dafa76c396d51e432bf3969c",
+   "identical": true
+  },
+  "control_holdout_descriptive.csv": {
+   "sha256_on_disk": "3091cd4bf8713392870e1a4bcf83d6588ac77eaa0c392468f8f4a6d35ba98c93",
+   "sha256_recomputed": "3091cd4bf8713392870e1a4bcf83d6588ac77eaa0c392468f8f4a6d35ba98c93",
+   "identical": true
+  }
+ },
+ "all_identical": true
+}

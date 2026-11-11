@@ -1,0 +1,12 @@
+{
+ "url": "https://futures.kraken.com/derivatives/api/v3/tickers",
+ "fetched_utc": "2026-11-10T13:52:47.257Z",
+ "fetched_utc_basis": "the payload's own serverTime",
+ "bytes": 133909,
+ "sha256": "17d897c536ae8eac753cad1ff2b1891aa22b258a67aefb30b6f51116213e73a8",
+ "saved_as": "kraken_futures_tickers.landscape_copy.json",
+ "fetched_by": "the landscape task (platforms_R1), NOT by v2_extras",
+ "copied_from": "/home/anont/meme/research/factory/landscape/evidence/platforms_R1/raw/kf_tickers.json",
+ "copied_utc": "2026-11-10T16:53:25Z",
+ "note": "used only to corroborate the Binance -> Kraken instrument mapping by price"
+}

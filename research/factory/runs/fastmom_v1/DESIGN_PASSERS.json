@@ -1,0 +1,17 @@
+{
+ "written_utc": "2026-11-10T18:44:54Z",
+ "prereg_sha256": "340b178b79d23fabd4c12939c68cfaebf91c3740a95e875623906e549e284f24",
+ "code_sha256": "7481080e8f0d00d2aa0df857d55296e80f2328b838670b47548cb87a7d70776d",
+ "design_ledger_csv_sha256": "cc852fbc1ccb92a090141ee7434c79a030ad05a87c2c15ed0ec5f1031e9f09ce",
+ "design_ledger_json_sha256": "ba86383b24474080bed2a3db4482f67133e2f753ef3be35d3be2044eca4aee31",
+ "rule": "mean net per trade > 0 AND day-clustered t >= 3.0 AND Benjamini-Hochberg (q = 0.10, m = 129) rejects under both the one-sided and the two-sided p-value",
+ "n_pairs": 129,
+ "n_mean_gross_positive": 33,
+ "n_mean_net_positive": 0,
+ "n_t_ge_3": 0,
+ "n_bh_reject_one_sided": 0,
+ "n_bh_reject_two_sided": 129,
+ "n_passers": 0,
+ "passers": [],
+ "payload_sha256": "17c316da8729dc7de7af1c2357b468baa602da10bc81d861fd3431581416ac32"
+}

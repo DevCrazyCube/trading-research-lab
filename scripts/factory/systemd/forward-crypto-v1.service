@@ -1,0 +1,17 @@
+[Unit]
+Description=FORWARD-CRYPTO v1 paper logger (no orders, public market data only)
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=8h
+StartLimitBurst=4
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/anont/meme
+ExecStart=/home/anont/meme/research/factory/.venv/bin/python -m scripts.factory.forward_crypto run
+Nice=10
+MemoryMax=2G
+TimeoutStartSec=45min
+Restart=on-failure
+RestartPreventExitStatus=1 2 4
+RestartSec=20min

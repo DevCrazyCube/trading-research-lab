@@ -1,0 +1,262 @@
+{
+ "meta": {
+  "written_utc": "2026-11-10T18:46:18Z",
+  "prereg_sha256": "340b178b79d23fabd4c12939c68cfaebf91c3740a95e875623906e549e284f24",
+  "code_sha256": "7481080e8f0d00d2aa0df857d55296e80f2328b838670b47548cb87a7d70776d",
+  "python": "3.12.12",
+  "numpy": "2.5.4",
+  "scipy": "1.18.1",
+  "symbols": [
+   "BTCUSDT",
+   "ETHUSDT",
+   "SOLUSDT"
+  ],
+  "formulas_per_symbol": 43,
+  "cost_side_bp": {
+   "BTCUSDT": 5.07,
+   "ETHUSDT": 5.24,
+   "SOLUSDT": 5.6
+  },
+  "maker_bound_side_bp": 2.0,
+  "sigma_window": 1440,
+  "bh_q": 0.1,
+  "design_t_min": 3.0,
+  "holdout_t_min": 2.0,
+  "control_seed": 20261110,
+  "window": "holdout",
+  "window_days": "2024-01-01..2026-10-31",
+  "status": "DESCRIPTIVE - not evidence; the pre-registered holdout read is holdout_passers.csv"
+ },
+ "symbols": [
+  {
+   "symbol": "BTCUSDT",
+   "first_month": "2023-12",
+   "last_month": "2026-10",
+   "first_bar_utc": "2023-12-01T00:00Z",
+   "last_bar_utc": "2026-10-31T23:59Z",
+   "files": 35,
+   "files_with_header_row": 35,
+   "files_in_microseconds": 0,
+   "bars_expected": 1535040,
+   "bars_present": 1533600,
+   "bars_missing": 1440,
+   "missing_runs": 1,
+   "longest_missing_run_min": 1440,
+   "missing_run_list": [
+    {
+     "start_utc": "2026-10-28T00:00Z",
+     "minutes": 1440
+    }
+   ],
+   "zero_volume_bars": 126,
+   "zero_trade_count_bars": 126,
+   "zero_volume_runs": 7,
+   "longest_zero_volume_run_min": 74,
+   "zero_volume_run_list": [
+    {
+     "start_utc": "2024-10-28T16:21Z",
+     "minutes": 14
+    },
+    {
+     "start_utc": "2024-10-28T16:36Z",
+     "minutes": 1
+    },
+    {
+     "start_utc": "2024-10-28T20:00Z",
+     "minutes": 74
+    },
+    {
+     "start_utc": "2025-01-14T13:32Z",
+     "minutes": 2
+    },
+    {
+     "start_utc": "2025-01-29T01:23Z",
+     "minutes": 13
+    },
+    {
+     "start_utc": "2025-01-29T02:41Z",
+     "minutes": 4
+    },
+    {
+     "start_utc": "2025-08-29T06:19Z",
+     "minutes": 18
+    }
+   ],
+   "ohlc_inconsistent_bars": 0,
+   "tradeable_bars": 1533474,
+   "months_with_missing_bars": [
+    {
+     "month": "2026-10",
+     "expected": 44640,
+     "present": 43200
+    }
+   ],
+   "window": "holdout",
+   "scored_from_utc": "2024-01-01T00:00Z",
+   "scored_days": 1035,
+   "scored_bars": 1490400,
+   "scored_bars_tradeable": 1488834,
+   "scored_bars_missing": 1440,
+   "scored_bars_zero_volume": 126,
+   "scored_bars_sigma1_defined": 1487520,
+   "scored_bars_sigma5_defined": 1487516,
+   "scored_bars_sigma15_defined": 1487506
+  },
+  {
+   "symbol": "ETHUSDT",
+   "first_month": "2023-12",
+   "last_month": "2026-10",
+   "first_bar_utc": "2023-12-01T00:00Z",
+   "last_bar_utc": "2026-10-31T23:59Z",
+   "files": 35,
+   "files_with_header_row": 35,
+   "files_in_microseconds": 0,
+   "bars_expected": 1535040,
+   "bars_present": 1533600,
+   "bars_missing": 1440,
+   "missing_runs": 1,
+   "longest_missing_run_min": 1440,
+   "missing_run_list": [
+    {
+     "start_utc": "2026-10-28T00:00Z",
+     "minutes": 1440
+    }
+   ],
+   "zero_volume_bars": 127,
+   "zero_trade_count_bars": 127,
+   "zero_volume_runs": 8,
+   "longest_zero_volume_run_min": 74,
+   "zero_volume_run_list": [
+    {
+     "start_utc": "2024-10-28T16:21Z",
+     "minutes": 14
+    },
+    {
+     "start_utc": "2024-10-28T16:36Z",
+     "minutes": 1
+    },
+    {
+     "start_utc": "2024-10-28T20:00Z",
+     "minutes": 74
+    },
+    {
+     "start_utc": "2025-01-14T13:32Z",
+     "minutes": 2
+    },
+    {
+     "start_utc": "2025-01-14T15:01Z",
+     "minutes": 1
+    },
+    {
+     "start_utc": "2025-01-29T01:23Z",
+     "minutes": 13
+    },
+    {
+     "start_utc": "2025-01-29T02:41Z",
+     "minutes": 4
+    },
+    {
+     "start_utc": "2025-08-29T06:19Z",
+     "minutes": 18
+    }
+   ],
+   "ohlc_inconsistent_bars": 0,
+   "tradeable_bars": 1533473,
+   "months_with_missing_bars": [
+    {
+     "month": "2026-10",
+     "expected": 44640,
+     "present": 43200
+    }
+   ],
+   "window": "holdout",
+   "scored_from_utc": "2024-01-01T00:00Z",
+   "scored_days": 1035,
+   "scored_bars": 1490400,
+   "scored_bars_tradeable": 1488833,
+   "scored_bars_missing": 1440,
+   "scored_bars_zero_volume": 127,
+   "scored_bars_sigma1_defined": 1487520,
+   "scored_bars_sigma5_defined": 1487516,
+   "scored_bars_sigma15_defined": 1487506
+  },
+  {
+   "symbol": "SOLUSDT",
+   "first_month": "2023-12",
+   "last_month": "2026-10",
+   "first_bar_utc": "2023-12-01T00:00Z",
+   "last_bar_utc": "2026-10-31T23:59Z",
+   "files": 35,
+   "files_with_header_row": 35,
+   "files_in_microseconds": 0,
+   "bars_expected": 1535040,
+   "bars_present": 1533600,
+   "bars_missing": 1440,
+   "missing_runs": 1,
+   "longest_missing_run_min": 1440,
+   "missing_run_list": [
+    {
+     "start_utc": "2026-10-28T00:00Z",
+     "minutes": 1440
+    }
+   ],
+   "zero_volume_bars": 128,
+   "zero_trade_count_bars": 128,
+   "zero_volume_runs": 8,
+   "longest_zero_volume_run_min": 74,
+   "zero_volume_run_list": [
+    {
+     "start_utc": "2024-10-28T16:21Z",
+     "minutes": 14
+    },
+    {
+     "start_utc": "2024-10-28T16:36Z",
+     "minutes": 1
+    },
+    {
+     "start_utc": "2024-10-28T20:00Z",
+     "minutes": 74
+    },
+    {
+     "start_utc": "2025-01-14T13:32Z",
+     "minutes": 2
+    },
+    {
+     "start_utc": "2025-01-14T15:01Z",
+     "minutes": 1
+    },
+    {
+     "start_utc": "2025-01-29T01:23Z",
+     "minutes": 13
+    },
+    {
+     "start_utc": "2025-01-29T02:41Z",
+     "minutes": 4
+    },
+    {
+     "start_utc": "2025-08-29T06:18Z",
+     "minutes": 19
+    }
+   ],
+   "ohlc_inconsistent_bars": 0,
+   "tradeable_bars": 1533472,
+   "months_with_missing_bars": [
+    {
+     "month": "2026-10",
+     "expected": 44640,
+     "present": 43200
+    }
+   ],
+   "window": "holdout",
+   "scored_from_utc": "2024-01-01T00:00Z",
+   "scored_days": 1035,
+   "scored_bars": 1490400,
+   "scored_bars_tradeable": 1488832,
+   "scored_bars_missing": 1440,
+   "scored_bars_zero_volume": 128,
+   "scored_bars_sigma1_defined": 1487520,
+   "scored_bars_sigma5_defined": 1487516,
+   "scored_bars_sigma15_defined": 1487506
+  }
+ ]
+}

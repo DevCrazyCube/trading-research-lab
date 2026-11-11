@@ -1,0 +1,33 @@
+{
+ "meta": {
+  "written_utc": "2026-11-10T18:45:02Z",
+  "prereg_sha256": "340b178b79d23fabd4c12939c68cfaebf91c3740a95e875623906e549e284f24",
+  "code_sha256": "7481080e8f0d00d2aa0df857d55296e80f2328b838670b47548cb87a7d70776d",
+  "python": "3.12.12",
+  "numpy": "2.5.4",
+  "scipy": "1.18.1",
+  "symbols": [
+   "BTCUSDT",
+   "ETHUSDT",
+   "SOLUSDT"
+  ],
+  "formulas_per_symbol": 43,
+  "cost_side_bp": {
+   "BTCUSDT": 5.07,
+   "ETHUSDT": 5.24,
+   "SOLUSDT": 5.6
+  },
+  "maker_bound_side_bp": 2.0,
+  "sigma_window": 1440,
+  "bh_q": 0.1,
+  "design_t_min": 3.0,
+  "holdout_t_min": 2.0,
+  "control_seed": 20261110,
+  "window": "holdout",
+  "window_days": "2024-01-01..2026-10-31",
+  "passers": [],
+  "design_passers_sha256": "2a8e0f670c65a8f46a3ceac769e957fcd8e7f8896e586609be6e789e51cd5d32"
+ },
+ "rows": [],
+ "note": "empty: no pair passed the design rule"
+}

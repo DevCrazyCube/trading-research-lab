@@ -1,0 +1,13 @@
+{
+ "url": "https://futures.kraken.com/derivatives/api/v3/instruments",
+ "method": "GET",
+ "fetched_utc": "2026-11-10T16:53:24Z",
+ "http_status": 200,
+ "bytes": 822473,
+ "sha256": "5cdaaad744f329f069c8b40f7823ed9cb3440b3bf984a7badd5f2e6108d82b20",
+ "saved_as": "kraken_futures_instruments.json",
+ "fetched_by": "scripts/factory/v2_extras.py",
+ "user_agent": "python-requests/2.34.2",
+ "content_type": "application/json",
+ "note": "raw response body, byte for byte; public key-less endpoint; one request"
+}

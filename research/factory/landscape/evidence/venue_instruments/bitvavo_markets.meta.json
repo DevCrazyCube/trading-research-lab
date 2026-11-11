@@ -1,0 +1,13 @@
+{
+ "url": "https://api.bitvavo.com/v2/markets",
+ "method": "GET",
+ "fetched_utc": "2026-11-10T16:53:25Z",
+ "http_status": 200,
+ "bytes": 187342,
+ "sha256": "82327c410a4c8fa75a22d39b0640207ab58ad18fdb2971de78f3f2055b033d46",
+ "saved_as": "bitvavo_markets.json",
+ "fetched_by": "scripts/factory/v2_extras.py",
+ "user_agent": "python-requests/2.34.2",
+ "content_type": "application/json",
+ "note": "raw response body, byte for byte; public key-less endpoint; one request"
+}

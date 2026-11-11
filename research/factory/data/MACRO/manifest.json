@@ -1,0 +1,1794 @@
+{
+ "lane": "MACRO",
+ "built_utc": "2026-11-10T15:43:53Z",
+ "rows": 2729,
+ "columns": [
+  "SPY",
+  "QQQ",
+  "IWM",
+  "EFA",
+  "EEM",
+  "VGK",
+  "EWJ",
+  "EWU",
+  "EWG",
+  "FXI",
+  "INDA",
+  "EWZ",
+  "EWA",
+  "EWC",
+  "EWY",
+  "EWT",
+  "XLE",
+  "XLF",
+  "XLK",
+  "XLV",
+  "XLU",
+  "XLI",
+  "XLP",
+  "XLY",
+  "XLB",
+  "SHY",
+  "IEF",
+  "TLT",
+  "TIP",
+  "LQD",
+  "HYG",
+  "EMB",
+  "AGG",
+  "GLD",
+  "SLV",
+  "USO",
+  "UNG",
+  "DBC",
+  "DBA",
+  "VNQ"
+ ],
+ "n_columns": 40,
+ "first_print": "2016-01-04 21:00:00+00:00",
+ "last_print": "2026-11-09 21:00:00+00:00",
+ "meta": {
+  "periods_per_year": 252,
+  "print_convention": "Row = one regular US equity session. Index = the session date at 16:00 America/New_York (the scheduled close) converted to UTC; on early-close sessions the market actually closes at 13:00 New York time and the label is still 16:00. Price = Alpaca daily bar close, SIP feed, adjustment=all (split-, dividend- and spin-off-adjusted). Evaluation is lag = 1 (fill at the next close).",
+  "universe_groups": {
+   "equity_region": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "EFA",
+    "EEM",
+    "VGK",
+    "EWJ",
+    "EWU",
+    "EWG",
+    "FXI",
+    "INDA",
+    "EWZ",
+    "EWA",
+    "EWC",
+    "EWY",
+    "EWT"
+   ],
+   "equity_sector": [
+    "XLE",
+    "XLF",
+    "XLK",
+    "XLV",
+    "XLU",
+    "XLI",
+    "XLP",
+    "XLY",
+    "XLB"
+   ],
+   "bond": [
+    "SHY",
+    "IEF",
+    "TLT",
+    "TIP",
+    "LQD",
+    "HYG",
+    "EMB",
+    "AGG"
+   ],
+   "commodity": [
+    "GLD",
+    "SLV",
+    "USO",
+    "UNG",
+    "DBC",
+    "DBA"
+   ],
+   "real_estate": [
+    "VNQ"
+   ],
+   "equity": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "EFA",
+    "EEM",
+    "VGK",
+    "EWJ",
+    "EWU",
+    "EWG",
+    "FXI",
+    "INDA",
+    "EWZ",
+    "EWA",
+    "EWC",
+    "EWY",
+    "EWT",
+    "XLE",
+    "XLF",
+    "XLK",
+    "XLV",
+    "XLU",
+    "XLI",
+    "XLP",
+    "XLY",
+    "XLB"
+   ],
+   "ALL": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "EFA",
+    "EEM",
+    "VGK",
+    "EWJ",
+    "EWU",
+    "EWG",
+    "FXI",
+    "INDA",
+    "EWZ",
+    "EWA",
+    "EWC",
+    "EWY",
+    "EWT",
+    "XLE",
+    "XLF",
+    "XLK",
+    "XLV",
+    "XLU",
+    "XLI",
+    "XLP",
+    "XLY",
+    "XLB",
+    "SHY",
+    "IEF",
+    "TLT",
+    "TIP",
+    "LQD",
+    "HYG",
+    "EMB",
+    "AGG",
+    "GLD",
+    "SLV",
+    "USO",
+    "UNG",
+    "DBC",
+    "DBA",
+    "VNQ"
+   ]
+  },
+  "asset_class_of": {
+   "SPY": "equity_region",
+   "QQQ": "equity_region",
+   "IWM": "equity_region",
+   "EFA": "equity_region",
+   "EEM": "equity_region",
+   "VGK": "equity_region",
+   "EWJ": "equity_region",
+   "EWU": "equity_region",
+   "EWG": "equity_region",
+   "FXI": "equity_region",
+   "INDA": "equity_region",
+   "EWZ": "equity_region",
+   "EWA": "equity_region",
+   "EWC": "equity_region",
+   "EWY": "equity_region",
+   "EWT": "equity_region",
+   "XLE": "equity_sector",
+   "XLF": "equity_sector",
+   "XLK": "equity_sector",
+   "XLV": "equity_sector",
+   "XLU": "equity_sector",
+   "XLI": "equity_sector",
+   "XLP": "equity_sector",
+   "XLY": "equity_sector",
+   "XLB": "equity_sector",
+   "SHY": "bond",
+   "IEF": "bond",
+   "TLT": "bond",
+   "TIP": "bond",
+   "LQD": "bond",
+   "HYG": "bond",
+   "EMB": "bond",
+   "AGG": "bond",
+   "GLD": "commodity",
+   "SLV": "commodity",
+   "USO": "commodity",
+   "UNG": "commodity",
+   "DBC": "commodity",
+   "DBA": "commodity",
+   "VNQ": "real_estate"
+  },
+  "excluded_instruments": {
+   "CPER": "thin trading: 47 sessions with zero trades (2016-2018) and 490 sessions with fewer than 20 trades (last 2020-01-07); under the <= 3-session forward-fill rule its 4th consecutive no-trade session (2017-07-14, inside the design window) is a missing print"
+  },
+  "rates_unit": "decimal per year (0.05 = 5 %), last DFF observation dated strictly before the session date",
+  "carry_convention": "-i_usd * days / 360 for every instrument; days = calendar days since the previous session; first row NaN",
+  "research_proxy_note": "US-listed ETFs are research proxies for wrappers an NL retail account can use (DESIGN v2 \u00a70 #3)",
+  "adjusted_prices_note": "adjustment=all is the vendor's CURRENT back-adjustment (as of the fetch); it is a total-return style series, not a price that printed on the day \u2014 see aux['raw_close']. The vendor rounds adjusted closes to whole cents: a daily return carries up to +/- (1 cent / price) of rounding noise (see per_etf.max_rounding_error_bp_of_price).",
+  "first_row_all_groups_complete": "2016-01-05 21:00:00+00:00",
+  "last_row_all_groups_complete": "2026-11-09 21:00:00+00:00",
+  "lane": "MACRO",
+  "source_manifest": "research/factory/data/MACRO/manifest.json"
+ },
+ "files": {
+  "prices.parquet": {
+   "sha256": "7ffbf454d18131e3b5ac95086a54e77de7fce2e7860d44d89210cefe6a8a03ee",
+   "rows": 2729,
+   "cols": 40,
+   "bytes": 402765
+  },
+  "carry.parquet": {
+   "sha256": "8419f07ff210db12116e90fbb9e483df8172b870282018fa838a4c7ab452eaa3",
+   "rows": 2729,
+   "cols": 40,
+   "bytes": 143162
+  },
+  "tbill.parquet": {
+   "sha256": "2fbf84858888f7a38b199f8e4e39c59452c051dba0a585e15fc5cc9bafa57f18",
+   "rows": 2729,
+   "cols": 1,
+   "bytes": 27512
+  },
+  "aux/raw_close.parquet": {
+   "sha256": "c0e24810da44e26d0b2651dc6e6305c277e85373f0215f4cd655d861f7d3743e",
+   "rows": 2729,
+   "cols": 40,
+   "bytes": 408495
+  },
+  "aux/volume.parquet": {
+   "sha256": "f90142f2a5da7d01948108c81e982aef5f4202d95310bf9d6cf351293b834122",
+   "rows": 2729,
+   "cols": 40,
+   "bytes": 661533
+  },
+  "aux/trade_count.parquet": {
+   "sha256": "7de13b9beb688a23345569b741006325211f49bb1a9f2a408479c42f4a6a74a9",
+   "rows": 2729,
+   "cols": 40,
+   "bytes": 503191
+  },
+  "aux/usd_per_eur.parquet": {
+   "sha256": "8d0867576937b013187c959402d81e3df79d1738237882de3a6b26953a9d5900",
+   "rows": 2729,
+   "cols": 1,
+   "bytes": 34886
+  },
+  "aux/rates.parquet": {
+   "sha256": "c872b06f5248cb97447eef3e95d70b6906237e3f127b0e3135c28a3fbc3d6b63",
+   "rows": 2729,
+   "cols": 1,
+   "bytes": 26572
+  }
+ },
+ "instruments": {
+  "SPY": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "QQQ": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "IWM": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EFA": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EEM": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "VGK": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EWJ": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EWU": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EWG": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "FXI": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "INDA": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EWZ": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EWA": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EWC": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EWY": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EWT": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "XLE": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "XLF": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "XLK": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "XLV": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "XLU": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "XLI": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "XLP": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "XLY": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "XLB": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "SHY": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "IEF": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "TLT": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "TIP": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "LQD": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "HYG": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "EMB": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "AGG": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "GLD": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "SLV": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "USO": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "UNG": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "DBC": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "DBA": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  },
+  "VNQ": {
+   "first_print": "2016-01-04 21:00:00+00:00",
+   "last_print": "2026-11-09 21:00:00+00:00",
+   "n_prints": 2729,
+   "carry_first": "2016-01-05 21:00:00+00:00",
+   "carry_last": "2026-11-09 21:00:00+00:00",
+   "n_carry": 2728
+  }
+ },
+ "sources": {
+  "alpaca": [
+   {
+    "path": "raw/alpaca/bars_1Day_all_DONE.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars (paging summary, written locally)",
+    "fetched_utc": "2026-11-10T14:12:52Z",
+    "bytes": 385,
+    "sha256": "fce4341aa6c6fede1cb114a86c783915867d7ba2e1c563d8565c7d1c045f64b9"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page000.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000",
+    "fetched_utc": "2026-11-10T14:12:47Z",
+    "bytes": 1010805,
+    "sha256": "57c4bfd6b95fe40f8d0fd4e6401a9b9a16c40cc29bad6cdf51c144a778106571"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page001.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=REJDfER8MTY3OTAyNTYwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:48Z",
+    "bytes": 1020491,
+    "sha256": "279e846603c851af5df1f0bc377faf57e1c20967e5e67e419d3da051f98bff84"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page002.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=RVdBfER8MTU2NDM3MjgwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:48Z",
+    "bytes": 1010292,
+    "sha256": "f73905ce068184809762d2bcc37e3590045fe59486f48971750277c78bccb171"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page003.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=RVdKfER8MTc5MTk1MDQwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:49Z",
+    "bytes": 1017551,
+    "sha256": "4609e31074c0a5853f46f16a251158b2943a4a67062239882b9a4106d3a0f698"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page004.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=RVdafER8MTY3NjYxMDAwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:49Z",
+    "bytes": 1048468,
+    "sha256": "a96ecb6167ad19b2e7b695fa1d5873c951b541b7794a375a7b84e00c225451a3"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page005.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=SUVGfER8MTU2MTk1MzYwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:49Z",
+    "bytes": 1042142,
+    "sha256": "786c4458c87dbd1972493788af521daf4f95b7b17b3a66cfb14d6c15db51e5a9"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page006.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=TFFEfER8MTc4OTYxNzYwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:50Z",
+    "bytes": 1058475,
+    "sha256": "3d32f9d014695da49b8a94c2479a1a96d0538d896235f8ddbb5e41395a0fad45"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page007.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=U1BZfER8MTY3NDQ1MDAwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:50Z",
+    "bytes": 1035446,
+    "sha256": "f1b3675d7e13455b2ff72f5686b321c908ec6c77f2e5b86bd2ff5bb86bcd770f"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page008.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=VVNPfER8MTU1OTYyMDgwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:51Z",
+    "bytes": 1024312,
+    "sha256": "5379952caf6d6c302a2735991b51ed0827a11e62b93a3fc29b5b35a114c7d197"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page009.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=WExCfER8MTc4NzE5ODQwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:51Z",
+    "bytes": 1031172,
+    "sha256": "1732104a15c7dd8c20a470063681ab09b75372647a985bef97927adb50aa96d2"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page010.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=WExLfER8MTY3MTY4NTIwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:51Z",
+    "bytes": 1033972,
+    "sha256": "960983ff473fdf49e0f0c9705bfc2b14a7e6a04303c95344df91f3ca7a49a9fd"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_all_page011.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=all&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=WExZfER8MTU1NzIwMTYwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:52Z",
+    "bytes": 195151,
+    "sha256": "9e45337fd72b918df107a7cf38f4340e552cd8d2d0eda8b6ae8d5c0d8b324367"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_DONE.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars (paging summary, written locally)",
+    "fetched_utc": "2026-11-10T14:12:57Z",
+    "bytes": 385,
+    "sha256": "fce4341aa6c6fede1cb114a86c783915867d7ba2e1c563d8565c7d1c045f64b9"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page000.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000",
+    "fetched_utc": "2026-11-10T14:12:52Z",
+    "bytes": 1053196,
+    "sha256": "c45586cbc42102181466c8097cd6a375167b8102a0d50a028f171d6a47513f81"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page001.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=REJDfER8MTY3OTAyNTYwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:53Z",
+    "bytes": 1072401,
+    "sha256": "c6335870ddcc5ff8a02d9fa7782ecff744d5a90320c1d21100fff86a7ca1984c"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page002.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=RVdBfER8MTU2NDM3MjgwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:53Z",
+    "bytes": 1055959,
+    "sha256": "621a8bac7fb15272d944c8bce3f0bf94dc19c25c7447a425d72fd37bd988e953"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page003.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=RVdKfER8MTc5MTk1MDQwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:53Z",
+    "bytes": 1060841,
+    "sha256": "849d182014a9386dd85cf32a81c18617130ec6458ba4e8f5a7cfe8dfe0a8b30b"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page004.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=RVdafER8MTY3NjYxMDAwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:54Z",
+    "bytes": 1084568,
+    "sha256": "ad4ac7545700800c8cfe01571655620b93ffe140fe069c31946c4710a0462601"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page005.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=SUVGfER8MTU2MTk1MzYwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:54Z",
+    "bytes": 1097387,
+    "sha256": "7892d00c88e99c1e5f13d54afac40198f121449af363215693ff77ab6f25a015"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page006.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=TFFEfER8MTc4OTYxNzYwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:55Z",
+    "bytes": 1090565,
+    "sha256": "f3f1443e79eff55ac26df9f67a5d6bb603afe1af63b6508ced5195a029783045"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page007.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=U1BZfER8MTY3NDQ1MDAwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:55Z",
+    "bytes": 1087459,
+    "sha256": "14c5e7eecf0220d56f9edfa2069bfc796c69ee07b788816b8fb101f31ac069ec"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page008.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=VVNPfER8MTU1OTYyMDgwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:55Z",
+    "bytes": 1062120,
+    "sha256": "c8c3a9bdc1fd545a0ef9ba8620d94efa4e6f30fc3d5a2d37f015d7370a936d40"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page009.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=WExCfER8MTc4NzE5ODQwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:56Z",
+    "bytes": 1078858,
+    "sha256": "873c3f610c4b525f10629eda6e7a451f3d9a590aba3ae03a3f2ad262dbae85a6"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page010.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=WExLfER8MTY3MTY4NTIwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:56Z",
+    "bytes": 1080954,
+    "sha256": "bbec75cc5d4d8e8148f4944e8d74aaaa1d71d0c15e1b2ca739e2fb690fcad731"
+   },
+   {
+    "path": "raw/alpaca/bars_1Day_raw_page011.json",
+    "url": "https://data.alpaca.markets/v2/stocks/bars?symbols=SPY%2CQQQ%2CIWM%2CEFA%2CEEM%2CVGK%2CEWJ%2CEWU%2CEWG%2CFXI%2CINDA%2CEWZ%2CEWA%2CEWC%2CEWY%2CEWT%2CXLE%2CXLF%2CXLK%2CXLV%2CXLU%2CXLI%2CXLP%2CXLY%2CXLB%2CSHY%2CIEF%2CTLT%2CTIP%2CLQD%2CHYG%2CEMB%2CAGG%2CGLD%2CSLV%2CUSO%2CUNG%2CDBC%2CDBA%2CCPER%2CVNQ&timeframe=1Day&adjustment=raw&feed=sip&start=2016-01-01&end=2026-11-10T00%3A00%3A00Z&limit=10000&page_token=WExZfER8MTU1NzIwMTYwMDAwMDAwMDAwMA%3D%3D",
+    "fetched_utc": "2026-11-10T14:12:57Z",
+    "bytes": 209544,
+    "sha256": "3998381e4ea29244c532bd2c46e2f88129cec5342d5169eaff6a1af9e66bfb18"
+   }
+  ],
+  "alpaca_request": {
+   "endpoint": "https://data.alpaca.markets/v2/stocks/bars",
+   "timeframe": "1Day",
+   "feed": "sip",
+   "adjustment": [
+    "all",
+    "raw"
+   ],
+   "start": "2016-01-01",
+   "symbols": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "EFA",
+    "EEM",
+    "VGK",
+    "EWJ",
+    "EWU",
+    "EWG",
+    "FXI",
+    "INDA",
+    "EWZ",
+    "EWA",
+    "EWC",
+    "EWY",
+    "EWT",
+    "XLE",
+    "XLF",
+    "XLK",
+    "XLV",
+    "XLU",
+    "XLI",
+    "XLP",
+    "XLY",
+    "XLB",
+    "SHY",
+    "IEF",
+    "TLT",
+    "TIP",
+    "LQD",
+    "HYG",
+    "EMB",
+    "AGG",
+    "GLD",
+    "SLV",
+    "USO",
+    "UNG",
+    "DBC",
+    "DBA",
+    "CPER",
+    "VNQ"
+   ],
+   "note": "CPER was downloaded with the other 40 and is excluded from the lane"
+  },
+  "fred": [
+   {
+    "path": "raw/fred/DFF.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF",
+    "fetched_utc": "2026-11-10T14:09:26Z",
+    "bytes": 424667,
+    "sha256": "5e1275425c0f765edda73c1b3127431e692e3f8b356d984edf5e241f875e5a88"
+   }
+  ],
+  "ecb": [
+   {
+    "path": "raw/ecb/EXR_D_USD_EUR_SP00_A.csv",
+    "url": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?format=csvdata",
+    "fetched_utc": "2026-11-10T14:09:32Z",
+    "bytes": 1490651,
+    "sha256": "5897fade51482676a96490b9878d9a10fdb58f5b8f5beaa7a132a9d6a6944fb7"
+   }
+  ]
+ },
+ "rate_series": {
+  "USD": {
+   "series": "FRED DFF (effective federal funds rate)",
+   "asof": {
+    "fresh": 2729,
+    "ffilled": 0,
+    "ffilled_beyond_3_prints": 0,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 0,
+    "first_valid_print": "2016-01-04",
+    "last_valid_print": "2026-11-09"
+   }
+  }
+ },
+ "usd_per_eur": {
+  "series": "ECB EXR/D.USD.EUR.SP00.A, fixing of the same date (on or before), <= 3 sessions old",
+  "asof": {
+   "fresh": 2704,
+   "ffilled": 25,
+   "ffilled_beyond_3_prints": 0,
+   "max_stale_prints_allowed": 3,
+   "nan_stale": 0,
+   "nan_before_start": 0,
+   "first_valid_print": "2016-01-04",
+   "last_valid_print": "2026-11-09"
+  }
+ },
+ "per_etf": {
+  "SPY": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.8490731233633404,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 41,
+   "min_adjusted_close": 155.26,
+   "max_rounding_error_bp_of_price": 0.32,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "QQQ": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.9239269406392694,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 44,
+   "min_adjusted_close": 88.99,
+   "max_rounding_error_bp_of_price": 0.56,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "IWM": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.8725570402690663,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 43,
+   "min_adjusted_close": 82.7,
+   "max_rounding_error_bp_of_price": 0.6,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EFA": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.729851262538914,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 26,
+   "min_adjusted_close": 37.5,
+   "max_rounding_error_bp_of_price": 1.33,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EEM": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.7968700095816034,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 176,
+   "min_adjusted_close": 22.51,
+   "max_rounding_error_bp_of_price": 2.22,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "VGK": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.7094608341810783,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 97,
+   "min_adjusted_close": 30.15,
+   "max_rounding_error_bp_of_price": 1.66,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EWJ": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 3.2523051131601006,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 45,
+   "min_adjusted_close": 33.57,
+   "max_rounding_error_bp_of_price": 1.49,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EWU": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 1.3337531486146095,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 518,
+   "min_adjusted_close": 15.49,
+   "max_rounding_error_bp_of_price": 3.23,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EWG": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.769170579029734,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 610,
+   "min_adjusted_close": 15.28,
+   "max_rounding_error_bp_of_price": 3.27,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "FXI": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.7841874084919473,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 370,
+   "min_adjusted_close": 19.02,
+   "max_rounding_error_bp_of_price": 2.63,
+   "one_day_moves_over_20pct": {
+    "2022-03-16": 0.2121
+   },
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "INDA": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.8911589895988111,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 266,
+   "min_adjusted_close": 19.22,
+   "max_rounding_error_bp_of_price": 2.6,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EWZ": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.5932798395185557,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 699,
+   "min_adjusted_close": 10.28,
+   "max_rounding_error_bp_of_price": 4.86,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EWA": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.6529411764705884,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 1045,
+   "min_adjusted_close": 10.05,
+   "max_rounding_error_bp_of_price": 4.98,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EWC": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.8065125058990089,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 503,
+   "min_adjusted_close": 15.04,
+   "max_rounding_error_bp_of_price": 3.32,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EWY": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.8278705421562564,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 16,
+   "min_adjusted_close": 34.83,
+   "max_rounding_error_bp_of_price": 1.44,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "EWT": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 1.2084006462035541,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 432,
+   "min_adjusted_close": 13.71,
+   "max_rounding_error_bp_of_price": 3.65,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_region"
+  },
+  "XLE": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.32902155887230516,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 613,
+   "min_adjusted_close": 9.125,
+   "max_rounding_error_bp_of_price": 5.48,
+   "one_day_moves_over_20pct": {
+    "2020-03-09": -0.2016
+   },
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_sector"
+  },
+  "XLF": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.7976037655113393,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 523,
+   "min_adjusted_close": 15.68,
+   "max_rounding_error_bp_of_price": 3.19,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_sector"
+  },
+  "XLK": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.4473621954104566,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 228,
+   "min_adjusted_close": 17.33,
+   "max_rounding_error_bp_of_price": 2.89,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_sector"
+  },
+  "XLV": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.8392478439134737,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 43,
+   "min_adjusted_close": 53.31,
+   "max_rounding_error_bp_of_price": 0.94,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_sector"
+  },
+  "XLU": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.35887937022458904,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 609,
+   "min_adjusted_close": 15.44,
+   "max_rounding_error_bp_of_price": 3.24,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_sector"
+  },
+  "XLI": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.8351816443594646,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 43,
+   "min_adjusted_close": 40.09,
+   "max_rounding_error_bp_of_price": 1.25,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_sector"
+  },
+  "XLP": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.7550651955867602,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 68,
+   "min_adjusted_close": 36.45,
+   "max_rounding_error_bp_of_price": 1.37,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_sector"
+  },
+  "XLY": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.44806040093725596,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 82,
+   "min_adjusted_close": 30.7,
+   "max_rounding_error_bp_of_price": 1.63,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_sector"
+  },
+  "XLB": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.4054749649040711,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 456,
+   "min_adjusted_close": 15.13,
+   "max_rounding_error_bp_of_price": 3.3,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "equity_sector"
+  },
+  "SHY": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.8051379187877353,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 124,
+   "min_adjusted_close": 67.97,
+   "max_rounding_error_bp_of_price": 0.74,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "bond"
+  },
+  "IEF": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.7776310826103356,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 129,
+   "min_adjusted_close": 79.29,
+   "max_rounding_error_bp_of_price": 0.63,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "bond"
+  },
+  "TLT": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.7358583779333059,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 129,
+   "min_adjusted_close": 72.53,
+   "max_rounding_error_bp_of_price": 0.69,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "bond"
+  },
+  "TIP": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.7290890927254564,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 93,
+   "min_adjusted_close": 80.05,
+   "max_rounding_error_bp_of_price": 0.62,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "bond"
+  },
+  "LQD": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.6818780166739798,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 129,
+   "min_adjusted_close": 77.23,
+   "max_rounding_error_bp_of_price": 0.65,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "bond"
+  },
+  "HYG": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.5637952559300874,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 130,
+   "min_adjusted_close": 42.82,
+   "max_rounding_error_bp_of_price": 1.17,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "bond"
+  },
+  "EMB": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.5965742405602347,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 130,
+   "min_adjusted_close": 61.51,
+   "max_rounding_error_bp_of_price": 0.81,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "bond"
+  },
+  "AGG": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.7376122997128832,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 130,
+   "min_adjusted_close": 79.64,
+   "max_rounding_error_bp_of_price": 0.63,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "bond"
+  },
+  "GLD": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 1.0,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 0,
+   "min_adjusted_close": 102.89,
+   "max_rounding_error_bp_of_price": 0.49,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "commodity"
+  },
+  "SLV": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 1.0,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 0,
+   "min_adjusted_close": 11.21,
+   "max_rounding_error_bp_of_price": 4.46,
+   "one_day_moves_over_20pct": {
+    "2026-01-30": -0.2854
+   },
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "commodity"
+  },
+  "USO": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 8.0,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 1,
+   "min_adjusted_close": 17.04,
+   "max_rounding_error_bp_of_price": 2.93,
+   "one_day_moves_over_20pct": {
+    "2020-03-09": -0.2532,
+    "2020-04-21": -0.2493
+   },
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "commodity"
+  },
+  "UNG": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 16.0,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 2,
+   "min_adjusted_close": 9.0,
+   "max_rounding_error_bp_of_price": 5.56,
+   "one_day_moves_over_20pct": {
+    "2026-02-02": -0.2485
+   },
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "commodity"
+  },
+  "DBC": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.8340874811463047,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 1129,
+   "min_adjusted_close": 9.136,
+   "max_rounding_error_bp_of_price": 5.47,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "commodity"
+  },
+  "DBA": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.850563449289564,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 1075,
+   "min_adjusted_close": 11.61,
+   "max_rounding_error_bp_of_price": 4.31,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "commodity"
+  },
+  "VNQ": {
+   "first_bar": "2016-01-04",
+   "last_bar": "2026-11-09",
+   "bars": 2729,
+   "sessions_missing_vs_union": 0,
+   "missing_dates": [],
+   "adjusted_over_raw_first": 0.6538022089628032,
+   "adjusted_over_raw_last": 1.0,
+   "adjustment_events_over_2bp": 43,
+   "min_adjusted_close": 44.43,
+   "max_rounding_error_bp_of_price": 1.13,
+   "one_day_moves_over_20pct": {},
+   "zero_trade_sessions": 0,
+   "sessions_with_fewer_than_20_trades": 0,
+   "last_session_with_fewer_than_20_trades": null,
+   "asset_class": "real_estate"
+  }
+ },
+ "price_gaps": {
+  "rule": "a session with zero trades is a missing print (the vendor's flat bar is discarded); forward-fill at most 3 consecutive sessions, longer gaps stay NaN",
+  "per_instrument": {
+   "SPY": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "QQQ": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "IWM": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EFA": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EEM": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "VGK": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EWJ": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EWU": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EWG": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "FXI": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "INDA": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EWZ": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EWA": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EWC": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EWY": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EWT": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "XLE": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "XLF": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "XLK": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "XLV": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "XLU": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "XLI": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "XLP": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "XLY": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "XLB": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "SHY": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "IEF": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "TLT": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "TIP": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "LQD": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "HYG": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "EMB": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "AGG": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "GLD": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "SLV": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "USO": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "UNG": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "DBC": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "DBA": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   },
+   "VNQ": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0
+   }
+  }
+ },
+ "thin_trading_warning": {},
+ "day_count_distribution": {
+  "1": 2135,
+  "2": 27,
+  "3": 491,
+  "4": 75
+ },
+ "exclusions": {
+  "CPER": "thin trading: 47 sessions with zero trades (2016-2018) and 490 sessions with fewer than 20 trades (last 2020-01-07); under the <= 3-session forward-fill rule its 4th consecutive no-trade session (2017-07-14, inside the design window) is a missing print"
+ }
+}

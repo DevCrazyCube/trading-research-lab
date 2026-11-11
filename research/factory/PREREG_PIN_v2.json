@@ -1,0 +1,28 @@
+{
+ "preregistration_sha256": "83d568c3b3b51692a1ed62bdcc421b08635b02751b98d5a1269888d830e3329c",
+ "design_sha256": "0b9f21acdd21a0fb53f1ffe24ae86e2a835cb12a5f36e1beb9ec56400433411c",
+ "venues_sha256": "ad2e131ed2c2f625cdd2ece6303d5291631e838cef22d8b10459d8dd00955b18",
+ "grid_sha256_with_sources": "01ca21df8f7bb94e6054d4e4bc8b6d22cc08f1bb88931b5734ce2b5678870609",
+ "grid_sha256_declaration": "03565f90bd71382b4a31baede0bfc1815be42bb997fd12569e0cfbc7301ad9e7",
+ "data_manifest_sha256": {
+  "FX": "8c424e17e57be255dcbc23a7fed769594afeaa94adebf3410bd1fb00ef9f3c55",
+  "FX-EXEC": "1d65bd22a2281d1f51b84b9b1d955355fb1878ef2defa1accf1c4619c6934bae",
+  "FX-FRED": "34ac712cdae9f6405cecf038b8a8e86de07248ad9e265b08536559a227e8ea7c",
+  "MACRO": "5b118cf16815814af8f1603e734eecfd31cf8b321ec6983b5bad25388a112741",
+  "CRYPTO-PERP": "ab6cc409e84025e4b21a5e0b55a0d7d4e93bad368bca2cea29bc0b82c9d33803",
+  "CRYPTO-SPOT": "34b5f55679ce7bc96b7a75fd75737b455a49d6bf8493f90457ebb89f747ca06a"
+ },
+ "library_sha256": {
+  "panel.py": "a00a43f7b14e0b97646e1be36fe35d6fd7b5064379bec89cda313462766a2897",
+  "engine.py": "5d5c546f7ed854cfd87228e1392d9e4ca5c54f8da81c05bb7145ebfb8ed54c24",
+  "stats.py": "fe0474c2883885542214f83d8ca20acd4ae12f426be8ed8979951457ced075aa",
+  "mtest.py": "3e05d904b7fa76b69077acfa97d76019915a47dadee0d6d8a07121079ffe9356",
+  "audit.py": "7f0c79b6ab66a31d21d20f70ae1afd57467ea3319481295ff5d310679dd53dad",
+  "portfolio.py": "2ad6137472983725b8b75b1ad31582831112f1210e68b92fa0083e3f9b2ec884",
+  "realism.py": "85b1e07ba6b0bd9b2245613d80eeec6d87ea1cd16b41485a5a5a4daf58109afc"
+ },
+ "frozen_utc": "2026-11-10T16:28:03.474084+00:00",
+ "runner_sha256": "457f06474f706117a6618ca451e4a8b7c0a2273ba5b8d840ca2f6d193a9ddc6a",
+ "tier2_formula_count": 255,
+ "primaries": 16
+}

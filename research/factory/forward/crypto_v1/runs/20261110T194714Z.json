@@ -1,0 +1,525 @@
+{
+ "run_id": "20261110T194714Z",
+ "run_utc": "2026-11-10T19:47:14Z",
+ "mode": "run",
+ "status": "NO_FORWARD_ROW_YET",
+ "exit_code": 0,
+ "forward_start_label": "2026-11-11",
+ "pins": {
+  "forward_prereg": "9942631a16b37c764cfa8c30d27f7bb95086638a5a12e0ae163546d650f7649f",
+  "v2_prereg": "83d568c3b3b51692a1ed62bdcc421b08635b02751b98d5a1269888d830e3329c",
+  "grid": "01ca21df8f7bb94e6054d4e4bc8b6d22cc08f1bb88931b5734ce2b5678870609",
+  "manifest": "ab6cc409e84025e4b21a5e0b55a0d7d4e93bad368bca2cea29bc0b82c9d33803",
+  "venues": "ad2e131ed2c2f625cdd2ece6303d5291631e838cef22d8b10459d8dd00955b18",
+  "library/panel.py": "a00a43f7b14e0b97646e1be36fe35d6fd7b5064379bec89cda313462766a2897",
+  "library/engine.py": "5d5c546f7ed854cfd87228e1392d9e4ca5c54f8da81c05bb7145ebfb8ed54c24",
+  "library/stats.py": "fe0474c2883885542214f83d8ca20acd4ae12f426be8ed8979951457ced075aa",
+  "library/portfolio.py": "2ad6137472983725b8b75b1ad31582831112f1210e68b92fa0083e3f9b2ec884",
+  "library/realism.py": "85b1e07ba6b0bd9b2245613d80eeec6d87ea1cd16b41485a5a5a4daf58109afc"
+ },
+ "code_sha256": {
+  "forward_crypto.py": "df7636f82316dc14949a5cc1b132aeeb5c33854dca4550ce7d16d057ba60e42d",
+  "v2.py": "980ceee5df263891ad6cc6b432391d98a1e44d14a96d16fe299c6a20f051765b",
+  "v2_extras.py": "d696f3c134eede98e26da2150a7541332983c70e82b3a51fbdbadfc200a54591",
+  "panel.py": "a00a43f7b14e0b97646e1be36fe35d6fd7b5064379bec89cda313462766a2897",
+  "engine.py": "5d5c546f7ed854cfd87228e1392d9e4ca5c54f8da81c05bb7145ebfb8ed54c24",
+  "stats.py": "fe0474c2883885542214f83d8ca20acd4ae12f426be8ed8979951457ced075aa",
+  "portfolio.py": "2ad6137472983725b8b75b1ad31582831112f1210e68b92fa0083e3f9b2ec884",
+  "realism.py": "85b1e07ba6b0bd9b2245613d80eeec6d87ea1cd16b41485a5a5a4daf58109afc",
+  "data/crypto.py": "83201f1c9b260f2f622e2af2ece1439ad104ac830b6203fc6ec5ff64188dba08",
+  "data/crypto_build.py": "3376a531834162da7d663db3d84cca3c85039759737ea7f117fb560af1feb59e",
+  "data/universe.py": "f768d176fabc896f796e554d2255aa4b67f913880497c6d8c8d7e05d9c6ce526",
+  "data/panelio.py": "d82396a1d4ee3e482b6847a15fa9953cbeb877b356f4d879ab394b27998dbd7a",
+  "strategies/common.py": "9cbacf11617693cbef3e50a44c860de280db5f2b74734f943975a79dc80c3e71",
+  "strategies/registry.py": "2006cf66308f26b798292f587ee4529b4bb5eaf54861add61bafeb5094854570",
+  "strategies/rules_trend.py": "e45174833b5287af0876422d068e6399eceb178ac7bab1ed01447ab722fd0be2",
+  "strategies/rules_xs.py": "9e51d62d78bdf17d6299cc1b1622d55da3e9198303524158f8841b534a59cf73"
+ },
+ "frozen_last_row": "2026-11-10",
+ "binance": {
+  "through_row": "2026-11-10T00:00:00Z",
+  "notices": [],
+  "exchange_info": {
+   "symbols": 942,
+   "request_weight_limit_per_minute": 2400,
+   "payload_server_time": "2026-11-10T01:01:01Z",
+   "payload_age_hours": 18.77
+  },
+  "names": {
+   "usdt_perpetuals_in_exchange_info": 893,
+   "included": 693,
+   "excluded_by_reason": {
+    "TRADIFI_PERPETUAL (EQUITY) - not a crypto underlying": 196,
+    "TRADIFI_PERPETUAL (HK_EQUITY) - not a crypto underlying": 15,
+    "TRADIFI_PERPETUAL (COMMODITY) - not a crypto underlying": 8,
+    "TRADIFI_PERPETUAL (KR_EQUITY) - not a crypto underlying": 8,
+    "TRADIFI_PERPETUAL (PREMARKET) - not a crypto underlying": 4,
+    "synthetic index (BTCDOM-type)": 3,
+    "TRADIFI_PERPETUAL (CN_EQUITY) - not a crypto underlying": 2,
+    "commodity-backed token (gold) - not a crypto asset": 2,
+    "TRADIFI_PERPETUAL (FX) - not a crypto underlying": 1,
+    "stablecoin/fiat underlying": 1
+   },
+   "new_since_freeze": [
+    "GAIBUSDT"
+   ]
+  },
+  "requests": 1313,
+  "zip": "20261110T194714Z.zip",
+  "zip_bytes": 30637502,
+  "zip_sha256": "c6c69a1936b3f75cf134525e4eb91ab4b14e7d488789c7ed50c7167b0b2180aa",
+  "response_bytes": 102040104,
+  "rows_added": {
+   "1d": 47308,
+   "1h": 574983,
+   "fund": 120455
+  },
+  "conflicts": 0,
+  "parsed": "20261110T194714Z.parquet",
+  "parsed_sha256": "8782339c3789e070f07812e75a6c70966b72c604e12a6256854daa9056444bab",
+  "index": "20261110T194714Z.index.jsonl",
+  "index_sha256": "7441dd714630f4fab8774f0549300aca0e8c7a67269943aa0a19c7ea544985db",
+  "seconds": 881.6,
+  "max_used_weight_1m": 430,
+  "weight_budget": 1200,
+  "weight_pauses": 0,
+  "retries": 0,
+  "max_clock_skew_s": 1.6
+ },
+ "panel": {
+  "frozen_last_row": "2026-11-10T00:00:00Z",
+  "last_row": "2026-11-10T00:00:00Z",
+  "extension_rows": 0,
+  "instruments": 693,
+  "new_instruments": [],
+  "newly_tracked": [],
+  "settlements_booked": [],
+  "notices": [],
+  "decision_vs_hourly": {
+   "rows_compared": 0,
+   "mismatches": []
+  },
+  "mask_without_exec_print": []
+ },
+ "panel_last_row": "2026-11-10",
+ "continuity": {
+  "rows": [
+   "2026-08-13",
+   "2026-11-10"
+  ],
+  "n_rows": 90,
+  "frames": {
+   "prices": {
+    "cells": 62280,
+    "mismatches": 0,
+    "first": []
+   },
+   "volume_quote": {
+    "cells": 62280,
+    "mismatches": 0,
+    "first": []
+   },
+   "exec_prices": {
+    "cells": 62370,
+    "mismatches": 0,
+    "first": []
+   },
+   "exec_prices_alt": {
+    "cells": 62370,
+    "mismatches": 0,
+    "first": []
+   },
+   "live_at_print": {
+    "cells": 62370,
+    "mismatches": 0,
+    "first": []
+   },
+   "carry": {
+    "cells": 62370,
+    "mismatches": 0,
+    "first": []
+   },
+   "funding_obs": {
+    "cells": 62370,
+    "mismatches": 0,
+    "first": []
+   },
+   "settlement_row": {
+    "cells": 62370,
+    "mismatches": 0,
+    "first": []
+   },
+   "universe_mask": {
+    "cells": 62370,
+    "mismatches": 0,
+    "first": []
+   }
+  },
+  "instruments_rebuilt_from_hourly_and_funding": 261,
+  "symbols_with_daily_candles_in_store": 528,
+  "mismatches": 0,
+  "ok": true
+ },
+ "advance": {
+  "run_utc": "2026-11-10T19:47:14Z",
+  "panel_last_row": "2026-11-10T00:00:00Z",
+  "forward_start": null,
+  "forward_rows": 0,
+  "ledger_rows_before": 0,
+  "new_days": [],
+  "rows_appended": 0,
+  "arms": {
+   "primary": "P.CRYPTO.TREND",
+   "declared_members": 20,
+   "kept_members": 20,
+   "dropped_by_speed_limit": [],
+   "max_cost_sr": 0.12958489543320748,
+   "speed_limit_sr": 0.13
+  },
+  "instruments_ever_eligible": 317,
+  "kraken": {
+   "book_instruments": 317,
+   "mapped": 126,
+   "dropped_by_kind": {
+    "not_listed": 184,
+    "name": 7
+   },
+   "refused": null,
+   "terms_sha256": "e6db9509eaa2664e44182b597c85fe7bcf72a159b4b4c2de601e8a21c1ddcd6d",
+   "source": {
+    "kraken_instruments": {
+     "url": "https://futures.kraken.com/derivatives/api/v3/instruments",
+     "fetched_utc": "2026-11-10T20:02:10Z",
+     "sha256": "407a60d600abe317101e564c13f02a3094d6bf5ba9cb9fabe483476ba173499c",
+     "saved_as": "20261110T194714Z_instruments.json.gz"
+    },
+    "kraken_tickers": {
+     "url": "https://futures.kraken.com/derivatives/api/v3/tickers",
+     "fetched_utc": "2026-11-10T20:02:11Z",
+     "sha256": "535c980a164979b4626c539cd7e46059188bccfa51cbee7b66aecb3ce1d3ecc6",
+     "saved_as": "20261110T194714Z_tickers.json.gz"
+    }
+   }
+  },
+  "kraken_lot_changes": [],
+  "targets_now": {
+   "A60": {
+    "row": "2026-11-10",
+    "target_gross": 0.4110109705170324,
+    "target_net": -0.21598118805967825,
+    "n_targets": 30,
+    "kraken_unheld_share": 0.017856961495219315
+   },
+   "A30": {
+    "row": "2026-11-10",
+    "target_gross": 1.1623636964691013,
+    "target_net": -0.6766644088470639,
+    "n_targets": 30,
+    "kraken_unheld_share": 0.01516371460848831
+   },
+   "A120": {
+    "row": "2026-11-10",
+    "target_gross": 0.39520771035122293,
+    "target_net": -0.22721692304750343,
+    "n_targets": 30,
+    "kraken_unheld_share": 0.021839071628560247
+   },
+   "A0": {
+    "row": "2026-11-10",
+    "target_gross": 0.2320390559415563,
+    "target_net": -0.1361715775848498,
+    "n_targets": 30,
+    "kraken_unheld_share": 0.02432556751074222
+   },
+   "C252": {
+    "row": "2026-11-10",
+    "target_gross": 0.907950161347962,
+    "target_net": 0.5165264919870983,
+    "n_targets": 18,
+    "kraken_unheld_share": 0.05781252112152313
+   }
+  },
+  "status": "NO_FORWARD_ROW_YET"
+ },
+ "price_gap": [
+  {
+   "instrument": "1000PEPEUSDT",
+   "kraken_symbol": "PF_PEPEUSD",
+   "binance_price": 0.0053291,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 0.00523079,
+   "kraken_last_per_panel_unit": 0.005230299999999999,
+   "kraken_last_time": "2026-11-10T20:02:07.720477972Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -184.47767915783174,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "AAVEUSDT",
+   "kraken_symbol": "PF_AAVEUSD",
+   "binance_price": 123.3,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 123.3128602127,
+   "kraken_last_per_panel_unit": 123.3,
+   "kraken_last_time": "2026-11-10T20:02:07.743698902Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": 1.043001841039004,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "ADAUSDT",
+   "kraken_symbol": "PF_ADAUSD",
+   "binance_price": 0.1732,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 0.17336299552,
+   "kraken_last_per_panel_unit": 0.17337,
+   "kraken_last_time": "2026-11-10T20:02:04.936129334Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": 9.410826789839621,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "AVAXUSDT",
+   "kraken_symbol": "PF_AVAXUSD",
+   "binance_price": 8.254,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 8.24643454861,
+   "kraken_last_per_panel_unit": 8.242,
+   "kraken_last_time": "2026-11-10T20:01:55.416317632Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -9.165800084806053,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "BNBUSDT",
+   "kraken_symbol": "PF_BNBUSD",
+   "binance_price": 675.62,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 673.36222098179,
+   "kraken_last_per_panel_unit": 673.15,
+   "kraken_last_time": "2026-11-10T20:01:33.193978847Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -33.41788310307625,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "BTCUSDT",
+   "kraken_symbol": "PF_XBTUSD",
+   "binance_price": 73455.6,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 73328.0776348617,
+   "kraken_last_per_panel_unit": 73327.0,
+   "kraken_last_time": "2026-11-10T20:02:08.360024259Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -17.360468791802752,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "DOGEUSDT",
+   "kraken_symbol": "PF_DOGEUSD",
+   "binance_price": 0.06741,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 0.06723462738,
+   "kraken_last_per_panel_unit": 0.06724,
+   "kraken_last_time": "2026-11-10T20:02:07.732143359Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -26.015816644414656,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "ENAUSDT",
+   "kraken_symbol": "PF_ENAUSD",
+   "binance_price": 0.14897,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 0.14822132044,
+   "kraken_last_per_panel_unit": 0.14841,
+   "kraken_last_time": "2026-11-10T20:00:24.905081062Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -50.25706920856465,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "ETHUSDT",
+   "kraken_symbol": "PF_ETHUSD",
+   "binance_price": 2043.16,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 2039.99591649665,
+   "kraken_last_per_panel_unit": 2039.9,
+   "kraken_last_time": "2026-11-10T20:02:07.713982728Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -15.486224785872249,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "FILUSDT",
+   "kraken_symbol": "PF_FILUSD",
+   "binance_price": 0.7473,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 0.7438331515,
+   "kraken_last_per_panel_unit": 0.7436,
+   "kraken_last_time": "2026-11-10T20:01:27.817356033Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -46.39165663053668,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "HYPEUSDT",
+   "kraken_symbol": "PF_HYPEUSD",
+   "binance_price": 71.614,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 71.89405222848,
+   "kraken_last_per_panel_unit": 71.864,
+   "kraken_last_time": "2026-11-10T20:01:44.326802572Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": 39.105793347669064,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "INJUSDT",
+   "kraken_symbol": "PF_INJUSD",
+   "binance_price": 7.973,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 8.0467112281,
+   "kraken_last_per_panel_unit": 8.039,
+   "kraken_last_time": "2026-11-10T20:01:48.578479335Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": 92.45105744387195,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "LINKUSDT",
+   "kraken_symbol": "PF_LINKUSD",
+   "binance_price": 10.281,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 10.27112834652,
+   "kraken_last_per_panel_unit": 10.269,
+   "kraken_last_time": "2026-11-10T20:01:42.004100067Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -9.601841727459037,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "NEARUSDT",
+   "kraken_symbol": "PF_NEARUSD",
+   "binance_price": 3.591,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 3.55852127707,
+   "kraken_last_per_panel_unit": 3.5568,
+   "kraken_last_time": "2026-11-10T20:02:04.163405018Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -90.44478677248668,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "PUMPUSDT",
+   "kraken_symbol": "PF_PUMPUSD",
+   "binance_price": 0.003461,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 0.00342961253,
+   "kraken_last_per_panel_unit": 0.003432,
+   "kraken_last_time": "2026-11-10T20:00:25.250024164Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -90.68902051430294,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "SOLUSDT",
+   "kraken_symbol": "PF_SOLUSD",
+   "binance_price": 82.93,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 82.75330685979,
+   "kraken_last_per_panel_unit": 82.75,
+   "kraken_last_time": "2026-11-10T20:02:07.806382606Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -21.306299313880174,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "STRKUSDT",
+   "kraken_symbol": "PF_STRKUSD",
+   "binance_price": 0.03756,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 0.0376250068,
+   "kraken_last_per_panel_unit": 0.03768,
+   "kraken_last_time": "2026-11-10T20:00:25.020049074Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": 17.307454739083905,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "SUIUSDT",
+   "kraken_symbol": "PF_SUIUSD",
+   "binance_price": 0.8167,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 0.8151722884,
+   "kraken_last_per_panel_unit": 0.8153,
+   "kraken_last_time": "2026-11-10T20:02:04.329049734Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -18.70590914656467,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "TAOUSDT",
+   "kraken_symbol": "PF_TAOUSD",
+   "binance_price": 217.68,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 217.14814791032,
+   "kraken_last_per_panel_unit": 217.52,
+   "kraken_last_time": "2026-11-10T19:58:10.667553065Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -24.432749434031287,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "UNIUSDT",
+   "kraken_symbol": "PF_UNIUSD",
+   "binance_price": 6.688,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 6.69895620743,
+   "kraken_last_per_panel_unit": 6.696,
+   "kraken_last_time": "2026-11-10T20:01:24.458213175Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": 16.381889099881253,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "WLDUSDT",
+   "kraken_symbol": "PF_WLDUSD",
+   "binance_price": 0.3076,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 0.30627050689,
+   "kraken_last_per_panel_unit": 0.3066,
+   "kraken_last_time": "2026-11-10T20:01:15.255686485Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -43.22149252275587,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "XRPUSDT",
+   "kraken_symbol": "PF_XRPUSD",
+   "binance_price": 1.0716,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 1.06181468271,
+   "kraken_last_per_panel_unit": 1.0617,
+   "kraken_last_time": "2026-11-10T20:02:10.533363418Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -91.31501763718019,
+   "seconds_kraken_after_binance": 3730.684
+  },
+  {
+   "instrument": "ZECUSDT",
+   "kraken_symbol": "PF_ZECUSD",
+   "binance_price": 1037.25,
+   "binance_print_utc": "2026-11-10T19:00:00Z",
+   "kraken_mark_per_panel_unit": 1028.9492833868,
+   "kraken_last_per_panel_unit": 1029.31,
+   "kraken_last_time": "2026-11-10T20:02:08.937928487Z",
+   "kraken_server_time": "2026-11-10T20:02:10.684Z",
+   "mark_gap_bp": -80.0261905345856,
+   "seconds_kraken_after_binance": 3730.684
+  }
+ ],
+ "price_gap_basis": "No KRAKEN-5K position exists yet: the Kraken-listed instruments the five books target on the panel's last row.",
+ "message": "0 forward rows: the panel is current through 2026-11-10 and the forward-start row 2026-11-11 has no 01:00 print yet; nothing appended",
+ "seconds": 930.3
+}

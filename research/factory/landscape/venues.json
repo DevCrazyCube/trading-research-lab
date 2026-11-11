@@ -1,0 +1,2519 @@
+{
+ "schema": {
+  "version": 1,
+  "generated_utc": "2026-11-10",
+  "author": "research analyst (landscape task), for the FACTORY conductor",
+  "units": "fees and half-spreads in basis points of notional per side unless stated; financing in basis points per year; markup_bp = spread over the stated benchmark, paid by BOTH long and short (long pays benchmark + markup, short receives benchmark - markup) unless detail says otherwise",
+  "multi_class_fields": "fee_bp_taker, fee_bp_maker, min_fee_per_order, typical_half_spread_bp, financing_*_bp_year, min_order_notional and leverage_caps are objects keyed by instrument class or symbol when a venue offers several",
+  "labels": {
+   "VERIFIED": "read on 2026-11-10 on the venue's own page, legal PDF or public API (by me or by a sub-analyst who recorded a verbatim quote)",
+   "MEASURED": "one public order-book or funding snapshot/series taken on 2026-11-10 - a point-in-time observation, not a typical value",
+   "DERIVED": "arithmetic on VERIFIED or MEASURED inputs",
+   "CLAIM": "third party, search extract, or a marketing 'from' / worked-example figure",
+   "UNKNOWN": "not verified; the value is null"
+  },
+  "engine_tag": "suggested cost-provenance tag for research/factory data/costs/COSTS.json (MEASURED, VENDOR_SCHEDULE, LITERATURE, ASSUMED)",
+  "nl_eligible_type": "string, one of 'true' | 'false' | 'unknown'",
+  "null_convention": "null means not verified (UNKNOWN); it never means zero",
+  "caveat": "No account was opened and no order was placed. nl_eligible reflects the venue's own statements or a regulator register, not a completed onboarding.",
+  "contract_multipliers": "CLAIM - standard CME contract sizes (MES USD 5 x index, MNQ USD 2 x index, M6E EUR 12,500, M6B GBP 6,250, M6A AUD 10,000, MGC 10 oz, MCL 100 bbl, MBT 0.1 BTC) are from general knowledge; cmegroup.com did not answer automated requests"
+ },
+ "reference": {
+  "access_date": "2026-11-10",
+  "fx_reference": {
+   "source": "ECB euro foreign exchange reference rates, value date 2026-11-09",
+   "url": "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml",
+   "EURUSD": 1.1193,
+   "USDJPY": 157.947,
+   "GBPUSD": 1.3416,
+   "USDCHF": 0.8187,
+   "USDCAD": 1.4103,
+   "AUDUSD": 0.6894,
+   "NZDUSD": 0.5613,
+   "USDSEK": 9.824,
+   "USDNOK": 9.41
+  },
+  "level_proxies": {
+   "note": "scaling prices only (not tradeable prints): Hyperliquid xyz dex mark prices / Kraken order books, 2026-11-10 ~14:15 UTC",
+   "SP500": 7508.5,
+   "NDX": 27637.0,
+   "gold_usd_oz": 4056.0,
+   "wti_usd_bbl": 83.85,
+   "BTCUSD": 73900.0,
+   "SPY_token_usd": 748.3
+  },
+  "benchmarks_pct": {
+   "SOFR": {
+    "value": 3.88,
+    "date": "2026-11-09",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=SOFR"
+   },
+   "EFFR": {
+    "value": 3.88,
+    "date": "2026-11-06",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF"
+   },
+   "ESTR": {
+    "value": 2.442,
+    "date": "2026-11-09",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=ECBESTRVOLWGTTRMDMNRT"
+   },
+   "ECB_DFR": {
+    "value": 2.5,
+    "date": "2026-11-10",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=ECBDFR"
+   },
+   "IBKR_BM": {
+    "USD": 3.88,
+    "EUR": 2.529,
+    "GBP": 4.024,
+    "JPY": 1.17,
+    "CHF": -0.075,
+    "AUD": 4.85,
+    "CAD": 2.483,
+    "note": "DERIVED from IBKR's published 'rate (BM +/- x%)' strings",
+    "url": "https://www.interactivebrokers.ie/en/accounts/fees/pricing-interest-rates.php"
+   }
+  },
+  "eu_retail_cfd_rules": {
+   "leverage_caps": {
+    "fx_major": 30,
+    "fx_non_major_gold_major_index": 20,
+    "other_commodity_non_major_index": 10,
+    "single_equity_other": 5,
+    "crypto": 2
+   },
+   "margin_close_out": "50% of required initial margin, per account",
+   "negative_balance_protection": true,
+   "nl_instrument": "AFM decision of 18 April 2019 (in force 19 April 2019); AEX is not in the 20:1 list, so AEX CFDs fall under 10:1 (DERIVED)",
+   "url": "https://www.afm.nl/~/profmedia/files/onderwerpen/productinterventie/besluit-productinterventie-cfd.pdf",
+   "perpetual_futures_note": "ESMA statement of 24 Feb 2026 (ESMA35-243228190-8024): perpetual futures 'are likely to fall within the scope of the existing national product intervention measures on CFDs' - the 10x perp-style products below sit in tension with the 2:1 crypto cap; treat leverage and availability as revocable",
+   "label": "VERIFIED"
+  }
+ },
+ "venues": [
+  {
+   "venue_id": "ibkr_ie",
+   "name": "Interactive Brokers (Interactive Brokers Ireland Limited, IBIE)",
+   "legal_entity": "Interactive Brokers Ireland Limited, regulated by the Central Bank of Ireland (C423427), member of the Irish Investor Compensation Scheme",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "IBKR's EU page: 'Interactive Brokers Ireland Limited (IBIE) serving all EU and EEA residents'. Not tested by opening an account.",
+   "asset_classes": [
+    "fx_spot_conversion",
+    "fx_cfd",
+    "index_cfd",
+    "share_and_us_etf_cfd",
+    "metals_cfd",
+    "futures_incl_cme_micros",
+    "options",
+    "eu_stocks_ucits_etfs",
+    "crypto_spot_via_zerohash"
+   ],
+   "fee_bp_taker": {
+    "fx_spot": 0.2,
+    "fx_cfd": 0.2,
+    "index_cfd_us500_de40_uk100_us30": 0.5,
+    "index_cfd_ustech100_eu50_fr40_nl25": 1.0,
+    "share_cfd_eu": 5.0,
+    "share_etf_cfd_us": null,
+    "metals_cfd_gold": 1.5,
+    "metals_cfd_silver": 3.0,
+    "eu_stocks_etfs_tiered": 5.0,
+    "eu_stocks_etfs_fixed_smart": 5.0,
+    "crypto_spot": 18.0,
+    "futures": null
+   },
+   "fee_bp_maker": {
+    "fx_spot": 0.2,
+    "fx_cfd": 0.2,
+    "index_cfd_us500_de40_uk100_us30": 0.5,
+    "index_cfd_ustech100_eu50_fr40_nl25": 1.0,
+    "share_cfd_eu": 5.0,
+    "share_etf_cfd_us": null,
+    "metals_cfd_gold": 1.5,
+    "metals_cfd_silver": 3.0,
+    "eu_stocks_etfs_tiered": 5.0,
+    "eu_stocks_etfs_fixed_smart": 5.0,
+    "crypto_spot": 18.0,
+    "futures": null
+   },
+   "fee_model_note": "commission schedules, not maker/taker: maker = taker. Per-share and per-contract products are in fee_per_unit (fee_bp null).",
+   "fee_per_unit": {
+    "share_etf_cfd_us": {
+     "amount": 0.005,
+     "currency": "USD",
+     "per": "share"
+    },
+    "futures_usd_standard": {
+     "amount": 0.85,
+     "currency": "USD",
+     "per": "contract",
+     "plus": "exchange + regulatory fees (ES example: 0.85 + 1.38 + 0.00/0.01 = 2.24)"
+    },
+    "futures_micro_equity_MES_MNQ_M2K": {
+     "commission": 0.25,
+     "exchange": 0.35,
+     "regulatory": 0.01,
+     "all_in": 0.61,
+     "currency": "USD",
+     "per": "contract per side"
+    },
+    "futures_micro_fx_M6E_M6B_M6A_MJY_MSF_MCD": {
+     "commission": 0.15,
+     "exchange": 0.24,
+     "regulatory": 0.01,
+     "all_in": 0.4,
+     "currency": "USD",
+     "per": "contract per side"
+    },
+    "futures_micro_gold_MGC": {
+     "commission": 0.25,
+     "exchange": 0.7,
+     "regulatory": 0.01,
+     "all_in": 0.96,
+     "currency": "USD",
+     "per": "contract per side"
+    },
+    "futures_micro_crude_MCL": {
+     "commission": 0.25,
+     "exchange": 0.6,
+     "regulatory": 0.01,
+     "all_in": 0.86,
+     "currency": "USD",
+     "per": "contract per side"
+    },
+    "futures_micro_bitcoin_MBT": {
+     "commission": 0.85,
+     "exchange": 1.15,
+     "regulatory": 0.01,
+     "all_in": 2.01,
+     "currency": "USD",
+     "per": "contract per side"
+    },
+    "futures_micro_dax_micro_estx50": {
+     "commission": 0.25,
+     "exchange": 0.12,
+     "regulatory": 0.01,
+     "all_in": 0.38,
+     "currency": "EUR",
+     "per": "contract per side",
+     "note": "IBKR's own tiered example for Micro DAX"
+    }
+   },
+   "fee_bp_derived_at_reference_prices": {
+    "MES": {
+     "notional_usd": 37542.5,
+     "all_in_bp_per_side": 0.16
+    },
+    "MNQ": {
+     "notional_usd": 55274.0,
+     "all_in_bp_per_side": 0.11
+    },
+    "M6E": {
+     "notional_usd": 13991.25,
+     "all_in_bp_per_side": 0.29
+    },
+    "M6B": {
+     "notional_usd": 8385.0,
+     "all_in_bp_per_side": 0.48
+    },
+    "M6A": {
+     "notional_usd": 6894.0,
+     "all_in_bp_per_side": 0.58
+    },
+    "MGC": {
+     "notional_usd": 40560.0,
+     "all_in_bp_per_side": 0.24
+    },
+    "MCL": {
+     "notional_usd": 8385.0,
+     "all_in_bp_per_side": 1.03
+    },
+    "MBT": {
+     "notional_usd": 7390.0,
+     "all_in_bp_per_side": 2.72
+    },
+    "label": "DERIVED (fee / contract notional at the reference prices above); bid-ask spread not included"
+   },
+   "min_fee_per_order": {
+    "fx_spot": {
+     "amount": 2.0,
+     "currency": "USD"
+    },
+    "fx_cfd": {
+     "amount": 2.0,
+     "currency": "USD"
+    },
+    "index_cfd": {
+     "amount": 1.0,
+     "currency": "USD or EUR/GBP/CHF by index"
+    },
+    "share_etf_cfd_us": {
+     "amount": 1.0,
+     "currency": "USD"
+    },
+    "share_cfd_eu": {
+     "amount": 3.0,
+     "currency": "EUR"
+    },
+    "metals_cfd": {
+     "amount": 2.0,
+     "currency": "USD"
+    },
+    "eu_stocks_etfs_tiered": {
+     "amount": 1.25,
+     "currency": "EUR",
+     "max": 29.0,
+     "plus": "third-party exchange/clearing/regulatory fees"
+    },
+    "eu_stocks_etfs_fixed_smart": {
+     "amount": 3.0,
+     "currency": "EUR",
+     "max": 29.0
+    },
+    "crypto_spot": {
+     "amount": 1.75,
+     "currency": "USD",
+     "cap": "1% of trade value"
+    },
+    "futures": null
+   },
+   "typical_half_spread_bp": {
+    "fx_spot": null,
+    "fx_cfd": null,
+    "index_cfd": null,
+    "share_etf_cfd_us": null,
+    "futures": null,
+    "note": "UNKNOWN - not published as averages and not measurable without an account. IBKR markets FX quotes 'as narrow as 1/10 PIP'; its knowledge base (search extract, CLAIM) says odd lots below the USD 25,000 IDEALPRO minimum execute '1-2 basis points outside the IdealPro quote'."
+   },
+   "financing_long_bp_year": {
+    "fx_cfd_majors": {
+     "benchmark": "IBKR pair BM = BM(base ccy) - BM(quote ccy)",
+     "markup_bp": 200,
+     "detail": "long is CREDITED pair BM - 1.00% (tier I) - 1.00% retail add-on; e.g. EUR.USD pair BM -1.351% -> long pays 3.351%/yr"
+    },
+    "fx_cfd_mxn_zar": {
+     "benchmark": "IBKR pair BM",
+     "markup_bp": 250
+    },
+    "index_cfd": {
+     "benchmark": "IBKR BM of the contract currency",
+     "markup_bp": 250,
+     "detail": "BM + 1.5% + 1.0% retail add-on; USD long 6.38%/yr, EUR long 5.029%/yr"
+    },
+    "share_etf_cfd": {
+     "benchmark": "IBKR BM of the contract currency",
+     "markup_bp": 250,
+     "detail": "BM + 1.5% (below tier I) + 1.0% retail add-on"
+    },
+    "metals_cfd": {
+     "benchmark": "IBKR BM",
+     "markup_bp": 250,
+     "detail": "page text 'benchmark +/-1.5%' plus the 1% retail add-on (add-on stated on the share/index/forex pages; assumed to apply likewise)",
+     "label": "DERIVED"
+    },
+    "oil_cfd": {
+     "benchmark": null,
+     "markup_bp": 0,
+     "detail": "'Overnight financing does not apply to the Crude Oil CFDs as they reference perpetual rolling futures'"
+    },
+    "futures": {
+     "benchmark": "embedded in the futures price",
+     "markup_bp": 0,
+     "detail": "no financing charge; only an overnight position fee of USD 0.10/contract/day if the account just meets margin, 0.05 at 2x, 0 at >= 3x (E-micro FX: 0.01 / 0.005 / 0)"
+    },
+    "margin_loan_cash": {
+     "benchmark": "IBKR BM",
+     "markup_bp": 150,
+     "detail": "USD 0-100k: 5.380%; EUR 0-90k: 4.029%"
+    }
+   },
+   "financing_short_bp_year": {
+    "fx_cfd_majors": {
+     "benchmark": "IBKR pair BM",
+     "markup_bp": 200,
+     "detail": "short is DEBITED pair BM + 2.00%; e.g. EUR.USD short pays +0.649%/yr instead of receiving 1.351%"
+    },
+    "index_cfd": {
+     "benchmark": "IBKR BM",
+     "markup_bp": 250,
+     "detail": "short receives BM - 2.5% (USD 1.38%/yr, EUR 0.029%/yr)"
+    },
+    "share_etf_cfd": {
+     "benchmark": "IBKR BM",
+     "markup_bp": 250,
+     "detail": "short receives BM - 2.5% less any stock borrow fee"
+    },
+    "futures": {
+     "benchmark": "embedded in the futures price",
+     "markup_bp": 0
+    }
+   },
+   "cash_interest_threshold": {
+    "EUR": 10000,
+    "USD": 10000,
+    "GBP": 8000,
+    "JPY": 5000000,
+    "CHF": 100000,
+    "rate_above": "BM - 0.5% (USD 3.380%, EUR 2.029%), scaled down pro rata for accounts with NAV below USD 100,000",
+    "below_threshold_rate_pct": 0.0,
+    "ibkr_own_example": "NAV EUR 20,000 with EUR 5,000 cash earns 0.000%"
+   },
+   "min_order_notional": {
+    "fx_spot": null,
+    "fx_cfd": null,
+    "index_cfd": "1 unit x index level (IBUS500 ~ USD 7,500; IBDE40 ~ EUR 26,600)",
+    "share_etf_cfd_us": "1 share assumed (fractional CFDs UNKNOWN)",
+    "futures": "1 contract (see fee_bp_derived notionals)",
+    "eu_stocks_etfs": "fractional shares offered (tiered pricing, min EUR 1.25)"
+   },
+   "lot_step": "FX: IDEALPRO minimum USD 25,000; smaller orders are odd lots (CLAIM, IBKR KB via search extract). Index CFD: multiplier 1, minimum 1 unit. Futures: whole contracts.",
+   "leverage_caps": {
+    "fx_cfd_major": 30,
+    "fx_cfd_non_major": 20,
+    "index_cfd_major": 20,
+    "index_cfd_other": 10,
+    "share_etf_cfd": 5,
+    "futures": "exchange/IBKR margin, e.g. overnight initial USD: MES 2755.63, MNQ 4637.28, M2K 1178.70, M6E 543.56, M6B 293.76, M6A 268.46, MJY 437.03, MSF 621.01, MCD 217.02, MGC 2713.67, MCL 1625.00, MBT 3349.08",
+    "fx_spot_leveraged_for_eea_retail": "unknown (IBIE retail risk disclosure says IBIE 'may also offer spot trading of foreign currencies ... including on a leveraged basis'; introducing broker CapTrader says EEA residents can only use leverage via Forex CFDs)"
+   },
+   "negative_balance_protection": "CFDs: yes (CBI CFD measure). Futures / margin loans: no ('You may lose more than your initial investment').",
+   "shorting": "CFDs and futures: yes. US ETFs themselves cannot be bought by EEA retail (no KID) - 'They can however be traded as CFDs'.",
+   "paper_api": {
+    "available": true,
+    "url": "https://www.interactivebrokers.ie/en/trading/free-trial.php",
+    "note": "Free trial / paper account with delayed data (spot FX and metals not delayed). API use against a paper account is standard practice but was not re-verified on an IBKR page today (CLAIM)."
+   },
+   "api": {
+    "types": [
+     "TWS API (socket; open source GPL; Python among languages)",
+     "Web API (REST + WebSocket)",
+     "FIX (institutions)"
+    ],
+    "market_data": "free streaming Cboe One + IEX for US stocks/ETFs; 100 market-data lines via TWS or API; subscriptions need USD 500 equity; snapshots USD 0.01-0.03",
+    "note": "'directed API orders cannot use the Tiered fee structure. SmartRouted API orders can use either the Tiered or Fixed structure.'"
+   },
+   "python_lib": "ib_async 2.1.0 (PyPI upload 2025-12-08; community successor to ib_insync; needs a running IB Gateway/TWS); official ibapi ships with the TWS API download",
+   "bots_allowed": "yes - API automation is an advertised product ('Automate algorithmic trading strategies')",
+   "other_fees": {
+    "account_minimum_usd": 0,
+    "inactivity_fee_usd": 0,
+    "withdrawals": "two free per calendar month",
+    "auto_fx_conversion": "0.03% added to the rate, no commission"
+   },
+   "retail_restrictions": [
+    "Forecast (prediction) contracts: 'Available to MiFID professional clients only'",
+    "US-domiciled ETFs blocked for EEA retail (PRIIPs) - CFDs on them are offered",
+    "58.9% of retail investor accounts lose money when trading CFDs with IBKR"
+   ],
+   "provenance": [
+    {
+     "field": "nl_eligible / legal_entity",
+     "url": "https://www.interactivebrokers.eu/en/home.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "fee_bp_taker.fx_spot, min_fee_per_order.fx_spot, auto conversion",
+     "url": "https://www.interactivebrokers.ie/en/pricing/commissions-spot-currencies.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "fee_bp_taker.fx_cfd",
+     "url": "https://www.interactivebrokers.ie/en/pricing/commissions-cfd-forex.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "index CFD commissions, minimum 1 unit",
+     "url": "https://www.interactivebrokers.ie/en/pricing/commissions-cfd-index.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "share CFD commissions",
+     "url": "https://www.interactivebrokers.ie/en/pricing/commissions-cfd-share.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "metals CFD commissions",
+     "url": "https://www.interactivebrokers.ie/en/pricing/commissions-cfd-metals.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "financing fx_cfd (formula, retail +1%)",
+     "url": "https://www.interactivebrokers.ie/en/trading/ibkr-forex-cfds.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "financing fx_cfd per-pair table (EUR.USD pair BM -1.351, BM -/+ 1%)",
+     "url": "https://www.interactivebrokers.ie/webrest/interests/fxcfds",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "public JSON behind the page; 85 pairs; no KRW, INR, BRL, THB, TWD"
+    },
+    {
+     "field": "financing index_cfd",
+     "url": "https://www.interactivebrokers.ie/en/trading/ibkr-index-cfds.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "financing share_etf_cfd",
+     "url": "https://www.interactivebrokers.ie/en/trading/ibkr-share-cfds.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "US ETF CFDs for EEA retail; CFD product statements",
+     "url": "https://www.interactivebrokers.ie/en/trading/products-cfds.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "cash_interest_threshold",
+     "url": "https://www.interactivebrokers.ie/en/accounts/fees/pricing-interest-rates.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "margin loan rates",
+     "url": "https://www.interactivebrokers.ie/en/trading/margin-rates.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "futures commissions",
+     "url": "https://www.interactivebrokers.ie/en/pricing/commissions-futures.php?region=americas",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "CME exchange fees (micros)",
+     "url": "https://www.interactivebrokers.ie/en/accounts/fees/CME.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "COMEX / NYMEX exchange fees (MGC, MCL)",
+     "url": "https://www.interactivebrokers.ie/en/accounts/fees/COMEX.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "NYMEX: /accounts/fees/NYMEX.php"
+    },
+    {
+     "field": "overnight position fee",
+     "url": "https://www.interactivebrokers.ie/en/accounts/fees/overnight-position-fee-europe.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "futures margins",
+     "url": "https://www.interactivebrokers.ie/en/trading/margin-futures-fops.php?hm=eu&ex=us&rgt=0&rsk=1&pm=0&rst=040404040404040104",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "values change; snapshot of 2026-11-10"
+    },
+    {
+     "field": "retail CFD margins (shares 20%, index 5%/10%)",
+     "url": "https://www.interactivebrokers.ie/en/trading/margin-cfd.php?hm=eu&ex=eu&rgt=0&rsk=1&pm=0&rst=040404040404040104",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "EU stock/ETF commissions",
+     "url": "https://www.interactivebrokers.ie/en/pricing/commissions-stocks.php?region=europe",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "crypto commission, zerohash europe B.V.",
+     "url": "https://www.interactivebrokers.ie/en/pricing/commissions-crypto-assets.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "forecast contracts professional-only",
+     "url": "https://www.interactivebrokers.ie/en/pricing/commissions-events.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "account minimum, inactivity fee",
+     "url": "https://www.interactivebrokers.ie/en/accounts/required-minimums.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "withdrawals",
+     "url": "https://www.interactivebrokers.ie/en/pricing/other-fees.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "market data",
+     "url": "https://www.interactivebrokers.ie/en/pricing/market-data-pricing.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "api.types",
+     "url": "https://www.interactivebrokers.ie/en/trading/ib-api.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "paper_api",
+     "url": "https://www.interactivebrokers.ie/en/trading/free-trial.php",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "API-on-paper not stated on this page"
+    },
+    {
+     "field": "negative_balance_protection, leveraged spot FX wording",
+     "url": "https://gdcdyn.interactivebrokers.com/Universal/servlet/Registration_v2.formSampleView?formdb=4766",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "IBIE form 4766 dated 9 October 2026"
+    },
+    {
+     "field": "leverage_caps.fx_spot_leveraged_for_eea_retail (CapTrader statement)",
+     "url": "https://www.captrader.com/en/tradable-products/forex/",
+     "access_date": "2026-11-10",
+     "label": "CLAIM",
+     "note": "introducing broker, not IBIE itself"
+    },
+    {
+     "field": "lot_step (odd lots), PRIIPs KID rule",
+     "url": "https://ibkb.interactivebrokers.com/node/1459",
+     "access_date": "2026-11-10",
+     "label": "CLAIM",
+     "note": "IBKR knowledge base is a JavaScript app; read only as search-engine extracts (nodes 1459 and 2993)"
+    },
+    {
+     "field": "python_lib",
+     "url": "https://pypi.org/pypi/ib_async/json",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "typical_half_spread_bp",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "kraken_pro_spot",
+   "name": "Kraken Pro spot (crypto, fiat FX pairs, stable pairs, xStocks)",
+   "legal_entity": "Payward Europe Solutions Limited (Central Bank of Ireland, MiCA CASP authorised 25/06/2025, NL in passport list); xStocks and other financial instruments via Payward Europe Digital Solutions (CY) Limited (CySEC 342/17); spot margin via Payward Trading Ltd (BVI) - 'NOT REGULATED ACTIVITIES IN THE EEA'",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "ESMA MiCA register row with NL passport; public API returns 1,266 of 1,431 pairs for country_code=NL (USDT pairs excluded); fee page served in Dutch with an NL region selector. Not tested by opening an account.",
+   "asset_classes": [
+    "crypto_spot",
+    "fiat_fx_pairs",
+    "stablecoin_pairs",
+    "tokenized_us_stocks_etfs_xstocks"
+   ],
+   "fee_bp_taker": {
+    "crypto_spot": 80.0,
+    "fiat_fx_pairs": 20.0,
+    "stablecoin_pairs": 20.0,
+    "usdg_pairs": 1.0,
+    "xstocks": 8.0
+   },
+   "fee_bp_maker": {
+    "crypto_spot": 40.0,
+    "fiat_fx_pairs": 20.0,
+    "stablecoin_pairs": 20.0,
+    "usdg_pairs": 0.0,
+    "xstocks": 0.0
+   },
+   "fee_tiers": {
+    "crypto_spot": [
+     {
+      "min_30d_spot_usd": 0,
+      "maker_bp": 40,
+      "taker_bp": 80
+     },
+     {
+      "min_30d_spot_usd": 2500,
+      "maker_bp": 30,
+      "taker_bp": 60
+     },
+     {
+      "min_30d_spot_usd": 10000,
+      "or_assets_usd": 20000,
+      "maker_bp": 22,
+      "taker_bp": 38
+     },
+     {
+      "min_30d_spot_usd": 25000,
+      "or_assets_usd": 50000,
+      "maker_bp": 20,
+      "taker_bp": 35
+     },
+     {
+      "min_30d_spot_usd": 50000,
+      "or_assets_usd": 100000,
+      "maker_bp": 15,
+      "taker_bp": 30
+     },
+     {
+      "min_30d_spot_usd": 100000,
+      "or_assets_usd": 200000,
+      "maker_bp": 12,
+      "taker_bp": 25
+     }
+    ],
+    "fiat_fx_and_stable_pairs": [
+     {
+      "min_30d_spot_crypto_usd": 0,
+      "bp": 20
+     },
+     {
+      "min_30d_spot_crypto_usd": 50000,
+      "bp": 16
+     },
+     {
+      "min_30d_spot_crypto_usd": 100000,
+      "bp": 12
+     },
+     {
+      "min_30d_spot_crypto_usd": 250000,
+      "bp": 8
+     },
+     {
+      "min_30d_spot_crypto_usd": 500000,
+      "bp": 4
+     },
+     {
+      "min_30d_spot_crypto_usd": 1000000,
+      "bp": 2
+     }
+    ],
+    "note": "tier = best of 30-day spot volume, 30-day futures volume or assets on platform; a futures tier also lowers spot fees; '-0.02%' discount on selected spot pairs"
+   },
+   "min_fee_per_order": null,
+   "typical_half_spread_bp": {
+    "EURUSD": 0.09,
+    "GBPUSD": 0.37,
+    "USDJPY": 117.4,
+    "USDCEUR": 0.56,
+    "XBTEUR": 0.06,
+    "XBTUSD": 0.007,
+    "SPYx": 0.2,
+    "QQQx": 0.15,
+    "GLDx": 0.13,
+    "NVDAx": 0.57,
+    "IWMx": 50.5,
+    "SLVx": 99.2,
+    "VGKx": 102.7,
+    "XLEx": 54.7,
+    "label": "MEASURED - single order-book snapshot 2026-11-10 13:50-13:52 UTC (xStocks in US pre-market)",
+    "depth_note": "EURUSD: EUR 5,000 costs ~0.3 bp from mid, EUR 25,000 ~0.4-0.5 bp; 24h volume EUR 33.7M. GLDx: USD 5,000 costs ~3 bp."
+   },
+   "financing_long_bp_year": {
+    "fiat_fx_pairs": {
+     "benchmark": null,
+     "markup_bp": null,
+     "detail": "unlevered spot: no financing, and NO carry is earned - EEA Terms: 'Any Fiat Currency held in your Kraken E-Money Wallet will not expire, but it will not earn interest'"
+    },
+    "spot_margin": {
+     "benchmark": null,
+     "markup_bp": null,
+     "detail": "opening fee 0.01-0.02% (BTC) / 0.02-0.04% (ETH and others) plus the same rollover every 4 hours = roughly 22-88%/yr; margin is closed to consumers anyway"
+    }
+   },
+   "financing_short_bp_year": {
+    "fiat_fx_pairs": {
+     "benchmark": null,
+     "markup_bp": null,
+     "detail": "no margin on FX pairs (leverage_buy/sell empty): a 'short EUR/USD' is only possible by holding USD instead of EUR"
+    }
+   },
+   "cash_interest_threshold": {
+    "fiat_rate_pct": 0.0,
+    "note": "fiat in the Kraken E-Money Wallet 'will not earn interest' (EEA Terms); the Opt-In Rewards Program covers idle crypto-asset balances only"
+   },
+   "min_order_notional": {
+    "EURUSD": {
+     "amount": 4,
+     "currency": "EUR",
+     "costmin_usd": 0.5
+    },
+    "XBTEUR": {
+     "amount_btc": 6e-05,
+     "costmin_eur": 0.45
+    },
+    "USDCEUR": {
+     "amount": 5,
+     "currency": "USDC"
+    },
+    "xstocks": {
+     "costmin_usd": 0.5
+    }
+   },
+   "lot_step": "8 lot decimals; EURUSD tick 0.00001",
+   "universe_notes": {
+    "fiat_fx_pairs": [
+     "AUDJPY",
+     "AUDUSD",
+     "EURAUD",
+     "EURCAD",
+     "EURCHF",
+     "EURGBP",
+     "EURJPY",
+     "EURUSD",
+     "GBPUSD",
+     "USDCAD",
+     "USDCHF",
+     "USDJPY"
+    ],
+    "missing_for_g10": [
+     "NZD",
+     "SEK",
+     "NOK"
+    ],
+    "usdt_pairs_for_nl": false,
+    "xstocks": "177 tokenized pairs, all USD-quoted (SPYx, QQQx, IWMx, GLDx, SLVx, VGKx, EWGx, EWUx, EWYx, XLEx, SGOVx, VTIx, VOOx ...); only SPYx/QQQx/GLDx and large single names had tight books"
+   },
+   "leverage_caps": {
+    "fiat_fx_pairs": 1,
+    "crypto_spot_margin_pair_level": 10,
+    "xstocks_margin_pair_level": 3,
+    "note": "EEA Terms Part K: 'Consumers are not eligible to receive Margin Extensions' - margin only for individuals acting for business/trade/profession"
+   },
+   "shorting": "no for a consumer (no margin); use Kraken Derivatives instead",
+   "paper_api": {
+    "available": null,
+    "url": null,
+    "note": "no spot sandbox found (UNKNOWN)"
+   },
+   "api": {
+    "types": [
+     "REST",
+     "WebSocket",
+     "FIX"
+    ],
+    "note": "public AssetPairs no longer returns fee schedules (fees arrays empty); xStocks order-book/API trading for EEA clients is disputed between an older support text and newer Kraken posts (OPEN QUESTION)"
+   },
+   "python_lib": "python-kraken-sdk 3.5.1 (community, PyPI 2026-09-28); ccxt 4.5.92",
+   "bots_allowed": "yes - 'API Trading' is a listed Kraken product; EEA Terms s.11.5 only bars bots/scrapers against site content and unapproved third-party apps",
+   "provenance": [
+    {
+     "field": "fee_bp_taker, fee_bp_maker, fee_tiers, margin fees, entities",
+     "url": "https://www.kraken.com/pro/fees",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "page fetched from an NL IP, Dutch version"
+    },
+    {
+     "field": "universe_notes, min_order_notional, leverage per pair, NL pair availability",
+     "url": "https://api.kraken.com/0/public/AssetPairs?country_code=NL",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "also ?aclass_base=tokenized_asset"
+    },
+    {
+     "field": "typical_half_spread_bp",
+     "url": "https://api.kraken.com/0/public/Depth",
+     "access_date": "2026-11-10",
+     "label": "MEASURED",
+     "engine_tag": "MEASURED",
+     "note": "Depth + Ticker, 2026-11-10 13:50-13:52 UTC"
+    },
+    {
+     "field": "leverage_caps.note (consumers not eligible for margin), entity roles",
+     "url": "https://www.kraken.com/legal/eea-terms",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "EEA Terms effective 14 October 2026"
+    },
+    {
+     "field": "legal_entity (MiCA, NL passport)",
+     "url": "https://www.esma.europa.eu/sites/default/files/2024-12/CASPS.csv",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "xStocks EEA rules (questionnaire, fiat only, 3x list)",
+     "url": "https://support.kraken.com/articles/xstocks-availability",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "article updated 18 June 2026"
+    },
+    {
+     "field": "xStocks via Pro order books / API for EEA",
+     "url": "https://support.kraken.com/articles/xstocks-availability",
+     "access_date": "2026-11-10",
+     "label": "CLAIM",
+     "note": "search extract of an older version says order-book trading is not available to EEA clients on Kraken Pro or the API; the current article does not say this"
+    },
+    {
+     "field": "US-listed stocks for EEA since 18 Aug 2026 (PEDSL-CY, commission-free, app + Pro; API not mentioned)",
+     "url": "https://blog.kraken.com/product/equities/announcing-us-listed-stock-trading-for-eea-customers",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "python_lib",
+     "url": "https://pypi.org/pypi/python-kraken-sdk/json",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "cash_interest_threshold (no interest on fiat)",
+     "url": "https://www.kraken.com/legal/eea-terms",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "spot sandbox",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "kraken_derivatives_eea",
+   "name": "Kraken Derivatives for EEA clients (Kraken Futures)",
+   "legal_entity": "Payward Europe Digital Solutions (CY) Limited (formerly I.F. Greenfields Wealth Ltd), CySEC licence 342/17 (MiFID II)",
+   "nl_eligible": "unknown",
+   "nl_eligible_basis": "Kraken's EEA eligibility article requires a fully verified retail account, a knowledge questionnaire and a tax ID, and refers to 'geographic requirements' without listing countries. The futures API lists no instrument banned for NL. Netherlands not confirmed by name.",
+   "asset_classes": [
+    "crypto_perps",
+    "crypto_dated_futures",
+    "commodity_perps",
+    "index_perp_us100",
+    "xstock_and_equity_perps"
+   ],
+   "fee_bp_taker": {
+    "all_perps_and_futures": 5.0,
+    "kraken_app_perps_consumer_schedule": 25.0
+   },
+   "fee_bp_maker": {
+    "all_perps_and_futures": 2.0,
+    "kraken_app_perps_consumer_schedule": 25.0
+   },
+   "fee_tiers": [
+    {
+     "min_30d_futures_usd": 0,
+     "maker_bp": 2.0,
+     "taker_bp": 5.0
+    },
+    {
+     "min_30d_futures_usd": 5000000,
+     "maker_bp": 1.75,
+     "taker_bp": 4.5
+    }
+   ],
+   "min_fee_per_order": null,
+   "typical_half_spread_bp": {
+    "PF_XBTUSD": 0.07,
+    "PF_ETHUSD": 0.24,
+    "PF_SOLUSD": 0.6,
+    "PF_XAUUSD": 1.9,
+    "PF_XAGUSD": 3.2,
+    "PF_WTIOILUSD": 3.8,
+    "PF_BRENTOILUSD": 10.8,
+    "PF_US100USD": 4.5,
+    "PF_SPYXUSD": 1.3,
+    "PF_QQQXUSD": 1.5,
+    "PF_GLDXUSD": 4.0,
+    "PF_EWYUSD": 32.2,
+    "PF_EWZUSD": 16.9,
+    "label": "MEASURED - top of book from the public tickers endpoint, 2026-11-10 13:52 UTC"
+   },
+   "financing_long_bp_year": {
+    "mechanism": "hourly funding; long pays when positive",
+    "measured_mean_last_365d_bp": {
+     "PF_XBTUSD": 366,
+     "PF_ETHUSD": 379,
+     "PF_SOLUSD": 66
+    },
+    "measured_mean_since_listing_bp": {
+     "PF_XAUUSD": {
+      "bp": 1741,
+      "since": "2026-08-05"
+     },
+     "PF_US100USD": {
+      "bp": 6487,
+      "since": "2026-08-25"
+     },
+     "PF_SPYXUSD": {
+      "bp": -2542,
+      "since": "2025-12-17"
+     },
+     "PF_QQQXUSD": {
+      "bp": -2388,
+      "since": "2025-12-17"
+     },
+     "PF_WTIOILUSD": {
+      "bp": -1201,
+      "since": "2026-05-28"
+     }
+    },
+    "measured_mean_last_90d_bp": {
+     "PF_XBTUSD": 836,
+     "PF_ETHUSD": 778,
+     "PF_SOLUSD": 613,
+     "PF_SPYXUSD": 1849,
+     "PF_QQQXUSD": 1526
+    },
+    "mean_abs_rate_bp": {
+     "PF_XBTUSD": 646,
+     "PF_ETHUSD": 683,
+     "PF_SOLUSD": 1188,
+     "PF_XAUUSD": 2671,
+     "PF_US100USD": 13655,
+     "PF_SPYXUSD": 8292
+    },
+    "label": "MEASURED - mean of hourly relativeFundingRate x 8760 from the public historical funding endpoint",
+    "reading": "crypto majors: a few %/yr; commodity / index / xStock perps: funding is large and unstable - not usable for multi-day holding"
+   },
+   "financing_short_bp_year": {
+    "mechanism": "short receives what long pays (same measured series with opposite sign)"
+   },
+   "cash_interest_threshold": null,
+   "min_order_notional": {
+    "PF_XBTUSD": "0.0001 BTC (~USD 7)",
+    "note": "contractValueTradePrecision 4 (BTC), 3 (ETH), 2 (SOL); no minimum fee"
+   },
+   "lot_step": "contract size 1 unit of base; precision per instrument from the public instruments endpoint",
+   "leverage_caps": {
+    "eea_retail": 10,
+    "detail": "margin schedule 'europa' retail: initial margin 10%, maintenance 5% at tier I for BTC, ETH, SOL, DOGE, XAU, US100, SPYx, WTI; Kraken article: Tier I 10x, II 5x, III 3.33x, IV 2x",
+    "fx_perps": "PF_EURUSD / PF_GBPUSD / PF_CHFUSD are NOT permitted on the EEA platform (platformsPermitted = payward_digital_solutions only) and are illiquid"
+   },
+   "negative_balance_protection": null,
+   "shorting": "yes",
+   "paper_api": {
+    "available": true,
+    "url": "https://demo-futures.kraken.com",
+    "note": "separate from production; no existing account needed; email and password auto-generated; API keys can be generated"
+   },
+   "api": {
+    "types": [
+     "REST https://futures.kraken.com/derivatives/api/v3/",
+     "WebSocket wss://futures.kraken.com/ws/v1",
+     "FIX"
+    ],
+    "history": "charts API /api/charts/v1; historical funding /derivatives/api/v4/historicalfundingrates (about one year)"
+   },
+   "python_lib": "python-kraken-sdk 3.5.1 (covers Futures REST/WS); ccxt 'krakenfutures'",
+   "bots_allowed": "yes",
+   "provenance": [
+    {
+     "field": "fee_bp_taker, fee_bp_maker, fee_tiers",
+     "url": "https://www.kraken.com/pro/fees",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "fee schedules (cross-check), consumer schedule",
+     "url": "https://futures.kraken.com/derivatives/api/v3/feeschedules",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "instruments, platformsPermitted, marginSchedules.europa.retail, countriesBanned",
+     "url": "https://futures.kraken.com/derivatives/api/v3/instruments",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "219 instruments on 2026-11-10; reading 'europa' as the EEA platform is an inference supported by the Kraken margin article"
+    },
+    {
+     "field": "typical_half_spread_bp",
+     "url": "https://futures.kraken.com/derivatives/api/v3/tickers",
+     "access_date": "2026-11-10",
+     "label": "MEASURED",
+     "engine_tag": "MEASURED"
+    },
+    {
+     "field": "financing (funding history)",
+     "url": "https://futures.kraken.com/derivatives/api/v4/historicalfundingrates?symbol=PF_XBTUSD",
+     "access_date": "2026-11-10",
+     "label": "MEASURED",
+     "engine_tag": "MEASURED"
+    },
+    {
+     "field": "leverage_caps.eea_retail (Tier I 10x)",
+     "url": "https://support.kraken.com/articles/derivatives-margin-schedule-and-maximum-leverage-eea",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "article updated 30 October 2026"
+    },
+    {
+     "field": "eligibility (verification, questionnaire, tax ID), entity",
+     "url": "https://support.kraken.com/articles/derivatives-eligibility-requirements-eea",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "article updated 10 December 2025"
+    },
+    {
+     "field": "paper_api",
+     "url": "https://docs.kraken.com/api/docs/guides/futures-introduction",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "negative_balance_protection",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN",
+     "note": "EEA Terms mention a Liquidity Pool covering negative collateral balances; no retail NBP statement found"
+    },
+    {
+     "field": "nl_eligible",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "trading212_invest",
+   "name": "Trading 212 Invest (public API, beta)",
+   "legal_entity": "Trading 212 EU GmbH (BaFin, German Securities Trading Act) for residents of NL, DE, AT, LU, DK, NO, FI, PT, FR, ES, IS, SE, IE, CH, LI",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "Trading 212 help centre 'What are the supported countries?' (updated 2026-11-09) lists the Netherlands under Trading 212 EU GmbH. Not tested by opening an account.",
+   "asset_classes": [
+    "stocks",
+    "ucits_etfs",
+    "etcs_etns"
+   ],
+   "fee_bp_taker": {
+    "stocks_etfs": 0.0,
+    "fx_fee_when_instrument_currency_differs": 15.0
+   },
+   "fee_bp_maker": {
+    "stocks_etfs": 0.0
+   },
+   "min_fee_per_order": {
+    "amount": 0.0,
+    "currency": "EUR"
+   },
+   "typical_half_spread_bp": {
+    "ucits_etfs": null,
+    "note": "UNKNOWN - no market-data endpoint in the API; fractional orders are executed internally 'matching the price for whole shares on the reference exchange. No spread is applied.'"
+   },
+   "financing_long_bp_year": {
+    "benchmark": null,
+    "markup_bp": 0,
+    "detail": "unlevered cash account; only the fund's own TER"
+   },
+   "financing_short_bp_year": null,
+   "cash_interest_threshold": {
+    "minimum_balance": 0,
+    "rate_pct": null,
+    "eur_cap": 100000,
+    "note": "interest paid on uninvested cash with no minimum balance; EUR balances above EUR 100,000 earn 0% from 3 December 2026 (EU GmbH); the rate itself sits on the terms page, which blocks automated clients (UNKNOWN)"
+   },
+   "min_order_notional": null,
+   "lot_step": "fractional quantities; API orders by QUANTITY only ('Placing orders by value is not currently supported via the API'); sell = negative quantity; max 50 pending orders per ticker",
+   "leverage_caps": {
+    "invest": 1
+   },
+   "shorting": "no (Invest account); the CFD account is not covered by the API",
+   "paper_api": {
+    "available": true,
+    "url": "https://demo.trading212.com/api/v0",
+    "note": "live: https://live.trading212.com/api/v0; separate keys for demo and live"
+   },
+   "api": {
+    "types": [
+     "REST"
+    ],
+    "auth": "HTTP Basic (API key : API secret)",
+    "order_types_live": [
+     "market",
+     "limit",
+     "stop",
+     "stop-limit"
+    ],
+    "endpoints": [
+     "account summary",
+     "instruments + exchange schedules (metadata)",
+     "orders",
+     "positions",
+     "history: orders, dividends, transactions, CSV export",
+     "pies (deprecated)"
+    ],
+    "market_data": "none - no quotes, prices or candles endpoint",
+    "limits": "per account, per endpoint (examples: get order by id 1 req / 1 s; one order endpoint 1 req / 5 s); 'Orders can be executed only in the primary account currency'; multi-currency accounts not supported",
+    "status": "beta"
+   },
+   "python_lib": null,
+   "python_lib_note": "no official SDK; PyPI wrappers 'trading212' (2021) and 'pytrading212' (2024) are unofficial and stale - call the REST API directly",
+   "bots_allowed": "yes via the official API after accepting its risk warning; API terms exist (not read)",
+   "provenance": [
+    {
+     "field": "api.*, paper_api, lot_step",
+     "url": "https://docs.trading212.com/api",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "api.order_types_live",
+     "url": "https://helpcentre.trading212.com/hc/en-us/articles/14584770928157-Trading-212-API-key",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "updated 2026-11-06"
+    },
+    {
+     "field": "fee_bp_taker",
+     "url": "https://helpcentre.trading212.com/hc/en-us/articles/11471996799517-What-are-the-fees-in-the-Invest-ISAs-and-SIPP",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "'FX fee: 0.15%; Trading commission: Free; Custody Fee: Free' (updated 2026-10-31)"
+    },
+    {
+     "field": "legal_entity / nl_eligible",
+     "url": "https://helpcentre.trading212.com/hc/en-us/articles/12933782261917-What-are-the-supported-countries",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "cash_interest_threshold",
+     "url": "https://helpcentre.trading212.com/hc/en-us/articles/15475153380637-How-can-I-start-earning-interest-on-my-cash",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "typical_half_spread_bp (fractional execution statement)",
+     "url": "https://helpcentre.trading212.com/hc/en-us/articles/9511997937437-Can-I-trade-with-fractional-shares",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "terms and fees page",
+     "url": "https://www.trading212.com/terms/invest",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN",
+     "note": "HTTP 403 to automated clients"
+    },
+    {
+     "field": "min_order_notional",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "bitvavo",
+   "name": "Bitvavo",
+   "legal_entity": "Bitvavo B.V. (Amsterdam), MiCA CASP authorised by the AFM on 26/06/2025",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "Dutch entity, AFM-authorised; ESMA register row.",
+   "asset_classes": [
+    "crypto_spot",
+    "stablecoin_pairs",
+    "spot_margin (eligibility unknown)"
+   ],
+   "fee_bp_taker": {
+    "crypto_spot_eur_markets": 25.0,
+    "usdc_quoted_markets": 5.0,
+    "stable_pairs_usdc_eur_eurc_usdc": 10.0,
+    "eurc_eur": 1.0
+   },
+   "fee_bp_maker": {
+    "crypto_spot_eur_markets": 15.0,
+    "usdc_quoted_markets": 5.0,
+    "stable_pairs_usdc_eur_eurc_usdc": 10.0,
+    "eurc_eur": 0.0
+   },
+   "fee_tiers": {
+    "crypto_spot_eur_markets": [
+     {
+      "min_30d_eur": 0,
+      "maker_bp": 15,
+      "taker_bp": 25
+     },
+     {
+      "min_30d_eur": 100000,
+      "maker_bp": 10,
+      "taker_bp": 20
+     },
+     {
+      "min_30d_eur": 250000,
+      "maker_bp": 9,
+      "taker_bp": 18
+     },
+     {
+      "min_30d_eur": 500000,
+      "maker_bp": 8,
+      "taker_bp": 16
+     }
+    ],
+    "note": "stablecoin-pair trades do not count toward the volume tier"
+   },
+   "min_fee_per_order": null,
+   "typical_half_spread_bp": {
+    "BTC-EUR": 0.08,
+    "ETH-EUR": 0.03,
+    "SOL-EUR": 0.47,
+    "USDC-EUR": 0.56,
+    "EURC-EUR": 7.0,
+    "EURC-USDC": 50.5,
+    "BTC-USDC": 0.95,
+    "ETH-USDC": 2.1,
+    "label": "MEASURED - top of book from the public ticker endpoint, 2026-11-10 14:12 UTC"
+   },
+   "financing_long_bp_year": {
+    "spot": {
+     "benchmark": null,
+     "markup_bp": 0
+    },
+    "margin_borrow": {
+     "benchmark": "fixed",
+     "markup_bp": 2015,
+     "detail": "0.0023% per hour for each listed asset = 20.1%/yr; 2% liquidation fee"
+    }
+   },
+   "financing_short_bp_year": {
+    "margin_borrow": {
+     "benchmark": "fixed",
+     "markup_bp": 2015
+    }
+   },
+   "cash_interest_threshold": null,
+   "min_order_notional": {
+    "amount": 5.0,
+    "currency": "EUR (or 5 USDC)"
+   },
+   "lot_step": "quantityDecimals per market (BTC-EUR min 0.00007294 BTC at snapshot)",
+   "leverage_caps": {
+    "spot": 1,
+    "margin": null
+   },
+   "shorting": "only through margin trading; who may use it is UNKNOWN (fee page lists margin terms; CoinMarketCap profile claims up to 10x)",
+   "paper_api": {
+    "available": null,
+    "url": null,
+    "note": "no sandbox mentioned in the docs read (UNKNOWN)"
+   },
+   "api": {
+    "types": [
+     "REST https://api.bitvavo.com/v2",
+     "WebSocket"
+    ],
+    "limits": "1000 weight points per minute; exceeding blocks the key 1 minute (IP 15 minutes)",
+    "markets": 436,
+    "quotes": [
+     "EUR",
+     "USDC"
+    ]
+   },
+   "python_lib": "python-bitvavo-api 1.4.3 (official, PyPI 2025-05-14); ccxt 4.5.92",
+   "bots_allowed": "API offered to all clients (terms not read)",
+   "other_fees": {
+    "sepa_ideal_deposit": "free",
+    "eur_withdrawal": null
+   },
+   "provenance": [
+    {
+     "field": "fee_bp_*, fee_tiers, margin terms, entity",
+     "url": "https://bitvavo.com/en/fees",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "read through the summarising fetcher; numbers are consistent with the API feeCategory fields"
+    },
+    {
+     "field": "min_order_notional, markets, order types",
+     "url": "https://api.bitvavo.com/v2/markets",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "typical_half_spread_bp",
+     "url": "https://api.bitvavo.com/v2/ticker/book",
+     "access_date": "2026-11-10",
+     "label": "MEASURED",
+     "engine_tag": "MEASURED"
+    },
+    {
+     "field": "api.limits",
+     "url": "https://docs.bitvavo.com/docs/rate-limits/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "legal_entity",
+     "url": "https://www.esma.europa.eu/sites/default/files/2024-12/CASPS.csv",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "python_lib",
+     "url": "https://pypi.org/pypi/python-bitvavo-api/json",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "shorting / margin eligibility",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "pepperstone_eu_ctrader",
+   "name": "Pepperstone EU - Razor account on cTrader (cTrader Open API)",
+   "legal_entity": "Pepperstone EU Limited, Cyprus, CySEC licence 388/20",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "CySEC register lists the Netherlands in the cross-border list; the site excludes only Belgium, Spain and the US. Not tested by opening an account. (IC Markets EU 362/18 and FP Markets EU 371/18 are equivalent cTrader routes.)",
+   "asset_classes": [
+    "fx_cfd",
+    "index_cfd",
+    "commodity_cfd",
+    "share_etf_cfd",
+    "crypto_cfd",
+    "forward_cfds"
+   ],
+   "fee_bp_taker": {
+    "fx_cfd_razor_ctrader": 0.27,
+    "index_cfd": 0.0,
+    "share_etf_cfd": "7 to 20 bp per side"
+   },
+   "fee_bp_maker": {
+    "fx_cfd_razor_ctrader": 0.27,
+    "index_cfd": 0.0,
+    "share_etf_cfd": "7 to 20 bp per side"
+   },
+   "fee_model_note": "commission per lot, not maker/taker: maker = taker",
+   "fee_per_unit": {
+    "fx_cfd_razor_ctrader": {
+     "amount": 3.0,
+     "currency": "USD",
+     "per": "standard lot (100,000 base units) per side",
+     "note": "MT4/MT5 EUR account: EUR 2.60 per lot per side; 'commission will round up to US$0.04 per 0.01 lot'"
+    }
+   },
+   "min_fee_per_order": {
+    "amount": 0.04,
+    "currency": "USD",
+    "note": "effective minimum from rounding at 0.01 lot"
+   },
+   "typical_half_spread_bp": {
+    "EURUSD_razor": 0.045,
+    "GBPUSD_razor": 0.075,
+    "USDJPY_razor": 0.063,
+    "EURUSD_standard": 0.49,
+    "US500_razor": 0.26,
+    "GER40_razor": 0.19,
+    "NAS100_razor": null,
+    "label": "VENDOR_SCHEDULE - broker-published AVERAGE spreads for 01/08/2026-31/08/2026 (EURUSD 0.1 pip, GBPUSD 0.2, USDJPY 0.2, US500 0.4 pt, GER40 1.0 pt), converted at the reference prices; not measured",
+    "peer_brokers": {
+     "ic_markets_eu_raw_avg_pips": {
+      "EURUSD": 0.06,
+      "GBPUSD": 0.26,
+      "USDJPY": 0.22,
+      "DE40_pt": 1.46,
+      "US500_pt": 0.36
+     },
+     "fp_markets_eu_raw_avg_pips": {
+      "EURUSD": 0.16,
+      "GBPUSD": 0.46,
+      "USDJPY": 0.52,
+      "GER40_pt": 1.54,
+      "US500_pt": 0.25
+     }
+    }
+   },
+   "all_in_round_trip_bp_derived": {
+    "EURUSD_razor_ctrader": 0.63,
+    "GBPUSD_razor_ctrader": 0.6,
+    "USDJPY_razor_ctrader": 0.73,
+    "GER40_razor": 0.38,
+    "US500_razor": 0.53,
+    "label": "DERIVED by the FX/CFD sub-analyst: average spread + 2 x commission, before slippage"
+   },
+   "financing_long_bp_year": {
+    "fx_cfd": {
+     "benchmark": "liquidity providers' tom-next",
+     "markup_bp": null,
+     "detail": "'Number of nights held x (TomNext including funding fee) x trade size'; the funding fee is stated relative to the tom-next points, annual equivalent not established (UNKNOWN). Peers, DERIVED from today's swap points: IC Markets EUR/USD about 109 bp/yr each side, FP Markets about 58 bp/yr"
+    },
+    "index_cfd": {
+     "benchmark": "ARR (alternative reference rate of the index currency), /360",
+     "markup_bp": 250
+    },
+    "commodity_cfd": {
+     "benchmark": "futures basis",
+     "markup_bp": 250,
+     "detail": "CFD mid x 2.5% / 365 added to the basis"
+    },
+    "forward_cfds": {
+     "benchmark": "carry inside the forward price",
+     "markup_bp": 0,
+     "detail": "'with forward CFDs there is no overnight funding' (GER40, US500, NAS100, crude, gold; MT5 and cTrader); forward spreads UNKNOWN"
+    }
+   },
+   "financing_short_bp_year": {
+    "index_cfd": {
+     "benchmark": "ARR",
+     "markup_bp": 250,
+     "detail": "'If you're long, you pay ARR. If you're short, you receive it' less the 2.5% charge"
+    }
+   },
+   "cash_interest_threshold": null,
+   "min_order_notional": {
+    "fx_cfd": {
+     "amount": 1000,
+     "currency": "base currency units (0.01 lot)",
+     "note": "'you can typically trade from as low as 0.01 lots' - EUR 1,000 notional on EUR/USD, margin EUR 33.30"
+    },
+    "index_cfd": null
+   },
+   "lot_step": "0.01 lot (1,000 base units) on FX; index/commodity minimums vary by instrument (UNKNOWN)",
+   "leverage_caps": {
+    "fx_major": 30,
+    "fx_minor_gold_major_index": 20,
+    "commodity_minor_index": 10,
+    "shares": 5,
+    "crypto": 2
+   },
+   "negative_balance_protection": "yes for retail (AFM/ESMA CFD rules)",
+   "shorting": "yes",
+   "paper_api": {
+    "available": true,
+    "url": "demo.ctraderapi.com:5035 (cTrader Open API demo host)",
+    "note": "cTrader demo accounts expire after 90 days of inactivity; the Open API application must be registered and approved by Spotware; live host live.ctraderapi.com:5035"
+   },
+   "api": {
+    "types": [
+     "cTrader Open API (Protobuf/JSON over TCP/WebSocket, OAuth2)",
+     "cTrader Automate (C#)",
+     "MT4/MT5 (Windows terminal)"
+    ],
+    "limits": "50 requests/s per connection (non-historical), 5 requests/s (historical)",
+    "history": "trend bars M1..MN1, bid/ask ticks on request; depth set by the broker (UNKNOWN)",
+    "note": "the MetaTrader5 Python package ships win_amd64 wheels only"
+   },
+   "python_lib": "ctrader-open-api 0.9.2 (Spotware, PyPI 2024-06-26; pure Python but stale: pins protobuf 3.20.1 / Twisted 24.3.0, last repo push 2024-08-07)",
+   "bots_allowed": "yes, with a latency-abuse / 'no downside risk' termination clause in the March 2026 terms",
+   "other_fees": {
+    "minimum_deposit": "USD 10 headline",
+    "inactivity_fee": "none currently (terms reserve the right)",
+    "international_withdrawal": "EUR 20"
+   },
+   "provenance": [
+    {
+     "field": "legal_entity",
+     "url": "https://pepperstone.com/en-eu/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "nl_eligible (cross-border list)",
+     "url": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/88151/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "fee_per_unit, typical_half_spread_bp (FX)",
+     "url": "https://pepperstone.com/en-eu/markets/forex/pairs-and-spreads/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "typical_half_spread_bp (indices)",
+     "url": "https://pepperstone.com/en-eu/markets/index-cfds/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "financing, leverage_caps, min size, deposits",
+     "url": "https://pepperstone.com/en-eu/ways-to-trade/pricing/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "micro-lot commission rounding",
+     "url": "https://pepperstone.com/en-eu/ways-to-trade/trading-accounts/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "forward CFDs",
+     "url": "https://pepperstone.com/en-eu/markets/cfd-forwards/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "demo expiry",
+     "url": "https://pepperstone.com/en-eu/ways-to-trade/demo-accounts/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "api (cTrader Open API access, limits, demo)",
+     "url": "https://help.ctrader.com/open-api/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "python_lib",
+     "url": "https://pypi.org/pypi/ctrader-open-api/json",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "peer spreads / swaps IC Markets",
+     "url": "https://www.icmarkets.eu/en/trading-pricing/spreads-and-swaps",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "peer spreads / swaps FP Markets",
+     "url": "https://www.fpmarkets.eu/forex/spreads/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "swaps: https://www.fpmarkets.eu/swap-rates/"
+    },
+    {
+     "field": "financing_long_bp_year.fx_cfd.markup_bp, cash interest, index minimum size",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "capital_com",
+   "name": "Capital.com (REST + WebSocket API)",
+   "legal_entity": "Capital Com SV Investments Limited, Cyprus, CySEC licence 319/17 (a second group entity, Capital Com Group Ltd, CySEC 463/25, also exists)",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "Dutch-language site capital.com/nl-nl is an approved domain of the CySEC entity; CySEC register lists the Netherlands; site excludes US, Canada, Belgium. Not tested by opening an account.",
+   "asset_classes": [
+    "fx_cfd",
+    "index_cfd",
+    "commodity_cfd",
+    "share_cfd",
+    "crypto_cfd",
+    "real_stocks (NL listed as available)"
+   ],
+   "fee_bp_taker": {
+    "all_cfds_commission": 0.0
+   },
+   "fee_bp_maker": {
+    "all_cfds_commission": 0.0
+   },
+   "min_fee_per_order": {
+    "amount": 0.0,
+    "currency": "EUR"
+   },
+   "typical_half_spread_bp": {
+    "EURUSD": 0.27,
+    "gold": 0.37,
+    "label": "CLAIM-grade: these are the worked EXAMPLES on Capital.com's pricing page (EUR/USD 0.6 pip, gold 0.30), not published averages; 'Spreads are dynamic'"
+   },
+   "financing_long_bp_year": {
+    "fx_cfd": {
+     "benchmark": "tom-next",
+     "markup_bp": 150,
+     "detail": "'Our daily fee (0.00411%) +/- Underlying market adjustment (TomNext)' = 1.50%/yr"
+    },
+    "index_cfd": {
+     "benchmark": "interest-rate benchmark (USD indices: SOFR)",
+     "markup_bp": 400,
+     "detail": "'Our daily fee is 4% per year'"
+    },
+    "commodity_cfd": {
+     "benchmark": "futures basis",
+     "markup_bp": 400,
+     "detail": "0.01096% per day"
+    },
+    "unleveraged_1to1": {
+     "benchmark": null,
+     "markup_bp": 0,
+     "detail": "'1:1 leverage (unleveraged) CFD positions are not subject to overnight funding, except on a limited number of markets'"
+    }
+   },
+   "financing_short_bp_year": {
+    "fx_cfd": {
+     "benchmark": "tom-next",
+     "markup_bp": 150
+    },
+    "index_cfd": {
+     "benchmark": "interest-rate benchmark",
+     "markup_bp": 400
+    }
+   },
+   "cash_interest_threshold": null,
+   "min_order_notional": null,
+   "lot_step": "fractional contract sizes appear in the fee examples (0.6 contract US Tech 100, 0.1 contract Bitcoin); per-instrument dealing rules come from the API /markets endpoint (UNKNOWN here)",
+   "leverage_caps": {
+    "fx_major": 30,
+    "fx_minor_gold_major_index": 20,
+    "commodity_minor_index": 10,
+    "shares": 5,
+    "crypto": 2
+   },
+   "negative_balance_protection": "retail: AFM/ESMA rules apply; only professionals are warned about losses beyond the deposit",
+   "shorting": "yes",
+   "paper_api": {
+    "available": true,
+    "url": "https://demo-api-capital.backend-capital.com/",
+    "note": "'Live prices. Virtual funds. No expiry'; demo balance capped at 100,000; 1,000 order requests per hour on demo"
+   },
+   "api": {
+    "types": [
+     "REST https://api-capital.backend-capital.com/",
+     "WebSocket (max 40 instruments, 10-minute session, ping to keep alive)"
+    ],
+    "limits": "10 requests/s per user; 1 order request per 0.1 s; POST /session 1 per second",
+    "history": "candles MINUTE..WEEK with bid AND ask, max 1,000 per call; depth UNKNOWN",
+    "key": "generated in Settings > API integrations; 2FA mandatory"
+   },
+   "python_lib": null,
+   "python_lib_note": "no official Python SDK (Postman collection and a sample bot only)",
+   "bots_allowed": "yes - 'You are solely responsible for all ... automated activity on your account'",
+   "other_fees": {
+    "currency_conversion": "0.7% of spot FX rate on realised P&L, overnight funding, dividends booked in a non-account currency",
+    "minimum_deposit": "20 EUR/USD/GBP (wire: 50 EUR)",
+    "deposit_withdrawal": "no fee"
+   },
+   "provenance": [
+    {
+     "field": "legal_entity, exclusions",
+     "url": "https://capital.com/nl-nl",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "nl_eligible (register)",
+     "url": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/42294/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "fees, conversion fee, financing formulas, minimum deposit",
+     "url": "https://capital.com/en-eu/ways-to-trade/fees-and-charges/cfd-and-ko",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "typical_half_spread_bp (page examples)",
+     "url": "https://capital.com/en-eu/ways-to-trade/pricing",
+     "access_date": "2026-11-10",
+     "label": "CLAIM",
+     "engine_tag": "ASSUMED",
+     "note": "examples, not averages"
+    },
+    {
+     "field": "api.*, paper_api",
+     "url": "https://open-api.capital.com/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "demo no expiry",
+     "url": "https://capital.com/en-eu/trading-platforms/demo-account",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "min_order_notional, cash interest, inactivity fee",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "ig_europe",
+   "name": "IG (REST + Streaming API)",
+   "legal_entity": "IG Europe GmbH, authorised by BaFin and Deutsche Bundesbank (registration 148759); Dutch branch registered with the AFM",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "ig.com/nl states the AFM registration of IG Europe GmbH Nederland. Not tested by opening an account.",
+   "asset_classes": [
+    "fx_cfd",
+    "index_cfd",
+    "commodity_cfd",
+    "share_cfd",
+    "crypto_cfd",
+    "options/turbos (not researched)"
+   ],
+   "fee_bp_taker": {
+    "fx_index_commodity_cfd_commission": 0.0
+   },
+   "fee_bp_maker": {
+    "fx_index_commodity_cfd_commission": 0.0
+   },
+   "min_fee_per_order": null,
+   "typical_half_spread_bp": {
+    "EURUSD": 0.41,
+    "USDJPY": 0.34,
+    "GBPUSD": 0.36,
+    "Germany40": 1.93,
+    "spot_gold": 0.74,
+    "bitcoin": 12.2,
+    "label": "DERIVED from IG's standardised cost document for the Netherlands: 'spread at opening' in EUR per EUR 25,000 notional (EUR/USD 1.03, USD/JPY 0.84, GBP/USD 0.89, Germany 40 4.83, Spot Gold 1.86, Bitcoin 30.45). The file name carries the date 240110 (January 2024) although it is hosted under a 2026/02/13 path - treat as dated"
+   },
+   "financing_long_bp_year": {
+    "fx_cfd": {
+     "benchmark": "tom-next",
+     "markup_bp": 95,
+     "detail": "DERIVED from the same document: EUR/USD long EUR 1.62/day and short credit EUR 0.30/day per EUR 25,000 -> half the long/short gap = about 0.95%/yr",
+     "label": "DERIVED, dated document"
+    },
+    "index_cfd": {
+     "benchmark": "overnight benchmark of the index currency",
+     "markup_bp": 250,
+     "detail": "DERIVED: Germany 40 long EUR 4.48/day, short credit EUR 1.01/day per EUR 25,000 -> +/-2.5%/yr around the benchmark",
+     "label": "DERIVED, dated document"
+    }
+   },
+   "financing_short_bp_year": {
+    "fx_cfd": {
+     "benchmark": "tom-next",
+     "markup_bp": 95
+    },
+    "index_cfd": {
+     "benchmark": "overnight benchmark",
+     "markup_bp": 250
+    }
+   },
+   "cash_interest_threshold": null,
+   "min_order_notional": null,
+   "lot_step": "UNKNOWN (mini contracts exist in the cost document; sizes not read)",
+   "leverage_caps": {
+    "fx_major": 30,
+    "fx_minor_gold_major_index": 20,
+    "commodity_minor_index": 10,
+    "shares": 5,
+    "crypto": 2
+   },
+   "negative_balance_protection": "retail: AFM/ESMA rules",
+   "shorting": "yes",
+   "paper_api": {
+    "available": true,
+    "url": "https://demo-api.ig.com/gateway/deal",
+    "note": "live https://api.ig.com/gateway/deal; no fee within default quotas"
+   },
+   "api": {
+    "types": [
+     "REST",
+     "Streaming"
+    ],
+    "limits": "60 non-trading requests/min per app; 100 trading requests/min per account; 30 non-trading/min per account; 40 concurrent streaming subscriptions; no limit increases",
+    "history": "10,000 historical price points per week; 1 s (4 days), 1-3 min (40 days), 5 min-4 h (360 days), 1 day (15 years)"
+   },
+   "python_lib": "trading-ig 0.0.25 (community, PyPI 2026-08-25)",
+   "bots_allowed": "API offered free of charge (ToS clauses not read)",
+   "retail_loss_rate": "74% of retail investors lose money trading CFDs with this provider",
+   "provenance": [
+    {
+     "field": "legal_entity, loss rate",
+     "url": "https://www.ig.com/nl/kosten-en-tarieven",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "typical_half_spread_bp, financing (derived)",
+     "url": "https://www.ig.com/content/dam/igcom-websites/1770999417219/nl_NL/pdf/2026/02/13/240110_StandardisedCost_OTC_NL.pdf",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "numbers read from the PDF; rates DERIVED by arithmetic; document appears to date from January 2024"
+    },
+    {
+     "field": "api.*, paper_api",
+     "url": "https://labs.ig.com/faq.html",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "python_lib",
+     "url": "https://pypi.org/pypi/trading-ig/json",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "min_order_notional, current spreads, inactivity fee, conversion fee",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "okx_europe",
+   "name": "OKX Europe (spot, spot margin, X-Perps)",
+   "legal_entity": "OKX Europe Limited (MFSA Malta, MiCA CASP authorised 27/01/2025, NL in passport list) for spot; OKX Europe Markets Limited (MFSA, Investment Services Act) for X-Perps",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "spot: ESMA register row with NL passport. X-Perps: 'access may not be enabled at the same time in every EEA country, even though all 30 are supported' - NL activation status not confirmed.",
+   "asset_classes": [
+    "crypto_spot",
+    "stablecoin_pairs",
+    "spot_margin_long_short",
+    "x_perps_crypto_equity_commodity"
+   ],
+   "fee_bp_taker": {
+    "crypto_spot_spot_only_account": 20.0,
+    "crypto_spot_with_xperps_account": 10.0,
+    "stablecoin_group": 5.0,
+    "zero_fee_pairs_incl_USDC-EUR": 0.0,
+    "x_perps": 5.0
+   },
+   "fee_bp_maker": {
+    "crypto_spot_spot_only_account": 10.0,
+    "crypto_spot_with_xperps_account": 8.0,
+    "stablecoin_group": 0.0,
+    "zero_fee_pairs_incl_USDC-EUR": 0.0,
+    "x_perps": 2.0
+   },
+   "fee_notes": "spot-only schedule effective 25 September 2026. USDC-EUR carries groupId 11, which OKX's API docs define as 'Spot zero'; the EEA fee framework lists 'Zero-Fee Pairs' at 0.000% / 0.000% for every tier (both VERIFIED) - but that an EEA retail account is really charged 0% on USDC-EUR has NOT been confirmed at account level (worst case 10/20 bp spot-only or 8/10 bp with an X-Perps account). USDT-EUR, USDG-EUR and BTC-EUR sit in group 18; EURC-USDC and BTC-USDC in group 12 (ordinary). Buy/Sell/Convert quotes carry up to 1.00% spread.",
+   "min_fee_per_order": null,
+   "typical_half_spread_bp": {
+    "USDC-EUR": 0.17,
+    "USDT-EUR": 0.56,
+    "BTC-EUR": 1.0,
+    "BTC-USDC": 0.007,
+    "BTC_XPERP": 0.007,
+    "label": "MEASURED - USDC-EUR, BTC-EUR, BTC-USDC from the public books endpoint on the EEA host at 2026-11-10 14:40 UTC (USDC-EUR: EUR 300-5,000 tickets cost 0.28-0.55 bp from mid; 24h volume about 18M USDC); others from tickers ~14:00 UTC. The EEA host returns the global catalogue for public endpoints, so the EEA book may differ"
+   },
+   "financing_long_bp_year": {
+    "x_perps": {
+     "mechanism": "funding every 8 hours (4 hours on some contracts), capped at +/-0.375% per period; average level not measured (UNKNOWN)"
+    },
+    "spot_margin_borrow": {
+     "detail": "public endpoint rates (global, may not be EEA-specific): USDC 0.00012336 and BTC 0.00001392 per day",
+     "label": "VERIFIED as API output, applicability UNKNOWN"
+    }
+   },
+   "financing_short_bp_year": {
+    "x_perps": {
+     "mechanism": "short receives positive funding"
+    }
+   },
+   "cash_interest_threshold": null,
+   "min_order_notional": {
+    "USDC-EUR": "1 USDC",
+    "BTC-EUR": "0.0001 BTC",
+    "BTC X-Perp": "1 contract = 0.0001 BTC per the API (the help page says 0.01 BTC - conflict)"
+   },
+   "lot_step": "per-instrument minSz/lotSz from the public instruments endpoint",
+   "leverage_caps": {
+    "x_perps": 10,
+    "spot_margin": 10
+   },
+   "negative_balance_protection": "X-Perps: yes - 'OEM shall forfeit any negative balance that may be accrued by the counterparty'",
+   "shorting": "yes (X-Perps; spot margin 'Long and short positions')",
+   "paper_api": {
+    "available": true,
+    "url": "https://eea.okx.com (header x-simulated-trading: 1)",
+    "note": "demo keys created under Trade > Demo Trading; public demo WebSocket wss://wseeapap.okx.com/ws/v5/public"
+   },
+   "api": {
+    "types": [
+     "REST https://eea.okx.com",
+     "WebSocket wss://wseea.okx.com/ws/v5/public"
+    ],
+    "limits": "place order 60 requests / 2 s; history candles 20 requests / 2 s",
+    "history": "history candles for recent years (1 s candles: last 3 months)",
+    "universe": "263 X-Perp instruments (167 crypto, 89 equity/ETF, 4 commodity: BZ, CL, XAG, XAU); no FX X-Perp"
+   },
+   "python_lib": "python-okx (official); ccxt id 'myokx'",
+   "bots_allowed": "OKX markets trading bots in its EU navigation; ToS clause not read (UNKNOWN)",
+   "retail_access": "X-Perps need an appropriateness assessment; retail and professional get the same product offering",
+   "provenance": [
+    {
+     "field": "legal_entity (spot)",
+     "url": "https://www.esma.europa.eu/sites/default/files/2024-12/CASPS.csv",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "legal_entity (derivatives), fees x_perps, collateral",
+     "url": "https://www.okx.com/en-eu/x-perps",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "retail eligibility, 5-year expiry",
+     "url": "https://www.okx.com/en-eu/help/okx-x-perps-eea-what-are-expiry-perps",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "country availability",
+     "url": "https://www.okx.com/en-eu/help/okx-x-perps-eea-regional-availability-eligibility",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "leverage, margin call, liquidation, NBP",
+     "url": "https://www.okx.com/en-eu/help/x-perps-contract-specifications",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "funding interval, VIP threshold",
+     "url": "https://www.okx.com/en-eu/help/okx-x-perps-eea-fees-overview",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "spot fees (spot-only schedule, stablecoin group)",
+     "url": "https://www.okx.com/en-eu/help/important-notice-upcoming-spot-fee-adjustment-eea",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "zero-fee pair class 0.000% / 0.000%",
+     "url": "https://www.okx.com/en-eu/help/updates-to-eea-fee-framework",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "USDC-EUR fee group (groupId 11 = 'Spot zero')",
+     "url": "https://my.okx.com/docs-v5/en/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "group id read from the public instrument record; account-level charge not confirmed"
+    },
+    {
+     "field": "typical_half_spread_bp",
+     "url": "https://eea.okx.com/api/v5/market/books?instId=USDC-EUR&sz=100",
+     "access_date": "2026-11-10",
+     "label": "MEASURED",
+     "engine_tag": "MEASURED",
+     "note": "2026-11-10 14:40 UTC"
+    },
+    {
+     "field": "spot margin",
+     "url": "https://www.okx.com/en-eu/learn/spot-margin-arrives-in-europe",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "api.*, paper_api, python_lib",
+     "url": "https://my.okx.com/docs-v5/en/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "instruments, minimums, tickers",
+     "url": "https://eea.okx.com/api/v5/public/instruments?instType=SPOT",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "public endpoints on the EEA host return the global catalogue"
+    },
+    {
+     "field": "account-level fee actually charged on USDC-EUR, EEA borrow rates, inactivity fee, NL activation of X-Perps, BTC X-Perp contract size",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "coinbase_eu",
+   "name": "Coinbase Advanced (EU spot) and Coinbase Financial Services Europe futures",
+   "legal_entity": "Coinbase Luxembourg S.A. (CSSF, MiCA CASP authorised 20/06/2025, NL in passport list) for spot; Coinbase Financial Services Europe Ltd (CySEC 374/19) for futures",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "spot: ESMA register. Futures: Coinbase blog of 9 March 2026 - 'initially available through Coinbase Advanced, in 26 European countries, including Germany, France, and Netherlands'; retail subject to appropriateness and target-market assessments.",
+   "asset_classes": [
+    "crypto_spot",
+    "stablecoin_pairs",
+    "perpetual_style_futures (5-year expiry, hourly funding)",
+    "index/commodity dated futures"
+   ],
+   "fee_bp_taker": {
+    "crypto_spot_intro_tier": 50.0,
+    "crypto_spot_10k_usd_30d": 40.0,
+    "stablecoin_pairs": null,
+    "futures": 2.0
+   },
+   "fee_bp_maker": {
+    "crypto_spot_intro_tier": 25.0,
+    "crypto_spot_10k_usd_30d": 20.0,
+    "stablecoin_pairs": null,
+    "futures": 2.0
+   },
+   "fee_per_unit": {
+    "futures": {
+     "amount": 0.12,
+     "currency": "USD",
+     "per": "contract per side, on top of 2 bp of notional (exchange 0.10 + clearing 0.02); liquidation trades 10 bp + 0.12"
+    }
+   },
+   "fee_bp_derived_at_reference_prices": {
+    "nano_btc_perp_0.01_BTC": {
+     "notional_usd": 739.0,
+     "all_in_bp_per_side": 3.6,
+     "label": "DERIVED: 2 bp + 0.12/739"
+    }
+   },
+   "fee_notes": "a separate stablecoin-pair schedule exists ('Certain pairs have separate fee schedules') but its numbers sit behind a log-in; a third-party figure of 0.00% / 0.0045% is a CLAIM",
+   "min_fee_per_order": null,
+   "typical_half_spread_bp": {
+    "USDC-EUR": 0.56,
+    "EURC-USDC": 0.45,
+    "USDT-EUR": 0.11,
+    "BTC-EUR": 0.06,
+    "label": "MEASURED by the crypto sub-analyst from public tickers (~14:00 UTC 2026-11-10); USDC-EUR 24h volume 82.0M USDC"
+   },
+   "financing_long_bp_year": {
+    "futures": {
+     "mechanism": "hourly funding, 'average difference between the futures price and the spot price over the past hour', settled once per day; level not measured (UNKNOWN)"
+    }
+   },
+   "financing_short_bp_year": {
+    "futures": {
+     "mechanism": "short receives positive funding"
+    }
+   },
+   "cash_interest_threshold": null,
+   "min_order_notional": {
+    "USDC-EUR": "min_market_funds 0.84 EUR",
+    "futures": "1 contract (nano BTC perp = 0.01 BTC, about USD 740; nano ETH = 0.1 ETH)"
+   },
+   "lot_step": "futures: whole contracts; EURC-USDC is limit-only with whole-unit size",
+   "leverage_caps": {
+    "futures_btc_eth_equity_index": 10,
+    "futures_other": "4x-5x",
+    "spot_margin": "none (margin_enabled false on all 846 products)"
+   },
+   "negative_balance_protection": null,
+   "shorting": "yes via futures; no spot margin",
+   "paper_api": {
+    "available": false,
+    "url": "https://api-sandbox.coinbase.com/api/v3/brokerage/",
+    "note": "static mock only - 'All responses are static and pre-defined'; only accounts and orders endpoints"
+   },
+   "api": {
+    "types": [
+     "Advanced Trade REST + WebSocket",
+     "Coinbase Exchange API"
+    ],
+    "history": "public candles, max 350 per call",
+    "note": "API trading of the EU (CBFSE) futures is UNKNOWN - the docs only describe US derivatives via Coinbase Financial Markets"
+   },
+   "python_lib": "official Advanced Trade Python SDK on PyPI; ccxt ids 'coinbase', 'coinbaseexchange'",
+   "bots_allowed": "UNKNOWN (terms not read)",
+   "other_fees": {
+    "sepa_coinbase_exchange": "deposit EUR 0.15, withdrawal free"
+   },
+   "provenance": [
+    {
+     "field": "legal_entity (spot)",
+     "url": "https://www.esma.europa.eu/sites/default/files/2024-12/CASPS.csv",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "legal_entity (futures)",
+     "url": "https://www.coinbase.com/cbfse",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "futures: countries incl. Netherlands, product, leverage",
+     "url": "https://www.coinbase.com/en-gb/blog/futures-contracts-europe",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "futures fees and funding",
+     "url": "https://www.coinbase.com/cbfse",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "CBFSE fee schedule PDF linked from this page, read by the crypto sub-analyst"
+    },
+    {
+     "field": "spot fee tiers",
+     "url": "https://help.coinbase.com/en/coinbase/trading-and-funding/advanced-trade/advanced-trade-fees",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "tier table as served to a Dutch-localised client"
+    },
+    {
+     "field": "products, flags, minimums, tickers, candles",
+     "url": "https://api.exchange.coinbase.com/products",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "typical_half_spread_bp",
+     "url": "https://api.exchange.coinbase.com/products/USDC-EUR/ticker",
+     "access_date": "2026-11-10",
+     "label": "MEASURED",
+     "engine_tag": "MEASURED",
+     "note": "tickers ~14:00 UTC 2026-11-10, taken by the crypto sub-analyst"
+    },
+    {
+     "field": "api, sandbox, python_lib",
+     "url": "https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/overview",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "stablecoin-pair fees, NBP, API access to EU futures, rate limits",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "one_trading",
+   "name": "One Trading (EU-regulated crypto and equity-index futures; spot)",
+   "legal_entity": "One Trading Exchange B.V. (Amsterdam, KvK 88528766), regulated by the AFM as an investment firm operating an organised trading facility, and MiCA CASP authorised 15/05/2025",
+   "nl_eligible": "true",
+   "nl_eligible_basis": "Dutch AFM-regulated entity that states it serves 'large institutions and retail investors' (UK limited to investment professionals). Retail onboarding conditions for futures were not read.",
+   "asset_classes": [
+    "crypto_futures_5y_with_4h_funding",
+    "equity_index_and_single_stock_futures",
+    "crypto_spot",
+    "usdc_eur_spot"
+   ],
+   "fee_bp_taker": {
+    "futures_ui_under_10k_usd_30d": 20.0,
+    "futures_ui_10k_to_100k": 8.0,
+    "spot_ui_under_10k": 20.0,
+    "api_trading_all_volumes": 1.5
+   },
+   "fee_bp_maker": {
+    "futures_ui_under_10k_usd_30d": 10.0,
+    "futures_ui_10k_to_100k": 4.0,
+    "spot_ui_under_10k": 10.0,
+    "api_trading_all_volumes": -0.5
+   },
+   "fee_notes": "the fee page lists 'API Trading - All volumes: maker -0.005%, taker 0.015%' without stating who qualifies; whether that schedule applies to a retail account is an OPEN QUESTION. Liquidation fee 3%.",
+   "min_fee_per_order": null,
+   "typical_half_spread_bp": {
+    "BTC_USD_P": 1.7,
+    "ONEX100_USD_P": 0.9,
+    "USDC_EUR": 4.0,
+    "label": "MEASURED - public order book 2026-11-10 ~14:20 UTC; 24h quote volume BTC_USD_P USD 8.0M, ETH_USD_P USD 18.5M, SOL_USD_P USD 1.4M, ONEX100_USD_P USD 53k, USDC_EUR EUR 48k"
+   },
+   "financing_long_bp_year": {
+    "crypto_futures": {
+     "mechanism": "funding every 240 minutes",
+     "snapshot_annualised_bp": 392,
+     "label": "MEASURED single ticker value 0.0000179 per period x 2190; not an average"
+    },
+    "equity_futures": {
+     "mechanism": "session-based funding (NASDAQ calendar, max 2 periods per day); level UNKNOWN"
+    }
+   },
+   "financing_short_bp_year": {
+    "crypto_futures": {
+     "mechanism": "short receives positive funding"
+    }
+   },
+   "cash_interest_threshold": null,
+   "min_order_notional": {
+    "all_instruments": "min_size 10 (quote currency) per the public instruments endpoint"
+   },
+   "lot_step": "amount precision 5 (BTC), 4 (ETH)",
+   "leverage_caps": {
+    "futures": 10,
+    "note": "'Trade Futures up to 10x - Subject to product & client category'"
+   },
+   "negative_balance_protection": null,
+   "shorting": "yes via futures",
+   "paper_api": {
+    "available": null,
+    "url": null,
+    "note": "not found (UNKNOWN)"
+   },
+   "api": {
+    "types": [
+     "REST https://api.onetrading.com/fast/v1"
+    ],
+    "public_endpoints_verified": [
+     "instruments",
+     "fees",
+     "market-ticker",
+     "order-book"
+    ],
+    "universe": "active: 10 crypto futures (BTC, ETH, XRP, SOL, LTC, SUI, TAO, DOGE, LINK, ADA vs USD), equity futures ONEX100 and SPCX; spot BTC_USDC, ETH_USDC, USDC_EUR; the EUR-quoted perps are CLOSED"
+   },
+   "python_lib": null,
+   "python_lib_note": "no official Python SDK found (not searched exhaustively)",
+   "bots_allowed": "an 'API Trading' fee schedule is published; terms not read",
+   "other_fees": {
+    "custody_inactivity": "0.17% of the account balance charged on the 12th of each month if no trade in the preceding 90 days (collateral for open futures excluded)"
+   },
+   "provenance": [
+    {
+     "field": "legal_entity, retail statement, leverage",
+     "url": "https://www.onetrading.com/",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "fee_bp_*, liquidation fee, custody fee",
+     "url": "https://www.onetrading.com/fees",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "fee tiers (cross-check), instruments, funding period, position limits",
+     "url": "https://api.onetrading.com/fast/v1/instruments",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "fees: https://api.onetrading.com/fast/v1/fees"
+    },
+    {
+     "field": "typical_half_spread_bp, volumes, funding snapshot",
+     "url": "https://api.onetrading.com/fast/v1/market-ticker",
+     "access_date": "2026-11-10",
+     "label": "MEASURED",
+     "engine_tag": "MEASURED",
+     "note": "order books: /fast/v1/order-book/{instrument}?level=2"
+    },
+    {
+     "field": "legal_entity (MiCA)",
+     "url": "https://www.esma.europa.eu/sites/default/files/2024-12/CASPS.csv",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "API-fee eligibility for retail, paper environment, NBP, python_lib",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN"
+    }
+   ]
+  },
+  {
+   "venue_id": "hyperliquid",
+   "name": "Hyperliquid (on-chain order book; crypto perps plus builder-deployed index / FX / commodity perps)",
+   "legal_entity": "none serving the EU: no MiFID or MiCA authorisation is claimed",
+   "nl_eligible": "unknown",
+   "nl_eligible_basis": "No KYC step in the onboarding docs (wallet or email). The Terms could not be read by a plain client (JavaScript app); third parties report US, Ontario and sanctioned persons as restricted (CLAIM). ESMA's February 2026 statement treats perpetuals as likely CFD-type instruments; legality and tax treatment for an NL retail user are unverified.",
+   "asset_classes": [
+    "crypto_perps",
+    "hip3_perps_index_fx_commodity_equity (xyz dex)",
+    "spot"
+   ],
+   "fee_bp_taker": {
+    "crypto_perps": 4.5,
+    "hip3_growth_mode_scale_1 (xyz:SP500, XYZ100, EUR, JPY, GBP, TLT)": 0.9,
+    "hip3_no_growth_mode_scale_1 (xyz:GOLD)": 9.0,
+    "spot": 7.0
+   },
+   "fee_bp_maker": {
+    "crypto_perps": 1.5,
+    "hip3_growth_mode_scale_1": 0.3,
+    "hip3_no_growth_mode_scale_1": 3.0,
+    "spot": 4.0
+   },
+   "fee_notes": "base tier read from the public userFees endpoint (cross 0.00045, add 0.00015). HIP-3 fees are DERIVED from the docs formula (deployerFeeScale 1.0 -> x2; growth mode -90%; docs: 'Baseline all-in taker rate under growth mode: 0.0045%-0.009%'); not confirmed on a fill.",
+   "min_fee_per_order": null,
+   "typical_half_spread_bp": {
+    "BTC": 0.07,
+    "ETH": 0.24,
+    "xyz:SP500": 0.13,
+    "xyz:XYZ100": 0.18,
+    "xyz:GOLD": 0.12,
+    "xyz:EUR": 0.89,
+    "xyz:JPY": 0.32,
+    "xyz:GBP": 1.12,
+    "label": "MEASURED - l2Book snapshot 2026-11-10 14:31 UTC; xyz:GBP is thin (USD 5,600 costs ~6 bp); 24h volume xyz:SP500 USD 403M, xyz:XYZ100 USD 464M, xyz:GOLD USD 60M, xyz:EUR USD 6.2M"
+   },
+   "financing_long_bp_year": {
+    "mechanism": "hourly funding = average premium + clamp(interest - premium, -0.05%, +0.05%); interest component 0.01% per 8 h ('11.6% APR paid to short'); cap 0.5% per hour; paid on size x oracle price",
+    "measured_mean_last_365d_bp": {
+     "BTC": 582,
+     "ETH": 637,
+     "SOL": 100,
+     "xyz:XYZ100": 317
+    },
+    "measured_mean_since_listing_bp": {
+     "xyz:SP500": {
+      "bp": -83,
+      "since": "2026-03-18"
+     },
+     "xyz:GOLD": {
+      "bp": 836,
+      "since": "2025-12-22"
+     },
+     "xyz:EUR": {
+      "bp": 311,
+      "since": "2025-12-23"
+     },
+     "xyz:CL": {
+      "bp": -1635,
+      "since": "2026-01-06"
+     }
+    },
+    "measured_mean_last_90d_bp": {
+     "BTC": 920,
+     "ETH": 871,
+     "SOL": 737,
+     "xyz:SP500": 253,
+     "xyz:XYZ100": 486,
+     "xyz:GOLD": 695,
+     "xyz:EUR": 487
+    },
+    "mean_abs_rate_bp": {
+     "BTC": 849,
+     "ETH": 900,
+     "SOL": 1024,
+     "xyz:SP500": 759,
+     "xyz:XYZ100": 900,
+     "xyz:GOLD": 1150,
+     "xyz:EUR": 409,
+     "xyz:CL": 4724
+    },
+    "label": "MEASURED - hourly fundingHistory x 8760, pulled 2026-11-10"
+   },
+   "financing_short_bp_year": {
+    "mechanism": "short receives what long pays"
+   },
+   "cash_interest_threshold": null,
+   "min_order_notional": null,
+   "min_order_notional_note": "a USD 10 minimum order value is widely reported but was not read on a docs page today (CLAIM)",
+   "lot_step": "szDecimals per asset from the meta endpoint (BTC 5, ETH 4, xyz:SP500 3, xyz:EUR 1); prices up to 5 significant figures",
+   "leverage_caps": {
+    "BTC": 40,
+    "ETH": 25,
+    "SOL": 20,
+    "xyz:SP500": 50,
+    "xyz:XYZ100": 30,
+    "xyz:GOLD": 25,
+    "xyz:EUR": "50 (isolated only)",
+    "note": "venue limits, far above the EU retail CFD caps; no negative-balance protection by contract"
+   },
+   "negative_balance_protection": null,
+   "shorting": "yes",
+   "paper_api": {
+    "available": true,
+    "url": "https://app.hyperliquid-testnet.xyz",
+    "note": "the testnet faucet (1,000 mock USDC) requires an address that has deposited on mainnet"
+   },
+   "api": {
+    "types": [
+     "REST https://api.hyperliquid.xyz/info and /exchange",
+     "WebSocket"
+    ],
+    "limits": "1,200 weight per minute per IP (most info requests weigh 20; l2Book 2); per-address: 1 request per USD 1 traded plus a 10,000 buffer; 1,000 open orders",
+    "history": "funding history and recent candles via the API; older L2 snapshots on a requester-pays S3 bucket"
+   },
+   "python_lib": "hyperliquid-python-sdk 0.24.0 (official, PyPI 2026-06-04); ccxt",
+   "bots_allowed": "API-first venue",
+   "custody_note": "self-custody of keys; funds bridged as USDC (Arbitrum/Ethereum/Base/Polygon); smart-contract, bridge and validator-set risk; HLP vault has a 4-day lock-up",
+   "provenance": [
+    {
+     "field": "fee_bp_* (base tier)",
+     "url": "https://api.hyperliquid.xyz/info",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE",
+     "note": "POST {\"type\":\"userFees\"}"
+    },
+    {
+     "field": "fee schedule, HIP-3 multiplier and growth mode",
+     "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "engine_tag": "VENDOR_SCHEDULE"
+    },
+    {
+     "field": "growthMode / deployerFeeScale per xyz asset, leverage, szDecimals, volumes",
+     "url": "https://api.hyperliquid.xyz/info",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "POST {\"type\":\"metaAndAssetCtxs\",\"dex\":\"xyz\"}"
+    },
+    {
+     "field": "typical_half_spread_bp",
+     "url": "https://api.hyperliquid.xyz/info",
+     "access_date": "2026-11-10",
+     "label": "MEASURED",
+     "engine_tag": "MEASURED",
+     "note": "POST {\"type\":\"l2Book\"}"
+    },
+    {
+     "field": "financing (funding history)",
+     "url": "https://api.hyperliquid.xyz/info",
+     "access_date": "2026-11-10",
+     "label": "MEASURED",
+     "engine_tag": "MEASURED",
+     "note": "POST {\"type\":\"fundingHistory\"}"
+    },
+    {
+     "field": "funding formula and cap",
+     "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "api.limits",
+     "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/rate-limits-and-user-limits",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "onboarding (no KYC step), testnet",
+     "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/onboarding/how-to-start-trading",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED",
+     "note": "testnet: /onboarding/testnet-faucet"
+    },
+    {
+     "field": "python_lib",
+     "url": "https://pypi.org/pypi/hyperliquid-python-sdk/json",
+     "access_date": "2026-11-10",
+     "label": "VERIFIED"
+    },
+    {
+     "field": "nl_eligible, restricted persons, min_order_notional",
+     "url": "",
+     "access_date": "2026-11-10",
+     "label": "UNKNOWN",
+     "note": "https://app.hyperliquid.xyz/terms is a JavaScript app"
+    }
+   ]
+  }
+ ]
+}

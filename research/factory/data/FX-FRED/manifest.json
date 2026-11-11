@@ -1,0 +1,1212 @@
+{
+ "lane": "FX-FRED",
+ "built_utc": "2026-11-10T15:47:50Z",
+ "rows": 14011,
+ "columns": [
+  "EUR",
+  "GBP",
+  "JPY",
+  "CHF",
+  "CAD",
+  "AUD",
+  "NZD",
+  "SEK",
+  "NOK"
+ ],
+ "n_columns": 9,
+ "first_print": "1971-01-04 17:00:00+00:00",
+ "last_print": "2026-11-06 17:00:00+00:00",
+ "meta": {
+  "periods_per_year": 252,
+  "universe_groups": {
+   "G10": [
+    "EUR",
+    "GBP",
+    "JPY",
+    "CHF",
+    "CAD",
+    "AUD",
+    "NZD",
+    "SEK",
+    "NOK"
+   ],
+   "G10_EX_EUR": [
+    "GBP",
+    "JPY",
+    "CHF",
+    "CAD",
+    "AUD",
+    "NZD",
+    "SEK",
+    "NOK"
+   ]
+  },
+  "rates_unit": "decimal per year (0.05 = 5 %), lagged: last observation dated strictly before the print date",
+  "carry_convention": "(i_fx - i_usd) * days / 360; days = calendar days since the previous print; first row NaN",
+  "cpi_convention": "index level; a monthly observation is usable from the 1st day of the 2nd month after its reference month starts, a quarterly one (AUD, NZD) from the 1st day of the 4th month after its reference quarter starts; step function until the next release; current-vintage data (NOT real-time vintages)",
+  "oil_convention": "WTI spot price level (USD/bbl), FRED DCOILWTICO, last observation dated strictly before the print; non-positive observations (one: -36.98 on 2020-04-20) are set to NaN before the <= 3-print forward-fill, so every value in aux['oil'] is > 0",
+  "universe_mask_note": "True where the price AND the carry of the instrument are known at the row (an instrument without a financing leg may not be held: the engine refuses it)",
+  "first_row_all_groups_complete": "1999-01-05 17:00:00+00:00",
+  "last_row_all_groups_complete": "2026-11-06 17:00:00+00:00",
+  "print_convention": "Row = one Federal Reserve H.10 noon buying rate in New York. Index = the date at 12:00 America/New_York converted to UTC. Price = USD per 1 unit of foreign currency (DEXJPUS, DEXSZUS, DEXCAUS, DEXSDUS, DEXNOUS are inverted). EUR exists from 1999-01-04. Evaluation is lag = 1 (next noon print).",
+  "universe_groups_note": "the G10 group includes EUR, which has prices only from 1999-01-04; before that the group has 8 members",
+  "lane": "FX-FRED",
+  "source_manifest": "research/factory/data/FX-FRED/manifest.json"
+ },
+ "files": {
+  "prices.parquet": {
+   "sha256": "45fb002f499308c546514a4180948f8fb77089478576d92fdd36903bc78c9b7a",
+   "rows": 14011,
+   "cols": 9,
+   "bytes": 676263
+  },
+  "carry.parquet": {
+   "sha256": "f8d72736379add6fd356a61513e917a9c205aa185163baf78d846056fa4c68a0",
+   "rows": 14011,
+   "cols": 9,
+   "bytes": 511758
+  },
+  "tbill.parquet": {
+   "sha256": "067fec09ff670e3950276e07cddd029a550de0bfda640648b1a4b37a3563aa03",
+   "rows": 14011,
+   "cols": 1,
+   "bytes": 153304
+  },
+  "aux/rates.parquet": {
+   "sha256": "9106645043cea6376b470b681370acaf1084369b2fc113af13036d28e0d1c6f4",
+   "rows": 14011,
+   "cols": 10,
+   "bytes": 245719
+  },
+  "aux/cpi.parquet": {
+   "sha256": "07f775bd703197b382419a6823c015a23d5df6c5ffdc020e15bd08e1d5c72d18",
+   "rows": 14011,
+   "cols": 10,
+   "bytes": 170892
+  },
+  "aux/oil.parquet": {
+   "sha256": "10fb2b9267b78a80c64dc59a14f518420b9d3c8a6aa72e0f688b020250b756ce",
+   "rows": 14011,
+   "cols": 1,
+   "bytes": 155423
+  },
+  "aux/universe_mask.parquet": {
+   "sha256": "a29e6a48fb74243221954d4afabfa3aa78edfd4efdaeee3eef0da73118f34eae",
+   "rows": 14011,
+   "cols": 9,
+   "bytes": 125919
+  }
+ },
+ "instruments": {
+  "EUR": {
+   "first_print": "1999-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "n_prints": 6984,
+   "carry_first": "1999-01-05 17:00:00+00:00",
+   "carry_last": "2026-11-06 17:00:00+00:00",
+   "n_carry": 6983
+  },
+  "GBP": {
+   "first_print": "1971-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "n_prints": 14009,
+   "carry_first": "1971-01-05 17:00:00+00:00",
+   "carry_last": "2026-11-06 17:00:00+00:00",
+   "n_carry": 14010
+  },
+  "JPY": {
+   "first_print": "1971-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "n_prints": 14003,
+   "carry_first": "1971-01-05 17:00:00+00:00",
+   "carry_last": "2026-11-06 17:00:00+00:00",
+   "n_carry": 14010
+  },
+  "CHF": {
+   "first_print": "1971-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "n_prints": 14009,
+   "carry_first": "1971-01-05 17:00:00+00:00",
+   "carry_last": "2026-11-06 17:00:00+00:00",
+   "n_carry": 14010
+  },
+  "CAD": {
+   "first_print": "1971-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "n_prints": 14011,
+   "carry_first": "1971-01-05 17:00:00+00:00",
+   "carry_last": "2026-11-06 17:00:00+00:00",
+   "n_carry": 14010
+  },
+  "AUD": {
+   "first_print": "1971-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "n_prints": 14008,
+   "carry_first": "1976-04-08 17:00:00+00:00",
+   "carry_last": "2026-11-06 17:00:00+00:00",
+   "n_carry": 12692
+  },
+  "NZD": {
+   "first_print": "1971-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "n_prints": 14005,
+   "carry_first": "1985-01-07 17:00:00+00:00",
+   "carry_last": "2026-11-06 17:00:00+00:00",
+   "n_carry": 10500
+  },
+  "SEK": {
+   "first_print": "1971-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "n_prints": 14009,
+   "carry_first": "1971-01-05 17:00:00+00:00",
+   "carry_last": "2026-11-06 17:00:00+00:00",
+   "n_carry": 14010
+  },
+  "NOK": {
+   "first_print": "1971-01-04 17:00:00+00:00",
+   "last_print": "2026-11-06 17:00:00+00:00",
+   "n_prints": 14009,
+   "carry_first": "1986-03-04 17:00:00+00:00",
+   "carry_last": "2026-11-06 17:00:00+00:00",
+   "n_carry": 10212
+  }
+ },
+ "sources": {
+  "ecb_rates": [
+   {
+    "path": "raw/ecb/EON_D_EONIA_TO_RATE.csv",
+    "url": "https://data-api.ecb.europa.eu/service/data/EON/D.EONIA_TO.RATE?format=csvdata",
+    "fetched_utc": "2026-11-10T14:12:19Z",
+    "bytes": 2543761,
+    "sha256": "e3dab718d57b468346ac7639480d47800fc73215cc6575fb840308dc14481cd8"
+   },
+   {
+    "path": "raw/ecb/EST_B_EU000A2X2A25_WT.csv",
+    "url": "https://data-api.ecb.europa.eu/service/data/EST/B.EU000A2X2A25.WT?format=csvdata",
+    "fetched_utc": "2026-11-10T14:12:20Z",
+    "bytes": 565376,
+    "sha256": "8114323599b3f2a09bb7a35f58fb32ae7078e9a8e268b2ff9724ade02e3201a7"
+   }
+  ],
+  "fred": [
+   {
+    "path": "raw/fred/DFF.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF",
+    "fetched_utc": "2026-11-10T14:09:26Z",
+    "bytes": 424667,
+    "sha256": "5e1275425c0f765edda73c1b3127431e692e3f8b356d984edf5e241f875e5a88"
+   },
+   {
+    "path": "raw/fred/IUDSOIA.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=IUDSOIA",
+    "fetched_utc": "2026-11-10T14:09:26Z",
+    "bytes": 138727,
+    "sha256": "2e19fba561e8a49c8115e20268895c9bdaeb9a41a0655efee8337869277dae22"
+   },
+   {
+    "path": "raw/fred/DCOILWTICO.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILWTICO",
+    "fetched_utc": "2026-11-10T14:09:27Z",
+    "bytes": 176135,
+    "sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e"
+   },
+   {
+    "path": "raw/fred/IRSTCI01JPM156N.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=IRSTCI01JPM156N",
+    "fetched_utc": "2026-11-10T14:25:09Z",
+    "bytes": 9534,
+    "sha256": "07912c387ef20d6fa17b93819e5c5c08bddf05388106fc6ebb80e8b0f2a8f1a0"
+   },
+   {
+    "path": "raw/fred/DEXUSEU.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXUSEU",
+    "fetched_utc": "2026-11-10T14:09:27Z",
+    "bytes": 129109,
+    "sha256": "2374b98f07cdfc5c0f3b5147325bfe5ddc15fc9d6cc5eb71b2c320d19c5438d3"
+   },
+   {
+    "path": "raw/fred/DEXUSUK.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXUSUK",
+    "fetched_utc": "2026-11-10T14:09:28Z",
+    "bytes": 258895,
+    "sha256": "e5e496466383ef8c7fa406acc930e361150d5c8a413330793335ff37f9c22c20"
+   },
+   {
+    "path": "raw/fred/DEXJPUS.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXJPUS",
+    "fetched_utc": "2026-11-10T14:09:28Z",
+    "bytes": 257345,
+    "sha256": "981ecae92d8bf73940b09f817787f190e98269f382abb050bbb84daa8786468e"
+   },
+   {
+    "path": "raw/fred/DEXSZUS.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXSZUS",
+    "fetched_utc": "2026-11-10T14:09:28Z",
+    "bytes": 258895,
+    "sha256": "2a32d909031076d4559c43306794b9c10a1ff64be8a8884635ada0fbda75917e"
+   },
+   {
+    "path": "raw/fred/DEXCAUS.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXCAUS",
+    "fetched_utc": "2026-11-10T14:09:29Z",
+    "bytes": 258931,
+    "sha256": "e2fb2368b337c34fbd2f70f99d02535c10336d6c564190f14d8a24659d9ddfe5"
+   },
+   {
+    "path": "raw/fred/DEXUSAL.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXUSAL",
+    "fetched_utc": "2026-11-10T14:09:29Z",
+    "bytes": 258853,
+    "sha256": "cd663f7a4eef6e12df31f650ffb755913c676df2996b99158d7aa12ac80f28e9"
+   },
+   {
+    "path": "raw/fred/DEXUSNZ.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXUSNZ",
+    "fetched_utc": "2026-11-10T14:09:30Z",
+    "bytes": 258799,
+    "sha256": "7be2f9f8a6b379625fe2f4ce50d46b988ef5ffbe4c37e4bc38f53e07f6e26b07"
+   },
+   {
+    "path": "raw/fred/DEXSDUS.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXSDUS",
+    "fetched_utc": "2026-11-10T14:09:30Z",
+    "bytes": 259951,
+    "sha256": "dca666a9d721c348a5dbb69c8efb836821263931223c57c9f19bc890262983ae"
+   },
+   {
+    "path": "raw/fred/DEXNOUS.csv",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXNOUS",
+    "fetched_utc": "2026-11-10T14:09:31Z",
+    "bytes": 259717,
+    "sha256": "4141827293462706ae2ab7d636213ab459425bc0395a9a1182d9aeb85fdf4bd0"
+   }
+  ],
+  "bis": [
+   {
+    "path": "raw/bis/WS_CBPOL_D_GB.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.GB?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:20Z",
+    "bytes": 471426,
+    "sha256": "0aff783165dc931f8a5cb86fdbdba9ec86b2813437ece4b0089907ce179920ce"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_GB_meta.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.GB?format=csv&lastNObservations=1",
+    "fetched_utc": "2026-11-10T14:12:20Z",
+    "bytes": 542,
+    "sha256": "99a86fa203368465d44ade9f9acdef142bc8a25531d5f65fd8e199e4dda49ce9"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_JP.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.JP?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:21Z",
+    "bytes": 506894,
+    "sha256": "923c4d7528c43c0656a08f2efb1cc19cba66b814cf332faa42435d0c859087df"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_JP_meta.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.JP?format=csv&lastNObservations=1",
+    "fetched_utc": "2026-11-10T14:12:21Z",
+    "bytes": 2666,
+    "sha256": "1ae39d419782ae6ad690ce860bc1f5aa43a9691f74b29a03fe243386cf04075c"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_CH.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.CH?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:21Z",
+    "bytes": 417728,
+    "sha256": "ab57f2af24f5c51f12c51bf544aecc5f2e8d0a7633654ff8cf8b6a15c72de3e9"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_CH_meta.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.CH?format=csv&lastNObservations=1",
+    "fetched_utc": "2026-11-10T14:12:22Z",
+    "bytes": 435,
+    "sha256": "acb212e207e7a7ce4ed45b1b7c2712cc30a3026085e60b33985c6bbb999058e5"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_CA.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.CA?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:22Z",
+    "bytes": 467591,
+    "sha256": "3ef1ef1c97a5d1267d82f455e5dda53ea1f64a47e2383a3110b65c8a33d76841"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_CA_meta.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.CA?format=csv&lastNObservations=1",
+    "fetched_utc": "2026-11-10T14:12:22Z",
+    "bytes": 784,
+    "sha256": "43e799f0fcb37efd47a115a1eb4ee8f7830292661521ed2f2c22d7ac65f8320e"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_AU.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.AU?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:23Z",
+    "bytes": 262823,
+    "sha256": "ba5b440585782de1cf197b90de2d809045f13b0d33d94f2093094e6b99f388fb"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_AU_meta.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.AU?format=csv&lastNObservations=1",
+    "fetched_utc": "2026-11-10T14:12:23Z",
+    "bytes": 852,
+    "sha256": "cf31df3e9a113e0b265bc51918bbcbd0353d1f25dd91d3a816a157df9644e6dc"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_NZ.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.NZ?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:24Z",
+    "bytes": 309066,
+    "sha256": "30f09eae61a3f69774e658040ad4fb221a0bcb90d08bbc5e799fa6cbb7c4feb3"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_NZ_meta.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.NZ?format=csv&lastNObservations=1",
+    "fetched_utc": "2026-11-10T14:12:24Z",
+    "bytes": 512,
+    "sha256": "2c328e38e03c0a4e5b2f0435d523900a130236f2d9542760aeb898b701785621"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_SE.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.SE?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:25Z",
+    "bytes": 446949,
+    "sha256": "7eb92fa5b49260431e9b73450bde9508a998dabdc98dbc64689e31fafbaf6bde"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_SE_meta.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.SE?format=csv&lastNObservations=1",
+    "fetched_utc": "2026-11-10T14:12:25Z",
+    "bytes": 439,
+    "sha256": "1e9173d6b0d022a1b65586f6fcb46b3fbf1ef94b63779014db1a24aa04e5f8f7"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_NO.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.NO?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:25Z",
+    "bytes": 295029,
+    "sha256": "34759b6d4b264dbe29045ec454ee375870babb55e20c6531568246e1849612de"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_NO_meta.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.NO?format=csv&lastNObservations=1",
+    "fetched_utc": "2026-11-10T14:12:26Z",
+    "bytes": 387,
+    "sha256": "fea95690932619bde21df9db9c1ab5e7801a0969d96e68acb037213fd86d4dca"
+   },
+   {
+    "path": "raw/bis/WS_CBPOL_D_SG.NO_DATA.xml",
+    "url": "https://stats.bis.org/api/v1/data/WS_CBPOL/D.SG?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:32Z",
+    "bytes": 453,
+    "sha256": "ce7a977e308067957b88481e0dad1de443f34c4e06a6b0db09272098425f1d3d",
+    "http_status": 404
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_XM_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.XM.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:33Z",
+    "bytes": 10318,
+    "sha256": "e157ae039fb6ae094014aa24c95c3fe3125d1d6f2953fca0436301e07f4baeb7"
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_GB_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.GB.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:34Z",
+    "bytes": 35651,
+    "sha256": "04400415c152d1279c395def7984d8b48375af253cd99a908c0677562da529ac"
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_JP_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.JP.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:35Z",
+    "bytes": 26244,
+    "sha256": "a79746c058f7e4de82762df9c03875fe1299eb7cc306360b83ed130f858bb3b8"
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_CH_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.CH.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:36Z",
+    "bytes": 34243,
+    "sha256": "6cd2fe3f50064e5bfdf58050a51c2a403a68cf0bb6bbfed49e6fb6c27a27cf10"
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_CA_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.CA.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:36Z",
+    "bytes": 36210,
+    "sha256": "3194ca49fe0b4460d46b5f00d4b9f69069683aefa6206cc63a63031e4f374c7a"
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_AU_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.AU.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:37Z",
+    "bytes": 33250,
+    "sha256": "bc49221c5f043da0123480df7ecfd03a6547871499cd9f7dd3c7ce5bf9e9d982"
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_NZ_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.NZ.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:38Z",
+    "bytes": 32320,
+    "sha256": "d2ce3b84ecfba49a6d4dffaab53901605c12aae46a80744e0abd1f1bd060f39f"
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_SE_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.SE.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:39Z",
+    "bytes": 33330,
+    "sha256": "69ea13c68090abc36f0ae8e2a3f31f391db5fc793abfd9e82be38c3bea142d62"
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_NO_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.NO.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:40Z",
+    "bytes": 34120,
+    "sha256": "04fe0b3b87884b9a4f091e0134bbe377ac12087e24f4a54cb93497d84cc64c46"
+   },
+   {
+    "path": "raw/bis/WS_LONG_CPI_M_US_628.csv",
+    "url": "https://stats.bis.org/api/v1/data/WS_LONG_CPI/M.US.628?format=csv&detail=dataonly",
+    "fetched_utc": "2026-11-10T14:12:32Z",
+    "bytes": 36447,
+    "sha256": "cd54ac050cfe877bc2c6bbe2ad2e18a9a6a3e46feb3e2228e8aa1ea224c6c69d"
+   }
+  ]
+ },
+ "rate_series": {
+  "EUR": {
+   "series": "ECB EON/D.EONIA_TO.RATE (EONIA) through 2019-09-30, then ECB EST/B.EU000A2X2A25.WT (euro short-term rate)",
+   "first_obs": "1999-01-04",
+   "last_obs": "2026-11-09",
+   "splice_date": "2019-10-01",
+   "level_at_splice": {
+    "EONIA_2019-09-30": -0.451,
+    "ESTR_2019-10-01": -0.549
+   },
+   "asof": {
+    "fresh": 6892,
+    "ffilled": 91,
+    "ffilled_beyond_3_prints": 0,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 7028,
+    "first_valid_print": "1999-01-05",
+    "last_valid_print": "2026-11-06"
+   }
+  },
+  "GBP": {
+   "series": "FRED IUDSOIA (SONIA) from 1997-01-02; BIS WS_CBPOL D.GB before",
+   "first_obs": "1946-01-01",
+   "last_obs": "2026-11-06",
+   "splice_date": "1997-01-02",
+   "bis_compilation": "From 3 Aug 2006 onwards: official bank rate; from 6 May 1997 to 2 Aug 2006: repo rate; from 20 Aug 1981 to 5 May 1997: minimum Bank of England Band 1 dealing rate; from 16 Oct 1972 to 19 Aug 1981: minimum lending rate; from 1 Jan 1946 to 15 Oct 1972: bank rate.",
+   "asof": {
+    "fresh": 13728,
+    "ffilled": 283,
+    "ffilled_beyond_3_prints": 0,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 0,
+    "first_valid_print": "1971-01-04",
+    "last_valid_print": "2026-11-06"
+   }
+  },
+  "JPY": {
+   "series": "BIS WS_CBPOL D.JP (daily central bank policy rate); inside the BIS 'no policy rate' windows: FRED IRSTCI01JPM156N (OECD immediate rate, call money/interbank, monthly average), month M used from the 1st day of month M+1",
+   "first_obs": "1946-01-01",
+   "last_obs": "2026-11-03",
+   "bis_compilation": "From 24 Sep 2026: the BOJ encourages the uncollateralized overnight call rate to remain at around 1.25 percent; From 17 Jun 2026 to 23 Sep 2026: the BOJ encourages the uncollateralized overnight call rate to remain at around 1.00 percent; From 22 Dec 2025 to 16 Jun 2026: the BOJ encourages the uncollateralized overnight call rate to remain at around 0.75 percent; From 27 Jan 2025 to 21 Dec 2025: the BOJ encourages the uncollateralized overnight call rate to remain at around 0.50 percent; From 1 Aug 2024 to 26 Jan 2025: the BOJ encouraged the UOCR to remain at around 0.25% ; From 21 Mar 2024 to 31 July: the BOJ encouraged the UOCR to remain at around 0 to 0.1 %; from 21 Sep 2016 to 20 Mar 2024: the BOJ set the guideline for market operations which specifies a short-term policy interest rate at minus 0.1% and a target level of 10-year JGB yields at around 0%. Short-term policy interest rate; from 4 Apr 2013 to 20 Sep 2016: no policy rate; from 5 Oct 2010 to 3 Apr 2013: the BOJ encouraged the UOCR to remain at around 0 to 0.1%; from 19 Dec 2008 to 4 Oct 2010: the BOJ encouraged the UOCR to remain at around 0. %; from 31 Oct 2008 to 18 Dec 2008: the BOJ encouraged the UOCR to remain at around 0.3%; before 30 Oct 2008, refer to https://data.bis.org/topics/CBPOL",
+   "bis_source": "Bank of Japan",
+   "source_gaps_over_10_calendar_days": [
+    {
+     "after": "1999-02-11",
+     "before": "2000-08-11"
+    },
+    {
+     "after": "2001-03-18",
+     "before": "2006-03-09"
+    },
+    {
+     "after": "2013-04-03",
+     "before": "2016-09-21"
+    }
+   ],
+   "gap_fill": {
+    "deviation_from_brief": "the brief asks for BIS daily policy rates; BIS has none for JPY in these windows",
+    "series": "FRED IRSTCI01JPM156N",
+    "windows": [
+     {
+      "after": "1999-02-11",
+      "before": "2000-08-11"
+     },
+     {
+      "after": "2001-03-18",
+      "before": "2006-03-09"
+     },
+     {
+      "after": "2013-04-03",
+      "before": "2016-09-21"
+     }
+    ],
+    "calendar_days_filled": 3628
+   },
+   "asof": {
+    "fresh": 14009,
+    "ffilled": 2,
+    "ffilled_beyond_3_prints": 0,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 0,
+    "first_valid_print": "1971-01-04",
+    "last_valid_print": "2026-11-06"
+   }
+  },
+  "CHF": {
+   "series": "BIS WS_CBPOL D.CH (daily central bank policy rate)",
+   "first_obs": "1946-01-01",
+   "last_obs": "2026-11-03",
+   "bis_compilation": "From 13 June 2019 onwards SNB Policy rate; From 1 Jan 2000 to 12 June 2019 mid-point of the SNB target range; from 1 Jan 1946 to 31 Dec 1999: discount rate.",
+   "bis_source": "Swiss National Bank",
+   "source_gaps_over_10_calendar_days": [],
+   "asof": {
+    "fresh": 13965,
+    "ffilled": 46,
+    "ffilled_beyond_3_prints": 0,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 0,
+    "first_valid_print": "1971-01-04",
+    "last_valid_print": "2026-11-06"
+   }
+  },
+  "CAD": {
+   "series": "BIS WS_CBPOL D.CA (daily central bank policy rate)",
+   "first_obs": "1960-07-27",
+   "last_obs": "2026-11-02",
+   "bis_compilation": "From 1 Jun 1994 onwards: Central Bank target, overnight rate; from 27 Jul 1960 to 31 May 1994: official bank rate.",
+   "bis_source": "Bank of Canada",
+   "source_gaps_over_10_calendar_days": [],
+   "asof": {
+    "fresh": 13978,
+    "ffilled": 33,
+    "ffilled_beyond_3_prints": 0,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 0,
+    "first_valid_print": "1971-01-04",
+    "last_valid_print": "2026-11-06"
+   }
+  },
+  "AUD": {
+   "series": "BIS WS_CBPOL D.AU (daily central bank policy rate)",
+   "first_obs": "1976-04-07",
+   "last_obs": "2026-10-29",
+   "bis_compilation": "From 2 Aug 1990 onwards: cash rate target; from 23 Jan 1990 to 1 Aug 1990: middle of the cash rate target range; from 7 Apr 1976 to 22 Jan 1990: interbank overnight cash rate.",
+   "bis_source": "Reserve Bank of Australia",
+   "source_gaps_over_10_calendar_days": [],
+   "asof": {
+    "fresh": 12399,
+    "ffilled": 293,
+    "ffilled_beyond_3_prints": 2,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 1319,
+    "first_valid_print": "1976-04-08",
+    "last_valid_print": "2026-11-06"
+   }
+  },
+  "NZD": {
+   "series": "BIS WS_CBPOL D.NZ (daily central bank policy rate)",
+   "first_obs": "1985-01-04",
+   "last_obs": "2026-10-30",
+   "bis_compilation": "From 17 Mar 1999 onwards: Official market intervention representative rate, official cash rate; from Jan 1985 to 16 Mar 1999: overnight cash rate.",
+   "bis_source": "Reserve Bank of New Zealand",
+   "source_gaps_over_10_calendar_days": [],
+   "asof": {
+    "fresh": 10349,
+    "ffilled": 151,
+    "ffilled_beyond_3_prints": 4,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 3511,
+    "first_valid_print": "1985-01-07",
+    "last_valid_print": "2026-11-06"
+   }
+  },
+  "SEK": {
+   "series": "BIS WS_CBPOL D.SE (daily central bank policy rate)",
+   "first_obs": "1946-01-02",
+   "last_obs": "2026-11-03",
+   "bis_compilation": "From 1 Jun 1994 onwards: Central Bank fixed repo/reversed repo rate; from 30 Jan 1987 to 31 May 1994: marginal rate; from 1 Jan 1946 to 29 Jan 1987: discount rate. ",
+   "bis_source": "Sveriges Riksbank",
+   "source_gaps_over_10_calendar_days": [],
+   "asof": {
+    "fresh": 13635,
+    "ffilled": 376,
+    "ffilled_beyond_3_prints": 0,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 0,
+    "first_valid_print": "1971-01-04",
+    "last_valid_print": "2026-11-06"
+   }
+  },
+  "NOK": {
+   "series": "BIS WS_CBPOL D.NO (daily central bank policy rate)",
+   "first_obs": "1986-03-03",
+   "last_obs": "2026-11-02",
+   "bis_compilation": "From 11 Jun 1993 onwards: official deposit facility rate; from 3 Mar 1986 to 10 Jun 1993 official credit facility rate.",
+   "bis_source": "Norges Bank",
+   "source_gaps_over_10_calendar_days": [],
+   "asof": {
+    "fresh": 9933,
+    "ffilled": 279,
+    "ffilled_beyond_3_prints": 0,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 3799,
+    "first_valid_print": "1986-03-04",
+    "last_valid_print": "2026-11-06"
+   }
+  },
+  "USD": {
+   "series": "FRED DFF (effective federal funds rate, 7-day series)",
+   "first_obs": "1954-07-01",
+   "last_obs": "2026-11-06",
+   "asof": {
+    "fresh": 14011,
+    "ffilled": 0,
+    "ffilled_beyond_3_prints": 0,
+    "max_stale_prints_allowed": 10,
+    "nan_stale": 0,
+    "nan_before_start": 0,
+    "first_valid_print": "1971-01-04",
+    "last_valid_print": "2026-11-06"
+   }
+  }
+ },
+ "cpi_series": {
+  "EUR": {
+   "series": "BIS WS_LONG_CPI M.XM.628 (index, 2010 = 100)",
+   "observations_used": 441,
+   "first_reference_period": "1990-01-01",
+   "last_reference_period": "2026-09-01",
+   "last_available_from": "2026-11-01",
+   "nan_before_start": 4803,
+   "nan_stale": 0,
+   "quarterly": false,
+   "quarter_consistency_violations": 0
+  },
+  "GBP": {
+   "series": "BIS WS_LONG_CPI M.GB.628 (index, 2010 = 100)",
+   "observations_used": 1341,
+   "first_reference_period": "1915-01-01",
+   "last_reference_period": "2026-09-01",
+   "last_available_from": "2026-11-01",
+   "nan_before_start": 0,
+   "nan_stale": 0,
+   "quarterly": false,
+   "quarter_consistency_violations": 0
+  },
+  "JPY": {
+   "series": "BIS WS_LONG_CPI M.JP.628 (index, 2010 = 100)",
+   "observations_used": 962,
+   "first_reference_period": "1946-08-01",
+   "last_reference_period": "2026-09-01",
+   "last_available_from": "2026-11-01",
+   "nan_before_start": 0,
+   "nan_stale": 0,
+   "quarterly": false,
+   "quarter_consistency_violations": 0
+  },
+  "CHF": {
+   "series": "BIS WS_LONG_CPI M.CH.628 (index, 2010 = 100)",
+   "observations_used": 1269,
+   "first_reference_period": "1921-01-01",
+   "last_reference_period": "2026-09-01",
+   "last_available_from": "2026-11-01",
+   "nan_before_start": 0,
+   "nan_stale": 0,
+   "quarterly": false,
+   "quarter_consistency_violations": 0
+  },
+  "CAD": {
+   "series": "BIS WS_LONG_CPI M.CA.628 (index, 2010 = 100)",
+   "observations_used": 1353,
+   "first_reference_period": "1914-01-01",
+   "last_reference_period": "2026-09-01",
+   "last_available_from": "2026-11-01",
+   "nan_before_start": 0,
+   "nan_stale": 0,
+   "quarterly": false,
+   "quarter_consistency_violations": 0
+  },
+  "AUD": {
+   "series": "BIS WS_LONG_CPI M.AU.628 (index, 2010 = 100)",
+   "observations_used": 417,
+   "first_reference_period": "1922-04-01",
+   "last_reference_period": "2026-04-01",
+   "last_available_from": "2026-08-01",
+   "nan_before_start": 0,
+   "nan_stale": 0,
+   "quarterly": true,
+   "quarter_consistency_violations": 0
+  },
+  "NZD": {
+   "series": "BIS WS_LONG_CPI M.NZ.628 (index, 2010 = 100)",
+   "observations_used": 405,
+   "first_reference_period": "1925-07-01",
+   "last_reference_period": "2026-07-01",
+   "last_available_from": "2026-11-01",
+   "nan_before_start": 0,
+   "nan_stale": 0,
+   "quarterly": true,
+   "quarter_consistency_violations": 0
+  },
+  "SEK": {
+   "series": "BIS WS_LONG_CPI M.SE.628 (index, 2010 = 100)",
+   "observations_used": 1013,
+   "first_reference_period": "1918-03-01",
+   "last_reference_period": "2026-09-01",
+   "last_available_from": "2026-11-01",
+   "nan_before_start": 0,
+   "nan_stale": 0,
+   "quarterly": false,
+   "quarter_consistency_violations": 0
+  },
+  "NOK": {
+   "series": "BIS WS_LONG_CPI M.NO.628 (index, 2010 = 100)",
+   "observations_used": 1278,
+   "first_reference_period": "1920-03-01",
+   "last_reference_period": "2026-09-01",
+   "last_available_from": "2026-11-01",
+   "nan_before_start": 0,
+   "nan_stale": 0,
+   "quarterly": false,
+   "quarter_consistency_violations": 0
+  },
+  "USD": {
+   "series": "BIS WS_LONG_CPI M.US.628 (index, 2010 = 100)",
+   "observations_used": 1364,
+   "first_reference_period": "1913-01-01",
+   "last_reference_period": "2026-09-01",
+   "last_available_from": "2026-11-01",
+   "nan_before_start": 0,
+   "nan_stale": 0,
+   "quarterly": false,
+   "quarter_consistency_violations": 0
+  }
+ },
+ "oil_series": {
+  "fresh": 9440,
+  "ffilled": 776,
+  "ffilled_beyond_3_prints": 0,
+  "max_stale_prints_allowed": 3,
+  "nan_stale": 36,
+  "nan_before_start": 3759,
+  "first_valid_print": "1986-01-03",
+  "last_valid_print": "2026-11-06",
+  "series": "FRED DCOILWTICO (WTI spot, USD per barrel), price LEVEL, lagged one day",
+  "non_positive_observations_set_to_nan": {
+   "2020-04-20": -36.98
+  },
+  "non_positive_observations_set_to_nan_count": 1,
+  "min_level_in_panel": 8.91
+ },
+ "price_gaps": {
+  "rule": "forward-fill at most 3 consecutive missing prints inside an instrument's life; longer gaps stay NaN",
+  "per_instrument": {
+   "EUR": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0,
+    "first_print": "1999-01-04"
+   },
+   "GBP": {
+    "missing_prints": 6,
+    "ffilled": 4,
+    "left_nan": 2,
+    "first_print": "1971-01-04"
+   },
+   "JPY": {
+    "missing_prints": 12,
+    "ffilled": 4,
+    "left_nan": 8,
+    "first_print": "1971-01-04"
+   },
+   "CHF": {
+    "missing_prints": 6,
+    "ffilled": 4,
+    "left_nan": 2,
+    "first_print": "1971-01-04"
+   },
+   "CAD": {
+    "missing_prints": 0,
+    "ffilled": 0,
+    "left_nan": 0,
+    "first_print": "1971-01-04"
+   },
+   "AUD": {
+    "missing_prints": 13,
+    "ffilled": 10,
+    "left_nan": 3,
+    "first_print": "1971-01-04"
+   },
+   "NZD": {
+    "missing_prints": 22,
+    "ffilled": 16,
+    "left_nan": 6,
+    "first_print": "1971-01-04"
+   },
+   "SEK": {
+    "missing_prints": 7,
+    "ffilled": 5,
+    "left_nan": 2,
+    "first_print": "1971-01-04"
+   },
+   "NOK": {
+    "missing_prints": 7,
+    "ffilled": 5,
+    "left_nan": 2,
+    "first_print": "1971-01-04"
+   }
+  }
+ },
+ "carry_trailing_nan_prints": {
+  "EUR": 0,
+  "GBP": 0,
+  "JPY": 0,
+  "CHF": 0,
+  "CAD": 0,
+  "AUD": 0,
+  "NZD": 0,
+  "SEK": 0,
+  "NOK": 0
+ },
+ "carry_nan_inside_price_life": {
+  "EUR": 1,
+  "GBP": 1,
+  "JPY": 1,
+  "CHF": 1,
+  "CAD": 1,
+  "AUD": 1316,
+  "NZD": 3505,
+  "SEK": 1,
+  "NOK": 3797
+ },
+ "day_count_distribution": {
+  "1": 10923,
+  "2": 174,
+  "3": 2534,
+  "4": 373,
+  "5": 6
+ },
+ "carry_coverage_by_decade": {
+  "EUR": {
+   "1970s": {
+    "price_prints": 0,
+    "carry_prints": 0,
+    "share": null
+   },
+   "1980s": {
+    "price_prints": 0,
+    "carry_prints": 0,
+    "share": null
+   },
+   "1990s": {
+    "price_prints": 252,
+    "carry_prints": 251,
+    "share": 0.996
+   },
+   "2000s": {
+    "price_prints": 2517,
+    "carry_prints": 2517,
+    "share": 1.0
+   },
+   "2010s": {
+    "price_prints": 2502,
+    "carry_prints": 2502,
+    "share": 1.0
+   },
+   "2020s": {
+    "price_prints": 1713,
+    "carry_prints": 1713,
+    "share": 1.0
+   }
+  },
+  "GBP": {
+   "1970s": {
+    "price_prints": 2252,
+    "carry_prints": 2251,
+    "share": 0.9996
+   },
+   "1980s": {
+    "price_prints": 2509,
+    "carry_prints": 2509,
+    "share": 1.0
+   },
+   "1990s": {
+    "price_prints": 2516,
+    "carry_prints": 2516,
+    "share": 1.0
+   },
+   "2000s": {
+    "price_prints": 2517,
+    "carry_prints": 2517,
+    "share": 1.0
+   },
+   "2010s": {
+    "price_prints": 2502,
+    "carry_prints": 2502,
+    "share": 1.0
+   },
+   "2020s": {
+    "price_prints": 1713,
+    "carry_prints": 1713,
+    "share": 1.0
+   }
+  },
+  "JPY": {
+   "1970s": {
+    "price_prints": 2246,
+    "carry_prints": 2245,
+    "share": 0.9996
+   },
+   "1980s": {
+    "price_prints": 2509,
+    "carry_prints": 2509,
+    "share": 1.0
+   },
+   "1990s": {
+    "price_prints": 2516,
+    "carry_prints": 2516,
+    "share": 1.0
+   },
+   "2000s": {
+    "price_prints": 2517,
+    "carry_prints": 2517,
+    "share": 1.0
+   },
+   "2010s": {
+    "price_prints": 2502,
+    "carry_prints": 2502,
+    "share": 1.0
+   },
+   "2020s": {
+    "price_prints": 1713,
+    "carry_prints": 1713,
+    "share": 1.0
+   }
+  },
+  "CHF": {
+   "1970s": {
+    "price_prints": 2252,
+    "carry_prints": 2251,
+    "share": 0.9996
+   },
+   "1980s": {
+    "price_prints": 2509,
+    "carry_prints": 2509,
+    "share": 1.0
+   },
+   "1990s": {
+    "price_prints": 2516,
+    "carry_prints": 2516,
+    "share": 1.0
+   },
+   "2000s": {
+    "price_prints": 2517,
+    "carry_prints": 2517,
+    "share": 1.0
+   },
+   "2010s": {
+    "price_prints": 2502,
+    "carry_prints": 2502,
+    "share": 1.0
+   },
+   "2020s": {
+    "price_prints": 1713,
+    "carry_prints": 1713,
+    "share": 1.0
+   }
+  },
+  "CAD": {
+   "1970s": {
+    "price_prints": 2254,
+    "carry_prints": 2253,
+    "share": 0.9996
+   },
+   "1980s": {
+    "price_prints": 2509,
+    "carry_prints": 2509,
+    "share": 1.0
+   },
+   "1990s": {
+    "price_prints": 2516,
+    "carry_prints": 2516,
+    "share": 1.0
+   },
+   "2000s": {
+    "price_prints": 2517,
+    "carry_prints": 2517,
+    "share": 1.0
+   },
+   "2010s": {
+    "price_prints": 2502,
+    "carry_prints": 2502,
+    "share": 1.0
+   },
+   "2020s": {
+    "price_prints": 1713,
+    "carry_prints": 1713,
+    "share": 1.0
+   }
+  },
+  "AUD": {
+   "1970s": {
+    "price_prints": 2251,
+    "carry_prints": 935,
+    "share": 0.4154
+   },
+   "1980s": {
+    "price_prints": 2509,
+    "carry_prints": 2509,
+    "share": 1.0
+   },
+   "1990s": {
+    "price_prints": 2516,
+    "carry_prints": 2516,
+    "share": 1.0
+   },
+   "2000s": {
+    "price_prints": 2517,
+    "carry_prints": 2517,
+    "share": 1.0
+   },
+   "2010s": {
+    "price_prints": 2502,
+    "carry_prints": 2502,
+    "share": 1.0
+   },
+   "2020s": {
+    "price_prints": 1713,
+    "carry_prints": 1713,
+    "share": 1.0
+   }
+  },
+  "NZD": {
+   "1970s": {
+    "price_prints": 2248,
+    "carry_prints": 0,
+    "share": 0.0
+   },
+   "1980s": {
+    "price_prints": 2509,
+    "carry_prints": 1252,
+    "share": 0.499
+   },
+   "1990s": {
+    "price_prints": 2516,
+    "carry_prints": 2516,
+    "share": 1.0
+   },
+   "2000s": {
+    "price_prints": 2517,
+    "carry_prints": 2517,
+    "share": 1.0
+   },
+   "2010s": {
+    "price_prints": 2502,
+    "carry_prints": 2502,
+    "share": 1.0
+   },
+   "2020s": {
+    "price_prints": 1713,
+    "carry_prints": 1713,
+    "share": 1.0
+   }
+  },
+  "SEK": {
+   "1970s": {
+    "price_prints": 2252,
+    "carry_prints": 2251,
+    "share": 0.9996
+   },
+   "1980s": {
+    "price_prints": 2509,
+    "carry_prints": 2509,
+    "share": 1.0
+   },
+   "1990s": {
+    "price_prints": 2516,
+    "carry_prints": 2516,
+    "share": 1.0
+   },
+   "2000s": {
+    "price_prints": 2517,
+    "carry_prints": 2517,
+    "share": 1.0
+   },
+   "2010s": {
+    "price_prints": 2502,
+    "carry_prints": 2502,
+    "share": 1.0
+   },
+   "2020s": {
+    "price_prints": 1713,
+    "carry_prints": 1713,
+    "share": 1.0
+   }
+  },
+  "NOK": {
+   "1970s": {
+    "price_prints": 2252,
+    "carry_prints": 0,
+    "share": 0.0
+   },
+   "1980s": {
+    "price_prints": 2509,
+    "carry_prints": 964,
+    "share": 0.3842
+   },
+   "1990s": {
+    "price_prints": 2516,
+    "carry_prints": 2516,
+    "share": 1.0
+   },
+   "2000s": {
+    "price_prints": 2517,
+    "carry_prints": 2517,
+    "share": 1.0
+   },
+   "2010s": {
+    "price_prints": 2502,
+    "carry_prints": 2502,
+    "share": 1.0
+   },
+   "2020s": {
+    "price_prints": 1713,
+    "carry_prints": 1713,
+    "share": 1.0
+   }
+  }
+ },
+ "rates_above_100pct_per_year": {
+  "note": "true crisis observations, NOT clipped",
+  "per_currency": {
+   "NZD": {
+    "prints": 5,
+    "first": "1985-03-06",
+    "last": "1985-03-13",
+    "max_decimal": 2.65
+   },
+   "SEK": {
+    "prints": 2,
+    "first": "1992-09-18",
+    "last": "1992-09-21",
+    "max_decimal": 5.0
+   }
+  }
+ }
+}
